@@ -1,0 +1,12 @@
+/node_modules
+/dist
+/.vscode
+.env
+.envrc
+inventory.ini
+app.js
+app.mjs
+.DS_Store
+cypress
+*.pem
+backups

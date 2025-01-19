@@ -1,0 +1,5 @@
+{
+    "execMap": {
+        "ts": "node --env-file=.env -r ts-node/register ./app.ts"
+    }
+}
