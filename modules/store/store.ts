@@ -1,5 +1,8 @@
+import { DistributionChannel } from "./distribution-channel";
+
 export class Store {
-    constructor() {
-        console.log('Store feature');
+    private readonly distributionChannel: DistributionChannel;
+    constructor(private readonly name: string, distributionChannel: DistributionChannel) {
+        this.distributionChannel = distributionChannel;
     }
 }
