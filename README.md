@@ -26,6 +26,7 @@
 ## Install
 
 ```bash
+cp .env.example .env
 yarn
 yarn db
 yarn migrate
