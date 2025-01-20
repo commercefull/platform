@@ -11,7 +11,7 @@ import helmet from "helmet";
 import compression from "compression";
 import session from "express-session";
 import { pool } from "./libs/db/pool";
-import { Passport } from "./modules/auth/passport";
+import { Passport } from "./modules/merchant/passport";
 import { storefrontRoutes } from "./routes/storefront/routes";
 import { storefrontApiRoutes } from "./routes/storefront-api/routes";
 import { merchantRoutes } from "./routes/merchant/routes";

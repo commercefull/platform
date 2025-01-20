@@ -1,5 +1,3 @@
-const { verify } = require('crypto');
-
 /**
  * @type {import('node-pg-migrate').ColumnDefinitions | undefined}
  */
@@ -11,21 +9,19 @@ exports.shorthands = undefined;
  * @returns {Promise<void> | void}
  */
 exports.up = (pgm) => {
-    pgm.createTable("auth_merchant", {
+    pgm.createTable("page_attribute_value_locale", {
         id: {
             type: "uuid",
             notNull: true,
-            default: pgm.func("uuid_generate_v4"),
+            default: pgm.func("uuid_generate_v4()"),
             primaryKey: true,
         },
         created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
         updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-        email: { type: "varchar(255)", notNull: true },
-        password: { type: "varchar(255)", notNull: true },
-        verify_token: { type: "varchar(255)"},
+        page_attribute_value_id: { type: "uuid", notNull: true, references: "page_attribute_value" },
+        locale_id: { type: "uuid", notNull: true, references: "locale", onDelete: "CASCADE" },
+        value: { type: "text", notNull: true },
     });
-
-    pgm.createIndex('auth_merchant', 'email', { unique: true });
 };
 
 /**
@@ -34,5 +30,5 @@ exports.up = (pgm) => {
  * @returns {Promise<void> | void}
  */
 exports.down = (pgm) => {
-    pgm.dropTable("auth_merchant");
+    pgm.dropTable("page_attribute_value_locale");
 };

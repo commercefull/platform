@@ -9,19 +9,24 @@ exports.shorthands = undefined;
  * @returns {Promise<void> | void}
  */
 exports.up = (pgm) => {
-    pgm.createTable("content", {
+    pgm.createTable('merchant_profile', {
         id: {
             type: "uuid",
             notNull: true,
-            default: pgm.func("uuid_generate_v4"),
+            default: pgm.func("uuid_generate_v4()"),
             primaryKey: true,
+        },
+        merchant_id: {
+            type: 'uuid',
+            notNull: true,
+            references: 'merchant',
+            onDelete: 'CASCADE',
         },
         created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
         updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-        type: { type: "varchar(100)", notNull: true },
-        title: { type: "varchar(1000)", notNull: true },
-        description: { type: "text", notNull: true
-        },
+        first_name: { type: 'string', notNull: true },
+        last_name: { type: 'string', notNull: true },
+        phone: { type: 'string', notNull: true },
     });
 };
 
@@ -31,5 +36,5 @@ exports.up = (pgm) => {
  * @returns {Promise<void> | void}
  */
 exports.down = (pgm) => {
-    pgm.dropTable("content");
-};
+    pgm.dropTable('merchant_profile');
+ };

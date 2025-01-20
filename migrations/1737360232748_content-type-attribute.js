@@ -9,18 +9,18 @@ exports.shorthands = undefined;
  * @returns {Promise<void> | void}
  */
 exports.up = (pgm) => {
-    pgm.createTable("product_attribute_value_locale", {
+    pgm.createTable("content_type_attribute", {
         id: {
             type: "uuid",
             notNull: true,
-            default: pgm.func("uuid_generate_v4"),
+            default: pgm.func("uuid_generate_v4()"),
             primaryKey: true,
         },
         created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
         updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-        product_attribute_value_id: { type: "integer", notNull: true, references: "product_attribute_value" },
-        locale_id: { type: "integer", notNull: true, references: "locale" },
-        value: { type: "text", notNull: true },
+        content_type_id: { type: "uuid", notNull: true, references: "content_type" },
+        name: { type: "text", notNull: true },
+        type: { type: "text", notNull: true },
     });
 };
 
@@ -30,5 +30,5 @@ exports.up = (pgm) => {
  * @returns {Promise<void> | void}
  */
 exports.down = (pgm) => {
-    pgm.dropTable("product_attribute_value_locale");
+    pgm.dropTable("content_type_attribute");
 };

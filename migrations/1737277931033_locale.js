@@ -13,7 +13,7 @@ exports.up = (pgm) => {
         id: {
             type: "uuid",
             notNull: true,
-            default: pgm.func("uuid_generate_v4"),
+            default: pgm.func("uuid_generate_v4()"),
             primaryKey: true,
         },
         created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },

@@ -10,10 +10,7 @@ exports.shorthands = undefined;
  */
 
 exports.up = (pgm) => {
-    pgm.createExtension("uuid-ossp", {
-        ifNotExists: true,
-        schema: 'public'
-    });
+    pgm.createExtension("uuid-ossp", {ifNotExists: true });
 };
 
 /**
@@ -22,8 +19,5 @@ exports.up = (pgm) => {
  * @returns {Promise<void> | void}
  */
 exports.down = (pgm) => {
-    pgm.dropExtension("uuid-ossp", {
-        ifExists: true,
-        schema: 'public'
-    });
+    pgm.dropExtension("uuid-ossp", {ifExists: true });
 };

@@ -1,3 +1,6 @@
+const { verify } = require('crypto');
+const { rootLogger } = require('ts-jest');
+
 /**
  * @type {import('node-pg-migrate').ColumnDefinitions | undefined}
  */
@@ -9,19 +12,22 @@ exports.shorthands = undefined;
  * @returns {Promise<void> | void}
  */
 exports.up = (pgm) => {
-    pgm.createTable("content_attribute", {
+    pgm.createType('roles', ['ADMIN', 'MERCHANT', 'VIEWER', 'AGENT']);
+    pgm.createTable("merchant", {
         id: {
             type: "uuid",
             notNull: true,
-            default: pgm.func("uuid_generate_v4"),
+            default: pgm.func("uuid_generate_v4()"),
             primaryKey: true,
         },
         created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
         updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-        content_id: { type: "integer", notNull: true, references: "content" },
-        attribute_id: { type: "integer", notNull: true, references: "attribute" },
-        value: { type: "text", notNull: true },
+        email: { type: "varchar(255)", notNull: true },
+        password: { type: "varchar(255)", notNull: true },
+        verify_token: { type: "varchar(255)"},
+        role: { type: 'roles', notNull: true, default: 'VIEWER' },
     });
+    pgm.createIndex('merchant', 'email', { unique: true });
 };
 
 /**
@@ -30,5 +36,7 @@ exports.up = (pgm) => {
  * @returns {Promise<void> | void}
  */
 exports.down = (pgm) => {
-    pgm.dropTable("content_attribute");
+    pgm.dropTable("merchant");
+    pgm.dropType('roles');
+
 };

@@ -9,18 +9,24 @@ exports.shorthands = undefined;
  * @returns {Promise<void> | void}
  */
 exports.up = (pgm) => {
-    pgm.createTable("product_attribute_value", {
+    pgm.createTable('customer_profile', {
         id: {
             type: "uuid",
             notNull: true,
-            default: pgm.func("uuid_generate_v4"),
+            default: pgm.func("uuid_generate_v4()"),
             primaryKey: true,
+        },
+        customer_id: {
+            type: 'uuid',
+            notNull: true,
+            references: 'customer',
+            onDelete: 'CASCADE',
         },
         created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
         updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-        product_id: { type: "integer", notNull: true, references: "product" },
-        product_attribute_id: { type: "integer", notNull: true, references: "product_attribute" },
-        value: { type: "text", notNull: true },
+        first_name: { type: 'string', notNull: true },
+        last_name: { type: 'string', notNull: true },
+        phone: { type: 'string', notNull: true },
     });
 };
 
@@ -30,5 +36,5 @@ exports.up = (pgm) => {
  * @returns {Promise<void> | void}
  */
 exports.down = (pgm) => {
-    pgm.dropTable("product_attribute_value");
+    pgm.dropTable('customer_profile');
 };

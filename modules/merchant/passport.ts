@@ -1,6 +1,6 @@
 import passport from "passport";
 const LocalStrategy = require("passport-local").Strategy;
-import { MerchantAuthRepo } from "./merchant-auth-repo";
+import { MerchantAuthRepo } from "./repos/merchant-auth-repo";
 import { validStringToHash } from "../../libs/hash";
 
 passport.serializeUser((user: any, done) => {

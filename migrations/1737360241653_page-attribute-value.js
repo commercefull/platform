@@ -9,7 +9,7 @@ exports.shorthands = undefined;
  * @returns {Promise<void> | void}
  */
 exports.up = (pgm) => {
-    pgm.createTable("product_attribute", {
+    pgm.createTable("page_attribute_value", {
         id: {
             type: "uuid",
             notNull: true,
@@ -18,9 +18,7 @@ exports.up = (pgm) => {
         },
         created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
         updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-        product_attribute_category_id: { type: "uuid", notNull: true, references: "product_attribute_category", onDelete: 'CASCADE', },
-        name: { type: "varchar(1000)", notNull: true },
-        value: { type: "text", notNull: true },
+        page_id: { type: "uuid", notNull: true, references: "page" },
     });
 };
 
@@ -30,5 +28,5 @@ exports.up = (pgm) => {
  * @returns {Promise<void> | void}
  */
 exports.down = (pgm) => {
-    pgm.dropTable("product_attribute");
+    pgm.dropTable("page_attribute_value");
 };
