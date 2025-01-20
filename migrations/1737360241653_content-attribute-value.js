@@ -10,11 +10,16 @@ exports.shorthands = undefined;
  */
 exports.up = (pgm) => {
     pgm.createTable("content_attribute_value", {
-        id: "id",
-        content_type_id: { type: "integer", notNull: true, references: "content_type" },
-        locale_id: { type: "integer", notNull: true, references: "locale" },
+        id: {
+            type: "uuid",
+            notNull: true,
+            default: pgm.func("uuid_generate_v4"),
+            primaryKey: true,
+        },
         created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
         updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+        content_type_id: { type: "integer", notNull: true, references: "content_type" },
+        locale_id: { type: "integer", notNull: true, references: "locale" },
     });
 };
 

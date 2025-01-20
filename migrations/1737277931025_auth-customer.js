@@ -9,13 +9,19 @@ exports.shorthands = undefined;
  * @returns {Promise<void> | void}
  */
 exports.up = (pgm) => {
-    pgm.createTable("content", {
-        id: "id",
-        type: { type: "varchar(100)", notNull: true },
-        title: { type: "varchar(1000)", notNull: true },
-        description: { type: "text", notNull: true
+
+    pgm.createTable("auth_customer", {
+        id: {
+            type: "uuid",
+            notNull: true,
+            default: pgm.func("uuid_generate_v4"),
+            primaryKey: true,
         },
         created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+        updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+        email: { type: "varchar(255)", notNull: true }, 
+        password: { type: "varchar(255)", notNull: true },
+        email_verified: { type: "boolean", notNull: true, default: false },
     });
 };
 
@@ -25,5 +31,5 @@ exports.up = (pgm) => {
  * @returns {Promise<void> | void}
  */
 exports.down = (pgm) => {
-    pgm.dropTable("content");
+    pgm.dropTable("auth_customer");
 };

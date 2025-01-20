@@ -1,3 +1,5 @@
+const { verify } = require('crypto');
+
 /**
  * @type {import('node-pg-migrate').ColumnDefinitions | undefined}
  */
@@ -9,13 +11,21 @@ exports.shorthands = undefined;
  * @returns {Promise<void> | void}
  */
 exports.up = (pgm) => {
-    pgm.createTable("product_type", {
-        id: "id",
-        name: { type: "varchar(1000)", notNull: true },
-        description: { type: "text" },
+    pgm.createTable("auth_merchant", {
+        id: {
+            type: "uuid",
+            notNull: true,
+            default: pgm.func("uuid_generate_v4"),
+            primaryKey: true,
+        },
         created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
         updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+        email: { type: "varchar(255)", notNull: true },
+        password: { type: "varchar(255)", notNull: true },
+        verify_token: { type: "varchar(255)"},
     });
+
+    pgm.createIndex('auth_merchant', 'email', { unique: true });
 };
 
 /**
@@ -24,5 +34,5 @@ exports.up = (pgm) => {
  * @returns {Promise<void> | void}
  */
 exports.down = (pgm) => {
-    pgm.dropTable("product_type");
+    pgm.dropTable("auth_merchant");
 };

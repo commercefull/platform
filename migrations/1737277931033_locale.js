@@ -10,10 +10,17 @@ exports.shorthands = undefined;
  */
 exports.up = (pgm) => {
     pgm.createTable("locale", {
-        id: "id",
-        code: { type: "varchar(10)", notNull: true},
-        name: { type: "varchar(1000)", notNull: true },
+        id: {
+            type: "uuid",
+            notNull: true,
+            default: pgm.func("uuid_generate_v4"),
+            primaryKey: true,
+        },
         created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+        updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+        code: { type: "varchar(5)", notNull: true },
+        name: { type: "varchar(100)", notNull: true },
+        short: { type: "varchar(2)", notNull: true },
     });
 };
 
