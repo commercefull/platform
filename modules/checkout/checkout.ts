@@ -1,16 +1,14 @@
 
-import { SupplyChannel } from "../inventory/supply-channels";
-
 export class Checkout {
     private readonly shippingCost: number;
     private readonly shippingAddress: string;
     private readonly billingAddress: string;
-    private readonly channel: SupplyChannel;
+    private readonly channel: string;
     private readonly items: string[];
     private readonly customerGroup: string;
     private readonly total: number;
 
-    constructor(shippingCost: number, shippingAddress: string, billingAddress: string, channel: Channel, items: string[], customerGroup: string, total: number) {
+    constructor(shippingCost: number, shippingAddress: string, billingAddress: string, channel: string, items: string[], customerGroup: string, total: number) {
         this.shippingCost = shippingCost;
         this.shippingAddress = shippingAddress;
         this.billingAddress = billingAddress;
