@@ -11,10 +11,19 @@ import helmet from "helmet";
 import compression from "compression";
 import session from "express-session";
 import { pool } from "./libs/db/pool";
-import { Passport } from "./modules/merchant/passport";
-import { storefrontRoutes } from "./routes/storefront/routes";
-import { storefrontApiRoutes } from "./routes/storefront-api/routes";
-import { merchantRoutes } from "./routes/merchant/routes";
+import passport from "passport";
+import { basketRouter } from "./features/basket/router";
+import { customerRouter } from "./features/account/router";
+import { pageRouter } from "./features/page/router";
+import { productRouter } from "./features/product/router";
+import { checkoutRouter } from "./features/checkout/router";
+import { orderRouter } from "./features/order/router";
+import { settingRouterAdmin } from "./features/setting/adminRouter";
+import { promotionRouterAdmin } from "./features/promotion/routerAdmin";
+import { productRouterAdmin } from "./features/product/routerAdmin";
+import { orderRouterAdmin } from "./features/order/routerAdmin";
+import { distributionRouterAdmin } from "./features/distribution/routerAdmin";
+
 const pgSession = require('connect-pg-simple')(session);
 
 const app = express();
@@ -110,8 +119,8 @@ app.use(
   })
 );
 app.use(flash());
-app.use(Passport.initialize());
-app.use(Passport.session());
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use(async (req: Request, res: Response, next) => {
   try {
@@ -125,9 +134,14 @@ app.use(async (req: Request, res: Response, next) => {
   }
 });
 
-app.use("/", storefrontRoutes);
-app.use("/api", storefrontApiRoutes);
-app.use("/merchant", merchantRoutes);
+//routes config
+app.use("/administrator", [settingRouterAdmin, promotionRouterAdmin, productRouterAdmin, orderRouterAdmin, distributionRouterAdmin]);
+app.use("/customer", customerRouter);
+app.use("/basket", basketRouter);
+app.use("/order", orderRouter);
+app.use("/checkout", checkoutRouter);
+app.use("/products", productRouter);
+app.use("/", pageRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res) {

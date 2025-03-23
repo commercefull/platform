@@ -36,12 +36,17 @@
     "i18next": "^24.1.2",
     "i18next-fs-backend": "^2.3.2",
     "i18next-http-middleware": "^3.6.0",
+    "moment": "^2.30.1",
+    "mongoose": "^8.12.2",
+    "mongoose-slug-updater": "^3.3.0",
     "morgan": "^1.10.0",
     "node-mailjet": "^6.0.6",
+    "nodemailer": "^6.10.0",
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
     "pg": "^8.13.1",
-    "session": "^0.1.0"
+    "session": "^0.1.0",
+    "stripe": "^17.7.0"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
@@ -56,6 +61,7 @@
     "@types/jest": "^29.5.14",
     "@types/morgan": "^1.9.9",
     "@types/node": "^22.7.6",
+    "@types/nodemailer": "^6.4.17",
     "@types/passport": "^1.0.16",
     "@types/pg": "^8.11.10",
     "cypress": "^13.17.0",
