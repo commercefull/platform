@@ -2,4 +2,4 @@ import express from "express";
 
 const router = express.Router();
 
-export const settingRouterAdmin = router;
+export const authRouterAdmin = router;

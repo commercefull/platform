@@ -13,16 +13,18 @@ import session from "express-session";
 import { pool } from "./libs/db/pool";
 import passport from "passport";
 import { basketRouter } from "./features/basket/router";
-import { customerRouter } from "./features/account/router";
+import { accountRouter } from "./features/account/router";
 import { pageRouter } from "./features/page/router";
 import { productRouter } from "./features/product/router";
 import { checkoutRouter } from "./features/checkout/router";
 import { orderRouter } from "./features/order/router";
-import { settingRouterAdmin } from "./features/setting/adminRouter";
+import { configurationRouterAdmin } from "./features/configuration/routerAdmin";
 import { promotionRouterAdmin } from "./features/promotion/routerAdmin";
 import { productRouterAdmin } from "./features/product/routerAdmin";
 import { orderRouterAdmin } from "./features/order/routerAdmin";
 import { distributionRouterAdmin } from "./features/distribution/routerAdmin";
+import { merchantRouterAdmin } from "./features/merchant/routerAdmin";
+import { authRouterAdmin } from "./features/auth/routerAdmin";
 
 const pgSession = require('connect-pg-simple')(session);
 
@@ -135,13 +137,22 @@ app.use(async (req: Request, res: Response, next) => {
 });
 
 //routes config
-app.use("/administrator", [settingRouterAdmin, promotionRouterAdmin, productRouterAdmin, orderRouterAdmin, distributionRouterAdmin]);
-app.use("/customer", customerRouter);
+app.use("/", pageRouter);
+app.use("/account", accountRouter);
 app.use("/basket", basketRouter);
 app.use("/order", orderRouter);
 app.use("/checkout", checkoutRouter);
 app.use("/products", productRouter);
-app.use("/", pageRouter);
+app.use("/administrator", [
+  authRouterAdmin,
+  merchantRouterAdmin, 
+  configurationRouterAdmin, 
+  promotionRouterAdmin, 
+  productRouterAdmin, 
+  orderRouterAdmin, 
+  distributionRouterAdmin
+]);
+
 
 // catch 404 and forward to error handler
 app.use(function (req, res) {

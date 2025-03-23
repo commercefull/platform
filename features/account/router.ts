@@ -111,4 +111,4 @@ router.get("/logout", isLoggedIn, (req: any, res) => {
   res.redirect("/");
 });
 
-export const customerRouter = router;
+export const accountRouter = router;
