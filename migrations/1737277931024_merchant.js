@@ -14,18 +14,13 @@ exports.shorthands = undefined;
 exports.up = (pgm) => {
     pgm.createType('roles', ['ADMIN', 'MERCHANT', 'VIEWER', 'AGENT']);
     pgm.createTable("merchant", {
-        id: {
-            type: "uuid",
-            notNull: true,
-            default: pgm.func("uuid_generate_v4()"),
-            primaryKey: true,
-        },
-        created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-        updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+        id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
+        createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+        updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
         email: { type: "varchar(255)", notNull: true },
         password: { type: "varchar(255)", notNull: true },
-        verify_token: { type: "varchar(255)"},
-        role: { type: 'roles', notNull: true, default: 'VIEWER' },
+        verifyToken: { type: "varchar(255)" },
+        role: { type: 'roles', notNull: true, default: 'VIEWER' }
     });
     pgm.createIndex('merchant', 'email', { unique: true });
 };

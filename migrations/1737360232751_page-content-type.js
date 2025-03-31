@@ -9,16 +9,15 @@ exports.shorthands = undefined;
  * @returns {Promise<void> | void}
  */
 exports.up = (pgm) => {
-    pgm.createTable("page_content_type", {
-        page_id: { type: "uuid", notNull: true, references: "page" },
-        content_type_id: { type: "uuid", notNull: true, references: "content_type" },
-        created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-        updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    pgm.createTable("pageContentType", {
+        id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
+        pageId: { type: "uuid", notNull: true, references: 'page', onDelete: 'CASCADE' },
+        contentTypeId: { type: "uuid", notNull: true, references: 'contentType', onDelete: 'CASCADE' },
+        createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+        updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
     });
-
-    pgm.addConstraint("page_content_type", "page_content_type_pkey", {
-        primaryKey: ["page_id", "content_type_id"],
-    });
+    pgm.createIndex('pageContentType', 'pageId');
+    pgm.createIndex('pageContentType', 'contentTypeId');
 };
 
 /**
@@ -27,5 +26,5 @@ exports.up = (pgm) => {
  * @returns {Promise<void> | void}
  */
 exports.down = (pgm) => {
-    pgm.dropTable("page_content_type");
+    pgm.dropTable("pageContentType");
 };

@@ -5,9 +5,10 @@
   "license": "MIT",
   "scripts": {
     "dev": "NODE_ENV=development nodemon app.ts",
-    "migrate": "node-pg-migrate up",
-    "migrate:new": "node-pg-migrate create $1",
-    "migrate:rollback": "node-pg-migrate down",
+    "migrate": "DATABASE_URL=postgres://ecomm-user:ecomm-password@127.0.0.1:5432/ecomm-db node-pg-migrate up",
+    "migrate:new": "DATABASE_URL=postgres://ecomm-user:ecomm-password@127.0.0.1:5432/ecomm-db node-pg-migrate create $1",
+    "migrate:rollback": "DATABASE_URL=postgres://ecomm-user:ecomm-password@127.0.0.1:5432/ecomm-db node-pg-migrate down",
+    "migrate:rollback:all": "DATABASE_URL=postgres://ecomm-user:ecomm-password@127.0.0.1:5432/ecomm-db node-pg-migrate down 100000",
     "prd": "yarn prd:build && yarn prd:run",
     "prd:run": "NODE_ENV=production node --env-file=.env --watch ./app.mjs",
     "prd:run:pm2": "NODE_ENV=production pm2 start -i max node --env-file=.env --name commercefull -- ./app.mjs",
@@ -17,7 +18,7 @@
     "test": "jest",
     "test:int": "jest",
     "test:e2e": "npx cypress run --headless --browser chrome",
-    "cmd:new:merchant": "NODE_ENV=development node -r ts-node/register ./cmd/new-merchant.ts",
+    "cmd:merchant": "NODE_ENV=development node -r ts-node/register ./cmd/merchant.ts",
     "knip": "knip"
   },
   "dependencies": {

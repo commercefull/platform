@@ -10,21 +10,14 @@ exports.shorthands = undefined;
  */
 exports.up = (pgm) => {
     pgm.createTable("page", {
-        id: {
-            type: "uuid",
-            notNull: true,
-            default: pgm.func("uuid_generate_v4()"),
-            primaryKey: true,
-        },
-        created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-        updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-        slug: { type: "varchar(100)", notNull: true },
-        type: { type: "varchar(100)", notNull: true },
-        title: { type: "varchar(1000)", notNull: true },
-        description: { type: "text", notNull: true },
+        id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
+        title: { type: "varchar(255)", notNull: true },
+        content: { type: "text", notNull: true },
+        createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+        updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
     });
 
-    pgm.createIndex('page', 'slug', { unique: true });
+    pgm.createIndex('page', 'id', { unique: true });
 };
 
 /**

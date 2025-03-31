@@ -9,20 +9,16 @@ exports.shorthands = undefined;
  * @returns {Promise<void> | void}
  */
 exports.up = (pgm) => {
-    pgm.createTable("product_attribute_category", {
-        id: {
-            type: "uuid",
-            notNull: true,
-            default: pgm.func("uuid_generate_v4()"),
-            primaryKey: true,
-        },
-        created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-        updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-        product_type_id: { type: "uuid", notNull: true, references: "product_type" },
-        name: { type: "varchar(255)", notNull: true},
+    pgm.createTable("productAttributeCategory", {
+        id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
+        name: { type: "varchar(255)", notNull: true },
+        productTypeId: { type: "uuid", notNull: true, references: 'productType', onDelete: 'CASCADE' },
+        createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+        updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
         value: { type: "text", notNull: true},
         order: { type: "integer", notNull: true, default: 0 },
     });
+    pgm.createIndex('productAttributeCategory', 'productTypeId');
 };
 
 /**
@@ -31,5 +27,5 @@ exports.up = (pgm) => {
  * @returns {Promise<void> | void}
  */
 exports.down = (pgm) => {
-    pgm.dropTable("product_attribute_category");
+    pgm.dropTable("productAttributeCategory");
 };

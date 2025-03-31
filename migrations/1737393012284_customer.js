@@ -11,18 +11,14 @@ exports.shorthands = undefined;
 exports.up = (pgm) => {
 
     pgm.createTable("customer", {
-        id: {
-            type: "uuid",
-            notNull: true,
-            default: pgm.func("uuid_generate_v4()"),
-            primaryKey: true,
-        },
-        created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-        updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-        email: { type: "varchar(255)", notNull: true }, 
+        id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
+        email: { type: "varchar(255)", notNull: true },
         password: { type: "varchar(255)", notNull: true },
-        email_verified: { type: "boolean", notNull: true, default: false },
+        createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+        updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+        emailVerified: { type: "boolean", notNull: true, default: false },
     });
+    pgm.createIndex('customer', 'email', { unique: true });
 };
 
 /**

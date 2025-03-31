@@ -9,25 +9,26 @@ exports.shorthands = undefined;
  * @returns {Promise<void> | void}
  */
 exports.up = (pgm) => {
-    pgm.createTable('merchant_profile', {
+    pgm.createTable('merchantProfile', {
         id: {
             type: "uuid",
             notNull: true,
             default: pgm.func("uuid_generate_v4()"),
             primaryKey: true,
         },
-        merchant_id: {
+        merchantId: {
             type: 'uuid',
             notNull: true,
             references: 'merchant',
             onDelete: 'CASCADE',
         },
-        created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-        updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-        first_name: { type: 'string', notNull: true },
-        last_name: { type: 'string', notNull: true },
+        createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+        updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+        firstName: { type: 'varchar(255)', notNull: true },
+        lastName: { type: 'varchar(255)', notNull: true },
         phone: { type: 'string', notNull: true },
     });
+    pgm.createIndex('merchantProfile', 'merchantId');
 };
 
 /**
@@ -36,5 +37,5 @@ exports.up = (pgm) => {
  * @returns {Promise<void> | void}
  */
 exports.down = (pgm) => {
-    pgm.dropTable('merchant_profile');
+    pgm.dropTable('merchantProfile');
  };

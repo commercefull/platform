@@ -9,18 +9,15 @@ exports.shorthands = undefined;
  * @returns {Promise<void> | void}
  */
 exports.up = (pgm) => {
-    pgm.createTable("product_bundle_product", {
-        id: {
-            type: "uuid",
-            notNull: true,
-            default: pgm.func("uuid_generate_v4()"),
-            primaryKey: true,
-        },
-        created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-        updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-        product_bundle_id: { type: "uuid", notNull: true, references: "product_bundle" },
-        product_id: { type: "uuid", notNull: true, references: "product" },
+    pgm.createTable("productBundleProduct", {
+        id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
+        productBundleId: { type: "uuid", notNull: true, references: 'productBundle', onDelete: 'CASCADE' },
+        productId: { type: "uuid", notNull: true, references: 'product', onDelete: 'CASCADE' },
+        createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+        updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
     });
+    pgm.createIndex('productBundleProduct', 'productBundleId');
+    pgm.createIndex('productBundleProduct', 'productId');
 };
 
 /**
@@ -29,5 +26,5 @@ exports.up = (pgm) => {
  * @returns {Promise<void> | void}
  */
 exports.down = (pgm) => {
-    pgm.dropTable("product_bundle_product");
+    pgm.dropTable("productBundleProduct");
 };

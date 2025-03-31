@@ -9,25 +9,26 @@ exports.shorthands = undefined;
  * @returns {Promise<void> | void}
  */
 exports.up = (pgm) => {
-    pgm.createTable('customer_profile', {
+    pgm.createTable('customerProfile', {
         id: {
             type: "uuid",
             notNull: true,
             default: pgm.func("uuid_generate_v4()"),
             primaryKey: true,
         },
-        customer_id: {
+        customerId: {
             type: 'uuid',
             notNull: true,
             references: 'customer',
             onDelete: 'CASCADE',
         },
-        created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-        updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-        first_name: { type: 'string', notNull: true },
-        last_name: { type: 'string', notNull: true },
+        createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+        updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+        firstName: { type: 'varchar(255)', notNull: true },
+        lastName: { type: 'varchar(255)', notNull: true },
         phone: { type: 'string', notNull: true },
     });
+    pgm.createIndex('customerProfile', 'customerId');
 };
 
 /**
@@ -36,5 +37,5 @@ exports.up = (pgm) => {
  * @returns {Promise<void> | void}
  */
 exports.down = (pgm) => {
-    pgm.dropTable('customer_profile');
+    pgm.dropTable('customerProfile');
 };

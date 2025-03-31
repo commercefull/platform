@@ -9,17 +9,16 @@ exports.shorthands = undefined;
  * @returns {Promise<void> | void}
  */
 exports.up = (pgm) => {
-    pgm.createTable("page_attribute_value", {
-        id: {
-            type: "uuid",
-            notNull: true,
-            default: pgm.func("uuid_generate_v4()"),
-            primaryKey: true,
-        },
-        created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-        updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-        page_id: { type: "uuid", notNull: true, references: "page" },
+    pgm.createTable("pageAttributeValue", {
+        id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
+        pageId: { type: "uuid", notNull: true, references: 'page', onDelete: 'CASCADE' },
+        attributeId: { type: "uuid", notNull: true, references: 'attribute', onDelete: 'CASCADE' },
+        value: { type: "text", notNull: true },
+        createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+        updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
     });
+    pgm.createIndex('pageAttributeValue', 'pageId');
+    pgm.createIndex('pageAttributeValue', 'attributeId');
 };
 
 /**
@@ -28,5 +27,5 @@ exports.up = (pgm) => {
  * @returns {Promise<void> | void}
  */
 exports.down = (pgm) => {
-    pgm.dropTable("page_attribute_value");
+    pgm.dropTable("pageAttributeValue");
 };

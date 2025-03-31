@@ -1,6 +1,6 @@
 import express from "express";
 import stripePackage from "stripe";
-import { Product } from "../product/repos/product";
+import { Product } from "../product/repos/productRepo";
 import { Basket, findBasketByIdAndDelete, findUserBasket } from "./repos/basketMongo";
 import { isLoggedIn } from "../../libs/middlewares";
 import { storefrontRespond } from "../../libs/templates";

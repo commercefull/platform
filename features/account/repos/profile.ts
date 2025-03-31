@@ -1,40 +1,91 @@
-import mongoose, { Schema, Document } from 'mongoose';
-import bcrypt from 'bcryptjs';
 
-interface IUser extends Document {
-  username: string;
-  email: string;
-  password: string;
-  encryptPassword(password: string): string;
-  validPassword(candidatePassword: string): boolean;
-}
+import { unixTimestamp } from "../../../libs/date";
+import { queryOne } from "../../../libs/db";
+import { Profile } from "../domain/profile";
 
-const userSchema: Schema = new Schema<IUser>({
-  username: {
-    type: String,
-    required: true,
-  },
-  email: {
-    type: String,
-    required: true,
-  },
-  password: {
-    type: String,
-    required: true,
-  },
-});
 
-// encrypt the password before storing
-userSchema.methods.encryptPassword = function (password: string): string {
-  return bcrypt.hashSync(password, bcrypt.genSaltSync(5));
-};
+export type ProfileCreateProps = Pick<Profile, 'userId' | 'firstName' | 'lastName' | 'email' | 'phone' | 'address' | 'city' | 'state' | 'zip' | 'country'>;
 
-userSchema.methods.validPassword = function (candidatePassword: string): boolean {
-  if (this.password != null) {
-    return bcrypt.compareSync(candidatePassword, this.password);
-  } else {
-    return false;
+export class ProfileRepo {
+
+  async create(props: ProfileCreateProps): Promise<Profile> {
+    const {
+      userId,
+      firstName,
+      lastName,
+      email,
+      phone,
+      address,
+      city,
+      state,
+      zip,
+      country,
+    } = props;
+
+    const query = `
+      INSERT INTO "public"."profile" (
+        "userId", "firstName", "lastName", "email", "phone", "address", "city", "state", "zip", "country"
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *;
+    `;
+
+    const data = await queryOne<Profile>(query, [
+      userId,
+      firstName,
+      lastName,
+      email,
+      phone,
+      address,
+      city,
+      state,
+      zip,
+      country,
+    ]);
+
+    if (!data) {
+      throw new Error('profile not saved')
+    }
+
+    return data
   }
-};
 
-export const User = mongoose.model<IUser>('User', userSchema);
+  async update(props: AppointmentPatientBodyChartUpdateProps, appointmentPatientBodyChartId: string): Promise<AppointmentPatientBodyChart> {
+    const {
+      name,
+      description,
+      updatedBy,
+    } = props;
+
+    const query = `
+      UPDATE "public"."appointmentPatientBodyChart"
+      SET "name" = $1, "description" = $2, "updatedBy" = $3, "updatedAt" = $4
+      WHERE "appointmentPatientBodyChartId" = $5
+      RETURNING *;
+    `;
+
+    const data = await queryOne<AppointmentPatientBodyChart>(query, [
+      name,
+      description,
+      updatedBy,
+      unixTimestamp(),
+      appointmentPatientBodyChartId,
+    ]);
+
+    if (!data) {
+      throw new Error('appointmentPatientBodyChart not found')
+    }
+
+    return data
+  }
+
+  async delete(appointmentPatientBodyChartId: string): Promise<void> {
+    const query = `
+      DELETE FROM "public"."appointmentPatientBodyChart"
+      WHERE "appointmentPatientBodyChartId" = $1;
+    `;
+
+    await queryOne(query, [
+      appointmentPatientBodyChartId,
+    ]);
+  }
+
+}

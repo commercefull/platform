@@ -1,5 +1,5 @@
 import express from "express";
-import { Product } from "./repos/product";
+import { Product } from "./repos/productRepo";
 import { Category } from "./repos/category";
 import moment from "moment";
 import { storefrontRespond } from "../../libs/templates";

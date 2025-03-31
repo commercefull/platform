@@ -9,19 +9,16 @@ exports.shorthands = undefined;
  * @returns {Promise<void> | void}
  */
 exports.up = (pgm) => {
-    pgm.createTable("page_attribute_value_locale", {
-        id: {
-            type: "uuid",
-            notNull: true,
-            default: pgm.func("uuid_generate_v4()"),
-            primaryKey: true,
-        },
-        created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-        updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-        page_attribute_value_id: { type: "uuid", notNull: true, references: "page_attribute_value" },
-        locale_id: { type: "uuid", notNull: true, references: "locale", onDelete: "CASCADE" },
+    pgm.createTable("pageAttributeValueLocale", {
+        id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
+        pageAttributeValueId: { type: "uuid", notNull: true, references: 'pageAttributeValue', onDelete: 'CASCADE' },
+        localeId: { type: "uuid", notNull: true, references: 'locale', onDelete: 'CASCADE' },
         value: { type: "text", notNull: true },
+        createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+        updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
     });
+    pgm.createIndex('pageAttributeValueLocale', 'pageAttributeValueId');
+    pgm.createIndex('pageAttributeValueLocale', 'localeId');
 };
 
 /**
@@ -30,5 +27,5 @@ exports.up = (pgm) => {
  * @returns {Promise<void> | void}
  */
 exports.down = (pgm) => {
-    pgm.dropTable("page_attribute_value_locale");
+    pgm.dropTable("pageAttributeValueLocale");
 };

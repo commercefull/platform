@@ -1,7 +1,7 @@
 import express, { Response } from "express";
 import nodemailer from "nodemailer";
 import { userContactUsValidationRules, validateContactUs } from "./validator";
-import { Product } from "../product/repos/product";
+import { Product } from "../product/repos/productRepo";
 import { storefrontRespond } from "../../libs/templates";
 
 const router = express.Router();
