@@ -1,8 +1,8 @@
 import express from "express";
-import { Product } from "./repos/productRepo";
-import { Category } from "./repos/category";
 import moment from "moment";
 import { storefrontRespond } from "../../libs/templates";
+import { ProductRepo } from "./repos/productRepo";
+import { CategoryRepo } from "./repos/categoryRepo";
 
 const router = express.Router();
 
@@ -13,13 +13,10 @@ router.get("/", async (req: any, res) => {
   const perPage = 8;
   let page = parseInt(req.query.page) || 1;
   try {
-    const products = await Product.find({})
-      .sort("-createdAt")
-      .skip(perPage * page - perPage)
-      .limit(perPage)
-      .populate("category");
-
-    const count = await Product.countDocuments();
+    const productRepo = new ProductRepo();
+    const products = await productRepo.findAll();
+      
+    const count = await productRepo.count();
 
     storefrontRespond(req, res, "product/plp", {
       pageName: "All Products",
@@ -44,17 +41,8 @@ router.get("/search", async (req: any, res) => {
   const errorMsg = req.flash("error")[0];
 
   try {
-    const products = await Product.find({
-      title: { $regex: req.query.search, $options: "i" },
-    })
-      .sort("-createdAt")
-      .skip(perPage * page - perPage)
-      .limit(perPage)
-      .populate("category")
-      .exec();
-    const count = await Product.countDocuments({
-      title: { $regex: req.query.search, $options: "i" },
-    });
+    const products = await (new ProductRepo()).findBySearch(req.query.search);
+    const count = await (new ProductRepo()).countBySearch(req.query.search);
     storefrontRespond(req, res, "product/plp", {
       pageName: "Search Results",
       products,
@@ -63,6 +51,7 @@ router.get("/search", async (req: any, res) => {
       current: page,
       home: "/products/search?search=" + req.query.search + "&",
       pages: Math.ceil(count / perPage),
+      search: req.query.search,
     });
   } catch (error) {
     console.log(error);
@@ -70,27 +59,21 @@ router.get("/search", async (req: any, res) => {
   }
 });
 
-//GET: get a certain category by its slug (this is used for the categories navbar)
-router.get("/:slug", async (req: any, res) => {
+// GET: get product by category
+router.get("/category/:slug", async (req: any, res) => {
   const successMsg = req.flash("success")[0];
   const errorMsg = req.flash("error")[0];
   const perPage = 8;
   let page = parseInt(req.query.page) || 1;
   try {
-    const foundCategory = await Category.findOne({ slug: req.params.slug });
-
+    const foundCategory = await (new CategoryRepo()).findOne(req.params.slug);
     if (!foundCategory) {
-      req.flash("error", "Product not found");
+      req.flash("error", "Category not found");
       return res.redirect("/");
     }
 
-    const allProducts = await Product.find({ category: foundCategory.id })
-      .sort("-createdAt")
-      .skip(perPage * page - perPage)
-      .limit(perPage)
-      .populate("category");
-
-    const count = await Product.countDocuments({ category: foundCategory.id });
+    const allProducts = await (new ProductRepo()).findByCategory(foundCategory.id);
+    const count = await (new ProductRepo()).countByCategory(foundCategory.id);
 
     storefrontRespond(req, res, "product/plp", {
       pageName: foundCategory.title,
@@ -99,25 +82,26 @@ router.get("/:slug", async (req: any, res) => {
       successMsg,
       errorMsg,
       current: page,
-      home: "/products/" + req.params.slug.toString() + "/?",
+      home: "/products/category/" + req.params.slug + "/?",
       pages: Math.ceil(count / perPage),
     });
   } catch (error) {
     console.log(error);
-    return res.redirect("/");
+    res.redirect("/");
   }
 });
 
-// GET: display a certain product by its id
-router.get("/:slug/:id", async (req, res) => {
+// GET: get a product by id
+router.get("/:id", async (req: any, res) => {
   const successMsg = req.flash("success")[0];
   const errorMsg = req.flash("error")[0];
   try {
-    const product = await Product.findById(req.params.id).populate("category");
+    const product = await (new ProductRepo()).findById(req.params.id);
     if (!product) {
       req.flash("error", "Product not found");
       return res.redirect("/");
     }
+
     storefrontRespond(req, res, "product/pdp", {
       pageName: product.title,
       product,
@@ -127,7 +111,7 @@ router.get("/:slug/:id", async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    return res.redirect("/");
+    res.redirect("/");
   }
 });
 

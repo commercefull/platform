@@ -3,6 +3,7 @@ import { unixTimestamp } from "../../../libs/date";
 
 export type Category = {
   id: string;
+  title: string;
   createdAt: string;
   updatedAt: string;
   name: string;

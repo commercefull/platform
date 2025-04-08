@@ -7,7 +7,8 @@ export type Product = {
   updatedAt: string,
   name: string,
   description: string,
-  productTypeId: string
+  productTypeId: string,
+  category?: string
 }
 
 type ProductCreateProps = Pick<Product, "name" | "description" | "productTypeId">;
@@ -20,11 +21,36 @@ export class ProductRepo {
     return await queryOne<Product>('SELECT * FROM "public"."product" WHERE "id" = $1', [id]);
   }
 
+  async findById(id: string): Promise<any> {
+    return await queryOne<Product>('SELECT * FROM "public"."product" WHERE "id" = $1', [id]);
+  }
+
   async findAll(): Promise<Product[] | null> {
-
     const value = await query<Product[]>('SELECT * FROM "public"."product"');
+    return value;
+  }
 
-    return value
+  async findBySearch(searchTerm: string): Promise<Product[] | null> {
+    return await query<Product[]>('SELECT * FROM "public"."product" WHERE "name" ILIKE $1', [`%${searchTerm}%`]);
+  }
+
+  async findByCategory(categoryId: string): Promise<Product[] | null> {
+    return await query<Product[]>('SELECT * FROM "public"."product" WHERE "categoryId" = $1', [categoryId]);
+  }
+
+  async count(): Promise<number> {
+    const result = await queryOne<{ count: string }>('SELECT COUNT(*) as count FROM "public"."product"');
+    return result ? parseInt(result.count, 10) : 0;
+  }
+
+  async countBySearch(searchTerm: string): Promise<number> {
+    const result = await queryOne<{ count: string }>('SELECT COUNT(*) as count FROM "public"."product" WHERE "name" ILIKE $1', [`%${searchTerm}%`]);
+    return result ? parseInt(result.count, 10) : 0;
+  }
+
+  async countByCategory(categoryId: string): Promise<number> {
+    const result = await queryOne<{ count: string }>('SELECT COUNT(*) as count FROM "public"."product" WHERE "categoryId" = $1', [categoryId]);
+    return result ? parseInt(result.count, 10) : 0;
   }
 
   async create(props: ProductCreateProps): Promise<Product> {
@@ -48,5 +74,11 @@ export class ProductRepo {
 
   async delete(id: string) {
     return await queryOne<Product>('DELETE FROM "public"."product" WHERE "id" = $1', [id]);
+  }
+  
+  // Chain-like methods to support MongoDB-style API (compatibility layer)
+  populate(field: string): this {
+    // This is a stub for backward compatibility
+    return this;
   }
 }

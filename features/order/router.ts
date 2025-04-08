@@ -1,26 +1,24 @@
 import express from "express";
-import { findAllOrdersForAnUser } from "./repos/orderMongo";
 import { isLoggedIn } from "../../libs/middlewares";
-import { storefrontRespond } from "../../libs/templates";
+import { 
+  getUserOrders, 
+  getOrderDetails, 
+  createOrder, 
+  cancelOrder 
+} from "./controllers/orderController";
 
 const router = express.Router();
 
-// GET: display user's profile
-router.get("/orders", isLoggedIn, async (req, res) => {
-  const successMsg = req.flash("success")[0];
-  const errorMsg = req.flash("error")[0];
-  try {
-    const allOrders = await findAllOrdersForAnUser(req.user);
-    storefrontRespond(req, res, "user/profile", {
-      orders: allOrders,
-      errorMsg,
-      successMsg,
-      pageName: "User Profile",
-    });
-  } catch (err) {
-    console.log(err);
-    return res.redirect("/");
-  }
-});
+// GET: display user's orders
+router.get("/orders", isLoggedIn, getUserOrders);
+
+// GET: display specific order details
+router.get("/orders/:id", isLoggedIn, getOrderDetails);
+
+// POST: create a new order
+router.post("/orders", isLoggedIn, createOrder);
+
+// POST: cancel an order
+router.post("/orders/:id/cancel", isLoggedIn, cancelOrder);
 
 export const orderRouter = router;
