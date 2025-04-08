@@ -1,10 +1,9 @@
 
-import { unixTimestamp } from "../../../libs/date";
 import { queryOne } from "../../../libs/db";
-import { Profile } from "../domain/profile";
+import { Profile, ProfileProps } from "../domain/profile";
 
-
-export type ProfileCreateProps = Pick<Profile, 'userId' | 'firstName' | 'lastName' | 'email' | 'phone' | 'address' | 'city' | 'state' | 'zip' | 'country'>;
+export type ProfileCreateProps = Pick<ProfileProps, 'userId' | 'firstName' | 'lastName' | 'email' | 'phone' | 'address' | 'city' | 'state' | 'zip' | 'country'>;
+export type ProfileUpdateProps = Pick<ProfileProps, 'firstName' | 'lastName' | 'email' | 'phone' | 'address' | 'city' | 'state' | 'zip' | 'country'>;
 
 export class ProfileRepo {
 
@@ -48,26 +47,37 @@ export class ProfileRepo {
     return data
   }
 
-  async update(props: AppointmentPatientBodyChartUpdateProps, appointmentPatientBodyChartId: string): Promise<AppointmentPatientBodyChart> {
+  async update(props: ProfileUpdateProps, profileId: string): Promise<Profile> {
     const {
-      name,
-      description,
-      updatedBy,
+      firstName,
+      lastName,
+      email,
+      phone,
+      address,
+      city,
+      state,
+      zip,
+      country,
     } = props;
 
     const query = `
-      UPDATE "public"."appointmentPatientBodyChart"
-      SET "name" = $1, "description" = $2, "updatedBy" = $3, "updatedAt" = $4
-      WHERE "appointmentPatientBodyChartId" = $5
+      UPDATE "public"."profile"
+      SET "firstName" = $1, "lastName" = $2, "email" = $3, "phone" = $4, "address" = $5, "city" = $6, "state" = $7, "zip" = $8, "country" = $9
+      WHERE "profileId" = $12
       RETURNING *;
     `;
 
-    const data = await queryOne<AppointmentPatientBodyChart>(query, [
-      name,
-      description,
-      updatedBy,
-      unixTimestamp(),
-      appointmentPatientBodyChartId,
+    const data = await queryOne<Profile>(query, [
+      firstName,
+      lastName,
+      email,
+      phone,
+      address,
+      city,
+      state,
+      zip,
+      country,
+      profileId,
     ]);
 
     if (!data) {

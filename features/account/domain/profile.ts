@@ -1,3 +1,17 @@
+export type ProfileProps = {
+  profileId: string;
+  userId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  address: string;
+  city: string;
+  state: string;
+  zip: string;
+  country: string;
+};
+
 export class Profile {
   constructor(
     private readonly profileId: string,
