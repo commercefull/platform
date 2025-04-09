@@ -45,7 +45,8 @@
     "passport-local": "^1.0.0",
     "pg": "^8.13.1",
     "session": "^0.1.0",
-    "stripe": "^17.7.0"
+    "stripe": "^17.7.0",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",

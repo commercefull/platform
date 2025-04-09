@@ -1,52 +1,62 @@
 import express from "express";
-import stripePackage from "stripe";
-import { findBasketById, findBasketByIdAndDelete } from "../basket/repos/basketMongo";
-import { createOrder } from "../order/repos/orderMongo";
 import { isLoggedIn } from "../../libs/middlewares";
+import checkoutPublicController from "./controllers/checkoutPublicController";
 
-if (!process.env.STRIPE_PRIVATE_KEY) {
-  throw new Error("Stripe private key is not defined");
-}
-const stripe = new stripePackage(process.env.STRIPE_PRIVATE_KEY);
 const router = express.Router();
 
-// POST: handle checkout logic and payment using Stripe
-router.post("/checkout", isLoggedIn, async (req: any, res) => {
-  if (!req.session.cart) {
-    return res.redirect("/shopping-cart");
-  }
+// Initialize checkout session
+router.post("/session", async (req, res) => {
+  await checkoutPublicController.initializeCheckout(req, res);
+});
 
-  try {
-    const cart = await findBasketById(req.session.cart._id);
+// Get checkout session by ID
+router.get("/session/:sessionId", async (req, res) => {
+  await checkoutPublicController.getCheckoutSession(req, res);
+});
 
-    const charge = await stripe.charges.create({
-      amount: cart.totalCost * 100,
-      currency: "usd",
-      source: req.body.stripeToken,
-      description: "Test charge",
-    });
+// Update shipping address
+router.put("/session/:sessionId/shipping-address", async (req, res) => {
+  await checkoutPublicController.updateShippingAddress(req, res);
+});
 
-    await createOrder({
-      user: req.user,
-      cart: {
-        totalQty: cart.totalQty,
-        totalCost: cart.totalCost,
-        items: cart.items,
-      },
-      address: req.body.address,
-      paymentId: charge.id,
-    });
+// Update billing address
+router.put("/session/:sessionId/billing-address", async (req, res) => {
+  await checkoutPublicController.updateBillingAddress(req, res);
+});
 
-    await findBasketByIdAndDelete(req.session.cart._id);
-    
-    req.flash("success", "Successfully purchased");
-    req.session.cart = null;
-    res.redirect("/user/profile");
-  } catch (err:any) {
-    req.flash("error", err.message);
-    console.log(err);
-    res.redirect("/checkout");
-  }
+// Get available shipping methods
+router.get("/shipping-methods", async (req, res) => {
+  await checkoutPublicController.getShippingMethods(req, res);
+});
+
+// Select shipping method
+router.put("/session/:sessionId/shipping-method", async (req, res) => {
+  await checkoutPublicController.selectShippingMethod(req, res);
+});
+
+// Get available payment methods
+router.get("/payment-methods", async (req, res) => {
+  await checkoutPublicController.getPaymentMethods(req, res);
+});
+
+// Select payment method
+router.put("/session/:sessionId/payment-method", async (req, res) => {
+  await checkoutPublicController.selectPaymentMethod(req, res);
+});
+
+// Calculate totals
+router.get("/session/:sessionId/calculate", async (req, res) => {
+  await checkoutPublicController.calculateTotals(req, res);
+});
+
+// Complete checkout (requires authentication)
+router.post("/session/:sessionId/complete", isLoggedIn, async (req, res) => {
+  await checkoutPublicController.completeCheckout(req, res);
+});
+
+// Abandon checkout session
+router.post("/session/:sessionId/abandon", async (req, res) => {
+  await checkoutPublicController.abandonCheckout(req, res);
 });
 
 export const checkoutRouter = router;
