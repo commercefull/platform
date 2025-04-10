@@ -28,4 +28,14 @@ taxRouter.get('/exemption/:customerId', isLoggedIn, (req, res) => {
   taxPublicController.checkCustomerTaxExemption(req, res);
 });
 
+// NEW: Tax zone finder endpoint
+taxRouter.post('/zones/find', (req, res) => {
+  taxPublicController.findTaxZoneForAddress(req, res);
+});
+
+// NEW: Get public tax settings for storefront
+taxRouter.get('/settings/:merchantId', (req, res) => {
+  taxPublicController.getStorefrontTaxSettings(req, res);
+});
+
 export default taxRouter;

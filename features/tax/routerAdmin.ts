@@ -5,7 +5,8 @@ import { isAdmin } from '../../libs/auth';
 const taxAdminRouter = Router();
 
 // Apply admin role verification to all routes
-// Tax Rate routes
+
+// -------------------- Tax Rate Routes --------------------
 taxAdminRouter.get('/rates', isAdmin, (req, res) => {
   taxController.getAllTaxRates(req, res);
 });
@@ -26,7 +27,7 @@ taxAdminRouter.delete('/rates/:id', isAdmin, (req, res) => {
   taxController.deleteTaxRate(req, res);
 });
 
-// Tax Category routes
+// -------------------- Tax Category Routes --------------------
 taxAdminRouter.get('/categories', isAdmin, (req, res) => {
   taxController.getAllTaxCategories(req, res);
 });
@@ -47,7 +48,7 @@ taxAdminRouter.delete('/categories/:id', isAdmin, (req, res) => {
   taxController.deleteTaxCategory(req, res);
 });
 
-// Tax Exemption routes
+// -------------------- Tax Exemption Routes --------------------
 taxAdminRouter.get('/exemptions/:id', isAdmin, (req, res) => {
   taxController.getTaxExemption(req, res);
 });
@@ -66,6 +67,45 @@ taxAdminRouter.put('/exemptions/:id', isAdmin, (req, res) => {
 
 taxAdminRouter.delete('/exemptions/:id', isAdmin, (req, res) => {
   taxController.deleteTaxExemption(req, res);
+});
+
+// -------------------- NEW: Tax Zone Routes --------------------
+taxAdminRouter.get('/zones', isAdmin, (req, res) => {
+  taxController.getAllTaxZones(req, res);
+});
+
+taxAdminRouter.get('/zones/:id', isAdmin, (req, res) => {
+  taxController.getTaxZone(req, res);
+});
+
+taxAdminRouter.post('/zones', isAdmin, (req, res) => {
+  taxController.createTaxZone(req, res);
+});
+
+taxAdminRouter.put('/zones/:id', isAdmin, (req, res) => {
+  taxController.updateTaxZone(req, res);
+});
+
+taxAdminRouter.delete('/zones/:id', isAdmin, (req, res) => {
+  taxController.deleteTaxZone(req, res);
+});
+
+taxAdminRouter.post('/zones/find-by-address', isAdmin, (req, res) => {
+  taxController.getTaxZoneForAddress(req, res);
+});
+
+// -------------------- NEW: Tax Settings Routes --------------------
+taxAdminRouter.get('/settings/:merchantId', isAdmin, (req, res) => {
+  taxController.getTaxSettings(req, res);
+});
+
+taxAdminRouter.post('/settings/:merchantId', isAdmin, (req, res) => {
+  taxController.createOrUpdateTaxSettings(req, res);
+});
+
+// -------------------- NEW: Tax Calculation Routes --------------------
+taxAdminRouter.post('/calculate', isAdmin, (req, res) => {
+  taxController.calculateTax(req, res);
 });
 
 export default taxAdminRouter;
