@@ -32,20 +32,20 @@ exports.up = (pgm) => {
   // Create customer tax exemption table
   pgm.createTable("customer_tax_exemption", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    customerId: { type: "uuid", notNull: true, references: "customer", onDelete: "CASCADE" },
-    taxZoneId: { type: "uuid", references: "tax_zone", onDelete: "SET NULL" },
+    customer_id: { type: "uuid", notNull: true, references: "customer", onDelete: "CASCADE" },
+    tax_zone_id: { type: "uuid", references: "tax_zone", onDelete: "SET NULL" },
     type: { type: "tax_exemption_type", notNull: true },
     status: { type: "tax_exemption_status", notNull: true, default: "pending" },
     name: { type: "varchar(100)", notNull: true },
-    exemptionNumber: { type: "varchar(100)", notNull: true },
-    businessName: { type: "varchar(255)" },
-    exemptionReason: { type: "text" },
-    documentUrl: { type: "text" }, // Path to stored exemption certificate
-    startDate: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    expiryDate: { type: "timestamp" },
-    isVerified: { type: "boolean", notNull: true, default: false },
-    verifiedBy: { type: "uuid", references: "admin_user" },
-    verifiedAt: { type: "timestamp" },
+    exemption_number: { type: "varchar(100)", notNull: true },
+    business_name: { type: "varchar(255)" },
+    exemption_reason: { type: "text" },
+    document_url: { type: "text" }, // Path to stored exemption certificate
+    start_date: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    expiry_date: { type: "timestamp" },
+    is_verified: { type: "boolean", notNull: true, default: false },
+    verified_by: { type: "uuid", references: "admin_user" },
+    verified_at: { type: "timestamp" },
     notes: { type: "text" },
     metadata: { type: "jsonb" },
     created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
@@ -53,44 +53,44 @@ exports.up = (pgm) => {
   });
 
   // Create indexes for customer tax exemptions
-  pgm.createIndex("customer_tax_exemption", "customerId");
-  pgm.createIndex("customer_tax_exemption", "taxZoneId");
+  pgm.createIndex("customer_tax_exemption", "customer_id");
+  pgm.createIndex("customer_tax_exemption", "tax_zone_id");
   pgm.createIndex("customer_tax_exemption", "type");
   pgm.createIndex("customer_tax_exemption", "status");
-  pgm.createIndex("customer_tax_exemption", "exemptionNumber");
-  pgm.createIndex("customer_tax_exemption", "startDate");
-  pgm.createIndex("customer_tax_exemption", "expiryDate");
-  pgm.createIndex("customer_tax_exemption", "isVerified");
-  pgm.createIndex("customer_tax_exemption", "verifiedBy");
-  pgm.createIndex("customer_tax_exemption", "verifiedAt");
+  pgm.createIndex("customer_tax_exemption", "exemption_number");
+  pgm.createIndex("customer_tax_exemption", "start_date");
+  pgm.createIndex("customer_tax_exemption", "expiry_date");
+  pgm.createIndex("customer_tax_exemption", "is_verified");
+  pgm.createIndex("customer_tax_exemption", "verified_by");
+  pgm.createIndex("customer_tax_exemption", "verified_at");
 
   // Create customer tax exemption categories table
   pgm.createTable("customer_tax_exemption_category", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    exemptionId: { type: "uuid", notNull: true, references: "customer_tax_exemption", onDelete: "CASCADE" },
-    taxCategoryId: { type: "uuid", notNull: true, references: "tax_category", onDelete: "CASCADE" },
-    isExempt: { type: "boolean", notNull: true, default: true },
+    exemption_id: { type: "uuid", notNull: true, references: "customer_tax_exemption", onDelete: "CASCADE" },
+    tax_category_id: { type: "uuid", notNull: true, references: "tax_category", onDelete: "CASCADE" },
+    is_exempt: { type: "boolean", notNull: true, default: true },
     notes: { type: "text" },
     created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for customer tax exemption categories
-  pgm.createIndex("customer_tax_exemption_category", "exemptionId");
-  pgm.createIndex("customer_tax_exemption_category", "taxCategoryId");
-  pgm.createIndex("customer_tax_exemption_category", ["exemptionId", "taxCategoryId"], { unique: true });
+  pgm.createIndex("customer_tax_exemption_category", "exemption_id");
+  pgm.createIndex("customer_tax_exemption_category", "tax_category_id");
+  pgm.createIndex("customer_tax_exemption_category", ["exemption_id", "tax_category_id"], { unique: true });
 
   // Create tax overrides for specific customer groups
   pgm.createTable("customer_group_tax_override", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    customerGroupId: { type: "uuid", notNull: true }, // References customer_group
-    taxCategoryId: { type: "uuid", notNull: true, references: "tax_category", onDelete: "CASCADE" },
-    taxRateId: { type: "uuid", references: "tax_rate", onDelete: "SET NULL" },
-    isExempt: { type: "boolean", notNull: true, default: false },
-    exemptionReason: { type: "text" },
-    overrideRate: { type: "decimal(10,6)" }, // If not NULL, overrides the tax rate
-    startDate: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    endDate: { type: "timestamp" },
-    isActive: { type: "boolean", notNull: true, default: true },
+    customer_group_id: { type: "uuid", notNull: true }, // References customer_group
+    tax_category_id: { type: "uuid", notNull: true, references: "tax_category", onDelete: "CASCADE" },
+    tax_rate_id: { type: "uuid", references: "tax_rate", onDelete: "SET NULL" },
+    is_exempt: { type: "boolean", notNull: true, default: false },
+    exemption_reason: { type: "text" },
+    override_rate: { type: "decimal(10,6)" }, // If not NULL, overrides the tax rate
+    start_date: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    end_date: { type: "timestamp" },
+    is_active: { type: "boolean", notNull: true, default: true },
     notes: { type: "text" },
     metadata: { type: "jsonb" },
     created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
@@ -98,57 +98,57 @@ exports.up = (pgm) => {
   });
 
   // Create indexes for customer group tax overrides
-  pgm.createIndex("customer_group_tax_override", "customerGroupId");
-  pgm.createIndex("customer_group_tax_override", "taxCategoryId");
-  pgm.createIndex("customer_group_tax_override", "taxRateId");
-  pgm.createIndex("customer_group_tax_override", "isExempt");
-  pgm.createIndex("customer_group_tax_override", "startDate");
-  pgm.createIndex("customer_group_tax_override", "endDate");
-  pgm.createIndex("customer_group_tax_override", "isActive");
-  pgm.createIndex("customer_group_tax_override", ["customerGroupId", "taxCategoryId"], { unique: true });
+  pgm.createIndex("customer_group_tax_override", "customer_group_id");
+  pgm.createIndex("customer_group_tax_override", "tax_category_id");
+  pgm.createIndex("customer_group_tax_override", "tax_rate_id");
+  pgm.createIndex("customer_group_tax_override", "is_exempt");
+  pgm.createIndex("customer_group_tax_override", "start_date");
+  pgm.createIndex("customer_group_tax_override", "end_date");
+  pgm.createIndex("customer_group_tax_override", "is_active");
+  pgm.createIndex("customer_group_tax_override", ["customer_group_id", "tax_category_id"], { unique: true });
 
   // Create product tax category assignments
   pgm.createTable("product_tax_category", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    productId: { type: "uuid", notNull: true, references: "product", onDelete: "CASCADE" },
-    variantId: { type: "uuid", references: "productVariant", onDelete: "CASCADE" },
-    taxCategoryId: { type: "uuid", notNull: true, references: "tax_category", onDelete: "CASCADE" },
-    merchantId: { type: "uuid", references: "merchant" },
-    isDefault: { type: "boolean", notNull: true, default: false },
-    overrideStoreSettings: { type: "boolean", notNull: true, default: false },
+    product_id: { type: "uuid", notNull: true, references: "product", onDelete: "CASCADE" },
+    variant_id: { type: "uuid", references: "product_variant", onDelete: "CASCADE" },
+    tax_category_id: { type: "uuid", notNull: true, references: "tax_category", onDelete: "CASCADE" },
+    merchant_id: { type: "uuid", references: "merchant" },
+    is_default: { type: "boolean", notNull: true, default: false },
+    override_store_settings: { type: "boolean", notNull: true, default: false },
     notes: { type: "text" },
     created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
     updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for product tax categories
-  pgm.createIndex("product_tax_category", "productId");
-  pgm.createIndex("product_tax_category", "variantId");
-  pgm.createIndex("product_tax_category", "taxCategoryId");
-  pgm.createIndex("product_tax_category", "merchantId");
-  pgm.createIndex("product_tax_category", "isDefault");
-  pgm.createIndex("product_tax_category", "overrideStoreSettings");
-  pgm.createIndex("product_tax_category", ["productId", "variantId", "taxCategoryId"], {
+  pgm.createIndex("product_tax_category", "product_id");
+  pgm.createIndex("product_tax_category", "variant_id");
+  pgm.createIndex("product_tax_category", "tax_category_id");
+  pgm.createIndex("product_tax_category", "merchant_id");
+  pgm.createIndex("product_tax_category", "is_default");
+  pgm.createIndex("product_tax_category", "override_store_settings");
+  pgm.createIndex("product_tax_category", ["product_id", "variant_id", "tax_category_id"], {
     unique: true,
-    where: "variantId IS NOT NULL"
+    where: "variant_id IS NOT NULL"
   });
-  pgm.createIndex("product_tax_category", ["productId", "taxCategoryId"], {
+  pgm.createIndex("product_tax_category", ["product_id", "tax_category_id"], {
     unique: true,
-    where: "variantId IS NULL"
+    where: "variant_id IS NULL"
   });
 
   // Create product tax exemptions for specific zones
   pgm.createTable("product_tax_exemption", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    productId: { type: "uuid", notNull: true, references: "product", onDelete: "CASCADE" },
-    variantId: { type: "uuid", references: "productVariant", onDelete: "CASCADE" },
-    taxZoneId: { type: "uuid", notNull: true, references: "tax_zone", onDelete: "CASCADE" },
-    taxCategoryId: { type: "uuid", references: "tax_category", onDelete: "SET NULL" },
-    isExempt: { type: "boolean", notNull: true, default: true },
-    exemptionReason: { type: "text" },
-    startDate: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    endDate: { type: "timestamp" },
-    isActive: { type: "boolean", notNull: true, default: true },
+    product_id: { type: "uuid", notNull: true, references: "product", onDelete: "CASCADE" },
+    variant_id: { type: "uuid", references: "product_variant", onDelete: "CASCADE" },
+    tax_zone_id: { type: "uuid", notNull: true, references: "tax_zone", onDelete: "CASCADE" },
+    tax_category_id: { type: "uuid", references: "tax_category", onDelete: "SET NULL" },
+    is_exempt: { type: "boolean", notNull: true, default: true },
+    exemption_reason: { type: "text" },
+    start_date: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    end_date: { type: "timestamp" },
+    is_active: { type: "boolean", notNull: true, default: true },
     notes: { type: "text" },
     metadata: { type: "jsonb" },
     created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
@@ -156,21 +156,21 @@ exports.up = (pgm) => {
   });
 
   // Create indexes for product tax exemptions
-  pgm.createIndex("product_tax_exemption", "productId");
-  pgm.createIndex("product_tax_exemption", "variantId");
-  pgm.createIndex("product_tax_exemption", "taxZoneId");
-  pgm.createIndex("product_tax_exemption", "taxCategoryId");
-  pgm.createIndex("product_tax_exemption", "isExempt");
-  pgm.createIndex("product_tax_exemption", "startDate");
-  pgm.createIndex("product_tax_exemption", "endDate");
-  pgm.createIndex("product_tax_exemption", "isActive");
-  pgm.createIndex("product_tax_exemption", ["productId", "variantId", "taxZoneId"], {
+  pgm.createIndex("product_tax_exemption", "product_id");
+  pgm.createIndex("product_tax_exemption", "variant_id");
+  pgm.createIndex("product_tax_exemption", "tax_zone_id");
+  pgm.createIndex("product_tax_exemption", "tax_category_id");
+  pgm.createIndex("product_tax_exemption", "is_exempt");
+  pgm.createIndex("product_tax_exemption", "start_date");
+  pgm.createIndex("product_tax_exemption", "end_date");
+  pgm.createIndex("product_tax_exemption", "is_active");
+  pgm.createIndex("product_tax_exemption", ["product_id", "variant_id", "tax_zone_id"], {
     unique: true,
-    where: "variantId IS NOT NULL"
+    where: "variant_id IS NOT NULL"
   });
-  pgm.createIndex("product_tax_exemption", ["productId", "taxZoneId"], {
+  pgm.createIndex("product_tax_exemption", ["product_id", "tax_zone_id"], {
     unique: true,
-    where: "variantId IS NULL"
+    where: "variant_id IS NULL"
   });
 
   // Insert sample data
@@ -185,10 +185,10 @@ exports.up = (pgm) => {
       ) THEN
         -- Assign standard tax category to sample product
         INSERT INTO product_tax_category (
-          productId,
-          taxCategoryId,
-          isDefault,
-          overrideStoreSettings
+          product_id,
+          tax_category_id,
+          is_default,
+          override_store_settings
         )
         SELECT
           product.id,
@@ -214,14 +214,11 @@ exports.up = (pgm) => {
  * @returns {Promise<void> | void}
  */
 exports.down = (pgm) => {
-  // Drop tables in reverse order
   pgm.dropTable("product_tax_exemption");
   pgm.dropTable("product_tax_category");
   pgm.dropTable("customer_group_tax_override");
   pgm.dropTable("customer_tax_exemption_category");
   pgm.dropTable("customer_tax_exemption");
-
-  // Drop enum types
   pgm.dropType("tax_exemption_type");
   pgm.dropType("tax_exemption_status");
 };

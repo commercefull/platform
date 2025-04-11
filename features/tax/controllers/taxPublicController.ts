@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
-import taxRepo, { AddressInput } from '../repos/taxRepo';
+import taxQueryRepo from '../repos/taxQueryRepo';
+import { AddressInput } from '../taxTypes';
 import { BasketRepo } from '../../basket/basketRepo';
 
 // Define interfaces needed for the controller
@@ -15,16 +16,6 @@ interface BasketItem {
   quantity: number;
   price: number;
   taxCategoryId?: string;
-  [key: string]: any;
-}
-
-interface Basket {
-  id: string;
-  customerId?: string;
-  merchantId?: string;
-  subtotal: number;
-  shippingAmount?: number;
-  items: BasketItem[];
   [key: string]: any;
 }
 
@@ -63,8 +54,8 @@ export class TaxPublicController {
       }
 
       // For backward compatibility, use simple tax calculation if available
-      if (typeof taxRepo.calculateTaxForLineItem === 'function') {
-        const taxResult = await taxRepo.calculateTaxForLineItem(
+      if (typeof taxQueryRepo.calculateTaxForLineItem === 'function') {
+        const taxResult = await taxQueryRepo.calculateTaxForLineItem(
           productId,
           parsedQuantity,
           parsedPrice,
@@ -94,7 +85,7 @@ export class TaxPublicController {
         city: shippingAddress.city
       };
       
-      const taxResult = await taxRepo.calculateComplexTax(
+      const taxResult = await taxQueryRepo.calculateComplexTax(
         items,
         address,
         address, // Same address for billing
@@ -127,9 +118,9 @@ export class TaxPublicController {
       }
       
       // For backward compatibility
-      if (typeof taxRepo.calculateTaxForBasket === 'function') {
+      if (typeof taxQueryRepo.calculateTaxForBasket === 'function') {
         // Calculate taxes for the entire basket using the legacy method
-        const taxResult = await taxRepo.calculateTaxForBasket(
+        const taxResult = await taxQueryRepo.calculateTaxForBasket(
           basketId,
           {
             country: shippingAddress.country,
@@ -175,7 +166,7 @@ export class TaxPublicController {
         } : shippingAddrInput;
         
         // Calculate tax using the enhanced method
-        const taxResult = await taxRepo.calculateComplexTax(
+        const taxResult = await taxQueryRepo.calculateComplexTax(
           items,
           shippingAddrInput,
           billingAddrInput,
@@ -207,7 +198,7 @@ export class TaxPublicController {
         return res.status(400).json({ error: 'Tax category code is required' });
       }
       
-      const taxCategory = await taxRepo.findTaxCategoryByCode(code);
+      const taxCategory = await taxQueryRepo.findTaxCategoryByCode(code);
       
       if (!taxCategory) {
         return res.status(404).json({ error: 'Tax category not found' });
@@ -227,7 +218,7 @@ export class TaxPublicController {
     try {
       const { country, region } = req.query;
       
-      const taxRates = await taxRepo.findAllTaxRates(
+      const taxRates = await taxQueryRepo.findAllTaxRates(
         true, // Use boolean instead of string for 'active'
         country as string,
         region as string
@@ -252,7 +243,7 @@ export class TaxPublicController {
       }
       
       // Use the legacy method as the new one will be added to taxRepo later
-      const exemptions = await taxRepo.findTaxExemptionsByCustomerId(customerId);
+      const exemptions = await taxQueryRepo.findTaxExemptionsByCustomerId(customerId);
       
       return res.json({
         hasExemption: exemptions.length > 0,
@@ -286,7 +277,7 @@ export class TaxPublicController {
       // The enhanced method will be implemented in taxRepo
       try {
         // Fallback to look up by country only
-        const taxRates = await taxRepo.findAllTaxRates(true, country);
+        const taxRates = await taxQueryRepo.findAllTaxRates(true, country);
         
         if (taxRates.length === 0) {
           return res.status(404).json({ error: 'No matching tax zone found' });
