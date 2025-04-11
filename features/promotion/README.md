@@ -4,6 +4,75 @@ Based on the code I've examined, the promotion feature in the commerce platform 
 
 ## Core Components
 
+### 1. Generic Promotion (Base Layer)
+- The foundation of the promotion system
+- Defines common properties like status, scope, priority, dates, and discount parameters
+- Handles generic promotion rules and actions based on configurable conditions
+- Implements a rule-based engine for flexible promotion targeting
+- Repository: `promotionRepo.ts`
+
+### 2. Coupon Promotion
+- Extends the base promotion system with unique codes that customers can apply
+- Handles coupon-specific properties like code, usage limits, and per-customer limits
+- Supports various coupon types: percentage discounts, fixed amounts, free shipping, etc.
+- Manages coupon usage tracking and validation
+- Repository: `couponRepo.ts`
+
+### 3. Cart Promotions
+- Applies promotions directly to shopping carts
+- Tracks which promotions are applied to which carts
+- Handles discount calculations at the cart level
+- Manages promotion application/removal from carts
+- Repository: `cartRepo.ts`
+
+### 4. Category Promotions
+- Applies promotions to specific product categories
+- Enables percentage or fixed discounts on category-wide items
+- Sets category-specific promotion parameters (min purchase amount, max discount)
+- Repository: `categoryRepo.ts`
+
+### 5. Discount Promotions
+- Offers more targeted discount mechanisms
+- Can be applied to specific products or categories
+- Supports various discount types including percentage, fixed, and BOGO (buy-one-get-one)
+- Handles priority-based application of multiple discounts
+- Repository: `discountsRepo.ts`
+
+## Data Flow & Relationships
+
+The promotion service flows as follows:
+
+1. **Promotion Creation**: Promotions are created through their respective endpoints, stored in the database with snake_case column names while maintaining camelCase in TypeScript interfaces.
+2. **Rule Configuration**: For generic promotions, rules and actions are configured to determine when and how discounts apply (e.g., first order, minimum spend, specific products).
+3. **Application Process**:
+   - **Cart Promotions**: Applied directly when a promotion is added to a cart
+   - **Category Promotions**: Applied when products from eligible categories are added to the cart
+   - **Coupon Promotions**: Applied when a user enters a valid coupon code
+   - **Discount Promotions**: Applied automatically based on eligibility rules
+4. **Validation & Calculation**: Each promotion type implements its own validation logic and discount calculation methods.
+5. **Conflict Resolution**: Promotions have priority settings to determine which apply when multiple are eligible.
+
+## Controller Layer
+
+Each promotion type has its own controller implementing standard CRUD operations and specialized methods:
+
+- **Generic Promotions**: Creation, updating, applying to carts, validation
+- **Coupons**: Code validation, usage tracking, discount calculation
+- **Cart Promotions**: Application, removal, retrieval by cart ID
+- **Category Promotions**: Category-specific promotion management
+- **Discount Promotions**: Product and category-specific discount management
+
+## API Endpoints
+
+The system exposes a comprehensive API via [routerAdmin.ts](cci:7://file:///Users/ank6259/work/commercefull/platform/features/promotion/routerAdmin.ts:0:0-0:0) with modern endpoints for each promotion type plus legacy endpoints for backward compatibility.
+
+## Technical Implementation Notes
+
+- All repositories use snake_case for database column names while maintaining camelCase for TypeScript interfaces
+- Explicit mapping is implemented through AS clauses in SQL queries
+- The system maintains transactional integrity when deleting promotions with related records
+- Date handling is standardized across all promotion types for consistent validation
+
 ### 1. Promotions
 - **Types of Discounts**: The system supports multiple discount types:
   - Percentage discounts (e.g., 10% off)

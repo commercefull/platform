@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { CartPromotionRepo } from "../repos/cart";
+import { CartPromotionRepo } from "../repos/cartRepo";
 
 const cartPromotionRepo = new CartPromotionRepo();
 

@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import couponRepo, { 
   CouponStatus, 
-  CouponType, 
   CreateCouponInput, 
   UpdateCouponInput 
 } from "../repos/couponRepo";

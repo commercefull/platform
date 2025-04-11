@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { DiscountRepo } from "../repos/discounts";
+import { DiscountRepo } from "../repos/discountRepo";
 
 const discountRepo = new DiscountRepo();
 

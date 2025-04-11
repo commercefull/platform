@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { CategoryPromotionRepo } from "../repos/category";
+import { CategoryPromotionRepo } from "../repos/categoryRepo";
 
 const categoryPromotionRepo = new CategoryPromotionRepo();
 
