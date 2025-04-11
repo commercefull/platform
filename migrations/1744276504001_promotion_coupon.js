@@ -31,84 +31,84 @@ exports.up = (pgm) => {
   pgm.createTable("coupon", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
     code: { type: "varchar(100)", notNull: true, unique: true },
-    promotionId: { type: "uuid", references: "promotion", onDelete: "CASCADE" },
+    promotion_id: { type: "uuid", references: "promotion", onDelete: "CASCADE" },
     name: { type: "varchar(255)", notNull: true },
     description: { type: "text" },
     type: { type: "coupon_type", notNull: true },
-    discountAmount: { type: "decimal(15,2)" }, // Percentage or fixed amount value
-    currencyCode: { type: "varchar(3)", default: "USD" },
-    minOrderAmount: { type: "decimal(15,2)" }, // Minimum order amount to apply coupon
-    maxDiscountAmount: { type: "decimal(15,2)" }, // Maximum discount the coupon can give
-    startDate: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    endDate: { type: "timestamp" },
-    isActive: { type: "boolean", notNull: true, default: true },
-    isOneTimeUse: { type: "boolean", notNull: true, default: false }, // One-time use per customer
-    maxUsage: { type: "integer" }, // Total number of times the coupon can be used
-    usageCount: { type: "integer", notNull: true, default: 0 },
-    maxUsagePerCustomer: { type: "integer", default: 1 }, // Max usage per customer
-    generationMethod: { type: "coupon_generation_method", notNull: true, default: "manual" },
-    isReferral: { type: "boolean", notNull: true, default: false }, // Indicates if this is a referral coupon
-    referrerId: { type: "uuid", references: "customer" }, // The customer who referred
-    isPublic: { type: "boolean", notNull: true, default: false }, // Whether this coupon is visible in public listings
-    merchantId: { type: "uuid", references: "merchant" }, // Owner merchant
+    discount_amount: { type: "decimal(15,2)" }, // Percentage or fixed amount value
+    currency_code: { type: "varchar(3)", default: "USD" },
+    min_order_amount: { type: "decimal(15,2)" }, // Minimum order amount to apply coupon
+    max_discount_amount: { type: "decimal(15,2)" }, // Maximum discount the coupon can give
+    start_date: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    end_date: { type: "timestamp" },
+    is_active: { type: "boolean", notNull: true, default: true },
+    is_one_time_use: { type: "boolean", notNull: true, default: false }, // One-time use per customer
+    max_usage: { type: "integer" }, // Total number of times the coupon can be used
+    usage_count: { type: "integer", notNull: true, default: 0 },
+    max_usage_per_customer: { type: "integer", default: 1 }, // Max usage per customer
+    generation_method: { type: "coupon_generation_method", notNull: true, default: "manual" },
+    is_referral: { type: "boolean", notNull: true, default: false }, // Indicates if this is a referral coupon
+    referrer_id: { type: "uuid", references: "customer" }, // The customer who referred
+    is_public: { type: "boolean", notNull: true, default: false }, // Whether this coupon is visible in public listings
+    merchant_id: { type: "uuid", references: "merchant" }, // Owner merchant
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for coupons
   pgm.createIndex("coupon", "code");
-  pgm.createIndex("coupon", "promotionId");
+  pgm.createIndex("coupon", "promotion_id");
   pgm.createIndex("coupon", "type");
-  pgm.createIndex("coupon", "startDate");
-  pgm.createIndex("coupon", "endDate");
-  pgm.createIndex("coupon", "isActive");
-  pgm.createIndex("coupon", "isOneTimeUse");
-  pgm.createIndex("coupon", "usageCount");
-  pgm.createIndex("coupon", "generationMethod");
-  pgm.createIndex("coupon", "isReferral");
-  pgm.createIndex("coupon", "referrerId");
-  pgm.createIndex("coupon", "isPublic");
-  pgm.createIndex("coupon", "merchantId");
+  pgm.createIndex("coupon", "start_date");
+  pgm.createIndex("coupon", "end_date");
+  pgm.createIndex("coupon", "is_active");
+  pgm.createIndex("coupon", "is_one_time_use");
+  pgm.createIndex("coupon", "usage_count");
+  pgm.createIndex("coupon", "generation_method");
+  pgm.createIndex("coupon", "is_referral");
+  pgm.createIndex("coupon", "referrer_id");
+  pgm.createIndex("coupon", "is_public");
+  pgm.createIndex("coupon", "merchant_id");
 
   // Create coupon usage table
   pgm.createTable("coupon_usage", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    couponId: { type: "uuid", notNull: true, references: "coupon", onDelete: "CASCADE" },
-    orderId: { type: "uuid", references: "order", onDelete: "SET NULL" },
-    customerId: { type: "uuid", references: "customer", onDelete: "SET NULL" },
-    discountAmount: { type: "decimal(15,2)", notNull: true },
-    currencyCode: { type: "varchar(3)", notNull: true, default: "USD" },
-    usedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    coupon_id: { type: "uuid", notNull: true, references: "coupon", onDelete: "CASCADE" },
+    order_id: { type: "uuid", references: "order", onDelete: "SET NULL" },
+    customer_id: { type: "uuid", references: "customer", onDelete: "SET NULL" },
+    discount_amount: { type: "decimal(15,2)", notNull: true },
+    currency_code: { type: "varchar(3)", notNull: true, default: "USD" },
+    used_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
     metadata: { type: "jsonb" }
   });
 
   // Create indexes for coupon usage
-  pgm.createIndex("coupon_usage", "couponId");
-  pgm.createIndex("coupon_usage", "orderId");
-  pgm.createIndex("coupon_usage", "customerId");
-  pgm.createIndex("coupon_usage", "usedAt");
-  pgm.createIndex("coupon_usage", ["couponId", "customerId"], {
-    where: "customerId IS NOT NULL" 
+  pgm.createIndex("coupon_usage", "coupon_id");
+  pgm.createIndex("coupon_usage", "order_id");
+  pgm.createIndex("coupon_usage", "customer_id");
+  pgm.createIndex("coupon_usage", "used_at");
+  pgm.createIndex("coupon_usage", ["coupon_id", "customer_id"], {
+    where: "customer_id IS NOT NULL" 
   });
 
   // Create coupon restriction table
   pgm.createTable("coupon_restriction", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    couponId: { type: "uuid", notNull: true, references: "coupon", onDelete: "CASCADE" },
-    restrictionType: { 
+    coupon_id: { type: "uuid", notNull: true, references: "coupon", onDelete: "CASCADE" },
+    restriction_type: { 
       type: "varchar(50)", 
       notNull: true,
-      check: "restrictionType IN ('product_ids', 'category_ids', 'customer_groups', 'payment_methods', 'shipping_methods', 'countries', 'excluded_product_ids', 'excluded_category_ids', 'minimum_quantity', 'maximum_quantity')"
+      check: "restriction_type IN ('product_ids', 'category_ids', 'customer_groups', 'payment_methods', 'shipping_methods', 'countries', 'excluded_product_ids', 'excluded_category_ids', 'minimum_quantity', 'maximum_quantity')"
     },
-    restrictionValue: { type: "jsonb", notNull: true }, // Array of IDs or values
+    restriction_value: { type: "jsonb", notNull: true }, // Array of IDs or values
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for coupon restrictions
-  pgm.createIndex("coupon_restriction", "couponId");
-  pgm.createIndex("coupon_restriction", "restrictionType");
+  pgm.createIndex("coupon_restriction", "coupon_id");
+  pgm.createIndex("coupon_restriction", "restriction_type");
 
   // Create coupon code batch table (for bulk coupon generation)
   pgm.createTable("coupon_batch", {
@@ -117,28 +117,28 @@ exports.up = (pgm) => {
     description: { type: "text" },
     prefix: { type: "varchar(50)" }, 
     suffix: { type: "varchar(50)" },
-    codePattern: { type: "varchar(100)" }, // Pattern for generated codes
-    codeLength: { type: "integer", notNull: true, default: 8 },
+    code_pattern: { type: "varchar(100)" }, // Pattern for generated codes
+    code_length: { type: "integer", notNull: true, default: 8 },
     quantity: { type: "integer", notNull: true, default: 1 },
-    generatedCount: { type: "integer", notNull: true, default: 0 },
+    generated_count: { type: "integer", notNull: true, default: 0 },
     status: { 
       type: "varchar(50)", 
       notNull: true,
       check: "status IN ('draft', 'pending', 'completed', 'failed', 'cancelled')",
       default: "'pending'"
     },
-    expiryDate: { type: "timestamp" }, // Expiry date for all coupons in batch
-    merchantId: { type: "uuid", references: "merchant" }, // Owner merchant
+    expiry_date: { type: "timestamp" }, // Expiry date for all coupons in batch
+    merchant_id: { type: "uuid", references: "merchant" }, // Owner merchant
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for coupon batches
   pgm.createIndex("coupon_batch", "status");
-  pgm.createIndex("coupon_batch", "merchantId");
-  pgm.createIndex("coupon_batch", "expiryDate");
-  pgm.createIndex("coupon_batch", "createdAt");
+  pgm.createIndex("coupon_batch", "merchant_id");
+  pgm.createIndex("coupon_batch", "expiry_date");
+  pgm.createIndex("coupon_batch", "created_at");
 
   // Insert sample coupon
   pgm.sql(`
@@ -147,21 +147,21 @@ exports.up = (pgm) => {
       sample_merchant AS (SELECT id FROM merchant LIMIT 1)
     INSERT INTO coupon (
       code,
-      promotionId,
+      promotion_id,
       name,
       description,
       type,
-      discountAmount,
-      currencyCode,
-      minOrderAmount,
-      maxDiscountAmount,
-      startDate,
-      endDate,
-      isActive,
-      maxUsage,
-      maxUsagePerCustomer,
-      isPublic,
-      merchantId
+      discount_amount,
+      currency_code,
+      min_order_amount,
+      max_discount_amount,
+      start_date,
+      end_date,
+      is_active,
+      max_usage,
+      max_usage_per_customer,
+      is_public,
+      merchant_id
     )
     VALUES (
       'SUMMER25',
@@ -187,9 +187,9 @@ exports.up = (pgm) => {
   pgm.sql(`
     WITH sample_coupon AS (SELECT id FROM coupon WHERE code = 'SUMMER25')
     INSERT INTO coupon_restriction (
-      couponId,
-      restrictionType,
-      restrictionValue
+      coupon_id,
+      restriction_type,
+      restriction_value
     )
     VALUES 
     (
@@ -199,8 +199,8 @@ exports.up = (pgm) => {
     ),
     (
       (SELECT id FROM sample_coupon),
-      'customer_groups',
-      '{"groups": ["regular", "vip"]}'
+      'category_ids',
+      '["summer-collection", "new-arrivals"]'
     );
   `);
 };

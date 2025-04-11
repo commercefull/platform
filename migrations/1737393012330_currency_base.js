@@ -27,8 +27,8 @@ exports.up = (pgm) => {
     },
     isActive: { type: "boolean", notNull: true, default: true },
     isDefault: { type: "boolean", notNull: true, default: false },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for currencies

@@ -16,23 +16,23 @@ exports.up = (pgm) => {
     slug: { type: "varchar(100)", notNull: true, unique: true },
     description: { type: "text" },
     location: { type: "varchar(50)" }, // E.g., 'header', 'footer', 'sidebar'
-    isActive: { type: "boolean", notNull: true, default: true },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    createdBy: { type: "uuid" }, // Reference to admin user
-    updatedBy: { type: "uuid" } // Reference to admin user
+    is_active: { type: "boolean", notNull: true, default: true },
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    created_by: { type: "uuid" }, // Reference to admin user
+    updated_by: { type: "uuid" } // Reference to admin user
   });
 
   // Create indexes for navigation
   pgm.createIndex("content_navigation", "slug");
   pgm.createIndex("content_navigation", "location");
-  pgm.createIndex("content_navigation", "isActive");
+  pgm.createIndex("content_navigation", "is_active");
 
   // Create navigation items table
   pgm.createTable("content_navigation_item", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    navigationId: { type: "uuid", notNull: true, references: "content_navigation", onDelete: "CASCADE" },
-    parentId: { type: "uuid", references: "content_navigation_item" }, // For nested items
+    navigation_id: { type: "uuid", notNull: true, references: "content_navigation", onDelete: "CASCADE" },
+    parent_id: { type: "uuid", references: "content_navigation_item" }, // For nested items
     title: { type: "varchar(255)", notNull: true },
     type: { 
       type: "varchar(50)", 
@@ -41,67 +41,67 @@ exports.up = (pgm) => {
       check: "type IN ('url', 'page', 'category', 'product', 'blog')" 
     },
     url: { type: "text" }, // For external links or custom URLs
-    contentPageId: { type: "uuid", references: "content_page" }, // If linking to internal page
-    targetId: { type: "uuid" }, // ID of target entity (product, category, etc.)
-    targetSlug: { type: "varchar(255)" }, // Slug of target entity
+    content_page_id: { type: "uuid", references: "content_page" }, // If linking to internal page
+    target_id: { type: "uuid" }, // ID of target entity (product, category, etc.)
+    target_slug: { type: "varchar(255)" }, // Slug of target entity
     icon: { type: "varchar(50)" }, // Icon for menu item
-    cssClasses: { type: "text" }, // Custom CSS classes
-    openInNewTab: { type: "boolean", notNull: true, default: false },
-    isActive: { type: "boolean", notNull: true, default: true },
-    sortOrder: { type: "integer", notNull: true, default: 0 },
+    css_classes: { type: "text" }, // Custom CSS classes
+    open_in_new_tab: { type: "boolean", notNull: true, default: false },
+    is_active: { type: "boolean", notNull: true, default: true },
+    sort_order: { type: "integer", notNull: true, default: 0 },
     conditions: { type: "jsonb" }, // Conditional display rules (e.g., only show when logged in)
     depth: { type: "integer", notNull: true, default: 0 }, // Depth in menu hierarchy
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for navigation items
-  pgm.createIndex("content_navigation_item", "navigationId");
-  pgm.createIndex("content_navigation_item", "parentId");
-  pgm.createIndex("content_navigation_item", "contentPageId");
-  pgm.createIndex("content_navigation_item", "targetId");
-  pgm.createIndex("content_navigation_item", "targetSlug");
-  pgm.createIndex("content_navigation_item", "isActive");
-  pgm.createIndex("content_navigation_item", ["navigationId", "sortOrder"]);
+  pgm.createIndex("content_navigation_item", "navigation_id");
+  pgm.createIndex("content_navigation_item", "parent_id");
+  pgm.createIndex("content_navigation_item", "content_page_id");
+  pgm.createIndex("content_navigation_item", "target_id");
+  pgm.createIndex("content_navigation_item", "target_slug");
+  pgm.createIndex("content_navigation_item", "is_active");
+  pgm.createIndex("content_navigation_item", ["navigation_id", "sort_order"]);
 
   // Create content categories table
   pgm.createTable("content_category", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
     name: { type: "varchar(100)", notNull: true },
     slug: { type: "varchar(100)", notNull: true },
-    parentId: { type: "uuid", references: "content_category" }, // For hierarchical categories
+    parent_id: { type: "uuid", references: "content_category" }, // For hierarchical categories
     description: { type: "text" },
-    featuredImage: { type: "text" },
-    metaTitle: { type: "varchar(255)" },
-    metaDescription: { type: "text" },
-    sortOrder: { type: "integer", notNull: true, default: 0 },
-    isActive: { type: "boolean", notNull: true, default: true },
+    featured_image: { type: "text" },
+    meta_title: { type: "varchar(255)" },
+    meta_description: { type: "text" },
+    sort_order: { type: "integer", notNull: true, default: 0 },
+    is_active: { type: "boolean", notNull: true, default: true },
     path: { type: "varchar(255)" }, // Full category path
     depth: { type: "integer", notNull: true, default: 0 }, // Depth in category hierarchy
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for content categories
   pgm.createIndex("content_category", "slug");
-  pgm.createIndex("content_category", "parentId");
-  pgm.createIndex("content_category", "isActive");
+  pgm.createIndex("content_category", "parent_id");
+  pgm.createIndex("content_category", "is_active");
   pgm.createIndex("content_category", "path");
-  pgm.createIndex("content_category", ["parentId", "slug"], { unique: true });
+  pgm.createIndex("content_category", ["parent_id", "slug"], { unique: true });
 
   // Create content categorization table
   pgm.createTable("content_categorization", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    contentPageId: { type: "uuid", notNull: true, references: "content_page", onDelete: "CASCADE" },
-    categoryId: { type: "uuid", notNull: true, references: "content_category", onDelete: "CASCADE" },
-    isPrimary: { type: "boolean", notNull: true, default: false }, // Whether this is the primary category
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    content_page_id: { type: "uuid", notNull: true, references: "content_page", onDelete: "CASCADE" },
+    category_id: { type: "uuid", notNull: true, references: "content_category", onDelete: "CASCADE" },
+    is_primary: { type: "boolean", notNull: true, default: false }, // Whether this is the primary category
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for content categorization
-  pgm.createIndex("content_categorization", "contentPageId");
-  pgm.createIndex("content_categorization", "categoryId");
-  pgm.createIndex("content_categorization", ["contentPageId", "categoryId"], { unique: true });
+  pgm.createIndex("content_categorization", "content_page_id");
+  pgm.createIndex("content_categorization", "category_id");
+  pgm.createIndex("content_categorization", ["content_page_id", "category_id"], { unique: true });
 
   // Add basic navigation menus
   pgm.sql(`

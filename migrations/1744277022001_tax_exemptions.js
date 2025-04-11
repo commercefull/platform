@@ -48,8 +48,8 @@ exports.up = (pgm) => {
     verifiedAt: { type: "timestamp" },
     notes: { type: "text" },
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for customer tax exemptions
@@ -71,7 +71,7 @@ exports.up = (pgm) => {
     taxCategoryId: { type: "uuid", notNull: true, references: "tax_category", onDelete: "CASCADE" },
     isExempt: { type: "boolean", notNull: true, default: true },
     notes: { type: "text" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for customer tax exemption categories
@@ -93,8 +93,8 @@ exports.up = (pgm) => {
     isActive: { type: "boolean", notNull: true, default: true },
     notes: { type: "text" },
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for customer group tax overrides
@@ -117,8 +117,8 @@ exports.up = (pgm) => {
     isDefault: { type: "boolean", notNull: true, default: false },
     overrideStoreSettings: { type: "boolean", notNull: true, default: false },
     notes: { type: "text" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for product tax categories
@@ -151,8 +151,8 @@ exports.up = (pgm) => {
     isActive: { type: "boolean", notNull: true, default: true },
     notes: { type: "text" },
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for product tax exemptions

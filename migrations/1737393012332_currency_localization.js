@@ -20,8 +20,8 @@ exports.up = (pgm) => {
     isActive: { type: "boolean", notNull: true, default: true },
     flagIcon: { type: "varchar(255)" }, // URL or path to flag icon
     region: { type: "varchar(100)" }, // Geographic region (Europe, North America, etc.)
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for countries
@@ -49,8 +49,8 @@ exports.up = (pgm) => {
     timeFormat: { type: "varchar(50)", notNull: true, default: "HH:mm:ss" },
     timeZone: { type: "varchar(50)", notNull: true, default: "UTC" },
     defaultCurrencyId: { type: "uuid", references: "currency" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for locales
@@ -78,8 +78,8 @@ exports.up = (pgm) => {
     thousandsSeparator: { type: "varchar(1)" },
     symbolPosition: { type: "varchar(10)", check: "symbolPosition IN ('before', 'after')" },
     format: { type: "varchar(100)" }, // Custom format string, e.g., "%s%v" for symbol-before-value
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for currency localization

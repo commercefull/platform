@@ -12,36 +12,36 @@ exports.up = (pgm) => {
   // Create product category table 
   pgm.createTable("product_category", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    parentId: { type: "uuid", references: "product_category" }, // For hierarchical categories
+    parent_id: { type: "uuid", references: "product_category" }, // For hierarchical categories
     name: { type: "varchar(100)", notNull: true },
     slug: { type: "varchar(150)", notNull: true, unique: true },
     description: { type: "text" },
-    metaTitle: { type: "varchar(255)" },
-    metaDescription: { type: "text" },
-    metaKeywords: { type: "text" },
-    isActive: { type: "boolean", notNull: true, default: true },
-    isVisible: { type: "boolean", notNull: true, default: true },
+    meta_title: { type: "varchar(255)" },
+    meta_description: { type: "text" },
+    meta_keywords: { type: "text" },
+    is_active: { type: "boolean", notNull: true, default: true },
+    is_visible: { type: "boolean", notNull: true, default: true },
     position: { type: "integer", default: 0 }, // For ordering within parent
     level: { type: "integer", notNull: true, default: 0 }, // Hierarchy level
     path: { type: "text" }, // Full path from root to this category
     attributes: { type: "jsonb" }, // Category-specific attributes
-    filterableAttributes: { type: "jsonb" }, // Attributes used for filtering
-    thumbnailUrl: { type: "text" },
-    imageUrl: { type: "text" },
-    bannerUrl: { type: "text" },
+    filterable_attributes: { type: "jsonb" }, // Attributes used for filtering
+    thumbnail_url: { type: "text" },
+    image_url: { type: "text" },
+    banner_url: { type: "text" },
     content: { type: "text" }, // Rich content for category page
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    createdBy: { type: "uuid" }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    created_by: { type: "uuid" }
   });
 
   // Create indexes for product categories
-  pgm.createIndex("product_category", "parentId");
+  pgm.createIndex("product_category", "parent_id");
   pgm.createIndex("product_category", "name");
   pgm.createIndex("product_category", "slug");
-  pgm.createIndex("product_category", "isActive");
-  pgm.createIndex("product_category", "isVisible");
+  pgm.createIndex("product_category", "is_active");
+  pgm.createIndex("product_category", "is_visible");
   pgm.createIndex("product_category", "position");
   pgm.createIndex("product_category", "level");
   pgm.createIndex("product_category", "path", { method: "btree" });
@@ -53,28 +53,28 @@ exports.up = (pgm) => {
     slug: { type: "varchar(150)", notNull: true, unique: true },
     description: { type: "text" },
     logo: { type: "text" },
-    bannerImage: { type: "text" },
+    banner_image: { type: "text" },
     website: { type: "text" },
-    isActive: { type: "boolean", notNull: true, default: true },
-    isFeatured: { type: "boolean", notNull: true, default: false },
+    is_active: { type: "boolean", notNull: true, default: true },
+    is_featured: { type: "boolean", notNull: true, default: false },
     position: { type: "integer", default: 0 }, // For ordering
-    metaTitle: { type: "varchar(255)" },
-    metaDescription: { type: "text" },
-    metaKeywords: { type: "text" },
+    meta_title: { type: "varchar(255)" },
+    meta_description: { type: "text" },
+    meta_keywords: { type: "text" },
     content: { type: "text" }, // Rich content for brand page
-    countryOfOrigin: { type: "varchar(2)" }, // ISO country code
-    foundedYear: { type: "integer" },
+    country_of_origin: { type: "varchar(2)" }, // ISO country code
+    founded_year: { type: "integer" },
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    createdBy: { type: "uuid" }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    created_by: { type: "uuid" }
   });
 
   // Create indexes for product brands
   pgm.createIndex("product_brand", "name");
   pgm.createIndex("product_brand", "slug");
-  pgm.createIndex("product_brand", "isActive");
-  pgm.createIndex("product_brand", "isFeatured");
+  pgm.createIndex("product_brand", "is_active");
+  pgm.createIndex("product_brand", "is_featured");
   pgm.createIndex("product_brand", "position");
 
   // Create product attribute table
@@ -88,52 +88,52 @@ exports.up = (pgm) => {
       notNull: true, 
       check: "type IN ('text', 'number', 'boolean', 'date', 'color', 'select', 'multiselect', 'file')" 
     },
-    isActive: { type: "boolean", notNull: true, default: true },
-    isRequired: { type: "boolean", notNull: true, default: false },
-    isVariant: { type: "boolean", notNull: true, default: false }, // Used for variants
-    isSearchable: { type: "boolean", notNull: true, default: false },
-    isFilterable: { type: "boolean", notNull: true, default: false },
-    isComparable: { type: "boolean", notNull: true, default: false },
-    isVisibleOnProduct: { type: "boolean", notNull: true, default: true },
+    is_active: { type: "boolean", notNull: true, default: true },
+    is_required: { type: "boolean", notNull: true, default: false },
+    is_variant: { type: "boolean", notNull: true, default: false }, // Used for variants
+    is_searchable: { type: "boolean", notNull: true, default: false },
+    is_filterable: { type: "boolean", notNull: true, default: false },
+    is_comparable: { type: "boolean", notNull: true, default: false },
+    is_visible_on_product: { type: "boolean", notNull: true, default: true },
     position: { type: "integer", default: 0 }, // For ordering
-    defaultValue: { type: "text" },
+    default_value: { type: "text" },
     validations: { type: "jsonb" }, // Validation rules
-    allowedValues: { type: "jsonb" }, // For select/multiselect
+    allowed_values: { type: "jsonb" }, // For select/multiselect
     unit: { type: "varchar(20)" }, // For number attributes
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    createdBy: { type: "uuid" }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    created_by: { type: "uuid" }
   });
 
   // Create indexes for product attributes
   pgm.createIndex("product_attribute", "code");
   pgm.createIndex("product_attribute", "type");
-  pgm.createIndex("product_attribute", "isActive");
-  pgm.createIndex("product_attribute", "isVariant");
-  pgm.createIndex("product_attribute", "isSearchable");
-  pgm.createIndex("product_attribute", "isFilterable");
+  pgm.createIndex("product_attribute", "is_active");
+  pgm.createIndex("product_attribute", "is_variant");
+  pgm.createIndex("product_attribute", "is_searchable");
+  pgm.createIndex("product_attribute", "is_filterable");
   pgm.createIndex("product_attribute", "position");
 
   // Create product attribute value table
   pgm.createTable("product_attribute_value", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    attributeId: { type: "uuid", notNull: true, references: "product_attribute", onDelete: "CASCADE" },
+    attribute_id: { type: "uuid", notNull: true, references: "product_attribute", onDelete: "CASCADE" },
     value: { type: "text", notNull: true }, // Actual value
-    displayValue: { type: "varchar(255)" }, // Formatted display value
+    display_value: { type: "varchar(255)" }, // Formatted display value
     position: { type: "integer", default: 0 }, // For ordering
-    isDefault: { type: "boolean", notNull: true, default: false },
+    is_default: { type: "boolean", notNull: true, default: false },
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for product attribute values
-  pgm.createIndex("product_attribute_value", "attributeId");
+  pgm.createIndex("product_attribute_value", "attribute_id");
   pgm.createIndex("product_attribute_value", "value");
-  pgm.createIndex("product_attribute_value", "isDefault");
+  pgm.createIndex("product_attribute_value", "is_default");
   pgm.createIndex("product_attribute_value", "position");
-  pgm.createIndex("product_attribute_value", ["attributeId", "value"], { unique: true });
+  pgm.createIndex("product_attribute_value", ["attribute_id", "value"], { unique: true });
 
   // Create product attribute group table
   pgm.createTable("product_attribute_group", {
@@ -141,32 +141,32 @@ exports.up = (pgm) => {
     name: { type: "varchar(100)", notNull: true },
     code: { type: "varchar(50)", notNull: true, unique: true }, // System name
     description: { type: "text" },
-    isActive: { type: "boolean", notNull: true, default: true },
+    is_active: { type: "boolean", notNull: true, default: true },
     position: { type: "integer", default: 0 }, // For ordering
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for product attribute groups
   pgm.createIndex("product_attribute_group", "code");
-  pgm.createIndex("product_attribute_group", "isActive");
+  pgm.createIndex("product_attribute_group", "is_active");
   pgm.createIndex("product_attribute_group", "position");
 
   // Create product attribute to group mapping table
   pgm.createTable("product_attribute_to_group", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    attributeId: { type: "uuid", notNull: true, references: "product_attribute", onDelete: "CASCADE" },
-    groupId: { type: "uuid", notNull: true, references: "product_attribute_group", onDelete: "CASCADE" },
+    attribute_id: { type: "uuid", notNull: true, references: "product_attribute", onDelete: "CASCADE" },
+    group_id: { type: "uuid", notNull: true, references: "product_attribute_group", onDelete: "CASCADE" },
     position: { type: "integer", default: 0 }, // For ordering within group
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for product attribute to group mappings
-  pgm.createIndex("product_attribute_to_group", "attributeId");
-  pgm.createIndex("product_attribute_to_group", "groupId");
+  pgm.createIndex("product_attribute_to_group", "attribute_id");
+  pgm.createIndex("product_attribute_to_group", "group_id");
   pgm.createIndex("product_attribute_to_group", "position");
-  pgm.createIndex("product_attribute_to_group", ["attributeId", "groupId"], { unique: true });
+  pgm.createIndex("product_attribute_to_group", ["attribute_id", "group_id"], { unique: true });
 
   // Create product tag table
   pgm.createTable("product_tag", {
@@ -174,20 +174,20 @@ exports.up = (pgm) => {
     name: { type: "varchar(100)", notNull: true },
     slug: { type: "varchar(150)", notNull: true, unique: true },
     description: { type: "text" },
-    isActive: { type: "boolean", notNull: true, default: true },
+    is_active: { type: "boolean", notNull: true, default: true },
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for product tags
   pgm.createIndex("product_tag", "name");
   pgm.createIndex("product_tag", "slug");
-  pgm.createIndex("product_tag", "isActive");
+  pgm.createIndex("product_tag", "is_active");
 
   // Insert default product categories
   pgm.sql(`
-    INSERT INTO "product_category" (name, slug, description, isActive, isVisible, level, path)
+    INSERT INTO "product_category" (name, slug, description, is_active, is_visible, level, path)
     VALUES 
       ('All Products', 'all-products', 'Root category for all products', true, true, 0, '/'),
       ('Electronics', 'electronics', 'Electronic devices and accessories', true, true, 1, '/electronics'),
@@ -197,7 +197,7 @@ exports.up = (pgm) => {
 
   // Insert default brands
   pgm.sql(`
-    INSERT INTO "product_brand" (name, slug, description, isActive, isFeatured)
+    INSERT INTO "product_brand" (name, slug, description, is_active, is_featured)
     VALUES 
       ('Generic', 'generic', 'Generic/unbranded products', true, false),
       ('Sample Brand', 'sample-brand', 'Sample brand for testing', true, true)
@@ -210,11 +210,11 @@ exports.up = (pgm) => {
       code, 
       description, 
       type, 
-      isActive, 
-      isVariant, 
-      isSearchable, 
-      isFilterable, 
-      isVisibleOnProduct, 
+      is_active, 
+      is_variant, 
+      is_searchable, 
+      is_filterable, 
+      is_visible_on_product, 
       position
     )
     VALUES 
@@ -226,7 +226,7 @@ exports.up = (pgm) => {
 
   // Insert default attribute group
   pgm.sql(`
-    INSERT INTO "product_attribute_group" (name, code, description, isActive, position)
+    INSERT INTO "product_attribute_group" (name, code, description, is_active, position)
     VALUES 
       ('Basic Attributes', 'basic', 'Basic product attributes', true, 10),
       ('Physical Properties', 'physical', 'Physical properties of the product', true, 20)
@@ -241,7 +241,7 @@ exports.up = (pgm) => {
       size_attr AS (SELECT id FROM product_attribute WHERE code = 'size'),
       material_attr AS (SELECT id FROM product_attribute WHERE code = 'material'),
       weight_attr AS (SELECT id FROM product_attribute WHERE code = 'weight')
-    INSERT INTO "product_attribute_to_group" (attributeId, groupId, position)
+    INSERT INTO "product_attribute_to_group" (attribute_id, group_id, position)
     VALUES 
       ((SELECT id FROM color_attr), (SELECT id FROM basic_group), 10),
       ((SELECT id FROM size_attr), (SELECT id FROM basic_group), 20),
@@ -254,7 +254,7 @@ exports.up = (pgm) => {
     WITH 
       color_attr AS (SELECT id FROM product_attribute WHERE code = 'color'),
       size_attr AS (SELECT id FROM product_attribute WHERE code = 'size')
-    INSERT INTO "product_attribute_value" (attributeId, value, displayValue, position)
+    INSERT INTO "product_attribute_value" (attribute_id, value, display_value, position)
     VALUES 
       ((SELECT id FROM color_attr), 'red', 'Red', 10),
       ((SELECT id FROM color_attr), 'blue', 'Blue', 20),

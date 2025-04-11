@@ -38,25 +38,25 @@ exports.up = (pgm) => {
   // Create base notification table
   pgm.createTable("notification", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    userId: { type: "uuid", notNull: true }, // User ID (customer, merchant, admin)
-    userType: { 
+    user_id: { type: "uuid", notNull: true }, // User ID (customer, merchant, admin)
+    user_type: { 
       type: "varchar(20)", 
       notNull: true, 
       default: 'customer',
-      check: "userType IN ('customer', 'merchant', 'admin')" 
+      check: "user_type IN ('customer', 'merchant', 'admin')" 
     },
     type: { type: "notification_type", notNull: true },
     title: { type: "varchar(255)", notNull: true },
     content: { type: "text", notNull: true },
     channel: { type: "notification_channel", notNull: true },
-    isRead: { type: "boolean", notNull: true, default: false },
-    readAt: { type: "timestamp" },
-    sentAt: { type: "timestamp" },
-    deliveredAt: { type: "timestamp" },
-    expiresAt: { type: "timestamp" },
-    actionUrl: { type: "text" }, // URL to direct user when clicked
-    actionLabel: { type: "varchar(100)" }, // Text for action button/link
-    imageUrl: { type: "text" }, // Optional image to display
+    is_read: { type: "boolean", notNull: true, default: false },
+    read_at: { type: "timestamp" },
+    sent_at: { type: "timestamp" },
+    delivered_at: { type: "timestamp" },
+    expires_at: { type: "timestamp" },
+    action_url: { type: "text" }, // URL to direct user when clicked
+    action_label: { type: "varchar(100)" }, // Text for action button/link
+    image_url: { type: "text" }, // Optional image to display
     priority: { 
       type: "varchar(10)", 
       notNull: true, 
@@ -66,20 +66,20 @@ exports.up = (pgm) => {
     category: { type: "varchar(50)" }, // For grouping
     data: { type: "jsonb" }, // Structured data for the notification
     metadata: { type: "jsonb" }, // Additional metadata
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for notifications
-  pgm.createIndex("notification", "userId");
-  pgm.createIndex("notification", "userType");
+  pgm.createIndex("notification", "user_id");
+  pgm.createIndex("notification", "user_type");
   pgm.createIndex("notification", "type");
   pgm.createIndex("notification", "channel");
-  pgm.createIndex("notification", "isRead");
-  pgm.createIndex("notification", "sentAt");
-  pgm.createIndex("notification", "expiresAt");
+  pgm.createIndex("notification", "is_read");
+  pgm.createIndex("notification", "sent_at");
+  pgm.createIndex("notification", "expires_at");
   pgm.createIndex("notification", "priority");
   pgm.createIndex("notification", "category");
-  pgm.createIndex("notification", "createdAt");
+  pgm.createIndex("notification", "created_at");
 
   // Create notification template table
   pgm.createTable("notification_template", {
@@ -88,29 +88,29 @@ exports.up = (pgm) => {
     name: { type: "varchar(100)", notNull: true },
     description: { type: "text" },
     type: { type: "notification_type", notNull: true },
-    supportedChannels: { type: "notification_channel[]", notNull: true }, // Which channels this template supports
-    defaultChannel: { type: "notification_channel", notNull: true },
+    supported_channels: { type: "notification_channel[]", notNull: true }, // Which channels this template supports
+    default_channel: { type: "notification_channel", notNull: true },
     subject: { type: "varchar(255)" }, // For email
-    htmlTemplate: { type: "text" }, // HTML template
-    textTemplate: { type: "text" }, // Plain text template
-    pushTemplate: { type: "text" }, // Push notification template
-    smsTemplate: { type: "text" }, // SMS template
+    html_template: { type: "text" }, // HTML template
+    text_template: { type: "text" }, // Plain text template
+    push_template: { type: "text" }, // Push notification template
+    sms_template: { type: "text" }, // SMS template
     parameters: { type: "jsonb" }, // Required parameters for template
-    isActive: { type: "boolean", notNull: true, default: true },
-    categoryCode: { type: "varchar(50)" }, // For grouping
-    previewData: { type: "jsonb" }, // Sample data for previewing
+    is_active: { type: "boolean", notNull: true, default: true },
+    category_code: { type: "varchar(50)" }, // For grouping
+    preview_data: { type: "jsonb" }, // Sample data for previewing
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    createdBy: { type: "uuid" }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    created_by: { type: "uuid" }
   });
 
   // Create indexes for notification templates
   pgm.createIndex("notification_template", "code");
   pgm.createIndex("notification_template", "type");
-  pgm.createIndex("notification_template", "isActive");
-  pgm.createIndex("notification_template", "categoryCode");
-  pgm.createIndex("notification_template", "supportedChannels", { method: "gin" });
+  pgm.createIndex("notification_template", "is_active");
+  pgm.createIndex("notification_template", "category_code");
+  pgm.createIndex("notification_template", "supported_channels", { method: "gin" });
 
   // Create notification category table
   pgm.createTable("notification_category", {
@@ -118,25 +118,25 @@ exports.up = (pgm) => {
     code: { type: "varchar(50)", notNull: true, unique: true },
     name: { type: "varchar(100)", notNull: true },
     description: { type: "text" },
-    defaultPriority: { 
+    default_priority: { 
       type: "varchar(10)", 
       notNull: true, 
       default: 'normal',
-      check: "defaultPriority IN ('low', 'normal', 'high', 'urgent')" 
+      check: "default_priority IN ('low', 'normal', 'high', 'urgent')" 
     },
-    isTransactional: { type: "boolean", notNull: true, default: false }, // Is transactional or marketing
+    is_transactional: { type: "boolean", notNull: true, default: false }, // Is transactional or marketing
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for notification categories
   pgm.createIndex("notification_category", "code");
-  pgm.createIndex("notification_category", "isTransactional");
+  pgm.createIndex("notification_category", "is_transactional");
 
   // Insert default notification categories
   pgm.sql(`
-    INSERT INTO "notification_category" (code, name, description, defaultPriority, isTransactional)
+    INSERT INTO "notification_category" (code, name, description, default_priority, is_transactional)
     VALUES 
       ('order', 'Orders', 'Order-related notifications', 'high', true),
       ('payment', 'Payments', 'Payment-related notifications', 'high', true),
@@ -154,13 +154,13 @@ exports.up = (pgm) => {
       name, 
       description, 
       type, 
-      supportedChannels, 
-      defaultChannel,
+      supported_channels, 
+      default_channel,
       subject,
-      htmlTemplate,
-      textTemplate,
+      html_template,
+      text_template,
       parameters,
-      categoryCode
+      category_code
     )
     VALUES 
       ('order_confirmation', 
@@ -191,14 +191,14 @@ exports.up = (pgm) => {
   // Insert sample notification
   pgm.sql(`
     INSERT INTO "notification" (
-      userId, 
-      userType, 
+      user_id, 
+      user_type, 
       type, 
       title, 
       content, 
       channel, 
-      isRead, 
-      sentAt, 
+      is_read, 
+      sent_at, 
       priority,
       category,
       data

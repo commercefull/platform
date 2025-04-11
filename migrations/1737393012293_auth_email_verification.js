@@ -12,30 +12,30 @@ exports.up = (pgm) => {
   // Create customer email verification table
   pgm.createTable("customer_email_verification", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    customerId: { type: "uuid", notNull: true, references: "customer" },
+    customer_id: { type: "uuid", notNull: true, references: "customer" },
     token: { type: "varchar(255)", notNull: true },
-    expiresAt: { type: "timestamp", notNull: true },
-    isUsed: { type: "boolean", notNull: true, default: false },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    expires_at: { type: "timestamp", notNull: true },
+    is_used: { type: "boolean", notNull: true, default: false },
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
-  pgm.createIndex("customer_email_verification", "customerId");
+  pgm.createIndex("customer_email_verification", "customer_id");
   pgm.createIndex("customer_email_verification", "token");
   
   // Create merchant email verification table
   pgm.createTable("merchant_email_verification", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    merchantId: { type: "uuid", notNull: true, references: "merchant" },
+    merchant_id: { type: "uuid", notNull: true, references: "merchant" },
     token: { type: "varchar(255)", notNull: true },
-    expiresAt: { type: "timestamp", notNull: true },
-    isUsed: { type: "boolean", notNull: true, default: false },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    expires_at: { type: "timestamp", notNull: true },
+    is_used: { type: "boolean", notNull: true, default: false },
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
-  pgm.createIndex("merchant_email_verification", "merchantId");
+  pgm.createIndex("merchant_email_verification", "merchant_id");
   pgm.createIndex("merchant_email_verification", "token");
   
-  // Update customer table to ensure it has an emailVerified field if not already present
+  // Update customer table to ensure it has an email_verified field if not already present
   pgm.addColumns("customer", {
-    emailVerified: {
+    email_verified: {
       type: "boolean",
       notNull: true,
       default: false,
@@ -46,7 +46,7 @@ exports.up = (pgm) => {
   
   // Update merchant table to track email verification
   pgm.addColumns("merchant", {
-    emailVerified: {
+    email_verified: {
       type: "boolean",
       notNull: true,
       default: false,
@@ -61,9 +61,8 @@ exports.up = (pgm) => {
  * @returns {Promise<void> | void}
  */
 exports.down = (pgm) => {
-  pgm.dropTable("customer_email_verification");
+  pgm.dropColumns("merchant", ["email_verified"], { ifExists: true });
+  pgm.dropColumns("customer", ["email_verified"], { ifExists: true });
   pgm.dropTable("merchant_email_verification");
-  
-  // We don't remove the emailVerified column in down migration
-  // as it might be used by other features and would be destructive
+  pgm.dropTable("customer_email_verification");
 };

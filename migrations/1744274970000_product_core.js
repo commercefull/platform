@@ -34,40 +34,40 @@ exports.up = (pgm) => {
       sku: { type: "varchar(100)" },
       status: { type: "product_status", notNull: true, default: "draft" },
       visibility: { type: "product_visibility", notNull: true, default: "hidden" },
-      shortDescription: { type: "text" },
-      metaTitle: { type: "varchar(255)" },
-      metaDescription: { type: "text" },
-      metaKeywords: { type: "varchar(255)" },
+      short_description: { type: "text" },
+      meta_title: { type: "varchar(255)" },
+      meta_description: { type: "text" },
+      meta_keywords: { type: "varchar(255)" },
       slug: { type: "varchar(255)", unique: true },
-      isFeatured: { type: "boolean", notNull: true, default: false },
-      isVirtual: { type: "boolean", notNull: true, default: false },
-      isDownloadable: { type: "boolean", notNull: true, default: false },
-      isSubscription: { type: "boolean", notNull: true, default: false },
-      isTaxable: { type: "boolean", notNull: true, default: true },
-      taxClass: { type: "varchar(100)", default: "standard" },
+      is_featured: { type: "boolean", notNull: true, default: false },
+      is_virtual: { type: "boolean", notNull: true, default: false },
+      is_downloadable: { type: "boolean", notNull: true, default: false },
+      is_subscription: { type: "boolean", notNull: true, default: false },
+      is_taxable: { type: "boolean", notNull: true, default: true },
+      tax_class: { type: "varchar(100)", default: "standard" },
       weight: { type: "decimal(10,2)" },
-      weightUnit: { type: "varchar(10)", default: "kg" },
+      weight_unit: { type: "varchar(10)", default: "kg" },
       length: { type: "decimal(10,2)" },
       width: { type: "decimal(10,2)" },
       height: { type: "decimal(10,2)" },
-      dimensionUnit: { type: "varchar(10)", default: "cm" },
-      basePrice: { type: "decimal(15,2)" },
-      salePrice: { type: "decimal(15,2)" },
+      dimension_unit: { type: "varchar(10)", default: "cm" },
+      base_price: { type: "decimal(15,2)" },
+      sale_price: { type: "decimal(15,2)" },
       cost: { type: "decimal(15,2)" },
-      currencyCode: { type: "varchar(3)", default: "USD" },
-      primaryImageId: { type: "uuid" },
-      publishedAt: { type: "timestamp" },
-      deletedAt: { type: "timestamp" },
-      userId: { type: "uuid" }, // User who created the product
-      merchantId: { type: "uuid", references: "merchant" }, // Owner merchant
-      brandId: { type: "uuid" },
-      minOrderQuantity: { type: "integer", default: 1 },
-      maxOrderQuantity: { type: "integer" },
-      returnPolicy: { type: "text" },
+      currency_code: { type: "varchar(3)", default: "USD" },
+      primary_image_id: { type: "uuid" },
+      published_at: { type: "timestamp" },
+      deleted_at: { type: "timestamp" },
+      user_id: { type: "uuid" }, // User who created the product
+      merchant_id: { type: "uuid", references: "merchant" }, // Owner merchant
+      brand_id: { type: "uuid" },
+      min_order_quantity: { type: "integer", default: 1 },
+      max_order_quantity: { type: "integer" },
+      return_policy: { type: "text" },
       warranty: { type: "text" },
-      externalId: { type: "varchar(255)" }, // For integration with external systems
-      hasVariants: { type: "boolean", notNull: true, default: false },
-      variantAttributes: { type: "jsonb" }, // Attributes used for creating variants
+      external_id: { type: "varchar(255)" }, // For integration with external systems
+      has_variants: { type: "boolean", notNull: true, default: false },
+      variant_attributes: { type: "jsonb" }, // Attributes used for creating variants
       metadata: { type: "jsonb" },
     }
   });
@@ -77,22 +77,22 @@ exports.up = (pgm) => {
   pgm.createIndex("product", "sku");
   pgm.createIndex("product", "status");
   pgm.createIndex("product", "visibility");
-  pgm.createIndex("product", "isFeatured");
-  pgm.createIndex("product", "basePrice");
-  pgm.createIndex("product", "salePrice");
-  pgm.createIndex("product", "merchantId");
-  pgm.createIndex("product", "brandId");
-  pgm.createIndex("product", "hasVariants");
-  pgm.createIndex("product", "publishedAt");
-  pgm.createIndex("product", "deletedAt");
-  pgm.createIndex("product", "userId");
-  pgm.createIndex("product", "externalId");
+  pgm.createIndex("product", "is_featured");
+  pgm.createIndex("product", "base_price");
+  pgm.createIndex("product", "sale_price");
+  pgm.createIndex("product", "merchant_id");
+  pgm.createIndex("product", "brand_id");
+  pgm.createIndex("product", "has_variants");
+  pgm.createIndex("product", "published_at");
+  pgm.createIndex("product", "deleted_at");
+  pgm.createIndex("product", "user_id");
+  pgm.createIndex("product", "external_id");
 
   // Create product media table
   pgm.createTable("product_media", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    productId: { type: "uuid", notNull: true, references: "product", onDelete: "CASCADE" },
-    variantId: { type: "uuid", references: "productVariant", onDelete: "CASCADE" },
+    product_id: { type: "uuid", notNull: true, references: "product", onDelete: "CASCADE" },
+    variant_id: { type: "uuid", references: "product_variant", onDelete: "CASCADE" },
     type: { 
       type: "varchar(50)", 
       notNull: true,
@@ -101,80 +101,86 @@ exports.up = (pgm) => {
     url: { type: "text", notNull: true },
     filename: { type: "varchar(255)" },
     filesize: { type: "integer" },
-    mimeType: { type: "varchar(100)" },
-    altText: { type: "varchar(255)" },
+    mime_type: { type: "varchar(100)" },
+    alt_text: { type: "varchar(255)" },
     title: { type: "varchar(255)" },
-    sortOrder: { type: "integer", notNull: true, default: 0 },
-    isPrimary: { type: "boolean", notNull: true, default: false },
+    sort_order: { type: "integer", notNull: true, default: 0 },
+    is_primary: { type: "boolean", notNull: true, default: false },
     width: { type: "integer" },
     height: { type: "integer" },
     duration: { type: "integer" }, // For video/audio in seconds
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    deleted_at: { type: "timestamp" }
   });
 
   // Create indexes for product media
-  pgm.createIndex("product_media", "productId");
-  pgm.createIndex("product_media", "variantId");
+  pgm.createIndex("product_media", "product_id");
+  pgm.createIndex("product_media", "variant_id");
   pgm.createIndex("product_media", "type");
-  pgm.createIndex("product_media", "sortOrder");
-  pgm.createIndex("product_media", "isPrimary");
-  pgm.createIndex("product_media", ["productId", "isPrimary"], {
+  pgm.createIndex("product_media", "sort_order");
+  pgm.createIndex("product_media", "is_primary");
+  pgm.createIndex("product_media", "deleted_at");
+  pgm.createIndex("product_media", ["product_id", "is_primary"], {
     unique: true,
-    where: "isPrimary = true AND variantId IS NULL"
+    where: "is_primary = true AND variant_id IS NULL"
   });
-  pgm.createIndex("product_media", ["variantId", "isPrimary"], {
+  pgm.createIndex("product_media", ["variant_id", "is_primary"], {
     unique: true,
-    where: "isPrimary = true AND variantId IS NOT NULL"
+    where: "is_primary = true AND variant_id IS NOT NULL"
   });
 
   // Create product SEO table
   pgm.createTable("product_seo", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    productId: { type: "uuid", notNull: true, references: "product", onDelete: "CASCADE", unique: true },
-    metaTitle: { type: "varchar(255)" },
-    metaDescription: { type: "text" },
-    metaKeywords: { type: "varchar(255)" },
-    ogTitle: { type: "varchar(255)" },
-    ogDescription: { type: "text" },
-    ogImage: { type: "text" },
-    twitterCard: { type: "varchar(50)", default: "summary_large_image" },
-    twitterTitle: { type: "varchar(255)" },
-    twitterDescription: { type: "text" },
-    twitterImage: { type: "text" },
-    canonicalUrl: { type: "text" },
+    product_id: { type: "uuid", notNull: true, references: "product", onDelete: "CASCADE", unique: true },
+    meta_title: { type: "varchar(255)" },
+    meta_description: { type: "text" },
+    meta_keywords: { type: "varchar(255)" },
+    og_title: { type: "varchar(255)" },
+    og_description: { type: "text" },
+    og_image: { type: "text" },
+    twitter_card: { type: "varchar(50)", default: "summary_large_image" },
+    twitter_title: { type: "varchar(255)" },
+    twitter_description: { type: "text" },
+    twitter_image: { type: "text" },
+    canonical_url: { type: "text" },
     robots: { type: "varchar(100)", default: "index, follow" },
-    structuredData: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    structured_data: { type: "jsonb" },
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    deleted_at: { type: "timestamp" }
   });
 
   // Create index for product SEO
-  pgm.createIndex("product_seo", "productId");
+  pgm.createIndex("product_seo", "product_id");
+  pgm.createIndex("product_seo", "deleted_at");
 
   // Enhance product type table with more fields
-  pgm.alterTable("productType", {
+  pgm.alterTable("product_type", {
     add: {
       slug: { type: "varchar(255)", unique: true },
-      isActive: { type: "boolean", notNull: true, default: true },
+      is_active: { type: "boolean", notNull: true, default: true },
       icon: { type: "varchar(255)" },
-      metaTitle: { type: "varchar(255)" },
-      metaDescription: { type: "text" },
-      sortOrder: { type: "integer", notNull: true, default: 0 },
-      attributeTemplate: { type: "jsonb" }, // Default attributes for this product type
-      merchantId: { type: "uuid", references: "merchant" }, // Owner merchant if not global
-      isGlobal: { type: "boolean", notNull: true, default: true },
-      metadata: { type: "jsonb" }
+      meta_title: { type: "varchar(255)" },
+      meta_description: { type: "text" },
+      sort_order: { type: "integer", notNull: true, default: 0 },
+      attribute_template: { type: "jsonb" }, // Default attributes for this product type
+      merchant_id: { type: "uuid", references: "merchant" }, // Owner merchant if not global
+      is_global: { type: "boolean", notNull: true, default: true },
+      metadata: { type: "jsonb" },
+      deleted_at: { type: "timestamp" }
     }
   });
 
   // Create additional indexes for product type
-  pgm.createIndex("productType", "slug");
-  pgm.createIndex("productType", "isActive");
-  pgm.createIndex("productType", "sortOrder");
-  pgm.createIndex("productType", "merchantId");
-  pgm.createIndex("productType", "isGlobal");
+  pgm.createIndex("product_type", "slug");
+  pgm.createIndex("product_type", "is_active");
+  pgm.createIndex("product_type", "sort_order");
+  pgm.createIndex("product_type", "merchant_id");
+  pgm.createIndex("product_type", "is_global");
+  pgm.createIndex("product_type", "deleted_at");
 
   // Create product brand table
   pgm.createTable("product_brand", {
@@ -182,34 +188,35 @@ exports.up = (pgm) => {
     name: { type: "varchar(255)", notNull: true },
     slug: { type: "varchar(255)", unique: true },
     description: { type: "text" },
-    logoUrl: { type: "text" },
-    websiteUrl: { type: "text" },
-    isActive: { type: "boolean", notNull: true, default: true },
-    isFeatured: { type: "boolean", notNull: true, default: false },
-    metaTitle: { type: "varchar(255)" },
-    metaDescription: { type: "text" },
-    metaKeywords: { type: "varchar(255)" },
-    merchantId: { type: "uuid", references: "merchant" }, // Owner merchant if not global
-    isGlobal: { type: "boolean", notNull: true, default: true },
-    sortOrder: { type: "integer", notNull: true, default: 0 },
+    logo_url: { type: "text" },
+    website_url: { type: "text" },
+    is_active: { type: "boolean", notNull: true, default: true },
+    is_featured: { type: "boolean", notNull: true, default: false },
+    meta_title: { type: "varchar(255)" },
+    meta_description: { type: "text" },
+    meta_keywords: { type: "varchar(255)" },
+    merchant_id: { type: "uuid", references: "merchant" }, // Owner merchant if not global
+    is_global: { type: "boolean", notNull: true, default: true },
+    sort_order: { type: "integer", notNull: true, default: 0 },
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    deleted_at: { type: "timestamp" }
   });
 
   // Create indexes for product brand
   pgm.createIndex("product_brand", "slug");
-  pgm.createIndex("product_brand", "isActive");
-  pgm.createIndex("product_brand", "isFeatured");
-  pgm.createIndex("product_brand", "merchantId");
-  pgm.createIndex("product_brand", "isGlobal");
-  pgm.createIndex("product_brand", "sortOrder");
+  pgm.createIndex("product_brand", "is_active");
+  pgm.createIndex("product_brand", "is_featured");
+  pgm.createIndex("product_brand", "merchant_id");
+  pgm.createIndex("product_brand", "is_global");
+  pgm.createIndex("product_brand", "deleted_at");
 
   // Update product table to reference brand table
   pgm.sql(`
     ALTER TABLE product
     ADD CONSTRAINT fk_product_brand
-    FOREIGN KEY (brandId)
+    FOREIGN KEY (brand_id)
     REFERENCES product_brand(id)
     ON DELETE SET NULL;
   `);
@@ -217,28 +224,28 @@ exports.up = (pgm) => {
   // Create product downloadable asset table (for digital products)
   pgm.createTable("product_download", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    productId: { type: "uuid", notNull: true, references: "product", onDelete: "CASCADE" },
-    variantId: { type: "uuid", references: "productVariant", onDelete: "CASCADE" },
+    product_id: { type: "uuid", notNull: true, references: "product", onDelete: "CASCADE" },
+    variant_id: { type: "uuid", references: "product_variant", onDelete: "CASCADE" },
     name: { type: "varchar(255)", notNull: true },
-    fileUrl: { type: "text", notNull: true },
-    filePath: { type: "text" },
-    fileSize: { type: "integer" },
-    mimeType: { type: "varchar(100)" },
-    maxDownloads: { type: "integer" }, // Limit number of downloads per purchase
-    daysValid: { type: "integer" }, // Expiration in days after purchase
-    isActive: { type: "boolean", notNull: true, default: true },
-    sampleUrl: { type: "text" }, // Preview download URL
-    sortOrder: { type: "integer", notNull: true, default: 0 },
+    file_url: { type: "text", notNull: true },
+    file_path: { type: "text" },
+    file_size: { type: "integer" },
+    mime_type: { type: "varchar(100)" },
+    max_downloads: { type: "integer" }, // Limit number of downloads per purchase
+    days_valid: { type: "integer" }, // Expiration in days after purchase
+    is_active: { type: "boolean", notNull: true, default: true },
+    sample_url: { type: "text" }, // Preview download URL
+    sort_order: { type: "integer", notNull: true, default: 0 },
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for product downloads
-  pgm.createIndex("product_download", "productId");
-  pgm.createIndex("product_download", "variantId");
-  pgm.createIndex("product_download", "isActive");
-  pgm.createIndex("product_download", "sortOrder");
+  pgm.createIndex("product_download", "product_id");
+  pgm.createIndex("product_download", "variant_id");
+  pgm.createIndex("product_download", "is_active");
+  pgm.createIndex("product_download", "sort_order");
 
   // Insert sample brand data
   pgm.sql(`
@@ -246,10 +253,10 @@ exports.up = (pgm) => {
       name, 
       slug, 
       description,
-      logoUrl,
-      isActive,
-      isFeatured,
-      isGlobal
+      logo_url,
+      is_active,
+      is_featured,
+      is_global
     )
     VALUES 
     (
@@ -283,29 +290,29 @@ exports.up = (pgm) => {
 
   // Insert sample product types
   pgm.sql(`
-    UPDATE "productType"
+    UPDATE product_type
     SET 
       slug = 'electronics',
-      isActive = true,
+      is_active = true,
       icon = 'laptop',
-      metaTitle = 'Electronics - High Quality Electronic Products',
-      metaDescription = 'Shop our wide range of electronic products including smartphones, laptops, and accessories.',
-      sortOrder = 1,
-      attributeTemplate = '{"attributes": ["color", "size", "weight", "material"]}',
-      isGlobal = true
+      meta_title = 'Electronics - High Quality Electronic Products',
+      meta_description = 'Shop our wide range of electronic products including smartphones, laptops, and accessories.',
+      sort_order = 1,
+      attribute_template = '{"attributes": ["color", "size", "weight", "material"]}',
+      is_global = true
     WHERE name = 'Electronics';
     
-    INSERT INTO "productType" (
+    INSERT INTO product_type (
       name,
       slug,
       description,
-      isActive,
+      is_active,
       icon,
-      metaTitle,
-      metaDescription,
-      sortOrder,
-      attributeTemplate,
-      isGlobal
+      meta_title,
+      meta_description,
+      sort_order,
+      attribute_template,
+      is_global
     )
     VALUES 
     (
@@ -347,69 +354,69 @@ exports.up = (pgm) => {
   `);
 
   // Update product variants table with more fields
-  pgm.alterTable("productVariant", {
+  pgm.alterTable("product_variant", {
     add: {
       name: { type: "varchar(255)" },
       barcode: { type: "varchar(100)" },
-      isDefault: { type: "boolean", notNull: true, default: false },
-      isActive: { type: "boolean", notNull: true, default: true },
-      stockQuantity: { type: "integer" },
-      lowStockThreshold: { type: "integer" },
-      backorderStatus: { type: "varchar(50)", default: "no" }, // yes, no, notify
+      is_default: { type: "boolean", notNull: true, default: false },
+      is_active: { type: "boolean", notNull: true, default: true },
+      stock_quantity: { type: "integer" },
+      low_stock_threshold: { type: "integer" },
+      backorder_status: { type: "varchar(50)", default: "no" }, // yes, no, notify
       weight: { type: "decimal(10,2)" },
       dimensions: { type: "jsonb" }, // {length, width, height, unit}
       cost: { type: "decimal(15,2)" },
-      salePrice: { type: "decimal(15,2)" },
-      saleStartDate: { type: "timestamp" },
-      saleEndDate: { type: "timestamp" },
-      minOrderQuantity: { type: "integer", default: 1 },
-      maxOrderQuantity: { type: "integer" },
+      sale_price: { type: "decimal(15,2)" },
+      sale_start_date: { type: "timestamp" },
+      sale_end_date: { type: "timestamp" },
+      min_order_quantity: { type: "integer", default: 1 },
+      max_order_quantity: { type: "integer" },
       metadata: { type: "jsonb" },
       attributes: { type: "jsonb" }, // Specific attributes of this variant
-      imageUrl: { type: "text" }, // Main image URL
+      image_url: { type: "text" }, // Main image URL
       position: { type: "integer", default: 0 }, // Sort order among variants
-      externalId: { type: "varchar(255)" } // For integration with external systems
+      external_id: { type: "varchar(255)" } // For integration with external systems
     }
   });
 
   // Create additional indexes for product variants
-  pgm.createIndex("productVariant", "barcode");
-  pgm.createIndex("productVariant", "isDefault");
-  pgm.createIndex("productVariant", "isActive");
-  pgm.createIndex("productVariant", "stockQuantity");
-  pgm.createIndex("productVariant", "salePrice");
-  pgm.createIndex("productVariant", "externalId");
-  pgm.createIndex("productVariant", ["productId", "isDefault"], {
+  pgm.createIndex("product_variant", "barcode");
+  pgm.createIndex("product_variant", "is_default");
+  pgm.createIndex("product_variant", "is_active");
+  pgm.createIndex("product_variant", "stock_quantity");
+  pgm.createIndex("product_variant", "sale_price");
+  pgm.createIndex("product_variant", "external_id");
+  pgm.createIndex("product_variant", ["product_id", "is_default"], {
     unique: true,
-    where: "isDefault = true"
+    where: "is_default = true"
   });
 
   // Insert sample product
   pgm.sql(`
     WITH 
-      sample_type AS (SELECT id FROM "productType" WHERE slug = 'electronics' LIMIT 1),
+      sample_type AS (SELECT id FROM product_type WHERE slug = 'electronics' LIMIT 1),
       sample_brand AS (SELECT id FROM product_brand WHERE slug = 'techgear' LIMIT 1),
       sample_merchant AS (SELECT id FROM merchant LIMIT 1)
     INSERT INTO product (
       name,
-      productTypeId,
+      product_type_id,
       description,
       sku,
       status,
       visibility,
-      shortDescription,
-      metaTitle,
-      metaDescription,
+      short_description,
+      meta_title,
+      meta_description,
       slug,
-      isFeatured,
-      isVirtual,
-      basePrice,
-      salePrice,
-      currencyCode,
-      publishedAt,
-      merchantId,
-      brandId,
-      hasVariants
+      is_featured,
+      is_virtual,
+      base_price,
+      sale_price,
+      currency_code,
+      published_at,
+      merchant_id,
+      brand_id,
+      has_variants
     )
     VALUES (
       'Premium Bluetooth Headphones',
@@ -438,17 +445,17 @@ exports.up = (pgm) => {
   // Insert sample variants for the product
   pgm.sql(`
     WITH sample_product AS (SELECT id FROM product WHERE slug = 'premium-bluetooth-headphones' LIMIT 1)
-    INSERT INTO "productVariant" (
-      productId,
+    INSERT INTO product_variant (
+      product_id,
       sku,
       price,
       name,
       barcode,
-      isDefault,
-      isActive,
-      stockQuantity,
-      lowStockThreshold,
-      salePrice,
+      is_default,
+      is_active,
+      stock_quantity,
+      low_stock_threshold,
+      sale_price,
       attributes,
       position
     )
@@ -507,7 +514,7 @@ exports.down = (pgm) => {
   // Drop the sample data (not required, but cleaner)
   pgm.sql(`DELETE FROM product WHERE slug = 'premium-bluetooth-headphones';`);
   pgm.sql(`DELETE FROM product_brand WHERE slug IN ('acme-corporation', 'techgear', 'fashionista');`);
-  pgm.sql(`DELETE FROM "productType" WHERE slug IN ('clothing', 'home-goods', 'digital-downloads');`);
+  pgm.sql(`DELETE FROM product_type WHERE slug IN ('clothing', 'home-goods', 'digital-downloads');`);
 
   // Drop tables in reverse order
   pgm.dropTable("product_download");
@@ -516,22 +523,22 @@ exports.down = (pgm) => {
   pgm.dropTable("product_brand");
 
   // Remove added columns from existing tables
-  pgm.alterTable("productVariant", {
+  pgm.alterTable("product_variant", {
     drop: {
       columns: [
-        "name", "barcode", "isDefault", "isActive", "stockQuantity", "lowStockThreshold",
-        "backorderStatus", "weight", "dimensions", "cost", "salePrice", "saleStartDate",
-        "saleEndDate", "minOrderQuantity", "maxOrderQuantity", "metadata", "attributes",
-        "imageUrl", "position", "externalId"
+        "name", "barcode", "is_default", "is_active", "stock_quantity", "low_stock_threshold",
+        "backorder_status", "weight", "dimensions", "cost", "sale_price", "sale_start_date",
+        "sale_end_date", "min_order_quantity", "max_order_quantity", "metadata", "attributes",
+        "image_url", "position", "external_id"
       ]
     }
   });
 
-  pgm.alterTable("productType", {
+  pgm.alterTable("product_type", {
     drop: {
       columns: [
-        "slug", "isActive", "icon", "metaTitle", "metaDescription", "sortOrder",
-        "attributeTemplate", "merchantId", "isGlobal", "metadata"
+        "slug", "is_active", "icon", "meta_title", "meta_description", "sort_order",
+        "attribute_template", "merchant_id", "is_global", "metadata", "deleted_at"
       ]
     }
   });
@@ -539,13 +546,13 @@ exports.down = (pgm) => {
   pgm.alterTable("product", {
     drop: {
       columns: [
-        "sku", "status", "visibility", "shortDescription", "metaTitle", "metaDescription", 
-        "metaKeywords", "slug", "isFeatured", "isVirtual", "isDownloadable", "isSubscription", 
-        "isTaxable", "taxClass", "weight", "weightUnit", "length", "width", "height", 
-        "dimensionUnit", "basePrice", "salePrice", "cost", "currencyCode", "primaryImageId", 
-        "publishedAt", "deletedAt", "userId", "merchantId", "brandId", "minOrderQuantity", 
-        "maxOrderQuantity", "returnPolicy", "warranty", "externalId", "hasVariants", 
-        "variantAttributes", "metadata"
+        "sku", "status", "visibility", "short_description", "meta_title", "meta_description", 
+        "meta_keywords", "slug", "is_featured", "is_virtual", "is_downloadable", "is_subscription", 
+        "is_taxable", "tax_class", "weight", "weight_unit", "length", "width", "height", 
+        "dimension_unit", "base_price", "sale_price", "cost", "currency_code", "primary_image_id", 
+        "published_at", "deleted_at", "user_id", "merchant_id", "brand_id", "min_order_quantity", 
+        "max_order_quantity", "return_policy", "warranty", "external_id", "has_variants", 
+        "variant_attributes", "metadata"
       ]
     }
   });

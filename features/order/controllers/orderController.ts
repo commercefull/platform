@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
-import { OrderRepo, OrderStatus } from "../repos/orderRepo";
+
 import { storefrontRespond } from "../../../libs/templates";
+import { OrderRepo, OrderStatus } from "../repos/orderRepo";
 
 // Extend Express Request with User
 interface UserRequest extends Request {
@@ -45,53 +46,92 @@ export const getUserOrders = async (req: UserRequest, res: Response): Promise<vo
   }
   
   try {
-    const orders = await orderRepo.findByUser(userId);
+    const orders = await orderRepo.findByCustomer(userId);
     
     // Respond with the storefront template
     storefrontRespond(req, res, "user/orders", {
-      pageName: "My Orders",
+      title: "Your Orders",
       orders,
-      successMsg: req.flash("success")[0],
-      errorMsg: req.flash("error")[0],
+      orderCount: orders ? orders.length : 0
     });
   } catch (error) {
     console.error('Error fetching user orders:', error);
-    req.flash("error", "Failed to load your orders");
-    res.redirect("/account");
+    req.flash('error', 'Failed to load your orders. Please try again later.');
+    res.redirect('/account');
   }
 };
 
 /**
- * Get a single order by ID
+ * Get details for a specific order - for customer use
  */
 export const getOrderDetails = async (req: UserRequest, res: Response): Promise<void> => {
-  const { id } = req.params;
+  const orderId = req.params.id;
   const userId = req.user?._id || req.user?.id;
   
+  if (!userId) {
+    req.flash('error', 'You must be logged in to view order details');
+    res.redirect('/login');
+    return;
+  }
+  
   try {
-    const order = await orderRepo.findOne(id);
+    const order = await orderRepo.findById(orderId);
     
     if (!order) {
-      req.flash("error", "Order not found");
-      return res.redirect("/account/orders");
+      req.flash('error', 'Order not found');
+      res.redirect('/account/orders');
+      return;
     }
     
-    // For security, ensure users can only see their own orders (unless admin)
-    if (order.userId !== userId && req.user?.role !== 'admin') {
-      req.flash("error", "Unauthorized access");
-      return res.redirect("/account/orders");
+    // Check if the order belongs to the logged-in user
+    if (order.customer_id !== userId) {
+      req.flash('error', 'You do not have permission to view this order');
+      res.redirect('/account/orders');
+      return;
     }
+    
+    // Fetch order items separately
+    const orderItems = await orderRepo.getOrderItems(orderId);
     
     storefrontRespond(req, res, "user/order-details", {
-      pageName: `Order #${id}`,
+      title: `Order #${order.order_number}`,
       order,
-      successMsg: req.flash("success")[0],
-      errorMsg: req.flash("error")[0],
+      items: orderItems
     });
   } catch (error) {
     console.error('Error fetching order details:', error);
-    req.flash("error", "Failed to load order details");
-    res.redirect("/account/orders");
+    req.flash('error', 'Failed to load order details. Please try again later.');
+    res.redirect('/account/orders');
+  }
+};
+
+/**
+ * Get order details - for admin use
+ */
+export const getOrderDetailsAdmin = async (req: UserRequest, res: Response): Promise<void> => {
+  const orderId = req.params.id;
+  
+  try {
+    const order = await orderRepo.findById(orderId);
+    
+    if (!order) {
+      res.status(404).json({ success: false, message: 'Order not found' });
+      return;
+    }
+    
+    // Fetch order items separately
+    const orderItems = await orderRepo.getOrderItems(orderId);
+    
+    res.json({ 
+      success: true, 
+      data: { 
+        order, 
+        items: orderItems 
+      } 
+    });
+  } catch (error) {
+    console.error('Error fetching order details:', error);
+    res.status(500).json({ success: false, message: 'Failed to load order details' });
   }
 };
 
@@ -100,6 +140,7 @@ export const getOrderDetails = async (req: UserRequest, res: Response): Promise<
  */
 export const createOrder = async (req: UserRequest, res: Response): Promise<void> => {
   const userId = req.user?._id || req.user?.id;
+  const orderData = req.body;
   
   if (!userId) {
     res.status(401).json({ success: false, message: 'User not authenticated' });
@@ -107,31 +148,18 @@ export const createOrder = async (req: UserRequest, res: Response): Promise<void
   }
   
   try {
-    const orderData = req.body;
-    orderData.userId = userId;
-    orderData.status = 'pending';
+    // Add the customer ID to the order data
+    orderData.customer_id = userId;
     
-    const newOrder = await orderRepo.create(orderData);
+    // Create the order
+    const order = await orderRepo.create(orderData);
     
-    // For API requests
-    if (req.xhr || req.headers.accept?.includes('application/json')) {
-      res.status(201).json({ success: true, data: newOrder });
-    } else {
-      // For form submissions
-      req.flash("success", "Order placed successfully!");
-      res.redirect(`/account/orders/${newOrder.id}`);
-    }
+    // Redirect to the order confirmation page
+    res.redirect(`/account/orders/${order.id}/confirmation`);
   } catch (error) {
     console.error('Error creating order:', error);
-    
-    // For API requests
-    if (req.xhr || req.headers.accept?.includes('application/json')) {
-      res.status(500).json({ success: false, message: 'Failed to create order' });
-    } else {
-      // For form submissions
-      req.flash("error", "Failed to place your order. Please try again.");
-      res.redirect("/checkout");
-    }
+    req.flash('error', 'Failed to create your order. Please try again.');
+    res.redirect('/checkout');
   }
 };
 
@@ -139,16 +167,21 @@ export const createOrder = async (req: UserRequest, res: Response): Promise<void
  * Update order status - for admin use
  */
 export const updateOrderStatus = async (req: UserRequest, res: Response): Promise<void> => {
-  const { id } = req.params;
+  const orderId = req.params.id;
   const { status } = req.body;
   
-  if (!Object.values(['pending', 'processing', 'completed', 'cancelled', 'refunded']).includes(status)) {
+  // Check if status is a valid OrderStatus
+  const validStatuses: OrderStatus[] = ['pending', 'processing', 'on_hold', 'completed', 'shipped', 
+                                      'delivered', 'cancelled', 'refunded', 'failed', 
+                                      'payment_pending', 'payment_failed', 'backordered'];
+  
+  if (!validStatuses.includes(status as OrderStatus)) {
     res.status(400).json({ success: false, message: 'Invalid order status' });
     return;
   }
   
   try {
-    const updatedOrder = await orderRepo.updateStatus(id, status as OrderStatus);
+    const updatedOrder = await orderRepo.updateStatus(orderId, status as OrderStatus);
     
     if (!updatedOrder) {
       res.status(404).json({ success: false, message: 'Order not found' });
@@ -166,37 +199,45 @@ export const updateOrderStatus = async (req: UserRequest, res: Response): Promis
  * Cancel an order - for customer use
  */
 export const cancelOrder = async (req: UserRequest, res: Response): Promise<void> => {
-  const { id } = req.params;
+  const orderId = req.params.id;
   const userId = req.user?._id || req.user?.id;
   
+  if (!userId) {
+    res.status(401).json({ success: false, message: 'User not authenticated' });
+    return;
+  }
+  
   try {
-    // Check if the order exists and belongs to the user
-    const order = await orderRepo.findOne(id);
+    // Verify the order belongs to the user
+    const order = await orderRepo.findById(orderId);
     
     if (!order) {
-      req.flash("error", "Order not found");
-      return res.redirect("/account/orders");
+      req.flash('error', 'Order not found');
+      res.redirect('/account/orders');
+      return;
     }
     
-    if (order.userId !== userId) {
-      req.flash("error", "Unauthorized access");
-      return res.redirect("/account/orders");
+    if (order.customer_id !== userId) {
+      req.flash('error', 'You do not have permission to cancel this order');
+      res.redirect('/account/orders');
+      return;
     }
     
-    // Only pending or processing orders can be cancelled
+    // Check if the order can be cancelled (only pending or processing orders)
     if (order.status !== 'pending' && order.status !== 'processing') {
-      req.flash("error", "This order cannot be cancelled");
-      return res.redirect(`/account/orders/${id}`);
+      req.flash('error', 'This order cannot be cancelled');
+      res.redirect(`/account/orders/${orderId}`);
+      return;
     }
     
-    // Update order status to cancelled
-    await orderRepo.updateStatus(id, 'cancelled');
+    // Update the order status to cancelled
+    await orderRepo.updateStatus(orderId, 'cancelled');
     
-    req.flash("success", "Order cancelled successfully");
-    res.redirect(`/account/orders/${id}`);
+    req.flash('success', 'Your order has been cancelled');
+    res.redirect('/account/orders');
   } catch (error) {
     console.error('Error cancelling order:', error);
-    req.flash("error", "Failed to cancel order");
-    res.redirect(`/account/orders/${id}`);
+    req.flash('error', 'Failed to cancel your order. Please try again.');
+    res.redirect(`/account/orders/${orderId}`);
   }
 };

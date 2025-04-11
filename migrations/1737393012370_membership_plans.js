@@ -44,8 +44,8 @@ exports.up = (pgm) => {
     visibilityRules: { type: "jsonb" }, // Rules for when plan is visible
     availabilityRules: { type: "jsonb" }, // Rules for when plan is available
     customFields: { type: "jsonb" }, // Custom fields for the plan
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
     createdBy: { type: "uuid" }
   });
 
@@ -89,8 +89,8 @@ exports.up = (pgm) => {
     icon: { type: "text" }, // Icon URL for the benefit
     rules: { type: "jsonb" }, // Rules for applying the benefit
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
     createdBy: { type: "uuid" }
   });
 
@@ -111,8 +111,8 @@ exports.up = (pgm) => {
     valueOverride: { type: "jsonb" }, // Override default benefit value
     rulesOverride: { type: "jsonb" }, // Override default benefit rules
     notes: { type: "text" }, // Internal notes
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for plan-benefit mappings
@@ -152,8 +152,8 @@ exports.up = (pgm) => {
     endDate: { type: "timestamp" }, // Optional end date
     conditions: { type: "jsonb" }, // Additional conditions
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
     createdBy: { type: "uuid" }
   });
 
@@ -184,8 +184,8 @@ exports.up = (pgm) => {
     accessibleIds: { type: "uuid[]" }, // IDs of accessible content
     conditions: { type: "jsonb" }, // Conditions for access
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
     createdBy: { type: "uuid" }
   });
 

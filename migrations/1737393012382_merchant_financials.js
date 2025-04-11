@@ -12,44 +12,44 @@ exports.up = (pgm) => {
   // Create merchant balance table
   pgm.createTable("merchant_balance", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    merchantId: { type: "uuid", notNull: true, references: "merchant", onDelete: "CASCADE" },
-    availableBalance: { type: "decimal(15,2)", notNull: true, default: 0 },
-    pendingBalance: { type: "decimal(15,2)", notNull: true, default: 0 },
-    reserveBalance: { type: "decimal(15,2)", notNull: true, default: 0 }, // Reserved for disputes/chargebacks
-    lifetimeRevenue: { type: "decimal(15,2)", notNull: true, default: 0 },
-    lifetimeCommission: { type: "decimal(15,2)", notNull: true, default: 0 },
-    lifetimePayout: { type: "decimal(15,2)", notNull: true, default: 0 },
+    merchant_id: { type: "uuid", notNull: true, references: "merchant", onDelete: "CASCADE" },
+    available_balance: { type: "decimal(15,2)", notNull: true, default: 0 },
+    pending_balance: { type: "decimal(15,2)", notNull: true, default: 0 },
+    reserve_balance: { type: "decimal(15,2)", notNull: true, default: 0 }, // Reserved for disputes/chargebacks
+    lifetime_revenue: { type: "decimal(15,2)", notNull: true, default: 0 },
+    lifetime_commission: { type: "decimal(15,2)", notNull: true, default: 0 },
+    lifetime_payout: { type: "decimal(15,2)", notNull: true, default: 0 },
     currency: { type: "varchar(3)", notNull: true, default: 'USD' },
-    lastPayoutDate: { type: "timestamp" },
-    nextScheduledPayoutDate: { type: "timestamp" },
-    isPayoutHeld: { type: "boolean", notNull: true, default: false },
-    payoutHoldReason: { type: "text" },
+    last_payout_date: { type: "timestamp" },
+    next_scheduled_payout_date: { type: "timestamp" },
+    is_payout_held: { type: "boolean", notNull: true, default: false },
+    payout_hold_reason: { type: "text" },
     metadata: { type: "jsonb" },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for merchant balances
-  pgm.createIndex("merchant_balance", "merchantId", { unique: true });
-  pgm.createIndex("merchant_balance", "availableBalance");
-  pgm.createIndex("merchant_balance", "pendingBalance");
-  pgm.createIndex("merchant_balance", "reserveBalance");
-  pgm.createIndex("merchant_balance", "lastPayoutDate");
-  pgm.createIndex("merchant_balance", "nextScheduledPayoutDate");
-  pgm.createIndex("merchant_balance", "isPayoutHeld");
+  pgm.createIndex("merchant_balance", "merchant_id", { unique: true });
+  pgm.createIndex("merchant_balance", "available_balance");
+  pgm.createIndex("merchant_balance", "pending_balance");
+  pgm.createIndex("merchant_balance", "reserve_balance");
+  pgm.createIndex("merchant_balance", "last_payout_date");
+  pgm.createIndex("merchant_balance", "next_scheduled_payout_date");
+  pgm.createIndex("merchant_balance", "is_payout_held");
 
   // Create merchant transaction table
   pgm.createTable("merchant_transaction", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    merchantId: { type: "uuid", notNull: true, references: "merchant", onDelete: "CASCADE" },
-    transactionType: { 
+    merchant_id: { type: "uuid", notNull: true, references: "merchant", onDelete: "CASCADE" },
+    transaction_type: { 
       type: "varchar(20)", 
       notNull: true, 
-      check: "transactionType IN ('sale', 'refund', 'chargeback', 'commission', 'adjustment', 'payout', 'fee')" 
+      check: "transaction_type IN ('sale', 'refund', 'chargeback', 'commission', 'adjustment', 'payout', 'fee')" 
     },
     amount: { type: "decimal(15,2)", notNull: true },
     currency: { type: "varchar(3)", notNull: true, default: 'USD' },
-    referenceId: { type: "uuid" }, // Order ID, payout ID, etc.
-    referenceType: { type: "varchar(50)" }, // 'order', 'payout', etc.
+    reference_id: { type: "uuid" }, // Order ID, payout ID, etc.
+    reference_type: { type: "varchar(50)" }, // 'order', 'payout', etc.
     description: { type: "text" },
     status: { 
       type: "varchar(20)", 
@@ -57,43 +57,43 @@ exports.up = (pgm) => {
       default: 'completed',
       check: "status IN ('pending', 'completed', 'failed', 'cancelled')" 
     },
-    availableBalanceBefore: { type: "decimal(15,2)" },
-    availableBalanceAfter: { type: "decimal(15,2)" },
-    pendingBalanceBefore: { type: "decimal(15,2)" },
-    pendingBalanceAfter: { type: "decimal(15,2)" },
-    reserveBalanceBefore: { type: "decimal(15,2)" },
-    reserveBalanceAfter: { type: "decimal(15,2)" },
+    available_balance_before: { type: "decimal(15,2)" },
+    available_balance_after: { type: "decimal(15,2)" },
+    pending_balance_before: { type: "decimal(15,2)" },
+    pending_balance_after: { type: "decimal(15,2)" },
+    reserve_balance_before: { type: "decimal(15,2)" },
+    reserve_balance_after: { type: "decimal(15,2)" },
     metadata: { type: "jsonb" },
     notes: { type: "text" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    createdBy: { type: "uuid" }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    created_by: { type: "uuid" }
   });
 
   // Create indexes for merchant transactions
-  pgm.createIndex("merchant_transaction", "merchantId");
-  pgm.createIndex("merchant_transaction", "transactionType");
+  pgm.createIndex("merchant_transaction", "merchant_id");
+  pgm.createIndex("merchant_transaction", "transaction_type");
   pgm.createIndex("merchant_transaction", "amount");
   pgm.createIndex("merchant_transaction", "currency");
-  pgm.createIndex("merchant_transaction", "referenceId");
-  pgm.createIndex("merchant_transaction", "referenceType");
+  pgm.createIndex("merchant_transaction", "reference_id");
+  pgm.createIndex("merchant_transaction", "reference_type");
   pgm.createIndex("merchant_transaction", "status");
-  pgm.createIndex("merchant_transaction", "createdAt");
+  pgm.createIndex("merchant_transaction", "created_at");
 
   // Create merchant payout table
   pgm.createTable("merchant_payout", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    merchantId: { type: "uuid", notNull: true, references: "merchant", onDelete: "CASCADE" },
-    paymentInfoId: { type: "uuid", references: "merchant_payment_info" },
+    merchant_id: { type: "uuid", notNull: true, references: "merchant", onDelete: "CASCADE" },
+    payment_info_id: { type: "uuid", references: "merchant_payment_info" },
     amount: { type: "decimal(15,2)", notNull: true },
     fee: { type: "decimal(15,2)", notNull: true, default: 0 },
-    netAmount: { type: "decimal(15,2)", notNull: true },
+    net_amount: { type: "decimal(15,2)", notNull: true },
     currency: { type: "varchar(3)", notNull: true, default: 'USD' },
-    payoutMethod: { 
+    payout_method: { 
       type: "varchar(50)", 
       notNull: true, 
-      check: "payoutMethod IN ('bank_transfer', 'paypal', 'stripe', 'check', 'other')" 
+      check: "payout_method IN ('bank_transfer', 'paypal', 'stripe', 'check', 'other')" 
     },
-    transactionId: { type: "varchar(255)" }, // External transaction ID
+    transaction_id: { type: "varchar(255)" }, // External transaction ID
     reference: { type: "varchar(255)" }, // Payout reference number
     status: { 
       type: "varchar(20)", 
@@ -102,40 +102,40 @@ exports.up = (pgm) => {
       check: "status IN ('pending', 'processing', 'completed', 'failed', 'cancelled')" 
     },
     notes: { type: "text" },
-    startDate: { type: "timestamp" }, // Period start covered by payout
-    endDate: { type: "timestamp" }, // Period end covered by payout
-    requestedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    processedAt: { type: "timestamp" }, // When it was processed
-    completedAt: { type: "timestamp" }, // When it was completed
-    failureReason: { type: "text" },
+    start_date: { type: "timestamp" }, // Period start covered by payout
+    end_date: { type: "timestamp" }, // Period end covered by payout
+    requested_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    processed_at: { type: "timestamp" }, // When it was processed
+    completed_at: { type: "timestamp" }, // When it was completed
+    failure_reason: { type: "text" },
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    createdBy: { type: "uuid" },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedBy: { type: "uuid" }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    created_by: { type: "uuid" },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_by: { type: "uuid" }
   });
 
   // Create indexes for merchant payouts
-  pgm.createIndex("merchant_payout", "merchantId");
-  pgm.createIndex("merchant_payout", "paymentInfoId");
+  pgm.createIndex("merchant_payout", "merchant_id");
+  pgm.createIndex("merchant_payout", "payment_info_id");
   pgm.createIndex("merchant_payout", "amount");
   pgm.createIndex("merchant_payout", "currency");
-  pgm.createIndex("merchant_payout", "payoutMethod");
-  pgm.createIndex("merchant_payout", "transactionId");
+  pgm.createIndex("merchant_payout", "payout_method");
+  pgm.createIndex("merchant_payout", "transaction_id");
   pgm.createIndex("merchant_payout", "reference");
   pgm.createIndex("merchant_payout", "status");
-  pgm.createIndex("merchant_payout", "startDate");
-  pgm.createIndex("merchant_payout", "endDate");
-  pgm.createIndex("merchant_payout", "requestedAt");
-  pgm.createIndex("merchant_payout", "processedAt");
-  pgm.createIndex("merchant_payout", "completedAt");
+  pgm.createIndex("merchant_payout", "start_date");
+  pgm.createIndex("merchant_payout", "end_date");
+  pgm.createIndex("merchant_payout", "requested_at");
+  pgm.createIndex("merchant_payout", "processed_at");
+  pgm.createIndex("merchant_payout", "completed_at");
 
   // Create merchant payout item table
   pgm.createTable("merchant_payout_item", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    payoutId: { type: "uuid", notNull: true, references: "merchant_payout", onDelete: "CASCADE" },
-    orderId: { type: "uuid", references: "order" },
-    merchantOrderId: { type: "uuid", references: "merchant_order" },
+    payout_id: { type: "uuid", notNull: true, references: "merchant_payout", onDelete: "CASCADE" },
+    order_id: { type: "uuid", references: "order" },
+    merchant_order_id: { type: "uuid", references: "merchant_order" },
     amount: { type: "decimal(15,2)", notNull: true },
     description: { type: "text" },
     type: { 
@@ -145,22 +145,22 @@ exports.up = (pgm) => {
       check: "type IN ('order', 'adjustment', 'fee', 'refund')" 
     },
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for merchant payout items
-  pgm.createIndex("merchant_payout_item", "payoutId");
-  pgm.createIndex("merchant_payout_item", "orderId");
-  pgm.createIndex("merchant_payout_item", "merchantOrderId");
+  pgm.createIndex("merchant_payout_item", "payout_id");
+  pgm.createIndex("merchant_payout_item", "order_id");
+  pgm.createIndex("merchant_payout_item", "merchant_order_id");
   pgm.createIndex("merchant_payout_item", "amount");
   pgm.createIndex("merchant_payout_item", "type");
 
   // Create merchant invoice table
   pgm.createTable("merchant_invoice", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    merchantId: { type: "uuid", notNull: true, references: "merchant", onDelete: "CASCADE" },
-    invoiceNumber: { type: "varchar(50)", notNull: true, unique: true },
-    payoutId: { type: "uuid", references: "merchant_payout" },
+    merchant_id: { type: "uuid", notNull: true, references: "merchant", onDelete: "CASCADE" },
+    invoice_number: { type: "varchar(50)", notNull: true, unique: true },
+    payout_id: { type: "uuid", references: "merchant_payout" },
     amount: { type: "decimal(15,2)", notNull: true },
     tax: { type: "decimal(15,2)", notNull: true, default: 0 },
     total: { type: "decimal(15,2)", notNull: true },
@@ -171,81 +171,81 @@ exports.up = (pgm) => {
       default: 'draft',
       check: "status IN ('draft', 'issued', 'paid', 'cancelled', 'void')" 
     },
-    invoiceDate: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    dueDate: { type: "timestamp" },
-    paidDate: { type: "timestamp" },
-    startDate: { type: "timestamp" }, // Period start
-    endDate: { type: "timestamp" }, // Period end
+    invoice_date: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    due_date: { type: "timestamp" },
+    paid_date: { type: "timestamp" },
+    start_date: { type: "timestamp" }, // Period start
+    end_date: { type: "timestamp" }, // Period end
     notes: { type: "text" },
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    createdBy: { type: "uuid" },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedBy: { type: "uuid" }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    created_by: { type: "uuid" },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_by: { type: "uuid" }
   });
 
   // Create indexes for merchant invoices
-  pgm.createIndex("merchant_invoice", "merchantId");
-  pgm.createIndex("merchant_invoice", "invoiceNumber");
-  pgm.createIndex("merchant_invoice", "payoutId");
+  pgm.createIndex("merchant_invoice", "merchant_id");
+  pgm.createIndex("merchant_invoice", "invoice_number");
+  pgm.createIndex("merchant_invoice", "payout_id");
   pgm.createIndex("merchant_invoice", "amount");
   pgm.createIndex("merchant_invoice", "total");
   pgm.createIndex("merchant_invoice", "status");
-  pgm.createIndex("merchant_invoice", "invoiceDate");
-  pgm.createIndex("merchant_invoice", "dueDate");
-  pgm.createIndex("merchant_invoice", "paidDate");
-  pgm.createIndex("merchant_invoice", "startDate");
-  pgm.createIndex("merchant_invoice", "endDate");
+  pgm.createIndex("merchant_invoice", "invoice_date");
+  pgm.createIndex("merchant_invoice", "due_date");
+  pgm.createIndex("merchant_invoice", "paid_date");
+  pgm.createIndex("merchant_invoice", "start_date");
+  pgm.createIndex("merchant_invoice", "end_date");
 
   // Create merchant tax info table
   pgm.createTable("merchant_tax_info", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    merchantId: { type: "uuid", notNull: true, references: "merchant", onDelete: "CASCADE" },
-    taxIdentificationType: { 
+    merchant_id: { type: "uuid", notNull: true, references: "merchant", onDelete: "CASCADE" },
+    tax_identification_type: { 
       type: "varchar(20)", 
       notNull: true, 
-      check: "taxIdentificationType IN ('ssn', 'ein', 'tin', 'vat', 'gst', 'other')" 
+      check: "tax_identification_type IN ('ssn', 'ein', 'tin', 'vat', 'gst', 'other')" 
     },
-    taxIdentificationNumber: { type: "varchar(255)", notNull: true }, // Encrypted
-    businessType: { 
+    tax_identification_number: { type: "varchar(255)", notNull: true }, // Encrypted
+    business_type: { 
       type: "varchar(50)", 
-      check: "businessType IN ('individual', 'sole_proprietorship', 'partnership', 'llc', 'corporation', 'non_profit')" 
+      check: "business_type IN ('individual', 'sole_proprietorship', 'partnership', 'llc', 'corporation', 'non_profit')" 
     },
-    legalName: { type: "varchar(100)", notNull: true },
-    taxAddress: { type: "jsonb", notNull: true },
-    isVerified: { type: "boolean", notNull: true, default: false },
-    verifiedAt: { type: "timestamp" },
-    verifiedBy: { type: "uuid" },
-    verificationNotes: { type: "text" },
-    taxFormFiled: { type: "boolean", notNull: true, default: false },
-    taxFormType: { type: "varchar(20)" }, // W-9, W-8BEN, etc.
-    taxFormFiledAt: { type: "timestamp" },
-    taxExempt: { type: "boolean", notNull: true, default: false },
-    taxExemptionReason: { type: "text" },
+    legal_name: { type: "varchar(100)", notNull: true },
+    tax_address: { type: "jsonb", notNull: true },
+    is_verified: { type: "boolean", notNull: true, default: false },
+    verified_at: { type: "timestamp" },
+    verified_by: { type: "uuid" },
+    verification_notes: { type: "text" },
+    tax_form_filed: { type: "boolean", notNull: true, default: false },
+    tax_form_type: { type: "varchar(20)" }, // W-9, W-8BEN, etc.
+    tax_form_filed_at: { type: "timestamp" },
+    tax_exempt: { type: "boolean", notNull: true, default: false },
+    tax_exemption_reason: { type: "text" },
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    createdBy: { type: "uuid" }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    created_by: { type: "uuid" }
   });
 
   // Create indexes for merchant tax info
-  pgm.createIndex("merchant_tax_info", "merchantId", { unique: true });
-  pgm.createIndex("merchant_tax_info", "taxIdentificationType");
-  pgm.createIndex("merchant_tax_info", "isVerified");
-  pgm.createIndex("merchant_tax_info", "taxFormFiled");
-  pgm.createIndex("merchant_tax_info", "taxExempt");
+  pgm.createIndex("merchant_tax_info", "merchant_id", { unique: true });
+  pgm.createIndex("merchant_tax_info", "tax_identification_type");
+  pgm.createIndex("merchant_tax_info", "is_verified");
+  pgm.createIndex("merchant_tax_info", "tax_form_filed");
+  pgm.createIndex("merchant_tax_info", "tax_exempt");
 
   // Insert sample merchant balance
   pgm.sql(`
     WITH sample_merchant AS (SELECT id FROM merchant WHERE slug = 'sample-merchant')
     INSERT INTO "merchant_balance" (
-      merchantId,
-      availableBalance,
-      pendingBalance,
-      reserveBalance,
-      lifetimeRevenue,
-      lifetimeCommission,
-      lifetimePayout,
+      merchant_id,
+      available_balance,
+      pending_balance,
+      reserve_balance,
+      lifetime_revenue,
+      lifetime_commission,
+      lifetime_payout,
       currency
     )
     VALUES (
@@ -264,14 +264,14 @@ exports.up = (pgm) => {
   pgm.sql(`
     WITH sample_merchant AS (SELECT id FROM merchant WHERE slug = 'sample-merchant')
     INSERT INTO "merchant_transaction" (
-      merchantId,
-      transactionType,
+      merchant_id,
+      transaction_type,
       amount,
       currency,
       description,
       status,
-      availableBalanceBefore,
-      availableBalanceAfter
+      available_balance_before,
+      available_balance_after
     )
     VALUES (
       (SELECT id FROM sample_merchant),

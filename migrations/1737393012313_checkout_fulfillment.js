@@ -12,8 +12,8 @@ exports.up = (pgm) => {
   // Create a fulfillment table to track order shipments and fulfillments
   pgm.createTable("order_fulfillment", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    orderId: { type: "uuid", notNull: true, references: "order", onDelete: "CASCADE" },
-    fulfillmentNumber: { type: "varchar(100)", notNull: true },
+    order_id: { type: "uuid", notNull: true, references: "order", onDelete: "CASCADE" },
+    fulfillment_number: { type: "varchar(100)", notNull: true },
     type: { 
       type: "varchar(50)", 
       notNull: true, 
@@ -26,54 +26,54 @@ exports.up = (pgm) => {
       default: "pending", 
       check: "status IN ('pending', 'processing', 'shipped', 'delivered', 'failed', 'cancelled')" 
     },
-    trackingNumber: { type: "varchar(255)" },
-    trackingUrl: { type: "text" },
-    carrierCode: { type: "varchar(100)" }, // ups, fedex, usps, etc.
-    carrierName: { type: "varchar(255)" },
-    shippingMethod: { type: "varchar(255)" },
-    shippingAddressId: { type: "uuid", references: "order_address" },
+    tracking_number: { type: "varchar(255)" },
+    tracking_url: { type: "text" },
+    carrier_code: { type: "varchar(100)" }, // ups, fedex, usps, etc.
+    carrier_name: { type: "varchar(255)" },
+    shipping_method: { type: "varchar(255)" },
+    shipping_address_id: { type: "uuid", references: "order_address" },
     weight: { type: "decimal(10,3)" },
-    weightUnit: { type: "varchar(10)", default: "kg" },
+    weight_unit: { type: "varchar(10)", default: "kg" },
     dimensions: { type: "jsonb" }, // {length, width, height, unit}
-    packageCount: { type: "integer", default: 1 },
-    shippedAt: { type: "timestamp" },
-    deliveredAt: { type: "timestamp" },
-    estimatedDeliveryDate: { type: "timestamp" },
+    package_count: { type: "integer", default: 1 },
+    shipped_at: { type: "timestamp" },
+    delivered_at: { type: "timestamp" },
+    estimated_delivery_date: { type: "timestamp" },
     notes: { type: "text" },
     metadata: { type: "jsonb" },
-    fulfilledBy: { type: "uuid" }, // User ID who processed the fulfillment
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    fulfilled_by: { type: "uuid" }, // User ID who processed the fulfillment
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for order fulfillment
-  pgm.createIndex("order_fulfillment", "orderId");
-  pgm.createIndex("order_fulfillment", "fulfillmentNumber");
+  pgm.createIndex("order_fulfillment", "order_id");
+  pgm.createIndex("order_fulfillment", "fulfillment_number");
   pgm.createIndex("order_fulfillment", "status");
-  pgm.createIndex("order_fulfillment", "trackingNumber");
-  pgm.createIndex("order_fulfillment", "carrierCode");
+  pgm.createIndex("order_fulfillment", "tracking_number");
+  pgm.createIndex("order_fulfillment", "carrier_code");
 
   // Create a fulfillment item table to track which items are in which fulfillment
   pgm.createTable("order_fulfillment_item", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    fulfillmentId: { type: "uuid", notNull: true, references: "order_fulfillment", onDelete: "CASCADE" },
-    orderItemId: { type: "uuid", notNull: true, references: "order_item", onDelete: "CASCADE" },
+    fulfillment_id: { type: "uuid", notNull: true, references: "order_fulfillment", onDelete: "CASCADE" },
+    order_item_id: { type: "uuid", notNull: true, references: "order_item", onDelete: "CASCADE" },
     quantity: { type: "integer", notNull: true, default: 1 },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for fulfillment items
-  pgm.createIndex("order_fulfillment_item", "fulfillmentId");
-  pgm.createIndex("order_fulfillment_item", "orderItemId");
+  pgm.createIndex("order_fulfillment_item", "fulfillment_id");
+  pgm.createIndex("order_fulfillment_item", "order_item_id");
   
   // Create unique constraint to ensure an item can't be added to the same fulfillment multiple times
-  pgm.createIndex("order_fulfillment_item", ["fulfillmentId", "orderItemId"], { unique: true });
+  pgm.createIndex("order_fulfillment_item", ["fulfillment_id", "order_item_id"], { unique: true });
 
   // Create order discount table to track applied discounts
   pgm.createTable("order_discount", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    orderId: { type: "uuid", notNull: true, references: "order", onDelete: "CASCADE" },
+    order_id: { type: "uuid", notNull: true, references: "order", onDelete: "CASCADE" },
     code: { type: "varchar(100)" }, // Coupon code if applicable
     type: { 
       type: "varchar(50)", 
@@ -82,41 +82,41 @@ exports.up = (pgm) => {
     },
     description: { type: "varchar(255)", notNull: true },
     value: { type: "decimal(15,2)", notNull: true },
-    isPercentage: { type: "boolean", notNull: true, default: false },
-    targetType: { 
+    is_percentage: { type: "boolean", notNull: true, default: false },
+    target_type: { 
       type: "varchar(20)", 
       notNull: true, 
-      check: "targetType IN ('order', 'item', 'shipping')"
+      check: "target_type IN ('order', 'item', 'shipping')"
     },
-    targetId: { type: "uuid" }, // For item-specific discounts, references order_item.id
-    metaData: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    target_id: { type: "uuid" }, // For item-specific discounts, references order_item.id
+    metadata: { type: "jsonb" },
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for order discounts
-  pgm.createIndex("order_discount", "orderId");
+  pgm.createIndex("order_discount", "order_id");
   pgm.createIndex("order_discount", "code");
   pgm.createIndex("order_discount", "type");
-  pgm.createIndex("order_discount", "targetId");
+  pgm.createIndex("order_discount", "target_id");
 
   // Create an order status history table to track order status changes
   pgm.createTable("order_status_history", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    orderId: { type: "uuid", notNull: true, references: "order", onDelete: "CASCADE" },
-    previousStatus: { type: "varchar(50)" },
-    newStatus: { type: "varchar(50)", notNull: true },
+    order_id: { type: "uuid", notNull: true, references: "order", onDelete: "CASCADE" },
+    previous_status: { type: "varchar(50)" },
+    new_status: { type: "varchar(50)", notNull: true },
     comment: { type: "text" },
-    changedBy: { type: "uuid" }, // User ID who changed the status
-    notifyCustomer: { type: "boolean", notNull: true, default: false },
+    changed_by: { type: "uuid" }, // User ID who changed the status
+    notify_customer: { type: "boolean", notNull: true, default: false },
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for order status history
-  pgm.createIndex("order_status_history", "orderId");
-  pgm.createIndex("order_status_history", "newStatus");
-  pgm.createIndex("order_status_history", "createdAt");
+  pgm.createIndex("order_status_history", "order_id");
+  pgm.createIndex("order_status_history", "new_status");
+  pgm.createIndex("order_status_history", "created_at");
 };
 
 /**

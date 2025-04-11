@@ -12,40 +12,40 @@ exports.up = (pgm) => {
   // Create a payment method table to store saved payment methods
   pgm.createTable("payment_method", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    customerId: { type: "uuid", notNull: true, references: "customer", onDelete: "CASCADE" },
+    customer_id: { type: "uuid", notNull: true, references: "customer", onDelete: "CASCADE" },
     type: { 
       type: "varchar(50)", 
       notNull: true,
-      check: "type IN ('credit_card', 'debit_card', 'paypal', 'apple_pay', 'google_pay', 'bank_transfer', 'crypto')" 
+      check: "type IN ('credit_card', 'debit_card', 'paypal', 'apple_pay', 'google_pay', 'bank_transfer')" 
     },
     provider: { type: "varchar(100)", notNull: true }, // stripe, paypal, etc.
     token: { type: "varchar(255)" }, // Token from payment provider
-    gatewayCustomerId: { type: "varchar(255)" }, // Customer ID in the payment provider
-    gatewayPaymentMethodId: { type: "varchar(255)" }, // Payment method ID in the payment provider
-    maskedNumber: { type: "varchar(30)" }, // Last 4 digits for cards
-    cardType: { type: "varchar(50)" }, // visa, mastercard, etc.
-    expiryMonth: { type: "integer", check: "expiryMonth >= 1 AND expiryMonth <= 12" },
-    expiryYear: { type: "integer" },
-    cardholderName: { type: "varchar(255)" },
-    isDefault: { type: "boolean", notNull: true, default: false },
-    billingAddressId: { type: "uuid", references: "customer_address" },
-    metaData: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    gateway_customer_id: { type: "varchar(255)" }, // Customer ID in the payment provider
+    gateway_payment_method_id: { type: "varchar(255)" }, // Payment method ID in the payment provider
+    masked_number: { type: "varchar(30)" }, // Last 4 digits for cards
+    card_type: { type: "varchar(50)" }, // visa, mastercard, etc.
+    expiry_month: { type: "integer", check: "expiry_month >= 1 AND expiry_month <= 12" },
+    expiry_year: { type: "integer" },
+    cardholder_name: { type: "varchar(255)" },
+    is_default: { type: "boolean", notNull: true, default: false },
+    billing_address_id: { type: "uuid", references: "customer_address" },
+    meta_data: { type: "jsonb" },
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for payment methods
-  pgm.createIndex("payment_method", "customerId");
+  pgm.createIndex("payment_method", "customer_id");
   pgm.createIndex("payment_method", "type");
   pgm.createIndex("payment_method", "provider");
-  pgm.createIndex("payment_method", "gatewayCustomerId");
-  pgm.createIndex("payment_method", "gatewayPaymentMethodId");
+  pgm.createIndex("payment_method", "gateway_customer_id");
+  pgm.createIndex("payment_method", "gateway_payment_method_id");
 
   // Create order payment table to track payments for orders
   pgm.createTable("order_payment", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    orderId: { type: "uuid", notNull: true, references: "order", onDelete: "CASCADE" },
-    paymentMethodId: { type: "uuid", references: "payment_method" }, // Optional link to saved payment method
+    order_id: { type: "uuid", notNull: true, references: "order", onDelete: "CASCADE" },
+    payment_method_id: { type: "uuid", references: "payment_method" }, // Optional link to saved payment method
     type: { 
       type: "varchar(50)", 
       notNull: true, 
@@ -60,52 +60,52 @@ exports.up = (pgm) => {
       default: "pending", 
       check: "status IN ('pending', 'authorized', 'captured', 'refunded', 'partially_refunded', 'voided', 'failed')" 
     },
-    transactionId: { type: "varchar(255)" }, // ID from payment provider
-    authorizationCode: { type: "varchar(255)" },
-    errorCode: { type: "varchar(100)" },
-    errorMessage: { type: "text" },
+    transaction_id: { type: "varchar(255)" }, // ID from payment provider
+    authorization_code: { type: "varchar(255)" },
+    error_code: { type: "varchar(100)" },
+    error_message: { type: "text" },
     metadata: { type: "jsonb" },
-    maskedNumber: { type: "varchar(30)" }, // Last 4 digits for cards
-    cardType: { type: "varchar(50)" }, // visa, mastercard, etc.
-    gatewayResponse: { type: "jsonb" }, // Full response from payment gateway
-    refundedAmount: { type: "decimal(15,2)", notNull: true, default: 0 },
-    capturedAt: { type: "timestamp" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    masked_number: { type: "varchar(30)" }, // Last 4 digits for cards
+    card_type: { type: "varchar(50)" }, // visa, mastercard, etc.
+    gateway_response: { type: "jsonb" }, // Full response from payment gateway
+    refunded_amount: { type: "decimal(15,2)", notNull: true, default: 0 },
+    captured_at: { type: "timestamp" },
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for order payments
-  pgm.createIndex("order_payment", "orderId");
-  pgm.createIndex("order_payment", "paymentMethodId");
+  pgm.createIndex("order_payment", "order_id");
+  pgm.createIndex("order_payment", "payment_method_id");
   pgm.createIndex("order_payment", "type");
   pgm.createIndex("order_payment", "provider");
   pgm.createIndex("order_payment", "status");
-  pgm.createIndex("order_payment", "transactionId");
+  pgm.createIndex("order_payment", "transaction_id");
 
   // Create order payment refund table
   pgm.createTable("order_payment_refund", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    orderPaymentId: { type: "uuid", notNull: true, references: "order_payment", onDelete: "CASCADE" },
+    order_payment_id: { type: "uuid", notNull: true, references: "order_payment", onDelete: "CASCADE" },
     amount: { type: "decimal(15,2)", notNull: true },
     reason: { type: "varchar(255)" },
     notes: { type: "text" },
-    transactionId: { type: "varchar(255)" }, // ID from payment provider
+    transaction_id: { type: "varchar(255)" }, // ID from payment provider
     status: { 
       type: "varchar(50)", 
       notNull: true, 
       default: "pending", 
       check: "status IN ('pending', 'completed', 'failed')" 
     },
-    gatewayResponse: { type: "jsonb" }, // Full response from payment gateway
-    refundedBy: { type: "uuid" }, // User ID of admin who processed the refund
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    gateway_response: { type: "jsonb" }, // Full response from payment gateway
+    refunded_by: { type: "uuid" }, // User ID of admin who processed the refund
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for refunds
-  pgm.createIndex("order_payment_refund", "orderPaymentId");
+  pgm.createIndex("order_payment_refund", "order_payment_id");
+  pgm.createIndex("order_payment_refund", "transaction_id");
   pgm.createIndex("order_payment_refund", "status");
-  pgm.createIndex("order_payment_refund", "transactionId");
 };
 
 /**

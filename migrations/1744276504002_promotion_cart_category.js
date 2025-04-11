@@ -30,8 +30,8 @@ exports.up = (pgm) => {
     },
     validUntil: { type: "timestamp" },
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for cart promotions
@@ -44,7 +44,7 @@ exports.up = (pgm) => {
   pgm.createIndex("cart_promotion", "appliedBy");
   pgm.createIndex("cart_promotion", "status");
   pgm.createIndex("cart_promotion", "validUntil");
-  pgm.createIndex("cart_promotion", "createdAt");
+  pgm.createIndex("cart_promotion", "created_at");
 
   // Create cart promotion item table (for promotions applied to specific items)
   pgm.createTable("cart_promotion_item", {
@@ -57,7 +57,7 @@ exports.up = (pgm) => {
     originalPrice: { type: "decimal(15,2)", notNull: true },
     finalPrice: { type: "decimal(15,2)", notNull: true },
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for cart promotion items
@@ -78,8 +78,8 @@ exports.up = (pgm) => {
     isDisplayedOnCategoryPage: { type: "boolean", notNull: true, default: true },
     isDisplayedOnProductPage: { type: "boolean", notNull: true, default: true },
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for category promotions
@@ -98,7 +98,7 @@ exports.up = (pgm) => {
     isFeatured: { type: "boolean", notNull: true, default: false },
     displayOrder: { type: "integer", notNull: true, default: 0 },
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for category promotion products

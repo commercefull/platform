@@ -35,7 +35,7 @@ exports.up = (pgm) => {
       default: "symbol", 
       check: "priceDisplayFormat IN ('symbol', 'code', 'symbol_code', 'name')" 
     },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
     updatedBy: { type: "uuid" } // Reference to admin user
   });
 
@@ -55,8 +55,8 @@ exports.up = (pgm) => {
     compareAtPrice: { type: "decimal(15,4)" }, // Original/MSRP price for showing discounts
     isManual: { type: "boolean", notNull: true, default: true }, // Whether price was manually set or auto-converted
     lastUpdated: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
     updatedBy: { type: "uuid" } // Reference to admin user
   });
 
@@ -72,8 +72,8 @@ exports.up = (pgm) => {
     customerId: { type: "uuid", notNull: true, references: "customer", onDelete: "CASCADE" },
     currencyId: { type: "uuid", notNull: true, references: "currency" },
     automaticDetection: { type: "boolean", notNull: true, default: true },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for customer currency preferences

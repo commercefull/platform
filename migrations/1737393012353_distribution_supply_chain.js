@@ -18,8 +18,8 @@ exports.up = (pgm) => {
     website: { type: "varchar(255)" },
     email: { type: "varchar(255)" },
     phone: { type: "varchar(30)" },
-    isActive: { type: "boolean", notNull: true, default: true },
-    isApproved: { type: "boolean", notNull: true, default: false },
+    is_active: { type: "boolean", notNull: true, default: true },
+    is_approved: { type: "boolean", notNull: true, default: false },
     status: { 
       type: "varchar(20)", 
       notNull: true, 
@@ -27,137 +27,137 @@ exports.up = (pgm) => {
       check: "status IN ('active', 'inactive', 'pending', 'suspended', 'blacklisted')" 
     },
     rating: { type: "decimal(3,2)" }, // Supplier rating
-    taxId: { type: "varchar(50)" }, // Tax identification number
-    paymentTerms: { type: "varchar(100)" }, // Net 30, etc.
-    paymentMethod: { type: "varchar(50)" }, // Wire, ACH, etc.
+    tax_id: { type: "varchar(50)" }, // Tax identification number
+    payment_terms: { type: "varchar(100)" }, // Net 30, etc.
+    payment_method: { type: "varchar(50)" }, // Wire, ACH, etc.
     currency: { type: "varchar(3)", notNull: true, default: 'USD' },
-    minOrderValue: { type: "decimal(10,2)" }, // Minimum order value
-    leadTime: { type: "integer" }, // Average lead time in days
+    min_order_value: { type: "decimal(10,2)" }, // Minimum order value
+    lead_time: { type: "integer" }, // Average lead time in days
     notes: { type: "text" },
     categories: { type: "text[]" }, // Product categories supplied
     tags: { type: "text[]" }, // For categorization
-    customFields: { type: "jsonb" },
+    custom_fields: { type: "jsonb" },
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    createdBy: { type: "uuid" }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    created_by: { type: "uuid" }
   });
 
   // Create indexes for supplier
   pgm.createIndex("supplier", "code");
-  pgm.createIndex("supplier", "isActive");
-  pgm.createIndex("supplier", "isApproved");
+  pgm.createIndex("supplier", "is_active");
+  pgm.createIndex("supplier", "is_approved");
   pgm.createIndex("supplier", "status");
   pgm.createIndex("supplier", "rating");
-  pgm.createIndex("supplier", "leadTime");
+  pgm.createIndex("supplier", "lead_time");
   pgm.createIndex("supplier", "categories", { method: "gin" });
   pgm.createIndex("supplier", "tags", { method: "gin" });
 
   // Create supplier address table
   pgm.createTable("supplier_address", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    supplierId: { type: "uuid", notNull: true, references: "supplier", onDelete: "CASCADE" },
+    supplier_id: { type: "uuid", notNull: true, references: "supplier", onDelete: "CASCADE" },
     name: { type: "varchar(100)", notNull: true }, // Address name (Headquarters, Warehouse, etc.)
-    addressLine1: { type: "varchar(255)", notNull: true },
-    addressLine2: { type: "varchar(255)" },
+    address_line1: { type: "varchar(255)", notNull: true },
+    address_line2: { type: "varchar(255)" },
     city: { type: "varchar(100)", notNull: true },
     state: { type: "varchar(100)", notNull: true },
-    postalCode: { type: "varchar(20)", notNull: true },
+    postal_code: { type: "varchar(20)", notNull: true },
     country: { type: "varchar(2)", notNull: true }, // ISO country code
-    addressType: { 
+    address_type: { 
       type: "varchar(20)", 
       notNull: true, 
       default: 'headquarters',
-      check: "addressType IN ('headquarters', 'billing', 'warehouse', 'returns', 'manufacturing')" 
+      check: "address_type IN ('headquarters', 'billing', 'warehouse', 'returns', 'manufacturing')" 
     },
-    isDefault: { type: "boolean", notNull: true, default: false },
-    contactName: { type: "varchar(100)" },
-    contactEmail: { type: "varchar(255)" },
-    contactPhone: { type: "varchar(30)" },
+    is_default: { type: "boolean", notNull: true, default: false },
+    contact_name: { type: "varchar(100)" },
+    contact_email: { type: "varchar(255)" },
+    contact_phone: { type: "varchar(30)" },
     notes: { type: "text" },
-    isActive: { type: "boolean", notNull: true, default: true },
+    is_active: { type: "boolean", notNull: true, default: true },
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for supplier addresses
-  pgm.createIndex("supplier_address", "supplierId");
-  pgm.createIndex("supplier_address", "addressType");
-  pgm.createIndex("supplier_address", "isDefault");
-  pgm.createIndex("supplier_address", "isActive");
-  pgm.createIndex("supplier_address", ["supplierId", "addressType", "isDefault"], {
+  pgm.createIndex("supplier_address", "supplier_id");
+  pgm.createIndex("supplier_address", "address_type");
+  pgm.createIndex("supplier_address", "is_default");
+  pgm.createIndex("supplier_address", "is_active");
+  pgm.createIndex("supplier_address", ["supplier_id", "address_type", "is_default"], {
     unique: true,
-    where: "isDefault = true"
+    where: "is_default = true"
   });
 
   // Create supplier_product table (connecting suppliers to products)
   pgm.createTable("supplier_product", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    supplierId: { type: "uuid", notNull: true, references: "supplier", onDelete: "CASCADE" },
-    productId: { type: "uuid", notNull: true }, // Reference to product
-    variantId: { type: "uuid" }, // Optional reference to product variant
+    supplier_id: { type: "uuid", notNull: true, references: "supplier", onDelete: "CASCADE" },
+    product_id: { type: "uuid", notNull: true }, // Reference to product
+    variant_id: { type: "uuid" }, // Optional reference to product variant
     sku: { type: "varchar(100)", notNull: true }, // Our SKU
-    supplierSku: { type: "varchar(100)" }, // Supplier's SKU
-    supplierProductName: { type: "varchar(255)" }, // Supplier's product name
+    supplier_sku: { type: "varchar(100)" }, // Supplier's SKU
+    supplier_product_name: { type: "varchar(255)" }, // Supplier's product name
     status: { 
       type: "varchar(20)", 
       notNull: true, 
       default: 'active',
       check: "status IN ('active', 'inactive', 'discontinued', 'pending')" 
     },
-    isPreferred: { type: "boolean", notNull: true, default: false }, // Preferred supplier for this product
-    unitCost: { type: "decimal(10,2)", notNull: true }, // Cost per unit
+    is_preferred: { type: "boolean", notNull: true, default: false }, // Preferred supplier for this product
+    unit_cost: { type: "decimal(10,2)", notNull: true }, // Cost per unit
     currency: { type: "varchar(3)", notNull: true, default: 'USD' },
-    minimumOrderQuantity: { type: "integer", default: 1 }, // MOQ
-    leadTime: { type: "integer" }, // Lead time in days
-    packagingInfo: { type: "jsonb" }, // Units per pack, etc.
+    minimum_order_quantity: { type: "integer", default: 1 }, // MOQ
+    lead_time: { type: "integer" }, // Lead time in days
+    packaging_info: { type: "jsonb" }, // Units per pack, etc.
     dimensions: { type: "jsonb" }, // Product dimensions from supplier
     weight: { type: "decimal(10,2)" }, // Weight per unit
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    lastOrderedAt: { type: "timestamp" },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    last_ordered_at: { type: "timestamp" },
     notes: { type: "text" },
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for supplier products
-  pgm.createIndex("supplier_product", "supplierId");
-  pgm.createIndex("supplier_product", "productId");
-  pgm.createIndex("supplier_product", "variantId");
+  pgm.createIndex("supplier_product", "supplier_id");
+  pgm.createIndex("supplier_product", "product_id");
+  pgm.createIndex("supplier_product", "variant_id");
   pgm.createIndex("supplier_product", "sku");
-  pgm.createIndex("supplier_product", "supplierSku");
+  pgm.createIndex("supplier_product", "supplier_sku");
   pgm.createIndex("supplier_product", "status");
-  pgm.createIndex("supplier_product", "isPreferred");
-  pgm.createIndex("supplier_product", "unitCost");
-  pgm.createIndex("supplier_product", "leadTime");
-  pgm.createIndex("supplier_product", ["productId", "variantId", "supplierId"], { 
+  pgm.createIndex("supplier_product", "is_preferred");
+  pgm.createIndex("supplier_product", "unit_cost");
+  pgm.createIndex("supplier_product", "lead_time");
+  pgm.createIndex("supplier_product", ["product_id", "variant_id", "supplier_id"], { 
     unique: true,
     nulls: "not distinct"
   });
-  pgm.createIndex("supplier_product", ["productId", "variantId", "isPreferred"], {
+  pgm.createIndex("supplier_product", ["product_id", "variant_id", "is_preferred"], {
     unique: true,
-    where: "isPreferred = true",
+    where: "is_preferred = true",
     nulls: "not distinct"
   });
 
   // Create purchase order table
   pgm.createTable("purchase_order", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    poNumber: { type: "varchar(50)", notNull: true, unique: true }, // Purchase order number
-    supplierId: { type: "uuid", notNull: true, references: "supplier" },
-    warehouseId: { type: "uuid", notNull: true, references: "warehouse" }, // Destination warehouse
+    po_number: { type: "varchar(50)", notNull: true, unique: true }, // Purchase order number
+    supplier_id: { type: "uuid", notNull: true, references: "supplier" },
+    warehouse_id: { type: "uuid", notNull: true, references: "warehouse" }, // Destination warehouse
     status: { 
       type: "varchar(20)", 
       notNull: true, 
       default: 'draft',
       check: "status IN ('draft', 'pending', 'approved', 'sent', 'confirmed', 'partial', 'completed', 'cancelled')" 
     },
-    orderType: { 
+    order_type: { 
       type: "varchar(20)", 
       notNull: true, 
       default: 'standard',
-      check: "orderType IN ('standard', 'restock', 'backorder', 'special', 'emergency')" 
+      check: "order_type IN ('standard', 'restock', 'backorder', 'special', 'emergency')" 
     },
     priority: { 
       type: "varchar(10)", 
@@ -165,13 +165,13 @@ exports.up = (pgm) => {
       default: 'normal',
       check: "priority IN ('low', 'normal', 'high', 'urgent')" 
     },
-    orderDate: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    expectedDeliveryDate: { type: "timestamp" },
-    deliveryDate: { type: "timestamp" },
-    shippingMethod: { type: "varchar(50)" },
-    trackingNumber: { type: "varchar(100)" },
-    carrierName: { type: "varchar(100)" },
-    paymentTerms: { type: "varchar(100)" },
+    order_date: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    expected_delivery_date: { type: "timestamp" },
+    delivery_date: { type: "timestamp" },
+    shipping_method: { type: "varchar(50)" },
+    tracking_number: { type: "varchar(100)" },
+    carrier_name: { type: "varchar(100)" },
+    payment_terms: { type: "varchar(100)" },
     currency: { type: "varchar(3)", notNull: true, default: 'USD' },
     subtotal: { type: "decimal(15,2)", notNull: true, default: 0 },
     tax: { type: "decimal(15,2)", notNull: true, default: 0 },
@@ -184,53 +184,53 @@ exports.up = (pgm) => {
       check: "total = subtotal + tax + shipping - discount"
     },
     notes: { type: "text" },
-    supplierNotes: { type: "text" }, // Notes visible to supplier
+    supplier_notes: { type: "text" }, // Notes visible to supplier
     attachments: { type: "jsonb" }, // Attached documents
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    createdBy: { type: "uuid" },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedBy: { type: "uuid" },
-    approvedAt: { type: "timestamp" },
-    approvedBy: { type: "uuid" },
-    sentAt: { type: "timestamp" },
-    confirmedAt: { type: "timestamp" },
-    completedAt: { type: "timestamp" }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    created_by: { type: "uuid" },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_by: { type: "uuid" },
+    approved_at: { type: "timestamp" },
+    approved_by: { type: "uuid" },
+    sent_at: { type: "timestamp" },
+    confirmed_at: { type: "timestamp" },
+    completed_at: { type: "timestamp" }
   });
 
   // Create indexes for purchase orders
-  pgm.createIndex("purchase_order", "poNumber");
-  pgm.createIndex("purchase_order", "supplierId");
-  pgm.createIndex("purchase_order", "warehouseId");
+  pgm.createIndex("purchase_order", "po_number");
+  pgm.createIndex("purchase_order", "supplier_id");
+  pgm.createIndex("purchase_order", "warehouse_id");
   pgm.createIndex("purchase_order", "status");
-  pgm.createIndex("purchase_order", "orderType");
+  pgm.createIndex("purchase_order", "order_type");
   pgm.createIndex("purchase_order", "priority");
-  pgm.createIndex("purchase_order", "orderDate");
-  pgm.createIndex("purchase_order", "expectedDeliveryDate");
-  pgm.createIndex("purchase_order", "deliveryDate");
+  pgm.createIndex("purchase_order", "order_date");
+  pgm.createIndex("purchase_order", "expected_delivery_date");
+  pgm.createIndex("purchase_order", "delivery_date");
   pgm.createIndex("purchase_order", "total");
-  pgm.createIndex("purchase_order", "createdAt");
+  pgm.createIndex("purchase_order", "created_at");
 
   // Create purchase order item table
   pgm.createTable("purchase_order_item", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    purchaseOrderId: { type: "uuid", notNull: true, references: "purchase_order", onDelete: "CASCADE" },
-    supplierProductId: { type: "uuid", references: "supplier_product" },
-    productId: { type: "uuid", notNull: true }, // Reference to product
-    variantId: { type: "uuid" }, // Optional reference to product variant
+    purchase_order_id: { type: "uuid", notNull: true, references: "purchase_order", onDelete: "CASCADE" },
+    supplier_product_id: { type: "uuid", references: "supplier_product" },
+    product_id: { type: "uuid", notNull: true }, // Reference to product
+    variant_id: { type: "uuid" }, // Optional reference to product variant
     sku: { type: "varchar(100)", notNull: true }, // Our SKU
-    supplierSku: { type: "varchar(100)" }, // Supplier's SKU
+    supplier_sku: { type: "varchar(100)" }, // Supplier's SKU
     name: { type: "varchar(255)", notNull: true }, // Product name
     description: { type: "text" },
     quantity: { type: "integer", notNull: true },
-    receivedQuantity: { type: "integer", notNull: true, default: 0 },
-    unitCost: { type: "decimal(10,2)", notNull: true },
+    received_quantity: { type: "integer", notNull: true, default: 0 },
+    unit_cost: { type: "decimal(10,2)", notNull: true },
     tax: { type: "decimal(10,2)", notNull: true, default: 0 },
     discount: { type: "decimal(10,2)", notNull: true, default: 0 },
     total: { 
       type: "decimal(15,2)", 
       notNull: true,
-      check: "total = (quantity * unitCost) + tax - discount"
+      check: "total = (quantity * unit_cost) + tax - discount"
     },
     status: { 
       type: "varchar(20)", 
@@ -238,116 +238,116 @@ exports.up = (pgm) => {
       default: 'pending',
       check: "status IN ('pending', 'partial', 'received', 'cancelled', 'backordered')" 
     },
-    expectedDeliveryDate: { type: "timestamp" },
-    receivedAt: { type: "timestamp" },
+    expected_delivery_date: { type: "timestamp" },
+    received_at: { type: "timestamp" },
     notes: { type: "text" },
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for purchase order items
-  pgm.createIndex("purchase_order_item", "purchaseOrderId");
-  pgm.createIndex("purchase_order_item", "supplierProductId");
-  pgm.createIndex("purchase_order_item", "productId");
-  pgm.createIndex("purchase_order_item", "variantId");
+  pgm.createIndex("purchase_order_item", "purchase_order_id");
+  pgm.createIndex("purchase_order_item", "supplier_product_id");
+  pgm.createIndex("purchase_order_item", "product_id");
+  pgm.createIndex("purchase_order_item", "variant_id");
   pgm.createIndex("purchase_order_item", "sku");
-  pgm.createIndex("purchase_order_item", "supplierSku");
+  pgm.createIndex("purchase_order_item", "supplier_sku");
   pgm.createIndex("purchase_order_item", "status");
   pgm.createIndex("purchase_order_item", "quantity");
-  pgm.createIndex("purchase_order_item", "receivedQuantity");
-  pgm.createIndex("purchase_order_item", "expectedDeliveryDate");
-  pgm.createIndex("purchase_order_item", "receivedAt");
+  pgm.createIndex("purchase_order_item", "received_quantity");
+  pgm.createIndex("purchase_order_item", "expected_delivery_date");
+  pgm.createIndex("purchase_order_item", "received_at");
 
   // Create receiving record table
   pgm.createTable("receiving_record", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    receiptNumber: { type: "varchar(50)", notNull: true, unique: true },
-    purchaseOrderId: { type: "uuid", references: "purchase_order" },
-    warehouseId: { type: "uuid", notNull: true, references: "warehouse" },
-    supplierId: { type: "uuid", notNull: true, references: "supplier" },
+    receipt_number: { type: "varchar(50)", notNull: true, unique: true },
+    purchase_order_id: { type: "uuid", references: "purchase_order" },
+    warehouse_id: { type: "uuid", notNull: true, references: "warehouse" },
+    supplier_id: { type: "uuid", notNull: true, references: "supplier" },
     status: { 
       type: "varchar(20)", 
       notNull: true, 
       default: 'pending',
       check: "status IN ('pending', 'in_progress', 'completed', 'cancelled', 'disputed')" 
     },
-    receivedDate: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    carrierName: { type: "varchar(100)" },
-    trackingNumber: { type: "varchar(100)" },
-    packageCount: { type: "integer" },
+    received_date: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    carrier_name: { type: "varchar(100)" },
+    tracking_number: { type: "varchar(100)" },
+    package_count: { type: "integer" },
     notes: { type: "text" },
     discrepancies: { type: "boolean", notNull: true, default: false }, // Whether any discrepancies found
     attachments: { type: "jsonb" }, // Attached documents
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    createdBy: { type: "uuid" },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedBy: { type: "uuid" },
-    completedAt: { type: "timestamp" },
-    completedBy: { type: "uuid" }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    created_by: { type: "uuid" },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_by: { type: "uuid" },
+    completed_at: { type: "timestamp" },
+    completed_by: { type: "uuid" }
   });
 
   // Create indexes for receiving records
-  pgm.createIndex("receiving_record", "receiptNumber");
-  pgm.createIndex("receiving_record", "purchaseOrderId");
-  pgm.createIndex("receiving_record", "warehouseId");
-  pgm.createIndex("receiving_record", "supplierId");
+  pgm.createIndex("receiving_record", "receipt_number");
+  pgm.createIndex("receiving_record", "purchase_order_id");
+  pgm.createIndex("receiving_record", "warehouse_id");
+  pgm.createIndex("receiving_record", "supplier_id");
   pgm.createIndex("receiving_record", "status");
-  pgm.createIndex("receiving_record", "receivedDate");
-  pgm.createIndex("receiving_record", "trackingNumber");
+  pgm.createIndex("receiving_record", "received_date");
+  pgm.createIndex("receiving_record", "tracking_number");
   pgm.createIndex("receiving_record", "discrepancies");
-  pgm.createIndex("receiving_record", "createdAt");
+  pgm.createIndex("receiving_record", "created_at");
 
   // Create receiving item table
   pgm.createTable("receiving_item", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    receivingRecordId: { type: "uuid", notNull: true, references: "receiving_record", onDelete: "CASCADE" },
-    purchaseOrderItemId: { type: "uuid", references: "purchase_order_item" },
-    productId: { type: "uuid", notNull: true }, // Reference to product
-    variantId: { type: "uuid" }, // Optional reference to product variant
+    receiving_record_id: { type: "uuid", notNull: true, references: "receiving_record", onDelete: "CASCADE" },
+    purchase_order_item_id: { type: "uuid", references: "purchase_order_item" },
+    product_id: { type: "uuid", notNull: true }, // Reference to product
+    variant_id: { type: "uuid" }, // Optional reference to product variant
     sku: { type: "varchar(100)", notNull: true }, // Our SKU
     name: { type: "varchar(255)", notNull: true }, // Product name
-    expectedQuantity: { type: "integer" }, // Expected quantity based on PO
-    receivedQuantity: { type: "integer", notNull: true }, // Actual received quantity
-    rejectedQuantity: { type: "integer", notNull: true, default: 0 }, // Quantity rejected
-    binId: { type: "uuid", references: "warehouse_bin" }, // Storage location
-    lotNumber: { type: "varchar(100)" },
-    serialNumbers: { type: "text[]" }, // Array of serial numbers
-    expiryDate: { type: "timestamp" },
+    expected_quantity: { type: "integer" }, // Expected quantity based on PO
+    received_quantity: { type: "integer", notNull: true }, // Actual received quantity
+    rejected_quantity: { type: "integer", notNull: true, default: 0 }, // Quantity rejected
+    bin_id: { type: "uuid", references: "warehouse_bin" }, // Storage location
+    lot_number: { type: "varchar(100)" },
+    serial_numbers: { type: "text[]" }, // Array of serial numbers
+    expiry_date: { type: "timestamp" },
     status: { 
       type: "varchar(20)", 
       notNull: true, 
       default: 'received',
       check: "status IN ('received', 'inspecting', 'accepted', 'rejected', 'partial')" 
     },
-    acceptanceStatus: { 
+    acceptance_status: { 
       type: "varchar(20)", 
       default: 'pending',
-      check: "acceptanceStatus IN ('pending', 'accepted', 'rejected', 'partial')" 
+      check: "acceptance_status IN ('pending', 'accepted', 'rejected', 'partial')" 
     },
-    inspectionNotes: { type: "text" },
-    discrepancyReason: { type: "varchar(255)" },
+    inspection_notes: { type: "text" },
+    discrepancy_reason: { type: "varchar(255)" },
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    processedAt: { type: "timestamp" },
-    processedBy: { type: "uuid" }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    processed_at: { type: "timestamp" },
+    processed_by: { type: "uuid" }
   });
 
   // Create indexes for receiving items
-  pgm.createIndex("receiving_item", "receivingRecordId");
-  pgm.createIndex("receiving_item", "purchaseOrderItemId");
-  pgm.createIndex("receiving_item", "productId");
-  pgm.createIndex("receiving_item", "variantId");
+  pgm.createIndex("receiving_item", "receiving_record_id");
+  pgm.createIndex("receiving_item", "purchase_order_item_id");
+  pgm.createIndex("receiving_item", "product_id");
+  pgm.createIndex("receiving_item", "variant_id");
   pgm.createIndex("receiving_item", "sku");
-  pgm.createIndex("receiving_item", "binId");
-  pgm.createIndex("receiving_item", "lotNumber");
-  pgm.createIndex("receiving_item", "expiryDate");
+  pgm.createIndex("receiving_item", "bin_id");
+  pgm.createIndex("receiving_item", "lot_number");
+  pgm.createIndex("receiving_item", "expiry_date");
   pgm.createIndex("receiving_item", "status");
-  pgm.createIndex("receiving_item", "acceptanceStatus");
-  pgm.createIndex("receiving_item", "createdAt");
-  pgm.createIndex("receiving_item", "serialNumbers", { method: "gin" });
+  pgm.createIndex("receiving_item", "acceptance_status");
+  pgm.createIndex("receiving_item", "created_at");
+  pgm.createIndex("receiving_item", "serial_numbers", { method: "gin" });
 
   // Insert default supplier
   pgm.sql(`
@@ -355,10 +355,10 @@ exports.up = (pgm) => {
       name, 
       code, 
       description, 
-      isActive, 
-      isApproved,
+      is_active, 
+      is_approved,
       status,
-      paymentTerms,
+      payment_terms,
       currency,
       categories
     )
@@ -379,16 +379,16 @@ exports.up = (pgm) => {
   pgm.sql(`
     WITH sample_supplier AS (SELECT id FROM supplier WHERE code = 'SAMPLE')
     INSERT INTO "supplier_address" (
-      supplierId,
+      supplier_id,
       name, 
-      addressLine1, 
+      address_line1, 
       city, 
       state, 
-      postalCode,
+      postal_code,
       country,
-      addressType,
-      isDefault,
-      isActive
+      address_type,
+      is_default,
+      is_active
     )
     VALUES (
       (SELECT id FROM sample_supplier),

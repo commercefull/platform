@@ -15,61 +15,61 @@ exports.up = (pgm) => {
     name: { type: "varchar(255)", notNull: true },
     slug: { type: "varchar(255)", unique: true },
     description: { type: "text" },
-    parentId: { type: "uuid", references: "product_category" },
+    parent_id: { type: "uuid", references: "product_category" },
     path: { type: "text" }, // Materialized path (e.g., "1/2/3")
     depth: { type: "integer", notNull: true, default: 0 },
     position: { type: "integer", notNull: true, default: 0 },
-    isActive: { type: "boolean", notNull: true, default: true },
-    isFeatured: { type: "boolean", notNull: true, default: false },
-    imageUrl: { type: "text" },
-    bannerUrl: { type: "text" },
-    iconUrl: { type: "text" },
-    metaTitle: { type: "varchar(255)" },
-    metaDescription: { type: "text" },
-    metaKeywords: { type: "varchar(255)" },
-    includeInMenu: { type: "boolean", notNull: true, default: true },
-    productCount: { type: "integer", notNull: true, default: 0 },
-    merchantId: { type: "uuid", references: "merchant" }, // Owner merchant if not global
-    isGlobal: { type: "boolean", notNull: true, default: true },
-    customLayout: { type: "text" }, // Reference to custom template
-    displaySettings: { type: "jsonb" }, // Settings for category display
+    is_active: { type: "boolean", notNull: true, default: true },
+    is_featured: { type: "boolean", notNull: true, default: false },
+    image_url: { type: "text" },
+    banner_url: { type: "text" },
+    icon_url: { type: "text" },
+    meta_title: { type: "varchar(255)" },
+    meta_description: { type: "text" },
+    meta_keywords: { type: "varchar(255)" },
+    include_in_menu: { type: "boolean", notNull: true, default: true },
+    product_count: { type: "integer", notNull: true, default: 0 },
+    merchant_id: { type: "uuid", references: "merchant" }, // Owner merchant if not global
+    is_global: { type: "boolean", notNull: true, default: true },
+    custom_layout: { type: "text" }, // Reference to custom template
+    display_settings: { type: "jsonb" }, // Settings for category display
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for product categories
   pgm.createIndex("product_category", "slug");
-  pgm.createIndex("product_category", "parentId");
+  pgm.createIndex("product_category", "parent_id");
   pgm.createIndex("product_category", "path");
   pgm.createIndex("product_category", "depth");
   pgm.createIndex("product_category", "position");
-  pgm.createIndex("product_category", "isActive");
-  pgm.createIndex("product_category", "isFeatured");
-  pgm.createIndex("product_category", "includeInMenu");
-  pgm.createIndex("product_category", "merchantId");
-  pgm.createIndex("product_category", "isGlobal");
+  pgm.createIndex("product_category", "is_active");
+  pgm.createIndex("product_category", "is_featured");
+  pgm.createIndex("product_category", "include_in_menu");
+  pgm.createIndex("product_category", "merchant_id");
+  pgm.createIndex("product_category", "is_global");
 
   // Create product-to-category mapping table
   pgm.createTable("product_category_map", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    productId: { type: "uuid", notNull: true, references: "product", onDelete: "CASCADE" },
-    categoryId: { type: "uuid", notNull: true, references: "product_category", onDelete: "CASCADE" },
+    product_id: { type: "uuid", notNull: true, references: "product", onDelete: "CASCADE" },
+    category_id: { type: "uuid", notNull: true, references: "product_category", onDelete: "CASCADE" },
     position: { type: "integer", notNull: true, default: 0 },
-    isPrimary: { type: "boolean", notNull: true, default: false },
+    is_primary: { type: "boolean", notNull: true, default: false },
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for product-to-category mapping
-  pgm.createIndex("product_category_map", "productId");
-  pgm.createIndex("product_category_map", "categoryId");
+  pgm.createIndex("product_category_map", "product_id");
+  pgm.createIndex("product_category_map", "category_id");
   pgm.createIndex("product_category_map", "position");
-  pgm.createIndex("product_category_map", "isPrimary");
-  pgm.createIndex("product_category_map", ["productId", "categoryId"], { unique: true });
-  pgm.createIndex("product_category_map", ["productId", "isPrimary"], {
+  pgm.createIndex("product_category_map", "is_primary");
+  pgm.createIndex("product_category_map", ["product_id", "category_id"], { unique: true });
+  pgm.createIndex("product_category_map", ["product_id", "is_primary"], {
     unique: true,
-    where: "isPrimary = true"
+    where: "is_primary = true"
   });
 
   // Create product tag table
@@ -78,32 +78,32 @@ exports.up = (pgm) => {
     name: { type: "varchar(100)", notNull: true },
     slug: { type: "varchar(100)", unique: true },
     description: { type: "text" },
-    isActive: { type: "boolean", notNull: true, default: true },
-    merchantId: { type: "uuid", references: "merchant" }, // Owner merchant if not global
-    isGlobal: { type: "boolean", notNull: true, default: true },
+    is_active: { type: "boolean", notNull: true, default: true },
+    merchant_id: { type: "uuid", references: "merchant" }, // Owner merchant if not global
+    is_global: { type: "boolean", notNull: true, default: true },
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for product tags
   pgm.createIndex("product_tag", "slug");
-  pgm.createIndex("product_tag", "isActive");
-  pgm.createIndex("product_tag", "merchantId");
-  pgm.createIndex("product_tag", "isGlobal");
+  pgm.createIndex("product_tag", "is_active");
+  pgm.createIndex("product_tag", "merchant_id");
+  pgm.createIndex("product_tag", "is_global");
 
   // Create product-to-tag mapping table
   pgm.createTable("product_tag_map", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    productId: { type: "uuid", notNull: true, references: "product", onDelete: "CASCADE" },
-    tagId: { type: "uuid", notNull: true, references: "product_tag", onDelete: "CASCADE" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    product_id: { type: "uuid", notNull: true, references: "product", onDelete: "CASCADE" },
+    tag_id: { type: "uuid", notNull: true, references: "product_tag", onDelete: "CASCADE" },
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for product-to-tag mapping
-  pgm.createIndex("product_tag_map", "productId");
-  pgm.createIndex("product_tag_map", "tagId");
-  pgm.createIndex("product_tag_map", ["productId", "tagId"], { unique: true });
+  pgm.createIndex("product_tag_map", "product_id");
+  pgm.createIndex("product_tag_map", "tag_id");
+  pgm.createIndex("product_tag_map", ["product_id", "tag_id"], { unique: true });
 
   // Create product collection table
   pgm.createTable("product_collection", {
@@ -111,45 +111,45 @@ exports.up = (pgm) => {
     name: { type: "varchar(255)", notNull: true },
     slug: { type: "varchar(255)", unique: true },
     description: { type: "text" },
-    isActive: { type: "boolean", notNull: true, default: true },
-    isAutomated: { type: "boolean", notNull: true, default: false },
-    isFeatured: { type: "boolean", notNull: true, default: false },
-    imageUrl: { type: "text" },
-    bannerUrl: { type: "text" },
-    metaTitle: { type: "varchar(255)" },
-    metaDescription: { type: "text" },
+    is_active: { type: "boolean", notNull: true, default: true },
+    is_automated: { type: "boolean", notNull: true, default: false },
+    is_featured: { type: "boolean", notNull: true, default: false },
+    image_url: { type: "text" },
+    banner_url: { type: "text" },
+    meta_title: { type: "varchar(255)" },
+    meta_description: { type: "text" },
     conditions: { type: "jsonb" }, // For automated collections
-    sortOrder: { type: "varchar(50)", default: "manual" }, // manual, price-asc, price-desc, etc.
-    merchantId: { type: "uuid", references: "merchant" }, // Owner merchant
+    sort_order: { type: "varchar(50)", default: "manual" }, // manual, price-asc, price-desc, etc.
+    merchant_id: { type: "uuid", references: "merchant" }, // Owner merchant
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for product collections
   pgm.createIndex("product_collection", "slug");
-  pgm.createIndex("product_collection", "isActive");
-  pgm.createIndex("product_collection", "isAutomated");
-  pgm.createIndex("product_collection", "isFeatured");
-  pgm.createIndex("product_collection", "merchantId");
+  pgm.createIndex("product_collection", "is_active");
+  pgm.createIndex("product_collection", "is_automated");
+  pgm.createIndex("product_collection", "is_featured");
+  pgm.createIndex("product_collection", "merchant_id");
 
   // Create product-to-collection mapping table
   pgm.createTable("product_collection_map", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    productId: { type: "uuid", notNull: true, references: "product", onDelete: "CASCADE" },
-    collectionId: { type: "uuid", notNull: true, references: "product_collection", onDelete: "CASCADE" },
+    product_id: { type: "uuid", notNull: true, references: "product", onDelete: "CASCADE" },
+    collection_id: { type: "uuid", notNull: true, references: "product_collection", onDelete: "CASCADE" },
     position: { type: "integer", notNull: true, default: 0 },
-    addedManually: { type: "boolean", notNull: true, default: true },
+    added_manually: { type: "boolean", notNull: true, default: true },
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for product-to-collection mapping
-  pgm.createIndex("product_collection_map", "productId");
-  pgm.createIndex("product_collection_map", "collectionId");
+  pgm.createIndex("product_collection_map", "product_id");
+  pgm.createIndex("product_collection_map", "collection_id");
   pgm.createIndex("product_collection_map", "position");
-  pgm.createIndex("product_collection_map", "addedManually");
-  pgm.createIndex("product_collection_map", ["productId", "collectionId"], { unique: true });
+  pgm.createIndex("product_collection_map", "added_manually");
+  pgm.createIndex("product_collection_map", ["product_id", "collection_id"], { unique: true });
 
   // Insert sample categories
   pgm.sql(`
@@ -157,13 +157,13 @@ exports.up = (pgm) => {
       name,
       slug,
       description,
-      isActive,
-      isFeatured,
-      includeInMenu,
+      is_active,
+      is_featured,
+      include_in_menu,
       path,
       depth,
       position,
-      isGlobal
+      is_global
     )
     VALUES 
     (
@@ -257,8 +257,8 @@ exports.up = (pgm) => {
     INSERT INTO product_tag (
       name,
       slug,
-      isActive,
-      isGlobal
+      is_active,
+      is_global
     )
     VALUES 
     (
@@ -300,9 +300,9 @@ exports.up = (pgm) => {
       name,
       slug,
       description,
-      isActive,
-      isFeatured,
-      merchantId
+      is_active,
+      is_featured,
+      merchant_id
     )
     VALUES 
     (
@@ -338,9 +338,9 @@ exports.up = (pgm) => {
       audio_category AS (SELECT id FROM product_category WHERE slug = 'audio' LIMIT 1),
       electronics_category AS (SELECT id FROM product_category WHERE slug = 'electronics' LIMIT 1)
     INSERT INTO product_category_map (
-      productId,
-      categoryId,
-      isPrimary
+      product_id,
+      category_id,
+      is_primary
     )
     VALUES 
     (
@@ -362,8 +362,8 @@ exports.up = (pgm) => {
       new_arrival_tag AS (SELECT id FROM product_tag WHERE slug = 'new-arrival' LIMIT 1),
       best_seller_tag AS (SELECT id FROM product_tag WHERE slug = 'best-seller' LIMIT 1)
     INSERT INTO product_tag_map (
-      productId,
-      tagId
+      product_id,
+      tag_id
     )
     VALUES 
     (
@@ -382,8 +382,8 @@ exports.up = (pgm) => {
       sample_product AS (SELECT id FROM product WHERE slug = 'premium-bluetooth-headphones' LIMIT 1),
       staff_picks_collection AS (SELECT id FROM product_collection WHERE slug = 'staff-picks' LIMIT 1)
     INSERT INTO product_collection_map (
-      productId,
-      collectionId,
+      product_id,
+      collection_id,
       position
     )
     VALUES 
@@ -400,11 +400,11 @@ exports.up = (pgm) => {
       electronics AS (SELECT id FROM product_category WHERE slug = 'electronics'),
       clothing AS (SELECT id FROM product_category WHERE slug = 'clothing')
     UPDATE product_category
-    SET parentId = (SELECT id FROM electronics)
+    SET parent_id = (SELECT id FROM electronics)
     WHERE slug IN ('smartphones', 'laptops', 'audio');
     
     UPDATE product_category
-    SET parentId = (SELECT id FROM clothing)
+    SET parent_id = (SELECT id FROM clothing)
     WHERE slug IN ('men', 'women');
   `);
 };

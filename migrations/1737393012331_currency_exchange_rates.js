@@ -22,8 +22,8 @@ exports.up = (pgm) => {
     effectiveTo: { type: "timestamp" }, // When rate expires (null for current rates)
     isActive: { type: "boolean", notNull: true, default: true },
     lastUpdated: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
     updatedBy: { type: "uuid" } // Reference to admin user
   });
 
@@ -71,8 +71,8 @@ exports.up = (pgm) => {
     isActive: { type: "boolean", notNull: true, default: false },
     lastSyncAt: { type: "timestamp" },
     syncFrequency: { type: "integer", default: 1440 }, // In minutes, default is daily
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for currency providers

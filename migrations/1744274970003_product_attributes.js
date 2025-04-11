@@ -21,8 +21,8 @@ exports.up = (pgm) => {
     merchantId: { type: "uuid", references: "merchant" }, // Owner merchant if not global
     isGlobal: { type: "boolean", notNull: true, default: true },
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for attribute groups
@@ -68,8 +68,8 @@ exports.up = (pgm) => {
     merchantId: { type: "uuid", references: "merchant" }, // Owner merchant if not global
     isGlobal: { type: "boolean", notNull: true, default: true },
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for product attributes
@@ -98,8 +98,8 @@ exports.up = (pgm) => {
     merchantId: { type: "uuid", references: "merchant" }, // Owner merchant if not global
     isGlobal: { type: "boolean", notNull: true, default: true },
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for attribute sets
@@ -118,7 +118,7 @@ exports.up = (pgm) => {
     isRequired: { type: "boolean" }, // Override attribute required setting
     defaultValue: { type: "text" }, // Override attribute default value
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for attribute set mapping
@@ -142,8 +142,8 @@ exports.up = (pgm) => {
     isSystem: { type: "boolean", notNull: true, default: false }, // System-defined value
     language: { type: "varchar(10)", default: 'en' }, // Language code for localized values
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for attribute values
@@ -173,8 +173,8 @@ exports.up = (pgm) => {
     position: { type: "integer", notNull: true, default: 0 },
     isDefault: { type: "boolean", notNull: true, default: false },
     metadata: { type: "jsonb" }, // Additional data like color hex code for color attributes
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for attribute options

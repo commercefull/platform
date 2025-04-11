@@ -31,124 +31,124 @@ exports.up = (pgm) => {
   // Create tax calculation log table
   pgm.createTable("tax_calculation", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    merchantId: { type: "uuid", notNull: true, references: "merchant", onDelete: "CASCADE" },
-    orderId: { type: "uuid", references: "order" },
-    invoiceId: { type: "uuid" }, // Reference to invoice if applicable
-    basketId: { type: "uuid", references: "basket" },
-    customerId: { type: "uuid", references: "customer" },
-    calculationMethod: { type: "tax_calculation_method", notNull: true },
+    merchant_id: { type: "uuid", notNull: true, references: "merchant", onDelete: "CASCADE" },
+    order_id: { type: "uuid", references: "order" },
+    invoice_id: { type: "uuid" }, // Reference to invoice if applicable
+    basket_id: { type: "uuid", references: "basket" },
+    customer_id: { type: "uuid", references: "customer" },
+    calculation_method: { type: "tax_calculation_method", notNull: true },
     status: { type: "tax_calculation_status", notNull: true, default: "pending" },
-    sourceType: { type: "tax_transaction_source", notNull: true },
-    sourceId: { type: "uuid" }, // ID of the source entity
-    taxAddress: { type: "jsonb" }, // Address used for tax calculation
-    taxableAmount: { type: "decimal(15,2)", notNull: true, default: 0 },
-    taxExemptAmount: { type: "decimal(15,2)", notNull: true, default: 0 },
-    taxAmount: { type: "decimal(15,2)", notNull: true, default: 0 },
-    totalAmount: { type: "decimal(15,2)", notNull: true, default: 0 },
-    currencyCode: { type: "varchar(3)", notNull: true, default: "USD" },
-    exchangeRate: { type: "decimal(15,6)", notNull: true, default: 1.0 },
-    taxProviderResponse: { type: "jsonb" }, // Raw response from tax provider
-    taxProviderReference: { type: "varchar(255)" }, // Reference ID from tax provider
-    errorMessage: { type: "text" }, // Error message if calculation failed
+    source_type: { type: "tax_transaction_source", notNull: true },
+    source_id: { type: "uuid" }, // ID of the source entity
+    tax_address: { type: "jsonb" }, // Address used for tax calculation
+    taxable_amount: { type: "decimal(15,2)", notNull: true, default: 0 },
+    tax_exempt_amount: { type: "decimal(15,2)", notNull: true, default: 0 },
+    tax_amount: { type: "decimal(15,2)", notNull: true, default: 0 },
+    total_amount: { type: "decimal(15,2)", notNull: true, default: 0 },
+    currency_code: { type: "varchar(3)", notNull: true, default: "USD" },
+    exchange_rate: { type: "decimal(15,6)", notNull: true, default: 1.0 },
+    tax_provider_response: { type: "jsonb" }, // Raw response from tax provider
+    tax_provider_reference: { type: "varchar(255)" }, // Reference ID from tax provider
+    error_message: { type: "text" }, // Error message if calculation failed
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for tax calculation
-  pgm.createIndex("tax_calculation", "merchantId");
-  pgm.createIndex("tax_calculation", "orderId");
-  pgm.createIndex("tax_calculation", "invoiceId");
-  pgm.createIndex("tax_calculation", "basketId");
-  pgm.createIndex("tax_calculation", "customerId");
+  pgm.createIndex("tax_calculation", "merchant_id");
+  pgm.createIndex("tax_calculation", "order_id");
+  pgm.createIndex("tax_calculation", "invoice_id");
+  pgm.createIndex("tax_calculation", "basket_id");
+  pgm.createIndex("tax_calculation", "customer_id");
   pgm.createIndex("tax_calculation", "status");
-  pgm.createIndex("tax_calculation", "sourceType");
-  pgm.createIndex("tax_calculation", "sourceId");
-  pgm.createIndex("tax_calculation", "taxProviderReference");
-  pgm.createIndex("tax_calculation", "createdAt");
+  pgm.createIndex("tax_calculation", "source_type");
+  pgm.createIndex("tax_calculation", "source_id");
+  pgm.createIndex("tax_calculation", "tax_provider_reference");
+  pgm.createIndex("tax_calculation", "created_at");
 
   // Create tax calculation line items table
   pgm.createTable("tax_calculation_line", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    calculationId: { type: "uuid", notNull: true, references: "tax_calculation", onDelete: "CASCADE" },
-    lineItemId: { type: "uuid" }, // ID of the original line item (order item, etc.)
-    lineItemType: { type: "varchar(50)", notNull: true }, // Type of line item (product, shipping, etc.)
-    productId: { type: "uuid", references: "product" },
-    variantId: { type: "uuid", references: "productVariant" },
+    calculation_id: { type: "uuid", notNull: true, references: "tax_calculation", onDelete: "CASCADE" },
+    line_item_id: { type: "uuid" }, // ID of the original line item (order item, etc.)
+    line_item_type: { type: "varchar(50)", notNull: true }, // Type of line item (product, shipping, etc.)
+    product_id: { type: "uuid", references: "product" },
+    variant_id: { type: "uuid", references: "product_variant" },
     sku: { type: "varchar(255)" },
     name: { type: "varchar(255)", notNull: true },
     quantity: { type: "integer", notNull: true, default: 1 },
-    unitPrice: { type: "decimal(15,2)", notNull: true },
-    lineTotal: { type: "decimal(15,2)", notNull: true },
-    discountAmount: { type: "decimal(15,2)", notNull: true, default: 0 },
-    taxableAmount: { type: "decimal(15,2)", notNull: true },
-    taxExemptAmount: { type: "decimal(15,2)", notNull: true, default: 0 },
-    taxCategoryId: { type: "uuid", references: "tax_category" },
-    taxCategoryCode: { type: "varchar(50)" },
+    unit_price: { type: "decimal(15,2)", notNull: true },
+    line_total: { type: "decimal(15,2)", notNull: true },
+    discount_amount: { type: "decimal(15,2)", notNull: true, default: 0 },
+    taxable_amount: { type: "decimal(15,2)", notNull: true },
+    tax_exempt_amount: { type: "decimal(15,2)", notNull: true, default: 0 },
+    tax_category_id: { type: "uuid", references: "tax_category" },
+    tax_category_code: { type: "varchar(50)" },
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for tax calculation lines
-  pgm.createIndex("tax_calculation_line", "calculationId");
-  pgm.createIndex("tax_calculation_line", "lineItemId");
-  pgm.createIndex("tax_calculation_line", "lineItemType");
-  pgm.createIndex("tax_calculation_line", "productId");
-  pgm.createIndex("tax_calculation_line", "variantId");
-  pgm.createIndex("tax_calculation_line", "taxCategoryId");
+  pgm.createIndex("tax_calculation_line", "calculation_id");
+  pgm.createIndex("tax_calculation_line", "line_item_id");
+  pgm.createIndex("tax_calculation_line", "line_item_type");
+  pgm.createIndex("tax_calculation_line", "product_id");
+  pgm.createIndex("tax_calculation_line", "variant_id");
+  pgm.createIndex("tax_calculation_line", "tax_category_id");
   pgm.createIndex("tax_calculation_line", "sku");
 
   // Create tax applied table (detail of taxes applied to each item)
   pgm.createTable("tax_calculation_applied", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    calculationId: { type: "uuid", notNull: true, references: "tax_calculation", onDelete: "CASCADE" },
-    calculationLineId: { type: "uuid", references: "tax_calculation_line", onDelete: "CASCADE" },
-    taxRateId: { type: "uuid", references: "tax_rate" },
-    taxRateName: { type: "varchar(100)", notNull: true },
-    taxZoneId: { type: "uuid", references: "tax_zone" },
-    taxZoneName: { type: "varchar(100)" },
-    taxCategoryId: { type: "uuid", references: "tax_category" },
-    taxCategoryName: { type: "varchar(100)" },
-    jurisdictionLevel: {
+    calculation_id: { type: "uuid", notNull: true, references: "tax_calculation", onDelete: "CASCADE" },
+    calculation_line_id: { type: "uuid", references: "tax_calculation_line", onDelete: "CASCADE" },
+    tax_rate_id: { type: "uuid", references: "tax_rate" },
+    tax_rate_name: { type: "varchar(100)", notNull: true },
+    tax_zone_id: { type: "uuid", references: "tax_zone" },
+    tax_zone_name: { type: "varchar(100)" },
+    tax_category_id: { type: "uuid", references: "tax_category" },
+    tax_category_name: { type: "varchar(100)" },
+    jurisdiction_level: {
       type: "varchar(50)",
       notNull: true,
-      check: "jurisdictionLevel IN ('country', 'state', 'county', 'city', 'district', 'special')"
+      check: "jurisdiction_level IN ('country', 'state', 'county', 'city', 'district', 'special')"
     },
-    jurisdictionName: { type: "varchar(100)", notNull: true },
+    jurisdiction_name: { type: "varchar(100)", notNull: true },
     rate: { type: "decimal(10,6)", notNull: true },
-    isCompound: { type: "boolean", notNull: true, default: false },
-    taxableAmount: { type: "decimal(15,2)", notNull: true },
-    taxAmount: { type: "decimal(15,2)", notNull: true },
+    is_compound: { type: "boolean", notNull: true, default: false },
+    taxable_amount: { type: "decimal(15,2)", notNull: true },
+    tax_amount: { type: "decimal(15,2)", notNull: true },
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for tax applied
-  pgm.createIndex("tax_calculation_applied", "calculationId");
-  pgm.createIndex("tax_calculation_applied", "calculationLineId");
-  pgm.createIndex("tax_calculation_applied", "taxRateId");
-  pgm.createIndex("tax_calculation_applied", "taxZoneId");
-  pgm.createIndex("tax_calculation_applied", "taxCategoryId");
-  pgm.createIndex("tax_calculation_applied", "jurisdictionLevel");
-  pgm.createIndex("tax_calculation_applied", "jurisdictionName");
+  pgm.createIndex("tax_calculation_applied", "calculation_id");
+  pgm.createIndex("tax_calculation_applied", "calculation_line_id");
+  pgm.createIndex("tax_calculation_applied", "tax_rate_id");
+  pgm.createIndex("tax_calculation_applied", "tax_zone_id");
+  pgm.createIndex("tax_calculation_applied", "tax_category_id");
+  pgm.createIndex("tax_calculation_applied", "jurisdiction_level");
+  pgm.createIndex("tax_calculation_applied", "jurisdiction_name");
 
   // Create tax report table
   pgm.createTable("tax_report", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    merchantId: { type: "uuid", notNull: true, references: "merchant", onDelete: "CASCADE" },
+    merchant_id: { type: "uuid", notNull: true, references: "merchant", onDelete: "CASCADE" },
     name: { type: "varchar(255)", notNull: true },
-    reportType: { 
+    report_type: { 
       type: "varchar(50)", 
       notNull: true,
-      check: "reportType IN ('sales', 'filing', 'jurisdiction', 'summary', 'exemption', 'audit')" 
+      check: "report_type IN ('sales', 'filing', 'jurisdiction', 'summary', 'exemption', 'audit')" 
     },
-    dateFrom: { type: "timestamp", notNull: true },
-    dateTo: { type: "timestamp", notNull: true },
-    taxJurisdictions: { type: "jsonb" }, // List of jurisdictions included
-    fileUrl: { type: "text" }, // URL to download the file
-    fileFormat: { 
+    date_from: { type: "timestamp", notNull: true },
+    date_to: { type: "timestamp", notNull: true },
+    tax_jurisdictions: { type: "jsonb" }, // List of jurisdictions included
+    file_url: { type: "text" }, // URL to download the file
+    file_format: { 
       type: "varchar(20)",
-      check: "fileFormat IN ('csv', 'xlsx', 'pdf', 'json')"
+      check: "file_format IN ('csv', 'xlsx', 'pdf', 'json')"
     },
     status: { 
       type: "varchar(50)",
@@ -156,115 +156,115 @@ exports.up = (pgm) => {
       check: "status IN ('pending', 'processing', 'completed', 'failed')",
       default: "'pending'"
     },
-    generatedBy: { type: "uuid", references: "admin_user" },
+    generated_by: { type: "uuid", references: "admin_user" },
     parameters: { type: "jsonb" }, // Report parameters
     results: { type: "jsonb" }, // Summary results
-    errorMessage: { type: "text" },
+    error_message: { type: "text" },
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for tax reports
-  pgm.createIndex("tax_report", "merchantId");
-  pgm.createIndex("tax_report", "reportType");
-  pgm.createIndex("tax_report", "dateFrom");
-  pgm.createIndex("tax_report", "dateTo");
+  pgm.createIndex("tax_report", "merchant_id");
+  pgm.createIndex("tax_report", "report_type");
+  pgm.createIndex("tax_report", "date_from");
+  pgm.createIndex("tax_report", "date_to");
   pgm.createIndex("tax_report", "status");
-  pgm.createIndex("tax_report", "generatedBy");
-  pgm.createIndex("tax_report", "createdAt");
+  pgm.createIndex("tax_report", "generated_by");
+  pgm.createIndex("tax_report", "created_at");
 
   // Create tax provider logs table
   pgm.createTable("tax_provider_log", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    merchantId: { type: "uuid", notNull: true, references: "merchant", onDelete: "CASCADE" },
+    merchant_id: { type: "uuid", notNull: true, references: "merchant", onDelete: "CASCADE" },
     provider: { 
       type: "varchar(50)", 
       notNull: true,
       check: "provider IN ('internal', 'avalara', 'taxjar', 'external')" 
     },
-    requestType: { 
+    request_type: { 
       type: "varchar(50)", 
       notNull: true,
-      check: "requestType IN ('calculation', 'verification', 'filing', 'refund', 'adjustment', 'validation')" 
+      check: "request_type IN ('calculation', 'verification', 'filing', 'refund', 'adjustment', 'validation')" 
     },
-    entityType: { 
+    entity_type: { 
       type: "varchar(50)",
       notNull: true
     },
-    entityId: { type: "uuid" },
-    requestData: { type: "jsonb" },
-    responseData: { type: "jsonb" },
-    responseStatus: { type: "integer" },
-    isSuccess: { type: "boolean", notNull: true },
-    errorCode: { type: "varchar(100)" },
-    errorMessage: { type: "text" },
-    processingTimeMs: { type: "integer" },
-    providerReference: { type: "varchar(255)" },
+    entity_id: { type: "uuid" },
+    request_data: { type: "jsonb" },
+    response_data: { type: "jsonb" },
+    response_status: { type: "integer" },
+    is_success: { type: "boolean", notNull: true },
+    error_code: { type: "varchar(100)" },
+    error_message: { type: "text" },
+    processing_time_ms: { type: "integer" },
+    provider_reference: { type: "varchar(255)" },
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for tax provider logs
-  pgm.createIndex("tax_provider_log", "merchantId");
+  pgm.createIndex("tax_provider_log", "merchant_id");
   pgm.createIndex("tax_provider_log", "provider");
-  pgm.createIndex("tax_provider_log", "requestType");
-  pgm.createIndex("tax_provider_log", "entityType");
-  pgm.createIndex("tax_provider_log", "entityId");
-  pgm.createIndex("tax_provider_log", "isSuccess");
-  pgm.createIndex("tax_provider_log", "providerReference");
-  pgm.createIndex("tax_provider_log", "createdAt");
+  pgm.createIndex("tax_provider_log", "request_type");
+  pgm.createIndex("tax_provider_log", "entity_type");
+  pgm.createIndex("tax_provider_log", "entity_id");
+  pgm.createIndex("tax_provider_log", "is_success");
+  pgm.createIndex("tax_provider_log", "provider_reference");
+  pgm.createIndex("tax_provider_log", "created_at");
 
   // Add tax_nexus table for tracking where a merchant has tax obligations
   pgm.createTable("tax_nexus", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    merchantId: { type: "uuid", notNull: true, references: "merchant", onDelete: "CASCADE" },
+    merchant_id: { type: "uuid", notNull: true, references: "merchant", onDelete: "CASCADE" },
     name: { type: "varchar(100)", notNull: true },
     country: { type: "varchar(2)", notNull: true },
     region: { type: "varchar(100)" }, // State/province/region
-    regionCode: { type: "varchar(10)" }, // State/province code
+    region_code: { type: "varchar(10)" }, // State/province code
     city: { type: "varchar(100)" },
-    postalCode: { type: "varchar(20)" },
-    streetAddress: { type: "text" },
-    taxId: { type: "varchar(100)" }, // Tax registration number
-    registrationNumber: { type: "varchar(100)" }, // Business registration
-    isDefault: { type: "boolean", notNull: true, default: false },
-    startDate: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    endDate: { type: "timestamp" },
-    isActive: { type: "boolean", notNull: true, default: true },
+    postal_code: { type: "varchar(20)" },
+    street_address: { type: "text" },
+    tax_id: { type: "varchar(100)" }, // Tax registration number
+    registration_number: { type: "varchar(100)" }, // Business registration
+    is_default: { type: "boolean", notNull: true, default: false },
+    start_date: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    end_date: { type: "timestamp" },
+    is_active: { type: "boolean", notNull: true, default: true },
     notes: { type: "text" },
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for tax nexus
-  pgm.createIndex("tax_nexus", "merchantId");
+  pgm.createIndex("tax_nexus", "merchant_id");
   pgm.createIndex("tax_nexus", "country");
-  pgm.createIndex("tax_nexus", "regionCode");
+  pgm.createIndex("tax_nexus", "region_code");
   pgm.createIndex("tax_nexus", "city");
-  pgm.createIndex("tax_nexus", "postalCode");
-  pgm.createIndex("tax_nexus", "isDefault");
-  pgm.createIndex("tax_nexus", "isActive");
-  pgm.createIndex("tax_nexus", "startDate");
-  pgm.createIndex("tax_nexus", "endDate");
+  pgm.createIndex("tax_nexus", "postal_code");
+  pgm.createIndex("tax_nexus", "is_default");
+  pgm.createIndex("tax_nexus", "is_active");
+  pgm.createIndex("tax_nexus", "start_date");
+  pgm.createIndex("tax_nexus", "end_date");
 
   // Insert sample tax nexus
   pgm.sql(`
     -- Insert sample tax nexus
     WITH sample_merchant AS (SELECT id FROM merchant LIMIT 1)
     INSERT INTO tax_nexus (
-      merchantId,
+      merchant_id,
       name,
       country,
       region,
-      regionCode,
+      region_code,
       city,
-      postalCode,
-      streetAddress,
-      taxId,
-      isDefault,
-      isActive
+      postal_code,
+      street_address,
+      tax_id,
+      is_default,
+      is_active
     )
     SELECT
       id,

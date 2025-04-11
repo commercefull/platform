@@ -39,8 +39,8 @@ exports.up = (pgm) => {
     badgeStyle: { type: "jsonb" }, // Styling information for the badge
     merchantId: { type: "uuid", references: "merchant" }, // Owner merchant
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for product discounts
@@ -69,7 +69,7 @@ exports.up = (pgm) => {
       notNull: true,
       check: "itemType IN ('product', 'variant', 'category', 'brand')"
     },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for product discount items
@@ -97,7 +97,7 @@ exports.up = (pgm) => {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
     discountId: { type: "uuid", notNull: true, references: "product_discount", onDelete: "CASCADE" },
     customerGroupId: { type: "uuid", notNull: true }, // Reference to a customer group
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for product discount customer groups
@@ -123,8 +123,8 @@ exports.up = (pgm) => {
     discountPercentage: { type: "decimal(5,2)", notNull: true, default: 100.00 }, // 100% = free
     maxFreeItems: { type: "integer" }, // Maximum number of free/discounted items
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for buy x get y discounts
@@ -158,8 +158,8 @@ exports.up = (pgm) => {
     priority: { type: "integer", notNull: true, default: 0 },
     merchantId: { type: "uuid", references: "merchant" },
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for tiered pricing

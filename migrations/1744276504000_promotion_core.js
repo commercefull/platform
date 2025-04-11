@@ -101,99 +101,99 @@ exports.up = (pgm) => {
     status: { type: "promotion_status", notNull: true, default: "active" },
     scope: { type: "promotion_scope", notNull: true },
     priority: { type: "integer", notNull: true, default: 0 }, // Higher number = higher priority
-    startDate: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    endDate: { type: "timestamp" },
-    isActive: { type: "boolean", notNull: true, default: true },
-    isExclusive: { type: "boolean", notNull: true, default: false }, // If true, cannot be combined with other promotions
-    maxUsage: { type: "integer" }, // Max number of times this promotion can be used in total
-    usageCount: { type: "integer", notNull: true, default: 0 },
-    maxUsagePerCustomer: { type: "integer" }, // Max usage per customer
-    minOrderAmount: { type: "decimal(15,2)" }, // Minimum order amount to be eligible
-    maxDiscountAmount: { type: "decimal(15,2)" }, // Cap on the maximum discount
-    merchantId: { type: "uuid", references: "merchant" }, // Owner merchant if not global
-    isGlobal: { type: "boolean", notNull: true, default: false },
-    eligibleCustomerGroups: { type: "jsonb" }, // Customer groups eligible for this promotion
-    excludedCustomerGroups: { type: "jsonb" }, // Customer groups excluded from this promotion
+    start_date: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    end_date: { type: "timestamp" },
+    is_active: { type: "boolean", notNull: true, default: true },
+    is_exclusive: { type: "boolean", notNull: true, default: false }, // If true, cannot be combined with other promotions
+    max_usage: { type: "integer" }, // Max number of times this promotion can be used in total
+    usage_count: { type: "integer", notNull: true, default: 0 },
+    max_usage_per_customer: { type: "integer" }, // Max usage per customer
+    min_order_amount: { type: "decimal(15,2)" }, // Minimum order amount to be eligible
+    max_discount_amount: { type: "decimal(15,2)" }, // Cap on the maximum discount
+    merchant_id: { type: "uuid", references: "merchant" }, // Owner merchant if not global
+    is_global: { type: "boolean", notNull: true, default: false },
+    eligible_customer_groups: { type: "jsonb" }, // Customer groups eligible for this promotion
+    excluded_customer_groups: { type: "jsonb" }, // Customer groups excluded from this promotion
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for promotions
   pgm.createIndex("promotion", "status");
   pgm.createIndex("promotion", "scope");
-  pgm.createIndex("promotion", "startDate");
-  pgm.createIndex("promotion", "endDate");
-  pgm.createIndex("promotion", "isActive");
-  pgm.createIndex("promotion", "isExclusive");
+  pgm.createIndex("promotion", "start_date");
+  pgm.createIndex("promotion", "end_date");
+  pgm.createIndex("promotion", "is_active");
+  pgm.createIndex("promotion", "is_exclusive");
   pgm.createIndex("promotion", "priority");
-  pgm.createIndex("promotion", "merchantId");
-  pgm.createIndex("promotion", "isGlobal");
+  pgm.createIndex("promotion", "merchant_id");
+  pgm.createIndex("promotion", "is_global");
 
   // Create promotion rule table (conditions)
   pgm.createTable("promotion_rule", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    promotionId: { type: "uuid", notNull: true, references: "promotion", onDelete: "CASCADE" },
+    promotion_id: { type: "uuid", notNull: true, references: "promotion", onDelete: "CASCADE" },
     name: { type: "varchar(255)" },
     description: { type: "text" },
     condition: { type: "promotion_rule_condition", notNull: true },
     operator: { type: "promotion_rule_operator", notNull: true },
     value: { type: "jsonb", notNull: true }, // The value to compare against
-    isRequired: { type: "boolean", notNull: true, default: true }, // If false, rule is optional (OR logic)
-    ruleGroup: { type: "varchar(100)", default: "default" }, // Group rules together for OR/AND logic
-    sortOrder: { type: "integer", notNull: true, default: 0 },
+    is_required: { type: "boolean", notNull: true, default: true }, // If false, rule is optional (OR logic)
+    rule_group: { type: "varchar(100)", default: "default" }, // Group rules together for OR/AND logic
+    sort_order: { type: "integer", notNull: true, default: 0 },
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for promotion rules
-  pgm.createIndex("promotion_rule", "promotionId");
+  pgm.createIndex("promotion_rule", "promotion_id");
   pgm.createIndex("promotion_rule", "condition");
   pgm.createIndex("promotion_rule", "operator");
-  pgm.createIndex("promotion_rule", "ruleGroup");
-  pgm.createIndex("promotion_rule", "isRequired");
-  pgm.createIndex("promotion_rule", "sortOrder");
+  pgm.createIndex("promotion_rule", "rule_group");
+  pgm.createIndex("promotion_rule", "is_required");
+  pgm.createIndex("promotion_rule", "sort_order");
 
   // Create promotion action table (effects)
   pgm.createTable("promotion_action", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    promotionId: { type: "uuid", notNull: true, references: "promotion", onDelete: "CASCADE" },
+    promotion_id: { type: "uuid", notNull: true, references: "promotion", onDelete: "CASCADE" },
     name: { type: "varchar(255)" },
     description: { type: "text" },
-    actionType: { type: "promotion_action_type", notNull: true },
+    action_type: { type: "promotion_action_type", notNull: true },
     value: { type: "jsonb", notNull: true }, // The discount value or action parameters
-    targetType: { type: "varchar(100)" }, // What the action applies to (e.g., "product", "category", "cart")
-    targetIds: { type: "jsonb" }, // IDs of specific targets (e.g., product IDs, category IDs)
-    sortOrder: { type: "integer", notNull: true, default: 0 },
+    target_type: { type: "varchar(100)" }, // What the action applies to (e.g., "product", "category", "cart")
+    target_ids: { type: "jsonb" }, // IDs of specific targets (e.g., product IDs, category IDs)
+    sort_order: { type: "integer", notNull: true, default: 0 },
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for promotion actions
-  pgm.createIndex("promotion_action", "promotionId");
-  pgm.createIndex("promotion_action", "actionType");
-  pgm.createIndex("promotion_action", "targetType");
-  pgm.createIndex("promotion_action", "sortOrder");
+  pgm.createIndex("promotion_action", "promotion_id");
+  pgm.createIndex("promotion_action", "action_type");
+  pgm.createIndex("promotion_action", "target_type");
+  pgm.createIndex("promotion_action", "sort_order");
 
   // Create promotion usage table
   pgm.createTable("promotion_usage", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    promotionId: { type: "uuid", notNull: true, references: "promotion", onDelete: "CASCADE" },
-    customerId: { type: "uuid", references: "customer", onDelete: "SET NULL" },
-    orderId: { type: "uuid", references: "order", onDelete: "SET NULL" },
-    discountAmount: { type: "decimal(15,2)", notNull: true },
-    currencyCode: { type: "varchar(3)", notNull: true, default: "USD" },
-    usedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    promotion_id: { type: "uuid", notNull: true, references: "promotion", onDelete: "CASCADE" },
+    customer_id: { type: "uuid", references: "customer", onDelete: "SET NULL" },
+    order_id: { type: "uuid", references: "order", onDelete: "SET NULL" },
+    discount_amount: { type: "decimal(15,2)", notNull: true },
+    currency_code: { type: "varchar(3)", notNull: true, default: "USD" },
+    used_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
     metadata: { type: "jsonb" }
   });
 
   // Create indexes for promotion usage
-  pgm.createIndex("promotion_usage", "promotionId");
-  pgm.createIndex("promotion_usage", "customerId");
-  pgm.createIndex("promotion_usage", "orderId");
-  pgm.createIndex("promotion_usage", "usedAt");
+  pgm.createIndex("promotion_usage", "promotion_id");
+  pgm.createIndex("promotion_usage", "customer_id");
+  pgm.createIndex("promotion_usage", "order_id");
+  pgm.createIndex("promotion_usage", "used_at");
 
   // Insert some sample data
   pgm.sql(`
@@ -204,72 +204,137 @@ exports.up = (pgm) => {
       status,
       scope,
       priority,
-      startDate,
-      endDate,
-      isActive,
-      isExclusive,
-      maxUsage,
-      maxUsagePerCustomer,
-      minOrderAmount,
-      maxDiscountAmount,
-      isGlobal
+      start_date,
+      end_date,
+      is_active,
+      is_exclusive,
+      max_usage,
+      max_usage_per_customer,
+      max_discount_amount,
+      is_global
     )
-    VALUES (
-      'Summer Sale 2025',
-      'Get 15% off your entire order during our summer sale',
+    VALUES 
+    (
+      '10% Off Sitewide',
+      'Get 10% off your entire purchase',
       'active',
       'cart',
-      10,
-      '2025-06-01 00:00:00',
-      '2025-08-31 23:59:59',
+      100,
+      current_timestamp,
+      current_timestamp + interval '30 days',
       true,
       false,
       1000,
       1,
-      50.00,
-      200.00,
+      250.00,
+      true
+    ),
+    (
+      'Summer Sale',
+      '15% off all summer items',
+      'active',
+      'category',
+      90,
+      current_timestamp,
+      current_timestamp + interval '60 days',
+      true,
+      false,
+      NULL,
+      NULL,
+      NULL,
+      true
+    ),
+    (
+      'First Order Discount',
+      'Get $10 off your first order',
+      'active',
+      'cart',
+      80,
+      current_timestamp,
+      NULL,
+      true,
+      false,
+      NULL,
+      1,
+      10.00,
       true
     );
-  `);
 
-  // Insert sample rule for the promotion
-  pgm.sql(`
-    WITH summer_promo AS (SELECT id FROM promotion WHERE name = 'Summer Sale 2025')
+    -- Add sample promotion rules
+    WITH 
+      promo1 AS (SELECT id FROM promotion WHERE name = '10% Off Sitewide' LIMIT 1),
+      promo2 AS (SELECT id FROM promotion WHERE name = 'Summer Sale' LIMIT 1),
+      promo3 AS (SELECT id FROM promotion WHERE name = 'First Order Discount' LIMIT 1)
     INSERT INTO promotion_rule (
-      promotionId,
+      promotion_id,
       name,
       condition,
       operator,
       value,
-      isRequired
+      is_required
     )
-    VALUES (
-      (SELECT id FROM summer_promo),
+    SELECT
+      promo1.id,
       'Minimum Order Amount',
       'cart_subtotal',
       'gte',
-      '{"amount": 50.00, "currency": "USD"}',
+      '{"amount": 50.00}',
       true
-    );
-  `);
+    FROM promo1
+    UNION ALL
+    SELECT
+      promo2.id,
+      'Summer Category',
+      'category_ids',
+      'in',
+      '{"ids": ["summer-collection"]}',
+      true
+    FROM promo2
+    UNION ALL
+    SELECT
+      promo3.id,
+      'First Order',
+      'customer_order_count',
+      'eq',
+      '{"count": 0}',
+      true
+    FROM promo3;
 
-  // Insert sample action for the promotion
-  pgm.sql(`
-    WITH summer_promo AS (SELECT id FROM promotion WHERE name = 'Summer Sale 2025')
+    -- Add promotion actions
+    WITH 
+      promo1 AS (SELECT id FROM promotion WHERE name = '10% Off Sitewide' LIMIT 1),
+      promo2 AS (SELECT id FROM promotion WHERE name = 'Summer Sale' LIMIT 1),
+      promo3 AS (SELECT id FROM promotion WHERE name = 'First Order Discount' LIMIT 1)
     INSERT INTO promotion_action (
-      promotionId,
+      promotion_id,
       name,
-      actionType,
+      action_type,
       value,
-      targetType
+      target_type
     )
-    VALUES (
-      (SELECT id FROM summer_promo),
-      '15% Off Entire Order',
+    SELECT
+      promo1.id,
+      '10% Cart Discount',
+      'percentage_discount',
+      '{"percentage": 10}',
+      'cart'
+    FROM promo1
+    UNION ALL
+    SELECT
+      promo2.id,
+      '15% Category Discount',
       'percentage_discount',
       '{"percentage": 15}',
+      'category'
+    FROM promo2
+    UNION ALL
+    SELECT
+      promo3.id,
+      '$10 Fixed Discount',
+      'fixed_amount_discount',
+      '{"amount": 10.00}',
       'cart'
-    );
+    FROM promo3;
   `);
 };
 
@@ -279,13 +344,10 @@ exports.up = (pgm) => {
  * @returns {Promise<void> | void}
  */
 exports.down = (pgm) => {
-  // Drop tables in reverse order
   pgm.dropTable("promotion_usage");
   pgm.dropTable("promotion_action");
   pgm.dropTable("promotion_rule");
   pgm.dropTable("promotion");
-
-  // Drop enum types
   pgm.dropType("promotion_rule_condition");
   pgm.dropType("promotion_action_type");
   pgm.dropType("promotion_rule_operator");

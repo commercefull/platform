@@ -39,8 +39,8 @@ exports.up = (pgm) => {
     providerResponse: { type: "jsonb" }, // Full response from provider
     retryCount: { type: "integer", default: 0 },
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for notification delivery logs
@@ -56,7 +56,7 @@ exports.up = (pgm) => {
   pgm.createIndex("notification_delivery_log", "failedAt");
   pgm.createIndex("notification_delivery_log", "provider");
   pgm.createIndex("notification_delivery_log", "providerMessageId");
-  pgm.createIndex("notification_delivery_log", "createdAt");
+  pgm.createIndex("notification_delivery_log", "created_at");
   
   // Create notification event log
   pgm.createTable("notification_event_log", {
@@ -111,8 +111,8 @@ exports.up = (pgm) => {
     sendingSettings: { type: "jsonb" }, // Throttling, retry settings, etc.
     testRecipients: { type: "jsonb" }, // Test recipients before full send
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
     createdBy: { type: "uuid" },
     updatedBy: { type: "uuid" }
   });
@@ -125,7 +125,7 @@ exports.up = (pgm) => {
   pgm.createIndex("notification_batch", "scheduledAt");
   pgm.createIndex("notification_batch", "startedAt");
   pgm.createIndex("notification_batch", "completedAt");
-  pgm.createIndex("notification_batch", "createdAt");
+  pgm.createIndex("notification_batch", "created_at");
   pgm.createIndex("notification_batch", "createdBy");
 
   // Create notification webhook endpoint
@@ -148,8 +148,8 @@ exports.up = (pgm) => {
     lastFailure: { type: "timestamp" },
     lastFailureReason: { type: "text" },
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
     createdBy: { type: "uuid" }
   });
 
@@ -158,7 +158,7 @@ exports.up = (pgm) => {
   pgm.createIndex("notification_webhook", "events", { method: "gin" });
   pgm.createIndex("notification_webhook", "lastSuccess");
   pgm.createIndex("notification_webhook", "lastFailure");
-  pgm.createIndex("notification_webhook", "createdAt");
+  pgm.createIndex("notification_webhook", "created_at");
 
   // Insert sample notification delivery log
   pgm.sql(`

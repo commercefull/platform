@@ -47,141 +47,141 @@ exports.up = (pgm) => {
   // Create fulfillment table
   pgm.createTable("order_fulfillment", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    orderId: { type: "uuid", notNull: true, references: "order", onDelete: "CASCADE" },
-    warehouseId: { type: "uuid", references: "warehouse" },
-    fulfillmentNumber: { type: "varchar(50)", notNull: true, unique: true }, // Human-readable fulfillment number
+    order_id: { type: "uuid", notNull: true, references: "order", onDelete: "CASCADE" },
+    warehouse_id: { type: "uuid", references: "warehouse" },
+    fulfillment_number: { type: "varchar(50)", notNull: true, unique: true }, // Human-readable fulfillment number
     status: { type: "shipment_status", notNull: true, default: "pending" },
     provider: { type: "fulfillment_provider", notNull: true, default: "self" },
     carrier: { type: "shipping_carrier" },
-    serviceLevel: { type: "varchar(100)" }, // e.g., "Ground", "2-Day Air"
-    trackingNumber: { type: "varchar(100)" },
-    trackingUrl: { type: "text" },
-    labelUrl: { type: "text" }, // URL to shipping label
-    manifestId: { type: "varchar(100)" }, // Shipping manifest ID
-    shippingAddressId: { type: "uuid", references: "customer_address" },
-    shippingAddress: { type: "jsonb", notNull: true }, // Copy of shipping address at time of fulfillment
-    shippingCost: { type: "decimal(15,2)" },
-    packageCount: { type: "integer", default: 1 },
-    totalWeight: { type: "decimal(10,2)" }, // Total weight of all packages
+    service_level: { type: "varchar(100)" }, // e.g., "Ground", "2-Day Air"
+    tracking_number: { type: "varchar(100)" },
+    tracking_url: { type: "text" },
+    label_url: { type: "text" }, // URL to shipping label
+    manifest_id: { type: "varchar(100)" }, // Shipping manifest ID
+    shipping_address_id: { type: "uuid", references: "customer_address" },
+    shipping_address: { type: "jsonb", notNull: true }, // Copy of shipping address at time of fulfillment
+    shipping_cost: { type: "decimal(15,2)" },
+    package_count: { type: "integer", default: 1 },
+    total_weight: { type: "decimal(10,2)" }, // Total weight of all packages
     dimensions: { type: "jsonb" }, // Combined dimensions
-    packagingType: { type: "varchar(50)" }, // Type of packaging used
-    shippingMethod: { type: "varchar(100)" },
+    packaging_type: { type: "varchar(50)" }, // Type of packaging used
+    shipping_method: { type: "varchar(100)" },
     instructions: { type: "text" }, // Special handling instructions
     notes: { type: "text" }, // Internal notes
     metadata: { type: "jsonb" },
-    createdBy: { type: "varchar(255)" }, // User who created the fulfillment
-    fulfillmentData: { type: "jsonb" }, // Additional data from the fulfillment provider
-    estimatedDeliveryDate: { type: "timestamp" },
-    shippedAt: { type: "timestamp" }, // When the fulfillment was shipped
-    deliveredAt: { type: "timestamp" }, // When the fulfillment was delivered
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_by: { type: "varchar(255)" }, // User who created the fulfillment
+    fulfillment_data: { type: "jsonb" }, // Additional data from the fulfillment provider
+    estimated_delivery_date: { type: "timestamp" },
+    shipped_at: { type: "timestamp" }, // When the fulfillment was shipped
+    delivered_at: { type: "timestamp" }, // When the fulfillment was delivered
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for fulfillment
-  pgm.createIndex("order_fulfillment", "orderId");
-  pgm.createIndex("order_fulfillment", "warehouseId");
-  pgm.createIndex("order_fulfillment", "fulfillmentNumber");
+  pgm.createIndex("order_fulfillment", "order_id");
+  pgm.createIndex("order_fulfillment", "warehouse_id");
+  pgm.createIndex("order_fulfillment", "fulfillment_number");
   pgm.createIndex("order_fulfillment", "status");
   pgm.createIndex("order_fulfillment", "provider");
   pgm.createIndex("order_fulfillment", "carrier");
-  pgm.createIndex("order_fulfillment", "trackingNumber");
-  pgm.createIndex("order_fulfillment", "shippingAddressId");
-  pgm.createIndex("order_fulfillment", "shippedAt");
-  pgm.createIndex("order_fulfillment", "deliveredAt");
-  pgm.createIndex("order_fulfillment", "estimatedDeliveryDate");
-  pgm.createIndex("order_fulfillment", "createdAt");
+  pgm.createIndex("order_fulfillment", "tracking_number");
+  pgm.createIndex("order_fulfillment", "shipping_address_id");
+  pgm.createIndex("order_fulfillment", "shipped_at");
+  pgm.createIndex("order_fulfillment", "delivered_at");
+  pgm.createIndex("order_fulfillment", "estimated_delivery_date");
+  pgm.createIndex("order_fulfillment", "created_at");
 
   // Create fulfillment item table
   pgm.createTable("order_fulfillment_item", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    fulfillmentId: { type: "uuid", notNull: true, references: "order_fulfillment", onDelete: "CASCADE" },
-    orderItemId: { type: "uuid", notNull: true, references: "order_item", onDelete: "CASCADE" },
+    fulfillment_id: { type: "uuid", notNull: true, references: "order_fulfillment", onDelete: "CASCADE" },
+    order_item_id: { type: "uuid", notNull: true, references: "order_item", onDelete: "CASCADE" },
     quantity: { type: "integer", notNull: true },
-    inventoryItemId: { type: "uuid", references: "inventory_item" },
-    warehouseLocationId: { type: "uuid", references: "warehouse_location" },
-    lotNumber: { type: "varchar(100)" }, // Batch/lot for items with expiry dates
-    serialNumber: { type: "varchar(100)" }, // For serialized products
+    inventory_item_id: { type: "uuid", references: "inventory_item" },
+    warehouse_location_id: { type: "uuid", references: "warehouse_location" },
+    lot_number: { type: "varchar(100)" }, // Batch/lot for items with expiry dates
+    serial_number: { type: "varchar(100)" }, // For serialized products
     notes: { type: "text" },
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for fulfillment items
-  pgm.createIndex("order_fulfillment_item", "fulfillmentId");
-  pgm.createIndex("order_fulfillment_item", "orderItemId");
-  pgm.createIndex("order_fulfillment_item", "inventoryItemId");
-  pgm.createIndex("order_fulfillment_item", "warehouseLocationId");
-  pgm.createIndex("order_fulfillment_item", "lotNumber");
-  pgm.createIndex("order_fulfillment_item", "serialNumber");
+  pgm.createIndex("order_fulfillment_item", "fulfillment_id");
+  pgm.createIndex("order_fulfillment_item", "order_item_id");
+  pgm.createIndex("order_fulfillment_item", "inventory_item_id");
+  pgm.createIndex("order_fulfillment_item", "warehouse_location_id");
+  pgm.createIndex("order_fulfillment_item", "lot_number");
+  pgm.createIndex("order_fulfillment_item", "serial_number");
 
   // Create fulfillment package table
   pgm.createTable("order_fulfillment_package", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    fulfillmentId: { type: "uuid", notNull: true, references: "order_fulfillment", onDelete: "CASCADE" },
-    packageNumber: { type: "varchar(50)", notNull: true }, // Human-readable package identifier
-    trackingNumber: { type: "varchar(100)" }, // Individual package tracking number
+    fulfillment_id: { type: "uuid", notNull: true, references: "order_fulfillment", onDelete: "CASCADE" },
+    package_number: { type: "varchar(50)", notNull: true }, // Human-readable package identifier
+    tracking_number: { type: "varchar(100)" }, // Individual package tracking number
     weight: { type: "decimal(10,2)" }, // Weight in oz/g
     dimensions: { type: "jsonb" }, // Length, width, height
-    packageType: { type: "varchar(50)" }, // Box, envelope, etc.
-    shippingLabelUrl: { type: "text" },
-    commercialInvoiceUrl: { type: "text" }, // For international shipments
-    customsInfo: { type: "jsonb" }, // For international shipments
+    package_type: { type: "varchar(50)" }, // Box, envelope, etc.
+    shipping_label_url: { type: "text" },
+    commercial_invoice_url: { type: "text" }, // For international shipments
+    customs_info: { type: "jsonb" }, // For international shipments
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for fulfillment packages
-  pgm.createIndex("order_fulfillment_package", "fulfillmentId");
-  pgm.createIndex("order_fulfillment_package", "packageNumber");
-  pgm.createIndex("order_fulfillment_package", "trackingNumber");
+  pgm.createIndex("order_fulfillment_package", "fulfillment_id");
+  pgm.createIndex("order_fulfillment_package", "package_number");
+  pgm.createIndex("order_fulfillment_package", "tracking_number");
 
   // Create shipping rate table
   pgm.createTable("shipping_rate", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    orderId: { type: "uuid", notNull: true, references: "order", onDelete: "CASCADE" },
+    order_id: { type: "uuid", notNull: true, references: "order", onDelete: "CASCADE" },
     carrier: { type: "shipping_carrier", notNull: true },
-    serviceLevel: { type: "varchar(100)", notNull: true }, // e.g., "Ground", "2-Day Air"
-    serviceName: { type: "varchar(255)", notNull: true }, // Display name for the service
+    service_level: { type: "varchar(100)", notNull: true }, // e.g., "Ground", "2-Day Air"
+    service_name: { type: "varchar(255)", notNull: true }, // Display name for the service
     rate: { type: "decimal(15,2)", notNull: true }, // Cost of shipping
-    estimatedDays: { type: "integer" }, // Estimated transit time in days
-    estimatedDeliveryDate: { type: "timestamp" },
-    currencyCode: { type: "varchar(3)", notNull: true, default: "USD" },
-    isSelected: { type: "boolean", notNull: true, default: false }, // Whether this rate was chosen
-    carrierAccountId: { type: "varchar(100)" }, // Carrier account ID
-    shipmentId: { type: "varchar(100)" }, // ID from shipping API
+    estimated_days: { type: "integer" }, // Estimated transit time in days
+    estimated_delivery_date: { type: "timestamp" },
+    currency_code: { type: "varchar(3)", notNull: true, default: "USD" },
+    is_selected: { type: "boolean", notNull: true, default: false }, // Whether this rate was chosen
+    carrier_account_id: { type: "varchar(100)" }, // Carrier account ID
+    shipment_id: { type: "varchar(100)" }, // ID from shipping API
     metadata: { type: "jsonb" },
-    rateData: { type: "jsonb" }, // Full rate data from carrier API
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    rate_data: { type: "jsonb" }, // Full rate data from carrier API
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for shipping rates
-  pgm.createIndex("shipping_rate", "orderId");
+  pgm.createIndex("shipping_rate", "order_id");
   pgm.createIndex("shipping_rate", "carrier");
-  pgm.createIndex("shipping_rate", "serviceLevel");
+  pgm.createIndex("shipping_rate", "service_level");
   pgm.createIndex("shipping_rate", "rate");
-  pgm.createIndex("shipping_rate", "estimatedDays");
-  pgm.createIndex("shipping_rate", "isSelected");
-  pgm.createIndex("shipping_rate", "shipmentId");
-  pgm.createIndex("shipping_rate", "createdAt");
+  pgm.createIndex("shipping_rate", "estimated_days");
+  pgm.createIndex("shipping_rate", "is_selected");
+  pgm.createIndex("shipping_rate", "shipment_id");
+  pgm.createIndex("shipping_rate", "created_at");
 
   // Create fulfillment status history table
   pgm.createTable("fulfillment_status_history", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    fulfillmentId: { type: "uuid", notNull: true, references: "order_fulfillment", onDelete: "CASCADE" },
+    fulfillment_id: { type: "uuid", notNull: true, references: "order_fulfillment", onDelete: "CASCADE" },
     status: { type: "shipment_status", notNull: true },
-    previousStatus: { type: "shipment_status" },
+    previous_status: { type: "shipment_status" },
     notes: { type: "text" },
     location: { type: "varchar(255)" }, // Location where the status was updated
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    createdBy: { type: "varchar(255)" } // User who updated the status
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    created_by: { type: "varchar(255)" } // User who updated the status
   });
 
   // Create indexes for fulfillment status history
-  pgm.createIndex("fulfillment_status_history", "fulfillmentId");
+  pgm.createIndex("fulfillment_status_history", "fulfillment_id");
   pgm.createIndex("fulfillment_status_history", "status");
-  pgm.createIndex("fulfillment_status_history", "createdAt");
+  pgm.createIndex("fulfillment_status_history", "created_at");
 
   // Create return reason enum
   pgm.createType("return_reason", [
@@ -211,85 +211,85 @@ exports.up = (pgm) => {
   // Create order return table
   pgm.createTable("order_return", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    orderId: { type: "uuid", notNull: true, references: "order", onDelete: "CASCADE" },
-    returnNumber: { type: "varchar(50)", notNull: true, unique: true }, // Human-readable return number
-    customerId: { type: "uuid", references: "customer" },
+    order_id: { type: "uuid", notNull: true, references: "order", onDelete: "CASCADE" },
+    return_number: { type: "varchar(50)", notNull: true, unique: true }, // Human-readable return number
+    customer_id: { type: "uuid", references: "customer" },
     status: { type: "return_status", notNull: true, default: "requested" },
-    returnType: { 
+    return_type: { 
       type: "varchar(50)", 
       notNull: true,
-      check: "returnType IN ('refund', 'exchange', 'store_credit', 'repair')" 
+      check: "return_type IN ('refund', 'exchange', 'store_credit', 'repair')" 
     },
-    requestedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    approvedAt: { type: "timestamp" },
-    receivedAt: { type: "timestamp" },
-    completedAt: { type: "timestamp" },
-    rmaNumber: { type: "varchar(100)" }, // Return Merchandise Authorization number
-    refundId: { type: "uuid", references: "order_refund" },
-    returnShippingPaid: { type: "boolean", notNull: true, default: false }, // Whether return shipping was paid for
-    returnShippingAmount: { type: "decimal(15,2)" }, // Cost of return shipping
-    returnShippingLabel: { type: "text" }, // URL to return shipping label
-    returnCarrier: { type: "shipping_carrier" },
-    returnTrackingNumber: { type: "varchar(100)" },
-    returnTrackingUrl: { type: "text" },
-    returnReason: { type: "text" },
-    returnInstructions: { type: "text" },
-    customerNotes: { type: "text" }, // Notes from customer
-    adminNotes: { type: "text" }, // Internal notes
-    requiresInspection: { type: "boolean", notNull: true, default: true },
-    inspectionPassedItems: { type: "jsonb" }, // Items that passed inspection
-    inspectionFailedItems: { type: "jsonb" }, // Items that failed inspection
+    requested_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    approved_at: { type: "timestamp" },
+    received_at: { type: "timestamp" },
+    completed_at: { type: "timestamp" },
+    rma_number: { type: "varchar(100)" }, // Return Merchandise Authorization number
+    refund_id: { type: "uuid", references: "order_refund" },
+    return_shipping_paid: { type: "boolean", notNull: true, default: false }, // Whether return shipping was paid for
+    return_shipping_amount: { type: "decimal(15,2)" }, // Cost of return shipping
+    return_shipping_label: { type: "text" }, // URL to return shipping label
+    return_carrier: { type: "shipping_carrier" },
+    return_tracking_number: { type: "varchar(100)" },
+    return_tracking_url: { type: "text" },
+    return_reason: { type: "text" },
+    return_instructions: { type: "text" },
+    customer_notes: { type: "text" }, // Notes from customer
+    admin_notes: { type: "text" }, // Internal notes
+    requires_inspection: { type: "boolean", notNull: true, default: true },
+    inspection_passed_items: { type: "jsonb" }, // Items that passed inspection
+    inspection_failed_items: { type: "jsonb" }, // Items that failed inspection
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for order returns
-  pgm.createIndex("order_return", "orderId");
-  pgm.createIndex("order_return", "returnNumber");
-  pgm.createIndex("order_return", "customerId");
+  pgm.createIndex("order_return", "order_id");
+  pgm.createIndex("order_return", "return_number");
+  pgm.createIndex("order_return", "customer_id");
   pgm.createIndex("order_return", "status");
-  pgm.createIndex("order_return", "returnType");
-  pgm.createIndex("order_return", "requestedAt");
-  pgm.createIndex("order_return", "approvedAt");
-  pgm.createIndex("order_return", "receivedAt");
-  pgm.createIndex("order_return", "completedAt");
-  pgm.createIndex("order_return", "rmaNumber");
-  pgm.createIndex("order_return", "refundId");
-  pgm.createIndex("order_return", "returnTrackingNumber");
-  pgm.createIndex("order_return", "createdAt");
+  pgm.createIndex("order_return", "return_type");
+  pgm.createIndex("order_return", "requested_at");
+  pgm.createIndex("order_return", "approved_at");
+  pgm.createIndex("order_return", "received_at");
+  pgm.createIndex("order_return", "completed_at");
+  pgm.createIndex("order_return", "rma_number");
+  pgm.createIndex("order_return", "refund_id");
+  pgm.createIndex("order_return", "return_tracking_number");
+  pgm.createIndex("order_return", "created_at");
 
   // Create order return item table
   pgm.createTable("order_return_item", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    returnId: { type: "uuid", notNull: true, references: "order_return", onDelete: "CASCADE" },
-    orderItemId: { type: "uuid", notNull: true, references: "order_item", onDelete: "CASCADE" },
+    return_id: { type: "uuid", notNull: true, references: "order_return", onDelete: "CASCADE" },
+    order_item_id: { type: "uuid", notNull: true, references: "order_item", onDelete: "CASCADE" },
     quantity: { type: "integer", notNull: true },
-    returnReason: { type: "return_reason", notNull: true },
-    returnReasonDetail: { type: "text" }, // Detailed reason
+    return_reason: { type: "return_reason", notNull: true },
+    return_reason_detail: { type: "text" }, // Detailed reason
     condition: { 
       type: "varchar(50)", 
       notNull: true,
       check: "condition IN ('new', 'like_new', 'used', 'damaged', 'unsellable')" 
     },
-    restockItem: { type: "boolean", notNull: true, default: false },
-    refundAmount: { type: "decimal(15,2)" }, // Amount to refund for this item
-    exchangeProductId: { type: "uuid", references: "product" }, // For exchange returns
-    exchangeVariantId: { type: "uuid", references: "product_variant" }, // For exchange returns
+    restock_item: { type: "boolean", notNull: true, default: false },
+    refund_amount: { type: "decimal(15,2)" }, // Amount to refund for this item
+    exchange_product_id: { type: "uuid", references: "product" }, // For exchange returns
+    exchange_variant_id: { type: "uuid", references: "product_variant" }, // For exchange returns
     metadata: { type: "jsonb" },
     notes: { type: "text" },
-    inspectionNotes: { type: "text" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    inspection_notes: { type: "text" },
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for order return items
-  pgm.createIndex("order_return_item", "returnId");
-  pgm.createIndex("order_return_item", "orderItemId");
-  pgm.createIndex("order_return_item", "returnReason");
+  pgm.createIndex("order_return_item", "return_id");
+  pgm.createIndex("order_return_item", "order_item_id");
+  pgm.createIndex("order_return_item", "return_reason");
   pgm.createIndex("order_return_item", "condition");
-  pgm.createIndex("order_return_item", "restockItem");
-  pgm.createIndex("order_return_item", "exchangeProductId");
-  pgm.createIndex("order_return_item", "exchangeVariantId");
+  pgm.createIndex("order_return_item", "restock_item");
+  pgm.createIndex("order_return_item", "exchange_product_id");
+  pgm.createIndex("order_return_item", "exchange_variant_id");
 
   // Insert sample fulfillment data
   pgm.sql(`
@@ -297,21 +297,21 @@ exports.up = (pgm) => {
       SELECT id FROM "order" LIMIT 1
     ),
     sample_items AS (
-      SELECT id FROM "order_item" WHERE orderId = (SELECT id FROM sample_order) LIMIT 2
+      SELECT id FROM "order_item" WHERE order_id = (SELECT id FROM sample_order) LIMIT 2
     ),
     new_fulfillment AS (
       INSERT INTO "order_fulfillment" (
-        orderId,
-        fulfillmentNumber,
+        order_id,
+        fulfillment_number,
         status,
         provider,
         carrier,
-        serviceLevel,
-        trackingNumber,
-        trackingUrl,
-        shippingAddress,
-        shippingCost,
-        shippingMethod
+        service_level,
+        tracking_number,
+        tracking_url,
+        shipping_address,
+        shipping_cost,
+        shipping_method
       )
       VALUES (
         (SELECT id FROM sample_order),
@@ -329,8 +329,8 @@ exports.up = (pgm) => {
       RETURNING id
     )
     INSERT INTO "order_fulfillment_item" (
-      fulfillmentId,
-      orderItemId,
+      fulfillment_id,
+      order_item_id,
       quantity
     )
     SELECT 

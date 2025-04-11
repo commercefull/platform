@@ -12,91 +12,91 @@ exports.up = (pgm) => {
   // Create user notification preferences table
   pgm.createTable("notification_preference", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    userId: { type: "uuid", notNull: true }, // User ID (customer, merchant, admin)
-    userType: { 
+    user_id: { type: "uuid", notNull: true }, // User ID (customer, merchant, admin)
+    user_type: { 
       type: "varchar(20)", 
       notNull: true, 
       default: 'customer',
-      check: "userType IN ('customer', 'merchant', 'admin')" 
+      check: "user_type IN ('customer', 'merchant', 'admin')" 
     },
     type: { type: "notification_type", notNull: true },
-    channelPreferences: { type: "jsonb", notNull: true, default: '{}'}, // Preferences for each channel
-    isEnabled: { type: "boolean", notNull: true, default: true },
-    schedulePreferences: { type: "jsonb" }, // Preferred times to receive notifications
+    channel_preferences: { type: "jsonb", notNull: true, default: '{}'}, // Preferences for each channel
+    is_enabled: { type: "boolean", notNull: true, default: true },
+    schedule_preferences: { type: "jsonb" }, // Preferred times to receive notifications
     metadata: { type: "jsonb" },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create unique index for user preferences
-  pgm.createIndex("notification_preference", ["userId", "userType", "type"], { unique: true });
-  pgm.createIndex("notification_preference", "isEnabled");
+  pgm.createIndex("notification_preference", ["user_id", "user_type", "type"], { unique: true });
+  pgm.createIndex("notification_preference", "is_enabled");
 
   // Create notification device table for push notifications
   pgm.createTable("notification_device", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    userId: { type: "uuid", notNull: true }, // User ID (customer, merchant, admin)
-    userType: { 
+    user_id: { type: "uuid", notNull: true }, // User ID (customer, merchant, admin)
+    user_type: { 
       type: "varchar(20)", 
       notNull: true, 
       default: 'customer',
-      check: "userType IN ('customer', 'merchant', 'admin')" 
+      check: "user_type IN ('customer', 'merchant', 'admin')" 
     },
-    deviceToken: { type: "text", notNull: true }, // Device token for push notifications
-    deviceType: { 
+    device_token: { type: "text", notNull: true }, // Device token for push notifications
+    device_type: { 
       type: "varchar(20)", 
       notNull: true,
-      check: "deviceType IN ('ios', 'android', 'web', 'desktop', 'other')" 
+      check: "device_type IN ('ios', 'android', 'web', 'desktop', 'other')" 
     },
-    deviceName: { type: "varchar(100)" }, // User-friendly device name
-    deviceModel: { type: "varchar(100)" }, // Device model
-    appVersion: { type: "varchar(20)" }, // App version
-    osVersion: { type: "varchar(20)" }, // OS version
-    isActive: { type: "boolean", notNull: true, default: true },
-    lastUsedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    device_name: { type: "varchar(100)" }, // User-friendly device name
+    device_model: { type: "varchar(100)" }, // Device model
+    app_version: { type: "varchar(20)" }, // App version
+    os_version: { type: "varchar(20)" }, // OS version
+    is_active: { type: "boolean", notNull: true, default: true },
+    last_used_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for notification devices
-  pgm.createIndex("notification_device", "userId");
-  pgm.createIndex("notification_device", "userType");
-  pgm.createIndex("notification_device", "deviceToken");
-  pgm.createIndex("notification_device", "deviceType");
-  pgm.createIndex("notification_device", "isActive");
-  pgm.createIndex("notification_device", "lastUsedAt");
-  pgm.createIndex("notification_device", ["userId", "deviceToken"], { unique: true });
+  pgm.createIndex("notification_device", "user_id");
+  pgm.createIndex("notification_device", "user_type");
+  pgm.createIndex("notification_device", "device_token");
+  pgm.createIndex("notification_device", "device_type");
+  pgm.createIndex("notification_device", "is_active");
+  pgm.createIndex("notification_device", "last_used_at");
+  pgm.createIndex("notification_device", ["user_id", "device_token"], { unique: true });
 
   // Create notification unsubscribe table
   pgm.createTable("notification_unsubscribe", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    userId: { type: "uuid" }, // Optional user ID
+    user_id: { type: "uuid" }, // Optional user ID
     email: { type: "varchar(255)" }, // Email address for unsubscribe
     phone: { type: "varchar(30)" }, // Phone number for unsubscribe
     token: { type: "varchar(100)", notNull: true }, // Unique unsubscribe token
     category: { type: "varchar(50)" }, // Category unsubscribed from
     reason: { type: "text" }, // Reason for unsubscribing
-    isGlobal: { type: "boolean", notNull: true, default: false }, // Global unsubscribe
+    is_global: { type: "boolean", notNull: true, default: false }, // Global unsubscribe
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for notification unsubscribes
-  pgm.createIndex("notification_unsubscribe", "userId");
+  pgm.createIndex("notification_unsubscribe", "user_id");
   pgm.createIndex("notification_unsubscribe", "email");
   pgm.createIndex("notification_unsubscribe", "phone");
   pgm.createIndex("notification_unsubscribe", "token", { unique: true });
   pgm.createIndex("notification_unsubscribe", "category");
-  pgm.createIndex("notification_unsubscribe", "isGlobal");
+  pgm.createIndex("notification_unsubscribe", "is_global");
 
   // Insert default notification preferences for system user
   pgm.sql(`
     INSERT INTO "notification_preference" (
-      userId, 
-      userType, 
+      user_id, 
+      user_type, 
       type, 
-      channelPreferences, 
-      isEnabled
+      channel_preferences, 
+      is_enabled
     )
     VALUES 
       (
@@ -132,14 +132,14 @@ exports.up = (pgm) => {
   // Insert sample device token
   pgm.sql(`
     INSERT INTO "notification_device" (
-      userId,
-      userType,
-      deviceToken,
-      deviceType,
-      deviceName,
-      deviceModel,
-      appVersion,
-      osVersion
+      user_id,
+      user_type,
+      device_token,
+      device_type,
+      device_name,
+      device_model,
+      app_version,
+      os_version
     )
     VALUES (
       '00000000-0000-0000-0000-000000000001', -- Dummy user ID

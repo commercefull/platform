@@ -30,78 +30,82 @@ exports.up = (pgm) => {
   // Create payout settings table
   pgm.createTable("payout_settings", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    merchantId: { type: "uuid", notNull: true, references: "merchant", unique: true },
+    merchant_id: { type: "uuid", notNull: true, references: "merchant", unique: true },
     frequency: { type: "payout_frequency", notNull: true, default: "weekly" },
-    minimumAmount: { type: "decimal(15,2)", notNull: true, default: 1.00 },
-    bankAccountId: { type: "uuid" }, // Reference to bank account in payment_method or external system
-    payoutDay: { type: "integer" }, // Day of week (1-7) or day of month (1-31) depending on frequency
-    holdPeriod: { type: "integer", notNull: true, default: 0 }, // Days to hold payments before payout
-    automaticPayouts: { type: "boolean", notNull: true, default: true },
-    currencyCode: { type: "varchar(3)", notNull: true, default: "USD" },
-    payoutProvider: { type: "payment_provider", notNull: true, default: "stripe" },
-    payoutMethod: { 
+    minimum_amount: { type: "decimal(15,2)", notNull: true, default: 1.00 },
+    bank_account_id: { type: "uuid" }, // Reference to bank account in payment_method or external system
+    payout_day: { type: "integer" }, // Day of week (1-7) or day of month (1-31) depending on frequency
+    hold_period: { type: "integer", notNull: true, default: 0 }, // Days to hold payments before payout
+    automatic_payouts: { type: "boolean", notNull: true, default: true },
+    currency_code: { type: "varchar(3)", notNull: true, default: "USD" },
+    payout_provider: { type: "payment_provider", notNull: true, default: "stripe" },
+    payout_method: { 
       type: "varchar(50)", 
       notNull: true,
-      check: "payoutMethod IN ('bank_transfer', 'paypal', 'check', 'other')",
+      check: "payout_method IN ('bank_transfer', 'paypal', 'check', 'other')",
       default: "'bank_transfer'"
     },
-    providerSettings: { type: "jsonb" }, // Provider-specific settings
+    provider_settings: { type: "jsonb" }, // Provider-specific settings
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    deleted_at: { type: "timestamp" }
   });
 
   // Create indexes for payout settings
-  pgm.createIndex("payout_settings", "merchantId");
+  pgm.createIndex("payout_settings", "merchant_id");
   pgm.createIndex("payout_settings", "frequency");
-  pgm.createIndex("payout_settings", "payoutProvider");
+  pgm.createIndex("payout_settings", "payout_provider");
+  pgm.createIndex("payout_settings", "deleted_at");
 
   // Create payout table
   pgm.createTable("payout", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    merchantId: { type: "uuid", notNull: true, references: "merchant" },
+    merchant_id: { type: "uuid", notNull: true, references: "merchant" },
     amount: { type: "decimal(15,2)", notNull: true },
     fee: { type: "decimal(15,2)", notNull: true, default: 0 },
-    netAmount: { type: "decimal(15,2)", notNull: true },
-    currencyCode: { type: "varchar(3)", notNull: true, default: "USD" },
+    net_amount: { type: "decimal(15,2)", notNull: true },
+    currency_code: { type: "varchar(3)", notNull: true, default: "USD" },
     status: { type: "payout_status", notNull: true, default: "pending" },
-    payoutMethod: { 
+    payout_method: { 
       type: "varchar(50)", 
       notNull: true,
-      check: "payoutMethod IN ('bank_transfer', 'paypal', 'check', 'other')",
+      check: "payout_method IN ('bank_transfer', 'paypal', 'check', 'other')",
       default: "'bank_transfer'"
     },
-    bankAccountId: { type: "uuid" }, // Reference to bank account in payment_method or external system
-    bankAccountDetails: { type: "jsonb" }, // Snapshot of bank account info
+    bank_account_id: { type: "uuid" }, // Reference to bank account in payment_method or external system
+    bank_account_details: { type: "jsonb" }, // Snapshot of bank account info
     description: { type: "text" },
-    statementDescriptor: { type: "varchar(255)" }, // Text that appears on bank statement
-    periodStart: { type: "timestamp" },
-    periodEnd: { type: "timestamp" },
-    expectedArrivalDate: { type: "timestamp" },
-    completedAt: { type: "timestamp" },
-    failureReason: { type: "text" },
-    transactionReference: { type: "varchar(255)" }, // Reference ID for the payout transaction
-    gatewayPayoutId: { type: "varchar(255)" }, // ID from payment provider
+    statement_descriptor: { type: "varchar(255)" }, // Text that appears on bank statement
+    period_start: { type: "timestamp" },
+    period_end: { type: "timestamp" },
+    expected_arrival_date: { type: "timestamp" },
+    completed_at: { type: "timestamp" },
+    failure_reason: { type: "text" },
+    transaction_reference: { type: "varchar(255)" }, // Reference ID for the payout transaction
+    gateway_payout_id: { type: "varchar(255)" }, // ID from payment provider
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    deleted_at: { type: "timestamp" }
   });
 
   // Create indexes for payouts
-  pgm.createIndex("payout", "merchantId");
+  pgm.createIndex("payout", "merchant_id");
   pgm.createIndex("payout", "status");
-  pgm.createIndex("payout", "payoutMethod");
-  pgm.createIndex("payout", "periodStart");
-  pgm.createIndex("payout", "periodEnd");
-  pgm.createIndex("payout", "gatewayPayoutId");
-  pgm.createIndex("payout", "transactionReference");
-  pgm.createIndex("payout", "completedAt");
-  pgm.createIndex("payout", "createdAt");
+  pgm.createIndex("payout", "payout_method");
+  pgm.createIndex("payout", "period_start");
+  pgm.createIndex("payout", "period_end");
+  pgm.createIndex("payout", "gateway_payout_id");
+  pgm.createIndex("payout", "transaction_reference");
+  pgm.createIndex("payout", "completed_at");
+  pgm.createIndex("payout", "created_at");
+  pgm.createIndex("payout", "deleted_at");
 
   // Create payout item table (payments included in a payout)
   pgm.createTable("payout_item", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    payoutId: { type: "uuid", notNull: true, references: "payout", onDelete: "CASCADE" },
+    payout_id: { type: "uuid", notNull: true, references: "payout", onDelete: "CASCADE" },
     type: { 
       type: "varchar(50)", 
       notNull: true,
@@ -109,77 +113,79 @@ exports.up = (pgm) => {
     },
     amount: { type: "decimal(15,2)", notNull: true },
     fee: { type: "decimal(15,2)", notNull: true, default: 0 },
-    netAmount: { type: "decimal(15,2)", notNull: true },
-    currencyCode: { type: "varchar(3)", notNull: true, default: "USD" },
+    net_amount: { type: "decimal(15,2)", notNull: true },
+    currency_code: { type: "varchar(3)", notNull: true, default: "USD" },
     description: { type: "text" },
-    orderId: { type: "uuid", references: "order" },
-    paymentId: { type: "uuid", references: "order_payment" },
-    refundId: { type: "uuid", references: "order_refund" },
-    disputeId: { type: "uuid", references: "payment_dispute" },
+    order_id: { type: "uuid", references: "order" },
+    payment_id: { type: "uuid", references: "order_payment" },
+    refund_id: { type: "uuid", references: "order_refund" },
+    dispute_id: { type: "uuid", references: "payment_dispute" },
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    deleted_at: { type: "timestamp" }
   });
 
   // Create indexes for payout items
-  pgm.createIndex("payout_item", "payoutId");
+  pgm.createIndex("payout_item", "payout_id");
   pgm.createIndex("payout_item", "type");
-  pgm.createIndex("payout_item", "orderId");
-  pgm.createIndex("payout_item", "paymentId");
-  pgm.createIndex("payout_item", "refundId");
-  pgm.createIndex("payout_item", "disputeId");
+  pgm.createIndex("payout_item", "order_id");
+  pgm.createIndex("payout_item", "payment_id");
+  pgm.createIndex("payout_item", "refund_id");
+  pgm.createIndex("payout_item", "dispute_id");
+  pgm.createIndex("payout_item", "deleted_at");
 
   // Create payment balance table (running balances for merchants)
   pgm.createTable("payment_balance", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    merchantId: { type: "uuid", notNull: true, references: "merchant" },
-    availableAmount: { type: "decimal(15,2)", notNull: true, default: 0 },
-    pendingAmount: { type: "decimal(15,2)", notNull: true, default: 0 },
-    reservedAmount: { type: "decimal(15,2)", notNull: true, default: 0 }, // For disputes, potential refunds
-    totalVolume: { type: "decimal(15,2)", notNull: true, default: 0 }, // Lifetime volume
-    currencyCode: { type: "varchar(3)", notNull: true, default: "USD" },
-    lastPayoutDate: { type: "timestamp" },
-    nextPayoutDate: { type: "timestamp" },
-    nextPayoutAmount: { type: "decimal(15,2)" },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    merchant_id: { type: "uuid", notNull: true, references: "merchant" },
+    available_amount: { type: "decimal(15,2)", notNull: true, default: 0 },
+    pending_amount: { type: "decimal(15,2)", notNull: true, default: 0 },
+    reserved_amount: { type: "decimal(15,2)", notNull: true, default: 0 }, // For disputes, potential refunds
+    total_volume: { type: "decimal(15,2)", notNull: true, default: 0 }, // Lifetime volume
+    currency_code: { type: "varchar(3)", notNull: true, default: "USD" },
+    last_payout_date: { type: "timestamp" },
+    next_payout_date: { type: "timestamp" },
+    next_payout_amount: { type: "decimal(15,2)" },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for payment balances
-  pgm.createIndex("payment_balance", ["merchantId", "currencyCode"], { unique: true });
+  pgm.createIndex("payment_balance", ["merchant_id", "currency_code"], { unique: true });
 
   // Create payment fee table
   pgm.createTable("payment_fee", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    merchantId: { type: "uuid", notNull: true, references: "merchant" },
+    merchant_id: { type: "uuid", notNull: true, references: "merchant" },
     type: { 
       type: "varchar(50)", 
       notNull: true,
       check: "type IN ('transaction', 'subscription', 'dispute', 'refund', 'chargeback', 'payout', 'platform', 'other')"
     },
     amount: { type: "decimal(15,2)", notNull: true },
-    currencyCode: { type: "varchar(3)", notNull: true, default: "USD" },
+    currency_code: { type: "varchar(3)", notNull: true, default: "USD" },
     description: { type: "text" },
-    paymentId: { type: "uuid", references: "order_payment" },
-    orderId: { type: "uuid", references: "order" },
-    subscriptionId: { type: "uuid", references: "payment_subscription" },
-    payoutId: { type: "uuid", references: "payout" },
-    appliedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    payment_id: { type: "uuid", references: "order_payment" },
+    order_id: { type: "uuid", references: "order" },
+    subscription_id: { type: "uuid", references: "payment_subscription" },
+    payout_id: { type: "uuid", references: "payout" },
+    applied_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for payment fees
-  pgm.createIndex("payment_fee", "merchantId");
+  pgm.createIndex("payment_fee", "merchant_id");
   pgm.createIndex("payment_fee", "type");
-  pgm.createIndex("payment_fee", "paymentId");
-  pgm.createIndex("payment_fee", "orderId");
-  pgm.createIndex("payment_fee", "subscriptionId");
-  pgm.createIndex("payment_fee", "payoutId");
-  pgm.createIndex("payment_fee", "appliedAt");
+  pgm.createIndex("payment_fee", "payment_id");
+  pgm.createIndex("payment_fee", "order_id");
+  pgm.createIndex("payment_fee", "subscription_id");
+  pgm.createIndex("payment_fee", "payout_id");
+  pgm.createIndex("payment_fee", "applied_at");
 
   // Create payment report table
   pgm.createTable("payment_report", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    merchantId: { type: "uuid", notNull: true, references: "merchant" },
+    merchant_id: { type: "uuid", notNull: true, references: "merchant" },
     name: { type: "varchar(255)", notNull: true },
     type: { 
       type: "varchar(50)", 
@@ -193,7 +199,7 @@ exports.up = (pgm) => {
       default: "'csv'"
     },
     parameters: { type: "jsonb" },
-    dateRange: { 
+    date_range: { 
       type: "tstzrange",
       notNull: true
     },
@@ -203,36 +209,43 @@ exports.up = (pgm) => {
       check: "status IN ('pending', 'processing', 'completed', 'failed')",
       default: "'pending'"
     },
-    fileUrl: { type: "text" },
-    errorMessage: { type: "text" },
-    notifyEmail: { type: "varchar(255)" },
-    createdBy: { type: "uuid" }, // Reference to admin or user
-    completedAt: { type: "timestamp" },
-    expiresAt: { type: "timestamp" },
+    file_url: { type: "text" },
+    size: { type: "integer" }, // Size in bytes
+    error_message: { type: "text" },
+    notify_email: { type: "varchar(255)" },
+    created_by: { type: "uuid" }, // Reference to admin or user
+    generated_at: { type: "timestamp" },
+    downloaded_at: { type: "timestamp" },
+    completed_at: { type: "timestamp" },
+    expires_at: { type: "timestamp" },
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    deleted_at: { type: "timestamp" }
   });
 
   // Create indexes for payment reports
-  pgm.createIndex("payment_report", "merchantId");
+  pgm.createIndex("payment_report", "merchant_id");
   pgm.createIndex("payment_report", "type");
   pgm.createIndex("payment_report", "status");
-  pgm.createIndex("payment_report", "createdBy");
-  pgm.createIndex("payment_report", "createdAt");
-  pgm.createIndex("payment_report", "expiresAt");
+  pgm.createIndex("payment_report", "created_by");
+  pgm.createIndex("payment_report", "generated_at");
+  pgm.createIndex("payment_report", "completed_at");
+  pgm.createIndex("payment_report", "created_at");
+  pgm.createIndex("payment_report", "expires_at");
+  pgm.createIndex("payment_report", "deleted_at");
 
   // Insert sample payout settings
   pgm.sql(`
     WITH sample_merchant AS (SELECT id FROM merchant LIMIT 1)
     INSERT INTO payout_settings (
-      merchantId,
+      merchant_id,
       frequency,
-      minimumAmount,
-      payoutDay,
-      holdPeriod,
-      automaticPayouts,
-      providerSettings
+      minimum_amount,
+      payout_day,
+      hold_period,
+      automatic_payouts,
+      provider_settings
     )
     VALUES (
       (SELECT id FROM sample_merchant),
@@ -241,7 +254,7 @@ exports.up = (pgm) => {
       2, -- Tuesday
       3, -- 3 days hold
       true,
-      '{"accountVerified": true, "defaultDescription": "Weekly payout", "instantPayouts": false}'
+      '{"webhook_url": "https://example.com/payout-webhooks", "notifications": true}'
     )
   `);
 
@@ -249,23 +262,23 @@ exports.up = (pgm) => {
   pgm.sql(`
     WITH sample_merchant AS (SELECT id FROM merchant LIMIT 1)
     INSERT INTO payment_balance (
-      merchantId,
-      availableAmount,
-      pendingAmount,
-      reservedAmount,
-      totalVolume,
-      lastPayoutDate,
-      nextPayoutDate,
-      nextPayoutAmount
+      merchant_id,
+      available_amount,
+      pending_amount,
+      reserved_amount,
+      total_volume,
+      currency_code,
+      next_payout_date,
+      next_payout_amount
     )
     VALUES (
       (SELECT id FROM sample_merchant),
       1250.00,
-      350.75,
-      100.00,
-      15350.25,
-      NOW() - INTERVAL '7 days',
-      NOW() + INTERVAL '7 days',
+      450.00,
+      200.00,
+      15000.00,
+      'USD',
+      current_timestamp + interval '7 days',
       1250.00
     )
   `);

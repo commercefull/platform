@@ -32,8 +32,8 @@ exports.up = (pgm) => {
     isExternal: { type: "boolean", notNull: true, default: false }, // Whether stored externally (e.g., CDN)
     externalService: { type: "varchar(100)" }, // e.g., 'aws', 'cloudinary'
     externalId: { type: "varchar(255)" }, // ID in external service
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
     createdBy: { type: "uuid" }, // Reference to admin user
     updatedBy: { type: "uuid" } // Reference to admin user
   });
@@ -43,7 +43,7 @@ exports.up = (pgm) => {
   pgm.createIndex("content_media", "fileType");
   pgm.createIndex("content_media", "folderId");
   pgm.createIndex("content_media", "tags");
-  pgm.createIndex("content_media", "createdAt");
+  pgm.createIndex("content_media", "created_at");
 
   // Create media folders table
   pgm.createTable("content_media_folder", {
@@ -53,8 +53,8 @@ exports.up = (pgm) => {
     path: { type: "varchar(255)" }, // Full folder path
     depth: { type: "integer", notNull: true, default: 0 }, // Depth in folder hierarchy
     sortOrder: { type: "integer", notNull: true, default: 0 },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
     createdBy: { type: "uuid" }, // Reference to admin user
     updatedBy: { type: "uuid" } // Reference to admin user
   });
@@ -76,7 +76,7 @@ exports.up = (pgm) => {
     entityId: { type: "uuid", notNull: true }, // ID of the entity using the media
     field: { type: "varchar(100)" }, // Which field is using the media
     sortOrder: { type: "integer", default: 0 }, // For multiple media items in the same field
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for media usage
@@ -95,8 +95,8 @@ exports.up = (pgm) => {
     hits: { type: "integer", notNull: true, default: 0 }, // Count of times this redirect was used
     lastUsed: { type: "timestamp" },
     notes: { type: "text" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
     createdBy: { type: "uuid" }, // Reference to admin user
     updatedBy: { type: "uuid" } // Reference to admin user
   });
@@ -118,8 +118,8 @@ exports.up = (pgm) => {
     name: { type: "varchar(100)", notNull: true },
     slug: { type: "varchar(100)", notNull: true, unique: true },
     description: { type: "text" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for tags
@@ -136,7 +136,7 @@ exports.up = (pgm) => {
       check: "entityType IN ('content_page', 'product', 'category', 'blog')" 
     },
     entityId: { type: "uuid", notNull: true },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for tagging

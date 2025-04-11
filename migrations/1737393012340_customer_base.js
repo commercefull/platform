@@ -13,54 +13,56 @@ exports.up = (pgm) => {
   pgm.createTable("customer", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
     email: { type: "varchar(255)", notNull: true },
-    firstName: { type: "varchar(100)" },
-    lastName: { type: "varchar(100)" },
+    first_name: { type: "varchar(100)" },
+    last_name: { type: "varchar(100)" },
     password: { type: "varchar(255)", notNull: true }, // Hashed password using bcrypt
     phone: { type: "varchar(30)" },
-    dateOfBirth: { type: "date" },
+    date_of_birth: { type: "date" },
     gender: { type: "varchar(20)" },
-    avatarUrl: { type: "text" },
-    isActive: { type: "boolean", notNull: true, default: true },
-    isVerified: { type: "boolean", notNull: true, default: false },
-    emailVerified: { type: "boolean", notNull: true, default: false },
-    phoneVerified: { type: "boolean", notNull: true, default: false },
-    lastLoginAt: { type: "timestamp" },
-    failedLoginAttempts: { type: "integer", notNull: true, default: 0 },
-    lockedUntil: { type: "timestamp" }, // Account lockout time
-    preferredLocaleId: { type: "uuid", references: "locale" },
-    preferredCurrencyId: { type: "uuid", references: "currency" },
+    avatar_url: { type: "text" },
+    is_active: { type: "boolean", notNull: true, default: true },
+    is_verified: { type: "boolean", notNull: true, default: false },
+    email_verified: { type: "boolean", notNull: true, default: false },
+    phone_verified: { type: "boolean", notNull: true, default: false },
+    last_login_at: { type: "timestamp" },
+    failed_login_attempts: { type: "integer", notNull: true, default: 0 },
+    locked_until: { type: "timestamp" }, // Account lockout time
+    preferred_locale_id: { type: "uuid", references: "locale" },
+    preferred_currency_id: { type: "uuid", references: "currency" },
     timezone: { type: "varchar(50)" },
-    referralSource: { type: "varchar(100)" }, // How they found the store
-    referralCode: { type: "varchar(50)" }, // Customer's personal referral code
-    referredBy: { type: "uuid", references: "customer" }, // Which customer referred them
-    acceptsMarketing: { type: "boolean", notNull: true, default: false },
-    marketingPreferences: { type: "jsonb" }, // Detailed marketing preferences
+    referral_source: { type: "varchar(100)" }, // How they found the store
+    referral_code: { type: "varchar(50)" }, // Customer's personal referral code
+    referred_by: { type: "uuid", references: "customer" }, // Which customer referred them
+    accepts_marketing: { type: "boolean", notNull: true, default: false },
+    marketing_preferences: { type: "jsonb" }, // Detailed marketing preferences
     metadata: { type: "jsonb" }, // Custom attributes/fields
     tags: { type: "text[]" }, // For customer categorization
     note: { type: "text" }, // Admin notes about customer
-    externalId: { type: "varchar(100)" }, // ID in external system for integrations
-    externalSource: { type: "varchar(50)" }, // Source of external ID
-    taxExempt: { type: "boolean", notNull: true, default: false },
-    taxExemptionCertificate: { type: "varchar(100)" },
-    passwordResetToken: { type: "varchar(255)" },
-    passwordResetExpires: { type: "timestamp" },
-    verificationToken: { type: "varchar(255)" },
-    agreeToTerms: { type: "boolean", notNull: true, default: false },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    external_id: { type: "varchar(100)" }, // ID in external system for integrations
+    external_source: { type: "varchar(50)" }, // Source of external ID
+    tax_exempt: { type: "boolean", notNull: true, default: false },
+    tax_exemption_certificate: { type: "varchar(100)" },
+    password_reset_token: { type: "varchar(255)" },
+    password_reset_expires: { type: "timestamp" },
+    verification_token: { type: "varchar(255)" },
+    agree_to_terms: { type: "boolean", notNull: true, default: false },
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    deleted_at: { type: "timestamp" }
   });
 
   // Create indexes for customer
   pgm.createIndex("customer", "email", { unique: true });
   pgm.createIndex("customer", "phone");
-  pgm.createIndex("customer", "lastLoginAt");
-  pgm.createIndex("customer", "isActive");
-  pgm.createIndex("customer", "isVerified");
-  pgm.createIndex("customer", "emailVerified");
+  pgm.createIndex("customer", "last_login_at");
+  pgm.createIndex("customer", "is_active");
+  pgm.createIndex("customer", "is_verified");
+  pgm.createIndex("customer", "email_verified");
   pgm.createIndex("customer", "tags");
-  pgm.createIndex("customer", "externalId");
-  pgm.createIndex("customer", "referralCode", { unique: true, where: "referralCode IS NOT NULL" });
-  pgm.createIndex("customer", "createdAt");
+  pgm.createIndex("customer", "external_id");
+  pgm.createIndex("customer", "referral_code", { unique: true, where: "referral_code IS NOT NULL" });
+  pgm.createIndex("customer", "created_at");
+  pgm.createIndex("customer", "deleted_at");
 
   // Create customer groups table
   pgm.createTable("customer_group", {
@@ -68,51 +70,66 @@ exports.up = (pgm) => {
     name: { type: "varchar(100)", notNull: true },
     description: { type: "text" },
     code: { type: "varchar(50)", notNull: true, unique: true },
-    isActive: { type: "boolean", notNull: true, default: true },
-    isSystem: { type: "boolean", notNull: true, default: false }, // System groups cannot be deleted
-    sortOrder: { type: "integer", notNull: true, default: 0 },
-    discountPercent: { type: "decimal(5,2)", default: 0 }, // Default discount for this group
+    is_active: { type: "boolean", notNull: true, default: true },
+    is_system: { type: "boolean", notNull: true, default: false }, // System groups cannot be deleted
+    sort_order: { type: "integer", notNull: true, default: 0 },
+    discount_percent: { type: "decimal(5,2)", default: 0 }, // Default discount for this group
     metadata: { type: "jsonb" },
-    createdAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    createdBy: { type: "uuid" } // Reference to admin user
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    created_by: { type: "uuid" }, // Reference to admin user
+    deleted_at: { type: "timestamp" }
   });
 
   // Create indexes for customer groups
   pgm.createIndex("customer_group", "code");
-  pgm.createIndex("customer_group", "isActive");
-  pgm.createIndex("customer_group", "isSystem");
+  pgm.createIndex("customer_group", "is_active");
+  pgm.createIndex("customer_group", "is_system");
+  pgm.createIndex("customer_group", "deleted_at");
 
   // Create customer-group memberships table
   pgm.createTable("customer_group_membership", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    customerId: { type: "uuid", notNull: true, references: "customer", onDelete: "CASCADE" },
-    groupId: { type: "uuid", notNull: true, references: "customer_group", onDelete: "CASCADE" },
-    isActive: { type: "boolean", notNull: true, default: true },
+    customer_id: { type: "uuid", notNull: true, references: "customer", onDelete: "CASCADE" },
+    group_id: { type: "uuid", notNull: true, references: "customer_group", onDelete: "CASCADE" },
+    is_active: { type: "boolean", notNull: true, default: true },
     metadata: { type: "jsonb" },
-    expiresAt: { type: "timestamp" }, // For time-limited group memberships
-    addedBy: { type: "uuid" }, // Reference to admin user
-    addedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    updatedAt: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+    expires_at: { type: "timestamp" }, // For time-limited group memberships
+    added_by: { type: "uuid" }, // Reference to admin user
+    added_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    deleted_at: { type: "timestamp" }
   });
 
   // Create indexes for customer group memberships
-  pgm.createIndex("customer_group_membership", "customerId");
-  pgm.createIndex("customer_group_membership", "groupId");
-  pgm.createIndex("customer_group_membership", "isActive");
-  pgm.createIndex("customer_group_membership", "expiresAt");
-  pgm.createIndex("customer_group_membership", ["customerId", "groupId"], { unique: true });
+  pgm.createIndex("customer_group_membership", "customer_id");
+  pgm.createIndex("customer_group_membership", "group_id");
+  pgm.createIndex("customer_group_membership", "is_active");
+  pgm.createIndex("customer_group_membership", "expires_at");
+  pgm.createIndex("customer_group_membership", "deleted_at");
+  pgm.createConstraint("customer_group_membership", "customer_group_unique", {
+    unique: ["customer_id", "group_id"]
+  });
 
-  // Insert default customer groups
-  pgm.sql(`
-    INSERT INTO "customer_group" (name, description, code, isActive, isSystem, sortOrder)
-    VALUES 
-      ('General', 'Default customer group', 'general', true, true, 0),
-      ('VIP', 'Premium customers', 'vip', true, true, 10),
-      ('Wholesale', 'Wholesale customers', 'wholesale', true, true, 20),
-      ('Staff', 'Employee discount group', 'staff', true, true, 30),
-      ('Newsletter', 'Newsletter subscribers', 'newsletter', true, true, 40)
-  `);
+  // Create customer sessions table for tracking logged in sessions
+  pgm.createTable("customer_session", {
+    id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
+    customer_id: { type: "uuid", notNull: true, references: "customer", onDelete: "CASCADE" },
+    token: { type: "varchar(255)", notNull: true },
+    ip_address: { type: "varchar(45)" },
+    user_agent: { type: "text" },
+    device_info: { type: "jsonb" },
+    expires_at: { type: "timestamp", notNull: true },
+    is_active: { type: "boolean", notNull: true, default: true },
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
+    updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
+  });
+
+  // Create indexes for customer sessions
+  pgm.createIndex("customer_session", "customer_id");
+  pgm.createIndex("customer_session", "token", { unique: true });
+  pgm.createIndex("customer_session", "expires_at");
+  pgm.createIndex("customer_session", "is_active");
 };
 
 /**
@@ -121,7 +138,8 @@ exports.up = (pgm) => {
  * @returns {Promise<void> | void}
  */
 exports.down = (pgm) => {
-  pgm.dropTable("customer_group_membership");
-  pgm.dropTable("customer_group");
-  pgm.dropTable("customer");
+  pgm.dropTable("customer_session", { cascade: true });
+  pgm.dropTable("customer_group_membership", { cascade: true });
+  pgm.dropTable("customer_group", { cascade: true });
+  pgm.dropTable("customer", { cascade: true });
 };
