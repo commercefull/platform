@@ -84,7 +84,7 @@ export const getOrderDetails = async (req: UserRequest, res: Response): Promise<
     }
     
     // Check if the order belongs to the logged-in user
-    if (order.customer_id !== userId) {
+    if (order.customerId !== userId) {
       req.flash('error', 'You do not have permission to view this order');
       res.redirect('/account/orders');
       return;
@@ -94,7 +94,7 @@ export const getOrderDetails = async (req: UserRequest, res: Response): Promise<
     const orderItems = await orderRepo.getOrderItems(orderId);
     
     storefrontRespond(req, res, "user/order-details", {
-      title: `Order #${order.order_number}`,
+      title: `Order #${order.orderNumber}`,
       order,
       items: orderItems
     });
@@ -149,7 +149,7 @@ export const createOrder = async (req: UserRequest, res: Response): Promise<void
   
   try {
     // Add the customer ID to the order data
-    orderData.customer_id = userId;
+    orderData.customerId = userId;
     
     // Create the order
     const order = await orderRepo.create(orderData);
@@ -217,7 +217,7 @@ export const cancelOrder = async (req: UserRequest, res: Response): Promise<void
       return;
     }
     
-    if (order.customer_id !== userId) {
+    if (order.customerId !== userId) {
       req.flash('error', 'You do not have permission to cancel this order');
       res.redirect('/account/orders');
       return;
