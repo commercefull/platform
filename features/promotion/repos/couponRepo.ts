@@ -87,13 +87,35 @@ export class CouponRepo {
     const coupon = await queryOne<Coupon>(
       `INSERT INTO "public"."coupon" (
         "id", "code", "name", "description", "type", "value", 
-        "minOrderAmount", "maxDiscountAmount", "startDate", "endDate", 
-        "usageLimit", "usageCount", "perCustomerLimit", "forNewCustomersOnly", 
-        "forAutoApply", "status", "merchantId", "excludedProductIds", 
-        "excludedCategoryIds", "metadata", "createdAt", "updatedAt"
+        "min_order_amount", "max_discount_amount", "start_date", "end_date", 
+        "usage_limit", "usage_count", "per_customer_limit", "for_new_customers_only", 
+        "for_auto_apply", "status", "merchant_id", "excluded_product_ids", 
+        "excluded_category_ids", "metadata", "created_at", "updated_at"
       ) VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22
-      ) RETURNING *`,
+      ) RETURNING 
+        id,
+        code,
+        name,
+        description,
+        type,
+        value,
+        min_order_amount AS "minOrderAmount",
+        max_discount_amount AS "maxDiscountAmount",
+        start_date AS "startDate",
+        end_date AS "endDate",
+        usage_limit AS "usageLimit",
+        usage_count AS "usageCount",
+        per_customer_limit AS "perCustomerLimit",
+        for_new_customers_only AS "forNewCustomersOnly",
+        for_auto_apply AS "forAutoApply",
+        status,
+        merchant_id AS "merchantId",
+        excluded_product_ids AS "excludedProductIds",
+        excluded_category_ids AS "excludedCategoryIds",
+        metadata,
+        created_at AS "createdAt",
+        updated_at AS "updatedAt"`,
       [
         id,
         input.code,
@@ -132,10 +154,29 @@ export class CouponRepo {
     const params: any[] = [id];
     let paramIndex = 2;
     
+    // Map camelCase property names to snake_case column names
+    const fieldMappings: Record<string, string> = {
+      minOrderAmount: 'min_order_amount',
+      maxDiscountAmount: 'max_discount_amount',
+      startDate: 'start_date',
+      endDate: 'end_date',
+      usageLimit: 'usage_limit',
+      usageCount: 'usage_count',
+      perCustomerLimit: 'per_customer_limit',
+      forNewCustomersOnly: 'for_new_customers_only',
+      forAutoApply: 'for_auto_apply',
+      merchantId: 'merchant_id',
+      excludedProductIds: 'excluded_product_ids',
+      excludedCategoryIds: 'excluded_category_ids',
+      createdAt: 'created_at',
+      updatedAt: 'updated_at'
+    };
+    
     // Build dynamic update query
     Object.entries(input).forEach(([key, value]) => {
       if (value !== undefined) {
-        updateFields.push(`"${key}" = $${paramIndex}`);
+        const dbField = fieldMappings[key] || key;
+        updateFields.push(`"${dbField}" = $${paramIndex}`);
         
         // Handle array and object fields
         if (['excludedProductIds', 'excludedCategoryIds', 'metadata'].includes(key) && typeof value === 'object') {
@@ -149,7 +190,7 @@ export class CouponRepo {
     });
     
     // Always update the updatedAt timestamp
-    updateFields.push(`"updatedAt" = $${paramIndex}`);
+    updateFields.push(`"updated_at" = $${paramIndex}`);
     params.push(new Date());
     paramIndex++;
     
@@ -161,7 +202,29 @@ export class CouponRepo {
       `UPDATE "public"."coupon" 
        SET ${updateFields.join(', ')} 
        WHERE "id" = $1 
-       RETURNING *`,
+       RETURNING 
+        id,
+        code,
+        name,
+        description,
+        type,
+        value,
+        min_order_amount AS "minOrderAmount",
+        max_discount_amount AS "maxDiscountAmount",
+        start_date AS "startDate",
+        end_date AS "endDate",
+        usage_limit AS "usageLimit",
+        usage_count AS "usageCount",
+        per_customer_limit AS "perCustomerLimit",
+        for_new_customers_only AS "forNewCustomersOnly",
+        for_auto_apply AS "forAutoApply",
+        status,
+        merchant_id AS "merchantId",
+        excluded_product_ids AS "excludedProductIds",
+        excluded_category_ids AS "excludedCategoryIds",
+        metadata,
+        created_at AS "createdAt",
+        updated_at AS "updatedAt"`,
       params
     );
     
@@ -174,17 +237,63 @@ export class CouponRepo {
   
   async findById(id: string): Promise<Coupon | null> {
     return await queryOne<Coupon>(
-      'SELECT * FROM "public"."coupon" WHERE "id" = $1',
+      `SELECT 
+        id,
+        code,
+        name,
+        description,
+        type,
+        value,
+        min_order_amount AS "minOrderAmount",
+        max_discount_amount AS "maxDiscountAmount",
+        start_date AS "startDate",
+        end_date AS "endDate",
+        usage_limit AS "usageLimit",
+        usage_count AS "usageCount",
+        per_customer_limit AS "perCustomerLimit",
+        for_new_customers_only AS "forNewCustomersOnly",
+        for_auto_apply AS "forAutoApply",
+        status,
+        merchant_id AS "merchantId",
+        excluded_product_ids AS "excludedProductIds",
+        excluded_category_ids AS "excludedCategoryIds",
+        metadata,
+        created_at AS "createdAt",
+        updated_at AS "updatedAt"
+      FROM "public"."coupon" WHERE "id" = $1`,
       [id]
     );
   }
   
   async findByCode(code: string, merchantId?: string): Promise<Coupon | null> {
-    let sql = 'SELECT * FROM "public"."coupon" WHERE "code" = $1';
+    let sql = `SELECT 
+      id,
+      code,
+      name,
+      description,
+      type,
+      value,
+      min_order_amount AS "minOrderAmount",
+      max_discount_amount AS "maxDiscountAmount",
+      start_date AS "startDate",
+      end_date AS "endDate",
+      usage_limit AS "usageLimit",
+      usage_count AS "usageCount",
+      per_customer_limit AS "perCustomerLimit",
+      for_new_customers_only AS "forNewCustomersOnly",
+      for_auto_apply AS "forAutoApply",
+      status,
+      merchant_id AS "merchantId",
+      excluded_product_ids AS "excludedProductIds",
+      excluded_category_ids AS "excludedCategoryIds",
+      metadata,
+      created_at AS "createdAt",
+      updated_at AS "updatedAt"
+    FROM "public"."coupon" WHERE "code" = $1`;
     const params: any[] = [code];
     
     if (merchantId) {
-      sql += ' AND "merchantId" = $2';
+      sql += ' AND "merchant_id" = $2';
       params.push(merchantId);
     }
     
@@ -203,23 +312,52 @@ export class CouponRepo {
     const { limit = 50, offset = 0, orderBy = 'createdAt', direction = 'DESC' } = options;
     const now = new Date();
     
+    // Map camelCase sorting to snake_case columns
+    const dbOrderBy = orderBy === 'createdAt' ? 'created_at' :
+                      orderBy === 'updatedAt' ? 'updated_at' :
+                      orderBy === 'startDate' ? 'start_date' :
+                      orderBy === 'endDate' ? 'end_date' : orderBy;
+    
     let sql = `
-      SELECT * FROM "public"."coupon" 
+      SELECT 
+        id,
+        code,
+        name,
+        description,
+        type,
+        value,
+        min_order_amount AS "minOrderAmount",
+        max_discount_amount AS "maxDiscountAmount",
+        start_date AS "startDate",
+        end_date AS "endDate",
+        usage_limit AS "usageLimit",
+        usage_count AS "usageCount",
+        per_customer_limit AS "perCustomerLimit",
+        for_new_customers_only AS "forNewCustomersOnly",
+        for_auto_apply AS "forAutoApply",
+        status,
+        merchant_id AS "merchantId",
+        excluded_product_ids AS "excludedProductIds",
+        excluded_category_ids AS "excludedCategoryIds",
+        metadata,
+        created_at AS "createdAt",
+        updated_at AS "updatedAt"
+      FROM "public"."coupon" 
       WHERE "status" = 'active' 
-      AND "startDate" <= $1 
-      AND ("endDate" IS NULL OR "endDate" >= $1)
+      AND "start_date" <= $1 
+      AND ("end_date" IS NULL OR "end_date" >= $1)
     `;
     
     const params: any[] = [now];
     let paramIndex = 2;
     
     if (merchantId) {
-      sql += ` AND "merchantId" = $${paramIndex}`;
+      sql += ` AND "merchant_id" = $${paramIndex}`;
       params.push(merchantId);
       paramIndex++;
     }
     
-    sql += ` ORDER BY "${orderBy}" ${direction} LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
+    sql += ` ORDER BY "${dbOrderBy}" ${direction} LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
     params.push(limit, offset);
     
     return await query<Coupon[]>(sql, params) || [];
@@ -231,7 +369,7 @@ export class CouponRepo {
     
     try {
       // Delete coupon usage records
-      await query('DELETE FROM "public"."coupon_usage" WHERE "couponId" = $1', [id]);
+      await query('DELETE FROM "public"."coupon_usage" WHERE "coupon_id" = $1', [id]);
       
       // Delete coupon
       const result = await queryOne<{ id: string }>(
@@ -267,9 +405,17 @@ export class CouponRepo {
       // Insert usage record
       const usage = await queryOne<CouponUsage>(
         `INSERT INTO "public"."coupon_usage" (
-          "id", "couponId", "orderId", "customerId", "sessionId",
-          "discountAmount", "appliedAt"
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+          "id", "coupon_id", "order_id", "customer_id", "session_id",
+          "discount_amount", "applied_at"
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7) 
+        RETURNING 
+          id,
+          coupon_id AS "couponId",
+          order_id AS "orderId",
+          customer_id AS "customerId",
+          session_id AS "sessionId",
+          discount_amount AS "discountAmount",
+          applied_at AS "appliedAt"`,
         [
           id,
           couponId,
@@ -287,7 +433,7 @@ export class CouponRepo {
       
       // Increment usage count on coupon
       await query(
-        'UPDATE "public"."coupon" SET "usageCount" = "usageCount" + 1 WHERE "id" = $1',
+        'UPDATE "public"."coupon" SET "usage_count" = "usage_count" + 1 WHERE "id" = $1',
         [couponId]
       );
       
@@ -304,14 +450,24 @@ export class CouponRepo {
   
   async getCouponUsage(couponId: string): Promise<CouponUsage[]> {
     return await query<CouponUsage[]>(
-      'SELECT * FROM "public"."coupon_usage" WHERE "couponId" = $1 ORDER BY "appliedAt" DESC',
+      `SELECT 
+        id,
+        coupon_id AS "couponId",
+        order_id AS "orderId",
+        customer_id AS "customerId",
+        session_id AS "sessionId",
+        discount_amount AS "discountAmount",
+        applied_at AS "appliedAt"
+      FROM "public"."coupon_usage" 
+      WHERE "coupon_id" = $1 
+      ORDER BY "applied_at" DESC`,
       [couponId]
     ) || [];
   }
   
   async getCustomerCouponUsageCount(couponId: string, customerId: string): Promise<number> {
     const result = await queryOne<{count: string}>(
-      'SELECT COUNT(*) as count FROM "public"."coupon_usage" WHERE "couponId" = $1 AND "customerId" = $2',
+      'SELECT COUNT(*) as count FROM "public"."coupon_usage" WHERE "coupon_id" = $1 AND "customer_id" = $2',
       [couponId, customerId]
     );
     
@@ -389,7 +545,7 @@ export class CouponRepo {
   
   private async getCustomerOrderCount(customerId: string): Promise<number> {
     const result = await queryOne<{count: string}>(
-      'SELECT COUNT(*) as count FROM "public"."order" WHERE "customerId" = $1',
+      'SELECT COUNT(*) as count FROM "public"."order" WHERE "customer_id" = $1',
       [customerId]
     );
     
@@ -402,67 +558,52 @@ export class CouponRepo {
     orderTotal: number,
     items?: Array<{ productId: string; categoryId?: string; quantity: number; price: number; }>
   ): Promise<number> {
-    if (!coupon) return 0;
+    // Check if any product or category is excluded
+    let eligibleTotal = orderTotal;
     
-    // Check excluded products and categories if provided
     if (items && (coupon.excludedProductIds?.length || coupon.excludedCategoryIds?.length)) {
-      // Parse excluded arrays from JSON if needed
-      const excludedProductIds = typeof coupon.excludedProductIds === 'string' 
-        ? JSON.parse(coupon.excludedProductIds) 
-        : coupon.excludedProductIds || [];
-        
-      const excludedCategoryIds = typeof coupon.excludedCategoryIds === 'string'
-        ? JSON.parse(coupon.excludedCategoryIds)
-        : coupon.excludedCategoryIds || [];
-      
-      // Calculate eligible subtotal by excluding specified products and categories
-      let eligibleTotal = 0;
-      
-      for (const item of items) {
-        if (
-          !excludedProductIds.includes(item.productId) && 
-          !(item.categoryId && excludedCategoryIds.includes(item.categoryId))
-        ) {
-          eligibleTotal += item.price * item.quantity;
+      // Calculate total excluding any excluded products or categories
+      eligibleTotal = items.reduce((total, item) => {
+        // Skip if product is excluded
+        if (coupon.excludedProductIds?.includes(item.productId)) {
+          return total;
         }
-      }
-      
-      // Use eligible total instead of order total
-      orderTotal = eligibleTotal;
+        
+        // Skip if category is excluded
+        if (item.categoryId && coupon.excludedCategoryIds?.includes(item.categoryId)) {
+          return total;
+        }
+        
+        return total + (item.price * item.quantity);
+      }, 0);
     }
     
     let discountAmount = 0;
     
     switch (coupon.type) {
       case CouponType.PERCENTAGE:
-        discountAmount = orderTotal * (coupon.value / 100);
+        discountAmount = (eligibleTotal * coupon.value) / 100;
         break;
         
       case CouponType.FIXED_AMOUNT:
-        discountAmount = Math.min(coupon.value, orderTotal);
+        discountAmount = Math.min(coupon.value, eligibleTotal);
         break;
         
       case CouponType.FREE_SHIPPING:
-        // This would be handled in combination with shipping calculation
-        // For now, we'll just apply the value as a discount
+        // This would require shipping cost information
+        // For now, we'll just use the value as a fixed amount
         discountAmount = coupon.value;
         break;
         
       case CouponType.BUY_X_GET_Y:
-        // This requires item-level calculation logic
-        // For now, we'll just apply the value as a discount
-        discountAmount = coupon.value;
-        break;
-        
       case CouponType.FIRST_TIME:
-        discountAmount = orderTotal * (coupon.value / 100);
+        // These are more complex discount types
+        // For now, we'll just use the value as a fixed amount
+        discountAmount = Math.min(coupon.value, eligibleTotal);
         break;
-        
-      default:
-        discountAmount = 0;
     }
     
-    // Apply maximum discount cap if specified
+    // Apply maximum discount cap if set
     if (coupon.maxDiscountAmount && discountAmount > coupon.maxDiscountAmount) {
       discountAmount = coupon.maxDiscountAmount;
     }
