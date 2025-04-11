@@ -1,766 +1,332 @@
 import { Request, Response } from 'express';
-import { PaymentRepo } from '../repos/paymentRepo';
+import paymentRepo from '../repos/paymentRepo';
+import { errorResponse, successResponse } from '../../../libs/apiResponse';
 
 export class PaymentController {
-  private paymentRepo: PaymentRepo;
-
-  constructor() {
-    this.paymentRepo = new PaymentRepo();
-  }
-
-  // ---------- Payment Method Methods ----------
-
-  getPaymentMethods = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const methods = await this.paymentRepo.findAllPaymentMethods();
-      res.status(200).json({
-        success: true,
-        data: methods
-      });
-    } catch (error) {
-      console.error('Error fetching payment methods:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to fetch payment methods'
-      });
-    }
-  };
-
-  getPaymentMethodById = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const method = await this.paymentRepo.findPaymentMethodById(id);
-      
-      if (!method) {
-        res.status(404).json({
-          success: false,
-          message: `Payment method with ID ${id} not found`
-        });
-        return;
-      }
-      
-      res.status(200).json({
-        success: true,
-        data: method
-      });
-    } catch (error) {
-      console.error(`Error fetching payment method:`, error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to fetch payment method'
-      });
-    }
-  };
-
-  createPaymentMethod = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { name, code, provider, isActive, requiresCustomerSaved, config, testMode } = req.body;
-      
-      // Validate required fields
-      if (!name || !code || !provider) {
-        res.status(400).json({
-          success: false,
-          message: 'Required fields missing: name, code, and provider are required'
-        });
-        return;
-      }
-      
-      const newMethod = await this.paymentRepo.createPaymentMethod({
-        name,
-        code,
-        provider,
-        isActive: isActive ?? true,
-        requiresCustomerSaved: requiresCustomerSaved ?? false,
-        config: config ?? {},
-        testMode: testMode ?? false
-      });
-      
-      res.status(201).json({
-        success: true,
-        data: newMethod
-      });
-    } catch (error) {
-      console.error('Error creating payment method:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to create payment method'
-      });
-    }
-  };
-
-  updatePaymentMethod = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const { name, code, provider, isActive, requiresCustomerSaved, config, testMode } = req.body;
-      
-      const existingMethod = await this.paymentRepo.findPaymentMethodById(id);
-      if (!existingMethod) {
-        res.status(404).json({
-          success: false,
-          message: `Payment method with ID ${id} not found`
-        });
-        return;
-      }
-      
-      const updatedMethod = await this.paymentRepo.updatePaymentMethod(id, {
-        name,
-        code,
-        provider,
-        isActive,
-        requiresCustomerSaved,
-        config,
-        testMode
-      });
-      
-      res.status(200).json({
-        success: true,
-        data: updatedMethod
-      });
-    } catch (error) {
-      console.error('Error updating payment method:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to update payment method'
-      });
-    }
-  };
-
-  deletePaymentMethod = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      
-      const existingMethod = await this.paymentRepo.findPaymentMethodById(id);
-      if (!existingMethod) {
-        res.status(404).json({
-          success: false,
-          message: `Payment method with ID ${id} not found`
-        });
-        return;
-      }
-      
-      const deleted = await this.paymentRepo.deletePaymentMethod(id);
-      
-      if (deleted) {
-        res.status(200).json({
-          success: true,
-          message: `Payment method with ID ${id} deleted successfully`
-        });
-      } else {
-        res.status(500).json({
-          success: false,
-          message: `Failed to delete payment method with ID ${id}`
-        });
-      }
-    } catch (error) {
-      console.error('Error deleting payment method:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to delete payment method'
-      });
-    }
-  };
-
   // ---------- Payment Gateway Methods ----------
 
-  getPaymentGateways = async (req: Request, res: Response): Promise<void> => {
+  getGateways = async (req: Request, res: Response): Promise<void> => {
     try {
-      const gateways = await this.paymentRepo.findAllPaymentGateways();
-      res.status(200).json({
-        success: true,
-        data: gateways
-      });
+      const { merchantId } = req.params;
+      
+      if (!merchantId) {
+        errorResponse(res, 'Merchant ID is required', 400);
+        return;
+      }
+      
+      const gateways = await paymentRepo.findAllGateways(merchantId);
+      successResponse(res, gateways);
     } catch (error) {
       console.error('Error fetching payment gateways:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to fetch payment gateways'
-      });
+      errorResponse(res, 'Failed to fetch payment gateways');
     }
   };
 
-  getPaymentGatewayById = async (req: Request, res: Response): Promise<void> => {
+  getGatewayById = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
-      const gateway = await this.paymentRepo.findPaymentGatewayById(id);
+      const gateway = await paymentRepo.findGatewayById(id);
       
       if (!gateway) {
-        res.status(404).json({
-          success: false,
-          message: `Payment gateway with ID ${id} not found`
-        });
+        errorResponse(res, `Payment gateway with ID ${id} not found`, 404);
         return;
       }
       
-      res.status(200).json({
-        success: true,
-        data: gateway
-      });
+      successResponse(res, gateway);
     } catch (error) {
       console.error(`Error fetching payment gateway:`, error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to fetch payment gateway'
-      });
+      errorResponse(res, 'Failed to fetch payment gateway');
     }
   };
 
-  createPaymentGateway = async (req: Request, res: Response): Promise<void> => {
+  createGateway = async (req: Request, res: Response): Promise<void> => {
     try {
-      const { 
-        name, code, apiKey, secretKey, webhookSecret,
-        apiEndpoint, isActive, supportedCurrencies,
-        supportedPaymentMethods, testMode
-      } = req.body;
+      const gatewayData = req.body;
       
-      // Validate required fields
-      if (!name || !code) {
-        res.status(400).json({
-          success: false,
-          message: 'Required fields missing: name and code are required'
-        });
+      if (!gatewayData.merchantId) {
+        errorResponse(res, 'Merchant ID is required', 400);
         return;
       }
       
-      const newGateway = await this.paymentRepo.createPaymentGateway({
-        name,
-        code,
-        apiKey,
-        secretKey,
-        webhookSecret,
-        apiEndpoint,
-        isActive: isActive ?? true,
-        supportedCurrencies: supportedCurrencies ?? ['USD'],
-        supportedPaymentMethods: supportedPaymentMethods ?? [],
-        testMode: testMode ?? false
-      });
+      // Handle potential default gateway
+      if (gatewayData.isDefault) {
+        // Default is handled in the repository
+      }
       
-      res.status(201).json({
-        success: true,
-        data: newGateway
-      });
+      const gateway = await paymentRepo.createGateway(gatewayData);
+      successResponse(res, gateway, 201);
     } catch (error) {
       console.error('Error creating payment gateway:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to create payment gateway'
-      });
+      errorResponse(res, 'Failed to create payment gateway');
     }
   };
 
-  updatePaymentGateway = async (req: Request, res: Response): Promise<void> => {
+  updateGateway = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
-      const {
-        name, code, apiKey, secretKey, webhookSecret,
-        apiEndpoint, isActive, supportedCurrencies,
-        supportedPaymentMethods, testMode
-      } = req.body;
+      const gatewayData = req.body;
       
-      const existingGateway = await this.paymentRepo.findPaymentGatewayById(id);
-      if (!existingGateway) {
-        res.status(404).json({
-          success: false,
-          message: `Payment gateway with ID ${id} not found`
-        });
-        return;
-      }
-      
-      const updatedGateway = await this.paymentRepo.updatePaymentGateway(id, {
-        name,
-        code,
-        apiKey,
-        secretKey,
-        webhookSecret,
-        apiEndpoint,
-        isActive,
-        supportedCurrencies,
-        supportedPaymentMethods,
-        testMode
-      });
-      
-      res.status(200).json({
-        success: true,
-        data: updatedGateway
-      });
+      const gateway = await paymentRepo.updateGateway(id, gatewayData);
+      successResponse(res, gateway);
     } catch (error) {
       console.error('Error updating payment gateway:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to update payment gateway'
-      });
+      errorResponse(res, 'Failed to update payment gateway');
     }
   };
 
-  deletePaymentGateway = async (req: Request, res: Response): Promise<void> => {
+  deleteGateway = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
+      const result = await paymentRepo.deleteGateway(id);
       
-      const existingGateway = await this.paymentRepo.findPaymentGatewayById(id);
-      if (!existingGateway) {
-        res.status(404).json({
-          success: false,
-          message: `Payment gateway with ID ${id} not found`
-        });
-        return;
-      }
-      
-      const deleted = await this.paymentRepo.deletePaymentGateway(id);
-      
-      if (deleted) {
-        res.status(200).json({
-          success: true,
-          message: `Payment gateway with ID ${id} deleted successfully`
-        });
+      if (result) {
+        successResponse(res, { message: 'Payment gateway deleted successfully' });
       } else {
-        res.status(500).json({
-          success: false,
-          message: `Failed to delete payment gateway with ID ${id}`
-        });
+        errorResponse(res, 'Failed to delete payment gateway', 500);
       }
     } catch (error) {
       console.error('Error deleting payment gateway:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to delete payment gateway'
-      });
+      errorResponse(res, 'Failed to delete payment gateway');
     }
   };
 
-  // ---------- Customer Payment Method Methods ----------
+  // ---------- Payment Method Config Methods ----------
 
-  getCustomerPaymentMethods = async (req: Request, res: Response): Promise<void> => {
+  getMethodConfigs = async (req: Request, res: Response): Promise<void> => {
     try {
-      const { customerId } = req.params;
+      const { merchantId } = req.params;
       
-      if (!customerId) {
-        res.status(400).json({
-          success: false,
-          message: 'Customer ID is required'
-        });
+      if (!merchantId) {
+        errorResponse(res, 'Merchant ID is required', 400);
         return;
       }
       
-      const methods = await this.paymentRepo.findCustomerPaymentMethods(customerId);
-      
-      res.status(200).json({
-        success: true,
-        data: methods
-      });
+      const methodConfigs = await paymentRepo.findAllMethodConfigs(merchantId);
+      successResponse(res, methodConfigs);
     } catch (error) {
-      console.error('Error fetching customer payment methods:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to fetch customer payment methods'
-      });
+      console.error('Error fetching payment method configurations:', error);
+      errorResponse(res, 'Failed to fetch payment method configurations');
     }
   };
 
-  getCustomerPaymentMethodById = async (req: Request, res: Response): Promise<void> => {
+  getMethodConfigById = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
-      const method = await this.paymentRepo.findCustomerPaymentMethodById(id);
+      const methodConfig = await paymentRepo.findMethodConfigById(id);
       
-      if (!method) {
-        res.status(404).json({
-          success: false,
-          message: `Customer payment method with ID ${id} not found`
-        });
+      if (!methodConfig) {
+        errorResponse(res, `Payment method configuration with ID ${id} not found`, 404);
         return;
       }
       
-      res.status(200).json({
-        success: true,
-        data: method
-      });
+      successResponse(res, methodConfig);
     } catch (error) {
-      console.error('Error fetching customer payment method:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to fetch customer payment method'
-      });
+      console.error(`Error fetching payment method configuration:`, error);
+      errorResponse(res, 'Failed to fetch payment method configuration');
     }
   };
 
-  updateCustomerPaymentMethod = async (req: Request, res: Response): Promise<void> => {
+  createMethodConfig = async (req: Request, res: Response): Promise<void> => {
     try {
-      const { id } = req.params;
-      const { isDefault } = req.body;
+      const methodConfigData = req.body;
       
-      const existingMethod = await this.paymentRepo.findCustomerPaymentMethodById(id);
-      if (!existingMethod) {
-        res.status(404).json({
-          success: false,
-          message: `Customer payment method with ID ${id} not found`
-        });
+      if (!methodConfigData.merchantId) {
+        errorResponse(res, 'Merchant ID is required', 400);
         return;
       }
       
-      const updatedMethod = await this.paymentRepo.updateCustomerPaymentMethod(id, {
-        isDefault
-      });
+      if (!methodConfigData.paymentMethod) {
+        errorResponse(res, 'Payment method type is required', 400);
+        return;
+      }
       
-      res.status(200).json({
-        success: true,
-        data: updatedMethod
-      });
+      const methodConfig = await paymentRepo.createMethodConfig(methodConfigData);
+      successResponse(res, methodConfig, 201);
     } catch (error) {
-      console.error('Error updating customer payment method:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to update customer payment method'
-      });
+      console.error('Error creating payment method configuration:', error);
+      errorResponse(res, 'Failed to create payment method configuration');
     }
   };
 
-  deleteCustomerPaymentMethod = async (req: Request, res: Response): Promise<void> => {
+  updateMethodConfig = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
+      const methodConfigData = req.body;
       
-      const existingMethod = await this.paymentRepo.findCustomerPaymentMethodById(id);
-      if (!existingMethod) {
-        res.status(404).json({
-          success: false,
-          message: `Customer payment method with ID ${id} not found`
-        });
-        return;
-      }
+      const methodConfig = await paymentRepo.updateMethodConfig(id, methodConfigData);
+      successResponse(res, methodConfig);
+    } catch (error) {
+      console.error('Error updating payment method configuration:', error);
+      errorResponse(res, 'Failed to update payment method configuration');
+    }
+  };
+
+  deleteMethodConfig = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const result = await paymentRepo.deleteMethodConfig(id);
       
-      const deleted = await this.paymentRepo.deleteCustomerPaymentMethod(id);
-      
-      if (deleted) {
-        res.status(200).json({
-          success: true,
-          message: `Customer payment method with ID ${id} deleted successfully`
-        });
+      if (result) {
+        successResponse(res, { message: 'Payment method configuration deleted successfully' });
       } else {
-        res.status(500).json({
-          success: false,
-          message: `Failed to delete customer payment method with ID ${id}`
-        });
+        errorResponse(res, 'Failed to delete payment method configuration', 500);
       }
     } catch (error) {
-      console.error('Error deleting customer payment method:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to delete customer payment method'
-      });
+      console.error('Error deleting payment method configuration:', error);
+      errorResponse(res, 'Failed to delete payment method configuration');
     }
   };
 
-  // ---------- Payment Methods ----------
+  // ---------- Transaction Methods ----------
 
-  getPayments = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const payments = await this.paymentRepo.findAllPayments();
-      res.status(200).json({
-        success: true,
-        data: payments
-      });
-    } catch (error) {
-      console.error('Error fetching payments:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to fetch payments'
-      });
-    }
-  };
-
-  getPaymentById = async (req: Request, res: Response): Promise<void> => {
+  getTransactionById = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
-      const payment = await this.paymentRepo.findPaymentById(id);
+      const transaction = await paymentRepo.findTransactionById(id);
       
-      if (!payment) {
-        res.status(404).json({
-          success: false,
-          message: `Payment with ID ${id} not found`
-        });
+      if (!transaction) {
+        errorResponse(res, `Transaction with ID ${id} not found`, 404);
         return;
       }
       
-      res.status(200).json({
-        success: true,
-        data: payment
-      });
+      successResponse(res, transaction);
     } catch (error) {
-      console.error('Error fetching payment:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to fetch payment'
-      });
+      console.error(`Error fetching transaction:`, error);
+      errorResponse(res, 'Failed to fetch transaction');
     }
   };
 
-  getPaymentsByOrderId = async (req: Request, res: Response): Promise<void> => {
+  getTransactionsByOrderId = async (req: Request, res: Response): Promise<void> => {
     try {
       const { orderId } = req.params;
       
       if (!orderId) {
-        res.status(400).json({
-          success: false,
-          message: 'Order ID is required'
-        });
+        errorResponse(res, 'Order ID is required', 400);
         return;
       }
       
-      const payments = await this.paymentRepo.findPaymentsByOrderId(orderId);
-      
-      res.status(200).json({
-        success: true,
-        data: payments
-      });
+      const transactions = await paymentRepo.findTransactionsByOrderId(orderId);
+      successResponse(res, transactions);
     } catch (error) {
-      console.error('Error fetching payments by order ID:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to fetch payments'
-      });
-    }
-  };
-  
-  getPaymentsByCustomerId = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { customerId } = req.params;
-      
-      if (!customerId) {
-        res.status(400).json({
-          success: false,
-          message: 'Customer ID is required'
-        });
-        return;
-      }
-      
-      const payments = await this.paymentRepo.findPaymentsByCustomerId(customerId);
-      
-      res.status(200).json({
-        success: true,
-        data: payments
-      });
-    } catch (error) {
-      console.error('Error fetching payments by customer ID:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to fetch payments'
-      });
+      console.error('Error fetching transactions by order ID:', error);
+      errorResponse(res, 'Failed to fetch transactions');
     }
   };
 
-  updatePaymentStatus = async (req: Request, res: Response): Promise<void> => {
+  updateTransaction = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
-      const { status, transactionId, gatewayResponse, errorMessage, metadata } = req.body;
+      const transactionData = req.body;
       
-      const existingPayment = await this.paymentRepo.findPaymentById(id);
-      if (!existingPayment) {
-        res.status(404).json({
-          success: false,
-          message: `Payment with ID ${id} not found`
-        });
-        return;
-      }
+      // In a real implementation, you'd have validation and business logic
+      // to ensure proper status transitions and other rules
       
-      if (!status || !['pending', 'processing', 'completed', 'failed', 'refunded', 'partially_refunded'].includes(status)) {
-        res.status(400).json({
-          success: false,
-          message: 'Invalid or missing status value'
-        });
-        return;
-      }
-      
-      const updatedPayment = await this.paymentRepo.updatePaymentStatus(id, status, {
-        transactionId,
-        gatewayResponse,
-        errorMessage,
-        metadata
-      });
-      
-      res.status(200).json({
-        success: true,
-        data: updatedPayment
-      });
+      const transaction = await paymentRepo.updateTransaction(id, transactionData);
+      successResponse(res, transaction);
     } catch (error) {
-      console.error('Error updating payment status:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to update payment status'
-      });
+      console.error('Error updating transaction:', error);
+      errorResponse(res, 'Failed to update transaction');
     }
   };
 
   // ---------- Refund Methods ----------
 
-  getRefunds = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const refunds = await this.paymentRepo.findAllRefunds();
-      res.status(200).json({
-        success: true,
-        data: refunds
-      });
-    } catch (error) {
-      console.error('Error fetching refunds:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to fetch refunds'
-      });
-    }
-  };
-
   getRefundById = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
-      const refund = await this.paymentRepo.findRefundById(id);
+      const refund = await paymentRepo.findRefundById(id);
       
       if (!refund) {
-        res.status(404).json({
-          success: false,
-          message: `Refund with ID ${id} not found`
-        });
+        errorResponse(res, `Refund with ID ${id} not found`, 404);
         return;
       }
       
-      res.status(200).json({
-        success: true,
-        data: refund
-      });
+      successResponse(res, refund);
     } catch (error) {
-      console.error('Error fetching refund:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to fetch refund'
-      });
+      console.error(`Error fetching refund:`, error);
+      errorResponse(res, 'Failed to fetch refund');
     }
   };
 
-  getRefundsByPaymentId = async (req: Request, res: Response): Promise<void> => {
+  getRefundsByTransactionId = async (req: Request, res: Response): Promise<void> => {
     try {
-      const { paymentId } = req.params;
+      const { transactionId } = req.params;
       
-      if (!paymentId) {
-        res.status(400).json({
-          success: false,
-          message: 'Payment ID is required'
-        });
+      if (!transactionId) {
+        errorResponse(res, 'Transaction ID is required', 400);
         return;
       }
       
-      const refunds = await this.paymentRepo.findRefundsByPaymentId(paymentId);
-      
-      res.status(200).json({
-        success: true,
-        data: refunds
-      });
+      const refunds = await paymentRepo.findRefundsByTransactionId(transactionId);
+      successResponse(res, refunds);
     } catch (error) {
-      console.error('Error fetching refunds by payment ID:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to fetch refunds'
-      });
+      console.error('Error fetching refunds by transaction ID:', error);
+      errorResponse(res, 'Failed to fetch refunds');
     }
   };
 
   createRefund = async (req: Request, res: Response): Promise<void> => {
     try {
-      const { paymentId, amount, reason } = req.body;
+      const refundData = req.body;
       
-      // Validate required fields
-      if (!paymentId || !amount || amount <= 0) {
-        res.status(400).json({
-          success: false,
-          message: 'Payment ID and amount (greater than 0) are required'
-        });
+      if (!refundData.transactionId) {
+        errorResponse(res, 'Transaction ID is required', 400);
         return;
       }
       
-      // Verify payment exists and can be refunded
-      const payment = await this.paymentRepo.findPaymentById(paymentId);
-      if (!payment) {
-        res.status(404).json({
-          success: false,
-          message: `Payment with ID ${paymentId} not found`
-        });
+      if (!refundData.amount || refundData.amount <= 0) {
+        errorResponse(res, 'Valid refund amount is required', 400);
         return;
       }
       
-      if (payment.status !== 'completed') {
-        res.status(400).json({
-          success: false,
-          message: `Only completed payments can be refunded. Current status: ${payment.status}`
-        });
+      // Get the transaction to validate and extract currency
+      const transaction = await paymentRepo.findTransactionById(refundData.transactionId);
+      
+      if (!transaction) {
+        errorResponse(res, 'Transaction not found', 404);
         return;
       }
       
-      const currentRefundedAmount = payment.refundedAmount || 0;
-      if (currentRefundedAmount + amount > payment.amount) {
-        res.status(400).json({
-          success: false,
-          message: `Refund amount exceeds the available amount. Available: ${payment.amount - currentRefundedAmount}`
-        });
+      // Check if the transaction can be refunded
+      if (!['paid', 'partially_refunded'].includes(transaction.status)) {
+        errorResponse(res, `Transaction with status '${transaction.status}' cannot be refunded`, 400);
         return;
       }
       
-      const newRefund = await this.paymentRepo.createRefund({
-        paymentId,
-        amount,
-        reason: reason || 'Customer requested refund',
-        status: 'pending',
-        transactionId: undefined,
-        gatewayResponse: undefined,
-        errorMessage: undefined,
-        metadata: undefined
-      });
+      // Calculate the maximum refundable amount
+      const alreadyRefunded = transaction.refundedAmount || 0;
+      const maxRefundable = transaction.amount - alreadyRefunded;
       
-      res.status(201).json({
-        success: true,
-        data: newRefund
-      });
+      if (refundData.amount > maxRefundable) {
+        errorResponse(res, `Maximum refundable amount is ${maxRefundable} ${transaction.currency}`, 400);
+        return;
+      }
+      
+      // Set currency from transaction if not provided
+      if (!refundData.currency) {
+        refundData.currency = transaction.currency;
+      }
+      
+      const refund = await paymentRepo.createRefund(refundData);
+      successResponse(res, refund, 201);
     } catch (error) {
       console.error('Error creating refund:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to create refund'
-      });
+      errorResponse(res, 'Failed to create refund');
     }
   };
 
-  updateRefundStatus = async (req: Request, res: Response): Promise<void> => {
+  updateRefund = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
-      const { status, transactionId, gatewayResponse, errorMessage, metadata } = req.body;
+      const refundData = req.body;
       
-      const existingRefund = await this.paymentRepo.findRefundById(id);
-      if (!existingRefund) {
-        res.status(404).json({
-          success: false,
-          message: `Refund with ID ${id} not found`
-        });
-        return;
-      }
-      
-      if (!status || !['pending', 'processing', 'completed', 'failed'].includes(status)) {
-        res.status(400).json({
-          success: false,
-          message: 'Invalid or missing status value'
-        });
-        return;
-      }
-      
-      const updatedRefund = await this.paymentRepo.updateRefundStatus(id, status, {
-        transactionId,
-        gatewayResponse,
-        errorMessage,
-        metadata
-      });
-      
-      res.status(200).json({
-        success: true,
-        data: updatedRefund
-      });
+      const refund = await paymentRepo.updateRefund(id, refundData);
+      successResponse(res, refund);
     } catch (error) {
-      console.error('Error updating refund status:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to update refund status'
-      });
+      console.error('Error updating refund:', error);
+      errorResponse(res, 'Failed to update refund');
     }
   };
 }
+
+export default new PaymentController();

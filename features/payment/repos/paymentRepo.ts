@@ -1,6 +1,7 @@
 import { query, queryOne } from '../../../libs/db';
+import { unixTimestamp } from '../../../libs/date';
 
-// Data models for payment
+// TypeScript interfaces with camelCase properties
 export interface PaymentMethod {
   id: string;
   name: string;
@@ -12,548 +13,744 @@ export interface PaymentMethod {
   testMode: boolean;
   createdAt: Date;
   updatedAt: Date;
+  deletedAt?: Date;
 }
 
 export interface PaymentGateway {
   id: string;
+  merchantId: string;
   name: string;
-  code: string;
+  provider: string;
+  isActive: boolean;
+  isDefault: boolean;
+  isTestMode: boolean;
   apiKey?: string;
-  secretKey?: string;
+  apiSecret?: string;
+  publicKey?: string;
   webhookSecret?: string;
   apiEndpoint?: string;
-  isActive: boolean;
-  supportedCurrencies: string[];
   supportedPaymentMethods: string[];
-  testMode: boolean;
+  supportedCurrencies: string[];
+  processingFees?: Record<string, any>;
+  checkoutSettings?: Record<string, any>;
+  metadata?: Record<string, any>;
   createdAt: Date;
   updatedAt: Date;
+  deletedAt?: Date;
 }
 
-export interface CustomerPaymentMethod {
+export interface PaymentMethodConfig {
   id: string;
-  customerId: string;
-  paymentMethodId: string;
-  gatewayId: string;
-  token: string;
-  last4?: string;
-  expiryMonth?: number;
-  expiryYear?: number;
-  cardType?: string;
-  isDefault: boolean;
+  merchantId: string;
+  paymentMethod: string;
+  isEnabled: boolean;
+  displayName?: string;
+  description?: string;
+  processingFee?: number;
+  minimumAmount?: number;
+  maximumAmount?: number;
+  displayOrder: number;
+  icon?: string;
+  supportedCurrencies: string[];
+  countries?: string[];
+  gatewayId?: string;
+  configuration?: Record<string, any>;
+  metadata?: Record<string, any>;
   createdAt: Date;
   updatedAt: Date;
+  deletedAt?: Date;
 }
 
-export interface Payment {
+export interface PaymentTransaction {
   id: string;
   orderId: string;
   customerId: string;
+  paymentMethodConfigId: string;
+  gatewayId: string;
+  externalTransactionId?: string;
   amount: number;
   currency: string;
-  status: 'pending' | 'processing' | 'completed' | 'failed' | 'refunded' | 'partially_refunded';
-  paymentMethodId: string;
-  gatewayId: string;
-  transactionId?: string;
+  status: 'pending' | 'authorized' | 'paid' | 'partially_refunded' | 'refunded' | 'voided' | 'failed' | 'cancelled' | 'expired';
+  paymentMethodDetails?: Record<string, any>;
   gatewayResponse?: Record<string, any>;
+  errorCode?: string;
   errorMessage?: string;
   refundedAmount?: number;
   metadata?: Record<string, any>;
+  customerIp?: string;
+  capturedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
+  deletedAt?: Date;
 }
 
-export interface Refund {
+export interface PaymentRefund {
   id: string;
-  paymentId: string;
+  transactionId: string;
+  externalRefundId?: string;
   amount: number;
-  reason: string;
+  currency: string;
+  reason?: string;
   status: 'pending' | 'processing' | 'completed' | 'failed';
-  transactionId?: string;
   gatewayResponse?: Record<string, any>;
+  errorCode?: string;
   errorMessage?: string;
   metadata?: Record<string, any>;
   createdAt: Date;
   updatedAt: Date;
+  deletedAt?: Date;
 }
 
+// Mapping dictionaries
+const gatewayDbToTsMap: Record<string, string> = {
+  'id': 'id',
+  'merchant_id': 'merchantId',
+  'name': 'name',
+  'provider': 'provider',
+  'is_active': 'isActive',
+  'is_default': 'isDefault',
+  'is_test_mode': 'isTestMode',
+  'api_key': 'apiKey',
+  'api_secret': 'apiSecret',
+  'public_key': 'publicKey',
+  'webhook_secret': 'webhookSecret',
+  'api_endpoint': 'apiEndpoint',
+  'supported_payment_methods': 'supportedPaymentMethods',
+  'supported_currencies': 'supportedCurrencies',
+  'processing_fees': 'processingFees',
+  'checkout_settings': 'checkoutSettings',
+  'metadata': 'metadata',
+  'created_at': 'createdAt',
+  'updated_at': 'updatedAt',
+  'deleted_at': 'deletedAt'
+};
+
+const gatewayTsToDbMap: Record<string, string> = Object.entries(gatewayDbToTsMap)
+  .reduce((acc, [dbCol, tsProp]) => {
+    acc[tsProp] = dbCol;
+    return acc;
+  }, {} as Record<string, string>);
+
+const methodConfigDbToTsMap: Record<string, string> = {
+  'id': 'id',
+  'merchant_id': 'merchantId',
+  'payment_method': 'paymentMethod',
+  'is_enabled': 'isEnabled',
+  'display_name': 'displayName',
+  'description': 'description',
+  'processing_fee': 'processingFee',
+  'minimum_amount': 'minimumAmount',
+  'maximum_amount': 'maximumAmount',
+  'display_order': 'displayOrder',
+  'icon': 'icon',
+  'supported_currencies': 'supportedCurrencies',
+  'countries': 'countries',
+  'gateway_id': 'gatewayId',
+  'configuration': 'configuration',
+  'metadata': 'metadata',
+  'created_at': 'createdAt',
+  'updated_at': 'updatedAt',
+  'deleted_at': 'deletedAt'
+};
+
+const methodConfigTsToDbMap: Record<string, string> = Object.entries(methodConfigDbToTsMap)
+  .reduce((acc, [dbCol, tsProp]) => {
+    acc[tsProp] = dbCol;
+    return acc;
+  }, {} as Record<string, string>);
+
+const transactionDbToTsMap: Record<string, string> = {
+  'id': 'id',
+  'order_id': 'orderId',
+  'customer_id': 'customerId',
+  'payment_method_config_id': 'paymentMethodConfigId',
+  'gateway_id': 'gatewayId',
+  'external_transaction_id': 'externalTransactionId',
+  'amount': 'amount',
+  'currency': 'currency',
+  'status': 'status',
+  'payment_method_details': 'paymentMethodDetails',
+  'gateway_response': 'gatewayResponse',
+  'error_code': 'errorCode',
+  'error_message': 'errorMessage',
+  'refunded_amount': 'refundedAmount',
+  'metadata': 'metadata',
+  'customer_ip': 'customerIp',
+  'captured_at': 'capturedAt',
+  'created_at': 'createdAt',
+  'updated_at': 'updatedAt',
+  'deleted_at': 'deletedAt'
+};
+
+const transactionTsToDbMap: Record<string, string> = Object.entries(transactionDbToTsMap)
+  .reduce((acc, [dbCol, tsProp]) => {
+    acc[tsProp] = dbCol;
+    return acc;
+  }, {} as Record<string, string>);
+
+const refundDbToTsMap: Record<string, string> = {
+  'id': 'id',
+  'transaction_id': 'transactionId',
+  'external_refund_id': 'externalRefundId',
+  'amount': 'amount',
+  'currency': 'currency',
+  'reason': 'reason',
+  'status': 'status',
+  'gateway_response': 'gatewayResponse',
+  'error_code': 'errorCode',
+  'error_message': 'errorMessage',
+  'metadata': 'metadata',
+  'created_at': 'createdAt',
+  'updated_at': 'updatedAt',
+  'deleted_at': 'deletedAt'
+};
+
+const refundTsToDbMap: Record<string, string> = Object.entries(refundDbToTsMap)
+  .reduce((acc, [dbCol, tsProp]) => {
+    acc[tsProp] = dbCol;
+    return acc;
+  }, {} as Record<string, string>);
+
 export class PaymentRepo {
-  // Payment Method methods
-  async findAllPaymentMethods(): Promise<PaymentMethod[]> {
-    const methods = await query<PaymentMethod[]>('SELECT * FROM "public"."payment_method" ORDER BY "name" ASC');
-    return methods || [];
+  // Helper methods for mapping
+  private tsToDbGateway(propertyName: string): string {
+    return gatewayTsToDbMap[propertyName] || propertyName;
   }
 
-  async findPaymentMethodById(id: string): Promise<PaymentMethod | null> {
-    const method = await queryOne<PaymentMethod>('SELECT * FROM "public"."payment_method" WHERE "id" = $1', [id]);
-    return method || null;
+  private generateGatewaySelectFields(): string {
+    return Object.keys(gatewayDbToTsMap).map(dbCol => 
+      `"${dbCol}" AS "${gatewayDbToTsMap[dbCol]}"`
+    ).join(', ');
   }
 
-  async findPaymentMethodByCode(code: string): Promise<PaymentMethod | null> {
-    const method = await queryOne<PaymentMethod>('SELECT * FROM "public"."payment_method" WHERE "code" = $1', [code]);
-    return method || null;
+  private tsToDbMethodConfig(propertyName: string): string {
+    return methodConfigTsToDbMap[propertyName] || propertyName;
   }
 
-  async findActivePaymentMethods(): Promise<PaymentMethod[]> {
-    const methods = await query<PaymentMethod[]>('SELECT * FROM "public"."payment_method" WHERE "isActive" = true ORDER BY "name" ASC');
-    return methods || [];
+  private generateMethodConfigSelectFields(): string {
+    return Object.keys(methodConfigDbToTsMap).map(dbCol => 
+      `"${dbCol}" AS "${methodConfigDbToTsMap[dbCol]}"`
+    ).join(', ');
   }
 
-  async createPaymentMethod(method: Omit<PaymentMethod, 'id' | 'createdAt' | 'updatedAt'>): Promise<PaymentMethod> {
-    const now = new Date();
-    const result = await queryOne<PaymentMethod>(
-      `INSERT INTO "public"."payment_method" 
-      ("name", "code", "provider", "isActive", "requiresCustomerSaved", "config", "testMode", "createdAt", "updatedAt") 
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
-      RETURNING *`,
-      [method.name, method.code, method.provider, method.isActive, 
-       method.requiresCustomerSaved, method.config, method.testMode, now, now]
+  private tsToDbTransaction(propertyName: string): string {
+    return transactionTsToDbMap[propertyName] || propertyName;
+  }
+
+  private generateTransactionSelectFields(): string {
+    return Object.keys(transactionDbToTsMap).map(dbCol => 
+      `"${dbCol}" AS "${transactionDbToTsMap[dbCol]}"`
+    ).join(', ');
+  }
+
+  private tsToDbRefund(propertyName: string): string {
+    return refundTsToDbMap[propertyName] || propertyName;
+  }
+
+  private generateRefundSelectFields(): string {
+    return Object.keys(refundDbToTsMap).map(dbCol => 
+      `"${dbCol}" AS "${refundDbToTsMap[dbCol]}"`
+    ).join(', ');
+  }
+
+  // Payment Gateway Methods
+  async findAllGateways(merchantId: string): Promise<PaymentGateway[]> {
+    const selectFields = this.generateGatewaySelectFields();
+    const gateways = await query<PaymentGateway[]>(
+      `SELECT ${selectFields} FROM "public"."payment_gateway" 
+       WHERE "merchant_id" = $1 AND "deleted_at" IS NULL 
+       ORDER BY "name" ASC`, 
+      [merchantId]
     );
-    
-    if (!result) {
-      throw new Error('Failed to create payment method');
-    }
-    
-    return result;
+    return gateways || [];
   }
 
-  async updatePaymentMethod(id: string, method: Partial<Omit<PaymentMethod, 'id' | 'createdAt' | 'updatedAt'>>): Promise<PaymentMethod> {
-    const updates: string[] = [];
-    const values: any[] = [];
-    let paramCount = 1;
-
-    Object.entries(method).forEach(([key, value]) => {
-      if (value !== undefined) {
-        updates.push(`"${key}" = $${paramCount}`);
-        values.push(value);
-        paramCount++;
-      }
-    });
-
-    if (updates.length === 0) {
-      const existingMethod = await this.findPaymentMethodById(id);
-      if (!existingMethod) {
-        throw new Error(`Payment method with ID ${id} not found`);
-      }
-      return existingMethod;
-    }
-
-    updates.push(`"updatedAt" = $${paramCount}`);
-    values.push(new Date());
-    paramCount++;
-
-    values.push(id);
-
-    const result = await queryOne<PaymentMethod>(
-      `UPDATE "public"."payment_method" 
-      SET ${updates.join(', ')} 
-      WHERE "id" = $${paramCount - 1} 
-      RETURNING *`,
-      values
-    );
-    
-    if (!result) {
-      throw new Error(`Failed to update payment method with ID ${id}`);
-    }
-    
-    return result;
-  }
-
-  async deletePaymentMethod(id: string): Promise<boolean> {
-    const result = await queryOne<{count: string}>(
-      `WITH deleted AS (
-        DELETE FROM "public"."payment_method" 
-        WHERE "id" = $1 
-        RETURNING *
-      ) 
-      SELECT COUNT(*) as count FROM deleted`,
+  async findGatewayById(id: string): Promise<PaymentGateway | null> {
+    const selectFields = this.generateGatewaySelectFields();
+    return await queryOne<PaymentGateway>(
+      `SELECT ${selectFields} FROM "public"."payment_gateway" 
+       WHERE "id" = $1 AND "deleted_at" IS NULL`, 
       [id]
     );
+  }
+
+  async findDefaultGateway(merchantId: string): Promise<PaymentGateway | null> {
+    const selectFields = this.generateGatewaySelectFields();
+    return await queryOne<PaymentGateway>(
+      `SELECT ${selectFields} FROM "public"."payment_gateway" 
+       WHERE "merchant_id" = $1 AND "is_default" = true AND "deleted_at" IS NULL`, 
+      [merchantId]
+    );
+  }
+
+  async createGateway(gateway: Omit<PaymentGateway, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>): Promise<PaymentGateway> {
+    const now = unixTimestamp();
     
-    return result ? parseInt(result.count) > 0 : false;
-  }
+    // Map TS properties to DB columns
+    const columnMap: Record<string, any> = {
+      'created_at': now,
+      'updated_at': now
+    };
 
-  // Payment Gateway methods
-  async findAllPaymentGateways(): Promise<PaymentGateway[]> {
-    const gateways = await query<PaymentGateway[]>('SELECT * FROM "public"."payment_gateway" ORDER BY "name" ASC');
-    return gateways || [];
-  }
-
-  async findPaymentGatewayById(id: string): Promise<PaymentGateway | null> {
-    const gateway = await queryOne<PaymentGateway>('SELECT * FROM "public"."payment_gateway" WHERE "id" = $1', [id]);
-    return gateway || null;
-  }
-
-  async findPaymentGatewayByCode(code: string): Promise<PaymentGateway | null> {
-    const gateway = await queryOne<PaymentGateway>('SELECT * FROM "public"."payment_gateway" WHERE "code" = $1', [code]);
-    return gateway || null;
-  }
-
-  async findActivePaymentGateways(): Promise<PaymentGateway[]> {
-    const gateways = await query<PaymentGateway[]>('SELECT * FROM "public"."payment_gateway" WHERE "isActive" = true ORDER BY "name" ASC');
-    return gateways || [];
-  }
-
-  async createPaymentGateway(gateway: Omit<PaymentGateway, 'id' | 'createdAt' | 'updatedAt'>): Promise<PaymentGateway> {
-    const now = new Date();
+    for (const [key, value] of Object.entries(gateway)) {
+      if (value !== undefined) {
+        const dbColumn = this.tsToDbGateway(key);
+        columnMap[dbColumn] = value;
+      }
+    }
+    
+    const columns = Object.keys(columnMap);
+    const values = Object.values(columnMap);
+    const placeholders = columns.map((_, i) => `$${i + 1}`).join(', ');
+    
+    const selectFields = this.generateGatewaySelectFields();
+    
     const result = await queryOne<PaymentGateway>(
-      `INSERT INTO "public"."payment_gateway" 
-      ("name", "code", "apiKey", "secretKey", "webhookSecret", "apiEndpoint", "isActive", 
-       "supportedCurrencies", "supportedPaymentMethods", "testMode", "createdAt", "updatedAt") 
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) 
-      RETURNING *`,
-      [gateway.name, gateway.code, gateway.apiKey, gateway.secretKey, gateway.webhookSecret,
-       gateway.apiEndpoint, gateway.isActive, gateway.supportedCurrencies, 
-       gateway.supportedPaymentMethods, gateway.testMode, now, now]
+      `INSERT INTO "public"."payment_gateway" (${columns.map(c => `"${c}"`).join(', ')}) 
+       VALUES (${placeholders}) 
+       RETURNING ${selectFields}`,
+      values
     );
     
     if (!result) {
       throw new Error('Failed to create payment gateway');
     }
     
+    // If this is the default gateway, ensure it's the only default
+    if (gateway.isDefault) {
+      await query(
+        `UPDATE "public"."payment_gateway" 
+         SET "is_default" = false 
+         WHERE "merchant_id" = $1 AND "id" != $2 AND "deleted_at" IS NULL`,
+        [gateway.merchantId, result.id]
+      );
+    }
+    
     return result;
   }
 
-  async updatePaymentGateway(id: string, gateway: Partial<Omit<PaymentGateway, 'id' | 'createdAt' | 'updatedAt'>>): Promise<PaymentGateway> {
-    const updates: string[] = [];
-    const values: any[] = [];
-    let paramCount = 1;
+  async updateGateway(id: string, gateway: Partial<Omit<PaymentGateway, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>>): Promise<PaymentGateway> {
+    const now = unixTimestamp();
+    
+    // Map TS properties to DB columns
+    const updateData: Record<string, any> = { 'updated_at': now };
 
-    Object.entries(gateway).forEach(([key, value]) => {
+    for (const [key, value] of Object.entries(gateway)) {
       if (value !== undefined) {
-        updates.push(`"${key}" = $${paramCount}`);
-        values.push(value);
-        paramCount++;
+        const dbColumn = this.tsToDbGateway(key);
+        updateData[dbColumn] = value;
       }
-    });
-
-    if (updates.length === 0) {
-      const existingGateway = await this.findPaymentGatewayById(id);
+    }
+    
+    if (Object.keys(updateData).length === 1) { // Only updatedAt
+      // No updates needed, just return the existing gateway
+      const existingGateway = await this.findGatewayById(id);
       if (!existingGateway) {
-        throw new Error(`Payment gateway with ID ${id} not found`);
+        throw new Error('Payment gateway not found');
       }
       return existingGateway;
     }
-
-    updates.push(`"updatedAt" = $${paramCount}`);
-    values.push(new Date());
-    paramCount++;
-
-    values.push(id);
-
+    
+    // Get the gateway to check if we're changing the default status and to get merchantId
+    const existingGateway = await this.findGatewayById(id);
+    if (!existingGateway) {
+      throw new Error('Payment gateway not found');
+    }
+    
+    // Prepare SQL statement
+    const setStatements = Object.keys(updateData).map((key, i) => `"${key}" = $${i + 1}`);
+    const values = [...Object.values(updateData), id];
+    
+    const selectFields = this.generateGatewaySelectFields();
+    
     const result = await queryOne<PaymentGateway>(
       `UPDATE "public"."payment_gateway" 
-      SET ${updates.join(', ')} 
-      WHERE "id" = $${paramCount - 1} 
-      RETURNING *`,
+       SET ${setStatements.join(', ')} 
+       WHERE "id" = $${values.length} AND "deleted_at" IS NULL
+       RETURNING ${selectFields}`,
       values
     );
     
     if (!result) {
-      throw new Error(`Failed to update payment gateway with ID ${id}`);
+      throw new Error('Failed to update payment gateway');
+    }
+    
+    // If this is now the default gateway, ensure it's the only default
+    if (gateway.isDefault && gateway.isDefault !== existingGateway.isDefault) {
+      await query(
+        `UPDATE "public"."payment_gateway" 
+         SET "is_default" = false 
+         WHERE "merchant_id" = $1 AND "id" != $2 AND "deleted_at" IS NULL`,
+        [existingGateway.merchantId, id]
+      );
     }
     
     return result;
   }
 
-  async deletePaymentGateway(id: string): Promise<boolean> {
-    const result = await queryOne<{count: string}>(
-      `WITH deleted AS (
-        DELETE FROM "public"."payment_gateway" 
-        WHERE "id" = $1 
-        RETURNING *
-      ) 
-      SELECT COUNT(*) as count FROM deleted`,
+  async deleteGateway(id: string): Promise<boolean> {
+    const now = unixTimestamp();
+    
+    // Soft delete by setting deleted_at
+    const result = await query(
+      `UPDATE "public"."payment_gateway" 
+       SET "deleted_at" = $1 
+       WHERE "id" = $2 AND "deleted_at" IS NULL`,
+      [now, id]
+    );
+    
+    return result !== null;
+  }
+
+  // Payment Method Config Methods
+  async findAllMethodConfigs(merchantId: string): Promise<PaymentMethodConfig[]> {
+    const selectFields = this.generateMethodConfigSelectFields();
+    const configs = await query<PaymentMethodConfig[]>(
+      `SELECT ${selectFields} FROM "public"."payment_method_config" 
+       WHERE "merchant_id" = $1 AND "deleted_at" IS NULL 
+       ORDER BY "display_order" ASC, "display_name" ASC`, 
+      [merchantId]
+    );
+    return configs || [];
+  }
+
+  async findMethodConfigById(id: string): Promise<PaymentMethodConfig | null> {
+    const selectFields = this.generateMethodConfigSelectFields();
+    return await queryOne<PaymentMethodConfig>(
+      `SELECT ${selectFields} FROM "public"."payment_method_config" 
+       WHERE "id" = $1 AND "deleted_at" IS NULL`, 
       [id]
     );
-    
-    return result ? parseInt(result.count) > 0 : false;
   }
 
-  // Customer Payment Method methods
-  async findCustomerPaymentMethods(customerId: string): Promise<CustomerPaymentMethod[]> {
-    const methods = await query<CustomerPaymentMethod[]>(
-      'SELECT * FROM "public"."customer_payment_method" WHERE "customerId" = $1 ORDER BY "isDefault" DESC, "createdAt" DESC',
-      [customerId]
+  async findEnabledMethodConfigs(merchantId: string): Promise<PaymentMethodConfig[]> {
+    const selectFields = this.generateMethodConfigSelectFields();
+    const configs = await query<PaymentMethodConfig[]>(
+      `SELECT ${selectFields} FROM "public"."payment_method_config" 
+       WHERE "merchant_id" = $1 AND "is_enabled" = true AND "deleted_at" IS NULL 
+       ORDER BY "display_order" ASC, "display_name" ASC`, 
+      [merchantId]
     );
-    return methods || [];
+    return configs || [];
   }
 
-  async findCustomerPaymentMethodById(id: string): Promise<CustomerPaymentMethod | null> {
-    const method = await queryOne<CustomerPaymentMethod>('SELECT * FROM "public"."customer_payment_method" WHERE "id" = $1', [id]);
-    return method || null;
-  }
+  async createMethodConfig(config: Omit<PaymentMethodConfig, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>): Promise<PaymentMethodConfig> {
+    const now = unixTimestamp();
+    
+    // Map TS properties to DB columns
+    const columnMap: Record<string, any> = {
+      'created_at': now,
+      'updated_at': now
+    };
 
-  async findDefaultCustomerPaymentMethod(customerId: string): Promise<CustomerPaymentMethod | null> {
-    const method = await queryOne<CustomerPaymentMethod>(
-      'SELECT * FROM "public"."customer_payment_method" WHERE "customerId" = $1 AND "isDefault" = true LIMIT 1',
-      [customerId]
-    );
-    return method || null;
-  }
-
-  async createCustomerPaymentMethod(method: Omit<CustomerPaymentMethod, 'id' | 'createdAt' | 'updatedAt'>): Promise<CustomerPaymentMethod> {
-    const now = new Date();
-    
-    // If this is being set as default, clear any existing defaults
-    if (method.isDefault) {
-      await query(
-        'UPDATE "public"."customer_payment_method" SET "isDefault" = false WHERE "customerId" = $1 AND "isDefault" = true',
-        [method.customerId]
-      );
-    }
-    
-    const result = await queryOne<CustomerPaymentMethod>(
-      `INSERT INTO "public"."customer_payment_method" 
-      ("customerId", "paymentMethodId", "gatewayId", "token", "last4", "expiryMonth", 
-       "expiryYear", "cardType", "isDefault", "createdAt", "updatedAt") 
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) 
-      RETURNING *`,
-      [method.customerId, method.paymentMethodId, method.gatewayId, method.token,
-       method.last4, method.expiryMonth, method.expiryYear, method.cardType, method.isDefault, now, now]
-    );
-    
-    if (!result) {
-      throw new Error('Failed to create customer payment method');
-    }
-    
-    return result;
-  }
-
-  async updateCustomerPaymentMethod(id: string, method: Partial<Omit<CustomerPaymentMethod, 'id' | 'customerId' | 'createdAt' | 'updatedAt'>>): Promise<CustomerPaymentMethod> {
-    const existingMethod = await this.findCustomerPaymentMethodById(id);
-    
-    if (!existingMethod) {
-      throw new Error(`Customer payment method with ID ${id} not found`);
-    }
-    
-    // If this is being set as default, clear any existing defaults
-    if (method.isDefault) {
-      await query(
-        'UPDATE "public"."customer_payment_method" SET "isDefault" = false WHERE "customerId" = $1 AND "isDefault" = true',
-        [existingMethod.customerId]
-      );
-    }
-    
-    const updates: string[] = [];
-    const values: any[] = [];
-    let paramCount = 1;
-
-    Object.entries(method).forEach(([key, value]) => {
+    for (const [key, value] of Object.entries(config)) {
       if (value !== undefined) {
-        updates.push(`"${key}" = $${paramCount}`);
-        values.push(value);
-        paramCount++;
+        const dbColumn = this.tsToDbMethodConfig(key);
+        columnMap[dbColumn] = value;
       }
-    });
-
-    if (updates.length === 0) {
-      return existingMethod;
     }
-
-    updates.push(`"updatedAt" = $${paramCount}`);
-    values.push(new Date());
-    paramCount++;
-
-    values.push(id);
-
-    const result = await queryOne<CustomerPaymentMethod>(
-      `UPDATE "public"."customer_payment_method" 
-      SET ${updates.join(', ')} 
-      WHERE "id" = $${paramCount - 1} 
-      RETURNING *`,
+    
+    const columns = Object.keys(columnMap);
+    const values = Object.values(columnMap);
+    const placeholders = columns.map((_, i) => `$${i + 1}`).join(', ');
+    
+    const selectFields = this.generateMethodConfigSelectFields();
+    
+    const result = await queryOne<PaymentMethodConfig>(
+      `INSERT INTO "public"."payment_method_config" (${columns.map(c => `"${c}"`).join(', ')}) 
+       VALUES (${placeholders}) 
+       RETURNING ${selectFields}`,
       values
     );
     
     if (!result) {
-      throw new Error(`Failed to update customer payment method with ID ${id}`);
+      throw new Error('Failed to create payment method configuration');
     }
     
     return result;
   }
 
-  async deleteCustomerPaymentMethod(id: string): Promise<boolean> {
-    const result = await queryOne<{count: string}>(
-      `WITH deleted AS (
-        DELETE FROM "public"."customer_payment_method" 
-        WHERE "id" = $1 
-        RETURNING *
-      ) 
-      SELECT COUNT(*) as count FROM deleted`,
-      [id]
+  async updateMethodConfig(id: string, config: Partial<Omit<PaymentMethodConfig, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>>): Promise<PaymentMethodConfig> {
+    const now = unixTimestamp();
+    
+    // Map TS properties to DB columns
+    const updateData: Record<string, any> = { 'updated_at': now };
+
+    for (const [key, value] of Object.entries(config)) {
+      if (value !== undefined) {
+        const dbColumn = this.tsToDbMethodConfig(key);
+        updateData[dbColumn] = value;
+      }
+    }
+    
+    if (Object.keys(updateData).length === 1) { // Only updatedAt
+      // No updates needed, just return the existing config
+      const existingConfig = await this.findMethodConfigById(id);
+      if (!existingConfig) {
+        throw new Error('Payment method configuration not found');
+      }
+      return existingConfig;
+    }
+    
+    // Prepare SQL statement
+    const setStatements = Object.keys(updateData).map((key, i) => `"${key}" = $${i + 1}`);
+    const values = [...Object.values(updateData), id];
+    
+    const selectFields = this.generateMethodConfigSelectFields();
+    
+    const result = await queryOne<PaymentMethodConfig>(
+      `UPDATE "public"."payment_method_config" 
+       SET ${setStatements.join(', ')} 
+       WHERE "id" = $${values.length} AND "deleted_at" IS NULL
+       RETURNING ${selectFields}`,
+      values
     );
     
-    return result ? parseInt(result.count) > 0 : false;
+    if (!result) {
+      throw new Error('Failed to update payment method configuration');
+    }
+    
+    return result;
   }
 
-  // Payment methods
-  async findAllPayments(): Promise<Payment[]> {
-    const payments = await query<Payment[]>('SELECT * FROM "public"."payment" ORDER BY "createdAt" DESC');
-    return payments || [];
+  async deleteMethodConfig(id: string): Promise<boolean> {
+    const now = unixTimestamp();
+    
+    // Soft delete by setting deleted_at
+    const result = await query(
+      `UPDATE "public"."payment_method_config" 
+       SET "deleted_at" = $1 
+       WHERE "id" = $2 AND "deleted_at" IS NULL`,
+      [now, id]
+    );
+    
+    return result !== null;
   }
 
-  async findPaymentById(id: string): Promise<Payment | null> {
-    const payment = await queryOne<Payment>('SELECT * FROM "public"."payment" WHERE "id" = $1', [id]);
-    return payment || null;
+  // Transaction methods
+  async findTransactionById(id: string): Promise<PaymentTransaction | null> {
+    const selectFields = this.generateTransactionSelectFields();
+    return await queryOne<PaymentTransaction>(
+      `SELECT ${selectFields} FROM "public"."payment_transaction" 
+       WHERE "id" = $1 AND "deleted_at" IS NULL`, 
+      [id]
+    );
   }
 
-  async findPaymentsByOrderId(orderId: string): Promise<Payment[]> {
-    const payments = await query<Payment[]>(
-      'SELECT * FROM "public"."payment" WHERE "orderId" = $1 ORDER BY "createdAt" DESC',
+  async findTransactionsByOrderId(orderId: string): Promise<PaymentTransaction[]> {
+    const selectFields = this.generateTransactionSelectFields();
+    const transactions = await query<PaymentTransaction[]>(
+      `SELECT ${selectFields} FROM "public"."payment_transaction" 
+       WHERE "order_id" = $1 AND "deleted_at" IS NULL 
+       ORDER BY "created_at" DESC`, 
       [orderId]
     );
-    return payments || [];
-  }
-  
-  async findPaymentsByCustomerId(customerId: string): Promise<Payment[]> {
-    const payments = await query<Payment[]>(
-      'SELECT * FROM "public"."payment" WHERE "customerId" = $1 ORDER BY "createdAt" DESC',
-      [customerId]
-    );
-    return payments || [];
+    return transactions || [];
   }
 
-  async findPaymentsByStatus(status: Payment['status']): Promise<Payment[]> {
-    const payments = await query<Payment[]>(
-      'SELECT * FROM "public"."payment" WHERE "status" = $1 ORDER BY "createdAt" DESC',
-      [status]
+  async findTransactionsByCustomerId(customerId: string, limit: number = 10, offset: number = 0): Promise<PaymentTransaction[]> {
+    const selectFields = this.generateTransactionSelectFields();
+    const transactions = await query<PaymentTransaction[]>(
+      `SELECT ${selectFields} FROM "public"."payment_transaction" 
+       WHERE "customer_id" = $1 AND "deleted_at" IS NULL 
+       ORDER BY "created_at" DESC
+       LIMIT $2 OFFSET $3`, 
+      [customerId, limit, offset]
     );
-    return payments || [];
+    return transactions || [];
   }
 
-  async createPayment(payment: Omit<Payment, 'id' | 'createdAt' | 'updatedAt'>): Promise<Payment> {
-    const now = new Date();
-    const result = await queryOne<Payment>(
-      `INSERT INTO "public"."payment" 
-      ("orderId", "customerId", "amount", "currency", "status", "paymentMethodId", 
-       "gatewayId", "transactionId", "gatewayResponse", "errorMessage", "refundedAmount", "metadata", "createdAt", "updatedAt") 
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) 
-      RETURNING *`,
-      [payment.orderId, payment.customerId, payment.amount, payment.currency, payment.status,
-       payment.paymentMethodId, payment.gatewayId, payment.transactionId, payment.gatewayResponse,
-       payment.errorMessage, payment.refundedAmount, payment.metadata, now, now]
+  async createTransaction(transaction: Omit<PaymentTransaction, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>): Promise<PaymentTransaction> {
+    const now = unixTimestamp();
+    
+    // Map TS properties to DB columns
+    const columnMap: Record<string, any> = {
+      'created_at': now,
+      'updated_at': now
+    };
+
+    for (const [key, value] of Object.entries(transaction)) {
+      if (value !== undefined) {
+        const dbColumn = this.tsToDbTransaction(key);
+        columnMap[dbColumn] = value;
+      }
+    }
+    
+    const columns = Object.keys(columnMap);
+    const values = Object.values(columnMap);
+    const placeholders = columns.map((_, i) => `$${i + 1}`).join(', ');
+    
+    const selectFields = this.generateTransactionSelectFields();
+    
+    const result = await queryOne<PaymentTransaction>(
+      `INSERT INTO "public"."payment_transaction" (${columns.map(c => `"${c}"`).join(', ')}) 
+       VALUES (${placeholders}) 
+       RETURNING ${selectFields}`,
+      values
     );
     
     if (!result) {
-      throw new Error('Failed to create payment');
+      throw new Error('Failed to create payment transaction');
     }
     
     return result;
   }
 
-  async updatePaymentStatus(id: string, status: Payment['status'], updates: Partial<Pick<Payment, 'transactionId' | 'gatewayResponse' | 'errorMessage' | 'refundedAmount' | 'metadata'>> = {}): Promise<Payment> {
-    const updateFields: string[] = ['"status" = $1', '"updatedAt" = $2'];
-    const values: any[] = [status, new Date()];
-    let paramCount = 3;
+  async updateTransaction(id: string, transaction: Partial<Omit<PaymentTransaction, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>>): Promise<PaymentTransaction> {
+    const now = unixTimestamp();
     
-    // Add optional fields if provided
-    Object.entries(updates).forEach(([key, value]) => {
+    // Map TS properties to DB columns
+    const updateData: Record<string, any> = { 'updated_at': now };
+
+    for (const [key, value] of Object.entries(transaction)) {
       if (value !== undefined) {
-        updateFields.push(`"${key}" = $${paramCount++}`);
-        values.push(value);
+        const dbColumn = this.tsToDbTransaction(key);
+        updateData[dbColumn] = value;
       }
-    });
+    }
     
-    values.push(id);
+    if (Object.keys(updateData).length === 1) { // Only updatedAt
+      // No updates needed, just return the existing transaction
+      const existingTransaction = await this.findTransactionById(id);
+      if (!existingTransaction) {
+        throw new Error('Payment transaction not found');
+      }
+      return existingTransaction;
+    }
     
-    const result = await queryOne<Payment>(
-      `UPDATE "public"."payment" 
-      SET ${updateFields.join(', ')} 
-      WHERE "id" = $${paramCount - 1} 
-      RETURNING *`,
+    // Prepare SQL statement
+    const setStatements = Object.keys(updateData).map((key, i) => `"${key}" = $${i + 1}`);
+    const values = [...Object.values(updateData), id];
+    
+    const selectFields = this.generateTransactionSelectFields();
+    
+    const result = await queryOne<PaymentTransaction>(
+      `UPDATE "public"."payment_transaction" 
+       SET ${setStatements.join(', ')} 
+       WHERE "id" = $${values.length} AND "deleted_at" IS NULL
+       RETURNING ${selectFields}`,
       values
     );
     
     if (!result) {
-      throw new Error(`Failed to update payment status for ID ${id}`);
+      throw new Error('Failed to update payment transaction');
     }
     
     return result;
   }
 
   // Refund methods
-  async findAllRefunds(): Promise<Refund[]> {
-    const refunds = await query<Refund[]>('SELECT * FROM "public"."refund" ORDER BY "createdAt" DESC');
-    return refunds || [];
+  async findRefundById(id: string): Promise<PaymentRefund | null> {
+    const selectFields = this.generateRefundSelectFields();
+    return await queryOne<PaymentRefund>(
+      `SELECT ${selectFields} FROM "public"."payment_refund" 
+       WHERE "id" = $1 AND "deleted_at" IS NULL`, 
+      [id]
+    );
   }
 
-  async findRefundById(id: string): Promise<Refund | null> {
-    const refund = await queryOne<Refund>('SELECT * FROM "public"."refund" WHERE "id" = $1', [id]);
-    return refund || null;
-  }
-
-  async findRefundsByPaymentId(paymentId: string): Promise<Refund[]> {
-    const refunds = await query<Refund[]>(
-      'SELECT * FROM "public"."refund" WHERE "paymentId" = $1 ORDER BY "createdAt" DESC',
-      [paymentId]
+  async findRefundsByTransactionId(transactionId: string): Promise<PaymentRefund[]> {
+    const selectFields = this.generateRefundSelectFields();
+    const refunds = await query<PaymentRefund[]>(
+      `SELECT ${selectFields} FROM "public"."payment_refund" 
+       WHERE "transaction_id" = $1 AND "deleted_at" IS NULL 
+       ORDER BY "created_at" DESC`, 
+      [transactionId]
     );
     return refunds || [];
   }
 
-  async createRefund(refund: Omit<Refund, 'id' | 'createdAt' | 'updatedAt'>): Promise<Refund> {
-    const now = new Date();
-    const result = await queryOne<Refund>(
-      `INSERT INTO "public"."refund" 
-      ("paymentId", "amount", "reason", "status", "transactionId", "gatewayResponse", "errorMessage", "metadata", "createdAt", "updatedAt") 
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) 
-      RETURNING *`,
-      [refund.paymentId, refund.amount, refund.reason, refund.status, refund.transactionId,
-       refund.gatewayResponse, refund.errorMessage, refund.metadata, now, now]
-    );
+  async createRefund(refund: Omit<PaymentRefund, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>): Promise<PaymentRefund> {
+    const now = unixTimestamp();
     
-    if (!result) {
-      throw new Error('Failed to create refund');
-    }
-    
-    // Update the refunded amount on the payment
-    const payment = await this.findPaymentById(refund.paymentId);
-    if (payment) {
-      const currentRefundedAmount = payment.refundedAmount || 0;
-      const newRefundedAmount = currentRefundedAmount + refund.amount;
-      
-      // Set payment status to refunded if full amount is refunded, otherwise partially_refunded
-      let newStatus: Payment['status'] = payment.status;
-      if (newRefundedAmount >= payment.amount) {
-        newStatus = 'refunded';
-      } else if (newRefundedAmount > 0) {
-        newStatus = 'partially_refunded';
-      }
-      
-      await this.updatePaymentStatus(payment.id, newStatus, {
-        refundedAmount: newRefundedAmount
-      });
-    }
-    
-    return result;
-  }
+    // Map TS properties to DB columns
+    const columnMap: Record<string, any> = {
+      'created_at': now,
+      'updated_at': now
+    };
 
-  async updateRefundStatus(id: string, status: Refund['status'], updates: Partial<Pick<Refund, 'transactionId' | 'gatewayResponse' | 'errorMessage' | 'metadata'>> = {}): Promise<Refund> {
-    const updateFields: string[] = ['"status" = $1', '"updatedAt" = $2'];
-    const values: any[] = [status, new Date()];
-    let paramCount = 3;
-    
-    // Add optional fields if provided
-    Object.entries(updates).forEach(([key, value]) => {
+    for (const [key, value] of Object.entries(refund)) {
       if (value !== undefined) {
-        updateFields.push(`"${key}" = $${paramCount++}`);
-        values.push(value);
+        const dbColumn = this.tsToDbRefund(key);
+        columnMap[dbColumn] = value;
       }
-    });
+    }
     
-    values.push(id);
+    const columns = Object.keys(columnMap);
+    const values = Object.values(columnMap);
+    const placeholders = columns.map((_, i) => `$${i + 1}`).join(', ');
     
-    const result = await queryOne<Refund>(
-      `UPDATE "public"."refund" 
-      SET ${updateFields.join(', ')} 
-      WHERE "id" = $${paramCount - 1} 
-      RETURNING *`,
+    const selectFields = this.generateRefundSelectFields();
+    
+    const result = await queryOne<PaymentRefund>(
+      `INSERT INTO "public"."payment_refund" (${columns.map(c => `"${c}"`).join(', ')}) 
+       VALUES (${placeholders}) 
+       RETURNING ${selectFields}`,
       values
     );
     
     if (!result) {
-      throw new Error(`Failed to update refund status for ID ${id}`);
+      throw new Error('Failed to create payment refund');
+    }
+    
+    // Update the transaction's refunded amount
+    await query(
+      `UPDATE "public"."payment_transaction" 
+       SET "refunded_amount" = COALESCE("refunded_amount", 0) + $1,
+           "status" = CASE
+             WHEN COALESCE("refunded_amount", 0) + $1 >= "amount" THEN 'refunded'::payment_status
+             ELSE 'partially_refunded'::payment_status
+           END,
+           "updated_at" = $2
+       WHERE "id" = $3 AND "deleted_at" IS NULL`,
+      [refund.amount, now, refund.transactionId]
+    );
+    
+    return result;
+  }
+
+  async updateRefund(id: string, refund: Partial<Omit<PaymentRefund, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>>): Promise<PaymentRefund> {
+    const now = unixTimestamp();
+    
+    // Map TS properties to DB columns
+    const updateData: Record<string, any> = { 'updated_at': now };
+
+    for (const [key, value] of Object.entries(refund)) {
+      if (value !== undefined) {
+        const dbColumn = this.tsToDbRefund(key);
+        updateData[dbColumn] = value;
+      }
+    }
+    
+    if (Object.keys(updateData).length === 1) { // Only updatedAt
+      // No updates needed, just return the existing refund
+      const existingRefund = await this.findRefundById(id);
+      if (!existingRefund) {
+        throw new Error('Payment refund not found');
+      }
+      return existingRefund;
+    }
+    
+    // Prepare SQL statement
+    const setStatements = Object.keys(updateData).map((key, i) => `"${key}" = $${i + 1}`);
+    const values = [...Object.values(updateData), id];
+    
+    const selectFields = this.generateRefundSelectFields();
+    
+    const result = await queryOne<PaymentRefund>(
+      `UPDATE "public"."payment_refund" 
+       SET ${setStatements.join(', ')} 
+       WHERE "id" = $${values.length} AND "deleted_at" IS NULL
+       RETURNING ${selectFields}`,
+      values
+    );
+    
+    if (!result) {
+      throw new Error('Failed to update payment refund');
     }
     
     return result;
   }
 }
+
+export default new PaymentRepo();

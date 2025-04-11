@@ -1,21 +1,17 @@
 import express from 'express';
-import { PaymentPublicController } from './controllers/paymentPublicController';
+import paymentPublicController from './controllers/paymentPublicController';
 
 const router = express.Router();
-const paymentPublicController = new PaymentPublicController();
 
 // Public payment method routes
 router.get('/payment-methods', paymentPublicController.getActivePaymentMethods);
 
-// Customer payment method management
-router.get('/customers/:customerId/payment-methods', paymentPublicController.getCustomerPaymentMethods);
-router.post('/customers/:customerId/payment-methods', paymentPublicController.addCustomerPaymentMethod);
-router.put('/customer-payment-methods/:id/set-default', paymentPublicController.setDefaultPaymentMethod);
-router.delete('/customer-payment-methods/:id', paymentPublicController.removePaymentMethod);
+// Customer transaction routes
+router.get('/customers/:customerId/transactions', paymentPublicController.getCustomerTransactions);
 
-// Payment processing
-router.post('/payments/process', paymentPublicController.processPayment);
-router.get('/payments/:id/receipt', paymentPublicController.getPaymentReceipt);
-router.get('/customers/:customerId/payments', paymentPublicController.getCustomerPayments);
+// Transaction routes
+router.get('/transactions/:transactionId', paymentPublicController.getTransactionDetails);
+router.get('/transactions/:transactionId/refunds', paymentPublicController.getTransactionRefunds);
+router.post('/transactions/:transactionId/refunds', paymentPublicController.requestRefund);
 
 export default router;

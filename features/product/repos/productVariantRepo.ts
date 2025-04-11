@@ -244,34 +244,71 @@ export class ProductVariantRepo {
 
   /**
    * Soft delete a product variant
+   * Prevents deleting the master variant (default variant) of a product
    */
   async delete(id: string): Promise<boolean> {
-    const now = new Date();
-    
-    // Get the variant before deleting
+    // First check if this is a default (master) variant
     const variant = await this.findById(id);
+    
     if (!variant) {
       return false;
     }
     
-    // Update deletedAt timestamp
-    const sql = `
-      UPDATE "public"."product_variant" 
-      SET "deleted_at" = $1, "updated_at" = $1 
-      WHERE "id" = $2 AND "deleted_at" IS NULL
-    `;
-    
-    const result = await query(sql, [now, id]);
-    
-    // If this was the default variant, set another one as default
+    // Prevent deletion of the master variant
     if (variant.isDefault) {
-      const otherVariants = await this.findByProductId(variant.productId);
-      if (otherVariants.length > 0) {
-        await this.update(otherVariants[0].id, { isDefault: true });
-      }
+      throw new Error('Cannot delete the master variant of a product. The master variant is required.');
     }
     
-    return result !== null;
+    const now = new Date();
+    
+    await query(
+      `UPDATE "public"."product_variant" SET "deleted_at" = $1, "updated_at" = $2 WHERE "id" = $3`,
+      [now, now, id]
+    );
+    
+    return true;
+  }
+
+  /**
+   * Ensure a master variant exists for a product
+   * If no master variant exists, create one based on product data
+   */
+  async ensureMasterVariantExists(product: any): Promise<ProductVariant | null> {
+    // Check if a default variant already exists
+    const defaultVariant = await this.findDefaultForProduct(product.id);
+    
+    if (defaultVariant) {
+      return defaultVariant;
+    }
+    
+    // No master variant exists, create one
+    try {
+      const masterVariant = {
+        productId: product.id,
+        name: product.name,
+        sku: product.sku || `${product.id}-master`,
+        price: product.basePrice || 0,
+        compareAtPrice: product.salePrice,
+        costPrice: product.cost,
+        inventory: 0,
+        inventoryPolicy: InventoryPolicy.CONTINUE,
+        weight: product.weight,
+        weightUnit: product.weightUnit,
+        length: product.length,
+        width: product.width,
+        height: product.height,
+        dimensionUnit: product.dimensionUnit,
+        isDefault: true,  // This is the master variant
+        position: 0,      // First position
+        options: [],      // No options for master variant
+        isActive: true
+      };
+      
+      return await this.create(masterVariant);
+    } catch (error) {
+      console.error(`Failed to create master variant for product ${product.id}:`, error);
+      return null;
+    }
   }
 
   /**

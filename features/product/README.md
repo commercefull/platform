@@ -26,11 +26,16 @@ The product feature is a comprehensive module that provides full e-commerce prod
    - Admin creates a base product with core attributes (name, description, type)
    - Product is assigned a unique ID and stored with initial draft status
    - Optional primary image can be associated with the product
+   - **Every product automatically has a master variant created with it**
 
 2. **Variant Management**:
-   - Products can have multiple variants (e.g., different sizes/colors)
+   - **Master Variant Architecture**: Every product has at least one variant (the master variant)
+     - The master variant contains the default configuration of the product
+     - It serves as the fallback when no specific variant is selected
+     - Core product attributes (price, inventory, etc.) are stored on the master variant
+   - Additional variants can be created for different configurations (e.g., different sizes/colors)
    - Each variant has its own inventory tracking, pricing, and attributes
-   - Variants can be reordered, set as default, or removed
+   - Variants can be reordered, but the master variant always remains essential to the product
 
 3. **Image Management**:
    - Multiple images can be associated with a product or specific variants
@@ -38,7 +43,7 @@ The product feature is a comprehensive module that provides full e-commerce prod
    - When a primary image is deleted, the system automatically promotes another image
 
 4. **Inventory Control**:
-   - Inventory is tracked at the variant level
+   - Inventory is tracked at the variant level (including the master variant)
    - Three inventory policies are supported:
      - **Deny**: Prevents purchase when out of stock
      - **Continue**: Allows purchase regardless of inventory
@@ -52,7 +57,8 @@ The product feature is a comprehensive module that provides full e-commerce prod
 
 2. **Product Details**:
    - Detailed product information including description, pricing, and images
-   - Variant selection (if product has variants)
+   - Variant selection (if product has variants beyond the master variant)
+   - When no specific variant is selected, the master variant's details are displayed
    - Related products suggestions
 
 ## Technical Implementation
@@ -60,6 +66,7 @@ The product feature is a comprehensive module that provides full e-commerce prod
 ### Database Design
 - Normalized relational schema with appropriate foreign key relationships
 - Product variants and images are separate tables with references to parent products
+- The master variant is marked with an `isDefault` flag in the database
 - Support for soft deletion (via deletedAt fields) to maintain data integrity
 
 ### API Patterns
@@ -76,6 +83,7 @@ The product feature is a comprehensive module that provides full e-commerce prod
 ### Basket Feature Integration
 The product feature integrates seamlessly with the basket feature:
 - When adding items to the basket, product and variant data is validated
+- If no specific variant is selected, the master variant is used
 - Inventory checks are performed based on the variant's inventory policy
 - Product images are available for display in the basket
 

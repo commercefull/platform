@@ -17,6 +17,9 @@ router.post("/", productController.createProduct.bind(productController));
 // GET: Get a single product by ID
 router.get("/:id", productController.getProductById.bind(productController));
 
+// GET: Get a product with all its variants
+router.get("/:id/with-variants", productController.getProductWithVariants.bind(productController));
+
 // PUT: Update a product
 router.put("/:id", productController.updateProduct.bind(productController));
 

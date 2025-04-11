@@ -53,7 +53,7 @@ export class ProductPublicController {
 
       // Return data as JSON or render template depending on request's Accept header
       if (req.headers.accept?.includes('application/json')) {
-        return successResponse(res, {
+        successResponse(res, {
           products,
           pagination: {
             total,
@@ -65,7 +65,7 @@ export class ProductPublicController {
           }
         });
       } else {
-        return storefrontRespond(req, res, "product/plp", {
+        storefrontRespond(req, res, "product/plp", {
           products,
           pagination: {
             total,
@@ -81,10 +81,10 @@ export class ProductPublicController {
       }
     } catch (error) {
       if (req.headers.accept?.includes('application/json')) {
-        return errorResponse(res, (error as Error).message);
+        errorResponse(res, (error as Error).message);
       } else {
         req.flash?.("error", (error as Error).message);
-        return res.redirect("/products");
+        res.redirect("/products");
       }
     }
   }
@@ -100,10 +100,12 @@ export class ProductPublicController {
       
       if (!product || product.status !== ProductStatus.ACTIVE || product.visibility !== ProductVisibility.VISIBLE) {
         if (req.headers.accept?.includes('application/json')) {
-          return errorResponse(res, 'Product not found', 404);
+          errorResponse(res, 'Product not found', 404);
+          return;
         } else {
           req.flash?.("error", "Product not found");
-          return res.redirect("/products");
+          res.redirect("/products");
+          return;
         }
       }
       
@@ -112,9 +114,9 @@ export class ProductPublicController {
       
       // Return data as JSON or render template depending on request's Accept header
       if (req.headers.accept?.includes('application/json')) {
-        return successResponse(res, { product, relatedProducts });
+        successResponse(res, { product, relatedProducts });
       } else {
-        return storefrontRespond(req, res, "product/pdp", {
+        storefrontRespond(req, res, "product/pdp", {
           product,
           relatedProducts,
           successMsg: req.flash?.("success")?.[0],
@@ -123,10 +125,10 @@ export class ProductPublicController {
       }
     } catch (error) {
       if (req.headers.accept?.includes('application/json')) {
-        return errorResponse(res, (error as Error).message);
+        errorResponse(res, (error as Error).message);
       } else {
         req.flash?.("error", (error as Error).message);
-        return res.redirect("/products");
+        res.redirect("/products");
       }
     }
   }
@@ -169,7 +171,7 @@ export class ProductPublicController {
       
       // Return data as JSON or render template depending on request's Accept header
       if (req.headers.accept?.includes('application/json')) {
-        return successResponse(res, {
+        successResponse(res, {
           products,
           category: { id: categoryId, slug },
           pagination: {
@@ -182,7 +184,7 @@ export class ProductPublicController {
           }
         });
       } else {
-        return storefrontRespond(req, res, "product/category", {
+        storefrontRespond(req, res, "product/category", {
           products,
           category: { id: categoryId, slug },
           pagination: {
@@ -199,10 +201,10 @@ export class ProductPublicController {
       }
     } catch (error) {
       if (req.headers.accept?.includes('application/json')) {
-        return errorResponse(res, (error as Error).message);
+        errorResponse(res, (error as Error).message);
       } else {
         req.flash?.("error", (error as Error).message);
-        return res.redirect("/products");
+        res.redirect("/products");
       }
     }
   }
@@ -221,7 +223,7 @@ export class ProductPublicController {
       } = req.query;
       
       if (!q) {
-        return res.redirect("/products");
+        res.redirect("/products");
       }
       
       const filterOptions: ProductFilterOptions = {
@@ -245,7 +247,7 @@ export class ProductPublicController {
       
       // Return data as JSON or render template depending on request's Accept header
       if (req.headers.accept?.includes('application/json')) {
-        return successResponse(res, {
+        successResponse(res, {
           products,
           query: q,
           pagination: {
@@ -258,7 +260,7 @@ export class ProductPublicController {
           }
         });
       } else {
-        return storefrontRespond(req, res, "product/search", {
+        storefrontRespond(req, res, "product/search", {
           products,
           query: q,
           pagination: {
@@ -275,10 +277,10 @@ export class ProductPublicController {
       }
     } catch (error) {
       if (req.headers.accept?.includes('application/json')) {
-        return errorResponse(res, (error as Error).message);
+        errorResponse(res, (error as Error).message);
       } else {
         req.flash?.("error", (error as Error).message);
-        return res.redirect("/products");
+        res.redirect("/products");
       }
     }
   }

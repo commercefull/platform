@@ -5,21 +5,38 @@ The payment feature provides comprehensive payment processing capabilities for t
 ## Core Architecture
 
 ### 1. Data Models & Repositories
-- **Payment Method Repository**: Manages available payment methods (credit card, PayPal, etc.)
-- **Payment Gateway Repository**: Handles payment gateway configurations (Stripe, PayPal, etc.)
-- **Customer Payment Method Repository**: Stores customer's saved payment methods
-- **Payment Repository**: Processes and tracks payment transactions
-- **Refund Repository**: Manages payment refunds and credits
+- **Payment Repository**: A unified repository that manages:
+  - **Payment Gateways**: Configurations for payment providers (Stripe, PayPal, etc.)
+  - **Payment Method Configs**: Settings for payment methods (credit card, PayPal, etc.)
+  - **Payment Transactions**: Records of payment transactions and their statuses
+  - **Payment Refunds**: Tracking of refund requests and processing
+
+The repository follows the platform's standardized database naming convention, using `snake_case` for database columns while maintaining `camelCase` for TypeScript interfaces with explicit mapping between them.
 
 ### 2. Controllers
-- **Payment Admin Controller**: Admin-facing operations for payment method and gateway configuration
-- **Payment Public Controller**: Customer-facing payment processing and information
-- **Subscription Controller**: Handling subscription-based payments and recurring billing
+- **Payment Admin Controller**: Admin-facing operations for:
+  - Gateway management (per merchant)
+  - Payment method configuration
+  - Transaction oversight
+  - Refund processing
+- **Payment Public Controller**: Customer-facing operations for:
+  - Viewing available payment methods
+  - Managing transactions
+  - Viewing transaction history
+  - Requesting refunds
 
-### 3. Services
-- **Payment Processing Service**: Handles payment gateway communication
-- **Fraud Detection Service**: Evaluates transactions for potential fraud
-- **Payment Method Validation**: Verifies payment method information
+### 3. Routers
+- **Public Router (`router.ts`)**: Exposes customer-facing endpoints:
+  - `/payment-methods`: Lists available payment methods
+  - `/customers/:customerId/transactions`: Customer transaction history
+  - `/transactions/:transactionId`: Transaction details
+  - `/transactions/:transactionId/refunds`: Refund management
+  
+- **Admin Router (`routerAdmin.ts`)**: Provides merchant administration endpoints:
+  - `/merchants/:merchantId/gateways`: Gateway management
+  - `/merchants/:merchantId/method-configs`: Payment method configuration
+  - `/transactions/:id`: Transaction management
+  - `/refunds/:id`: Refund processing
 
 ## Key Workflows
 
@@ -27,86 +44,66 @@ The payment feature provides comprehensive payment processing capabilities for t
 1. **Gateway Configuration**:
    - Merchant sets up payment gateway credentials (API keys, endpoints)
    - Configures supported payment methods per gateway
-   - Customizes checkout flow and payment form appearance
+   - Customizes checkout settings
    - Sets processing fees and currency handling
 
-2. **Payment Method Management**:
+2. **Payment Method Configuration**:
    - Enables/disables specific payment methods
    - Sets method-specific rules (minimum/maximum amounts)
    - Configures display order and payment icons
    - Sets country and currency restrictions
 
 ### Payment Processing
-1. **Payment Capture**:
-   - Can be configured for automatic or manual capture
-   - Supports authorization holds for delayed capture
-   - Handles 3D Secure authentication when required
-   - Manages payment validation and error handling
+1. **Transaction Management**:
+   - Supports multiple transaction statuses (pending, authorized, paid, etc.)
+   - Handles payment method details and validation
+   - Manages capture process and timestamps
+   - Tracks transaction metadata and errors
 
 2. **Refunds & Voids**:
    - Full or partial refund processing
-   - Refund reason tracking and reporting
-   - Automatic or manual refund approvals
-   - Crediting to original payment method
-
-### Subscription Management
-1. **Plan Management**:
-   - Creation of subscription plans with various billing cycles
-   - Trial period configurations
-   - Setup fee handling
-   - Grace period and auto-renewal settings
-
-2. **Subscription Processing**:
-   - Recurring billing automation
-   - Failed payment handling and retry logic
-   - Subscription status management (active, paused, canceled)
-   - Proration for mid-cycle changes
+   - Refund reason tracking
+   - Multiple refund statuses (pending, processing, completed, failed)
+   - Automatic tracking of refunded amounts per transaction
 
 ### Customer Experience
-1. **Saved Payment Methods**:
-   - Secure storage of payment tokens
-   - Default payment method selection
-   - Card expiration management
-   - Multiple payment method support
+1. **Payment Method Selection**:
+   - Filtered display of available payment methods
+   - Support for payment method-specific requirements
+   - Clear presentation of payment options based on merchant configuration
 
-2. **Checkout Integration**:
-   - Seamless integration with checkout flow
-   - Guest and logged-in payment handling
-   - Real-time payment method validation
-   - Mobile-friendly payment forms
+2. **Transaction History**:
+   - Customer can view their transaction history
+   - Access detailed information about specific transactions
+   - View refund status for transactions
+   - Request refunds when applicable
 
 ## Technical Implementation
 
+### Database Structure
+- **payment_gateway**: Stores gateway configurations per merchant
+- **payment_method_config**: Defines available payment methods and their settings
+- **payment_transaction**: Records all payment transactions and their status
+- **payment_refund**: Tracks refund requests and processing
+
 ### Security Features
 - PCI compliance through tokenization
-- Sensitive data encryption
-- Webhook signature validation
-- Rate limiting for payment endpoints
-
-### Fraud Prevention
-- Address Verification Service (AVS)
-- Card Verification Value (CVV) validation
-- Velocity checking for suspicious patterns
-- IP-based geolocation verification
+- Sensitive data encryption (API keys, secrets)
+- Proper handling of payment credentials
+- Soft deletion pattern for all records
 
 ### Integration Points
 - Connects with order management for payment status updates
-- Integrates with notification system for payment receipts
-- Works with tax calculation for accurate payment amounts
-- Links to customer profiles for payment method management
+- Works with merchant settings for payment configuration
+- Links to customer profiles for transaction history
 
 ### Error Handling
-- Structured error responses from payment gateways
-- Graceful failure handling
-- Clear customer-facing error messages
-- Detailed internal logging for troubleshooting
+- Structured error responses for failed payments
+- Validation of refund requests against transaction state
+- Clear error messages for both customers and administrators
 
-## Extensibility
-
-The payment feature is designed for extensibility:
-- Pluggable architecture for adding new payment gateways
-- Support for custom payment methods
-- Flexible metadata fields for gateway-specific data
-- Configurable webhook handling for external integrations
-
-This architecture ensures the payment feature can handle diverse payment scenarios while maintaining security, reliability, and a smooth customer experience.
+## Future Enhancements
+- Subscription management capabilities
+- Enhanced fraud detection mechanisms
+- Additional payment method integrations
+- Multi-currency support improvements

@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import productRepo, { ProductStatus, ProductVisibility, ProductCreateProps, ProductUpdateProps, ProductFilterOptions } from "../repos/productRepo";
+import productVariantRepo, { InventoryPolicy } from "../repos/productVariantRepo";
 import { generateSlug } from "../../../libs/slug";
 import { validateRequest } from "../../../libs/validation";
 import { errorResponse, successResponse } from "../../../libs/apiResponse";
@@ -139,7 +140,18 @@ export class ProductController {
       
       const product = await productRepo.create(productData);
       
-      successResponse(res, { product }, 201);
+      // Create master variant for the product
+      const masterVariant = await productVariantRepo.ensureMasterVariantExists(product);
+      
+      if (!masterVariant) {
+        // Log the error but don't fail the product creation
+        console.error(`Warning: Failed to create master variant for product ${product.id}`);
+      }
+      
+      successResponse(res, { 
+        product,
+        masterVariant 
+      }, 201);
     } catch (error) {
       errorResponse(res, (error as Error).message);
     }
@@ -179,6 +191,42 @@ export class ProductController {
       if (req.body.height) productData.height = Number(req.body.height);
       
       const product = await productRepo.update(id, productData);
+      
+      // Ensure master variant exists and update it with new product data if needed
+      const masterVariant = await productVariantRepo.ensureMasterVariantExists(product);
+      
+      // If master variant exists and product data was updated, sync relevant fields
+      if (masterVariant && (
+          req.body.name || 
+          req.body.basePrice !== undefined || 
+          req.body.salePrice !== undefined || 
+          req.body.cost !== undefined ||
+          req.body.weight !== undefined ||
+          req.body.weightUnit !== undefined ||
+          req.body.length !== undefined ||
+          req.body.width !== undefined ||
+          req.body.height !== undefined ||
+          req.body.dimensionUnit !== undefined
+        )) {
+        // Update master variant with new product data
+        const updateData: any = {};
+        
+        if (req.body.name) updateData.name = req.body.name;
+        if (req.body.basePrice !== undefined) updateData.price = Number(req.body.basePrice);
+        if (req.body.salePrice !== undefined) updateData.compareAtPrice = Number(req.body.salePrice);
+        if (req.body.cost !== undefined) updateData.costPrice = Number(req.body.cost);
+        if (req.body.weight !== undefined) updateData.weight = Number(req.body.weight);
+        if (req.body.weightUnit !== undefined) updateData.weightUnit = req.body.weightUnit;
+        if (req.body.length !== undefined) updateData.length = Number(req.body.length);
+        if (req.body.width !== undefined) updateData.width = Number(req.body.width);
+        if (req.body.height !== undefined) updateData.height = Number(req.body.height);
+        if (req.body.dimensionUnit !== undefined) updateData.dimensionUnit = req.body.dimensionUnit;
+        
+        // Only update if there are fields to update
+        if (Object.keys(updateData).length > 0) {
+          await productVariantRepo.update(masterVariant.id, updateData);
+        }
+      }
       
       successResponse(res, { product });
     } catch (error) {
@@ -325,6 +373,40 @@ export class ProductController {
           hasNextPage,
           hasPrevPage
         }
+      });
+    } catch (error) {
+      errorResponse(res, (error as Error).message);
+    }
+  }
+
+  /**
+   * Get product by ID with all its variants
+   */
+  async getProductWithVariants(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      
+      const product = await productRepo.findById(id);
+      
+      if (!product) {
+        errorResponse(res, 'Product not found', 404);
+        return;
+      }
+      
+      // Get all variants for the product
+      const variants = await productVariantRepo.findByProductId(id);
+      
+      // If no master variant exists, create one on-the-fly
+      if (!variants.some(v => v.isDefault)) {
+        const masterVariant = await productVariantRepo.ensureMasterVariantExists(product);
+        if (masterVariant) {
+          variants.unshift(masterVariant); // Add master variant at the beginning
+        }
+      }
+      
+      successResponse(res, { 
+        product,
+        variants 
       });
     } catch (error) {
       errorResponse(res, (error as Error).message);
