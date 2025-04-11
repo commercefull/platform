@@ -68,6 +68,7 @@
     "@types/nodemailer": "^6.4.17",
     "@types/passport": "^1.0.16",
     "@types/pg": "^8.11.10",
+    "axios": "^1.8.4",
     "cypress": "^13.17.0",
     "cypress-cucumber-preprocessor": "^4.3.1",
     "esbuild": "^0.25.1",
