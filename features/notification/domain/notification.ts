@@ -1,5 +1,6 @@
 /**
  * Base notification type that all specific notifications will extend
+ * These values are stored in the database as enum values, so we keep them in snake_case
  */
 export type NotificationType = 
   | 'account_registration'
@@ -19,19 +20,41 @@ export type NotificationType =
   | 'coupon_offer'
   | 'promotion';
 
+/**
+ * Database enum values are kept in snake_case
+ */
 export type NotificationChannel = 'email' | 'sms' | 'push' | 'in_app';
 
+export type NotificationPriority = 'low' | 'normal' | 'high' | 'urgent';
+
+export type NotificationUserType = 'customer' | 'merchant' | 'admin';
+
+/**
+ * BaseNotification interface representing the TypeScript model for notifications
+ * Uses camelCase property names according to platform standards
+ */
 export interface BaseNotification {
   id?: string;
   userId: string;
+  userType: NotificationUserType;
   type: NotificationType;
   title: string;
   content: string;
-  channel: NotificationChannel[];
+  channel: NotificationChannel | NotificationChannel[];
   isRead: boolean;
-  createdAt: string;
+  readAt?: string;
   sentAt?: string;
+  deliveredAt?: string;
+  expiresAt?: string;
+  actionUrl?: string;
+  actionLabel?: string;
+  imageUrl?: string;
+  priority?: NotificationPriority;
+  category?: string;
+  data?: Record<string, unknown>;
   metadata?: Record<string, unknown>;
+  createdAt: string;
+  updatedAt?: string;
 }
 
 /**
@@ -46,15 +69,24 @@ export const formatDate = (date: Date = new Date()): string => {
  */
 export abstract class NotificationBuilder<T> {
   protected userId: string;
+  protected userType: NotificationUserType;
   protected type!: NotificationType;  // Using definite assignment assertion
   protected title!: string;           // Using definite assignment assertion
   protected content!: string;         // Using definite assignment assertion
   protected channel: NotificationChannel[];
+  protected priority: NotificationPriority;
   protected metadata?: Record<string, unknown>;
   
-  constructor(userId: string, channels: NotificationChannel[] = ['email']) {
+  constructor(
+    userId: string, 
+    userType: NotificationUserType = 'customer',
+    channels: NotificationChannel[] = ['email'],
+    priority: NotificationPriority = 'normal'
+  ) {
     this.userId = userId;
+    this.userType = userType;
     this.channel = channels;
+    this.priority = priority;
   }
 
   abstract buildTitle(): string;
@@ -64,11 +96,13 @@ export abstract class NotificationBuilder<T> {
   build(): BaseNotification {
     return {
       userId: this.userId,
+      userType: this.userType,
       type: this.type,
       title: this.buildTitle(),
       content: this.buildContent(),
       channel: this.channel,
       isRead: false,
+      priority: this.priority,
       createdAt: formatDate(),
       metadata: this.getMetadata()
     };
