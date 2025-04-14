@@ -1,19 +1,18 @@
 import { AxiosInstance } from 'axios';
 import { createTestClient, loginTestUser } from '../testUtils';
-import { v4 as uuidv4 } from 'uuid';
+import { Product, ProductStatus, ProductVisibility } from '../../../features/product/repos/productRepo';
 
 // Common test data for product
-export const testProduct = {
+export const testProduct: Partial<Product> = {
   name: 'Test Product',
   description: 'Test product for integration tests',
   slug: `test-product-${Math.floor(Math.random() * 10000)}`,
-  status: 'active',
-  visibility: 'visible',
+  status: ProductStatus.ACTIVE,
+  visibility: ProductVisibility.VISIBLE,
   basePrice: 99.99,
   salePrice: 79.99,
   cost: 50.00,
   sku: `TST${Math.floor(Math.random() * 10000)}`,
-  barcode: `123456789${Math.floor(Math.random() * 10000)}`,
   weight: 1.5,
   length: 10,
   width: 5,
@@ -66,10 +65,10 @@ export const testCategory = {
 
 // Helper function to create a test product
 export async function createTestProduct(client: AxiosInstance, adminToken: string, categoryId?: string) {
-  const productData = { ...testProduct };
+  const productData: Partial<Product> = { ...testProduct };
   
   if (categoryId) {
-    productData.categoryIds = [categoryId];
+    productData.categoryId = categoryId;
   }
   
   const response = await client.post('/api/admin/products', productData, {
