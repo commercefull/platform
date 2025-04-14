@@ -15,54 +15,54 @@ exports.up = (pgm) => {
     name: { type: "varchar(100)", notNull: true },
     code: { type: "varchar(50)", notNull: true, unique: true },
     description: { type: "text" },
-    shortDescription: { type: "varchar(255)" },
-    isActive: { type: "boolean", notNull: true, default: true },
-    isPublic: { type: "boolean", notNull: true, default: true }, // Whether visible to public
-    isDefault: { type: "boolean", notNull: true, default: false }, // Default for new members
+    short_description: { type: "varchar(255)" },
+    is_active: { type: "boolean", notNull: true, default: true },
+    is_public: { type: "boolean", notNull: true, default: true }, // Whether visible to public
+    is_default: { type: "boolean", notNull: true, default: false }, // Default for new members
     priority: { type: "integer", default: 0 }, // Display order
     level: { type: "integer", default: 1 }, // Membership tier level (1, 2, 3, etc.)
-    trialDays: { type: "integer", default: 0 }, // Free trial period in days
+    trial_days: { type: "integer", default: 0 }, // Free trial period in days
     price: { type: "decimal(10,2)", notNull: true }, // Regular price
-    salePrice: { type: "decimal(10,2)" }, // Discounted price
-    setupFee: { type: "decimal(10,2)", default: 0 }, // One-time setup fee
+    sale_price: { type: "decimal(10,2)" }, // Discounted price
+    setup_fee: { type: "decimal(10,2)", default: 0 }, // One-time setup fee
     currency: { type: "varchar(3)", notNull: true, default: 'USD' },
-    billingCycle: { 
+    billing_cycle: { 
       type: "varchar(20)", 
       notNull: true, 
       default: 'monthly',
-      check: "billingCycle IN ('daily', 'weekly', 'monthly', 'quarterly', 'biannual', 'annual', 'lifetime')" 
+      check: "billing_cycle IN ('daily', 'weekly', 'monthly', 'quarterly', 'biannual', 'annual', 'lifetime')" 
     },
-    billingPeriod: { type: "integer", default: 1 }, // Number of billing cycle units
-    maxMembers: { type: "integer" }, // Maximum allowed members (for group plans)
-    autoRenew: { type: "boolean", notNull: true, default: true }, // Whether to auto-renew
+    billing_period: { type: "integer", default: 1 }, // Number of billing cycle units
+    max_members: { type: "integer" }, // Maximum allowed members (for group plans)
+    auto_renew: { type: "boolean", notNull: true, default: true }, // Whether to auto-renew
     duration: { type: "integer" }, // Total duration in days (NULL = unlimited)
-    gracePeriodsAllowed: { type: "integer", default: 0 }, // Number of payment grace periods
-    gracePeriodDays: { type: "integer", default: 0 }, // Days in each grace period
-    membershipImage: { type: "text" }, // Badge or icon for membership
-    publicDetails: { type: "jsonb" }, // Publicly visible details
-    privateMeta: { type: "jsonb" }, // Admin-only metadata
-    visibilityRules: { type: "jsonb" }, // Rules for when plan is visible
-    availabilityRules: { type: "jsonb" }, // Rules for when plan is available
-    customFields: { type: "jsonb" }, // Custom fields for the plan
+    grace_periods_allowed: { type: "integer", default: 0 }, // Number of payment grace periods
+    grace_period_days: { type: "integer", default: 0 }, // Days in each grace period
+    membership_image: { type: "text" }, // Badge or icon for membership
+    public_details: { type: "jsonb" }, // Publicly visible details
+    private_meta: { type: "jsonb" }, // Admin-only metadata
+    visibility_rules: { type: "jsonb" }, // Rules for when plan is visible
+    availability_rules: { type: "jsonb" }, // Rules for when plan is available
+    custom_fields: { type: "jsonb" }, // Custom fields for the plan
     created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
     updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    createdBy: { type: "uuid" }
+    created_by: { type: "uuid" }
   });
 
   // Create indexes for membership plans
   pgm.createIndex("membership_plan", "code");
-  pgm.createIndex("membership_plan", "isActive");
-  pgm.createIndex("membership_plan", "isPublic");
-  pgm.createIndex("membership_plan", "isDefault");
+  pgm.createIndex("membership_plan", "is_active");
+  pgm.createIndex("membership_plan", "is_public");
+  pgm.createIndex("membership_plan", "is_default");
   pgm.createIndex("membership_plan", "priority");
   pgm.createIndex("membership_plan", "level");
   pgm.createIndex("membership_plan", "price");
-  pgm.createIndex("membership_plan", "billingCycle");
+  pgm.createIndex("membership_plan", "billing_cycle");
 
   // Only one default plan allowed
-  pgm.createIndex("membership_plan", "isDefault", { 
+  pgm.createIndex("membership_plan", "is_default", { 
     unique: true,
-    where: "isDefault = true"
+    where: "is_default = true"
   });
 
   // Create membership benefit table
@@ -71,19 +71,19 @@ exports.up = (pgm) => {
     name: { type: "varchar(100)", notNull: true },
     code: { type: "varchar(50)", notNull: true, unique: true },
     description: { type: "text" },
-    shortDescription: { type: "varchar(255)" },
-    isActive: { type: "boolean", notNull: true, default: true },
+    short_description: { type: "varchar(255)" },
+    is_active: { type: "boolean", notNull: true, default: true },
     priority: { type: "integer", default: 0 }, // Display order
-    benefitType: { 
+    benefit_type: { 
       type: "varchar(50)", 
       notNull: true, 
-      check: "benefitType IN ('discount', 'free_shipping', 'content_access', 'priority_support', 'reward_points', 'gift', 'early_access', 'custom')" 
+      check: "benefit_type IN ('discount', 'free_shipping', 'content_access', 'priority_support', 'reward_points', 'gift', 'early_access', 'custom')" 
     },
-    valueType: { 
+    value_type: { 
       type: "varchar(20)", 
       notNull: true, 
       default: 'fixed',
-      check: "valueType IN ('fixed', 'percentage', 'boolean', 'text', 'json')" 
+      check: "value_type IN ('fixed', 'percentage', 'boolean', 'text', 'json')" 
     },
     value: { type: "jsonb" }, // Configuration of the benefit
     icon: { type: "text" }, // Icon URL for the benefit
@@ -91,109 +91,109 @@ exports.up = (pgm) => {
     metadata: { type: "jsonb" },
     created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
     updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    createdBy: { type: "uuid" }
+    created_by: { type: "uuid" }
   });
 
   // Create indexes for membership benefits
   pgm.createIndex("membership_benefit", "code");
-  pgm.createIndex("membership_benefit", "isActive");
+  pgm.createIndex("membership_benefit", "is_active");
   pgm.createIndex("membership_benefit", "priority");
-  pgm.createIndex("membership_benefit", "benefitType");
-  pgm.createIndex("membership_benefit", "valueType");
+  pgm.createIndex("membership_benefit", "benefit_type");
+  pgm.createIndex("membership_benefit", "value_type");
 
   // Create plan benefit mapping table
   pgm.createTable("membership_plan_benefit", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    planId: { type: "uuid", notNull: true, references: "membership_plan", onDelete: "CASCADE" },
-    benefitId: { type: "uuid", notNull: true, references: "membership_benefit", onDelete: "CASCADE" },
-    isActive: { type: "boolean", notNull: true, default: true },
+    plan_id: { type: "uuid", notNull: true, references: "membership_plan", onDelete: "CASCADE" },
+    benefit_id: { type: "uuid", notNull: true, references: "membership_benefit", onDelete: "CASCADE" },
+    is_active: { type: "boolean", notNull: true, default: true },
     priority: { type: "integer", default: 0 }, // Display order
-    valueOverride: { type: "jsonb" }, // Override default benefit value
-    rulesOverride: { type: "jsonb" }, // Override default benefit rules
+    value_override: { type: "jsonb" }, // Override default benefit value
+    rules_override: { type: "jsonb" }, // Override default benefit rules
     notes: { type: "text" }, // Internal notes
     created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
     updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") }
   });
 
   // Create indexes for plan-benefit mappings
-  pgm.createIndex("membership_plan_benefit", "planId");
-  pgm.createIndex("membership_plan_benefit", "benefitId");
-  pgm.createIndex("membership_plan_benefit", "isActive");
+  pgm.createIndex("membership_plan_benefit", "plan_id");
+  pgm.createIndex("membership_plan_benefit", "benefit_id");
+  pgm.createIndex("membership_plan_benefit", "is_active");
   pgm.createIndex("membership_plan_benefit", "priority");
-  pgm.createIndex("membership_plan_benefit", ["planId", "benefitId"], { unique: true });
+  pgm.createIndex("membership_plan_benefit", ["plan_id", "benefit_id"], { unique: true });
 
   // Create membership discount rule table
   pgm.createTable("membership_discount_rule", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    planId: { type: "uuid", notNull: true, references: "membership_plan", onDelete: "CASCADE" },
+    plan_id: { type: "uuid", notNull: true, references: "membership_plan", onDelete: "CASCADE" },
     name: { type: "varchar(100)", notNull: true },
     description: { type: "text" },
-    isActive: { type: "boolean", notNull: true, default: true },
+    is_active: { type: "boolean", notNull: true, default: true },
     priority: { type: "integer", default: 0 }, // For determining which rule applies
-    discountType: { 
+    discount_type: { 
       type: "varchar(20)", 
       notNull: true, 
-      check: "discountType IN ('percentage', 'fixed_amount', 'free_item', 'buy_x_get_y')" 
+      check: "discount_type IN ('percentage', 'fixed_amount', 'free_item', 'buy_x_get_y')" 
     },
-    discountValue: { type: "decimal(10,2)", notNull: true }, // Amount or percentage
-    maxDiscountAmount: { type: "decimal(10,2)" }, // Cap on discount
-    minOrderValue: { type: "decimal(10,2)" }, // Minimum purchase for discount
-    maxUses: { type: "integer" }, // Maximum times discount can be used
-    usesPerCustomer: { type: "integer" }, // Maximum uses per customer
-    appliesTo: { 
+    discount_value: { type: "decimal(10,2)", notNull: true }, // Amount or percentage
+    max_discount_amount: { type: "decimal(10,2)" }, // Cap on discount
+    min_order_value: { type: "decimal(10,2)" }, // Minimum purchase for discount
+    max_uses: { type: "integer" }, // Maximum times discount can be used
+    uses_per_customer: { type: "integer" }, // Maximum uses per customer
+    applies_to: { 
       type: "varchar(20)", 
       notNull: true, 
       default: 'entire_order',
-      check: "appliesTo IN ('entire_order', 'categories', 'products', 'shipping')" 
+      check: "applies_to IN ('entire_order', 'categories', 'products', 'shipping')" 
     },
-    applicableIds: { type: "uuid[]" }, // IDs of applicable products/categories
-    excludedIds: { type: "uuid[]" }, // IDs of excluded products/categories
-    startDate: { type: "timestamp" }, // Optional start date
-    endDate: { type: "timestamp" }, // Optional end date
+    applicable_ids: { type: "uuid[]" }, // IDs of applicable products/categories
+    excluded_ids: { type: "uuid[]" }, // IDs of excluded products/categories
+    start_date: { type: "timestamp" }, // Optional start date
+    end_date: { type: "timestamp" }, // Optional end date
     conditions: { type: "jsonb" }, // Additional conditions
     metadata: { type: "jsonb" },
     created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
     updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    createdBy: { type: "uuid" }
+    created_by: { type: "uuid" }
   });
 
   // Create indexes for membership discount rules
-  pgm.createIndex("membership_discount_rule", "planId");
-  pgm.createIndex("membership_discount_rule", "isActive");
+  pgm.createIndex("membership_discount_rule", "plan_id");
+  pgm.createIndex("membership_discount_rule", "is_active");
   pgm.createIndex("membership_discount_rule", "priority");
-  pgm.createIndex("membership_discount_rule", "discountType");
-  pgm.createIndex("membership_discount_rule", "discountValue");
-  pgm.createIndex("membership_discount_rule", "appliesTo");
-  pgm.createIndex("membership_discount_rule", "startDate");
-  pgm.createIndex("membership_discount_rule", "endDate");
-  pgm.createIndex("membership_discount_rule", "applicableIds", { method: "gin" });
-  pgm.createIndex("membership_discount_rule", "excludedIds", { method: "gin" });
+  pgm.createIndex("membership_discount_rule", "discount_type");
+  pgm.createIndex("membership_discount_rule", "discount_value");
+  pgm.createIndex("membership_discount_rule", "applies_to");
+  pgm.createIndex("membership_discount_rule", "start_date");
+  pgm.createIndex("membership_discount_rule", "end_date");
+  pgm.createIndex("membership_discount_rule", "applicable_ids", { method: "gin" });
+  pgm.createIndex("membership_discount_rule", "excluded_ids", { method: "gin" });
 
   // Create membership content access table
   pgm.createTable("membership_content_access", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    planId: { type: "uuid", notNull: true, references: "membership_plan", onDelete: "CASCADE" },
+    plan_id: { type: "uuid", notNull: true, references: "membership_plan", onDelete: "CASCADE" },
     name: { type: "varchar(100)", notNull: true },
     description: { type: "text" },
-    isActive: { type: "boolean", notNull: true, default: true },
-    accessType: { 
+    is_active: { type: "boolean", notNull: true, default: true },
+    access_type: { 
       type: "varchar(20)", 
       notNull: true, 
-      check: "accessType IN ('content_page', 'category', 'product', 'media', 'download', 'feature')" 
+      check: "access_type IN ('content_page', 'category', 'product', 'media', 'download', 'feature')" 
     },
-    accessibleIds: { type: "uuid[]" }, // IDs of accessible content
+    accessible_ids: { type: "uuid[]" }, // IDs of accessible content
     conditions: { type: "jsonb" }, // Conditions for access
     metadata: { type: "jsonb" },
     created_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
     updated_at: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
-    createdBy: { type: "uuid" }
+    created_by: { type: "uuid" }
   });
 
   // Create indexes for membership content access
-  pgm.createIndex("membership_content_access", "planId");
-  pgm.createIndex("membership_content_access", "isActive");
-  pgm.createIndex("membership_content_access", "accessType");
-  pgm.createIndex("membership_content_access", "accessibleIds", { method: "gin" });
+  pgm.createIndex("membership_content_access", "plan_id");
+  pgm.createIndex("membership_content_access", "is_active");
+  pgm.createIndex("membership_content_access", "access_type");
+  pgm.createIndex("membership_content_access", "accessible_ids", { method: "gin" });
 
   // Insert default membership plans
   pgm.sql(`
@@ -201,14 +201,14 @@ exports.up = (pgm) => {
       name, 
       code, 
       description, 
-      shortDescription,
-      isActive, 
-      isPublic,
-      isDefault,
+      short_description,
+      is_active, 
+      is_public,
+      is_default,
       priority,
       level,
       price,
-      billingCycle
+      billing_cycle
     )
     VALUES 
       ('Basic', 
@@ -252,11 +252,11 @@ exports.up = (pgm) => {
       name, 
       code, 
       description, 
-      shortDescription,
-      isActive,
+      short_description,
+      is_active,
       priority,
-      benefitType,
-      valueType,
+      benefit_type,
+      value_type,
       value
     )
     VALUES 
@@ -336,7 +336,7 @@ exports.up = (pgm) => {
       content_benefit AS (SELECT id FROM membership_benefit WHERE code = 'EXCLUSIVE_CONTENT'),
       early_benefit AS (SELECT id FROM membership_benefit WHERE code = 'EARLY_ACCESS')
       
-    INSERT INTO "membership_plan_benefit" (planId, benefitId, isActive, priority)
+    INSERT INTO "membership_plan_benefit" (plan_id, benefit_id, is_active, priority)
     VALUES 
       -- Basic plan benefits
       ((SELECT id FROM basic_plan), (SELECT id FROM discount_benefit), true, 10),
@@ -366,14 +366,14 @@ exports.up = (pgm) => {
       annual_plan AS (SELECT id FROM membership_plan WHERE code = 'ANNUAL_PREMIUM')
       
     INSERT INTO "membership_discount_rule" (
-      planId, 
+      plan_id, 
       name, 
       description, 
-      isActive, 
+      is_active, 
       priority,
-      discountType,
-      discountValue,
-      appliesTo
+      discount_type,
+      discount_value,
+      applies_to
     )
     VALUES 
       -- Basic plan discount

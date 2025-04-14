@@ -143,78 +143,126 @@ const loyaltyRewardFields = {
   updatedAt: 'updated_at'
 };
 
+const loyaltyRedemptionFields = {
+  id: 'id',
+  customerId: 'customer_id',
+  rewardId: 'reward_id',
+  pointsSpent: 'points_spent',
+  redemptionCode: 'redemption_code',
+  status: 'status',
+  usedAt: 'used_at',
+  expiresAt: 'expires_at',
+  createdAt: 'created_at'
+};
+
+// Helper to convert TypeScript camelCase field names to database snake_case
+function getDbFieldName(field: string, mappingObject: Record<string, string>): string {
+  return mappingObject[field] || field;
+}
+
+// Helper to build a dynamic UPDATE query with snake_case fields
+function buildUpdateQuery(
+  tableName: string, 
+  params: Record<string, any>, 
+  mappingObject: Record<string, string>, 
+  idField: string = 'id'
+): { sql: string; values: any[]; paramIndex: number } {
+  const updateFields: string[] = [];
+  const values: any[] = [];
+  let paramIndex = 1;
+
+  // Build dynamic query based on provided update params
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined) {
+      const dbField = getDbFieldName(key, mappingObject);
+      updateFields.push(`"${dbField}" = $${paramIndex}`);
+      values.push(value);
+      paramIndex++;
+    }
+  });
+
+  const sql = `
+    UPDATE "public"."${tableName}" 
+    SET ${updateFields.join(', ')} 
+    WHERE "${getDbFieldName(idField, mappingObject)}" = $${paramIndex} 
+    RETURNING *
+  `;
+
+  return { sql, values, paramIndex };
+}
+
 // Helper functions to transform between database and TypeScript formats
 function transformLoyaltyTierFromDb(dbRecord: Record<string, any>): LoyaltyTier {
   return {
-    id: dbRecord.id,
-    name: dbRecord.name,
-    description: dbRecord.description || undefined,
-    type: dbRecord.type,
-    pointsThreshold: dbRecord.points_threshold,
-    multiplier: dbRecord.multiplier,
-    benefits: dbRecord.benefits || undefined,
-    isActive: dbRecord.is_active,
-    createdAt: dbRecord.created_at,
-    updatedAt: dbRecord.updated_at
+    id: dbRecord[loyaltyTierFields.id],
+    name: dbRecord[loyaltyTierFields.name],
+    description: dbRecord[loyaltyTierFields.description] || undefined,
+    type: dbRecord[loyaltyTierFields.type],
+    pointsThreshold: dbRecord[loyaltyTierFields.pointsThreshold],
+    multiplier: dbRecord[loyaltyTierFields.multiplier],
+    benefits: dbRecord[loyaltyTierFields.benefits] || undefined,
+    isActive: dbRecord[loyaltyTierFields.isActive],
+    createdAt: dbRecord[loyaltyTierFields.createdAt],
+    updatedAt: dbRecord[loyaltyTierFields.updatedAt]
   };
 }
 
 function transformLoyaltyPointsFromDb(dbRecord: Record<string, any>): LoyaltyPoints {
   return {
-    id: dbRecord.id,
-    customerId: dbRecord.customer_id,
-    tierId: dbRecord.tier_id,
-    currentPoints: dbRecord.current_points,
-    lifetimePoints: dbRecord.lifetime_points,
-    lastActivity: dbRecord.last_activity,
-    expiryDate: dbRecord.expiry_date || undefined,
-    createdAt: dbRecord.created_at,
-    updatedAt: dbRecord.updated_at
+    id: dbRecord[loyaltyPointsFields.id],
+    customerId: dbRecord[loyaltyPointsFields.customerId],
+    tierId: dbRecord[loyaltyPointsFields.tierId],
+    currentPoints: dbRecord[loyaltyPointsFields.currentPoints],
+    lifetimePoints: dbRecord[loyaltyPointsFields.lifetimePoints],
+    lastActivity: dbRecord[loyaltyPointsFields.lastActivity],
+    expiryDate: dbRecord[loyaltyPointsFields.expiryDate] || undefined,
+    createdAt: dbRecord[loyaltyPointsFields.createdAt],
+    updatedAt: dbRecord[loyaltyPointsFields.updatedAt]
   };
 }
 
 function transformLoyaltyTransactionFromDb(dbRecord: Record<string, any>): LoyaltyTransaction {
   return {
-    id: dbRecord.id,
-    customerId: dbRecord.customer_id,
-    orderId: dbRecord.order_id || undefined,
-    action: dbRecord.action,
-    points: dbRecord.points,
-    description: dbRecord.description || undefined,
-    referenceId: dbRecord.reference_id || undefined,
-    createdAt: dbRecord.created_at
+    id: dbRecord[loyaltyTransactionFields.id],
+    customerId: dbRecord[loyaltyTransactionFields.customerId],
+    orderId: dbRecord[loyaltyTransactionFields.orderId] || undefined,
+    action: dbRecord[loyaltyTransactionFields.action],
+    points: dbRecord[loyaltyTransactionFields.points],
+    description: dbRecord[loyaltyTransactionFields.description] || undefined,
+    referenceId: dbRecord[loyaltyTransactionFields.referenceId] || undefined,
+    createdAt: dbRecord[loyaltyTransactionFields.createdAt]
   };
 }
 
 function transformLoyaltyRewardFromDb(dbRecord: Record<string, any>): LoyaltyReward {
   return {
-    id: dbRecord.id,
-    name: dbRecord.name,
-    description: dbRecord.description || undefined,
-    pointsCost: dbRecord.points_cost,
-    discountAmount: dbRecord.discount_amount || undefined,
-    discountPercent: dbRecord.discount_percent || undefined,
-    discountCode: dbRecord.discount_code || undefined,
-    freeShipping: dbRecord.free_shipping,
-    productIds: dbRecord.product_ids || undefined,
-    expiresAt: dbRecord.expires_at || undefined,
-    isActive: dbRecord.is_active,
-    createdAt: dbRecord.created_at,
-    updatedAt: dbRecord.updated_at
+    id: dbRecord[loyaltyRewardFields.id],
+    name: dbRecord[loyaltyRewardFields.name],
+    description: dbRecord[loyaltyRewardFields.description] || undefined,
+    pointsCost: dbRecord[loyaltyRewardFields.pointsCost],
+    discountAmount: dbRecord[loyaltyRewardFields.discountAmount] || undefined,
+    discountPercent: dbRecord[loyaltyRewardFields.discountPercent] || undefined,
+    discountCode: dbRecord[loyaltyRewardFields.discountCode] || undefined,
+    freeShipping: dbRecord[loyaltyRewardFields.freeShipping],
+    productIds: dbRecord[loyaltyRewardFields.productIds] || undefined,
+    expiresAt: dbRecord[loyaltyRewardFields.expiresAt] || undefined,
+    isActive: dbRecord[loyaltyRewardFields.isActive],
+    createdAt: dbRecord[loyaltyRewardFields.createdAt],
+    updatedAt: dbRecord[loyaltyRewardFields.updatedAt]
   };
 }
 
 function transformLoyaltyRedemptionFromDb(dbRecord: Record<string, any>): LoyaltyRedemption {
   return {
-    id: dbRecord.id,
-    customerId: dbRecord.customer_id,
-    rewardId: dbRecord.reward_id,
-    pointsSpent: dbRecord.points_spent,
-    redemptionCode: dbRecord.redemption_code,
-    status: dbRecord.status,
-    usedAt: dbRecord.used_at || undefined,
-    expiresAt: dbRecord.expires_at || undefined,
-    createdAt: dbRecord.created_at
+    id: dbRecord[loyaltyRedemptionFields.id],
+    customerId: dbRecord[loyaltyRedemptionFields.customerId],
+    rewardId: dbRecord[loyaltyRedemptionFields.rewardId],
+    pointsSpent: dbRecord[loyaltyRedemptionFields.pointsSpent],
+    redemptionCode: dbRecord[loyaltyRedemptionFields.redemptionCode],
+    status: dbRecord[loyaltyRedemptionFields.status],
+    usedAt: dbRecord[loyaltyRedemptionFields.usedAt] || undefined,
+    expiresAt: dbRecord[loyaltyRedemptionFields.expiresAt] || undefined,
+    createdAt: dbRecord[loyaltyRedemptionFields.createdAt]
   };
 }
 
@@ -277,34 +325,8 @@ export class LoyaltyRepo {
       throw new Error(`Loyalty tier with ID ${id} not found`);
     }
 
-    const updateFields: string[] = [];
-    const values: any[] = [];
-    let paramIndex = 1;
-
-    // Build dynamic query based on provided update params
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined) {
-        const dbField = loyaltyTierFields[key as keyof typeof loyaltyTierFields];
-        updateFields.push(`"${dbField}" = $${paramIndex}`);
-        values.push(value);
-        paramIndex++;
-      }
-    });
-
-    // Always update the updatedAt timestamp
-    updateFields.push(`"updated_at" = $${paramIndex}`);
-    values.push(now);
-    paramIndex++;
-
-    // Add ID for WHERE clause
+    const { sql, values, paramIndex } = buildUpdateQuery('loyalty_tier', params, loyaltyTierFields);
     values.push(id);
-
-    const sql = `
-      UPDATE "public"."loyalty_tier" 
-      SET ${updateFields.join(', ')} 
-      WHERE "id" = $${paramIndex} 
-      RETURNING *
-    `;
 
     const result = await queryOne<Record<string, any>>(sql, values);
 
@@ -518,34 +540,8 @@ export class LoyaltyRepo {
       throw new Error(`Loyalty reward with ID ${id} not found`);
     }
 
-    const updateFields: string[] = [];
-    const values: any[] = [];
-    let paramIndex = 1;
-
-    // Build dynamic query based on provided update params
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined) {
-        const dbField = loyaltyRewardFields[key as keyof typeof loyaltyRewardFields];
-        updateFields.push(`"${dbField}" = $${paramIndex}`);
-        values.push(value);
-        paramIndex++;
-      }
-    });
-
-    // Always update the updatedAt timestamp
-    updateFields.push(`"updated_at" = $${paramIndex}`);
-    values.push(now);
-    paramIndex++;
-
-    // Add ID for WHERE clause
+    const { sql, values, paramIndex } = buildUpdateQuery('loyalty_reward', params, loyaltyRewardFields);
     values.push(id);
-
-    const sql = `
-      UPDATE "public"."loyalty_reward" 
-      SET ${updateFields.join(', ')} 
-      WHERE "id" = $${paramIndex} 
-      RETURNING *
-    `;
 
     const result = await queryOne<Record<string, any>>(sql, values);
 
@@ -647,14 +643,11 @@ export class LoyaltyRepo {
       updates.usedAt = now;
     }
     
-    const result = await queryOne<Record<string, any>>(
-      `UPDATE "public"."loyalty_redemption" 
-      SET "status" = $1, "used_at" = $2
-      WHERE "id" = $3 
-      RETURNING *`,
-      [status, status === 'used' ? now : null, id]
-    );
-    
+    const { sql, values, paramIndex } = buildUpdateQuery('loyalty_redemption', updates, loyaltyRedemptionFields);
+    values.push(id);
+
+    const result = await queryOne<Record<string, any>>(sql, values);
+
     if (!result) {
       throw new Error(`Failed to update redemption status for ${id}`);
     }
