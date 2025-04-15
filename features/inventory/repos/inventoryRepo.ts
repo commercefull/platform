@@ -76,7 +76,7 @@ export class InventoryRepo {
     const params: any[] = [sku];
     
     if (locationId) {
-      sql += ' AND "locationId" = $2';
+      sql += ' AND "location_id" = $2';
       params.push(locationId);
     }
     
@@ -85,7 +85,7 @@ export class InventoryRepo {
 
   async findInventoryItemsByProductId(productId: string): Promise<InventoryItem[]> {
     const results = await query<InventoryItem[]>(
-      'SELECT * FROM "public"."inventory_item" WHERE "productId" = $1',
+      'SELECT * FROM "public"."inventory_item" WHERE "product_id" = $1',
       [productId]
     );
     return results || [];
@@ -93,7 +93,7 @@ export class InventoryRepo {
 
   async findInventoryItemsByLocationId(locationId: string): Promise<InventoryItem[]> {
     const results = await query<InventoryItem[]>(
-      'SELECT * FROM "public"."inventory_item" WHERE "locationId" = $1',
+      'SELECT * FROM "public"."inventory_item" WHERE "location_id" = $1',
       [locationId]
     );
     return results || [];
@@ -101,7 +101,7 @@ export class InventoryRepo {
 
   async findLowStockItems(): Promise<InventoryItem[]> {
     const results = await query<InventoryItem[]>(
-      'SELECT * FROM "public"."inventory_item" WHERE "availableQuantity" <= "lowStockThreshold"',
+      'SELECT * FROM "public"."inventory_item" WHERE "available_quantity" <= "low_stock_threshold"',
       []
     );
     return results || [];
@@ -109,7 +109,7 @@ export class InventoryRepo {
 
   async findOutOfStockItems(): Promise<InventoryItem[]> {
     const results = await query<InventoryItem[]>(
-      'SELECT * FROM "public"."inventory_item" WHERE "availableQuantity" <= 0',
+      'SELECT * FROM "public"."inventory_item" WHERE "available_quantity" <= 0',
       []
     );
     return results || [];
@@ -129,20 +129,20 @@ export class InventoryRepo {
     let paramIndex = 1;
     
     if (filter?.locationId) {
-      sql += ` AND "locationId" = $${paramIndex}`;
+      sql += ` AND "location_id" = $${paramIndex}`;
       params.push(filter.locationId);
       paramIndex++;
     }
     
     if (filter?.lowStock) {
-      sql += ` AND "availableQuantity" <= "lowStockThreshold"`;
+      sql += ` AND "available_quantity" <= "low_stock_threshold"`;
     }
     
     if (filter?.outOfStock) {
-      sql += ` AND "availableQuantity" <= 0`;
+      sql += ` AND "available_quantity" <= 0`;
     }
     
-    sql += ' ORDER BY "updatedAt" DESC';
+    sql += ' ORDER BY "updated_at" DESC';
     sql += ` LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
     params.push(limit.toString(), offset.toString());
     
@@ -173,8 +173,8 @@ export class InventoryRepo {
 
     const result = await queryOne<InventoryItem>(
       `INSERT INTO "public"."inventory_item" 
-      ("productId", "sku", "locationId", "quantity", "reservedQuantity", "availableQuantity", 
-      "lowStockThreshold", "reorderPoint", "reorderQuantity", "lastRestockDate", "createdAt", "updatedAt") 
+      ("product_id", "sku", "location_id", "quantity", "reserved_quantity", "available_quantity", 
+      "low_stock_threshold", "reorder_point", "reorder_quantity", "last_restock_date", "created_at", "updated_at") 
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) 
       RETURNING *`,
       [
@@ -215,14 +215,14 @@ export class InventoryRepo {
     // Build dynamic query based on provided update params
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined) {
-        updateFields.push(`"${key}" = $${paramIndex}`);
+        updateFields.push(`"${key.replace(/([A-Z])/g, '_$1').toLowerCase()}" = $${paramIndex}`);
         values.push(value);
         paramIndex++;
       }
     });
 
     // Always update the updatedAt timestamp
-    updateFields.push(`"updatedAt" = $${paramIndex}`);
+    updateFields.push(`"updated_at" = $${paramIndex}`);
     values.push(now);
     paramIndex++;
 
@@ -263,7 +263,7 @@ export class InventoryRepo {
 
     const result = await queryOne<InventoryItem>(
       `UPDATE "public"."inventory_item" 
-      SET "quantity" = $1, "reservedQuantity" = $2, "availableQuantity" = $3, "updatedAt" = $4 
+      SET "quantity" = $1, "reserved_quantity" = $2, "available_quantity" = $3, "updated_at" = $4 
       WHERE "id" = $5 
       RETURNING *`,
       [newQuantity, newReservedQuantity, newAvailableQuantity, now, id]
@@ -294,7 +294,7 @@ export class InventoryRepo {
     let sql = 'SELECT * FROM "public"."inventory_location"';
     
     if (!includeInactive) {
-      sql += ' WHERE "isActive" = true';
+      sql += ' WHERE "is_active" = true';
     }
     
     sql += ' ORDER BY "name" ASC';
@@ -318,7 +318,7 @@ export class InventoryRepo {
 
     const result = await queryOne<InventoryLocation>(
       `INSERT INTO "public"."inventory_location" 
-      ("name", "type", "address", "city", "state", "country", "postalCode", "isActive", "createdAt", "updatedAt") 
+      ("name", "type", "address", "city", "state", "country", "postal_code", "is_active", "created_at", "updated_at") 
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) 
       RETURNING *`,
       [
@@ -357,14 +357,14 @@ export class InventoryRepo {
     // Build dynamic query based on provided update params
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined) {
-        updateFields.push(`"${key}" = $${paramIndex}`);
+        updateFields.push(`"${key.replace(/([A-Z])/g, '_$1').toLowerCase()}" = $${paramIndex}`);
         values.push(value);
         paramIndex++;
       }
     });
 
     // Always update the updatedAt timestamp
-    updateFields.push(`"updatedAt" = $${paramIndex}`);
+    updateFields.push(`"updated_at" = $${paramIndex}`);
     values.push(now);
     paramIndex++;
 
@@ -425,8 +425,8 @@ export class InventoryRepo {
     // Create transaction
     const result = await queryOne<InventoryTransaction>(
       `INSERT INTO "public"."inventory_transaction" 
-      ("inventoryId", "transactionType", "quantity", "sourceLocationId", "destinationLocationId", 
-      "reference", "notes", "createdBy", "createdAt") 
+      ("inventory_id", "transaction_type", "quantity", "source_location_id", "destination_location_id", 
+      "reference", "notes", "created_by", "created_at") 
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
       RETURNING *`,
       [
@@ -493,7 +493,7 @@ export class InventoryRepo {
 
   async findTransactionsByInventoryId(inventoryId: string): Promise<InventoryTransaction[]> {
     const results = await query<InventoryTransaction[]>(
-      'SELECT * FROM "public"."inventory_transaction" WHERE "inventoryId" = $1 ORDER BY "createdAt" DESC',
+      'SELECT * FROM "public"."inventory_transaction" WHERE "inventory_id" = $1 ORDER BY "created_at" DESC',
       [inventoryId]
     );
     return results || [];
@@ -501,7 +501,7 @@ export class InventoryRepo {
 
   async findTransactionsByReference(reference: string): Promise<InventoryTransaction[]> {
     const results = await query<InventoryTransaction[]>(
-      'SELECT * FROM "public"."inventory_transaction" WHERE "reference" = $1 ORDER BY "createdAt" DESC',
+      'SELECT * FROM "public"."inventory_transaction" WHERE "reference" = $1 ORDER BY "created_at" DESC',
       [reference]
     );
     return results || [];
@@ -532,7 +532,7 @@ export class InventoryRepo {
     // Create reservation
     const result = await queryOne<InventoryReservation>(
       `INSERT INTO "public"."inventory_reservation" 
-      ("inventoryId", "quantity", "orderId", "cartId", "expiresAt", "status", "createdAt", "updatedAt") 
+      ("inventory_id", "quantity", "order_id", "cart_id", "expires_at", "status", "created_at", "updated_at") 
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
       RETURNING *`,
       [
@@ -569,7 +569,7 @@ export class InventoryRepo {
 
   async findReservationsByInventoryId(inventoryId: string): Promise<InventoryReservation[]> {
     const results = await query<InventoryReservation[]>(
-      'SELECT * FROM "public"."inventory_reservation" WHERE "inventoryId" = $1 AND "status" = \'active\' ORDER BY "createdAt" DESC',
+      'SELECT * FROM "public"."inventory_reservation" WHERE "inventory_id" = $1 AND "status" = \'active\' ORDER BY "created_at" DESC',
       [inventoryId]
     );
     return results || [];
@@ -577,7 +577,7 @@ export class InventoryRepo {
 
   async findReservationsByOrderId(orderId: string): Promise<InventoryReservation[]> {
     const results = await query<InventoryReservation[]>(
-      'SELECT * FROM "public"."inventory_reservation" WHERE "orderId" = $1 ORDER BY "createdAt" DESC',
+      'SELECT * FROM "public"."inventory_reservation" WHERE "order_id" = $1 ORDER BY "created_at" DESC',
       [orderId]
     );
     return results || [];
@@ -585,7 +585,7 @@ export class InventoryRepo {
 
   async findReservationsByCartId(cartId: string): Promise<InventoryReservation[]> {
     const results = await query<InventoryReservation[]>(
-      'SELECT * FROM "public"."inventory_reservation" WHERE "cartId" = $1 AND "status" = \'active\' ORDER BY "createdAt" DESC',
+      'SELECT * FROM "public"."inventory_reservation" WHERE "cart_id" = $1 AND "status" = \'active\' ORDER BY "created_at" DESC',
       [cartId]
     );
     return results || [];
@@ -605,7 +605,7 @@ export class InventoryRepo {
       
       const result = await queryOne<InventoryReservation>(
         `UPDATE "public"."inventory_reservation" 
-        SET "status" = $1, "updatedAt" = $2
+        SET "status" = $1, "updated_at" = $2
         WHERE "id" = $3 
         RETURNING *`,
         [status, now, id]

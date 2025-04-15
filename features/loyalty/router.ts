@@ -1,6 +1,6 @@
 import express from 'express';
 import { LoyaltyPublicController } from './controllers/loyaltyPublicController';
-import { authenticate } from '../../middleware/auth'; // Assuming this middleware exists
+import { isLoggedIn } from '../../libs/middlewares';
 
 const router = express.Router();
 const loyaltyPublicController = new LoyaltyPublicController();
@@ -10,9 +10,9 @@ router.get('/tiers', loyaltyPublicController.getPublicTiers);
 router.get('/rewards', loyaltyPublicController.getPublicRewards);
 
 // Customer authenticated routes
-router.get('/my-status', authenticate, loyaltyPublicController.getMyLoyaltyStatus);
-router.get('/my-transactions', authenticate, loyaltyPublicController.getMyTransactions);
-router.get('/my-redemptions', authenticate, loyaltyPublicController.getMyRedemptions);
-router.post('/redeem', authenticate, loyaltyPublicController.redeemReward);
+router.get('/my-status', isLoggedIn, loyaltyPublicController.getMyLoyaltyStatus);
+router.get('/my-transactions', isLoggedIn, loyaltyPublicController.getMyTransactions);
+router.get('/my-redemptions', isLoggedIn, loyaltyPublicController.getMyRedemptions);
+router.post('/redeem', isLoggedIn, loyaltyPublicController.redeemReward);
 
 export const loyaltyPublicRouter = router;

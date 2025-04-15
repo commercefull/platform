@@ -1,4 +1,13 @@
 import { Request, Response } from 'express';
+
+// Define interface for authenticated user request
+interface UserRequest extends Request {
+  user?: {
+    id?: string;
+    _id?: string;
+    role?: string;
+  };
+}
 import { LoyaltyRepo } from '../repos/loyaltyRepo';
 
 export class LoyaltyPublicController {
@@ -68,7 +77,7 @@ export class LoyaltyPublicController {
   };
 
   // Get customer's loyalty status and points
-  getMyLoyaltyStatus = async (req: Request, res: Response): Promise<void> => {
+  getMyLoyaltyStatus = async (req: UserRequest, res: Response): Promise<void> => {
     try {
       // Customer ID would come from authenticated user session
       const customerId = req.user?.id;
@@ -131,7 +140,7 @@ export class LoyaltyPublicController {
   };
 
   // Get customer's loyalty transaction history
-  getMyTransactions = async (req: Request, res: Response): Promise<void> => {
+  getMyTransactions = async (req: UserRequest, res: Response): Promise<void> => {
     try {
       // Customer ID would come from authenticated user session
       const customerId = req.user?.id;
@@ -177,7 +186,7 @@ export class LoyaltyPublicController {
   };
 
   // Redeem points for a reward
-  redeemReward = async (req: Request, res: Response): Promise<void> => {
+  redeemReward = async (req: UserRequest, res: Response): Promise<void> => {
     try {
       // Customer ID would come from authenticated user session
       const customerId = req.user?.id;
@@ -236,7 +245,7 @@ export class LoyaltyPublicController {
   };
 
   // Get my active redemptions
-  getMyRedemptions = async (req: Request, res: Response): Promise<void> => {
+  getMyRedemptions = async (req: UserRequest, res: Response): Promise<void> => {
     try {
       // Customer ID would come from authenticated user session
       const customerId = req.user?.id;
