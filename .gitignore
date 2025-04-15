@@ -10,3 +10,4 @@ app.mjs
 cypress
 *.pem
 backups
+coverage
