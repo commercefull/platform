@@ -93,7 +93,7 @@ export class CheckoutPublicController {
         return;
       }
       
-      const updatedSession = await checkoutRepo.setShippingAddress(sessionId, address);
+      const updatedSession = await checkoutRepo.updateShippingAddress(sessionId, address);
       
       if (!updatedSession) {
         res.status(404).json({
@@ -104,7 +104,7 @@ export class CheckoutPublicController {
       }
       
       // Recalculate totals (may affect tax based on shipping location)
-      const sessionWithTotals = await checkoutRepo.calculateOrderTotals(sessionId);
+      const sessionWithTotals = await checkoutRepo.calculateTaxes(sessionId);
       
       res.status(200).json({
         success: true,
@@ -135,7 +135,7 @@ export class CheckoutPublicController {
         return;
       }
       
-      const updatedSession = await checkoutRepo.setBillingAddress(sessionId, address);
+      const updatedSession = await checkoutRepo.updateBillingAddress(sessionId, address);
       
       if (!updatedSession) {
         res.status(404).json({
@@ -162,7 +162,7 @@ export class CheckoutPublicController {
   // Get all available shipping methods
   async getShippingMethods(req: Request, res: Response): Promise<void> {
     try {
-      const methods = await checkoutRepo.findAllShippingMethods();
+      const methods = await checkoutRepo.getShippingMethods();
       
       res.status(200).json({
         success: true,
@@ -191,7 +191,7 @@ export class CheckoutPublicController {
         return;
       }
       
-      const updatedSession = await checkoutRepo.setShippingMethod(sessionId, shippingMethodId);
+      const updatedSession = await checkoutRepo.selectShippingMethod(sessionId, shippingMethodId);
       
       if (!updatedSession) {
         res.status(404).json({
@@ -202,7 +202,7 @@ export class CheckoutPublicController {
       }
       
       // Recalculate totals (shipping cost changed)
-      const sessionWithTotals = await checkoutRepo.calculateOrderTotals(sessionId);
+      const sessionWithTotals = await checkoutRepo.calculateTaxes(sessionId);
       
       res.status(200).json({
         success: true,
@@ -221,7 +221,7 @@ export class CheckoutPublicController {
   // Get all available payment methods
   async getPaymentMethods(req: Request, res: Response): Promise<void> {
     try {
-      const methods = await checkoutRepo.findAllPaymentMethods();
+      const methods = await checkoutRepo.getPaymentMethods();
       
       res.status(200).json({
         success: true,
@@ -250,7 +250,7 @@ export class CheckoutPublicController {
         return;
       }
       
-      const updatedSession = await checkoutRepo.setPaymentMethod(sessionId, paymentMethodId);
+      const updatedSession = await checkoutRepo.selectPaymentMethod(sessionId, paymentMethodId);
       
       if (!updatedSession) {
         res.status(404).json({
@@ -279,7 +279,7 @@ export class CheckoutPublicController {
     try {
       const { sessionId } = req.params;
       
-      const updatedSession = await checkoutRepo.calculateOrderTotals(sessionId);
+      const updatedSession = await checkoutRepo.calculateTaxes(sessionId);
       
       if (!updatedSession) {
         res.status(404).json({
@@ -308,7 +308,7 @@ export class CheckoutPublicController {
       const { sessionId } = req.params;
       
       // Validate checkout session
-      const validation = await checkoutRepo.validateCheckoutSession(sessionId);
+      const validation = await checkoutRepo.validateCheckout(sessionId);
       
       if (!validation.isValid) {
         res.status(400).json({
@@ -319,7 +319,7 @@ export class CheckoutPublicController {
       }
       
       // Complete checkout and create order
-      const result = await checkoutRepo.completeCheckout(sessionId);
+      const result = await checkoutRepo.createOrder(sessionId);
       
       if (!result.success) {
         res.status(400).json({
@@ -350,19 +350,12 @@ export class CheckoutPublicController {
     try {
       const { sessionId } = req.params;
       
-      const updatedSession = await checkoutRepo.abandonCheckoutSession(sessionId);
-      
-      if (!updatedSession) {
-        res.status(404).json({
-          success: false,
-          error: 'Checkout session not found'
-        });
-        return;
-      }
+      // Updated: abandonCheckoutSession is no longer available
+      // Instead, we'll update the session status to 'abandoned'
+      await checkoutRepo.updateCheckoutSession(sessionId, { status: 'abandoned' });
       
       res.status(200).json({
         success: true,
-        data: updatedSession,
         message: 'Checkout session abandoned successfully'
       });
     } catch (error) {

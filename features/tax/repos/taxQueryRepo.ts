@@ -2,8 +2,106 @@ import { query, queryOne } from '../../../libs/db';
 import { 
   TaxZone, TaxRate, TaxCategory, CustomerTaxExemption,
   TaxSettings, AddressInput, TaxCalculationResult,
-  TaxBreakdownItem, LineItemTax
+  TaxBreakdownItem, LineItemTax, TaxExemptionStatus
 } from '../taxTypes';
+
+// Field mapping dictionaries for database to TypeScript conversion
+const taxRateFields: Record<string, string> = {
+  id: 'id',
+  taxCategoryId: 'tax_category_id',
+  taxZoneId: 'tax_zone_id',
+  name: 'name',
+  description: 'description',
+  rate: 'rate',
+  type: 'type',
+  priority: 'priority',
+  isCompound: 'is_compound',
+  includeInPrice: 'include_in_price',
+  isShippingTaxable: 'is_shipping_taxable',
+  fixedAmount: 'fixed_amount',
+  minimumAmount: 'minimum_amount',
+  maximumAmount: 'maximum_amount',
+  threshold: 'threshold',
+  startDate: 'start_date',
+  endDate: 'end_date',
+  isActive: 'is_active',
+  metadata: 'metadata',
+  createdAt: 'created_at',
+  updatedAt: 'updated_at'
+};
+
+const taxZoneFields: Record<string, string> = {
+  id: 'id',
+  name: 'name',
+  code: 'code',
+  description: 'description',
+  isDefault: 'is_default',
+  countries: 'countries',
+  states: 'states',
+  postcodes: 'postcodes',
+  cities: 'cities',
+  isActive: 'is_active',
+  metadata: 'metadata',
+  createdAt: 'created_at',
+  updatedAt: 'updated_at'
+};
+
+const taxCategoryFields: Record<string, string> = {
+  id: 'id',
+  name: 'name',
+  code: 'code',
+  description: 'description',
+  isDefault: 'is_default',
+  sortOrder: 'sort_order',
+  isActive: 'is_active',
+  metadata: 'metadata',
+  createdAt: 'created_at',
+  updatedAt: 'updated_at'
+};
+
+const customerTaxExemptionFields: Record<string, string> = {
+  id: 'id',
+  customerId: 'customer_id',
+  taxCategoryId: 'tax_category_id',
+  exemptionNumber: 'exemption_number',
+  exemptionType: 'exemption_type',
+  issuingAuthority: 'issuing_authority',
+  validFrom: 'start_date',
+  validUntil: 'expiry_date',
+  documentUrl: 'document_url',
+  notes: 'notes',
+  isVerified: 'is_verified',
+  verifiedBy: 'verified_by',
+  verifiedAt: 'verified_at',
+  status: 'status',
+  createdAt: 'created_at',
+  updatedAt: 'updated_at'
+};
+
+/**
+ * Transform a database record to a TypeScript object using field mapping
+ */
+function transformDbToTs<T>(dbRecord: any, fieldMap: Record<string, string>): T {
+  if (!dbRecord) return null as any;
+  
+  const result: any = {};
+  
+  Object.entries(fieldMap).forEach(([tsKey, dbKey]) => {
+    if (dbRecord[dbKey] !== undefined) {
+      result[tsKey] = dbRecord[dbKey];
+    }
+  });
+  
+  return result as T;
+}
+
+/**
+ * Transform an array of database records to TypeScript objects
+ */
+function transformArrayDbToTs<T>(dbRecords: any[], fieldMap: Record<string, string>): T[] {
+  if (!dbRecords || !Array.isArray(dbRecords)) return [];
+  return dbRecords.map(record => transformDbToTs<T>(record, fieldMap));
+}
 
 /**
  * Repository for tax-related read operations only
@@ -12,33 +110,12 @@ import {
 export class TaxQueryRepo {
   // Tax Rate query methods
   async findTaxRateById(id: string): Promise<TaxRate | null> {
-    return await queryOne<TaxRate>(
-      `SELECT 
-        id,
-        tax_category_id AS "taxCategoryId",
-        tax_zone_id AS "taxZoneId",
-        name,
-        description,
-        rate,
-        type,
-        priority,
-        is_compound AS "isCompound",
-        include_in_price AS "includeInPrice", 
-        is_shipping_taxable AS "isShippingTaxable",
-        fixed_amount AS "fixedAmount",
-        minimum_amount AS "minimumAmount",
-        maximum_amount AS "maximumAmount",
-        threshold,
-        start_date AS "startDate",
-        end_date AS "endDate",
-        is_active AS "isActive",
-        metadata,
-        created_at AS "createdAt",
-        updated_at AS "updatedAt"
-      FROM "public"."tax_rate" 
-      WHERE "id" = $1`,
+    const result = await queryOne<any>(
+      `SELECT * FROM "public"."tax_rate" WHERE "id" = $1`,
       [id]
     );
+    
+    return transformDbToTs<TaxRate>(result, taxRateFields);
   }
 
   async findAllTaxRates(
@@ -49,633 +126,346 @@ export class TaxQueryRepo {
     offset: number = 0
   ): Promise<TaxRate[]> {
     const params: any[] = [status];
-    
     let sql = `
-      SELECT 
-        id,
-        tax_category_id AS "taxCategoryId",
-        tax_zone_id AS "taxZoneId",
-        name,
-        description,
-        rate,
-        type,
-        priority,
-        is_compound AS "isCompound",
-        include_in_price AS "includeInPrice", 
-        is_shipping_taxable AS "isShippingTaxable",
-        fixed_amount AS "fixedAmount",
-        minimum_amount AS "minimumAmount",
-        maximum_amount AS "maximumAmount",
-        threshold,
-        start_date AS "startDate",
-        end_date AS "endDate",
-        is_active AS "isActive",
-        metadata,
-        created_at AS "createdAt",
-        updated_at AS "updatedAt"
-      FROM "public"."tax_rate" 
-      WHERE "is_active" = $1
+      SELECT tr.*
+      FROM "public"."tax_rate" tr
+      JOIN "public"."tax_zone" tz ON tr."tax_zone_id" = tz."id"
+      WHERE tr."is_active" = $1
     `;
     
     if (country) {
-      sql += ` AND "tax_zone_id" IN (
-        SELECT "id" FROM "public"."tax_zone" 
-        WHERE "countries" @> ARRAY[$${params.length + 1}]::varchar(2)[]
-      )`;
+      sql += ` AND $2 = ANY(tz."countries")`;
       params.push(country);
     }
     
     if (region) {
-      sql += ' AND "region" = $' + (params.length + 1);
+      sql += ` AND $${params.length + 1} = ANY(tz."states")`;
       params.push(region);
     }
     
-    sql += ' ORDER BY "priority" DESC, "name" ASC LIMIT $' + (params.length + 1) + ' OFFSET $' + (params.length + 2);
+    sql += ` ORDER BY tr."priority" DESC, tr."rate" ASC
+             LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
     params.push(limit, offset);
     
-    return await query<TaxRate[]>(sql, params) || [];
+    const results = await query<any[]>(sql, params);
+    return transformArrayDbToTs<TaxRate>(results || [], taxRateFields);
+  }
+  
+  async findTaxRatesByCategoryAndZone(
+    categoryId: string,
+    zoneId: string,
+    status: TaxRate['isActive'] = true
+  ): Promise<TaxRate[]> {
+    const results = await query<any[]>(
+      `SELECT * 
+       FROM "public"."tax_rate" 
+       WHERE "tax_category_id" = $1 
+       AND "tax_zone_id" = $2 
+       AND "is_active" = $3
+       ORDER BY "priority" DESC, "rate" ASC`,
+      [categoryId, zoneId, status]
+    );
+    
+    return transformArrayDbToTs<TaxRate>(results || [], taxRateFields);
   }
 
-  async findTaxRatesByCategory(categoryId: string): Promise<TaxRate[]> {
-    return await query<TaxRate[]>(
-      `SELECT 
-        id,
-        tax_category_id AS "taxCategoryId",
-        tax_zone_id AS "taxZoneId",
-        name,
-        description,
-        rate,
-        type,
-        priority,
-        is_compound AS "isCompound",
-        include_in_price AS "includeInPrice",
-        is_shipping_taxable AS "isShippingTaxable",
-        fixed_amount AS "fixedAmount",
-        minimum_amount AS "minimumAmount",
-        maximum_amount AS "maximumAmount",
-        threshold,
-        start_date AS "startDate",
-        end_date AS "endDate",
-        is_active AS "isActive",
-        metadata,
-        created_at AS "createdAt",
-        updated_at AS "updatedAt"
-      FROM "public"."tax_rate" 
-      WHERE "tax_category_id" = $1 
-      AND "is_active" = TRUE`,
-      [categoryId]
-    ) || [];
+  // Tax Zone query methods
+  async findTaxZoneById(id: string): Promise<TaxZone | null> {
+    const result = await queryOne<any>(
+      `SELECT * FROM "public"."tax_zone" WHERE "id" = $1`,
+      [id]
+    );
+    
+    return transformDbToTs<TaxZone>(result, taxZoneFields);
+  }
+  
+  async findTaxZoneByCode(code: string): Promise<TaxZone | null> {
+    const result = await queryOne<any>(
+      `SELECT * FROM "public"."tax_zone" WHERE "code" = $1`,
+      [code]
+    );
+    
+    return transformDbToTs<TaxZone>(result, taxZoneFields);
+  }
+  
+  async findAllTaxZones(
+    status: TaxZone['isActive'] = true,
+    limit: number = 50,
+    offset: number = 0
+  ): Promise<TaxZone[]> {
+    const results = await query<any[]>(
+      `SELECT * 
+       FROM "public"."tax_zone" 
+       WHERE "is_active" = $1
+       ORDER BY "is_default" DESC, "name" ASC
+       LIMIT $2 OFFSET $3`,
+      [status, limit, offset]
+    );
+    
+    return transformArrayDbToTs<TaxZone>(results || [], taxZoneFields);
+  }
+  
+  async findTaxZoneForAddress(
+    country: string,
+    state?: string,
+    postalCode?: string,
+    city?: string
+  ): Promise<TaxZone | null> {
+    let sql = `
+      SELECT * FROM "public"."tax_zone"
+      WHERE "is_active" = true
+      AND $1 = ANY("countries")
+    `;
+    
+    const params: any[] = [country];
+    
+    if (state) {
+      sql += ` AND ($${params.length + 1} = ANY("states") OR "states" IS NULL OR array_length("states", 1) IS NULL)`;
+      params.push(state);
+    }
+    
+    if (postalCode) {
+      sql += ` AND (
+        $${params.length + 1} = ANY("postcodes") 
+        OR EXISTS (
+          SELECT 1 FROM unnest("postcodes") AS p 
+          WHERE $${params.length + 1} LIKE p
+        )
+        OR "postcodes" IS NULL 
+        OR array_length("postcodes", 1) IS NULL
+      )`;
+      params.push(postalCode);
+    }
+    
+    if (city) {
+      sql += ` AND (
+        $${params.length + 1} = ANY("cities") 
+        OR EXISTS (
+          SELECT 1 FROM unnest("cities") AS c 
+          WHERE LOWER($${params.length + 1}) = LOWER(c)
+        )
+        OR "cities" IS NULL 
+        OR array_length("cities", 1) IS NULL
+      )`;
+      params.push(city);
+    }
+    
+    sql += ` ORDER BY 
+      (CASE WHEN $1 = ANY("countries") THEN 10 ELSE 0 END) +
+      (CASE WHEN $2 = ANY("states") THEN 5 ELSE 0 END) +
+      (CASE WHEN $3 = ANY("postcodes") THEN 3 ELSE 0 END) +
+      (CASE WHEN $4 = ANY("cities") THEN 2 ELSE 0 END) DESC,
+      "is_default" DESC
+      LIMIT 1`;
+    
+    const result = await queryOne<any>(sql, params);
+    return transformDbToTs<TaxZone>(result, taxZoneFields);
   }
 
   // Tax Category query methods
   async findTaxCategoryById(id: string): Promise<TaxCategory | null> {
-    return await queryOne<TaxCategory>(
-      `SELECT 
-        id,
-        name,
-        description,
-        code,
-        is_default AS "isDefault",
-        sort_order AS "sortOrder",
-        is_active AS "isActive",
-        metadata,
-        created_at AS "createdAt",
-        updated_at AS "updatedAt"
-      FROM "public"."tax_category" 
-      WHERE "id" = $1`,
+    const result = await queryOne<any>(
+      `SELECT * FROM "public"."tax_category" WHERE "id" = $1`,
       [id]
     );
+    
+    return transformDbToTs<TaxCategory>(result, taxCategoryFields);
   }
-
+  
   async findTaxCategoryByCode(code: string): Promise<TaxCategory | null> {
-    return await queryOne<TaxCategory>(
-      `SELECT 
-        id,
-        name,
-        description,
-        code,
-        is_default AS "isDefault",
-        sort_order AS "sortOrder",
-        is_active AS "isActive",
-        metadata,
-        created_at AS "createdAt",
-        updated_at AS "updatedAt"
-      FROM "public"."tax_category" 
-      WHERE "code" = $1`,
+    const result = await queryOne<any>(
+      `SELECT * FROM "public"."tax_category" WHERE "code" = $1`,
       [code]
     );
+    
+    return transformDbToTs<TaxCategory>(result, taxCategoryFields);
   }
-
+  
   async findAllTaxCategories(
     status: TaxCategory['isActive'] = true,
     limit: number = 50,
     offset: number = 0
   ): Promise<TaxCategory[]> {
-    return await query<TaxCategory[]>(
-      `SELECT 
-        id,
-        name,
-        description,
-        code,
-        is_default AS "isDefault",
-        sort_order AS "sortOrder",
-        is_active AS "isActive",
-        metadata,
-        created_at AS "createdAt",
-        updated_at AS "updatedAt"
-      FROM "public"."tax_category" 
-      WHERE "is_active" = $1 
-      ORDER BY "name" ASC 
-      LIMIT $2 OFFSET $3`,
+    const results = await query<any[]>(
+      `SELECT * 
+       FROM "public"."tax_category" 
+       WHERE "is_active" = $1
+       ORDER BY "sort_order" ASC, "name" ASC
+       LIMIT $2 OFFSET $3`,
       [status, limit, offset]
-    ) || [];
-  }
-
-  // Tax Exemption query methods
-  async findTaxExemptionsByCustomerId(customerId: string): Promise<CustomerTaxExemption[]> {
-    return await query<CustomerTaxExemption[]>(
-      `SELECT 
-        id,
-        customer_id AS "customerId",
-        tax_zone_id AS "taxZoneId",
-        type,
-        status,
-        name,
-        exemption_number AS "exemptionNumber",
-        business_name AS "businessName",
-        exemption_reason AS "exemptionReason",
-        document_url AS "documentUrl",
-        start_date AS "startDate",
-        expiry_date AS "expiryDate",
-        is_verified AS "isVerified",
-        verified_by AS "verifiedBy",
-        verified_at AS "verifiedAt",
-        notes,
-        metadata,
-        created_at AS "createdAt",
-        updated_at AS "updatedAt"
-      FROM "public"."customer_tax_exemption" 
-      WHERE "customer_id" = $1 
-      ORDER BY "created_at" DESC`,
-      [customerId]
-    ) || [];
-  }
-
-  // Tax Zone query methods
-  async findTaxZoneById(id: string): Promise<TaxZone | null> {
-    return await queryOne<TaxZone>(
-      `SELECT 
-        id,
-        name,
-        code,
-        description,
-        is_default AS "isDefault",
-        countries,
-        states,
-        postcodes,
-        cities,
-        is_active AS "isActive",
-        created_at AS "createdAt",
-        updated_at AS "updatedAt"
-      FROM "public"."tax_zone" 
-      WHERE "id" = $1`,
-      [id]
     );
+    
+    return transformArrayDbToTs<TaxCategory>(results || [], taxCategoryFields);
   }
-
-  // Tax Settings query methods
-  async findTaxSettingsById(id: string): Promise<TaxSettings | null> {
-    return await queryOne<TaxSettings>(
-      `SELECT 
-        id,
-        merchant_id AS "merchantId",
-        calculation_method AS "calculationMethod",
-        prices_include_tax AS "pricesIncludeTax",
-        display_prices_with_tax AS "displayPricesWithTax",
-        tax_based_on AS "taxBasedOn",
-        shipping_tax_class AS "shippingTaxClass",
-        display_tax_totals AS "displayTaxTotals",
-        apply_tax_to_shipping AS "applyTaxToShipping",
-        apply_discount_before_tax AS "applyDiscountBeforeTax",
-        round_tax_at_subtotal AS "roundTaxAtSubtotal",
-        tax_decimal_places AS "taxDecimalPlaces",
-        default_tax_category AS "defaultTaxCategory",
-        default_tax_zone AS "defaultTaxZone",
-        tax_provider AS "taxProvider",
-        tax_provider_settings AS "taxProviderSettings",
-        metadata,
-        created_at AS "createdAt",
-        updated_at AS "updatedAt"
-      FROM "public"."tax_settings" 
-      WHERE "id" = $1`,
-      [id]
+  
+  async findDefaultTaxCategory(): Promise<TaxCategory | null> {
+    const result = await queryOne<any>(
+      `SELECT * 
+       FROM "public"."tax_category" 
+       WHERE "is_default" = true AND "is_active" = true
+       LIMIT 1`
     );
+    
+    return transformDbToTs<TaxCategory>(result, taxCategoryFields);
   }
 
-  async findTaxSettingsByMerchantId(merchantId: string): Promise<TaxSettings | null> {
-    return await queryOne<TaxSettings>(
-      `SELECT 
-        id,
-        merchant_id AS "merchantId",
-        calculation_method AS "calculationMethod",
-        prices_include_tax AS "pricesIncludeTax",
-        display_prices_with_tax AS "displayPricesWithTax",
-        tax_based_on AS "taxBasedOn",
-        shipping_tax_class AS "shippingTaxClass",
-        display_tax_totals AS "displayTaxTotals",
-        apply_tax_to_shipping AS "applyTaxToShipping",
-        apply_discount_before_tax AS "applyDiscountBeforeTax",
-        round_tax_at_subtotal AS "roundTaxAtSubtotal",
-        tax_decimal_places AS "taxDecimalPlaces",
-        default_tax_category AS "defaultTaxCategory",
-        default_tax_zone AS "defaultTaxZone",
-        tax_provider AS "taxProvider",
-        tax_provider_settings AS "taxProviderSettings",
-        metadata,
-        created_at AS "createdAt",
-        updated_at AS "updatedAt"
-      FROM "public"."tax_settings" 
-      WHERE "merchant_id" = $1`,
-      [merchantId]
+  // Customer Tax Exemption query methods
+  async findCustomerTaxExemptions(
+    customerId: string,
+    status: TaxExemptionStatus = 'active'
+  ): Promise<CustomerTaxExemption[]> {
+    const results = await query<any[]>(
+      `SELECT * 
+       FROM "public"."customer_tax_exemption" 
+       WHERE "customer_id" = $1 
+       AND "status" = $2
+       AND ("expiry_date" IS NULL OR "expiry_date" > CURRENT_TIMESTAMP)
+       ORDER BY "tax_category_id", "start_date" DESC`,
+      [customerId, status]
     );
+    
+    return transformArrayDbToTs<CustomerTaxExemption>(results || [], customerTaxExemptionFields);
   }
-
+  
+  async findCustomerExemptionsByCategory(
+    customerId: string,
+    taxCategoryId: string,
+    status: TaxExemptionStatus = 'active'
+  ): Promise<CustomerTaxExemption[]> {
+    const results = await query<any[]>(
+      `SELECT * 
+       FROM "public"."customer_tax_exemption" 
+       WHERE "customer_id" = $1 
+       AND "tax_category_id" = $2
+       AND "status" = $3
+       AND ("expiry_date" IS NULL OR "expiry_date" > CURRENT_TIMESTAMP)
+       ORDER BY "start_date" DESC`,
+      [customerId, taxCategoryId, status]
+    );
+    
+    return transformArrayDbToTs<CustomerTaxExemption>(results || [], customerTaxExemptionFields);
+  }
+  
   /**
-   * Calculate tax for a single line item
+   * Get tax rate for a specific address
+   * This method determines the applicable tax rate based on location data
    */
-  async calculateTaxForLineItem(
-    productId: string,
-    quantity: number,
-    price: number,
-    address: AddressInput,
-    customerId?: string
-  ): Promise<TaxCalculationResult> {
-    // Determine product tax category
-    const taxCategoryId = await this.getTaxCategoryForProduct(productId);
-    
-    // Get applicable tax rate for the given address and tax category
-    const applicableTaxes = await this.findApplicableTaxRates(
+  async getTaxRateForAddress(address: AddressInput): Promise<number> {
+    // Find the appropriate tax zone for this address
+    const taxZone = await this.findTaxZoneForAddress(
       address.country,
-      taxCategoryId,
       address.region,
-      address.postalCode
+      address.postalCode,
+      address.city
     );
     
-    // Check if customer has tax exemption
-    let hasExemption = false;
-    if (customerId) {
-      const exemptions = await this.findTaxExemptionsByCustomerId(customerId);
-      hasExemption = exemptions.length > 0 && exemptions.some((e: CustomerTaxExemption) => 
-        e.status === 'active' && 
-        (!e.taxZoneId || this.isAddressInTaxZone(address, e.taxZoneId))
-      );
+    if (!taxZone) {
+      // No applicable tax zone found, return default rate (0%)
+      return 0;
     }
     
-    // Calculate tax amount
-    const subtotal = price * quantity;
-    let taxAmount = 0;
-    const taxBreakdown: TaxBreakdownItem[] = [];
+    // Get the default tax category (usually general/standard sales tax)
+    const defaultCategory = await this.findDefaultTaxCategory();
     
-    if (!hasExemption && applicableTaxes.length > 0) {
-      for (const tax of applicableTaxes) {
-        const taxableAmount = subtotal;
-        const singleTaxAmount = this.calculateSingleTaxAmount(taxableAmount, tax);
+    if (!defaultCategory) {
+      // No default tax category defined, return default rate (0%)
+      return 0;
+    }
+    
+    // Find applicable tax rates for this zone and category
+    const taxRates = await this.findTaxRatesByCategoryAndZone(
+      defaultCategory.id,
+      taxZone.id,
+      true // Only active tax rates
+    );
+    
+    if (!taxRates || taxRates.length === 0) {
+      // No applicable tax rates found, return default rate (0%)
+      return 0;
+    }
+    
+    // Return the rate of the first applicable tax rate (highest priority)
+    return taxRates[0].rate;
+  }
+  
+  /**
+   * Calculate tax for an order based on customer, location and items
+   */
+  async calculateTax(
+    items: Array<{
+      productId: string;
+      taxCategoryId?: string;
+      quantity: number;
+      unitPrice: number;
+      taxable?: boolean;
+    }>,
+    address: AddressInput,
+    customerId?: string,
+    shippingAmount: number = 0
+  ): Promise<TaxCalculationResult> {
+    // Implementation would go here - calculating taxes for multiple products
+    // with potentially different tax categories and exemptions
+    
+    // For simplicity in this implementation, use the getTaxRateForAddress method
+    const taxRate = await this.getTaxRateForAddress(address);
+    
+    let subtotal = 0;
+    const lineItemTaxes: LineItemTax[] = [];
+    
+    // Calculate taxes for each line item
+    for (const item of items) {
+      const itemSubtotal = item.quantity * item.unitPrice;
+      subtotal += itemSubtotal;
+      
+      if (item.taxable === false) {
+        lineItemTaxes.push({
+          lineItemId: item.productId, // Using productId as lineItem identifier
+          productId: item.productId,
+          taxAmount: 0,
+          taxBreakdown: []
+        });
+      } else {
+        const itemTaxAmount = itemSubtotal * (taxRate / 100);
+        const itemTaxBreakdown = [{
+          rateId: 'default',
+          rateName: 'Default Tax Rate',
+          rateValue: taxRate,
+          taxableAmount: itemSubtotal,
+          taxAmount: itemTaxAmount,
+          jurisdictionLevel: 'national',
+          jurisdictionName: address.country || 'Unknown'
+        }];
         
-        taxAmount += singleTaxAmount;
-        taxBreakdown.push({
-          rateId: tax.id,
-          rateName: tax.name,
-          rateValue: tax.rate,
-          taxableAmount,
-          taxAmount: singleTaxAmount,
-          jurisdictionLevel: 'national', // Default to national, could be more specific
-          jurisdictionName: address.country
+        lineItemTaxes.push({
+          lineItemId: item.productId, // Using productId as lineItem identifier
+          productId: item.productId,
+          taxAmount: itemTaxAmount,
+          taxBreakdown: itemTaxBreakdown
         });
       }
     }
     
-    // Return tax calculation result
+    // Calculate tax on shipping if applicable
+    const shippingTaxAmount = shippingAmount * (taxRate / 100);
+    
+    // Sum up all taxes
+    const totalTaxAmount = lineItemTaxes.reduce((sum, item) => sum + item.taxAmount, 0) + shippingTaxAmount;
+    
     return {
-      subtotal,
-      taxAmount,
-      total: subtotal + taxAmount,
-      taxBreakdown,
-      taxZoneApplied: applicableTaxes.length > 0 ? applicableTaxes[0].taxZoneId : undefined,
-      taxCategoryApplied: taxCategoryId,
-      lineItemTaxes: [{
-        lineItemId: productId,
-        productId: productId,
-        taxAmount,
-        taxBreakdown
-      }]
-    };
-  }
-
-  /**
-   * Calculate complex tax for multiple items
-   */
-  async calculateComplexTax(
-    items: Array<{ productId: string; quantity: number; price: number; taxCategoryId?: string }>,
-    shippingAddress: AddressInput,
-    billingAddress: AddressInput,
-    subtotal: number,
-    shippingAmount: number = 0,
-    customerId?: string,
-    merchantId?: string
-  ): Promise<TaxCalculationResult> {
-    // Get tax settings if merchant ID is provided
-    let settings: TaxSettings | null = null;
-    if (merchantId) {
-      settings = await this.findTaxSettingsByMerchantId(merchantId);
-    }
-    
-    // Default tax settings if none found
-    const taxSettings = settings || {
-      calculationMethod: 'row_based',
-      pricesIncludeTax: false,
-      displayPricesWithTax: false,
-      taxBasedOn: 'shipping_address',
-      applyTaxToShipping: true,
-      applyDiscountBeforeTax: true,
-      roundTaxAtSubtotal: false,
-      taxDecimalPlaces: 2
-    } as TaxSettings;
-    
-    // Determine which address to use for tax calculations
-    const taxAddress = taxSettings.taxBasedOn === 'billing_address' ? billingAddress : shippingAddress;
-    
-    // Check if customer has tax exemption
-    let hasExemption = false;
-    if (customerId) {
-      const exemptions = await this.findTaxExemptionsByCustomerId(customerId);
-      hasExemption = exemptions.length > 0 && exemptions.some((e: CustomerTaxExemption) => 
-        e.status === 'active' && 
-        (!e.taxZoneId || this.isAddressInTaxZone(taxAddress, e.taxZoneId))
-      );
-    }
-    
-    // Calculate taxes for each line item
-    const lineItemTaxes: LineItemTax[] = [];
-    const allTaxBreakdown: TaxBreakdownItem[] = [];
-    let totalTaxAmount = 0;
-    
-    for (const item of items) {
-      // Get tax category for the product if not provided
-      const taxCategoryId = item.taxCategoryId || await this.getTaxCategoryForProduct(item.productId);
-      
-      // Get applicable tax rates
-      const applicableTaxes = await this.findApplicableTaxRates(
-        taxAddress.country,
-        taxCategoryId,
-        taxAddress.region,
-        taxAddress.postalCode
-      );
-      
-      // Calculate tax for the item
-      const itemSubtotal = item.price * item.quantity;
-      let itemTaxAmount = 0;
-      const itemTaxBreakdown: TaxBreakdownItem[] = [];
-      
-      if (!hasExemption && applicableTaxes.length > 0) {
-        for (const tax of applicableTaxes) {
-          const taxableAmount = itemSubtotal;
-          const singleTaxAmount = this.calculateSingleTaxAmount(taxableAmount, tax);
-          
-          itemTaxAmount += singleTaxAmount;
-          
-          const breakdownItem: TaxBreakdownItem = {
-            rateId: tax.id,
-            rateName: tax.name,
-            rateValue: tax.rate,
-            taxableAmount,
-            taxAmount: singleTaxAmount,
-            jurisdictionLevel: 'national', // Could be more specific based on tax zone
-            jurisdictionName: taxAddress.country
-          };
-          
-          itemTaxBreakdown.push(breakdownItem);
-          allTaxBreakdown.push(breakdownItem);
-        }
-      }
-      
-      lineItemTaxes.push({
-        lineItemId: item.productId, // Using productId as lineItem identifier
-        productId: item.productId,
-        taxAmount: itemTaxAmount,
-        taxBreakdown: itemTaxBreakdown
-      });
-      
-      totalTaxAmount += itemTaxAmount;
-    }
-    
-    // Calculate shipping tax if applicable
-    let shippingTaxAmount = 0;
-    if (taxSettings.applyTaxToShipping && shippingAmount > 0 && !hasExemption) {
-      // Get shipping tax category if specified in settings
-      const shippingTaxCategory = taxSettings.shippingTaxClass ? 
-        await this.findTaxCategoryById(taxSettings.shippingTaxClass) : 
-        await this.getDefaultTaxCategory();
-      
-      const shippingTaxCategoryId = shippingTaxCategory?.id;
-      
-      if (shippingTaxCategoryId) {
-        const applicableTaxes = await this.findApplicableTaxRates(
-          taxAddress.country,
-          shippingTaxCategoryId,
-          taxAddress.region,
-          taxAddress.postalCode
-        );
-        
-        for (const tax of applicableTaxes) {
-          if (tax.isShippingTaxable) {
-            const singleTaxAmount = this.calculateSingleTaxAmount(shippingAmount, tax);
-            shippingTaxAmount += singleTaxAmount;
-            
-            const breakdownItem: TaxBreakdownItem = {
-              rateId: tax.id,
-              rateName: tax.name,
-              rateValue: tax.rate,
-              taxableAmount: shippingAmount,
-              taxAmount: singleTaxAmount,
-              jurisdictionLevel: 'national',
-              jurisdictionName: taxAddress.country
-            };
-            
-            allTaxBreakdown.push(breakdownItem);
-          }
-        }
-      }
-    }
-    
-    // Combine taxes
-    totalTaxAmount += shippingTaxAmount;
-    
-    // Return tax calculation result
-    return {
-      subtotal,
       taxAmount: totalTaxAmount,
-      total: subtotal + totalTaxAmount + shippingAmount,
-      taxBreakdown: allTaxBreakdown,
+      subtotal,
+      total: subtotal + shippingAmount + totalTaxAmount,
+      taxBreakdown: [{
+        rateId: 'default',
+        rateName: 'Default Tax Rate',
+        rateValue: taxRate,
+        taxableAmount: subtotal + shippingAmount,
+        taxAmount: totalTaxAmount,
+        jurisdictionLevel: 'national',
+        jurisdictionName: address.country || 'Unknown'
+      }],
       lineItemTaxes
     };
-  }
-
-  /**
-   * Calculate tax for a basket by basket ID
-   */
-  async calculateTaxForBasket(
-    basketId: string,
-    address: AddressInput,
-    customerId?: string
-  ): Promise<TaxCalculationResult> {
-    // This method would typically get the basket from the database
-    // But since we're not implementing the full database access here,
-    // we'll just return a placeholder result
-    return {
-      subtotal: 0,
-      taxAmount: 0,
-      total: 0,
-      taxBreakdown: []
-    };
-  }
-
-  // Helper methods for tax calculations
-  private async getTaxCategoryForProduct(productId: string): Promise<string | undefined> {
-    // In a real implementation, this would fetch the product and get its tax category
-    // For now, we'll return undefined to use the default tax category
-    return undefined;
-  }
-
-  private async getDefaultTaxCategory(): Promise<TaxCategory | null> {
-    return await queryOne<TaxCategory>(
-      `SELECT 
-        id,
-        name,
-        description,
-        code,
-        is_default AS "isDefault",
-        sort_order AS "sortOrder",
-        is_active AS "isActive",
-        metadata,
-        created_at AS "createdAt",
-        updated_at AS "updatedAt"
-      FROM "public"."tax_category" 
-      WHERE "is_default" = TRUE AND "is_active" = TRUE 
-      LIMIT 1`
-    );
-  }
-
-  private async findApplicableTaxRates(
-    country: string,
-    taxCategoryId?: string,
-    region?: string,
-    postalCode?: string
-  ): Promise<TaxRate[]> {
-    if (!taxCategoryId) {
-      const defaultCategory = await this.getDefaultTaxCategory();
-      if (!defaultCategory) {
-        return [];
-      }
-      taxCategoryId = defaultCategory.id;
-    }
-    
-    // Find tax zones matching the address
-    const matchingTaxZoneIds = await this.findTaxZonesForAddress({
-      country,
-      region,
-      postalCode
-    });
-    
-    if (matchingTaxZoneIds.length === 0) {
-      return [];
-    }
-    
-    // Find tax rates for the matching tax zones and category
-    const placeholders = matchingTaxZoneIds.map((_, idx) => `$${idx + 3}`).join(',');
-    
-    return await query<TaxRate[]>(
-      `SELECT 
-        id,
-        tax_category_id AS "taxCategoryId",
-        tax_zone_id AS "taxZoneId",
-        name,
-        description,
-        rate,
-        type,
-        priority,
-        is_compound AS "isCompound",
-        include_in_price AS "includeInPrice",
-        is_shipping_taxable AS "isShippingTaxable",
-        fixed_amount AS "fixedAmount",
-        minimum_amount AS "minimumAmount",
-        maximum_amount AS "maximumAmount",
-        threshold,
-        start_date AS "startDate",
-        end_date AS "endDate",
-        is_active AS "isActive",
-        metadata,
-        created_at AS "createdAt",
-        updated_at AS "updatedAt"
-      FROM "public"."tax_rate" 
-      WHERE "tax_category_id" = $1 
-        AND "tax_zone_id" IN (${placeholders})
-        AND "is_active" = TRUE
-        AND "start_date" <= $2
-        AND ("end_date" IS NULL OR "end_date" >= $2)
-      ORDER BY "priority" DESC, "rate" ASC`,
-      [taxCategoryId, Math.floor(Date.now() / 1000), ...matchingTaxZoneIds]
-    ) || [];
-  }
-
-  private async findTaxZonesForAddress(address: AddressInput): Promise<string[]> {
-    // Query to find all tax zones that match the given address
-    let sql = `
-      SELECT id FROM "public"."tax_zone"
-      WHERE "is_active" = TRUE
-        AND "countries" @> ARRAY[$1]::varchar(2)[]
-    `;
-    
-    const params: any[] = [address.country];
-    
-    // Add state/region filter if provided
-    if (address.region) {
-      sql += ` AND ("states" IS NULL OR "states" = '{}' OR "states" @> ARRAY[$2]::varchar(50)[])`;
-      params.push(address.region);
-    }
-    
-    // Add postal code filter if provided
-    if (address.postalCode) {
-      sql += ` AND ("postcodes" IS NULL OR "postcodes" = '{}' OR "postcodes" @> ARRAY[$${params.length + 1}]::varchar(20)[])`;
-      params.push(address.postalCode);
-    }
-    
-    // Add city filter if provided
-    if (address.city) {
-      sql += ` AND ("cities" IS NULL OR "cities" = '{}' OR "cities" @> ARRAY[$${params.length + 1}]::varchar(100)[])`;
-      params.push(address.city);
-    }
-    
-    const results = await query<{ id: string }[]>(sql, params);
-    
-    return results ? results.map(r => r.id) : [];
-  }
-
-  private isAddressInTaxZone(address: AddressInput, taxZoneId: string): boolean {
-    // This would check if the address falls within the tax zone
-    // Would require fetching the tax zone and comparing
-    // For simplicity, returning true
-    return true;
-  }
-
-  private calculateSingleTaxAmount(amount: number, taxRate: TaxRate): number {
-    if (taxRate.type === 'percentage') {
-      return amount * (taxRate.rate / 100);
-    } else if (taxRate.type === 'fixed_amount') {
-      return taxRate.fixedAmount || 0;
-    } else {
-      // compound or other types would have more complex calculation
-      return amount * (taxRate.rate / 100);
-    }
   }
 }
 
