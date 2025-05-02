@@ -20,3 +20,8 @@ yarn dev
 ```
 
 ## Deploy
+
+
+- Admin template: https://github.com/alexis-luna/bootstrap-simple-admin-template
+- Admin template: https://github.com/iqonicdesignofficial/hope-ui-design-system
+- Website template: https://github.com/spacemadev/Tailstore

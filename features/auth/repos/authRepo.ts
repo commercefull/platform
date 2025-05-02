@@ -1,5 +1,5 @@
 import { queryOne } from '../../../libs/db';
-import bcrypt from 'bcrypt';
+import bcryptjs from 'bcryptjs';
 import crypto from 'crypto';
 
 // Database transformation utilities
@@ -139,7 +139,7 @@ export class AuthRepo {
       return null;
     }
     
-    const isPasswordValid = await bcrypt.compare(password, customer.password);
+    const isPasswordValid = await bcryptjs.compare(password, customer.password);
     
     if (!isPasswordValid) {
       return null;
@@ -164,7 +164,7 @@ export class AuthRepo {
       return null;
     }
     
-    const isPasswordValid = await bcrypt.compare(password, merchant.password);
+    const isPasswordValid = await bcryptjs.compare(password, merchant.password);
     
     if (!isPasswordValid) {
       return null;
@@ -189,7 +189,7 @@ export class AuthRepo {
       return null;
     }
     
-    const isPasswordValid = await bcrypt.compare(password, admin.password);
+    const isPasswordValid = await bcryptjs.compare(password, admin.password);
     
     if (!isPasswordValid) {
       return null;
@@ -204,13 +204,13 @@ export class AuthRepo {
   // Password hashing
   async hashPassword(password: string): Promise<string> {
     const saltRounds = 10;
-    return await bcrypt.hash(password, saltRounds);
+    return await bcryptjs.hash(password, saltRounds);
   }
   
   // Generate password reset token
   async createPasswordResetToken(userId: string, userType: 'customer' | 'merchant' | 'admin'): Promise<string> {
     const token = crypto.randomBytes(32).toString('hex');
-    const hashedToken = await bcrypt.hash(token, 10);
+    const hashedToken = await bcryptjs.hash(token, 10);
     const expiresAt = new Date(Date.now() + 3600000); // 1 hour from now
     
     // Store token in database based on user type
@@ -242,7 +242,7 @@ export class AuthRepo {
     
     const resetToken = transformDbToTs<PasswordResetToken>(resetTokenRecord, passwordResetFields);
     
-    const isValid = await bcrypt.compare(token, resetToken.token);
+    const isValid = await bcryptjs.compare(token, resetToken.token);
     
     if (!isValid) {
       return null;
