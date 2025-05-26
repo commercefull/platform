@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import taxQueryRepo from '../repos/taxQueryRepo';
-import taxCommandRepo from '../repos/taxCommandRepo';
+import { TaxCommandRepo } from '../repos/taxCommandRepo';
 import { 
   TaxRate, 
   TaxCategory,
@@ -97,7 +97,7 @@ export class TaxController {
         startDate: startDate || Math.floor(Date.now() / 1000) // Unix timestamp if not provided
       };
       
-      const createdTaxRate = await taxCommandRepo.createTaxRate(newTaxRate);
+      const createdTaxRate = await (new TaxCommandRepo()).createTaxRate(newTaxRate);
       
       return res.status(201).json(createdTaxRate);
     } catch (error) {
@@ -135,7 +135,7 @@ export class TaxController {
       if (priority !== undefined) updatedTaxRate.priority = parseInt(priority);
       if (isActive !== undefined) updatedTaxRate.isActive = isActive;
       
-      const result = await taxCommandRepo.updateTaxRate(id, updatedTaxRate);
+      const result = await (new TaxCommandRepo()).updateTaxRate(id, updatedTaxRate);
       
       return res.json(result);
     } catch (error) {
@@ -154,7 +154,7 @@ export class TaxController {
         return res.status(404).json({ error: 'Tax rate not found' });
       }
       
-      await taxCommandRepo.deleteTaxRate(id);
+      await (new TaxCommandRepo()).deleteTaxRate(id);
       
       return res.json({ message: 'Tax rate deleted successfully' });
     } catch (error) {
@@ -225,7 +225,7 @@ export class TaxController {
         isActive: isActive !== undefined ? isActive : true
       };
       
-      const createdCategory = await taxCommandRepo.createTaxCategory(newTaxCategory);
+      const createdCategory = await (new TaxCommandRepo()).createTaxCategory(newTaxCategory);
       
       return res.status(201).json(createdCategory);
     } catch (error) {
@@ -261,7 +261,7 @@ export class TaxController {
       if (sortOrder !== undefined) updatedCategory.sortOrder = parseInt(sortOrder);
       if (isActive !== undefined) updatedCategory.isActive = isActive;
       
-      const result = await taxCommandRepo.updateTaxCategory(id, updatedCategory);
+      const result = await (new TaxCommandRepo()).updateTaxCategory(id, updatedCategory);
       
       return res.json(result);
     } catch (error) {
@@ -280,7 +280,7 @@ export class TaxController {
         return res.status(404).json({ error: 'Tax category not found' });
       }
       
-      await taxCommandRepo.deleteTaxCategory(id);
+      await (new TaxCommandRepo()).deleteTaxCategory(id);
       
       return res.json({ message: 'Tax category deleted successfully' });
     } catch (error) {
@@ -341,7 +341,7 @@ export class TaxController {
         isActive: isActive !== undefined ? isActive : true
       };
       
-      const createdTaxZone = await taxCommandRepo.createTaxZone(newTaxZone);
+      const createdTaxZone = await (new TaxCommandRepo()).createTaxZone(newTaxZone);
       
       return res.status(201).json(createdTaxZone);
     } catch (error) {
@@ -388,7 +388,7 @@ export class TaxController {
       if (cities !== undefined) updatedTaxZone.cities = cities;
       if (isActive !== undefined) updatedTaxZone.isActive = isActive;
       
-      const result = await taxCommandRepo.updateTaxZone(id, updatedTaxZone);
+      const result = await (new TaxCommandRepo()).updateTaxZone(id, updatedTaxZone);
       
       return res.json(result);
     } catch (error) {
@@ -407,7 +407,7 @@ export class TaxController {
         return res.status(404).json({ error: 'Tax zone not found' });
       }
       
-      await taxCommandRepo.deleteTaxZone(id);
+      await (new TaxCommandRepo()).deleteTaxZone(id);
       
       return res.json({ message: 'Tax zone deleted successfully' });
     } catch (error) {
