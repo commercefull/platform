@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import jwt, { SignOptions } from 'jsonwebtoken';
-import { AuthRepo, AuthCredentials } from '../repos/authRepo';
+import { AuthRepo } from '../repos/authRepo';
 import { CustomerRepo } from '../../customer/repos/customerRepo';
 import { MerchantRepo } from '../../merchant/repos/merchantRepo';
 

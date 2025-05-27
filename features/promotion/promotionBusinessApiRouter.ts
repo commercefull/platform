@@ -81,4 +81,4 @@ router.post('/discounts', isAdmin, createDiscount);
 router.put('/discounts/:id', isAdmin, updateDiscount);
 router.delete('/discounts/:id', isAdmin, deleteDiscount);
 
-export const promotionRouterAdmin = router;
+export const promotionBusinessApiRouter = router;

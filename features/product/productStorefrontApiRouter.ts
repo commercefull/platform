@@ -1,5 +1,5 @@
 import express from "express";
-import productPublicController from "./controllers/productPublicController";
+import productPublicController from "./controllers/productStorefrontApiController";
 
 const router = express.Router();
 
@@ -15,4 +15,4 @@ router.get("/category/:slug", productPublicController.getProductsByCategory.bind
 // GET: get a product by slug
 router.get("/:slug", productPublicController.getProductBySlug.bind(productPublicController));
 
-export const productRouter = router;
+export const productStorefrontApiRouter = router;

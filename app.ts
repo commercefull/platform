@@ -14,17 +14,18 @@ import { pool } from "./libs/db/pool";
 import passport from "passport";
 import { basketRouter } from "./features/basket/router";
 import { accountRouter } from "./features/account/router";
-import { pageRouter } from "./features/page/router";
-import { productRouter } from "./features/product/router";
+import { contentRouter } from "./features/content/router";
 import { checkoutRouter } from "./features/checkout/router";
 import { orderRouter } from "./features/order/router";
-import { configurationRouterAdmin } from "./features/configuration/routerAdmin";
-import { promotionRouterAdmin } from "./features/promotion/routerAdmin";
-import { productRouterAdmin } from "./features/product/routerAdmin";
 import { orderRouterAdmin } from "./features/order/routerAdmin";
 import { distributionRouterAdmin } from "./features/distribution/routerAdmin";
 import { merchantRouterAdmin } from "./features/merchant/routerAdmin";
 import { authRouterAdmin } from "./features/auth/routerAdmin";
+import { taxBusinessApiRouter } from "./features/tax/taxBusinessApiRouter";
+import { taxStorefrontApiRouter } from "./features/tax/taxStorefrontApiRouter";
+import { productBusinessApiRouter } from "./features/product/productBusinessApiRouter";
+import { productStorefrontApiRouter } from "./features/product/productStorefrontApiRouter";
+import { promotionBusinessApiRouter } from "./features/promotion/promotionBusinessApiRouter";
 
 const pgSession = require('connect-pg-simple')(session);
 
@@ -137,20 +138,21 @@ app.use(async (req: Request, res: Response, next) => {
 });
 
 //routes config
-app.use("/", pageRouter);
+app.use("/", contentRouter);
 app.use("/account", accountRouter);
 app.use("/basket", basketRouter);
 app.use("/order", orderRouter);
 app.use("/checkout", checkoutRouter);
-app.use("/products", productRouter);
-app.use("/administrator", [
+app.use("/tax", taxStorefrontApiRouter);
+app.use("/products", productStorefrontApiRouter);
+app.use("/merchant-center", [
   authRouterAdmin,
   merchantRouterAdmin, 
-  configurationRouterAdmin, 
-  promotionRouterAdmin, 
-  productRouterAdmin, 
+  promotionBusinessApiRouter, 
+  productBusinessApiRouter, 
   orderRouterAdmin, 
-  distributionRouterAdmin
+  distributionRouterAdmin,
+  taxBusinessApiRouter
 ]);
 
 

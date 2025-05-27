@@ -386,6 +386,20 @@ export class AuthRepo {
     return userId;
   }
   
+  // Change password for a user
+  async changePassword(userId: string, newPassword: string, userType: 'customer' | 'merchant' | 'admin'): Promise<boolean> {
+    // Hash the new password
+    const hashedPassword = await this.hashPassword(newPassword);
+    
+    // Update the user's password in the appropriate table
+    const result = await queryOne(
+      `UPDATE "public"."${userType}" SET "password" = $1, "updated_at" = $2 WHERE "id" = $3`,
+      [hashedPassword, new Date(), userId]
+    ) as QueryResult;
+    
+    return result.rowCount > 0;
+  }
+
   // Cleanup expired tokens (can be run by a scheduled task)
   async cleanupExpiredTokens(): Promise<{ passwordReset: number, emailVerification: number, refreshTokens: number }> {
     const now = new Date();

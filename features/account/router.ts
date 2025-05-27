@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 import passport from "passport";
-import { findUserBasket, saveUserBasket } from "../basket/repos/basketMongo";
+import basketRepo from "../basket/basketRepo";
 import { isLoggedIn, isNotLoggedIn } from "../../libs/middlewares";
 import {
   userSignUpValidationRules,
@@ -37,7 +37,29 @@ router.post(
     try {
       //if there is cart session, save it to the user's cart in db
       if (req.session.cart) {
-        await saveUserBasket(req.session.cart, req.user._id);
+        // Get or create a basket for the user
+        let userBasket = await basketRepo.findUserBasket(req.user._id);
+        
+        if (!userBasket) {
+          // Create a new basket for the user if one doesn't exist
+          userBasket = await basketRepo.createBasket(req.user._id);
+        }
+        
+        // Add each item from the session cart to the user's basket
+        if (req.session.cart.items && Array.isArray(req.session.cart.items)) {
+          for (const item of req.session.cart.items) {
+            await basketRepo.addItemToBasket(userBasket.id, {
+              productId: item.productId,
+              variantId: item.variantId,
+              quantity: item.quantity,
+              price: item.price,
+              name: item.name,
+              sku: item.sku,
+              imageUrl: item.imageUrl,
+              attributes: item.attributes
+            });
+          }
+        }
       }
       // redirect to the previous URL
       if (req.session.oldUrl) {
@@ -80,10 +102,27 @@ router.post(
   async (req: any, res: Response) => {
     try {
       // cart logic when the user logs in
-      let basket = await findUserBasket(req.user._id)
+      let basket = await basketRepo.findUserBasket(req.user._id)
       // if there is a cart session and user has no cart, save it to the user's cart in db
       if (req.session.cart && !basket) {
-        await saveUserBasket(req.session.cart, req.user._id);
+        // Create a new basket for the user
+        basket = await basketRepo.createBasket(req.user._id);
+        
+        // Add each item from the session cart to the user's basket
+        if (req.session.cart.items && Array.isArray(req.session.cart.items)) {
+          for (const item of req.session.cart.items) {
+            await basketRepo.addItemToBasket(basket.id, {
+              productId: item.productId,
+              variantId: item.variantId,
+              quantity: item.quantity,
+              price: item.price,
+              name: item.name,
+              sku: item.sku,
+              imageUrl: item.imageUrl,
+              attributes: item.attributes
+            });
+          }
+        }
       }
       // if user has a cart in db, load it to session
       if (basket) {

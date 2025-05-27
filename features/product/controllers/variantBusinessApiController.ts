@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import productRepo from "../repos/productRepo";
 import productVariantRepo, { 
-  ProductVariant, 
   ProductVariantCreateProps, 
   ProductVariantUpdateProps,
   InventoryPolicy 
@@ -10,13 +9,9 @@ import { validateRequest } from "../../../libs/validation";
 import { errorResponse, successResponse } from "../../../libs/apiResponse";
 
 /**
- * Product Variant Controller for admin operations
+ * Get all variants for a product
  */
-export class ProductVariantController {
-  /**
-   * Get all variants for a product
-   */
-  async getVariantsByProductId(req: Request, res: Response): Promise<void> {
+export const getVariantsByProductId = async (req: Request, res: Response): Promise<void> => {
     try {
       const { productId } = req.params;
       
@@ -36,10 +31,10 @@ export class ProductVariantController {
     }
   }
 
-  /**
-   * Get a variant by ID
-   */
-  async getVariantById(req: Request, res: Response): Promise<void> {
+/**
+ * Get a variant by ID
+ */
+export const getVariantById = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       
@@ -56,10 +51,10 @@ export class ProductVariantController {
     }
   }
 
-  /**
-   * Create a new variant for a product
-   */
-  async createVariant(req: Request, res: Response): Promise<void> {
+/**
+ * Create a new variant for a product
+ */
+export const createVariant = async (req: Request, res: Response): Promise<void> => {
     try {
       const { productId } = req.params;
       
@@ -104,18 +99,17 @@ export class ProductVariantController {
       };
       
       // Add optional number fields
-      if (req.body.salePrice) variantData.salePrice = Number(req.body.salePrice);
-      if (req.body.cost) variantData.cost = Number(req.body.cost);
+      if (req.body.compareAtPrice) variantData.compareAtPrice = Number(req.body.compareAtPrice);
+      if (req.body.costPrice) variantData.costPrice = Number(req.body.costPrice);
       if (req.body.weight) variantData.weight = Number(req.body.weight);
       
       // Process dimensions if provided
       if (req.body.dimensions) {
-        variantData.dimensions = {
-          ...req.body.dimensions,
-          length: req.body.dimensions.length ? Number(req.body.dimensions.length) : undefined,
-          width: req.body.dimensions.width ? Number(req.body.dimensions.width) : undefined,
-          height: req.body.dimensions.height ? Number(req.body.dimensions.height) : undefined
-        };
+        // Extract individual dimension properties
+        if (req.body.dimensions.length) variantData.length = Number(req.body.dimensions.length);
+        if (req.body.dimensions.width) variantData.width = Number(req.body.dimensions.width);
+        if (req.body.dimensions.height) variantData.height = Number(req.body.dimensions.height);
+        if (req.body.dimensions.dimensionUnit) variantData.dimensionUnit = req.body.dimensions.dimensionUnit;
       }
       
       // Create the variant
@@ -125,7 +119,7 @@ export class ProductVariantController {
       if (position === 0 || req.body.isDefault) {
         await productRepo.update(productId, { 
           hasVariants: true,
-          variantAttributes: Object.keys(variant.attributes)
+          variantAttributes: variant.options.map(option => option.name)
         });
       }
       
@@ -135,10 +129,10 @@ export class ProductVariantController {
     }
   }
 
-  /**
-   * Update an existing variant
-   */
-  async updateVariant(req: Request, res: Response): Promise<void> {
+/**
+ * Update an existing variant
+ */
+export const updateVariant = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       
@@ -165,19 +159,18 @@ export class ProductVariantController {
       
       // Process number fields
       if (req.body.price) variantData.price = Number(req.body.price);
-      if (req.body.salePrice) variantData.salePrice = Number(req.body.salePrice);
-      if (req.body.cost) variantData.cost = Number(req.body.cost);
+      if (req.body.compareAtPrice) variantData.compareAtPrice = Number(req.body.compareAtPrice);
+      if (req.body.costPrice) variantData.costPrice = Number(req.body.costPrice);
       if (req.body.inventory) variantData.inventory = Number(req.body.inventory);
       if (req.body.weight) variantData.weight = Number(req.body.weight);
       
       // Process dimensions if provided
       if (req.body.dimensions) {
-        variantData.dimensions = {
-          ...req.body.dimensions,
-          length: req.body.dimensions.length ? Number(req.body.dimensions.length) : undefined,
-          width: req.body.dimensions.width ? Number(req.body.dimensions.width) : undefined,
-          height: req.body.dimensions.height ? Number(req.body.dimensions.height) : undefined
-        };
+        // Extract individual dimension properties
+        if (req.body.dimensions.length) variantData.length = Number(req.body.dimensions.length);
+        if (req.body.dimensions.width) variantData.width = Number(req.body.dimensions.width);
+        if (req.body.dimensions.height) variantData.height = Number(req.body.dimensions.height);
+        if (req.body.dimensions.dimensionUnit) variantData.dimensionUnit = req.body.dimensions.dimensionUnit;
       }
       
       // Update the variant
@@ -193,9 +186,9 @@ export class ProductVariantController {
         const allVariants = await productVariantRepo.findByProductId(existingVariant.productId);
         const allAttributes = new Set<string>();
         
-        // Collect all unique attribute keys across all variants
+        // Collect all unique attribute names from variant options
         allVariants.forEach(v => {
-          Object.keys(v.attributes).forEach(key => allAttributes.add(key));
+          v.options.forEach(option => allAttributes.add(option.name));
         });
         
         // Update the product
@@ -210,10 +203,10 @@ export class ProductVariantController {
     }
   }
 
-  /**
-   * Delete a variant
-   */
-  async deleteVariant(req: Request, res: Response): Promise<void> {
+/**
+ * Delete a variant
+ */
+export const deleteVariant = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       
@@ -250,10 +243,10 @@ export class ProductVariantController {
     }
   }
 
-  /**
-   * Set a variant as the default for a product
-   */
-  async setDefaultVariant(req: Request, res: Response): Promise<void> {
+/**
+ * Set a variant as the default for a product
+ */
+export const setDefaultVariant = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       
@@ -274,10 +267,10 @@ export class ProductVariantController {
     }
   }
 
-  /**
-   * Update inventory for a variant
-   */
-  async updateInventory(req: Request, res: Response): Promise<void> {
+/**
+ * Update inventory for a variant
+ */
+export const updateInventory = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const { quantity } = req.body;
@@ -307,10 +300,10 @@ export class ProductVariantController {
     }
   }
 
-  /**
-   * Adjust inventory for a variant (increment or decrement)
-   */
-  async adjustInventory(req: Request, res: Response): Promise<void> {
+/**
+ * Adjust inventory for a variant (increment or decrement)
+ */
+export const adjustInventory = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const { adjustment } = req.body;
@@ -340,10 +333,10 @@ export class ProductVariantController {
     }
   }
 
-  /**
-   * Reorder variants for a product
-   */
-  async reorderVariants(req: Request, res: Response): Promise<void> {
+/**
+ * Reorder variants for a product
+ */
+export const reorderVariants = async (req: Request, res: Response): Promise<void> => {
     try {
       const { productId } = req.params;
       const { variantIds } = req.body;
@@ -395,9 +388,6 @@ export class ProductVariantController {
       
       successResponse(res, { variants: updatedVariants });
     } catch (error) {
-      errorResponse(res, (error as Error).message);
+      errorResponse(res, error instanceof Error ? error.message : String(error));
     }
-  }
 }
-
-export default new ProductVariantController();

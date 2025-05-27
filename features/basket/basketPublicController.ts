@@ -2,7 +2,6 @@ import { Response } from 'express';
 import { ProductRepo } from '../product/repos/productRepo';
 import basketRepo, { Basket } from './basketRepo';
 import { storefrontRespond } from '../../libs/templates';
-import { Product } from '../product/domain/product';
 
 class BasketPublicController {
   // Add item to cart
@@ -39,11 +38,11 @@ class BasketPublicController {
           productId: productId,
           variantId: undefined,
           quantity: 1,
-          price: product.price,
-          name: product.title,
-          sku: product.productCode,
-          imageUrl: product.imageUrl,
-          attributes: {}
+          price: product.salePrice || product.basePrice || 0, // Use salePrice if available, otherwise basePrice
+          name: product.name,
+          sku: product.sku || '',
+          imageUrl: product.primaryImageId ? `/product/image/${product.primaryImageId}` : undefined,
+          attributes: product.variantAttributes || {}
         }
       );
 
@@ -254,9 +253,12 @@ class BasketPublicController {
       try {
         const product = await (new ProductRepo()).findById(item.productId);
         if (product) {
-          const productObj = product.toObject();
-          productObj.qty = item.quantity;
-          productObj.totalPrice = item.price * item.quantity;
+          // Create a new object with product properties and additional basket item properties
+          const productObj = {
+            ...product,  // Spread all product properties
+            qty: item.quantity,
+            totalPrice: item.price * item.quantity
+          };
           products.push(productObj);
         }
       } catch (err) {
