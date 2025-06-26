@@ -27,9 +27,8 @@ import {
   validatePromotionForCart
 } from './controllers/promotionController';
 
-// Keeping the existing imports for backward compatibility
-import { applyPromotion, getPromotionById as getCartPromotionById, getPromotionsByCartId, removePromotion, updatePromotion as updateCartPromotion } from './controllers/cartPromotionController';
-import { getActivePromotions as getActiveCategoryPromotions, getPromotionsByCategoryId, getPromotionById as getCategoryPromotionById, createPromotion as createCategoryPromotion, updatePromotion as updateCategoryPromotion, deletePromotion as deleteCategoryPromotion } from './controllers/categoryPromotionController';
+import { applyPromotion,  getCartPromotionById, getPromotionsByCartId, removePromotion,  updateCartPromotion } from './controllers/cartPromotionController';
+import {  getActiveCategoryPromotions, getPromotionsByCategoryId, getCategoryPromotionById, createCategoryPromotion, updateCategoryPromotion, deleteCategoryPromotion } from './controllers/categoryPromotionController';
 import { getActiveDiscounts, getDiscountById, getDiscountsByCategoryId, getDiscountsByProductId, createDiscount, updateDiscount, deleteDiscount } from './controllers/discountController';
 
 const router = express.Router();

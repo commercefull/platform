@@ -15,7 +15,7 @@ export const getPromotionsByCartId = async (req: Request, res: Response): Promis
 };
 
 // Get promotion by ID
-export const getPromotionById = async (req: Request, res: Response): Promise<void> => {
+export const getCartPromotionById = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const promotion = await cartPromotionRepo.getById(id);
@@ -48,7 +48,7 @@ export const applyPromotion = async (req: Request, res: Response): Promise<void>
 };
 
 // Update a cart promotion
-export const updatePromotion = async (req: Request, res: Response): Promise<void> => {
+export const updateCartPromotion = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const promotionData = req.body;

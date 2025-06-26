@@ -28,4 +28,4 @@ router.put('/redemptions/:id/status', loyaltyController.updateRedemptionStatus);
 // Order Processing
 router.post('/orders/:orderId/points', loyaltyController.processOrderPoints);
 
-export const loyaltyAdminRouter = router;
+export const loyaltyBusinessRouter = router;

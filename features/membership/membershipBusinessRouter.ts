@@ -1,32 +1,49 @@
 import express from "express";
-import { MembershipController } from "./controllers/membershipController";
+import {
+  getMembershipTiers,
+  getMembershipTierById,
+  createMembershipTier,
+  updateMembershipTier,
+  deleteMembershipTier,
+  getMembershipBenefits,
+  getMembershipBenefitById,
+  createMembershipBenefit,
+  updateMembershipBenefit,
+  deleteMembershipBenefit,
+  getUserMemberships,
+  getUserMembershipById,
+  getUserMembershipByUserId,
+  createUserMembership,
+  updateUserMembership,
+  cancelUserMembership,
+  getUserMembershipBenefits
+} from "./controllers/membershipController";
 
 const router = express.Router();
-const membershipController = new MembershipController();
 
 // Admin routes for membership tier management
-router.get("/tiers", membershipController.getMembershipTiers);
-router.get("/tiers/:id", membershipController.getMembershipTierById);
-router.post("/tiers", membershipController.createMembershipTier);
-router.put("/tiers/:id", membershipController.updateMembershipTier);
-router.delete("/tiers/:id", membershipController.deleteMembershipTier);
+router.get("/tiers", getMembershipTiers);
+router.get("/tiers/:id", getMembershipTierById);
+router.post("/tiers", createMembershipTier);
+router.put("/tiers/:id", updateMembershipTier);
+router.delete("/tiers/:id", deleteMembershipTier);
 
 // Admin routes for membership benefit management
-router.get("/benefits", membershipController.getMembershipBenefits);
-router.get("/benefits/:id", membershipController.getMembershipBenefitById);
-router.post("/benefits", membershipController.createMembershipBenefit);
-router.put("/benefits/:id", membershipController.updateMembershipBenefit);
-router.delete("/benefits/:id", membershipController.deleteMembershipBenefit);
+router.get("/benefits", getMembershipBenefits);
+router.get("/benefits/:id", getMembershipBenefitById);
+router.post("/benefits", createMembershipBenefit);
+router.put("/benefits/:id", updateMembershipBenefit);
+router.delete("/benefits/:id", deleteMembershipBenefit);
 
 // Admin routes for user membership management
-router.get("/user-memberships", membershipController.getUserMemberships);
-router.get("/user-memberships/:id", membershipController.getUserMembershipById);
-router.post("/user-memberships", membershipController.createUserMembership);
-router.put("/user-memberships/:id", membershipController.updateUserMembership);
-router.post("/user-memberships/:id/cancel", membershipController.cancelUserMembership);
+router.get("/user-memberships", getUserMemberships);
+router.get("/user-memberships/:id", getUserMembershipById);
+router.post("/user-memberships", createUserMembership);
+router.put("/user-memberships/:id", updateUserMembership);
+router.post("/user-memberships/:id/cancel", cancelUserMembership);
 
 // Admin routes for fetching user-specific membership data
-router.get("/users/:userId/membership", membershipController.getUserMembershipByUserId);
-router.get("/users/:userId/benefits", membershipController.getUserMembershipBenefits);
+router.get("/users/:userId/membership", getUserMembershipByUserId);
+router.get("/users/:userId/benefits", getUserMembershipBenefits);
 
 export const membershipBusinessRouter = router;

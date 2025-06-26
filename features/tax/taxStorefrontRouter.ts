@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { calculateTaxForBasket, calculateTaxForLineItem, checkCustomerTaxExemption, findTaxZoneForAddress, getStorefrontTaxSettings, getTaxCategoryByCode, getTaxRates } from './controllers/taxStorefrontApiController';
+import { calculateTaxForBasket, calculateTaxForLineItem, checkCustomerTaxExemption, findTaxZoneForAddress, getStorefrontTaxSettings, getTaxCategoryByCode, getTaxRates } from './controllers/taxStorefrontController';
 import { isLoggedIn } from '../../libs/auth';
 
 const router = Router();

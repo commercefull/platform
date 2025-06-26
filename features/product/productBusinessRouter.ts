@@ -1,7 +1,7 @@
 import express from "express";
-import { getAllProducts, getProductById, createProduct, updateProduct, deleteProduct, updateProductStatus, updateProductVisibility, getRelatedProducts, getProductsByCategory, getProductWithVariants } from "./controllers/productBusinessApiController";
-import { getVariantsByProductId, getVariantById, createVariant, updateVariant, deleteVariant, setDefaultVariant, updateInventory, adjustInventory, reorderVariants } from "./controllers/variantBusinessApiController";
-import { getImagesByProductId, getImagesByVariantId, getImageById, createImage, updateImage, deleteImage, setPrimaryImage, reorderImages } from "./controllers/imageBusinessApiController";
+import { getAllProducts, getProductById, createProduct, updateProduct, deleteProduct, updateProductStatus, updateProductVisibility, getRelatedProducts, getProductsByCategory, getProductWithVariants } from "./controllers/productBusinessController";
+import { getVariantsByProductId, getVariantById, createVariant, updateVariant, deleteVariant, setDefaultVariant, updateInventory, adjustInventory, reorderVariants } from "./controllers/variantBusinessController";
+import { getImagesByProductId, getImagesByVariantId, getImageById, createImage, updateImage, deleteImage, setPrimaryImage, reorderImages } from "./controllers/imageBusinessController";
 
 const router = express.Router();
 

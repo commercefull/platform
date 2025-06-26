@@ -26,7 +26,7 @@ The repository follows the platform's standardized database naming convention, u
   - Requesting refunds
 
 ### 3. Routers
-- **Public Router (`router.ts`)**: Exposes customer-facing endpoints:
+- **Storefront Router (`router.ts`)**: Exposes customer-facing endpoints:
   - `/payment-methods`: Lists available payment methods
   - `/customers/:customerId/transactions`: Customer transaction history
   - `/transactions/:transactionId`: Transaction details

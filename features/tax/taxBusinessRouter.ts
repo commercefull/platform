@@ -14,7 +14,7 @@ import {
   createTaxZone,
   updateTaxZone,
   deleteTaxZone
-} from './controllers/taxBusinessApiController';
+} from './controllers/taxBusinessController';
 import { isAdmin } from '../../libs/auth';
 
 const router = Router();

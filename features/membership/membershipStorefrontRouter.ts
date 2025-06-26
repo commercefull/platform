@@ -1,19 +1,19 @@
 import express from "express";
-import { MembershipController } from "./controllers/membershipController";
+import {
+  getMembershipTiers,
+  getUserMembershipByUserId,
+  getUserMembershipBenefits
+} from "./controllers/membershipController";
 import { MembershipRepo } from "./repos/membershipRepo";
 
 const router = express.Router();
-const membershipController = new MembershipController();
-
-// Public routes for membership information
-// These endpoints are accessible to regular users
 
 // Get all active membership tiers
 router.get("/tiers", (req, res, next) => {
   // Force includeInactive to false for public API
   req.query.includeInactive = 'false';
   next();
-}, membershipController.getMembershipTiers);
+}, getMembershipTiers);
 
 // Get specific membership tier details
 router.get("/tiers/:id", async (req: any, res: any) => {
@@ -72,9 +72,9 @@ router.get("/tiers/:tierId/benefits", async (req: any, res: any) => {
 });
 
 // Get current user's membership
-router.get("/user/:userId", membershipController.getUserMembershipByUserId);
+router.get("/user/:userId", getUserMembershipByUserId);
 
 // Get current user's membership benefits
-router.get("/user/:userId/benefits", membershipController.getUserMembershipBenefits);
+router.get("/user/:userId/benefits", getUserMembershipBenefits);
 
 export const membershipStorefrontRouter = router;

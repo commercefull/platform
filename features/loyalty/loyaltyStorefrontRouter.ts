@@ -15,4 +15,4 @@ router.get('/my-transactions', isLoggedIn, loyaltyPublicController.getMyTransact
 router.get('/my-redemptions', isLoggedIn, loyaltyPublicController.getMyRedemptions);
 router.post('/redeem', isLoggedIn, loyaltyPublicController.redeemReward);
 
-export const loyaltyPublicRouter = router;
+export const loyaltyStorefrontRouter = router;

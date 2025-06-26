@@ -3,7 +3,7 @@ import { CategoryPromotionRepo } from "../repos/categoryRepo";
 
 const categoryPromotionRepo = new CategoryPromotionRepo();
 
-export const getActivePromotions = async (req: Request, res: Response): Promise<void> => {
+export const getActiveCategoryPromotions = async (req: Request, res: Response): Promise<void> => {
   try {
     const promotions = await categoryPromotionRepo.getActivePromotions();
     res.status(200).json({ success: true, data: promotions || [] });
@@ -24,7 +24,7 @@ export const getPromotionsByCategoryId = async (req: Request, res: Response): Pr
 };
 
 // Get promotion by ID
-export const getPromotionById = async (req: Request, res: Response): Promise<void> => {
+export const getCategoryPromotionById = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const promotion = await categoryPromotionRepo.getById(id);
@@ -41,7 +41,7 @@ export const getPromotionById = async (req: Request, res: Response): Promise<voi
 };
 
 // Create a new category promotion
-export const createPromotion = async (req: Request, res: Response): Promise<void> => {
+export const createCategoryPromotion = async (req: Request, res: Response): Promise<void> => {
   try {
     const promotionData = req.body;
 
@@ -57,7 +57,7 @@ export const createPromotion = async (req: Request, res: Response): Promise<void
 };
 
 // Update an existing category promotion
-export const updatePromotion = async (req: Request, res: Response): Promise<void> => {
+export const updateCategoryPromotion = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const promotionData = req.body;
@@ -73,7 +73,7 @@ export const updatePromotion = async (req: Request, res: Response): Promise<void
 };
 
 // Delete a category promotion
-export const deletePromotion = async (req: Request, res: Response): Promise<void> => {
+export const deleteCategoryPromotion = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const deletedBy = (req.user as any)?.id || 'system';

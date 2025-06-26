@@ -6,18 +6,14 @@ import {
   UserMembership 
 } from '../repos/membershipRepo';
 
-export class MembershipController {
-  private membershipRepo: MembershipRepo;
+// Create a single instance of the repository to be shared across handlers
+const membershipRepo = new MembershipRepo();
 
-  constructor() {
-    this.membershipRepo = new MembershipRepo();
-  }
-
-  // Membership Tier Endpoints
-  getMembershipTiers = async (req: Request, res: Response): Promise<void> => {
+// Membership Tier Endpoints
+export const getMembershipTiers = async (req: Request, res: Response): Promise<void> => {
     try {
       const includeInactive = req.query.includeInactive === 'true';
-      const tiers = await this.membershipRepo.findAllTiers(includeInactive);
+      const tiers = await membershipRepo.findAllTiers(includeInactive);
 
       res.status(200).json({
         success: true,
@@ -33,10 +29,10 @@ export class MembershipController {
     }
   };
 
-  getMembershipTierById = async (req: Request, res: Response): Promise<void> => {
+export const getMembershipTierById = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
-      const tier = await this.membershipRepo.findTierById(id);
+      const tier = await membershipRepo.findTierById(id);
 
       if (!tier) {
         res.status(404).json({
@@ -60,7 +56,7 @@ export class MembershipController {
     }
   };
 
-  createMembershipTier = async (req: Request, res: Response): Promise<void> => {
+export const createMembershipTier = async (req: Request, res: Response): Promise<void> => {
     try {
       const {
         name,
@@ -80,7 +76,7 @@ export class MembershipController {
         return;
       }
 
-      const tier = await this.membershipRepo.createTier({
+      const tier = await membershipRepo.createTier({
         name,
         description,
         monthlyPrice,
@@ -104,7 +100,7 @@ export class MembershipController {
     }
   };
 
-  updateMembershipTier = async (req: Request, res: Response): Promise<void> => {
+export const updateMembershipTier = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const {
@@ -117,7 +113,7 @@ export class MembershipController {
       } = req.body;
 
       // Check if tier exists
-      const existingTier = await this.membershipRepo.findTierById(id);
+      const existingTier = await membershipRepo.findTierById(id);
       if (!existingTier) {
         res.status(404).json({
           success: false,
@@ -126,7 +122,7 @@ export class MembershipController {
         return;
       }
 
-      const updatedTier = await this.membershipRepo.updateTier(id, {
+      const updatedTier = await membershipRepo.updateTier(id, {
         name,
         description,
         monthlyPrice,
@@ -150,12 +146,12 @@ export class MembershipController {
     }
   };
 
-  deleteMembershipTier = async (req: Request, res: Response): Promise<void> => {
+export const deleteMembershipTier = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
 
       // Check if tier exists
-      const existingTier = await this.membershipRepo.findTierById(id);
+      const existingTier = await membershipRepo.findTierById(id);
       if (!existingTier) {
         res.status(404).json({
           success: false,
@@ -164,7 +160,7 @@ export class MembershipController {
         return;
       }
 
-      const deleted = await this.membershipRepo.deleteTier(id);
+      const deleted = await membershipRepo.deleteTier(id);
 
       if (deleted) {
         res.status(200).json({
@@ -187,8 +183,8 @@ export class MembershipController {
     }
   };
 
-  // Membership Benefit Endpoints
-  getMembershipBenefits = async (req: Request, res: Response): Promise<void> => {
+// Membership Benefit Endpoints
+export const getMembershipBenefits = async (req: Request, res: Response): Promise<void> => {
     try {
       const includeInactive = req.query.includeInactive === 'true';
       const tierId = req.query.tierId as string | undefined;
@@ -196,9 +192,9 @@ export class MembershipController {
       let benefits: MembershipBenefit[];
       
       if (tierId) {
-        benefits = await this.membershipRepo.findBenefitsByTierId(tierId);
+        benefits = await membershipRepo.findBenefitsByTierId(tierId);
       } else {
-        benefits = await this.membershipRepo.findAllBenefits(includeInactive);
+        benefits = await membershipRepo.findAllBenefits(includeInactive);
       }
 
       res.status(200).json({
@@ -215,10 +211,10 @@ export class MembershipController {
     }
   };
 
-  getMembershipBenefitById = async (req: Request, res: Response): Promise<void> => {
+export const getMembershipBenefitById = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
-      const benefit = await this.membershipRepo.findBenefitById(id);
+      const benefit = await membershipRepo.findBenefitById(id);
 
       if (!benefit) {
         res.status(404).json({
@@ -242,7 +238,7 @@ export class MembershipController {
     }
   };
 
-  createMembershipBenefit = async (req: Request, res: Response): Promise<void> => {
+export const createMembershipBenefit = async (req: Request, res: Response): Promise<void> => {
     try {
       const {
         tierIds,
@@ -272,7 +268,7 @@ export class MembershipController {
         return;
       }
 
-      const benefit = await this.membershipRepo.createBenefit({
+      const benefit = await membershipRepo.createBenefit({
         tierIds,
         name,
         description,
@@ -297,7 +293,7 @@ export class MembershipController {
     }
   };
 
-  updateMembershipBenefit = async (req: Request, res: Response): Promise<void> => {
+export const updateMembershipBenefit = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const {
@@ -311,7 +307,7 @@ export class MembershipController {
       } = req.body;
 
       // Check if benefit exists
-      const existingBenefit = await this.membershipRepo.findBenefitById(id);
+      const existingBenefit = await membershipRepo.findBenefitById(id);
       if (!existingBenefit) {
         res.status(404).json({
           success: false,
@@ -320,7 +316,7 @@ export class MembershipController {
         return;
       }
 
-      const updatedBenefit = await this.membershipRepo.updateBenefit(id, {
+      const updatedBenefit = await membershipRepo.updateBenefit(id, {
         tierIds,
         name,
         description,
@@ -345,12 +341,12 @@ export class MembershipController {
     }
   };
 
-  deleteMembershipBenefit = async (req: Request, res: Response): Promise<void> => {
+export const deleteMembershipBenefit = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
 
       // Check if benefit exists
-      const existingBenefit = await this.membershipRepo.findBenefitById(id);
+      const existingBenefit = await membershipRepo.findBenefitById(id);
       if (!existingBenefit) {
         res.status(404).json({
           success: false,
@@ -359,7 +355,7 @@ export class MembershipController {
         return;
       }
 
-      const deleted = await this.membershipRepo.deleteBenefit(id);
+      const deleted = await membershipRepo.deleteBenefit(id);
 
       if (deleted) {
         res.status(200).json({
@@ -382,8 +378,8 @@ export class MembershipController {
     }
   };
 
-  // User Membership Endpoints
-  getUserMemberships = async (req: Request, res: Response): Promise<void> => {
+// User Membership Endpoints
+export const getUserMemberships = async (req: Request, res: Response): Promise<void> => {
     try {
       const limit = parseInt(req.query.limit as string) || 50;
       const offset = parseInt(req.query.offset as string) || 0;
@@ -397,7 +393,7 @@ export class MembershipController {
         tierId
       };
       
-      const memberships = await this.membershipRepo.findAllUserMemberships(limit, offset, filter);
+      const memberships = await membershipRepo.findAllUserMemberships(limit, offset, filter);
 
       res.status(200).json({
         success: true,
@@ -417,7 +413,7 @@ export class MembershipController {
     }
   };
 
-  getUserMembershipById = async (req: Request, res: Response): Promise<void> => {
+export const getUserMembershipById = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const includeTier = req.query.includeTier === 'true';
@@ -425,9 +421,9 @@ export class MembershipController {
       let membership;
       
       if (includeTier) {
-        membership = await this.membershipRepo.findUserMembershipWithTier(id);
+        membership = await membershipRepo.findUserMembershipWithTier(id);
       } else {
-        membership = await this.membershipRepo.findUserMembershipById(id);
+        membership = await membershipRepo.findUserMembershipById(id);
       }
 
       if (!membership) {
@@ -452,7 +448,7 @@ export class MembershipController {
     }
   };
 
-  getUserMembershipByUserId = async (req: Request, res: Response): Promise<void> => {
+export const getUserMembershipByUserId = async (req: Request, res: Response): Promise<void> => {
     try {
       const { userId } = req.params;
       const includeTier = req.query.includeTier === 'true';
@@ -460,9 +456,9 @@ export class MembershipController {
       let membership;
       
       if (includeTier) {
-        membership = await this.membershipRepo.findMembershipByUserIdWithTier(userId);
+        membership = await membershipRepo.findMembershipByUserIdWithTier(userId);
       } else {
-        membership = await this.membershipRepo.findMembershipByUserId(userId);
+        membership = await membershipRepo.findMembershipByUserId(userId);
       }
 
       if (!membership) {
@@ -487,7 +483,7 @@ export class MembershipController {
     }
   };
 
-  createUserMembership = async (req: Request, res: Response): Promise<void> => {
+export const createUserMembership = async (req: Request, res: Response): Promise<void> => {
     try {
       const {
         userId,
@@ -512,7 +508,7 @@ export class MembershipController {
       }
 
       // Verify that the tier exists
-      const tier = await this.membershipRepo.findTierById(tierId);
+      const tier = await membershipRepo.findTierById(tierId);
       if (!tier) {
         res.status(404).json({
           success: false,
@@ -521,7 +517,7 @@ export class MembershipController {
         return;
       }
 
-      const membership = await this.membershipRepo.createUserMembership({
+      const membership = await membershipRepo.createUserMembership({
         userId,
         tierId,
         startDate,
@@ -549,7 +545,7 @@ export class MembershipController {
     }
   };
 
-  updateUserMembership = async (req: Request, res: Response): Promise<void> => {
+export const updateUserMembership = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const {
@@ -565,7 +561,7 @@ export class MembershipController {
       } = req.body;
 
       // Check if membership exists
-      const existingMembership = await this.membershipRepo.findUserMembershipById(id);
+      const existingMembership = await membershipRepo.findUserMembershipById(id);
       if (!existingMembership) {
         res.status(404).json({
           success: false,
@@ -576,7 +572,7 @@ export class MembershipController {
 
       // If tier is being updated, verify that the new tier exists
       if (tierId && tierId !== existingMembership.tierId) {
-        const tier = await this.membershipRepo.findTierById(tierId);
+        const tier = await membershipRepo.findTierById(tierId);
         if (!tier) {
           res.status(404).json({
             success: false,
@@ -586,7 +582,7 @@ export class MembershipController {
         }
       }
 
-      const updatedMembership = await this.membershipRepo.updateUserMembership(id, {
+      const updatedMembership = await membershipRepo.updateUserMembership(id, {
         tierId,
         startDate,
         endDate,
@@ -613,12 +609,12 @@ export class MembershipController {
     }
   };
 
-  cancelUserMembership = async (req: Request, res: Response): Promise<void> => {
+export const cancelUserMembership = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
 
       // Check if membership exists
-      const existingMembership = await this.membershipRepo.findUserMembershipById(id);
+      const existingMembership = await membershipRepo.findUserMembershipById(id);
       if (!existingMembership) {
         res.status(404).json({
           success: false,
@@ -627,7 +623,7 @@ export class MembershipController {
         return;
       }
 
-      const cancelledMembership = await this.membershipRepo.cancelUserMembership(id);
+      const cancelledMembership = await membershipRepo.cancelUserMembership(id);
 
       res.status(200).json({
         success: true,
@@ -644,11 +640,11 @@ export class MembershipController {
     }
   };
 
-  getUserMembershipBenefits = async (req: Request, res: Response): Promise<void> => {
+export const getUserMembershipBenefits = async (req: Request, res: Response): Promise<void> => {
     try {
       const { userId } = req.params;
       
-      const benefits = await this.membershipRepo.getUserMembershipBenefits(userId);
+      const benefits = await membershipRepo.getUserMembershipBenefits(userId);
 
       res.status(200).json({
         success: true,
@@ -663,4 +659,3 @@ export class MembershipController {
       });
     }
   };
-}
