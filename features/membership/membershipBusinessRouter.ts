@@ -29,4 +29,4 @@ router.post("/user-memberships/:id/cancel", membershipController.cancelUserMembe
 router.get("/users/:userId/membership", membershipController.getUserMembershipByUserId);
 router.get("/users/:userId/benefits", membershipController.getUserMembershipBenefits);
 
-export const membershipRouterAdmin = router;
+export const membershipBusinessRouter = router;

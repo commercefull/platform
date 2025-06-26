@@ -88,4 +88,4 @@ router.patch("/images/:id/primary", setPrimaryImage);
 // POST: Reorder imagess
 router.post("/:productId/images/reorder", reorderImages);
 
-export const productBusinessApiRouter = router;
+export const productBusinessRouter = router;

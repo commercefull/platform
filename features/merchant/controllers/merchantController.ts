@@ -1,17 +1,13 @@
 import { Request, Response } from 'express';
 import { MerchantRepo, Merchant } from '../repos/merchantRepo';
 
-export class MerchantController {
-  private merchantRepo: MerchantRepo;
+// Create a single instance of the repository to be shared across handlers
+const merchantRepo = new MerchantRepo();
 
-  constructor() {
-    this.merchantRepo = new MerchantRepo();
-  }
-
-  /**
-   * Get all merchants with pagination
-   */
-  getMerchants = async (req: Request, res: Response): Promise<void> => {
+/**
+ * Get all merchants with pagination
+ */
+export const getMerchants = async (req: Request, res: Response): Promise<void> => {
     try {
       const limit = parseInt(req.query.limit as string) || 50;
       const offset = parseInt(req.query.offset as string) || 0;
@@ -20,9 +16,9 @@ export class MerchantController {
       let merchants: Merchant[];
       
       if (status) {
-        merchants = await this.merchantRepo.findByStatus(status, limit);
+        merchants = await merchantRepo.findByStatus(status, limit);
       } else {
-        merchants = await this.merchantRepo.findAll(limit, offset);
+        merchants = await merchantRepo.findAll(limit, offset);
       }
 
       res.status(200).json({
@@ -44,13 +40,13 @@ export class MerchantController {
     }
   };
 
-  /**
-   * Get merchant by ID
-   */
-  getMerchantById = async (req: Request, res: Response): Promise<void> => {
+/**
+ * Get merchant by ID
+ */
+export const getMerchantById = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
-      const merchant = await this.merchantRepo.findById(id);
+      const merchant = await merchantRepo.findById(id);
 
       if (!merchant) {
         res.status(404).json({
@@ -74,10 +70,10 @@ export class MerchantController {
     }
   };
 
-  /**
-   * Create a new merchant
-   */
-  createMerchant = async (req: Request, res: Response): Promise<void> => {
+/**
+ * Create a new merchant
+ */
+export const createMerchant = async (req: Request, res: Response): Promise<void> => {
     try {
       const {
         name,
@@ -99,7 +95,7 @@ export class MerchantController {
       }
 
       // Check if merchant with email already exists
-      const existingMerchant = await this.merchantRepo.findByEmail(email);
+      const existingMerchant = await merchantRepo.findByEmail(email);
       if (existingMerchant) {
         res.status(409).json({
           success: false,
@@ -108,7 +104,7 @@ export class MerchantController {
         return;
       }
 
-      const merchant = await this.merchantRepo.create({
+      const merchant = await merchantRepo.create({
         name,
         email,
         phone,
@@ -133,10 +129,10 @@ export class MerchantController {
     }
   };
 
-  /**
-   * Update a merchant
-   */
-  updateMerchant = async (req: Request, res: Response): Promise<void> => {
+/**
+ * Update a merchant
+ */
+export const updateMerchant = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const {
@@ -150,7 +146,7 @@ export class MerchantController {
       } = req.body;
 
       // Check if merchant exists
-      const existingMerchant = await this.merchantRepo.findById(id);
+      const existingMerchant = await merchantRepo.findById(id);
       if (!existingMerchant) {
         res.status(404).json({
           success: false,
@@ -161,7 +157,7 @@ export class MerchantController {
 
       // If email is being updated, check that it doesn't conflict with another merchant
       if (email && email !== existingMerchant.email) {
-        const merchantWithEmail = await this.merchantRepo.findByEmail(email);
+        const merchantWithEmail = await merchantRepo.findByEmail(email);
         if (merchantWithEmail && merchantWithEmail.id !== id) {
           res.status(409).json({
             success: false,
@@ -171,7 +167,7 @@ export class MerchantController {
         }
       }
 
-      const updatedMerchant = await this.merchantRepo.update(id, {
+      const updatedMerchant = await merchantRepo.update(id, {
         name,
         email,
         phone,
@@ -196,15 +192,15 @@ export class MerchantController {
     }
   };
 
-  /**
-   * Delete a merchant
-   */
-  deleteMerchant = async (req: Request, res: Response): Promise<void> => {
+/**
+ * Delete a merchant
+ */
+export const deleteMerchant = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
 
       // Check if merchant exists
-      const existingMerchant = await this.merchantRepo.findById(id);
+      const existingMerchant = await merchantRepo.findById(id);
       if (!existingMerchant) {
         res.status(404).json({
           success: false,
@@ -213,7 +209,7 @@ export class MerchantController {
         return;
       }
 
-      const deleted = await this.merchantRepo.delete(id);
+      const deleted = await merchantRepo.delete(id);
 
       if (deleted) {
         res.status(200).json({
@@ -236,15 +232,15 @@ export class MerchantController {
     }
   };
 
-  /**
-   * Get addresses for a merchant
-   */
-  getMerchantAddresses = async (req: Request, res: Response): Promise<void> => {
+/**
+ * Get addresses for a merchant
+ */
+export const getMerchantAddresses = async (req: Request, res: Response): Promise<void> => {
     try {
       const { merchantId } = req.params;
       
       // Check if merchant exists
-      const merchant = await this.merchantRepo.findById(merchantId);
+      const merchant = await merchantRepo.findById(merchantId);
       if (!merchant) {
         res.status(404).json({
           success: false,
@@ -253,7 +249,7 @@ export class MerchantController {
         return;
       }
 
-      const addresses = await this.merchantRepo.findAddressesByMerchantId(merchantId);
+      const addresses = await merchantRepo.findAddressesByMerchantId(merchantId);
 
       res.status(200).json({
         success: true,
@@ -269,10 +265,10 @@ export class MerchantController {
     }
   };
 
-  /**
-   * Add an address for a merchant
-   */
-  addMerchantAddress = async (req: Request, res: Response): Promise<void> => {
+/**
+ * Add an address for a merchant
+ */
+export const addMerchantAddress = async (req: Request, res: Response): Promise<void> => {
     try {
       const { merchantId } = req.params;
       const {
@@ -286,7 +282,7 @@ export class MerchantController {
       } = req.body;
 
       // Check if merchant exists
-      const merchant = await this.merchantRepo.findById(merchantId);
+      const merchant = await merchantRepo.findById(merchantId);
       if (!merchant) {
         res.status(404).json({
           success: false,
@@ -304,7 +300,7 @@ export class MerchantController {
         return;
       }
 
-      const address = await this.merchantRepo.createAddress({
+      const address = await merchantRepo.createAddress({
         merchantId,
         addressLine1,
         addressLine2,
@@ -330,15 +326,15 @@ export class MerchantController {
     }
   };
 
-  /**
-   * Get payment info for a merchant
-   */
-  getMerchantPaymentInfo = async (req: Request, res: Response): Promise<void> => {
+/**
+ * Get payment info for a merchant
+ */
+export const getMerchantPaymentInfo = async (req: Request, res: Response): Promise<void> => {
     try {
       const { merchantId } = req.params;
       
       // Check if merchant exists
-      const merchant = await this.merchantRepo.findById(merchantId);
+      const merchant = await merchantRepo.findById(merchantId);
       if (!merchant) {
         res.status(404).json({
           success: false,
@@ -347,7 +343,7 @@ export class MerchantController {
         return;
       }
 
-      const paymentInfo = await this.merchantRepo.findPaymentInfoByMerchantId(merchantId);
+      const paymentInfo = await merchantRepo.findPaymentInfoByMerchantId(merchantId);
 
       if (!paymentInfo) {
         res.status(404).json({
@@ -371,10 +367,10 @@ export class MerchantController {
     }
   };
 
-  /**
-   * Add payment info for a merchant
-   */
-  addMerchantPaymentInfo = async (req: Request, res: Response): Promise<void> => {
+/**
+ * Add payment info for a merchant
+ */
+export const addMerchantPaymentInfo = async (req: Request, res: Response): Promise<void> => {
     try {
       const { merchantId } = req.params;
       const {
@@ -388,7 +384,7 @@ export class MerchantController {
       } = req.body;
 
       // Check if merchant exists
-      const merchant = await this.merchantRepo.findById(merchantId);
+      const merchant = await merchantRepo.findById(merchantId);
       if (!merchant) {
         res.status(404).json({
           success: false,
@@ -398,7 +394,7 @@ export class MerchantController {
       }
 
       // Check if payment info already exists
-      const existingPaymentInfo = await this.merchantRepo.findPaymentInfoByMerchantId(merchantId);
+      const existingPaymentInfo = await merchantRepo.findPaymentInfoByMerchantId(merchantId);
       if (existingPaymentInfo) {
         res.status(409).json({
           success: false,
@@ -416,7 +412,7 @@ export class MerchantController {
         return;
       }
 
-      const paymentInfo = await this.merchantRepo.createPaymentInfo({
+      const paymentInfo = await merchantRepo.createPaymentInfo({
         merchantId,
         accountHolderName,
         bankName,
@@ -441,4 +437,3 @@ export class MerchantController {
       });
     }
   };
-}

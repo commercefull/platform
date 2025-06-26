@@ -77,4 +77,4 @@ router.get("/user/:userId", membershipController.getUserMembershipByUserId);
 // Get current user's membership benefits
 router.get("/user/:userId/benefits", membershipController.getUserMembershipBenefits);
 
-export const membershipRouter = router;
+export const membershipStorefrontRouter = router;

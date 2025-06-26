@@ -29,4 +29,4 @@ router.put("/notifications/read-all", isLoggedIn, markAllNotificationsAsRead);
 // Delete a notification
 router.delete("/notifications/:id", isLoggedIn, deleteNotification);
 
-export const notificationRouter = router;
+export const notificationBusinessRouter = router;

@@ -14,4 +14,5 @@ router.get('/transactions/:transactionId', paymentPublicController.getTransactio
 router.get('/transactions/:transactionId/refunds', paymentPublicController.getTransactionRefunds);
 router.post('/transactions/:transactionId/refunds', paymentPublicController.requestRefund);
 
-export default router;
+export const paymentStorefrontRouter = router;
+

@@ -15,4 +15,4 @@ router.get("/category/:slug", productPublicController.getProductsByCategory.bind
 // GET: get a product by slug
 router.get("/:slug", productPublicController.getProductBySlug.bind(productPublicController));
 
-export const productStorefrontApiRouter = router;
+export const productStorefrontRouter = router;

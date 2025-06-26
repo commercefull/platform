@@ -24,4 +24,4 @@ router.post('/zones/find', findTaxZoneForAddress);
 // NEW: Get public tax settings for storefront
 router.get('/settings/:merchantId', getStorefrontTaxSettings);
 
-export const taxStorefrontApiRouter = router;
+export const taxStorefrontRouter = router;

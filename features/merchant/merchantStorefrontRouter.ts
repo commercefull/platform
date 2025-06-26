@@ -1,9 +1,8 @@
 import express from "express";
-import { MerchantController } from "./controllers/merchantController";
+import { getMerchants } from "./controllers/merchantController";
 import { MerchantRepo } from "./repos/merchantRepo";
 
 const router = express.Router();
-const merchantController = new MerchantController();
 
 // Public routes for merchant information
 // These provide limited access compared to admin routes
@@ -13,7 +12,7 @@ router.get("/", (req, res, next) => {
   // Force status filter to only show active merchants for public API
   req.query.status = 'active';
   next();
-}, merchantController.getMerchants);
+}, getMerchants);
 
 // Get specific merchant by ID (if active)
 router.get("/:id", async (req: any, res: any) => {
@@ -48,4 +47,4 @@ router.get("/:id", async (req: any, res: any) => {
   }
 });
 
-export const merchantRouter = router;
+export const merchantStorefrontRouter = router;

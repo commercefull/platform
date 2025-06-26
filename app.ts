@@ -16,16 +16,17 @@ import { basketRouter } from "./features/basket/router";
 import { accountRouter } from "./features/account/router";
 import { contentRouter } from "./features/content/router";
 import { checkoutRouter } from "./features/checkout/router";
-import { orderRouter } from "./features/order/router";
-import { orderRouterAdmin } from "./features/order/routerAdmin";
+import { orderStorefrontRouter } from "./features/order/orderStorefrontRouter";
+import { orderBusinessRouter } from "./features/order/orderBusinessRouter";
 import { distributionRouterAdmin } from "./features/distribution/routerAdmin";
-import { merchantRouterAdmin } from "./features/merchant/routerAdmin";
+import { merchantBusinessRouter } from "./features/merchant/merchantBunisesRouter";
 import { authRouterAdmin } from "./features/auth/routerAdmin";
-import { taxBusinessApiRouter } from "./features/tax/taxBusinessApiRouter";
-import { taxStorefrontApiRouter } from "./features/tax/taxStorefrontApiRouter";
-import { productBusinessApiRouter } from "./features/product/productBusinessApiRouter";
-import { productStorefrontApiRouter } from "./features/product/productStorefrontApiRouter";
-import { promotionBusinessApiRouter } from "./features/promotion/promotionBusinessApiRouter";
+import { taxBusinessRouter } from "./features/tax/taxBusinessRouter";
+import { taxStorefrontRouter } from "./features/tax/taxStorefrontRouter";
+import { productBusinessRouter } from "./features/product/productBusinessRouter";
+import { productStorefrontRouter } from "./features/product/productStorefrontRouter";
+import { paymentStorefrontRouter } from "./features/payment/paymentStorefrontRouter";
+import { promotionBusinessApiRouter } from "./features/promotion/promotionBusinessRouter";
 
 const pgSession = require('connect-pg-simple')(session);
 
@@ -141,18 +142,19 @@ app.use(async (req: Request, res: Response, next) => {
 app.use("/", contentRouter);
 app.use("/account", accountRouter);
 app.use("/basket", basketRouter);
-app.use("/order", orderRouter);
+app.use("/order", orderStorefrontRouter);
 app.use("/checkout", checkoutRouter);
-app.use("/tax", taxStorefrontApiRouter);
-app.use("/products", productStorefrontApiRouter);
+app.use("/tax", taxStorefrontRouter);
+app.use("/products", productStorefrontRouter);
+app.use("/payment", paymentStorefrontRouter);
 app.use("/merchant-center", [
   authRouterAdmin,
-  merchantRouterAdmin, 
+  merchantBusinessRouter, 
   promotionBusinessApiRouter, 
-  productBusinessApiRouter, 
-  orderRouterAdmin, 
+  productBusinessRouter, 
+  orderBusinessRouter, 
   distributionRouterAdmin,
-  taxBusinessApiRouter
+  taxBusinessRouter
 ]);
 
 

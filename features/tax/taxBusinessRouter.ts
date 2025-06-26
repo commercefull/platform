@@ -39,4 +39,4 @@ router.post('/zones', isAdmin, createTaxZone);
 router.put('/zones/:id', isAdmin, updateTaxZone);
 router.delete('/zones/:id', isAdmin, deleteTaxZone);
 
-export const taxBusinessApiRouter = router;
+export const taxBusinessRouter = router;

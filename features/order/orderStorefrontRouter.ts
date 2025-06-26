@@ -21,4 +21,4 @@ router.post("/orders", isLoggedIn, createOrder);
 // POST: cancel an order
 router.post("/orders/:id/cancel", isLoggedIn, cancelOrder);
 
-export const orderRouter = router;
+export const orderStorefrontRouter = router;
