@@ -64,4 +64,4 @@ router.put("/fulfillments/:id", distributionControllerPart3.updateOrderFulfillme
 router.put("/fulfillments/:id/status", distributionControllerPart3.updateOrderFulfillmentStatus);
 router.delete("/fulfillments/:id", distributionControllerPart3.deleteOrderFulfillment);
 
-export const distributionRouterAdmin = router;
+export const distributionBusinessRouter = router;

@@ -10,18 +10,14 @@ interface UserRequest extends Request {
 }
 import { LoyaltyRepo } from '../repos/loyaltyRepo';
 
-export class LoyaltyPublicController {
-  private loyaltyRepo: LoyaltyRepo;
+// Create a single instance of the repository to be shared across handlers
+const loyaltyRepo = new LoyaltyRepo();
 
-  constructor() {
-    this.loyaltyRepo = new LoyaltyRepo();
-  }
-
-  // Get publicly available loyalty tiers
-  getPublicTiers = async (req: Request, res: Response): Promise<void> => {
+// Get publicly available loyalty tiers
+export const getPublicTiers = async (req: Request, res: Response): Promise<void> => {
     try {
       // Only get active tiers for public API
-      const tiers = await this.loyaltyRepo.findAllTiers(false);
+      const tiers = await loyaltyRepo.findAllTiers(false);
 
       // Return limited tier information for public view
       const publicTiers = tiers.map(tier => ({
@@ -46,11 +42,11 @@ export class LoyaltyPublicController {
     }
   };
 
-  // Get publicly available loyalty rewards
-  getPublicRewards = async (req: Request, res: Response): Promise<void> => {
+// Get publicly available loyalty rewards
+export const getPublicRewards = async (req: Request, res: Response): Promise<void> => {
     try {
       // Only get active rewards for public API
-      const rewards = await this.loyaltyRepo.findAllRewards(false);
+      const rewards = await loyaltyRepo.findAllRewards(false);
 
       // Return limited reward information for public view
       const publicRewards = rewards.map(reward => ({
@@ -76,8 +72,8 @@ export class LoyaltyPublicController {
     }
   };
 
-  // Get customer's loyalty status and points
-  getMyLoyaltyStatus = async (req: UserRequest, res: Response): Promise<void> => {
+// Get customer's loyalty status and points
+export const getMyLoyaltyStatus = async (req: UserRequest, res: Response): Promise<void> => {
     try {
       // Customer ID would come from authenticated user session
       const customerId = req.user?.id;
@@ -90,7 +86,7 @@ export class LoyaltyPublicController {
         return;
       }
 
-      const points = await this.loyaltyRepo.findCustomerPoints(customerId);
+      const points = await loyaltyRepo.findCustomerPoints(customerId);
 
       if (!points) {
         // Return default values for new customers
@@ -110,7 +106,7 @@ export class LoyaltyPublicController {
       }
 
       // Get the customer's tier
-      const tier = await this.loyaltyRepo.findTierById(points.tierId);
+      const tier = await loyaltyRepo.findTierById(points.tierId);
 
       // Return customer-friendly response
       res.status(200).json({
@@ -126,7 +122,7 @@ export class LoyaltyPublicController {
             pointsThreshold: tier.pointsThreshold,
             benefits: tier.benefits
           } : undefined,
-          pointsToNextTier: tier ? this.calculatePointsToNextTier(points.lifetimePoints, tier) : 0
+          pointsToNextTier: tier ? calculatePointsToNextTier(points.lifetimePoints, tier) : 0
         }
       });
     } catch (error) {
@@ -139,8 +135,8 @@ export class LoyaltyPublicController {
     }
   };
 
-  // Get customer's loyalty transaction history
-  getMyTransactions = async (req: UserRequest, res: Response): Promise<void> => {
+// Get my loyalty transactions
+export const getMyTransactions = async (req: UserRequest, res: Response): Promise<void> => {
     try {
       // Customer ID would come from authenticated user session
       const customerId = req.user?.id;
@@ -156,7 +152,7 @@ export class LoyaltyPublicController {
       const limit = parseInt(req.query.limit as string) || 20;
       const offset = parseInt(req.query.offset as string) || 0;
 
-      const transactions = await this.loyaltyRepo.getCustomerTransactions(customerId, limit, offset);
+      const transactions = await loyaltyRepo.getCustomerTransactions(customerId, limit, offset);
 
       // Format transactions for customer view
       const formattedTransactions = transactions.map(transaction => ({
@@ -185,8 +181,8 @@ export class LoyaltyPublicController {
     }
   };
 
-  // Redeem points for a reward
-  redeemReward = async (req: UserRequest, res: Response): Promise<void> => {
+// Redeem points for a reward
+export const redeemReward = async (req: UserRequest, res: Response): Promise<void> => {
     try {
       // Customer ID would come from authenticated user session
       const customerId = req.user?.id;
@@ -209,7 +205,7 @@ export class LoyaltyPublicController {
         return;
       }
 
-      const redemption = await this.loyaltyRepo.redeemReward(customerId, rewardId);
+      const redemption = await loyaltyRepo.redeemReward(customerId, rewardId);
 
       res.status(200).json({
         success: true,
@@ -244,8 +240,8 @@ export class LoyaltyPublicController {
     }
   };
 
-  // Get my active redemptions
-  getMyRedemptions = async (req: UserRequest, res: Response): Promise<void> => {
+// Get my active redemptions
+export const getMyRedemptions = async (req: UserRequest, res: Response): Promise<void> => {
     try {
       // Customer ID would come from authenticated user session
       const customerId = req.user?.id;
@@ -261,12 +257,12 @@ export class LoyaltyPublicController {
       // Default to only active (pending) redemptions
       const status = req.query.status as string || 'pending';
       
-      const redemptions = await this.loyaltyRepo.getCustomerRedemptions(customerId, status);
+      const redemptions = await loyaltyRepo.getCustomerRedemptions(customerId, status);
 
       // Add reward details to each redemption
       const detailedRedemptions = await Promise.all(
         redemptions.map(async (redemption) => {
-          const reward = await this.loyaltyRepo.findRewardById(redemption.rewardId);
+          const reward = await loyaltyRepo.findRewardById(redemption.rewardId);
           return {
             id: redemption.id,
             redemptionCode: redemption.redemptionCode,
@@ -296,8 +292,8 @@ export class LoyaltyPublicController {
     }
   };
 
-  // Helper method to calculate points needed for the next tier
-  private calculatePointsToNextTier = (currentLifetimePoints: number, currentTier: any): number => {
+// Helper method to calculate points needed for the next tier
+const calculatePointsToNextTier = (currentLifetimePoints: number, currentTier: any): number => {
     try {
       // This would need to be implemented based on the tiers in the system
       // For now, a simplified version that assumes tiers are ordered
@@ -307,4 +303,13 @@ export class LoyaltyPublicController {
       return 0;
     }
   };
-}
+
+// Export all controllers as a single object for backward compatibility
+export default {
+  getPublicTiers,
+  getPublicRewards,
+  getMyLoyaltyStatus,
+  getMyTransactions,
+  redeemReward,
+  getMyRedemptions
+};

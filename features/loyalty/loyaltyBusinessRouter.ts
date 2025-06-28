@@ -1,31 +1,33 @@
 import express from 'express';
-import { LoyaltyController } from './controllers/loyaltyController';
+import {adjustCustomerPoints, createReward, createTier, getCustomerPoints, getCustomerPointsTransactions, getCustomerRedemptions, getRewardById, getRewards, getTierById, getTiers, processOrderPoints, updateRedemptionStatus, updateReward, updateTier} from './controllers/loyaltyBusinessController';
+import { isMerchantLoggedIn } from '../../libs/auth';
 
 const router = express.Router();
-const loyaltyController = new LoyaltyController();
+
+router.use(isMerchantLoggedIn);
 
 // Tier Management
-router.get('/tiers', loyaltyController.getTiers);
-router.get('/tiers/:id', loyaltyController.getTierById);
-router.post('/tiers', loyaltyController.createTier);
-router.put('/tiers/:id', loyaltyController.updateTier);
+router.get('/tiers', getTiers);
+router.get('/tiers/:id', getTierById);
+router.post('/tiers', createTier);
+router.put('/tiers/:id', updateTier);
 
 // Reward Management
-router.get('/rewards', loyaltyController.getRewards);
-router.get('/rewards/:id', loyaltyController.getRewardById);
-router.post('/rewards', loyaltyController.createReward);
-router.put('/rewards/:id', loyaltyController.updateReward);
+router.get('/rewards', getRewards);
+router.get('/rewards/:id', getRewardById);
+router.post('/rewards', createReward);
+router.put('/rewards/:id', updateReward);
 
 // Customer Management
-router.get('/customers/:customerId/points', loyaltyController.getCustomerPoints);
-router.get('/customers/:customerId/transactions', loyaltyController.getCustomerTransactions);
-router.post('/customers/:customerId/points/adjust', loyaltyController.adjustCustomerPoints);
-router.get('/customers/:customerId/redemptions', loyaltyController.getCustomerRedemptions);
+router.get('/customers/:customerId/points', getCustomerPoints);
+router.get('/customers/:customerId/transactions', getCustomerPointsTransactions);
+router.post('/customers/:customerId/points/adjust', adjustCustomerPoints);
+router.get('/customers/:customerId/redemptions', getCustomerRedemptions);
 
 // Redemption Management
-router.put('/redemptions/:id/status', loyaltyController.updateRedemptionStatus);
+router.put('/redemptions/:id/status', updateRedemptionStatus);
 
 // Order Processing
-router.post('/orders/:orderId/points', loyaltyController.processOrderPoints);
+router.post('/orders/:orderId/points', processOrderPoints);
 
 export const loyaltyBusinessRouter = router;

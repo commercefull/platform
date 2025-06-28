@@ -2,10 +2,9 @@ import { Request, Response } from 'express';
 import paymentRepo from '../repos/paymentRepo';
 import { errorResponse, successResponse } from '../../../libs/apiResponse';
 
-export class PaymentController {
-  // ---------- Payment Gateway Methods ----------
+// ---------- Payment Gateway Methods ----------
 
-  getGateways = async (req: Request, res: Response): Promise<void> => {
+export const getGateways = async (req: Request, res: Response): Promise<void> => {
     try {
       const { merchantId } = req.params;
       
@@ -22,7 +21,7 @@ export class PaymentController {
     }
   };
 
-  getGatewayById = async (req: Request, res: Response): Promise<void> => {
+export const getGatewayById = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const gateway = await paymentRepo.findGatewayById(id);
@@ -39,7 +38,7 @@ export class PaymentController {
     }
   };
 
-  createGateway = async (req: Request, res: Response): Promise<void> => {
+export const createGateway = async (req: Request, res: Response): Promise<void> => {
     try {
       const gatewayData = req.body;
       
@@ -61,7 +60,7 @@ export class PaymentController {
     }
   };
 
-  updateGateway = async (req: Request, res: Response): Promise<void> => {
+export const updateGateway = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const gatewayData = req.body;
@@ -74,7 +73,7 @@ export class PaymentController {
     }
   };
 
-  deleteGateway = async (req: Request, res: Response): Promise<void> => {
+export const deleteGateway = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const result = await paymentRepo.deleteGateway(id);
@@ -90,9 +89,9 @@ export class PaymentController {
     }
   };
 
-  // ---------- Payment Method Config Methods ----------
+// ---------- Payment Method Config Methods ----------
 
-  getMethodConfigs = async (req: Request, res: Response): Promise<void> => {
+export const getMethodConfigs = async (req: Request, res: Response): Promise<void> => {
     try {
       const { merchantId } = req.params;
       
@@ -109,7 +108,7 @@ export class PaymentController {
     }
   };
 
-  getMethodConfigById = async (req: Request, res: Response): Promise<void> => {
+export const getMethodConfigById = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const methodConfig = await paymentRepo.findMethodConfigById(id);
@@ -126,7 +125,7 @@ export class PaymentController {
     }
   };
 
-  createMethodConfig = async (req: Request, res: Response): Promise<void> => {
+export const createMethodConfig = async (req: Request, res: Response): Promise<void> => {
     try {
       const methodConfigData = req.body;
       
@@ -148,7 +147,7 @@ export class PaymentController {
     }
   };
 
-  updateMethodConfig = async (req: Request, res: Response): Promise<void> => {
+export const updateMethodConfig = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const methodConfigData = req.body;
@@ -161,7 +160,7 @@ export class PaymentController {
     }
   };
 
-  deleteMethodConfig = async (req: Request, res: Response): Promise<void> => {
+export const deleteMethodConfig = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const result = await paymentRepo.deleteMethodConfig(id);
@@ -177,9 +176,9 @@ export class PaymentController {
     }
   };
 
-  // ---------- Transaction Methods ----------
+// ---------- Transaction Methods ----------
 
-  getTransactionById = async (req: Request, res: Response): Promise<void> => {
+export const getTransactionById = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const transaction = await paymentRepo.findTransactionById(id);
@@ -196,7 +195,7 @@ export class PaymentController {
     }
   };
 
-  getTransactionsByOrderId = async (req: Request, res: Response): Promise<void> => {
+export const getTransactionsByOrderId = async (req: Request, res: Response): Promise<void> => {
     try {
       const { orderId } = req.params;
       
@@ -213,7 +212,7 @@ export class PaymentController {
     }
   };
 
-  updateTransaction = async (req: Request, res: Response): Promise<void> => {
+export const updateTransaction = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const transactionData = req.body;
@@ -229,9 +228,9 @@ export class PaymentController {
     }
   };
 
-  // ---------- Refund Methods ----------
+// ---------- Refund Methods ----------
 
-  getRefundById = async (req: Request, res: Response): Promise<void> => {
+export const getRefundById = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const refund = await paymentRepo.findRefundById(id);
@@ -248,7 +247,7 @@ export class PaymentController {
     }
   };
 
-  getRefundsByTransactionId = async (req: Request, res: Response): Promise<void> => {
+export const getRefundsByTransactionId = async (req: Request, res: Response): Promise<void> => {
     try {
       const { transactionId } = req.params;
       
@@ -265,7 +264,7 @@ export class PaymentController {
     }
   };
 
-  createRefund = async (req: Request, res: Response): Promise<void> => {
+export const createRefund = async (req: Request, res: Response): Promise<void> => {
     try {
       const refundData = req.body;
       
@@ -315,7 +314,7 @@ export class PaymentController {
     }
   };
 
-  updateRefund = async (req: Request, res: Response): Promise<void> => {
+export const updateRefund = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const refundData = req.body;
@@ -327,6 +326,24 @@ export class PaymentController {
       errorResponse(res, 'Failed to update refund');
     }
   };
-}
 
-export default new PaymentController();
+// Export all controllers as a single object for backward compatibility
+export default {
+  getGateways,
+  getGatewayById,
+  createGateway,
+  updateGateway,
+  deleteGateway,
+  getMethodConfigs,
+  getMethodConfigById,
+  createMethodConfig,
+  updateMethodConfig,
+  deleteMethodConfig,
+  getTransactionById,
+  getTransactionsByOrderId,
+  updateTransaction,
+  getRefundById,
+  getRefundsByTransactionId,
+  createRefund,
+  updateRefund
+};

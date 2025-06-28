@@ -2,8 +2,11 @@ import express from "express";
 import { getAllProducts, getProductById, createProduct, updateProduct, deleteProduct, updateProductStatus, updateProductVisibility, getRelatedProducts, getProductsByCategory, getProductWithVariants } from "./controllers/productBusinessController";
 import { getVariantsByProductId, getVariantById, createVariant, updateVariant, deleteVariant, setDefaultVariant, updateInventory, adjustInventory, reorderVariants } from "./controllers/variantBusinessController";
 import { getImagesByProductId, getImagesByVariantId, getImageById, createImage, updateImage, deleteImage, setPrimaryImage, reorderImages } from "./controllers/imageBusinessController";
+import { isMerchantLoggedIn } from "../../libs/auth";
 
 const router = express.Router();
+
+router.use(isMerchantLoggedIn);
 
 // GET: List all products with filtering
 router.get("/", getAllProducts);

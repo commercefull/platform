@@ -18,15 +18,17 @@ import { contentRouter } from "./features/content/router";
 import { checkoutRouter } from "./features/checkout/router";
 import { orderStorefrontRouter } from "./features/order/orderStorefrontRouter";
 import { orderBusinessRouter } from "./features/order/orderBusinessRouter";
-import { distributionRouterAdmin } from "./features/distribution/routerAdmin";
-import { merchantBusinessRouter } from "./features/merchant/merchantBunisesRouter";
+import { distributionBusinessRouter } from "./features/distribution/distributionBusinessRouter";
+import { merchantBusinessRouter } from "./features/merchant/merchantBusinessRouter";
 import { authRouterAdmin } from "./features/auth/routerAdmin";
 import { taxBusinessRouter } from "./features/tax/taxBusinessRouter";
 import { taxStorefrontRouter } from "./features/tax/taxStorefrontRouter";
 import { productBusinessRouter } from "./features/product/productBusinessRouter";
 import { productStorefrontRouter } from "./features/product/productStorefrontRouter";
+import { inventoryStorefrontRouter } from "./features/inventory/inventoryStorefrontRouter";
 import { paymentStorefrontRouter } from "./features/payment/paymentStorefrontRouter";
 import { promotionBusinessApiRouter } from "./features/promotion/promotionBusinessRouter";
+import { distributionStorefrontRouter } from "./features/distribution/distributionStorefrontRouter";
 
 const pgSession = require('connect-pg-simple')(session);
 
@@ -147,13 +149,15 @@ app.use("/checkout", checkoutRouter);
 app.use("/tax", taxStorefrontRouter);
 app.use("/products", productStorefrontRouter);
 app.use("/payment", paymentStorefrontRouter);
+app.use("/inventory", inventoryStorefrontRouter);
+app.use("/distribution", distributionStorefrontRouter);
 app.use("/merchant-center", [
   authRouterAdmin,
   merchantBusinessRouter, 
   promotionBusinessApiRouter, 
   productBusinessRouter, 
   orderBusinessRouter, 
-  distributionRouterAdmin,
+  distributionBusinessRouter,
   taxBusinessRouter
 ]);
 

@@ -2,9 +2,8 @@ import { Request, Response } from 'express';
 import paymentRepo, { PaymentMethodConfig, PaymentGateway, PaymentTransaction } from '../repos/paymentRepo';
 import { errorResponse, successResponse } from '../../../libs/apiResponse';
 
-export class PaymentPublicController {
-  // Get available payment methods for customers
-  getActivePaymentMethods = async (req: Request, res: Response): Promise<void> => {
+// Get available payment methods for customers
+export const getActivePaymentMethods = async (req: Request, res: Response): Promise<void> => {
     try {
       // Get the merchant ID from the request (this would typically come from the session or site context)
       const merchantId = req.params.merchantId || 
@@ -29,10 +28,10 @@ export class PaymentPublicController {
       console.error('Error fetching active payment methods:', error);
       errorResponse(res, 'Failed to fetch payment methods');
     }
-  };
+};
 
-  // Get customer payment transactions
-  getCustomerTransactions = async (req: Request, res: Response): Promise<void> => {
+// Get customer payment transactions
+export const getCustomerTransactions = async (req: Request, res: Response): Promise<void> => {
     try {
       const { customerId } = req.params;
       const { limit = 10, page = 1 } = req.query;
@@ -64,10 +63,10 @@ export class PaymentPublicController {
       console.error('Error fetching customer payment transactions:', error);
       errorResponse(res, 'Failed to fetch payment transactions');
     }
-  };
+};
 
-  // Get single transaction details
-  getTransactionDetails = async (req: Request, res: Response): Promise<void> => {
+// Get single transaction details
+export const getTransactionDetails = async (req: Request, res: Response): Promise<void> => {
     try {
       const { transactionId } = req.params;
       
@@ -110,10 +109,10 @@ export class PaymentPublicController {
       console.error('Error fetching transaction details:', error);
       errorResponse(res, 'Failed to fetch transaction details');
     }
-  };
+};
 
-  // Initiate a refund request
-  requestRefund = async (req: Request, res: Response): Promise<void> => {
+// Initiate a refund request
+export const requestRefund = async (req: Request, res: Response): Promise<void> => {
     try {
       const { transactionId } = req.params;
       const { amount, reason } = req.body;
@@ -173,10 +172,10 @@ export class PaymentPublicController {
       console.error('Error creating refund request:', error);
       errorResponse(res, 'Failed to process refund request');
     }
-  };
+};
 
-  // Get refunds for a transaction
-  getTransactionRefunds = async (req: Request, res: Response): Promise<void> => {
+// Get refunds for a transaction
+export const getTransactionRefunds = async (req: Request, res: Response): Promise<void> => {
     try {
       const { transactionId } = req.params;
       
@@ -218,7 +217,13 @@ export class PaymentPublicController {
       console.error('Error fetching transaction refunds:', error);
       errorResponse(res, 'Failed to fetch refunds');
     }
-  };
-}
+};
 
-export default new PaymentPublicController();
+// Export all controllers as a single object for backward compatibility
+export default {
+  getActivePaymentMethods,
+  getCustomerTransactions,
+  getTransactionDetails,
+  requestRefund,
+  getTransactionRefunds
+};

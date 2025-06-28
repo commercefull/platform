@@ -9,9 +9,12 @@ import {
   addMerchantAddress,
   getMerchantPaymentInfo,
   addMerchantPaymentInfo
-} from "./controllers/merchantController";
+} from "./controllers/merchantBusinessController";
+import { isMerchantLoggedIn } from "../../libs/auth";
 
 const router = express.Router();
+
+router.use(isMerchantLoggedIn);
 
 // Admin routes for merchant management
 router.get("/", getMerchants);

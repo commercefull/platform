@@ -1,18 +1,14 @@
 import { Request, Response } from 'express';
 import { LoyaltyRepo, LoyaltyTier, LoyaltyPointsAction, LoyaltyReward } from '../repos/loyaltyRepo';
 
-export class LoyaltyController {
-  private loyaltyRepo: LoyaltyRepo;
+// Create a single instance of the repository to be shared across handlers
+const loyaltyRepo = new LoyaltyRepo();
 
-  constructor() {
-    this.loyaltyRepo = new LoyaltyRepo();
-  }
-
-  // Tier Management
-  getTiers = async (req: Request, res: Response): Promise<void> => {
+// Tier Management
+export const getTiers = async (req: Request, res: Response): Promise<void> => {
     try {
       const includeInactive = req.query.includeInactive === 'true';
-      const tiers = await this.loyaltyRepo.findAllTiers(includeInactive);
+      const tiers = await loyaltyRepo.findAllTiers(includeInactive);
 
       res.status(200).json({
         success: true,
@@ -28,10 +24,10 @@ export class LoyaltyController {
     }
   };
 
-  getTierById = async (req: Request, res: Response): Promise<void> => {
+export const getTierById = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
-      const tier = await this.loyaltyRepo.findTierById(id);
+      const tier = await loyaltyRepo.findTierById(id);
 
       if (!tier) {
         res.status(404).json({
@@ -55,7 +51,7 @@ export class LoyaltyController {
     }
   };
 
-  createTier = async (req: Request, res: Response): Promise<void> => {
+export const createTier = async (req: Request, res: Response): Promise<void> => {
     try {
       const {
         name,
@@ -76,7 +72,7 @@ export class LoyaltyController {
         return;
       }
 
-      const tier = await this.loyaltyRepo.createTier({
+      const tier = await loyaltyRepo.createTier({
         name,
         description,
         type,
@@ -101,7 +97,7 @@ export class LoyaltyController {
     }
   };
 
-  updateTier = async (req: Request, res: Response): Promise<void> => {
+export const updateTier = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const {
@@ -114,7 +110,7 @@ export class LoyaltyController {
         isActive
       } = req.body;
 
-      const tier = await this.loyaltyRepo.updateTier(id, {
+      const tier = await loyaltyRepo.updateTier(id, {
         name,
         description,
         type,
@@ -139,11 +135,11 @@ export class LoyaltyController {
     }
   };
 
-  // Rewards Management
-  getRewards = async (req: Request, res: Response): Promise<void> => {
+// Rewards Management
+export const getRewards = async (req: Request, res: Response): Promise<void> => {
     try {
       const includeInactive = req.query.includeInactive === 'true';
-      const rewards = await this.loyaltyRepo.findAllRewards(includeInactive);
+      const rewards = await loyaltyRepo.findAllRewards(includeInactive);
 
       res.status(200).json({
         success: true,
@@ -159,10 +155,10 @@ export class LoyaltyController {
     }
   };
 
-  getRewardById = async (req: Request, res: Response): Promise<void> => {
+export const getRewardById = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
-      const reward = await this.loyaltyRepo.findRewardById(id);
+      const reward = await loyaltyRepo.findRewardById(id);
 
       if (!reward) {
         res.status(404).json({
@@ -186,7 +182,7 @@ export class LoyaltyController {
     }
   };
 
-  createReward = async (req: Request, res: Response): Promise<void> => {
+export const createReward = async (req: Request, res: Response): Promise<void> => {
     try {
       const {
         name,
@@ -210,7 +206,7 @@ export class LoyaltyController {
         return;
       }
 
-      const reward = await this.loyaltyRepo.createReward({
+      const reward = await loyaltyRepo.createReward({
         name,
         description,
         pointsCost,
@@ -238,7 +234,7 @@ export class LoyaltyController {
     }
   };
 
-  updateReward = async (req: Request, res: Response): Promise<void> => {
+export const updateReward = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const {
@@ -254,7 +250,7 @@ export class LoyaltyController {
         isActive
       } = req.body;
 
-      const reward = await this.loyaltyRepo.updateReward(id, {
+      const reward = await loyaltyRepo.updateReward(id, {
         name,
         description,
         pointsCost,
@@ -282,67 +278,72 @@ export class LoyaltyController {
     }
   };
 
-  // Customer Management
-  getCustomerPoints = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { customerId } = req.params;
-      const points = await this.loyaltyRepo.findCustomerPoints(customerId);
+// Customer Points Management
+export const getCustomerPoints = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { customerId } = req.params;
+    const customerPoints = await loyaltyRepo.findCustomerPoints(customerId);
 
-      if (!points) {
-        res.status(404).json({
-          success: false,
-          message: `No loyalty points found for customer ${customerId}`
-        });
-        return;
+    if (!customerPoints) {
+      res.status(404).json({
+        success: false,
+        message: `No loyalty points found for customer ${customerId}`
+      });
+      return;
+    }
+
+    // Get the customer's tier
+    const tier = await loyaltyRepo.findTierById(customerPoints.tierId);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        ...customerPoints,
+        tier: tier || undefined
       }
+    });
+  } catch (error) {
+    console.error('Error fetching customer loyalty points:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch customer loyalty points',
+      error: (error as Error).message
+    });
+  }
+};
 
-      // Get the customer's tier
-      const tier = await this.loyaltyRepo.findTierById(points.tierId);
+export const getCustomerPointsTransactions = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { customerId } = req.params;
+    const limit = parseInt(req.query.limit as string) || 50;
+    const offset = parseInt(req.query.offset as string) || 0;
+    const action = req.query.action as string | undefined;
 
-      res.status(200).json({
-        success: true,
-        data: {
-          ...points,
-          tier: tier || undefined
-        }
-      });
-    } catch (error) {
-      console.error('Error fetching customer loyalty points:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to fetch customer loyalty points',
-        error: (error as Error).message
-      });
-    }
-  };
+    const transactions = await loyaltyRepo.getCustomerTransactions(
+      customerId, 
+      limit, 
+      offset
+    );
 
-  getCustomerTransactions = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { customerId } = req.params;
-      const limit = parseInt(req.query.limit as string) || 50;
-      const offset = parseInt(req.query.offset as string) || 0;
+    res.status(200).json({
+      success: true,
+      data: transactions,
+      pagination: {
+        limit,
+        offset
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching customer loyalty transactions:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch customer loyalty transactions',
+      error: (error as Error).message
+    });
+  }
+};
 
-      const transactions = await this.loyaltyRepo.getCustomerTransactions(customerId, limit, offset);
-
-      res.status(200).json({
-        success: true,
-        data: transactions,
-        pagination: {
-          limit,
-          offset
-        }
-      });
-    } catch (error) {
-      console.error('Error fetching customer loyalty transactions:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to fetch customer loyalty transactions',
-        error: (error as Error).message
-      });
-    }
-  };
-
-  adjustCustomerPoints = async (req: Request, res: Response): Promise<void> => {
+export const adjustCustomerPoints = async (req: Request, res: Response): Promise<void> => {
     try {
       const { customerId } = req.params;
       const { points, reason } = req.body;
@@ -355,7 +356,7 @@ export class LoyaltyController {
         return;
       }
 
-      const updatedPoints = await this.loyaltyRepo.addPoints(
+      const updatedPoints = await loyaltyRepo.addPoints(
         customerId,
         parseInt(points),
         LoyaltyPointsAction.MANUAL_ADJUSTMENT,
@@ -378,13 +379,13 @@ export class LoyaltyController {
     }
   };
 
-  // Redemption Management
-  getCustomerRedemptions = async (req: Request, res: Response): Promise<void> => {
+// Redemption Management
+export const getCustomerRedemptions = async (req: Request, res: Response): Promise<void> => {
     try {
       const { customerId } = req.params;
       const status = req.query.status as string | undefined;
 
-      const redemptions = await this.loyaltyRepo.getCustomerRedemptions(customerId, status);
+      const redemptions = await loyaltyRepo.getCustomerRedemptions(customerId, status);
 
       res.status(200).json({
         success: true,
@@ -400,7 +401,7 @@ export class LoyaltyController {
     }
   };
 
-  updateRedemptionStatus = async (req: Request, res: Response): Promise<void> => {
+export const updateRedemptionStatus = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const { status } = req.body;
@@ -413,7 +414,7 @@ export class LoyaltyController {
         return;
       }
 
-      const redemption = await this.loyaltyRepo.updateRedemptionStatus(
+      const redemption = await loyaltyRepo.updateRedemptionStatus(
         id,
         status as 'used' | 'expired' | 'cancelled'
       );
@@ -433,8 +434,8 @@ export class LoyaltyController {
     }
   };
 
-  // Order Processing
-  processOrderPoints = async (req: Request, res: Response): Promise<void> => {
+// Order Processing
+export const processOrderPoints = async (req: Request, res: Response): Promise<void> => {
     try {
       const { orderId } = req.params;
       const { orderAmount, customerId } = req.body;
@@ -447,7 +448,7 @@ export class LoyaltyController {
         return;
       }
 
-      const updatedPoints = await this.loyaltyRepo.processOrderPoints(
+      const updatedPoints = await loyaltyRepo.processOrderPoints(
         orderId,
         parseFloat(orderAmount),
         customerId
@@ -467,4 +468,21 @@ export class LoyaltyController {
       });
     }
   };
-}
+
+// Export all controllers as a single object for backward compatibility
+export default {
+  getTiers,
+  getTierById,
+  createTier,
+  updateTier,
+  getRewards,
+  getRewardById,
+  createReward,
+  updateReward,
+  getCustomerPoints,
+  getCustomerPointsTransactions,
+  adjustCustomerPoints,
+  getCustomerRedemptions,
+  updateRedemptionStatus,
+  processOrderPoints
+};

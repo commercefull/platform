@@ -1,24 +1,54 @@
-import { RequestHandler } from "express";
+import { Request, Response, NextFunction } from "express";
+import jwt from 'jsonwebtoken';
 
-export const isMerchantLoggedIn = (req: any, res: any, next: any) => {
+// Environment variables should be properly loaded in your application
+const MERCHANT_JWT_SECRET = process.env.MERCHANT_JWT_SECRET || 'your-secret-key-should-be-in-env';
+const CUSTOMER_JWT_SECRET = process.env.CUSTOMER_JWT_SECRET || 'your-secret-key-should-be-in-env';
+
+const authenticateToken = (req: Request, res: Response, next: NextFunction, secret: string): void => {
+  // Get token from header
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN format
+  
+  if (!token) {
+    res.status(401).json({ success: false, message: 'Access token is required' });
+    return;
+  }
+  
+  try {
+    // Verify token
+    const decoded = jwt.verify(token, String(secret));
+    req.user = decoded;
+    return next();
+  } catch (error) {
+    console.error('Token validation error:', error);
+    res.status(403).json({ success: false, message: 'Invalid or expired token' });
+  }
+};
+
+export const isMerchantLoggedIn = (req: Request, res: Response, next: NextFunction) => {
+
+    // Check if it's an AJAX request or API call
+    if (req.xhr || req.headers.accept?.indexOf('json') !== -1) {
+        return authenticateToken(req, res, next, MERCHANT_JWT_SECRET);
+    }
+
+    // Check if the request is authenticated
     if (req.isAuthenticated()) {
         return next();
     }
+    
+    // Redirect for regular HTTP requests
     res.redirect("/merchant/login");
 };
 
-export const isLoggedIn = (req: any, res: any, next: any) => {
+export const isCustomerLoggedIn = (req: Request, res: Response, next: NextFunction) => {
+    if (req.xhr || req.headers.accept?.indexOf('json') !== -1) {
+        return authenticateToken(req, res, next, CUSTOMER_JWT_SECRET);
+    }
+    
     if (req.isAuthenticated()) {
         return next();
     }
     res.redirect("/login");
-};
-
-// Middleware to ensure admin authorization (assuming there's a middleware in your app)
-export const isAdmin: RequestHandler = (req, res, next) => {
-    // This is a placeholder - replace with your actual admin authorization logic
-    if (req.user && (req.user as any).role === 'admin') {
-      return next();
-    }
-    res.status(403).json({ success: false, message: 'Unauthorized access' });
 };

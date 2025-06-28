@@ -1,19 +1,15 @@
 import { Request, Response } from 'express';
 import { InventoryRepo } from '../repos/inventoryRepo';
 
-export class InventoryPublicController {
-  private inventoryRepo: InventoryRepo;
+// Create a shared repository instance
+const inventoryRepo = new InventoryRepo();
 
-  constructor() {
-    this.inventoryRepo = new InventoryRepo();
-  }
-
-  /**
-   * Get inventory information for a product with limited details for public use
-   */
-  getProductInventory = async (req: Request, res: Response): Promise<void> => {
+/**
+ * Get inventory information for a product with limited details for public use
+ */
+export const getProductInventory = async (req: Request, res: Response): Promise<void> => {
     try {
-      const items = await this.inventoryRepo.findInventoryItemsByProductId(req.params.productId);
+      const items = await inventoryRepo.findInventoryItemsByProductId(req.params.productId);
       
       // Return simplified inventory information without internal details
       const publicItems = items.map(item => ({
@@ -36,13 +32,13 @@ export class InventoryPublicController {
     }
   };
 
-  /**
-   * Get inventory information for a specific location with limited details
-   */
-  getLocationInventory = async (req: Request, res: Response): Promise<void> => {
+/**
+ * Get inventory information for a specific location with limited details
+ */
+export const getLocationInventory = async (req: Request, res: Response): Promise<void> => {
     try {
       // Verify location exists and is active
-      const location = await this.inventoryRepo.findLocationById(req.params.id);
+      const location = await inventoryRepo.findLocationById(req.params.id);
       if (!location || !location.isActive) {
         res.status(404).json({
           success: false,
@@ -55,7 +51,7 @@ export class InventoryPublicController {
       const productIds = req.query.productIds ? (req.query.productIds as string).split(',') : [];
       
       // Get inventory for this location
-      const items = await this.inventoryRepo.findInventoryItemsByLocationId(req.params.id);
+      const items = await inventoryRepo.findInventoryItemsByLocationId(req.params.id);
       
       // Filter by product IDs if provided
       const filteredItems = productIds.length > 0 
@@ -88,10 +84,10 @@ export class InventoryPublicController {
     }
   };
 
-  /**
-   * Reserve inventory items for a cart
-   */
-  reserveCartItems = async (req: Request, res: Response): Promise<void> => {
+/**
+ * Reserve inventory items for a cart
+ */
+export const reserveCartItems = async (req: Request, res: Response): Promise<void> => {
     try {
       const { cartId } = req.params;
       const { items } = req.body;
@@ -122,7 +118,7 @@ export class InventoryPublicController {
         
         try {
           // Create reservation
-          const reservation = await this.inventoryRepo.createReservation({
+          const reservation = await inventoryRepo.createReservation({
             inventoryId,
             quantity,
             cartId,
@@ -159,15 +155,15 @@ export class InventoryPublicController {
     }
   };
 
-  /**
-   * Release all reservations for a cart
-   */
-  releaseCartReservations = async (req: Request, res: Response): Promise<void> => {
+/**
+ * Release all reservations for a cart
+ */
+export const releaseCartReservations = async (req: Request, res: Response): Promise<void> => {
     try {
       const { cartId } = req.params;
       
       // Find active reservations for this cart
-      const reservations = await this.inventoryRepo.findReservationsByCartId(cartId);
+      const reservations = await inventoryRepo.findReservationsByCartId(cartId);
       
       if (reservations.length === 0) {
         res.status(404).json({
@@ -183,7 +179,7 @@ export class InventoryPublicController {
       // Cancel each reservation
       for (const reservation of reservations) {
         try {
-          const updated = await this.inventoryRepo.updateReservationStatus(reservation.id, 'cancelled');
+          const updated = await inventoryRepo.updateReservationStatus(reservation.id, 'cancelled');
           results.push(updated);
         } catch (error) {
           errors.push({
@@ -212,4 +208,11 @@ export class InventoryPublicController {
       });
     }
   };
-}
+
+// Export default object for backward compatibility
+export default {
+  getProductInventory,
+  getLocationInventory,
+  reserveCartItems,
+  releaseCartReservations
+};

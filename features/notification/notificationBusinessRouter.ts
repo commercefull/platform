@@ -1,5 +1,5 @@
 import express from "express";
-import { isLoggedIn } from "../../libs/middlewares";
+import { isMerchantLoggedIn } from "../../libs/auth";
 import { 
   getUnreadNotifications,
   getRecentNotifications,
@@ -7,26 +7,27 @@ import {
   markAllNotificationsAsRead,
   deleteNotification,
   getUnreadCount
-} from "./controllers/notificationController";
+} from "./controllers/notificationBusinessController";
 
 const router = express.Router();
 
+router.use(isMerchantLoggedIn);
 // Get unread notifications for current user
-router.get("/notifications/unread", isLoggedIn, getUnreadNotifications);
+router.get("/notifications/unread", getUnreadNotifications);
 
 // Get recent notifications for current user
-router.get("/notifications/recent", isLoggedIn, getRecentNotifications);
+router.get("/notifications/recent", getRecentNotifications);
 
 // Get unread notification count for current user
-router.get("/notifications/count", isLoggedIn, getUnreadCount);
+router.get("/notifications/count", getUnreadCount);
 
 // Mark a notification as read
-router.put("/notifications/:id/read", isLoggedIn, markNotificationAsRead);
+router.put("/notifications/:id/read", markNotificationAsRead);
 
 // Mark all notifications as read
-router.put("/notifications/read-all", isLoggedIn, markAllNotificationsAsRead);
+router.put("/notifications/read-all", markAllNotificationsAsRead);
 
 // Delete a notification
-router.delete("/notifications/:id", isLoggedIn, deleteNotification);
+router.delete("/notifications/:id", deleteNotification);
 
 export const notificationBusinessRouter = router;

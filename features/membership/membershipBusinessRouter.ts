@@ -17,9 +17,12 @@ import {
   updateUserMembership,
   cancelUserMembership,
   getUserMembershipBenefits
-} from "./controllers/membershipController";
+} from "./controllers/membershipBusinessController";
+import { isMerchantLoggedIn } from "../../libs/auth";
 
 const router = express.Router();
+
+router.use(isMerchantLoggedIn);
 
 // Admin routes for membership tier management
 router.get("/tiers", getMembershipTiers);

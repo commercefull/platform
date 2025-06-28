@@ -1,5 +1,5 @@
 import express from 'express';
-import { isAdmin } from '../../libs/auth';
+import { isMerchantLoggedIn } from '../../libs/auth';
 
 // Import coupon controller
 import {
@@ -28,56 +28,58 @@ import {
 } from './controllers/promotionController';
 
 import { applyPromotion,  getCartPromotionById, getPromotionsByCartId, removePromotion,  updateCartPromotion } from './controllers/cartPromotionController';
-import {  getActiveCategoryPromotions, getPromotionsByCategoryId, getCategoryPromotionById, createCategoryPromotion, updateCategoryPromotion, deleteCategoryPromotion } from './controllers/categoryPromotionController';
+import { getActiveCategoryPromotions, getPromotionsByCategoryId, getCategoryPromotionById, createCategoryPromotion, updateCategoryPromotion, deleteCategoryPromotion } from './controllers/categoryPromotionController';
 import { getActiveDiscounts, getDiscountById, getDiscountsByCategoryId, getDiscountsByProductId, createDiscount, updateDiscount, deleteDiscount } from './controllers/discountController';
 
 const router = express.Router();
 
+router.use(isMerchantLoggedIn);
+
 // -------------------- Enhanced Coupon Routes --------------------
-router.get('/coupons', isAdmin, getActiveCoupons);
-router.get('/coupons/:id', isAdmin, getCouponById);
-router.get('/coupons/code/:code', isAdmin, getCouponByCode);
-router.post('/coupons', isAdmin, createCoupon);
-router.put('/coupons/:id', isAdmin, updateCoupon);
-router.delete('/coupons/:id', isAdmin, deleteCoupon);
-router.post('/coupons/validate', isAdmin, validateCoupon);
-router.get('/coupons/:id/usage', isAdmin, getCouponUsage);
-router.post('/coupons/calculate-discount', isAdmin, calculateCouponDiscount);
+router.get('/coupons', getActiveCoupons);
+router.get('/coupons/:id', getCouponById);
+router.get('/coupons/code/:code', getCouponByCode);
+router.post('/coupons', createCoupon);
+router.put('/coupons/:id', updateCoupon);
+router.delete('/coupons/:id', deleteCoupon);
+router.post('/coupons/validate', validateCoupon);
+router.get('/coupons/:id/usage', getCouponUsage);
+router.post('/coupons/calculate-discount', calculateCouponDiscount);
 
 // -------------------- New Unified Promotion Routes --------------------
-router.get('/promotions', isAdmin, getPromotions);
-router.get('/promotions/active', isAdmin, getActivePromotions);
-router.get('/promotions/:id', isAdmin, getPromotionById);
-router.post('/promotions', isAdmin, createPromotion);
-router.put('/promotions/:id', isAdmin, updatePromotion);
-router.delete('/promotions/:id', isAdmin, deletePromotion);
-router.post('/promotions/apply', isAdmin, applyPromotionToCart);
-router.delete('/promotions/cart/:cartId/promotion/:promotionId', isAdmin, removePromotionFromCart);
-router.post('/promotions/validate', isAdmin, validatePromotionForCart);
+router.get('/promotions', getPromotions);
+router.get('/promotions/active', getActivePromotions);
+router.get('/promotions/:id', getPromotionById);
+router.post('/promotions', createPromotion);
+router.put('/promotions/:id', updatePromotion);
+router.delete('/promotions/:id', deletePromotion);
+router.post('/promotions/apply', applyPromotionToCart);
+router.delete('/promotions/cart/:cartId/promotion/:promotionId', removePromotionFromCart);
+router.post('/promotions/validate', validatePromotionForCart);
 
 // -------------------- Legacy Routes (for backward compatibility) --------------------
 // Legacy Cart Promotion Routes
-router.get('/cart-promotions/cart/:cartId', isAdmin, getPromotionsByCartId);
-router.get('/cart-promotions/:id', isAdmin, getCartPromotionById);
-router.post('/cart-promotions', isAdmin, applyPromotion);
-router.put('/cart-promotions/:id', isAdmin, updateCartPromotion);
-router.delete('/cart-promotions/:id', isAdmin, removePromotion);
+router.get('/cart-promotions/cart/:cartId', getPromotionsByCartId);
+router.get('/cart-promotions/:id', getCartPromotionById);
+router.post('/cart-promotions', applyPromotion);
+router.put('/cart-promotions/:id', updateCartPromotion);
+router.delete('/cart-promotions/:id', removePromotion);
 
 // Legacy Category Promotion Routes
-router.get('/category-promotions', isAdmin, getActiveCategoryPromotions);
-router.get('/category-promotions/category/:categoryId', isAdmin, getPromotionsByCategoryId);
-router.get('/category-promotions/:id', isAdmin, getCategoryPromotionById);
-router.post('/category-promotions', isAdmin, createCategoryPromotion);
-router.put('/category-promotions/:id', isAdmin, updateCategoryPromotion);
-router.delete('/category-promotions/:id', isAdmin, deleteCategoryPromotion);
+router.get('/category-promotions', getActiveCategoryPromotions);
+router.get('/category-promotions/category/:categoryId', getPromotionsByCategoryId);
+router.get('/category-promotions/:id', getCategoryPromotionById);
+router.post('/category-promotions', createCategoryPromotion);
+router.put('/category-promotions/:id', updateCategoryPromotion);
+router.delete('/category-promotions/:id', deleteCategoryPromotion);
 
 // Legacy Discount Routes
-router.get('/discounts', isAdmin, getActiveDiscounts);
-router.get('/discounts/product/:productId', isAdmin, getDiscountsByProductId);
-router.get('/discounts/category/:categoryId', isAdmin, getDiscountsByCategoryId);
-router.get('/discounts/:id', isAdmin, getDiscountById);
-router.post('/discounts', isAdmin, createDiscount);
-router.put('/discounts/:id', isAdmin, updateDiscount);
-router.delete('/discounts/:id', isAdmin, deleteDiscount);
+router.get('/discounts', getActiveDiscounts);
+router.get('/discounts/product/:productId', getDiscountsByProductId);
+router.get('/discounts/category/:categoryId', getDiscountsByCategoryId);
+router.get('/discounts/:id', getDiscountById);
+router.post('/discounts', createDiscount);
+router.put('/discounts/:id', updateDiscount);
+router.delete('/discounts/:id', deleteDiscount);
 
 export const promotionBusinessApiRouter = router;

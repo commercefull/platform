@@ -15,28 +15,30 @@ import {
   updateTaxZone,
   deleteTaxZone
 } from './controllers/taxBusinessController';
-import { isAdmin } from '../../libs/auth';
+import { isMerchantLoggedIn } from '../../libs/auth';
 
 const router = Router();
 
+router.use(isMerchantLoggedIn);
+
 // -------------------- Tax Rate Routes --------------------
-router.get('/rates', isAdmin, getAllTaxRates);
-router.get('/rates/:id', isAdmin, getTaxRate);
-router.post('/rates', isAdmin, createTaxRate);
-router.put('/rates/:id', isAdmin, updateTaxRate);
-router.delete('/rates/:id', isAdmin, deleteTaxRate);
+router.get('/rates', getAllTaxRates);
+router.get('/rates/:id', getTaxRate);
+router.post('/rates', createTaxRate);
+router.put('/rates/:id', updateTaxRate);
+router.delete('/rates/:id', deleteTaxRate);
 
 // -------------------- Tax Category Routes --------------------
-router.get('/categories', isAdmin, getAllTaxCategories);
-router.get('/categories/:id', isAdmin, getTaxCategory);
-router.post('/categories', isAdmin, createTaxCategory);
-router.put('/categories/:id', isAdmin, updateTaxCategory);
-router.delete('/categories/:id', isAdmin, deleteTaxCategory);
+router.get('/categories', getAllTaxCategories);
+router.get('/categories/:id', getTaxCategory);
+router.post('/categories', createTaxCategory);
+router.put('/categories/:id', updateTaxCategory);
+router.delete('/categories/:id', deleteTaxCategory);
 
 // -------------------- Tax Zone Routes --------------------
-router.get('/zones/:id', isAdmin, getTaxZoneById);
-router.post('/zones', isAdmin, createTaxZone);
-router.put('/zones/:id', isAdmin, updateTaxZone);
-router.delete('/zones/:id', isAdmin, deleteTaxZone);
+router.get('/zones/:id', getTaxZoneById);
+router.post('/zones', createTaxZone);
+router.put('/zones/:id', updateTaxZone);
+router.delete('/zones/:id', deleteTaxZone);
 
 export const taxBusinessRouter = router;

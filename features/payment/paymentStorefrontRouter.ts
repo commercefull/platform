@@ -1,18 +1,24 @@
 import express from 'express';
-import paymentPublicController from './controllers/paymentPublicController';
+import {
+  getActivePaymentMethods,
+  getCustomerTransactions,
+  getTransactionDetails,
+  requestRefund,
+  getTransactionRefunds
+} from './controllers/paymentStorefrontController';
 
 const router = express.Router();
 
 // Public payment method routes
-router.get('/payment-methods', paymentPublicController.getActivePaymentMethods);
+router.get('/payment-methods', getActivePaymentMethods);
 
 // Customer transaction routes
-router.get('/customers/:customerId/transactions', paymentPublicController.getCustomerTransactions);
+router.get('/customers/:customerId/transactions', getCustomerTransactions);
 
 // Transaction routes
-router.get('/transactions/:transactionId', paymentPublicController.getTransactionDetails);
-router.get('/transactions/:transactionId/refunds', paymentPublicController.getTransactionRefunds);
-router.post('/transactions/:transactionId/refunds', paymentPublicController.requestRefund);
+router.get('/transactions/:transactionId', getTransactionDetails);
+router.get('/transactions/:transactionId/refunds', getTransactionRefunds);
+router.post('/transactions/:transactionId/refunds', requestRefund);
 
 export const paymentStorefrontRouter = router;
 
