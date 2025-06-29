@@ -314,15 +314,3 @@ export const calculateCouponDiscount = async (req: Request, res: Response): Prom
     res.status(500).json({ success: false, message: error.message });
   }
 };
-
-export default {
-  getActiveCoupons,
-  getCouponById,
-  getCouponByCode,
-  createCoupon,
-  updateCoupon,
-  deleteCoupon,
-  validateCoupon,
-  getCouponUsage,
-  calculateCouponDiscount
-};

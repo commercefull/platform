@@ -49,4 +49,4 @@ router.get('/transactions/:transactionId/refunds', getRefundsByTransactionId);
 router.post('/refunds', createRefund);
 router.put('/refunds/:id', updateRefund);
 
-export default router;
+export const paymentMerchantRouter = router;

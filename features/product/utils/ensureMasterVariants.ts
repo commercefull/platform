@@ -108,7 +108,3 @@ if (require.main === module) {
     process.exit(0);
   })();
 }
-
-export default {
-  ensureAllProductsHaveMasterVariants
-};

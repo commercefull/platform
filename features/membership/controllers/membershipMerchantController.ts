@@ -655,23 +655,3 @@ export const getUserMembershipBenefits = async (req: Request, res: Response): Pr
   }
 };
 
-// Export all controllers as a single object for backward compatibility
-export default {
-  getMembershipTiers,
-  getMembershipTierById,
-  createMembershipTier,
-  updateMembershipTier,
-  deleteMembershipTier,
-  getMembershipBenefits,
-  getMembershipBenefitById,
-  createMembershipBenefit,
-  updateMembershipBenefit,
-  deleteMembershipBenefit,
-  getUserMemberships,
-  getUserMembershipById,
-  getUserMembershipByUserId,
-  createUserMembership,
-  updateUserMembership,
-  cancelUserMembership,
-  getUserMembershipBenefits
-};

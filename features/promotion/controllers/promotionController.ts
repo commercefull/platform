@@ -397,14 +397,3 @@ export const validatePromotionForCart = async (req: Request, res: Response): Pro
   }
 };
 
-export default {
-  getActivePromotions,
-  getPromotions,
-  getPromotionById,
-  createPromotion,
-  updatePromotion,
-  deletePromotion,
-  applyPromotionToCart,
-  removePromotionFromCart,
-  validatePromotionForCart
-};
