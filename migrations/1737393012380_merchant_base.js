@@ -42,7 +42,7 @@ exports.up = (pgm) => {
     },
     year_established: { type: "integer" },
     employee_count: { type: "integer" },
-    tax_id_number: { type: "varchar(50)" }, // Business tax ID (encrypted)
+    tax_id_number: { type: "varchar(50)" }, // Merchant tax ID (encrypted)
     legal_name: { type: "varchar(100)" }, // Legal business name
     social_links: { type: "jsonb" }, // Social media links
     meta_title: { type: "varchar(255)" },
@@ -304,7 +304,7 @@ exports.up = (pgm) => {
       'John',
       'Doe',
       'Sample Merchant LLC',
-      '123 Business St',
+      '123 Merchant St',
       'Anytown',
       'CA',
       '12345',

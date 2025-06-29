@@ -16,7 +16,7 @@ The product feature is a comprehensive module that provides full e-commerce prod
 - **Product Image Controller**: Management of product imagery
 
 ### 3. Routers
-- **Storefront Router**: Exposes customer-facing endpoints for browsing products
+- **Customer Router**: Exposes customer-facing endpoints for browsing products
 - **Admin Router**: Protected routes for product administration
 
 ## Key Workflows

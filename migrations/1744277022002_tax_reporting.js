@@ -227,7 +227,7 @@ exports.up = (pgm) => {
     postal_code: { type: "varchar(20)" },
     street_address: { type: "text" },
     tax_id: { type: "varchar(100)" }, // Tax registration number
-    registration_number: { type: "varchar(100)" }, // Business registration
+    registration_number: { type: "varchar(100)" }, // Merchant registration
     is_default: { type: "boolean", notNull: true, default: false },
     start_date: { type: "timestamp", notNull: true, default: pgm.func("current_timestamp") },
     end_date: { type: "timestamp" },

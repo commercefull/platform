@@ -52,3 +52,14 @@ export const isCustomerLoggedIn = (req: Request, res: Response, next: NextFuncti
     }
     res.redirect("/login");
 };
+
+/**
+ * Middleware to check if a customer is NOT logged in
+ * Useful for pages that should only be accessible to non-authenticated users (signup, login)
+ */
+export const isCustomerNotLoggedIn = (req: Request, res: Response, next: NextFunction) => {
+    if (req.isAuthenticated()) {
+        return res.redirect('/user/profile'); // Redirect to profile if already authenticated
+    }
+    next(); // Continue if not authenticated
+};

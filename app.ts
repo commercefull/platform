@@ -13,22 +13,24 @@ import session from "express-session";
 import { pool } from "./libs/db/pool";
 import passport from "passport";
 import { basketRouter } from "./features/basket/router";
-import { accountRouter } from "./features/account/router";
+import { accountCustomerRouter } from "./features/account/accountCustomerRouter";
 import { contentRouter } from "./features/content/router";
 import { checkoutRouter } from "./features/checkout/router";
-import { orderStorefrontRouter } from "./features/order/orderStorefrontRouter";
-import { orderBusinessRouter } from "./features/order/orderBusinessRouter";
-import { distributionBusinessRouter } from "./features/distribution/distributionBusinessRouter";
-import { merchantBusinessRouter } from "./features/merchant/merchantBusinessRouter";
-import { authRouterAdmin } from "./features/auth/routerAdmin";
-import { taxBusinessRouter } from "./features/tax/taxBusinessRouter";
-import { taxStorefrontRouter } from "./features/tax/taxStorefrontRouter";
-import { productBusinessRouter } from "./features/product/productBusinessRouter";
-import { productStorefrontRouter } from "./features/product/productStorefrontRouter";
-import { inventoryStorefrontRouter } from "./features/inventory/inventoryStorefrontRouter";
-import { paymentStorefrontRouter } from "./features/payment/paymentStorefrontRouter";
-import { promotionBusinessApiRouter } from "./features/promotion/promotionBusinessRouter";
-import { distributionStorefrontRouter } from "./features/distribution/distributionStorefrontRouter";
+import { orderCustomerRouter } from "./features/order/orderCustomerRouter";
+import { orderMerchantRouter } from "./features/order/orderMerchantRouter";
+import { distributionMerchantRouter } from "./features/distribution/distributionMerchantRouter";
+import { merchantMerchantRouter } from "./features/merchant/merchantMerchantRouter";
+import { authRouterAdmin } from "./features/auth/authMerchantRouter";
+import { taxMerchantRouter } from "./features/tax/taxMerchantRouter";
+import { taxCustomerRouter } from "./features/tax/taxCustomerRouter";
+import { productMerchantRouter } from "./features/product/productMerchantRouter";
+import { productCustomerRouter } from "./features/product/productCustomerRouter";
+import { inventoryCustomerRouter } from "./features/inventory/inventoryCustomerRouter";
+import { paymentCustomerRouter } from "./features/payment/paymentCustomerRouter";
+import { promotionMerchantRouter } from "./features/promotion/promotionMerchantRouter";
+import { distributionCustomerRouter } from "./features/distribution/distributionCustomerRouter";
+import { customerMerchantRouter } from "./features/customer/customerMerchantRouter";
+import { customerRouter } from "./features/customer/customerRouter";
 
 const pgSession = require('connect-pg-simple')(session);
 
@@ -142,23 +144,24 @@ app.use(async (req: Request, res: Response, next) => {
 
 //routes config
 app.use("/", contentRouter);
-app.use("/account", accountRouter);
+app.use("/customer", customerRouter);
 app.use("/basket", basketRouter);
-app.use("/order", orderStorefrontRouter);
+app.use("/order", orderCustomerRouter);
 app.use("/checkout", checkoutRouter);
-app.use("/tax", taxStorefrontRouter);
-app.use("/products", productStorefrontRouter);
-app.use("/payment", paymentStorefrontRouter);
-app.use("/inventory", inventoryStorefrontRouter);
-app.use("/distribution", distributionStorefrontRouter);
-app.use("/merchant-center", [
+app.use("/tax", taxCustomerRouter);
+app.use("/products", productCustomerRouter);
+app.use("/payment", paymentCustomerRouter);
+app.use("/inventory", inventoryCustomerRouter);
+app.use("/distribution", distributionCustomerRouter);
+app.use("/merchant", [
   authRouterAdmin,
-  merchantBusinessRouter, 
-  promotionBusinessApiRouter, 
-  productBusinessRouter, 
-  orderBusinessRouter, 
-  distributionBusinessRouter,
-  taxBusinessRouter
+  merchantMerchantRouter, 
+  promotionMerchantRouter, 
+  productMerchantRouter, 
+  orderMerchantRouter, 
+  distributionMerchantRouter,
+  taxMerchantRouter,
+  customerMerchantRouter
 ]);
 
 

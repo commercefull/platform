@@ -92,7 +92,7 @@ The feature exposes two distinct router sets:
   - Reward configuration
   - Redemption management
   
-- **Storefront Router** (`router.ts`)
+- **Customer Router** (`router.ts`)
   - Customer point balance and tier information
   - Available rewards browsing
   - Point redemption

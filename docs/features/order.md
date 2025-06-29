@@ -20,7 +20,7 @@ The repository follows the platform's standardized database naming convention, u
   - Cancellation and refund workflows
 
 ### 3. Routers
-- **Storefront Router**: Customer-facing endpoints for order management
+- **Customer Router**: Customer-facing endpoints for order management
 - **Admin Router**: Protected routes for administrative control
 
 ## Database Structure & Naming Convention

@@ -29,7 +29,7 @@ This feature enables secure user authentication, token management, password rese
 - Optional authentication support
 - Rate limiting for security
 
-### Storefront Router (`router.ts`)
+### Customer Router (`router.ts`)
 - Customer login and registration
 - Merchant login and registration
 - Password reset functionality

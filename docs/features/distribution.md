@@ -19,7 +19,7 @@ Available shipping options (like standard, express, overnight) with associated c
 Third-party services that can handle the fulfillment process, complete with API integration capabilities for automated order processing.
 
 ### 5. Distribution Rules
-Business logic rules that determine which distribution center and fulfillment partner should handle a specific order based on shipping zone, method, and other factors. Rules have priorities to handle conflicts.
+Merchant logic rules that determine which distribution center and fulfillment partner should handle a specific order based on shipping zone, method, and other factors. Rules have priorities to handle conflicts.
 
 ### 6. Order Fulfillment
 Tracks the progress of order fulfillment, including status updates (pending, processing, shipped, delivered), tracking information, and delivery confirmation.

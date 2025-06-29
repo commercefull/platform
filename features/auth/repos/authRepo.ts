@@ -126,6 +126,72 @@ interface QueryResult {
 }
 
 export class AuthRepo {
+  // Refresh token methods for token-based authentication
+  async saveRefreshToken(userId: string, userType: string, token: string, userAgent?: string, ipAddress?: string): Promise<boolean> {
+    try {
+      const expiresAt = new Date();
+      // Calculate expiration based on JWT_REFRESH_EXPIRES_IN (e.g., '30d')
+      const expiresInMs = this.parseExpiresIn(process.env.JWT_REFRESH_EXPIRES_IN || '30d');
+      expiresAt.setTime(expiresAt.getTime() + expiresInMs);
+      
+      await queryOne(
+        `INSERT INTO "public"."auth_refresh_tokens" 
+        ("token", "user_type", "user_id", "is_revoked", "expires_at", "created_at", "user_agent", "ip_address") 
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+        [token, userType, userId, false, expiresAt, new Date(), userAgent, ipAddress]
+      );
+      
+      return true;
+    } catch (error) {
+      console.error('Error saving refresh token:', error);
+      return false;
+    }
+  }
+  
+  async verifyRefreshToken(userId: string, userType: string, token: string): Promise<boolean> {
+    try {
+      const refreshToken = await queryOne<RefreshToken>(
+        `SELECT * FROM "public"."auth_refresh_tokens" 
+        WHERE "user_id" = $1 AND "user_type" = $2 AND "token" = $3 AND "is_revoked" = false AND "expires_at" > $4`,
+        [userId, userType, token, new Date()]
+      );
+      
+      if (!refreshToken) {
+        return false;
+      }
+      
+      // Update last used timestamp
+      await queryOne(
+        `UPDATE "public"."auth_refresh_tokens" SET "last_used_at" = $1 WHERE "token" = $2`,
+        [new Date(), token]
+      );
+      
+      return true;
+    } catch (error) {
+      console.error('Error verifying refresh token:', error);
+      return false;
+    }
+  }
+  
+  // Parse JWT expiration string (e.g., '30d', '24h', '60m') to milliseconds
+  private parseExpiresIn(expiresIn: string): number {
+    const unit = expiresIn.charAt(expiresIn.length - 1);
+    const value = parseInt(expiresIn.substring(0, expiresIn.length - 1), 10);
+    
+    switch (unit) {
+      case 'd': // days
+        return value * 24 * 60 * 60 * 1000;
+      case 'h': // hours
+        return value * 60 * 60 * 1000;
+      case 'm': // minutes
+        return value * 60 * 1000;
+      case 's': // seconds
+        return value * 1000;
+      default:
+        return 30 * 24 * 60 * 60 * 1000; // default to 30 days
+    }
+  }
+
   // Customer authentication
   async authenticateCustomer(credentials: AuthCredentials): Promise<{ id: string; email: string } | null> {
     const { email, password } = credentials;
@@ -152,11 +218,11 @@ export class AuthRepo {
   }
   
   // Merchant authentication
-  async authenticateMerchant(credentials: AuthCredentials): Promise<{ id: string; email: string } | null> {
+  async authenticateMerchant(credentials: AuthCredentials): Promise<{ id: string; email: string; name: string; status: string } | null> {
     const { email, password } = credentials;
     
-    const merchant = await queryOne<{ id: string; email: string; password: string }>(
-      'SELECT "id", "email", "password" FROM "public"."merchant" WHERE "email" = $1',
+    const merchant = await queryOne<{ id: string; email: string; password: string; name: string; status: string }>(
+      'SELECT "id", "email", "password", "name", "status" FROM "public"."merchant" WHERE "email" = $1',
       [email]
     );
     
@@ -172,7 +238,9 @@ export class AuthRepo {
     
     return {
       id: merchant.id,
-      email: merchant.email
+      email: merchant.email,
+      name: merchant.name,
+      status: merchant.status
     };
   }
   

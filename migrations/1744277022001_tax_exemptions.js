@@ -20,7 +20,7 @@ exports.up = (pgm) => {
 
   // Create tax exemption type enum
   pgm.createType("tax_exemption_type", [
-    "business",    // Business exemption
+    "business",    // Merchant exemption
     "government",  // Government entity
     "nonprofit",   // Non-profit organization
     "educational", // Educational institution

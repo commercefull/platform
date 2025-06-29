@@ -18,7 +18,7 @@ The Inventory feature follows a layered architecture:
 
 - **Controllers**: Handle HTTP requests and responses
 - **Repositories**: Interface with the database using snake_case column names
-- **Domain Models**: Business logic and data structures using camelCase properties
+- **Domain Models**: Merchant logic and data structures using camelCase properties
 - **Database**: PostgreSQL tables with snake_case columns
 
 ### Key Components

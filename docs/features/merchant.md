@@ -39,7 +39,7 @@ The `MerchantController` class (`controllers/merchantController.ts`) handles bus
 
 The feature exposes two distinct router sets:
 
-- **Storefront Router** (`router.ts`): Limited access for storefront displays
+- **Customer Router** (`router.ts`): Limited access for storefront displays
   - Retrieves only active merchants
   - Returns restricted merchant information
   

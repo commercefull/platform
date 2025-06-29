@@ -1,99 +1,130 @@
 import { Request, Response } from 'express';
 import { CustomerRepo } from '../repos/customerRepo';
 
-export class CustomerController {
+export class CustomerPublicController {
   private customerRepo: CustomerRepo;
 
   constructor() {
     this.customerRepo = new CustomerRepo();
   }
 
-  // ---------- Customer Methods ----------
-
-  getCustomers = async (req: Request, res: Response): Promise<void> => {
+  // Get customer profile
+  getCustomerProfile = async (req: Request, res: Response): Promise<void> => {
     try {
-      const limit = req.query.limit ? parseInt(req.query.limit as string) : 100;
-      const offset = req.query.offset ? parseInt(req.query.offset as string) : 0;
+      // In a real app, we would get customerId from authenticated user session
+      const { customerId } = req.params;
       
-      const customers = await this.customerRepo.findAllCustomers(limit, offset);
-      res.status(200).json({
-        success: true,
-        data: customers
-      });
-    } catch (error) {
-      console.error('Error fetching customers:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to fetch customers'
-      });
-    }
-  };
-
-  getCustomerById = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const customer = await this.customerRepo.findCustomerById(id);
+      if (!customerId) {
+        res.status(400).json({
+          success: false,
+          message: 'Customer ID is required'
+        });
+        return;
+      }
+      
+      const customer = await this.customerRepo.findCustomerById(customerId);
       
       if (!customer) {
         res.status(404).json({
           success: false,
-          message: `Customer with ID ${id} not found`
+          message: 'Customer not found'
         });
         return;
       }
       
+      // Filter out sensitive data for public-facing API
+      const profile = {
+        id: customer.id,
+        email: customer.email,
+        firstName: customer.firstName,
+        lastName: customer.lastName,
+        phone: customer.phone,
+        dateOfBirth: customer.dateOfBirth,
+        isVerified: customer.isVerified,
+        createdAt: customer.createdAt
+      };
+      
       res.status(200).json({
         success: true,
-        data: customer
+        data: profile
       });
     } catch (error) {
-      console.error(`Error fetching customer:`, error);
+      console.error('Error fetching customer profile:', error);
       res.status(500).json({
         success: false,
-        message: 'Failed to fetch customer'
+        message: 'Failed to fetch customer profile'
       });
     }
   };
 
-  searchCustomers = async (req: Request, res: Response): Promise<void> => {
+  // Update customer profile
+  updateCustomerProfile = async (req: Request, res: Response): Promise<void> => {
     try {
-      const { term } = req.query;
-      const limit = req.query.limit ? parseInt(req.query.limit as string) : 100;
+      // In a real app, we would get customerId from authenticated user session
+      const { customerId } = req.params;
+      const { firstName, lastName, phone, dateOfBirth } = req.body;
       
-      if (!term) {
+      if (!customerId) {
         res.status(400).json({
           success: false,
-          message: 'Search term is required'
+          message: 'Customer ID is required'
         });
         return;
       }
       
-      const customers = await this.customerRepo.searchCustomers(term as string, limit);
+      const customer = await this.customerRepo.findCustomerById(customerId);
+      
+      if (!customer) {
+        res.status(404).json({
+          success: false,
+          message: 'Customer not found'
+        });
+        return;
+      }
+      
+      // Email changes would typically be handled through a separate verification flow
+      const updatedCustomer = await this.customerRepo.updateCustomer(customerId, {
+        firstName,
+        lastName,
+        phone,
+        dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : undefined
+      });
+      
+      // Filter out sensitive data for response
+      const profile = {
+        id: updatedCustomer.id,
+        email: updatedCustomer.email,
+        firstName: updatedCustomer.firstName,
+        lastName: updatedCustomer.lastName,
+        phone: updatedCustomer.phone,
+        dateOfBirth: updatedCustomer.dateOfBirth,
+        isVerified: updatedCustomer.isVerified,
+        createdAt: updatedCustomer.createdAt
+      };
+      
       res.status(200).json({
         success: true,
-        data: customers
+        data: profile
       });
     } catch (error) {
-      console.error('Error searching customers:', error);
+      console.error('Error updating customer profile:', error);
       res.status(500).json({
         success: false,
-        message: 'Failed to search customers'
+        message: 'Failed to update customer profile'
       });
     }
   };
 
-  createCustomer = async (req: Request, res: Response): Promise<void> => {
+  // Register a new customer
+  registerCustomer = async (req: Request, res: Response): Promise<void> => {
     try {
-      const { 
-        email, firstName, lastName, phone, dateOfBirth,
-        isActive, isVerified, notes, metadata
-      } = req.body;
+      const { email, firstName, lastName, password, phone } = req.body;
       
       // Validate required fields
-      if (!email || !firstName || !lastName) {
+      if (!email || !firstName || !lastName || !password) {
         res.status(400).json({
           success: false,
-          message: 'Required fields missing: email, firstName, and lastName are required'
+          message: 'Required fields missing: email, firstName, lastName, and password are required'
         });
         return;
       }
@@ -103,158 +134,62 @@ export class CustomerController {
       if (existingCustomer) {
         res.status(400).json({
           success: false,
-          message: `Email ${email} is already in use`
+          message: 'Email is already registered'
         });
         return;
       }
       
+      // In a real implementation, password would be hashed and stored separately
+      // Here we're just creating the customer record
       const newCustomer = await this.customerRepo.createCustomer({
         email,
         firstName,
         lastName,
         phone,
-        dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : undefined,
-        isActive: isActive ?? true,
-        isVerified: isVerified ?? false,
-        notes,
-        metadata
+        isActive: true,
+        isVerified: false, // Would typically require email verification
+        notes: 'Registered through public API',
+        metadata: { registrationSource: 'website' }
       });
+      
+      // Filter out sensitive data for response
+      const profile = {
+        id: newCustomer.id,
+        email: newCustomer.email,
+        firstName: newCustomer.firstName,
+        lastName: newCustomer.lastName,
+        phone: newCustomer.phone,
+        isVerified: newCustomer.isVerified,
+        createdAt: newCustomer.createdAt
+      };
       
       res.status(201).json({
         success: true,
-        data: newCustomer
+        message: 'Registration successful',
+        data: profile
       });
     } catch (error) {
-      console.error('Error creating customer:', error);
+      console.error('Error registering customer:', error);
       res.status(500).json({
         success: false,
-        message: 'Failed to create customer'
+        message: 'Failed to register customer'
       });
     }
   };
 
-  updateCustomer = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const { 
-        email, firstName, lastName, phone, dateOfBirth,
-        isActive, isVerified, notes, metadata
-      } = req.body;
-      
-      const existingCustomer = await this.customerRepo.findCustomerById(id);
-      if (!existingCustomer) {
-        res.status(404).json({
-          success: false,
-          message: `Customer with ID ${id} not found`
-        });
-        return;
-      }
-      
-      // If email is being changed, check if it's already in use
-      if (email && email !== existingCustomer.email) {
-        const customerWithEmail = await this.customerRepo.findCustomerByEmail(email);
-        if (customerWithEmail && customerWithEmail.id !== id) {
-          res.status(400).json({
-            success: false,
-            message: `Email ${email} is already in use`
-          });
-          return;
-        }
-      }
-      
-      const updatedCustomer = await this.customerRepo.updateCustomer(id, {
-        email,
-        firstName,
-        lastName,
-        phone,
-        dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : undefined,
-        isActive,
-        isVerified,
-        notes,
-        metadata
-      });
-      
-      res.status(200).json({
-        success: true,
-        data: updatedCustomer
-      });
-    } catch (error) {
-      console.error('Error updating customer:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to update customer'
-      });
-    }
-  };
-
-  deleteCustomer = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      
-      const existingCustomer = await this.customerRepo.findCustomerById(id);
-      if (!existingCustomer) {
-        res.status(404).json({
-          success: false,
-          message: `Customer with ID ${id} not found`
-        });
-        return;
-      }
-      
-      const deleted = await this.customerRepo.deleteCustomer(id);
-      
-      if (deleted) {
-        res.status(200).json({
-          success: true,
-          message: `Customer with ID ${id} deleted successfully`
-        });
-      } else {
-        res.status(500).json({
-          success: false,
-          message: `Failed to delete customer with ID ${id}`
-        });
-      }
-    } catch (error) {
-      console.error('Error deleting customer:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to delete customer'
-      });
-    }
-  };
-
-  getCustomerStats = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      
-      const existingCustomer = await this.customerRepo.findCustomerById(id);
-      if (!existingCustomer) {
-        res.status(404).json({
-          success: false,
-          message: `Customer with ID ${id} not found`
-        });
-        return;
-      }
-      
-      const stats = await this.customerRepo.getCustomerStats(id);
-      
-      res.status(200).json({
-        success: true,
-        data: stats
-      });
-    } catch (error) {
-      console.error('Error fetching customer stats:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to fetch customer statistics'
-      });
-    }
-  };
-
-  // ---------- Customer Address Methods ----------
-
+  // Customer address management
   getCustomerAddresses = async (req: Request, res: Response): Promise<void> => {
     try {
+      // In a real app, we would get customerId from authenticated user session
       const { customerId } = req.params;
+      
+      if (!customerId) {
+        res.status(400).json({
+          success: false,
+          message: 'Customer ID is required'
+        });
+        return;
+      }
       
       const addresses = await this.customerRepo.findCustomerAddresses(customerId);
       
@@ -271,39 +206,22 @@ export class CustomerController {
     }
   };
 
-  getCustomerAddressById = async (req: Request, res: Response): Promise<void> => {
+  addCustomerAddress = async (req: Request, res: Response): Promise<void> => {
     try {
-      const { id } = req.params;
-      const address = await this.customerRepo.findCustomerAddressById(id);
-      
-      if (!address) {
-        res.status(404).json({
-          success: false,
-          message: `Address with ID ${id} not found`
-        });
-        return;
-      }
-      
-      res.status(200).json({
-        success: true,
-        data: address
-      });
-    } catch (error) {
-      console.error('Error fetching customer address:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to fetch customer address'
-      });
-    }
-  };
-
-  createCustomerAddress = async (req: Request, res: Response): Promise<void> => {
-    try {
+      // In a real app, we would get customerId from authenticated user session
       const { customerId } = req.params;
       const { 
         addressLine1, addressLine2, city, state, postalCode,
         country, addressType, isDefault, phone
       } = req.body;
+      
+      if (!customerId) {
+        res.status(400).json({
+          success: false,
+          message: 'Customer ID is required'
+        });
+        return;
+      }
       
       // Validate required fields
       if (!addressLine1 || !city || !state || !postalCode || !country || !addressType) {
@@ -323,12 +241,11 @@ export class CustomerController {
         return;
       }
       
-      // Verify customer exists
       const customer = await this.customerRepo.findCustomerById(customerId);
       if (!customer) {
         res.status(404).json({
           success: false,
-          message: `Customer with ID ${customerId} not found`
+          message: 'Customer not found'
         });
         return;
       }
@@ -351,27 +268,28 @@ export class CustomerController {
         data: newAddress
       });
     } catch (error) {
-      console.error('Error creating customer address:', error);
+      console.error('Error adding customer address:', error);
       res.status(500).json({
         success: false,
-        message: 'Failed to create customer address'
+        message: 'Failed to add customer address'
       });
     }
   };
 
   updateCustomerAddress = async (req: Request, res: Response): Promise<void> => {
     try {
+      // In a real app, we would verify that the address belongs to the authenticated user
       const { id } = req.params;
       const { 
         addressLine1, addressLine2, city, state, postalCode,
         country, addressType, isDefault, phone
       } = req.body;
       
-      const existingAddress = await this.customerRepo.findCustomerAddressById(id);
-      if (!existingAddress) {
+      const address = await this.customerRepo.findCustomerAddressById(id);
+      if (!address) {
         res.status(404).json({
           success: false,
-          message: `Address with ID ${id} not found`
+          message: 'Address not found'
         });
         return;
       }
@@ -412,13 +330,14 @@ export class CustomerController {
 
   deleteCustomerAddress = async (req: Request, res: Response): Promise<void> => {
     try {
+      // In a real app, we would verify that the address belongs to the authenticated user
       const { id } = req.params;
       
-      const existingAddress = await this.customerRepo.findCustomerAddressById(id);
-      if (!existingAddress) {
+      const address = await this.customerRepo.findCustomerAddressById(id);
+      if (!address) {
         res.status(404).json({
           success: false,
-          message: `Address with ID ${id} not found`
+          message: 'Address not found'
         });
         return;
       }
@@ -445,306 +364,36 @@ export class CustomerController {
     }
   };
 
-  // ---------- Customer Group Methods ----------
-
-  getCustomerGroups = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const groups = await this.customerRepo.findAllCustomerGroups();
-      
-      res.status(200).json({
-        success: true,
-        data: groups
-      });
-    } catch (error) {
-      console.error('Error fetching customer groups:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to fetch customer groups'
-      });
-    }
-  };
-
-  getCustomerGroupById = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const group = await this.customerRepo.findCustomerGroupById(id);
-      
-      if (!group) {
-        res.status(404).json({
-          success: false,
-          message: `Customer group with ID ${id} not found`
-        });
-        return;
-      }
-      
-      res.status(200).json({
-        success: true,
-        data: group
-      });
-    } catch (error) {
-      console.error('Error fetching customer group:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to fetch customer group'
-      });
-    }
-  };
-
-  createCustomerGroup = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { name, description, discountPercentage, isActive } = req.body;
-      
-      // Validate required fields
-      if (!name) {
-        res.status(400).json({
-          success: false,
-          message: 'Group name is required'
-        });
-        return;
-      }
-      
-      const newGroup = await this.customerRepo.createCustomerGroup({
-        name,
-        description,
-        discountPercentage,
-        isActive: isActive ?? true
-      });
-      
-      res.status(201).json({
-        success: true,
-        data: newGroup
-      });
-    } catch (error) {
-      console.error('Error creating customer group:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to create customer group'
-      });
-    }
-  };
-
-  updateCustomerGroup = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const { name, description, discountPercentage, isActive } = req.body;
-      
-      const existingGroup = await this.customerRepo.findCustomerGroupById(id);
-      if (!existingGroup) {
-        res.status(404).json({
-          success: false,
-          message: `Customer group with ID ${id} not found`
-        });
-        return;
-      }
-      
-      const updatedGroup = await this.customerRepo.updateCustomerGroup(id, {
-        name,
-        description,
-        discountPercentage,
-        isActive
-      });
-      
-      res.status(200).json({
-        success: true,
-        data: updatedGroup
-      });
-    } catch (error) {
-      console.error('Error updating customer group:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to update customer group'
-      });
-    }
-  };
-
-  deleteCustomerGroup = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      
-      const existingGroup = await this.customerRepo.findCustomerGroupById(id);
-      if (!existingGroup) {
-        res.status(404).json({
-          success: false,
-          message: `Customer group with ID ${id} not found`
-        });
-        return;
-      }
-      
-      const deleted = await this.customerRepo.deleteCustomerGroup(id);
-      
-      if (deleted) {
-        res.status(200).json({
-          success: true,
-          message: 'Customer group deleted successfully'
-        });
-      } else {
-        res.status(500).json({
-          success: false,
-          message: 'Failed to delete customer group'
-        });
-      }
-    } catch (error) {
-      console.error('Error deleting customer group:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to delete customer group'
-      });
-    }
-  };
-
-  // ---------- Customer Group Membership Methods ----------
-
-  getCustomersInGroup = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { groupId } = req.params;
-      
-      const existingGroup = await this.customerRepo.findCustomerGroupById(groupId);
-      if (!existingGroup) {
-        res.status(404).json({
-          success: false,
-          message: `Customer group with ID ${groupId} not found`
-        });
-        return;
-      }
-      
-      const customers = await this.customerRepo.findCustomersInGroup(groupId);
-      
-      res.status(200).json({
-        success: true,
-        data: customers
-      });
-    } catch (error) {
-      console.error('Error fetching customers in group:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to fetch customers in group'
-      });
-    }
-  };
-
-  getCustomerGroupMemberships = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { customerId } = req.params;
-      
-      const existingCustomer = await this.customerRepo.findCustomerById(customerId);
-      if (!existingCustomer) {
-        res.status(404).json({
-          success: false,
-          message: `Customer with ID ${customerId} not found`
-        });
-        return;
-      }
-      
-      const memberships = await this.customerRepo.findCustomerGroupMemberships(customerId);
-      
-      // Get full group details for each membership
-      const groupPromises = memberships.map(membership => 
-        this.customerRepo.findCustomerGroupById(membership.groupId)
-      );
-      
-      const groups = await Promise.all(groupPromises);
-      
-      // Filter out any null groups (shouldn't happen, but just in case)
-      const validGroups = groups.filter(group => group !== null);
-      
-      res.status(200).json({
-        success: true,
-        data: validGroups
-      });
-    } catch (error) {
-      console.error('Error fetching customer group memberships:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to fetch customer group memberships'
-      });
-    }
-  };
-
-  addCustomerToGroup = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { customerId, groupId } = req.params;
-      
-      // Verify customer exists
-      const customer = await this.customerRepo.findCustomerById(customerId);
-      if (!customer) {
-        res.status(404).json({
-          success: false,
-          message: `Customer with ID ${customerId} not found`
-        });
-        return;
-      }
-      
-      // Verify group exists
-      const group = await this.customerRepo.findCustomerGroupById(groupId);
-      if (!group) {
-        res.status(404).json({
-          success: false,
-          message: `Customer group with ID ${groupId} not found`
-        });
-        return;
-      }
-      
-      const membership = await this.customerRepo.addCustomerToGroup(customerId, groupId);
-      
-      res.status(200).json({
-        success: true,
-        data: membership
-      });
-    } catch (error) {
-      console.error('Error adding customer to group:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to add customer to group'
-      });
-    }
-  };
-
-  removeCustomerFromGroup = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { customerId, groupId } = req.params;
-      
-      const removed = await this.customerRepo.removeCustomerFromGroup(customerId, groupId);
-      
-      if (removed) {
-        res.status(200).json({
-          success: true,
-          message: 'Customer removed from group successfully'
-        });
-      } else {
-        res.status(404).json({
-          success: false,
-          message: 'Customer was not a member of this group'
-        });
-      }
-    } catch (error) {
-      console.error('Error removing customer from group:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to remove customer from group'
-      });
-    }
-  };
-
-  // ---------- Customer Wishlist Methods ----------
-
+  // Customer wishlist management
   getCustomerWishlists = async (req: Request, res: Response): Promise<void> => {
     try {
+      // In a real app, we would get customerId from authenticated user session
       const { customerId } = req.params;
       
-      const existingCustomer = await this.customerRepo.findCustomerById(customerId);
-      if (!existingCustomer) {
-        res.status(404).json({
+      if (!customerId) {
+        res.status(400).json({
           success: false,
-          message: `Customer with ID ${customerId} not found`
+          message: 'Customer ID is required'
         });
         return;
       }
       
       const wishlists = await this.customerRepo.findCustomerWishlists(customerId);
       
+      // For each wishlist, get the items
+      const populatedWishlists = await Promise.all(
+        wishlists.map(async (wishlist) => {
+          const items = await this.customerRepo.findWishlistItems(wishlist.id);
+          return {
+            ...wishlist,
+            items
+          };
+        })
+      );
+      
       res.status(200).json({
         success: true,
-        data: wishlists
+        data: populatedWishlists
       });
     } catch (error) {
       console.error('Error fetching customer wishlists:', error);
@@ -755,54 +404,195 @@ export class CustomerController {
     }
   };
 
-  getWishlistById = async (req: Request, res: Response): Promise<void> => {
+  createWishlist = async (req: Request, res: Response): Promise<void> => {
     try {
-      const { id } = req.params;
-      const wishlist = await this.customerRepo.findCustomerWishlistById(id);
+      // In a real app, we would get customerId from authenticated user session
+      const { customerId } = req.params;
+      const { name, isPublic } = req.body;
       
-      if (!wishlist) {
-        res.status(404).json({
+      if (!customerId) {
+        res.status(400).json({
           success: false,
-          message: `Wishlist with ID ${id} not found`
+          message: 'Customer ID is required'
         });
         return;
       }
       
-      // Get the items in the wishlist
+      if (!name) {
+        res.status(400).json({
+          success: false,
+          message: 'Wishlist name is required'
+        });
+        return;
+      }
+      
+      const customer = await this.customerRepo.findCustomerById(customerId);
+      if (!customer) {
+        res.status(404).json({
+          success: false,
+          message: 'Customer not found'
+        });
+        return;
+      }
+      
+      const newWishlist = await this.customerRepo.createCustomerWishlist({
+        customerId,
+        name,
+        isPublic: isPublic ?? false
+      });
+      
+      res.status(201).json({
+        success: true,
+        data: {
+          ...newWishlist,
+          items: []
+        }
+      });
+    } catch (error) {
+      console.error('Error creating wishlist:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to create wishlist'
+      });
+    }
+  };
+
+  updateWishlist = async (req: Request, res: Response): Promise<void> => {
+    try {
+      // In a real app, we would verify that the wishlist belongs to the authenticated user
+      const { id } = req.params;
+      const { name, isPublic } = req.body;
+      
+      const wishlist = await this.customerRepo.findCustomerWishlistById(id);
+      if (!wishlist) {
+        res.status(404).json({
+          success: false,
+          message: 'Wishlist not found'
+        });
+        return;
+      }
+      
+      const updatedWishlist = await this.customerRepo.updateCustomerWishlist(id, {
+        name,
+        isPublic
+      });
+      
       const items = await this.customerRepo.findWishlistItems(id);
       
       res.status(200).json({
         success: true,
         data: {
-          ...wishlist,
+          ...updatedWishlist,
           items
         }
       });
     } catch (error) {
-      console.error('Error fetching wishlist:', error);
+      console.error('Error updating wishlist:', error);
       res.status(500).json({
         success: false,
-        message: 'Failed to fetch wishlist'
+        message: 'Failed to update wishlist'
+      });
+    }
+  };
+
+  deleteWishlist = async (req: Request, res: Response): Promise<void> => {
+    try {
+      // In a real app, we would verify that the wishlist belongs to the authenticated user
+      const { id } = req.params;
+      
+      const wishlist = await this.customerRepo.findCustomerWishlistById(id);
+      if (!wishlist) {
+        res.status(404).json({
+          success: false,
+          message: 'Wishlist not found'
+        });
+        return;
+      }
+      
+      const deleted = await this.customerRepo.deleteCustomerWishlist(id);
+      
+      if (deleted) {
+        res.status(200).json({
+          success: true,
+          message: 'Wishlist deleted successfully'
+        });
+      } else {
+        res.status(500).json({
+          success: false,
+          message: 'Failed to delete wishlist'
+        });
+      }
+    } catch (error) {
+      console.error('Error deleting wishlist:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to delete wishlist'
+      });
+    }
+  };
+
+  addItemToWishlist = async (req: Request, res: Response): Promise<void> => {
+    try {
+      // In a real app, we would verify that the wishlist belongs to the authenticated user
+      const { wishlistId } = req.params;
+      const { productId, variantId, note } = req.body;
+      
+      if (!productId) {
+        res.status(400).json({
+          success: false,
+          message: 'Product ID is required'
+        });
+        return;
+      }
+      
+      const wishlist = await this.customerRepo.findCustomerWishlistById(wishlistId);
+      if (!wishlist) {
+        res.status(404).json({
+          success: false,
+          message: 'Wishlist not found'
+        });
+        return;
+      }
+      
+      const now = new Date();
+      const newItem = await this.customerRepo.addItemToWishlist({
+        wishlistId,
+        productId,
+        variantId,
+        addedAt: now,
+        note
+      });
+      
+      res.status(201).json({
+        success: true,
+        data: newItem
+      });
+    } catch (error) {
+      console.error('Error adding item to wishlist:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to add item to wishlist'
       });
     }
   };
 
   removeItemFromWishlist = async (req: Request, res: Response): Promise<void> => {
     try {
+      // In a real app, we would verify that the wishlist item belongs to the authenticated user
       const { id } = req.params;
       
       const item = await this.customerRepo.findWishlistItemById(id);
       if (!item) {
         res.status(404).json({
           success: false,
-          message: `Wishlist item with ID ${id} not found`
+          message: 'Wishlist item not found'
         });
         return;
       }
       
-      const removed = await this.customerRepo.removeItemFromWishlist(id);
+      const deleted = await this.customerRepo.removeItemFromWishlist(id);
       
-      if (removed) {
+      if (deleted) {
         res.status(200).json({
           success: true,
           message: 'Item removed from wishlist successfully'
@@ -822,45 +612,54 @@ export class CustomerController {
     }
   };
 
-  // ---------- Customer Analytics Methods ----------
-
-  getNewCustomersCount = async (req: Request, res: Response): Promise<void> => {
+  // Get public wishlist (if shared)
+  getPublicWishlist = async (req: Request, res: Response): Promise<void> => {
     try {
-      const days = req.query.days ? parseInt(req.query.days as string) : 30;
+      const { id } = req.params;
       
-      const count = await this.customerRepo.getNewCustomersCount(days);
+      const wishlist = await this.customerRepo.findCustomerWishlistById(id);
+      
+      if (!wishlist) {
+        res.status(404).json({
+          success: false,
+          message: 'Wishlist not found'
+        });
+        return;
+      }
+      
+      // Only return if the wishlist is public
+      if (!wishlist.isPublic) {
+        res.status(403).json({
+          success: false,
+          message: 'This wishlist is not public'
+        });
+        return;
+      }
+      
+      const items = await this.customerRepo.findWishlistItems(id);
+      
+      // Get customer info (for public display only)
+      const customer = await this.customerRepo.findCustomerById(wishlist.customerId);
+      const customerInfo = customer ? {
+        firstName: customer.firstName,
+        lastName: customer.lastName.charAt(0) + '.' // Show only first initial of last name for privacy
+      } : null;
       
       res.status(200).json({
         success: true,
         data: {
-          count,
-          period: `${days} days`
+          id: wishlist.id,
+          name: wishlist.name,
+          customer: customerInfo,
+          createdAt: wishlist.createdAt,
+          items
         }
       });
     } catch (error) {
-      console.error('Error fetching new customers count:', error);
+      console.error('Error fetching public wishlist:', error);
       res.status(500).json({
         success: false,
-        message: 'Failed to fetch new customers count'
-      });
-    }
-  };
-
-  getTopCustomers = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
-      
-      const customers = await this.customerRepo.getTopCustomers(limit);
-      
-      res.status(200).json({
-        success: true,
-        data: customers
-      });
-    } catch (error) {
-      console.error('Error fetching top customers:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to fetch top customers'
+        message: 'Failed to fetch wishlist'
       });
     }
   };
