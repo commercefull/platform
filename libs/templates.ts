@@ -2,8 +2,8 @@ import { Request, Response } from "express";
 
 type ResponseData = Record<string, any>;
 
-export async function adminRespond(req: any, res: Response, view: string, data: ResponseData) {
-  res.render(`admin-default/${view}`, {
+export async function merchantRespond(req: any, res: Response, view: string, data: ResponseData) {
+  res.render(`merchant/${view}`, {
     ...data
   });
 }

@@ -658,7 +658,12 @@ export class ContentRepo {
     return transformDbToTs<ContentTemplate>(result, contentTemplateFields);
   }
 
-  async findAllTemplates(type?: ContentTemplate['type'], status?: ContentTemplate['status']): Promise<ContentTemplate[]> {
+  async findAllTemplates(
+    type?: ContentTemplate['type'], 
+    status?: ContentTemplate['status'],
+    limit: number = 50,
+    offset: number = 0
+  ): Promise<ContentTemplate[]> {
     let sql = 'SELECT * FROM "public"."content_template"';
     const whereConditions: string[] = [];
     const params: any[] = [];
@@ -678,7 +683,8 @@ export class ContentRepo {
       sql += ' WHERE ' + whereConditions.join(' AND ');
     }
     
-    sql += ' ORDER BY "name" ASC';
+    sql += ' ORDER BY "name" ASC LIMIT $' + (paramIndex++) + ' OFFSET $' + (paramIndex++);
+    params.push(limit, offset);
     
     const results = await query<any[]>(sql, params);
     return transformArrayDbToTs<ContentTemplate>(results || [], contentTemplateFields);
@@ -794,6 +800,41 @@ export class ContentRepo {
     );
     
     return !!result;
+  }
+
+  /**
+   * Reorders content blocks for a specific page
+   * @param pageId The ID of the page
+   * @param blockOrders Array of {id, order} objects representing new block ordering
+   * @returns Promise resolving to true if successful
+   */
+  async reorderBlocks(pageId: string, blockOrders: Array<{id: string; order: number}>): Promise<boolean> {
+    // Verify page exists
+    const page = await this.findPageById(pageId);
+    if (!page) {
+      throw new Error(`Page with ID ${pageId} not found`);
+    }
+    
+    // Process each block order update individually
+    for (const blockOrder of blockOrders) {
+      // Verify block exists and belongs to this page
+      const block = await this.findBlockById(blockOrder.id);
+      if (!block) {
+        throw new Error(`Block with ID ${blockOrder.id} not found`);
+      }
+      
+      if (block.pageId !== pageId) {
+        throw new Error(`Block with ID ${blockOrder.id} does not belong to page ${pageId}`);
+      }
+      
+      // Update the block order
+      await query(
+        'UPDATE "public"."content_block" SET "order" = $1, "updated_at" = $2 WHERE "id" = $3',
+        [blockOrder.order, unixTimestamp(), blockOrder.id]
+      );
+    }
+    
+    return true;
   }
 }
 

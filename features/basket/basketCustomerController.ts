@@ -164,6 +164,57 @@ class BasketPublicController {
     }
   }
 
+  // Increase item quantity
+  async increaseItem(req: any, res: Response): Promise<void> {
+    const productId = req.params.id;
+    try {
+      let basketId;
+      
+      // Get basket ID
+      if (req.user && req.user._id) {
+        const userBasket = await basketRepo.findUserBasket(req.user._id);
+        if (userBasket) {
+          basketId = userBasket.id;
+        }
+      } else if (req.session.cart) {
+        basketId = req.session.cart.id;
+      }
+
+      if (!basketId) {
+        req.flash('error', 'Cart not found');
+        return res.redirect('/');
+      }
+
+      // Get current basket
+      const basket = await basketRepo.getBasketById(basketId);
+      if (!basket) {
+        req.flash('error', 'Cart not found');
+        return res.redirect('/');
+      }
+
+      // Find the item in basket
+      const item = basket.items.find(item => item.productId === productId);
+      
+      if (item) {
+        // Increase quantity by 1
+        await basketRepo.updateItemQuantity(
+          basketId,
+          item.id,
+          item.quantity + 1
+        );
+
+        // Update session cart
+        req.session.cart = await basketRepo.getBasketById(basketId);
+      }
+      
+      res.redirect(req.headers.referer as string);
+    } catch (err) {
+      console.error('Error increasing item:', err);
+      req.flash('error', 'Failed to update cart');
+      res.redirect('/');
+    }
+  }
+
   // Remove all items of a particular product
   async removeAllItems(req: any, res: Response): Promise<void> {
     const productId = req.params.id;

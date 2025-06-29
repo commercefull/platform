@@ -3,7 +3,7 @@ import currencyRepo from '../repos/currencyRepo';
 import { convertCurrency, applyPriceRules, formatCurrency } from '../domain/currency';
 import { detectCountry } from '../../../libs/geoip';
 
-class CurrencyPublicController {
+class CurrencyCustomerController {
   // Get available currencies
   async getAvailableCurrencies(req: Request, res: Response): Promise<void | Response> {
     try {
@@ -340,4 +340,4 @@ class CurrencyPublicController {
   }
 }
 
-export default new CurrencyPublicController();
+export default new CurrencyCustomerController();

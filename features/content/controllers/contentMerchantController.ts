@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { ContentRepo, ContentType, ContentPage, ContentBlock, ContentTemplate } from '../repos/contentRepo';
+import { ContentRepo, ContentType, ContentPage, ContentTemplate } from '../repos/contentRepo';
 
 export class ContentController {
   private contentRepo: ContentRepo;
@@ -247,7 +247,7 @@ export class ContentController {
       const offset = parseInt(req.query.offset as string) || 0;
       const status = req.query.status as ContentPage['status'] | undefined;
 
-      const pages = await this.contentRepo.findAllPages(status, limit, offset);
+      const pages = await this.contentRepo.findAllPages(status, undefined, limit, offset);
 
       res.status(200).json({
         success: true,
@@ -304,7 +304,39 @@ export class ContentController {
   getFullPageById = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
-      const fullPage = await this.contentRepo.getFullPageContent(id);
+      
+      // Fetch the basic page data
+      const page = await this.contentRepo.findPageById(id);
+      if (!page) {
+        res.status(404).json({
+          success: false,
+          message: `Page with ID ${id} not found`
+        });
+        return;
+      }
+      
+      // Fetch all content blocks for this page
+      const blocks = await this.contentRepo.findBlocksByPageId(id);
+      
+      // If the page has a template, fetch it as well
+      let template = null;
+      if (page.templateId) {
+        template = await this.contentRepo.findTemplateById(page.templateId);
+      }
+      
+      // Fetch content type if specified
+      let contentType = null;
+      if (page.contentTypeId) {
+        contentType = await this.contentRepo.findContentTypeById(page.contentTypeId);
+      }
+      
+      // Construct the full page data
+      const fullPage = {
+        page,
+        blocks,
+        template,
+        contentType
+      };
 
       res.status(200).json({
         success: true,
@@ -342,7 +374,9 @@ export class ContentController {
         metaDescription,
         status = 'draft',
         publishedAt,
-        layout
+        layout,
+        contentTypeId = '1', // Default content type ID if not provided
+        visibility = 'public' // Default to public visibility
       } = req.body;
 
       // Basic validation
@@ -369,12 +403,14 @@ export class ContentController {
       const page = await this.contentRepo.createPage({
         title,
         slug,
-        description,
+        summary: description, // Using description value but assigning to the correct field name 'summary'
         metaTitle,
         metaDescription,
         status,
         publishedAt,
-        layout
+        templateId: layout, // Layout corresponds to templateId
+        contentTypeId, // Using default from destructuring
+        visibility // Using default from destructuring
       });
 
       res.status(201).json({
@@ -434,12 +470,12 @@ export class ContentController {
       const updatedPage = await this.contentRepo.updatePage(id, {
         title,
         slug,
-        description,
+        summary: description, // Using description value but mapping to 'summary' field
         metaTitle,
         metaDescription,
         status,
         publishedAt,
-        layout
+        templateId: layout // Layout corresponds to templateId
       });
 
       res.status(200).json({
@@ -762,8 +798,6 @@ export class ContentController {
     }
   };
 
-  // Content Template Handlers
-  
   /**
    * Get all templates with optional filtering
    */

@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 import nodemailer from "nodemailer";
-import { storefrontRespond } from "../../libs/templates";
-import { ProductRepo } from "../product/repos/productRepo";
-import { CategoryRepo } from "../product/repos/categoryRepo";
+import { ProductRepo } from "../../product/repos/productRepo";
+import { CategoryRepo } from "../../product/repos/categoryRepo";
+import { storefrontRespond } from "../../../libs/templates";
 
 const productRepo = new ProductRepo();
 const categoryRepo = new CategoryRepo();

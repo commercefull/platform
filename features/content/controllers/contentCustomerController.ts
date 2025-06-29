@@ -1,31 +1,26 @@
 import { Request, Response } from 'express';
 import { ContentRepo } from '../repos/contentRepo';
 
-export class ContentPublicController {
-  private contentRepo: ContentRepo;
-
-  constructor() {
-    this.contentRepo = new ContentRepo();
-  }
+const contentRepo = new ContentRepo();
 
   /**
    * Get published pages with optional filtering
    * Only returns published pages, with limited information
    */
-  getPublishedPages = async (req: Request, res: Response): Promise<void> => {
+  export const getPublishedPages = async (req: Request, res: Response): Promise<void> => {
     try {
       const limit = parseInt(req.query.limit as string) || 50;
       const offset = parseInt(req.query.offset as string) || 0;
 
       // Only return published pages
-      const pages = await this.contentRepo.findAllPages('published', limit, offset);
+      const pages = await contentRepo.findAllPages('published', undefined, limit, offset);
 
       // Remove sensitive information
       const sanitizedPages = pages.map(page => ({
         id: page.id,
         title: page.title,
         slug: page.slug,
-        description: page.description,
+        summary: page.summary, // Using summary instead of description as per ContentPage interface
         metaTitle: page.metaTitle,
         metaDescription: page.metaDescription,
         publishedAt: page.publishedAt
@@ -53,12 +48,46 @@ export class ContentPublicController {
   /**
    * Get a published page by its slug with all content blocks
    */
-  getPublishedPageBySlug = async (req: Request, res: Response): Promise<void> => {
+  export const getPublishedPageBySlug = async (req: Request, res: Response): Promise<void> => {
     try {
       const { slug } = req.params;
       
       try {
-        const pageData = await this.contentRepo.getFullPageContentBySlug(slug);
+        // First get the page by slug
+        const page = await contentRepo.findPageBySlug(slug);
+        
+        if (!page) {
+          res.status(404).json({
+            success: false,
+            message: 'Page not found'
+          });
+          return;
+        }
+        
+        // Then get content blocks for the page
+        const blocks = await contentRepo.findBlocksByPageId(page.id);
+        
+        // Get the template if one is assigned to the page
+        const template = page.templateId ? 
+          await contentRepo.findTemplateById(page.templateId) : 
+          undefined;
+          
+        // Combine into a pageData object for consistency with existing code
+        const pageData = {
+          page,
+          blocks: await Promise.all(blocks.map(async block => {
+            const contentType = await contentRepo.findContentTypeById(block.contentTypeId);
+            return {
+              ...block,
+              contentType: contentType || {
+                id: block.contentTypeId,
+                name: 'Unknown',
+                slug: 'unknown'
+              }
+            };
+          })),
+          template
+        };
         
         // Check if the page is published
         if (pageData.page.status !== 'published') {
@@ -70,7 +99,7 @@ export class ContentPublicController {
         }
         
         // Sanitize content types to remove sensitive schema information
-        const sanitizedBlocks = pageData.blocks.map(block => ({
+        const sanitizedBlocks = pageData.blocks.map((block: any) => ({
           id: block.id,
           name: block.name,
           order: block.order,
@@ -95,7 +124,7 @@ export class ContentPublicController {
           id: pageData.page.id,
           title: pageData.page.title,
           slug: pageData.page.slug,
-          description: pageData.page.description,
+          summary: pageData.page.summary,
           metaTitle: pageData.page.metaTitle,
           metaDescription: pageData.page.metaDescription,
           publishedAt: pageData.page.publishedAt
@@ -133,9 +162,9 @@ export class ContentPublicController {
   /**
    * Get active content types (sanitized for public use)
    */
-  getActiveContentTypes = async (req: Request, res: Response): Promise<void> => {
+  export const getActiveContentTypes = async (req: Request, res: Response): Promise<void> => {
     try {
-      const contentTypes = await this.contentRepo.findAllContentTypes('active');
+      const contentTypes = await contentRepo.findAllContentTypes('active');
       
       // Sanitize content types to remove sensitive schema information
       const sanitizedContentTypes = contentTypes.map(type => ({
@@ -158,4 +187,3 @@ export class ContentPublicController {
       });
     }
   };
-}

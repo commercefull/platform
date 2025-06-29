@@ -1,5 +1,4 @@
 import express from "express";
-import { ContentPublicController } from "./controllers/contentPublicController";
 import { userContactUsValidationRules, validateContactUs } from "./validator";
 import {
   getHomePage,
@@ -8,9 +7,8 @@ import {
   getCareersPage,
   getContactUsPage,
   submitContactForm
-} from "./controllers/pageController";
-
-const contentPublicController = new ContentPublicController();
+} from "./controllers/pageCustomerController";
+import { getActiveContentTypes, getPublishedPageBySlug, getPublishedPages } from "./controllers/contentCustomerController";
 
 const router = express.Router();
 
@@ -37,8 +35,8 @@ router.post(
 );
 
 // Public routes for content access
-router.get("/pages", contentPublicController.getPublishedPages);
-router.get("/pages/:slug", contentPublicController.getPublishedPageBySlug);
-router.get("/types", contentPublicController.getActiveContentTypes);
+router.get("/pages", getPublishedPages);
+router.get("/pages/:slug", getPublishedPageBySlug);
+router.get("/types", getActiveContentTypes);
 
 export const contentRouter = router;

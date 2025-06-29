@@ -1,7 +1,7 @@
-import { v4 as uuidv4 } from 'uuid';
-import { query, queryOne } from '../../../libs/db';
-import { unixTimestamp } from '../../../libs/date';
-import { TaxQueryRepo } from '../../tax/repos/taxQueryRepo';
+import { query, queryOne } from '../../libs/db';
+import { unixTimestamp } from '../../libs/date';
+import { TaxQueryRepo } from '../tax/repos/taxQueryRepo';
+import { generateUUID } from '../../libs/uuid';
 
 // Database query result interface
 interface QueryResult {
@@ -185,7 +185,7 @@ export class CheckoutRepository {
     customerId?: string,
     guestEmail?: string
   ): Promise<CheckoutSession> {
-    const id = uuidv4();
+    const id = generateUUID();
     const now = unixTimestamp();
     
     // Calculate expiry time (24 hours from now)
@@ -562,7 +562,7 @@ export class CheckoutRepository {
     // Process payment and create order
     // This would be a complex process in a real implementation
     // For now, we'll just create a placeholder
-    const orderId = uuidv4();
+    const orderId = generateUUID();
     
     // Mark the checkout as completed
     await this.updateCheckoutSession(sessionId, {

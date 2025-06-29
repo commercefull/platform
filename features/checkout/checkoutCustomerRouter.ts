@@ -1,6 +1,6 @@
 import express from "express";
-import { isLoggedIn } from "../../libs/middlewares";
-import checkoutPublicController from "./controllers/checkoutPublicController";
+import checkoutPublicController from "./checkoutCustomerController";
+import { isCustomerLoggedIn } from "../../libs/auth";
 
 const router = express.Router();
 
@@ -50,7 +50,7 @@ router.get("/session/:sessionId/calculate", async (req, res) => {
 });
 
 // Complete checkout (requires authentication)
-router.post("/session/:sessionId/complete", isLoggedIn, async (req, res) => {
+router.post("/session/:sessionId/complete", isCustomerLoggedIn, async (req, res) => {
   await checkoutPublicController.completeCheckout(req, res);
 });
 

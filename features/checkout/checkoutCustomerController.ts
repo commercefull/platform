@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import checkoutRepo, { 
   Address, 
-} from '../repos/checkoutRepo';
+} from './checkoutRepo';
 
 export class CheckoutPublicController {
   // Initialize a new checkout session

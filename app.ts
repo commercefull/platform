@@ -12,15 +12,14 @@ import compression from "compression";
 import session from "express-session";
 import { pool } from "./libs/db/pool";
 import passport from "passport";
-import { basketRouter } from "./features/basket/router";
-import { accountCustomerRouter } from "./features/account/accountCustomerRouter";
-import { contentRouter } from "./features/content/router";
-import { checkoutRouter } from "./features/checkout/router";
+import { basketCustomerRouter } from "./features/basket/basketCustomerRouter";
+import { contentRouter } from "./features/content/contentCustomerRouter";
+import { checkoutRouter } from "./features/checkout/checkoutCustomerRouter";
 import { orderCustomerRouter } from "./features/order/orderCustomerRouter";
 import { orderMerchantRouter } from "./features/order/orderMerchantRouter";
 import { distributionMerchantRouter } from "./features/distribution/distributionMerchantRouter";
 import { merchantMerchantRouter } from "./features/merchant/merchantMerchantRouter";
-import { authRouterAdmin } from "./features/auth/authMerchantRouter";
+import { authMerchantRouter } from "./features/auth/authMerchantRouter";
 import { taxMerchantRouter } from "./features/tax/taxMerchantRouter";
 import { taxCustomerRouter } from "./features/tax/taxCustomerRouter";
 import { productMerchantRouter } from "./features/product/productMerchantRouter";
@@ -31,6 +30,8 @@ import { promotionMerchantRouter } from "./features/promotion/promotionMerchantR
 import { distributionCustomerRouter } from "./features/distribution/distributionCustomerRouter";
 import { customerMerchantRouter } from "./features/customer/customerMerchantRouter";
 import { customerRouter } from "./features/customer/customerRouter";
+import { authCustomerRouter } from "./features/auth/authCustomerRouter";
+import { formCheckbox, formHidden, formInput, formLegend, formMultiSelect, formSelect, formSubmit, formText } from "./libs/form";
 
 const pgSession = require('connect-pg-simple')(session);
 
@@ -144,8 +145,9 @@ app.use(async (req: Request, res: Response, next) => {
 
 //routes config
 app.use("/", contentRouter);
+app.use("/auth", authCustomerRouter);
 app.use("/customer", customerRouter);
-app.use("/basket", basketRouter);
+app.use("/basket", basketCustomerRouter);
 app.use("/order", orderCustomerRouter);
 app.use("/checkout", checkoutRouter);
 app.use("/tax", taxCustomerRouter);
@@ -154,7 +156,7 @@ app.use("/payment", paymentCustomerRouter);
 app.use("/inventory", inventoryCustomerRouter);
 app.use("/distribution", distributionCustomerRouter);
 app.use("/merchant", [
-  authRouterAdmin,
+  authMerchantRouter,
   merchantMerchantRouter, 
   promotionMerchantRouter, 
   productMerchantRouter, 
@@ -178,6 +180,15 @@ app.use(function (err: any, req: any, res: any) {
   res.status(err.status || 500);
   res.render("error");
 });
+
+app.locals.formText = formText;
+app.locals.formInput = formInput;
+app.locals.formSelect = formSelect;
+app.locals.formLegend = formLegend;
+app.locals.formCheckbox = formCheckbox;
+app.locals.formMultiSelect = formMultiSelect;
+app.locals.formHidden = formHidden;
+app.locals.formSubmit = formSubmit;
 
 const port = process.env.PORT || 10000;
 app.set("port", port);

@@ -1,12 +1,11 @@
 import express from 'express';
-import { isLoggedIn } from '../../libs/middlewares';
-import currencyController from './controllers/currencyController';
+import currencyController from './controllers/currencyMerchantController';
+import { isMerchantLoggedIn } from '../../libs/auth';
 
 const router = express.Router();
 
 // Apply middleware to all routes in this router
-router.use(isLoggedIn);
-// router.use(isAdmin(Roles.ADMIN));
+router.use(isMerchantLoggedIn);
 
 // Currency routes
 router.get('/currencies', (req, res) => {
@@ -71,4 +70,4 @@ router.delete('/price-rules/:id', (req, res) => {
   currencyController.deletePriceRule(req, res);
 });
 
-export const currencyAdminRouter = router;
+export const currencyMerchantRouter = router;

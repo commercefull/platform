@@ -20,7 +20,8 @@
     "test:int": "jest",
     "test:e2e": "npx cypress run --headless --browser chrome",
     "cli:new:merchant": "NODE_ENV=development node -r ts-node/register ./cli/merchant.ts",
-    "knip": "knip"
+    "knip": "knip",
+    "update": "yarn upgrade --latest"
   },
   "dependencies": {
     "bcryptjs": "3.0.2",
@@ -45,8 +46,7 @@
     "nodemailer": "7.0.3",
     "passport": "0.7.0",
     "passport-local": "1.0.0",
-    "pg": "8.16.2",
-    "session": "0.1.0",
+    "pg": "8.16.3",
     "stripe": "18.2.1",
     "uuid": "11.1.0"
   },
@@ -62,7 +62,7 @@
     "@types/jest": "30.0.0",
     "@types/jsonwebtoken": "9.0.10",
     "@types/morgan": "1.9.10",
-    "@types/node": "24.0.4",
+    "@types/node": "24.0.7",
     "@types/nodemailer": "6.4.17",
     "@types/passport": "1.0.17",
     "@types/pg": "8.15.4",
@@ -71,7 +71,7 @@
     "cypress-cucumber-preprocessor": "4.3.1",
     "esbuild": "0.25.5",
     "jest": "30.0.3",
-    "knip": "5.61.2",
+    "knip": "5.61.3",
     "node-pg-migrate": "8.0.3",
     "nodemon": "3.1.10",
     "ts-jest": "29.4.0",
