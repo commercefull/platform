@@ -19,7 +19,7 @@
     "test": "jest",
     "test:int": "jest",
     "test:e2e": "npx cypress run --headless --browser chrome",
-    "cli:new:merchant": "NODE_ENV=development node -r ts-node/register ./cli/merchant.ts",
+    "cli:new:merchant": "NODE_ENV=development node -r ts-node/register ./cli/new-merchant.ts",
     "knip": "knip",
     "update": "yarn upgrade --latest"
   },

@@ -33,13 +33,12 @@ import {
   updateOrderFulfillmentStatus
 } from "./controllers/fulfillmentMerchantController";
 import { createDistributionCenter, createDistributionRule, deleteDistributionCenter, deleteDistributionRule, getActiveDistributionCenters, getActiveDistributionRules, getDefaultDistributionRule, getDistributionCenterByCode, getDistributionCenterById, getDistributionCenters, getDistributionRuleById, getDistributionRules, getDistributionRulesByZone, updateDistributionCenter, updateDistributionRule } from "./controllers/distributionMerchantController";
+import { getChannels, getActiveChannels, getChannelById, getChannelByCode, createChannel, updateChannel, deleteChannel, getChannelProducts, addProductToChannel, removeProductFromChannel, getProductChannels } from "./controllers/channelController";
 import { isMerchantLoggedIn } from "../../libs/auth";
 
 const router = express.Router();
 
 router.use(isMerchantLoggedIn);
-
-// No controller instance needed anymore, using imported functions directly
 
 // Distribution Center routes
 router.get("/centers", getDistributionCenters);
@@ -67,6 +66,21 @@ router.get("/shipping-zones/:id", getShippingZoneById);
 router.post("/shipping-zones", createShippingZone);
 router.put("/shipping-zones/:id", updateShippingZone);
 router.delete("/shipping-zones/:id", deleteShippingZone);
+
+// Channel routes
+router.get("/channels", getChannels);
+router.get("/channels/active", getActiveChannels);
+router.get("/channels/:id", getChannelById);
+router.get("/channels/code/:code", getChannelByCode);
+router.post("/channels", createChannel);
+router.put("/channels/:id", updateChannel);
+router.delete("/channels/:id", deleteChannel);
+
+// Channel product routes
+router.get("/channels/:id/products", getChannelProducts);
+router.post("/channels/:id/products", addProductToChannel);
+router.delete("/channels/:id/products/:productId", removeProductFromChannel);
+router.get("/products/:productId/channels", getProductChannels);
 
 // Shipping Method routes
 router.get("/shipping-methods", getShippingMethods);

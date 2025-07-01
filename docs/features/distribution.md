@@ -2,7 +2,7 @@
 
 ## Overview
 
-The distribution feature manages the logistics and fulfillment operations for the ecommerce platform. It handles distribution centers, shipping methods, zones, fulfillment partners, rules, and order processing. This system enables merchants to efficiently fulfill orders by routing them to appropriate distribution centers and fulfillment partners based on configurable rules.
+The distribution feature manages the logistics and fulfillment operations for the ecommerce platform. It handles distribution centers, shipping methods, zones, fulfillment partners, rules, channels, and order processing. This system enables merchants to efficiently fulfill orders by routing them to appropriate distribution centers and fulfillment partners based on configurable rules. It also provides channel management for multi-channel sales and distribution.
 
 ## Core Components
 
@@ -23,6 +23,9 @@ Merchant logic rules that determine which distribution center and fulfillment pa
 
 ### 6. Order Fulfillment
 Tracks the progress of order fulfillment, including status updates (pending, processing, shipped, delivered), tracking information, and delivery confirmation.
+
+### 7. Distribution Channels
+Sales and distribution channels through which products can be sold. Each channel can have its own specific product catalog, pricing, and configuration. Channels support multi-channel commerce strategies.
 
 ## Data Models
 
@@ -128,9 +131,44 @@ interface OrderFulfillment {
 }
 ```
 
+### Channel
+```typescript
+interface Channel {
+  channelId: string;
+  name: string;
+  code: string;
+  type: string;
+  description?: string;
+  status: ChannelStatus;
+  settings?: Record<string, any>;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+enum ChannelStatus {
+  ACTIVE = 'ACTIVE',
+  INACTIVE = 'INACTIVE'
+}
+```
+
+### ChannelProduct
+```typescript
+interface ChannelProduct {
+  channelProductId: string;
+  channelId: string;
+  productId: string;
+  isActive: boolean;
+  overrideSku?: string;
+  overridePrice?: number;
+  sortOrder?: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
 ## Repository Layer
 
-The `DistributionRepo` class provides data access methods for all distribution-related operations:
+The `DistributionRepo` and `ChannelRepo` classes provide data access methods for all distribution-related operations:
 
 - **Distribution Centers**: CRUD operations for centers, filtering by active status or code
 - **Shipping Zones**: Management of geographical shipping zones and their coverage areas
@@ -138,6 +176,8 @@ The `DistributionRepo` class provides data access methods for all distribution-r
 - **Fulfillment Partners**: Integration with third-party fulfillment services
 - **Distribution Rules**: Configuration of order routing logic
 - **Order Fulfillment**: Tracking and status updates for fulfillment processes
+- **Channels**: Management of sales and distribution channels
+- **Channel Products**: Association of products with specific channels, including channel-specific overrides
 
 ## API Endpoints
 
@@ -199,6 +239,21 @@ The `DistributionRepo` class provides data access methods for all distribution-r
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/rules` | GET | List all distribution rules |
+
+#### Channels
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/channels` | GET | List all channels with optional filtering (status, type) |
+| `/channels/active` | GET | List active channels |
+| `/channels/:id` | GET | Get channel by ID |
+| `/channels/code/:code` | GET | Get channel by code |
+| `/channels` | POST | Create a new channel |
+| `/channels/:id` | PUT | Update a channel |
+| `/channels/:id` | DELETE | Delete a channel |
+| `/channels/:id/products` | GET | List products in a channel |
+| `/channels/:id/products` | POST | Add a product to a channel |
+| `/channels/:id/products/:productId` | DELETE | Remove a product from a channel |
+| `/products/:productId/channels` | GET | List channels for a product |
 | `/rules/active` | GET | List active distribution rules |
 | `/rules/:id` | GET | Get distribution rule by ID |
 | `/rules/zone/:zoneId` | GET | Get distribution rules by shipping zone |

@@ -1,5 +1,7 @@
-import { query, queryOne } from '../../../libs/db';
-import { Currency, CurrencyRegion, CurrencyPriceRule } from '../domain/currency';
+import { query, queryOne } from "../../../libs/db";
+import { Currency, CurrencyRegion } from "../domain/currency";
+import { generateUUID } from "../../../libs/uuid";
+import axios from "axios";
 
 // Field mapping dictionaries for database to TypeScript conversion
 const currencyFields: Record<string, string> = {
@@ -22,24 +24,6 @@ const currencyRegionFields: Record<string, string> = {
   regionCode: 'region_code',
   regionName: 'region_name',
   currencyCode: 'currency_code',
-  isActive: 'is_active',
-  createdAt: 'created_at',
-  updatedAt: 'updated_at'
-};
-
-const currencyPriceRuleFields: Record<string, string> = {
-  id: 'id',
-  name: 'name',
-  description: 'description',
-  type: 'type',
-  value: 'value',
-  currencyCode: 'currency_code',
-  regionCode: 'region_code',
-  priority: 'priority',
-  minOrderValue: 'min_order_value',
-  maxOrderValue: 'max_order_value',
-  startDate: 'start_date',
-  endDate: 'end_date',
   isActive: 'is_active',
   createdAt: 'created_at',
   updatedAt: 'updated_at'
@@ -71,7 +55,9 @@ function transformArrayDbToTs<T>(dbRecords: any[], fieldMap: Record<string, stri
 }
 
 export class CurrencyRepo {
-  // Get all currencies
+  /**
+   * Get all currencies
+   */
   async getAllCurrencies(activeOnly: boolean = false): Promise<Currency[]> {
     let sql = `
       SELECT * FROM "currency"
@@ -95,7 +81,9 @@ export class CurrencyRepo {
     }));
   }
   
-  // Get currency by code
+  /**
+   * Get currency by code
+   */
   async getCurrencyByCode(code: string): Promise<Currency | null> {
     const sql = `
       SELECT * FROM "currency"
@@ -120,7 +108,9 @@ export class CurrencyRepo {
     };
   }
   
-  // Create or update currency
+  /**
+   * Create or update currency
+   */
   async saveCurrency(currency: Currency): Promise<Currency> {
     const existingCurrency = await this.getCurrencyByCode(currency.code);
     
@@ -159,7 +149,7 @@ export class CurrencyRepo {
         currency.code
       ]);
       
-      // If setting this currency as default, update others
+      // If this is now the default currency, clear other defaults
       if (currency.isDefault) {
         await this.clearOtherDefaultCurrencies(currency.code);
       }
@@ -201,7 +191,7 @@ export class CurrencyRepo {
         currency.decimalSeparator
       ]);
       
-      // If setting this currency as default, update others
+      // If this is now the default currency, clear other defaults
       if (currency.isDefault) {
         await this.clearOtherDefaultCurrencies(currency.code);
       }
@@ -210,63 +200,130 @@ export class CurrencyRepo {
     }
   }
   
-  // Delete currency
+  /**
+   * Delete currency
+   */
   async deleteCurrency(code: string): Promise<boolean> {
-    // Check if this is the default currency
     const currency = await this.getCurrencyByCode(code);
     
     if (!currency) {
       return false;
     }
     
+    // Don't allow deleting the default currency
     if (currency.isDefault) {
       throw new Error('Cannot delete the default currency');
     }
     
     const sql = 'DELETE FROM "currency" WHERE "code" = $1';
-    const result = await query(sql, [code]);
+    await query(sql, [code]);
     
     return true;
   }
   
-  // Helper method to clear default status from other currencies
+  /**
+   * Helper method to clear default status from other currencies
+   */
   private async clearOtherDefaultCurrencies(currentCode: string): Promise<void> {
     const sql = `
       UPDATE "currency"
       SET "is_default" = false
-      WHERE "code" != $1
+      WHERE "code" != $1 AND "is_default" = true
     `;
     
     await query(sql, [currentCode]);
   }
   
-  // Get default currency
+  /**
+   * Get default currency
+   */
   async getDefaultCurrency(): Promise<Currency | null> {
     const sql = `
       SELECT * FROM "currency"
       WHERE "is_default" = true
-      LIMIT 1
     `;
     
     const result = await queryOne<any>(sql);
     
     if (!result) {
-      return null;
+      // No default currency found, get the first active one
+      const fallbackSql = `
+        SELECT * FROM "currency"
+        WHERE "is_active" = true
+        LIMIT 1
+      `;
+      
+      const fallbackResult = await queryOne<any>(fallbackSql);
+      
+      if (!fallbackResult) {
+        return null;
+      }
+      
+      return transformDbToTs<Currency>(fallbackResult, currencyFields);
     }
     
-    const currency = transformDbToTs<Currency>(result, currencyFields);
-    
-    return {
-      ...currency,
-      decimals: Number(currency.decimals),
-      isDefault: Boolean(currency.isDefault),
-      isActive: Boolean(currency.isActive),
-      exchangeRate: Number(currency.exchangeRate),
-      lastUpdated: Number(currency.lastUpdated)
-    };
+    return transformDbToTs<Currency>(result, currencyFields);
   }
   
-  // Get currency regions
+  /**
+   * Update exchange rates for currencies
+   * @param source Source of exchange rates (e.g., 'api', 'manual')
+   */
+  async updateExchangeRates(source: string): Promise<Currency[]> {
+    // Get default currency as base
+    const defaultCurrency = await this.getDefaultCurrency();
+    if (!defaultCurrency) {
+      throw new Error('No default currency found to use as base for exchange rate updates');
+    }
+    
+    let currencies: Currency[] = [];
+    
+    if (source === 'api') {
+      // Call external exchange rate API (implementation will vary based on chosen provider)
+      try {
+        // This is a placeholder for an actual API call
+        // In a real implementation, you would call your exchange rate provider's API
+        // Example: const response = await axios.get(`https://api.exchangerate.com/latest?base=${defaultCurrency.code}`);
+        
+        // Placeholder for API response processing
+        // const rates = response.data.rates;
+        const rates: Record<string, number> = {}; // Replace with actual API response
+        
+        // Get all currencies
+        currencies = await this.getAllCurrencies(false);
+        
+        // Update exchange rates for each currency
+        for (const currency of currencies) {
+          if (currency.code === defaultCurrency.code) {
+            // Base currency always has exchange rate of 1
+            currency.exchangeRate = 1;
+          } else {
+            // Get rate from API response or keep existing if not available
+            currency.exchangeRate = rates[currency.code] || currency.exchangeRate;
+          }
+          currency.lastUpdated = Date.now();
+          
+          // Save updated currency
+          await this.saveCurrency(currency);
+        }
+      } catch (error) {
+        console.error('Error updating exchange rates from API:', error);
+        throw new Error(`Failed to update exchange rates from API: ${(error as Error).message}`);
+      }
+    } else if (source === 'manual') {
+      // Manual updates are handled directly through the saveCurrency method
+      // This just returns all currencies
+      currencies = await this.getAllCurrencies(false);
+    } else {
+      throw new Error(`Unsupported exchange rate source: ${source}`);
+    }
+    
+    return currencies;
+  }
+  
+  /**
+   * Get currency regions
+   */
   async getCurrencyRegions(activeOnly: boolean = false): Promise<CurrencyRegion[]> {
     let sql = `
       SELECT * FROM "currency_region"
@@ -283,7 +340,9 @@ export class CurrencyRepo {
     return transformArrayDbToTs<CurrencyRegion>(result || [], currencyRegionFields);
   }
   
-  // Get currency region by code
+  /**
+   * Get currency region by code
+   */
   async getCurrencyRegionByCode(regionCode: string): Promise<CurrencyRegion | null> {
     const sql = `
       SELECT * FROM "currency_region"
@@ -294,54 +353,136 @@ export class CurrencyRepo {
     
     return transformDbToTs<CurrencyRegion>(result, currencyRegionFields);
   }
-  
-  // Save currency region
-  async saveCurrencyRegion(region: CurrencyRegion): Promise<CurrencyRegion> {
-    const existingRegion = await this.getCurrencyRegionByCode(region.regionCode);
+
+  /**
+   * Get currency region by ID
+   */
+  async getCurrencyRegionById(id: string): Promise<CurrencyRegion | null> {
+    const sql = `
+      SELECT * FROM "currency_region"
+      WHERE "id" = $1
+    `;
     
+    const result = await queryOne<any>(sql, [id]);
+    
+    return transformDbToTs<CurrencyRegion>(result, currencyRegionFields);
+  }
+  
+  /**
+   * Create a new currency region
+   */
+  async createCurrencyRegion(region: CurrencyRegion): Promise<CurrencyRegion> {
+    // Ensure region doesn't already exist by code
+    const existingRegion = await this.getCurrencyRegionByCode(region.regionCode);
     if (existingRegion) {
+      throw new Error(`Currency region with code ${region.regionCode} already exists`);
+    }
+    
+    // Set defaults for new region
+    const newRegion: CurrencyRegion = {
+      ...region,
+      id: generateUUID(),
+      isActive: region.isActive !== undefined ? region.isActive : true,
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    };
+    
+    // Save using existing saveCurrencyRegion method
+    return this.saveCurrencyRegion(newRegion);
+  }
+  
+  /**
+   * Update an existing currency region
+   */
+  async updateCurrencyRegion(id: string, region: Partial<CurrencyRegion>): Promise<CurrencyRegion> {
+    // Check if region exists
+    const existingRegion = await this.getCurrencyRegionById(id);
+    if (!existingRegion) {
+      throw new Error(`Currency region with ID ${id} not found`);
+    }
+    
+    // Merge existing data with updates
+    const updatedRegion: CurrencyRegion = {
+      ...existingRegion,
+      ...region,
+      updatedAt: Date.now()
+    };
+    
+    // Save using existing saveCurrencyRegion method
+    return this.saveCurrencyRegion(updatedRegion);
+  }
+  
+  /**
+   * Delete a currency region
+   */
+  async deleteCurrencyRegion(id: string): Promise<boolean> {
+    // Check if region exists
+    const existingRegion = await this.getCurrencyRegionById(id);
+    if (!existingRegion) {
+      throw new Error(`Currency region with ID ${id} not found`);
+    }
+    
+    const sql = 'DELETE FROM "currency_region" WHERE "id" = $1';
+    await query(sql, [id]);
+    
+    return true;
+  }
+
+  /**
+   * Save currency region
+   */
+  async saveCurrencyRegion(region: CurrencyRegion): Promise<CurrencyRegion> {
+    if (region.id) {
       // Update existing region
       const sql = `
         UPDATE "currency_region"
         SET
-          "region_name" = $1,
-          "currency_code" = $2,
-          "is_active" = $3,
+          "region_code" = $1,
+          "region_name" = $2,
+          "currency_code" = $3,
+          "is_active" = $4,
           "updated_at" = now()
-        WHERE "region_code" = $4
+        WHERE "id" = $5
       `;
       
       await query(sql, [
+        region.regionCode,
         region.regionName,
         region.currencyCode,
         region.isActive,
-        region.regionCode
+        region.id
       ]);
       
       return {
         ...region,
-        id: existingRegion.id,
         updatedAt: Date.now()
       };
     } else {
       // Create new region
+      const id = generateUUID();
+      const now = Date.now();
+      
       const sql = `
         INSERT INTO "currency_region" (
+          "id",
           "region_code",
           "region_name",
           "currency_code",
           "is_active",
           "created_at",
           "updated_at"
-        ) VALUES ($1, $2, $3, $4, now(), now())
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7)
         RETURNING "id"
       `;
       
       const result = await queryOne<{id: string}>(sql, [
+        id,
         region.regionCode,
         region.regionName,
         region.currencyCode,
-        region.isActive
+        region.isActive,
+        now,
+        now
       ]);
       
       if (!result || !result.id) {
@@ -351,159 +492,10 @@ export class CurrencyRepo {
       return {
         ...region,
         id: result.id,
-        createdAt: Date.now(),
-        updatedAt: Date.now()
-      };
-    }
-  }
-  
-  // Get price rules
-  async getPriceRules(activeOnly: boolean = false): Promise<CurrencyPriceRule[]> {
-    let sql = `
-      SELECT * FROM "currency_price_rule"
-    `;
-    
-    if (activeOnly) {
-      sql += ' WHERE "is_active" = true';
-    }
-    
-    sql += ' ORDER BY "priority" DESC';
-    
-    const result = await query<any[]>(sql);
-    
-    return transformArrayDbToTs<CurrencyPriceRule>(result || [], currencyPriceRuleFields);
-  }
-  
-  // Get price rules for currency
-  async getPriceRulesForCurrency(currencyCode: string, activeOnly: boolean = true): Promise<CurrencyPriceRule[]> {
-    let sql = `
-      SELECT * FROM "currency_price_rule"
-      WHERE "currency_code" = $1
-    `;
-    
-    if (activeOnly) {
-      sql += ' AND "is_active" = true';
-    }
-    
-    sql += ' ORDER BY "priority" DESC';
-    
-    const result = await query<any[]>(sql, [currencyCode]);
-    
-    return transformArrayDbToTs<CurrencyPriceRule>(result || [], currencyPriceRuleFields);
-  }
-  
-  // Get price rule by ID
-  async getPriceRuleById(id: string): Promise<CurrencyPriceRule | null> {
-    const sql = `
-      SELECT * FROM "currency_price_rule"
-      WHERE "id" = $1
-    `;
-    
-    const result = await queryOne<any>(sql, [id]);
-    
-    return transformDbToTs<CurrencyPriceRule>(result, currencyPriceRuleFields);
-  }
-  
-  // Save price rule
-  async savePriceRule(rule: CurrencyPriceRule): Promise<CurrencyPriceRule> {
-    const now = Date.now();
-    
-    if (rule.id) {
-      // Update existing rule
-      const sql = `
-        UPDATE "currency_price_rule"
-        SET
-          "name" = $1,
-          "description" = $2,
-          "type" = $3,
-          "value" = $4,
-          "currency_code" = $5,
-          "region_code" = $6,
-          "priority" = $7,
-          "min_order_value" = $8,
-          "max_order_value" = $9,
-          "start_date" = $10,
-          "end_date" = $11,
-          "is_active" = $12,
-          "updated_at" = now()
-        WHERE "id" = $13
-      `;
-      
-      await query(sql, [
-        rule.name,
-        rule.description,
-        rule.type,
-        rule.value,
-        rule.currencyCode,
-        rule.regionCode,
-        rule.priority,
-        rule.minOrderValue,
-        rule.maxOrderValue,
-        rule.startDate,
-        rule.endDate,
-        rule.isActive,
-        rule.id
-      ]);
-      
-      return {
-        ...rule,
-        updatedAt: now
-      };
-    } else {
-      // Create new rule
-      const sql = `
-        INSERT INTO "currency_price_rule" (
-          "name",
-          "description",
-          "type",
-          "value",
-          "currency_code",
-          "region_code",
-          "priority",
-          "min_order_value",
-          "max_order_value",
-          "start_date",
-          "end_date",
-          "is_active",
-          "created_at",
-          "updated_at"
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, now(), now())
-        RETURNING "id"
-      `;
-      
-      const result = await queryOne<{id: string}>(sql, [
-        rule.name,
-        rule.description,
-        rule.type,
-        rule.value,
-        rule.currencyCode,
-        rule.regionCode,
-        rule.priority,
-        rule.minOrderValue,
-        rule.maxOrderValue,
-        rule.startDate,
-        rule.endDate,
-        rule.isActive
-      ]);
-      
-      if (!result || !result.id) {
-        throw new Error('Failed to create price rule');
-      }
-      
-      return {
-        ...rule,
-        id: result.id,
         createdAt: now,
         updatedAt: now
       };
     }
-  }
-  
-  // Delete price rule
-  async deletePriceRule(id: string): Promise<boolean> {
-    const sql = 'DELETE FROM "currency_price_rule" WHERE "id" = $1';
-    await query(sql, [id]);
-    return true;
   }
 }
 

@@ -1,5 +1,5 @@
 import express from "express";
-import { userContactUsValidationRules, validateContactUs } from "./validator";
+import { userContactUsValidationRules, validateContactUs } from "../content/validator";
 import {
   getHomePage,
   getAboutUsPage,
@@ -7,8 +7,8 @@ import {
   getCareersPage,
   getContactUsPage,
   submitContactForm
-} from "./controllers/pageCustomerController";
-import { getActiveContentTypes, getPublishedPageBySlug, getPublishedPages } from "./controllers/contentCustomerController";
+} from "../content/controllers/pageCustomerController";
+import { getActiveContentTypes, getPublishedPageBySlug, getPublishedPages } from "../content/controllers/contentCustomerController";
 
 const router = express.Router();
 
@@ -39,4 +39,4 @@ router.get("/pages", getPublishedPages);
 router.get("/pages/:slug", getPublishedPageBySlug);
 router.get("/types", getActiveContentTypes);
 
-export const contentRouter = router;
+export const storefrontCustomerRouter = router;

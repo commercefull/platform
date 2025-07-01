@@ -8,7 +8,8 @@ export enum PricingRuleType {
   CUSTOMER_SEGMENT = 'customer_segment',
   BUNDLE = 'bundle',
   DYNAMIC = 'dynamic',
-  CONTRACT = 'contract'
+  CONTRACT = 'contract',
+  CURRENCY_CONVERSION = 'currency_conversion'
 }
 
 export enum PricingRuleStatus {
@@ -20,8 +21,9 @@ export enum PricingRuleStatus {
 
 export enum PricingAdjustmentType {
   FIXED = 'fixed',
-  PERCENTAGE = 'percentage', 
-  OVERRIDE = 'override'
+  PERCENTAGE = 'percentage',
+  OVERRIDE = 'override',
+  EXCHANGE = 'exchange' // For currency exchange rate adjustments
 }
 
 export enum PricingRuleScope {
@@ -72,6 +74,19 @@ export interface PricingRule {
 export type PricingRuleCreateProps = Omit<PricingRule, 'id' | 'createdAt' | 'updatedAt'>;
 export type PricingRuleUpdateProps = Partial<Omit<PricingRule, 'id' | 'createdAt' | 'updatedAt'>>;
 
+/**
+ * Currency Price Rule - Extended from PricingRule for currency-specific pricing
+ */
+export interface CurrencyPriceRule extends PricingRule {
+  currencyCode: string;   // Target currency
+  regionCode?: string;    // Optional region specificity
+  minOrderValue?: number; // Minimum order value for rule to apply
+  maxOrderValue?: number; // Maximum order value for rule to apply
+}
+
+export type CurrencyPriceRuleCreateProps = Omit<CurrencyPriceRule, 'id' | 'createdAt' | 'updatedAt'>;
+export type CurrencyPriceRuleUpdateProps = Partial<Omit<CurrencyPriceRule, 'id' | 'createdAt' | 'updatedAt'>>;
+
 export interface PriceContext {
   customerId?: string;
   customerGroupIds?: string[];
@@ -81,7 +96,10 @@ export interface PriceContext {
   productIds?: string[];
   variantIds?: string[];
   variantId?: string; // Single variant ID for single product price calculations
+  currencyCode?: string; // Requested currency code
+  regionCode?: string; // Customer region for region-specific pricing
   additionalData?: Record<string, any>;
+  excludeRuleIds?: string[]; // IDs of pricing rules to exclude from calculation
 }
 
 export interface PricingResult {
@@ -95,6 +113,8 @@ export interface PricingResult {
     impact: number; // How much this rule changed the price
   }[];
   currency: string;
+  exchangeRate?: number; // Added for currency conversion tracking
+  originalCurrency?: string; // Original currency code before conversion
 }
 
 export interface TierPrice {

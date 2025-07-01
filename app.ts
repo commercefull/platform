@@ -13,7 +13,7 @@ import session from "express-session";
 import { pool } from "./libs/db/pool";
 import passport from "passport";
 import { basketCustomerRouter } from "./features/basket/basketCustomerRouter";
-import { contentRouter } from "./features/content/contentCustomerRouter";
+import { storefrontCustomerRouter } from "./features/storefront/storefrontCustomerRouter";
 import { checkoutRouter } from "./features/checkout/checkoutCustomerRouter";
 import { orderCustomerRouter } from "./features/order/orderCustomerRouter";
 import { orderMerchantRouter } from "./features/order/orderMerchantRouter";
@@ -144,7 +144,7 @@ app.use(async (req: Request, res: Response, next) => {
 });
 
 //routes config
-app.use("/", contentRouter);
+app.use("/", storefrontCustomerRouter);
 app.use("/auth", authCustomerRouter);
 app.use("/customer", customerRouter);
 app.use("/basket", basketCustomerRouter);

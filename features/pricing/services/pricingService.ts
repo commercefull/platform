@@ -3,18 +3,159 @@ import productVariantRepo from "../../product/repos/productVariantRepo";
 import pricingRuleRepo from "../repos/pricingRuleRepo";
 import tierPriceRepo from "../repos/tierPriceRepo";
 import customerPriceRepo from "../repos/customerPriceRepo";
+import currencyRepo from "../repos/currencyRepo";
+import currencyPriceRuleRepo from "../repos/currencyPriceRuleRepo";
 import { 
   PriceContext, 
   PricingAdjustmentType, 
   PricingResult,
   PricingRule,
   PricingRuleType,
-  PricingRuleScope
+  PricingRuleScope,
+  CurrencyPriceRule
 } from "../domain/pricingRule";
-import { MembershipRepo, MembershipBenefit } from "../../membership/repos/membershipRepo";
+import { Currency, convertCurrency, formatCurrency } from "../domain/currency";
+import { MembershipRepo } from "../../membership/repos/membershipRepo";
 import { LoyaltyRepo } from "../../loyalty/repos/loyaltyRepo";
 
+// Interface for pricing rule impact calculations
+export interface PricingRuleImpact {
+  beforeRule: PricingResult;
+  afterRule: PricingResult;
+  impact: number;
+  percentageImpact: number;
+}
+
 export class PricingService {
+  // Store cache of currencies to avoid frequent DB lookups
+  private currencyCache: Map<string, Currency> = new Map();
+  private defaultCurrencyCode: string | null = null;
+  
+  /**
+   * Get currency by code, with caching
+   */
+  async getCurrency(code: string): Promise<Currency | null> {
+    // Check cache first
+    if (this.currencyCache.has(code)) {
+      return this.currencyCache.get(code) || null;
+    }
+    
+    // Get from database
+    const currency = await currencyRepo.getCurrencyByCode(code);
+    
+    // Cache the result
+    if (currency) {
+      this.currencyCache.set(code, currency);
+    }
+    
+    return currency;
+  }
+  
+  /**
+   * Get default currency, with caching
+   */
+  async getDefaultCurrency(): Promise<Currency | null> {
+    // If we have a cached default code, get that currency
+    if (this.defaultCurrencyCode) {
+      return this.getCurrency(this.defaultCurrencyCode);
+    }
+    
+    // Otherwise get from database
+    const defaultCurrency = await currencyRepo.getDefaultCurrency();
+    
+    // Cache for future use
+    if (defaultCurrency) {
+      this.defaultCurrencyCode = defaultCurrency.code;
+      this.currencyCache.set(defaultCurrency.code, defaultCurrency);
+    }
+    
+    return defaultCurrency;
+  }
+  
+  /**
+   * Convert price between currencies
+   */
+  async convertPrice(
+    price: number,
+    fromCurrencyCode: string,
+    toCurrencyCode: string
+  ): Promise<{ 
+    convertedPrice: number; 
+    exchangeRate: number;
+    appliedRules: PricingResult['appliedRules'];
+  }> {
+    // If currencies are the same, no conversion needed
+    if (fromCurrencyCode === toCurrencyCode) {
+      return { 
+        convertedPrice: price, 
+        exchangeRate: 1,
+        appliedRules: []
+      };
+    }
+    
+    // Get both currencies
+    const fromCurrency = await this.getCurrency(fromCurrencyCode);
+    const toCurrency = await this.getCurrency(toCurrencyCode);
+    
+    if (!fromCurrency || !toCurrency) {
+      throw new Error(`Currency not found: ${!fromCurrency ? fromCurrencyCode : toCurrencyCode}`);
+    }
+    
+    // Find applicable currency price rules
+    const currencyRules = await currencyPriceRuleRepo.findByCurrencyCode(toCurrencyCode, true);
+    let appliedRules: PricingResult['appliedRules'] = [];
+    
+    // If we have currency-specific rules, apply them
+    if (currencyRules && currencyRules.length > 0) {
+      // Sort rules by priority (highest first)
+      const sortedRules = currencyRules.sort((a, b) => (b.priority || 0) - (a.priority || 0));
+      
+      // Apply the first matching rule
+      for (const rule of sortedRules) {
+        // Check if the rule applies to the current price
+        if (
+          (rule.minOrderValue === undefined || price >= rule.minOrderValue) &&
+          (rule.maxOrderValue === undefined || price <= rule.maxOrderValue)
+        ) {
+          // Apply the rule
+          const adjustment = rule.adjustments[0];
+          
+          if (adjustment) {
+            // Use basic exchange rate as starting point
+            let exchangeRate = toCurrency.exchangeRate / fromCurrency.exchangeRate;
+            let convertedPrice = price * exchangeRate;
+            
+            // Apply the adjustment
+            if (adjustment.type === PricingAdjustmentType.FIXED) {
+              convertedPrice += adjustment.value;
+            } else if (adjustment.type === PricingAdjustmentType.PERCENTAGE) {
+              convertedPrice *= (1 + adjustment.value / 100);
+            } else if (adjustment.type === PricingAdjustmentType.EXCHANGE) {
+              // Override the exchange rate
+              exchangeRate = adjustment.value;
+              convertedPrice = price * exchangeRate;
+            }
+            
+            appliedRules.push({
+              ruleId: rule.id,
+              ruleName: rule.name || `Currency conversion to ${toCurrency.code}`,
+              adjustmentType: adjustment.type,
+              adjustmentValue: adjustment.value,
+              impact: price * exchangeRate - convertedPrice
+            });
+            
+            return { convertedPrice, exchangeRate, appliedRules };
+          }
+        }
+      }
+    }
+    
+    // No special rules, just use the standard exchange rate
+    const exchangeRate = toCurrency.exchangeRate / fromCurrency.exchangeRate;
+    const convertedPrice = price * exchangeRate;
+    
+    return { convertedPrice, exchangeRate, appliedRules };
+  }
   /**
    * Calculate the price for a product or variant based on applicable rules and context
    */
@@ -29,6 +170,8 @@ export class PricingService {
       quantity = 1, 
       date = new Date(),
       cartTotal = 0,
+      currencyCode,
+      regionCode,
       additionalData = {} 
     } = context;
 
@@ -59,6 +202,34 @@ export class PricingService {
     const originalPrice = variant.price;
     let currentPrice = originalPrice;
     const appliedRules: PricingResult['appliedRules'] = [];
+    
+    // Get default currency if none specified
+    let priceCurrency = 'USD'; // Fallback
+    let originalCurrency: string | undefined;
+    
+    // Handle currency conversion if requested
+    if (currencyCode) {
+      // Get the default product currency (could be stored with the product/variant)
+      const defaultCurrency = await this.getDefaultCurrency();
+      priceCurrency = defaultCurrency?.code || 'USD';
+      
+      // Only convert if the requested currency is different
+      if (currencyCode !== priceCurrency) {
+        const { convertedPrice, exchangeRate, appliedRules: currencyRules } = await this.convertPrice(
+          currentPrice, 
+          priceCurrency, 
+          currencyCode
+        );
+        
+        // Update price and track original currency
+        currentPrice = convertedPrice;
+        originalCurrency = priceCurrency;
+        priceCurrency = currencyCode;
+        
+        // Add currency conversion rules
+        appliedRules.push(...currencyRules);
+      }
+    }
     
     // Step 2: Apply tier pricing (quantity discounts)
     if (quantity > 1) {
@@ -260,7 +431,9 @@ export class PricingService {
       originalPrice,
       finalPrice: currentPrice,
       appliedRules,
-      currency: product.currencyCode || 'USD'
+      currency: priceCurrency,
+      originalCurrency,
+      exchangeRate: originalCurrency ? currentPrice / originalPrice : undefined
     };
   }
   
@@ -295,50 +468,78 @@ export class PricingService {
    * Calculate the price impact of a pricing rule on a product
    */
   async calculateRuleImpact(
-    ruleId: string,
-    productId: string,
-    context: PriceContext = {}
-  ): Promise<{ 
-    beforeRule: PricingResult; 
-    afterRule: PricingResult;
-    impact: number;
-    percentageImpact: number;
-  }> {
-    // Calculate price without the rule
-    const beforeRule = await this.calculatePrice(productId, context);
+    ruleIdOrRule: string | PricingRule,
+    productIdOrContext: string | PriceContext = {},
+    contextParam?: PriceContext
+  ): Promise<PricingRuleImpact> {
+    let rule: PricingRule;
+    let productId: string;
+    let context: PriceContext = {};
+    let beforeRule: PricingResult;
     
-    // Calculate price with just this rule applied
-    const rule = await pricingRuleRepo.findById(ruleId);
-    if (!rule) {
-      throw new Error(`Pricing rule not found with ID: ${ruleId}`);
-    }
-    
-    // Apply the rule directly to the original price
-    let priceAfterRule = beforeRule.originalPrice;
-    
-    for (const adjustment of rule.adjustments) {
-      if (adjustment.type === PricingAdjustmentType.FIXED) {
-        priceAfterRule = adjustment.value;
-      } else if (adjustment.type === PricingAdjustmentType.PERCENTAGE) {
-        priceAfterRule = priceAfterRule * (1 - (adjustment.value / 100));
-      } else if (adjustment.type === PricingAdjustmentType.OVERRIDE) {
-        priceAfterRule = adjustment.value;
+    // Handle different parameter patterns
+    if (typeof ruleIdOrRule === 'string') {
+      // First overload: (ruleId, productId, context)
+      const ruleId = ruleIdOrRule;
+      productId = productIdOrContext as string;
+      context = contextParam || {};
+      
+      // Fetch the rule
+      const fetchedRule = await pricingRuleRepo.findById(ruleId);
+      if (!fetchedRule) {
+        throw new Error(`Pricing rule not found with ID: ${ruleId}`);
       }
+      rule = fetchedRule;
+      
+      // Calculate price without the rule
+      beforeRule = await this.calculatePrice(productId, {
+        ...context,
+        excludeRuleIds: [ruleId]
+      });
+    } else {
+      // Second overload: (rule, context)
+      rule = ruleIdOrRule;
+      context = productIdOrContext as PriceContext;
+    
+      // For this overload we need to get the price from the context
+      if (!context.productIds || context.productIds.length === 0) {
+        throw new Error('Product IDs must be specified in context when using rule object overload');
+      }
+      
+      // Use the first product ID from the context
+      productId = context.productIds[0];
+      
+      // Calculate price without the rule
+      beforeRule = await this.calculatePrice(productId, {
+        ...context,
+        excludeRuleIds: rule.id ? [rule.id] : []
+      });
     }
     
+    // Calculate price with only this rule
+    const priceAfterRule = await this.calculateAdjustedPrice(beforeRule.originalPrice, rule, context);
+    
+    // Create the afterRule result
     const afterRule: PricingResult = {
       originalPrice: beforeRule.originalPrice,
       finalPrice: priceAfterRule,
       appliedRules: [{
         ruleId: rule.id,
         ruleName: rule.name,
-        adjustmentType: rule.adjustments[0]?.type || PricingAdjustmentType.FIXED,
-        adjustmentValue: rule.adjustments[0]?.value || 0,
+        adjustmentType: rule.adjustments && rule.adjustments.length > 0 ? 
+          (rule.adjustments[0]?.type || PricingAdjustmentType.FIXED) : 
+          PricingAdjustmentType.FIXED,
+        adjustmentValue: rule.adjustments && rule.adjustments.length > 0 ? 
+          (rule.adjustments[0]?.value || 0) : 
+          0,
         impact: beforeRule.originalPrice - priceAfterRule
       }],
-      currency: beforeRule.currency
+      currency: beforeRule.currency,
+      originalCurrency: beforeRule.originalCurrency,
+      exchangeRate: beforeRule.exchangeRate
     };
     
+    // Calculate impact metrics
     const impact = beforeRule.originalPrice - priceAfterRule;
     const percentageImpact = (impact / beforeRule.originalPrice) * 100;
     
@@ -349,6 +550,26 @@ export class PricingService {
       percentageImpact
     };
   }
+
+  /**
+   * Calculate price after applying a specific rule
+   */
+  private async calculateAdjustedPrice(originalPrice: number, rule: PricingRule, context: PriceContext): Promise<number> {
+    let priceAfterRule = originalPrice;
+    
+    // Apply each adjustment in the rule
+    for (const adjustment of rule.adjustments) {
+      if (adjustment.type === PricingAdjustmentType.FIXED) {
+        priceAfterRule = adjustment.value;
+      } else if (adjustment.type === PricingAdjustmentType.PERCENTAGE) {
+        priceAfterRule = priceAfterRule * (1 - (adjustment.value / 100));
+      } else if (adjustment.type === PricingAdjustmentType.OVERRIDE) {
+        priceAfterRule = adjustment.value;
+      }
+    }
+    
+    return priceAfterRule;
+  }
   
   /**
    * Evaluate if a pricing rule's conditions are met given the context
@@ -358,11 +579,13 @@ export class PricingService {
       customerId, 
       customerGroupIds = [],
       quantity = 1, 
-      date = new Date(),
       cartTotal = 0,
       productIds = [],
       additionalData = {} 
     } = context;
+    
+    // Extract date from context or use current date as default
+    const date = context.date || new Date();
     
     // Check date range
     if (rule.startDate && new Date(rule.startDate) > date) {
@@ -461,6 +684,23 @@ export class PricingService {
     
     // All conditions passed
     return true;
+  }
+  
+  /**
+   * Format a price according to currency formatting rules
+   */
+  async formatPrice(price: number, currencyCode?: string): Promise<string> {
+    // Get the currency to use for formatting
+    const currency = currencyCode ? 
+      await this.getCurrency(currencyCode) : 
+      await this.getDefaultCurrency();
+    
+    if (!currency) {
+      // Fallback to basic formatting
+      return price.toFixed(2);
+    }
+    
+    return formatCurrency(price, currency);
   }
 }
 
