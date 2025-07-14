@@ -12,6 +12,7 @@ import compression from "compression";
 import session from "express-session";
 import { pool } from "./libs/db/pool";
 import passport from "passport";
+import { formCheckbox, formHidden, formInput, formLegend, formMultiSelect, formSelect, formSubmit, formText } from "./libs/form";
 import { basketCustomerRouter } from "./features/basket/basketCustomerRouter";
 import { storefrontCustomerRouter } from "./features/storefront/storefrontCustomerRouter";
 import { checkoutRouter } from "./features/checkout/checkoutCustomerRouter";
@@ -31,8 +32,6 @@ import { distributionCustomerRouter } from "./features/distribution/distribution
 import { customerMerchantRouter } from "./features/customer/customerMerchantRouter";
 import { customerRouter } from "./features/customer/customerRouter";
 import { authCustomerRouter } from "./features/auth/authCustomerRouter";
-import { formCheckbox, formHidden, formInput, formLegend, formMultiSelect, formSelect, formSubmit, formText } from "./libs/form";
-
 const pgSession = require('connect-pg-simple')(session);
 
 const app = express();
@@ -83,11 +82,14 @@ i18next
   .use(Backend)
   .use(i18nextMiddleware.LanguageDetector)
   .init({
+    debug: false,
     backend: {
       loadPath
     },
     fallbackLng: 'en',
-    preload: ['en', 'de', 'es', 'fr', 'it', 'pt', 'el', 'sq'],
+    preload: ['en', 'de', 'es', 'fr', 'it', 'el', 'sq'],
+    ns: ['shared', 'auth', 'basket', 'checkout', 'customer', 'distribution', 'merchant', 'order', 'product', 'promotion', 'tax'],
+    defaultNS: 'shared',
     detection: {
       order: ['querystring', 'cookie'],
       caches: ['cookie'],
@@ -96,6 +98,7 @@ i18next
       ignoreCase: true,
       cookieSecure: false
     },
+    initImmediate: true, // Initialize i18next synchronously to prevent race conditions
   });
 
 app.use(
@@ -157,10 +160,10 @@ app.use("/inventory", inventoryCustomerRouter);
 app.use("/distribution", distributionCustomerRouter);
 app.use("/merchant", [
   authMerchantRouter,
-  merchantMerchantRouter, 
-  promotionMerchantRouter, 
-  productMerchantRouter, 
-  orderMerchantRouter, 
+  merchantMerchantRouter,
+  promotionMerchantRouter,
+  productMerchantRouter,
+  orderMerchantRouter,
   distributionMerchantRouter,
   taxMerchantRouter,
   customerMerchantRouter

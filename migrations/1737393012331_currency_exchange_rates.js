@@ -38,7 +38,8 @@ exports.up = (pgm) => {
   // Create unique constraint for active currency pairs
   pgm.createIndex("currency_exchange_rate", ["sourceCurrencyId", "targetCurrencyId"], { 
     unique: true,
-    where: "isActive = true AND effectiveTo IS NULL"
+    where: '\"isActive\" = true AND \"effectiveTo\" IS NULL',
+    name: 'idx_currency_exchange_rate_unique_active_pair'
   });
 
   // Create currency exchange rate history table for tracking rate changes
@@ -81,7 +82,7 @@ exports.up = (pgm) => {
 
   // Insert default providers
   pgm.sql(`
-    INSERT INTO "currency_provider" (name, code, description, apiUrl, isActive)
+    INSERT INTO "currency_provider" ("name", "code", "description", "apiUrl", "isActive")
     VALUES 
       ('Manual', 'manual', 'Manually entered exchange rates', NULL, true),
       ('Exchange Rates API', 'exchangeratesapi', 'Exchange Rates API (exchangeratesapi.io)', 'https://api.exchangeratesapi.io', false),
