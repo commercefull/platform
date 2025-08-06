@@ -1,0 +1,47 @@
+/**
+ * @param { import("knex").Knex } knex
+ * @returns { Promise<void> }
+ */
+exports.up = function (knex) {
+  return knex.schema.createTable('merchantReview', t => {
+    t.uuid('merchantReviewId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+    t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
+    t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
+    t.uuid('merchantId').notNullable().references('merchantId').inTable('merchant').onDelete('CASCADE');
+    t.uuid('customerId').notNullable().references('customerId').inTable('customer').onDelete('CASCADE');
+    t.uuid('orderId').references('orderId').inTable('order');
+    t.integer('rating').notNullable();
+    t.string('title', 255);
+    t.text('content');
+    t.boolean('isVerifiedPurchase').notNullable().defaultTo(false);
+    t.boolean('isApproved').notNullable().defaultTo(false);
+    t.boolean('isPublished').notNullable().defaultTo(false);
+    t.timestamp('publishedAt');
+    t.enu('status', ['pending', 'approved', 'rejected', 'removed'], { useNative: true, enumName: 'merchant_review_status' }).notNullable().defaultTo('pending');
+    t.timestamp('reviewedAt');
+    t.uuid('reviewedBy');
+    t.text('reviewNotes');
+    t.jsonb('metadata');
+    t.check('rating BETWEEN 1 AND 5');
+    t.index('merchantId');
+    t.index('customerId');
+    t.index('orderId');
+    t.index('rating');
+    t.index('isVerifiedPurchase');
+    t.index('isApproved');
+    t.index('isPublished');
+    t.index('status');
+    t.index('createdAt');
+  }).then(() => {
+    return knex.raw('CREATE UNIQUE INDEX "merchant_review_order_unique_idx" ON "merchantReview" ("merchantId", "customerId", "orderId") WHERE "orderId" IS NOT NULL');
+  });
+};
+
+/**
+ * @param { import("knex").Knex } knex
+ * @returns { Promise<void> }
+ */
+exports.down = function (knex) {
+  return knex.schema.dropTable('merchantReview')
+    .then(() => knex.schema.raw('DROP TYPE IF EXISTS merchant_review_status'));
+};

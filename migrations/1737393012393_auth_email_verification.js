@@ -33,26 +33,35 @@ exports.up = (pgm) => {
   pgm.createIndex("merchant_email_verification", "merchant_id");
   pgm.createIndex("merchant_email_verification", "token");
   
-  // Update customer table to ensure it has an email_verified field if not already present
-  pgm.addColumns("customer", {
-    email_verified: {
-      type: "boolean",
-      notNull: true,
-      default: false,
-      // This is a safe addition as we're checking if it exists first
-      ifNotExists: true
-    }
-  });
-  
-  // Update merchant table to track email verification
-  pgm.addColumns("merchant", {
-    email_verified: {
-      type: "boolean",
-      notNull: true,
-      default: false,
-      ifNotExists: true
-    }
-  });
+  // Check if email_verified column exists in customer table before adding
+  pgm.sql(`
+    DO $$
+    BEGIN
+      IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'customer' 
+        AND column_name = 'email_verified'
+      ) THEN
+        ALTER TABLE customer 
+        ADD COLUMN email_verified boolean NOT NULL DEFAULT false;
+      END IF;
+    END $$;
+  `);
+
+  // Check if email_verified column exists in merchant table before adding
+  pgm.sql(`
+    DO $$
+    BEGIN
+      IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'merchant' 
+        AND column_name = 'email_verified'
+      ) THEN
+        ALTER TABLE merchant 
+        ADD COLUMN email_verified boolean NOT NULL DEFAULT false;
+      END IF;
+    END $$;
+  `);
 };
 
 /**

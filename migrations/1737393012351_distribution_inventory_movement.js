@@ -244,7 +244,7 @@ exports.up = (pgm) => {
   // Create distribution inventory movement table
   pgm.createTable("distribution_inventory_movement", {
     id: { type: "uuid", notNull: true, default: pgm.func("uuid_generate_v4()"), primaryKey: true },
-    warehouse_id: { type: "uuid", notNull: true, references: "distribution_warehouse", onDelete: "CASCADE" },
+    warehouse_id: { type: "uuid", notNull: true, references: "warehouse", onDelete: "CASCADE" },
     product_id: { type: "uuid", notNull: true }, // Reference to product
     variant_id: { type: "uuid" }, // Optional reference to product variant
     from_location_id: { type: "uuid", references: "inventory_location" }, // Where inventory moved from

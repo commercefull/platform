@@ -46,7 +46,7 @@
     "nodemailer": "7.0.3",
     "passport": "0.7.0",
     "passport-local": "1.0.0",
-    "pg": "8.16.3",
+    "pg": "^8.16.3",
     "stripe": "18.2.1",
     "uuid": "11.1.0"
   },
@@ -71,6 +71,7 @@
     "cypress-cucumber-preprocessor": "4.3.1",
     "esbuild": "0.25.5",
     "jest": "30.0.3",
+    "knex": "^3.1.0",
     "knip": "5.61.3",
     "node-pg-migrate": "8.0.3",
     "nodemon": "3.1.10",

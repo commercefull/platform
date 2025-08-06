@@ -167,11 +167,7 @@ exports.up = (pgm) => {
     length: { type: "decimal(10,2)", notNull: true }, // Length (cm)
     width: { type: "decimal(10,2)", notNull: true }, // Width (cm)
     height: { type: "decimal(10,2)", notNull: true }, // Height (cm)
-    volume: { 
-      type: "decimal(10,2)", 
-      notNull: true,
-      check: "volume = length * width * height / 1000" // Volume in liters
-    },
+    volume: { type: "decimal(10,2)", notNull: true },
     max_weight: { type: "decimal(10,2)" }, // Maximum content weight
     max_items: { type: "integer" }, // Maximum number of items
     cost: { type: "decimal(10,2)" }, // Cost of packaging
@@ -319,14 +315,20 @@ exports.up = (pgm) => {
       height,
       volume,
       max_weight,
-      recyclable
+      recyclable,
+      cost,
+      currency,
+      created_by,
+      valid_carriers,
+      metadata,
+      image_url
     )
     VALUES 
-      ('Small Box', 'BOX_S', 'Small shipping box', true, false, 0.2, 20, 15, 10, 3, 2, true),
-      ('Medium Box', 'BOX_M', 'Medium shipping box', true, true, 0.3, 30, 20, 15, 9, 5, true),
-      ('Large Box', 'BOX_L', 'Large shipping box', true, false, 0.4, 40, 30, 20, 24, 10, true),
-      ('Envelope', 'ENVELOPE', 'Shipping envelope for documents', true, false, 0.05, 30, 22, 1, 0.66, 0.5, true),
-      ('Poly Bag', 'POLY', 'Plastic poly bag for soft items', true, false, 0.1, 35, 25, 5, 4.375, 3, false)
+      ('Small Box', 'BOX_S', 'Small shipping box', true, false, 0.2, 20, 15, 10, 3, 2, true, 0.5, 'USD', '00000000-0000-0000-0000-000000000000', '{}', '{}', ''),
+      ('Medium Box', 'BOX_M', 'Medium shipping box', true, true, 0.3, 30, 20, 15, 9, 5, true, 1.0, 'USD', '00000000-0000-0000-0000-000000000000', '{}', '{}', ''),
+      ('Large Box', 'BOX_L', 'Large shipping box', true, false, 0.4, 40, 30, 20, 24, 10, true, 1.5, 'USD', '00000000-0000-0000-0000-000000000000', '{}', '{}', ''),
+      ('Envelope', 'ENVELOPE', 'Shipping envelope for documents', true, false, 0.05, 30, 22, 1, 0.66, 0.5, true, 0.2, 'USD', '00000000-0000-0000-0000-000000000000', '{}', '{}', ''),
+      ('Poly Bag', 'POLY', 'Plastic poly bag for soft items', true, false, 0.1, 35, 25, 5, 43.75, 3, false, 0.1, 'USD', '00000000-0000-0000-0000-000000000000', '{}', '{}', '')
   `);
 };
 
