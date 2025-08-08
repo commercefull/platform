@@ -5,14 +5,14 @@ module.exports = {
     client: 'pg',
     connection: {
       host: process.env.DB_HOST || '127.0.0.1',
-      port: process.env.DB_PORT || 5432,
-      user: process.env.DB_USER || 'postgres',
-      password: process.env.DB_PASSWORD || 'postgres',
-      database: process.env.DB_NAME || 'commercefull_dev',
+      port: process.env.POSTGRES_PORT || 5432,
+      user: process.env.POSTGRES_USER || 'postgres',
+      password: process.env.POSTGRES_PASSWORD || 'postgres',
+      database: process.env.POSTGRES_DB || 'commercefull_dev',
     },
     migrations: {
-      directory: './migrations_knex',
-      tableName: 'knex_migrations'
+      directory: './migrations',
+      tableName: 'knexMigrations'
     },
     seeds: {
       directory: './seeds'
@@ -21,10 +21,16 @@ module.exports = {
 
   staging: {
     client: 'pg',
-    connection: process.env.STAGING_DATABASE_URL,
+    connection: {
+      host: process.env.DB_HOST || '127.0.0.1',
+      port: process.env.POSTGRES_PORT || 5432,
+      user: process.env.POSTGRES_USER || 'postgres',
+      password: process.env.POSTGRES_PASSWORD || 'postgres',
+      database: process.env.POSTGRES_DB || 'commercefull_dev',
+    },
     migrations: {
-      directory: './migrations_knex',
-      tableName: 'knex_migrations'
+      directory: './migrations',
+      tableName: 'knexMigrations'
     },
     seeds: {
       directory: './seeds'
@@ -33,10 +39,16 @@ module.exports = {
 
   production: {
     client: 'pg',
-    connection: process.env.DATABASE_URL,
+    connection: {
+      host: process.env.DB_HOST || '127.0.0.1',
+      port: process.env.POSTGRES_PORT || 5432,
+      user: process.env.POSTGRES_USER || 'postgres',
+      password: process.env.POSTGRES_PASSWORD || 'postgres',
+      database: process.env.POSTGRES_DB || 'commercefull_dev',
+    },
     migrations: {
-      directory: './migrations_knex',
-      tableName: 'knex_migrations'
+      directory: './migrations',
+      tableName: 'knexMigrations'
     },
     seeds: {
       directory: './seeds'
