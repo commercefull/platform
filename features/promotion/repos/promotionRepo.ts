@@ -204,7 +204,7 @@ export class PromotionRepo {
     }
     
     if (merchantId) {
-      sql += ` AND "merchant_id" = $${paramIndex}`;
+      sql += ` AND "merchantId" = $${paramIndex}`;
       params.push(merchantId);
       paramIndex++;
     }
@@ -298,7 +298,7 @@ export class PromotionRepo {
           "id", "name", "description", "status", "scope", "priority",
           "start_date", "end_date", "usage_limit", "usage_count",
           "discount_type", "discount_value", "min_order_amount", "max_discount_amount",
-          "coupon_id", "is_exclusive", "merchant_id", "metadata", "created_at", "updated_at"
+          "coupon_id", "is_exclusive", "merchantId", "metadata", "createdAt", "updatedAt"
         ) VALUES (
           $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20
         ) RETURNING 
@@ -356,7 +356,7 @@ export class PromotionRepo {
           await queryOne(
             `INSERT INTO "public"."promotion_rule" (
               "id", "promotion_id", "name", "condition", "operator", "value",
-              "is_active", "created_at", "updated_at"
+              "isActive", "createdAt", "updatedAt"
             ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
             [
               generateUUID(),
@@ -379,7 +379,7 @@ export class PromotionRepo {
           await queryOne(
             `INSERT INTO "public"."promotion_action" (
               "id", "promotion_id", "type", "value", "target_type", "target_id",
-              "metadata", "created_at", "updated_at"
+              "metadata", "createdAt", "updatedAt"
             ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
             [
               generateUUID(),
@@ -484,7 +484,7 @@ export class PromotionRepo {
     }
     
     if (input.merchantId !== undefined) {
-      fieldsToUpdate.push(`"merchant_id" = $${paramIndex++}`);
+      fieldsToUpdate.push(`"merchantId" = $${paramIndex++}`);
       params.push(input.merchantId || null);
     }
     
@@ -494,7 +494,7 @@ export class PromotionRepo {
     }
     
     // Add updated_at timestamp
-    fieldsToUpdate.push(`"updated_at" = $${paramIndex++}`);
+    fieldsToUpdate.push(`"updatedAt" = $${paramIndex++}`);
     params.push(new Date());
     
     // No fields to update
@@ -622,8 +622,8 @@ export class PromotionRepo {
       // Insert usage record
       const usageRecord = await queryOne<PromotionUsage>(
         `INSERT INTO "public"."promotion_usage" (
-          "id", "promotion_id", "order_id", "customer_id", "session_id", 
-          "discount_amount", "applied_at"
+          "id", "promotion_id", "orderId", "customerId", "session_id", 
+          "discountAmount", "applied_at"
         ) VALUES ($1, $2, $3, $4, $5, $6, $7)
         RETURNING 
           id,
@@ -652,7 +652,7 @@ export class PromotionRepo {
       // Update usage count on the promotion
       await query(
         `UPDATE "public"."promotion" 
-        SET "usage_count" = "usage_count" + 1, "updated_at" = $2 
+        SET "usage_count" = "usage_count" + 1, "updatedAt" = $2 
         WHERE "id" = $1`,
         [promotionId, new Date()]
       );

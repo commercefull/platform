@@ -108,8 +108,8 @@ export class NotificationRepo {
     const queryResult = await query<Record<string, any>[]>(`
       SELECT ${this.generateSelectFields()} 
       FROM "public"."notification" 
-      WHERE "user_id" = $1 
-      ORDER BY "created_at" DESC 
+      WHERE "userId" = $1 
+      ORDER BY "createdAt" DESC 
       LIMIT $2
     `, [userId, limit.toString()]);
     return queryResult ? queryResult.map(record => this.mapDbToTs(record)) : [];
@@ -119,8 +119,8 @@ export class NotificationRepo {
     const queryResult = await query<Record<string, any>[]>(`
       SELECT ${this.generateSelectFields()} 
       FROM "public"."notification" 
-      WHERE "user_id" = $1 AND "is_read" = false 
-      ORDER BY "created_at" DESC
+      WHERE "userId" = $1 AND "is_read" = false 
+      ORDER BY "createdAt" DESC
     `, [userId]);
     return queryResult ? queryResult.map(record => this.mapDbToTs(record)) : [];
   }
@@ -129,8 +129,8 @@ export class NotificationRepo {
     const queryResult = await query<Record<string, any>[]>(`
       SELECT ${this.generateSelectFields()} 
       FROM "public"."notification" 
-      WHERE "user_id" = $1 AND "type" = $2 
-      ORDER BY "created_at" DESC
+      WHERE "userId" = $1 AND "type" = $2 
+      ORDER BY "createdAt" DESC
     `, [userId, type]);
     return queryResult ? queryResult.map(record => this.mapDbToTs(record)) : [];
   }
@@ -149,7 +149,7 @@ export class NotificationRepo {
 
     const notification = await queryOne<Record<string, any>>(`
       INSERT INTO "public"."notification" (
-        "userId", "type", "title", "content", "channel", "isRead", "createdAt", "sentAt", "metadata"
+        "userId", "type", "title", "content", "channel", "is_read", "createdAt", "sent_at", "metadata"
       ) 
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
       RETURNING ${this.generateSelectFields()}
@@ -175,7 +175,7 @@ export class NotificationRepo {
   async markAsRead(id: string): Promise<BaseNotification | null> {
     const queryResult = await queryOne<Record<string, any>>(`
       UPDATE "public"."notification"
-      SET "isRead" = true, "updatedAt" = $1
+      SET "is_read" = true, "updatedAt" = $1
       WHERE "id" = $2
       RETURNING ${this.generateSelectFields()}
     `, [unixTimestamp(), id]);
@@ -186,8 +186,8 @@ export class NotificationRepo {
   async markAllAsRead(userId: string): Promise<number> {
     const result = await queryOne<{ count: string }>(`
       UPDATE "public"."notification"
-      SET "isRead" = true, "updatedAt" = $1
-      WHERE "userId" = $2 AND "isRead" = false
+      SET "is_read" = true, "updatedAt" = $1
+      WHERE "userId" = $2 AND "is_read" = false
       RETURNING COUNT(*) as count
     `, [unixTimestamp(), userId]);
 
@@ -197,7 +197,7 @@ export class NotificationRepo {
   async markAsSent(id: string): Promise<BaseNotification | null> {
     const queryResult = await queryOne<Record<string, any>>(`
       UPDATE "public"."notification"
-      SET "sentAt" = $1, "updatedAt" = $2
+      SET "sent_at" = $1, "updatedAt" = $2
       WHERE "id" = $3
       RETURNING ${this.generateSelectFields()}
     `, [unixTimestamp(), unixTimestamp(), id]);
@@ -229,7 +229,7 @@ export class NotificationRepo {
     const result = await queryOne<{ count: string }>(`
       SELECT COUNT(*) as count
       FROM "public"."notification"
-      WHERE "userId" = $1 AND "isRead" = false
+      WHERE "userId" = $1 AND "is_read" = false
     `, [userId]);
 
     return result ? parseInt(result.count, 10) : 0;

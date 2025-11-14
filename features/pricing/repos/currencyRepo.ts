@@ -64,10 +64,10 @@ export class CurrencyRepo {
     `;
     
     if (activeOnly) {
-      sql += ' WHERE "is_active" = true';
+      sql += ' WHERE "isActive" = true';
     }
     
-    sql += ' ORDER BY "is_default" DESC, "name" ASC';
+    sql += ' ORDER BY "isDefault" DESC, "name" ASC';
     
     const result = await query<any[]>(sql);
     
@@ -122,15 +122,15 @@ export class CurrencyRepo {
           "name" = $1,
           "symbol" = $2,
           "decimal_places" = $3,
-          "is_default" = $4,
-          "is_active" = $5,
+          "isDefault" = $4,
+          "isActive" = $5,
           "exchange_rate" = $6,
           "last_updated" = $7,
           "format" = $8,
           "symbol_position" = $9,
           "thousands_separator" = $10,
           "decimal_separator" = $11,
-          "updated_at" = now()
+          "updatedAt" = now()
         WHERE "code" = $12
       `;
       
@@ -163,16 +163,16 @@ export class CurrencyRepo {
           "name",
           "symbol",
           "decimal_places",
-          "is_default",
-          "is_active",
+          "isDefault",
+          "isActive",
           "exchange_rate",
           "last_updated",
           "format",
           "symbol_position",
           "thousands_separator",
           "decimal_separator",
-          "created_at",
-          "updated_at"
+          "createdAt",
+          "updatedAt"
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, now(), now())
       `;
       
@@ -227,8 +227,8 @@ export class CurrencyRepo {
   private async clearOtherDefaultCurrencies(currentCode: string): Promise<void> {
     const sql = `
       UPDATE "currency"
-      SET "is_default" = false
-      WHERE "code" != $1 AND "is_default" = true
+      SET "isDefault" = false
+      WHERE "code" != $1 AND "isDefault" = true
     `;
     
     await query(sql, [currentCode]);
@@ -240,7 +240,7 @@ export class CurrencyRepo {
   async getDefaultCurrency(): Promise<Currency | null> {
     const sql = `
       SELECT * FROM "currency"
-      WHERE "is_default" = true
+      WHERE "isDefault" = true
     `;
     
     const result = await queryOne<any>(sql);
@@ -249,7 +249,7 @@ export class CurrencyRepo {
       // No default currency found, get the first active one
       const fallbackSql = `
         SELECT * FROM "currency"
-        WHERE "is_active" = true
+        WHERE "isActive" = true
         LIMIT 1
       `;
       
@@ -330,7 +330,7 @@ export class CurrencyRepo {
     `;
     
     if (activeOnly) {
-      sql += ' WHERE "is_active" = true';
+      sql += ' WHERE "isActive" = true';
     }
     
     sql += ' ORDER BY "region_name" ASC';
@@ -440,8 +440,8 @@ export class CurrencyRepo {
           "region_code" = $1,
           "region_name" = $2,
           "currency_code" = $3,
-          "is_active" = $4,
-          "updated_at" = now()
+          "isActive" = $4,
+          "updatedAt" = now()
         WHERE "id" = $5
       `;
       
@@ -468,9 +468,9 @@ export class CurrencyRepo {
           "region_code",
           "region_name",
           "currency_code",
-          "is_active",
-          "created_at",
-          "updated_at"
+          "isActive",
+          "createdAt",
+          "updatedAt"
         ) VALUES ($1, $2, $3, $4, $5, $6, $7)
         RETURNING "id"
       `;

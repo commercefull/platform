@@ -74,7 +74,7 @@ export class ProductImageRepo {
    */
   async findById(id: string): Promise<ProductImage | null> {
     const selectFields = this.generateSelectFields();
-    return await queryOne<ProductImage>(`SELECT ${selectFields} FROM "public"."product_image" WHERE "id" = $1 AND "deleted_at" IS NULL`, [id]);
+    return await queryOne<ProductImage>(`SELECT ${selectFields} FROM "public"."product_image" WHERE "id" = $1 AND "deletedAt" IS NULL`, [id]);
   }
 
   /**
@@ -83,7 +83,7 @@ export class ProductImageRepo {
   async findByProductId(productId: string): Promise<ProductImage[]> {
     const selectFields = this.generateSelectFields();
     return await query<ProductImage[]>(
-      `SELECT ${selectFields} FROM "public"."product_image" WHERE "product_id" = $1 AND "deleted_at" IS NULL ORDER BY "position" ASC`, 
+      `SELECT ${selectFields} FROM "public"."product_image" WHERE "productId" = $1 AND "deletedAt" IS NULL ORDER BY "position" ASC`, 
       [productId]
     ) || [];
   }
@@ -94,7 +94,7 @@ export class ProductImageRepo {
   async findByVariantId(variantId: string): Promise<ProductImage[]> {
     const selectFields = this.generateSelectFields();
     return await query<ProductImage[]>(
-      `SELECT ${selectFields} FROM "public"."product_image" WHERE "variant_id" = $1 AND "deleted_at" IS NULL ORDER BY "position" ASC`, 
+      `SELECT ${selectFields} FROM "public"."product_image" WHERE "variant_id" = $1 AND "deletedAt" IS NULL ORDER BY "position" ASC`, 
       [variantId]
     ) || [];
   }
@@ -105,7 +105,7 @@ export class ProductImageRepo {
   async findPrimaryForProduct(productId: string): Promise<ProductImage | null> {
     const selectFields = this.generateSelectFields();
     return await queryOne<ProductImage>(
-      `SELECT ${selectFields} FROM "public"."product_image" WHERE "product_id" = $1 AND "is_primary" = true AND "deleted_at" IS NULL`, 
+      `SELECT ${selectFields} FROM "public"."product_image" WHERE "productId" = $1 AND "isPrimary" = true AND "deletedAt" IS NULL`, 
       [productId]
     );
   }
@@ -213,7 +213,7 @@ export class ProductImageRepo {
     const sql = `
       UPDATE "public"."product_image" 
       SET ${setStatements.join(', ')} 
-      WHERE "id" = $${values.length} AND "deleted_at" IS NULL 
+      WHERE "id" = $${values.length} AND "deletedAt" IS NULL 
       RETURNING ${returnFields}
     `;
     
@@ -236,7 +236,7 @@ export class ProductImageRepo {
   private async updateOtherImagesNonPrimary(currentImageId: string, productId: string): Promise<void> {
     const now = new Date();
     await query(
-      `UPDATE "public"."product_image" SET "is_primary" = false, "updated_at" = $1 WHERE "product_id" = $2 AND "id" != $3 AND "deleted_at" IS NULL`,
+      `UPDATE "public"."product_image" SET "isPrimary" = false, "updatedAt" = $1 WHERE "productId" = $2 AND "id" != $3 AND "deletedAt" IS NULL`,
       [now, productId, currentImageId]
     );
   }
@@ -249,8 +249,8 @@ export class ProductImageRepo {
     
     const sql = `
       UPDATE "public"."product_image" 
-      SET "deleted_at" = $1, "updated_at" = $1 
-      WHERE "id" = $2 AND "deleted_at" IS NULL
+      SET "deletedAt" = $1, "updatedAt" = $1 
+      WHERE "id" = $2 AND "deletedAt" IS NULL
     `;
     
     const result = await query(sql, [now, id]);
@@ -287,15 +287,15 @@ export class ProductImageRepo {
     
     // First, unset primary on all images for this product
     await query(
-      `UPDATE "public"."product_image" SET "is_primary" = false, "updated_at" = $1 WHERE "product_id" = $2 AND "deleted_at" IS NULL`,
+      `UPDATE "public"."product_image" SET "isPrimary" = false, "updatedAt" = $1 WHERE "productId" = $2 AND "deletedAt" IS NULL`,
       [now, image.productId]
     );
     
     // Then set this image as primary
     const sql = `
       UPDATE "public"."product_image" 
-      SET "is_primary" = true, "updated_at" = $1 
-      WHERE "id" = $2 AND "deleted_at" IS NULL 
+      SET "isPrimary" = true, "updatedAt" = $1 
+      WHERE "id" = $2 AND "deletedAt" IS NULL 
       RETURNING ${returnFields}
     `;
     
@@ -315,7 +315,7 @@ export class ProductImageRepo {
     
     // Create a transaction for reordering
     const queries = imageIds.map((id, index) => ({
-      sql: `UPDATE "public"."product_image" SET "position" = $1, "updated_at" = $2 WHERE "id" = $3 AND "product_id" = $4 AND "deleted_at" IS NULL`,
+      sql: `UPDATE "public"."product_image" SET "position" = $1, "updatedAt" = $2 WHERE "id" = $3 AND "productId" = $4 AND "deletedAt" IS NULL`,
       params: [index, now, id, productId]
     }));
     

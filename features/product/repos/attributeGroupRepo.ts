@@ -119,7 +119,7 @@ export class AttributeGroupRepo {
     });
 
     // Add updatedAt and id
-    updates.push(`"updated_at" = $${paramIndex++}`);
+    updates.push(`"updatedAt" = $${paramIndex++}`);
     values.push(unixTimestamp());
     values.push(id);
 

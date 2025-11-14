@@ -281,7 +281,7 @@ export class LoyaltyRepo {
     const params: any[] = [];
 
     if (!includeInactive) {
-      sql += ' WHERE "is_active" = true';
+      sql += ' WHERE "isActive" = true';
     }
 
     sql += ' ORDER BY "points_threshold" ASC';
@@ -304,7 +304,7 @@ export class LoyaltyRepo {
 
     const result = await queryOne<Record<string, any>>(
       `INSERT INTO "public"."loyalty_tier" 
-      ("name", "description", "type", "points_threshold", "multiplier", "benefits", "is_active", "created_at", "updated_at") 
+      ("name", "description", "type", "points_threshold", "multiplier", "benefits", "isActive", "createdAt", "updatedAt") 
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
       RETURNING *`,
       [name, description || null, type, pointsThreshold, multiplier, benefits || null, isActive, now, now]
@@ -340,7 +340,7 @@ export class LoyaltyRepo {
   // Customer Points Management
   async findCustomerPoints(customerId: string): Promise<LoyaltyPoints | null> {
     const result = await queryOne<Record<string, any>>(
-      'SELECT * FROM "public"."loyalty_points" WHERE "customer_id" = $1',
+      'SELECT * FROM "public"."loyalty_points" WHERE "customerId" = $1',
       [customerId]
     );
     return result ? transformLoyaltyPointsFromDb(result) : null;
@@ -356,7 +356,7 @@ export class LoyaltyRepo {
 
     const result = await queryOne<Record<string, any>>(
       `INSERT INTO "public"."loyalty_points" 
-      ("customer_id", "tier_id", "current_points", "lifetime_points", "last_activity", "created_at", "updated_at") 
+      ("customerId", "tier_id", "current_points", "lifetime_points", "last_activity", "createdAt", "updatedAt") 
       VALUES ($1, $2, $3, $4, $5, $6, $7) 
       RETURNING *`,
       [customerId, tierId, 0, 0, now, now, now]
@@ -409,8 +409,8 @@ export class LoyaltyRepo {
     // Update customer points
     const result = await queryOne<Record<string, any>>(
       `UPDATE "public"."loyalty_points" 
-      SET "current_points" = $1, "lifetime_points" = $2, "last_activity" = $3, "tier_id" = $4, "updated_at" = $5
-      WHERE "customer_id" = $6 
+      SET "current_points" = $1, "lifetime_points" = $2, "last_activity" = $3, "tier_id" = $4, "updatedAt" = $5
+      WHERE "customerId" = $6 
       RETURNING *`,
       [newCurrentPoints, newLifetimePoints, now, newTierId, now, customerId]
     );
@@ -444,7 +444,7 @@ export class LoyaltyRepo {
 
     const result = await queryOne<Record<string, any>>(
       `INSERT INTO "public"."loyalty_transaction" 
-      ("customer_id", "order_id", "action", "points", "description", "reference_id", "created_at") 
+      ("customerId", "orderId", "action", "points", "description", "reference_id", "createdAt") 
       VALUES ($1, $2, $3, $4, $5, $6, $7) 
       RETURNING *`,
       [customerId, orderId || null, action, points, description || null, referenceId || null, now]
@@ -459,7 +459,7 @@ export class LoyaltyRepo {
 
   async getCustomerTransactions(customerId: string, limit: number = 50, offset: number = 0): Promise<LoyaltyTransaction[]> {
     const results = await query<Record<string, any>[]>(
-      'SELECT * FROM "public"."loyalty_transaction" WHERE "customer_id" = $1 ORDER BY "created_at" DESC LIMIT $2 OFFSET $3',
+      'SELECT * FROM "public"."loyalty_transaction" WHERE "customerId" = $1 ORDER BY "createdAt" DESC LIMIT $2 OFFSET $3',
       [customerId, limit.toString(), offset.toString()]
     );
     return results ? results.map(transformLoyaltyTransactionFromDb) : [];
@@ -479,7 +479,7 @@ export class LoyaltyRepo {
     const params: any[] = [];
 
     if (!includeInactive) {
-      sql += ' WHERE "is_active" = true';
+      sql += ' WHERE "isActive" = true';
     }
 
     sql += ' ORDER BY "points_cost" ASC';
@@ -505,8 +505,8 @@ export class LoyaltyRepo {
 
     const result = await queryOne<Record<string, any>>(
       `INSERT INTO "public"."loyalty_reward" 
-      ("name", "description", "points_cost", "discount_amount", "discount_percent", 
-       "discount_code", "free_shipping", "product_ids", "expires_at", "is_active", "created_at", "updated_at") 
+      ("name", "description", "points_cost", "discountAmount", "discount_percent", 
+       "discount_code", "free_shipping", "product_ids", "expiresAt", "isActive", "createdAt", "updatedAt") 
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) 
       RETURNING *`,
       [
@@ -600,7 +600,7 @@ export class LoyaltyRepo {
       // Create redemption record
       const result = await queryOne<Record<string, any>>(
         `INSERT INTO "public"."loyalty_redemption" 
-        ("customer_id", "reward_id", "points_spent", "redemption_code", "status", "expires_at", "created_at") 
+        ("customerId", "reward_id", "points_spent", "redemption_code", "status", "expiresAt", "createdAt") 
         VALUES ($1, $2, $3, $4, $5, $6, $7) 
         RETURNING *`,
         [customerId, rewardId, reward.pointsCost, redemptionCode, 'pending', expiresAt, now]
@@ -620,7 +620,7 @@ export class LoyaltyRepo {
   }
 
   async getCustomerRedemptions(customerId: string, status?: string): Promise<LoyaltyRedemption[]> {
-    let sql = 'SELECT * FROM "public"."loyalty_redemption" WHERE "customer_id" = $1';
+    let sql = 'SELECT * FROM "public"."loyalty_redemption" WHERE "customerId" = $1';
     const params: any[] = [customerId];
 
     if (status) {
@@ -628,7 +628,7 @@ export class LoyaltyRepo {
       params.push(status);
     }
 
-    sql += ' ORDER BY "created_at" DESC';
+    sql += ' ORDER BY "createdAt" DESC';
 
     const results = await query<Record<string, any>[]>(sql, params);
     return results ? results.map(transformLoyaltyRedemptionFromDb) : [];
@@ -662,7 +662,7 @@ export class LoyaltyRepo {
     
     // Apply tier multiplier if customer has a loyalty profile
     const orderDetails = await queryOne<Record<string, any>>(
-      'SELECT "customer_id" FROM "public"."order" WHERE "id" = $1',
+      'SELECT "customerId" FROM "public"."order" WHERE "id" = $1',
       [orderId]
     );
     

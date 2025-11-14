@@ -173,7 +173,7 @@ function transformUserMembershipFromDb(dbRecord: Record<string, any>): UserMembe
     membershipType: dbRecord.membership_type,
     lastRenewalDate: dbRecord.last_renewal_date || undefined,
     nextRenewalDate: dbRecord.next_renewal_date || undefined,
-    paymentMethod: dbRecord.payment_method || undefined,
+    paymentMethod: dbRecord.paymentMethod || undefined,
     createdAt: dbRecord.created_at,
     updatedAt: dbRecord.updated_at
   };
@@ -194,7 +194,7 @@ export class MembershipRepo {
     const params: any[] = [];
 
     if (!includeInactive) {
-      sql += ' WHERE "is_active" = true';
+      sql += ' WHERE "isActive" = true';
     }
 
     sql += ' ORDER BY "level" ASC';
@@ -216,7 +216,7 @@ export class MembershipRepo {
 
     const result = await queryOne<Record<string, any>>(
       `INSERT INTO "public"."membership_tier" 
-      ("name", "description", "monthly_price", "annual_price", "level", "is_active", "created_at", "updated_at") 
+      ("name", "description", "monthly_price", "annual_price", "level", "isActive", "createdAt", "updatedAt") 
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
       RETURNING *`,
       [name, description, monthlyPrice, annualPrice, level, isActive, now, now]
@@ -291,7 +291,7 @@ export class MembershipRepo {
 
   async findBenefitsByTierId(tierId: string): Promise<MembershipBenefit[]> {
     const results = await query<Record<string, any>[]>(
-      'SELECT * FROM "public"."membership_benefit" WHERE $1 = ANY("tier_ids") AND "is_active" = true',
+      'SELECT * FROM "public"."membership_benefit" WHERE $1 = ANY("tier_ids") AND "isActive" = true',
       [tierId]
     );
     return results ? results.map(transformMembershipBenefitFromDb) : [];
@@ -302,7 +302,7 @@ export class MembershipRepo {
     const params: any[] = [];
 
     if (!includeInactive) {
-      sql += ' WHERE "is_active" = true';
+      sql += ' WHERE "isActive" = true';
     }
 
     const results = await query<Record<string, any>[]>(sql, params);
@@ -323,7 +323,7 @@ export class MembershipRepo {
 
     const result = await queryOne<Record<string, any>>(
       `INSERT INTO "public"."membership_benefit" 
-      ("tier_ids", "name", "description", "benefit_type", "discount_percentage", "discount_amount", "is_active", "created_at", "updated_at") 
+      ("tier_ids", "name", "description", "benefit_type", "discount_percentage", "discountAmount", "isActive", "createdAt", "updatedAt") 
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
       RETURNING *`,
       [tierIds, name, description, benefitType, discountPercentage, discountAmount, isActive, now, now]
@@ -419,7 +419,7 @@ export class MembershipRepo {
 
   async findMembershipByUserId(userId: string): Promise<UserMembership | null> {
     const result = await queryOne<Record<string, any>>(
-      'SELECT * FROM "public"."user_membership" WHERE "user_id" = $1 AND "is_active" = true',
+      'SELECT * FROM "public"."user_membership" WHERE "userId" = $1 AND "isActive" = true',
       [userId]
     );
     return result ? transformUserMembershipFromDb(result) : null;
@@ -469,7 +469,7 @@ export class MembershipRepo {
       let paramIndex = 1;
 
       if (filter.isActive !== undefined) {
-        conditions.push(`"is_active" = $${paramIndex++}`);
+        conditions.push(`"isActive" = $${paramIndex++}`);
         params.push(filter.isActive);
       }
 
@@ -483,7 +483,7 @@ export class MembershipRepo {
       }
     }
 
-    sql += ' ORDER BY "created_at" DESC';
+    sql += ' ORDER BY "createdAt" DESC';
     sql += ` LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
     params.push(limit.toString(), offset.toString());
 
@@ -508,8 +508,8 @@ export class MembershipRepo {
 
     const result = await queryOne<Record<string, any>>(
       `INSERT INTO "public"."user_membership" 
-      ("user_id", "tier_id", "start_date", "end_date", "is_active", "auto_renew", 
-      "membership_type", "last_renewal_date", "next_renewal_date", "payment_method", "created_at", "updated_at") 
+      ("userId", "tier_id", "start_date", "end_date", "isActive", "auto_renew", 
+      "membership_type", "last_renewal_date", "next_renewal_date", "payment_method", "createdAt", "updatedAt") 
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) 
       RETURNING *`,
       [
@@ -577,7 +577,7 @@ export class MembershipRepo {
 
     const result = await queryOne<Record<string, any>>(
       `UPDATE "public"."user_membership" 
-      SET "is_active" = false, "auto_renew" = false, "updated_at" = $1
+      SET "isActive" = false, "auto_renew" = false, "updatedAt" = $1
       WHERE "id" = $2 
       RETURNING *`,
       [now, id]

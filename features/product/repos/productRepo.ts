@@ -186,7 +186,7 @@ export class ProductRepo {
     ).join(', ');
     
     return await queryOne<Product>(
-      `SELECT ${selectFields} FROM "public"."product" WHERE "id" = $1 AND "deleted_at" IS NULL`, 
+      `SELECT ${selectFields} FROM "public"."product" WHERE "id" = $1 AND "deletedAt" IS NULL`, 
       [id]
     );
   }
@@ -200,7 +200,7 @@ export class ProductRepo {
     ).join(', ');
     
     return await queryOne<Product>(
-      `SELECT ${selectFields} FROM "public"."product" WHERE "slug" = $1 AND "deleted_at" IS NULL`, 
+      `SELECT ${selectFields} FROM "public"."product" WHERE "slug" = $1 AND "deletedAt" IS NULL`, 
       [slug]
     );
   }
@@ -214,7 +214,7 @@ export class ProductRepo {
     ).join(', ');
     
     return await queryOne<Product>(
-      `SELECT ${selectFields} FROM "public"."product" WHERE "sku" = $1 AND "deleted_at" IS NULL`, 
+      `SELECT ${selectFields} FROM "public"."product" WHERE "sku" = $1 AND "deletedAt" IS NULL`, 
       [sku]
     );
   }
@@ -253,7 +253,7 @@ export class ProductRepo {
       return `"${dbField}" AS "${field}"`;
     }).join(', ');
 
-    let sql = `SELECT ${selectFields} FROM "public"."product" WHERE "deleted_at" IS NULL`;
+    let sql = `SELECT ${selectFields} FROM "public"."product" WHERE "deletedAt" IS NULL`;
     const params: any[] = [];
     
     // Apply filters if provided
@@ -308,7 +308,7 @@ export class ProductRepo {
     }
     
     if (merchantId) {
-      sql += ` AND "merchant_id" = $${params.length + 1}`;
+      sql += ` AND "merchantId" = $${params.length + 1}`;
       params.push(merchantId);
     }
     
@@ -349,7 +349,7 @@ export class ProductRepo {
       searchTerm
     } = options;
 
-    let sql = 'SELECT COUNT(*) as count FROM "public"."product" WHERE "deleted_at" IS NULL';
+    let sql = 'SELECT COUNT(*) as count FROM "public"."product" WHERE "deletedAt" IS NULL';
     const params: any[] = [];
     
     // Apply filters if provided (same logic as in findAll)
@@ -404,7 +404,7 @@ export class ProductRepo {
     }
     
     if (merchantId) {
-      sql += ` AND "merchant_id" = $${params.length + 1}`;
+      sql += ` AND "merchantId" = $${params.length + 1}`;
       params.push(merchantId);
     }
     
@@ -616,8 +616,8 @@ export class ProductRepo {
     
     const sql = `
       UPDATE "public"."product"
-      SET "deleted_at" = $2, "status" = $3
-      WHERE "id" = $1 AND "deleted_at" IS NULL
+      SET "deletedAt" = $2, "status" = $3
+      WHERE "id" = $1 AND "deletedAt" IS NULL
     `;
     
     const result = await query(sql, [id, now, ProductStatus.ARCHIVED]);
@@ -709,7 +709,7 @@ export class ProductRepo {
     const sql = `
       SELECT ${selectFields}
       FROM "public"."product"
-      WHERE "category_id" = $1 AND "id" != $2 AND "deleted_at" IS NULL
+      WHERE "category_id" = $1 AND "id" != $2 AND "deletedAt" IS NULL
       AND "status" = $3 AND "visibility" = $4
       ORDER BY "is_featured" DESC, RANDOM()
       LIMIT $5

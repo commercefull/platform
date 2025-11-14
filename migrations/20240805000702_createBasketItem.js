@@ -9,8 +9,8 @@ exports.up = function (knex) {
       t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
       t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
       t.uuid('basketId').notNullable().references('basketId').inTable('basket').onDelete('CASCADE');
-      t.uuid('productId').notNullable().references('productId').inTable('product').onDelete('CASCADE');
-      t.uuid('productVariantId').references('productVariantId').inTable('productVariant').onDelete('CASCADE');
+      t.uuid('productId').notNullable();
+      t.uuid('productVariantId');
       t.string('sku', 100).notNullable();
       t.string('name', 255).notNullable();
       t.integer('quantity').notNullable().defaultTo(1);

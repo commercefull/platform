@@ -134,7 +134,7 @@ export class CustomerPriceRepo {
       SELECT ${selectFields}
       FROM "public"."customer_price_list"
       WHERE ${whereClause}
-      ORDER BY "priority" DESC, "created_at" ASC
+      ORDER BY "priority" DESC, "createdAt" ASC
     `;
     
     return await query<CustomerPriceList[]>(sql, params) || [];
@@ -197,7 +197,7 @@ export class CustomerPriceRepo {
     const setStatements: string[] = [];
     const values: any[] = [id, now];
     
-    setStatements.push(`"updated_at" = $2`);
+    setStatements.push(`"updatedAt" = $2`);
     
     // Process each field from the input data
     let placeholderIndex = 3;
@@ -279,7 +279,7 @@ export class CustomerPriceRepo {
   ): Promise<CustomerPrice[]> {
     const selectFields = this.generateCustomerPriceSelectFields();
     
-    const conditions = [`"product_id" = $1`];
+    const conditions = [`"productId" = $1`];
     const params: any[] = [productId];
     
     if (variantId) {
@@ -361,7 +361,7 @@ export class CustomerPriceRepo {
     const setStatements: string[] = [];
     const values: any[] = [id, now];
     
-    setStatements.push(`"updated_at" = $2`);
+    setStatements.push(`"updatedAt" = $2`);
     
     // Process each field from the input data
     let placeholderIndex = 3;

@@ -130,7 +130,7 @@ export class TaxQueryRepo {
       SELECT tr.*
       FROM "public"."tax_rate" tr
       JOIN "public"."tax_zone" tz ON tr."tax_zone_id" = tz."id"
-      WHERE tr."is_active" = $1
+      WHERE tr."isActive" = $1
     `;
     
     if (country) {
@@ -161,7 +161,7 @@ export class TaxQueryRepo {
        FROM "public"."tax_rate" 
        WHERE "tax_category_id" = $1 
        AND "tax_zone_id" = $2 
-       AND "is_active" = $3
+       AND "isActive" = $3
        ORDER BY "priority" DESC, "rate" ASC`,
       [categoryId, zoneId, status]
     );
@@ -196,8 +196,8 @@ export class TaxQueryRepo {
     const results = await query<any[]>(
       `SELECT * 
        FROM "public"."tax_zone" 
-       WHERE "is_active" = $1
-       ORDER BY "is_default" DESC, "name" ASC
+       WHERE "isActive" = $1
+       ORDER BY "isDefault" DESC, "name" ASC
        LIMIT $2 OFFSET $3`,
       [status, limit, offset]
     );
@@ -213,7 +213,7 @@ export class TaxQueryRepo {
   ): Promise<TaxZone | null> {
     let sql = `
       SELECT * FROM "public"."tax_zone"
-      WHERE "is_active" = true
+      WHERE "isActive" = true
       AND $1 = ANY("countries")
     `;
     
@@ -255,7 +255,7 @@ export class TaxQueryRepo {
       (CASE WHEN $2 = ANY("states") THEN 5 ELSE 0 END) +
       (CASE WHEN $3 = ANY("postcodes") THEN 3 ELSE 0 END) +
       (CASE WHEN $4 = ANY("cities") THEN 2 ELSE 0 END) DESC,
-      "is_default" DESC
+      "isDefault" DESC
       LIMIT 1`;
     
     const result = await queryOne<any>(sql, params);
@@ -289,7 +289,7 @@ export class TaxQueryRepo {
     const results = await query<any[]>(
       `SELECT * 
        FROM "public"."tax_category" 
-       WHERE "is_active" = $1
+       WHERE "isActive" = $1
        ORDER BY "sort_order" ASC, "name" ASC
        LIMIT $2 OFFSET $3`,
       [status, limit, offset]
@@ -302,7 +302,7 @@ export class TaxQueryRepo {
     const result = await queryOne<any>(
       `SELECT * 
        FROM "public"."tax_category" 
-       WHERE "is_default" = true AND "is_active" = true
+       WHERE "isDefault" = true AND "isActive" = true
        LIMIT 1`
     );
     
@@ -317,7 +317,7 @@ export class TaxQueryRepo {
     const results = await query<any[]>(
       `SELECT * 
        FROM "public"."customer_tax_exemption" 
-       WHERE "customer_id" = $1 
+       WHERE "customerId" = $1 
        AND "status" = $2
        AND ("expiry_date" IS NULL OR "expiry_date" > CURRENT_TIMESTAMP)
        ORDER BY "tax_category_id", "start_date" DESC`,
@@ -345,7 +345,7 @@ export class TaxQueryRepo {
     const results = await query<any[]>(
       `SELECT * 
        FROM "public"."customer_tax_exemption" 
-       WHERE "customer_id" = $1 
+       WHERE "customerId" = $1 
        AND "tax_category_id" = $2
        AND "status" = $3
        AND ("expiry_date" IS NULL OR "expiry_date" > CURRENT_TIMESTAMP)

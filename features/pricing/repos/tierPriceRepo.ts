@@ -66,7 +66,7 @@ export class TierPriceRepo {
     const selectFields = this.generateSelectFields();
     const now = new Date();
     
-    const conditions = [`"product_id" = $1`];
+    const conditions = [`"productId" = $1`];
     const params: any[] = [productId];
     
     if (variantId) {
@@ -113,7 +113,7 @@ export class TierPriceRepo {
     const now = new Date();
     
     const conditions = [
-      `"product_id" = $1`,
+      `"productId" = $1`,
       `"quantity_min" <= $2`,
       `("quantity_max" IS NULL OR "quantity_max" >= $2)`
     ];
@@ -209,7 +209,7 @@ export class TierPriceRepo {
     const setStatements: string[] = [];
     const values: any[] = [id, now];
     
-    setStatements.push(`"updated_at" = $2`);
+    setStatements.push(`"updatedAt" = $2`);
     
     // Process each field from the input data
     let placeholderIndex = 3;
@@ -257,7 +257,7 @@ export class TierPriceRepo {
    * Delete all tier prices for a product
    */
   async deleteForProduct(productId: string, variantId?: string): Promise<boolean> {
-    let sql = `DELETE FROM "public"."tier_price" WHERE "product_id" = $1`;
+    let sql = `DELETE FROM "public"."tier_price" WHERE "productId" = $1`;
     const params: any[] = [productId];
     
     if (variantId) {
@@ -290,7 +290,7 @@ export class TierPriceRepo {
     
     if (productId) {
       params.push(productId);
-      conditions.push(`"product_id" = $${params.length}`);
+      conditions.push(`"productId" = $${params.length}`);
     }
     
     if (variantId) {
@@ -316,7 +316,7 @@ export class TierPriceRepo {
       SELECT ${selectFields}
       FROM "public"."tier_price"
       ${whereClause}
-      ORDER BY "quantity_min" ASC, "created_at" DESC
+      ORDER BY "quantity_min" ASC, "createdAt" DESC
       LIMIT $${params.length - 1} OFFSET $${params.length}
     `;
     

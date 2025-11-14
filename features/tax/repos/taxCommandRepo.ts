@@ -162,8 +162,8 @@ export class TaxCommandRepo {
         "id", "tax_category_id", "tax_zone_id", "name", "description",
         "rate", "type", "priority", "is_compound", "include_in_price",
         "is_shipping_taxable", "fixed_amount", "minimum_amount", "maximum_amount",
-        "threshold", "start_date", "end_date", "is_active", "metadata",
-        "created_at", "updated_at"
+        "threshold", "start_date", "end_date", "isActive", "metadata",
+        "createdAt", "updatedAt"
       ) VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, 
         $15, $16, $17, $18, $19, $20, $21
@@ -294,7 +294,7 @@ export class TaxCommandRepo {
     }
     
     if (dbTaxRate.is_active !== undefined) {
-      sets.push(`"is_active" = $${paramIndex++}`);
+      sets.push(`"isActive" = $${paramIndex++}`);
       params.push(dbTaxRate.is_active);
     }
     
@@ -304,7 +304,7 @@ export class TaxCommandRepo {
     }
     
     // Always update the updatedAt timestamp
-    sets.push(`"updated_at" = $${paramIndex++}`);
+    sets.push(`"updatedAt" = $${paramIndex++}`);
     params.push(now);
     
     if (sets.length === 0) {
@@ -346,8 +346,8 @@ export class TaxCommandRepo {
     
     const result = await queryOne<any>(
       `INSERT INTO "public"."tax_category" (
-        "id", "name", "code", "description", "is_default", "sort_order",
-        "is_active", "metadata", "created_at", "updated_at"
+        "id", "name", "code", "description", "isDefault", "sort_order",
+        "isActive", "metadata", "createdAt", "updatedAt"
       ) VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
       ) RETURNING *`,
@@ -400,7 +400,7 @@ export class TaxCommandRepo {
     }
     
     if (dbCategory.is_default !== undefined) {
-      sets.push(`"is_default" = $${paramIndex++}`);
+      sets.push(`"isDefault" = $${paramIndex++}`);
       params.push(dbCategory.is_default);
     }
     
@@ -410,7 +410,7 @@ export class TaxCommandRepo {
     }
     
     if (dbCategory.is_active !== undefined) {
-      sets.push(`"is_active" = $${paramIndex++}`);
+      sets.push(`"isActive" = $${paramIndex++}`);
       params.push(dbCategory.is_active);
     }
     
@@ -420,7 +420,7 @@ export class TaxCommandRepo {
     }
     
     // Always update the updatedAt timestamp
-    sets.push(`"updated_at" = $${paramIndex++}`);
+    sets.push(`"updatedAt" = $${paramIndex++}`);
     params.push(now);
     
     if (sets.length === 0) {
@@ -460,8 +460,8 @@ export class TaxCommandRepo {
     
     const result = await queryOne<any>(
       `INSERT INTO "public"."tax_zone" (
-        "id", "name", "code", "description", "is_default", "countries", "states", 
-        "postcodes", "cities", "is_active", "metadata", "created_at", "updated_at"
+        "id", "name", "code", "description", "isDefault", "countries", "states", 
+        "postcodes", "cities", "isActive", "metadata", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *`,
       [
         id, 
@@ -515,7 +515,7 @@ export class TaxCommandRepo {
     }
     
     if (dbTaxZone.is_default !== undefined) {
-      sets.push(`"is_default" = $${paramIndex++}`);
+      sets.push(`"isDefault" = $${paramIndex++}`);
       params.push(dbTaxZone.is_default);
     }
     
@@ -540,7 +540,7 @@ export class TaxCommandRepo {
     }
     
     if (dbTaxZone.is_active !== undefined) {
-      sets.push(`"is_active" = $${paramIndex++}`);
+      sets.push(`"isActive" = $${paramIndex++}`);
       params.push(dbTaxZone.is_active);
     }
     
@@ -550,7 +550,7 @@ export class TaxCommandRepo {
     }
     
     // Always update the updatedAt timestamp
-    sets.push(`"updated_at" = $${paramIndex++}`);
+    sets.push(`"updatedAt" = $${paramIndex++}`);
     params.push(now);
     
     if (sets.length === 0) {
@@ -590,10 +590,10 @@ export class TaxCommandRepo {
     
     const result = await queryOne<any>(
       `INSERT INTO "public"."customer_tax_exemption" (
-        "id", "customer_id", "tax_category_id", "exemption_type", "status", 
+        "id", "customerId", "tax_category_id", "exemption_type", "status", 
         "exemption_number", "issuing_authority", "document_url", 
-        "start_date", "expiry_date", "is_verified", "verified_by", 
-        "verified_at", "notes", "metadata", "created_at", "updated_at"
+        "start_date", "expiry_date", "isVerified", "verified_by", 
+        "verified_at", "notes", "metadata", "createdAt", "updatedAt"
       ) VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17
       ) RETURNING *`,
@@ -681,7 +681,7 @@ export class TaxCommandRepo {
     }
     
     if (dbExemption.is_verified !== undefined) {
-      sets.push(`"is_verified" = $${paramIndex++}`);
+      sets.push(`"isVerified" = $${paramIndex++}`);
       params.push(dbExemption.is_verified);
     }
     
@@ -706,7 +706,7 @@ export class TaxCommandRepo {
     }
     
     // Always update the updatedAt timestamp
-    sets.push(`"updated_at" = $${paramIndex++}`);
+    sets.push(`"updatedAt" = $${paramIndex++}`);
     params.push(now);
     
     if (sets.length === 0) {
@@ -746,12 +746,12 @@ export class TaxCommandRepo {
     
     const result = await queryOne<any>(
       `INSERT INTO "public"."tax_settings" (
-        "id", "merchant_id", "calculation_method", "prices_include_tax", 
+        "id", "merchantId", "calculation_method", "prices_include_tax", 
         "display_prices_with_tax", "tax_based_on", "shipping_tax_class", 
         "display_tax_totals", "apply_tax_to_shipping", "apply_discount_before_tax", 
         "round_tax_at_subtotal", "tax_decimal_places", "default_tax_category", 
         "default_tax_zone", "tax_provider", "tax_provider_settings", 
-        "metadata", "created_at", "updated_at"
+        "metadata", "createdAt", "updatedAt"
       ) VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19
       ) RETURNING *`,
@@ -873,7 +873,7 @@ export class TaxCommandRepo {
     }
     
     // Always update the updatedAt timestamp
-    sets.push(`"updated_at" = $${paramIndex++}`);
+    sets.push(`"updatedAt" = $${paramIndex++}`);
     params.push(now);
     
     if (sets.length === 0) {

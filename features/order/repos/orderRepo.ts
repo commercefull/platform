@@ -244,7 +244,7 @@ export class OrderRepo {
 
     const sql = `SELECT ${selectFields}
                 FROM "public"."order"
-                WHERE "id" = $1 AND "deleted_at" IS NULL`;
+                WHERE "id" = $1 AND "deletedAt" IS NULL`;
     
     return await queryOne<Order>(sql, [id]);
   }
@@ -257,7 +257,7 @@ export class OrderRepo {
 
     const sql = `SELECT ${selectFields}
                 FROM "public"."order"
-                WHERE "order_number" = $1 AND "deleted_at" IS NULL`;
+                WHERE "order_number" = $1 AND "deletedAt" IS NULL`;
     
     return await queryOne<Order>(sql, [orderNumber]);
   }
@@ -270,8 +270,8 @@ export class OrderRepo {
 
     const sql = `SELECT ${selectFields}
                 FROM "public"."order"
-                WHERE "customer_id" = $1 AND "deleted_at" IS NULL
-                ORDER BY "created_at" DESC
+                WHERE "customerId" = $1 AND "deletedAt" IS NULL
+                ORDER BY "createdAt" DESC
                 LIMIT $2 OFFSET $3`;
     
     return (await query<Order[]>(sql, [customerId, limit, offset])) || [];
@@ -285,8 +285,8 @@ export class OrderRepo {
 
     const sql = `SELECT ${selectFields}
                 FROM "public"."order"
-                WHERE "deleted_at" IS NULL
-                ORDER BY "created_at" DESC
+                WHERE "deletedAt" IS NULL
+                ORDER BY "createdAt" DESC
                 LIMIT $1 OFFSET $2`;
     
     return (await query<Order[]>(sql, [limit, offset])) || [];
@@ -300,8 +300,8 @@ export class OrderRepo {
 
     const sql = `SELECT ${selectFields}
                 FROM "public"."order"
-                WHERE "status" = $1 AND "deleted_at" IS NULL
-                ORDER BY "created_at" DESC
+                WHERE "status" = $1 AND "deletedAt" IS NULL
+                ORDER BY "createdAt" DESC
                 LIMIT $2 OFFSET $3`;
     
     return (await query<Order[]>(sql, [status, limit, offset])) || [];
@@ -315,8 +315,8 @@ export class OrderRepo {
 
     const sql = `SELECT ${selectFields}
                 FROM "public"."order"
-                WHERE "payment_status" = $1 AND "deleted_at" IS NULL
-                ORDER BY "created_at" DESC
+                WHERE "payment_status" = $1 AND "deletedAt" IS NULL
+                ORDER BY "createdAt" DESC
                 LIMIT $2 OFFSET $3`;
     
     return (await query<Order[]>(sql, [paymentStatus, limit, offset])) || [];
@@ -330,8 +330,8 @@ export class OrderRepo {
 
     const sql = `SELECT ${selectFields}
                 FROM "public"."order"
-                WHERE "fulfillment_status" = $1 AND "deleted_at" IS NULL
-                ORDER BY "created_at" DESC
+                WHERE "fulfillment_status" = $1 AND "deletedAt" IS NULL
+                ORDER BY "createdAt" DESC
                 LIMIT $2 OFFSET $3`;
     
     return (await query<Order[]>(sql, [fulfillmentStatus, limit, offset])) || [];
@@ -345,8 +345,8 @@ export class OrderRepo {
 
     const sql = `SELECT ${selectFields}
                 FROM "public"."order"
-                WHERE "created_at" >= $1 AND "created_at" <= $2 AND "deleted_at" IS NULL
-                ORDER BY "created_at" DESC
+                WHERE "createdAt" >= $1 AND "createdAt" <= $2 AND "deletedAt" IS NULL
+                ORDER BY "createdAt" DESC
                 LIMIT $3 OFFSET $4`;
     
     return (await query<Order[]>(sql, [startDate, endDate, limit, offset])) || [];
@@ -357,7 +357,7 @@ export class OrderRepo {
    */
   async count(): Promise<number> {
     const result = await queryOne<{count: string}>(`
-      SELECT COUNT(*) as count FROM "public"."order" WHERE "deleted_at" IS NULL
+      SELECT COUNT(*) as count FROM "public"."order" WHERE "deletedAt" IS NULL
     `);
     
     return result ? parseInt(result.count) : 0;
@@ -370,7 +370,7 @@ export class OrderRepo {
     const result = await queryOne<{count: string}>(`
       SELECT COUNT(*) as count 
       FROM "public"."order" 
-      WHERE "customer_id" = $1 AND "deleted_at" IS NULL
+      WHERE "customerId" = $1 AND "deletedAt" IS NULL
     `, [customerId]);
     
     return result ? parseInt(result.count) : 0;
@@ -383,7 +383,7 @@ export class OrderRepo {
     const result = await queryOne<{count: string}>(`
       SELECT COUNT(*) as count 
       FROM "public"."order" 
-      WHERE "status" = $1 AND "deleted_at" IS NULL
+      WHERE "status" = $1 AND "deletedAt" IS NULL
     `, [status]);
     
     return result ? parseInt(result.count) : 0;
@@ -400,7 +400,7 @@ export class OrderRepo {
 
     const sql = `SELECT ${selectFields}
                 FROM "public"."order_item"
-                WHERE "order_id" = $1 AND "deleted_at" IS NULL
+                WHERE "orderId" = $1 AND "deletedAt" IS NULL
                 ORDER BY "id"`;
     
     return (await query<OrderItem[]>(sql, [orderId])) || [];
@@ -431,7 +431,7 @@ export class OrderRepo {
     }
     
     // Add created_at and updated_at
-    fields.push('"created_at"', '"updated_at"');
+    fields.push('"createdAt"', '"updatedAt"');
     placeholders.push(`$${paramIndex}`, `$${paramIndex + 1}`);
     values.push(now, now);
     
@@ -481,7 +481,7 @@ export class OrderRepo {
     }
     
     // Add updated_at
-    updateParts.push(`"updated_at" = $${paramIndex}`);
+    updateParts.push(`"updatedAt" = $${paramIndex}`);
     values.push(now);
     paramIndex++;
     
@@ -492,7 +492,7 @@ export class OrderRepo {
     const sql = `
       UPDATE "public"."order"
       SET ${updateParts.join(', ')}
-      WHERE "id" = $${paramIndex - 1} AND "deleted_at" IS NULL
+      WHERE "id" = $${paramIndex - 1} AND "deletedAt" IS NULL
       RETURNING *
     `;
     
@@ -515,8 +515,8 @@ export class OrderRepo {
     // Update the order status
     const dbResult = await queryOne(
       `UPDATE "public"."order"
-       SET "status" = $1, "updated_at" = $2
-       WHERE "id" = $3 AND "deleted_at" IS NULL
+       SET "status" = $1, "updatedAt" = $2
+       WHERE "id" = $3 AND "deletedAt" IS NULL
        RETURNING *`,
       [status, now, id]
     );
@@ -528,7 +528,7 @@ export class OrderRepo {
     // Record the status change in the history table
     await query(
       `INSERT INTO "public"."order_status_history" 
-       ("order_id", "status", "created_at")
+       ("orderId", "status", "createdAt")
        VALUES ($1, $2, $3)`,
       [id, status, now]
     );
@@ -545,8 +545,8 @@ export class OrderRepo {
     // Update the payment status
     const dbResult = await queryOne(
       `UPDATE "public"."order"
-       SET "payment_status" = $1, "updated_at" = $2
-       WHERE "id" = $3 AND "deleted_at" IS NULL
+       SET "payment_status" = $1, "updatedAt" = $2
+       WHERE "id" = $3 AND "deletedAt" IS NULL
        RETURNING *`,
       [paymentStatus, now, id]
     );
@@ -558,7 +558,7 @@ export class OrderRepo {
     // Record the payment status change in the history table
     await query(
       `INSERT INTO "public"."order_payment_history" 
-       ("order_id", "payment_status", "created_at")
+       ("orderId", "payment_status", "createdAt")
        VALUES ($1, $2, $3)`,
       [id, paymentStatus, now]
     );
@@ -575,8 +575,8 @@ export class OrderRepo {
     // Update the fulfillment status
     const dbResult = await queryOne(
       `UPDATE "public"."order"
-       SET "fulfillment_status" = $1, "updated_at" = $2
-       WHERE "id" = $3 AND "deleted_at" IS NULL
+       SET "fulfillment_status" = $1, "updatedAt" = $2
+       WHERE "id" = $3 AND "deletedAt" IS NULL
        RETURNING *`,
       [fulfillmentStatus, now, id]
     );
@@ -588,7 +588,7 @@ export class OrderRepo {
     // Record the fulfillment status change in the history table
     await query(
       `INSERT INTO "public"."order_fulfillment_history" 
-       ("order_id", "fulfillment_status", "created_at")
+       ("orderId", "fulfillment_status", "createdAt")
        VALUES ($1, $2, $3)`,
       [id, fulfillmentStatus, now]
     );
@@ -604,8 +604,8 @@ export class OrderRepo {
     
     const result = await query(
       `UPDATE "public"."order"
-       SET "deleted_at" = $1, "updated_at" = $1
-       WHERE "id" = $2 AND "deleted_at" IS NULL`,
+       SET "deletedAt" = $1, "updatedAt" = $1
+       WHERE "id" = $2 AND "deletedAt" IS NULL`,
       [now, id]
     );
     

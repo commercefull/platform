@@ -253,7 +253,7 @@ export class DistributionRepo {
   }
 
   async findActiveDistributionCenters(): Promise<DistributionCenter[]> {
-    const centers = await query<any[]>('SELECT * FROM "public"."distribution_center" WHERE "is_active" = true ORDER BY "name" ASC');
+    const centers = await query<any[]>('SELECT * FROM "public"."distribution_center" WHERE "isActive" = true ORDER BY "name" ASC');
     return transformArrayDbToTs<DistributionCenter>(centers || [], distributionCenterFields);
   }
 
@@ -261,7 +261,7 @@ export class DistributionRepo {
     const now = new Date();
     const result = await queryOne<any>(
       `INSERT INTO "public"."distribution_center" 
-      ("name", "code", "address", "city", "state", "postal_code", "country", "contact_phone", "contact_email", "is_active", "capacity", "created_at", "updated_at") 
+      ("name", "code", "address", "city", "state", "postalCode", "country", "contact_phone", "contact_email", "isActive", "capacity", "createdAt", "updatedAt") 
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) 
       RETURNING *`,
       [center.name, center.code, center.address, center.city, center.state, center.postalCode, center.country, 
@@ -298,7 +298,7 @@ export class DistributionRepo {
       return existingCenter;
     }
 
-    updates.push(`"updated_at" = $${paramCount}`);
+    updates.push(`"updatedAt" = $${paramCount}`);
     values.push(new Date());
     paramCount++;
 
@@ -345,7 +345,7 @@ export class DistributionRepo {
   }
 
   async findActiveShippingZones(): Promise<ShippingZone[]> {
-    const zones = await query<any[]>('SELECT * FROM "public"."shipping_zone" WHERE "is_active" = true ORDER BY "name" ASC');
+    const zones = await query<any[]>('SELECT * FROM "public"."shipping_zone" WHERE "isActive" = true ORDER BY "name" ASC');
     return transformArrayDbToTs<ShippingZone>(zones || [], shippingZoneFields);
   }
 
@@ -353,7 +353,7 @@ export class DistributionRepo {
     const now = new Date();
     const result = await queryOne<any>(
       `INSERT INTO "public"."shipping_zone" 
-      ("name", "countries", "regions", "postal_codes", "is_active", "created_at", "updated_at") 
+      ("name", "countries", "regions", "postal_codes", "isActive", "createdAt", "updatedAt") 
       VALUES ($1, $2, $3, $4, $5, $6, $7) 
       RETURNING *`,
       [zone.name, zone.countries, zone.regions, zone.postalCodes, zone.isActive, now, now]
@@ -384,7 +384,7 @@ export class DistributionRepo {
       return existingZone;
     }
 
-    updates.push(`"updated_at" = $${paramCount}`);
+    updates.push(`"updatedAt" = $${paramCount}`);
     values.push(new Date());
     paramCount++;
 
@@ -436,7 +436,7 @@ export class DistributionRepo {
   }
 
   async findActiveShippingMethods(): Promise<ShippingMethod[]> {
-    const methods = await query<any[]>('SELECT * FROM "public"."shipping_method" WHERE "is_active" = true ORDER BY "name" ASC');
+    const methods = await query<any[]>('SELECT * FROM "public"."shipping_method" WHERE "isActive" = true ORDER BY "name" ASC');
     return transformArrayDbToTs<ShippingMethod>(methods || [], shippingMethodFields);
   }
 
@@ -444,7 +444,7 @@ export class DistributionRepo {
     const now = new Date();
     const result = await queryOne<any>(
       `INSERT INTO "public"."shipping_method" 
-      ("name", "code", "carrier", "estimated_delivery_days", "is_active", "base_price", "created_at", "updated_at") 
+      ("name", "code", "carrier", "estimated_delivery_days", "isActive", "base_price", "createdAt", "updatedAt") 
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
       RETURNING *`,
       [method.name, method.code, method.carrier, method.estimatedDeliveryDays, method.isActive, method.basePrice, now, now]
@@ -475,7 +475,7 @@ export class DistributionRepo {
       return existingMethod;
     }
 
-    updates.push(`"updated_at" = $${paramCount}`);
+    updates.push(`"updatedAt" = $${paramCount}`);
     values.push(new Date());
     paramCount++;
 
@@ -527,7 +527,7 @@ export class DistributionRepo {
   }
 
   async findActiveFulfillmentPartners(): Promise<FulfillmentPartner[]> {
-    const partners = await query<any[]>('SELECT * FROM "public"."fulfillment_partner" WHERE "is_active" = true ORDER BY "name" ASC');
+    const partners = await query<any[]>('SELECT * FROM "public"."fulfillment_partner" WHERE "isActive" = true ORDER BY "name" ASC');
     return transformArrayDbToTs<FulfillmentPartner>(partners || [], fulfillmentPartnerFields);
   }
 
@@ -535,7 +535,7 @@ export class DistributionRepo {
     const now = new Date();
     const result = await queryOne<any>(
       `INSERT INTO "public"."fulfillment_partner" 
-      ("name", "code", "api_key", "api_endpoint", "is_active", "contact_name", "contact_email", "contact_phone", "created_at", "updated_at") 
+      ("name", "code", "api_key", "api_endpoint", "isActive", "contact_name", "contact_email", "contact_phone", "createdAt", "updatedAt") 
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) 
       RETURNING *`,
       [partner.name, partner.code, partner.apiKey, partner.apiEndpoint, partner.isActive,
@@ -567,7 +567,7 @@ export class DistributionRepo {
       return existingPartner;
     }
 
-    updates.push(`"updated_at" = $${paramCount}`);
+    updates.push(`"updatedAt" = $${paramCount}`);
     values.push(new Date());
     paramCount++;
 
@@ -614,20 +614,20 @@ export class DistributionRepo {
   }
 
   async findActiveDistributionRules(): Promise<DistributionRule[]> {
-    const rules = await query<any[]>('SELECT * FROM "public"."distribution_rule" WHERE "is_active" = true ORDER BY "priority" ASC');
+    const rules = await query<any[]>('SELECT * FROM "public"."distribution_rule" WHERE "isActive" = true ORDER BY "priority" ASC');
     return transformArrayDbToTs<DistributionRule>(rules || [], distributionRuleFields);
   }
 
   async findDistributionRulesByZone(zoneId: string): Promise<DistributionRule[]> {
     const rules = await query<any[]>(
-      'SELECT * FROM "public"."distribution_rule" WHERE "shipping_zone_id" = $1 AND "is_active" = true ORDER BY "priority" ASC',
+      'SELECT * FROM "public"."distribution_rule" WHERE "shipping_zone_id" = $1 AND "isActive" = true ORDER BY "priority" ASC',
       [zoneId]
     );
     return transformArrayDbToTs<DistributionRule>(rules || [], distributionRuleFields);
   }
 
   async findDefaultDistributionRule(): Promise<DistributionRule | null> {
-    const rule = await queryOne<any>('SELECT * FROM "public"."distribution_rule" WHERE "is_default" = true AND "is_active" = true LIMIT 1');
+    const rule = await queryOne<any>('SELECT * FROM "public"."distribution_rule" WHERE "isDefault" = true AND "isActive" = true LIMIT 1');
     return transformDbToTs<DistributionRule>(rule, distributionRuleFields);
   }
 
@@ -636,12 +636,12 @@ export class DistributionRepo {
     
     // If this is a default rule, clear any existing defaults
     if (rule.isDefault) {
-      await query('UPDATE "public"."distribution_rule" SET "is_default" = false WHERE "is_default" = true');
+      await query('UPDATE "public"."distribution_rule" SET "isDefault" = false WHERE "isDefault" = true');
     }
     
     const result = await queryOne<any>(
       `INSERT INTO "public"."distribution_rule" 
-      ("name", "priority", "distribution_center_id", "shipping_zone_id", "shipping_method_id", "fulfillment_partner_id", "is_default", "is_active", "created_at", "updated_at") 
+      ("name", "priority", "distribution_center_id", "shipping_zone_id", "shippingMethodId", "fulfillment_partner_id", "isDefault", "isActive", "createdAt", "updatedAt") 
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) 
       RETURNING *`,
       [rule.name, rule.priority, rule.distributionCenterId, rule.shippingZoneId,
@@ -654,7 +654,7 @@ export class DistributionRepo {
   async updateDistributionRule(id: string, rule: Partial<Omit<DistributionRule, 'id' | 'createdAt' | 'updatedAt'>>): Promise<DistributionRule> {
     // If this is being set as default, clear any existing defaults
     if (rule.isDefault) {
-      await query('UPDATE "public"."distribution_rule" SET "is_default" = false WHERE "is_default" = true');
+      await query('UPDATE "public"."distribution_rule" SET "isDefault" = false WHERE "isDefault" = true');
     }
     
     const updates: string[] = [];
@@ -678,7 +678,7 @@ export class DistributionRepo {
       return existingRule;
     }
 
-    updates.push(`"updated_at" = $${paramCount}`);
+    updates.push(`"updatedAt" = $${paramCount}`);
     values.push(new Date());
     paramCount++;
 
@@ -715,7 +715,7 @@ export class DistributionRepo {
 
   // Order Fulfillment methods
   async findAllOrderFulfillments(): Promise<OrderFulfillment[]> {
-    const fulfillments = await query<any[]>('SELECT * FROM "public"."order_fulfillment" ORDER BY "created_at" DESC');
+    const fulfillments = await query<any[]>('SELECT * FROM "public"."order_fulfillment" ORDER BY "createdAt" DESC');
     return transformArrayDbToTs<OrderFulfillment>(fulfillments || [], orderFulfillmentFields);
   }
 
@@ -726,7 +726,7 @@ export class DistributionRepo {
 
   async findOrderFulfillmentsByOrderId(orderId: string): Promise<OrderFulfillment[]> {
     const fulfillments = await query<any[]>(
-      'SELECT * FROM "public"."order_fulfillment" WHERE "order_id" = $1 ORDER BY "created_at" DESC',
+      'SELECT * FROM "public"."order_fulfillment" WHERE "orderId" = $1 ORDER BY "createdAt" DESC',
       [orderId]
     );
     return transformArrayDbToTs<OrderFulfillment>(fulfillments || [], orderFulfillmentFields);
@@ -734,7 +734,7 @@ export class DistributionRepo {
 
   async findOrderFulfillmentsByStatus(status: OrderFulfillment['status']): Promise<OrderFulfillment[]> {
     const fulfillments = await query<any[]>(
-      'SELECT * FROM "public"."order_fulfillment" WHERE "status" = $1 ORDER BY "created_at" DESC',
+      'SELECT * FROM "public"."order_fulfillment" WHERE "status" = $1 ORDER BY "createdAt" DESC',
       [status]
     );
     return transformArrayDbToTs<OrderFulfillment>(fulfillments || [], orderFulfillmentFields);
@@ -742,7 +742,7 @@ export class DistributionRepo {
 
   async findOrderFulfillmentsByDistributionCenter(centerId: string): Promise<OrderFulfillment[]> {
     const fulfillments = await query<any[]>(
-      'SELECT * FROM "public"."order_fulfillment" WHERE "distribution_center_id" = $1 ORDER BY "created_at" DESC',
+      'SELECT * FROM "public"."order_fulfillment" WHERE "distribution_center_id" = $1 ORDER BY "createdAt" DESC',
       [centerId]
     );
     return transformArrayDbToTs<OrderFulfillment>(fulfillments || [], orderFulfillmentFields);
@@ -752,7 +752,7 @@ export class DistributionRepo {
     const now = new Date();
     const result = await queryOne<any>(
       `INSERT INTO "public"."order_fulfillment" 
-      ("order_id", "distribution_center_id", "rule_id", "status", "shipping_method_id", "tracking_number", "tracking_url", "shipped_at", "delivered_at", "notes", "created_at", "updated_at") 
+      ("orderId", "distribution_center_id", "rule_id", "status", "shippingMethodId", "tracking_number", "tracking_url", "shipped_at", "delivered_at", "notes", "createdAt", "updatedAt") 
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) 
       RETURNING *`,
       [fulfillment.orderId, fulfillment.distributionCenterId, fulfillment.ruleId, fulfillment.status,
@@ -785,7 +785,7 @@ export class DistributionRepo {
       return existingFulfillment;
     }
 
-    updates.push(`"updated_at" = $${paramCount}`);
+    updates.push(`"updatedAt" = $${paramCount}`);
     values.push(new Date());
     paramCount++;
 
@@ -807,7 +807,7 @@ export class DistributionRepo {
   }
 
   async updateOrderFulfillmentStatus(id: string, status: OrderFulfillment['status'], trackingInfo?: { trackingNumber?: string, trackingUrl?: string }): Promise<OrderFulfillment> {
-    const updates = ['"status" = $1', '"updated_at" = $2'];
+    const updates = ['"status" = $1', '"updatedAt" = $2'];
     const values: any[] = [status, new Date()];
     let paramCount = 3;
     

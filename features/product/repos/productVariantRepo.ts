@@ -96,7 +96,7 @@ export class ProductVariantRepo {
    */
   async findById(id: string): Promise<ProductVariant | null> {
     const selectFields = this.generateSelectFields();
-    return await queryOne<ProductVariant>(`SELECT ${selectFields} FROM "public"."product_variant" WHERE "id" = $1 AND "deleted_at" IS NULL`, [id]);
+    return await queryOne<ProductVariant>(`SELECT ${selectFields} FROM "public"."product_variant" WHERE "id" = $1 AND "deletedAt" IS NULL`, [id]);
   }
 
   /**
@@ -104,7 +104,7 @@ export class ProductVariantRepo {
    */
   async findBySku(sku: string): Promise<ProductVariant | null> {
     const selectFields = this.generateSelectFields();
-    return await queryOne<ProductVariant>(`SELECT ${selectFields} FROM "public"."product_variant" WHERE "sku" = $1 AND "deleted_at" IS NULL`, [sku]);
+    return await queryOne<ProductVariant>(`SELECT ${selectFields} FROM "public"."product_variant" WHERE "sku" = $1 AND "deletedAt" IS NULL`, [sku]);
   }
 
   /**
@@ -113,7 +113,7 @@ export class ProductVariantRepo {
   async findByProductId(productId: string): Promise<ProductVariant[]> {
     const selectFields = this.generateSelectFields();
     return await query<ProductVariant[]>(
-      `SELECT ${selectFields} FROM "public"."product_variant" WHERE "product_id" = $1 AND "deleted_at" IS NULL ORDER BY "position" ASC`, 
+      `SELECT ${selectFields} FROM "public"."product_variant" WHERE "productId" = $1 AND "deletedAt" IS NULL ORDER BY "position" ASC`, 
       [productId]
     ) || [];
   }
@@ -124,7 +124,7 @@ export class ProductVariantRepo {
   async findDefaultForProduct(productId: string): Promise<ProductVariant | null> {
     const selectFields = this.generateSelectFields();
     return await queryOne<ProductVariant>(
-      `SELECT ${selectFields} FROM "public"."product_variant" WHERE "product_id" = $1 AND "is_default" = true AND "deleted_at" IS NULL`, 
+      `SELECT ${selectFields} FROM "public"."product_variant" WHERE "productId" = $1 AND "isDefault" = true AND "deletedAt" IS NULL`, 
       [productId]
     );
   }
@@ -221,7 +221,7 @@ export class ProductVariantRepo {
     const sql = `
       UPDATE "public"."product_variant" 
       SET ${setStatements.join(', ')} 
-      WHERE "id" = $${values.length} AND "deleted_at" IS NULL 
+      WHERE "id" = $${values.length} AND "deletedAt" IS NULL 
       RETURNING ${returnFields}
     `;
     
@@ -262,7 +262,7 @@ export class ProductVariantRepo {
     const now = new Date();
     
     await query(
-      `UPDATE "public"."product_variant" SET "deleted_at" = $1, "updated_at" = $2 WHERE "id" = $3`,
+      `UPDATE "public"."product_variant" SET "deletedAt" = $1, "updatedAt" = $2 WHERE "id" = $3`,
       [now, now, id]
     );
     
@@ -330,15 +330,15 @@ export class ProductVariantRepo {
     
     // First, unset default on all variants for this product
     await query(
-      `UPDATE "public"."product_variant" SET "is_default" = false, "updated_at" = $1 WHERE "product_id" = $2 AND "deleted_at" IS NULL`,
+      `UPDATE "public"."product_variant" SET "isDefault" = false, "updatedAt" = $1 WHERE "productId" = $2 AND "deletedAt" IS NULL`,
       [now, variant.productId]
     );
     
     // Then set this variant as default
     const sql = `
       UPDATE "public"."product_variant" 
-      SET "is_default" = true, "updated_at" = $1 
-      WHERE "id" = $2 AND "deleted_at" IS NULL 
+      SET "isDefault" = true, "updatedAt" = $1 
+      WHERE "id" = $2 AND "deletedAt" IS NULL 
       RETURNING ${returnFields}
     `;
     
@@ -364,8 +364,8 @@ export class ProductVariantRepo {
     
     const sql = `
       UPDATE "public"."product_variant" 
-      SET "inventory" = $1, "updated_at" = $2 
-      WHERE "id" = $3 AND "deleted_at" IS NULL 
+      SET "inventory" = $1, "updatedAt" = $2 
+      WHERE "id" = $3 AND "deletedAt" IS NULL 
       RETURNING ${returnFields}
     `;
     
@@ -400,7 +400,7 @@ export class ProductVariantRepo {
     
     // Create statements for reordering
     const queries = variantIds.map((id, index) => ({
-      sql: `UPDATE "public"."product_variant" SET "position" = $1, "updated_at" = $2 WHERE "id" = $3 AND "product_id" = $4 AND "deleted_at" IS NULL`,
+      sql: `UPDATE "public"."product_variant" SET "position" = $1, "updatedAt" = $2 WHERE "id" = $3 AND "productId" = $4 AND "deletedAt" IS NULL`,
       params: [index, now, id, productId]
     }));
     
@@ -418,7 +418,7 @@ export class ProductVariantRepo {
   private async updateOtherVariantsNonDefault(currentVariantId: string, productId: string): Promise<void> {
     const now = new Date();
     await query(
-      `UPDATE "public"."product_variant" SET "is_default" = false, "updated_at" = $1 WHERE "product_id" = $2 AND "id" != $3 AND "deleted_at" IS NULL`,
+      `UPDATE "public"."product_variant" SET "isDefault" = false, "updatedAt" = $1 WHERE "productId" = $2 AND "id" != $3 AND "deletedAt" IS NULL`,
       [now, productId, currentVariantId]
     );
   }

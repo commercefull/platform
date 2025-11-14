@@ -258,7 +258,7 @@ export class PaymentRepo {
     const selectFields = this.generateGatewaySelectFields();
     const gateways = await query<PaymentGateway[]>(
       `SELECT ${selectFields} FROM "public"."payment_gateway" 
-       WHERE "merchant_id" = $1 AND "deleted_at" IS NULL 
+       WHERE "merchantId" = $1 AND "deletedAt" IS NULL 
        ORDER BY "name" ASC`, 
       [merchantId]
     );
@@ -269,7 +269,7 @@ export class PaymentRepo {
     const selectFields = this.generateGatewaySelectFields();
     return await queryOne<PaymentGateway>(
       `SELECT ${selectFields} FROM "public"."payment_gateway" 
-       WHERE "id" = $1 AND "deleted_at" IS NULL`, 
+       WHERE "id" = $1 AND "deletedAt" IS NULL`, 
       [id]
     );
   }
@@ -278,7 +278,7 @@ export class PaymentRepo {
     const selectFields = this.generateGatewaySelectFields();
     return await queryOne<PaymentGateway>(
       `SELECT ${selectFields} FROM "public"."payment_gateway" 
-       WHERE "merchant_id" = $1 AND "is_default" = true AND "deleted_at" IS NULL`, 
+       WHERE "merchantId" = $1 AND "isDefault" = true AND "deletedAt" IS NULL`, 
       [merchantId]
     );
   }
@@ -320,8 +320,8 @@ export class PaymentRepo {
     if (gateway.isDefault) {
       await query(
         `UPDATE "public"."payment_gateway" 
-         SET "is_default" = false 
-         WHERE "merchant_id" = $1 AND "id" != $2 AND "deleted_at" IS NULL`,
+         SET "isDefault" = false 
+         WHERE "merchantId" = $1 AND "id" != $2 AND "deletedAt" IS NULL`,
         [gateway.merchantId, result.id]
       );
     }
@@ -366,7 +366,7 @@ export class PaymentRepo {
     const result = await queryOne<PaymentGateway>(
       `UPDATE "public"."payment_gateway" 
        SET ${setStatements.join(', ')} 
-       WHERE "id" = $${values.length} AND "deleted_at" IS NULL
+       WHERE "id" = $${values.length} AND "deletedAt" IS NULL
        RETURNING ${selectFields}`,
       values
     );
@@ -379,8 +379,8 @@ export class PaymentRepo {
     if (gateway.isDefault && gateway.isDefault !== existingGateway.isDefault) {
       await query(
         `UPDATE "public"."payment_gateway" 
-         SET "is_default" = false 
-         WHERE "merchant_id" = $1 AND "id" != $2 AND "deleted_at" IS NULL`,
+         SET "isDefault" = false 
+         WHERE "merchantId" = $1 AND "id" != $2 AND "deletedAt" IS NULL`,
         [existingGateway.merchantId, id]
       );
     }
@@ -394,8 +394,8 @@ export class PaymentRepo {
     // Soft delete by setting deleted_at
     const result = await query(
       `UPDATE "public"."payment_gateway" 
-       SET "deleted_at" = $1 
-       WHERE "id" = $2 AND "deleted_at" IS NULL`,
+       SET "deletedAt" = $1 
+       WHERE "id" = $2 AND "deletedAt" IS NULL`,
       [now, id]
     );
     
@@ -407,7 +407,7 @@ export class PaymentRepo {
     const selectFields = this.generateMethodConfigSelectFields();
     const configs = await query<PaymentMethodConfig[]>(
       `SELECT ${selectFields} FROM "public"."payment_method_config" 
-       WHERE "merchant_id" = $1 AND "deleted_at" IS NULL 
+       WHERE "merchantId" = $1 AND "deletedAt" IS NULL 
        ORDER BY "display_order" ASC, "display_name" ASC`, 
       [merchantId]
     );
@@ -418,7 +418,7 @@ export class PaymentRepo {
     const selectFields = this.generateMethodConfigSelectFields();
     return await queryOne<PaymentMethodConfig>(
       `SELECT ${selectFields} FROM "public"."payment_method_config" 
-       WHERE "id" = $1 AND "deleted_at" IS NULL`, 
+       WHERE "id" = $1 AND "deletedAt" IS NULL`, 
       [id]
     );
   }
@@ -427,7 +427,7 @@ export class PaymentRepo {
     const selectFields = this.generateMethodConfigSelectFields();
     const configs = await query<PaymentMethodConfig[]>(
       `SELECT ${selectFields} FROM "public"."payment_method_config" 
-       WHERE "merchant_id" = $1 AND "is_enabled" = true AND "deleted_at" IS NULL 
+       WHERE "merchantId" = $1 AND "isEnabled" = true AND "deletedAt" IS NULL 
        ORDER BY "display_order" ASC, "display_name" ASC`, 
       [merchantId]
     );
@@ -501,7 +501,7 @@ export class PaymentRepo {
     const result = await queryOne<PaymentMethodConfig>(
       `UPDATE "public"."payment_method_config" 
        SET ${setStatements.join(', ')} 
-       WHERE "id" = $${values.length} AND "deleted_at" IS NULL
+       WHERE "id" = $${values.length} AND "deletedAt" IS NULL
        RETURNING ${selectFields}`,
       values
     );
@@ -519,8 +519,8 @@ export class PaymentRepo {
     // Soft delete by setting deleted_at
     const result = await query(
       `UPDATE "public"."payment_method_config" 
-       SET "deleted_at" = $1 
-       WHERE "id" = $2 AND "deleted_at" IS NULL`,
+       SET "deletedAt" = $1 
+       WHERE "id" = $2 AND "deletedAt" IS NULL`,
       [now, id]
     );
     
@@ -532,7 +532,7 @@ export class PaymentRepo {
     const selectFields = this.generateTransactionSelectFields();
     return await queryOne<PaymentTransaction>(
       `SELECT ${selectFields} FROM "public"."payment_transaction" 
-       WHERE "id" = $1 AND "deleted_at" IS NULL`, 
+       WHERE "id" = $1 AND "deletedAt" IS NULL`, 
       [id]
     );
   }
@@ -541,8 +541,8 @@ export class PaymentRepo {
     const selectFields = this.generateTransactionSelectFields();
     const transactions = await query<PaymentTransaction[]>(
       `SELECT ${selectFields} FROM "public"."payment_transaction" 
-       WHERE "order_id" = $1 AND "deleted_at" IS NULL 
-       ORDER BY "created_at" DESC`, 
+       WHERE "orderId" = $1 AND "deletedAt" IS NULL 
+       ORDER BY "createdAt" DESC`, 
       [orderId]
     );
     return transactions || [];
@@ -552,8 +552,8 @@ export class PaymentRepo {
     const selectFields = this.generateTransactionSelectFields();
     const transactions = await query<PaymentTransaction[]>(
       `SELECT ${selectFields} FROM "public"."payment_transaction" 
-       WHERE "customer_id" = $1 AND "deleted_at" IS NULL 
-       ORDER BY "created_at" DESC
+       WHERE "customerId" = $1 AND "deletedAt" IS NULL 
+       ORDER BY "createdAt" DESC
        LIMIT $2 OFFSET $3`, 
       [customerId, limit, offset]
     );
@@ -627,7 +627,7 @@ export class PaymentRepo {
     const result = await queryOne<PaymentTransaction>(
       `UPDATE "public"."payment_transaction" 
        SET ${setStatements.join(', ')} 
-       WHERE "id" = $${values.length} AND "deleted_at" IS NULL
+       WHERE "id" = $${values.length} AND "deletedAt" IS NULL
        RETURNING ${selectFields}`,
       values
     );
@@ -644,7 +644,7 @@ export class PaymentRepo {
     const selectFields = this.generateRefundSelectFields();
     return await queryOne<PaymentRefund>(
       `SELECT ${selectFields} FROM "public"."payment_refund" 
-       WHERE "id" = $1 AND "deleted_at" IS NULL`, 
+       WHERE "id" = $1 AND "deletedAt" IS NULL`, 
       [id]
     );
   }
@@ -653,8 +653,8 @@ export class PaymentRepo {
     const selectFields = this.generateRefundSelectFields();
     const refunds = await query<PaymentRefund[]>(
       `SELECT ${selectFields} FROM "public"."payment_refund" 
-       WHERE "transaction_id" = $1 AND "deleted_at" IS NULL 
-       ORDER BY "created_at" DESC`, 
+       WHERE "transaction_id" = $1 AND "deletedAt" IS NULL 
+       ORDER BY "createdAt" DESC`, 
       [transactionId]
     );
     return refunds || [];
@@ -701,8 +701,8 @@ export class PaymentRepo {
              WHEN COALESCE("refunded_amount", 0) + $1 >= "amount" THEN 'refunded'::payment_status
              ELSE 'partially_refunded'::payment_status
            END,
-           "updated_at" = $2
-       WHERE "id" = $3 AND "deleted_at" IS NULL`,
+           "updatedAt" = $2
+       WHERE "id" = $3 AND "deletedAt" IS NULL`,
       [refund.amount, now, refund.transactionId]
     );
     
@@ -740,7 +740,7 @@ export class PaymentRepo {
     const result = await queryOne<PaymentRefund>(
       `UPDATE "public"."payment_refund" 
        SET ${setStatements.join(', ')} 
-       WHERE "id" = $${values.length} AND "deleted_at" IS NULL
+       WHERE "id" = $${values.length} AND "deletedAt" IS NULL
        RETURNING ${selectFields}`,
       values
     );

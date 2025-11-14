@@ -89,8 +89,8 @@ export class CouponRepo {
         "id", "code", "name", "description", "type", "value", 
         "min_order_amount", "max_discount_amount", "start_date", "end_date", 
         "usage_limit", "usage_count", "per_customer_limit", "for_new_customers_only", 
-        "for_auto_apply", "status", "merchant_id", "excluded_product_ids", 
-        "excluded_category_ids", "metadata", "created_at", "updated_at"
+        "for_auto_apply", "status", "merchantId", "excluded_product_ids", 
+        "excluded_category_ids", "metadata", "createdAt", "updatedAt"
       ) VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22
       ) RETURNING 
@@ -190,7 +190,7 @@ export class CouponRepo {
     });
     
     // Always update the updatedAt timestamp
-    updateFields.push(`"updated_at" = $${paramIndex}`);
+    updateFields.push(`"updatedAt" = $${paramIndex}`);
     params.push(new Date());
     paramIndex++;
     
@@ -293,7 +293,7 @@ export class CouponRepo {
     const params: any[] = [code];
     
     if (merchantId) {
-      sql += ' AND "merchant_id" = $2';
+      sql += ' AND "merchantId" = $2';
       params.push(merchantId);
     }
     
@@ -352,7 +352,7 @@ export class CouponRepo {
     let paramIndex = 2;
     
     if (merchantId) {
-      sql += ` AND "merchant_id" = $${paramIndex}`;
+      sql += ` AND "merchantId" = $${paramIndex}`;
       params.push(merchantId);
       paramIndex++;
     }
@@ -405,8 +405,8 @@ export class CouponRepo {
       // Insert usage record
       const usage = await queryOne<CouponUsage>(
         `INSERT INTO "public"."coupon_usage" (
-          "id", "coupon_id", "order_id", "customer_id", "session_id",
-          "discount_amount", "applied_at"
+          "id", "coupon_id", "orderId", "customerId", "session_id",
+          "discountAmount", "applied_at"
         ) VALUES ($1, $2, $3, $4, $5, $6, $7) 
         RETURNING 
           id,
@@ -467,7 +467,7 @@ export class CouponRepo {
   
   async getCustomerCouponUsageCount(couponId: string, customerId: string): Promise<number> {
     const result = await queryOne<{count: string}>(
-      'SELECT COUNT(*) as count FROM "public"."coupon_usage" WHERE "coupon_id" = $1 AND "customer_id" = $2',
+      'SELECT COUNT(*) as count FROM "public"."coupon_usage" WHERE "coupon_id" = $1 AND "customerId" = $2',
       [couponId, customerId]
     );
     
@@ -545,7 +545,7 @@ export class CouponRepo {
   
   private async getCustomerOrderCount(customerId: string): Promise<number> {
     const result = await queryOne<{count: string}>(
-      'SELECT COUNT(*) as count FROM "public"."order" WHERE "customer_id" = $1',
+      'SELECT COUNT(*) as count FROM "public"."order" WHERE "customerId" = $1',
       [customerId]
     );
     

@@ -7,24 +7,47 @@ exports.up = function (knex) {
     t.uuid('notificationId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
-    t.string('type', 50).notNullable(); // e.g., 'email', 'sms', 'push'
-    t.string('recipient', 255).notNullable();
-    t.string('subject', 255);
-    t.text('body');
-    t.jsonb('data');
-    t.enum('status', ['pending', 'sent', 'failed', 'delivered', 'read']).notNullable().defaultTo('pending');
-    t.timestamp('scheduledAt');
-    t.timestamp('sentAt');
+    
+    // User information
+    t.uuid('userId').notNullable();
+    t.enum('userType', ['customer', 'merchant', 'admin']).notNullable().defaultTo('customer');
+    
+    // Notification content
+    t.enum('type', [
+      'account_registration', 'password_reset', 'email_verification',
+      'order_confirmation', 'order_shipped', 'order_delivered', 'order_cancelled',
+      'return_initiated', 'refund_processed', 'back_in_stock', 'price_drop',
+      'new_product', 'review_request', 'abandoned_cart', 'coupon_offer', 'promotion'
+    ]).notNullable();
+    t.string('title', 255).notNullable();
+    t.text('content').notNullable();
+    
+    // Channel and delivery
+    t.enum('channel', ['email', 'sms', 'push', 'in_app']).notNullable(); // Array of channels: email, sms, push, in_app
+    t.boolean('isRead').notNullable().defaultTo(false);
     t.timestamp('readAt');
-    t.uuid('templateId');
-    t.uuid('categoryId');
+    t.timestamp('sentAt');
+    t.timestamp('deliveredAt');
+    t.timestamp('expiresAt');
+    
+    // Actions and metadata
+    t.string('actionUrl', 500);
+    t.string('actionLabel', 100);
+    t.string('imageUrl', 500);
+    t.enum('priority', ['low', 'normal', 'high', 'urgent']).defaultTo('normal');
+    t.string('category', 100);
+    t.jsonb('data');
+    t.jsonb('metadata');
+    
+    // Soft delete
     t.timestamp('deletedAt');
 
+    // Indexes
+    t.index('userType');
     t.index('type');
-    t.index('status');
-    t.index('recipient');
-    t.index('scheduledAt');
-    t.index('deletedAt');
+    t.index('isRead');
+    t.index('sentAt');
+    t.index('createdAt');
   });
 };
 
@@ -33,7 +56,5 @@ exports.up = function (knex) {
  * @returns { Promise<void> }
  */
 exports.down = function (knex) {
-  return knex.schema.dropTable('notification').then(() => {
-    return knex.raw('DROP TYPE IF EXISTS notification_status');
-  });
+  return knex.schema.dropTable('notification');
 };

@@ -8,7 +8,7 @@ exports.up = function (knex) {
       t.uuid('basketId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
       t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
       t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
-      t.uuid('customerId').references('customerId').inTable('customer');
+      t.uuid('customerId');
       t.string('sessionId', 255);
       t.enum('status', ['active', 'merged', 'converted', 'abandoned', 'completed']).notNullable().defaultTo('active');
       t.string('currency', 3).notNullable().defaultTo('USD');
@@ -18,6 +18,7 @@ exports.up = function (knex) {
       t.decimal('discountAmount', 15, 2).notNullable().defaultTo(0);
       t.decimal('shippingAmount', 15, 2).notNullable().defaultTo(0);
       t.decimal('grandTotal', 15, 2).notNullable().defaultTo(0);
+      t.jsonb('metadata');
       
       t.timestamp('expiresAt');
       t.uuid('convertedToOrderId');

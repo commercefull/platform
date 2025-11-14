@@ -219,7 +219,7 @@ export class ContentRepo {
 
     const result = await queryOne<any>(
       `INSERT INTO "public"."content_type" 
-      ("name", "slug", "description", "schema", "status", "created_at", "updated_at") 
+      ("name", "slug", "description", "schema", "status", "createdAt", "updatedAt") 
       VALUES ($1, $2, $3, $4, $5, $6, $7) 
       RETURNING *`,
       [name, slug, description || null, JSON.stringify(schema), status, now, now]
@@ -275,7 +275,7 @@ export class ContentRepo {
     }
 
     // Always update the updated_at timestamp
-    updateFields.push(`"updated_at" = $${paramIndex++}`);
+    updateFields.push(`"updatedAt" = $${paramIndex++}`);
     values.push(now);
 
     // Add ID for WHERE clause
@@ -402,7 +402,7 @@ export class ContentRepo {
     });
 
     // Add created_at and updated_at
-    fieldNames.push('"created_at"', '"updated_at"');
+    fieldNames.push('"createdAt"', '"updatedAt"');
     placeholders.push(`$${paramIndex++}`, `$${paramIndex++}`);
     fieldValues.push(now, now);
 
@@ -464,7 +464,7 @@ export class ContentRepo {
     });
 
     // Always update the updated_at timestamp
-    updateFields.push(`"updated_at" = $${paramIndex++}`);
+    updateFields.push(`"updatedAt" = $${paramIndex++}`);
     values.push(now);
 
     // Add ID for WHERE clause
@@ -504,7 +504,7 @@ export class ContentRepo {
     
     const result = await queryOne<any>(
       `UPDATE "public"."content_page" 
-       SET "status" = 'published', "published_at" = $1, "updated_at" = $1 
+       SET "status" = 'published', "published_at" = $1, "updatedAt" = $1 
        WHERE "id" = $2 
        RETURNING *`,
       [now, id]
@@ -549,7 +549,7 @@ export class ContentRepo {
 
     const result = await queryOne<any>(
       `INSERT INTO "public"."content_block" 
-      ("page_id", "content_type_id", "name", "order", "content", "status", "created_at", "updated_at") 
+      ("page_id", "content_type_id", "name", "order", "content", "status", "createdAt", "updatedAt") 
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
       RETURNING *`,
       [
@@ -616,7 +616,7 @@ export class ContentRepo {
     }
 
     // Always update the updated_at timestamp
-    updateFields.push(`"updated_at" = $${paramIndex++}`);
+    updateFields.push(`"updatedAt" = $${paramIndex++}`);
     values.push(now);
 
     // If no fields to update, just return the current block
@@ -695,7 +695,7 @@ export class ContentRepo {
     
     const result = await queryOne<any>(
       `INSERT INTO "public"."content_template" 
-      ("name", "type", "description", "structure", "status", "created_at", "updated_at") 
+      ("name", "type", "description", "structure", "status", "createdAt", "updatedAt") 
       VALUES ($1, $2, $3, $4, $5, $6, $7) 
       RETURNING *`,
       [
@@ -756,7 +756,7 @@ export class ContentRepo {
     }
 
     // Always update the updated_at timestamp
-    updateFields.push(`"updated_at" = $${paramIndex++}`);
+    updateFields.push(`"updatedAt" = $${paramIndex++}`);
     values.push(now);
 
     // If no fields to update, just return the current template
@@ -829,7 +829,7 @@ export class ContentRepo {
       
       // Update the block order
       await query(
-        'UPDATE "public"."content_block" SET "order" = $1, "updated_at" = $2 WHERE "id" = $3',
+        'UPDATE "public"."content_block" SET "order" = $1, "updatedAt" = $2 WHERE "id" = $3',
         [blockOrder.order, unixTimestamp(), blockOrder.id]
       );
     }

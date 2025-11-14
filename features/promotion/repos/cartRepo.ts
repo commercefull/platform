@@ -39,7 +39,7 @@ export class CartPromotionRepo {
 
     const sql = `
       INSERT INTO "public"."cart_promotion" (
-        "cart_id", "promotion_id", "discount_amount", "status", 
+        "cart_id", "promotion_id", "discountAmount", "status", 
         "created_date", "updated_date", "deleted_flag", 
         "created_by", "updated_by"
       ) VALUES ($1, $2, $3, $4, NOW(), NOW(), false, $5, $6) 

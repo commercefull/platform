@@ -76,7 +76,7 @@ const findAllChannels = async (filters: {
     let paramIndex = 1;
     
     if (status !== undefined) {
-      conditions.push(`"is_active" = $${paramIndex}`);
+      conditions.push(`"isActive" = $${paramIndex}`);
       values.push(channelStatusToBoolean(status));
       paramIndex++;
     }
@@ -211,7 +211,7 @@ const create = async (channelData: Partial<Channel>): Promise<Channel> => {
     // Execute the query
     const result = await queryOne<any>(
       `INSERT INTO "public"."channels" (
-        "channel_id", "name", "code", "type", "description", "is_active", "settings", "created_at", "updated_at"
+        "channel_id", "name", "code", "type", "description", "isActive", "settings", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
       values
     );
@@ -271,7 +271,7 @@ const update = async (id: string, channelData: Partial<Channel>): Promise<Channe
     
     // Add updated timestamp
     const now = new Date();
-    updates.push(`"updated_at" = $${paramCount}`);
+    updates.push(`"updatedAt" = $${paramCount}`);
     values.push(now);
     paramCount++;
     
@@ -399,7 +399,7 @@ const addProductToChannel = async (channelProductData: Partial<ChannelProduct>):
     // Execute the query
     const result = await queryOne<any>(
       `INSERT INTO "public"."channel_products" (
-        "channel_product_id", "channel_id", "product_id", "is_active", "override_sku", "override_price", "sort_order", "created_at", "updated_at"
+        "channel_product_id", "channel_id", "productId", "isActive", "override_sku", "override_price", "sort_order", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
       values
     );
@@ -423,7 +423,7 @@ const removeProductFromChannel = async (channelId: string, productId: string): P
     const result = await queryOne<{count: string}>(
       `WITH deleted AS (
         DELETE FROM "public"."channel_products" 
-        WHERE "channel_id" = $1 AND "product_id" = $2 
+        WHERE "channel_id" = $1 AND "productId" = $2 
         RETURNING *
       ) 
       SELECT COUNT(*) as count FROM deleted`,
@@ -446,7 +446,7 @@ const findChannelsByProductId = async (productId: string): Promise<Channel[]> =>
       SELECT c.* 
       FROM "public"."channels" c
       JOIN "public"."channel_products" cp ON c."channel_id" = cp."channel_id"
-      WHERE cp."product_id" = $1
+      WHERE cp."productId" = $1
     `;
     
     const results = await query<any[]>(sql, [productId]) || [];

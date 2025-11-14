@@ -209,8 +209,8 @@ export class CheckoutRepository {
     
     await query(
       `INSERT INTO "public"."checkout_session" 
-      (id, "customer_id", "guest_email", "basket_id", status, subtotal, "tax_amount", 
-      "shipping_amount", "discount_amount", total, "created_at", "updated_at", "expires_at")
+      (id, "customerId", "guestEmail", "basketId", status, subtotal, "taxAmount", 
+      "shippingAmount", "discountAmount", total, "createdAt", "updatedAt", "expiresAt")
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
       [
         newSession.id,
@@ -246,8 +246,8 @@ export class CheckoutRepository {
   async findCheckoutSessionByBasketId(basketId: string): Promise<CheckoutSession | null> {
     const session = await queryOne<any>(
       `SELECT * FROM "public"."checkout_session" 
-      WHERE "basket_id" = $1 AND status = 'active'
-      ORDER BY "created_at" DESC LIMIT 1`,
+      WHERE "basketId" = $1 AND status = 'active'
+      ORDER BY "createdAt" DESC LIMIT 1`,
       [basketId]
     );
     
@@ -258,8 +258,8 @@ export class CheckoutRepository {
   async findCheckoutSessionsByCustomerId(customerId: string): Promise<CheckoutSession[]> {
     const sessions = await query<any[]>(
       `SELECT * FROM "public"."checkout_session" 
-      WHERE "customer_id" = $1
-      ORDER BY "created_at" DESC`,
+      WHERE "customerId" = $1
+      ORDER BY "createdAt" DESC`,
       [customerId]
     );
     
@@ -380,7 +380,7 @@ export class CheckoutRepository {
   // Get available shipping methods
   async getShippingMethods(): Promise<ShippingMethod[]> {
     const methods = await query<any[]>(
-      `SELECT * FROM "public"."shipping_method" WHERE "is_enabled" = true ORDER BY name ASC`
+      `SELECT * FROM "public"."shipping_method" WHERE "isEnabled" = true ORDER BY name ASC`
     );
     
     return transformArrayDbToTs<ShippingMethod>(methods || [], shippingMethodFields);
@@ -399,7 +399,7 @@ export class CheckoutRepository {
   // Get available payment methods
   async getPaymentMethods(): Promise<PaymentMethod[]> {
     const methods = await query<any[]>(
-      `SELECT * FROM "public"."payment_method" WHERE "is_enabled" = true ORDER BY name ASC`
+      `SELECT * FROM "public"."payment_method" WHERE "isEnabled" = true ORDER BY name ASC`
     );
     
     return transformArrayDbToTs<PaymentMethod>(methods || [], paymentMethodFields);

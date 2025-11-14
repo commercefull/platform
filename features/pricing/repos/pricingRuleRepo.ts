@@ -173,7 +173,7 @@ export class PricingRuleRepo {
       SELECT ${selectFields}
       FROM "public"."pricing_rule"
       WHERE ${whereClause}
-      ORDER BY "priority" DESC, "created_at" ASC
+      ORDER BY "priority" DESC, "createdAt" ASC
     `;
     
     const results = await query<Record<string, any>[]>(sql, params) || [];
@@ -276,7 +276,7 @@ export class PricingRuleRepo {
     // Add filter for merchant
     if (filters.merchantId) {
       params.push(filters.merchantId);
-      conditions.push(`"merchant_id" = $${params.length}`);
+      conditions.push(`"merchantId" = $${params.length}`);
     }
     
     // Add filter for active rules only
@@ -395,7 +395,7 @@ export class PricingRuleRepo {
     // Add filter for merchant
     if (filters.merchantId) {
       params.push(filters.merchantId);
-      conditions.push(`"merchant_id" = $${params.length}`);
+      conditions.push(`"merchantId" = $${params.length}`);
     }
     
     // Add filter for active rules only
@@ -492,7 +492,7 @@ export class PricingRuleRepo {
     const setStatements: string[] = [];
     const values: any[] = [id, now]; // Start with ID and updated_at
     
-    setStatements.push(`"updated_at" = $2`);
+    setStatements.push(`"updatedAt" = $2`);
     
     // Process each field from the input data
     let placeholderIndex = 3;

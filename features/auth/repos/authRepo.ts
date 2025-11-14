@@ -136,7 +136,7 @@ export class AuthRepo {
       
       await queryOne(
         `INSERT INTO "public"."auth_refresh_tokens" 
-        ("token", "user_type", "user_id", "is_revoked", "expires_at", "created_at", "user_agent", "ip_address") 
+        ("token", "user_type", "userId", "is_revoked", "expiresAt", "createdAt", "user_agent", "ip_address") 
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
         [token, userType, userId, false, expiresAt, new Date(), userAgent, ipAddress]
       );
@@ -152,7 +152,7 @@ export class AuthRepo {
     try {
       const refreshToken = await queryOne<RefreshToken>(
         `SELECT * FROM "public"."auth_refresh_tokens" 
-        WHERE "user_id" = $1 AND "user_type" = $2 AND "token" = $3 AND "is_revoked" = false AND "expires_at" > $4`,
+        WHERE "userId" = $1 AND "user_type" = $2 AND "token" = $3 AND "is_revoked" = false AND "expiresAt" > $4`,
         [userId, userType, token, new Date()]
       );
       
@@ -285,7 +285,7 @@ export class AuthRepo {
     const tableName = `${userType}_password_reset`;
     
     await queryOne(
-      `INSERT INTO "public"."${tableName}" ("user_id", "token", "expires_at", "is_used", "created_at") 
+      `INSERT INTO "public"."${tableName}" ("userId", "token", "expiresAt", "is_used", "createdAt") 
        VALUES ($1, $2, $3, $4, $5) RETURNING "id"`,
       [userId, hashedToken, expiresAt, false, new Date()]
     );
@@ -299,8 +299,8 @@ export class AuthRepo {
     
     const resetTokenRecord = await queryOne(
       `SELECT * FROM "public"."${tableName}" 
-       WHERE "is_used" = false AND "expires_at" > $1 
-       ORDER BY "created_at" DESC LIMIT 1`,
+       WHERE "is_used" = false AND "expiresAt" > $1 
+       ORDER BY "createdAt" DESC LIMIT 1`,
       [new Date()]
     );
     
@@ -331,7 +331,7 @@ export class AuthRepo {
     
     await queryOne(
       `INSERT INTO "public"."auth_token_blacklist" 
-       ("token", "user_type", "user_id", "expires_at", "invalidated_at", "reason") 
+       ("token", "user_type", "userId", "expiresAt", "invalidated_at", "reason") 
        VALUES ($1, $2, $3, $4, $5, $6)`,
       [token, userType, userId, expiresAt, new Date(), reason || 'logout']
     );
@@ -341,7 +341,7 @@ export class AuthRepo {
   async isTokenBlacklisted(token: string): Promise<boolean> {
     const result = await queryOne(
       `SELECT * FROM "public"."auth_token_blacklist" 
-       WHERE "token" = $1 AND "expires_at" > $2`,
+       WHERE "token" = $1 AND "expiresAt" > $2`,
       [token, new Date()]
     );
     
@@ -355,7 +355,7 @@ export class AuthRepo {
     
     await queryOne(
       `INSERT INTO "public"."auth_refresh_tokens" 
-       ("token", "user_type", "user_id", "expires_at", "created_at", "user_agent", "ip_address") 
+       ("token", "user_type", "userId", "expiresAt", "createdAt", "user_agent", "ip_address") 
        VALUES ($1, $2, $3, $4, $5, $6, $7)`,
       [token, userType, userId, expiresAt, new Date(), userAgent, ipAddress]
     );
@@ -367,7 +367,7 @@ export class AuthRepo {
   async getRefreshToken(token: string): Promise<RefreshToken | null> {
     const record = await queryOne(
       `SELECT * FROM "public"."auth_refresh_tokens" 
-       WHERE "token" = $1 AND "is_revoked" = false AND "expires_at" > $2`,
+       WHERE "token" = $1 AND "is_revoked" = false AND "expiresAt" > $2`,
       [token, new Date()]
     );
     
@@ -395,7 +395,7 @@ export class AuthRepo {
     const result = await queryOne(
       `UPDATE "public"."auth_refresh_tokens" 
        SET "is_revoked" = true 
-       WHERE "user_id" = $1 AND "user_type" = $2 AND "is_revoked" = false`,
+       WHERE "userId" = $1 AND "user_type" = $2 AND "is_revoked" = false`,
       [userId, userType]
     ) as QueryResult;
     
@@ -411,7 +411,7 @@ export class AuthRepo {
     
     await queryOne(
       `INSERT INTO "public"."${tableName}" 
-       ("${userIdColumn}", "token", "expires_at", "is_used", "created_at") 
+       ("${userIdColumn}", "token", "expiresAt", "is_used", "createdAt") 
        VALUES ($1, $2, $3, $4, $5)`,
       [userId, token, expiresAt, false, new Date()]
     );
@@ -428,7 +428,7 @@ export class AuthRepo {
     // Get verification record
     const verificationRecord = await queryOne(
       `SELECT * FROM "public"."${tableName}" 
-       WHERE "token" = $1 AND "is_used" = false AND "expires_at" > $2`,
+       WHERE "token" = $1 AND "is_used" = false AND "expiresAt" > $2`,
       [token, new Date()]
     );
     
@@ -461,7 +461,7 @@ export class AuthRepo {
     
     // Update the user's password in the appropriate table
     const result = await queryOne(
-      `UPDATE "public"."${userType}" SET "password" = $1, "updated_at" = $2 WHERE "id" = $3`,
+      `UPDATE "public"."${userType}" SET "password" = $1, "updatedAt" = $2 WHERE "id" = $3`,
       [hashedPassword, new Date(), userId]
     ) as QueryResult;
     
@@ -481,7 +481,7 @@ export class AuthRepo {
     for (const userType of userTypes) {
       const tableName = `${userType}_password_reset`;
       const result = await queryOne(
-        `DELETE FROM "public"."${tableName}" WHERE "expires_at" < $1 AND "is_used" = false`,
+        `DELETE FROM "public"."${tableName}" WHERE "expiresAt" < $1 AND "is_used" = false`,
         [now]
       ) as QueryResult;
       
@@ -492,7 +492,7 @@ export class AuthRepo {
     for (const userType of ['customer', 'merchant']) {
       const tableName = `${userType}_email_verification`;
       const result = await queryOne(
-        `DELETE FROM "public"."${tableName}" WHERE "expires_at" < $1 AND "is_used" = false`,
+        `DELETE FROM "public"."${tableName}" WHERE "expiresAt" < $1 AND "is_used" = false`,
         [now]
       ) as QueryResult;
       
@@ -501,7 +501,7 @@ export class AuthRepo {
     
     // Cleanup expired refresh tokens
     const refreshTokensResult = await queryOne(
-      `DELETE FROM "public"."auth_refresh_tokens" WHERE "expires_at" < $1`,
+      `DELETE FROM "public"."auth_refresh_tokens" WHERE "expiresAt" < $1`,
       [now]
     ) as QueryResult;
     

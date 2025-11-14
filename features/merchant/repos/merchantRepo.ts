@@ -47,127 +47,37 @@ type MerchantUpdateParams = Partial<Omit<Merchant, 'id' | 'createdAt' | 'updated
 type MerchantAddressCreateParams = Omit<MerchantAddress, 'id' | 'createdAt' | 'updatedAt'>;
 type MerchantPaymentInfoCreateParams = Omit<MerchantPaymentInfo, 'id' | 'createdAt' | 'updatedAt'>;
 
-// Field mapping between TypeScript camelCase and database snake_case
-const merchantFields = {
-  id: 'id',
-  name: 'name',
-  email: 'email',
-  phone: 'phone',
-  website: 'website',
-  logoUrl: 'logo_url',
-  description: 'description',
-  status: 'status',
-  createdAt: 'created_at',
-  updatedAt: 'updated_at'
-};
-
-const merchantAddressFields = {
-  id: 'id',
-  merchantId: 'merchant_id',
-  addressLine1: 'address_line1',
-  addressLine2: 'address_line2',
-  city: 'city',
-  state: 'state',
-  postalCode: 'postal_code',
-  country: 'country',
-  isPrimary: 'is_primary',
-  createdAt: 'created_at',
-  updatedAt: 'updated_at'
-};
-
-const merchantPaymentInfoFields = {
-  id: 'id',
-  merchantId: 'merchant_id',
-  accountHolderName: 'account_holder_name',
-  bankName: 'bank_name',
-  accountNumber: 'account_number',
-  routingNumber: 'routing_number',
-  paymentProcessor: 'payment_processor',
-  processorAccountId: 'processor_account_id',
-  isVerified: 'is_verified',
-  createdAt: 'created_at',
-  updatedAt: 'updated_at'
-};
-
-// Helper functions to transform between database and TypeScript formats
-function transformMerchantFromDb(dbRecord: Record<string, any>): Merchant {
-  return {
-    id: dbRecord.id,
-    name: dbRecord.name,
-    email: dbRecord.email,
-    phone: dbRecord.phone || undefined,
-    website: dbRecord.website || undefined,
-    logoUrl: dbRecord.logo_url || undefined,
-    description: dbRecord.description || undefined,
-    status: dbRecord.status,
-    createdAt: dbRecord.created_at,
-    updatedAt: dbRecord.updated_at
-  };
-}
-
-function transformMerchantAddressFromDb(dbRecord: Record<string, any>): MerchantAddress {
-  return {
-    id: dbRecord.id,
-    merchantId: dbRecord.merchant_id,
-    addressLine1: dbRecord.address_line1,
-    addressLine2: dbRecord.address_line2 || undefined,
-    city: dbRecord.city,
-    state: dbRecord.state,
-    postalCode: dbRecord.postal_code,
-    country: dbRecord.country,
-    isPrimary: dbRecord.is_primary,
-    createdAt: dbRecord.created_at,
-    updatedAt: dbRecord.updated_at
-  };
-}
-
-function transformMerchantPaymentInfoFromDb(dbRecord: Record<string, any>): MerchantPaymentInfo {
-  return {
-    id: dbRecord.id,
-    merchantId: dbRecord.merchant_id,
-    accountHolderName: dbRecord.account_holder_name,
-    bankName: dbRecord.bank_name || undefined,
-    accountNumber: dbRecord.account_number || undefined,
-    routingNumber: dbRecord.routing_number || undefined,
-    paymentProcessor: dbRecord.payment_processor || undefined,
-    processorAccountId: dbRecord.processor_account_id || undefined,
-    isVerified: dbRecord.is_verified,
-    createdAt: dbRecord.created_at,
-    updatedAt: dbRecord.updated_at
-  };
-}
+// Database uses camelCase for column names - no transformation needed
 
 export class MerchantRepo {
   async findById(id: string): Promise<Merchant | null> {
-    const result = await queryOne<Record<string, any>>(
+    return await queryOne<Merchant>(
       'SELECT * FROM "public"."merchant" WHERE "id" = $1', 
       [id]
     );
-    return result ? transformMerchantFromDb(result) : null;
   }
 
   async findByEmail(email: string): Promise<Merchant | null> {
-    const result = await queryOne<Record<string, any>>(
+    return await queryOne<Merchant>(
       'SELECT * FROM "public"."merchant" WHERE "email" = $1', 
       [email]
     );
-    return result ? transformMerchantFromDb(result) : null;
   }
 
   async findAll(limit: number = 50, offset: number = 0): Promise<Merchant[]> {
-    const results = await query<Record<string, any>[]>(
+    const results = await query<Merchant[]>(
       'SELECT * FROM "public"."merchant" ORDER BY "name" ASC LIMIT $1 OFFSET $2', 
       [limit.toString(), offset.toString()]
     );
-    return results ? results.map(transformMerchantFromDb) : [];
+    return results || [];
   }
 
   async findByStatus(status: Merchant['status'], limit: number = 50): Promise<Merchant[]> {
-    const results = await query<Record<string, any>[]>(
-      'SELECT * FROM "public"."merchant" WHERE "status" = $1 ORDER BY "created_at" DESC LIMIT $2', 
+    const results = await query<Merchant[]>(
+      'SELECT * FROM "public"."merchant" WHERE "status" = $1 ORDER BY "createdAt" DESC LIMIT $2', 
       [status, limit.toString()]
     );
-    return results ? results.map(transformMerchantFromDb) : [];
+    return results || [];
   }
 
   async create(params: MerchantCreateParams): Promise<Merchant> {
@@ -182,9 +92,9 @@ export class MerchantRepo {
       status
     } = params;
 
-    const result = await queryOne<Record<string, any>>(
+    const result = await queryOne<Merchant>(
       `INSERT INTO "public"."merchant" 
-      ("name", "email", "phone", "website", "logo_url", "description", "status", "created_at", "updated_at") 
+      ("name", "email", "phone", "website", "logoUrl", "description", "status", "createdAt", "updatedAt") 
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
       RETURNING *`,
       [name, email, phone || null, website || null, logoUrl || null, description || null, status, now, now]
@@ -194,7 +104,7 @@ export class MerchantRepo {
       throw new Error('Failed to create merchant');
     }
 
-    return transformMerchantFromDb(result);
+    return result;
   }
 
   async update(id: string, params: MerchantUpdateParams): Promise<Merchant> {
@@ -212,15 +122,14 @@ export class MerchantRepo {
     // Build dynamic query based on provided update params
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined) {
-        const dbField = merchantFields[key as keyof typeof merchantFields];
-        updateFields.push(`"${dbField}" = $${paramIndex}`);
+        updateFields.push(`"${key}" = $${paramIndex}`);
         values.push(value);
         paramIndex++;
       }
     });
 
     // Always update the updatedAt timestamp
-    updateFields.push(`"updated_at" = $${paramIndex}`);
+    updateFields.push(`"updatedAt" = $${paramIndex}`);
     values.push(now);
     paramIndex++;
 
@@ -234,13 +143,13 @@ export class MerchantRepo {
       RETURNING *
     `;
 
-    const result = await queryOne<Record<string, any>>(query, values);
+    const result = await queryOne<Merchant>(query, values);
 
     if (!result) {
       throw new Error(`Failed to update merchant with ID ${id}`);
     }
 
-    return transformMerchantFromDb(result);
+    return result;
   }
 
   async delete(id: string): Promise<boolean> {
@@ -254,11 +163,11 @@ export class MerchantRepo {
 
   // Address related methods
   async findAddressesByMerchantId(merchantId: string): Promise<MerchantAddress[]> {
-    const results = await query<Record<string, any>[]>(
-      'SELECT * FROM "public"."merchant_address" WHERE "merchant_id" = $1 ORDER BY "is_primary" DESC', 
+    const results = await query<MerchantAddress[]>(
+      'SELECT * FROM "public"."merchantAddress" WHERE "merchantId" = $1 ORDER BY "isPrimary" DESC', 
       [merchantId]
     );
-    return results ? results.map(transformMerchantAddressFromDb) : [];
+    return results || [];
   }
 
   async createAddress(params: MerchantAddressCreateParams): Promise<MerchantAddress> {
@@ -277,14 +186,14 @@ export class MerchantRepo {
     // If this is a primary address, update existing primary to non-primary
     if (isPrimary) {
       await query(
-        'UPDATE "public"."merchant_address" SET "is_primary" = false, "updated_at" = $1 WHERE "merchant_id" = $2 AND "is_primary" = true',
+        'UPDATE "public"."merchantAddress" SET "isPrimary" = false, "updatedAt" = $1 WHERE "merchantId" = $2 AND "isPrimary" = true',
         [now, merchantId]
       );
     }
 
-    const result = await queryOne<Record<string, any>>(
-      `INSERT INTO "public"."merchant_address" 
-      ("merchant_id", "address_line1", "address_line2", "city", "state", "postal_code", "country", "is_primary", "created_at", "updated_at") 
+    const result = await queryOne<MerchantAddress>(
+      `INSERT INTO "public"."merchantAddress" 
+      ("merchantId", "addressLine1", "addressLine2", "city", "state", "postalCode", "country", "isPrimary", "createdAt", "updatedAt") 
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) 
       RETURNING *`,
       [merchantId, addressLine1, addressLine2 || null, city, state, postalCode, country, isPrimary, now, now]
@@ -294,16 +203,15 @@ export class MerchantRepo {
       throw new Error('Failed to create merchant address');
     }
 
-    return transformMerchantAddressFromDb(result);
+    return result;
   }
 
   // Payment info related methods
   async findPaymentInfoByMerchantId(merchantId: string): Promise<MerchantPaymentInfo | null> {
-    const result = await queryOne<Record<string, any>>(
-      'SELECT * FROM "public"."merchant_payment_info" WHERE "merchant_id" = $1',
+    return await queryOne<MerchantPaymentInfo>(
+      'SELECT * FROM "public"."merchantPaymentInfo" WHERE "merchantId" = $1',
       [merchantId]
     );
-    return result ? transformMerchantPaymentInfoFromDb(result) : null;
   }
 
   async createPaymentInfo(params: MerchantPaymentInfoCreateParams): Promise<MerchantPaymentInfo> {
@@ -319,10 +227,10 @@ export class MerchantRepo {
       isVerified
     } = params;
 
-    const result = await queryOne<Record<string, any>>(
-      `INSERT INTO "public"."merchant_payment_info" 
-      ("merchant_id", "account_holder_name", "bank_name", "account_number", "routing_number", 
-      "payment_processor", "processor_account_id", "is_verified", "created_at", "updated_at") 
+    const result = await queryOne<MerchantPaymentInfo>(
+      `INSERT INTO "public"."merchantPaymentInfo" 
+      ("merchantId", "accountHolderName", "bankName", "accountNumber", "routingNumber", 
+      "paymentProcessor", "processorAccountId", "isVerified", "createdAt", "updatedAt") 
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) 
       RETURNING *`,
       [
@@ -343,6 +251,6 @@ export class MerchantRepo {
       throw new Error('Failed to create merchant payment info');
     }
 
-    return transformMerchantPaymentInfoFromDb(result);
+    return result;
   }
 }

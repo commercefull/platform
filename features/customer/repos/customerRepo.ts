@@ -207,7 +207,7 @@ export class CustomerRepo {
   // Customer methods
   async findAllCustomers(limit: number = 100, offset: number = 0): Promise<Array<Customer>> {
     const customers = await query<any[]>(
-      'SELECT * FROM "public"."customer" ORDER BY "last_name", "first_name" LIMIT $1 OFFSET $2',
+      'SELECT * FROM "public"."customer" ORDER BY "lastName", "firstName" LIMIT $1 OFFSET $2',
       [limit, offset]
     );
     return transformArrayDbToTs<Customer>(customers || [], customerFields);
@@ -226,8 +226,8 @@ export class CustomerRepo {
   async searchCustomers(searchTerm: string, limit: number = 100): Promise<Array<Customer>> {
     const customers = await query<any[]>(
       `SELECT * FROM "public"."customer" 
-       WHERE "email" ILIKE $1 OR "first_name" ILIKE $1 OR "last_name" ILIKE $1 OR "phone" ILIKE $1
-       ORDER BY "last_name", "first_name" LIMIT $2`,
+       WHERE "email" ILIKE $1 OR "firstName" ILIKE $1 OR "lastName" ILIKE $1 OR "phone" ILIKE $1
+       ORDER BY "lastName", "firstName" LIMIT $2`,
       [`%${searchTerm}%`, limit]
     );
     return transformArrayDbToTs<Customer>(customers || [], customerFields);
@@ -237,8 +237,8 @@ export class CustomerRepo {
     const now = new Date();
     const result = await queryOne<Customer>(
       `INSERT INTO "public"."customer" 
-      ("email", "first_name", "last_name", "phone", "date_of_birth", "is_active", 
-       "is_verified", "created_at", "updated_at", "last_login_at", "note", "metadata") 
+      ("email", "firstName", "lastName", "phone", "date_of_birth", "isActive", 
+       "isVerified", "createdAt", "updatedAt", "lastLoginAt", "note", "metadata") 
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) 
       RETURNING *`,
       [customer.email, customer.firstName, customer.lastName, customer.phone,
@@ -277,7 +277,7 @@ export class CustomerRepo {
       return existingCustomer;
     }
 
-    updates.push(`"updated_at" = $${paramCount}`);
+    updates.push(`"updatedAt" = $${paramCount}`);
     values.push(new Date());
     paramCount++;
 
@@ -301,7 +301,7 @@ export class CustomerRepo {
   async updateCustomerLoginTimestamp(id: string): Promise<Customer> {
     const now = new Date();
     const result = await queryOne<Customer>(
-      `UPDATE "public"."customer" SET "last_login_at" = $1, "updated_at" = $1 WHERE "id" = $2 RETURNING *`,
+      `UPDATE "public"."customer" SET "lastLoginAt" = $1, "updatedAt" = $1 WHERE "id" = $2 RETURNING *`,
       [now, id]
     );
     
@@ -329,7 +329,7 @@ export class CustomerRepo {
   // Customer Address methods
   async findCustomerAddresses(customerId: string): Promise<Array<CustomerAddress>> {
     const addresses = await query<any[]>(
-      'SELECT * FROM "public"."customer_address" WHERE "customer_id" = $1 ORDER BY "is_default" DESC, "created_at" DESC',
+      'SELECT * FROM "public"."customer_address" WHERE "customerId" = $1 ORDER BY "isDefault" DESC, "createdAt" DESC',
       [customerId]
     );
     return transformArrayDbToTs<CustomerAddress>(addresses || [], customerAddressFields);
@@ -342,7 +342,7 @@ export class CustomerRepo {
 
   async findDefaultCustomerAddress(customerId: string, addressType: CustomerAddress['addressType']): Promise<CustomerAddress | null> {
     const address = await queryOne<CustomerAddress>(
-      'SELECT * FROM "public"."customer_address" WHERE "customer_id" = $1 AND "address_type" = $2 AND "is_default" = true LIMIT 1',
+      'SELECT * FROM "public"."customer_address" WHERE "customerId" = $1 AND "address_type" = $2 AND "isDefault" = true LIMIT 1',
       [customerId, addressType]
     );
     return transformDbToTs(address, customerAddressFields) || null;
@@ -354,15 +354,15 @@ export class CustomerRepo {
     // If this is being set as default, clear any existing defaults of the same type
     if (address.isDefault) {
       await query(
-        'UPDATE "public"."customer_address" SET "is_default" = false WHERE "customer_id" = $1 AND "address_type" = $2 AND "is_default" = true',
+        'UPDATE "public"."customer_address" SET "isDefault" = false WHERE "customerId" = $1 AND "address_type" = $2 AND "isDefault" = true',
         [address.customerId, address.addressType]
       );
     }
     
     const result = await queryOne<CustomerAddress>(
       `INSERT INTO "public"."customer_address" 
-      ("customer_id", "address_line1", "address_line2", "city", "state", "postal_code", 
-       "country", "address_type", "is_default", "phone", "created_at", "updated_at") 
+      ("customerId", "addressLine1", "addressLine2", "city", "state", "postalCode", 
+       "country", "address_type", "isDefault", "phone", "createdAt", "updatedAt") 
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) 
       RETURNING *`,
       [address.customerId, address.addressLine1, address.addressLine2, address.city,
@@ -386,12 +386,12 @@ export class CustomerRepo {
     // If this is being set as default, clear any existing defaults of the same type
     if (address.isDefault && address.addressType) {
       await query(
-        'UPDATE "public"."customer_address" SET "is_default" = false WHERE "customer_id" = $1 AND "address_type" = $2 AND "is_default" = true',
+        'UPDATE "public"."customer_address" SET "isDefault" = false WHERE "customerId" = $1 AND "address_type" = $2 AND "isDefault" = true',
         [existingAddress.customerId, address.addressType]
       );
     } else if (address.isDefault && !address.addressType) {
       await query(
-        'UPDATE "public"."customer_address" SET "is_default" = false WHERE "customer_id" = $1 AND "address_type" = $2 AND "is_default" = true',
+        'UPDATE "public"."customer_address" SET "isDefault" = false WHERE "customerId" = $1 AND "address_type" = $2 AND "isDefault" = true',
         [existingAddress.customerId, existingAddress.addressType]
       );
     }
@@ -415,7 +415,7 @@ export class CustomerRepo {
       return existingAddress;
     }
 
-    updates.push(`"updated_at" = $${paramCount}`);
+    updates.push(`"updatedAt" = $${paramCount}`);
     values.push(new Date());
     paramCount++;
 
@@ -463,7 +463,7 @@ export class CustomerRepo {
 
   async findActiveCustomerGroups(): Promise<Array<CustomerGroup>> {
     const groups = await query<any[]>(
-      'SELECT * FROM "public"."customer_group" WHERE "is_active" = true ORDER BY "name" ASC'
+      'SELECT * FROM "public"."customer_group" WHERE "isActive" = true ORDER BY "name" ASC'
     );
     return transformArrayDbToTs<CustomerGroup>(groups || [], customerGroupFields);
   }
@@ -472,7 +472,7 @@ export class CustomerRepo {
     const now = new Date();
     const result = await queryOne<CustomerGroup>(
       `INSERT INTO "public"."customer_group" 
-      ("name", "description", "discount_percent", "is_active", "created_at", "updated_at") 
+      ("name", "description", "discount_percent", "isActive", "createdAt", "updatedAt") 
       VALUES ($1, $2, $3, $4, $5, $6) 
       RETURNING *`,
       [group.name, group.description, group.discountPercentage, group.isActive, now, now]
@@ -509,7 +509,7 @@ export class CustomerRepo {
       return existingGroup;
     }
 
-    updates.push(`"updated_at" = $${paramCount}`);
+    updates.push(`"updatedAt" = $${paramCount}`);
     values.push(new Date());
     paramCount++;
 
@@ -547,7 +547,7 @@ export class CustomerRepo {
   // Customer Group Membership methods
   async findCustomerGroupMemberships(customerId: string): Promise<Array<CustomerGroupMembership>> {
     const memberships = await query<any[]>(
-      'SELECT * FROM "public"."customer_group_membership" WHERE "customer_id" = $1',
+      'SELECT * FROM "public"."customer_group_membership" WHERE "customerId" = $1',
       [customerId]
     );
     return transformArrayDbToTs<CustomerGroupMembership>(memberships || [], customerGroupMembershipFields);
@@ -556,9 +556,9 @@ export class CustomerRepo {
   async findCustomersInGroup(groupId: string): Promise<Array<Customer>> {
     const customers = await query<any[]>(
       `SELECT c.* FROM "public"."customer" c
-       JOIN "public"."customer_group_membership" m ON c."id" = m."customer_id"
+       JOIN "public"."customer_group_membership" m ON c."id" = m."customerId"
        WHERE m."group_id" = $1
-       ORDER BY c."last_name", c."first_name"`,
+       ORDER BY c."lastName", c."firstName"`,
       [groupId]
     );
     return transformArrayDbToTs<Customer>(customers || [], customerFields);
@@ -567,7 +567,7 @@ export class CustomerRepo {
   async addCustomerToGroup(customerId: string, groupId: string): Promise<CustomerGroupMembership> {
     // Check if membership already exists
     const existingMembership = await queryOne<CustomerGroupMembership>(
-      'SELECT * FROM "public"."customer_group_membership" WHERE "customer_id" = $1 AND "group_id" = $2',
+      'SELECT * FROM "public"."customer_group_membership" WHERE "customerId" = $1 AND "group_id" = $2',
       [customerId, groupId]
     );
     
@@ -578,7 +578,7 @@ export class CustomerRepo {
     const now = new Date();
     const result = await queryOne<CustomerGroupMembership>(
       `INSERT INTO "public"."customer_group_membership" 
-      ("customer_id", "group_id", "added_at", "updated_at") 
+      ("customerId", "group_id", "added_at", "updatedAt") 
       VALUES ($1, $2, $3, $4) 
       RETURNING *`,
       [customerId, groupId, now, now]
@@ -595,7 +595,7 @@ export class CustomerRepo {
     const result = await queryOne<{count: string}>(
       `WITH deleted AS (
         DELETE FROM "public"."customer_group_membership" 
-        WHERE "customer_id" = $1 AND "group_id" = $2
+        WHERE "customerId" = $1 AND "group_id" = $2
         RETURNING *
       ) 
       SELECT COUNT(*) as count FROM deleted`,
@@ -608,7 +608,7 @@ export class CustomerRepo {
   // Customer Wishlist methods
   async findCustomerWishlists(customerId: string): Promise<Array<CustomerWishlist>> {
     const wishlists = await query<any[]>(
-      'SELECT * FROM "public"."customer_wishlist" WHERE "customer_id" = $1 ORDER BY "created_at" DESC',
+      'SELECT * FROM "public"."customer_wishlist" WHERE "customerId" = $1 ORDER BY "createdAt" DESC',
       [customerId]
     );
     return transformArrayDbToTs<CustomerWishlist>(wishlists || [], customerWishlistFields);
@@ -623,7 +623,7 @@ export class CustomerRepo {
     const now = new Date();
     const result = await queryOne<CustomerWishlist>(
       `INSERT INTO "public"."customer_wishlist" 
-      ("customer_id", "name", "is_public", "created_at", "updated_at") 
+      ("customerId", "name", "is_public", "createdAt", "updatedAt") 
       VALUES ($1, $2, $3, $4, $5) 
       RETURNING *`,
       [wishlist.customerId, wishlist.name, wishlist.isPublic, now, now]
@@ -660,7 +660,7 @@ export class CustomerRepo {
       return existingWishlist;
     }
 
-    updates.push(`"updated_at" = $${paramCount}`);
+    updates.push(`"updatedAt" = $${paramCount}`);
     values.push(new Date());
     paramCount++;
 
@@ -712,7 +712,7 @@ export class CustomerRepo {
   async addItemToWishlist(item: Omit<CustomerWishlistItem, 'id'>): Promise<CustomerWishlistItem> {
     // Check if item already exists in wishlist
     const existingItem = await queryOne<CustomerWishlistItem>(
-      'SELECT * FROM "public"."customer_wishlist_item" WHERE "wishlist_id" = $1 AND "product_id" = $2 AND "variant_id" IS NOT DISTINCT FROM $3',
+      'SELECT * FROM "public"."customer_wishlist_item" WHERE "wishlist_id" = $1 AND "productId" = $2 AND "variant_id" IS NOT DISTINCT FROM $3',
       [item.wishlistId, item.productId, item.variantId]
     );
     
@@ -729,7 +729,7 @@ export class CustomerRepo {
     
     const result = await queryOne<CustomerWishlistItem>(
       `INSERT INTO "public"."customer_wishlist_item" 
-      ("wishlist_id", "product_id", "variant_id", "added_at", "note") 
+      ("wishlist_id", "productId", "variant_id", "added_at", "note") 
       VALUES ($1, $2, $3, $4, $5) 
       RETURNING *`,
       [item.wishlistId, item.productId, item.variantId, item.addedAt || new Date(), item.note]
@@ -786,9 +786,9 @@ export class CustomerRepo {
         COUNT(*) as "orderCount",
         SUM(total) as "totalSpent",
         AVG(total) as "averageOrderValue",
-        MAX("created_at") as "lastOrderDate"
+        MAX("createdAt") as "lastOrderDate"
        FROM "public"."order"
-       WHERE "customer_id" = $1`,
+       WHERE "customerId" = $1`,
       [customerId]
     );
     
@@ -812,7 +812,7 @@ export class CustomerRepo {
   async getNewCustomersCount(days: number = 30): Promise<number> {
     const result = await queryOne<{count: string}>(
       `SELECT COUNT(*) as count FROM "public"."customer"
-       WHERE "created_at" >= NOW() - INTERVAL '${days} days'`
+       WHERE "createdAt" >= NOW() - INTERVAL '${days} days'`
     );
     
     return result ? parseInt(result.count) : 0;
@@ -825,7 +825,7 @@ export class CustomerRepo {
         SUM(o.total) as "totalSpent",
         COUNT(o.id) as "orderCount"
        FROM "public"."customer" c
-       JOIN "public"."order" o ON c."id" = o."customer_id"
+       JOIN "public"."order" o ON c."id" = o."customerId"
        GROUP BY c."id"
        ORDER BY "totalSpent" DESC
        LIMIT $1`,

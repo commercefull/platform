@@ -79,12 +79,12 @@ export class VariantRepo {
 
   async findByProduct(productId: string): Promise<Variant[] | null> {
     const selectFields = this.generateSelectFields();
-    return await query<Variant[]>(`SELECT ${selectFields} FROM "public"."product_variant" WHERE "product_id" = $1`, [productId]);
+    return await query<Variant[]>(`SELECT ${selectFields} FROM "public"."product_variant" WHERE "productId" = $1`, [productId]);
   }
 
   async findDefaultVariant(productId: string): Promise<Variant | null> {
     const selectFields = this.generateSelectFields();
-    return await queryOne<Variant>(`SELECT ${selectFields} FROM "public"."product_variant" WHERE "product_id" = $1 AND "is_default" = true`, [productId]);
+    return await queryOne<Variant>(`SELECT ${selectFields} FROM "public"."product_variant" WHERE "productId" = $1 AND "isDefault" = true`, [productId]);
   }
 
   async findInStock(minQuantity = 1): Promise<Variant[] | null> {
@@ -143,7 +143,7 @@ export class VariantRepo {
     });
 
     // Add updatedAt and id
-    updates.push(`"updated_at" = $${paramIndex++}`);
+    updates.push(`"updatedAt" = $${paramIndex++}`);
     values.push(unixTimestamp());
     values.push(id);
 
@@ -161,7 +161,7 @@ export class VariantRepo {
   async updateStock(id: string, quantity: number): Promise<Variant | null> {
     const returnFields = this.generateSelectFields();
     return await queryOne<Variant>(
-      `UPDATE "public"."product_variant" SET "quantity" = $1, "updated_at" = $2 WHERE "id" = $3 RETURNING ${returnFields}`,
+      `UPDATE "public"."product_variant" SET "quantity" = $1, "updatedAt" = $2 WHERE "id" = $3 RETURNING ${returnFields}`,
       [quantity, unixTimestamp(), id]
     );
   }
