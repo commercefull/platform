@@ -7,13 +7,13 @@ exports.up = function (knex) {
     t.uuid('merchantTransactionId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.uuid('merchantId').notNullable().references('merchantId').inTable('merchant').onDelete('CASCADE');
-    t.enu('transactionType', ['sale', 'refund', 'chargeback', 'commission', 'adjustment', 'payout', 'fee'], { useNative: true, enumName: 'merchant_transaction_type' }).notNullable();
+    t.enum('transactionType', ['sale', 'refund', 'chargeback', 'commission', 'adjustment', 'payout', 'fee']).notNullable();
     t.decimal('amount', 15, 2).notNullable();
     t.string('currency', 3).notNullable().defaultTo('USD');
     t.uuid('referenceId');
     t.string('referenceType', 50);
     t.text('description');
-    t.enu('status', ['pending', 'completed', 'failed', 'cancelled'], { useNative: true, enumName: 'merchant_transaction_status' }).notNullable().defaultTo('completed');
+    t.enum('status', ['pending', 'completed', 'failed', 'cancelled']).notNullable().defaultTo('completed');
     t.decimal('availableBalanceBefore', 15, 2);
     t.decimal('availableBalanceAfter', 15, 2);
     t.decimal('pendingBalanceBefore', 15, 2);

@@ -8,9 +8,9 @@ exports.up = function (knex) {
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     t.uuid('merchantId').notNullable().references('merchantId').inTable('merchant').onDelete('CASCADE');
-    t.enu('taxIdentificationType', ['ssn', 'ein', 'tin', 'vat', 'gst', 'other'], { useNative: true, enumName: 'merchant_tax_id_type' }).notNullable();
+    t.enum('taxIdentificationType', ['ssn', 'ein', 'tin', 'vat', 'gst', 'other']).notNullable();
     t.string('taxIdentificationNumber', 255).notNullable();
-    t.enu('businessType', ['individual', 'sole_proprietorship', 'partnership', 'llc', 'corporation', 'non_profit'], { useNative: true, enumName: 'merchant_business_type' });
+    t.enum('businessType', ['individual', 'sole_proprietorship', 'partnership', 'llc', 'corporation', 'non_profit']);
     t.string('legalName', 100).notNullable();
     t.jsonb('taxAddress').notNullable();
     t.boolean('isVerified').notNullable().defaultTo(false);

@@ -17,9 +17,9 @@ exports.up = function (knex) {
     t.string('activeProviderCode', 50).references('code').inTable('currencyProvider');
     t.decimal('markupPercentage', 5, 2).notNullable().defaultTo(0);
     t.integer('roundPrecision').notNullable().defaultTo(2);
-    t.enu('roundingMethod', ['up', 'down', 'ceiling', 'floor', 'half_up', 'half_down', 'half_even'], { useNative: true, enumName: 'rounding_method_enum' }).notNullable().defaultTo('half_up');
+    t.enum('roundingMethod', ['up', 'down', 'ceiling', 'floor', 'half_up', 'half_down', 'half_even']).notNullable().defaultTo('half_up');
     t.specificType('enabledCurrencies', 'text[]');
-    t.enu('priceDisplayFormat', ['symbol', 'code', 'symbol_code', 'name'], { useNative: true, enumName: 'price_display_format_enum' }).notNullable().defaultTo('symbol');
+    t.enum('priceDisplayFormat', ['symbol', 'code', 'symbol_code', 'name']).notNullable().defaultTo('symbol');
     t.uuid('updatedBy');
     t.index('storeCurrencyId');
     t.index('baseCurrencyId');

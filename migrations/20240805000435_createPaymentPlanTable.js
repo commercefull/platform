@@ -18,8 +18,7 @@ exports.up = function(knex) {
     t.boolean('autoRenew').notNullable().defaultTo(true);
     t.integer('gracePeriodDays').notNullable().defaultTo(3);
     t.jsonb('cancelationPolicy');
-    t.specificType('allowedPaymentMethods', '"paymentMethodType"[]');
-    
+    t.enum('allowedPaymentMethods', ['creditCard', 'debitCard', 'giftCard', 'storeCredit', 'other']).notNullable();
     
     t.index('merchantId');
     t.index('isActive');

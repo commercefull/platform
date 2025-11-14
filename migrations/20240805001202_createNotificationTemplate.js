@@ -10,9 +10,9 @@ exports.up = function (knex) {
     t.string('code', 100).notNullable().unique();
     t.string('name', 100).notNullable();
     t.text('description');
-    t.specificType('type', 'notification_type').notNullable();
-    t.specificType('supportedChannels', 'notification_channel[]').notNullable();
-    t.specificType('defaultChannel', 'notification_channel').notNullable();
+    t.enum('type', ['account_registration', 'password_reset', 'email_verification', 'order_confirmation', 'order_shipped', 'order_delivered', 'order_cancelled', 'return_initiated', 'refund_processed', 'back_in_stock', 'price_drop', 'new_product', 'review_request', 'abandoned_cart', 'coupon_offer', 'promotion']).notNullable();
+    t.enum('supportedChannels', ['email', 'sms', 'push', 'in_app']).notNullable();
+    t.enum('defaultChannel', ['email', 'sms', 'push', 'in_app']).notNullable();
     t.string('subject', 255);
     t.text('htmlTemplate');
     t.text('textTemplate');
@@ -28,7 +28,7 @@ exports.up = function (knex) {
     t.index('type');
     t.index('isActive');
     t.index('categoryCode');
-    t.index('supportedChannels', null, 'gin');
+    t.index('supportedChannels');
   });
 };
 

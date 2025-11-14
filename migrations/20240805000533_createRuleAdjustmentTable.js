@@ -1,7 +1,7 @@
 exports.up = function(knex) {
   return knex.schema.createTable('ruleAdjustment', t => {
     t.uuid('ruleAdjustmentId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
-    t.uuid('pricingRuleId').notNullable().references('pricingRuleId').inTable('pricing_rule').onDelete('CASCADE');
+    t.uuid('pricingRuleId').notNullable().references('pricingRuleId').inTable('pricingRule').onDelete('CASCADE');
     t.enum('type', ['percentage', 'fixed']).notNullable();
     t.decimal('value', 10, 2).notNullable();
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());

@@ -17,7 +17,7 @@ exports.up = function (knex) {
     t.boolean('isApproved').notNullable().defaultTo(false);
     t.boolean('isPublished').notNullable().defaultTo(false);
     t.timestamp('publishedAt');
-    t.enu('status', ['pending', 'approved', 'rejected', 'removed'], { useNative: true, enumName: 'merchant_review_status' }).notNullable().defaultTo('pending');
+    t.enum('status', ['pending', 'approved', 'rejected', 'removed']).notNullable().defaultTo('pending');
     t.timestamp('reviewedAt');
     t.uuid('reviewedBy');
     t.text('reviewNotes');

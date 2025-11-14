@@ -10,7 +10,7 @@ exports.up = function (knex) {
     t.string('code', 50).notNullable().unique();
     t.string('name', 100).notNullable();
     t.text('description');
-    t.specificType('defaultPriority', 'notification_priority').notNullable().defaultTo('normal');
+    t.enum('defaultPriority', ['low', 'normal', 'high']).notNullable().defaultTo('normal');
     t.boolean('isTransactional').notNullable().defaultTo(false);
     
     t.index('code');

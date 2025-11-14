@@ -14,7 +14,7 @@ exports.up = function (knex) {
     t.decimal('tax', 15, 2).notNullable().defaultTo(0);
     t.decimal('total', 15, 2).notNullable();
     t.string('currency', 3).notNullable().defaultTo('USD');
-    t.enum('status', ['draft', 'issued', 'paid', 'cancelled', 'void'], { useNative: true, enumName: 'merchantInvoiceStatus' }).notNullable().defaultTo('draft');
+    t.enum('status', ['draft', 'issued', 'paid', 'cancelled', 'void']).notNullable().defaultTo('draft');
     t.timestamp('invoiceDate').notNullable().defaultTo(knex.fn.now());
     t.timestamp('dueDate');
     t.timestamp('paidDate');

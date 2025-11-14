@@ -6,21 +6,21 @@ exports.up = function(knex) {
     t.uuid('discountId').notNullable().references('productDiscountId').inTable('productDiscount').onDelete('CASCADE');
     t.uuid('productId').references('productId').inTable('product').onDelete('CASCADE');
     t.uuid('productVariantId').references('productVariantId').inTable('productVariant').onDelete('CASCADE');
-    t.uuid('categoryId').references('categoryId').inTable('productCategory').onDelete('CASCADE');
-    t.uuid('brandId').references('brandId').inTable('productBrand').onDelete('CASCADE');
+    t.uuid('productCategoryId').notNullable().references('productCategoryId').inTable('productCategory').onDelete('CASCADE');
+    t.uuid('productBrandId').references('productBrandId').inTable('productBrand').onDelete('CASCADE');
     t.enum('itemType', ['product', 'variant', 'category', 'brand']).notNullable();
 
     t.index('discountId');
     t.index('productId');
     t.index('productVariantId');
-    t.index('categoryId');
-    t.index('brandId');
+    t.index('productCategoryId');
+    t.index('productBrandId');
     t.index('itemType');
 
     t.unique(['discountId', 'productId'], 'idx_discount_product');
     t.unique(['discountId', 'productVariantId'], 'idx_discount_variant');
-    t.unique(['discountId', 'categoryId'], 'idx_discount_category');
-    t.unique(['discountId', 'brandId'], 'idx_discount_brand');
+    t.unique(['discountId', 'productCategoryId'], 'idx_discount_category');
+    t.unique(['discountId', 'productBrandId'], 'idx_discount_brand');
   });
 };
 

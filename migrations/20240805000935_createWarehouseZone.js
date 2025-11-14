@@ -10,7 +10,7 @@ exports.up = function (knex) {
     t.string('code', 20).notNullable();
     t.text('description');
     t.boolean('isActive').notNullable().defaultTo(true);
-    t.enu('zoneType', ['storage', 'picking', 'packing', 'shipping', 'receiving', 'returns', 'quarantine', 'special'], { useNative: true, enumName: 'warehouse_zone_type' }).notNullable();
+    t.enum('zoneType', ['storage', 'picking', 'packing', 'shipping', 'receiving', 'returns', 'quarantine', 'special']).notNullable();
     t.jsonb('capabilities');
     t.integer('priority').defaultTo(0);
     t.decimal('capacity', 10, 2);

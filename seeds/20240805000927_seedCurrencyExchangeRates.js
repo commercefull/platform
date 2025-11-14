@@ -4,8 +4,8 @@
  */
 exports.up = function (knex) {
   return knex.raw(`
-    WITH currency_ids AS (
-      SELECT id, code FROM currency WHERE code IN ('USD', 'EUR', 'GBP', 'CAD')
+    WITH "currencyIds" AS (
+      SELECT "currencyId", code FROM currency WHERE code IN ('USD', 'EUR', 'GBP', 'CAD')
     )
     INSERT INTO "currencyExchangeRate" (
       "sourceCurrencyId", 
@@ -16,15 +16,15 @@ exports.up = function (knex) {
       "effectiveFrom"
     )
     SELECT 
-      usd.id, 
-      eur.id, 
+      usd."currencyId", 
+      eur."currencyId", 
       0.9200000000, 
       1.0869565217, 
       'manual', 
       CURRENT_TIMESTAMP
     FROM 
-      currency_ids usd, 
-      currency_ids eur
+      "currencyIds" usd, 
+      "currencyIds" eur
     WHERE 
       usd.code = 'USD' AND 
       eur.code = 'EUR'
@@ -32,15 +32,15 @@ exports.up = function (knex) {
     UNION ALL
     
     SELECT 
-      usd.id, 
-      gbp.id, 
+      usd."currencyId", 
+      gbp."currencyId", 
       0.7800000000, 
       1.2820512821, 
       'manual', 
       CURRENT_TIMESTAMP
     FROM 
-      currency_ids usd, 
-      currency_ids gbp
+      "currencyIds" usd, 
+      "currencyIds" gbp
     WHERE 
       usd.code = 'USD' AND 
       gbp.code = 'GBP'
@@ -48,15 +48,15 @@ exports.up = function (knex) {
     UNION ALL
 
     SELECT
-      usd.id,
-      cad.id,
+      usd."currencyId",
+      cad."currencyId",
       1.3500000000,
       0.7407407407,
       'manual',
       CURRENT_TIMESTAMP
     FROM
-      currency_ids usd,
-      currency_ids cad
+      "currencyIds" usd,
+      "currencyIds" cad
     WHERE
       usd.code = 'USD' AND
       cad.code = 'CAD'
@@ -68,8 +68,8 @@ exports.up = function (knex) {
  * @returns { Promise<void> }
  */
 exports.down = async function (knex) {
-    const currencies = await knex('currency').whereIn('code', ['USD', 'EUR', 'GBP', 'CAD']).select('id', 'code');
-    const currencyMap = currencies.reduce((acc, curr) => ({ ...acc, [curr.code]: curr.id }), {});
+    const currencies = await knex('currency').whereIn('code', ['USD', 'EUR', 'GBP', 'CAD']).select('currencyId', 'code');
+    const currencyMap = currencies.reduce((acc, curr) => ({ ...acc, [curr.code]: curr.currencyId }), {});
 
     if (currencyMap.USD && currencyMap.EUR) {
         await knex('currencyExchangeRate').where({ sourceCurrencyId: currencyMap.USD, targetCurrencyId: currencyMap.EUR }).delete();
@@ -80,4 +80,9 @@ exports.down = async function (knex) {
     if (currencyMap.USD && currencyMap.CAD) {
         await knex('currencyExchangeRate').where({ sourceCurrencyId: currencyMap.USD, targetCurrencyId: currencyMap.CAD }).delete();
     }
+};
+
+exports.seed = async function (knex) {
+  await exports.down(knex);
+  return exports.up(knex);
 };

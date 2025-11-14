@@ -10,7 +10,7 @@ exports.up = function(knex) {
     t.decimal('discountPercent', 5, 2);
     t.string('discountCode', 50);
     t.boolean('freeShipping').notNullable().defaultTo(false);
-    t.array('productIds').notNullable();
+    t.jsonb('productIds').notNullable();
     t.timestamp('expiresAt');
     t.boolean('isActive').notNullable().defaultTo(true);
 

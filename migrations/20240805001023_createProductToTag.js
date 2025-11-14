@@ -8,10 +8,10 @@ exports.up = function (knex) {
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     t.uuid('productId').notNullable().references('productId').inTable('product').onDelete('CASCADE');
-    t.uuid('tagId').notNullable().references('tagId').inTable('productTag').onDelete('CASCADE');
+    t.uuid('productTagId').notNullable().references('productTagId').inTable('productTag').onDelete('CASCADE');
     t.index('productId');
-    t.index('tagId');
-    t.unique(['productId', 'tagId']);
+    t.index('productTagId');
+    t.unique(['productId', 'productTagId']);
   });
 };
 

@@ -13,7 +13,7 @@ exports.up = function (knex) {
     t.string('sku', 100).notNullable();
     t.string('supplierSku', 100);
     t.string('supplierProductName', 255);
-    t.enum('status', ['active', 'inactive', 'discontinued', 'pending'], { useNative: true, enumName: 'supplier_product_status_type' }).notNullable().defaultTo('active');
+    t.enum('status', ['active', 'inactive', 'discontinued', 'pending']).notNullable().defaultTo('active');
     t.boolean('isPreferred').notNullable().defaultTo(false);
     t.decimal('unitCost', 10, 2).notNullable();
     t.string('currency', 3).notNullable().defaultTo('USD');

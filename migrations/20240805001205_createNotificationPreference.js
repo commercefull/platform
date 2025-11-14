@@ -7,8 +7,8 @@ exports.up = function (knex) {
     t.uuid('notificationPreferenceId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     t.uuid('userId').notNullable();
-    t.enu('userType', ['customer', 'merchant', 'admin'], { useNative: true, enumName: 'notification_user_type' }).notNullable().defaultTo('customer');
-    t.specificType('type', 'notification_type').notNullable();
+    t.enum('userType', ['customer', 'merchant', 'admin']).notNullable().defaultTo('customer');
+    t.enum('type', ['account_registration', 'password_reset', 'email_verification', 'order_confirmation', 'order_shipped', 'order_delivered', 'order_cancelled', 'return_initiated', 'refund_processed', 'back_in_stock', 'price_drop', 'new_product', 'review_request', 'abandoned_cart', 'coupon_offer', 'promotion']).notNullable();
     t.jsonb('channelPreferences').notNullable().defaultTo('{}');
     t.boolean('isEnabled').notNullable().defaultTo(true);
     t.jsonb('schedulePreferences');

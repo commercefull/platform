@@ -20,7 +20,7 @@ exports.up = function(knex) {
     t.jsonb('contentData');
     t.jsonb('sendingSettings');
     t.jsonb('testRecipients');
-    
+    t.uuid('createdBy');
 
     t.index('type');
     t.index('templateId');

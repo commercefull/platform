@@ -15,7 +15,7 @@ exports.up = function (knex) {
     t.decimal('flatRate', 10, 2);
     t.decimal('freeShippingThreshold', 10, 2);
     t.integer('processingTime').defaultTo(1);
-        t.enu('rulesType', ['flat', 'weight', 'price', 'distance', 'item', 'complex'], { useNative: true, enumName: 'merchantShippingTemplateRulesType' }).notNullable().defaultTo('flat');
+    t.enum('rulesType', ['flat', 'weight', 'price', 'distance', 'item', 'complex']).notNullable().defaultTo('flat');
     t.jsonb('rules');
     t.jsonb('shippingDestinations');
     t.jsonb('restrictedDestinations');

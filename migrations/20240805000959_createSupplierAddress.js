@@ -15,7 +15,7 @@ exports.up = function (knex) {
     t.string('state', 100).notNullable();
     t.string('postalCode', 20).notNullable();
     t.string('country', 2).notNullable();
-    t.enum('addressType', ['headquarters', 'billing', 'warehouse', 'returns', 'manufacturing'], { useNative: true, enumName: 'supplier_address_type' }).notNullable().defaultTo('headquarters');
+    t.enum('addressType', ['headquarters', 'billing', 'warehouse', 'returns', 'manufacturing']).notNullable().defaultTo('headquarters');
     t.boolean('isDefault').notNullable().defaultTo(false);
     t.string('contactName', 100);
     t.string('contactEmail', 255);

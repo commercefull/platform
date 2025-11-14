@@ -16,7 +16,7 @@ exports.up = function (knex) {
     t.text('altText');
     t.text('caption');
     t.text('description');
-    t.foreign('folderId').references('contentMediaFolderId').inTable('contentMediaFolder').onDelete('SET NULL');
+    t.uuid('contentMediaFolderId').references('contentMediaFolderId').inTable('contentMediaFolder').onDelete('SET NULL');
     t.text('url').notNullable();
     t.text('thumbnailUrl');
     t.integer('sortOrder').notNullable().defaultTo(0);
@@ -31,7 +31,7 @@ exports.up = function (knex) {
     t.uuid('updatedBy');
     t.index('fileName');
     t.index('fileType');
-    t.index('folderId');
+    t.index('contentMediaFolderId');
     t.index('tags', null, 'gin'); // Use GIN index for array
     t.index('createdAt');
   });

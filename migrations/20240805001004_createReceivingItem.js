@@ -16,7 +16,7 @@ exports.up = function (knex) {
     t.integer('expectedQuantity');
     t.integer('receivedQuantity').notNullable();
     t.integer('rejectedQuantity').notNullable().defaultTo(0);
-    t.uuid('binId').references('binId').inTable('warehouseBin');
+    t.uuid('warehouseBinId').references('warehouseBinId').inTable('warehouseBin');
     t.string('lotNumber', 100);
     t.specificType('serialNumbers', 'text[]');
     t.timestamp('expiryDate');
@@ -32,7 +32,7 @@ exports.up = function (knex) {
     t.index('productId');
     t.index('productVariantId');
     t.index('sku');
-    t.index('binId');
+    t.index('warehouseBinId');
     t.index('lotNumber');
     t.index('expiryDate');
     t.index('status');

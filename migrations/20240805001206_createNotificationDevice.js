@@ -8,9 +8,9 @@ exports.up = function (knex) {
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     t.uuid('userId').notNullable();
-    t.specificType('userType', 'notification_user_type').notNullable().defaultTo('customer');
+    t.enum('userType', ['customer', 'merchant', 'admin']).notNullable().defaultTo('customer');
     t.text('deviceToken').notNullable();
-    t.enu('deviceType', ['ios', 'android', 'web', 'desktop', 'other'], { useNative: true, enumName: 'notification_device_type' }).notNullable();
+    t.enum('deviceType', ['ios', 'android', 'web', 'desktop', 'other']).notNullable();
     t.string('deviceName', 100);
     t.string('deviceModel', 100);
     t.string('appVersion', 20);

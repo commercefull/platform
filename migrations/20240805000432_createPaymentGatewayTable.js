@@ -14,13 +14,12 @@ exports.up = function(knex) {
     t.text('publicKey');
     t.text('webhookSecret');
     t.text('apiEndpoint');
-    t.enum('supportedPaymentMethods', ['creditCard', 'debitCard', 'giftCard', 'storeCredit', 'other']).notNullable().defaultTo(knex.raw(`'{"credit_card", "debit_card"}'::"paymentMethodType"[]`));
-
+    t.enum('supportedPaymentMethods', ['creditCard', 'debitCard', 'giftCard', 'storeCredit', 'other']).notNullable();
 
     t.index('merchantId');
     t.index('provider');
     t.index('isActive');
-    t.unique(['merchantId', 'isDefault'], { predicate: knex.raw('"isDefault" = true') });
+
   });
 };
 

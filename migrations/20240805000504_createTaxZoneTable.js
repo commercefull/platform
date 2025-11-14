@@ -7,10 +7,10 @@ exports.up = function(knex) {
     t.string('code', 50).notNullable().unique();
     t.text('description');
     t.boolean('isDefault').notNullable().defaultTo(false);
-    t.array('countries').notNullable();
-    t.array('states');
-    t.array('postcodes');
-    t.array('cities');
+    t.jsonb('countries').notNullable();
+    t.jsonb('states');
+    t.jsonb('postcodes');
+    t.jsonb('cities');
     t.boolean('isActive').notNullable().defaultTo(true);
     
 

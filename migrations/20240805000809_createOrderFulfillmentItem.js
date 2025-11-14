@@ -10,7 +10,7 @@ exports.up = function (knex) {
     t.uuid('orderFulfillmentId').notNullable().references('orderFulfillmentId').inTable('orderFulfillment').onDelete('CASCADE');
     t.uuid('orderItemId').notNullable().references('orderItemId').inTable('orderItem').onDelete('CASCADE');
     t.integer('quantity').notNullable().defaultTo(1);
-    t.index('fulfillmentId');
+    t.index('orderFulfillmentId');
     t.index('orderItemId');
     t.unique(['orderFulfillmentId', 'orderItemId']);
   });

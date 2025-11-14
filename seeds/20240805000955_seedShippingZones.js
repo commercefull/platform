@@ -3,21 +3,21 @@
  * @returns { Promise<void> }
  */
 exports.up = function (knex) {
-  return knex('shipping_zone').insert([
+  return knex('shippingZone').insert([
     {
       name: 'Worldwide',
       description: 'Default shipping zone covering all locations',
-      is_active: true,
+      isActive: true,
       priority: 0,
-      location_type: 'country',
+      locationType: 'country',
       locations: JSON.stringify(['*'])
     },
     {
       name: 'United States',
       description: 'Shipping within the United States',
-      is_active: true,
+      isActive: true,
       priority: 10,
-      location_type: 'country',
+      locationType: 'country',
       locations: JSON.stringify(['US'])
     }
   ]);
@@ -28,5 +28,10 @@ exports.up = function (knex) {
  * @returns { Promise<void> }
  */
 exports.down = function (knex) {
-  return knex('shipping_zone').whereIn('name', ['Worldwide', 'United States']).delete();
+  return knex('shippingZone').whereIn('name', ['Worldwide', 'United States']).delete();
+};
+
+exports.seed = async function (knex) {
+  await exports.down(knex);
+  return exports.up(knex);
 };

@@ -44,3 +44,8 @@ exports.down = async function (knex) {
     await knex('merchantShippingTemplate').where({ merchantId: sampleMerchant.merchantId, name: 'Standard Shipping' }).del();
   }
 };
+
+exports.seed = async function (knex) {
+  await exports.down(knex);
+  return exports.up(knex);
+};

@@ -2,7 +2,16 @@
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.up = function (knex) {
+exports.up = async function (knex) {
+  await knex.schema.raw(`
+    DO $$
+    BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'shipping_method_domestic_international_type') THEN
+        CREATE TYPE shipping_method_domestic_international_type AS ENUM ('domestic', 'international', 'both');
+      END IF;
+    END$$;
+  `);
+
   return knex.schema.createTable('shippingMethod', t => {
     t.uuid('shippingMethodId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
@@ -14,7 +23,7 @@ exports.up = function (knex) {
     t.boolean('isActive').notNullable().defaultTo(true);
     t.boolean('isDefault').notNullable().defaultTo(false);
     t.string('serviceCode', 50);
-    t.enum('domesticInternational', ['domestic', 'international', 'both'], { useNative: true, enumName: 'shipping_method_domestic_international_type' }).notNullable().defaultTo('both');
+    t.enu('domesticInternational', ['domestic', 'international', 'both'], { useNative: true, enumName: 'shipping_method_domestic_international_type', existingType: true }).notNullable().defaultTo('both');
     t.jsonb('estimatedDeliveryDays');
     t.integer('handlingDays').defaultTo(1);
     t.integer('priority').defaultTo(0);
@@ -44,6 +53,7 @@ exports.up = function (knex) {
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.down = function (knex) {
-  return knex.schema.dropTable('shippingMethod');
+exports.down = async function (knex) {
+  await knex.schema.dropTable('shippingMethod');
+  await knex.schema.raw('DROP TYPE IF EXISTS shipping_method_domestic_international_type;');
 };

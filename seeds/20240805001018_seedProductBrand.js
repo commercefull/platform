@@ -3,20 +3,20 @@
  * @returns { Promise<void> }
  */
 exports.up = function (knex) {
-  return knex('product_brand').insert([
+  return knex('productBrand').insert([
     {
       name: 'Generic',
       slug: 'generic',
       description: 'Generic/unbranded products',
-      is_active: true,
-      is_featured: false
+      isActive: true,
+      isFeatured: false
     },
     {
       name: 'Sample Brand',
       slug: 'sample-brand',
       description: 'Sample brand for testing',
-      is_active: true,
-      is_featured: true
+      isActive: true,
+      isFeatured: true
     }
   ]);
 };
@@ -26,5 +26,31 @@ exports.up = function (knex) {
  * @returns { Promise<void> }
  */
 exports.down = function (knex) {
-  return knex('product_brand').whereIn('slug', ['generic', 'sample-brand']).delete();
+  return knex('productBrand').whereIn('slug', ['generic', 'sample-brand']).delete();
+};
+
+exports.seed = async function (knex) {
+  const brands = [
+    {
+      name: 'Generic',
+      slug: 'generic',
+      description: 'Generic/unbranded products',
+      isActive: true,
+      isFeatured: false
+    },
+    {
+      name: 'Sample Brand',
+      slug: 'sample-brand',
+      description: 'Sample brand for testing',
+      isActive: true,
+      isFeatured: true
+    }
+  ];
+
+  for (const brand of brands) {
+    await knex('productBrand')
+      .insert(brand)
+      .onConflict('slug')
+      .merge();
+  }
 };

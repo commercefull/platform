@@ -1,5 +1,5 @@
 exports.up = function(knex) {
-  return knex.schema.createTable('promotion_action', t => {
+  return knex.schema.createTable('promotionAction', t => {
     t.uuid('promotionActionId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());

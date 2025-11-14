@@ -8,7 +8,7 @@ exports.up = function(knex) {
     t.uuid('customerId').references('customerId').inTable('customer').onDelete('SET NULL');
     t.string('sessionId', 255);
     t.boolean('isHelpful').notNullable();
-    t.inet('ipAddress');
+    t.string('ipAddress', 45);
     t.text('userAgent');
 
     t.index('questionId');
@@ -16,10 +16,10 @@ exports.up = function(knex) {
     t.index('customerId');
     t.index('sessionId');
     t.index('isHelpful');
-    t.unique(['questionId', 'customerId'], { predicate: knex.raw('"customerId" IS NOT NULL AND "answerId" IS NULL') });
-    t.unique(['answerId', 'customerId'], { predicate: knex.raw('"customerId" IS NOT NULL AND "answerId" IS NOT NULL') });
-    t.unique(['questionId', 'sessionId'], { predicate: knex.raw('"sessionId" IS NOT NULL AND "customerId" IS NULL AND "answerId" IS NULL') });
-    t.unique(['answerId', 'sessionId'], { predicate: knex.raw('"sessionId" IS NOT NULL AND "customerId" IS NULL AND "answerId" IS NOT NULL') });
+    t.unique(['questionId', 'customerId']);
+    t.unique(['answerId', 'customerId']);
+    t.unique(['questionId', 'sessionId']);
+    t.unique(['answerId', 'sessionId']);
   });
 };
 

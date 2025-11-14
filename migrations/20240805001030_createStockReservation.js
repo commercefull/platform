@@ -11,7 +11,7 @@ exports.up = function (knex) {
     t.uuid('productVariantId').references('productVariantId').inTable('productVariant').onDelete('CASCADE');
     t.uuid('warehouseId').notNullable().references('warehouseId').inTable('warehouse').onDelete('CASCADE');
     t.integer('quantity').notNullable();
-    t.enum('reservationType', ['cart', 'order', 'pending', 'custom'], { useNative: true, enumName: 'stock_reservation_type' }).notNullable();
+    t.enum('reservationType', ['cart', 'order', 'pending', 'custom']).notNullable();
     t.uuid('referenceId');
     t.string('referenceType', 50);
     t.timestamp('expiresAt');

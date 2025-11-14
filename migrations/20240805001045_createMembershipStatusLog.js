@@ -11,7 +11,7 @@ exports.up = function (knex) {
     t.string('previousStatus', 20);
     t.string('newStatus', 20).notNullable();
     t.text('changeReason');
-    t.enum('changeSource', ['system', 'admin', 'customer', 'payment', 'api'], { useNative: true, enumName: 'membership_status_log_source' }).notNullable().defaultTo('system');
+    t.enum('changeSource', ['system', 'admin', 'customer', 'payment', 'api']).notNullable().defaultTo('system');
     
     t.uuid('createdBy');
     t.index('subscriptionId');

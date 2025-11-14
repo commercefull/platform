@@ -12,7 +12,7 @@ exports.up = function (knex) {
     t.string('name', 100);
     t.text('description');
     t.boolean('isActive').notNullable().defaultTo(true);
-    t.enum('rateType', ['flat', 'weightBased', 'priceBased', 'itemBased', 'dimensional', 'calculated', 'free'], { useNative: true, enumName: 'shipping_rate_type' }).notNullable();
+    t.enum('rateType', ['flat', 'weightBased', 'priceBased', 'itemBased', 'dimensional', 'calculated', 'free']).notNullable();
     t.decimal('baseRate', 10, 2).notNullable();
     t.decimal('perItemRate', 10, 2).defaultTo(0);
     t.decimal('freeThreshold', 10, 2);

@@ -21,3 +21,14 @@ exports.down = function (knex) {
     'page', 'blog-post', 'product-page', 'category-page', 'landing-page'
   ]).delete();
 };
+
+exports.seed = async function (knex) {
+  // Skip delete to avoid foreign key constraint violations from contentPage
+  const existing = await knex('contentType').whereIn('slug', [
+    'page', 'blog-post', 'product-page', 'category-page', 'landing-page'
+  ]).select('slug');
+  
+  if (existing.length === 0) {
+    return exports.up(knex);
+  }
+};

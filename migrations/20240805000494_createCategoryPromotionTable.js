@@ -1,7 +1,7 @@
 exports.up = function(knex) {
   return knex.schema.createTable('categoryPromotion', t => {
     t.uuid('categoryPromotionId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
-    t.uuid('categoryId').notNullable().references('categoryId').inTable('productCategory').onDelete('CASCADE');
+    t.uuid('productCategoryId').notNullable().references('productCategoryId').inTable('productCategory').onDelete('CASCADE');
     t.uuid('promotionId').notNullable().references('promotionId').inTable('promotion').onDelete('CASCADE');
     t.integer('displayOrder').notNullable().defaultTo(0);
     t.string('bannerText', 255);
@@ -14,12 +14,12 @@ exports.up = function(knex) {
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
 
-    t.index('categoryId');
+    t.index('productCategoryId');
     t.index('promotionId');
     t.index('displayOrder');
     t.index('isDisplayedOnCategoryPage');
     t.index('isDisplayedOnProductPage');
-    t.unique(['categoryId', 'promotionId']);
+    t.unique(['productCategoryId', 'promotionId']);
   });
 };
 

@@ -15,7 +15,7 @@ exports.up = function (knex) {
     t.string('phone', 30);
     t.boolean('isActive').notNullable().defaultTo(true);
     t.boolean('isApproved').notNullable().defaultTo(false);
-    t.enum('status', ['active', 'inactive', 'pending', 'suspended', 'blacklisted'], { useNative: true, enumName: 'supplier_status_type' }).notNullable().defaultTo('active');
+    t.enum('status', ['active', 'inactive', 'pending', 'suspended', 'blacklisted']).notNullable().defaultTo('active');
     t.decimal('rating', 3, 2);
     t.string('taxId', 50);
     t.string('paymentTerms', 100);

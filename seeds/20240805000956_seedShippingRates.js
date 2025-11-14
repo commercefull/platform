@@ -11,8 +11,8 @@ exports.up = async function (knex) {
   if (usZone && standardMethod && expressMethod && freeMethod) {
         return knex('shippingRate').insert([
       {
-        zoneId: usZone.id,
-        methodId: standardMethod.id,
+        zoneId: usZone.shippingZoneId,
+        methodId: standardMethod.shippingMethodId,
         isActive: true,
         rateType: 'flat',
         baseRate: 5.99,
@@ -20,8 +20,8 @@ exports.up = async function (knex) {
         currency: 'USD'
       },
       {
-        zoneId: usZone.id,
-        methodId: expressMethod.id,
+        zoneId: usZone.shippingZoneId,
+        methodId: expressMethod.shippingMethodId,
         isActive: true,
         rateType: 'flat',
         baseRate: 14.99,
@@ -29,8 +29,8 @@ exports.up = async function (knex) {
         currency: 'USD'
       },
       {
-        zoneId: usZone.id,
-        methodId: freeMethod.id,
+        zoneId: usZone.shippingZoneId,
+        methodId: freeMethod.shippingMethodId,
         isActive: true,
         rateType: 'free',
         baseRate: 0,
@@ -49,6 +49,11 @@ exports.up = async function (knex) {
 exports.down = async function (knex) {
     const usZone = await knex('shippingZone').where({ name: 'United States' }).first();
   if (usZone) {
-        return knex('shippingRate').where({ zoneId: usZone.id }).delete();
+        return knex('shippingRate').where({ zoneId: usZone.shippingZoneId }).delete();
   }
+};
+
+exports.seed = async function (knex) {
+  await exports.down(knex);
+  return exports.up(knex);
 };

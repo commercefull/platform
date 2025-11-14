@@ -5,8 +5,8 @@ exports.up = function(knex) {
     t.uuid('notificationId').references('notificationId').inTable('notification').onDelete('SET NULL');
     t.uuid('userId').notNullable();
     t.string('userType', 20).notNullable().defaultTo('customer').checkIn(['customer', 'merchant', 'admin']);
-    t.enu('type', ['orderStatus', 'promotion', 'accountAlert'], { useNative: true, enumName: 'notification_type' }).notNullable();
-    t.enu('channel', ['email', 'sms', 'in_app', 'push'], { useNative: true, enumName: 'notification_channel' }).notNullable();
+    t.enum('type', ['orderStatus', 'promotion', 'accountAlert']).notNullable();
+    t.enum('channel', ['email', 'sms', 'in_app', 'push']).notNullable();
     t.string('recipient', 255).notNullable();
     t.string('status', 20).notNullable().defaultTo('pending').checkIn(['pending', 'sent', 'delivered', 'failed', 'bounced', 'blocked']);
     t.text('statusDetails');

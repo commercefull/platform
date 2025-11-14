@@ -5,7 +5,6 @@ exports.up = function(knex) {
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     t.uuid('questionId').notNullable().references('productQaId').inTable('productQa').onDelete('CASCADE');
     t.text('answer').notNullable();
-    t.uuid('userId').references('userId').inTable('user').onDelete('SET NULL');
     t.uuid('customerId').references('customerId').inTable('customer').onDelete('SET NULL');
     t.string('responderName', 255);
     t.boolean('isVerified').notNullable().defaultTo(false);
@@ -15,7 +14,6 @@ exports.up = function(knex) {
     
 
     t.index('questionId');
-    t.index('userId');
     t.index('customerId');
     t.index('isVerified');
     t.index('status');

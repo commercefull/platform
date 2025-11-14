@@ -13,10 +13,10 @@ exports.up = async function (knex) {
       password,
       website,
       status,
-      verification_status,
-      business_type,
-      commission_rate,
-      payout_schedule
+      "verificationStatus",
+      "businessType",
+      "commissionRate",
+      "payoutSchedule"
     )
     VALUES (
       'Sample Merchant',
@@ -24,7 +24,7 @@ exports.up = async function (knex) {
       'This is a sample merchant for demonstration purposes',
       'merchant@example.com',
       '555-123-4567',
-      '$2a$10$Rnq.K1xbkBJ9JJ5L2FTK9.HXcT5gn97JOH6yEMBFMfRK.Mz9dUDty', -- "password123" hashed with bcrypt
+      '$2a$10$Rnq.K1xbkBJ9JJ5L2FTK9.HXcT5gn97JOH6yEMBFMfRK.Mz9dUDty',
       'https://example.com',
       'active',
       'verified',
@@ -35,24 +35,24 @@ exports.up = async function (knex) {
   `);
 
   await knex.raw(`
-    WITH sample_merchant AS (SELECT id FROM merchant WHERE slug = 'sample-merchant')
-    INSERT INTO "merchant_address" (
-      merchant_id,
-      address_type,
-      is_default,
-      first_name,
-      last_name,
+    WITH sample_merchant AS (SELECT "merchantId" FROM merchant WHERE slug = 'sample-merchant')
+    INSERT INTO "merchantAddress" (
+      "merchantId",
+      "addressType",
+      "isDefault",
+      "firstName",
+      "lastName",
       company,
-      address_line_1,
+      "addressLine1",
       city,
       state,
-      postal_code,
+      "postalCode",
       country,
       phone,
-      is_verified
+      "isVerified"
     )
     VALUES (
-      (SELECT id FROM sample_merchant),
+      (SELECT "merchantId" FROM sample_merchant),
       'business',
       true,
       'John',
@@ -69,19 +69,19 @@ exports.up = async function (knex) {
   `);
 
   await knex.raw(`
-    WITH sample_merchant AS (SELECT id FROM merchant WHERE slug = 'sample-merchant')
-    INSERT INTO "merchant_contact" (
-      merchant_id,
-      first_name,
-      last_name,
+    WITH sample_merchant AS (SELECT "merchantId" FROM merchant WHERE slug = 'sample-merchant')
+    INSERT INTO "merchantContact" (
+      "merchantId",
+      "firstName",
+      "lastName",
       email,
       phone,
-      job_title,
-      is_primary,
+      "jobTitle",
+      "isPrimary",
       department
     )
     VALUES (
-      (SELECT id FROM sample_merchant),
+      (SELECT "merchantId" FROM sample_merchant),
       'John',
       'Doe',
       'john.doe@example.com',
@@ -98,7 +98,12 @@ exports.up = async function (knex) {
  * @returns { Promise<void> }
  */
 exports.down = async function (knex) {
-  await knex('merchant_contact').where('email', 'john.doe@example.com').delete();
-  await knex('merchant_address').where('company', 'Sample Merchant LLC').delete();
+  await knex('merchantContact').where('email', 'john.doe@example.com').delete();
+  await knex('merchantAddress').where('company', 'Sample Merchant LLC').delete();
   await knex('merchant').where('slug', 'sample-merchant').delete();
+};
+
+exports.seed = async function (knex) {
+  await exports.down(knex);
+  return exports.up(knex);
 };

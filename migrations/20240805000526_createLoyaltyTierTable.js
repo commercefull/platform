@@ -8,7 +8,7 @@ exports.up = function(knex) {
     t.enum('type', ['points', 'amount']).notNullable();
     t.integer('pointsThreshold').notNullable();
     t.decimal('multiplier', 3, 2).notNullable().defaultTo(1.0);
-    t.array('benefits').notNullable();
+    t.jsonb('benefits').notNullable();
     t.boolean('isActive').notNullable().defaultTo(true);
 
     t.index('pointsThreshold');

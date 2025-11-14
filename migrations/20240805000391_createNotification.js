@@ -12,7 +12,7 @@ exports.up = function (knex) {
     t.string('subject', 255);
     t.text('body');
     t.jsonb('data');
-    t.enu('status', ['pending', 'sent', 'failed', 'delivered', 'read'], { useNative: true, enumName: 'notification_status' }).notNullable().defaultTo('pending');
+    t.enum('status', ['pending', 'sent', 'failed', 'delivered', 'read']).notNullable().defaultTo('pending');
     t.timestamp('scheduledAt');
     t.timestamp('sentAt');
     t.timestamp('readAt');

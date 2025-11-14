@@ -19,7 +19,7 @@ exports.up = function (knex) {
     t.decimal('sale_price', 10, 2);
     t.decimal('setup_fee', 10, 2).defaultTo(0);
     t.string('currency', 3).notNullable().defaultTo('USD');
-    t.enu('billing_cycle', ['daily', 'weekly', 'monthly', 'quarterly', 'biannual', 'annual', 'lifetime'], { useNative: true, enumName: 'membership_billing_cycle' }).notNullable().defaultTo('monthly');
+    t.enum('billing_cycle', ['daily', 'weekly', 'monthly', 'quarterly', 'biannual', 'annual', 'lifetime']).notNullable().defaultTo('monthly');
     t.integer('billing_period').defaultTo(1);
     t.integer('max_members');
     t.boolean('auto_renew').notNullable().defaultTo(true);

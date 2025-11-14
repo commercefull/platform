@@ -22,7 +22,7 @@ exports.up = function (knex) {
     t.string('serialNumber', 100);
     t.timestamp('expiryDate');
     t.text('notes');
-    t.enu('status', ['pending', 'completed', 'cancelled', 'rejected'], { useNative: true, enumName: 'inventory_transaction_status_type' }).notNullable().defaultTo('completed').index('status');
+    t.enum('status', ['pending', 'completed', 'cancelled', 'rejected']).notNullable().defaultTo('completed').index('status');
     t.string('reason', 255);
     
   });

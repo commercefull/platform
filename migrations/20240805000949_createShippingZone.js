@@ -2,7 +2,7 @@
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.up = function (knex) {
+exports.up = async function (knex) {
   return knex.schema.createTable('shippingZone', t => {
     t.uuid('shippingZoneId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
@@ -11,7 +11,7 @@ exports.up = function (knex) {
     t.text('description');
     t.boolean('isActive').notNullable().defaultTo(true);
     t.integer('priority').defaultTo(0);
-    t.enum('locationType', ['country', 'state', 'zipcode', 'region', 'continent'], { useNative: true, enumName: 'shipping_zone_location_type' }).notNullable().defaultTo('country');
+    t.enum('locationType', ['country', 'state', 'zipcode', 'region', 'continent']).notNullable().defaultTo('country');
     t.jsonb('locations').notNullable();
     t.jsonb('excludedLocations');
     
@@ -27,6 +27,6 @@ exports.up = function (knex) {
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.down = function (knex) {
-  return knex.schema.dropTable('shippingZone');
+exports.down = async function (knex) {
+  await knex.schema.dropTable('shippingZone');
 };

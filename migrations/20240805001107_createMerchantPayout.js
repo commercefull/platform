@@ -13,10 +13,10 @@ exports.up = function (knex) {
     t.decimal('fee', 15, 2).notNullable().defaultTo(0);
     t.decimal('netAmount', 15, 2).notNullable();
     t.string('currency', 3).notNullable().defaultTo('USD');
-    t.enu('payoutMethod', ['bank_transfer', 'paypal', 'stripe', 'check', 'other'], { useNative: true, enumName: 'merchant_payout_method' }).notNullable();
+    t.enum('payoutMethod', ['bank_transfer', 'paypal', 'stripe', 'check', 'other']).notNullable();
     t.string('transactionId', 255);
     t.string('reference', 255);
-    t.enu('status', ['pending', 'processing', 'completed', 'failed', 'cancelled'], { useNative: true, enumName: 'merchant_payout_status' }).notNullable().defaultTo('pending');
+    t.enum('status', ['pending', 'processing', 'completed', 'failed', 'cancelled']).notNullable().defaultTo('pending');
     t.text('notes');
     t.timestamp('startDate');
     t.timestamp('endDate');

@@ -8,27 +8,27 @@ exports.up = async function (knex) {
       name: 'Sample Supplier Inc.',
       code: 'SAMPLE',
       description: 'Default sample supplier for testing',
-      is_active: true,
-      is_approved: true,
+      isActive: true,
+      isApproved: true,
       status: 'active',
-      payment_terms: 'Net 30',
+      paymentTerms: 'Net 30',
       currency: 'USD',
       categories: ['General', 'Electronics', 'Apparel']
     }
-  ]).returning('id');
+  ]).returning('supplierId');
 
-  return knex('supplier_address').insert([
+  return knex('supplierAddress').insert([
     {
-      supplier_id: supplier.id,
+      supplierId: supplier.supplierId || supplier,
       name: 'Headquarters',
-      address_line1: '123 Supplier St',
+      addressLine1: '123 Supplier St',
       city: 'Suppliertown',
       state: 'State',
-      postal_code: '12345',
+      postalCode: '12345',
       country: 'US',
-      address_type: 'headquarters',
-      is_default: true,
-      is_active: true
+      addressType: 'headquarters',
+      isDefault: true,
+      isActive: true
     }
   ]);
 };
@@ -39,4 +39,9 @@ exports.up = async function (knex) {
  */
 exports.down = function (knex) {
   return knex('supplier').where({ code: 'SAMPLE' }).delete();
+};
+
+exports.seed = async function (knex) {
+  await exports.down(knex);
+  return exports.up(knex);
 };

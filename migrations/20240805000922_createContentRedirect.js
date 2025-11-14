@@ -7,7 +7,7 @@ exports.up = function (knex) {
     t.uuid('contentRedirectId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
     t.text('sourceUrl').notNullable().comment('The source URL pattern to match for redirection');
     t.text('targetUrl').notNullable().comment('The target URL to redirect to');
-    t.enu('statusCode', [301, 302, 303, 307, 308], { useNative: true, enumName: 'redirect_status_code_type' }).notNullable().defaultTo(301).comment('HTTP status code to use for the redirect');
+    t.enum('statusCode', [301, 302, 303, 307, 308]).notNullable().defaultTo(301).comment('HTTP status code to use for the redirect');
     t.boolean('isRegex').notNullable().defaultTo(false).comment('Whether sourceUrl is a regex pattern');
     t.boolean('isActive').notNullable().defaultTo(true).comment('Whether this redirect is active');
     t.integer('hits').notNullable().defaultTo(0).comment('Count of times this redirect was used');

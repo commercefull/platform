@@ -48,7 +48,7 @@ exports.up = function (knex) {
     t.index('followerCount');
     t.index('productCount');
     t.index('orderCount');
-    t.index('featuredProducts', { indexType: 'GIN' });
+    t.index('featuredProducts', null, 'gin');
   });
 };
 

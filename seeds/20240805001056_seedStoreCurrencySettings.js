@@ -3,13 +3,13 @@
  * @returns { Promise<void> }
  */
 exports.up = async function (knex) {
-  const usdCurrency = await knex('currency').where({ code: 'USD' }).first();
+  const usdCurrency = await knex('currency').where({ code: 'USD' }).first('currencyId');
 
   if (usdCurrency) {
     await knex('storeCurrencySettings').insert({
-      storeCurrencyId: usdCurrency.id,
-      baseCurrencyId: usdCurrency.id,
-      displayCurrencyId: usdCurrency.id,
+      storeCurrencyId: usdCurrency.currencyId,
+      baseCurrencyId: usdCurrency.currencyId,
+      displayCurrencyId: usdCurrency.currencyId,
       allowCustomerCurrencySelection: true,
       showCurrencySelector: true,
       autoUpdateRates: false,
@@ -30,4 +30,9 @@ exports.up = async function (knex) {
  */
 exports.down = function (knex) {
   return knex('storeCurrencySettings').del();
+};
+
+exports.seed = async function (knex) {
+  await exports.down(knex);
+  return exports.up(knex);
 };

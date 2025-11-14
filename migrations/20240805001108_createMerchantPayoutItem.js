@@ -11,7 +11,7 @@ exports.up = function (knex) {
     t.uuid('merchantOrderId').references('merchantOrderId').inTable('merchantOrder');
     t.decimal('amount', 15, 2).notNullable();
     t.text('description');
-    t.enu('type', ['order', 'adjustment', 'fee', 'refund'], { useNative: true, enumName: 'merchant_payout_item_type' }).notNullable().defaultTo('order');
+    t.enum('type', ['order', 'adjustment', 'fee', 'refund']).notNullable().defaultTo('order');
     
     t.index('merchantPayoutId');
     t.index('orderId');

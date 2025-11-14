@@ -10,9 +10,9 @@ exports.up = function (knex) {
     t.string('poNumber', 50).notNullable().unique();
     t.uuid('supplierId').notNullable().references('supplierId').inTable('supplier');
     t.uuid('warehouseId').notNullable().references('warehouseId').inTable('warehouse');
-    t.enu('status', ['draft', 'pending', 'approved', 'sent', 'confirmed', 'partial', 'completed', 'cancelled'], { useNative: true, enumName: 'po_status_type' }).notNullable().defaultTo('draft');
-    t.enu('orderType', ['standard', 'restock', 'backOrder', 'special', 'emergency'], { useNative: true, enumName: 'po_order_type' }).notNullable().defaultTo('standard');
-    t.enu('priority', ['low', 'normal', 'high', 'urgent'], { useNative: true, enumName: 'po_priority_type' }).notNullable().defaultTo('normal');
+    t.enum('status', ['draft', 'pending', 'approved', 'sent', 'confirmed', 'partial', 'completed', 'cancelled']).notNullable().defaultTo('draft');
+    t.enum('orderType', ['standard', 'restock', 'backOrder', 'special', 'emergency']).notNullable().defaultTo('standard');
+    t.enum('priority', ['low', 'normal', 'high', 'urgent']).notNullable().defaultTo('normal');
     t.timestamp('orderDate').notNullable().defaultTo(knex.fn.now());
     t.timestamp('expectedDeliveryDate');
     t.timestamp('deliveryDate');

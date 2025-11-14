@@ -2,29 +2,37 @@
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.up = async function (knex) {
-  // Insert sample merchant
-  await knex('merchant').insert({
-    name: 'Sample Merchant',
-    slug: 'sample-merchant',
-    description: 'This is a sample merchant for demonstration purposes',
-    email: 'merchant@example.com',
-    phone: '555-123-4567',
-    password: '$2a$10$Rnq.K1xbkBJ9JJ5L2FTK9.HXcT5gn97JOH6yEMBFMfRK.Mz9dUDty', // "password123"
-    website: 'https://example.com',
-    status: 'active',
-    verificationStatus: 'verified',
-    businessType: 'llc',
-    commissionRate: 10.00,
-    payoutSchedule: 'monthly'
-  });
+exports.seed = async function (knex) {
+  await knex.transaction(async trx => {
+    const merchantIds = trx('merchant')
+      .select('merchantId')
+      .where({ slug: 'sample-merchant' });
 
-  const sampleMerchant = await knex('merchant').where({ slug: 'sample-merchant' }).first();
+    await trx('merchantContact').whereIn('merchantId', merchantIds).del();
+    await trx('merchantAddress').whereIn('merchantId', merchantIds).del();
+    await trx('merchant').where({ slug: 'sample-merchant' }).del();
 
-  if (sampleMerchant) {
-    // Insert sample merchant address
-    await knex('merchantAddress').insert({
-      merchantId: sampleMerchant.id,
+    const [inserted] = await trx('merchant')
+      .insert({
+        name: 'Sample Merchant',
+        slug: 'sample-merchant',
+        description: 'This is a sample merchant for demonstration purposes',
+        email: 'merchant@example.com',
+        phone: '555-123-4567',
+        password: '$2a$10$Rnq.K1xbkBJ9JJ5L2FTK9.HXcT5gn97JOH6yEMBFMfRK.Mz9dUDty', // "password123"
+        website: 'https://example.com',
+        status: 'active',
+        verificationStatus: 'verified',
+        businessType: 'llc',
+        commissionRate: 10.0,
+        payoutSchedule: 'monthly'
+      })
+      .returning(['merchantId']);
+
+    const merchantId = inserted?.merchantId ?? inserted;
+
+    await trx('merchantAddress').insert({
+      merchantId,
       addressType: 'business',
       isDefault: true,
       firstName: 'John',
@@ -39,9 +47,8 @@ exports.up = async function (knex) {
       isVerified: true
     });
 
-    // Insert sample merchant contact
-    await knex('merchantContact').insert({
-      merchantId: sampleMerchant.id,
+    await trx('merchantContact').insert({
+      merchantId,
       firstName: 'John',
       lastName: 'Doe',
       email: 'john.doe@example.com',
@@ -50,13 +57,5 @@ exports.up = async function (knex) {
       isPrimary: true,
       department: 'general'
     });
-  }
-};
-
-/**
- * @param { import("knex").Knex } knex
- * @returns { Promise<void> }
- */
-exports.down = async function (knex) {
-  await knex('merchant').where({ slug: 'sample-merchant' }).del();
+  });
 };

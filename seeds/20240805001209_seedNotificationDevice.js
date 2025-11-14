@@ -7,7 +7,7 @@ exports.up = function (knex) {
     {
       userId: '00000000-0000-0000-0000-000000000001',
       userType: 'customer',
-      deviceToken: 'sample_device_token_for_testing',
+      deviceToken: 'sample_deviceToken_for_testing',
       deviceType: 'ios',
       deviceName: 'iPhone',
       deviceModel: 'iPhone 14 Pro',
@@ -23,6 +23,11 @@ exports.up = function (knex) {
  */
 exports.down = function (knex) {
   return knex('notificationDevice')
-    .where({ deviceToken: 'sample_device_token_for_testing' })
+    .where({ deviceToken: 'sample_deviceToken_for_testing' })
     .del();
+};
+
+exports.seed = async function (knex) {
+  await exports.down(knex);
+  return exports.up(knex);
 };

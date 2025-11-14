@@ -17,7 +17,7 @@ import {
   updateUserMembership,
   cancelUserMembership,
   getUserMembershipBenefits
-} from "./controllers/membershipMerchantController";
+} from "./controllers/membershipBusinessController";
 import { isMerchantLoggedIn } from "../../libs/auth";
 
 const router = express.Router();

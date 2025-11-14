@@ -8,7 +8,7 @@ exports.up = function (knex) {
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     t.uuid('warehouseId').notNullable().references('warehouseId').inTable('warehouse').onDelete('CASCADE');
-    t.uuid('binId').references('binId').inTable('warehouseBin').onDelete('SET NULL');
+    t.uuid('warehouseBinId').references('warehouseBinId').inTable('warehouseBin').onDelete('SET NULL');
     t.uuid('productId').notNullable();
     t.uuid('productVariantId');
     t.string('sku', 100).notNullable();
@@ -23,11 +23,8 @@ exports.up = function (knex) {
     t.timestamp('receivedDate');
     t.enum('status', ['available', 'reserved', 'damaged', 'quarantine', 'expired', 'pending']).notNullable().defaultTo('available');
     t.timestamp('lastCountDate');
-    
-    t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
-    t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     t.index('warehouseId');
-    t.index('binId');
+    t.index('warehouseBinId');
     t.index('productId');
     t.index('productVariantId');
     t.index('sku');

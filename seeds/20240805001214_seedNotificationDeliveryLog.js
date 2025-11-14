@@ -34,3 +34,8 @@ exports.down = function (knex) {
     .where({ recipient: 'system' })
     .del();
 };
+
+exports.seed = async function (knex) {
+  await exports.down(knex);
+  return exports.up(knex);
+};

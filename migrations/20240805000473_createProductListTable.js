@@ -16,7 +16,6 @@ exports.up = function(knex) {
     t.index('type');
     t.index('isDefault');
     t.index('isPublic');
-    t.unique(['customerId', 'type', 'isDefault'], { predicate: knex.raw('"isDefault" = true') });
   });
 };
 

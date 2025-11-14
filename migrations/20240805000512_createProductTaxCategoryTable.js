@@ -4,9 +4,9 @@ exports.up = function(knex) {
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     t.uuid('productId').notNullable().references('productId').inTable('product').onDelete('CASCADE');
-    t.uuid('productVariantId').references('productVariantId').inTable('productVariant').onDelete('CASCADE');
+    t.uuid('productVariantId').notNullable().references('productVariantId').inTable('productVariant').onDelete('CASCADE');
     t.uuid('taxCategoryId').notNullable().references('taxCategoryId').inTable('taxCategory').onDelete('CASCADE');
-    t.uuid('merchantId').references('merchantId').inTable('merchant');
+    t.uuid('merchantId').notNullable().references('merchantId').inTable('merchant');
     t.boolean('isDefault').notNullable().defaultTo(false);
     t.boolean('overrideStoreSettings').notNullable().defaultTo(false);
     t.text('notes');
@@ -17,8 +17,8 @@ exports.up = function(knex) {
     t.index('merchantId');
     t.index('isDefault');
     t.index('overrideStoreSettings');
-    t.unique(['productId', 'productVariantId', 'taxCategoryId'], 'productTaxCategoryVariantUnique').whereNotNull('productVariantId');
-    t.unique(['productId', 'taxCategoryId'], 'productTaxCategoryUnique').whereNull('productVariantId');
+    t.unique(['productId', 'productVariantId', 'taxCategoryId']);
+    t.unique(['productId', 'taxCategoryId']);
   });
 };
 
