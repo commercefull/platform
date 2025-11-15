@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import taxQueryRepo from '../repos/taxQueryRepo';
 import { AddressInput } from '../taxTypes';
-import { BasketRepo } from '../../basket/basketRepo';
+import { BasketRepo } from '../../basket/repos/basketRepo';
 
 // Field mapping dictionaries for TypeScript (camelCase) to database (snake_case) conversion
 const addressFields: Record<string, string> = {

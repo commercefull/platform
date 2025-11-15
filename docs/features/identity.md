@@ -1,115 +1,74 @@
 # Identity Feature
 
-The Identity feature unifies session-based and token-based authentication for customers, merchants ("business" users), and administrators. It consolidates legacy `auth` and `admin` flows into a single module under `features/identity`.
+The Identity feature unifies customer and merchant authentication under `features/identity`. It provides login, registration, token lifecycle, and password recovery flows across web and headless channels while enforcing business rules like merchant status checks and refresh token governance.
 
-## Overview
+## Business Scenarios (Given/When/Then)
 
-- **Session-based access** for customer/merchant web apps
-- **JWT-based access** for headless/mobile clients
-- **Token lifecycle** support (refresh tokens + blacklist)
-- **Password reset & email verification** flows
-- **Role-aware identity service** encapsulating all auth logic
+### Scenario: Customer signs in to the storefront
 
-## Repositories
-
-- `authRepo.ts`: password verification, password reset, email verification, fallback JWT support
-- `authRefreshTokenRepo.ts`: CRUD & lifecycle operations for `authRefreshTokens`
-- `authTokenBlacklistRepo.ts`: blacklist management for compromised tokens
-- `customerSessionRepo.ts`: device-aware customer sessions
-- `merchantSessionRepo.ts`: merchant sessions with last activity tracking
-
-## Services & Controllers
-
-- `IdentityService`: orchestrates authentication, session management, token issuance, password resets
-- `authCustomerController.ts`: REST endpoints for customer login/register/token/password flows
-- `authBusinessController.ts`: REST endpoints for merchant flows
-
-## Routers
-
-- `authCustomerRouter.ts`: routes customer auth endpoints (session + JWT)
-- `authBusinessRouter.ts`: routes merchant auth endpoints
-
-## Templates (Email/SMS)
-
-Located in `templates/merchant/auth/*` for merchant-specific communication flows (e.g., password reset, email verification).
-
-## Given/When/Then Scenarios
-
-### Customer Session Authentication
-
-- **Given** a customer provides valid email/password credentials
+- **Given** an existing customer provides a valid email and password
 - **When** the client calls `POST /identity/customer/login`
-- **Then** `IdentityService.authenticateCustomer` issues a session token saved via `customerSessionRepo`
+- **Then** the platform verifies the credentials, updates the customer’s last login timestamp, and returns an access token for the storefront session
 
-### Customer JWT Authentication
+### Scenario: Customer self-registers
 
-- **Given** a customer provides valid credentials
-- **When** the client invokes `POST /identity/customer/token`
-- **Then** the controller returns both access & refresh JWT tokens after storing refresh token via `authRefreshTokenRepo`
+- **Given** a shopper submits unique contact details and a password
+- **When** the client calls `POST /identity/customer/register`
+- **Then** the platform creates an active customer profile and immediately returns an access token so the customer can continue checkout without disruption
 
-### Refresh Token Rotation (Customer)
+### Scenario: Customer obtains headless access
 
-- **Given** a customer possesses a valid refresh token entry in `authRefreshTokens`
-- **When** they hit `POST /identity/customer/token/refresh`
-- **Then** `IdentityService.refreshToken` validates via `authRefreshTokenRepo` and issues a rotated token pair, updating `lastUsedAt`
+- **Given** a customer needs API-driven or mobile access
+- **When** they call `POST /identity/customer/token` with valid credentials
+- **Then** the platform issues both access and refresh tokens and records the refresh token in `identityRefreshTokens` with device metadata
 
-### Token Blacklist (Logout)
+### Scenario: Customer renews an expired access token
 
-- **Given** a user logs out or a token is compromised
-- **When** an API endpoint triggers blacklist logic
-- **Then** `authTokenBlacklistRepo.create` records the token and `IdentityService.validateToken` rejects future requests referencing it
+- **Given** a customer holds an unrevoked refresh token on record
+- **When** they call `POST /identity/customer/token/refresh`
+- **Then** the platform validates the token signature and database entry, marks the refresh token as used, and returns a fresh access token
 
-### Password Reset Flow
+### Scenario: Customer validates an access token
 
-- **Given** a user requests password reset
-- **When** controller calls `IdentityService.requestPasswordReset`
-- **Then** `authRepo.createPasswordResetToken` stores hashed token
-- **And** email template `templates/merchant/auth/recoverpw.html` is used to notify user
+- **Given** an API consumer needs to confirm a customer token
+- **When** it calls `POST /identity/customer/token/validate`
+- **Then** the platform confirms the token’s authenticity and role, returning the customer identity details when the token is valid
 
-- **Given** a user submits the reset token
-- **When** `IdentityService.resetPassword` is invoked
-- **Then** `authRepo.verifyPasswordResetToken` validates token and `authRepo.changePassword` persists the new password
+### Scenario: Customer resets a forgotten password
 
-### Email Verification
+- **Given** a customer requests help accessing their account
+- **When** they call `POST /identity/customer/password-reset/request` with their email
+- **Then** the platform generates a reset token and signals that instructions were sent without leaking whether the email exists
+- **And** when the customer later calls `POST /identity/customer/password-reset/reset` with the token and a new password, the platform verifies the token and updates the stored credentials
 
-- **Given** a newly registered user needs verification
-- **When** `authRepo.createEmailVerificationToken` is invoked
-- **Then** a token is stored in the appropriate table (`customerEmailVerification` or `merchantEmailVerification`)
-- **And** the corresponding email template (e.g., `templates/merchant/auth/confirm-mail.html`) is triggered externally
-- **When** the user verifies
-- **Then** `authRepo.verifyEmail` marks the token as used and flips the `emailVerified` flag
+### Scenario: Merchant authenticates an active storefront account
 
-### Business/Merchant Session Authentication
+- **Given** a merchant with an active status provides valid credentials
+- **When** the client calls `POST /identity/merchant/login`
+- **Then** the platform validates the login, ensures the merchant account is active, and returns an access token containing the merchant’s identity and status
 
-- **Given** a merchant (business user) signs in
-- **When** the client invokes `POST /identity/business/login`
-- **Then** `authBusinessController` delegates to `IdentityService.authenticateMerchant` which creates a merchant session via `merchantSessionRepo`
+### Scenario: Merchant applies for access
 
-### Business JWT Authentication
+- **Given** a prospective merchant supplies business details with a unique email
+- **When** they call `POST /identity/merchant/register`
+- **Then** the platform creates a merchant account in `pending` status and confirms that approval is required before access is granted
 
-- **Given** a merchant uses mobile/headless login
-- **When** they hit `POST /identity/business/token`
-- **Then** they receive access + refresh tokens, stored via `authRefreshTokenRepo` with metadata (user agent, IP)
+### Scenario: Merchant obtains headless access
 
-### Session Invalidation
+- **Given** an active merchant requests programmatic access
+- **When** they call `POST /identity/merchant/token` with valid credentials
+- **Then** the platform issues access and refresh tokens and stores the refresh token in `identityRefreshTokens` with user agent and IP metadata
 
-- **Given** an active session token (customer or merchant)
-- **When** the client calls `POST /identity/{role}/session/invalidate`
-- **Then** `IdentityService.invalidateSession` targets the appropriate repo to deactivate the session (customer → `customerSessionRepo`, merchant → `merchantSessionRepo`)
+### Scenario: Merchant renews access securely
 
-### Refresh Token Revocation
+- **Given** an active merchant holds a valid refresh token entry
+- **When** they call `POST /identity/merchant/token/refresh`
+- **Then** the platform verifies the token, confirms the merchant remains active, records the usage, and returns a new access token
 
-- **Given** a user loses their device or wants to rebuild trust
-- **When** `IdentityService.revokeRefreshToken(s)` is invoked via controllers
-- **Then** `authRefreshTokenRepo.revoke` marks tokens revoked, and `authTokenBlacklistRepo` guards access for previously-issued JWTs
+### Scenario: Merchant resets a forgotten password
 
-## Implementation Notes
+- **Given** a merchant cannot access their dashboard
+- **When** they call `POST /identity/merchant/password-reset/request` with their email
+- **Then** the platform issues a reset token and acknowledges the request without revealing merchant existence
+- **And** when the merchant calls `POST /identity/merchant/password-reset/reset` with the token and new password, the platform validates the token and updates the stored password
 
-- All database schemas use camelCase for columns, matching repo queries
-- Repos leverage utility `transformDbToTs` to map DB records into camelCase TypeScript models
-- Identity service centralizes config (session TTL, JWT secrets, expiry) via environment variables
-- Templates remain optional but illustrate how email notifications use tokens generated by the identity system
-
----
-
-This documentation should help integrate the Identity feature across session/JWT flows and ensure consistency between migrations, repositories, controllers, routers, and templates.
