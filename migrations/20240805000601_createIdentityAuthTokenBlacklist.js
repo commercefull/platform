@@ -3,14 +3,17 @@
  * @returns { Promise<void> }
  */
 exports.up = function (knex) {
-  return knex.schema.createTable('adminPasswordReset', t => {
-    t.uuid('adminPasswordResetId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+  return knex.schema.createTable('identityTokenBlacklist', t => {
+    t.uuid('authTokenBlacklistId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
-    t.uuid('userId').notNullable().references('adminId').inTable('admin').onDelete('CASCADE');
-    t.string('token', 255).notNullable();
+    t.text('token').notNullable();
+    t.string('userType', 20).notNullable();
+    t.uuid('userId').notNullable();
     t.timestamp('expiresAt').notNullable();
-    t.boolean('isUsed').notNullable().defaultTo(false);
+    t.timestamp('invalidatedAt').notNullable().defaultTo(knex.fn.now());
+    t.string('reason', 50);
+    t.index('token');
     t.index('userId');
     t.index('expiresAt');
   });
@@ -21,5 +24,5 @@ exports.up = function (knex) {
  * @returns { Promise<void> }
  */
 exports.down = function (knex) {
-  return knex.schema.dropTable('adminPasswordReset');
+  return knex.schema.dropTable('identityTokenBlacklist');
 };

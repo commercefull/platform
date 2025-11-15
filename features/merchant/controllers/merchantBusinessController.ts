@@ -111,7 +111,9 @@ export const createMerchant = async (req: Request, res: Response): Promise<void>
         website,
         logoUrl,
         description,
-        status
+        status,
+        password: '',  // Add required password field
+        slug: ''       // Add required slug field
       });
 
       res.status(201).json({

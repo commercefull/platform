@@ -145,7 +145,8 @@ export class NotificationService {
     const savedNotification = await this.notificationRepo.create(notification);
     
     // Send through appropriate channels
-    const deliveryPromises = notification.channel.map(channel => 
+    const channels = Array.isArray(notification.channel) ? notification.channel : [notification.channel];
+    const deliveryPromises = channels.map((channel: NotificationChannel) => 
       this.deliverToChannel(savedNotification, channel)
     );
     

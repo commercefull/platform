@@ -25,7 +25,7 @@ const card = elements.create("card", { style: style });
 card.mount("#card-element");
 
 // Handle real-time validation errors from the card Element.
-card.addEventListener("change", function (event) {
+card.addEventListener("change", function (event: any) {
   const displayError = document.getElementById("card-errors");
   if (event.error) {
     // @ts-expect-error TS(2531): Object is possibly 'null'.
@@ -40,7 +40,7 @@ card.addEventListener("change", function (event) {
 // @ts-expect-error TS(2581): Cannot find name '$'. Do you need to install type ... Remove this comment to see the full error message
 const $form = $("#checkout-form");
 
-$form.submit(function (event) {
+$form.submit(function (event: any) {
   event.preventDefault();
   $form.find("button").prop("disabled", true);
 
@@ -49,7 +49,7 @@ $form.submit(function (event) {
     name: $("#card-name").val(),
   };
 
-  stripe.createToken(card, extraDetails).then(function (result) {
+  stripe.createToken(card, extraDetails).then(function (result: any) {
     if (result.error) {
       $form.find("button").prop("disabled", false); // Re-enable submission
     } else {
@@ -60,7 +60,7 @@ $form.submit(function (event) {
 });
 
 // Submit the form with the token ID.
-function stripeTokenHandler(token) {
+function stripeTokenHandler(token: any) {
   // Insert the token ID into the form so it gets submitted to the server
   // @ts-expect-error TS(2581): Cannot find name '$'. Do you need to install type ... Remove this comment to see the full error message
   $form.append($('<input type="hidden" name="stripeToken" />').val(token.id));

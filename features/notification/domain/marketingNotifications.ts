@@ -30,7 +30,7 @@ export class AbandonedCartNotification extends NotificationBuilder<AbandonedCart
   private params: AbandonedCartParams;
   
   constructor(userId: string, params: AbandonedCartParams, channels: NotificationChannel[] = ['email']) {
-    super(userId, channels);
+    super(userId, 'customer', channels);
     this.type = 'abandoned_cart';
     this.params = params;
   }
@@ -98,7 +98,7 @@ export class PriceDropNotification extends NotificationBuilder<PriceDropParams> 
   private params: PriceDropParams;
   
   constructor(userId: string, params: PriceDropParams, channels: NotificationChannel[] = ['email', 'push']) {
-    super(userId, channels);
+    super(userId, 'customer', channels);
     this.type = 'price_drop';
     this.params = params;
   }
@@ -152,7 +152,7 @@ export class BackInStockNotification extends NotificationBuilder<BackInStockPara
   private params: BackInStockParams;
   
   constructor(userId: string, params: BackInStockParams, channels: NotificationChannel[] = ['email', 'push']) {
-    super(userId, channels);
+    super(userId, 'customer', channels);
     this.type = 'back_in_stock';
     this.params = params;
   }
@@ -208,7 +208,7 @@ export class CouponOfferNotification extends NotificationBuilder<CouponOfferPara
   private params: CouponOfferParams;
   
   constructor(userId: string, params: CouponOfferParams, channels: NotificationChannel[] = ['email', 'push', 'in_app']) {
-    super(userId, channels);
+    super(userId, 'customer', channels);
     this.type = 'coupon_offer';
     this.params = params;
   }
@@ -270,7 +270,7 @@ export class NewProductNotification extends NotificationBuilder<NewProductParams
   private params: NewProductParams;
   
   constructor(userId: string, params: NewProductParams, channels: NotificationChannel[] = ['email']) {
-    super(userId, channels);
+    super(userId, 'customer', channels);
     this.type = 'new_product';
     this.params = params;
   }

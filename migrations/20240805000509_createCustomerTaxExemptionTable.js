@@ -15,7 +15,7 @@ exports.up = function(knex) {
     t.timestamp('startDate').notNullable().defaultTo(knex.fn.now());
     t.timestamp('expiryDate');
     t.boolean('isVerified').notNullable().defaultTo(false);
-    t.uuid('verifiedBy').references('adminId').inTable('admin');
+    t.uuid('verifiedBy').references('merchantId').inTable('merchant');
     t.timestamp('verifiedAt');
     t.text('notes');
 

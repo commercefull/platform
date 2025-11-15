@@ -1,6 +1,6 @@
 import express from "express";
 import { isCustomerLoggedIn } from "../../libs/auth";
-import { addToCart, increaseItem, reduceItem, removeAllItems, viewCart, viewCheckout } from "./basketCustomerController";
+import { addToCart, increaseItem, reduceItem, removeItem, viewCart, checkout } from "./basketCustomerController";
 
 const router = express.Router();
 
@@ -17,9 +17,9 @@ router.post("/reduce/:id", reduceItem);
 router.post("/increase/:id", increaseItem);
 
 // POST: remove all instances of a single product from the cart
-router.post("/removeAll/:id", removeAllItems);
+router.post("/removeAll/:id", removeItem);
 
 // POST: checkout form with csrf token
-router.post("/checkout", isCustomerLoggedIn, viewCheckout);
+router.post("/checkout", isCustomerLoggedIn, checkout);
 
 export const basketCustomerRouter = router;

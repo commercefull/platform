@@ -43,7 +43,7 @@ export class OrderConfirmationNotification extends NotificationBuilder<OrderConf
   private params: OrderConfirmationParams;
   
   constructor(userId: string, params: OrderConfirmationParams, channels: NotificationChannel[] = ['email']) {
-    super(userId, channels);
+    super(userId, 'customer', channels);
     this.type = 'order_confirmation';
     this.params = params;
   }
@@ -111,7 +111,7 @@ export class OrderShippedNotification extends NotificationBuilder<OrderShippedPa
   private params: OrderShippedParams;
   
   constructor(userId: string, params: OrderShippedParams, channels: NotificationChannel[] = ['email', 'sms']) {
-    super(userId, channels);
+    super(userId, 'customer', channels);
     this.type = 'order_shipped';
     this.params = params;
   }
@@ -169,7 +169,7 @@ export class OrderDeliveredNotification extends NotificationBuilder<OrderNotific
   private params: OrderNotificationBaseParams;
   
   constructor(userId: string, params: OrderNotificationBaseParams, channels: NotificationChannel[] = ['email', 'push']) {
-    super(userId, channels);
+    super(userId, 'customer', channels);
     this.type = 'order_delivered';
     this.params = params;
   }
@@ -224,7 +224,7 @@ export class OrderCancelledNotification extends NotificationBuilder<OrderCancell
   private params: OrderCancelledParams;
   
   constructor(userId: string, params: OrderCancelledParams, channels: NotificationChannel[] = ['email']) {
-    super(userId, channels);
+    super(userId, 'customer', channels);
     this.type = 'order_cancelled';
     this.params = params;
   }

@@ -22,7 +22,7 @@ export class AccountRegistrationNotification extends NotificationBuilder<Account
   private params: AccountRegistrationParams;
   
   constructor(userId: string, params: AccountRegistrationParams, channels: NotificationChannel[] = ['email']) {
-    super(userId, channels);
+    super(userId, 'customer', channels);
     this.type = 'account_registration';
     this.params = params;
   }
@@ -72,7 +72,7 @@ export class PasswordResetNotification extends NotificationBuilder<PasswordReset
   private params: PasswordResetParams;
   
   constructor(userId: string, params: PasswordResetParams, channels: NotificationChannel[] = ['email']) {
-    super(userId, channels);
+    super(userId, 'customer', channels);
     this.type = 'password_reset';
     this.params = params;
   }
@@ -119,7 +119,7 @@ export class EmailVerificationNotification extends NotificationBuilder<EmailVeri
   private params: EmailVerificationParams;
   
   constructor(userId: string, params: EmailVerificationParams, channels: NotificationChannel[] = ['email']) {
-    super(userId, channels);
+    super(userId, 'customer', channels);
     this.type = 'email_verification';
     this.params = params;
   }

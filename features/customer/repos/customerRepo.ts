@@ -1,4 +1,6 @@
 import { query, queryOne } from '../../../libs/db';
+import bcryptjs from 'bcryptjs';
+import crypto from 'crypto';
 
 // Field mapping dictionaries
 const customerFields = {
@@ -203,6 +205,32 @@ export interface CustomerWishlistItem {
   note?: string;
 }
 
+export interface CustomerAuthCredentials {
+  email: string;
+  password: string;
+}
+
+export interface CustomerAuthResult {
+  id: string;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+}
+
+export interface CustomerCreateWithPasswordParams {
+  email: string;
+  firstName: string;
+  lastName: string;
+  password: string;
+  phone?: string;
+  dateOfBirth?: Date;
+  isActive?: boolean;
+  isVerified?: boolean;
+  metadata?: Record<string, any>;
+  lastLoginAt?: Date;
+  notes?: string;
+}
+
 export class CustomerRepo {
   // Customer methods
   async findAllCustomers(limit: number = 100, offset: number = 0): Promise<Array<Customer>> {
@@ -221,6 +249,37 @@ export class CustomerRepo {
   async findCustomerByEmail(email: string): Promise<Customer | null> {
     const customer = await queryOne<Customer>('SELECT * FROM "public"."customer" WHERE "email" = $1', [email]);
     return transformDbToTs(customer, customerFields) || null;
+  }
+
+  async authenticateCustomer(credentials: CustomerAuthCredentials): Promise<CustomerAuthResult | null> {
+    const { email, password } = credentials;
+
+    const customer = await queryOne<{ id: string; email: string; password: string; firstName?: string; lastName?: string }>(
+      'SELECT "id", "email", "password", "firstName", "lastName" FROM "public"."customer" WHERE "email" = $1',
+      [email]
+    );
+
+    if (!customer) {
+      return null;
+    }
+
+    const isPasswordValid = await bcryptjs.compare(password, customer.password);
+
+    if (!isPasswordValid) {
+      return null;
+    }
+
+    return {
+      id: customer.id,
+      email: customer.email,
+      firstName: customer.firstName,
+      lastName: customer.lastName
+    };
+  }
+
+  async hashPassword(password: string): Promise<string> {
+    const saltRounds = 10;
+    return bcryptjs.hash(password, saltRounds);
   }
 
   async searchCustomers(searchTerm: string, limit: number = 100): Promise<Array<Customer>> {
@@ -250,6 +309,38 @@ export class CustomerRepo {
       throw new Error('Failed to create customer');
     }
     
+    return transformDbToTs(result, customerFields);
+  }
+
+  async createCustomerWithPassword(params: CustomerCreateWithPasswordParams): Promise<Customer> {
+    const now = new Date();
+    const hashedPassword = await this.hashPassword(params.password);
+
+    const result = await queryOne<Customer>(
+      `INSERT INTO "public"."customer"
+       ("email", "firstName", "lastName", "password", "phone", "date_of_birth", "isActive", "isVerified", "createdAt", "updatedAt", "lastLoginAt", "note", "metadata")
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $9, $10, $11, $12)
+       RETURNING *`,
+      [
+        params.email,
+        params.firstName,
+        params.lastName,
+        hashedPassword,
+        params.phone ?? null,
+        params.dateOfBirth ?? null,
+        params.isActive ?? true,
+        params.isVerified ?? false,
+        now,
+        params.lastLoginAt ?? null,
+        params.notes ?? null,
+        params.metadata ?? null
+      ]
+    );
+
+    if (!result) {
+      throw new Error('Failed to create customer');
+    }
+
     return transformDbToTs(result, customerFields);
   }
 
@@ -324,6 +415,68 @@ export class CustomerRepo {
     );
     
     return result ? parseInt(result.count) > 0 : false;
+  }
+
+  async createPasswordResetToken(userId: string): Promise<string> {
+    const token = crypto.randomBytes(32).toString('hex');
+    const hashedToken = await bcryptjs.hash(token, 10);
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+    const now = new Date();
+
+    await queryOne(
+      `INSERT INTO "public"."customerPasswordReset" ("userId", "token", "expiresAt", "isUsed", "createdAt", "updatedAt")
+       VALUES ($1, $2, $3, false, $4, $4)
+       RETURNING "customerPasswordResetId"`,
+      [userId, hashedToken, expiresAt, now]
+    );
+
+    return token;
+  }
+
+  async verifyPasswordResetToken(token: string): Promise<string | null> {
+    const resetRecord = await queryOne<{
+      customerPasswordResetId: string;
+      userId: string;
+      token: string;
+    }>(
+      `SELECT "customerPasswordResetId", "userId", "token" FROM "public"."customerPasswordReset"
+       WHERE "isUsed" = false AND "expiresAt" > $1
+       ORDER BY "createdAt" DESC
+       LIMIT 1`,
+      [new Date()]
+    );
+
+    if (!resetRecord) {
+      return null;
+    }
+
+    const isValid = await bcryptjs.compare(token, resetRecord.token);
+
+    if (!isValid) {
+      return null;
+    }
+
+    await queryOne(
+      `UPDATE "public"."customerPasswordReset"
+       SET "isUsed" = true, "updatedAt" = $1
+       WHERE "customerPasswordResetId" = $2`,
+      [new Date(), resetRecord.customerPasswordResetId]
+    );
+
+    return resetRecord.userId;
+  }
+
+  async changePassword(userId: string, newPassword: string): Promise<boolean> {
+    const hashedPassword = await this.hashPassword(newPassword);
+    const result = await queryOne<{ id: string }>(
+      `UPDATE "public"."customer"
+       SET "password" = $1, "updatedAt" = $2
+       WHERE "id" = $3
+       RETURNING "id"`,
+      [hashedPassword, new Date(), userId]
+    );
+
+    return !!result;
   }
 
   // Customer Address methods

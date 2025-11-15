@@ -20,7 +20,6 @@ import { orderCustomerRouter } from "./features/order/orderCustomerRouter";
 import { orderMerchantRouter } from "./features/order/orderBusinessRouter";
 import { distributionMerchantRouter } from "./features/distribution/distributionBusinessRouter";
 import { merchantMerchantRouter } from "./features/merchant/merchantBusinessRouter";
-import { authMerchantRouter } from "./features/auth/authBusinessRouter";
 import { taxMerchantRouter } from "./features/tax/taxMerchantRouter";
 import { taxCustomerRouter } from "./features/tax/taxCustomerRouter";
 import { productMerchantRouter } from "./features/product/productBusinessRouter";
@@ -31,7 +30,8 @@ import { promotionMerchantRouter } from "./features/promotion/promotionBusinessR
 import { distributionCustomerRouter } from "./features/distribution/distributionCustomerRouter";
 import { customerMerchantRouter } from "./features/customer/customerBusinessRouter";
 import { customerRouter } from "./features/customer/customerRouter";
-import { authCustomerRouter } from "./features/auth/authCustomerRouter";
+import { identityMerchantRouter } from "./features/identity/routers/identityMerchantRouter";
+import { identityCustomerRouter } from "./features/identity/routers/identityCustomerRouter";
 const pgSession = require('connect-pg-simple')(session);
 
 const app = express();
@@ -148,7 +148,7 @@ app.use(async (req: Request, res: Response, next) => {
 
 //routes config
 app.use("/", storefrontCustomerRouter);
-app.use("/auth", authCustomerRouter);
+app.use("/identity", identityCustomerRouter);
 app.use("/customer", customerRouter);
 app.use("/basket", basketCustomerRouter);
 app.use("/order", orderCustomerRouter);
@@ -158,8 +158,8 @@ app.use("/products", productCustomerRouter);
 app.use("/payment", paymentCustomerRouter);
 app.use("/inventory", inventoryCustomerRouter);
 app.use("/distribution", distributionCustomerRouter);
-app.use("/merchant", [
-  authMerchantRouter,
+app.use("/business", [
+  identityMerchantRouter,
   merchantMerchantRouter,
   promotionMerchantRouter,
   productMerchantRouter,

@@ -10,4 +10,7 @@ export class ProductAttribute {
     this.name = props.name;
     this.options = props.options;
   }
-}   
+}
+
+// Export as Attribute for backward compatibility
+export { ProductAttribute as Attribute };

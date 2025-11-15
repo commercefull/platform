@@ -12,7 +12,7 @@ exports.up = function(knex) {
     t.text('fileUrl');
     t.enum('fileFormat', ['csv', 'xlsx', 'pdf', 'json']);
     t.enum('status', ['pending', 'processing', 'completed', 'failed']).notNullable().defaultTo('pending');
-    t.uuid('generatedBy').references('adminId').inTable('admin').onDelete('SET NULL');
+    t.uuid('generatedBy').references('merchantId').inTable('merchant').onDelete('SET NULL');
     t.jsonb('parameters');
     t.jsonb('results');
     t.text('errorMessage');
