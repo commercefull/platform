@@ -56,7 +56,7 @@ describe('Notification Tests', () => {
 
   describe('Admin Notification Operations', () => {
     it('should get all notifications (admin)', async () => {
-      const response = await client.get('/api/admin/notifications', {
+      const response = await client.get('/business/notifications', {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -78,7 +78,7 @@ describe('Notification Tests', () => {
     });
 
     it('should get a notification by ID (admin)', async () => {
-      const response = await client.get(`/api/admin/notifications/${testNotificationId}`, {
+      const response = await client.get(`/business/notifications/${testNotificationId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -111,7 +111,7 @@ describe('Notification Tests', () => {
         }
       };
       
-      const response = await client.post('/api/admin/notifications', newNotificationData, {
+      const response = await client.post('/business/notifications', newNotificationData, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -126,7 +126,7 @@ describe('Notification Tests', () => {
       expect(createdNotification.isRead).toBe(false);
       
       // Clean up
-      await client.delete(`/api/admin/notifications/${createdNotification.id}`, {
+      await client.delete(`/business/notifications/${createdNotification.id}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
     });
@@ -138,7 +138,7 @@ describe('Notification Tests', () => {
         priority: 'high'
       };
       
-      const response = await client.put(`/api/admin/notifications/${testNotificationId}`, updateData, {
+      const response = await client.put(`/business/notifications/${testNotificationId}`, updateData, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -157,7 +157,7 @@ describe('Notification Tests', () => {
     });
 
     it('should mark a notification as sent (admin)', async () => {
-      const response = await client.post(`/api/admin/notifications/${testNotificationId}/send`, {}, {
+      const response = await client.post(`/business/notifications/${testNotificationId}/send`, {}, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -181,14 +181,14 @@ describe('Notification Tests', () => {
         channel: 'in_app'
       };
       
-      const createResponse = await client.post('/api/admin/notifications', deleteTestData, {
+      const createResponse = await client.post('/business/notifications', deleteTestData, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
       const deleteId = createResponse.data.data.id;
       
       // Delete the notification
-      const response = await client.delete(`/api/admin/notifications/${deleteId}`, {
+      const response = await client.delete(`/business/notifications/${deleteId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -196,7 +196,7 @@ describe('Notification Tests', () => {
       expect(response.data.success).toBe(true);
       
       // Verify deletion
-      const getResponse = await client.get(`/api/admin/notifications/${deleteId}`, {
+      const getResponse = await client.get(`/business/notifications/${deleteId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -260,7 +260,7 @@ describe('Notification Tests', () => {
     it('should mark all notifications as read (customer)', async () => {
       // Create a few unread notifications first
       for (let i = 0; i < 3; i++) {
-        await client.post('/api/admin/notifications', {
+        await client.post('/business/notifications', {
           userId: testUserId,
           userType: 'customer',
           type: 'system',

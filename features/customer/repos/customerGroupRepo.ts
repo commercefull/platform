@@ -1,21 +1,13 @@
 import { query, queryOne } from '../../../libs/db';
 import { unixTimestamp } from '../../../libs/date';
 
-export interface CustomerGroup {
-  customerGroupId: string;
-  createdAt: string;
-  updatedAt: string;
-  deletedAt?: string;
-  name: string;
-  description?: string;
-  code: string;
-  isActive: boolean;
-  isSystem: boolean;
-  sortOrder: number;
-  discountPercent: number;
-  createdBy?: string;
-}
+// Import types from generated DB types - single source of truth
+import { CustomerGroup as DbCustomerGroup } from '../../../libs/db/types';
 
+// Re-export DB type
+export type CustomerGroup = DbCustomerGroup;
+
+// Derived types for create/update operations
 export type CustomerGroupCreateParams = Omit<CustomerGroup, 'customerGroupId' | 'createdAt' | 'updatedAt' | 'deletedAt'>;
 export type CustomerGroupUpdateParams = Partial<Omit<CustomerGroup, 'customerGroupId' | 'code' | 'createdAt' | 'updatedAt' | 'deletedAt'>>;
 

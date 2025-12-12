@@ -1,31 +1,16 @@
 import { query, queryOne } from '../../../libs/db';
 import { unixTimestamp } from '../../../libs/date';
 
+// Import types from generated DB types - single source of truth
+import { MembershipSubscription as DbMembershipSubscription } from '../../../libs/db/types';
+
+// Re-export DB type
+export type MembershipSubscription = DbMembershipSubscription;
+
+// Type alias for subscription status (used in application logic)
 export type SubscriptionStatus = 'active' | 'cancelled' | 'expired' | 'paused' | 'trial' | 'pending' | 'pastDue';
 
-export interface MembershipSubscription {
-  membershipSubscriptionId: string;
-  createdAt: string;
-  updatedAt: string;
-  customerId: string;
-  membershipPlanId: string;
-  status: SubscriptionStatus;
-  membershipNumber?: string;
-  startDate: string;
-  endDate?: string;
-  trialEndDate?: string;
-  nextBillingDate?: string;
-  lastBillingDate?: string;
-  cancelledAt?: string;
-  cancelReason?: string;
-  isAutoRenew: boolean;
-  priceOverride?: number;
-  billingCycleOverride?: string;
-  paymentMethodId?: string;
-  notes?: string;
-  createdBy?: string;
-}
-
+// Derived types for create/update operations
 export type MembershipSubscriptionCreateParams = Omit<MembershipSubscription, 'membershipSubscriptionId' | 'createdAt' | 'updatedAt' | 'membershipNumber'>;
 export type MembershipSubscriptionUpdateParams = Partial<Pick<MembershipSubscription, 'status' | 'endDate' | 'nextBillingDate' | 'lastBillingDate' | 'cancelledAt' | 'cancelReason' | 'isAutoRenew' | 'priceOverride' | 'paymentMethodId' | 'notes'>>;
 
@@ -138,12 +123,12 @@ export class MembershipSubscriptionRepo {
 
   async updateStatus(id: string, status: SubscriptionStatus): Promise<MembershipSubscription | null> {
     const updates: any = { status };
-    if (status === 'cancelled') updates.cancelledAt = unixTimestamp();
+    if (status === 'cancelled') updates.cancelledAt = new Date();
     return this.update(id, updates);
   }
 
   async cancel(id: string, reason?: string): Promise<MembershipSubscription | null> {
-    return this.update(id, { status: 'cancelled', cancelledAt: unixTimestamp(), cancelReason: reason });
+    return this.update(id, { status: 'cancelled', cancelledAt: new Date(), cancelReason: reason });
   }
 
   async pause(id: string): Promise<MembershipSubscription | null> {
@@ -154,8 +139,8 @@ export class MembershipSubscriptionRepo {
     return this.update(id, { status: 'active' });
   }
 
-  async renew(id: string, endDate: string, nextBillingDate: string): Promise<MembershipSubscription | null> {
-    return this.update(id, { endDate, nextBillingDate, lastBillingDate: unixTimestamp() });
+  async renew(id: string, endDate: Date, nextBillingDate: Date): Promise<MembershipSubscription | null> {
+    return this.update(id, { endDate, nextBillingDate, lastBillingDate: new Date() });
   }
 
   async delete(id: string): Promise<boolean> {

@@ -60,7 +60,7 @@ export async function createTestCategoryAndProduct(client: AxiosInstance, adminT
   const categoryId = categoryResponse.data.data.id;
   
   // Create a test product in that category
-  const productResponse = await client.post('/api/products', {
+  const productResponse = await client.post('/product', {
     name: `Test Product ${Math.floor(Math.random() * 10000)}`,
     description: 'Test product for promotion tests',
     price: 49.99,
@@ -78,7 +78,16 @@ export async function createTestCategoryAndProduct(client: AxiosInstance, adminT
 // Setup function to initialize client and test data
 export async function setupPromotionTests() {
   const client = createTestClient();
-  const adminToken = await loginTestUser(client, 'admin@example.com', 'adminpassword');
+  // Use merchant login for business routes
+  const loginResponse = await client.post('/business/auth/login', {
+    email: 'merchant@example.com',
+    password: 'password123'
+  });
+  const adminToken = loginResponse.data.accessToken;
+  
+  if (!adminToken) {
+    throw new Error('Failed to get admin token for promotion tests');
+  }
   
   // Create test data: cart, category, product
   const testCartId = await createTestCart(client, adminToken);
@@ -106,7 +115,7 @@ export async function cleanupPromotionTests(
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
-    await client.delete(`/api/products/${testProductId}`, {
+    await client.delete(`/product/${testProductId}`, {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     

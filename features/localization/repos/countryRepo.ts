@@ -1,20 +1,13 @@
 import { query, queryOne } from '../../../libs/db';
 import { unixTimestamp } from '../../../libs/date';
 
-export interface Country {
-  countryId: string;
-  createdAt: string;
-  updatedAt: string;
-  code: string;
-  name: string;
-  numericCode?: number;
-  alpha3Code?: string;
-  defaultCurrencyId?: string;
-  isActive: boolean;
-  flagIcon?: string;
-  region?: string;
-}
+// Import types from generated DB types - single source of truth
+import { Country as DbCountry } from '../../../libs/db/types';
 
+// Re-export DB type
+export type Country = DbCountry;
+
+// Derived types for create/update operations
 export type CountryCreateParams = Omit<Country, 'countryId' | 'createdAt' | 'updatedAt'>;
 export type CountryUpdateParams = Partial<Omit<Country, 'countryId' | 'code' | 'createdAt' | 'updatedAt'>>;
 

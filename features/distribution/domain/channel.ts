@@ -26,7 +26,7 @@ export function booleanToChannelStatus(isActive: boolean): ChannelStatus {
  * Interface for Channel entity
  */
 export interface Channel {
-  channelId: string;
+  distributionChannelId: string;
   name: string;
   code: string;
   type: ChannelType;
@@ -41,8 +41,8 @@ export interface Channel {
  * Interface for ChannelProduct entity (products assigned to channels)
  */
 export interface ChannelProduct {
-  channelProductId: string;
-  channelId: string;
+  distributionChannelProductId: string;
+  distributionChannelId: string;
   productId: string;
   isActive: boolean;
   overrideSku?: string;

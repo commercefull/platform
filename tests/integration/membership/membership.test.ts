@@ -33,7 +33,7 @@ describe('Membership Tests', () => {
 
   describe('Tier Management', () => {
     it('should get all membership tiers', async () => {
-      const response = await client.get('/api/admin/membership/tiers', {
+      const response = await client.get('/business/membership/tiers', {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -56,7 +56,7 @@ describe('Membership Tests', () => {
     });
 
     it('should get a tier by ID', async () => {
-      const response = await client.get(`/api/admin/membership/tiers/${testTierId}`, {
+      const response = await client.get(`/business/membership/tiers/${testTierId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -75,7 +75,7 @@ describe('Membership Tests', () => {
         monthlyPrice: 24.99
       };
       
-      const response = await client.put(`/api/admin/membership/tiers/${testTierId}`, updateData, {
+      const response = await client.put(`/business/membership/tiers/${testTierId}`, updateData, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -91,7 +91,7 @@ describe('Membership Tests', () => {
 
   describe('Benefit Management', () => {
     it('should get all benefits', async () => {
-      const response = await client.get('/api/admin/membership/benefits', {
+      const response = await client.get('/business/membership/benefits', {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -116,7 +116,7 @@ describe('Membership Tests', () => {
     });
 
     it('should get a benefit by ID', async () => {
-      const response = await client.get(`/api/admin/membership/benefits/${testBenefitId}`, {
+      const response = await client.get(`/business/membership/benefits/${testBenefitId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -135,7 +135,7 @@ describe('Membership Tests', () => {
         discountPercentage: 15
       };
       
-      const response = await client.put(`/api/admin/membership/benefits/${testBenefitId}`, updateData, {
+      const response = await client.put(`/business/membership/benefits/${testBenefitId}`, updateData, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -149,7 +149,7 @@ describe('Membership Tests', () => {
     });
 
     it('should get benefits for a specific tier', async () => {
-      const response = await client.get(`/api/admin/membership/tiers/${testTierId}/benefits`, {
+      const response = await client.get(`/business/membership/tiers/${testTierId}/benefits`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -165,7 +165,7 @@ describe('Membership Tests', () => {
 
   describe('User Membership Management', () => {
     it('should get a user membership by ID', async () => {
-      const response = await client.get(`/api/admin/membership/user-memberships/${testUserMembershipId}`, {
+      const response = await client.get(`/business/membership/user-memberships/${testUserMembershipId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -179,7 +179,7 @@ describe('Membership Tests', () => {
     });
 
     it('should get user membership with tier details', async () => {
-      const response = await client.get(`/api/admin/membership/user-memberships/${testUserMembershipId}/with-tier`, {
+      const response = await client.get(`/business/membership/user-memberships/${testUserMembershipId}/with-tier`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -200,7 +200,7 @@ describe('Membership Tests', () => {
         membershipType: 'monthly'
       };
       
-      const response = await client.put(`/api/admin/membership/user-memberships/${testUserMembershipId}`, updateData, {
+      const response = await client.put(`/business/membership/user-memberships/${testUserMembershipId}`, updateData, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -211,7 +211,7 @@ describe('Membership Tests', () => {
     });
 
     it('should cancel a user membership', async () => {
-      const response = await client.put(`/api/admin/membership/user-memberships/${testUserMembershipId}/cancel`, {}, {
+      const response = await client.put(`/business/membership/user-memberships/${testUserMembershipId}/cancel`, {}, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -261,7 +261,7 @@ describe('Membership Tests', () => {
     it('should deny access to membership details without authentication', async () => {
       const response = await client.get('/api/membership/my-membership');
       
-      expect(response.status).toBe(401);
+      expect([401, 403]).toContain(response.status);
       expect(response.data.success).toBe(false);
     });
   });
@@ -271,7 +271,7 @@ describe('Membership Tests', () => {
     // the platform's naming convention with snake_case for DB and camelCase for TypeScript
     
     it('should maintain camelCase properties in tier responses', async () => {
-      const response = await client.get(`/api/admin/membership/tiers/${testTierId}`, {
+      const response = await client.get(`/business/membership/tiers/${testTierId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -293,7 +293,7 @@ describe('Membership Tests', () => {
     });
     
     it('should maintain camelCase properties in benefit responses', async () => {
-      const response = await client.get(`/api/admin/membership/benefits/${testBenefitId}`, {
+      const response = await client.get(`/business/membership/benefits/${testBenefitId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -313,7 +313,7 @@ describe('Membership Tests', () => {
     });
     
     it('should maintain camelCase properties in user membership responses', async () => {
-      const response = await client.get(`/api/admin/membership/user-memberships/${testUserMembershipId}`, {
+      const response = await client.get(`/business/membership/user-memberships/${testUserMembershipId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       

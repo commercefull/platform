@@ -4,7 +4,7 @@
  */
 exports.up = function (knex) {
   return knex.schema.createTable('checkoutSession', t => {
-    t.uuid('checkoutSessionId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+    t.uuid('checkoutSessionId').primary().defaultTo(knex.raw('uuidv7()'));
     t.string('sessionId', 255).notNullable().unique();
     t.uuid('basketId').notNullable().references('basketId').inTable('basket');
     t.uuid('customerId').references('customerId').inTable('customer');

@@ -1,6 +1,6 @@
 exports.up = function(knex) {
   return knex.schema.createTable('payout', t => {
-    t.uuid('payoutId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+    t.uuid('payoutId').primary().defaultTo(knex.raw('uuidv7()'));
     t.uuid('merchantId').notNullable().references('merchantId').inTable('merchant');
     t.decimal('amount', 15, 2).notNullable();
     t.decimal('fee', 15, 2).notNullable().defaultTo(0);

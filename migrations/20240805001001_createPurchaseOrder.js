@@ -4,12 +4,12 @@
  */
 exports.up = function (knex) {
   return knex.schema.createTable('purchaseOrder', t => {
-    t.uuid('purchaseOrderId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+    t.uuid('purchaseOrderId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     t.string('poNumber', 50).notNullable().unique();
     t.uuid('supplierId').notNullable().references('supplierId').inTable('supplier');
-    t.uuid('warehouseId').notNullable().references('warehouseId').inTable('warehouse');
+    t.uuid('distributionWarehouseId').notNullable().references('distributionWarehouseId').inTable('distributionWarehouse');
     t.enum('status', ['draft', 'pending', 'approved', 'sent', 'confirmed', 'partial', 'completed', 'cancelled']).notNullable().defaultTo('draft');
     t.enum('orderType', ['standard', 'restock', 'backOrder', 'special', 'emergency']).notNullable().defaultTo('standard');
     t.enum('priority', ['low', 'normal', 'high', 'urgent']).notNullable().defaultTo('normal');
@@ -37,7 +37,7 @@ exports.up = function (knex) {
     t.timestamp('cancelledAt');
     t.index('poNumber');
     t.index('supplierId');
-    t.index('warehouseId');
+    t.index('distributionWarehouseId');
     t.index('status');
     t.index('orderType');
     t.index('priority');

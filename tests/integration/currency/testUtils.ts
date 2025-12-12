@@ -35,7 +35,7 @@ export const testPriceRule = {
 
 // Test credentials
 const adminCredentials = {
-  email: 'admin@example.com', // Replace with valid admin credentials
+  email: 'merchant@example.com', // Replace with valid admin credentials
   password: 'password123'     // Replace with valid admin password
 };
 
@@ -46,12 +46,16 @@ export async function setupCurrencyTests() {
   // Create client
   const client = axios.create({
     baseURL: process.env.API_URL || 'http://localhost:3000',
-    validateStatus: () => true // Don't throw HTTP errors
+    validateStatus: () => true,
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    } // Don't throw HTTP errors
   });
 
   // Get admin token - Use the same authentication endpoint as other features
-  const loginResponse = await client.post('/api/auth/login', adminCredentials);
-  const adminToken = loginResponse.data.token;
+  const loginResponse = await client.post('/business/auth/login', adminCredentials);
+  const adminToken = loginResponse.data.accessToken;
 
   if (!loginResponse.data.success || !adminToken) {
     throw new Error('Failed to get admin token');
@@ -59,7 +63,7 @@ export async function setupCurrencyTests() {
 
   // Create test data
   // 1. Create Currency
-  const currencyResponse = await client.post('/api/admin/currencies', testCurrency, {
+  const currencyResponse = await client.post('/business/currencies', testCurrency, {
     headers: { Authorization: `Bearer ${adminToken}` }
   });
   
@@ -73,7 +77,7 @@ export async function setupCurrencyTests() {
     currencyCode: testCurrency.code
   };
   
-  const regionResponse = await client.post('/api/admin/currency-regions', testRegion, {
+  const regionResponse = await client.post('/business/currency-regions', testRegion, {
     headers: { Authorization: `Bearer ${adminToken}` }
   });
   
@@ -89,7 +93,7 @@ export async function setupCurrencyTests() {
     currencyCode: testCurrency.code
   };
   
-  const ruleResponse = await client.post('/api/admin/currency-price-rules', testRule, {
+  const ruleResponse = await client.post('/business/currency-price-rules', testRule, {
     headers: { Authorization: `Bearer ${adminToken}` }
   });
   
@@ -129,21 +133,21 @@ export async function cleanupCurrencyTests(
   // Delete in reverse order of dependencies
   // 1. Delete Price Rule
   if (testPriceRuleId) {
-    await client.delete(`/api/admin/currency-price-rules/${testPriceRuleId}`, {
+    await client.delete(`/business/currency-price-rules/${testPriceRuleId}`, {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
   }
 
   // 2. Delete Currency Region
   if (testCurrencyRegionCode) {
-    await client.delete(`/api/admin/currency-regions/${testCurrencyRegionCode}`, {
+    await client.delete(`/business/currency-regions/${testCurrencyRegionCode}`, {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
   }
 
   // 3. Delete Currency
   if (testCurrencyCode) {
-    await client.delete(`/api/admin/currencies/${testCurrencyCode}`, {
+    await client.delete(`/business/currencies/${testCurrencyCode}`, {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
   }

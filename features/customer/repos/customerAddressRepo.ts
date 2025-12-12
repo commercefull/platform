@@ -1,37 +1,13 @@
 import { query, queryOne } from '../../../libs/db';
 import { unixTimestamp } from '../../../libs/date';
 
-export type AddressType = 'billing' | 'shipping' | 'both';
+// Import types from generated DB types - single source of truth
+import { CustomerAddress as DbCustomerAddress } from '../../../libs/db/types';
 
-export interface CustomerAddress {
-  customerAddressId: string;
-  createdAt: string;
-  updatedAt: string;
-  customerId: string;
-  firstName?: string;
-  lastName?: string;
-  company?: string;
-  addressLine1: string;
-  addressLine2?: string;
-  city: string;
-  state?: string;
-  postalCode: string;
-  country: string;
-  phone?: string;
-  email?: string;
-  isDefault: boolean;
-  isDefaultBilling: boolean;
-  isDefaultShipping: boolean;
-  addressType: AddressType;
-  isVerified: boolean;
-  verifiedAt?: string;
-  verificationData?: Record<string, any>;
-  additionalInfo?: string;
-  latitude?: number;
-  longitude?: number;
-  name?: string;
-}
+// Re-export DB type
+export type CustomerAddress = DbCustomerAddress;
 
+// Derived types for create/update operations
 export type CustomerAddressCreateParams = Omit<CustomerAddress, 'customerAddressId' | 'createdAt' | 'updatedAt'>;
 export type CustomerAddressUpdateParams = Partial<Omit<CustomerAddress, 'customerAddressId' | 'customerId' | 'createdAt' | 'updatedAt'>>;
 

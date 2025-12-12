@@ -21,7 +21,7 @@ describe('Product Tests', () => {
 
   describe('Product CRUD Operations', () => {
     it('should get a product by ID', async () => {
-      const response = await client.get(`/api/admin/products/${testProductId}`, {
+      const response = await client.get(`/business/products/${testProductId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -37,7 +37,7 @@ describe('Product Tests', () => {
     });
 
     it('should list all products with pagination', async () => {
-      const response = await client.get('/api/admin/products', {
+      const response = await client.get('/business/products', {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -55,7 +55,7 @@ describe('Product Tests', () => {
         basePrice: 129.99
       };
       
-      const response = await client.put(`/api/admin/products/${testProductId}`, updatedData, {
+      const response = await client.put(`/business/products/${testProductId}`, updatedData, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -67,7 +67,7 @@ describe('Product Tests', () => {
     });
 
     it('should get products by category', async () => {
-      const response = await client.get(`/api/admin/products/category/${testCategoryId}`, {
+      const response = await client.get(`/business/products/category/${testCategoryId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -83,7 +83,7 @@ describe('Product Tests', () => {
     it('should update product status', async () => {
       const statusData = { status: 'draft' };
       
-      const response = await client.patch(`/api/admin/products/${testProductId}/status`, statusData, {
+      const response = await client.patch(`/business/products/${testProductId}/status`, statusData, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -95,7 +95,7 @@ describe('Product Tests', () => {
     it('should update product visibility', async () => {
       const visibilityData = { visibility: 'hidden' };
       
-      const response = await client.patch(`/api/admin/products/${testProductId}/visibility`, visibilityData, {
+      const response = await client.patch(`/business/products/${testProductId}/visibility`, visibilityData, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       

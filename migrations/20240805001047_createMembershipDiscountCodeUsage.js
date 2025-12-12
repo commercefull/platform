@@ -4,7 +4,7 @@
  */
 exports.up = function (knex) {
   return knex.schema.createTable('membershipDiscountCodeUsage', t => {
-    t.uuid('membershipDiscountCodeUsageId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+    t.uuid('membershipDiscountCodeUsageId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     t.uuid('discountCodeId').notNullable().references('membershipDiscountCodeId').inTable('membershipDiscountCode').onDelete('CASCADE');

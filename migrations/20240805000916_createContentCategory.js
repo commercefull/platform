@@ -4,7 +4,7 @@
  */
 exports.up = function (knex) {
   return knex.schema.createTable('contentCategory', t => {
-    t.uuid('contentCategoryId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+    t.uuid('contentCategoryId').primary().defaultTo(knex.raw('uuidv7()'));
     t.string('name', 100).notNullable();
     t.string('slug', 100).notNullable().unique();
     t.uuid('parentId').references('contentCategoryId').inTable('contentCategory');

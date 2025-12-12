@@ -45,7 +45,7 @@ describe('Order Item Tests', () => {
 
   describe('Admin Order Item Operations', () => {
     it('should get all items for an order (admin)', async () => {
-      const response = await client.get(`/api/admin/orders/${testOrderId}/items`, {
+      const response = await client.get(`/business/orders/${testOrderId}/items`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -71,7 +71,7 @@ describe('Order Item Tests', () => {
     });
 
     it('should get an order item by ID (admin)', async () => {
-      const response = await client.get(`/api/admin/order-items/${testOrderItemId}`, {
+      const response = await client.get(`/business/order-items/${testOrderItemId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -104,7 +104,7 @@ describe('Order Item Tests', () => {
         total: 29.99
       };
       
-      const response = await client.post('/api/admin/order-items', newItemData, {
+      const response = await client.post('/business/order-items', newItemData, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -117,7 +117,7 @@ describe('Order Item Tests', () => {
       
       // Clean up the new test item
       const newItemId = response.data.data.id;
-      await client.delete(`/api/admin/order-items/${newItemId}`, {
+      await client.delete(`/business/order-items/${newItemId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
     });
@@ -128,7 +128,7 @@ describe('Order Item Tests', () => {
         unitPrice: 39.99
       };
       
-      const response = await client.put(`/api/admin/order-items/${testOrderItemId}`, updateData, {
+      const response = await client.put(`/business/order-items/${testOrderItemId}`, updateData, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -145,7 +145,7 @@ describe('Order Item Tests', () => {
 
     it('should recalculate order totals when items change', async () => {
       // Get current order totals
-      const beforeResponse = await client.get(`/api/admin/orders/${testOrderId}`, {
+      const beforeResponse = await client.get(`/business/orders/${testOrderId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       const beforeTotals = beforeResponse.data.data;
@@ -155,17 +155,17 @@ describe('Order Item Tests', () => {
         quantity: 5 // Increasing quantity
       };
       
-      await client.put(`/api/admin/order-items/${testOrderItemId}`, updateData, {
+      await client.put(`/business/order-items/${testOrderItemId}`, updateData, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
       // Explicitly trigger order totals recalculation
-      await client.post(`/api/admin/orders/${testOrderId}/recalculate`, {}, {
+      await client.post(`/business/orders/${testOrderId}/recalculate`, {}, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
       // Get updated order totals
-      const afterResponse = await client.get(`/api/admin/orders/${testOrderId}`, {
+      const afterResponse = await client.get(`/business/orders/${testOrderId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       const afterTotals = afterResponse.data.data;

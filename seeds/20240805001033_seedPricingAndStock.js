@@ -30,7 +30,7 @@ exports.up = async function (knex) {
 
   // Get sample product and main warehouse IDs
   const sampleProduct = await knex('product').where({ sku: 'SAMPLE-001' }).first('productId');
-  const mainWarehouse = await knex('warehouse').where({ code: 'MAIN' }).first('warehouseId');
+  const mainWarehouse = await knex('distributionWarehouse').where({ code: 'MAIN' }).first('distributionWarehouseId');
 
   if (!sampleProduct || !mainWarehouse) {
     throw new Error('Required seed data (product/warehouse) not found');
@@ -38,13 +38,13 @@ exports.up = async function (knex) {
 
   // Insert sample inventory level
   const productId = sampleProduct.productId ?? sampleProduct;
-  const warehouseId = mainWarehouse.warehouseId ?? mainWarehouse;
+  const distributionWarehouseId = mainWarehouse.distributionWarehouseId ?? mainWarehouse;
 
-  await knex('inventoryLevel').where({ productId, warehouseId }).delete();
+  await knex('inventoryLevel').where({ productId, distributionWarehouseId }).delete();
 
   return knex('inventoryLevel').insert({
     productId,
-    warehouseId,
+    distributionWarehouseId,
     isTracked: true,
     availableQuantity: 100,
     onHandQuantity: 100,

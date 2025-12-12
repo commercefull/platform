@@ -23,7 +23,7 @@ describe('Inventory Location Tests', () => {
     
     // Delete additional location if it was created
     if (additionalLocationId) {
-      await client.delete(`/api/admin/inventory/locations/${additionalLocationId}`, {
+      await client.delete(`/business/inventory/locations/${additionalLocationId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
     }
@@ -31,7 +31,7 @@ describe('Inventory Location Tests', () => {
 
   describe('Location CRUD Operations', () => {
     it('should get a location by ID', async () => {
-      const response = await client.get(`/api/admin/inventory/locations/${testLocationId}`, {
+      const response = await client.get(`/business/inventory/locations/${testLocationId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -43,7 +43,7 @@ describe('Inventory Location Tests', () => {
     });
 
     it('should list all active locations', async () => {
-      const response = await client.get('/api/admin/inventory/locations', {
+      const response = await client.get('/business/inventory/locations', {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
 
@@ -68,7 +68,7 @@ describe('Inventory Location Tests', () => {
         isActive: true
       };
 
-      const response = await client.post('/api/admin/inventory/locations', newLocation, {
+      const response = await client.post('/business/inventory/locations', newLocation, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
 
@@ -88,7 +88,7 @@ describe('Inventory Location Tests', () => {
         isActive: false
       };
 
-      const response = await client.put(`/api/admin/inventory/locations/${additionalLocationId}`, updateData, {
+      const response = await client.put(`/business/inventory/locations/${additionalLocationId}`, updateData, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
 
@@ -99,7 +99,7 @@ describe('Inventory Location Tests', () => {
     });
 
     it('should only return active locations with the isActive filter', async () => {
-      const response = await client.get('/api/admin/inventory/locations', {
+      const response = await client.get('/business/inventory/locations', {
         headers: { Authorization: `Bearer ${adminToken}` },
         params: { includeInactive: false }
       });

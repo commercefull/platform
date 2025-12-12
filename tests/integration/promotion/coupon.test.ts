@@ -19,7 +19,7 @@ describe('Coupon API Tests', () => {
   });
 
   it('should create a new coupon', async () => {
-    const response = await client.post('/api/admin/coupons', testCoupon, {
+    const response = await client.post('/business/coupons', testCoupon, {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
@@ -36,7 +36,7 @@ describe('Coupon API Tests', () => {
   });
 
   it('should get a coupon by ID', async () => {
-    const response = await client.get(`/api/admin/coupons/${couponId}`, {
+    const response = await client.get(`/business/coupons/${couponId}`, {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
@@ -46,7 +46,7 @@ describe('Coupon API Tests', () => {
   });
 
   it('should get a coupon by code', async () => {
-    const response = await client.get(`/api/admin/coupons/code/${testCoupon.code}`, {
+    const response = await client.get(`/business/coupons/code/${testCoupon.code}`, {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
@@ -56,7 +56,7 @@ describe('Coupon API Tests', () => {
   });
 
   it('should validate a coupon', async () => {
-    const response = await client.post('/api/admin/coupons/validate', {
+    const response = await client.post('/business/coupons/validate', {
       code: testCoupon.code,
       orderTotal: 50
     }, {
@@ -75,7 +75,7 @@ describe('Coupon API Tests', () => {
       { productId: testProductId, quantity: 2, price: 49.99 }
     ];
     
-    const response = await client.post('/api/admin/coupons/validate', {
+    const response = await client.post('/business/coupons/validate', {
       code: testCoupon.code,
       orderTotal: 99.98,
       items: cartItems
@@ -98,7 +98,7 @@ describe('Coupon API Tests', () => {
       value: 20
     };
     
-    const response = await client.put(`/api/admin/coupons/${couponId}`, updateData, {
+    const response = await client.put(`/business/coupons/${couponId}`, updateData, {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
@@ -109,7 +109,7 @@ describe('Coupon API Tests', () => {
   });
   
   it('should delete a coupon', async () => {
-    const response = await client.delete(`/api/admin/coupons/${couponId}`, {
+    const response = await client.delete(`/business/coupons/${couponId}`, {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
@@ -117,7 +117,7 @@ describe('Coupon API Tests', () => {
     expect(response.data.success).toBe(true);
     
     // Verify the coupon is deleted
-    const getResponse = await client.get(`/api/admin/coupons/${couponId}`, {
+    const getResponse = await client.get(`/business/coupons/${couponId}`, {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     

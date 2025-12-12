@@ -19,7 +19,7 @@ describe('Cart Promotion Tests', () => {
     testProductId = setup.testProductId;
 
     // Create a new promotion to apply to cart
-    const promotionResponse = await client.post('/api/admin/promotions', testPromotion, {
+    const promotionResponse = await client.post('/business/promotions', testPromotion, {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
@@ -34,7 +34,7 @@ describe('Cart Promotion Tests', () => {
       status: 'applied'
     };
     
-    const response = await client.post('/api/admin/cart-promotions', cartPromotionData, {
+    const response = await client.post('/business/cart-promotions', cartPromotionData, {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
@@ -46,7 +46,7 @@ describe('Cart Promotion Tests', () => {
   });
 
   it('should get cart promotions by cart ID', async () => {
-    const response = await client.get(`/api/admin/cart-promotions/cart/${testCartId}`, {
+    const response = await client.get(`/business/cart-promotions/cart/${testCartId}`, {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
@@ -62,7 +62,7 @@ describe('Cart Promotion Tests', () => {
   });
 
   it('should remove a promotion from a cart', async () => {
-    const response = await client.delete(`/api/admin/cart-promotions/${cartPromotionId}`, {
+    const response = await client.delete(`/business/cart-promotions/${cartPromotionId}`, {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
@@ -70,7 +70,7 @@ describe('Cart Promotion Tests', () => {
     expect(response.data.success).toBe(true);
     
     // Verify the promotion is removed
-    const getResponse = await client.get(`/api/admin/cart-promotions/cart/${testCartId}`, {
+    const getResponse = await client.get(`/business/cart-promotions/cart/${testCartId}`, {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
@@ -81,7 +81,7 @@ describe('Cart Promotion Tests', () => {
   afterAll(async () => {
     // Clean up the promotion we created in this test
     try {
-      await client.delete(`/api/admin/promotions/${promotionId}`, {
+      await client.delete(`/business/promotions/${promotionId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
     } catch (error) {

@@ -1,15 +1,13 @@
 import { query, queryOne } from '../../../libs/db';
 import { unixTimestamp } from '../../../libs/date';
 
-export interface CustomerCurrencyPreference {
-  customerCurrencyPreferenceId: string;
-  createdAt: string;
-  updatedAt: string;
-  customerId: string;
-  currencyId: string;
-  automaticDetection: boolean;
-}
+// Import types from generated DB types - single source of truth
+import { CustomerCurrencyPreference as DbCustomerCurrencyPreference } from '../../../libs/db/types';
 
+// Re-export DB type
+export type CustomerCurrencyPreference = DbCustomerCurrencyPreference;
+
+// Derived types for create/update operations
 export type CustomerCurrencyPreferenceCreateParams = Omit<CustomerCurrencyPreference, 'customerCurrencyPreferenceId' | 'createdAt' | 'updatedAt'>;
 export type CustomerCurrencyPreferenceUpdateParams = Partial<Pick<CustomerCurrencyPreference, 'currencyId' | 'automaticDetection'>>;
 

@@ -12,7 +12,23 @@ import {
   getShippingMethodsByCarrier,
   createShippingMethod,
   updateShippingMethod,
-  deleteShippingMethod
+  deleteShippingMethod,
+  getShippingCarriers,
+  getActiveShippingCarriers,
+  getShippingCarrierById,
+  getShippingCarrierByCode,
+  createShippingCarrier,
+  updateShippingCarrier,
+  deleteShippingCarrier,
+  getShippingRates,
+  getShippingRateById,
+  getShippingRatesByZone,
+  getShippingRatesByMethod,
+  createShippingRate,
+  updateShippingRate,
+  deleteShippingRate,
+  calculateRate,
+  getAvailableMethods
 } from "./controllers/shippingBusinessController";
 import { 
   createFulfillmentPartner,
@@ -26,14 +42,17 @@ import {
   deleteOrderFulfillment,
   getOrderFulfillmentById,
   getOrderFulfillments,
-  getOrderFulfillmentsByDistributionCenter,
+  getOrderFulfillmentsByWarehouse,
   getOrderFulfillmentsByOrderId,
   getOrderFulfillmentsByStatus,
   updateOrderFulfillment,
-  updateOrderFulfillmentStatus
+  updateOrderFulfillmentStatus,
+  getBestWarehouse
 } from "./controllers/fulfillmentBusinessController";
 import { createDistributionCenter, createDistributionRule, deleteDistributionCenter, deleteDistributionRule, getActiveDistributionCenters, getActiveDistributionRules, getDefaultDistributionRule, getDistributionCenterByCode, getDistributionCenterById, getDistributionCenters, getDistributionRuleById, getDistributionRules, getDistributionRulesByZone, updateDistributionCenter, updateDistributionRule } from "./controllers/distributionBusinessController";
 import { getChannels, getActiveChannels, getChannelById, getChannelByCode, createChannel, updateChannel, deleteChannel, getChannelProducts, addProductToChannel, removeProductFromChannel, getProductChannels } from "./controllers/channelController";
+import * as pickupController from "./controllers/pickupBusinessController";
+import * as preOrderController from "./controllers/preOrderBusinessController";
 import { isMerchantLoggedIn } from "../../libs/auth";
 
 const router = express.Router();
@@ -86,10 +105,35 @@ router.get("/products/:productId/channels", getProductChannels);
 router.get("/shipping-methods", getShippingMethods);
 router.get("/shipping-methods/active", getActiveShippingMethods);
 router.get("/shipping-methods/:id", getShippingMethodById);
-router.get("/shipping-methods/carrier/:carrier", getShippingMethodsByCarrier);
+router.get("/shipping-methods/carrier/:carrierId", getShippingMethodsByCarrier);
 router.post("/shipping-methods", createShippingMethod);
 router.put("/shipping-methods/:id", updateShippingMethod);
 router.delete("/shipping-methods/:id", deleteShippingMethod);
+
+// Shipping Carrier routes
+router.get("/shipping-carriers", getShippingCarriers);
+router.get("/shipping-carriers/active", getActiveShippingCarriers);
+router.get("/shipping-carriers/:id", getShippingCarrierById);
+router.get("/shipping-carriers/code/:code", getShippingCarrierByCode);
+router.post("/shipping-carriers", createShippingCarrier);
+router.put("/shipping-carriers/:id", updateShippingCarrier);
+router.delete("/shipping-carriers/:id", deleteShippingCarrier);
+
+// Shipping Rate routes
+router.get("/shipping-rates", getShippingRates);
+router.get("/shipping-rates/:id", getShippingRateById);
+router.get("/shipping-rates/zone/:zoneId", getShippingRatesByZone);
+router.get("/shipping-rates/method/:methodId", getShippingRatesByMethod);
+router.post("/shipping-rates", createShippingRate);
+router.put("/shipping-rates/:id", updateShippingRate);
+router.delete("/shipping-rates/:id", deleteShippingRate);
+
+// Shipping Calculation routes (Use Cases)
+router.post("/shipping/calculate-rate", calculateRate);
+router.get("/shipping/available-methods", getAvailableMethods);
+
+// Warehouse Selection routes (Use Cases)
+router.get("/warehouses/best", getBestWarehouse);
 
 // Fulfillment Partner routes
 router.get("/fulfillment-partners", getFulfillmentPartners);
@@ -105,10 +149,34 @@ router.get("/fulfillments", getOrderFulfillments);
 router.get("/fulfillments/:id", getOrderFulfillmentById);
 router.get("/fulfillments/order/:orderId", getOrderFulfillmentsByOrderId);
 router.get("/fulfillments/status/:status", getOrderFulfillmentsByStatus);
-router.get("/fulfillments/center/:centerId", getOrderFulfillmentsByDistributionCenter);
+router.get("/fulfillments/warehouse/:warehouseId", getOrderFulfillmentsByWarehouse);
 router.post("/fulfillments", createOrderFulfillment);
 router.put("/fulfillments/:id", updateOrderFulfillment);
 router.put("/fulfillments/:id/status", updateOrderFulfillmentStatus);
 router.delete("/fulfillments/:id", deleteOrderFulfillment);
 
-export const distributionMerchantRouter = router;
+// Store Location routes (Click & Collect)
+router.get("/locations", pickupController.getLocations);
+router.get("/locations/:id", pickupController.getLocation);
+router.post("/locations", pickupController.createLocation);
+router.put("/locations/:id", pickupController.updateLocation);
+router.delete("/locations/:id", pickupController.deleteLocation);
+
+// Pickup Order routes
+router.get("/pickups", pickupController.getPickupOrders);
+router.post("/pickups/:id/ready", pickupController.markPickupReady);
+router.post("/pickups/:id/notify", pickupController.notifyPickupReady);
+router.post("/pickups/:id/complete", pickupController.completePickup);
+
+// Pre-Order routes
+router.get("/pre-orders", preOrderController.getPreOrders);
+router.get("/pre-orders/:id", preOrderController.getPreOrder);
+router.post("/pre-orders", preOrderController.createPreOrder);
+router.put("/pre-orders/:id", preOrderController.updatePreOrder);
+
+// Pre-Order Reservation routes
+router.get("/reservations", preOrderController.getReservations);
+router.post("/reservations/:id/fulfill", preOrderController.fulfillReservation);
+router.post("/reservations/:id/cancel", preOrderController.cancelReservation);
+
+export const distributionBusinessRouter = router;

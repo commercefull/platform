@@ -1,6 +1,6 @@
 exports.up = function(knex) {
   return knex.schema.createTable('payoutItem', t => {
-    t.uuid('payoutItemId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+    t.uuid('payoutItemId').primary().defaultTo(knex.raw('uuidv7()'));
     t.uuid('payoutId').notNullable().references('payoutId').inTable('payout').onDelete('CASCADE');
     t.string('type', 50).notNullable().checkIn(['payment', 'refund', 'dispute', 'fee', 'adjustment', 'other']);
     t.decimal('amount', 15, 2).notNullable();

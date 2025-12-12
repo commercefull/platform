@@ -4,7 +4,7 @@
  */
 exports.up = function (knex) {
   return knex.schema.createTable('merchantBalance', t => {
-    t.uuid('merchantBalanceId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+    t.uuid('merchantBalanceId').primary().defaultTo(knex.raw('uuidv7()'));
     t.uuid('merchantId').notNullable().references('merchantId').inTable('merchant').onDelete('CASCADE').unique();
     t.decimal('availableBalance', 15, 2).notNullable().defaultTo(0);
     t.decimal('pendingBalance', 15, 2).notNullable().defaultTo(0);

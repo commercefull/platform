@@ -4,7 +4,7 @@
  */
 exports.up = function (knex) {
   return knex.schema.createTable('receivingItem', t => {
-    t.uuid('receivingItemId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+    t.uuid('receivingItemId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     t.uuid('receivingRecordId').notNullable().references('receivingRecordId').inTable('receivingRecord').onDelete('CASCADE');
@@ -16,7 +16,7 @@ exports.up = function (knex) {
     t.integer('expectedQuantity');
     t.integer('receivedQuantity').notNullable();
     t.integer('rejectedQuantity').notNullable().defaultTo(0);
-    t.uuid('warehouseBinId').references('warehouseBinId').inTable('warehouseBin');
+    t.uuid('distributionWarehouseBinId').references('distributionWarehouseBinId').inTable('distributionWarehouseBin');
     t.string('lotNumber', 100);
     t.specificType('serialNumbers', 'text[]');
     t.timestamp('expiryDate');
@@ -32,7 +32,7 @@ exports.up = function (knex) {
     t.index('productId');
     t.index('productVariantId');
     t.index('sku');
-    t.index('warehouseBinId');
+    t.index('distributionWarehouseBinId');
     t.index('lotNumber');
     t.index('expiryDate');
     t.index('status');

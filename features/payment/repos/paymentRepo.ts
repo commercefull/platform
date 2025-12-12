@@ -751,6 +751,67 @@ export class PaymentRepo {
     
     return result;
   }
+
+  // Payment processing methods (mock implementations)
+  async processPayment(paymentData: {
+    orderId: string;
+    amount: number;
+    currency: string;
+    paymentMethodId?: string;
+    gatewayId?: string;
+  }): Promise<{ success: boolean; transactionId?: string; error?: string }> {
+    try {
+      // Mock payment processing - in real implementation, this would integrate with payment gateways
+      console.log(`Processing payment for order ${paymentData.orderId}: $${paymentData.amount} ${paymentData.currency}`);
+
+      // Simulate successful payment
+      const transactionId = `txn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+      // Create transaction record
+      await this.createTransaction({
+        orderId: paymentData.orderId,
+        customerId: '', // Would come from order
+        paymentMethodConfigId: paymentData.paymentMethodId || '',
+        gatewayId: paymentData.gatewayId || '',
+        amount: paymentData.amount,
+        currency: paymentData.currency,
+        status: 'paid',
+        gatewayResponse: { mock: true, transactionId }
+      });
+
+      return { success: true, transactionId };
+    } catch (error: any) {
+      console.error('Payment processing failed:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async processRefund(refundData: {
+    orderId: string;
+    transactionId: string;
+    amount: number;
+    reason?: string;
+  }): Promise<{ success: boolean; refundId?: string; error?: string }> {
+    try {
+      // Mock refund processing - in real implementation, this would integrate with payment gateways
+      console.log(`Processing refund for order ${refundData.orderId}: $${refundData.amount}`);
+
+      // Create refund record
+      const refund = await this.createRefund({
+        transactionId: refundData.transactionId,
+        amount: refundData.amount,
+        currency: 'USD', // Would come from transaction
+        reason: refundData.reason,
+        status: 'completed',
+        gatewayResponse: { mock: true }
+      });
+
+      return { success: true, refundId: refund.id };
+    } catch (error: any) {
+      console.error('Refund processing failed:', error);
+      return { success: false, error: error.message };
+    }
+  }
 }
 
 export default new PaymentRepo();

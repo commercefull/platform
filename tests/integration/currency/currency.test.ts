@@ -43,7 +43,7 @@ describe('Currency Feature Tests', () => {
 
   describe('Currency API', () => {
     it('should get currency by code with camelCase properties', async () => {
-      const response = await client.get(`/api/admin/currencies/${testCurrencyCode}`, {
+      const response = await client.get(`/business/currencies/${testCurrencyCode}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -77,7 +77,7 @@ describe('Currency Feature Tests', () => {
         exchangeRate: 1.5
       };
       
-      const response = await client.put(`/api/admin/currencies/${testCurrencyCode}`, updateData, {
+      const response = await client.put(`/business/currencies/${testCurrencyCode}`, updateData, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -100,7 +100,7 @@ describe('Currency Feature Tests', () => {
     });
 
     it('should list all currencies with camelCase properties', async () => {
-      const response = await client.get('/api/admin/currencies', {
+      const response = await client.get('/business/currencies', {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -148,7 +148,7 @@ describe('Currency Feature Tests', () => {
 
   describe('Currency Region API', () => {
     it('should get currency region by code with camelCase properties', async () => {
-      const response = await client.get(`/api/admin/currency-regions/${testCurrencyRegionCode}`, {
+      const response = await client.get(`/business/currency-regions/${testCurrencyRegionCode}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -169,7 +169,7 @@ describe('Currency Feature Tests', () => {
     });
 
     it('should list currency regions with camelCase properties', async () => {
-      const response = await client.get('/api/admin/currency-regions', {
+      const response = await client.get('/business/currency-regions', {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -219,7 +219,7 @@ describe('Currency Feature Tests', () => {
 
   describe('Price Rule API', () => {
     it('should get price rule by ID with camelCase properties', async () => {
-      const response = await client.get(`/api/admin/currency-price-rules/${testPriceRuleId}`, {
+      const response = await client.get(`/business/currency-price-rules/${testPriceRuleId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -244,7 +244,7 @@ describe('Currency Feature Tests', () => {
     });
 
     it('should list price rules with camelCase properties', async () => {
-      const response = await client.get('/api/admin/currency-price-rules', {
+      const response = await client.get('/business/currency-price-rules', {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       

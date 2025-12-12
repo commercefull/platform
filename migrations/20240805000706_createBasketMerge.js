@@ -4,7 +4,7 @@
  */
 exports.up = function (knex) {
   return knex.schema.createTable('basketMerge', t => {
-    t.uuid('basketMergeId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+    t.uuid('basketMergeId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     t.uuid('targetBasketId').notNullable().references('basketId').inTable('basket');

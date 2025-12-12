@@ -1,6 +1,6 @@
 exports.up = function(knex) {
   return knex.schema.createTable('productSeo', t => {
-    t.uuid('productSeoId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+    t.uuid('productSeoId').primary().defaultTo(knex.raw('uuidv7()'));
     t.uuid('productId').notNullable().references('productId').inTable('product').onDelete('CASCADE').unique();
     t.string('metaTitle', 255);
     t.text('metaDescription');

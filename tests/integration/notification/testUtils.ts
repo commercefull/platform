@@ -7,7 +7,7 @@ export const loginTestUser = async (
   email: string = 'customer@example.com', 
   password: string = 'password123'
 ): Promise<string> => {
-  const response = await client.post('/api/auth/login', {
+  const response = await client.post('/business/auth/login', {
     email,
     password
   });
@@ -16,7 +16,7 @@ export const loginTestUser = async (
     throw new Error(`Failed to login test user: ${response.data.error}`);
   }
   
-  return response.data.data.token;
+  return response.data.accessToken;
 };
 
 // Test data for notifications
@@ -104,7 +104,7 @@ export const setupNotificationTests = async () => {
     userType: 'customer'
   };
   
-  const createNotificationResponse = await client.post('/api/admin/notifications', notificationData, {
+  const createNotificationResponse = await client.post('/business/notifications', notificationData, {
     headers: { Authorization: `Bearer ${adminToken}` }
   });
   
@@ -115,7 +115,7 @@ export const setupNotificationTests = async () => {
   const testNotificationId = createNotificationResponse.data.data.id;
   
   // Create test template
-  const createTemplateResponse = await client.post('/api/admin/notification-templates', testTemplateData, {
+  const createTemplateResponse = await client.post('/business/notification-templates', testTemplateData, {
     headers: { Authorization: `Bearer ${adminToken}` }
   });
   
@@ -166,17 +166,17 @@ export const cleanupNotificationTests = async (
 ) => {
   try {
     // Delete test notification
-    await client.delete(`/api/admin/notifications/${testNotificationId}`, {
+    await client.delete(`/business/notifications/${testNotificationId}`, {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
     // Delete test template
-    await client.delete(`/api/admin/notification-templates/${testTemplateId}`, {
+    await client.delete(`/business/notification-templates/${testTemplateId}`, {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
     // Delete test preference
-    await client.delete(`/api/admin/notification-preferences/${testPreferenceId}`, {
+    await client.delete(`/business/notification-preferences/${testPreferenceId}`, {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
   } catch (error) {

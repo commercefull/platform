@@ -1,6 +1,6 @@
 exports.up = function(knex) {
   return knex.schema.createTable('notificationDeliveryLog', t => {
-    t.uuid('notificationDeliveryLogId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+    t.uuid('notificationDeliveryLogId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.uuid('notificationId').references('notificationId').inTable('notification').onDelete('SET NULL');
     t.uuid('userId').notNullable();

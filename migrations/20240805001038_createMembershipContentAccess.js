@@ -4,7 +4,7 @@
  */
 exports.up = function (knex) {
   return knex.schema.createTable('membershipContentAccess', t => {
-    t.uuid('membershipContentAccessId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+    t.uuid('membershipContentAccessId').primary().defaultTo(knex.raw('uuidv7()'));
     t.uuid('planId').notNullable().references('membershipPlanId').inTable('membershipPlan').onDelete('CASCADE');
     t.string('name', 100).notNullable();
     t.text('description');

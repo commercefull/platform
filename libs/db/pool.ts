@@ -21,9 +21,9 @@ export const query = async <T>(text: string, params?: Array<unknown>): Promise<T
       res = await pool.query(text);
     }
 
-  } catch (e) {
-    console.error('Error in query', e);
-    throw new Error('Query failed')
+  } catch (e: any) {
+    console.error('Error in query', e.message, e.detail, e.hint);
+    throw new Error(`Query failed: ${e.message}`)
   }
 
   if (res.rows.length > 0) {
@@ -38,9 +38,9 @@ export const queryOne = async <T>(text: string, params: Array<unknown>): Promise
 
   try {
     res = await pool.query(text, params);
-  } catch (e) {
-    console.error('Error in query', e);
-    throw new Error('Query failed')
+  } catch (e: any) {
+    console.error('Error in query', e.message, e.detail, e.hint);
+    throw new Error(`Query failed: ${e.message}`)
   }
 
   if (res.rows.length === 1) {

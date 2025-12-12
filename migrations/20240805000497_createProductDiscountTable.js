@@ -1,6 +1,6 @@
 exports.up = function(knex) {
   return knex.schema.createTable('productDiscount', t => {
-    t.uuid('productDiscountId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+    t.uuid('productDiscountId').primary().defaultTo(knex.raw('uuidv7()'));
     t.uuid('promotionId').references('promotionId').inTable('promotion').onDelete('CASCADE');
     t.string('name', 255).notNullable();
     t.text('description');

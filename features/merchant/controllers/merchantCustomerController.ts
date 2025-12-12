@@ -107,10 +107,10 @@ export const getMerchantById = async (req: Request, res: Response): Promise<void
     if (req.headers.accept?.includes('application/json')) {
       // Filter out sensitive information
       const publicMerchant = {
-        id: merchant.id,
+        id: merchant.merchantId,
         name: merchant.name,
         website: merchant.website,
-        logoUrl: merchant.logoUrl,
+        logo: merchant.logo,
         description: merchant.description
       };
       
@@ -123,7 +123,7 @@ export const getMerchantById = async (req: Request, res: Response): Promise<void
 
     // Get merchant's primary address for display
     const addresses = await merchantRepo.findAddressesByMerchantId(id);
-    const primaryAddress = addresses.find(addr => addr.isPrimary) || addresses[0];
+    const primaryAddress = addresses.find(addr => addr.isDefault) || addresses[0];
     
     // For storefront template response
     storefrontRespond(req, res, 'merchants/detail', {

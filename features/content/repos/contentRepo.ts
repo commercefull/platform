@@ -7,10 +7,17 @@ export interface ContentType {
   name: string;
   slug: string;
   description?: string;
-  schema: Record<string, any>; // JSON schema defining the content structure
-  status: 'active' | 'inactive';
+  icon?: string;
+  allowedBlocks?: string[];
+  defaultTemplate?: string;
+  requiredFields?: Record<string, any>;
+  metaFields?: Record<string, any>;
+  isSystem: boolean;
+  isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  createdBy?: string;
+  updatedBy?: string;
 }
 
 // ContentPage represents a full page with a collection of content blocks
@@ -62,12 +69,21 @@ export interface ContentBlock {
 export interface ContentTemplate {
   id: string;
   name: string;
-  type: 'layout' | 'section';
+  slug: string;
   description?: string;
-  structure: Record<string, any>; // Template definition
-  status: 'active' | 'inactive';
+  thumbnail?: string;
+  htmlStructure?: string;
+  cssStyles?: string;
+  jsScripts?: string;
+  areas?: Record<string, any>;
+  defaultBlocks?: Record<string, any>;
+  compatibleContentTypes?: string[];
+  isSystem: boolean;
+  isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  createdBy?: string;
+  updatedBy?: string;
 }
 
 // Field mapping dictionaries for database to TypeScript conversion
@@ -185,17 +201,17 @@ export class ContentRepo {
     return transformDbToTs<ContentType>(result, contentTypeFields);
   }
 
-  async findAllContentTypes(status?: ContentType['status'], limit: number = 50, offset: number = 0): Promise<ContentType[]> {
-    let sql = 'SELECT * FROM "public"."content_type"';
+  async findAllContentTypes(isActive?: boolean, limit: number = 50, offset: number = 0): Promise<ContentType[]> {
+    let sql = 'SELECT * FROM "contentType"';
     const params: any[] = [];
     
-    if (status) {
-      sql += ' WHERE "status" = $1';
-      params.push(status);
+    if (isActive !== undefined) {
+      sql += ' WHERE "isActive" = $1';
+      params.push(isActive);
     }
     
     sql += ' ORDER BY "name" ASC LIMIT $' + (params.length + 1) + ' OFFSET $' + (params.length + 2);
-    params.push(limit.toString(), offset.toString());
+    params.push(limit, offset);
     
     const results = await query<any[]>(sql, params);
     return transformArrayDbToTs<ContentType>(results || [], contentTypeFields);
@@ -203,26 +219,33 @@ export class ContentRepo {
 
   async createContentType(params: ContentTypeCreateParams): Promise<ContentType> {
     const now = unixTimestamp();
-    const {
-      name,
-      slug,
-      description,
-      schema,
-      status
-    } = params;
 
     // Validate slug uniqueness
-    const existingType = await this.findContentTypeBySlug(slug);
+    const existingType = await this.findContentTypeBySlug(params.slug);
     if (existingType) {
-      throw new Error(`Content type with slug "${slug}" already exists`);
+      throw new Error(`Content type with slug "${params.slug}" already exists`);
     }
 
     const result = await queryOne<any>(
-      `INSERT INTO "public"."content_type" 
-      ("name", "slug", "description", "schema", "status", "createdAt", "updatedAt") 
-      VALUES ($1, $2, $3, $4, $5, $6, $7) 
+      `INSERT INTO "contentType" 
+      ("name", "slug", "description", "icon", "allowedBlocks", "defaultTemplate", 
+       "requiredFields", "metaFields", "isSystem", "isActive", "createdAt", "updatedAt") 
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) 
       RETURNING *`,
-      [name, slug, description || null, JSON.stringify(schema), status, now, now]
+      [
+        params.name, 
+        params.slug, 
+        params.description || null, 
+        params.icon || null,
+        params.allowedBlocks || null,
+        params.defaultTemplate || null,
+        params.requiredFields ? JSON.stringify(params.requiredFields) : null,
+        params.metaFields ? JSON.stringify(params.metaFields) : null,
+        params.isSystem || false,
+        params.isActive !== undefined ? params.isActive : true,
+        now, 
+        now
+      ]
     );
 
     if (!result) {
@@ -252,7 +275,7 @@ export class ContentRepo {
     const values: any[] = [];
     let paramIndex = 1;
 
-    // Build dynamic query with snake_case field names
+    // Build dynamic query
     if (params.name !== undefined) {
       updateFields.push(`"name" = $${paramIndex++}`);
       values.push(params.name);
@@ -265,13 +288,21 @@ export class ContentRepo {
       updateFields.push(`"description" = $${paramIndex++}`);
       values.push(params.description);
     }
-    if (params.schema !== undefined) {
-      updateFields.push(`"schema" = $${paramIndex++}`);
-      values.push(JSON.stringify(params.schema));
+    if (params.icon !== undefined) {
+      updateFields.push(`"icon" = $${paramIndex++}`);
+      values.push(params.icon);
     }
-    if (params.status !== undefined) {
-      updateFields.push(`"status" = $${paramIndex++}`);
-      values.push(params.status);
+    if (params.requiredFields !== undefined) {
+      updateFields.push(`"requiredFields" = $${paramIndex++}`);
+      values.push(JSON.stringify(params.requiredFields));
+    }
+    if (params.metaFields !== undefined) {
+      updateFields.push(`"metaFields" = $${paramIndex++}`);
+      values.push(JSON.stringify(params.metaFields));
+    }
+    if (params.isActive !== undefined) {
+      updateFields.push(`"isActive" = $${paramIndex++}`);
+      values.push(params.isActive);
     }
 
     // Always update the updated_at timestamp
@@ -659,24 +690,18 @@ export class ContentRepo {
   }
 
   async findAllTemplates(
-    type?: ContentTemplate['type'], 
-    status?: ContentTemplate['status'],
+    isActive?: boolean,
     limit: number = 50,
     offset: number = 0
   ): Promise<ContentTemplate[]> {
-    let sql = 'SELECT * FROM "public"."content_template"';
+    let sql = 'SELECT * FROM "contentTemplate"';
     const whereConditions: string[] = [];
     const params: any[] = [];
     let paramIndex = 1;
     
-    if (type) {
-      whereConditions.push(`"type" = $${paramIndex++}`);
-      params.push(type);
-    }
-    
-    if (status) {
-      whereConditions.push(`"status" = $${paramIndex++}`);
-      params.push(status);
+    if (isActive !== undefined) {
+      whereConditions.push(`"isActive" = $${paramIndex++}`);
+      params.push(isActive);
     }
     
     if (whereConditions.length > 0) {
@@ -694,16 +719,24 @@ export class ContentRepo {
     const now = unixTimestamp();
     
     const result = await queryOne<any>(
-      `INSERT INTO "public"."content_template" 
-      ("name", "type", "description", "structure", "status", "createdAt", "updatedAt") 
-      VALUES ($1, $2, $3, $4, $5, $6, $7) 
+      `INSERT INTO "contentTemplate" 
+      ("name", "slug", "description", "thumbnail", "htmlStructure", "cssStyles", "jsScripts", 
+       "areas", "defaultBlocks", "compatibleContentTypes", "isSystem", "isActive", "createdAt", "updatedAt") 
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) 
       RETURNING *`,
       [
         params.name, 
-        params.type, 
+        params.slug,
         params.description || null, 
-        JSON.stringify(params.structure), 
-        params.status,
+        params.thumbnail || null,
+        params.htmlStructure || null,
+        params.cssStyles || null,
+        params.jsScripts || null,
+        params.areas ? JSON.stringify(params.areas) : null,
+        params.defaultBlocks ? JSON.stringify(params.defaultBlocks) : null,
+        params.compatibleContentTypes || null,
+        params.isSystem || false,
+        params.isActive !== undefined ? params.isActive : true,
         now, 
         now
       ]
@@ -724,7 +757,7 @@ export class ContentRepo {
       throw new Error(`Content template with ID ${id} not found`);
     }
 
-    // Build dynamic query with snake_case field names
+    // Build dynamic query
     const updateFields: string[] = [];
     const values: any[] = [];
     let paramIndex = 1;
@@ -735,9 +768,9 @@ export class ContentRepo {
       values.push(params.name);
     }
     
-    if (params.type !== undefined) {
-      updateFields.push(`"type" = $${paramIndex++}`);
-      values.push(params.type);
+    if (params.slug !== undefined) {
+      updateFields.push(`"slug" = $${paramIndex++}`);
+      values.push(params.slug);
     }
     
     if (params.description !== undefined) {
@@ -745,14 +778,19 @@ export class ContentRepo {
       values.push(params.description);
     }
     
-    if (params.structure !== undefined) {
-      updateFields.push(`"structure" = $${paramIndex++}`);
-      values.push(JSON.stringify(params.structure));
+    if (params.htmlStructure !== undefined) {
+      updateFields.push(`"htmlStructure" = $${paramIndex++}`);
+      values.push(params.htmlStructure);
     }
     
-    if (params.status !== undefined) {
-      updateFields.push(`"status" = $${paramIndex++}`);
-      values.push(params.status);
+    if (params.areas !== undefined) {
+      updateFields.push(`"areas" = $${paramIndex++}`);
+      values.push(JSON.stringify(params.areas));
+    }
+    
+    if (params.isActive !== undefined) {
+      updateFields.push(`"isActive" = $${paramIndex++}`);
+      values.push(params.isActive);
     }
 
     // Always update the updated_at timestamp

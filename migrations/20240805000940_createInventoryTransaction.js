@@ -4,12 +4,12 @@
  */
 exports.up = function (knex) {
   return knex.schema.createTable('inventoryTransaction', t => {
-    t.uuid('inventoryTransactionId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+    t.uuid('inventoryTransactionId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now()).index('createdAt');
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());  
     t.uuid('typeId').notNullable().references('inventoryTransactionTypeId').inTable('inventoryTransactionType').index('typeId');
-    t.uuid('warehouseId').notNullable().references('warehouseId').inTable('warehouse').index('warehouseId');
-    t.uuid('binId').references('warehouseBinId').inTable('warehouseBin').index('binId');
+    t.uuid('distributionWarehouseId').notNullable().references('distributionWarehouseId').inTable('distributionWarehouse').index('distributionWarehouseId');
+    t.uuid('distributionWarehouseBinId').references('distributionWarehouseBinId').inTable('distributionWarehouseBin').index('distributionWarehouseBinId');
     t.uuid('productId').notNullable().references('productId').inTable('product').index('productId');
     t.uuid('productVariantId').references('productVariantId').inTable('productVariant').index('productVariantId');
     t.string('sku', 100).notNullable().index('sku');

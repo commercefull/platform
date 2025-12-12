@@ -4,7 +4,7 @@
  */
 exports.up = function (knex) {
   return knex.schema.createTable('contentMedia', t => {
-    t.uuid('contentMediaId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+    t.uuid('contentMediaId').primary().defaultTo(knex.raw('uuidv7()'));
     t.string('title', 255).notNullable();
     t.string('fileName', 255).notNullable();
     t.text('filePath').notNullable();

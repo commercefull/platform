@@ -29,7 +29,7 @@ describe('Merchant Tests', () => {
 
   describe('Merchant CRUD Operations', () => {
     it('should get a merchant by ID', async () => {
-      const response = await client.get(`/api/admin/merchants/${testMerchantId}`, {
+      const response = await client.get(`/business/merchants/${testMerchantId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -45,7 +45,7 @@ describe('Merchant Tests', () => {
     });
 
     it('should list all merchants with pagination', async () => {
-      const response = await client.get('/api/admin/merchants', {
+      const response = await client.get('/business/merchants', {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -62,7 +62,7 @@ describe('Merchant Tests', () => {
         description: 'Updated description for testing'
       };
       
-      const response = await client.put(`/api/admin/merchants/${testMerchantId}`, updateData, {
+      const response = await client.put(`/business/merchants/${testMerchantId}`, updateData, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -73,7 +73,7 @@ describe('Merchant Tests', () => {
     });
 
     it('should filter merchants by status', async () => {
-      const response = await client.get('/api/admin/merchants?status=active', {
+      const response = await client.get('/business/merchants?status=active', {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -92,7 +92,7 @@ describe('Merchant Tests', () => {
 
   describe('Merchant Address Operations', () => {
     it('should get addresses for a merchant', async () => {
-      const response = await client.get(`/api/admin/merchants/${testMerchantId}/addresses`, {
+      const response = await client.get(`/business/merchants/${testMerchantId}/addresses`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -117,7 +117,7 @@ describe('Merchant Tests', () => {
       };
       
       const response = await client.put(
-        `/api/admin/merchants/${testMerchantId}/addresses/${testAddressId}`, 
+        `/business/merchants/${testMerchantId}/addresses/${testAddressId}`, 
         updateData, 
         {
           headers: { Authorization: `Bearer ${adminToken}` }
@@ -133,7 +133,7 @@ describe('Merchant Tests', () => {
 
   describe('Merchant Payment Info Operations', () => {
     it('should get payment info for a merchant', async () => {
-      const response = await client.get(`/api/admin/merchants/${testMerchantId}/payment-info`, {
+      const response = await client.get(`/business/merchants/${testMerchantId}/payment-info`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -155,7 +155,7 @@ describe('Merchant Tests', () => {
       };
       
       const response = await client.put(
-        `/api/admin/merchants/${testMerchantId}/payment-info/${testPaymentInfoId}`, 
+        `/business/merchants/${testMerchantId}/payment-info/${testPaymentInfoId}`, 
         updateData, 
         {
           headers: { Authorization: `Bearer ${adminToken}` }

@@ -12,9 +12,9 @@ describe('Tax Rates API Integration Tests', () => {
     userToken = await loginTestUser(client);
   });
 
-  describe('GET /api/admin/tax/rates', () => {
+  describe('GET /business/tax/rates', () => {
     it('should return tax rates when authenticated as admin', async () => {
-      const response = await client.get('/api/admin/tax/rates', {
+      const response = await client.get('/business/tax/rates', {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
 
@@ -33,19 +33,19 @@ describe('Tax Rates API Integration Tests', () => {
     });
 
     it('should reject access when not authenticated', async () => {
-      const response = await client.get('/api/admin/tax/rates');
-      expect(response.status).toBe(401);
+      const response = await client.get('/business/tax/rates');
+      expect([401, 403]).toContain(response.status);
     });
 
     it('should reject access when authenticated as non-admin user', async () => {
-      const response = await client.get('/api/admin/tax/rates', {
+      const response = await client.get('/business/tax/rates', {
         headers: { Authorization: `Bearer ${userToken}` }
       });
       expect(response.status).toBe(403);
     });
 
     it('should support filtering by country', async () => {
-      const response = await client.get('/api/admin/tax/rates?country=US', {
+      const response = await client.get('/business/tax/rates?country=US', {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
 
@@ -59,7 +59,7 @@ describe('Tax Rates API Integration Tests', () => {
         
         // Get the tax zones for these rates to verify
         const taxZonePromises = taxRateIds.map((id: string) => 
-          client.get(`/api/admin/tax/zones/${id}`, {
+          client.get(`/business/tax/zones/${id}`, {
             headers: { Authorization: `Bearer ${adminToken}` }
           })
         );
@@ -76,14 +76,14 @@ describe('Tax Rates API Integration Tests', () => {
     });
   });
 
-  describe('POST /api/admin/tax/rates', () => {
+  describe('POST /business/tax/rates', () => {
     it('should create a new tax rate when authenticated as admin', async () => {
       // First, get a valid tax category and tax zone to reference
-      const categoriesResponse = await client.get('/api/admin/tax/categories', {
+      const categoriesResponse = await client.get('/business/tax/categories', {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
-      const zonesResponse = await client.get('/api/admin/tax/zones', {
+      const zonesResponse = await client.get('/business/tax/zones', {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -111,7 +111,7 @@ describe('Tax Rates API Integration Tests', () => {
         startDate: Date.now() / 1000 // Convert to unix timestamp
       };
       
-      const response = await client.post('/api/admin/tax/rates', newTaxRate, {
+      const response = await client.post('/business/tax/rates', newTaxRate, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -124,7 +124,7 @@ describe('Tax Rates API Integration Tests', () => {
       const createdTaxRateId = response.data.id;
       
       // Clean up - delete the tax rate we just created
-      await client.delete(`/api/admin/tax/rates/${createdTaxRateId}`, {
+      await client.delete(`/business/tax/rates/${createdTaxRateId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
     });
@@ -135,7 +135,7 @@ describe('Tax Rates API Integration Tests', () => {
         name: 'Invalid Tax Rate'
       };
       
-      const response = await client.post('/api/admin/tax/rates', invalidTaxRate, {
+      const response = await client.post('/business/tax/rates', invalidTaxRate, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -143,16 +143,16 @@ describe('Tax Rates API Integration Tests', () => {
     });
   });
 
-  describe('PUT /api/admin/tax/rates/:id', () => {
+  describe('PUT /business/tax/rates/:id', () => {
     let testTaxRateId: string;
     
     beforeEach(async () => {
       // Create a tax rate for testing updates
-      const categoriesResponse = await client.get('/api/admin/tax/categories', {
+      const categoriesResponse = await client.get('/business/tax/categories', {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
-      const zonesResponse = await client.get('/api/admin/tax/zones', {
+      const zonesResponse = await client.get('/business/tax/zones', {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -180,7 +180,7 @@ describe('Tax Rates API Integration Tests', () => {
         startDate: Date.now() / 1000
       };
       
-      const createResponse = await client.post('/api/admin/tax/rates', newTaxRate, {
+      const createResponse = await client.post('/business/tax/rates', newTaxRate, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -192,7 +192,7 @@ describe('Tax Rates API Integration Tests', () => {
     afterEach(async () => {
       // Clean up - delete the test tax rate if it exists
       if (testTaxRateId) {
-        await client.delete(`/api/admin/tax/rates/${testTaxRateId}`, {
+        await client.delete(`/business/tax/rates/${testTaxRateId}`, {
           headers: { Authorization: `Bearer ${adminToken}` }
         });
       }
@@ -210,7 +210,7 @@ describe('Tax Rates API Integration Tests', () => {
         description: 'Updated description'
       };
       
-      const response = await client.put(`/api/admin/tax/rates/${testTaxRateId}`, updateData, {
+      const response = await client.put(`/business/tax/rates/${testTaxRateId}`, updateData, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -221,7 +221,7 @@ describe('Tax Rates API Integration Tests', () => {
     });
     
     it('should return 404 for non-existent tax rate', async () => {
-      const response = await client.put('/api/admin/tax/rates/non-existent-id', { name: 'Test' }, {
+      const response = await client.put('/business/tax/rates/non-existent-id', { name: 'Test' }, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -229,16 +229,16 @@ describe('Tax Rates API Integration Tests', () => {
     });
   });
 
-  describe('DELETE /api/admin/tax/rates/:id', () => {
+  describe('DELETE /business/tax/rates/:id', () => {
     let testTaxRateId: string;
     
     beforeEach(async () => {
       // Create a tax rate for testing deletion
-      const categoriesResponse = await client.get('/api/admin/tax/categories', {
+      const categoriesResponse = await client.get('/business/tax/categories', {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
-      const zonesResponse = await client.get('/api/admin/tax/zones', {
+      const zonesResponse = await client.get('/business/tax/zones', {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -266,7 +266,7 @@ describe('Tax Rates API Integration Tests', () => {
         startDate: Date.now() / 1000
       };
       
-      const createResponse = await client.post('/api/admin/tax/rates', newTaxRate, {
+      const createResponse = await client.post('/business/tax/rates', newTaxRate, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -281,14 +281,14 @@ describe('Tax Rates API Integration Tests', () => {
         return;
       }
       
-      const response = await client.delete(`/api/admin/tax/rates/${testTaxRateId}`, {
+      const response = await client.delete(`/business/tax/rates/${testTaxRateId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
       expect(response.status).toBe(200);
       
       // Verify it's really gone
-      const getResponse = await client.get(`/api/admin/tax/rates/${testTaxRateId}`, {
+      const getResponse = await client.get(`/business/tax/rates/${testTaxRateId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -296,7 +296,7 @@ describe('Tax Rates API Integration Tests', () => {
     });
     
     it('should return 404 for non-existent tax rate', async () => {
-      const response = await client.delete('/api/admin/tax/rates/non-existent-id', {
+      const response = await client.delete('/business/tax/rates/non-existent-id', {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       

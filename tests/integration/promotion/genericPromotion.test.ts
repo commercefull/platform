@@ -19,7 +19,7 @@ describe('Generic Promotion API Tests', () => {
   });
 
   it('should create a new promotion', async () => {
-    const response = await client.post('/api/admin/promotions', testPromotion, {
+    const response = await client.post('/business/promotions', testPromotion, {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
@@ -37,7 +37,7 @@ describe('Generic Promotion API Tests', () => {
   });
 
   it('should get a promotion by ID', async () => {
-    const response = await client.get(`/api/admin/promotions/${promotionId}`, {
+    const response = await client.get(`/business/promotions/${promotionId}`, {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
@@ -52,7 +52,7 @@ describe('Generic Promotion API Tests', () => {
       discountValue: 15
     };
     
-    const response = await client.put(`/api/admin/promotions/${promotionId}`, updateData, {
+    const response = await client.put(`/business/promotions/${promotionId}`, updateData, {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
@@ -73,7 +73,7 @@ describe('Generic Promotion API Tests', () => {
     });
     
     // Apply the promotion to the cart
-    const response = await client.post('/api/admin/promotions/apply', {
+    const response = await client.post('/business/promotions/apply', {
       cartId: testCartId,
       promotionId: promotionId
     }, {
@@ -90,7 +90,7 @@ describe('Generic Promotion API Tests', () => {
   });
 
   it('should validate a promotion for a cart', async () => {
-    const response = await client.post('/api/admin/promotions/validate', {
+    const response = await client.post('/business/promotions/validate', {
       cartId: testCartId,
       promotionId: promotionId
     }, {
@@ -104,7 +104,7 @@ describe('Generic Promotion API Tests', () => {
   });
   
   it('should delete a promotion', async () => {
-    const response = await client.delete(`/api/admin/promotions/${promotionId}`, {
+    const response = await client.delete(`/business/promotions/${promotionId}`, {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
@@ -112,7 +112,7 @@ describe('Generic Promotion API Tests', () => {
     expect(response.data.success).toBe(true);
     
     // Verify the promotion is deleted
-    const getResponse = await client.get(`/api/admin/promotions/${promotionId}`, {
+    const getResponse = await client.get(`/business/promotions/${promotionId}`, {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     

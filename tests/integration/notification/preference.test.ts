@@ -228,7 +228,7 @@ describe('Notification Preference Tests', () => {
 
   describe('Admin Preference Operations', () => {
     it('should get all preferences for all users (admin)', async () => {
-      const response = await client.get('/api/admin/notification-preferences', {
+      const response = await client.get('/business/notification-preferences', {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -239,7 +239,7 @@ describe('Notification Preference Tests', () => {
     });
 
     it('should get all preferences for a specific user (admin)', async () => {
-      const response = await client.get(`/api/admin/notification-preferences/user/${testUserId}`, {
+      const response = await client.get(`/business/notification-preferences/user/${testUserId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -271,7 +271,7 @@ describe('Notification Preference Tests', () => {
         }
       };
       
-      const response = await client.put(`/api/admin/notification-preferences/${testPreferenceId}`, updateData, {
+      const response = await client.put(`/business/notification-preferences/${testPreferenceId}`, updateData, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       

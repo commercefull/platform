@@ -60,7 +60,7 @@ describe('Notification Template Tests', () => {
 
   describe('Admin Template Operations', () => {
     it('should get all templates (admin)', async () => {
-      const response = await client.get('/api/admin/notification-templates', {
+      const response = await client.get('/business/notification-templates', {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -84,7 +84,7 @@ describe('Notification Template Tests', () => {
     });
 
     it('should get a template by ID (admin)', async () => {
-      const response = await client.get(`/api/admin/notification-templates/${testTemplateId}`, {
+      const response = await client.get(`/business/notification-templates/${testTemplateId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -124,7 +124,7 @@ describe('Notification Template Tests', () => {
         categoryCode: 'account'
       };
       
-      const response = await client.post('/api/admin/notification-templates', newTemplateData, {
+      const response = await client.post('/business/notification-templates', newTemplateData, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -140,7 +140,7 @@ describe('Notification Template Tests', () => {
       expect(createdTemplate.isActive).toBe(newTemplateData.isActive);
       
       // Clean up
-      await client.delete(`/api/admin/notification-templates/${createdTemplate.id}`, {
+      await client.delete(`/business/notification-templates/${createdTemplate.id}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
     });
@@ -152,7 +152,7 @@ describe('Notification Template Tests', () => {
         isActive: false
       };
       
-      const response = await client.put(`/api/admin/notification-templates/${testTemplateId}`, updateData, {
+      const response = await client.put(`/business/notification-templates/${testTemplateId}`, updateData, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -177,7 +177,7 @@ describe('Notification Template Tests', () => {
         testParam: 'Preview Value'
       };
       
-      const response = await client.post(`/api/admin/notification-templates/${testTemplateId}/preview`, { 
+      const response = await client.post(`/business/notification-templates/${testTemplateId}/preview`, { 
         data: previewData,
         channel: 'email'
       }, {
@@ -205,14 +205,14 @@ describe('Notification Template Tests', () => {
         isActive: true
       };
       
-      const createResponse = await client.post('/api/admin/notification-templates', deleteTemplateData, {
+      const createResponse = await client.post('/business/notification-templates', deleteTemplateData, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
       const deleteId = createResponse.data.data.id;
       
       // Delete the template
-      const response = await client.delete(`/api/admin/notification-templates/${deleteId}`, {
+      const response = await client.delete(`/business/notification-templates/${deleteId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -220,7 +220,7 @@ describe('Notification Template Tests', () => {
       expect(response.data.success).toBe(true);
       
       // Verify deletion
-      const getResponse = await client.get(`/api/admin/notification-templates/${deleteId}`, {
+      const getResponse = await client.get(`/business/notification-templates/${deleteId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -232,7 +232,7 @@ describe('Notification Template Tests', () => {
   describe('Template Access Control', () => {
     it('should prevent customers from accessing admin template operations', async () => {
       // Try to get all templates as customer
-      const response = await client.get('/api/admin/notification-templates', {
+      const response = await client.get('/business/notification-templates', {
         headers: { Authorization: `Bearer ${customerToken}` }
       });
       
@@ -244,7 +244,7 @@ describe('Notification Template Tests', () => {
   describe('Template by Type', () => {
     it('should get templates filtered by type', async () => {
       // Get templates by type
-      const response = await client.get(`/api/admin/notification-templates/type/${testTemplateData.type}`, {
+      const response = await client.get(`/business/notification-templates/type/${testTemplateData.type}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       

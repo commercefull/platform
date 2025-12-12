@@ -1,6 +1,6 @@
 exports.up = function(knex) {
   return knex.schema.createTable('paymentRefund', t => {
-    t.uuid('paymentRefundId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+    t.uuid('paymentRefundId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     t.uuid('orderPaymentId').notNullable().references('orderPaymentId').inTable('orderPayment').onDelete('CASCADE');

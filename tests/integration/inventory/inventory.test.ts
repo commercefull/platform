@@ -23,7 +23,7 @@ describe('Inventory Tests', () => {
 
   describe('Inventory Item CRUD Operations', () => {
     it('should get an inventory item by ID', async () => {
-      const response = await client.get(`/api/admin/inventory/items/${testInventoryItemId}`, {
+      const response = await client.get(`/business/inventory/items/${testInventoryItemId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -36,7 +36,7 @@ describe('Inventory Tests', () => {
     });
 
     it('should list inventory items with pagination', async () => {
-      const response = await client.get('/api/admin/inventory/items', {
+      const response = await client.get('/business/inventory/items', {
         headers: { Authorization: `Bearer ${adminToken}` },
         params: { limit: 10, offset: 0 }
       });
@@ -55,7 +55,7 @@ describe('Inventory Tests', () => {
         lowStockThreshold: 15
       };
 
-      const response = await client.put(`/api/admin/inventory/items/${testInventoryItemId}`, updateData, {
+      const response = await client.put(`/business/inventory/items/${testInventoryItemId}`, updateData, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
 
@@ -67,7 +67,7 @@ describe('Inventory Tests', () => {
     });
 
     it('should filter inventory items by location', async () => {
-      const response = await client.get('/api/admin/inventory/items', {
+      const response = await client.get('/business/inventory/items', {
         headers: { Authorization: `Bearer ${adminToken}` },
         params: { locationId: testLocationId }
       });
@@ -84,13 +84,13 @@ describe('Inventory Tests', () => {
 
     it('should get low stock items', async () => {
       // First update the item to have low stock
-      await client.put(`/api/admin/inventory/items/${testInventoryItemId}`, {
+      await client.put(`/business/inventory/items/${testInventoryItemId}`, {
         quantity: 8, // Below the lowStockThreshold of 15 from previous test
       }, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
 
-      const response = await client.get('/api/admin/inventory/items', {
+      const response = await client.get('/business/inventory/items', {
         headers: { Authorization: `Bearer ${adminToken}` },
         params: { lowStock: true }
       });

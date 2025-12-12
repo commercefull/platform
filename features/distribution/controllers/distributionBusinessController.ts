@@ -1,14 +1,33 @@
+/**
+ * Distribution Business Controller
+ * Handles admin/merchant operations for warehouses (distribution centers)
+ * Note: "Distribution Centers" in the API map to "Warehouses" in the database
+ */
 import { Request, Response } from 'express';
-import { DistributionRepo } from '../repos/distributionRepo';
+import * as warehouseRepo from '../repos/warehouseRepo';
+import * as fulfillmentRepo from '../repos/fulfillmentRepo';
+import { createWarehouse as createWarehouseUseCase } from '../useCases/warehouse/CreateWarehouse';
+import { updateWarehouse as updateWarehouseUseCase } from '../useCases/warehouse/UpdateWarehouse';
+import { deleteWarehouse as deleteWarehouseUseCase } from '../useCases/warehouse/DeleteWarehouse';
+import { createDistributionRule as createDistributionRuleUseCase } from '../useCases/rules/CreateDistributionRule';
+import { updateDistributionRule as updateDistributionRuleUseCase } from '../useCases/rules/UpdateDistributionRule';
+import { deleteDistributionRule as deleteDistributionRuleUseCase } from '../useCases/rules/DeleteDistributionRule';
 
-// Create a single instance of the repo to be used by all functions
-const distributionRepo = new DistributionRepo();
+// =============================================================================
+// Warehouses (Distribution Centers)
+// =============================================================================
+
 export const getDistributionCenters = async (req: Request, res: Response): Promise<void> => {
   try {
-    const centers = await distributionRepo.findAllDistributionCenters();
+    const { limit, offset } = req.query;
+    const result = await warehouseRepo.findAllWarehouses({
+      limit: limit ? parseInt(limit as string) : undefined,
+      offset: offset ? parseInt(offset as string) : undefined
+    });
     res.status(200).json({
       success: true,
-      data: centers
+      data: result.warehouses,
+      total: result.total
     });
   } catch (error) {
     console.error('Error fetching distribution centers:', error);
@@ -21,10 +40,10 @@ export const getDistributionCenters = async (req: Request, res: Response): Promi
 
 export const getActiveDistributionCenters = async (req: Request, res: Response): Promise<void> => {
   try {
-    const centers = await distributionRepo.findActiveDistributionCenters();
+    const warehouses = await warehouseRepo.findActiveWarehouses();
     res.status(200).json({
       success: true,
-      data: centers
+      data: warehouses
     });
   } catch (error) {
     console.error('Error fetching active distribution centers:', error);
@@ -37,9 +56,9 @@ export const getActiveDistributionCenters = async (req: Request, res: Response):
 
 export const getDistributionCenterById = async (req: Request, res: Response): Promise<void> => {
   try {
-    const center = await distributionRepo.findDistributionCenterById(req.params.id);
+    const warehouse = await warehouseRepo.findWarehouseById(req.params.id);
 
-    if (!center) {
+    if (!warehouse) {
       res.status(404).json({
         success: false,
         message: 'Distribution center not found'
@@ -49,7 +68,7 @@ export const getDistributionCenterById = async (req: Request, res: Response): Pr
 
     res.status(200).json({
       success: true,
-      data: center
+      data: warehouse
     });
   } catch (error) {
     console.error('Error fetching distribution center:', error);
@@ -62,9 +81,9 @@ export const getDistributionCenterById = async (req: Request, res: Response): Pr
 
 export const getDistributionCenterByCode = async (req: Request, res: Response): Promise<void> => {
   try {
-    const center = await distributionRepo.findDistributionCenterByCode(req.params.code);
+    const warehouse = await warehouseRepo.findWarehouseByCode(req.params.code);
 
-    if (!center) {
+    if (!warehouse) {
       res.status(404).json({
         success: false,
         message: 'Distribution center not found'
@@ -74,7 +93,7 @@ export const getDistributionCenterByCode = async (req: Request, res: Response): 
 
     res.status(200).json({
       success: true,
-      data: center
+      data: warehouse
     });
   } catch (error) {
     console.error('Error fetching distribution center by code:', error);
@@ -87,47 +106,24 @@ export const getDistributionCenterByCode = async (req: Request, res: Response): 
 
 export const createDistributionCenter = async (req: Request, res: Response): Promise<void> => {
   try {
-    const {
-      name, code, address, city, state, postalCode, country,
-      contactPhone, contactEmail, isActive, capacity
-    } = req.body;
-
-    // Validate required fields
-    if (!name || !code || !address || !city) {
-      res.status(400).json({
-        success: false,
-        message: 'Name, code, address, and city are required'
-      });
-      return;
-    }
-
-    // Check if center with same code exists
-    const existingCenter = await distributionRepo.findDistributionCenterByCode(code);
-    if (existingCenter) {
-      res.status(409).json({
-        success: false,
-        message: 'A distribution center with this code already exists'
-      });
-      return;
-    }
-
-    const center = await distributionRepo.createDistributionCenter({
-      name,
-      code,
-      address,
-      city,
-      state,
-      postalCode,
-      country,
-      contactPhone,
-      contactEmail,
-      isActive: isActive !== undefined ? isActive : true,
-      capacity: capacity || 0
+    const result = await createWarehouseUseCase.execute({
+      ...req.body,
+      isFulfillmentCenter: true,
+      createdBy: (req as any).user?.id
     });
+
+    if (!result.success) {
+      const statusCode = result.error?.includes('already exists') ? 409 : 400;
+      res.status(statusCode).json({
+        success: false,
+        message: result.error
+      });
+      return;
+    }
 
     res.status(201).json({
       success: true,
-      data: center,
+      data: result.warehouse,
       message: 'Distribution center created successfully'
     });
   } catch (error) {
@@ -143,33 +139,24 @@ export const updateDistributionCenter = async (req: Request, res: Response): Pro
   try {
     const { id } = req.params;
 
-    // Check if center exists
-    const existingCenter = await distributionRepo.findDistributionCenterById(id);
-    if (!existingCenter) {
-      res.status(404).json({
+    const result = await updateWarehouseUseCase.execute({
+      id,
+      ...req.body
+    });
+
+    if (!result.success) {
+      const statusCode = result.error?.includes('not found') ? 404 : 
+                         result.error?.includes('already exists') ? 409 : 400;
+      res.status(statusCode).json({
         success: false,
-        message: 'Distribution center not found'
+        message: result.error
       });
       return;
     }
 
-    // Check if updating to an existing code
-    if (req.body.code && req.body.code !== existingCenter.code) {
-      const codeCheck = await distributionRepo.findDistributionCenterByCode(req.body.code);
-      if (codeCheck) {
-        res.status(409).json({
-          success: false,
-          message: 'A distribution center with this code already exists'
-        });
-        return;
-      }
-    }
-
-    const updatedCenter = await distributionRepo.updateDistributionCenter(id, req.body);
-
     res.status(200).json({
       success: true,
-      data: updatedCenter,
+      data: result.warehouse,
       message: 'Distribution center updated successfully'
     });
   } catch (error) {
@@ -185,29 +172,21 @@ export const deleteDistributionCenter = async (req: Request, res: Response): Pro
   try {
     const { id } = req.params;
 
-    // Check if center exists
-    const existingCenter = await distributionRepo.findDistributionCenterById(id);
-    if (!existingCenter) {
-      res.status(404).json({
+    const result = await deleteWarehouseUseCase.execute({ id });
+
+    if (!result.success) {
+      const statusCode = result.error?.includes('not found') ? 404 : 500;
+      res.status(statusCode).json({
         success: false,
-        message: 'Distribution center not found'
+        message: result.error
       });
       return;
     }
 
-    const deleted = await distributionRepo.deleteDistributionCenter(id);
-
-    if (deleted) {
-      res.status(200).json({
-        success: true,
-        message: 'Distribution center deleted successfully'
-      });
-    } else {
-      res.status(500).json({
-        success: false,
-        message: 'Failed to delete distribution center'
-      });
-    }
+    res.status(200).json({
+      success: true,
+      message: 'Distribution center deleted successfully'
+    });
   } catch (error) {
     console.error('Error deleting distribution center:', error);
     res.status(500).json({
@@ -217,10 +196,13 @@ export const deleteDistributionCenter = async (req: Request, res: Response): Pro
   }
 };
 
-// Distribution Rule Controllers
+// =============================================================================
+// Distribution Rules (re-exported from fulfillmentRepo for backward compatibility)
+// =============================================================================
+
 export const getDistributionRules = async (req: Request, res: Response): Promise<void> => {
   try {
-    const rules = await distributionRepo.findAllDistributionRules();
+    const rules = await fulfillmentRepo.findAllDistributionRules();
     res.status(200).json({
       success: true,
       data: rules
@@ -236,7 +218,7 @@ export const getDistributionRules = async (req: Request, res: Response): Promise
 
 export const getActiveDistributionRules = async (req: Request, res: Response): Promise<void> => {
   try {
-    const rules = await distributionRepo.findActiveDistributionRules();
+    const rules = await fulfillmentRepo.findActiveDistributionRules();
     res.status(200).json({
       success: true,
       data: rules
@@ -252,7 +234,7 @@ export const getActiveDistributionRules = async (req: Request, res: Response): P
 
 export const getDistributionRuleById = async (req: Request, res: Response): Promise<void> => {
   try {
-    const rule = await distributionRepo.findDistributionRuleById(req.params.id);
+    const rule = await fulfillmentRepo.findDistributionRuleById(req.params.id);
 
     if (!rule) {
       res.status(404).json({
@@ -277,7 +259,7 @@ export const getDistributionRuleById = async (req: Request, res: Response): Prom
 
 export const getDistributionRulesByZone = async (req: Request, res: Response): Promise<void> => {
   try {
-    const rules = await distributionRepo.findDistributionRulesByZone(req.params.zoneId);
+    const rules = await fulfillmentRepo.findDistributionRulesByZone(req.params.zoneId);
     res.status(200).json({
       success: true,
       data: rules
@@ -291,26 +273,9 @@ export const getDistributionRulesByZone = async (req: Request, res: Response): P
   }
 };
 
-export const getDistributionRulesByCenter = async (req: Request, res: Response): Promise<void> => {
-  try {
-    // Use the correct method name as per the repository implementation
-    const rules = await distributionRepo.findDistributionRulesByZone(req.params.centerId);
-    res.status(200).json({
-      success: true,
-      data: rules
-    });
-  } catch (error) {
-    console.error('Error fetching distribution rules by center:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch distribution rules'
-    });
-  }
-};
-
 export const getDefaultDistributionRule = async (req: Request, res: Response): Promise<void> => {
   try {
-    const rule = await distributionRepo.findDefaultDistributionRule();
+    const rule = await fulfillmentRepo.findDefaultDistributionRule();
 
     if (!rule) {
       res.status(404).json({
@@ -335,78 +300,22 @@ export const getDefaultDistributionRule = async (req: Request, res: Response): P
 
 export const createDistributionRule = async (req: Request, res: Response): Promise<void> => {
   try {
-    const {
-      name, priority, distributionCenterId, shippingZoneId,
-      shippingMethodId, fulfillmentPartnerId, isDefault, isActive
-    } = req.body;
-
-    // Validate required fields
-    if (!name || !distributionCenterId || !shippingZoneId || !shippingMethodId || !fulfillmentPartnerId) {
-      res.status(400).json({
-        success: false,
-        message: 'Name, distributionCenterId, shippingZoneId, shippingMethodId, and fulfillmentPartnerId are required'
-      });
-      return;
-    }
-
-    // Validate that referenced entities exist
-    const centerExists = await distributionRepo.findDistributionCenterById(distributionCenterId);
-    if (!centerExists) {
-      res.status(400).json({
-        success: false,
-        message: 'Distribution center not found'
-      });
-      return;
-    }
-
-    const zoneExists = await distributionRepo.findShippingZoneById(shippingZoneId);
-    if (!zoneExists) {
-      res.status(400).json({
-        success: false,
-        message: 'Shipping zone not found'
-      });
-      return;
-    }
-
-    const methodExists = await distributionRepo.findShippingMethodById(shippingMethodId);
-    if (!methodExists) {
-      res.status(400).json({
-        success: false,
-        message: 'Shipping method not found'
-      });
-      return;
-    }
-
-    const partnerExists = await distributionRepo.findFulfillmentPartnerById(fulfillmentPartnerId);
-    if (!partnerExists) {
-      res.status(400).json({
-        success: false,
-        message: 'Fulfillment partner not found'
-      });
-      return;
-    }
-
-    // Set a default priority if not provided (add to the end)
-    let rulePriority = priority;
-    if (rulePriority === undefined) {
-      const rules = await distributionRepo.findAllDistributionRules();
-      rulePriority = rules.length > 0 ? Math.max(...rules.map(r => r.priority)) + 1 : 1;
-    }
-
-    const rule = await distributionRepo.createDistributionRule({
-      name,
-      priority: rulePriority,
-      distributionCenterId,
-      shippingZoneId,
-      shippingMethodId,
-      fulfillmentPartnerId,
-      isDefault: isDefault !== undefined ? isDefault : false,
-      isActive: isActive !== undefined ? isActive : true
+    const result = await createDistributionRuleUseCase.execute({
+      ...req.body,
+      createdBy: (req as any).user?.id
     });
+
+    if (!result.success) {
+      res.status(400).json({
+        success: false,
+        message: result.error
+      });
+      return;
+    }
 
     res.status(201).json({
       success: true,
-      data: rule,
+      data: result.rule,
       message: 'Distribution rule created successfully'
     });
   } catch (error) {
@@ -422,66 +331,23 @@ export const updateDistributionRule = async (req: Request, res: Response): Promi
   try {
     const { id } = req.params;
 
-    // Check if rule exists
-    const existingRule = await distributionRepo.findDistributionRuleById(id);
-    if (!existingRule) {
-      res.status(404).json({
+    const result = await updateDistributionRuleUseCase.execute({
+      id,
+      ...req.body
+    });
+
+    if (!result.success) {
+      const statusCode = result.error?.includes('not found') ? 404 : 400;
+      res.status(statusCode).json({
         success: false,
-        message: 'Distribution rule not found'
+        message: result.error
       });
       return;
     }
 
-    // Validate that referenced entities exist if they are being updated
-    if (req.body.distributionCenterId) {
-      const centerExists = await distributionRepo.findDistributionCenterById(req.body.distributionCenterId);
-      if (!centerExists) {
-        res.status(400).json({
-          success: false,
-          message: 'Distribution center not found'
-        });
-        return;
-      }
-    }
-
-    if (req.body.shippingZoneId) {
-      const zoneExists = await distributionRepo.findShippingZoneById(req.body.shippingZoneId);
-      if (!zoneExists) {
-        res.status(400).json({
-          success: false,
-          message: 'Shipping zone not found'
-        });
-        return;
-      }
-    }
-
-    if (req.body.shippingMethodId) {
-      const methodExists = await distributionRepo.findShippingMethodById(req.body.shippingMethodId);
-      if (!methodExists) {
-        res.status(400).json({
-          success: false,
-          message: 'Shipping method not found'
-        });
-        return;
-      }
-    }
-
-    if (req.body.fulfillmentPartnerId) {
-      const partnerExists = await distributionRepo.findFulfillmentPartnerById(req.body.fulfillmentPartnerId);
-      if (!partnerExists) {
-        res.status(400).json({
-          success: false,
-          message: 'Fulfillment partner not found'
-        });
-        return;
-      }
-    }
-
-    const updatedRule = await distributionRepo.updateDistributionRule(id, req.body);
-
     res.status(200).json({
       success: true,
-      data: updatedRule,
+      data: result.rule,
       message: 'Distribution rule updated successfully'
     });
   } catch (error) {
@@ -497,32 +363,21 @@ export const deleteDistributionRule = async (req: Request, res: Response): Promi
   try {
     const { id } = req.params;
 
-    // Check if rule exists
-    const existingRule = await distributionRepo.findDistributionRuleById(id);
-    if (!existingRule) {
-      res.status(404).json({
+    const result = await deleteDistributionRuleUseCase.execute({ id });
+
+    if (!result.success) {
+      const statusCode = result.error?.includes('not found') ? 404 : 500;
+      res.status(statusCode).json({
         success: false,
-        message: 'Distribution rule not found'
+        message: result.error
       });
       return;
     }
 
-    // Check if rule is being used in any order fulfillments
-    // This would require additional methods
-
-    const deleted = await distributionRepo.deleteDistributionRule(id);
-
-    if (deleted) {
-      res.status(200).json({
-        success: true,
-        message: 'Distribution rule deleted successfully'
-      });
-    } else {
-      res.status(500).json({
-        success: false,
-        message: 'Failed to delete distribution rule'
-      });
-    }
+    res.status(200).json({
+      success: true,
+      message: 'Distribution rule deleted successfully'
+    });
   } catch (error) {
     console.error('Error deleting distribution rule:', error);
     res.status(500).json({
@@ -531,4 +386,3 @@ export const deleteDistributionRule = async (req: Request, res: Response): Promi
     });
   }
 };
-

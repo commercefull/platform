@@ -1,13 +1,13 @@
 /**
- * @param { import("knex").Knex } knex
- * @returns { Promise<void> }
+ * Distribution Inventory Movement Migration
+ * Creates the distributionInventoryMovement table for tracking inventory movements between locations
  */
 exports.up = function (knex) {
   return knex.schema.createTable('distributionInventoryMovement', t => {
-    t.uuid('distributionInventoryMovementId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+    t.uuid('distributionInventoryMovementId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
-    t.uuid('warehouseId').notNullable().references('warehouseId').inTable('warehouse').onDelete('CASCADE');
+    t.uuid('distributionWarehouseId').notNullable().references('distributionWarehouseId').inTable('distributionWarehouse').onDelete('CASCADE');
     t.uuid('productId').notNullable();
     t.uuid('productVariantId');  
     t.uuid('fromLocationId').references('inventoryLocationId').inTable('inventoryLocation');
@@ -16,7 +16,7 @@ exports.up = function (knex) {
     t.string('reason', 50);
     t.string('reference', 255);
     
-    t.index('warehouseId');
+    t.index('distributionWarehouseId');
     t.index('productId');
     t.index('productVariantId');
     t.index('fromLocationId');
@@ -24,10 +24,6 @@ exports.up = function (knex) {
   });
 };
 
-/**
- * @param { import("knex").Knex } knex
- * @returns { Promise<void> }
- */
 exports.down = function (knex) {
   return knex.schema.dropTable('distributionInventoryMovement');
 };

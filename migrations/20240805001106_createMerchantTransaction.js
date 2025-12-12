@@ -4,7 +4,7 @@
  */
 exports.up = function (knex) {
   return knex.schema.createTable('merchantTransaction', t => {
-    t.uuid('merchantTransactionId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+    t.uuid('merchantTransactionId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.uuid('merchantId').notNullable().references('merchantId').inTable('merchant').onDelete('CASCADE');
     t.enum('transactionType', ['sale', 'refund', 'chargeback', 'commission', 'adjustment', 'payout', 'fee']).notNullable();

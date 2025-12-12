@@ -1,23 +1,16 @@
 import { query, queryOne } from '../../../libs/db';
 import { unixTimestamp } from '../../../libs/date';
 
+// Import types from generated DB types - single source of truth
+import { StockReservation as DbStockReservation } from '../../../libs/db/types';
+
+// Re-export DB type
+export type StockReservation = DbStockReservation;
+
+// Type alias for reservation type (used in application logic)
 export type StockReservationType = 'cart' | 'order' | 'pending' | 'custom';
 
-export interface StockReservation {
-  stockReservationId: string;
-  createdAt: string;
-  updatedAt: string;
-  productId: string;
-  productVariantId?: string;
-  warehouseId: string;
-  quantity: number;
-  reservationType: StockReservationType;
-  referenceId?: string;
-  referenceType?: string;
-  expiresAt?: string;
-  createdBy?: string;
-}
-
+// Derived types for create/update operations
 export type StockReservationCreateParams = Omit<StockReservation, 'stockReservationId' | 'createdAt' | 'updatedAt'>;
 export type StockReservationUpdateParams = Partial<Omit<StockReservation, 'stockReservationId' | 'productId' | 'createdAt' | 'updatedAt'>>;
 

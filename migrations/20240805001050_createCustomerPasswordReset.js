@@ -4,7 +4,7 @@
  */
 exports.up = function (knex) {
   return knex.schema.createTable('customerPasswordReset', t => {
-    t.uuid('customerPasswordResetId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+    t.uuid('customerPasswordResetId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     t.uuid('userId').notNullable().references('customerId').inTable('customer').onDelete('CASCADE');

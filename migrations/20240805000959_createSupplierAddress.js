@@ -4,7 +4,7 @@
  */
 exports.up = function (knex) {
   return knex.schema.createTable('supplierAddress', t => {
-    t.uuid('supplierAddressId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+    t.uuid('supplierAddressId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     t.uuid('supplierId').notNullable().references('supplierId').inTable('supplier').onDelete('CASCADE');

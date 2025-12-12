@@ -33,7 +33,7 @@ describe('Loyalty Tests', () => {
 
   describe('Tier Management', () => {
     it('should get all loyalty tiers', async () => {
-      const response = await client.get('/api/admin/loyalty/tiers', {
+      const response = await client.get('/business/loyalty/tiers', {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -53,7 +53,7 @@ describe('Loyalty Tests', () => {
     });
 
     it('should get a tier by ID', async () => {
-      const response = await client.get(`/api/admin/loyalty/tiers/${testTierId}`, {
+      const response = await client.get(`/business/loyalty/tiers/${testTierId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -72,7 +72,7 @@ describe('Loyalty Tests', () => {
         multiplier: 1.5
       };
       
-      const response = await client.put(`/api/admin/loyalty/tiers/${testTierId}`, updateData, {
+      const response = await client.put(`/business/loyalty/tiers/${testTierId}`, updateData, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -86,7 +86,7 @@ describe('Loyalty Tests', () => {
 
   describe('Reward Management', () => {
     it('should get all loyalty rewards', async () => {
-      const response = await client.get('/api/admin/loyalty/rewards', {
+      const response = await client.get('/business/loyalty/rewards', {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -106,7 +106,7 @@ describe('Loyalty Tests', () => {
     });
 
     it('should get a reward by ID', async () => {
-      const response = await client.get(`/api/admin/loyalty/rewards/${testRewardId}`, {
+      const response = await client.get(`/business/loyalty/rewards/${testRewardId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -124,7 +124,7 @@ describe('Loyalty Tests', () => {
         pointsCost: 600
       };
       
-      const response = await client.put(`/api/admin/loyalty/rewards/${testRewardId}`, updateData, {
+      const response = await client.put(`/business/loyalty/rewards/${testRewardId}`, updateData, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -138,7 +138,7 @@ describe('Loyalty Tests', () => {
 
   describe('Customer Points Management', () => {
     it('should get customer points', async () => {
-      const response = await client.get(`/api/admin/loyalty/customers/${customerId}/points`, {
+      const response = await client.get(`/business/loyalty/customers/${customerId}/points`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -155,7 +155,7 @@ describe('Loyalty Tests', () => {
 
     it('should adjust customer points', async () => {
       const pointsToAdd = 250;
-      const response = await client.post(`/api/admin/loyalty/customers/${customerId}/points/adjust`, {
+      const response = await client.post(`/business/loyalty/customers/${customerId}/points/adjust`, {
         points: pointsToAdd,
         reason: 'Test adjustment'
       }, {
@@ -166,7 +166,7 @@ describe('Loyalty Tests', () => {
       expect(response.data.success).toBe(true);
       
       // Get the updated points to verify
-      const verifyResponse = await client.get(`/api/admin/loyalty/customers/${customerId}/points`, {
+      const verifyResponse = await client.get(`/business/loyalty/customers/${customerId}/points`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -175,7 +175,7 @@ describe('Loyalty Tests', () => {
     });
 
     it('should get customer transactions', async () => {
-      const response = await client.get(`/api/admin/loyalty/customers/${customerId}/transactions`, {
+      const response = await client.get(`/business/loyalty/customers/${customerId}/transactions`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -219,7 +219,7 @@ describe('Loyalty Tests', () => {
     it('should update redemption status', async () => {
       // We need the redemption ID, which we'd typically get from the database
       // Since we don't have direct DB access in tests, we'd need to get it from a list endpoint
-      const response = await client.get(`/api/admin/loyalty/customers/${customerId}/redemptions`, {
+      const response = await client.get(`/business/loyalty/customers/${customerId}/redemptions`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -231,7 +231,7 @@ describe('Loyalty Tests', () => {
       expect(redemption).toBeDefined();
       
       // Update the status
-      const updateResponse = await client.put(`/api/admin/loyalty/redemptions/${redemption.id}/status`, {
+      const updateResponse = await client.put(`/business/loyalty/redemptions/${redemption.id}/status`, {
         status: 'used'
       }, {
         headers: { Authorization: `Bearer ${adminToken}` }
@@ -313,7 +313,7 @@ describe('Loyalty Tests', () => {
 
     it('should require authentication for loyalty status', async () => {
       const response = await client.get('/api/loyalty/my-status');
-      expect(response.status).toBe(401);
+      expect([401, 403]).toContain(response.status);
       expect(response.data.success).toBe(false);
     });
 

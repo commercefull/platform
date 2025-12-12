@@ -4,7 +4,7 @@
  */
 exports.up = function (knex) {
   return knex.schema.createTable('merchantFollower', t => {
-    t.uuid('merchantFollowerId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+    t.uuid('merchantFollowerId').primary().defaultTo(knex.raw('uuidv7()'));
     t.uuid('merchantId').notNullable().references('merchantId').inTable('merchant').onDelete('CASCADE');
     t.uuid('customerId').notNullable().references('customerId').inTable('customer').onDelete('CASCADE');
     t.timestamp('followedAt').notNullable().defaultTo(knex.fn.now());

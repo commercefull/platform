@@ -1,22 +1,40 @@
 import { AxiosInstance } from 'axios';
 import { createTestClient, loginTestAdmin } from '../testUtils';
 
-// Export loginTestUser function
+// Export loginTestUser function (customer login)
 export const loginTestUser = async (
   client: AxiosInstance, 
   email: string = 'customer@example.com', 
   password: string = 'password123'
 ): Promise<string> => {
-  const response = await client.post('/api/auth/login', {
+  const response = await client.post('/identity/login', {
     email,
     password
   });
   
-  if (!response.data.success) {
-    throw new Error(`Failed to login test user: ${response.data.error}`);
+  if (!response.data.accessToken) {
+    throw new Error(`Failed to login test user: ${JSON.stringify(response.data)}`);
   }
   
-  return response.data.data.token;
+  return response.data.accessToken;
+};
+
+// Export loginTestMerchant function (merchant/admin login)
+export const loginTestMerchant = async (
+  client: AxiosInstance, 
+  email: string = 'merchant@example.com', 
+  password: string = 'password123'
+): Promise<string> => {
+  const response = await client.post('/business/auth/login', {
+    email,
+    password
+  });
+  
+  if (!response.data.accessToken) {
+    throw new Error(`Failed to login merchant: ${JSON.stringify(response.data)}`);
+  }
+  
+  return response.data.accessToken;
 };
 
 // Test data for orders
@@ -96,7 +114,7 @@ export const setupOrderTests = async () => {
   const customerToken = await loginTestUser(client);
   
   // Create test order
-  const createOrderResponse = await client.post('/api/orders', {
+  const createOrderResponse = await client.post('/order', {
     ...testOrderData,
     customerId: 'test-customer-id-123' // Will be overwritten by the actual customer ID in the createOrder endpoint
   }, {
@@ -110,7 +128,7 @@ export const setupOrderTests = async () => {
   const testOrderId = createOrderResponse.data.data.id;
   
   // Create test order item
-  const createOrderItemResponse = await client.post('/api/admin/order-items', {
+  const createOrderItemResponse = await client.post('/business/order-items', {
     ...testOrderItemData,
     orderId: testOrderId
   }, {
@@ -144,12 +162,12 @@ export const cleanupOrderTests = async (
 ) => {
   try {
     // Delete test order item
-    await client.delete(`/api/admin/order-items/${testOrderItemId}`, {
+    await client.delete(`/business/order-items/${testOrderItemId}`, {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
     // Delete test order
-    await client.delete(`/api/admin/orders/${testOrderId}`, {
+    await client.delete(`/business/orders/${testOrderId}`, {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
   } catch (error) {

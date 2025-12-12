@@ -7,6 +7,10 @@ export const createTestClient = (baseURL: string = 'http://localhost:3000'): Axi
   return axios.create({
     baseURL,
     validateStatus: () => true, // Don't throw HTTP errors so we can test them
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    }
   });
 };
 
@@ -42,22 +46,31 @@ export const resetDatabase = async (): Promise<void> => {
 /**
  * Test authentication helper - logs in a test user and returns auth token
  */
-export const loginTestUser = async (client: AxiosInstance, email: string = 'test@example.com', password: string = 'testpassword'): Promise<string> => {
-  const response = await client.post('/auth/login', {
+export const loginTestUser = async (client: AxiosInstance, email: string = 'customer@example.com', password: string = 'password123'): Promise<string> => {
+  const response = await client.post('/identity/login', {
     email,
     password,
   });
   
-  if (response.status !== 200 || !response.data.token) {
+  if (response.status !== 200 || !response.data.accessToken) {
     throw new Error('Failed to login test user');
   }
   
-  return response.data.token;
+  return response.data.accessToken;
 };
 
 /**
- * Test authentication helper - logs in an admin user and returns auth token
+ * Test authentication helper - logs in an admin/merchant user and returns auth token
  */
 export const loginTestAdmin = async (client: AxiosInstance): Promise<string> => {
-  return loginTestUser(client, 'admin@example.com', 'adminpassword');
+  const response = await client.post('/business/auth/login', {
+    email: 'merchant@example.com',
+    password: 'password123',
+  });
+  
+  if (response.status !== 200 || !response.data.accessToken) {
+    throw new Error('Failed to login admin/merchant user');
+  }
+  
+  return response.data.accessToken;
 };

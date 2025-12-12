@@ -4,11 +4,11 @@
  */
 exports.up = function (knex) {
   return knex.schema.createTable('inventoryLocation', t => {
-    t.uuid('inventoryLocationId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+    t.uuid('inventoryLocationId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
-    t.uuid('warehouseId').notNullable().references('warehouseId').inTable('warehouse').onDelete('CASCADE');
-    t.uuid('warehouseBinId').references('warehouseBinId').inTable('warehouseBin').onDelete('SET NULL');
+    t.uuid('distributionWarehouseId').notNullable().references('distributionWarehouseId').inTable('distributionWarehouse').onDelete('CASCADE');
+    t.uuid('distributionWarehouseBinId').references('distributionWarehouseBinId').inTable('distributionWarehouseBin').onDelete('SET NULL');
     t.uuid('productId').notNullable();
     t.uuid('productVariantId');
     t.string('sku', 100).notNullable();
@@ -23,8 +23,8 @@ exports.up = function (knex) {
     t.timestamp('receivedDate');
     t.enum('status', ['available', 'reserved', 'damaged', 'quarantine', 'expired', 'pending']).notNullable().defaultTo('available');
     t.timestamp('lastCountDate');
-    t.index('warehouseId');
-    t.index('warehouseBinId');
+    t.index('distributionWarehouseId');
+    t.index('distributionWarehouseBinId');
     t.index('productId');
     t.index('productVariantId');
     t.index('sku');

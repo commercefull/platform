@@ -29,7 +29,7 @@ describe('Attribute Tests', () => {
         attributeGroupId: testAttributeGroupId
       };
       
-      const response = await client.post('/api/admin/attributes', newAttribute, {
+      const response = await client.post('/business/attributes', newAttribute, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -52,7 +52,7 @@ describe('Attribute Tests', () => {
     });
 
     it('should get an attribute by ID', async () => {
-      const response = await client.get(`/api/admin/attributes/${testAttributeId}`, {
+      const response = await client.get(`/business/attributes/${testAttributeId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -65,13 +65,13 @@ describe('Attribute Tests', () => {
     
     it('should get an attribute by code', async () => {
       // First get the attribute to find its code
-      const getResponse = await client.get(`/api/admin/attributes/${testAttributeId}`, {
+      const getResponse = await client.get(`/business/attributes/${testAttributeId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
       const attrCode = getResponse.data.data.code;
       
-      const response = await client.get(`/api/admin/attributes/code/${attrCode}`, {
+      const response = await client.get(`/business/attributes/code/${attrCode}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -82,7 +82,7 @@ describe('Attribute Tests', () => {
     });
     
     it('should list all attributes', async () => {
-      const response = await client.get('/api/admin/attributes', {
+      const response = await client.get('/business/attributes', {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -100,7 +100,7 @@ describe('Attribute Tests', () => {
     });
     
     it('should get attributes by group', async () => {
-      const response = await client.get(`/api/admin/attributes/group/${testAttributeGroupId}`, {
+      const response = await client.get(`/business/attributes/group/${testAttributeGroupId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -125,7 +125,7 @@ describe('Attribute Tests', () => {
         sortOrder: 2
       };
       
-      const response = await client.put(`/api/admin/attributes/${createdAttributeId}`, updatedData, {
+      const response = await client.put(`/business/attributes/${createdAttributeId}`, updatedData, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -138,7 +138,7 @@ describe('Attribute Tests', () => {
     });
 
     it('should delete an attribute', async () => {
-      const response = await client.delete(`/api/admin/attributes/${createdAttributeId}`, {
+      const response = await client.delete(`/business/attributes/${createdAttributeId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -146,7 +146,7 @@ describe('Attribute Tests', () => {
       expect(response.data.success).toBe(true);
       
       // Verify the attribute is deleted
-      const getResponse = await client.get(`/api/admin/attributes/${createdAttributeId}`, {
+      const getResponse = await client.get(`/business/attributes/${createdAttributeId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       

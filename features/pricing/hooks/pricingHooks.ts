@@ -5,7 +5,7 @@
  * with basket and checkout processes.
  */
 import { PricingService } from '../services/pricingService';
-import { Basket } from '../../basket/repos/basketRepo';
+import { Basket } from '../../basket/domain/entities/Basket';
 import { Order } from '../../order/repos/orderRepo';
 
 const pricingService = new PricingService();

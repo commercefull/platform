@@ -4,7 +4,7 @@
  */
 exports.up = function (knex) {
   return knex.schema.createTable('contentPage', t => {
-    t.uuid('contentPageId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+    t.uuid('contentPageId').primary().defaultTo(knex.raw('uuidv7()'));
     t.string('title', 255).notNullable();
     t.string('slug', 255).notNullable();
     t.uuid('contentTypeId').notNullable().references('contentTypeId').inTable('contentType');
@@ -42,7 +42,6 @@ exports.up = function (knex) {
     t.index('path');
     t.index('publishedAt');
     t.unique(['parentId', 'slug']);
-    t.unique(['isHomePage'], 'contentPageIsHomePageUnique', { predicate: knex.raw('"isHomePage" = true') });
   });
 };
 

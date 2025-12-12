@@ -1,7 +1,7 @@
 // Consolidated: Product Mapping Tables (Category, Tag, Collection)
 exports.up = function(knex) {
   return knex.schema.createTable('productCollectionMap', t => {
-        t.uuid('productCollectionMapId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+        t.uuid('productCollectionMapId').primary().defaultTo(knex.raw('uuidv7()'));
         t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
         t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
         t.uuid('productId').notNullable().references('productId').inTable('product').onDelete('CASCADE');

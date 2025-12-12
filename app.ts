@@ -13,26 +13,51 @@ import session from "express-session";
 import { pool } from "./libs/db/pool";
 import passport from "passport";
 import { formCheckbox, formHidden, formInput, formLegend, formMultiSelect, formSelect, formSubmit, formText } from "./libs/form";
-import { basketCustomerRouter } from "./features/basket/basketCustomerRouter";
-import { storefrontCustomerRouter } from "./features/storefront/storefrontCustomerRouter";
-import { checkoutRouter } from "./features/checkout/checkoutCustomerRouter";
-import { orderCustomerRouter } from "./features/order/orderCustomerRouter";
-import { orderMerchantRouter } from "./features/order/orderBusinessRouter";
-import { distributionMerchantRouter } from "./features/distribution/distributionBusinessRouter";
+import { storefrontCustomerRouter } from "./storefront/storefrontRouter";
+import { distributionBusinessRouter } from "./features/distribution/distributionBusinessRouter";
 import { merchantMerchantRouter } from "./features/merchant/merchantBusinessRouter";
-import { taxMerchantRouter } from "./features/tax/taxMerchantRouter";
+import { taxBusinessRouter } from "./features/tax/taxBusinessRouter";
 import { taxCustomerRouter } from "./features/tax/taxCustomerRouter";
-import { productMerchantRouter } from "./features/product/productBusinessRouter";
-import { productCustomerRouter } from "./features/product/productCustomerRouter";
-import { inventoryCustomerRouter } from "./features/inventory/inventoryCustomerRouter";
-import { paymentCustomerRouter } from "./features/payment/paymentCustomerRouter";
-import { promotionMerchantRouter } from "./features/promotion/promotionBusinessRouter";
 import { distributionCustomerRouter } from "./features/distribution/distributionCustomerRouter";
-import { customerMerchantRouter } from "./features/customer/customerBusinessRouter";
-import { customerRouter } from "./features/customer/customerRouter";
-import { identityMerchantRouter } from "./features/identity/routers/identityMerchantRouter";
-import { identityCustomerRouter } from "./features/identity/routers/identityCustomerRouter";
+import gdprRouter from "./features/gdpr/gdprRouter";
+import { gdprBusinessRouter } from "./features/gdpr/gdprBusinessRouter";
+import { basketCustomerRouter } from "./features/basket/interface/routers/basketRouter";
+import { orderBusinessRouter } from "./features/order/interface/routers/businessRouter";
+import { orderCustomerRouter } from "./features/order/interface/routers/customerRouter";
+import { checkoutCustomerRouter } from "./features/checkout/interface/routers/checkoutRouter";
+import { productBusinessRouter } from "./features/product/interface/routers/businessRouter";
+import { promotionBusinessRouter } from "./features/promotion/interface/routers/businessRouter";
+import { inventoryCustomerRouter } from "./features/inventory/interface/routers/customerRouter";
+import { paymentCustomerRouter } from "./features/payment/interface/routers/customerRouter";
+import { productCustomerRouter } from "./features/product/interface/routers/customerRouter";
+import { customerRouter } from "./features/customer/interface/routers/customerRouter";
+import { customerBusinessRouter } from "./features/customer/interface/routers/businessRouter";
+import { identityBusinessRouter } from "./features/identity/interface/routers/identityBusinessRouter";
+import { identityCustomerRouter } from "./features/identity/interface/routers/identityCustomerRouter";
+import { marketingBusinessRouter } from "./features/marketing/marketingBusinessRouter";
+import { marketingCustomerRouter } from "./features/marketing/marketingCustomerRouter";
+import { b2bBusinessRouter } from "./features/b2b/b2bBusinessRouter";
+import { b2bCustomerRouter } from "./features/b2b/b2bCustomerRouter";
+import { subscriptionBusinessRouter } from "./features/subscription/subscriptionBusinessRouter";
+import { subscriptionCustomerRouter } from "./features/subscription/subscriptionCustomerRouter";
+import { supportBusinessRouter } from "./features/support/supportBusinessRouter";
+import { supportCustomerRouter } from "./features/support/supportCustomerRouter";
+import { analyticsBusinessRouter } from "./features/analytics/analyticsBusinessRouter";
+import { initializeAnalyticsHandlers } from "./features/analytics/services/analyticsEventHandler";
+import { warehouseMerchantRouter } from "./features/warehouse/warehouseBusinessRouter";
+import { warehouseCustomerRouter } from "./features/warehouse/warehouseCustomerRouter";
+import { supplierMerchantRouter } from "./features/supplier/supplierBusinessRouter";
+import { localizationMerchantRouter } from "./features/localization/localizationBusinessRouter";
+import { localizationCustomerRouter } from "./features/localization/localizationCustomerRouter";
+import { pricingMerchantRouter } from "./features/pricing/pricingBusinessRouter";
+import { loyaltyMerchantRouter } from "./features/loyalty/loyaltyBusinessRouter";
+import { loyaltyCustomerRouter } from "./features/loyalty/loyaltyCustomerRouter";
+import { notificationMerchantRouter } from "./features/notification/notificationBusinessRouter";
+import { contentRouterAdmin } from "./features/content/contentBusinessRouter";
 const pgSession = require('connect-pg-simple')(session);
+
+// Initialize analytics event handlers
+initializeAnalyticsHandlers();
 
 const app = express();
 let loadPath;
@@ -152,21 +177,42 @@ app.use("/identity", identityCustomerRouter);
 app.use("/customer", customerRouter);
 app.use("/basket", basketCustomerRouter);
 app.use("/order", orderCustomerRouter);
-app.use("/checkout", checkoutRouter);
+app.use("/checkout", checkoutCustomerRouter);
 app.use("/tax", taxCustomerRouter);
 app.use("/products", productCustomerRouter);
 app.use("/payment", paymentCustomerRouter);
 app.use("/inventory", inventoryCustomerRouter);
 app.use("/distribution", distributionCustomerRouter);
+app.use("/gdpr", gdprRouter);
+app.use("/marketing", marketingCustomerRouter);
+app.use("/b2b", b2bCustomerRouter);
+app.use("/subscriptions", subscriptionCustomerRouter);
+app.use("/support", supportCustomerRouter);
+app.use("/warehouse", warehouseCustomerRouter);
+app.use("/localization", localizationCustomerRouter);
+app.use("/loyalty", loyaltyCustomerRouter);
 app.use("/business", [
-  identityMerchantRouter,
+  identityBusinessRouter,
   merchantMerchantRouter,
-  promotionMerchantRouter,
-  productMerchantRouter,
-  orderMerchantRouter,
-  distributionMerchantRouter,
-  taxMerchantRouter,
-  customerMerchantRouter
+  promotionBusinessRouter,
+  productBusinessRouter,
+  orderBusinessRouter,
+  distributionBusinessRouter,
+  taxBusinessRouter,
+  customerBusinessRouter,
+  gdprBusinessRouter,
+  marketingBusinessRouter,
+  b2bBusinessRouter,
+  subscriptionBusinessRouter,
+  supportBusinessRouter,
+  analyticsBusinessRouter,
+  warehouseMerchantRouter,
+  supplierMerchantRouter,
+  localizationMerchantRouter,
+  pricingMerchantRouter,
+  loyaltyMerchantRouter,
+  notificationMerchantRouter,
+  contentRouterAdmin
 ]);
 
 

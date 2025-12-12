@@ -1,6 +1,6 @@
 exports.up = function(knex) {
   return knex.schema.createTable('orderStatusHistory', t => {
-    t.uuid('orderStatusHistoryId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+    t.uuid('orderStatusHistoryId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     t.uuid('orderId').notNullable().references('orderId').inTable('order').onDelete('CASCADE');

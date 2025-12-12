@@ -1,1229 +1,896 @@
+/**
+ * Shipping Business Controller
+ * Handles admin/merchant operations for shipping zones, methods, carriers, and rates
+ */
 import { Request, Response } from 'express';
-import { DistributionRepo } from '../repos/distributionRepo';
+import * as shippingRepo from '../repos/shippingRepo';
+import { calculateShippingRate } from '../useCases/shipping/CalculateShippingRate';
+import { getAvailableShippingMethods } from '../useCases/shipping/GetAvailableShippingMethods';
 
-// Create a single instance of the repo to be used by all functions
-const distributionRepo = new DistributionRepo();
-// ---------- Shipping Zone Methods ----------
+// =============================================================================
+// Shipping Zones
+// =============================================================================
 
 export const getShippingZones = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const zones = await distributionRepo.findAllShippingZones();
-      res.status(200).json({
-        success: true,
-        data: zones
-      });
-    } catch (error) {
-      console.error('Error fetching shipping zones:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to fetch shipping zones'
-      });
-    }
-  };
+  try {
+    const { limit, offset } = req.query;
+    const result = await shippingRepo.findAllShippingZones({
+      limit: limit ? parseInt(limit as string) : undefined,
+      offset: offset ? parseInt(offset as string) : undefined
+    });
+    res.status(200).json({
+      success: true,
+      data: result.zones,
+      total: result.total
+    });
+  } catch (error) {
+    console.error('Error fetching shipping zones:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch shipping zones'
+    });
+  }
+};
 
 export const getActiveShippingZones = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const zones = await distributionRepo.findActiveShippingZones();
-      res.status(200).json({
-        success: true,
-        data: zones
-      });
-    } catch (error) {
-      console.error('Error fetching active shipping zones:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to fetch active shipping zones'
-      });
-    }
-  };
+  try {
+    const zones = await shippingRepo.findActiveShippingZones();
+    res.status(200).json({
+      success: true,
+      data: zones
+    });
+  } catch (error) {
+    console.error('Error fetching active shipping zones:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch active shipping zones'
+    });
+  }
+};
 
 export const getShippingZoneById = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const zone = await distributionRepo.findShippingZoneById(req.params.id);
-      
-      if (!zone) {
-        res.status(404).json({
-          success: false,
-          message: 'Shipping zone not found'
-        });
-        return;
-      }
-      
-      res.status(200).json({
-        success: true,
-        data: zone
-      });
-    } catch (error) {
-      console.error('Error fetching shipping zone:', error);
-      res.status(500).json({
+  try {
+    const zone = await shippingRepo.findShippingZoneById(req.params.id);
+    
+    if (!zone) {
+      res.status(404).json({
         success: false,
-        message: 'Failed to fetch shipping zone'
+        message: 'Shipping zone not found'
       });
+      return;
     }
-  };
+    
+    res.status(200).json({
+      success: true,
+      data: zone
+    });
+  } catch (error) {
+    console.error('Error fetching shipping zone:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch shipping zone'
+    });
+  }
+};
 
 export const createShippingZone = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { name, countries, regions, postalCodes, isActive } = req.body;
-      
-      // Validate required fields
-      if (!name) {
-        res.status(400).json({
-          success: false,
-          message: 'Name is required'
-        });
-        return;
-      }
-      
-      // Ensure arrays are proper format
-      const formattedZone = {
-        name,
-        countries: Array.isArray(countries) ? countries : [],
-        regions: Array.isArray(regions) ? regions : [],
-        postalCodes: Array.isArray(postalCodes) ? postalCodes : [],
-        isActive: isActive !== undefined ? isActive : true
-      };
-      
-      const zone = await distributionRepo.createShippingZone(formattedZone);
-      
-      res.status(201).json({
-        success: true,
-        data: zone,
-        message: 'Shipping zone created successfully'
-      });
-    } catch (error) {
-      console.error('Error creating shipping zone:', error);
-      res.status(500).json({
+  try {
+    const { name, description, locationType, locations, excludedLocations, isActive, priority } = req.body;
+    
+    if (!name) {
+      res.status(400).json({
         success: false,
-        message: 'Failed to create shipping zone'
+        message: 'Name is required'
       });
+      return;
     }
-  };
+    
+    const zone = await shippingRepo.createShippingZone({
+      name,
+      description: description || null,
+      locationType: locationType || 'country',
+      locations: Array.isArray(locations) ? locations : [],
+      excludedLocations: Array.isArray(excludedLocations) ? excludedLocations : null,
+      isActive: isActive !== false,
+      priority: priority || 0,
+      createdBy: (req as any).user?.id || null
+    });
+    
+    res.status(201).json({
+      success: true,
+      data: zone,
+      message: 'Shipping zone created successfully'
+    });
+  } catch (error) {
+    console.error('Error creating shipping zone:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to create shipping zone'
+    });
+  }
+};
 
 export const updateShippingZone = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      
-      // Check if zone exists
-      const existingZone = await distributionRepo.findShippingZoneById(id);
-      if (!existingZone) {
-        res.status(404).json({
-          success: false,
-          message: 'Shipping zone not found'
-        });
-        return;
-      }
-      
-      // Format arrays if provided
-      const updates: any = { ...req.body };
-      if (updates.countries !== undefined && !Array.isArray(updates.countries)) {
-        updates.countries = [];
-      }
-      
-      if (updates.regions !== undefined && !Array.isArray(updates.regions)) {
-        updates.regions = [];
-      }
-      
-      if (updates.postalCodes !== undefined && !Array.isArray(updates.postalCodes)) {
-        updates.postalCodes = [];
-      }
-      
-      const updatedZone = await distributionRepo.updateShippingZone(id, updates);
-      
-      res.status(200).json({
-        success: true,
-        data: updatedZone,
-        message: 'Shipping zone updated successfully'
-      });
-    } catch (error) {
-      console.error('Error updating shipping zone:', error);
-      res.status(500).json({
+  try {
+    const { id } = req.params;
+    
+    const existingZone = await shippingRepo.findShippingZoneById(id);
+    if (!existingZone) {
+      res.status(404).json({
         success: false,
-        message: 'Failed to update shipping zone'
+        message: 'Shipping zone not found'
       });
+      return;
     }
-  };
+    
+    const updatedZone = await shippingRepo.updateShippingZone(id, req.body);
+    
+    res.status(200).json({
+      success: true,
+      data: updatedZone,
+      message: 'Shipping zone updated successfully'
+    });
+  } catch (error) {
+    console.error('Error updating shipping zone:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update shipping zone'
+    });
+  }
+};
 
 export const deleteShippingZone = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      
-      // Check if zone exists
-      const existingZone = await distributionRepo.findShippingZoneById(id);
-      if (!existingZone) {
-        res.status(404).json({
-          success: false,
-          message: 'Shipping zone not found'
-        });
-        return;
-      }
-      
-      const deleted = await distributionRepo.deleteShippingZone(id);
-      
-      if (deleted) {
-        res.status(200).json({
-          success: true,
-          message: 'Shipping zone deleted successfully'
-        });
-      } else {
-        res.status(500).json({
-          success: false,
-          message: 'Failed to delete shipping zone'
-        });
-      }
-    } catch (error) {
-      console.error('Error deleting shipping zone:', error);
+  try {
+    const { id } = req.params;
+    
+    const existingZone = await shippingRepo.findShippingZoneById(id);
+    if (!existingZone) {
+      res.status(404).json({
+        success: false,
+        message: 'Shipping zone not found'
+      });
+      return;
+    }
+    
+    const deleted = await shippingRepo.deleteShippingZone(id);
+    
+    if (deleted) {
+      res.status(200).json({
+        success: true,
+        message: 'Shipping zone deleted successfully'
+      });
+    } else {
       res.status(500).json({
         success: false,
         message: 'Failed to delete shipping zone'
       });
     }
-  };
+  } catch (error) {
+    console.error('Error deleting shipping zone:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete shipping zone'
+    });
+  }
+};
 
-// ---------- Shipping Method Methods ----------
+// =============================================================================
+// Shipping Methods
+// =============================================================================
 
 export const getShippingMethods = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const methods = await distributionRepo.findAllShippingMethods();
-      res.status(200).json({
-        success: true,
-        data: methods
-      });
-    } catch (error) {
-      console.error('Error fetching shipping methods:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to fetch shipping methods'
-      });
-    }
-  };
+  try {
+    const { limit, offset } = req.query;
+    const result = await shippingRepo.findAllShippingMethods({
+      limit: limit ? parseInt(limit as string) : undefined,
+      offset: offset ? parseInt(offset as string) : undefined
+    });
+    res.status(200).json({
+      success: true,
+      data: result.methods,
+      total: result.total
+    });
+  } catch (error) {
+    console.error('Error fetching shipping methods:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch shipping methods'
+    });
+  }
+};
 
 export const getActiveShippingMethods = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const methods = await distributionRepo.findActiveShippingMethods();
-      res.status(200).json({
-        success: true,
-        data: methods
-      });
-    } catch (error) {
-      console.error('Error fetching active shipping methods:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to fetch active shipping methods'
-      });
-    }
-  };
+  try {
+    const methods = await shippingRepo.findActiveShippingMethods();
+    res.status(200).json({
+      success: true,
+      data: methods
+    });
+  } catch (error) {
+    console.error('Error fetching active shipping methods:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch active shipping methods'
+    });
+  }
+};
 
 export const getShippingMethodById = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const method = await distributionRepo.findShippingMethodById(req.params.id);
-      
-      if (!method) {
-        res.status(404).json({
-          success: false,
-          message: 'Shipping method not found'
-        });
-        return;
-      }
-      
-      res.status(200).json({
-        success: true,
-        data: method
-      });
-    } catch (error) {
-      console.error('Error fetching shipping method:', error);
-      res.status(500).json({
+  try {
+    const method = await shippingRepo.findShippingMethodById(req.params.id);
+    
+    if (!method) {
+      res.status(404).json({
         success: false,
-        message: 'Failed to fetch shipping method'
+        message: 'Shipping method not found'
       });
+      return;
     }
-  };
+    
+    res.status(200).json({
+      success: true,
+      data: method
+    });
+  } catch (error) {
+    console.error('Error fetching shipping method:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch shipping method'
+    });
+  }
+};
 
 export const getShippingMethodsByCarrier = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const methods = await distributionRepo.findShippingMethodsByCarrier(req.params.carrier);
-      res.status(200).json({
-        success: true,
-        data: methods
-      });
-    } catch (error) {
-      console.error('Error fetching shipping methods by carrier:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to fetch shipping methods'
-      });
-    }
-  };
+  try {
+    const methods = await shippingRepo.findShippingMethodsByCarrier(req.params.carrierId);
+    res.status(200).json({
+      success: true,
+      data: methods
+    });
+  } catch (error) {
+    console.error('Error fetching shipping methods by carrier:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch shipping methods'
+    });
+  }
+};
 
 export const createShippingMethod = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { name, code, carrier, estimatedDeliveryDays, isActive, basePrice } = req.body;
-      
-      // Validate required fields
-      if (!name || !code || !carrier) {
-        res.status(400).json({
-          success: false,
-          message: 'Name, code, and carrier are required'
-        });
-        return;
-      }
-      
-      const method = await distributionRepo.createShippingMethod({
-        name,
-        code,
-        carrier,
-        estimatedDeliveryDays: estimatedDeliveryDays || 3, // Default to 3 days
-        isActive: isActive !== undefined ? isActive : true,
-        basePrice: basePrice || 0
-      });
-      
-      res.status(201).json({
-        success: true,
-        data: method,
-        message: 'Shipping method created successfully'
-      });
-    } catch (error) {
-      console.error('Error creating shipping method:', error);
-      res.status(500).json({
+  try {
+    const { name, code, distributionShippingCarrierId, estimatedDeliveryDays, isActive } = req.body;
+    
+    if (!name || !code) {
+      res.status(400).json({
         success: false,
-        message: 'Failed to create shipping method'
+        message: 'Name and code are required'
       });
+      return;
     }
-  };
+    
+    const method = await shippingRepo.createShippingMethod({
+      name,
+      code,
+      distributionShippingCarrierId: distributionShippingCarrierId || null,
+      estimatedDeliveryDays: estimatedDeliveryDays || null,
+      isActive: isActive !== false,
+      ...req.body
+    });
+    
+    res.status(201).json({
+      success: true,
+      data: method,
+      message: 'Shipping method created successfully'
+    });
+  } catch (error) {
+    console.error('Error creating shipping method:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to create shipping method'
+    });
+  }
+};
 
 export const updateShippingMethod = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      
-      // Check if method exists
-      const existingMethod = await distributionRepo.findShippingMethodById(id);
-      if (!existingMethod) {
-        res.status(404).json({
-          success: false,
-          message: 'Shipping method not found'
-        });
-        return;
-      }
-      
-      const updatedMethod = await distributionRepo.updateShippingMethod(id, req.body);
-      
-      res.status(200).json({
-        success: true,
-        data: updatedMethod,
-        message: 'Shipping method updated successfully'
-      });
-    } catch (error) {
-      console.error('Error updating shipping method:', error);
-      res.status(500).json({
+  try {
+    const { id } = req.params;
+    
+    const existingMethod = await shippingRepo.findShippingMethodById(id);
+    if (!existingMethod) {
+      res.status(404).json({
         success: false,
-        message: 'Failed to update shipping method'
+        message: 'Shipping method not found'
       });
+      return;
     }
-  };
+    
+    const updatedMethod = await shippingRepo.updateShippingMethod(id, req.body);
+    
+    res.status(200).json({
+      success: true,
+      data: updatedMethod,
+      message: 'Shipping method updated successfully'
+    });
+  } catch (error) {
+    console.error('Error updating shipping method:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update shipping method'
+    });
+  }
+};
 
 export const deleteShippingMethod = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      
-      // Check if method exists
-      const existingMethod = await distributionRepo.findShippingMethodById(id);
-      if (!existingMethod) {
-        res.status(404).json({
-          success: false,
-          message: 'Shipping method not found'
-        });
-        return;
-      }
-      
-      const deleted = await distributionRepo.deleteShippingMethod(id);
-      
-      if (deleted) {
-        res.status(200).json({
-          success: true,
-          message: 'Shipping method deleted successfully'
-        });
-      } else {
-        res.status(500).json({
-          success: false,
-          message: 'Failed to delete shipping method'
-        });
-      }
-    } catch (error) {
-      console.error('Error deleting shipping method:', error);
+  try {
+    const { id } = req.params;
+    
+    const existingMethod = await shippingRepo.findShippingMethodById(id);
+    if (!existingMethod) {
+      res.status(404).json({
+        success: false,
+        message: 'Shipping method not found'
+      });
+      return;
+    }
+    
+    const deleted = await shippingRepo.deleteShippingMethod(id);
+    
+    if (deleted) {
+      res.status(200).json({
+        success: true,
+        message: 'Shipping method deleted successfully'
+      });
+    } else {
       res.status(500).json({
         success: false,
         message: 'Failed to delete shipping method'
       });
     }
-  };
+  } catch (error) {
+    console.error('Error deleting shipping method:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete shipping method'
+    });
+  }
+};
 
-  // ---------- Fulfillment Partner Methods ----------
+// =============================================================================
+// Shipping Carriers
+// =============================================================================
 
-// ---------- Fulfillment Partner Methods ----------
+export const getShippingCarriers = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { limit, offset } = req.query;
+    const result = await shippingRepo.findAllShippingCarriers({
+      limit: limit ? parseInt(limit as string) : undefined,
+      offset: offset ? parseInt(offset as string) : undefined
+    });
+    res.status(200).json({
+      success: true,
+      data: result.carriers,
+      total: result.total
+    });
+  } catch (error) {
+    console.error('Error fetching shipping carriers:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch shipping carriers'
+    });
+  }
+};
 
-export const getFulfillmentPartners = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const partners = await distributionRepo.findAllFulfillmentPartners();
-      res.status(200).json({
-        success: true,
-        data: partners
-      });
-    } catch (error) {
-      console.error('Error fetching fulfillment partners:', error);
-      res.status(500).json({
+export const getActiveShippingCarriers = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const carriers = await shippingRepo.findActiveShippingCarriers();
+    res.status(200).json({
+      success: true,
+      data: carriers
+    });
+  } catch (error) {
+    console.error('Error fetching active shipping carriers:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch active shipping carriers'
+    });
+  }
+};
+
+export const getShippingCarrierById = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const carrier = await shippingRepo.findShippingCarrierById(req.params.id);
+    
+    if (!carrier) {
+      res.status(404).json({
         success: false,
-        message: 'Failed to fetch fulfillment partners'
+        message: 'Shipping carrier not found'
       });
+      return;
     }
-  };
+    
+    res.status(200).json({
+      success: true,
+      data: carrier
+    });
+  } catch (error) {
+    console.error('Error fetching shipping carrier:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch shipping carrier'
+    });
+  }
+};
 
-export const getActiveFulfillmentPartners = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const partners = await distributionRepo.findActiveFulfillmentPartners();
-      res.status(200).json({
-        success: true,
-        data: partners
-      });
-    } catch (error) {
-      console.error('Error fetching active fulfillment partners:', error);
-      res.status(500).json({
+export const getShippingCarrierByCode = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const carrier = await shippingRepo.findShippingCarrierByCode(req.params.code);
+    
+    if (!carrier) {
+      res.status(404).json({
         success: false,
-        message: 'Failed to fetch active fulfillment partners'
+        message: 'Shipping carrier not found'
       });
+      return;
     }
-  };
+    
+    res.status(200).json({
+      success: true,
+      data: carrier
+    });
+  } catch (error) {
+    console.error('Error fetching shipping carrier by code:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch shipping carrier'
+    });
+  }
+};
 
-export const getFulfillmentPartnerById = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const partner = await distributionRepo.findFulfillmentPartnerById(req.params.id);
-      
-      if (!partner) {
-        res.status(404).json({
-          success: false,
-          message: 'Fulfillment partner not found'
-        });
-        return;
-      }
-      
-      res.status(200).json({
-        success: true,
-        data: partner
-      });
-    } catch (error) {
-      console.error('Error fetching fulfillment partner:', error);
-      res.status(500).json({
+export const createShippingCarrier = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { name, code } = req.body;
+    
+    if (!name || !code) {
+      res.status(400).json({
         success: false,
-        message: 'Failed to fetch fulfillment partner'
+        message: 'Name and code are required'
       });
+      return;
     }
-  };
-
-export const getFulfillmentPartnerByCode = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const partner = await distributionRepo.findFulfillmentPartnerByCode(req.params.code);
-      
-      if (!partner) {
-        res.status(404).json({
-          success: false,
-          message: 'Fulfillment partner not found'
-        });
-        return;
-      }
-      
-      res.status(200).json({
-        success: true,
-        data: partner
-      });
-    } catch (error) {
-      console.error('Error fetching fulfillment partner by code:', error);
-      res.status(500).json({
+    
+    // Check if code already exists
+    const existing = await shippingRepo.findShippingCarrierByCode(code);
+    if (existing) {
+      res.status(409).json({
         success: false,
-        message: 'Failed to fetch fulfillment partner'
+        message: 'A shipping carrier with this code already exists'
       });
+      return;
     }
-  };
+    
+    const carrier = await shippingRepo.createShippingCarrier(req.body);
+    
+    res.status(201).json({
+      success: true,
+      data: carrier,
+      message: 'Shipping carrier created successfully'
+    });
+  } catch (error) {
+    console.error('Error creating shipping carrier:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to create shipping carrier'
+    });
+  }
+};
 
-export const createFulfillmentPartner = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { 
-        name, code, apiKey, apiEndpoint, isActive,
-        contactName, contactEmail, contactPhone 
-      } = req.body;
-      
-      // Validate required fields
-      if (!name || !code) {
-        res.status(400).json({
-          success: false,
-          message: 'Name and code are required'
-        });
-        return;
-      }
-      
-      // Check if partner with same code exists
-      const existingPartner = await distributionRepo.findFulfillmentPartnerByCode(code);
-      if (existingPartner) {
+export const updateShippingCarrier = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    
+    const existingCarrier = await shippingRepo.findShippingCarrierById(id);
+    if (!existingCarrier) {
+      res.status(404).json({
+        success: false,
+        message: 'Shipping carrier not found'
+      });
+      return;
+    }
+    
+    // Check if updating to an existing code
+    if (req.body.code && req.body.code !== existingCarrier.code) {
+      const codeExists = await shippingRepo.findShippingCarrierByCode(req.body.code);
+      if (codeExists) {
         res.status(409).json({
           success: false,
-          message: 'A fulfillment partner with this code already exists'
+          message: 'A shipping carrier with this code already exists'
         });
         return;
       }
-      
-      const partner = await distributionRepo.createFulfillmentPartner({
-        name,
-        code,
-        apiKey,
-        apiEndpoint,
-        isActive: isActive !== undefined ? isActive : true,
-        contactName: contactName || '',
-        contactEmail: contactEmail || '',
-        contactPhone: contactPhone || ''
+    }
+    
+    const updatedCarrier = await shippingRepo.updateShippingCarrier(id, req.body);
+    
+    res.status(200).json({
+      success: true,
+      data: updatedCarrier,
+      message: 'Shipping carrier updated successfully'
+    });
+  } catch (error) {
+    console.error('Error updating shipping carrier:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update shipping carrier'
+    });
+  }
+};
+
+export const deleteShippingCarrier = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    
+    const existingCarrier = await shippingRepo.findShippingCarrierById(id);
+    if (!existingCarrier) {
+      res.status(404).json({
+        success: false,
+        message: 'Shipping carrier not found'
       });
-      
-      res.status(201).json({
+      return;
+    }
+    
+    const deleted = await shippingRepo.deleteShippingCarrier(id);
+    
+    if (deleted) {
+      res.status(200).json({
         success: true,
-        data: partner,
-        message: 'Fulfillment partner created successfully'
+        message: 'Shipping carrier deleted successfully'
       });
-    } catch (error) {
-      console.error('Error creating fulfillment partner:', error);
+    } else {
       res.status(500).json({
         success: false,
-        message: 'Failed to create fulfillment partner'
+        message: 'Failed to delete shipping carrier'
       });
     }
-  };
+  } catch (error) {
+    console.error('Error deleting shipping carrier:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete shipping carrier'
+    });
+  }
+};
 
-export const updateFulfillmentPartner = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      
-      // Check if partner exists
-      const existingPartner = await distributionRepo.findFulfillmentPartnerById(id);
-      if (!existingPartner) {
-        res.status(404).json({
-          success: false,
-          message: 'Fulfillment partner not found'
-        });
-        return;
-      }
-      
-      // Check if updating to an existing code
-      if (req.body.code && req.body.code !== existingPartner.code) {
-        const codeExists = await distributionRepo.findFulfillmentPartnerByCode(req.body.code);
-        if (codeExists) {
-          res.status(409).json({
-            success: false,
-            message: 'A fulfillment partner with this code already exists'
-          });
-          return;
+// =============================================================================
+// Shipping Rates
+// =============================================================================
+
+export const getShippingRates = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { limit, offset } = req.query;
+    const result = await shippingRepo.findAllShippingRates({
+      limit: limit ? parseInt(limit as string) : undefined,
+      offset: offset ? parseInt(offset as string) : undefined
+    });
+    res.status(200).json({
+      success: true,
+      data: result.rates,
+      total: result.total
+    });
+  } catch (error) {
+    console.error('Error fetching shipping rates:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch shipping rates'
+    });
+  }
+};
+
+export const getShippingRateById = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const rate = await shippingRepo.findShippingRateById(req.params.id);
+    
+    if (!rate) {
+      res.status(404).json({
+        success: false,
+        message: 'Shipping rate not found'
+      });
+      return;
+    }
+    
+    res.status(200).json({
+      success: true,
+      data: rate
+    });
+  } catch (error) {
+    console.error('Error fetching shipping rate:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch shipping rate'
+    });
+  }
+};
+
+export const getShippingRatesByZone = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const rates = await shippingRepo.findShippingRatesByZone(req.params.zoneId);
+    res.status(200).json({
+      success: true,
+      data: rates
+    });
+  } catch (error) {
+    console.error('Error fetching shipping rates by zone:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch shipping rates'
+    });
+  }
+};
+
+export const getShippingRatesByMethod = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const rates = await shippingRepo.findShippingRatesByMethod(req.params.methodId);
+    res.status(200).json({
+      success: true,
+      data: rates
+    });
+  } catch (error) {
+    console.error('Error fetching shipping rates by method:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch shipping rates'
+    });
+  }
+};
+
+export const createShippingRate = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { distributionShippingZoneId, distributionShippingMethodId, baseRate } = req.body;
+    
+    if (!distributionShippingZoneId || !distributionShippingMethodId) {
+      res.status(400).json({
+        success: false,
+        message: 'Zone ID and method ID are required'
+      });
+      return;
+    }
+    
+    // Validate zone exists
+    const zone = await shippingRepo.findShippingZoneById(distributionShippingZoneId);
+    if (!zone) {
+      res.status(400).json({
+        success: false,
+        message: 'Shipping zone not found'
+      });
+      return;
+    }
+    
+    // Validate method exists
+    const method = await shippingRepo.findShippingMethodById(distributionShippingMethodId);
+    if (!method) {
+      res.status(400).json({
+        success: false,
+        message: 'Shipping method not found'
+      });
+      return;
+    }
+    
+    const rate = await shippingRepo.createShippingRate({
+      ...req.body,
+      baseRate: baseRate || '0'
+    });
+    
+    res.status(201).json({
+      success: true,
+      data: rate,
+      message: 'Shipping rate created successfully'
+    });
+  } catch (error) {
+    console.error('Error creating shipping rate:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to create shipping rate'
+    });
+  }
+};
+
+export const updateShippingRate = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    
+    const existingRate = await shippingRepo.findShippingRateById(id);
+    if (!existingRate) {
+      res.status(404).json({
+        success: false,
+        message: 'Shipping rate not found'
+      });
+      return;
+    }
+    
+    const updatedRate = await shippingRepo.updateShippingRate(id, req.body);
+    
+    res.status(200).json({
+      success: true,
+      data: updatedRate,
+      message: 'Shipping rate updated successfully'
+    });
+  } catch (error) {
+    console.error('Error updating shipping rate:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update shipping rate'
+    });
+  }
+};
+
+export const deleteShippingRate = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    
+    const existingRate = await shippingRepo.findShippingRateById(id);
+    if (!existingRate) {
+      res.status(404).json({
+        success: false,
+        message: 'Shipping rate not found'
+      });
+      return;
+    }
+    
+    const deleted = await shippingRepo.deleteShippingRate(id);
+    
+    if (deleted) {
+      res.status(200).json({
+        success: true,
+        message: 'Shipping rate deleted successfully'
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        message: 'Failed to delete shipping rate'
+      });
+    }
+  } catch (error) {
+    console.error('Error deleting shipping rate:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete shipping rate'
+    });
+  }
+};
+
+// =============================================================================
+// Shipping Rate Calculation (Use Cases)
+// =============================================================================
+
+/**
+ * Calculate shipping rate for a specific method and destination
+ */
+export const calculateRate = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const {
+      destinationCountry,
+      destinationState,
+      destinationPostalCode,
+      shippingMethodId,
+      orderValue,
+      orderWeight,
+      weightUnit,
+      currency,
+      itemCount,
+      orderId
+    } = req.body;
+
+    if (!destinationCountry || !shippingMethodId) {
+      res.status(400).json({
+        success: false,
+        message: 'Destination country and shipping method ID are required'
+      });
+      return;
+    }
+
+    const result = await calculateShippingRate.execute({
+      destinationCountry,
+      destinationState,
+      destinationPostalCode,
+      shippingMethodId,
+      orderValue: orderValue || 0,
+      orderWeight: orderWeight || 0,
+      weightUnit,
+      currency,
+      itemCount,
+      orderId
+    });
+
+    if (!result.success) {
+      res.status(400).json({
+        success: false,
+        message: result.error
+      });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      data: {
+        baseRate: result.rate!.baseRate.amount,
+        perItemRate: result.rate!.perItemRate.amount,
+        totalRate: result.rate!.totalRate.amount,
+        currency: result.rate!.totalRate.currency,
+        formatted: result.rate!.totalRate.format(),
+        isFreeShipping: result.rate!.isFreeShipping,
+        zone: {
+          id: result.rate!.zoneId,
+          name: result.rate!.zoneName
+        },
+        method: {
+          id: result.rate!.methodId,
+          name: result.rate!.methodName
         }
       }
-      
-      const updatedPartner = await distributionRepo.updateFulfillmentPartner(id, req.body);
-      
-      res.status(200).json({
-        success: true,
-        data: updatedPartner,
-        message: 'Fulfillment partner updated successfully'
-      });
-    } catch (error) {
-      console.error('Error updating fulfillment partner:', error);
-      res.status(500).json({
+    });
+  } catch (error) {
+    console.error('Error calculating shipping rate:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to calculate shipping rate'
+    });
+  }
+};
+
+/**
+ * Get all available shipping methods for a destination with calculated rates
+ */
+export const getAvailableMethods = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const {
+      destinationCountry,
+      destinationState,
+      destinationPostalCode,
+      orderValue,
+      orderWeight,
+      weightUnit,
+      currency,
+      itemCount
+    } = req.query;
+
+    if (!destinationCountry) {
+      res.status(400).json({
         success: false,
-        message: 'Failed to update fulfillment partner'
+        message: 'Destination country is required'
       });
+      return;
     }
-  };
 
-export const deleteFulfillmentPartner = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      
-      // Check if partner exists
-      const existingPartner = await distributionRepo.findFulfillmentPartnerById(id);
-      if (!existingPartner) {
-        res.status(404).json({
-          success: false,
-          message: 'Fulfillment partner not found'
-        });
-        return;
-      }
-      
-      const deleted = await distributionRepo.deleteFulfillmentPartner(id);
-      
-      if (deleted) {
-        res.status(200).json({
-          success: true,
-          message: 'Fulfillment partner deleted successfully'
-        });
-      } else {
-        res.status(500).json({
-          success: false,
-          message: 'Failed to delete fulfillment partner'
-        });
-      }
-    } catch (error) {
-      console.error('Error deleting fulfillment partner:', error);
-      res.status(500).json({
+    const result = await getAvailableShippingMethods.execute({
+      destinationCountry: destinationCountry as string,
+      destinationState: destinationState as string | undefined,
+      destinationPostalCode: destinationPostalCode as string | undefined,
+      orderValue: orderValue ? parseFloat(orderValue as string) : 0,
+      orderWeight: orderWeight ? parseFloat(orderWeight as string) : undefined,
+      weightUnit: weightUnit as 'kg' | 'g' | 'lb' | 'oz' | undefined,
+      currency: currency as string | undefined,
+      itemCount: itemCount ? parseInt(itemCount as string) : undefined
+    });
+
+    if (!result.success) {
+      res.status(400).json({
         success: false,
-        message: 'Failed to delete fulfillment partner'
+        message: result.error
       });
+      return;
     }
-  };
 
-// ---------- Distribution Rule Methods ----------
-
-export const getDistributionRules = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const rules = await distributionRepo.findAllDistributionRules();
-      res.status(200).json({
-        success: true,
-        data: rules
-      });
-    } catch (error) {
-      console.error('Error fetching distribution rules:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to fetch distribution rules'
-      });
-    }
-  };
-
-export const getActiveDistributionRules = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const rules = await distributionRepo.findActiveDistributionRules();
-      res.status(200).json({
-        success: true,
-        data: rules
-      });
-    } catch (error) {
-      console.error('Error fetching active distribution rules:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to fetch active distribution rules'
-      });
-    }
-  };
-
-export const getDistributionRuleById = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const rule = await distributionRepo.findDistributionRuleById(req.params.id);
-      
-      if (!rule) {
-        res.status(404).json({
-          success: false,
-          message: 'Distribution rule not found'
-        });
-        return;
+    res.status(200).json({
+      success: true,
+      data: {
+        methods: result.methods,
+        defaultMethodId: result.defaultMethodId
       }
-      
-      res.status(200).json({
-        success: true,
-        data: rule
-      });
-    } catch (error) {
-      console.error('Error fetching distribution rule:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to fetch distribution rule'
-      });
-    }
-  };
-
-export const getDistributionRulesByZone = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const rules = await distributionRepo.findDistributionRulesByZone(req.params.zoneId);
-      res.status(200).json({
-        success: true,
-        data: rules
-      });
-    } catch (error) {
-      console.error('Error fetching distribution rules by zone:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to fetch distribution rules'
-      });
-    }
-  };
-
-export const getDefaultDistributionRule = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const rule = await distributionRepo.findDefaultDistributionRule();
-      
-      if (!rule) {
-        res.status(404).json({
-          success: false,
-          message: 'No default distribution rule found'
-        });
-        return;
-      }
-      
-      res.status(200).json({
-        success: true,
-        data: rule
-      });
-    } catch (error) {
-      console.error('Error fetching default distribution rule:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to fetch default distribution rule'
-      });
-    }
-  };
-
-export const createDistributionRule = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const {
-        name, priority, distributionCenterId, shippingZoneId,
-        shippingMethodId, fulfillmentPartnerId, isDefault, isActive
-      } = req.body;
-      
-      // Validate required fields
-      if (!name || !distributionCenterId || !shippingZoneId || !shippingMethodId || !fulfillmentPartnerId) {
-        res.status(400).json({
-          success: false,
-          message: 'Name, distributionCenterId, shippingZoneId, shippingMethodId, and fulfillmentPartnerId are required'
-        });
-        return;
-      }
-      
-      // Validate that referenced entities exist
-      const centerExists = await distributionRepo.findDistributionCenterById(distributionCenterId);
-      if (!centerExists) {
-        res.status(400).json({
-          success: false,
-          message: 'Distribution center not found'
-        });
-        return;
-      }
-      
-      const zoneExists = await distributionRepo.findShippingZoneById(shippingZoneId);
-      if (!zoneExists) {
-        res.status(400).json({
-          success: false,
-          message: 'Shipping zone not found'
-        });
-        return;
-      }
-      
-      const methodExists = await distributionRepo.findShippingMethodById(shippingMethodId);
-      if (!methodExists) {
-        res.status(400).json({
-          success: false,
-          message: 'Shipping method not found'
-        });
-        return;
-      }
-      
-      const partnerExists = await distributionRepo.findFulfillmentPartnerById(fulfillmentPartnerId);
-      if (!partnerExists) {
-        res.status(400).json({
-          success: false,
-          message: 'Fulfillment partner not found'
-        });
-        return;
-      }
-      
-      // Set a default priority if not provided (add to the end)
-      let rulePriority = priority;
-      if (rulePriority === undefined) {
-        const rules = await distributionRepo.findAllDistributionRules();
-        rulePriority = rules.length > 0 ? Math.max(...rules.map(r => r.priority)) + 1 : 1;
-      }
-      
-      const rule = await distributionRepo.createDistributionRule({
-        name,
-        priority: rulePriority,
-        distributionCenterId,
-        shippingZoneId,
-        shippingMethodId,
-        fulfillmentPartnerId,
-        isDefault: isDefault !== undefined ? isDefault : false,
-        isActive: isActive !== undefined ? isActive : true
-      });
-      
-      res.status(201).json({
-        success: true,
-        data: rule,
-        message: 'Distribution rule created successfully'
-      });
-    } catch (error) {
-      console.error('Error creating distribution rule:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to create distribution rule'
-      });
-    }
-  };
-
-export const updateDistributionRule = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      
-      // Check if rule exists
-      const existingRule = await distributionRepo.findDistributionRuleById(id);
-      if (!existingRule) {
-        res.status(404).json({
-          success: false,
-          message: 'Distribution rule not found'
-        });
-        return;
-      }
-      
-      // Validate that referenced entities exist if they are being updated
-      if (req.body.distributionCenterId) {
-        const centerExists = await distributionRepo.findDistributionCenterById(req.body.distributionCenterId);
-        if (!centerExists) {
-          res.status(400).json({
-            success: false,
-            message: 'Distribution center not found'
-          });
-          return;
-        }
-      }
-      
-      if (req.body.shippingZoneId) {
-        const zoneExists = await distributionRepo.findShippingZoneById(req.body.shippingZoneId);
-        if (!zoneExists) {
-          res.status(400).json({
-            success: false,
-            message: 'Shipping zone not found'
-          });
-          return;
-        }
-      }
-      
-      if (req.body.shippingMethodId) {
-        const methodExists = await distributionRepo.findShippingMethodById(req.body.shippingMethodId);
-        if (!methodExists) {
-          res.status(400).json({
-            success: false,
-            message: 'Shipping method not found'
-          });
-          return;
-        }
-      }
-      
-      if (req.body.fulfillmentPartnerId) {
-        const partnerExists = await distributionRepo.findFulfillmentPartnerById(req.body.fulfillmentPartnerId);
-        if (!partnerExists) {
-          res.status(400).json({
-            success: false,
-            message: 'Fulfillment partner not found'
-          });
-          return;
-        }
-      }
-      
-      const updatedRule = await distributionRepo.updateDistributionRule(id, req.body);
-      
-      res.status(200).json({
-        success: true,
-        data: updatedRule,
-        message: 'Distribution rule updated successfully'
-      });
-    } catch (error) {
-      console.error('Error updating distribution rule:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to update distribution rule'
-      });
-    }
-  };
-
-export const deleteDistributionRule = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      
-      // Check if rule exists
-      const existingRule = await distributionRepo.findDistributionRuleById(id);
-      if (!existingRule) {
-        res.status(404).json({
-          success: false,
-          message: 'Distribution rule not found'
-        });
-        return;
-      }
-      
-      const deleted = await distributionRepo.deleteDistributionRule(id);
-      
-      if (deleted) {
-        res.status(200).json({
-          success: true,
-          message: 'Distribution rule deleted successfully'
-        });
-      } else {
-        res.status(500).json({
-          success: false,
-          message: 'Failed to delete distribution rule'
-        });
-      }
-    } catch (error) {
-      console.error('Error deleting distribution rule:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to delete distribution rule'
-      });
-    }
-  };
-
-// ---------- Order Fulfillment Methods ----------
-
-export const getOrderFulfillments = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const fulfillments = await distributionRepo.findAllOrderFulfillments();
-      res.status(200).json({
-        success: true,
-        data: fulfillments
-      });
-    } catch (error) {
-      console.error('Error fetching order fulfillments:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to fetch order fulfillments'
-      });
-    }
-  };
-
-export const getOrderFulfillmentById = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const fulfillment = await distributionRepo.findOrderFulfillmentById(req.params.id);
-      
-      if (!fulfillment) {
-        res.status(404).json({
-          success: false,
-          message: 'Order fulfillment not found'
-        });
-        return;
-      }
-      
-      res.status(200).json({
-        success: true,
-        data: fulfillment
-      });
-    } catch (error) {
-      console.error('Error fetching order fulfillment:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to fetch order fulfillment'
-      });
-    }
-  };
-
-export const getOrderFulfillmentsByOrderId = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const fulfillments = await distributionRepo.findOrderFulfillmentsByOrderId(req.params.orderId);
-      res.status(200).json({
-        success: true,
-        data: fulfillments
-      });
-    } catch (error) {
-      console.error('Error fetching order fulfillments by order ID:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to fetch order fulfillments'
-      });
-    }
-  };
-
-export const getOrderFulfillmentsByStatus = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const status = req.params.status as 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
-      
-      // Validate status
-      const validStatuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
-      if (!validStatuses.includes(status)) {
-        res.status(400).json({
-          success: false,
-          message: 'Invalid status. Must be one of: pending, processing, shipped, delivered, cancelled'
-        });
-        return;
-      }
-      
-      const fulfillments = await distributionRepo.findOrderFulfillmentsByStatus(status);
-      res.status(200).json({
-        success: true,
-        data: fulfillments
-      });
-    } catch (error) {
-      console.error('Error fetching order fulfillments by status:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to fetch order fulfillments'
-      });
-    }
-  };
-
-export const getOrderFulfillmentsByDistributionCenter = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const fulfillments = await distributionRepo.findOrderFulfillmentsByDistributionCenter(req.params.centerId);
-      res.status(200).json({
-        success: true,
-        data: fulfillments
-      });
-    } catch (error) {
-      console.error('Error fetching order fulfillments by distribution center:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to fetch order fulfillments'
-      });
-    }
-  };
-
-export const createOrderFulfillment = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const {
-        orderId, distributionCenterId, ruleId, status,
-        shippingMethodId, trackingNumber, trackingUrl, notes
-      } = req.body;
-      
-      // Validate required fields
-      if (!orderId || !distributionCenterId || !shippingMethodId) {
-        res.status(400).json({
-          success: false,
-          message: 'OrderId, distributionCenterId, and shippingMethodId are required'
-        });
-        return;
-      }
-      
-      // Validate status
-      const validStatuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
-      if (status && !validStatuses.includes(status)) {
-        res.status(400).json({
-          success: false,
-          message: 'Invalid status. Must be one of: pending, processing, shipped, delivered, cancelled'
-        });
-        return;
-      }
-      
-      // Validate that referenced entities exist
-      const centerExists = await distributionRepo.findDistributionCenterById(distributionCenterId);
-      if (!centerExists) {
-        res.status(400).json({
-          success: false,
-          message: 'Distribution center not found'
-        });
-        return;
-      }
-      
-      const methodExists = await distributionRepo.findShippingMethodById(shippingMethodId);
-      if (!methodExists) {
-        res.status(400).json({
-          success: false,
-          message: 'Shipping method not found'
-        });
-        return;
-      }
-      
-      // Rule is optional, but if provided, validate it
-      if (ruleId) {
-        const ruleExists = await distributionRepo.findDistributionRuleById(ruleId);
-        if (!ruleExists) {
-          res.status(400).json({
-            success: false,
-            message: 'Distribution rule not found'
-          });
-          return;
-        }
-      }
-      
-      // Set dates based on status
-      let shippedAt = undefined;
-      let deliveredAt = undefined;
-      
-      if (status === 'shipped') {
-        shippedAt = new Date();
-      } else if (status === 'delivered') {
-        shippedAt = new Date();
-        deliveredAt = new Date();
-      }
-      
-      const fulfillment = await distributionRepo.createOrderFulfillment({
-        orderId,
-        distributionCenterId,
-        ruleId: ruleId || '', // Empty string if not provided
-        status: status || 'pending',
-        shippingMethodId,
-        trackingNumber,
-        trackingUrl,
-        shippedAt,
-        deliveredAt,
-        notes
-      });
-      
-      res.status(201).json({
-        success: true,
-        data: fulfillment,
-        message: 'Order fulfillment created successfully'
-      });
-    } catch (error) {
-      console.error('Error creating order fulfillment:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to create order fulfillment'
-      });
-    }
-  };
-
-export const updateOrderFulfillment = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      
-      // Check if fulfillment exists
-      const existingFulfillment = await distributionRepo.findOrderFulfillmentById(id);
-      if (!existingFulfillment) {
-        res.status(404).json({
-          success: false,
-          message: 'Order fulfillment not found'
-        });
-        return;
-      }
-      
-      // Validate status if it's being updated
-      if (req.body.status) {
-        const validStatuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
-        if (!validStatuses.includes(req.body.status)) {
-          res.status(400).json({
-            success: false,
-            message: 'Invalid status. Must be one of: pending, processing, shipped, delivered, cancelled'
-          });
-          return;
-        }
-      }
-      
-      // Validate that referenced entities exist if they are being updated
-      if (req.body.distributionCenterId) {
-        const centerExists = await distributionRepo.findDistributionCenterById(req.body.distributionCenterId);
-        if (!centerExists) {
-          res.status(400).json({
-            success: false,
-            message: 'Distribution center not found'
-          });
-          return;
-        }
-      }
-      
-      if (req.body.shippingMethodId) {
-        const methodExists = await distributionRepo.findShippingMethodById(req.body.shippingMethodId);
-        if (!methodExists) {
-          res.status(400).json({
-            success: false,
-            message: 'Shipping method not found'
-          });
-          return;
-        }
-      }
-      
-      if (req.body.ruleId) {
-        const ruleExists = await distributionRepo.findDistributionRuleById(req.body.ruleId);
-        if (!ruleExists) {
-          res.status(400).json({
-            success: false,
-            message: 'Distribution rule not found'
-          });
-          return;
-        }
-      }
-      
-      const updatedFulfillment = await distributionRepo.updateOrderFulfillment(id, req.body);
-      
-      res.status(200).json({
-        success: true,
-        data: updatedFulfillment,
-        message: 'Order fulfillment updated successfully'
-      });
-    } catch (error) {
-      console.error('Error updating order fulfillment:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to update order fulfillment'
-      });
-    }
-  };
-
-export const updateOrderFulfillmentStatus = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const { status, trackingNumber, trackingUrl } = req.body;
-      
-      // Check if fulfillment exists
-      const existingFulfillment = await distributionRepo.findOrderFulfillmentById(id);
-      if (!existingFulfillment) {
-        res.status(404).json({
-          success: false,
-          message: 'Order fulfillment not found'
-        });
-        return;
-      }
-      
-      // Validate status
-      const validStatuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
-      if (!validStatuses.includes(status)) {
-        res.status(400).json({
-          success: false,
-          message: 'Invalid status. Must be one of: pending, processing, shipped, delivered, cancelled'
-        });
-        return;
-      }
-      
-      const updatedFulfillment = await distributionRepo.updateOrderFulfillmentStatus(id, status, { trackingNumber, trackingUrl });
-      
-      res.status(200).json({
-        success: true,
-        data: updatedFulfillment,
-        message: `Order fulfillment status updated to ${status} successfully`
-      });
-    } catch (error) {
-      console.error('Error updating order fulfillment status:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to update order fulfillment status'
-      });
-    }
-  };
-
-export const deleteOrderFulfillment = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      
-      // Check if fulfillment exists
-      const existingFulfillment = await distributionRepo.findOrderFulfillmentById(id);
-      if (!existingFulfillment) {
-        res.status(404).json({
-          success: false,
-          message: 'Order fulfillment not found'
-        });
-        return;
-      }
-      
-      // Only allow deletion of pending fulfillments
-      if (existingFulfillment.status !== 'pending') {
-        res.status(400).json({
-          success: false,
-          message: 'Only pending fulfillments can be deleted'
-        });
-        return;
-      }
-      
-      const deleted = await distributionRepo.deleteOrderFulfillment(id);
-      
-      if (deleted) {
-        res.status(200).json({
-          success: true,
-          message: 'Order fulfillment deleted successfully'
-        });
-      } else {
-        res.status(500).json({
-          success: false,
-          message: 'Failed to delete order fulfillment'
-        });
-      }
-    } catch (error) {
-      console.error('Error deleting order fulfillment:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to delete order fulfillment'
-      });
-    }
-  };
+    });
+  } catch (error) {
+    console.error('Error getting available shipping methods:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get available shipping methods'
+    });
+  }
+};

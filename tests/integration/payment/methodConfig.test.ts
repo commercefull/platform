@@ -31,7 +31,7 @@ describe('Payment Method Configuration Tests', () => {
 
   describe('Admin Method Config Operations', () => {
     it('should get all method configurations for a merchant', async () => {
-      const response = await client.get(`/api/admin/merchants/${testMethodConfig.merchantId}/method-configs`, {
+      const response = await client.get(`/business/merchants/${testMethodConfig.merchantId}/method-configs`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -48,7 +48,7 @@ describe('Payment Method Configuration Tests', () => {
     });
 
     it('should get a method configuration by ID', async () => {
-      const response = await client.get(`/api/admin/method-configs/${testMethodConfigId}`, {
+      const response = await client.get(`/business/method-configs/${testMethodConfigId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -80,7 +80,7 @@ describe('Payment Method Configuration Tests', () => {
         displayOrder: 2
       };
       
-      const response = await client.post('/api/admin/method-configs', newMethodConfig, {
+      const response = await client.post('/business/method-configs', newMethodConfig, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -94,7 +94,7 @@ describe('Payment Method Configuration Tests', () => {
       
       // Clean up - delete the new method config
       const newMethodConfigId = response.data.data.id;
-      await client.delete(`/api/admin/method-configs/${newMethodConfigId}`, {
+      await client.delete(`/business/method-configs/${newMethodConfigId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
     });
@@ -109,7 +109,7 @@ describe('Payment Method Configuration Tests', () => {
         }
       };
       
-      const response = await client.put(`/api/admin/method-configs/${testMethodConfigId}`, updates, {
+      const response = await client.put(`/business/method-configs/${testMethodConfigId}`, updates, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -121,7 +121,7 @@ describe('Payment Method Configuration Tests', () => {
       expect(response.data.data.settings).toHaveProperty('requireCVV', false);
       
       // Reset to original values for other tests
-      await client.put(`/api/admin/method-configs/${testMethodConfigId}`, {
+      await client.put(`/business/method-configs/${testMethodConfigId}`, {
         name: testMethodConfig.name,
         isActive: testMethodConfig.isActive,
         settings: testMethodConfig.settings

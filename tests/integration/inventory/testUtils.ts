@@ -30,19 +30,23 @@ export const testInventoryLocation = {
 export const setupInventoryTests = async () => {
   const client = axios.create({
     baseURL: API_URL,
-    validateStatus: () => true // Don't throw HTTP errors
+    validateStatus: () => true,
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    } // Don't throw HTTP errors
   });
 
-  // Get admin token
-  const adminLogin = await client.post('/api/admin/auth/login', {
-    email: process.env.ADMIN_EMAIL || 'admin@commercefull.com',
-    password: process.env.ADMIN_PASSWORD || 'admin123'
+  // Get admin token (merchant login for business routes)
+  const adminLogin = await client.post('/business/auth/login', {
+    email: 'merchant@example.com',
+    password: 'password123'
   });
   
-  const adminToken = adminLogin.data.data.token;
+  const adminToken = adminLogin.data.accessToken;
 
   // Create test product if needed
-  const productResponse = await client.get('/api/admin/products', {
+  const productResponse = await client.get('/business/products', {
     headers: { Authorization: `Bearer ${adminToken}` }
   });
   
@@ -51,7 +55,7 @@ export const setupInventoryTests = async () => {
     testProductId = productResponse.data.data[0].id;
   } else {
     // Create a test product
-    const newProduct = await client.post('/api/admin/products', {
+    const newProduct = await client.post('/business/products', {
       name: 'Test Inventory Product',
       sku: 'TEST-INVENTORY-SKU',
       price: 29.99,
@@ -63,7 +67,7 @@ export const setupInventoryTests = async () => {
   }
 
   // Create a test inventory location
-  const locationResponse = await client.post('/api/admin/inventory/locations', testInventoryLocation, {
+  const locationResponse = await client.post('/business/inventory/locations', testInventoryLocation, {
     headers: { Authorization: `Bearer ${adminToken}` }
   });
   const testLocationId = locationResponse.data.data.id;
@@ -75,7 +79,7 @@ export const setupInventoryTests = async () => {
     locationId: testLocationId
   };
   
-  const itemResponse = await client.post('/api/admin/inventory/items', inventoryItemData, {
+  const itemResponse = await client.post('/business/inventory/items', inventoryItemData, {
     headers: { Authorization: `Bearer ${adminToken}` }
   });
   const testInventoryItemId = itemResponse.data.data.id;
@@ -97,12 +101,12 @@ export const cleanupInventoryTests = async (
   testLocationId: string
 ) => {
   // Delete test inventory item
-  await client.delete(`/api/admin/inventory/items/${testInventoryItemId}`, {
+  await client.delete(`/business/inventory/items/${testInventoryItemId}`, {
     headers: { Authorization: `Bearer ${adminToken}` }
   });
   
   // Delete test location
-  await client.delete(`/api/admin/inventory/locations/${testLocationId}`, {
+  await client.delete(`/business/inventory/locations/${testLocationId}`, {
     headers: { Authorization: `Bearer ${adminToken}` }
   });
 };

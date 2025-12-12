@@ -33,7 +33,7 @@ describe('Inventory Transaction Tests', () => {
         createdBy: 'test-admin'
       };
 
-      const response = await client.post('/api/admin/inventory/transactions', transaction, {
+      const response = await client.post('/business/inventory/transactions', transaction, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -50,7 +50,7 @@ describe('Inventory Transaction Tests', () => {
 
     it('should increase inventory quantity after restock transaction', async () => {
       // Get the updated inventory item
-      const inventoryResponse = await client.get(`/api/admin/inventory/items/${testInventoryItemId}`, {
+      const inventoryResponse = await client.get(`/business/inventory/items/${testInventoryItemId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -68,7 +68,7 @@ describe('Inventory Transaction Tests', () => {
         createdBy: 'test-admin'
       };
 
-      const response = await client.post('/api/admin/inventory/transactions', transaction, {
+      const response = await client.post('/business/inventory/transactions', transaction, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -79,7 +79,7 @@ describe('Inventory Transaction Tests', () => {
 
     it('should decrease inventory quantity after adjustment transaction', async () => {
       // Get the updated inventory item
-      const inventoryResponse = await client.get(`/api/admin/inventory/items/${testInventoryItemId}`, {
+      const inventoryResponse = await client.get(`/business/inventory/items/${testInventoryItemId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -88,7 +88,7 @@ describe('Inventory Transaction Tests', () => {
     });
 
     it('should get transaction history for an inventory item', async () => {
-      const response = await client.get(`/api/admin/inventory/items/${testInventoryItemId}/transactions`, {
+      const response = await client.get(`/business/inventory/items/${testInventoryItemId}/transactions`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -107,7 +107,7 @@ describe('Inventory Transaction Tests', () => {
     });
 
     it('should get transaction by ID', async () => {
-      const response = await client.get(`/api/admin/inventory/transactions/${testTransactionId}`, {
+      const response = await client.get(`/business/inventory/transactions/${testTransactionId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -119,7 +119,7 @@ describe('Inventory Transaction Tests', () => {
     });
 
     it('should search transactions by reference', async () => {
-      const response = await client.get('/api/admin/inventory/transactions', {
+      const response = await client.get('/business/inventory/transactions', {
         headers: { Authorization: `Bearer ${adminToken}` },
         params: { reference: 'PO-12345' }
       });

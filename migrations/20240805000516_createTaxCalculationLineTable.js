@@ -1,6 +1,6 @@
 exports.up = function(knex) {
   return knex.schema.createTable('taxCalculationLine', t => {
-    t.uuid('taxCalculationLineId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+    t.uuid('taxCalculationLineId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     t.uuid('calculationId').notNullable().references('taxCalculationId').inTable('taxCalculation').onDelete('CASCADE');

@@ -1,12 +1,31 @@
-import { AxiosInstance } from 'axios';
+import axios, { AxiosInstance } from 'axios';
 import {
-  setupContentTests,
-  cleanupContentTests,
-  testContentType,
-  testContentPage,
-  testContentBlock,
-  testContentTemplate
-} from './testUtils';
+  TEST_CONTENT_TYPE_ID,
+  TEST_CONTENT_PAGE_ID,
+  TEST_CONTENT_BLOCK_ID,
+  TEST_CONTENT_TEMPLATE_ID,
+  TEST_CONTENT_TYPE,
+  TEST_CONTENT_PAGE,
+  TEST_CONTENT_BLOCK,
+  TEST_CONTENT_TEMPLATE,
+  ADMIN_CREDENTIALS
+} from '../testConstants';
+
+// Create axios client for tests
+const createClient = () => axios.create({
+  baseURL: process.env.API_URL || 'http://localhost:3000',
+  validateStatus: () => true,
+  headers: {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json'
+  }
+});
+
+// Use test data from constants
+const testContentType = TEST_CONTENT_TYPE;
+const testContentPage = TEST_CONTENT_PAGE;
+const testContentBlock = TEST_CONTENT_BLOCK;
+const testContentTemplate = TEST_CONTENT_TEMPLATE;
 
 describe('Content Feature Tests', () => {
   let client: AxiosInstance;
@@ -19,37 +38,123 @@ describe('Content Feature Tests', () => {
   let testContentPageSlug: string;
 
   beforeAll(async () => {
-    // Use a longer timeout for setup as it creates multiple test entities
     jest.setTimeout(30000);
+    client = createClient();
     
-    try {
-      const setup = await setupContentTests();
-      client = setup.client;
-      adminToken = setup.adminToken;
-      testContentTypeId = setup.testContentTypeId;
-      testContentPageId = setup.testContentPageId;
-      testContentBlockId = setup.testContentBlockId;
-      testContentTemplateId = setup.testContentTemplateId;
-      testContentTypeSlug = setup.testContentTypeSlug;
-      testContentPageSlug = setup.testContentPageSlug;
-    } catch (error) {
-      console.error('Setup failed:', error);
-      throw error;
-    }
-  });
-
-  afterAll(async () => {
-    await cleanupContentTests(client, adminToken, {
-      testContentBlockId,
-      testContentPageId,
-      testContentTypeId,
-      testContentTemplateId
+    // Get admin token
+    const loginResponse = await client.post('/business/auth/login', ADMIN_CREDENTIALS);
+    adminToken = loginResponse.data.accessToken;
+    
+    // Check if seeded content type exists, create if not
+    const typeResponse = await client.get(`/business/content/types/${TEST_CONTENT_TYPE_ID}`, {
+      headers: { Authorization: `Bearer ${adminToken}` }
     });
+    
+    if (typeResponse.status === 200) {
+      testContentTypeId = TEST_CONTENT_TYPE_ID;
+      testContentTypeSlug = TEST_CONTENT_TYPE.slug;
+    } else {
+      // Create content type dynamically
+      const createTypeResponse = await client.post('/business/content/types', {
+        name: TEST_CONTENT_TYPE.name,
+        slug: TEST_CONTENT_TYPE.slug + '-' + Date.now(),
+        description: TEST_CONTENT_TYPE.description,
+        schema: { type: 'object' },
+        status: 'active'
+      }, { headers: { Authorization: `Bearer ${adminToken}` } });
+      
+      if (createTypeResponse.status === 201) {
+        testContentTypeId = createTypeResponse.data.data.id;
+        testContentTypeSlug = createTypeResponse.data.data.slug;
+      } else {
+        console.log('Failed to create content type:', createTypeResponse.data);
+      }
+    }
+    
+    // Check if seeded template exists, create if not
+    const templateResponse = await client.get(`/business/content/templates/${TEST_CONTENT_TEMPLATE_ID}`, {
+      headers: { Authorization: `Bearer ${adminToken}` }
+    });
+    
+    if (templateResponse.status === 200) {
+      testContentTemplateId = TEST_CONTENT_TEMPLATE_ID;
+    } else {
+      // Create template dynamically
+      const createTemplateResponse = await client.post('/business/content/templates', {
+        name: TEST_CONTENT_TEMPLATE.name + '-' + Date.now(),
+        type: TEST_CONTENT_TEMPLATE.type,
+        description: TEST_CONTENT_TEMPLATE.description,
+        structure: TEST_CONTENT_TEMPLATE.structure,
+        status: 'active'
+      }, { headers: { Authorization: `Bearer ${adminToken}` } });
+      
+      if (createTemplateResponse.status === 201) {
+        testContentTemplateId = createTemplateResponse.data.data.id;
+      } else {
+        console.log('Failed to create template:', createTemplateResponse.data);
+      }
+    }
+    
+    // Check if seeded page exists, create if not
+    const pageResponse = await client.get(`/business/content/pages/${TEST_CONTENT_PAGE_ID}`, {
+      headers: { Authorization: `Bearer ${adminToken}` }
+    });
+    
+    if (pageResponse.status === 200) {
+      testContentPageId = TEST_CONTENT_PAGE_ID;
+      testContentPageSlug = TEST_CONTENT_PAGE.slug;
+    } else if (testContentTypeId) {
+      // Create page dynamically
+      const createPageResponse = await client.post('/business/content/pages', {
+        title: TEST_CONTENT_PAGE.title,
+        slug: TEST_CONTENT_PAGE.slug + '-' + Date.now(),
+        contentTypeId: testContentTypeId,
+        templateId: testContentTemplateId,
+        status: 'published',
+        visibility: 'public',
+        summary: TEST_CONTENT_PAGE.summary,
+        metaTitle: TEST_CONTENT_PAGE.metaTitle,
+        metaDescription: TEST_CONTENT_PAGE.metaDescription,
+        isHomePage: false
+      }, { headers: { Authorization: `Bearer ${adminToken}` } });
+      
+      if (createPageResponse.status === 201) {
+        testContentPageId = createPageResponse.data.data.id;
+        testContentPageSlug = createPageResponse.data.data.slug;
+      } else {
+        console.log('Failed to create page:', createPageResponse.data);
+      }
+    }
+    
+    // Check if seeded block exists, create if not
+    const blockResponse = await client.get(`/business/content/blocks/${TEST_CONTENT_BLOCK_ID}`, {
+      headers: { Authorization: `Bearer ${adminToken}` }
+    });
+    
+    if (blockResponse.status === 200) {
+      testContentBlockId = TEST_CONTENT_BLOCK_ID;
+    } else if (testContentPageId && testContentTypeId) {
+      // Create block dynamically
+      const createBlockResponse = await client.post('/business/content/blocks', {
+        pageId: testContentPageId,
+        contentTypeId: testContentTypeId,
+        name: TEST_CONTENT_BLOCK.name,
+        order: 0,
+        content: TEST_CONTENT_BLOCK.content,
+        status: 'active'
+      }, { headers: { Authorization: `Bearer ${adminToken}` } });
+      
+      if (createBlockResponse.status === 201) {
+        testContentBlockId = createBlockResponse.data.data.id;
+      } else {
+        console.log('Failed to create block:', createBlockResponse.data);
+      }
+    }
   });
 
   describe('Content Type API', () => {
     it('should get content type by id with camelCase properties', async () => {
-      const response = await client.get(`/api/admin/content/types/${testContentTypeId}`, {
+      const response = await client.get(`/business/content/types/${testContentTypeId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -77,7 +182,7 @@ describe('Content Feature Tests', () => {
         description: 'Updated description for integration tests'
       };
       
-      const response = await client.put(`/api/admin/content/types/${testContentTypeId}`, updateData, {
+      const response = await client.put(`/business/content/types/${testContentTypeId}`, updateData, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -101,7 +206,7 @@ describe('Content Feature Tests', () => {
     });
 
     it('should list all content types with camelCase properties', async () => {
-      const response = await client.get('/api/admin/content/types', {
+      const response = await client.get('/business/content/types', {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -129,7 +234,7 @@ describe('Content Feature Tests', () => {
 
   describe('Content Page API', () => {
     it('should get content page by id with camelCase properties', async () => {
-      const response = await client.get(`/api/admin/content/pages/${testContentPageId}`, {
+      const response = await client.get(`/business/content/pages/${testContentPageId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -165,7 +270,7 @@ describe('Content Feature Tests', () => {
         metaTitle: 'Updated Meta Title'
       };
       
-      const response = await client.put(`/api/admin/content/pages/${testContentPageId}`, updateData, {
+      const response = await client.put(`/business/content/pages/${testContentPageId}`, updateData, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -210,7 +315,7 @@ describe('Content Feature Tests', () => {
 
   describe('Content Block API', () => {
     it('should get content block by id with camelCase properties', async () => {
-      const response = await client.get(`/api/admin/content/blocks/${testContentBlockId}`, {
+      const response = await client.get(`/business/content/blocks/${testContentBlockId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -236,7 +341,7 @@ describe('Content Feature Tests', () => {
     });
 
     it('should get blocks for a page with camelCase properties', async () => {
-      const response = await client.get(`/api/admin/content/pages/${testContentPageId}/blocks`, {
+      const response = await client.get(`/business/content/pages/${testContentPageId}/blocks`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -267,7 +372,7 @@ describe('Content Feature Tests', () => {
 
   describe('Content Template API', () => {
     it('should get content template by id with camelCase properties', async () => {
-      const response = await client.get(`/api/admin/content/templates/${testContentTemplateId}`, {
+      const response = await client.get(`/business/content/templates/${testContentTemplateId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -290,7 +395,7 @@ describe('Content Feature Tests', () => {
     });
 
     it('should list templates with camelCase properties', async () => {
-      const response = await client.get('/api/admin/content/templates', {
+      const response = await client.get('/business/content/templates', {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       

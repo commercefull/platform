@@ -31,7 +31,7 @@ describe('Payment Gateway Tests', () => {
 
   describe('Admin Gateway Operations', () => {
     it('should get all gateways for a merchant', async () => {
-      const response = await client.get(`/api/admin/merchants/${testGateway.merchantId}/gateways`, {
+      const response = await client.get(`/business/merchants/${testGateway.merchantId}/gateways`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -48,7 +48,7 @@ describe('Payment Gateway Tests', () => {
     });
 
     it('should get a gateway by ID', async () => {
-      const response = await client.get(`/api/admin/gateways/${testGatewayId}`, {
+      const response = await client.get(`/business/gateways/${testGatewayId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -75,7 +75,7 @@ describe('Payment Gateway Tests', () => {
         merchantId: testGateway.merchantId
       };
       
-      const response = await client.post('/api/admin/gateways', newGateway, {
+      const response = await client.post('/business/gateways', newGateway, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -87,7 +87,7 @@ describe('Payment Gateway Tests', () => {
       
       // Clean up - delete the new gateway
       const newGatewayId = response.data.data.id;
-      await client.delete(`/api/admin/gateways/${newGatewayId}`, {
+      await client.delete(`/business/gateways/${newGatewayId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
     });
@@ -98,7 +98,7 @@ describe('Payment Gateway Tests', () => {
         isActive: false
       };
       
-      const response = await client.put(`/api/admin/gateways/${testGatewayId}`, updates, {
+      const response = await client.put(`/business/gateways/${testGatewayId}`, updates, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -109,7 +109,7 @@ describe('Payment Gateway Tests', () => {
       expect(response.data.data).toHaveProperty('isActive', updates.isActive);
       
       // Reset to original values for other tests
-      await client.put(`/api/admin/gateways/${testGatewayId}`, {
+      await client.put(`/business/gateways/${testGatewayId}`, {
         name: testGateway.name,
         isActive: testGateway.isActive
       }, {
@@ -119,7 +119,7 @@ describe('Payment Gateway Tests', () => {
 
     it('should reject gateway operations for unauthorized users', async () => {
       // Try to get gateways with customer token
-      const response = await client.get(`/api/admin/merchants/${testGateway.merchantId}/gateways`, {
+      const response = await client.get(`/business/merchants/${testGateway.merchantId}/gateways`, {
         headers: { Authorization: `Bearer ${customerToken}` }
       });
       

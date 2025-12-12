@@ -1,6 +1,6 @@
 exports.up = function(knex) {
   return knex.schema.createTable('cartPromotionItem', t => {
-    t.uuid('cartPromotionItemId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+    t.uuid('cartPromotionItemId').primary().defaultTo(knex.raw('uuidv7()'));
     t.uuid('cartPromotionId').notNullable().references('cartPromotionId').inTable('cartPromotion').onDelete('CASCADE');
     t.uuid('basketItemId').notNullable().references('basketItemId').inTable('basketItem').onDelete('CASCADE');
     t.decimal('discountAmount', 15, 2).notNullable();

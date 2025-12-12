@@ -4,7 +4,7 @@
  */
 exports.up = function (knex) {
   return knex.schema.createTable('contentRedirect', t => {
-    t.uuid('contentRedirectId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+    t.uuid('contentRedirectId').primary().defaultTo(knex.raw('uuidv7()'));
     t.text('sourceUrl').notNullable().comment('The source URL pattern to match for redirection');
     t.text('targetUrl').notNullable().comment('The target URL to redirect to');
     t.enum('statusCode', [301, 302, 303, 307, 308]).notNullable().defaultTo(301).comment('HTTP status code to use for the redirect');

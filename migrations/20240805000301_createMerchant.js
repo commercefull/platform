@@ -4,7 +4,7 @@
  */
 exports.up = function (knex) {
   return knex.schema.createTable('merchant', t => {
-    t.uuid('merchantId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+    t.uuid('merchantId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     t.string('name', 100).notNullable();
@@ -26,6 +26,19 @@ exports.up = function (knex) {
     t.integer('employeeCount');
     t.string('taxIdNumber', 50);
     t.string('legalName', 100);
+    // VAT and International Tax Compliance
+    t.string('vatNumber', 50); // EU VAT number
+    t.boolean('vatVerified').defaultTo(false);
+    t.timestamp('vatVerifiedAt');
+    t.string('vatVerificationSource', 50); // vies, hmrc, manual
+    t.boolean('ossRegistered').defaultTo(false); // EU One-Stop Shop registration
+    t.string('ossRegistrationCountry', 2); // Country of OSS registration
+    t.boolean('iossRegistered').defaultTo(false); // Import One-Stop Shop
+    t.string('iossNumber', 50);
+    t.string('eoriNumber', 20); // EU customs number
+    t.string('ukVatNumber', 50); // UK-specific VAT post-Brexit
+    t.boolean('reverseChargeEligible').defaultTo(false); // B2B reverse charge
+    t.string('defaultTaxCountry', 2); // Primary country for tax purposes
     t.jsonb('socialLinks');
     t.string('metaTitle', 255);
     t.text('metaDescription');
@@ -59,6 +72,9 @@ exports.up = function (knex) {
     t.index('lastLoginAt');
     t.index('createdAt');
     t.index('allowedCategories', null, 'gin');
+    t.index('vatNumber');
+    t.index('ossRegistered');
+    t.index('defaultTaxCountry');
   });
 };
 

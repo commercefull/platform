@@ -34,10 +34,10 @@ export const getChannels = async (req: Request, res: Response): Promise<void> =>
       filters.type = type as ChannelType;
     }
 
-    const { channels, total } = await channelRepo.findAllChannels(filters, {
-      limit: limitNum,
-      offset: (pageNum - 1) * limitNum
-    });
+    const { channels, total } = await channelRepo.findAll(
+      { isActive: filters.status === ChannelStatus.ACTIVE ? true : filters.status === ChannelStatus.INACTIVE ? false : undefined, type: filters.type },
+      { limit: limitNum, offset: (pageNum - 1) * limitNum }
+    );
 
     res.json({
       success: true,
@@ -72,10 +72,10 @@ export const getActiveChannels = async (req: Request, res: Response): Promise<vo
     const pageNum = parseInt(page as string, 10);
     const limitNum = parseInt(limit as string, 10);
 
-    const { channels, total } = await channelRepo.findActiveChannels({
-      limit: limitNum,
-      offset: (pageNum - 1) * limitNum
-    });
+    const { channels, total } = await channelRepo.findAll(
+      { isActive: true },
+      { limit: limitNum, offset: (pageNum - 1) * limitNum }
+    );
 
     res.json({
       success: true,
@@ -225,7 +225,7 @@ export const updateChannel = async (req: Request, res: Response): Promise<void> 
     // If code is being updated, ensure it's unique
     if (channelData.code && channelData.code !== existingChannel.code) {
       const channelWithCode = await channelRepo.findByCode(channelData.code);
-      if (channelWithCode && channelWithCode.channelId !== id) {
+      if (channelWithCode && channelWithCode.distributionChannelId !== id) {
         res.status(400).json({
           success: false,
           message: "Channel code must be unique",

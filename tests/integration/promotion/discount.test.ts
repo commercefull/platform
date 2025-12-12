@@ -35,7 +35,7 @@ describe('Discount Tests', () => {
       status: 'active'
     };
     
-    const response = await client.post('/api/admin/discounts', discountData, {
+    const response = await client.post('/business/discounts', discountData, {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
@@ -47,7 +47,7 @@ describe('Discount Tests', () => {
   });
 
   it('should get active discounts', async () => {
-    const response = await client.get('/api/admin/discounts', {
+    const response = await client.get('/business/discounts', {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
@@ -60,7 +60,7 @@ describe('Discount Tests', () => {
   });
 
   it('should get discounts by product ID', async () => {
-    const response = await client.get(`/api/admin/discounts/product/${testProductId}`, {
+    const response = await client.get(`/business/discounts/product/${testProductId}`, {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
@@ -74,7 +74,7 @@ describe('Discount Tests', () => {
   });
 
   it('should get discounts by category ID', async () => {
-    const response = await client.get(`/api/admin/discounts/category/${testCategoryId}`, {
+    const response = await client.get(`/business/discounts/category/${testCategoryId}`, {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
@@ -93,7 +93,7 @@ describe('Discount Tests', () => {
       value: 20
     };
     
-    const response = await client.put(`/api/admin/discounts/${discountId}`, updateData, {
+    const response = await client.put(`/business/discounts/${discountId}`, updateData, {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
@@ -104,7 +104,7 @@ describe('Discount Tests', () => {
   });
 
   it('should delete a discount', async () => {
-    const response = await client.delete(`/api/admin/discounts/${discountId}`, {
+    const response = await client.delete(`/business/discounts/${discountId}`, {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
@@ -112,7 +112,7 @@ describe('Discount Tests', () => {
     expect(response.data.success).toBe(true);
     
     // Verify the discount is deleted
-    const getResponse = await client.get(`/api/admin/discounts/${discountId}`, {
+    const getResponse = await client.get(`/business/discounts/${discountId}`, {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     

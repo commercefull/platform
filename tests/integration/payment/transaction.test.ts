@@ -31,7 +31,7 @@ describe('Payment Transaction Tests', () => {
 
   describe('Transaction Operations', () => {
     it('should get a transaction by ID (admin)', async () => {
-      const response = await client.get(`/api/admin/transactions/${testTransactionId}`, {
+      const response = await client.get(`/business/transactions/${testTransactionId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -63,7 +63,7 @@ describe('Payment Transaction Tests', () => {
     });
 
     it('should get transactions for a customer', async () => {
-      const response = await client.get(`/api/customers/${testTransaction.customerId}/transactions`, {
+      const response = await client.get(`/customer/${testTransaction.customerId}/transactions`, {
         headers: { Authorization: `Bearer ${customerToken}` }
       });
       
@@ -78,7 +78,7 @@ describe('Payment Transaction Tests', () => {
     });
 
     it('should get transactions for an order', async () => {
-      const response = await client.get(`/api/admin/orders/${testTransaction.orderId}/transactions`, {
+      const response = await client.get(`/business/orders/${testTransaction.orderId}/transactions`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -115,7 +115,7 @@ describe('Payment Transaction Tests', () => {
       
       // Clean up - only admin can delete transactions
       const newTransactionId = response.data.data.id;
-      await client.delete(`/api/admin/transactions/${newTransactionId}`, {
+      await client.delete(`/business/transactions/${newTransactionId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
     });
@@ -125,7 +125,7 @@ describe('Payment Transaction Tests', () => {
         status: 'paid'
       };
       
-      const response = await client.put(`/api/admin/transactions/${testTransactionId}`, update, {
+      const response = await client.put(`/business/transactions/${testTransactionId}`, update, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -154,7 +154,7 @@ describe('Payment Transaction Tests', () => {
         transactionId: testTransactionId
       };
       
-      const response = await client.post('/api/admin/refunds', refund, {
+      const response = await client.post('/business/refunds', refund, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -168,14 +168,14 @@ describe('Payment Transaction Tests', () => {
     afterAll(async () => {
       // Clean up the test refund
       if (testRefundId) {
-        await client.delete(`/api/admin/refunds/${testRefundId}`, {
+        await client.delete(`/business/refunds/${testRefundId}`, {
           headers: { Authorization: `Bearer ${adminToken}` }
         });
       }
     });
 
     it('should get a refund by ID', async () => {
-      const response = await client.get(`/api/admin/refunds/${testRefundId}`, {
+      const response = await client.get(`/business/refunds/${testRefundId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -191,7 +191,7 @@ describe('Payment Transaction Tests', () => {
     });
 
     it('should get refunds for a transaction', async () => {
-      const response = await client.get(`/api/admin/transactions/${testTransactionId}/refunds`, {
+      const response = await client.get(`/business/transactions/${testTransactionId}/refunds`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -210,7 +210,7 @@ describe('Payment Transaction Tests', () => {
         status: 'completed'
       };
       
-      const response = await client.put(`/api/admin/refunds/${testRefundId}`, update, {
+      const response = await client.put(`/business/refunds/${testRefundId}`, update, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -256,7 +256,7 @@ describe('Payment Transaction Tests', () => {
       
       // Clean up the customer-requested refund
       const customerRefundId = response.data.data.id;
-      await client.delete(`/api/admin/refunds/${customerRefundId}`, {
+      await client.delete(`/business/refunds/${customerRefundId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
     });

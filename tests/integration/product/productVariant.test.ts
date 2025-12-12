@@ -21,7 +21,7 @@ describe('Product Variant Tests', () => {
 
   describe('Variant CRUD Operations', () => {
     it('should get a variant by ID', async () => {
-      const response = await client.get(`/api/admin/products/variants/${testVariantId}`, {
+      const response = await client.get(`/business/products/variants/${testVariantId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -37,7 +37,7 @@ describe('Product Variant Tests', () => {
     });
 
     it('should get all variants for a product', async () => {
-      const response = await client.get(`/api/admin/products/${testProductId}/variants`, {
+      const response = await client.get(`/business/products/${testProductId}/variants`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -66,7 +66,7 @@ describe('Product Variant Tests', () => {
         ]
       };
       
-      const response = await client.post(`/api/admin/products/${testProductId}/variants`, newVariantData, {
+      const response = await client.post(`/business/products/${testProductId}/variants`, newVariantData, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -81,7 +81,7 @@ describe('Product Variant Tests', () => {
       const newVariantId = response.data.data.id;
       
       // Clean up - delete the new variant
-      await client.delete(`/api/admin/products/variants/${newVariantId}`, {
+      await client.delete(`/business/products/variants/${newVariantId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
     });
@@ -93,7 +93,7 @@ describe('Product Variant Tests', () => {
         inventory: 200
       };
       
-      const response = await client.put(`/api/admin/products/variants/${testVariantId}`, updatedData, {
+      const response = await client.put(`/business/products/variants/${testVariantId}`, updatedData, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -107,7 +107,7 @@ describe('Product Variant Tests', () => {
     it('should update variant inventory', async () => {
       const inventoryData = { inventory: 150 };
       
-      const response = await client.patch(`/api/admin/products/variants/${testVariantId}/inventory`, inventoryData, {
+      const response = await client.patch(`/business/products/variants/${testVariantId}/inventory`, inventoryData, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       

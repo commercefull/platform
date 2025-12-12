@@ -4,7 +4,7 @@
  */
 exports.up = function (knex) {
   return knex.schema.createTable('notificationPreference', t => {
-    t.uuid('notificationPreferenceId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+    t.uuid('notificationPreferenceId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     t.uuid('userId').notNullable();
     t.enum('userType', ['customer', 'merchant', 'admin']).notNullable().defaultTo('customer');

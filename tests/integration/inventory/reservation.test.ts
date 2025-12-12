@@ -30,7 +30,7 @@ describe('Inventory Reservation Tests', () => {
   describe('Reservation Workflow', () => {
     it('should create a reservation for cart items', async () => {
       // First reset the inventory quantity to a known value
-      await client.put(`/api/admin/inventory/items/${testInventoryItemId}`, {
+      await client.put(`/business/inventory/items/${testInventoryItemId}`, {
         quantity: 100,
         reservedQuantity: 0,
         availableQuantity: 100
@@ -62,7 +62,7 @@ describe('Inventory Reservation Tests', () => {
     });
 
     it('should update inventory reserved quantity after reservation', async () => {
-      const response = await client.get(`/api/admin/inventory/items/${testInventoryItemId}`, {
+      const response = await client.get(`/business/inventory/items/${testInventoryItemId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -87,7 +87,7 @@ describe('Inventory Reservation Tests', () => {
     });
 
     it('should update a reservation status', async () => {
-      const response = await client.put(`/api/admin/inventory/reservations/${testReservationId}/status`, {
+      const response = await client.put(`/business/inventory/reservations/${testReservationId}/status`, {
         status: 'fulfilled'
       }, {
         headers: { Authorization: `Bearer ${adminToken}` }
@@ -100,7 +100,7 @@ describe('Inventory Reservation Tests', () => {
     });
 
     it('should release inventory when reservation is fulfilled', async () => {
-      const response = await client.get(`/api/admin/inventory/items/${testInventoryItemId}`, {
+      const response = await client.get(`/business/inventory/items/${testInventoryItemId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -139,7 +139,7 @@ describe('Inventory Reservation Tests', () => {
       });
       
       // Check the reserved and available quantities
-      const response = await client.get(`/api/admin/inventory/items/${testInventoryItemId}`, {
+      const response = await client.get(`/business/inventory/items/${testInventoryItemId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -171,7 +171,7 @@ describe('Inventory Reservation Tests', () => {
       expect(releaseResponse.data.success).toBe(true);
       
       // Check that the inventory has been updated
-      const inventoryResponse = await client.get(`/api/admin/inventory/items/${testInventoryItemId}`, {
+      const inventoryResponse = await client.get(`/business/inventory/items/${testInventoryItemId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -194,7 +194,7 @@ describe('Inventory Reservation Tests', () => {
       });
       
       // Run the expired reservations cleanup job
-      const cleanupResponse = await client.post('/api/admin/inventory/reservations/cleanup', {}, {
+      const cleanupResponse = await client.post('/business/inventory/reservations/cleanup', {}, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -202,7 +202,7 @@ describe('Inventory Reservation Tests', () => {
       expect(cleanupResponse.data.success).toBe(true);
       
       // The expired reservation should now be marked as expired
-      const reservationsResponse = await client.get('/api/admin/inventory/reservations', {
+      const reservationsResponse = await client.get('/business/inventory/reservations', {
         headers: { Authorization: `Bearer ${adminToken}` },
         params: { status: 'expired' }
       });

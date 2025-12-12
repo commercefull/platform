@@ -4,10 +4,10 @@
  */
 exports.up = function (knex) {
   return knex.schema.createTable('inventoryCount', t => {
-    t.uuid('inventoryCountId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+    t.uuid('inventoryCountId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
-    t.uuid('warehouseId').notNullable().references('warehouseId').inTable('warehouse');
+    t.uuid('distributionWarehouseId').notNullable().references('distributionWarehouseId').inTable('distributionWarehouse');
     t.string('referenceNumber', 50).unique();
     t.enum('countType', ['full', 'cycle', 'spot', 'blind', 'audit']).notNullable();
     t.enum('status', ['pending', 'inProgress', 'completed', 'cancelled', 'reconciled']).notNullable().defaultTo('pending');
@@ -16,7 +16,7 @@ exports.up = function (knex) {
     t.timestamp('endDate');
     t.text('notes');
     
-    t.index('warehouseId');
+    t.index('distributionWarehouseId');
     t.index('referenceNumber');
     t.index('countType');
     t.index('status');

@@ -40,7 +40,7 @@ export const createTestTier = async (
   client: AxiosInstance, 
   adminToken: string
 ): Promise<string> => {
-  const response = await client.post('/api/admin/membership/tiers', testTier, {
+  const response = await client.post('/business/membership/tiers', testTier, {
     headers: { Authorization: `Bearer ${adminToken}` }
   });
   
@@ -61,7 +61,7 @@ export const createTestBenefit = async (
     tierIds: [tierId]
   };
   
-  const response = await client.post('/api/admin/membership/benefits', benefitData, {
+  const response = await client.post('/business/membership/benefits', benefitData, {
     headers: { Authorization: `Bearer ${adminToken}` }
   });
   
@@ -84,7 +84,7 @@ export const createTestUserMembership = async (
     tierId
   };
   
-  const response = await client.post('/api/admin/membership/user-memberships', membershipData, {
+  const response = await client.post('/business/membership/user-memberships', membershipData, {
     headers: { Authorization: `Bearer ${adminToken}` }
   });
   
@@ -134,17 +134,17 @@ export const cleanupMembershipTests = async (
 ) => {
   try {
     // Cancel test user membership
-    await client.put(`/api/admin/membership/user-memberships/${testUserMembershipId}/cancel`, {}, {
+    await client.put(`/business/membership/user-memberships/${testUserMembershipId}/cancel`, {}, {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
     // Delete test benefit
-    await client.delete(`/api/admin/membership/benefits/${testBenefitId}`, {
+    await client.delete(`/business/membership/benefits/${testBenefitId}`, {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
     // Delete test tier
-    await client.delete(`/api/admin/membership/tiers/${testTierId}`, {
+    await client.delete(`/business/membership/tiers/${testTierId}`, {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
   } catch (error) {

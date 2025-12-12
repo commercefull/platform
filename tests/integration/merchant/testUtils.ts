@@ -8,7 +8,7 @@ export const testMerchant: Partial<Merchant> = {
   email: `test-merchant-${Math.floor(Math.random() * 10000)}@example.com`,
   phone: '123-456-7890',
   website: 'https://testmerchant.com',
-  logoUrl: 'https://example.com/logo.png',
+  logo: 'https://example.com/logo.png',
   description: 'Test merchant for integration tests',
   status: 'active'
 };
@@ -21,7 +21,7 @@ export const testMerchantAddress: Partial<MerchantAddress> = {
   state: 'TS',
   postalCode: '12345',
   country: 'US',
-  isPrimary: true
+  isDefault: true
 };
 
 // Common test data for merchant payment info
@@ -30,8 +30,8 @@ export const testMerchantPaymentInfo: Partial<MerchantPaymentInfo> = {
   bankName: 'Test Bank',
   accountNumber: '123456789',
   routingNumber: '987654321',
-  paymentProcessor: 'stripe',
-  processorAccountId: 'acct_test123',
+  paymentType: 'bank',
+  currency: 'USD',
   isVerified: true
 };
 
@@ -40,7 +40,7 @@ export const createTestMerchant = async (
   client: AxiosInstance, 
   adminToken: string
 ): Promise<string> => {
-  const response = await client.post('/api/admin/merchants', testMerchant, {
+  const response = await client.post('/business/merchants', testMerchant, {
     headers: { Authorization: `Bearer ${adminToken}` }
   });
   
@@ -61,7 +61,7 @@ export const createTestMerchantAddress = async (
     merchantId
   };
   
-  const response = await client.post(`/api/admin/merchants/${merchantId}/addresses`, addressData, {
+  const response = await client.post(`/business/merchants/${merchantId}/addresses`, addressData, {
     headers: { Authorization: `Bearer ${adminToken}` }
   });
   
@@ -82,7 +82,7 @@ export const createTestMerchantPaymentInfo = async (
     merchantId
   };
   
-  const response = await client.post(`/api/admin/merchants/${merchantId}/payment-info`, paymentInfoData, {
+  const response = await client.post(`/business/merchants/${merchantId}/payment-info`, paymentInfoData, {
     headers: { Authorization: `Bearer ${adminToken}` }
   });
   
@@ -126,7 +126,7 @@ export const cleanupMerchantTests = async (
 ) => {
   try {
     // Delete test merchant (cascades to addresses and payment info)
-    await client.delete(`/api/admin/merchants/${testMerchantId}`, {
+    await client.delete(`/business/merchants/${testMerchantId}`, {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
   } catch (error) {

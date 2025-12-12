@@ -1,25 +1,16 @@
 import { query, queryOne } from '../../../libs/db';
 import { unixTimestamp } from '../../../libs/date';
 
+// Import types from generated DB types - single source of truth
+import { Locale as DbLocale } from '../../../libs/db/types';
+
+// Re-export DB type
+export type Locale = DbLocale;
+
+// Type alias for text direction (used in other parts of the codebase)
 export type TextDirection = 'ltr' | 'rtl';
 
-export interface Locale {
-  localeId: string;
-  createdAt: string;
-  updatedAt: string;
-  code: string;
-  name: string;
-  language: string;
-  countryCode?: string;
-  isActive: boolean;
-  isDefault: boolean;
-  textDirection: TextDirection;
-  dateFormat: string;
-  timeFormat: string;
-  timeZone: string;
-  defaultCurrencyId?: string;
-}
-
+// Derived types for create/update operations
 export type LocaleCreateParams = Omit<Locale, 'localeId' | 'createdAt' | 'updatedAt'>;
 export type LocaleUpdateParams = Partial<Omit<Locale, 'localeId' | 'code' | 'createdAt' | 'updatedAt'>>;
 

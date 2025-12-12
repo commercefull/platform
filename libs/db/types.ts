@@ -1,13 +1,35 @@
 // The TypeScript definitions below are automatically generated.
 // Do not touch them, or risk, your modifications being lost.
 
-export enum ShippingMethodDomesticInternationalType {
-  Domestic = "domestic",
-  International = "international",
-  Both = "both",
-}
-
 export enum Table {
+  AbandonedCart = "abandonedCart",
+  AbandonedCartEmail = "abandonedCartEmail",
+  Affiliate = "affiliate",
+  AffiliateCommission = "affiliateCommission",
+  AffiliateLink = "affiliateLink",
+  AffiliatePayout = "affiliatePayout",
+  AnalyticsChannelAttribution = "analyticsChannelAttribution",
+  AnalyticsCustomer = "analyticsCustomer",
+  AnalyticsCustomerCohort = "analyticsCustomerCohort",
+  AnalyticsProductPerformance = "analyticsProductPerformance",
+  AnalyticsReportDashboard = "analyticsReportDashboard",
+  AnalyticsReportEvent = "analyticsReportEvent",
+  AnalyticsReportSnapshot = "analyticsReportSnapshot",
+  AnalyticsSalesDaily = "analyticsSalesDaily",
+  AnalyticsSearchQuery = "analyticsSearchQuery",
+  AttributeOptionTranslation = "attributeOptionTranslation",
+  AttributeTranslation = "attributeTranslation",
+  B2BApprovalAction = "b2bApprovalAction",
+  B2BApprovalRequest = "b2bApprovalRequest",
+  B2BApprovalWorkflow = "b2bApprovalWorkflow",
+  B2BApprovalWorkflowStep = "b2bApprovalWorkflowStep",
+  B2BCompany = "b2bCompany",
+  B2BCompanyAddress = "b2bCompanyAddress",
+  B2BCompanyCreditLimit = "b2bCompanyCreditLimit",
+  B2BCompanyCreditTransaction = "b2bCompanyCreditTransaction",
+  B2BCompanyUser = "b2bCompanyUser",
+  B2BQuote = "b2bQuote",
+  B2BQuoteItem = "b2bQuoteItem",
   Basket = "basket",
   BasketAnalytics = "basketAnalytics",
   BasketDiscount = "basketDiscount",
@@ -15,14 +37,16 @@ export enum Table {
   BasketItem = "basketItem",
   BasketMerge = "basketMerge",
   BasketSavedItem = "basketSavedItem",
+  BrandTranslation = "brandTranslation",
+  BundleItem = "bundleItem",
   BuyXGetYDiscount = "buyXGetYDiscount",
   CartPromotion = "cartPromotion",
   CartPromotionItem = "cartPromotionItem",
   CategoryPromotion = "categoryPromotion",
   CategoryPromotionProduct = "categoryPromotionProduct",
-  ChannelProducts = "channelProducts",
-  Channels = "channels",
+  CategoryTranslation = "categoryTranslation",
   CheckoutSession = "checkoutSession",
+  CollectionTranslation = "collectionTranslation",
   ContentBlock = "contentBlock",
   ContentBlockType = "contentBlockType",
   ContentCategorization = "contentCategorization",
@@ -33,6 +57,7 @@ export enum Table {
   ContentNavigation = "contentNavigation",
   ContentNavigationItem = "contentNavigationItem",
   ContentPage = "contentPage",
+  ContentPageTranslation = "contentPageTranslation",
   ContentPageVersion = "contentPageVersion",
   ContentRedirect = "contentRedirect",
   ContentTemplate = "contentTemplate",
@@ -50,7 +75,6 @@ export enum Table {
   Customer = "customer",
   CustomerActivity = "customerActivity",
   CustomerAddress = "customerAddress",
-  CustomerAnalytics = "customerAnalytics",
   CustomerConsent = "customerConsent",
   CustomerContact = "customerContact",
   CustomerCurrencyPreference = "customerCurrencyPreference",
@@ -66,15 +90,45 @@ export enum Table {
   CustomerPreference = "customerPreference",
   CustomerPrice = "customerPrice",
   CustomerPriceList = "customerPriceList",
+  CustomerProductView = "customerProductView",
   CustomerSegmentMembership = "customerSegmentMembership",
   CustomerSegments = "customerSegments",
+  CustomerSubscription = "customerSubscription",
   CustomerTaxExemption = "customerTaxExemption",
   CustomerTaxExemptionCategory = "customerTaxExemptionCategory",
   CustomerWishlist = "customerWishlist",
   CustomerWishlistItem = "customerWishlistItem",
+  DistributionChannel = "distributionChannel",
+  DistributionChannelProduct = "distributionChannelProduct",
+  DistributionFulfillmentPartner = "distributionFulfillmentPartner",
   DistributionInventoryMovement = "distributionInventoryMovement",
+  DistributionOrderFulfillment = "distributionOrderFulfillment",
+  DistributionPickupOrder = "distributionPickupOrder",
+  DistributionPreOrder = "distributionPreOrder",
+  DistributionPreOrderReservation = "distributionPreOrderReservation",
+  DistributionRule = "distributionRule",
+  DistributionShippingCarrier = "distributionShippingCarrier",
   DistributionShippingMethod = "distributionShippingMethod",
+  DistributionShippingRate = "distributionShippingRate",
+  DistributionShippingZone = "distributionShippingZone",
+  DistributionWarehouse = "distributionWarehouse",
+  DistributionWarehouseBin = "distributionWarehouseBin",
+  DistributionWarehouseZone = "distributionWarehouseZone",
+  DunningAttempt = "dunningAttempt",
+  EmailCampaign = "emailCampaign",
+  EmailCampaignLink = "emailCampaignLink",
+  EmailCampaignRecipient = "emailCampaignRecipient",
+  EmailTemplate = "emailTemplate",
+  FaqArticle = "faqArticle",
+  FaqCategory = "faqCategory",
+  FraudBlacklist = "fraudBlacklist",
+  FraudCheck = "fraudCheck",
+  FraudRule = "fraudRule",
   FulfillmentStatusHistory = "fulfillmentStatusHistory",
+  GdprCookieConsent = "gdprCookieConsent",
+  GdprDataRequest = "gdprDataRequest",
+  GiftCard = "giftCard",
+  GiftCardTransaction = "giftCardTransaction",
   IdentityCustomerSession = "identityCustomerSession",
   IdentityMerchantSession = "identityMerchantSession",
   IdentityRefreshTokens = "identityRefreshTokens",
@@ -138,6 +192,7 @@ export enum Table {
   NotificationEventLog = "notificationEventLog",
   NotificationPreference = "notificationPreference",
   NotificationTemplate = "notificationTemplate",
+  NotificationTemplateTranslation = "notificationTemplateTranslation",
   NotificationUnsubscribe = "notificationUnsubscribe",
   NotificationWebhook = "notificationWebhook",
   Order = "order",
@@ -173,6 +228,7 @@ export enum Table {
   Payout = "payout",
   PayoutItem = "payoutItem",
   PayoutSettings = "payoutSettings",
+  PriceAlert = "priceAlert",
   PriceList = "priceList",
   PricingRule = "pricingRule",
   Product = "product",
@@ -185,6 +241,7 @@ export enum Table {
   ProductAttributeValue = "productAttributeValue",
   ProductAttributeValueMap = "productAttributeValueMap",
   ProductBrand = "productBrand",
+  ProductBundle = "productBundle",
   ProductCategory = "productCategory",
   ProductCategoryMap = "productCategoryMap",
   ProductCollection = "productCollection",
@@ -202,6 +259,7 @@ export enum Table {
   ProductQa = "productQa",
   ProductQaAnswer = "productQaAnswer",
   ProductQaVote = "productQaVote",
+  ProductRecommendation = "productRecommendation",
   ProductRelated = "productRelated",
   ProductReview = "productReview",
   ProductReviewMedia = "productReviewMedia",
@@ -214,6 +272,7 @@ export enum Table {
   ProductTieredPrice = "productTieredPrice",
   ProductToCategory = "productToCategory",
   ProductToTag = "productToTag",
+  ProductTranslation = "productTranslation",
   ProductType = "productType",
   ProductVariant = "productVariant",
   Promotion = "promotion",
@@ -224,20 +283,28 @@ export enum Table {
   PurchaseOrderItem = "purchaseOrderItem",
   ReceivingItem = "receivingItem",
   ReceivingRecord = "receivingRecord",
+  Referral = "referral",
+  ReferralReward = "referralReward",
   RuleAdjustment = "ruleAdjustment",
   RuleCondition = "ruleCondition",
   Session = "session",
-  ShippingCarrier = "shippingCarrier",
-  ShippingMethod = "shippingMethod",
-  ShippingRate = "shippingRate",
-  ShippingZone = "shippingZone",
+  StockAlert = "stockAlert",
   StockReservation = "stockReservation",
   StoreCurrencySettings = "storeCurrencySettings",
+  StoreLocation = "storeLocation",
   StoredPaymentMethod = "storedPaymentMethod",
   SubscriptionInvoice = "subscriptionInvoice",
+  SubscriptionOrder = "subscriptionOrder",
+  SubscriptionPause = "subscriptionPause",
+  SubscriptionPlan = "subscriptionPlan",
+  SubscriptionProduct = "subscriptionProduct",
   Supplier = "supplier",
   SupplierAddress = "supplierAddress",
   SupplierProduct = "supplierProduct",
+  SupportAgent = "supportAgent",
+  SupportAttachment = "supportAttachment",
+  SupportMessage = "supportMessage",
+  SupportTicket = "supportTicket",
   TaxCalculation = "taxCalculation",
   TaxCalculationApplied = "taxCalculationApplied",
   TaxCalculationLine = "taxCalculationLine",
@@ -250,12 +317,41 @@ export enum Table {
   TaxSettings = "taxSettings",
   TaxZone = "taxZone",
   TierPrice = "tierPrice",
-  Warehouse = "warehouse",
-  WarehouseBin = "warehouseBin",
-  WarehouseZone = "warehouseZone",
+  VatOssReport = "vatOssReport",
+  VatOssReportLine = "vatOssReportLine",
+  VatRegistration = "vatRegistration",
+  VatValidationLog = "vatValidationLog",
 }
 
 export type Tables = {
+  "abandonedCart": AbandonedCart,
+  "abandonedCartEmail": AbandonedCartEmail,
+  "affiliate": Affiliate,
+  "affiliateCommission": AffiliateCommission,
+  "affiliateLink": AffiliateLink,
+  "affiliatePayout": AffiliatePayout,
+  "analyticsChannelAttribution": AnalyticsChannelAttribution,
+  "analyticsCustomer": AnalyticsCustomer,
+  "analyticsCustomerCohort": AnalyticsCustomerCohort,
+  "analyticsProductPerformance": AnalyticsProductPerformance,
+  "analyticsReportDashboard": AnalyticsReportDashboard,
+  "analyticsReportEvent": AnalyticsReportEvent,
+  "analyticsReportSnapshot": AnalyticsReportSnapshot,
+  "analyticsSalesDaily": AnalyticsSalesDaily,
+  "analyticsSearchQuery": AnalyticsSearchQuery,
+  "attributeOptionTranslation": AttributeOptionTranslation,
+  "attributeTranslation": AttributeTranslation,
+  "b2bApprovalAction": B2BApprovalAction,
+  "b2bApprovalRequest": B2BApprovalRequest,
+  "b2bApprovalWorkflow": B2BApprovalWorkflow,
+  "b2bApprovalWorkflowStep": B2BApprovalWorkflowStep,
+  "b2bCompany": B2BCompany,
+  "b2bCompanyAddress": B2BCompanyAddress,
+  "b2bCompanyCreditLimit": B2BCompanyCreditLimit,
+  "b2bCompanyCreditTransaction": B2BCompanyCreditTransaction,
+  "b2bCompanyUser": B2BCompanyUser,
+  "b2bQuote": B2BQuote,
+  "b2bQuoteItem": B2BQuoteItem,
   "basket": Basket,
   "basketAnalytics": BasketAnalytics,
   "basketDiscount": BasketDiscount,
@@ -263,14 +359,16 @@ export type Tables = {
   "basketItem": BasketItem,
   "basketMerge": BasketMerge,
   "basketSavedItem": BasketSavedItem,
+  "brandTranslation": BrandTranslation,
+  "bundleItem": BundleItem,
   "buyXGetYDiscount": BuyXGetYDiscount,
   "cartPromotion": CartPromotion,
   "cartPromotionItem": CartPromotionItem,
   "categoryPromotion": CategoryPromotion,
   "categoryPromotionProduct": CategoryPromotionProduct,
-  "channelProducts": ChannelProducts,
-  "channels": Channels,
+  "categoryTranslation": CategoryTranslation,
   "checkoutSession": CheckoutSession,
+  "collectionTranslation": CollectionTranslation,
   "contentBlock": ContentBlock,
   "contentBlockType": ContentBlockType,
   "contentCategorization": ContentCategorization,
@@ -281,6 +379,7 @@ export type Tables = {
   "contentNavigation": ContentNavigation,
   "contentNavigationItem": ContentNavigationItem,
   "contentPage": ContentPage,
+  "contentPageTranslation": ContentPageTranslation,
   "contentPageVersion": ContentPageVersion,
   "contentRedirect": ContentRedirect,
   "contentTemplate": ContentTemplate,
@@ -298,7 +397,6 @@ export type Tables = {
   "customer": Customer,
   "customerActivity": CustomerActivity,
   "customerAddress": CustomerAddress,
-  "customerAnalytics": CustomerAnalytics,
   "customerConsent": CustomerConsent,
   "customerContact": CustomerContact,
   "customerCurrencyPreference": CustomerCurrencyPreference,
@@ -314,15 +412,45 @@ export type Tables = {
   "customerPreference": CustomerPreference,
   "customerPrice": CustomerPrice,
   "customerPriceList": CustomerPriceList,
+  "customerProductView": CustomerProductView,
   "customerSegmentMembership": CustomerSegmentMembership,
   "customerSegments": CustomerSegments,
+  "customerSubscription": CustomerSubscription,
   "customerTaxExemption": CustomerTaxExemption,
   "customerTaxExemptionCategory": CustomerTaxExemptionCategory,
   "customerWishlist": CustomerWishlist,
   "customerWishlistItem": CustomerWishlistItem,
+  "distributionChannel": DistributionChannel,
+  "distributionChannelProduct": DistributionChannelProduct,
+  "distributionFulfillmentPartner": DistributionFulfillmentPartner,
   "distributionInventoryMovement": DistributionInventoryMovement,
+  "distributionOrderFulfillment": DistributionOrderFulfillment,
+  "distributionPickupOrder": DistributionPickupOrder,
+  "distributionPreOrder": DistributionPreOrder,
+  "distributionPreOrderReservation": DistributionPreOrderReservation,
+  "distributionRule": DistributionRule,
+  "distributionShippingCarrier": DistributionShippingCarrier,
   "distributionShippingMethod": DistributionShippingMethod,
+  "distributionShippingRate": DistributionShippingRate,
+  "distributionShippingZone": DistributionShippingZone,
+  "distributionWarehouse": DistributionWarehouse,
+  "distributionWarehouseBin": DistributionWarehouseBin,
+  "distributionWarehouseZone": DistributionWarehouseZone,
+  "dunningAttempt": DunningAttempt,
+  "emailCampaign": EmailCampaign,
+  "emailCampaignLink": EmailCampaignLink,
+  "emailCampaignRecipient": EmailCampaignRecipient,
+  "emailTemplate": EmailTemplate,
+  "faqArticle": FaqArticle,
+  "faqCategory": FaqCategory,
+  "fraudBlacklist": FraudBlacklist,
+  "fraudCheck": FraudCheck,
+  "fraudRule": FraudRule,
   "fulfillmentStatusHistory": FulfillmentStatusHistory,
+  "gdprCookieConsent": GdprCookieConsent,
+  "gdprDataRequest": GdprDataRequest,
+  "giftCard": GiftCard,
+  "giftCardTransaction": GiftCardTransaction,
   "identityCustomerSession": IdentityCustomerSession,
   "identityMerchantSession": IdentityMerchantSession,
   "identityRefreshTokens": IdentityRefreshTokens,
@@ -386,6 +514,7 @@ export type Tables = {
   "notificationEventLog": NotificationEventLog,
   "notificationPreference": NotificationPreference,
   "notificationTemplate": NotificationTemplate,
+  "notificationTemplateTranslation": NotificationTemplateTranslation,
   "notificationUnsubscribe": NotificationUnsubscribe,
   "notificationWebhook": NotificationWebhook,
   "order": Order,
@@ -421,6 +550,7 @@ export type Tables = {
   "payout": Payout,
   "payoutItem": PayoutItem,
   "payoutSettings": PayoutSettings,
+  "priceAlert": PriceAlert,
   "priceList": PriceList,
   "pricingRule": PricingRule,
   "product": Product,
@@ -433,6 +563,7 @@ export type Tables = {
   "productAttributeValue": ProductAttributeValue,
   "productAttributeValueMap": ProductAttributeValueMap,
   "productBrand": ProductBrand,
+  "productBundle": ProductBundle,
   "productCategory": ProductCategory,
   "productCategoryMap": ProductCategoryMap,
   "productCollection": ProductCollection,
@@ -450,6 +581,7 @@ export type Tables = {
   "productQa": ProductQa,
   "productQaAnswer": ProductQaAnswer,
   "productQaVote": ProductQaVote,
+  "productRecommendation": ProductRecommendation,
   "productRelated": ProductRelated,
   "productReview": ProductReview,
   "productReviewMedia": ProductReviewMedia,
@@ -462,6 +594,7 @@ export type Tables = {
   "productTieredPrice": ProductTieredPrice,
   "productToCategory": ProductToCategory,
   "productToTag": ProductToTag,
+  "productTranslation": ProductTranslation,
   "productType": ProductType,
   "productVariant": ProductVariant,
   "promotion": Promotion,
@@ -472,20 +605,28 @@ export type Tables = {
   "purchaseOrderItem": PurchaseOrderItem,
   "receivingItem": ReceivingItem,
   "receivingRecord": ReceivingRecord,
+  "referral": Referral,
+  "referralReward": ReferralReward,
   "ruleAdjustment": RuleAdjustment,
   "ruleCondition": RuleCondition,
   "session": Session,
-  "shippingCarrier": ShippingCarrier,
-  "shippingMethod": ShippingMethod,
-  "shippingRate": ShippingRate,
-  "shippingZone": ShippingZone,
+  "stockAlert": StockAlert,
   "stockReservation": StockReservation,
   "storeCurrencySettings": StoreCurrencySettings,
+  "storeLocation": StoreLocation,
   "storedPaymentMethod": StoredPaymentMethod,
   "subscriptionInvoice": SubscriptionInvoice,
+  "subscriptionOrder": SubscriptionOrder,
+  "subscriptionPause": SubscriptionPause,
+  "subscriptionPlan": SubscriptionPlan,
+  "subscriptionProduct": SubscriptionProduct,
   "supplier": Supplier,
   "supplierAddress": SupplierAddress,
   "supplierProduct": SupplierProduct,
+  "supportAgent": SupportAgent,
+  "supportAttachment": SupportAttachment,
+  "supportMessage": SupportMessage,
+  "supportTicket": SupportTicket,
   "taxCalculation": TaxCalculation,
   "taxCalculationApplied": TaxCalculationApplied,
   "taxCalculationLine": TaxCalculationLine,
@@ -498,9 +639,800 @@ export type Tables = {
   "taxSettings": TaxSettings,
   "taxZone": TaxZone,
   "tierPrice": TierPrice,
-  "warehouse": Warehouse,
-  "warehouseBin": WarehouseBin,
-  "warehouseZone": WarehouseZone,
+  "vatOssReport": VatOssReport,
+  "vatOssReportLine": VatOssReportLine,
+  "vatRegistration": VatRegistration,
+  "vatValidationLog": VatValidationLog,
+};
+
+export type AbandonedCart = {
+  abandonedCartId: string;
+  basketId: string;
+  customerId: string | null;
+  email: string | null;
+  firstName: string | null;
+  status: string | null;
+  cartValue: string | null;
+  currency: string | null;
+  itemCount: number | null;
+  cartSnapshot: unknown | null;
+  abandonedAt: Date;
+  emailSequence: number | null;
+  emailsSent: number | null;
+  lastEmailSentAt: Date | null;
+  nextEmailScheduledAt: Date | null;
+  recoveredOrderId: string | null;
+  recoveredAt: Date | null;
+  recoveredValue: string | null;
+  recoverySource: string | null;
+  discountCode: string | null;
+  discountAmount: string | null;
+  optedOut: boolean | null;
+  optedOutAt: Date | null;
+  ipAddress: string | null;
+  userAgent: string | null;
+  deviceType: string | null;
+  country: string | null;
+  metadata: unknown | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
+
+export type AbandonedCartEmail = {
+  abandonedCartEmailId: string;
+  abandonedCartId: string;
+  emailTemplateId: string | null;
+  sequenceNumber: number;
+  subject: string | null;
+  bodyHtml: string | null;
+  bodyText: string | null;
+  status: string | null;
+  scheduledAt: Date | null;
+  sentAt: Date | null;
+  deliveredAt: Date | null;
+  openedAt: Date | null;
+  openCount: number | null;
+  clickedAt: Date | null;
+  clickCount: number | null;
+  messageId: string | null;
+  failureReason: string | null;
+  discountCode: string | null;
+  discountAmount: string | null;
+  discountType: string | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
+
+export type Affiliate = {
+  affiliateId: string;
+  customerId: string | null;
+  email: string;
+  firstName: string | null;
+  lastName: string | null;
+  companyName: string | null;
+  website: string | null;
+  socialMedia: string | null;
+  affiliateCode: string;
+  status: string | null;
+  tier: string | null;
+  commissionRate: string | null;
+  commissionType: string | null;
+  cookieDurationDays: number | null;
+  lifetimeEarnings: string | null;
+  pendingBalance: string | null;
+  availableBalance: string | null;
+  totalPaidOut: string | null;
+  totalClicks: number | null;
+  totalConversions: number | null;
+  conversionRate: string | null;
+  averageOrderValue: string | null;
+  paymentMethod: string | null;
+  paypalEmail: string | null;
+  bankDetails: unknown | null;
+  minimumPayout: string | null;
+  currency: string | null;
+  bio: string | null;
+  categories: unknown | null;
+  rejectionReason: string | null;
+  approvedAt: Date | null;
+  approvedBy: string | null;
+  lastLoginAt: Date | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+  deletedAt: Date | null;
+};
+
+export type AffiliateCommission = {
+  affiliateCommissionId: string;
+  affiliateId: string;
+  affiliateLinkId: string | null;
+  orderId: string;
+  customerId: string | null;
+  orderTotal: string;
+  commissionableAmount: string;
+  commissionRate: string;
+  commissionType: string;
+  commissionAmount: string;
+  currency: string | null;
+  status: string | null;
+  isFirstOrder: boolean | null;
+  notes: string | null;
+  rejectionReason: string | null;
+  approvedAt: Date | null;
+  approvedBy: string | null;
+  payoutId: string | null;
+  paidAt: Date | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
+
+export type AffiliateLink = {
+  affiliateLinkId: string;
+  affiliateId: string;
+  name: string | null;
+  shortCode: string;
+  destinationUrl: string;
+  productId: string | null;
+  productCategoryId: string | null;
+  campaignId: string | null;
+  utmSource: string | null;
+  utmMedium: string | null;
+  utmCampaign: string | null;
+  clickCount: number | null;
+  uniqueClickCount: number | null;
+  conversionCount: number | null;
+  revenue: string | null;
+  commission: string | null;
+  isActive: boolean | null;
+  lastClickedAt: Date | null;
+  expiresAt: Date | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
+
+export type AffiliatePayout = {
+  affiliatePayoutId: string;
+  affiliateId: string;
+  amount: string;
+  currency: string | null;
+  paymentMethod: string;
+  status: string | null;
+  paypalEmail: string | null;
+  paypalTransactionId: string | null;
+  bankDetails: unknown | null;
+  bankReference: string | null;
+  checkNumber: string | null;
+  storeCreditCode: string | null;
+  commissionsCount: number | null;
+  periodStart: string | null;
+  periodEnd: string | null;
+  notes: string | null;
+  failureReason: string | null;
+  processedAt: Date | null;
+  processedBy: string | null;
+  completedAt: Date | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
+
+export type AnalyticsChannelAttribution = {
+  analyticsChannelAttributionId: string;
+  merchantId: string | null;
+  date: Date;
+  channel: string;
+  source: string | null;
+  medium: string | null;
+  campaign: string | null;
+  sessions: number | null;
+  uniqueVisitors: number | null;
+  pageViews: number | null;
+  bounceRate: string | null;
+  averageSessionDuration: number | null;
+  conversions: number | null;
+  conversionRate: string | null;
+  revenue: string | null;
+  averageOrderValue: string | null;
+  firstTouchRevenue: string | null;
+  lastTouchRevenue: string | null;
+  linearRevenue: string | null;
+  adSpend: string | null;
+  costPerAcquisition: string | null;
+  returnOnAdSpend: string | null;
+  computedAt: Date | null;
+  createdAt: Date | null;
+};
+
+export type AnalyticsCustomer = {
+  analyticsCustomerId: string;
+  lastUpdatedAt: Date;
+  createdAt: Date;
+  customerId: string;
+  totalOrders: number;
+  totalSpent: string;
+  averageOrderValue: string | null;
+  firstOrderDate: Date | null;
+  lastOrderDate: Date | null;
+  lastVisitDate: Date | null;
+  visitCount: number;
+  cartCount: number;
+  abandonedCarts: number;
+  productViews: number;
+  wishlistItemCount: number;
+  reviewCount: number;
+  averageReviewRating: string | null;
+  lifetimeValue: string | null;
+  riskScore: string | null;
+  engagementScore: string | null;
+  churnRisk: string | null;
+  preferredCategories: unknown | null;
+  preferredProducts: unknown | null;
+  preferredPaymentMethods: unknown | null;
+  preferredShippingMethods: unknown | null;
+  segmentData: unknown | null;
+  deviceUsage: unknown | null;
+};
+
+export type AnalyticsCustomerCohort = {
+  analyticsCustomerCohortId: string;
+  merchantId: string | null;
+  cohortMonth: Date;
+  monthNumber: number;
+  customersInCohort: number | null;
+  activeCustomers: number | null;
+  retentionRate: string | null;
+  revenue: string | null;
+  orders: number | null;
+  averageOrderValue: string | null;
+  lifetimeValue: string | null;
+  repeatPurchasers: number | null;
+  repeatPurchaseRate: string | null;
+  averageOrdersPerCustomer: string | null;
+  computedAt: Date | null;
+  createdAt: Date | null;
+};
+
+export type AnalyticsProductPerformance = {
+  analyticsProductPerformanceId: string;
+  productId: string;
+  productVariantId: string | null;
+  date: Date;
+  channel: string | null;
+  views: number | null;
+  uniqueViews: number | null;
+  detailViews: number | null;
+  addToCarts: number | null;
+  removeFromCarts: number | null;
+  viewToCartRate: string | null;
+  purchases: number | null;
+  quantitySold: number | null;
+  revenue: string | null;
+  averagePrice: string | null;
+  cartToOrderRate: string | null;
+  returns: number | null;
+  returnQuantity: number | null;
+  returnRate: string | null;
+  reviews: number | null;
+  averageRating: string | null;
+  stockAlerts: number | null;
+  outOfStockViews: number | null;
+  computedAt: Date | null;
+  createdAt: Date | null;
+};
+
+export type AnalyticsReportDashboard = {
+  analyticsReportDashboardId: string;
+  merchantId: string | null;
+  createdBy: string | null;
+  name: string;
+  slug: string | null;
+  description: string | null;
+  isDefault: boolean | null;
+  isShared: boolean | null;
+  layout: unknown | null;
+  widgets: unknown | null;
+  filters: unknown | null;
+  dateRange: string | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
+
+export type AnalyticsReportEvent = {
+  analyticsReportEventId: string;
+  merchantId: string | null;
+  eventType: string;
+  eventCategory: string;
+  eventAction: string;
+  customerId: string | null;
+  orderId: string | null;
+  productId: string | null;
+  basketId: string | null;
+  sessionId: string | null;
+  visitorId: string | null;
+  channel: string | null;
+  eventData: unknown | null;
+  eventValue: string | null;
+  eventQuantity: number | null;
+  currency: string | null;
+  ipAddress: string | null;
+  userAgent: string | null;
+  referrer: string | null;
+  utmSource: string | null;
+  utmMedium: string | null;
+  utmCampaign: string | null;
+  deviceType: string | null;
+  country: string | null;
+  region: string | null;
+  isProcessed: boolean | null;
+  processedAt: Date | null;
+  createdAt: Date | null;
+};
+
+export type AnalyticsReportSnapshot = {
+  analyticsReportSnapshotId: string;
+  merchantId: string | null;
+  snapshotType: string;
+  snapshotTime: Date;
+  snapshotDate: Date;
+  snapshotHour: number | null;
+  totalOrders: number | null;
+  pendingOrders: number | null;
+  processingOrders: number | null;
+  shippedOrders: number | null;
+  deliveredOrders: number | null;
+  cancelledOrders: number | null;
+  refundedOrders: number | null;
+  totalRevenue: string | null;
+  pendingRevenue: string | null;
+  refundedAmount: string | null;
+  totalCustomers: number | null;
+  activeCustomers: number | null;
+  newCustomersToday: number | null;
+  totalProducts: number | null;
+  activeProducts: number | null;
+  outOfStockProducts: number | null;
+  lowStockProducts: number | null;
+  totalInventoryValue: string | null;
+  totalInventoryUnits: number | null;
+  openTickets: number | null;
+  pendingTickets: number | null;
+  activeSubscriptions: number | null;
+  monthlyRecurringRevenue: string | null;
+  createdAt: Date | null;
+};
+
+export type AnalyticsSalesDaily = {
+  analyticsSalesDailyId: string;
+  merchantId: string | null;
+  date: Date;
+  channel: string | null;
+  currency: string | null;
+  orderCount: number | null;
+  itemsSold: number | null;
+  grossRevenue: string | null;
+  discountTotal: string | null;
+  refundTotal: string | null;
+  netRevenue: string | null;
+  taxTotal: string | null;
+  shippingRevenue: string | null;
+  averageOrderValue: string | null;
+  newCustomers: number | null;
+  returningCustomers: number | null;
+  guestOrders: number | null;
+  cartCreated: number | null;
+  cartAbandoned: number | null;
+  checkoutStarted: number | null;
+  checkoutCompleted: number | null;
+  conversionRate: string | null;
+  paymentSuccessCount: number | null;
+  paymentFailedCount: number | null;
+  paymentSuccessRate: string | null;
+  computedAt: Date | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
+
+export type AnalyticsSearchQuery = {
+  analyticsSearchQueryId: string;
+  merchantId: string | null;
+  query: string;
+  queryNormalized: string | null;
+  date: Date;
+  searchCount: number | null;
+  uniqueSearchers: number | null;
+  resultCount: number | null;
+  isZeroResult: boolean | null;
+  clickCount: number | null;
+  clickThroughRate: string | null;
+  averageClickPosition: number | null;
+  addToCartCount: number | null;
+  purchaseCount: number | null;
+  conversionRate: string | null;
+  revenue: string | null;
+  refinementCount: number | null;
+  exitCount: number | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
+
+export type AttributeOptionTranslation = {
+  attributeOptionTranslationId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  productAttributeOptionId: string;
+  localeId: string;
+  label: string;
+  description: string | null;
+  isAutoTranslated: boolean;
+  translationSource: string | null;
+  isApproved: boolean;
+};
+
+export type AttributeTranslation = {
+  attributeTranslationId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  productAttributeId: string;
+  localeId: string;
+  name: string;
+  description: string | null;
+  placeholder: string | null;
+  helpText: string | null;
+  isAutoTranslated: boolean;
+  translationSource: string | null;
+  isApproved: boolean;
+};
+
+export type B2BApprovalAction = {
+  b2bApprovalActionId: string;
+  b2bApprovalRequestId: string;
+  b2bApprovalWorkflowStepId: string | null;
+  stepNumber: number;
+  approverId: string;
+  approverType: string;
+  action: string;
+  comment: string | null;
+  delegatedTo: string | null;
+  requestedInfo: unknown | null;
+  ipAddress: string | null;
+  userAgent: string | null;
+  metadata: unknown | null;
+  actionAt: Date | null;
+  createdAt: Date | null;
+};
+
+export type B2BApprovalRequest = {
+  b2bApprovalRequestId: string;
+  b2bApprovalWorkflowId: string;
+  b2bCompanyId: string | null;
+  requestType: string;
+  entityId: string;
+  entityType: string;
+  requesterId: string;
+  requesterType: string;
+  status: string | null;
+  currentStep: number | null;
+  totalSteps: number;
+  amount: string | null;
+  currency: string | null;
+  requestNotes: string | null;
+  approvalNotes: string | null;
+  rejectionReason: string | null;
+  approvalHistory: unknown[] | null;
+  finalApproverId: string | null;
+  submittedAt: Date | null;
+  approvedAt: Date | null;
+  rejectedAt: Date | null;
+  cancelledAt: Date | null;
+  expiresAt: Date | null;
+  metadata: unknown | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
+
+export type B2BApprovalWorkflow = {
+  b2bApprovalWorkflowId: string;
+  b2bCompanyId: string | null;
+  name: string;
+  description: string | null;
+  workflowType: string;
+  isActive: boolean | null;
+  isDefault: boolean | null;
+  priority: number | null;
+  conditions: Record<string, unknown> | null;
+  rules: unknown[] | null;
+  minAmount: string | null;
+  maxAmount: string | null;
+  currency: string | null;
+  requiresAllApprovers: boolean | null;
+  autoApproveAfterHours: number | null;
+  autoRejectAfterExpiry: boolean | null;
+  expiryHours: number | null;
+  notifyOnSubmit: boolean | null;
+  notifyOnApprove: boolean | null;
+  notifyOnReject: boolean | null;
+  notifyRequester: boolean | null;
+  metadata: unknown | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+  deletedAt: Date | null;
+};
+
+export type B2BApprovalWorkflowStep = {
+  b2bApprovalWorkflowStepId: string;
+  b2bApprovalWorkflowId: string;
+  stepNumber: number;
+  name: string;
+  description: string | null;
+  approverType: string;
+  approverId: string | null;
+  approverRole: string | null;
+  approverIds: unknown[] | null;
+  requiresAll: boolean | null;
+  minApprovers: number | null;
+  timeoutHours: number | null;
+  escalateTo: string | null;
+  escalateToUserId: string | null;
+  canDelegate: boolean | null;
+  canSkip: boolean | null;
+  conditions: unknown | null;
+  metadata: unknown | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
+
+export type B2BCompany = {
+  b2bCompanyId: string;
+  name: string;
+  legalName: string | null;
+  registrationNumber: string | null;
+  vatNumber: string | null;
+  taxId: string | null;
+  dunsNumber: string | null;
+  status: string | null;
+  companyType: string | null;
+  industry: string | null;
+  industryCode: string | null;
+  employeeCount: number | null;
+  employeeRange: string | null;
+  annualRevenue: string | null;
+  revenueRange: string | null;
+  creditLimit: string | null;
+  availableCredit: string | null;
+  usedCredit: string | null;
+  paymentTermsDays: number | null;
+  paymentTermsType: string | null;
+  currency: string | null;
+  primaryContactId: string | null;
+  billingContactId: string | null;
+  website: string | null;
+  phone: string | null;
+  fax: string | null;
+  email: string | null;
+  logoUrl: string | null;
+  description: string | null;
+  notes: string | null;
+  metadata: unknown | null;
+  customFields: unknown | null;
+  taxExempt: boolean | null;
+  taxExemptCertificate: string | null;
+  taxExemptExpiry: Date | null;
+  parentCompanyId: string | null;
+  accountManagerId: string | null;
+  tier: string | null;
+  discountRate: string | null;
+  requiresApproval: boolean | null;
+  orderMinimum: string | null;
+  orderMaximum: string | null;
+  approvedAt: Date | null;
+  approvedBy: string | null;
+  lastOrderAt: Date | null;
+  totalOrders: number | null;
+  lifetimeValue: string | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+  deletedAt: Date | null;
+};
+
+export type B2BCompanyAddress = {
+  b2bCompanyAddressId: string;
+  b2bCompanyId: string;
+  addressType: string | null;
+  label: string | null;
+  contactName: string | null;
+  contactPhone: string | null;
+  contactEmail: string | null;
+  company: string | null;
+  addressLine1: string;
+  addressLine2: string | null;
+  addressLine3: string | null;
+  city: string;
+  state: string | null;
+  postalCode: string | null;
+  countryCode: string;
+  country: string | null;
+  latitude: string | null;
+  longitude: string | null;
+  isDefault: boolean | null;
+  isDefaultBilling: boolean | null;
+  isDefaultShipping: boolean | null;
+  isVerified: boolean | null;
+  verifiedAt: Date | null;
+  verificationSource: string | null;
+  deliveryInstructions: string | null;
+  metadata: unknown | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+  deletedAt: Date | null;
+};
+
+export type B2BCompanyCreditLimit = {
+  b2bCompanyCreditLimitId: string;
+  b2bCompanyId: string;
+  creditLimit: string;
+  availableCredit: string;
+  usedCredit: string | null;
+  pendingCredit: string | null;
+  currency: string | null;
+  status: string | null;
+  paymentTermsDays: number | null;
+  interestRate: string | null;
+  latePaymentFee: string | null;
+  reviewDate: Date | null;
+  lastReviewDate: Date | null;
+  reviewedBy: string | null;
+  reviewNotes: string | null;
+  previousLimit: string | null;
+  limitChangeReason: string | null;
+  autoApproveOrders: boolean | null;
+  autoApproveLimit: string | null;
+  notifyOnLowCredit: boolean | null;
+  lowCreditThreshold: string | null;
+  notifyOnExceeded: boolean | null;
+  metadata: unknown | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
+
+export type B2BCompanyCreditTransaction = {
+  b2bCompanyCreditTransactionId: string;
+  b2bCompanyId: string;
+  b2bCompanyCreditLimitId: string;
+  transactionType: string;
+  amount: string;
+  currency: string | null;
+  balanceBefore: string;
+  balanceAfter: string;
+  orderId: string | null;
+  invoiceId: string | null;
+  paymentId: string | null;
+  reference: string | null;
+  description: string | null;
+  notes: string | null;
+  dueDate: Date | null;
+  isPaid: boolean | null;
+  paidAt: Date | null;
+  paymentMethod: string | null;
+  paymentReference: string | null;
+  createdBy: string | null;
+  metadata: unknown | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
+
+export type B2BCompanyUser = {
+  b2bCompanyUserId: string;
+  b2bCompanyId: string;
+  customerId: string | null;
+  email: string;
+  firstName: string | null;
+  lastName: string | null;
+  phone: string | null;
+  jobTitle: string | null;
+  department: string | null;
+  role: string | null;
+  permissions: unknown[] | null;
+  isActive: boolean | null;
+  isPrimaryContact: boolean | null;
+  isBillingContact: boolean | null;
+  canPlaceOrders: boolean | null;
+  canViewPrices: boolean | null;
+  canApproveOrders: boolean | null;
+  canManageUsers: boolean | null;
+  canManageCompany: boolean | null;
+  orderLimit: string | null;
+  monthlyLimit: string | null;
+  currentMonthSpend: string | null;
+  requiresApproval: boolean | null;
+  approverId: string | null;
+  inviteToken: string | null;
+  invitedAt: Date | null;
+  inviteExpiresAt: Date | null;
+  acceptedAt: Date | null;
+  lastLoginAt: Date | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+  deletedAt: Date | null;
+};
+
+export type B2BQuote = {
+  b2bQuoteId: string;
+  quoteNumber: string | null;
+  b2bCompanyId: string | null;
+  customerId: string | null;
+  b2bCompanyUserId: string | null;
+  salesRepId: string | null;
+  status: string | null;
+  currency: string | null;
+  subtotal: string | null;
+  discountTotal: string | null;
+  discountType: string | null;
+  discountValue: string | null;
+  discountReason: string | null;
+  taxTotal: string | null;
+  shippingTotal: string | null;
+  handlingTotal: string | null;
+  grandTotal: string | null;
+  margin: string | null;
+  marginPercent: string | null;
+  validUntil: Date | null;
+  validityDays: number | null;
+  billingAddressId: string | null;
+  shippingAddressId: string | null;
+  shippingMethod: string | null;
+  customerNotes: string | null;
+  internalNotes: string | null;
+  terms: string | null;
+  conditions: string | null;
+  paymentTerms: string | null;
+  paymentTermsDays: number | null;
+  convertedOrderId: string | null;
+  rejectionReason: string | null;
+  revisionNumber: number | null;
+  previousVersionId: string | null;
+  attachments: unknown[] | null;
+  metadata: unknown | null;
+  sentAt: Date | null;
+  viewedAt: Date | null;
+  acceptedAt: Date | null;
+  rejectedAt: Date | null;
+  convertedAt: Date | null;
+  expiresAt: Date | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+  deletedAt: Date | null;
+};
+
+export type B2BQuoteItem = {
+  b2bQuoteItemId: string;
+  b2bQuoteId: string;
+  productId: string | null;
+  productVariantId: string | null;
+  sku: string | null;
+  name: string;
+  description: string | null;
+  quantity: number;
+  unit: string | null;
+  listPrice: string | null;
+  unitPrice: string;
+  costPrice: string | null;
+  discountPercent: string | null;
+  discountAmount: string | null;
+  lineTotal: string;
+  taxRate: string | null;
+  taxAmount: string | null;
+  margin: string | null;
+  marginPercent: string | null;
+  isCustomItem: boolean | null;
+  isPriceOverride: boolean | null;
+  priceOverrideReason: string | null;
+  position: number | null;
+  notes: string | null;
+  requestedDeliveryDate: Date | null;
+  leadTimeDays: number | null;
+  customFields: unknown | null;
+  metadata: unknown | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
 };
 
 export type Basket = {
@@ -616,6 +1548,42 @@ export type BasketSavedItem = {
   addedFrom: string | null;
 };
 
+export type BrandTranslation = {
+  brandTranslationId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  productBrandId: string;
+  localeId: string;
+  name: string | null;
+  slug: string | null;
+  description: string | null;
+  story: string | null;
+  metaTitle: string | null;
+  metaDescription: string | null;
+  isAutoTranslated: boolean;
+  translationSource: string | null;
+  isApproved: boolean;
+};
+
+export type BundleItem = {
+  bundleItemId: string;
+  productBundleId: string;
+  productId: string;
+  productVariantId: string | null;
+  slotName: string | null;
+  quantity: number | null;
+  minQuantity: number | null;
+  maxQuantity: number | null;
+  isRequired: boolean | null;
+  isDefault: boolean | null;
+  priceAdjustment: string | null;
+  discountPercent: string | null;
+  sortOrder: number | null;
+  metadata: unknown | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
+
 export type BuyXGetYDiscount = {
   buyXGetYDiscountId: string;
   createdAt: Date;
@@ -685,28 +1653,21 @@ export type CategoryPromotionProduct = {
   displayOrder: number;
 };
 
-export type ChannelProducts = {
-  channelProductId: string;
+export type CategoryTranslation = {
+  categoryTranslationId: string;
   createdAt: Date;
   updatedAt: Date;
-  channelId: string;
-  productId: string;
-  isActive: boolean;
-  overrideSku: string | null;
-  overridePrice: string | null;
-  sortOrder: number | null;
-};
-
-export type Channels = {
-  channelId: string;
-  createdAt: Date;
-  updatedAt: Date;
+  productCategoryId: string;
+  localeId: string;
   name: string;
-  code: string;
-  type: string;
+  slug: string | null;
   description: string | null;
-  isActive: boolean;
-  settings: unknown | null;
+  metaTitle: string | null;
+  metaDescription: string | null;
+  metaKeywords: string | null;
+  isAutoTranslated: boolean;
+  translationSource: string | null;
+  isApproved: boolean;
 };
 
 export type CheckoutSession = {
@@ -735,6 +1696,22 @@ export type CheckoutSession = {
   createdAt: Date;
   updatedAt: Date;
   lastActivityAt: Date;
+};
+
+export type CollectionTranslation = {
+  collectionTranslationId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  productCollectionId: string;
+  localeId: string;
+  name: string;
+  slug: string | null;
+  description: string | null;
+  metaTitle: string | null;
+  metaDescription: string | null;
+  isAutoTranslated: boolean;
+  translationSource: string | null;
+  isApproved: boolean;
 };
 
 export type ContentBlock = {
@@ -915,6 +1892,29 @@ export type ContentPage = {
   createdBy: string | null;
   updatedBy: string | null;
   publishedBy: string | null;
+};
+
+export type ContentPageTranslation = {
+  contentPageTranslationId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  contentPageId: string;
+  localeId: string;
+  title: string;
+  slug: string | null;
+  summary: string | null;
+  content: unknown | null;
+  metaTitle: string | null;
+  metaDescription: string | null;
+  metaKeywords: string | null;
+  openGraphTitle: string | null;
+  openGraphDescription: string | null;
+  featuredImage: string | null;
+  isAutoTranslated: boolean;
+  translationSource: string | null;
+  isApproved: boolean;
+  isPublished: boolean;
+  publishedAt: Date | null;
 };
 
 export type ContentPageVersion = {
@@ -1226,36 +2226,6 @@ export type CustomerAddress = {
   name: string | null;
 };
 
-export type CustomerAnalytics = {
-  customerAnalyticsId: string;
-  lastUpdatedAt: Date;
-  createdAt: Date;
-  customerId: string;
-  totalOrders: number;
-  totalSpent: string;
-  averageOrderValue: string | null;
-  firstOrderDate: Date | null;
-  lastOrderDate: Date | null;
-  lastVisitDate: Date | null;
-  visitCount: number;
-  cartCount: number;
-  abandonedCarts: number;
-  productViews: number;
-  wishlistItemCount: number;
-  reviewCount: number;
-  averageReviewRating: string | null;
-  lifetimeValue: string | null;
-  riskScore: string | null;
-  engagementScore: string | null;
-  churnRisk: string | null;
-  preferredCategories: unknown | null;
-  preferredProducts: unknown | null;
-  preferredPaymentMethods: unknown | null;
-  preferredShippingMethods: unknown | null;
-  segmentData: unknown | null;
-  deviceUsage: unknown | null;
-};
-
 export type CustomerConsent = {
   customerConsentId: string;
   createdAt: Date;
@@ -1271,6 +2241,9 @@ export type CustomerConsent = {
   expiresAt: Date | null;
   withdrawnAt: Date | null;
   additionalData: unknown | null;
+  legalBasis: string | null;
+  consentText: string | null;
+  country: string | null;
 };
 
 export type CustomerContact = {
@@ -1460,6 +2433,26 @@ export type CustomerPriceList = {
   customerGroupId: string | null;
 };
 
+export type CustomerProductView = {
+  customerProductViewId: string;
+  customerId: string | null;
+  sessionId: string | null;
+  productId: string;
+  productVariantId: string | null;
+  source: string | null;
+  referrer: string | null;
+  viewDurationSeconds: number | null;
+  scrollDepthPercent: number | null;
+  addedToCart: boolean | null;
+  purchased: boolean | null;
+  deviceType: string | null;
+  country: string | null;
+  ipAddress: string | null;
+  userAgent: string | null;
+  metadata: unknown | null;
+  viewedAt: Date | null;
+};
+
 export type CustomerSegmentMembership = {
   customerSegmentMembershipId: string;
   addedAt: Date;
@@ -1484,6 +2477,52 @@ export type CustomerSegments = {
   lastRun: Date | null;
   memberCount: number | null;
   priority: number | null;
+};
+
+export type CustomerSubscription = {
+  customerSubscriptionId: string;
+  subscriptionNumber: string | null;
+  customerId: string;
+  subscriptionPlanId: string;
+  subscriptionProductId: string | null;
+  productVariantId: string | null;
+  status: string | null;
+  quantity: number | null;
+  unitPrice: string;
+  discountAmount: string | null;
+  taxAmount: string | null;
+  totalPrice: string;
+  currency: string | null;
+  billingInterval: string;
+  billingIntervalCount: number | null;
+  trialStartAt: Date | null;
+  trialEndAt: Date | null;
+  currentPeriodStart: Date | null;
+  currentPeriodEnd: Date | null;
+  nextBillingAt: Date | null;
+  cancelledAt: Date | null;
+  cancellationReason: string | null;
+  cancelledBy: string | null;
+  cancelAtPeriodEnd: boolean | null;
+  pausedAt: Date | null;
+  resumeAt: Date | null;
+  pauseReason: string | null;
+  pauseCount: number | null;
+  skipCount: number | null;
+  billingCycleCount: number | null;
+  contractCyclesRemaining: number | null;
+  shippingAddressId: string | null;
+  billingAddressId: string | null;
+  paymentMethodId: string | null;
+  externalSubscriptionId: string | null;
+  lifetimeValue: string | null;
+  failedPaymentCount: number | null;
+  lastPaymentAt: Date | null;
+  lastPaymentFailedAt: Date | null;
+  customizations: unknown | null;
+  metadata: unknown | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
 };
 
 export type CustomerTaxExemption = {
@@ -1541,11 +2580,69 @@ export type CustomerWishlistItem = {
   additionalData: unknown | null;
 };
 
+export type DistributionChannel = {
+  distributionChannelId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  name: string;
+  code: string;
+  type: string;
+  description: string | null;
+  isActive: boolean;
+  settings: unknown | null;
+};
+
+export type DistributionChannelProduct = {
+  distributionChannelProductId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  distributionChannelId: string;
+  productId: string;
+  isActive: boolean;
+  overrideSku: string | null;
+  overridePrice: string | null;
+  sortOrder: number | null;
+};
+
+export type DistributionFulfillmentPartner = {
+  distributionFulfillmentPartnerId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt: Date | null;
+  name: string;
+  code: string;
+  description: string | null;
+  isActive: boolean;
+  contactName: string | null;
+  contactEmail: string | null;
+  contactPhone: string | null;
+  apiKey: string | null;
+  apiSecret: string | null;
+  apiEndpoint: string | null;
+  apiCredentials: unknown | null;
+  supportedCarriers: string[] | null;
+  supportedRegions: string[] | null;
+  supportedServices: string[] | null;
+  supportsReturns: boolean;
+  supportsInternational: boolean;
+  supportsTracking: boolean;
+  averageProcessingTimeHours: number | null;
+  fulfillmentRate: string | null;
+  onTimeDeliveryRate: string | null;
+  baseFee: string | null;
+  perOrderFee: string | null;
+  perItemFee: string | null;
+  currency: string;
+  settings: unknown | null;
+  metadata: unknown | null;
+  createdBy: string | null;
+};
+
 export type DistributionInventoryMovement = {
   distributionInventoryMovementId: string;
   createdAt: Date;
   updatedAt: Date;
-  warehouseId: string;
+  distributionWarehouseId: string;
   productId: string;
   productVariantId: string | null;
   fromLocationId: string | null;
@@ -1555,19 +2652,601 @@ export type DistributionInventoryMovement = {
   reference: string | null;
 };
 
-export type DistributionShippingMethod = {
-  distributionShippingMethodId: string;
+export type DistributionOrderFulfillment = {
+  distributionOrderFulfillmentId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt: Date | null;
+  orderId: string;
+  orderNumber: string | null;
+  status: string;
+  statusReason: string | null;
+  distributionWarehouseId: string | null;
+  distributionRuleId: string | null;
+  distributionShippingMethodId: string | null;
+  distributionShippingCarrierId: string | null;
+  distributionFulfillmentPartnerId: string | null;
+  trackingNumber: string | null;
+  trackingUrl: string | null;
+  carrierCode: string | null;
+  serviceCode: string | null;
+  shipToName: string | null;
+  shipToCompany: string | null;
+  shipToAddressLine1: string | null;
+  shipToAddressLine2: string | null;
+  shipToCity: string | null;
+  shipToState: string | null;
+  shipToPostalCode: string | null;
+  shipToCountry: string | null;
+  shipToPhone: string | null;
+  shipToEmail: string | null;
+  packageWeight: string | null;
+  packageWeightUnit: string | null;
+  packageLength: string | null;
+  packageWidth: string | null;
+  packageHeight: string | null;
+  packageDimensionUnit: string | null;
+  packageCount: number;
+  shippingCost: string | null;
+  insuranceCost: string | null;
+  handlingCost: string | null;
+  totalCost: string | null;
+  currency: string;
+  pickedAt: Date | null;
+  packedAt: Date | null;
+  shippedAt: Date | null;
+  deliveredAt: Date | null;
+  estimatedDeliveryAt: Date | null;
+  actualDeliveryAt: Date | null;
+  internalNotes: string | null;
+  customerNotes: string | null;
+  shippingLabel: unknown | null;
+  trackingEvents: unknown | null;
+  metadata: unknown | null;
+  pickedBy: string | null;
+  packedBy: string | null;
+  shippedBy: string | null;
+  createdBy: string | null;
+};
+
+export type DistributionPickupOrder = {
+  distributionPickupOrderId: string;
+  orderId: string;
+  storeLocationId: string;
+  customerId: string;
+  pickupNumber: string | null;
+  status: string | null;
+  scheduledPickupAt: Date | null;
+  pickupWindowStart: Date | null;
+  pickupWindowEnd: Date | null;
+  readyAt: Date | null;
+  notifiedAt: Date | null;
+  pickedUpAt: Date | null;
+  expiresAt: Date | null;
+  pickedUpBy: string | null;
+  pickupCode: string | null;
+  lockerNumber: string | null;
+  lockerCode: string | null;
+  alternatePickupName: string | null;
+  alternatePickupPhone: string | null;
+  alternatePickupEmail: string | null;
+  customerNotes: string | null;
+  storeNotes: string | null;
+  remindersSent: number | null;
+  lastReminderAt: Date | null;
+  metadata: unknown | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
+
+export type DistributionPreOrder = {
+  distributionPreOrderId: string;
+  productId: string;
+  productVariantId: string | null;
+  status: string | null;
+  preOrderType: string | null;
+  releaseDate: Date | null;
+  estimatedShipDate: Date | null;
+  estimatedShipText: string | null;
+  requiresDeposit: boolean | null;
+  depositAmount: string | null;
+  depositPercent: string | null;
+  isDepositRefundable: boolean | null;
+  maxQuantity: number | null;
+  reservedQuantity: number | null;
+  orderedQuantity: number | null;
+  allowOversell: boolean | null;
+  oversellLimit: number | null;
+  preOrderPrice: string | null;
+  regularPrice: string | null;
+  discountPercent: string | null;
+  currency: string | null;
+  chargeOnRelease: boolean | null;
+  notifyOnRelease: boolean | null;
+  preOrderMessage: string | null;
+  termsAndConditions: string | null;
+  metadata: unknown | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
+
+export type DistributionPreOrderReservation = {
+  distributionPreOrderReservationId: string;
+  distributionPreOrderId: string;
+  customerId: string;
+  orderId: string | null;
+  reservationNumber: string | null;
+  status: string | null;
+  quantity: number | null;
+  unitPrice: string;
+  totalPrice: string;
+  depositPaid: string | null;
+  balanceDue: string | null;
+  currency: string | null;
+  depositPaidAt: Date | null;
+  balancePaidAt: Date | null;
+  paymentIntentId: string | null;
+  estimatedFulfillmentAt: Date | null;
+  fulfilledAt: Date | null;
+  cancelledAt: Date | null;
+  cancellationReason: string | null;
+  notificationSent: boolean | null;
+  notificationSentAt: Date | null;
+  metadata: unknown | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
+
+export type DistributionRule = {
+  distributionRuleId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt: Date | null;
+  name: string;
+  description: string | null;
+  priority: number;
+  isActive: boolean;
+  isDefault: boolean;
+  distributionWarehouseId: string | null;
+  distributionShippingZoneId: string | null;
+  distributionShippingMethodId: string | null;
+  distributionShippingCarrierId: string | null;
+  distributionFulfillmentPartnerId: string | null;
+  applicableCountries: string[] | null;
+  applicableRegions: string[] | null;
+  applicablePostalCodes: string[] | null;
+  applicableProductCategories: string[] | null;
+  applicableProductTags: string[] | null;
+  excludedProductIds: string[] | null;
+  minOrderValue: string | null;
+  maxOrderValue: string | null;
+  minOrderItems: number | null;
+  maxOrderItems: number | null;
+  minOrderWeight: string | null;
+  maxOrderWeight: string | null;
+  applicableCustomerGroups: string[] | null;
+  applicableMembershipTiers: string[] | null;
+  validFrom: Date | null;
+  validTo: Date | null;
+  applicableDaysOfWeek: number[] | null;
+  settings: unknown | null;
+  metadata: unknown | null;
+  createdBy: string | null;
+};
+
+export type DistributionShippingCarrier = {
+  distributionShippingCarrierId: string;
   createdAt: Date;
   updatedAt: Date;
   name: string;
   code: string;
   description: string | null;
-  carrier: string | null;
-  serviceCode: string | null;
-  shippingZoneId: string | null;
-  baseRate: string;
-  rateCalculation: unknown | null;
+  websiteUrl: string | null;
+  trackingUrl: string | null;
   isActive: boolean;
+  accountNumber: string | null;
+  apiCredentials: unknown | null;
+  supportedRegions: unknown | null;
+  supportedServices: unknown | null;
+  requiresContract: boolean;
+  hasApiIntegration: boolean;
+  customFields: unknown | null;
+  createdBy: string | null;
+};
+
+export type DistributionShippingMethod = {
+  distributionShippingMethodId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  distributionShippingCarrierId: string | null;
+  name: string;
+  code: string;
+  description: string | null;
+  isActive: boolean;
+  isDefault: boolean;
+  serviceCode: string | null;
+  domesticInternational: string;
+  estimatedDeliveryDays: unknown | null;
+  handlingDays: number | null;
+  priority: number | null;
+  displayOnFrontend: boolean;
+  allowFreeShipping: boolean;
+  minWeight: string | null;
+  maxWeight: string | null;
+  minOrderValue: string | null;
+  maxOrderValue: string | null;
+  dimensionRestrictions: unknown | null;
+  shippingClass: string | null;
+  customFields: unknown | null;
+  createdBy: string | null;
+};
+
+export type DistributionShippingRate = {
+  distributionShippingRateId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  distributionShippingZoneId: string;
+  distributionShippingMethodId: string;
+  name: string | null;
+  description: string | null;
+  isActive: boolean;
+  rateType: string;
+  baseRate: string;
+  perItemRate: string | null;
+  freeThreshold: string | null;
+  rateMatrix: unknown | null;
+  minRate: string | null;
+  maxRate: string | null;
+  currency: string;
+  taxable: boolean;
+  priority: number | null;
+  validFrom: Date | null;
+  validTo: Date | null;
+  conditions: unknown | null;
+  createdBy: string | null;
+};
+
+export type DistributionShippingZone = {
+  distributionShippingZoneId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  name: string;
+  description: string | null;
+  isActive: boolean;
+  priority: number | null;
+  locationType: string;
+  locations: unknown;
+  excludedLocations: unknown | null;
+  createdBy: string | null;
+};
+
+export type DistributionWarehouse = {
+  distributionWarehouseId: string;
+  name: string;
+  code: string;
+  description: string | null;
+  isActive: boolean;
+  isDefault: boolean;
+  isFulfillmentCenter: boolean;
+  isReturnCenter: boolean;
+  isVirtual: boolean;
+  merchantId: string | null;
+  addressLine1: string;
+  addressLine2: string | null;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+  latitude: string | null;
+  longitude: string | null;
+  email: string | null;
+  phone: string | null;
+  contactName: string | null;
+  timezone: string;
+  cutoffTime: string | null;
+  processingTime: number | null;
+  operatingHours: unknown | null;
+  capabilities: unknown | null;
+  shippingMethods: string[] | null;
+  createdAt: Date;
+  updatedAt: Date;
+  createdBy: string | null;
+};
+
+export type DistributionWarehouseBin = {
+  distributionWarehouseBinId: string;
+  distributionWarehouseId: string;
+  distributionWarehouseZoneId: string | null;
+  locationCode: string;
+  isActive: boolean;
+  binType: string;
+  height: string | null;
+  width: string | null;
+  depth: string | null;
+  maxVolume: string | null;
+  maxWeight: string | null;
+  isPickable: boolean;
+  isReceivable: boolean;
+  isMixed: boolean;
+  priority: number | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type DistributionWarehouseZone = {
+  distributionWarehouseZoneId: string;
+  distributionWarehouseId: string;
+  name: string;
+  code: string;
+  description: string | null;
+  isActive: boolean;
+  zoneType: string;
+  capabilities: unknown | null;
+  priority: number | null;
+  capacity: string | null;
+  capacityUnit: string | null;
+  temperature: string | null;
+  humidity: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type DunningAttempt = {
+  dunningAttemptId: string;
+  customerSubscriptionId: string;
+  subscriptionOrderId: string | null;
+  attemptNumber: number;
+  status: string | null;
+  amount: string;
+  currency: string | null;
+  scheduledAt: Date;
+  attemptedAt: Date | null;
+  paymentMethodId: string | null;
+  paymentIntentId: string | null;
+  failureCode: string | null;
+  failureMessage: string | null;
+  emailSent: boolean | null;
+  emailSentAt: Date | null;
+  emailType: string | null;
+  smsSent: boolean | null;
+  smsSentAt: Date | null;
+  action: string | null;
+  actionTakenBy: string | null;
+  actionTakenAt: Date | null;
+  metadata: unknown | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
+
+export type EmailCampaign = {
+  emailCampaignId: string;
+  merchantId: string | null;
+  name: string;
+  subject: string;
+  preheader: string | null;
+  fromName: string | null;
+  fromEmail: string | null;
+  replyTo: string | null;
+  bodyHtml: string | null;
+  bodyText: string | null;
+  status: string | null;
+  campaignType: string | null;
+  templateId: string | null;
+  segmentIds: unknown[] | null;
+  tags: unknown[] | null;
+  scheduledAt: Date | null;
+  sentAt: Date | null;
+  totalRecipients: number | null;
+  sentCount: number | null;
+  deliveredCount: number | null;
+  openCount: number | null;
+  uniqueOpenCount: number | null;
+  clickCount: number | null;
+  uniqueClickCount: number | null;
+  bounceCount: number | null;
+  softBounceCount: number | null;
+  hardBounceCount: number | null;
+  unsubscribeCount: number | null;
+  complaintCount: number | null;
+  revenue: string | null;
+  conversionCount: number | null;
+  openRate: string | null;
+  clickRate: string | null;
+  abTestConfig: unknown | null;
+  winningVariant: string | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+  deletedAt: Date | null;
+};
+
+export type EmailCampaignLink = {
+  emailCampaignLinkId: string;
+  emailCampaignId: string;
+  originalUrl: string;
+  trackingUrl: string | null;
+  linkText: string | null;
+  position: number | null;
+  clickCount: number | null;
+  uniqueClickCount: number | null;
+  firstClickedAt: Date | null;
+  lastClickedAt: Date | null;
+  createdAt: Date | null;
+};
+
+export type EmailCampaignRecipient = {
+  emailCampaignRecipientId: string;
+  emailCampaignId: string;
+  customerId: string | null;
+  email: string;
+  firstName: string | null;
+  lastName: string | null;
+  status: string | null;
+  variant: string | null;
+  sentAt: Date | null;
+  deliveredAt: Date | null;
+  firstOpenedAt: Date | null;
+  lastOpenedAt: Date | null;
+  openCount: number | null;
+  firstClickedAt: Date | null;
+  lastClickedAt: Date | null;
+  clickCount: number | null;
+  bouncedAt: Date | null;
+  bounceType: string | null;
+  bounceReason: string | null;
+  unsubscribedAt: Date | null;
+  complainedAt: Date | null;
+  failureReason: string | null;
+  messageId: string | null;
+  ipAddress: string | null;
+  userAgent: string | null;
+  deviceType: string | null;
+  country: string | null;
+  city: string | null;
+  metadata: unknown | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
+
+export type EmailTemplate = {
+  emailTemplateId: string;
+  merchantId: string | null;
+  name: string;
+  slug: string | null;
+  category: string | null;
+  description: string | null;
+  subject: string | null;
+  preheader: string | null;
+  bodyHtml: string | null;
+  bodyText: string | null;
+  variables: unknown[] | null;
+  thumbnailUrl: string | null;
+  isDefault: boolean | null;
+  isActive: boolean | null;
+  usageCount: number | null;
+  lastUsedAt: Date | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+  deletedAt: Date | null;
+};
+
+export type FaqArticle = {
+  faqArticleId: string;
+  faqCategoryId: string | null;
+  title: string;
+  slug: string | null;
+  content: string;
+  contentHtml: string | null;
+  excerpt: string | null;
+  keywords: string[] | null;
+  relatedArticleIds: string[] | null;
+  views: number | null;
+  uniqueViews: number | null;
+  helpfulYes: number | null;
+  helpfulNo: number | null;
+  helpfulScore: string | null;
+  sortOrder: number | null;
+  isPublished: boolean | null;
+  isFeatured: boolean | null;
+  isPinned: boolean | null;
+  publishedAt: Date | null;
+  authorId: string | null;
+  authorName: string | null;
+  lastEditedBy: string | null;
+  metadata: unknown | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
+
+export type FaqCategory = {
+  faqCategoryId: string;
+  parentCategoryId: string | null;
+  name: string;
+  slug: string | null;
+  description: string | null;
+  icon: string | null;
+  color: string | null;
+  imageUrl: string | null;
+  sortOrder: number | null;
+  articleCount: number | null;
+  isActive: boolean | null;
+  isFeatured: boolean | null;
+  metadata: unknown | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
+
+export type FraudBlacklist = {
+  fraudBlacklistId: string;
+  type: string;
+  value: string;
+  reason: string | null;
+  source: string | null;
+  relatedOrderId: string | null;
+  relatedCustomerId: string | null;
+  isActive: boolean | null;
+  expiresAt: Date | null;
+  addedBy: string | null;
+  metadata: unknown | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
+
+export type FraudCheck = {
+  fraudCheckId: string;
+  orderId: string | null;
+  customerId: string | null;
+  checkType: string;
+  status: string | null;
+  riskScore: number | null;
+  riskLevel: string | null;
+  triggeredRules: unknown | null;
+  signals: unknown | null;
+  deviceFingerprint: unknown | null;
+  ipAddress: string | null;
+  ipCountry: string | null;
+  ipCity: string | null;
+  ipIsProxy: boolean | null;
+  ipIsVpn: boolean | null;
+  ipIsTor: boolean | null;
+  billingCountry: string | null;
+  shippingCountry: string | null;
+  addressMismatch: boolean | null;
+  highRiskCountry: boolean | null;
+  previousOrders: number | null;
+  previousChargebacks: number | null;
+  orderAmount: string | null;
+  currency: string | null;
+  isFirstOrder: boolean | null;
+  isGuestCheckout: boolean | null;
+  paymentMethod: string | null;
+  cardBin: string | null;
+  cardCountry: string | null;
+  cardBinMismatch: boolean | null;
+  reviewedBy: string | null;
+  reviewedAt: Date | null;
+  reviewDecision: string | null;
+  reviewNotes: string | null;
+  metadata: unknown | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
+
+export type FraudRule = {
+  fraudRuleId: string;
+  name: string;
+  description: string | null;
+  ruleType: string;
+  entityType: string | null;
+  conditions: unknown;
+  action: string | null;
+  riskScore: number | null;
+  priority: number | null;
+  isActive: boolean | null;
+  triggerCount: number | null;
+  lastTriggeredAt: Date | null;
+  metadata: unknown | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
 };
 
 export type FulfillmentStatusHistory = {
@@ -1579,6 +3258,108 @@ export type FulfillmentStatusHistory = {
   previousStatus: string | null;
   notes: string | null;
   location: string | null;
+};
+
+export type GdprCookieConsent = {
+  gdprCookieConsentId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  customerId: string | null;
+  sessionId: string | null;
+  browserFingerprint: string | null;
+  necessary: boolean;
+  functional: boolean;
+  analytics: boolean;
+  marketing: boolean;
+  thirdParty: boolean;
+  ipAddress: string | null;
+  userAgent: string | null;
+  country: string | null;
+  region: string | null;
+  consentBannerVersion: string | null;
+  consentMethod: string | null;
+  consentedAt: Date;
+  expiresAt: Date | null;
+  linkedAt: Date | null;
+};
+
+export type GdprDataRequest = {
+  gdprDataRequestId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  customerId: string;
+  requestType: string;
+  status: string;
+  reason: string | null;
+  requestedData: unknown | null;
+  downloadUrl: string | null;
+  downloadExpiresAt: Date | null;
+  downloadFormat: string | null;
+  processedAt: Date | null;
+  processedBy: string | null;
+  adminNotes: string | null;
+  rejectionReason: string | null;
+  identityVerified: boolean | null;
+  verificationMethod: string | null;
+  verifiedAt: Date | null;
+  deadlineAt: Date | null;
+  extensionRequested: boolean | null;
+  extensionReason: string | null;
+  extendedDeadlineAt: Date | null;
+  ipAddress: string | null;
+  userAgent: string | null;
+};
+
+export type GiftCard = {
+  giftCardId: string;
+  code: string;
+  type: string | null;
+  initialBalance: string;
+  currentBalance: string;
+  currency: string | null;
+  status: string | null;
+  purchasedBy: string | null;
+  purchaseOrderId: string | null;
+  recipientEmail: string | null;
+  recipientName: string | null;
+  personalMessage: string | null;
+  deliveryDate: Date | null;
+  isDelivered: boolean | null;
+  deliveredAt: Date | null;
+  deliveryMethod: string | null;
+  assignedTo: string | null;
+  assignedAt: Date | null;
+  activatedAt: Date | null;
+  expiresAt: Date | null;
+  lastUsedAt: Date | null;
+  usageCount: number | null;
+  totalRedeemed: string | null;
+  isReloadable: boolean | null;
+  minReloadAmount: string | null;
+  maxReloadAmount: string | null;
+  maxBalance: string | null;
+  restrictions: unknown | null;
+  metadata: unknown | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
+
+export type GiftCardTransaction = {
+  giftCardTransactionId: string;
+  giftCardId: string;
+  type: string;
+  amount: string;
+  balanceBefore: string;
+  balanceAfter: string;
+  currency: string | null;
+  orderId: string | null;
+  customerId: string | null;
+  performedBy: string | null;
+  performedByType: string | null;
+  notes: string | null;
+  referenceNumber: string | null;
+  metadata: unknown | null;
+  createdAt: Date | null;
 };
 
 export type IdentityCustomerSession = {
@@ -1638,7 +3419,7 @@ export type InventoryCount = {
   inventoryCountId: string;
   createdAt: Date;
   updatedAt: Date;
-  warehouseId: string;
+  distributionWarehouseId: string;
   referenceNumber: string | null;
   countType: string;
   status: string;
@@ -1653,7 +3434,7 @@ export type InventoryCountItem = {
   createdAt: Date;
   updatedAt: Date;
   inventoryCountId: string;
-  binId: string | null;
+  distributionWarehouseBinId: string | null;
   productId: string;
   productVariantId: string | null;
   sku: string;
@@ -1677,7 +3458,7 @@ export type InventoryLevel = {
   updatedAt: Date;
   productId: string;
   productVariantId: string | null;
-  warehouseId: string;
+  distributionWarehouseId: string;
   isTracked: boolean;
   isBackorderable: boolean;
   isPurchasableOutOfStock: boolean;
@@ -1705,8 +3486,8 @@ export type InventoryLocation = {
   inventoryLocationId: string;
   createdAt: Date;
   updatedAt: Date;
-  warehouseId: string;
-  warehouseBinId: string | null;
+  distributionWarehouseId: string;
+  distributionWarehouseBinId: string | null;
   productId: string;
   productVariantId: string | null;
   sku: string;
@@ -1729,8 +3510,8 @@ export type InventoryLot = {
   updatedAt: Date;
   productId: string;
   productVariantId: string | null;
-  warehouseId: string;
-  warehouseBinId: string | null;
+  distributionWarehouseId: string;
+  distributionWarehouseBinId: string | null;
   lotNumber: string;
   serialNumbers: string[] | null;
   quantity: number;
@@ -1750,8 +3531,8 @@ export type InventoryTransaction = {
   createdAt: Date;
   updatedAt: Date;
   typeId: string;
-  warehouseId: string;
-  binId: string | null;
+  distributionWarehouseId: string;
+  distributionWarehouseBinId: string | null;
   productId: string;
   productVariantId: string | null;
   sku: string;
@@ -1786,10 +3567,10 @@ export type InventoryTransfer = {
   createdAt: Date;
   updatedAt: Date;
   referenceNumber: string | null;
-  sourceWarehouseId: string;
-  sourceBinId: string | null;
-  destinationWarehouseId: string;
-  destinationBinId: string | null;
+  sourceDistributionWarehouseId: string;
+  sourceDistributionWarehouseBinId: string | null;
+  destinationDistributionWarehouseId: string;
+  destinationDistributionWarehouseBinId: string | null;
   status: string;
   transferType: string;
   priority: string;
@@ -1836,6 +3617,7 @@ export type Locale = {
   updatedAt: Date;
   code: string;
   name: string;
+  nativeName: string | null;
   language: string;
   countryCode: string | null;
   isActive: boolean;
@@ -1845,6 +3627,9 @@ export type Locale = {
   timeFormat: string;
   timeZone: string;
   defaultCurrencyId: string | null;
+  numberFormat: Record<string, unknown> | null;
+  fallbackLocaleId: string | null;
+  flagIcon: string | null;
 };
 
 export type LowStockNotification = {
@@ -1853,7 +3638,7 @@ export type LowStockNotification = {
   updatedAt: Date;
   productId: string;
   productVariantId: string | null;
-  warehouseId: string;
+  distributionWarehouseId: string;
   threshold: number;
   currentQuantity: number;
   status: string;
@@ -2185,6 +3970,18 @@ export type Merchant = {
   employeeCount: number | null;
   taxIdNumber: string | null;
   legalName: string | null;
+  vatNumber: string | null;
+  vatVerified: boolean | null;
+  vatVerifiedAt: Date | null;
+  vatVerificationSource: string | null;
+  ossRegistered: boolean | null;
+  ossRegistrationCountry: string | null;
+  iossRegistered: boolean | null;
+  iossNumber: string | null;
+  eoriNumber: string | null;
+  ukVatNumber: string | null;
+  reverseChargeEligible: boolean | null;
+  defaultTaxCountry: string | null;
   socialLinks: unknown | null;
   metaTitle: string | null;
   metaDescription: string | null;
@@ -2722,6 +4519,28 @@ export type NotificationTemplate = {
   categoryCode: string | null;
   previewData: unknown | null;
   createdBy: string | null;
+};
+
+export type NotificationTemplateTranslation = {
+  notificationTemplateTranslationId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  notificationTemplateId: string;
+  localeId: string;
+  subject: string | null;
+  preheader: string | null;
+  htmlTemplate: string | null;
+  textTemplate: string | null;
+  smsTemplate: string | null;
+  pushTitle: string | null;
+  pushBody: string | null;
+  inAppTitle: string | null;
+  inAppBody: string | null;
+  isAutoTranslated: boolean;
+  translationSource: string | null;
+  isApproved: boolean;
+  isActive: boolean;
+  previewData: unknown | null;
 };
 
 export type NotificationUnsubscribe = {
@@ -3400,6 +5219,36 @@ export type PayoutSettings = {
   providerSettings: unknown | null;
 };
 
+export type PriceAlert = {
+  priceAlertId: string;
+  customerId: string | null;
+  email: string | null;
+  phone: string | null;
+  productId: string;
+  productVariantId: string | null;
+  productName: string | null;
+  variantName: string | null;
+  sku: string | null;
+  status: string | null;
+  alertType: string | null;
+  targetPrice: string | null;
+  percentageDrop: string | null;
+  originalPrice: string | null;
+  currentPrice: string | null;
+  currency: string | null;
+  notificationChannel: string | null;
+  notifiedAt: Date | null;
+  notifiedPrice: string | null;
+  notificationCount: number | null;
+  lastNotifiedAt: Date | null;
+  purchasedAt: Date | null;
+  purchaseOrderId: string | null;
+  expiresAt: Date | null;
+  metadata: unknown | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
+
 export type PriceList = {
   priceListId: string;
   createdAt: Date;
@@ -3634,6 +5483,39 @@ export type ProductBrand = {
   createdAt: Date;
   updatedAt: Date;
   deletedAt: Date | null;
+};
+
+export type ProductBundle = {
+  productBundleId: string;
+  productId: string;
+  name: string;
+  slug: string | null;
+  description: string | null;
+  bundleType: string | null;
+  pricingType: string | null;
+  fixedPrice: string | null;
+  discountPercent: string | null;
+  discountAmount: string | null;
+  minPrice: string | null;
+  maxPrice: string | null;
+  currency: string | null;
+  minItems: number | null;
+  maxItems: number | null;
+  minQuantity: number | null;
+  maxQuantity: number | null;
+  requireAllItems: boolean | null;
+  allowDuplicates: boolean | null;
+  showSavings: boolean | null;
+  savingsAmount: string | null;
+  savingsPercent: string | null;
+  imageUrl: string | null;
+  sortOrder: number | null;
+  isActive: boolean | null;
+  startDate: Date | null;
+  endDate: Date | null;
+  metadata: unknown | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
 };
 
 export type ProductCategory = {
@@ -3902,6 +5784,26 @@ export type ProductQaVote = {
   userAgent: string | null;
 };
 
+export type ProductRecommendation = {
+  productRecommendationId: string;
+  productId: string;
+  recommendedProductId: string;
+  recommendationType: string;
+  score: string | null;
+  rank: number | null;
+  purchaseCount: number | null;
+  viewCount: number | null;
+  clickCount: number | null;
+  conversionRate: string | null;
+  isActive: boolean | null;
+  isManual: boolean | null;
+  computedAt: Date | null;
+  expiresAt: Date | null;
+  metadata: unknown | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
+
 export type ProductRelated = {
   productRelatedId: string;
   createdAt: Date;
@@ -4070,6 +5972,33 @@ export type ProductToTag = {
   productTagId: string;
 };
 
+export type ProductTranslation = {
+  productTranslationId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  productId: string;
+  localeId: string;
+  name: string;
+  slug: string | null;
+  shortDescription: string | null;
+  description: string | null;
+  metaTitle: string | null;
+  metaDescription: string | null;
+  metaKeywords: string | null;
+  returnPolicy: string | null;
+  warranty: string | null;
+  careInstructions: string | null;
+  ingredients: string | null;
+  usageInstructions: string | null;
+  customFields: unknown | null;
+  isAutoTranslated: boolean;
+  translationSource: string | null;
+  translationQuality: string | null;
+  reviewedAt: Date | null;
+  reviewedBy: string | null;
+  isApproved: boolean;
+};
+
 export type ProductType = {
   productTypeId: string;
   createdAt: Date;
@@ -4172,7 +6101,7 @@ export type PurchaseOrder = {
   updatedAt: Date;
   poNumber: string;
   supplierId: string;
-  warehouseId: string;
+  distributionWarehouseId: string;
   status: string;
   orderType: string;
   priority: string;
@@ -4236,7 +6165,7 @@ export type ReceivingItem = {
   expectedQuantity: number | null;
   receivedQuantity: number;
   rejectedQuantity: number;
-  warehouseBinId: string | null;
+  distributionWarehouseBinId: string | null;
   lotNumber: string | null;
   serialNumbers: string[] | null;
   expiryDate: Date | null;
@@ -4254,7 +6183,7 @@ export type ReceivingRecord = {
   updatedAt: Date;
   receiptNumber: string;
   purchaseOrderId: string | null;
-  warehouseId: string;
+  distributionWarehouseId: string;
   supplierId: string;
   status: string;
   receivedDate: Date;
@@ -4265,6 +6194,51 @@ export type ReceivingRecord = {
   discrepancies: boolean;
   attachments: unknown | null;
   completedAt: Date | null;
+};
+
+export type Referral = {
+  referralId: string;
+  referrerId: string;
+  referredId: string | null;
+  referralCode: string;
+  referredEmail: string | null;
+  referredFirstName: string | null;
+  status: string | null;
+  firstOrderId: string | null;
+  firstOrderValue: string | null;
+  source: string | null;
+  channel: string | null;
+  invitedAt: Date | null;
+  signedUpAt: Date | null;
+  purchasedAt: Date | null;
+  rewardedAt: Date | null;
+  expiresAt: Date | null;
+  ipAddress: string | null;
+  userAgent: string | null;
+  metadata: unknown | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
+
+export type ReferralReward = {
+  referralRewardId: string;
+  referralId: string;
+  customerId: string;
+  recipientType: string;
+  rewardType: string;
+  rewardValue: string;
+  currency: string | null;
+  discountCode: string | null;
+  pointsAwarded: number | null;
+  freeProductId: string | null;
+  status: string | null;
+  issuedAt: Date | null;
+  claimedAt: Date | null;
+  claimedOrderId: string | null;
+  expiresAt: Date | null;
+  notes: string | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
 };
 
 export type RuleAdjustment = {
@@ -4291,90 +6265,30 @@ export type Session = {
   expire: Date;
 };
 
-export type ShippingCarrier = {
-  shippingCarrierId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  name: string;
-  code: string;
-  description: string | null;
-  websiteUrl: string | null;
-  trackingUrl: string | null;
-  isActive: boolean;
-  accountNumber: string | null;
-  apiCredentials: unknown | null;
-  supportedRegions: unknown | null;
-  supportedServices: unknown | null;
-  requiresContract: boolean;
-  hasApiIntegration: boolean;
-  customFields: unknown | null;
-  createdBy: string | null;
-};
-
-export type ShippingMethod = {
-  shippingMethodId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  carrierId: string | null;
-  name: string;
-  code: string;
-  description: string | null;
-  isActive: boolean;
-  isDefault: boolean;
-  serviceCode: string | null;
-  domesticInternational: ShippingMethodDomesticInternationalType;
-  estimatedDeliveryDays: unknown | null;
-  handlingDays: number | null;
-  priority: number | null;
-  displayOnFrontend: boolean;
-  allowFreeShipping: boolean;
-  minWeight: string | null;
-  maxWeight: string | null;
-  minOrderValue: string | null;
-  maxOrderValue: string | null;
-  dimensionRestrictions: unknown | null;
-  shippingClass: string | null;
-  customFields: unknown | null;
-  createdBy: string | null;
-};
-
-export type ShippingRate = {
-  shippingRateId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  zoneId: string;
-  methodId: string;
-  name: string | null;
-  description: string | null;
-  isActive: boolean;
-  rateType: string;
-  baseRate: string;
-  perItemRate: string | null;
-  freeThreshold: string | null;
-  rateMatrix: unknown | null;
-  minRate: string | null;
-  maxRate: string | null;
-  currency: string;
-  taxable: boolean;
-  priority: number | null;
-  validFrom: Date | null;
-  validTo: Date | null;
-  conditions: unknown | null;
-  createdBy: string | null;
-};
-
-export type ShippingZone = {
-  shippingZoneId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  name: string;
-  description: string | null;
-  isActive: boolean;
-  priority: number | null;
-  locationType: string;
-  locations: unknown;
-  excludedLocations: unknown | null;
-  createdBy: string | null;
+export type StockAlert = {
+  stockAlertId: string;
+  customerId: string | null;
+  email: string | null;
+  phone: string | null;
+  productId: string;
+  productVariantId: string | null;
+  productName: string | null;
+  variantName: string | null;
+  sku: string | null;
+  status: string | null;
+  desiredQuantity: number | null;
+  stockThreshold: number | null;
+  notifyOnAnyStock: boolean | null;
+  notificationChannel: string | null;
+  notifiedAt: Date | null;
+  notificationCount: number | null;
+  lastNotifiedAt: Date | null;
+  purchasedAt: Date | null;
+  purchaseOrderId: string | null;
+  expiresAt: Date | null;
+  metadata: unknown | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
 };
 
 export type StockReservation = {
@@ -4383,7 +6297,7 @@ export type StockReservation = {
   updatedAt: Date;
   productId: string;
   productVariantId: string | null;
-  warehouseId: string;
+  distributionWarehouseId: string;
   quantity: number;
   reservationType: string;
   referenceId: string | null;
@@ -4410,6 +6324,42 @@ export type StoreCurrencySettings = {
   enabledCurrencies: string[] | null;
   priceDisplayFormat: string;
   updatedBy: string | null;
+};
+
+export type StoreLocation = {
+  storeLocationId: string;
+  code: string;
+  name: string;
+  type: string | null;
+  description: string | null;
+  address1: string;
+  address2: string | null;
+  city: string;
+  state: string | null;
+  postalCode: string;
+  country: string;
+  latitude: string | null;
+  longitude: string | null;
+  phone: string | null;
+  email: string | null;
+  operatingHours: unknown | null;
+  holidayHours: unknown | null;
+  specialHours: unknown | null;
+  timezone: string | null;
+  isActive: boolean | null;
+  acceptsPickup: boolean | null;
+  acceptsReturns: boolean | null;
+  hasLocker: boolean | null;
+  lockerCount: number | null;
+  pickupCapacityPerHour: number | null;
+  pickupLeadTimeMinutes: number | null;
+  maxPickupDays: number | null;
+  pickupInstructions: string | null;
+  imageUrl: string | null;
+  amenities: unknown | null;
+  metadata: unknown | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
 };
 
 export type StoredPaymentMethod = {
@@ -4456,6 +6406,113 @@ export type SubscriptionInvoice = {
   createdAt: Date;
   updatedAt: Date;
   deletedAt: Date | null;
+};
+
+export type SubscriptionOrder = {
+  subscriptionOrderId: string;
+  customerSubscriptionId: string;
+  orderId: string | null;
+  billingCycleNumber: number;
+  periodStart: Date;
+  periodEnd: Date;
+  status: string | null;
+  subtotal: string;
+  discountAmount: string | null;
+  taxAmount: string | null;
+  shippingAmount: string | null;
+  totalAmount: string;
+  currency: string | null;
+  scheduledAt: Date | null;
+  processedAt: Date | null;
+  paidAt: Date | null;
+  failedAt: Date | null;
+  failureReason: string | null;
+  retryCount: number | null;
+  nextRetryAt: Date | null;
+  paymentIntentId: string | null;
+  invoiceId: string | null;
+  isProrated: boolean | null;
+  lineItems: unknown | null;
+  metadata: unknown | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
+
+export type SubscriptionPause = {
+  subscriptionPauseId: string;
+  customerSubscriptionId: string;
+  status: string | null;
+  pausedAt: Date;
+  scheduledResumeAt: Date | null;
+  actualResumeAt: Date | null;
+  reason: string | null;
+  customerNote: string | null;
+  pausedBy: string | null;
+  resumedBy: string | null;
+  pauseDays: number | null;
+  billingCyclesSkipped: number | null;
+  creditAmount: string | null;
+  creditApplied: boolean | null;
+  metadata: unknown | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
+
+export type SubscriptionPlan = {
+  subscriptionPlanId: string;
+  subscriptionProductId: string;
+  name: string;
+  slug: string | null;
+  description: string | null;
+  billingInterval: string;
+  billingIntervalCount: number | null;
+  price: string;
+  compareAtPrice: string | null;
+  currency: string | null;
+  setupFee: string | null;
+  trialDays: number | null;
+  contractLength: number | null;
+  isContractRequired: boolean | null;
+  discountPercent: string | null;
+  discountAmount: string | null;
+  freeShippingThreshold: number | null;
+  includesFreeShipping: boolean | null;
+  includedProducts: unknown | null;
+  features: unknown | null;
+  metadata: unknown | null;
+  sortOrder: number | null;
+  isPopular: boolean | null;
+  isActive: boolean | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
+
+export type SubscriptionProduct = {
+  subscriptionProductId: string;
+  productId: string;
+  isSubscriptionOnly: boolean | null;
+  allowOneTimePurchase: boolean | null;
+  minSubscriptionLength: number | null;
+  maxSubscriptionLength: number | null;
+  trialDays: number | null;
+  trialRequiresPayment: boolean | null;
+  billingAnchor: string | null;
+  billingAnchorDay: number | null;
+  prorateOnChange: boolean | null;
+  allowPause: boolean | null;
+  maxPauseDays: number | null;
+  maxPausesPerYear: number | null;
+  allowSkip: boolean | null;
+  maxSkipsPerYear: number | null;
+  allowEarlyCancel: boolean | null;
+  cancelNoticeDays: number | null;
+  earlyTerminationFee: string | null;
+  autoRenew: boolean | null;
+  renewalReminderDays: number | null;
+  metadata: unknown | null;
+  isActive: boolean | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
 };
 
 export type Supplier = {
@@ -4526,6 +6583,117 @@ export type SupplierProduct = {
   weight: string | null;
   lastOrderedAt: Date | null;
   notes: string | null;
+};
+
+export type SupportAgent = {
+  supportAgentId: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  displayName: string | null;
+  avatarUrl: string | null;
+  role: string | null;
+  department: string | null;
+  skills: string[] | null;
+  languages: string[] | null;
+  isActive: boolean | null;
+  isAvailable: boolean | null;
+  maxTickets: number | null;
+  currentTickets: number | null;
+  totalTicketsHandled: number | null;
+  averageResponseTimeMinutes: number | null;
+  averageResolutionTimeMinutes: number | null;
+  satisfactionScore: string | null;
+  satisfactionCount: number | null;
+  timezone: string | null;
+  workingHours: unknown | null;
+  notificationPreferences: unknown | null;
+  metadata: unknown | null;
+  lastActiveAt: Date | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
+
+export type SupportAttachment = {
+  supportAttachmentId: string;
+  supportTicketId: string;
+  supportMessageId: string | null;
+  fileName: string;
+  originalName: string;
+  mimeType: string;
+  fileSize: number;
+  storageUrl: string;
+  thumbnailUrl: string | null;
+  uploadedBy: string | null;
+  uploadedByType: string | null;
+  isPublic: boolean | null;
+  isScanned: boolean | null;
+  isSafe: boolean | null;
+  metadata: unknown | null;
+  createdAt: Date | null;
+};
+
+export type SupportMessage = {
+  supportMessageId: string;
+  supportTicketId: string;
+  senderId: string | null;
+  senderType: string;
+  senderName: string | null;
+  senderEmail: string | null;
+  message: string;
+  messageHtml: string | null;
+  messageType: string | null;
+  isInternal: boolean | null;
+  isAutoReply: boolean | null;
+  isRead: boolean | null;
+  readAt: Date | null;
+  readBy: string | null;
+  metadata: unknown | null;
+  createdAt: Date | null;
+};
+
+export type SupportTicket = {
+  supportTicketId: string;
+  ticketNumber: string;
+  customerId: string | null;
+  orderId: string | null;
+  email: string;
+  name: string | null;
+  phone: string | null;
+  subject: string;
+  description: string | null;
+  status: string | null;
+  priority: string | null;
+  category: string | null;
+  subcategory: string | null;
+  channel: string | null;
+  assignedAgentId: string | null;
+  lastMessageBy: string | null;
+  lastMessageByType: string | null;
+  lastMessageAt: Date | null;
+  firstResponseAt: Date | null;
+  responseTimeMinutes: number | null;
+  resolvedAt: Date | null;
+  resolutionTimeMinutes: number | null;
+  resolutionType: string | null;
+  resolutionNotes: string | null;
+  customerSatisfaction: number | null;
+  customerFeedback: string | null;
+  feedbackRequested: boolean | null;
+  feedbackRequestedAt: Date | null;
+  tags: string[] | null;
+  isEscalated: boolean | null;
+  escalatedTo: string | null;
+  escalatedAt: Date | null;
+  escalationReason: string | null;
+  isSpam: boolean | null;
+  reopenCount: number | null;
+  customFields: unknown | null;
+  metadata: unknown | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+  closedAt: Date | null;
+  dueAt: Date | null;
 };
 
 export type TaxCalculation = {
@@ -4747,74 +6915,99 @@ export type TierPrice = {
   price: string;
 };
 
-export type Warehouse = {
-  warehouseId: string;
-  name: string;
-  code: string;
-  description: string | null;
+export type VatOssReport = {
+  vatOssReportId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  merchantId: string;
+  year: number;
+  quarter: number;
+  reportingCountry: string;
+  totalSales: string;
+  totalVat: string;
+  transactionCount: number;
+  status: string;
+  submissionReference: string | null;
+  submittedAt: Date | null;
+  acceptedAt: Date | null;
+  rejectionReason: string | null;
+  vatPaid: string | null;
+  paidAt: Date | null;
+  paymentReference: string | null;
+  reportingDeadline: Date | null;
+  paymentDeadline: Date | null;
+  generatedBy: string | null;
+  submittedBy: string | null;
+  metadata: unknown | null;
+};
+
+export type VatOssReportLine = {
+  vatOssReportLineId: string;
+  createdAt: Date;
+  vatOssReportId: string;
+  consumptionCountry: string;
+  vatRateType: string;
+  vatRate: string;
+  taxableAmount: string;
+  vatAmount: string;
+  grossAmount: string;
+  orderCount: number;
+  itemCount: number;
+  currency: string;
+  exchangeRate: string | null;
+};
+
+export type VatRegistration = {
+  vatRegistrationId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  merchantId: string;
+  countryCode: string;
+  vatNumber: string;
+  tradingName: string | null;
+  legalName: string | null;
+  registrationType: string;
+  isVerified: boolean;
+  verifiedAt: Date | null;
+  verificationSource: string | null;
+  verificationRequestId: string | null;
+  verificationResponse: unknown | null;
+  registrationDate: Date | null;
+  deregistrationDate: Date | null;
+  effectiveFrom: Date | null;
+  effectiveUntil: Date | null;
+  annualThreshold: string | null;
+  thresholdCurrency: string | null;
+  currentYearSales: string | null;
+  thresholdExceeded: boolean | null;
   isActive: boolean;
-  isDefault: boolean;
-  isFulfillmentCenter: boolean;
-  isReturnCenter: boolean;
-  isVirtual: boolean;
+  notes: string | null;
+  certificateUrl: string | null;
+};
+
+export type VatValidationLog = {
+  vatValidationLogId: string;
+  createdAt: Date;
+  customerId: string | null;
   merchantId: string | null;
-  addressLine1: string;
-  addressLine2: string | null;
-  city: string;
-  state: string;
-  postalCode: string;
-  country: string;
-  latitude: string | null;
-  longitude: string | null;
-  email: string | null;
-  phone: string | null;
-  contactName: string | null;
-  timezone: string;
-  cutoffTime: string | null;
-  processingTime: number | null;
-  operatingHours: unknown | null;
-  capabilities: unknown | null;
-  shippingMethods: string[] | null;
-  createdAt: Date;
-  updatedAt: Date;
-  createdBy: string | null;
-};
-
-export type WarehouseBin = {
-  warehouseBinId: string;
-  warehouseId: string;
-  zoneId: string | null;
-  locationCode: string;
-  isActive: boolean;
-  binType: string;
-  height: string | null;
-  width: string | null;
-  depth: string | null;
-  maxVolume: string | null;
-  maxWeight: string | null;
-  isPickable: boolean;
-  isReceivable: boolean;
-  isMixed: boolean;
-  priority: number | null;
-  createdAt: Date;
-  updatedAt: Date;
-};
-
-export type WarehouseZone = {
-  warehouseZoneId: string;
-  warehouseId: string;
-  name: string;
-  code: string;
-  description: string | null;
-  isActive: boolean;
-  zoneType: string;
-  capabilities: unknown | null;
-  priority: number | null;
-  capacity: string | null;
-  capacityUnit: string | null;
-  temperature: string | null;
-  humidity: string | null;
-  createdAt: Date;
-  updatedAt: Date;
+  orderId: string | null;
+  vatNumber: string;
+  countryCode: string;
+  vatNumberFormatted: string | null;
+  isValid: boolean | null;
+  validationStatus: string;
+  validationSource: string;
+  requestId: string | null;
+  response: unknown | null;
+  companyName: string | null;
+  companyAddress: string | null;
+  companyCity: string | null;
+  companyPostalCode: string | null;
+  validatedAt: Date;
+  responseTimeMs: number | null;
+  expiresAt: Date | null;
+  reverseChargeApplicable: boolean | null;
+  ipAddress: string | null;
+  context: string | null;
 };
 

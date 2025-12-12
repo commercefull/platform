@@ -57,14 +57,14 @@ describe('Order Status Tests', () => {
   describe('Order Status Management', () => {
     it('should update order status with history tracking', async () => {
       // First ensure we have a consistent starting point
-      await client.put(`/api/admin/orders/${testOrderId}/status`, {
+      await client.put(`/business/orders/${testOrderId}/status`, {
         status: 'pending'
       }, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
       // Change status to processing
-      const processingResponse = await client.put(`/api/admin/orders/${testOrderId}/status`, {
+      const processingResponse = await client.put(`/business/orders/${testOrderId}/status`, {
         status: 'processing'
       }, {
         headers: { Authorization: `Bearer ${adminToken}` }
@@ -75,7 +75,7 @@ describe('Order Status Tests', () => {
       expect(processingResponse.data.data).toHaveProperty('status', 'processing');
       
       // Change status to shipped
-      const shippedResponse = await client.put(`/api/admin/orders/${testOrderId}/status`, {
+      const shippedResponse = await client.put(`/business/orders/${testOrderId}/status`, {
         status: 'shipped'
       }, {
         headers: { Authorization: `Bearer ${adminToken}` }
@@ -86,7 +86,7 @@ describe('Order Status Tests', () => {
       expect(shippedResponse.data.data).toHaveProperty('status', 'shipped');
       
       // Get order status history
-      const historyResponse = await client.get(`/api/admin/orders/${testOrderId}/status-history`, {
+      const historyResponse = await client.get(`/business/orders/${testOrderId}/status-history`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -114,7 +114,7 @@ describe('Order Status Tests', () => {
 
     it('should update payment status separately from order status', async () => {
       // Update payment status to authorized
-      const authorizedResponse = await client.put(`/api/admin/orders/${testOrderId}/payment-status`, {
+      const authorizedResponse = await client.put(`/business/orders/${testOrderId}/payment-status`, {
         paymentStatus: 'authorized'
       }, {
         headers: { Authorization: `Bearer ${adminToken}` }
@@ -125,7 +125,7 @@ describe('Order Status Tests', () => {
       expect(authorizedResponse.data.data).toHaveProperty('paymentStatus', 'authorized');
       
       // Update payment status to paid
-      const paidResponse = await client.put(`/api/admin/orders/${testOrderId}/payment-status`, {
+      const paidResponse = await client.put(`/business/orders/${testOrderId}/payment-status`, {
         paymentStatus: 'paid'
       }, {
         headers: { Authorization: `Bearer ${adminToken}` }
@@ -136,7 +136,7 @@ describe('Order Status Tests', () => {
       expect(paidResponse.data.data).toHaveProperty('paymentStatus', 'paid');
       
       // Get payment status history
-      const historyResponse = await client.get(`/api/admin/orders/${testOrderId}/payment-history`, {
+      const historyResponse = await client.get(`/business/orders/${testOrderId}/payment-history`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -159,7 +159,7 @@ describe('Order Status Tests', () => {
 
     it('should update fulfillment status separately from order status', async () => {
       // Update fulfillment status to partially_fulfilled
-      const partialResponse = await client.put(`/api/admin/orders/${testOrderId}/fulfillment-status`, {
+      const partialResponse = await client.put(`/business/orders/${testOrderId}/fulfillment-status`, {
         fulfillmentStatus: 'partially_fulfilled'
       }, {
         headers: { Authorization: `Bearer ${adminToken}` }
@@ -170,7 +170,7 @@ describe('Order Status Tests', () => {
       expect(partialResponse.data.data).toHaveProperty('fulfillmentStatus', 'partially_fulfilled');
       
       // Update fulfillment status to fulfilled
-      const fulfilledResponse = await client.put(`/api/admin/orders/${testOrderId}/fulfillment-status`, {
+      const fulfilledResponse = await client.put(`/business/orders/${testOrderId}/fulfillment-status`, {
         fulfillmentStatus: 'fulfilled'
       }, {
         headers: { Authorization: `Bearer ${adminToken}` }
@@ -181,7 +181,7 @@ describe('Order Status Tests', () => {
       expect(fulfilledResponse.data.data).toHaveProperty('fulfillmentStatus', 'fulfilled');
       
       // Get fulfillment status history
-      const historyResponse = await client.get(`/api/admin/orders/${testOrderId}/fulfillment-history`, {
+      const historyResponse = await client.get(`/business/orders/${testOrderId}/fulfillment-history`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       

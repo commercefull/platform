@@ -482,6 +482,29 @@ export class InventoryRepo {
 
     return transformDbToTs<InventoryReservation>(result, inventoryReservationFields)!;
   }
+
+  // =============== Product Availability Methods ===============
+  
+  async checkProductAvailability(productId: string, variantId?: string, requiredQuantity: number = 1): Promise<boolean> {
+    try {
+      // Get all inventory items for this product
+      const inventoryItems = await this.findInventoryItemsByProductId(productId);
+      
+      if (!inventoryItems || inventoryItems.length === 0) {
+        return false; // No inventory found
+      }
+
+      // Calculate total available quantity across all locations
+      const totalAvailable = inventoryItems.reduce((total, item) => {
+        return total + Math.max(0, item.availableQuantity - item.reservedQuantity);
+      }, 0);
+
+      return totalAvailable >= requiredQuantity;
+    } catch (error) {
+      console.error('Error checking product availability:', error);
+      return false;
+    }
+  }
 }
 
 export default new InventoryRepo();

@@ -34,7 +34,7 @@ export const createTestTier = async (
   client: AxiosInstance, 
   adminToken: string
 ): Promise<string> => {
-  const response = await client.post('/api/admin/loyalty/tiers', testTier, {
+  const response = await client.post('/business/loyalty/tiers', testTier, {
     headers: { Authorization: `Bearer ${adminToken}` }
   });
   
@@ -49,7 +49,7 @@ export const createTestReward = async (
   client: AxiosInstance, 
   adminToken: string
 ): Promise<string> => {
-  const response = await client.post('/api/admin/loyalty/rewards', testReward, {
+  const response = await client.post('/business/loyalty/rewards', testReward, {
     headers: { Authorization: `Bearer ${adminToken}` }
   });
   
@@ -67,7 +67,7 @@ export const initializeCustomerPoints = async (
   tierId: string
 ): Promise<void> => {
   // Initialize customer with the specified tier
-  const response = await client.post(`/api/admin/loyalty/customers/${customerId}/points/adjust`, {
+  const response = await client.post(`/business/loyalty/customers/${customerId}/points/adjust`, {
     points: 0,
     reason: 'Initialize customer for testing',
     tierId
@@ -87,7 +87,7 @@ export const addCustomerPoints = async (
   points: number,
   reason: string = 'Test points adjustment'
 ): Promise<void> => {
-  const response = await client.post(`/api/admin/loyalty/customers/${customerId}/points/adjust`, {
+  const response = await client.post(`/business/loyalty/customers/${customerId}/points/adjust`, {
     points,
     reason
   }, {
@@ -106,7 +106,7 @@ export const createTestOrderPoints = async (
   orderId: string = `order-${Math.floor(Math.random() * 10000)}`,
   orderAmount: number = 100
 ): Promise<string> => {
-  const response = await client.post(`/api/admin/loyalty/orders/${orderId}/points`, {
+  const response = await client.post(`/business/loyalty/orders/${orderId}/points`, {
     customerId,
     orderAmount
   }, {
@@ -178,22 +178,22 @@ export const cleanupLoyaltyTests = async (
 ) => {
   try {
     // There's no explicit delete endpoint in our API, but if needed we could add:
-    // await client.delete(`/api/admin/loyalty/tiers/${testTierId}`, {
+    // await client.delete(`/business/loyalty/tiers/${testTierId}`, {
     //   headers: { Authorization: `Bearer ${adminToken}` }
     // });
     
-    // await client.delete(`/api/admin/loyalty/rewards/${testRewardId}`, {
+    // await client.delete(`/business/loyalty/rewards/${testRewardId}`, {
     //   headers: { Authorization: `Bearer ${adminToken}` }
     // });
     
     // For now, we can deactivate them instead
-    await client.put(`/api/admin/loyalty/tiers/${testTierId}`, {
+    await client.put(`/business/loyalty/tiers/${testTierId}`, {
       isActive: false
     }, {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
-    await client.put(`/api/admin/loyalty/rewards/${testRewardId}`, {
+    await client.put(`/business/loyalty/rewards/${testRewardId}`, {
       isActive: false
     }, {
       headers: { Authorization: `Bearer ${adminToken}` }

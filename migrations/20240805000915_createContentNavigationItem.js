@@ -4,7 +4,7 @@
  */
 exports.up = function (knex) {
   return knex.schema.createTable('contentNavigationItem', t => {
-    t.uuid('contentNavigationItemId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+    t.uuid('contentNavigationItemId').primary().defaultTo(knex.raw('uuidv7()'));
     t.uuid('navigationId').notNullable().references('contentNavigationId').inTable('contentNavigation').onDelete('CASCADE');
     t.uuid('parentId').references('contentNavigationItemId').inTable('contentNavigationItem');
     t.string('title', 255).notNullable();

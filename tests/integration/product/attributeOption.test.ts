@@ -31,7 +31,7 @@ describe('Attribute Option Tests', () => {
         attributeId: testAttributeId
       };
       
-      const response = await client.post('/api/admin/attribute-options', newOption, {
+      const response = await client.post('/business/attribute-options', newOption, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -51,7 +51,7 @@ describe('Attribute Option Tests', () => {
     });
 
     it('should get an attribute option by ID', async () => {
-      const response = await client.get(`/api/admin/attribute-options/${testAttributeOptionId}`, {
+      const response = await client.get(`/business/attribute-options/${testAttributeOptionId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -62,7 +62,7 @@ describe('Attribute Option Tests', () => {
     });
     
     it('should get options by attribute', async () => {
-      const response = await client.get(`/api/admin/attribute-options/attribute/${testAttributeId}`, {
+      const response = await client.get(`/business/attribute-options/attribute/${testAttributeId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -81,13 +81,13 @@ describe('Attribute Option Tests', () => {
     
     it('should find option by value', async () => {
       // First get the option to find its value
-      const getResponse = await client.get(`/api/admin/attribute-options/${createdOptionId}`, {
+      const getResponse = await client.get(`/business/attribute-options/${createdOptionId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
       const optionValue = getResponse.data.data.value;
       
-      const response = await client.get(`/api/admin/attribute-options/attribute/${testAttributeId}/value/${optionValue}`, {
+      const response = await client.get(`/business/attribute-options/attribute/${testAttributeId}/value/${optionValue}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -104,7 +104,7 @@ describe('Attribute Option Tests', () => {
         sortOrder: 2
       };
       
-      const response = await client.put(`/api/admin/attribute-options/${createdOptionId}`, updatedData, {
+      const response = await client.put(`/business/attribute-options/${createdOptionId}`, updatedData, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -116,7 +116,7 @@ describe('Attribute Option Tests', () => {
     });
 
     it('should delete an attribute option', async () => {
-      const response = await client.delete(`/api/admin/attribute-options/${createdOptionId}`, {
+      const response = await client.delete(`/business/attribute-options/${createdOptionId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -124,7 +124,7 @@ describe('Attribute Option Tests', () => {
       expect(response.data.success).toBe(true);
       
       // Verify the option is deleted
-      const getResponse = await client.get(`/api/admin/attribute-options/${createdOptionId}`, {
+      const getResponse = await client.get(`/business/attribute-options/${createdOptionId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       

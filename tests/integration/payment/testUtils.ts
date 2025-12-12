@@ -57,7 +57,7 @@ export const setupPaymentTests = async () => {
   const customerToken = await loginTestUser(client);
   
   // Create test gateway
-  const gatewayResponse = await client.post('/api/admin/gateways', testGateway, {
+  const gatewayResponse = await client.post('/business/gateways', testGateway, {
     headers: { Authorization: `Bearer ${adminToken}` }
   });
   
@@ -73,7 +73,7 @@ export const setupPaymentTests = async () => {
     gatewayId: testGatewayId
   };
   
-  const methodConfigResponse = await client.post('/api/admin/method-configs', methodConfig, {
+  const methodConfigResponse = await client.post('/business/method-configs', methodConfig, {
     headers: { Authorization: `Bearer ${adminToken}` }
   });
   
@@ -121,17 +121,17 @@ export const cleanupPaymentTests = async (
   testTransactionId: string
 ) => {
   // Delete test transaction
-  await client.delete(`/api/admin/transactions/${testTransactionId}`, {
+  await client.delete(`/business/transactions/${testTransactionId}`, {
     headers: { Authorization: `Bearer ${adminToken}` }
   });
   
   // Delete test method config
-  await client.delete(`/api/admin/method-configs/${testMethodConfigId}`, {
+  await client.delete(`/business/method-configs/${testMethodConfigId}`, {
     headers: { Authorization: `Bearer ${adminToken}` }
   });
   
   // Delete test gateway
-  await client.delete(`/api/admin/gateways/${testGatewayId}`, {
+  await client.delete(`/business/gateways/${testGatewayId}`, {
     headers: { Authorization: `Bearer ${adminToken}` }
   });
 };

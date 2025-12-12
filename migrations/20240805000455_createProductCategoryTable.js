@@ -1,6 +1,6 @@
 exports.up = function(knex) {
   return knex.schema.createTable('productCategory', t => {
-    t.uuid('productCategoryId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+    t.uuid('productCategoryId').primary().defaultTo(knex.raw('uuidv7()'));
     t.string('name', 255).notNullable();
     t.string('slug', 255).unique();
     t.text('description');

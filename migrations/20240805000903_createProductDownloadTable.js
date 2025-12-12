@@ -1,6 +1,6 @@
 exports.up = function(knex) {
   return knex.schema.createTable('productDownload', t => {
-    t.uuid('productDownloadId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+    t.uuid('productDownloadId').primary().defaultTo(knex.raw('uuidv7()'));
     t.uuid('productId').notNullable().references('productId').inTable('product').onDelete('CASCADE');
     t.uuid('productVariantId').references('productVariantId').inTable('productVariant').onDelete('CASCADE');
     t.string('name', 255).notNullable();

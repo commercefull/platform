@@ -43,11 +43,11 @@ export const loginCustomer = async (req: Request, res: Response): Promise<void> 
     }
 
     // Track login activity
-    await customerRepo.updateCustomerLoginTimestamp(customer.id);
+    await customerRepo.updateCustomerLoginTimestamp(customer.customerId);
 
     // Generate access token
     const accessToken = generateAccessToken(
-      customer.id,
+      customer.customerId,
       customer.email,
       'customer',
       CUSTOMER_JWT_SECRET,
@@ -58,7 +58,7 @@ export const loginCustomer = async (req: Request, res: Response): Promise<void> 
       success: true,
       accessToken,
       customer: {
-        id: customer.id,
+        id: customer.customerId,
         email: customer.email
       }
     });
@@ -105,13 +105,12 @@ export const registerCustomer = async (req: Request, res: Response): Promise<voi
       password,
       phone,
       isActive: true,
-      isVerified: false,
-      metadata: {}
+      isVerified: false
     });
 
     // Generate access token for immediate login
     const accessToken = generateAccessToken(
-      newCustomer.id,
+      newCustomer.customerId,
       newCustomer.email,
       'customer',
       CUSTOMER_JWT_SECRET,
@@ -122,7 +121,7 @@ export const registerCustomer = async (req: Request, res: Response): Promise<voi
       success: true,
       accessToken,
       customer: {
-        id: newCustomer.id,
+        id: newCustomer.customerId,
         email: newCustomer.email,
         firstName: newCustomer.firstName,
         lastName: newCustomer.lastName
@@ -164,11 +163,11 @@ export const issueTokenPair = async (req: Request, res: Response): Promise<void>
     }
 
     // Track login activity
-    await customerRepo.updateCustomerLoginTimestamp(customer.id);
+    await customerRepo.updateCustomerLoginTimestamp(customer.customerId);
 
     // Generate access token (short-lived)
     const accessToken = generateAccessToken(
-      customer.id,
+      customer.customerId,
       customer.email,
       'customer',
       CUSTOMER_JWT_SECRET,
@@ -177,7 +176,7 @@ export const issueTokenPair = async (req: Request, res: Response): Promise<void>
 
     // Generate refresh token (long-lived)
     const refreshToken = generateAccessToken(
-      customer.id,
+      customer.customerId,
       customer.email,
       'customer',
       CUSTOMER_JWT_SECRET,
@@ -188,7 +187,7 @@ export const issueTokenPair = async (req: Request, res: Response): Promise<void>
     await refreshTokenRepo.create({
       token: refreshToken,
       userType: 'customer',
-      userId: customer.id,
+      userId: customer.customerId,
       expiresAt: parseExpirationDate(REFRESH_TOKEN_DURATION),
       userAgent: req.headers['user-agent'] || null,
       ipAddress: req.ip || null
@@ -201,7 +200,7 @@ export const issueTokenPair = async (req: Request, res: Response): Promise<void>
       tokenType: 'Bearer',
       expiresIn: ACCESS_TOKEN_DURATION,
       customer: {
-        id: customer.id,
+        id: customer.customerId,
         email: customer.email
       }
     });
@@ -261,7 +260,7 @@ export const renewAccessToken = async (req: Request, res: Response): Promise<voi
 
     // Generate new access token
     const newAccessToken = generateAccessToken(
-      customer.id,
+      customer.customerId,
       customer.email,
       'customer',
       CUSTOMER_JWT_SECRET,
@@ -349,7 +348,7 @@ export const requestPasswordReset = async (req: Request, res: Response): Promise
     const customer = await customerRepo.findCustomerByEmail(email);
 
     // Always return success to prevent email enumeration attacks
-    if (!customer?.id) {
+    if (!customer?.customerId) {
       res.json({
         success: true,
         message: 'If an account exists with that email, a password reset link has been sent'
@@ -358,7 +357,7 @@ export const requestPasswordReset = async (req: Request, res: Response): Promise
     }
 
     // Generate secure reset token
-    const resetToken = await customerRepo.createPasswordResetToken(customer.id);
+    const resetToken = await customerRepo.createPasswordResetToken(customer.customerId);
 
     // TODO: Send reset token via email
     // await emailService.sendPasswordResetEmail(email, resetToken);

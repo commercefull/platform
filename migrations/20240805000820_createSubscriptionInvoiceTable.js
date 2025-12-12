@@ -1,6 +1,6 @@
 exports.up = function(knex) {
   return knex.schema.createTable('subscriptionInvoice', t => {
-    t.uuid('subscriptionInvoiceId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+    t.uuid('subscriptionInvoiceId').primary().defaultTo(knex.raw('uuidv7()'));
     t.uuid('paymentSubscriptionId').notNullable().references('paymentSubscriptionId').inTable('paymentSubscription').onDelete('CASCADE');
     t.uuid('customerId').notNullable().references('customerId').inTable('customer');
     t.uuid('merchantId').notNullable().references('merchantId').inTable('merchant');

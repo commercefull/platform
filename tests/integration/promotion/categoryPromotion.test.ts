@@ -19,7 +19,7 @@ describe('Category Promotion Tests', () => {
     testProductId = setup.testProductId;
 
     // Create a new promotion to apply to category
-    const promotionResponse = await client.post('/api/admin/promotions', testPromotion, {
+    const promotionResponse = await client.post('/business/promotions', testPromotion, {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
@@ -38,7 +38,7 @@ describe('Category Promotion Tests', () => {
       status: 'active'
     };
     
-    const response = await client.post('/api/admin/category-promotions', categoryPromotionData, {
+    const response = await client.post('/business/category-promotions', categoryPromotionData, {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
@@ -50,7 +50,7 @@ describe('Category Promotion Tests', () => {
   });
 
   it('should get promotions by category ID', async () => {
-    const response = await client.get(`/api/admin/category-promotions/category/${testCategoryId}`, {
+    const response = await client.get(`/business/category-promotions/category/${testCategoryId}`, {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
@@ -66,7 +66,7 @@ describe('Category Promotion Tests', () => {
   });
 
   it('should get active category promotions', async () => {
-    const response = await client.get('/api/admin/category-promotions', {
+    const response = await client.get('/business/category-promotions', {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
@@ -79,7 +79,7 @@ describe('Category Promotion Tests', () => {
   });
 
   it('should delete a category promotion', async () => {
-    const response = await client.delete(`/api/admin/category-promotions/${categoryPromotionId}`, {
+    const response = await client.delete(`/business/category-promotions/${categoryPromotionId}`, {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
@@ -87,7 +87,7 @@ describe('Category Promotion Tests', () => {
     expect(response.data.success).toBe(true);
     
     // Verify the category promotion is deleted
-    const getResponse = await client.get(`/api/admin/category-promotions/category/${testCategoryId}`, {
+    const getResponse = await client.get(`/business/category-promotions/category/${testCategoryId}`, {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
@@ -98,7 +98,7 @@ describe('Category Promotion Tests', () => {
   afterAll(async () => {
     // Clean up the promotion we created in this test
     try {
-      await client.delete(`/api/admin/promotions/${promotionId}`, {
+      await client.delete(`/business/promotions/${promotionId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
     } catch (error) {

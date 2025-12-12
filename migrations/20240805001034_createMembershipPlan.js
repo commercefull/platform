@@ -4,7 +4,7 @@
  */
 exports.up = function (knex) {
   return knex.schema.createTable('membershipPlan', t => {
-    t.uuid('membershipPlanId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+    t.uuid('membershipPlanId').primary().defaultTo(knex.raw('uuidv7()'));
     t.string('name', 100).notNullable();
     t.string('code', 50).notNullable().unique();
     t.text('description');

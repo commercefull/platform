@@ -5,7 +5,7 @@
 exports.up = function (knex) {
   return knex.schema
     .createTable('country', t => {
-      t.uuid('countryId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+      t.uuid('countryId').primary().defaultTo(knex.raw('uuidv7()'));
       t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
       t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
       t.string('code', 2).notNullable().unique();

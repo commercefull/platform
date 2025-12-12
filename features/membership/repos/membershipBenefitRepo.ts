@@ -1,27 +1,17 @@
 import { query, queryOne } from '../../../libs/db';
 import { unixTimestamp } from '../../../libs/date';
 
+// Import types from generated DB types - single source of truth
+import { MembershipBenefit as DbMembershipBenefit } from '../../../libs/db/types';
+
+// Re-export DB type
+export type MembershipBenefit = DbMembershipBenefit;
+
+// Type aliases for benefit and value types (used in application logic)
 export type BenefitType = 'discount' | 'freeShipping' | 'contentAccess' | 'prioritySupport' | 'rewardPoints' | 'gift' | 'earlyAccess' | 'custom';
 export type ValueType = 'fixed' | 'percentage' | 'boolean' | 'text' | 'json';
 
-export interface MembershipBenefit {
-  membershipBenefitId: string;
-  createdAt: string;
-  updatedAt: string;
-  name: string;
-  code: string;
-  description?: string;
-  shortDescription?: string;
-  isActive: boolean;
-  priority: number;
-  benefitType: BenefitType;
-  valueType: ValueType;
-  value?: Record<string, any>;
-  icon?: string;
-  rules?: Record<string, any>;
-  createdBy?: string;
-}
-
+// Derived types for create/update operations
 export type MembershipBenefitCreateParams = Omit<MembershipBenefit, 'membershipBenefitId' | 'createdAt' | 'updatedAt'>;
 export type MembershipBenefitUpdateParams = Partial<Omit<MembershipBenefit, 'membershipBenefitId' | 'code' | 'createdAt' | 'updatedAt'>>;
 

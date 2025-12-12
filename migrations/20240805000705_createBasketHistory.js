@@ -4,7 +4,7 @@
  */
 exports.up = function (knex) {
   return knex.schema.createTable('basketHistory', t => {
-    t.uuid('basketHistoryId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+    t.uuid('basketHistoryId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     t.uuid('basketId').notNullable().references('basketId').inTable('basket').onDelete('CASCADE');

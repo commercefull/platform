@@ -4,7 +4,7 @@
  */
 exports.up = function (knex) {
     return knex.schema.createTable('productAttributeValue', t => {
-        t.uuid('productAttributeValueId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+        t.uuid('productAttributeValueId').primary().defaultTo(knex.raw('uuidv7()'));
         t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
         t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
         t.uuid('attributeId').notNullable().references('productAttributeId').inTable('productAttribute').onDelete('CASCADE');

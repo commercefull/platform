@@ -109,7 +109,7 @@ export const createMerchant = async (req: Request, res: Response): Promise<void>
         email,
         phone,
         website,
-        logoUrl,
+        logo: logoUrl,
         description,
         status,
         password: '',  // Add required password field
@@ -160,7 +160,7 @@ export const updateMerchant = async (req: Request, res: Response): Promise<void>
       // If email is being updated, check that it doesn't conflict with another merchant
       if (email && email !== existingMerchant.email) {
         const merchantWithEmail = await merchantRepo.findByEmail(email);
-        if (merchantWithEmail && merchantWithEmail.id !== id) {
+        if (merchantWithEmail && merchantWithEmail.merchantId !== id) {
           res.status(409).json({
             success: false,
             message: `Email ${email} is already in use by another merchant`
@@ -174,7 +174,7 @@ export const updateMerchant = async (req: Request, res: Response): Promise<void>
         email,
         phone,
         website,
-        logoUrl,
+        logo: logoUrl,
         description,
         status
       });
@@ -310,7 +310,7 @@ export const addMerchantAddress = async (req: Request, res: Response): Promise<v
         state,
         postalCode,
         country,
-        isPrimary
+        isDefault: isPrimary
       });
 
       res.status(201).json({
@@ -420,8 +420,8 @@ export const addMerchantPaymentInfo = async (req: Request, res: Response): Promi
         bankName,
         accountNumber,
         routingNumber,
-        paymentProcessor,
-        processorAccountId,
+        paymentType: paymentProcessor || 'bank',
+        currency: 'USD',
         isVerified
       });
 

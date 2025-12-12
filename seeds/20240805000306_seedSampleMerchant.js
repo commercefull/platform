@@ -19,7 +19,7 @@ exports.seed = async function (knex) {
         description: 'This is a sample merchant for demonstration purposes',
         email: 'merchant@example.com',
         phone: '555-123-4567',
-        password: '$2a$10$Rnq.K1xbkBJ9JJ5L2FTK9.HXcT5gn97JOH6yEMBFMfRK.Mz9dUDty', // "password123"
+        password: '$2b$10$wADyOBQwHwy0mz49WoGA.OcCrjAAXaYnMhsOrWWQ9FzUmXkrq6.aC', // "password123"
         website: 'https://example.com',
         status: 'active',
         verificationStatus: 'verified',

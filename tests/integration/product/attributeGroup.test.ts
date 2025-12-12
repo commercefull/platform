@@ -28,7 +28,7 @@ describe('Attribute Group Tests', () => {
         code: `new-group-${Math.floor(Math.random() * 10000)}`
       };
       
-      const response = await client.post('/api/admin/attribute-groups', newGroup, {
+      const response = await client.post('/business/attribute-groups', newGroup, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -47,7 +47,7 @@ describe('Attribute Group Tests', () => {
     });
 
     it('should get an attribute group by ID', async () => {
-      const response = await client.get(`/api/admin/attribute-groups/${testAttributeGroupId}`, {
+      const response = await client.get(`/business/attribute-groups/${testAttributeGroupId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -58,7 +58,7 @@ describe('Attribute Group Tests', () => {
     });
     
     it('should list all attribute groups', async () => {
-      const response = await client.get('/api/admin/attribute-groups', {
+      const response = await client.get('/business/attribute-groups', {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -82,7 +82,7 @@ describe('Attribute Group Tests', () => {
         sortOrder: 2
       };
       
-      const response = await client.put(`/api/admin/attribute-groups/${createdGroupId}`, updatedData, {
+      const response = await client.put(`/business/attribute-groups/${createdGroupId}`, updatedData, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -94,7 +94,7 @@ describe('Attribute Group Tests', () => {
     });
 
     it('should delete an attribute group', async () => {
-      const response = await client.delete(`/api/admin/attribute-groups/${createdGroupId}`, {
+      const response = await client.delete(`/business/attribute-groups/${createdGroupId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
@@ -102,7 +102,7 @@ describe('Attribute Group Tests', () => {
       expect(response.data.success).toBe(true);
       
       // Verify the group is deleted
-      const getResponse = await client.get(`/api/admin/attribute-groups/${createdGroupId}`, {
+      const getResponse = await client.get(`/business/attribute-groups/${createdGroupId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       

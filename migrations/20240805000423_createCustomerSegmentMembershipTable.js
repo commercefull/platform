@@ -1,6 +1,6 @@
 exports.up = function(knex) {
   return knex.schema.createTable('customerSegmentMembership', t => {
-    t.uuid('customerSegmentMembershipId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+    t.uuid('customerSegmentMembershipId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('addedAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     t.uuid('customerId').notNullable().references('customerId').inTable('customer').onDelete('CASCADE');

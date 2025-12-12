@@ -4,13 +4,13 @@
  */
 exports.up = function (knex) {
   return knex.schema.createTable('inventoryLot', t => {
-    t.uuid('inventoryLotId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+    t.uuid('inventoryLotId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     t.uuid('productId').notNullable().references('productId').inTable('product').onDelete('CASCADE');
     t.uuid('productVariantId').references('productVariantId').inTable('productVariant').onDelete('CASCADE');
-    t.uuid('warehouseId').notNullable().references('warehouseId').inTable('warehouse').onDelete('CASCADE');
-    t.uuid('warehouseBinId').references('warehouseBinId').inTable('warehouseBin');
+    t.uuid('distributionWarehouseId').notNullable().references('distributionWarehouseId').inTable('distributionWarehouse').onDelete('CASCADE');
+    t.uuid('distributionWarehouseBinId').references('distributionWarehouseBinId').inTable('distributionWarehouseBin');
     t.string('lotNumber', 100).notNullable();
     t.specificType('serialNumbers', 'text[]');
     t.integer('quantity').notNullable().defaultTo(0);
@@ -26,8 +26,8 @@ exports.up = function (knex) {
     t.uuid('createdBy');
     t.index('productId');
     t.index('productVariantId');
-    t.index('warehouseId');
-    t.index('warehouseBinId');
+    t.index('distributionWarehouseId');
+    t.index('distributionWarehouseBinId');
     t.index('lotNumber');
     t.index('expiryDate');
     t.index('quantity');
@@ -35,7 +35,7 @@ exports.up = function (knex) {
     t.index('supplierId');
     t.index('purchaseOrderId');
     t.index('serialNumbers', null, 'gin');
-    t.unique(['productId', 'productVariantId', 'warehouseId', 'lotNumber'], { nullsNotDistinct: true });
+    t.unique(['productId', 'productVariantId', 'distributionWarehouseId', 'lotNumber'], { nullsNotDistinct: true });
   });
 };
 

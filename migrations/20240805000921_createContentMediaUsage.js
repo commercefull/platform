@@ -4,7 +4,7 @@
  */
 exports.up = function (knex) {
   return knex.schema.createTable('contentMediaUsage', t => {
-    t.uuid('contentMediaUsageId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+    t.uuid('contentMediaUsageId').primary().defaultTo(knex.raw('uuidv7()'));
     t.uuid('mediaId').notNullable().references('contentMediaId').inTable('contentMedia').onDelete('CASCADE');
     t.enum('entityType', ['contentPage', 'contentBlock', 'product', 'category', 'merchant', 'blog']).notNullable();
     t.uuid('entityId').notNullable();

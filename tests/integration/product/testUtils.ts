@@ -57,7 +57,7 @@ export const testAttributeOption = {
 export const testCategory = {
   name: 'Test Category',
   description: 'Test category for integration tests',
-  slug: `test-category-${Math.floor(Math.random() * 10000)}`,
+  code: `test-category-${Math.floor(Math.random() * 10000)}`,
   isActive: true,
   sortOrder: 1,
   parentId: null
@@ -71,11 +71,18 @@ export async function createTestProduct(client: AxiosInstance, adminToken: strin
     productData.categoryId = categoryId;
   }
   
-  const response = await client.post('/api/admin/products', productData, {
+  const response = await client.post('/business/products', productData, {
     headers: { Authorization: `Bearer ${adminToken}` }
   });
   
-  return response.data.data.id;
+  // Handle different response formats
+  if (response.data?.data?.id) return response.data.data.id;
+  if (response.data?.data?.productId) return response.data.data.productId;
+  if (response.data?.id) return response.data.id;
+  if (response.data?.productId) return response.data.productId;
+  
+  console.error('Failed to create product:', response.data);
+  return null;
 }
 
 // Helper function to create a test product variant
@@ -94,7 +101,7 @@ export async function createTestProductVariant(client: AxiosInstance, adminToken
     ]
   };
   
-  const response = await client.post(`/api/admin/products/${productId}/variants`, variantData, {
+  const response = await client.post(`/business/products/${productId}/variants`, variantData, {
     headers: { Authorization: `Bearer ${adminToken}` }
   });
   
@@ -103,16 +110,23 @@ export async function createTestProductVariant(client: AxiosInstance, adminToken
 
 // Helper function to create a test category
 export async function createTestCategory(client: AxiosInstance, adminToken: string) {
-  const response = await client.post('/api/admin/categories', testCategory, {
+  const response = await client.post('/business/categories', testCategory, {
     headers: { Authorization: `Bearer ${adminToken}` }
   });
   
-  return response.data.data.id;
+  // Handle different response formats
+  if (response.data?.data?.id) return response.data.data.id;
+  if (response.data?.data?.categoryId) return response.data.data.categoryId;
+  if (response.data?.id) return response.data.id;
+  if (response.data?.categoryId) return response.data.categoryId;
+  
+  console.error('Failed to create category:', response.data);
+  return null;
 }
 
 // Helper function to create a test attribute group
 export async function createTestAttributeGroup(client: AxiosInstance, adminToken: string) {
-  const response = await client.post('/api/admin/attribute-groups', testAttributeGroup, {
+  const response = await client.post('/business/attribute-groups', testAttributeGroup, {
     headers: { Authorization: `Bearer ${adminToken}` }
   });
   
@@ -126,7 +140,7 @@ export async function createTestAttribute(client: AxiosInstance, adminToken: str
     attributeGroupId
   };
   
-  const response = await client.post('/api/admin/attributes', attributeData, {
+  const response = await client.post('/business/attributes', attributeData, {
     headers: { Authorization: `Bearer ${adminToken}` }
   });
   
@@ -140,7 +154,7 @@ export async function createTestAttributeOption(client: AxiosInstance, adminToke
     attributeId
   };
   
-  const response = await client.post('/api/admin/attribute-options', optionData, {
+  const response = await client.post('/business/attribute-options', optionData, {
     headers: { Authorization: `Bearer ${adminToken}` }
   });
   
@@ -150,7 +164,16 @@ export async function createTestAttributeOption(client: AxiosInstance, adminToke
 // Setup function to initialize client and test data for product tests
 export async function setupProductTests() {
   const client = createTestClient();
-  const adminToken = await loginTestUser(client, 'admin@example.com', 'adminpassword');
+  // Use merchant login for business routes
+  const loginResponse = await client.post('/business/auth/login', {
+    email: 'merchant@example.com',
+    password: 'password123'
+  });
+  const adminToken = loginResponse.data.accessToken;
+  
+  if (!adminToken) {
+    throw new Error('Failed to get admin token for product tests');
+  }
   
   // Create test category
   const testCategoryId = await createTestCategory(client, adminToken);
@@ -192,17 +215,17 @@ export async function cleanupProductTests(
 ) {
   try {
     // Delete test product (this should cascade delete variants)
-    await client.delete(`/api/admin/products/${testProductId}`, {
+    await client.delete(`/business/products/${testProductId}`, {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
     // Delete test category
-    await client.delete(`/api/admin/categories/${testCategoryId}`, {
+    await client.delete(`/business/categories/${testCategoryId}`, {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
     // Delete test attribute group (this should cascade delete attributes and options)
-    await client.delete(`/api/admin/attribute-groups/${testAttributeGroupId}`, {
+    await client.delete(`/business/attribute-groups/${testAttributeGroupId}`, {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
   } catch (error) {

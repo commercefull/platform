@@ -24,7 +24,7 @@ exports.up = async function (knex) {
       'This is a sample merchant for demonstration purposes',
       'merchant@example.com',
       '555-123-4567',
-      '$2a$10$Rnq.K1xbkBJ9JJ5L2FTK9.HXcT5gn97JOH6yEMBFMfRK.Mz9dUDty',
+      '$2b$10$wADyOBQwHwy0mz49WoGA.OcCrjAAXaYnMhsOrWWQ9FzUmXkrq6.aC',
       'https://example.com',
       'active',
       'verified',

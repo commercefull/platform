@@ -115,8 +115,8 @@ const contentRepo = new ContentRepo();
         const sanitizedTemplate = pageData.template ? {
           id: pageData.template.id,
           name: pageData.template.name,
-          type: pageData.template.type,
-          structure: pageData.template.structure
+          slug: pageData.template.slug,
+          htmlStructure: pageData.template.htmlStructure
         } : undefined;
         
         // Sanitize page data
@@ -164,7 +164,7 @@ const contentRepo = new ContentRepo();
    */
   export const getActiveContentTypes = async (req: Request, res: Response): Promise<void> => {
     try {
-      const contentTypes = await contentRepo.findAllContentTypes('active');
+      const contentTypes = await contentRepo.findAllContentTypes(true);
       
       // Sanitize content types to remove sensitive schema information
       const sanitizedContentTypes = contentTypes.map(type => ({

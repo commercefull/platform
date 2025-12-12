@@ -4,12 +4,12 @@
  */
 exports.up = function (knex) {
   return knex.schema.createTable('inventoryLevel', t => {
-    t.uuid('inventoryLevelId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+    t.uuid('inventoryLevelId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     t.uuid('productId').notNullable().references('productId').inTable('product').onDelete('CASCADE');
     t.uuid('productVariantId').references('productVariantId').inTable('productVariant').onDelete('CASCADE');
-    t.uuid('warehouseId').notNullable().references('warehouseId').inTable('warehouse').onDelete('CASCADE');
+    t.uuid('distributionWarehouseId').notNullable().references('distributionWarehouseId').inTable('distributionWarehouse').onDelete('CASCADE');
     t.boolean('isTracked').notNullable().defaultTo(true);
     t.boolean('isBackorderable').notNullable().defaultTo(false);
     t.boolean('isPurchasableOutOfStock').notNullable().defaultTo(false);
@@ -33,7 +33,7 @@ exports.up = function (knex) {
     t.uuid('updatedBy');
     t.index('productId');
     t.index('productVariantId');
-    t.index('warehouseId');
+    t.index('distributionWarehouseId');
     t.index('availableQuantity');
     t.index('onHandQuantity');
     t.index('allocatedQuantity');
@@ -42,7 +42,7 @@ exports.up = function (knex) {
     t.index('minStockLevel');
     t.index('reorderStatus');
     t.index('binLocation');
-    t.unique(['productId', 'productVariantId', 'warehouseId'], { nullsNotDistinct: true });
+    t.unique(['productId', 'productVariantId', 'distributionWarehouseId'], { nullsNotDistinct: true });
   });
 };
 

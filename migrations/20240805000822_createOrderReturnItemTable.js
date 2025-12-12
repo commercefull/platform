@@ -1,6 +1,6 @@
 exports.up = function(knex) {
   return knex.schema.createTable('orderReturnItem', t => {
-    t.uuid('orderReturnItemId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+    t.uuid('orderReturnItemId').primary().defaultTo(knex.raw('uuidv7()'));
     t.uuid('orderReturnId').notNullable().references('orderReturnId').inTable('orderReturn').onDelete('CASCADE');
     t.uuid('orderItemId').notNullable().references('orderItemId').inTable('orderItem').onDelete('CASCADE');
     t.integer('quantity').notNullable();

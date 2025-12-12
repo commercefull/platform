@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import taxQueryRepo from '../repos/taxQueryRepo';
 import { AddressInput } from '../taxTypes';
-import { BasketRepo } from '../../basket/repos/basketRepo';
+import basketRepo from '../../basket/infrastructure/repositories/BasketRepository';
 
 // Field mapping dictionaries for TypeScript (camelCase) to database (snake_case) conversion
 const addressFields: Record<string, string> = {
@@ -269,7 +269,7 @@ export const calculateTaxForBasket = async (req: Request, res: Response) => {
     // If not, this would need to be implemented based on your application structure
     try {
       // Get the basket with items
-      const basket = await (new BasketRepo()).findById(basketId);
+      const basket = await basketRepo.findById(basketId);
 
       if (!basket) {
         res.status(404).json({ error: 'Basket not found' });
@@ -310,7 +310,7 @@ export const calculateTaxForBasket = async (req: Request, res: Response) => {
         dbItems,
         dbShippingAddr,
         dbBillingAddr,
-        basket.subTotal,
+        basket.subtotal.amount,
         0,
         customerId,
         merchantId

@@ -4,7 +4,7 @@
  */
 exports.up = function (knex) {
   return knex.schema.createTable('contentMediaFolder', t => {
-    t.uuid('contentMediaFolderId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+    t.uuid('contentMediaFolderId').primary().defaultTo(knex.raw('uuidv7()'));
     t.string('name', 255).notNullable();
     t.uuid('parentId').references('contentMediaFolderId').inTable('contentMediaFolder');
     t.string('path', 255);

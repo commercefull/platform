@@ -1,6 +1,6 @@
 exports.up = function(knex) {
   return knex.schema.createTable('customerLoyaltyTransaction', t => {
-    t.uuid('customerLoyaltyTransactionId').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+    t.uuid('customerLoyaltyTransactionId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     t.uuid('accountId').notNullable().references('customerLoyaltyAccountId').inTable('customerLoyaltyAccount').onDelete('CASCADE');
