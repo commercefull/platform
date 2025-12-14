@@ -9,6 +9,10 @@ module.exports = {
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   verbose: true,
   testTimeout: 30000,
+  // Force Jest to exit after tests complete to avoid open handle warnings
+  forceExit: true,
+  // Detect open handles for debugging (can be disabled in CI)
+  detectOpenHandles: false,
   collectCoverage: true,
   collectCoverageFrom: [
     'features/**/*.ts',

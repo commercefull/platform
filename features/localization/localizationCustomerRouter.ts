@@ -9,10 +9,10 @@ import * as localizationController from './controllers/localizationCustomerContr
 const router = express.Router();
 
 // Public routes (no auth required)
-router.get('/locales', localizationController.getActiveLocales);
-router.get('/locales/:code', localizationController.getLocaleByCode);
-router.get('/countries', localizationController.getActiveCountries);
-router.get('/countries/:code', localizationController.getCountryByCode);
-router.get('/detect', localizationController.detectLocale);
+router.get('/localization/locales', localizationController.getActiveLocales);
+router.get('/localization/locales/:code', localizationController.getLocaleByCode);
+router.get('/localization/countries', localizationController.getActiveCountries);
+router.get('/localization/countries/:code', localizationController.getCountryByCode);
+router.get('/localization/detect', localizationController.detectLocale);
 
 export const localizationCustomerRouter = router;

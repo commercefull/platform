@@ -86,8 +86,7 @@ describe('Shipping Feature Tests', () => {
 
       const response = await client.post('/api/shipping/rates', rateRequest);
 
-      // May return 200 with rates or error if no carriers configured
-      expect([200, 400, 404]).toContain(response.status);
+      expect(response.status).toBe(200);
     });
   });
 
@@ -109,8 +108,7 @@ describe('Shipping Feature Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
 
-      // May return 201 or error if order/carrier doesn't exist
-      expect([201, 400, 404]).toContain(response.status);
+      expect(response.status).toBe(201);
     });
   });
 
@@ -122,8 +120,7 @@ describe('Shipping Feature Tests', () => {
     it('UC-SHP-010: should get tracking info', async () => {
       const response = await client.get('/api/shipping/tracking/TEST123456');
 
-      // May return 200 with tracking or 404 if not found
-      expect([200, 404]).toContain(response.status);
+      expect(response.status).toBe(200);
     });
   });
 
@@ -134,14 +131,14 @@ describe('Shipping Feature Tests', () => {
   describe('Authorization', () => {
     it('should require auth for carrier management', async () => {
       const response = await client.get('/business/shipping/carriers');
-      expect([401, 403]).toContain(response.status);
+      expect(response.status).toBe(401);
     });
 
     it('should reject invalid tokens', async () => {
       const response = await client.get('/business/shipping/carriers', {
         headers: { Authorization: 'Bearer invalid-token' }
       });
-      expect([401, 403]).toContain(response.status);
+      expect(response.status).toBe(401);
     });
   });
 });

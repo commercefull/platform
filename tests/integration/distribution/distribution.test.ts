@@ -411,15 +411,11 @@ describe('Distribution Feature Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
-      // May succeed or fail depending on rate configuration
-      expect([200, 400]).toContain(response.status);
-      
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-        expect(response.data.data).toHaveProperty('totalRate');
-        expect(response.data.data).toHaveProperty('currency');
-        expect(response.data.data).toHaveProperty('isFreeShipping');
-      }
+      expect(response.status).toBe(200);
+      expect(response.data.success).toBe(true);
+      expect(response.data.data).toHaveProperty('totalRate');
+      expect(response.data.data).toHaveProperty('currency');
+      expect(response.data.data).toHaveProperty('isFreeShipping');
     });
 
     it('should get available shipping methods for a destination', async () => {
@@ -432,14 +428,10 @@ describe('Distribution Feature Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
-      // May succeed or fail depending on configuration
-      expect([200, 400]).toContain(response.status);
-      
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-        expect(response.data.data).toHaveProperty('methods');
-        expect(Array.isArray(response.data.data.methods)).toBe(true);
-      }
+      expect(response.status).toBe(200);
+      expect(response.data.success).toBe(true);
+      expect(response.data.data).toHaveProperty('methods');
+      expect(Array.isArray(response.data.data.methods)).toBe(true);
     });
 
     it('should return error for missing destination country', async () => {
@@ -468,15 +460,11 @@ describe('Distribution Feature Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
-      // May succeed or return 404 if no warehouses configured
-      expect([200, 404]).toContain(response.status);
-      
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-        expect(response.data.data).toHaveProperty('bestWarehouse');
-        expect(response.data.data.bestWarehouse).toHaveProperty('id');
-        expect(response.data.data.bestWarehouse).toHaveProperty('name');
-      }
+      expect(response.status).toBe(200);
+      expect(response.data.success).toBe(true);
+      expect(response.data.data).toHaveProperty('bestWarehouse');
+      expect(response.data.data.bestWarehouse).toHaveProperty('id');
+      expect(response.data.data.bestWarehouse).toHaveProperty('name');
     });
 
     it('should return error for missing destination country', async () => {
@@ -775,24 +763,24 @@ describe('Distribution Feature Tests', () => {
   describe('Authorization', () => {
     it('should require auth for distribution center management', async () => {
       const response = await client.get('/business/distribution/centers');
-      expect([401, 403]).toContain(response.status);
+      expect(response.status).toBe(401);
     });
 
     it('should require auth for shipping zone management', async () => {
       const response = await client.get('/business/distribution/shipping-zones');
-      expect([401, 403]).toContain(response.status);
+      expect(response.status).toBe(401);
     });
 
     it('should require auth for fulfillment management', async () => {
       const response = await client.get('/business/distribution/fulfillments');
-      expect([401, 403]).toContain(response.status);
+      expect(response.status).toBe(401);
     });
 
     it('should reject invalid tokens', async () => {
       const response = await client.get('/business/distribution/centers', {
         headers: { Authorization: 'Bearer invalid-token' }
       });
-      expect([401, 403]).toContain(response.status);
+      expect(response.status).toBe(401);
     });
   });
 
@@ -804,25 +792,17 @@ describe('Distribution Feature Tests', () => {
     it('should get active distribution centers with limited information', async () => {
       const response = await client.get('/api/distribution/centers');
       
-      // May return 200 or 404 depending on public routes configuration
-      expect([200, 404]).toContain(response.status);
-      
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-        expect(Array.isArray(response.data.data)).toBe(true);
-      }
+      expect(response.status).toBe(200);
+      expect(response.data.success).toBe(true);
+      expect(Array.isArray(response.data.data)).toBe(true);
     });
 
     it('should get active shipping methods with public information', async () => {
       const response = await client.get('/api/distribution/shipping-methods');
       
-      // May return 200 or 404 depending on public routes configuration
-      expect([200, 404]).toContain(response.status);
-      
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-        expect(Array.isArray(response.data.data)).toBe(true);
-      }
+      expect(response.status).toBe(200);
+      expect(response.data.success).toBe(true);
+      expect(Array.isArray(response.data.data)).toBe(true);
     });
   });
 });

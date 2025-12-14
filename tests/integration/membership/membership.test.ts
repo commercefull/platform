@@ -261,7 +261,7 @@ describe('Membership Tests', () => {
     it('should deny access to membership details without authentication', async () => {
       const response = await client.get('/api/membership/my-membership');
       
-      expect([401, 403]).toContain(response.status);
+      expect(response.status).toBe(401);
       expect(response.data.success).toBe(false);
     });
   });

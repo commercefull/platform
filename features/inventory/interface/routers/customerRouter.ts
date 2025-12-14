@@ -1,13 +1,15 @@
 /**
  * Inventory Customer Router
+ * 
+ * Public routes for checking product availability.
  */
 
 import express from 'express';
-import * as inventoryController from '../controllers/InventoryController';
+import { checkAvailability } from '../controllers/inventoryController';
 
 const router = express.Router();
 
-router.get('/availability/:sku', inventoryController.checkAvailability);
+// Check product availability by SKU
+router.get('/inventory/availability/:sku', checkAvailability);
 
 export const inventoryCustomerRouter = router;
-export default router;

@@ -218,8 +218,7 @@ describe('Warehouse Feature Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
 
-      // May return 201 or error if orders don't exist
-      expect([201, 400, 404]).toContain(response.status);
+      expect(response.status).toBe(201);
     });
   });
 
@@ -230,14 +229,14 @@ describe('Warehouse Feature Tests', () => {
   describe('Authorization', () => {
     it('should require auth for warehouse list', async () => {
       const response = await client.get('/business/warehouses');
-      expect([401, 403]).toContain(response.status);
+      expect(response.status).toBe(401);
     });
 
     it('should reject invalid tokens', async () => {
       const response = await client.get('/business/warehouses', {
         headers: { Authorization: 'Bearer invalid-token' }
       });
-      expect([401, 403]).toContain(response.status);
+      expect(response.status).toBe(401);
     });
   });
 });

@@ -11,14 +11,24 @@ exports.up = function(knex) {
     t.string('reason', 255);
     t.string('status', 50).notNullable().defaultTo('pending');
     t.string('refundId', 255);
-    
+    t.uuid('paymentTransactionId').references('paymentTransactionId').inTable('paymentTransaction').onDelete('CASCADE');
+    t.string('externalRefundId', 255);
+    t.string('currency', 3).defaultTo('USD');
+    t.jsonb('gatewayResponse');
+    t.string('errorCode', 100);
+    t.text('errorMessage');
+    t.timestamp('processedAt');
+    t.jsonb('metadata');
 
+    // Add indexes
     t.index('orderPaymentId');
     t.index('orderId');
     t.index('transactionId');
     t.index('status');
     t.index('refundId');
     t.index('createdAt');
+    t.index('paymentTransactionId');
+    t.index('externalRefundId');
   });
 };
 

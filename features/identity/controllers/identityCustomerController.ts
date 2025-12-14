@@ -6,6 +6,13 @@ import {
   verifyAccessToken,
   parseExpirationDate
 } from '../utils/jwtHelpers';
+import {
+  emitCustomerLogin,
+  emitCustomerRegistered,
+  emitCustomerTokenRefreshed,
+  emitCustomerPasswordResetRequested,
+  emitCustomerPasswordResetCompleted
+} from '../domain/events/emitIdentityEvent';
 
 // Environment configuration with secure defaults
 const CUSTOMER_JWT_SECRET = process.env.CUSTOMER_JWT_SECRET || 'customer-secret-key-should-be-in-env';
@@ -44,6 +51,14 @@ export const loginCustomer = async (req: Request, res: Response): Promise<void> 
 
     // Track login activity
     await customerRepo.updateCustomerLoginTimestamp(customer.customerId);
+
+    // Emit login event
+    emitCustomerLogin({
+      customerId: customer.customerId,
+      email: customer.email,
+      ipAddress: req.ip,
+      userAgent: req.headers['user-agent']
+    });
 
     // Generate access token
     const accessToken = generateAccessToken(
@@ -106,6 +121,14 @@ export const registerCustomer = async (req: Request, res: Response): Promise<voi
       phone,
       isActive: true,
       isVerified: false
+    });
+
+    // Emit registration event
+    emitCustomerRegistered({
+      customerId: newCustomer.customerId,
+      email: newCustomer.email,
+      firstName: newCustomer.firstName || '',
+      lastName: newCustomer.lastName || ''
     });
 
     // Generate access token for immediate login
@@ -269,6 +292,12 @@ export const renewAccessToken = async (req: Request, res: Response): Promise<voi
 
     // Mark refresh token as used (optional - for tracking)
     await refreshTokenRepo.markUsed(refreshToken);
+
+    // Emit token refreshed event
+    emitCustomerTokenRefreshed({
+      userId: customer.customerId,
+      ipAddress: req.ip
+    });
 
     res.json({
       success: true,

@@ -69,4 +69,3 @@ router.delete('/me/addresses/:addressId', customerController.deleteAddress);
 router.post('/me/addresses/:addressId/default', customerController.setDefaultAddress);
 
 export const customerRouter = router;
-export default router;

@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
-import { NotificationService } from "../services/notificationService";
-import { BaseNotification } from "../domain/notification";
+import { NotificationRepo, Notification } from "../repos/notificationRepo";
 
 // Extend Express Request with User
 interface UserRequest extends Request {
@@ -16,8 +15,125 @@ interface UserRequest extends Request {
   };
 }
 
-// Initialize the notification service
-const notificationService = new NotificationService();
+// Initialize the notification repository
+const notificationRepo = new NotificationRepo();
+
+/**
+ * Get all notifications (admin)
+ */
+export const getAllNotifications = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const limit = parseInt(req.query.limit as string) || 50;
+    const offset = parseInt(req.query.offset as string) || 0;
+    
+    const notifications = await notificationRepo.findAll(limit, offset);
+    
+    res.status(200).json({
+      success: true,
+      data: notifications,
+      pagination: { limit, offset, total: notifications.length }
+    });
+  } catch (error) {
+    console.error('Error fetching notifications:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch notifications' });
+  }
+};
+
+/**
+ * Get notification by ID (admin)
+ */
+export const getNotificationById = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const notification = await notificationRepo.findById(id);
+    
+    if (!notification) {
+      res.status(404).json({ success: false, message: 'Notification not found' });
+      return;
+    }
+    
+    res.status(200).json({ success: true, data: notification });
+  } catch (error) {
+    console.error('Error fetching notification:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch notification' });
+  }
+};
+
+/**
+ * Create a new notification (admin)
+ */
+export const createNotification = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { userId, userType, type, title, content, channel, priority, category, data, metadata } = req.body;
+    
+    if (!userId || !type || !title || !content || !channel) {
+      res.status(400).json({ success: false, message: 'userId, type, title, content, and channel are required' });
+      return;
+    }
+    
+    const notification = await notificationRepo.create({
+      userId,
+      userType: userType || 'customer',
+      type,
+      title,
+      content,
+      channel,
+      priority: priority || 'normal',
+      category,
+      data,
+      metadata
+    });
+    
+    res.status(201).json({ success: true, data: notification });
+  } catch (error) {
+    console.error('Error creating notification:', error);
+    res.status(500).json({ success: false, message: 'Failed to create notification' });
+  }
+};
+
+/**
+ * Update a notification (admin)
+ */
+export const updateNotification = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { title, content, priority, category, data, metadata } = req.body;
+    
+    const existing = await notificationRepo.findById(id);
+    if (!existing) {
+      res.status(404).json({ success: false, message: 'Notification not found' });
+      return;
+    }
+    
+    const updated = await notificationRepo.update(id, { title, content, priority, category, data, metadata });
+    
+    res.status(200).json({ success: true, data: updated });
+  } catch (error) {
+    console.error('Error updating notification:', error);
+    res.status(500).json({ success: false, message: 'Failed to update notification' });
+  }
+};
+
+/**
+ * Mark notification as sent (admin)
+ */
+export const markNotificationAsSent = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    
+    const notification = await notificationRepo.markAsSent(id);
+    
+    if (!notification) {
+      res.status(404).json({ success: false, message: 'Notification not found' });
+      return;
+    }
+    
+    res.status(200).json({ success: true, data: notification });
+  } catch (error) {
+    console.error('Error marking notification as sent:', error);
+    res.status(500).json({ success: false, message: 'Failed to mark notification as sent' });
+  }
+};
 
 /**
  * Get unread notifications for the current user
@@ -31,7 +147,7 @@ export const getUnreadNotifications = async (req: UserRequest, res: Response): P
   }
   
   try {
-    const notifications = await notificationService.getUnreadNotifications(userId);
+    const notifications = await notificationRepo.findUnreadByUser(userId);
     res.json({ success: true, data: notifications });
   } catch (error) {
     console.error('Error fetching unread notifications:', error);
@@ -53,7 +169,7 @@ export const getRecentNotifications = async (req: UserRequest, res: Response): P
   const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 50;
   
   try {
-    const notifications = await notificationService.getRecentNotifications(userId, limit);
+    const notifications = await notificationRepo.findByUser(userId, limit);
     res.json({ success: true, data: notifications });
   } catch (error) {
     console.error('Error fetching recent notifications:', error);
@@ -74,7 +190,7 @@ export const markNotificationAsRead = async (req: UserRequest, res: Response): P
   }
   
   try {
-    const updatedNotification = await notificationService.markAsRead(id);
+    const updatedNotification = await notificationRepo.markAsRead(id);
     
     if (!updatedNotification) {
       res.status(404).json({ success: false, message: 'Notification not found' });
@@ -106,7 +222,7 @@ export const markAllNotificationsAsRead = async (req: UserRequest, res: Response
   }
   
   try {
-    const updatedCount = await notificationService.markAllAsRead(userId);
+    const updatedCount = await notificationRepo.markAllAsRead(userId);
     res.json({ success: true, data: { count: updatedCount } });
   } catch (error) {
     console.error('Error marking all notifications as read:', error);
@@ -128,15 +244,19 @@ export const deleteNotification = async (req: UserRequest, res: Response): Promi
   
   try {
     // First, check if the notification belongs to the user
-    const notification = await notificationService.getUnreadNotifications(userId);
-    const userNotification = notification?.find(n => n.id === id);
+    const notification = await notificationRepo.findById(id);
     
-    if (!userNotification) {
+    if (!notification) {
       res.status(404).json({ success: false, message: 'Notification not found' });
       return;
     }
     
-    const deleted = await notificationService.deleteNotification(id);
+    if (notification.userId !== userId) {
+      res.status(403).json({ success: false, message: 'Unauthorized' });
+      return;
+    }
+    
+    const deleted = await notificationRepo.delete(id);
     
     if (!deleted) {
       res.status(404).json({ success: false, message: 'Notification not found or already deleted' });
@@ -162,7 +282,7 @@ export const getUnreadCount = async (req: UserRequest, res: Response): Promise<v
   }
   
   try {
-    const count = await notificationService.getUnreadCount(userId);
+    const count = await notificationRepo.countUnread(userId);
     res.json({ success: true, data: { count } });
   } catch (error) {
     console.error('Error getting unread notification count:', error);

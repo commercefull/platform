@@ -1,11 +1,9 @@
 import { queryOne, query } from "../../../libs/db";
-import { unixTimestamp } from "../../../libs/date";
-import { generateUUID } from "../../../libs/uuid";
+import { Table } from "../../../libs/db/types";
 
 // Product status and visibility enums to match database schema
 export enum ProductStatus {
   DRAFT = "draft",
-  PENDING_REVIEW = "pending_review",
   ACTIVE = "active",
   INACTIVE = "inactive",
   DISCONTINUED = "discontinued",
@@ -14,226 +12,171 @@ export enum ProductStatus {
 
 export enum ProductVisibility {
   VISIBLE = "visible",
-  HIDDEN = "hidden",
-  CATALOG_ONLY = "catalog_only",
-  SEARCH_ONLY = "search_only",
-  FEATURED = "featured"
+  NOT_VISIBLE = "not_visible",
+  CATALOG = "catalog",
+  SEARCH = "search"
 }
 
-export type Product = {
-  id: string;
-  createdAt: number;
-  updatedAt: number;
+export enum ProductType {
+  SIMPLE = "simple",
+  CONFIGURABLE = "configurable",
+  GROUPED = "grouped",
+  VIRTUAL = "virtual",
+  DOWNLOADABLE = "downloadable",
+  BUNDLE = "bundle",
+  SUBSCRIPTION = "subscription"
+}
+
+// Product interface matching database schema (camelCase)
+export interface Product {
+  productId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  sku: string;
   name: string;
-  description: string;
-  productTypeId: string;
-  categoryId?: string;
-  
-  // Fields from database schema
-  sku?: string;
+  slug: string;
+  description?: string;
+  shortDescription?: string;
+  brandId?: string;
+  categoryId?: string; // Primary category ID (from productCategoryMap)
+  type: ProductType;
   status: ProductStatus;
   visibility: ProductVisibility;
-  shortDescription?: string;
-  metaTitle?: string;
-  metaDescription?: string;
-  metaKeywords?: string;
-  slug?: string;
-  isFeatured: boolean;
-  isVirtual: boolean;
-  isDownloadable: boolean;
-  isSubscription: boolean;
-  isTaxable: boolean;
+  price: number;
+  basePrice?: number;
+  salePrice?: number;
+  costPrice?: number;
+  compareAtPrice?: number;
   taxClass?: string;
+  taxRate?: number;
+  isTaxable: boolean;
+  currency: string;
+  currencyCode?: string;
+  isInventoryManaged: boolean;
+  minOrderQuantity?: number;
+  maxOrderQuantity?: number;
+  orderIncrementQuantity?: number;
   weight?: number;
   weightUnit?: string;
   length?: number;
   width?: number;
   height?: number;
   dimensionUnit?: string;
-  basePrice?: number;
-  salePrice?: number;
-  cost?: number;
-  currencyCode?: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  metaKeywords?: string;
+  hsCode?: string;
+  countryOfOrigin?: string;
+  isFeatured: boolean;
+  isNew: boolean;
+  isBestseller: boolean;
+  warningThreshold?: number;
+  preorderEnabled: boolean;
+  preorderReleaseDate?: Date;
+  preorderAllowance?: number;
+  averageRating?: number;
+  reviewCount: number;
+  customFields?: Record<string, any>;
+  seoData?: Record<string, any>;
+  relatedProducts?: string[];
+  crossSellProducts?: string[];
+  upSellProducts?: string[];
+  isVirtual: boolean;
+  isDownloadable: boolean;
+  isSubscription: boolean;
   primaryImageId?: string;
-  publishedAt?: number;
-  deletedAt?: number;
+  publishedAt?: Date;
+  deletedAt?: Date;
   userId?: string;
   merchantId?: string;
-  brandId?: string;
-  minOrderQuantity?: number;
-  maxOrderQuantity?: number;
   returnPolicy?: string;
   warranty?: string;
   externalId?: string;
   hasVariants: boolean;
   variantAttributes?: Record<string, any>;
-  metadata?: Record<string, any>;
+  createdBy?: string;
+  updatedBy?: string;
 }
 
+// Alias for backward compatibility
 export type ProductListItem = Pick<Product, 
-  'id' | 'name' | 'sku' | 'status' | 'visibility' | 'basePrice' | 
+  'productId' | 'name' | 'sku' | 'status' | 'visibility' | 'price' | 'basePrice' | 
   'salePrice' | 'isFeatured' | 'hasVariants' | 'createdAt' | 'updatedAt'
->;
+> & { id?: string }; // Include id alias for compatibility
 
-export type ProductCreateProps = Omit<Product, 'id' | 'createdAt' | 'updatedAt'>;
+export type ProductCreateProps = Omit<Product, 'productId' | 'createdAt' | 'updatedAt'>;
 
-export type ProductUpdateProps = Partial<Omit<Product, 'id' | 'createdAt' | 'updatedAt'>>;
+export type ProductUpdateProps = Partial<Omit<Product, 'productId' | 'createdAt' | 'updatedAt'>>;
 
-export type ProductFilterOptions = {
+export interface ProductFilterOptions {
   status?: ProductStatus | ProductStatus[];
   visibility?: ProductVisibility | ProductVisibility[];
-  categoryId?: string;
+  type?: ProductType | ProductType[];
+  brandId?: string;
   isFeatured?: boolean;
   isVirtual?: boolean;
   hasVariants?: boolean;
   priceMin?: number;
   priceMax?: number;
   merchantId?: string;
-  brandId?: string;
   searchTerm?: string;
   limit?: number;
   offset?: number;
   orderBy?: string;
   orderDirection?: 'ASC' | 'DESC';
-};
-
-// Define DB column to TS property mapping
-const dbToTsMapping: Record<string, string> = {
-  id: 'id',
-  created_at: 'createdAt',
-  updated_at: 'updatedAt',
-  name: 'name',
-  description: 'description',
-  product_type_id: 'productTypeId',
-  category_id: 'categoryId',
-  sku: 'sku',
-  status: 'status',
-  visibility: 'visibility',
-  short_description: 'shortDescription',
-  meta_title: 'metaTitle',
-  meta_description: 'metaDescription',
-  meta_keywords: 'metaKeywords',
-  slug: 'slug',
-  is_featured: 'isFeatured',
-  is_virtual: 'isVirtual',
-  is_downloadable: 'isDownloadable',
-  is_subscription: 'isSubscription',
-  is_taxable: 'isTaxable',
-  tax_class: 'taxClass',
-  weight: 'weight',
-  weight_unit: 'weightUnit',
-  length: 'length',
-  width: 'width',
-  height: 'height',
-  dimension_unit: 'dimensionUnit',
-  base_price: 'basePrice',
-  sale_price: 'salePrice',
-  cost: 'cost',
-  currency_code: 'currencyCode',
-  primary_image_id: 'primaryImageId',
-  published_at: 'publishedAt',
-  deleted_at: 'deletedAt',
-  user_id: 'userId',
-  merchant_id: 'merchantId',
-  brand_id: 'brandId',
-  min_order_quantity: 'minOrderQuantity',
-  max_order_quantity: 'maxOrderQuantity',
-  return_policy: 'returnPolicy',
-  warranty: 'warranty',
-  external_id: 'externalId',
-  has_variants: 'hasVariants',
-  variant_attributes: 'variantAttributes',
-  metadata: 'metadata'
-};
-
-// Define TS property to DB column mapping
-const tsToDbMapping = Object.entries(dbToTsMapping).reduce((acc, [dbCol, tsProp]) => {
-  acc[tsProp] = dbCol;
-  return acc;
-}, {} as Record<string, string>);
+}
 
 export class ProductRepo {
-  /**
-   * Convert snake_case column name to camelCase property name
-   */
-  private dbToTs(columnName: string): string {
-    return dbToTsMapping[columnName] || columnName;
-  }
-
-  /**
-   * Convert camelCase property name to snake_case column name
-   */
-  private tsToDb(propertyName: string): string {
-    return tsToDbMapping[propertyName] || propertyName;
-  }
-
-  /**
-   * Generate field mapping for SELECT statements
-   */
-  private generateSelectFields(fields: string[] = Object.values(dbToTsMapping)): string {
-    return fields.map(field => {
-      const dbField = this.tsToDb(field);
-      return `"${dbField}" AS "${field}"`;
-    }).join(', ');
-  }
+  private readonly tableName = Table.Product;
 
   /**
    * Find a product by its ID
    */
   async findById(id: string): Promise<Product | null> {
-    const selectFields = Object.keys(dbToTsMapping).map(dbCol => 
-      `"${dbCol}" AS "${dbToTsMapping[dbCol]}"`
-    ).join(', ');
-    
-    return await queryOne<Product>(
-      `SELECT ${selectFields} FROM "public"."product" WHERE "id" = $1 AND "deletedAt" IS NULL`, 
-      [id]
-    );
+    const sql = `
+      SELECT * FROM "${this.tableName}" 
+      WHERE "productId" = $1 AND "deletedAt" IS NULL
+    `;
+    return await queryOne<Product>(sql, [id]);
   }
 
   /**
    * Find a product by its slug
    */
   async findBySlug(slug: string): Promise<Product | null> {
-    const selectFields = Object.keys(dbToTsMapping).map(dbCol => 
-      `"${dbCol}" AS "${dbToTsMapping[dbCol]}"`
-    ).join(', ');
-    
-    return await queryOne<Product>(
-      `SELECT ${selectFields} FROM "public"."product" WHERE "slug" = $1 AND "deletedAt" IS NULL`, 
-      [slug]
-    );
+    const sql = `
+      SELECT * FROM "${this.tableName}" 
+      WHERE "slug" = $1 AND "deletedAt" IS NULL
+    `;
+    return await queryOne<Product>(sql, [slug]);
   }
 
   /**
    * Find a product by its SKU
    */
   async findBySku(sku: string): Promise<Product | null> {
-    const selectFields = Object.keys(dbToTsMapping).map(dbCol => 
-      `"${dbCol}" AS "${dbToTsMapping[dbCol]}"`
-    ).join(', ');
-    
-    return await queryOne<Product>(
-      `SELECT ${selectFields} FROM "public"."product" WHERE "sku" = $1 AND "deletedAt" IS NULL`, 
-      [sku]
-    );
+    const sql = `
+      SELECT * FROM "${this.tableName}" 
+      WHERE "sku" = $1 AND "deletedAt" IS NULL
+    `;
+    return await queryOne<Product>(sql, [sku]);
   }
 
   /**
    * Get all products with pagination and filtering
    */
-  async findAll(options: ProductFilterOptions = {}): Promise<ProductListItem[]> {
+  async findAll(options: ProductFilterOptions = {}): Promise<Product[]> {
     const {
       status,
       visibility,
-      categoryId,
+      type,
+      brandId,
       isFeatured,
       isVirtual,
       hasVariants,
       priceMin,
       priceMax,
       merchantId,
-      brandId,
       searchTerm,
       limit = 50,
       offset = 0,
@@ -241,94 +184,94 @@ export class ProductRepo {
       orderDirection = 'DESC'
     } = options;
 
-    // List of fields for ProductListItem
-    const listItemFields = [
-      'id', 'name', 'sku', 'status', 'visibility', 'basePrice', 
-      'salePrice', 'isFeatured', 'hasVariants', 'createdAt', 'updatedAt'
-    ];
-    
-    // Generate SELECT field mapping
-    const selectFields = listItemFields.map(field => {
-      const dbField = this.tsToDb(field);
-      return `"${dbField}" AS "${field}"`;
-    }).join(', ');
-
-    let sql = `SELECT ${selectFields} FROM "public"."product" WHERE "deletedAt" IS NULL`;
+    let sql = `SELECT * FROM "${this.tableName}" WHERE "deletedAt" IS NULL`;
     const params: any[] = [];
-    
-    // Apply filters if provided
+    let paramIndex = 1;
+
     if (status) {
       if (Array.isArray(status)) {
-        sql += ` AND "status" IN (${status.map((_, i) => `$${params.length + i + 1}`).join(', ')})`;
+        const placeholders = status.map(() => `$${paramIndex++}`).join(', ');
+        sql += ` AND "status" IN (${placeholders})`;
         params.push(...status);
       } else {
-        sql += ` AND "status" = $${params.length + 1}`;
+        sql += ` AND "status" = $${paramIndex++}`;
         params.push(status);
       }
     }
-    
+
     if (visibility) {
       if (Array.isArray(visibility)) {
-        sql += ` AND "visibility" IN (${visibility.map((_, i) => `$${params.length + i + 1}`).join(', ')})`;
+        const placeholders = visibility.map(() => `$${paramIndex++}`).join(', ');
+        sql += ` AND "visibility" IN (${placeholders})`;
         params.push(...visibility);
       } else {
-        sql += ` AND "visibility" = $${params.length + 1}`;
+        sql += ` AND "visibility" = $${paramIndex++}`;
         params.push(visibility);
       }
     }
-    
-    if (categoryId) {
-      sql += ` AND "category_id" = $${params.length + 1}`;
-      params.push(categoryId);
+
+    if (type) {
+      if (Array.isArray(type)) {
+        const placeholders = type.map(() => `$${paramIndex++}`).join(', ');
+        sql += ` AND "type" IN (${placeholders})`;
+        params.push(...type);
+      } else {
+        sql += ` AND "type" = $${paramIndex++}`;
+        params.push(type);
+      }
     }
-    
-    if (isFeatured !== undefined) {
-      sql += ` AND "is_featured" = $${params.length + 1}`;
-      params.push(isFeatured);
-    }
-    
-    if (isVirtual !== undefined) {
-      sql += ` AND "is_virtual" = $${params.length + 1}`;
-      params.push(isVirtual);
-    }
-    
-    if (hasVariants !== undefined) {
-      sql += ` AND "has_variants" = $${params.length + 1}`;
-      params.push(hasVariants);
-    }
-    
-    if (priceMin !== undefined) {
-      sql += ` AND "base_price" >= $${params.length + 1}`;
-      params.push(priceMin);
-    }
-    
-    if (priceMax !== undefined) {
-      sql += ` AND "base_price" <= $${params.length + 1}`;
-      params.push(priceMax);
-    }
-    
-    if (merchantId) {
-      sql += ` AND "merchantId" = $${params.length + 1}`;
-      params.push(merchantId);
-    }
-    
+
     if (brandId) {
-      sql += ` AND "brand_id" = $${params.length + 1}`;
+      sql += ` AND "brandId" = $${paramIndex++}`;
       params.push(brandId);
     }
-    
-    if (searchTerm) {
-      sql += ` AND ("name" ILIKE $${params.length + 1} OR "description" ILIKE $${params.length + 2} OR "sku" ILIKE $${params.length + 3})`;
-      const searchPattern = `%${searchTerm}%`;
-      params.push(searchPattern, searchPattern, searchPattern);
+
+    if (isFeatured !== undefined) {
+      sql += ` AND "isFeatured" = $${paramIndex++}`;
+      params.push(isFeatured);
     }
-    
-    // Apply ordering and pagination
-    const dbOrderBy = this.tsToDb(orderBy);
-    sql += ` ORDER BY "${dbOrderBy}" ${orderDirection} LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
+
+    if (isVirtual !== undefined) {
+      sql += ` AND "isVirtual" = $${paramIndex++}`;
+      params.push(isVirtual);
+    }
+
+    if (hasVariants !== undefined) {
+      sql += ` AND "hasVariants" = $${paramIndex++}`;
+      params.push(hasVariants);
+    }
+
+    if (priceMin !== undefined) {
+      sql += ` AND "price" >= $${paramIndex++}`;
+      params.push(priceMin);
+    }
+
+    if (priceMax !== undefined) {
+      sql += ` AND "price" <= $${paramIndex++}`;
+      params.push(priceMax);
+    }
+
+    if (merchantId) {
+      sql += ` AND "merchantId" = $${paramIndex++}`;
+      params.push(merchantId);
+    }
+
+    if (searchTerm) {
+      sql += ` AND ("name" ILIKE $${paramIndex} OR "description" ILIKE $${paramIndex} OR "sku" ILIKE $${paramIndex})`;
+      params.push(`%${searchTerm}%`);
+      paramIndex++;
+    }
+
+    // Validate orderBy to prevent SQL injection
+    const validOrderColumns = ['createdAt', 'updatedAt', 'name', 'price', 'sku', 'status'];
+    const safeOrderBy = validOrderColumns.includes(orderBy) ? orderBy : 'createdAt';
+    const safeDirection = orderDirection === 'ASC' ? 'ASC' : 'DESC';
+
+    sql += ` ORDER BY "${safeOrderBy}" ${safeDirection}`;
+    sql += ` LIMIT $${paramIndex++} OFFSET $${paramIndex++}`;
     params.push(limit, offset);
-    
-    return await query<ProductListItem[]>(sql, params) || [];
+
+    return await query<Product[]>(sql, params) || [];
   }
 
   /**
@@ -338,87 +281,95 @@ export class ProductRepo {
     const {
       status,
       visibility,
-      categoryId,
+      type,
+      brandId,
       isFeatured,
       isVirtual,
       hasVariants,
       priceMin,
       priceMax,
       merchantId,
-      brandId,
       searchTerm
     } = options;
 
-    let sql = 'SELECT COUNT(*) as count FROM "public"."product" WHERE "deletedAt" IS NULL';
+    let sql = `SELECT COUNT(*) as count FROM "${this.tableName}" WHERE "deletedAt" IS NULL`;
     const params: any[] = [];
-    
-    // Apply filters if provided (same logic as in findAll)
+    let paramIndex = 1;
+
     if (status) {
       if (Array.isArray(status)) {
-        sql += ` AND "status" IN (${status.map((_, i) => `$${params.length + i + 1}`).join(', ')})`;
+        const placeholders = status.map(() => `$${paramIndex++}`).join(', ');
+        sql += ` AND "status" IN (${placeholders})`;
         params.push(...status);
       } else {
-        sql += ` AND "status" = $${params.length + 1}`;
+        sql += ` AND "status" = $${paramIndex++}`;
         params.push(status);
       }
     }
-    
+
     if (visibility) {
       if (Array.isArray(visibility)) {
-        sql += ` AND "visibility" IN (${visibility.map((_, i) => `$${params.length + i + 1}`).join(', ')})`;
+        const placeholders = visibility.map(() => `$${paramIndex++}`).join(', ');
+        sql += ` AND "visibility" IN (${placeholders})`;
         params.push(...visibility);
       } else {
-        sql += ` AND "visibility" = $${params.length + 1}`;
+        sql += ` AND "visibility" = $${paramIndex++}`;
         params.push(visibility);
       }
     }
-    
-    if (categoryId) {
-      sql += ` AND "category_id" = $${params.length + 1}`;
-      params.push(categoryId);
+
+    if (type) {
+      if (Array.isArray(type)) {
+        const placeholders = type.map(() => `$${paramIndex++}`).join(', ');
+        sql += ` AND "type" IN (${placeholders})`;
+        params.push(...type);
+      } else {
+        sql += ` AND "type" = $${paramIndex++}`;
+        params.push(type);
+      }
     }
-    
-    if (isFeatured !== undefined) {
-      sql += ` AND "is_featured" = $${params.length + 1}`;
-      params.push(isFeatured);
-    }
-    
-    if (isVirtual !== undefined) {
-      sql += ` AND "is_virtual" = $${params.length + 1}`;
-      params.push(isVirtual);
-    }
-    
-    if (hasVariants !== undefined) {
-      sql += ` AND "has_variants" = $${params.length + 1}`;
-      params.push(hasVariants);
-    }
-    
-    if (priceMin !== undefined) {
-      sql += ` AND "base_price" >= $${params.length + 1}`;
-      params.push(priceMin);
-    }
-    
-    if (priceMax !== undefined) {
-      sql += ` AND "base_price" <= $${params.length + 1}`;
-      params.push(priceMax);
-    }
-    
-    if (merchantId) {
-      sql += ` AND "merchantId" = $${params.length + 1}`;
-      params.push(merchantId);
-    }
-    
+
     if (brandId) {
-      sql += ` AND "brand_id" = $${params.length + 1}`;
+      sql += ` AND "brandId" = $${paramIndex++}`;
       params.push(brandId);
     }
-    
-    if (searchTerm) {
-      sql += ` AND ("name" ILIKE $${params.length + 1} OR "description" ILIKE $${params.length + 2} OR "sku" ILIKE $${params.length + 3})`;
-      const searchPattern = `%${searchTerm}%`;
-      params.push(searchPattern, searchPattern, searchPattern);
+
+    if (isFeatured !== undefined) {
+      sql += ` AND "isFeatured" = $${paramIndex++}`;
+      params.push(isFeatured);
     }
-    
+
+    if (isVirtual !== undefined) {
+      sql += ` AND "isVirtual" = $${paramIndex++}`;
+      params.push(isVirtual);
+    }
+
+    if (hasVariants !== undefined) {
+      sql += ` AND "hasVariants" = $${paramIndex++}`;
+      params.push(hasVariants);
+    }
+
+    if (priceMin !== undefined) {
+      sql += ` AND "price" >= $${paramIndex++}`;
+      params.push(priceMin);
+    }
+
+    if (priceMax !== undefined) {
+      sql += ` AND "price" <= $${paramIndex++}`;
+      params.push(priceMax);
+    }
+
+    if (merchantId) {
+      sql += ` AND "merchantId" = $${paramIndex++}`;
+      params.push(merchantId);
+    }
+
+    if (searchTerm) {
+      sql += ` AND ("name" ILIKE $${paramIndex} OR "description" ILIKE $${paramIndex} OR "sku" ILIKE $${paramIndex})`;
+      params.push(`%${searchTerm}%`);
+      paramIndex++;
+    }
+
     const result = await queryOne<{ count: string }>(sql, params);
     return result ? parseInt(result.count, 10) : 0;
   }
@@ -426,202 +377,200 @@ export class ProductRepo {
   /**
    * Create a new product
    */
-  async create(product: ProductCreateProps): Promise<Product> {
-    const now = unixTimestamp();
-    const id = generateUUID();
-    
-    const {
-      name,
-      description,
-      productTypeId,
-      categoryId,
-      sku,
-      status = ProductStatus.DRAFT,
-      visibility = ProductVisibility.HIDDEN,
-      shortDescription,
-      metaTitle,
-      metaDescription,
-      metaKeywords,
-      slug,
-      isFeatured = false,
-      isVirtual = false,
-      isDownloadable = false,
-      isSubscription = false,
-      isTaxable = true,
-      taxClass,
-      weight,
-      weightUnit,
-      length,
-      width,
-      height,
-      dimensionUnit,
-      basePrice,
-      salePrice,
-      cost,
-      currencyCode,
-      primaryImageId,
-      publishedAt,
-      userId,
-      merchantId,
-      brandId,
-      minOrderQuantity,
-      maxOrderQuantity,
-      returnPolicy,
-      warranty,
-      externalId,
-      hasVariants = false,
-      variantAttributes,
-      metadata
-    } = product;
-    
-    // Map TS property names to DB column names
-    const columnMap: Record<string, any> = {
-      id,
-      name,
-      description,
-      product_type_id: productTypeId,
-      created_at: now,
-      updated_at: now,
-      category_id: categoryId,
-      sku,
-      status,
-      visibility,
-      short_description: shortDescription,
-      meta_title: metaTitle,
-      meta_description: metaDescription,
-      meta_keywords: metaKeywords,
-      slug,
-      is_featured: isFeatured,
-      is_virtual: isVirtual,
-      is_downloadable: isDownloadable,
-      is_subscription: isSubscription,
-      is_taxable: isTaxable,
-      tax_class: taxClass,
-      weight,
-      weight_unit: weightUnit,
-      length,
-      width,
-      height,
-      dimension_unit: dimensionUnit,
-      base_price: basePrice,
-      sale_price: salePrice,
-      cost,
-      currency_code: currencyCode,
-      primary_image_id: primaryImageId,
-      published_at: publishedAt,
-      user_id: userId,
-      merchant_id: merchantId,
-      brand_id: brandId,
-      min_order_quantity: minOrderQuantity,
-      max_order_quantity: maxOrderQuantity,
-      return_policy: returnPolicy,
-      warranty,
-      external_id: externalId,
-      has_variants: hasVariants,
-      variant_attributes: variantAttributes,
-      metadata
-    };
-    
-    // Filter out undefined values
-    const columns = Object.entries(columnMap)
-      .filter(([_, value]) => value !== undefined)
-      .map(([key]) => key);
-      
-    const values = Object.entries(columnMap)
-      .filter(([_, value]) => value !== undefined)
-      .map(([_, value]) => value);
-    
-    const placeholders = columns.map((_, i) => `$${i + 1}`).join(', ');
-    
-    // Generate SELECT AS mapping for returning values in camelCase
-    const returnFields = columns.map(col => 
-      `"${col}" AS "${dbToTsMapping[col] || col}"`
-    ).join(', ');
-    
+  async create(data: ProductCreateProps): Promise<Product> {
     const sql = `
-      INSERT INTO "public"."product" (${columns.map(c => `"${c}"`).join(', ')})
-      VALUES (${placeholders})
-      RETURNING ${returnFields}
+      INSERT INTO "${this.tableName}" (
+        "sku", "name", "slug", "description", "shortDescription",
+        "brandId", "type", "status", "visibility",
+        "price", "basePrice", "salePrice", "costPrice", "compareAtPrice",
+        "taxClass", "taxRate", "isTaxable", "currency", "currencyCode",
+        "isInventoryManaged", "minOrderQuantity", "maxOrderQuantity", "orderIncrementQuantity",
+        "weight", "weightUnit", "length", "width", "height", "dimensionUnit",
+        "metaTitle", "metaDescription", "metaKeywords",
+        "hsCode", "countryOfOrigin",
+        "isFeatured", "isNew", "isBestseller",
+        "warningThreshold", "preorderEnabled", "preorderReleaseDate", "preorderAllowance",
+        "customFields", "seoData",
+        "relatedProducts", "crossSellProducts", "upSellProducts",
+        "isVirtual", "isDownloadable", "isSubscription",
+        "primaryImageId", "publishedAt",
+        "userId", "merchantId",
+        "returnPolicy", "warranty", "externalId",
+        "hasVariants", "variantAttributes",
+        "createdBy", "updatedBy"
+      ) VALUES (
+        $1, $2, $3, $4, $5,
+        $6, $7, $8, $9,
+        $10, $11, $12, $13, $14,
+        $15, $16, $17, $18, $19,
+        $20, $21, $22, $23,
+        $24, $25, $26, $27, $28, $29,
+        $30, $31, $32,
+        $33, $34,
+        $35, $36, $37,
+        $38, $39, $40, $41,
+        $42, $43,
+        $44, $45, $46,
+        $47, $48, $49,
+        $50, $51,
+        $52, $53,
+        $54, $55, $56,
+        $57, $58,
+        $59, $60
+      )
+      RETURNING *
     `;
-    
+
+    const values = [
+      data.sku,
+      data.name,
+      data.slug,
+      data.description || null,
+      data.shortDescription || null,
+      data.brandId || null,
+      data.type || ProductType.SIMPLE,
+      data.status || ProductStatus.DRAFT,
+      data.visibility || ProductVisibility.VISIBLE,
+      data.price,
+      data.basePrice || null,
+      data.salePrice || null,
+      data.costPrice || null,
+      data.compareAtPrice || null,
+      data.taxClass || 'standard',
+      data.taxRate || null,
+      data.isTaxable !== false,
+      data.currency || 'USD',
+      data.currencyCode || 'USD',
+      data.isInventoryManaged !== false,
+      data.minOrderQuantity || 1,
+      data.maxOrderQuantity || null,
+      data.orderIncrementQuantity || 1,
+      data.weight || null,
+      data.weightUnit || 'g',
+      data.length || null,
+      data.width || null,
+      data.height || null,
+      data.dimensionUnit || 'cm',
+      data.metaTitle || null,
+      data.metaDescription || null,
+      data.metaKeywords || null,
+      data.hsCode || null,
+      data.countryOfOrigin || null,
+      data.isFeatured || false,
+      data.isNew || false,
+      data.isBestseller || false,
+      data.warningThreshold || null,
+      data.preorderEnabled || false,
+      data.preorderReleaseDate || null,
+      data.preorderAllowance || null,
+      data.customFields ? JSON.stringify(data.customFields) : null,
+      data.seoData ? JSON.stringify(data.seoData) : null,
+      data.relatedProducts || null,
+      data.crossSellProducts || null,
+      data.upSellProducts || null,
+      data.isVirtual || false,
+      data.isDownloadable || false,
+      data.isSubscription || false,
+      data.primaryImageId || null,
+      data.publishedAt || null,
+      data.userId || null,
+      data.merchantId || null,
+      data.returnPolicy || null,
+      data.warranty || null,
+      data.externalId || null,
+      data.hasVariants || false,
+      data.variantAttributes ? JSON.stringify(data.variantAttributes) : null,
+      data.createdBy || null,
+      data.updatedBy || null
+    ];
+
     const result = await queryOne<Product>(sql, values);
-    
+
     if (!result) {
       throw new Error('Failed to create product');
     }
-    
+
     return result;
   }
 
   /**
    * Update an existing product
    */
-  async update(id: string, product: ProductUpdateProps): Promise<Product> {
-    const now = unixTimestamp();
-    
-    // Ensure we have something to update
-    if (Object.keys(product).length === 0) {
-      const existingProduct = await this.findById(id);
-      
-      if (!existingProduct) {
+  async update(id: string, data: ProductUpdateProps): Promise<Product> {
+    const setStatements: string[] = ['"updatedAt" = now()'];
+    const values: any[] = [id];
+    let paramIndex = 2;
+
+    // Build dynamic SET clause
+    const updateableFields: (keyof ProductUpdateProps)[] = [
+      'sku', 'name', 'slug', 'description', 'shortDescription',
+      'brandId', 'type', 'status', 'visibility',
+      'price', 'basePrice', 'salePrice', 'costPrice', 'compareAtPrice',
+      'taxClass', 'taxRate', 'isTaxable', 'currency', 'currencyCode',
+      'isInventoryManaged', 'minOrderQuantity', 'maxOrderQuantity', 'orderIncrementQuantity',
+      'weight', 'weightUnit', 'length', 'width', 'height', 'dimensionUnit',
+      'metaTitle', 'metaDescription', 'metaKeywords',
+      'hsCode', 'countryOfOrigin',
+      'isFeatured', 'isNew', 'isBestseller',
+      'warningThreshold', 'preorderEnabled', 'preorderReleaseDate', 'preorderAllowance',
+      'customFields', 'seoData',
+      'relatedProducts', 'crossSellProducts', 'upSellProducts',
+      'isVirtual', 'isDownloadable', 'isSubscription',
+      'primaryImageId', 'publishedAt',
+      'userId', 'merchantId',
+      'returnPolicy', 'warranty', 'externalId',
+      'hasVariants', 'variantAttributes',
+      'updatedBy'
+    ];
+
+    for (const field of updateableFields) {
+      if (data[field] !== undefined) {
+        let value = data[field];
+        // Handle JSON fields
+        if (['customFields', 'seoData', 'variantAttributes'].includes(field) && typeof value === 'object') {
+          value = JSON.stringify(value);
+        }
+        setStatements.push(`"${field}" = $${paramIndex++}`);
+        values.push(value);
+      }
+    }
+
+    if (setStatements.length === 1) {
+      // Only updatedAt, nothing else to update
+      const existing = await this.findById(id);
+      if (!existing) {
         throw new Error('Product not found');
       }
-      
-      return existingProduct;
+      return existing;
     }
-    
-    // Convert property names to DB column names
-    const updateData: Record<string, any> = { updated_at: now };
-    
-    for (const [key, value] of Object.entries(product)) {
-      const dbColumn = this.tsToDb(key);
-      updateData[dbColumn] = value;
-    }
-    
-    // Generate set statements for each field
-    const setStatements: string[] = Object.keys(updateData).map((key, i) => `"${key}" = $${i + 2}`);
-    
-    // Create values array with the updated fields
-    const values = [
-      id,
-      ...Object.values(updateData)
-    ];
-    
-    // Generate SELECT AS mapping for returning values in camelCase
-    const returnFields = Object.keys(dbToTsMapping).map(dbCol => 
-      `"${dbCol}" AS "${dbToTsMapping[dbCol]}"`
-    ).join(', ');
-    
+
     const sql = `
-      UPDATE "public"."product"
+      UPDATE "${this.tableName}"
       SET ${setStatements.join(', ')}
-      WHERE "id" = $1
-      RETURNING ${returnFields}
+      WHERE "productId" = $1 AND "deletedAt" IS NULL
+      RETURNING *
     `;
-    
+
     const result = await queryOne<Product>(sql, values);
-    
+
     if (!result) {
       throw new Error('Product not found or update failed');
     }
-    
+
     return result;
   }
 
   /**
-   * Soft delete a product by setting deletedAt
+   * Soft delete a product
    */
   async delete(id: string): Promise<boolean> {
-    const now = unixTimestamp();
-    
     const sql = `
-      UPDATE "public"."product"
-      SET "deletedAt" = $2, "status" = $3
-      WHERE "id" = $1 AND "deletedAt" IS NULL
+      UPDATE "${this.tableName}"
+      SET "deletedAt" = now(), "status" = $2, "updatedAt" = now()
+      WHERE "productId" = $1 AND "deletedAt" IS NULL
     `;
-    
-    const result = await query(sql, [id, now, ProductStatus.ARCHIVED]);
-    
+
+    const result = await query(sql, [id, ProductStatus.ARCHIVED]);
     return result !== null;
   }
 
@@ -629,9 +578,8 @@ export class ProductRepo {
    * Hard delete a product (permanent)
    */
   async hardDelete(id: string): Promise<boolean> {
-    const sql = `DELETE FROM "public"."product" WHERE "id" = $1`;
+    const sql = `DELETE FROM "${this.tableName}" WHERE "productId" = $1`;
     const result = await query(sql, [id]);
-    
     return result !== null;
   }
 
@@ -650,75 +598,167 @@ export class ProductRepo {
   }
 
   /**
-   * Find products by category
+   * Find featured products
    */
-  async findByCategory(categoryId: string, options: Omit<ProductFilterOptions, 'categoryId'> = {}): Promise<ProductListItem[]> {
-    return this.findAll({ ...options, categoryId });
+  async findFeatured(limit: number = 10): Promise<Product[]> {
+    return this.findAll({ 
+      isFeatured: true, 
+      status: ProductStatus.ACTIVE,
+      visibility: ProductVisibility.VISIBLE,
+      limit 
+    });
   }
 
   /**
-   * Count products by category
+   * Find new products
    */
-  async countByCategory(categoryId: string, options: Omit<ProductFilterOptions, 'categoryId' | 'limit' | 'offset' | 'orderBy' | 'orderDirection'> = {}): Promise<number> {
-    return this.count({ ...options, categoryId });
+  async findNew(limit: number = 10): Promise<Product[]> {
+    const sql = `
+      SELECT * FROM "${this.tableName}"
+      WHERE "isNew" = true 
+        AND "status" = $1 
+        AND "visibility" = $2 
+        AND "deletedAt" IS NULL
+      ORDER BY "createdAt" DESC
+      LIMIT $3
+    `;
+    return await query<Product[]>(sql, [ProductStatus.ACTIVE, ProductVisibility.VISIBLE, limit]) || [];
   }
 
   /**
-   * Find products by search term
+   * Find bestseller products
    */
-  async findBySearch(searchTerm: string, options: Omit<ProductFilterOptions, 'searchTerm'> = {}): Promise<ProductListItem[]> {
+  async findBestsellers(limit: number = 10): Promise<Product[]> {
+    const sql = `
+      SELECT * FROM "${this.tableName}"
+      WHERE "isBestseller" = true 
+        AND "status" = $1 
+        AND "visibility" = $2 
+        AND "deletedAt" IS NULL
+      ORDER BY "reviewCount" DESC, "averageRating" DESC
+      LIMIT $3
+    `;
+    return await query<Product[]>(sql, [ProductStatus.ACTIVE, ProductVisibility.VISIBLE, limit]) || [];
+  }
+
+  /**
+   * Find related products
+   */
+  async findRelated(productId: string, limit: number = 10): Promise<Product[]> {
+    const product = await this.findById(productId);
+    if (!product) {
+      return [];
+    }
+
+    // If product has explicit related products, use those
+    if (product.relatedProducts && product.relatedProducts.length > 0) {
+      const placeholders = product.relatedProducts.map((_, i) => `$${i + 1}`).join(', ');
+      const sql = `
+        SELECT * FROM "${this.tableName}"
+        WHERE "productId" IN (${placeholders})
+          AND "status" = $${product.relatedProducts.length + 1}
+          AND "visibility" = $${product.relatedProducts.length + 2}
+          AND "deletedAt" IS NULL
+        LIMIT $${product.relatedProducts.length + 3}
+      `;
+      return await query<Product[]>(sql, [
+        ...product.relatedProducts,
+        ProductStatus.ACTIVE,
+        ProductVisibility.VISIBLE,
+        limit
+      ]) || [];
+    }
+
+    // Otherwise, find products with same brand
+    if (product.brandId) {
+      const sql = `
+        SELECT * FROM "${this.tableName}"
+        WHERE "brandId" = $1
+          AND "productId" != $2
+          AND "status" = $3
+          AND "visibility" = $4
+          AND "deletedAt" IS NULL
+        ORDER BY RANDOM()
+        LIMIT $5
+      `;
+      return await query<Product[]>(sql, [
+        product.brandId,
+        productId,
+        ProductStatus.ACTIVE,
+        ProductVisibility.VISIBLE,
+        limit
+      ]) || [];
+    }
+
+    return [];
+  }
+
+  /**
+   * Find products by brand
+   */
+  async findByBrand(brandId: string, options: Omit<ProductFilterOptions, 'brandId'> = {}): Promise<Product[]> {
+    return this.findAll({ ...options, brandId });
+  }
+
+  /**
+   * Find products by merchant
+   */
+  async findByMerchant(merchantId: string, options: Omit<ProductFilterOptions, 'merchantId'> = {}): Promise<Product[]> {
+    return this.findAll({ ...options, merchantId });
+  }
+
+  /**
+   * Search products
+   */
+  async search(searchTerm: string, options: Omit<ProductFilterOptions, 'searchTerm'> = {}): Promise<Product[]> {
     return this.findAll({ ...options, searchTerm });
   }
 
   /**
-   * Count products by search term
+   * Update product rating
    */
-  async countBySearch(searchTerm: string, options: Omit<ProductFilterOptions, 'searchTerm' | 'limit' | 'offset' | 'orderBy' | 'orderDirection'> = {}): Promise<number> {
-    return this.count({ ...options, searchTerm });
-  }
-
-  /**
-   * Find featured products
-   */
-  async findFeatured(options: Omit<ProductFilterOptions, 'isFeatured'> = {}): Promise<ProductListItem[]> {
-    return this.findAll({ ...options, isFeatured: true });
-  }
-
-  /**
-   * Get related products based on category
-   */
-  async findRelated(productId: string, limit: number = 10): Promise<ProductListItem[]> {
-    const product = await this.findById(productId);
-    
-    if (!product || !product.categoryId) {
-      return [];
-    }
-    
-    // List of fields for ProductListItem
-    const listItemFields = [
-      'id', 'name', 'sku', 'status', 'visibility', 'basePrice', 
-      'salePrice', 'isFeatured', 'hasVariants', 'createdAt', 'updatedAt'
-    ];
-    
-    // Generate SELECT field mapping
-    const selectFields = listItemFields.map(field => {
-      const dbField = this.tsToDb(field);
-      return `"${dbField}" AS "${field}"`;
-    }).join(', ');
-    
+  async updateRating(productId: string, averageRating: number, reviewCount: number): Promise<Product> {
     const sql = `
-      SELECT ${selectFields}
-      FROM "public"."product"
-      WHERE "category_id" = $1 AND "id" != $2 AND "deletedAt" IS NULL
-      AND "status" = $3 AND "visibility" = $4
-      ORDER BY "is_featured" DESC, RANDOM()
-      LIMIT $5
+      UPDATE "${this.tableName}"
+      SET "averageRating" = $2, "reviewCount" = $3, "updatedAt" = now()
+      WHERE "productId" = $1 AND "deletedAt" IS NULL
+      RETURNING *
     `;
-    
-    return await query<ProductListItem[]>(
-      sql, 
-      [product.categoryId, productId, ProductStatus.ACTIVE, ProductVisibility.VISIBLE, limit]
-    ) || [];
+
+    const result = await queryOne<Product>(sql, [productId, averageRating, reviewCount]);
+
+    if (!result) {
+      throw new Error('Product not found');
+    }
+
+    return result;
+  }
+
+  /**
+   * Publish a product
+   */
+  async publish(id: string): Promise<Product> {
+    const sql = `
+      UPDATE "${this.tableName}"
+      SET "status" = $2, "publishedAt" = now(), "updatedAt" = now()
+      WHERE "productId" = $1 AND "deletedAt" IS NULL
+      RETURNING *
+    `;
+
+    const result = await queryOne<Product>(sql, [id, ProductStatus.ACTIVE]);
+
+    if (!result) {
+      throw new Error('Product not found');
+    }
+
+    return result;
+  }
+
+  /**
+   * Unpublish a product
+   */
+  async unpublish(id: string): Promise<Product> {
+    return this.update(id, { status: ProductStatus.DRAFT });
   }
 }
 

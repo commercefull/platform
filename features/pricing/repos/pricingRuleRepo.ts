@@ -1,5 +1,6 @@
 import { queryOne, query } from "../../../libs/db";
 import { generateUUID } from "../../../libs/uuid";
+import { Table } from "../../../libs/db/types";
 import {
   PricingRule,
   PricingRuleCreateProps,
@@ -7,106 +8,45 @@ import {
   PricingRuleUpdateProps
 } from "../domain/pricingRule";
 
-// Define DB column to TS property mapping to follow the platform's conventions
-const dbToTsMapping: Record<string, string> = {
-  id: 'id',
-  name: 'name',
-  description: 'description',
-  type: 'type',
-  scope: 'scope',
-  status: 'status',
-  priority: 'priority',
-  conditions: 'conditions',
-  adjustments: 'adjustments',
-  product_ids: 'productIds',
-  variant_ids: 'variantIds',
-  category_ids: 'categoryIds',
-  customer_ids: 'customerIds',
-  customer_group_ids: 'customerGroupIds',
-  start_date: 'startDate',
-  end_date: 'endDate',
-  minimum_quantity: 'minimumQuantity',
-  maximum_quantity: 'maximumQuantity',
-  minimum_order_amount: 'minimumOrderAmount',
-  created_at: 'createdAt',
-  updated_at: 'updatedAt',
-  merchant_id: 'merchantId',
-  metadata: 'metadata'
-};
-
-// Define TS property to DB column mapping
-const tsToDbMapping = Object.entries(dbToTsMapping).reduce((acc, [dbCol, tsProp]) => {
-  acc[tsProp] = dbCol;
-  return acc;
-}, {} as Record<string, string>);
-
+/**
+ * Pricing Rule Repository
+ * 
+ * Uses camelCase for table and column names as per platform convention.
+ * Table: pricingRule (from db/types.ts)
+ */
 export class PricingRuleRepo {
+  private readonly tableName = Table.PricingRule;
+
   /**
-   * Convert snake_case column name to camelCase property name
+   * Transform database record to PricingRule
    */
-  private dbToTs(columnName: string): string {
-    return dbToTsMapping[columnName] || columnName;
+  private transformRecord(record: Record<string, any>): PricingRule {
+    if (!record) return null as any;
+    return record as PricingRule;
   }
 
   /**
-   * Convert camelCase property name to snake_case column name
+   * Transform array of records
    */
-  private tsToDb(propertyName: string): string {
-    return tsToDbMapping[propertyName] || propertyName;
-  }
-
-  /**
-   * Generate field mapping for SELECT statements
-   */
-  private generateSelectFields(fields: string[] = Object.keys(dbToTsMapping)): string {
-    return fields.map(field => {
-      return `"${field}" AS "${this.dbToTs(field)}"`;
-    }).join(', ');
-  }
-
-  /**
-   * Transform database record to TypeScript object
-   */
-  private transformDbToTs(dbRecord: Record<string, any>): PricingRule {
-    const result: Record<string, any> = {};
-
-    // Handle JSON fields that need parsing
-    for (const [key, value] of Object.entries(dbRecord)) {
-      if (key === 'conditions' || key === 'adjustments' || key === 'metadata') {
-        result[key] = typeof value === 'string' ? JSON.parse(value) : value;
-      } else {
-        result[key] = value;
-      }
-    }
-
-    return result as PricingRule;
-  }
-
-  /**
-   * Transform array of database records to TypeScript objects
-   */
-  private transformArrayDbToTs(dbRecords: Record<string, any>[]): PricingRule[] {
-    return dbRecords.map(record => this.transformDbToTs(record));
+  private transformRecords(records: Record<string, any>[]): PricingRule[] {
+    return (records || []).map(r => this.transformRecord(r));
   }
 
   /**
    * Find a pricing rule by ID
    */
   async findById(id: string): Promise<PricingRule | null> {
-    const selectFields = this.generateSelectFields();
-    const sql = `SELECT ${selectFields} FROM "public"."pricing_rule" WHERE "id" = $1`;
+    const sql = `
+      SELECT * FROM "${this.tableName}" 
+      WHERE "pricingRuleId" = $1
+    `;
     
     const result = await queryOne<Record<string, any>>(sql, [id]);
-    
-    if (!result) {
-      return null;
-    }
-    
-    return this.transformDbToTs(result);
+    return result ? this.transformRecord(result) : null;
   }
 
   /**
-   * Find all active pricing rules
+   * Find all active pricing rules with optional filters
    */
   async findActiveRules(
     productId?: string,
@@ -115,13 +55,12 @@ export class PricingRuleRepo {
     customerGroupIds?: string[]
   ): Promise<PricingRule[]> {
     const now = new Date();
-    const selectFields = this.generateSelectFields();
-    const params: any[] = [PricingRuleStatus.ACTIVE, now];
+    const params: any[] = [now];
     
     let whereConditions = [
-      `"status" = $1`,
-      `("start_date" IS NULL OR "start_date" <= $2)`,
-      `("end_date" IS NULL OR "end_date" >= $2)`
+      `"isActive" = true`,
+      `("startDate" IS NULL OR "startDate" <= $1)`,
+      `("endDate" IS NULL OR "endDate" >= $1)`
     ];
     
     // Add product-specific filter
@@ -167,18 +106,14 @@ export class PricingRuleRepo {
       )`);
     }
     
-    const whereClause = whereConditions.join(' AND ');
-    
     const sql = `
-      SELECT ${selectFields}
-      FROM "public"."pricing_rule"
-      WHERE ${whereClause}
+      SELECT * FROM "${this.tableName}"
+      WHERE ${whereConditions.join(' AND ')}
       ORDER BY "priority" DESC, "createdAt" ASC
     `;
     
-    const results = await query<Record<string, any>[]>(sql, params) || [];
-    
-    return this.transformArrayDbToTs(results);
+    const results = await query<Record<string, any>[]>(sql, params);
+    return this.transformRecords(results || []);
   }
 
   /**
@@ -213,16 +148,15 @@ export class PricingRuleRepo {
     const params: any[] = [];
     const conditions: string[] = [];
     
-    // Add filters for status
-    if (filters.status) {
-      if (Array.isArray(filters.status)) {
-        const placeholders = filters.status.map((_, i) => `$${params.length + i + 1}`).join(', ');
-        params.push(...filters.status);
-        conditions.push(`"status" IN (${placeholders})`);
-      } else {
-        params.push(filters.status);
-        conditions.push(`"status" = $${params.length}`);
-      }
+    // Add filter for active rules only
+    if (filters.activeOnly) {
+      const now = new Date();
+      params.push(now);
+      conditions.push(`
+        "isActive" = true AND
+        ("startDate" IS NULL OR "startDate" <= $${params.length}) AND
+        ("endDate" IS NULL OR "endDate" >= $${params.length})
+      `);
     }
     
     // Add filter for type
@@ -230,10 +164,10 @@ export class PricingRuleRepo {
       if (Array.isArray(filters.type)) {
         const placeholders = filters.type.map((_, i) => `$${params.length + i + 1}`).join(', ');
         params.push(...filters.type);
-        conditions.push(`"type" IN (${placeholders})`);
+        conditions.push(`"ruleType" IN (${placeholders})`);
       } else {
         params.push(filters.type);
-        conditions.push(`"type" = $${params.length}`);
+        conditions.push(`"ruleType" = $${params.length}`);
       }
     }
     
@@ -273,75 +207,48 @@ export class PricingRuleRepo {
       conditions.push(`"customer_group_ids" @> ARRAY[$${params.length}]::uuid[]`);
     }
     
-    // Add filter for merchant
-    if (filters.merchantId) {
-      params.push(filters.merchantId);
-      conditions.push(`"merchantId" = $${params.length}`);
-    }
-    
-    // Add filter for active rules only
-    if (filters.activeOnly) {
-      const now = new Date();
-      params.push(now);
-      conditions.push(`
-        "status" = 'active' AND
-        ("start_date" IS NULL OR "start_date" <= $${params.length}) AND
-        ("end_date" IS NULL OR "end_date" >= $${params.length})
-      `);
-    }
-    
-    // Prepare SQL parts
     const whereClause = conditions.length > 0
       ? `WHERE ${conditions.join(' AND ')}`
       : '';
     
-    const orderByField = this.tsToDb(orderBy);
-    
     // Add pagination params
     params.push(limit, offset);
     
-    const selectFields = this.generateSelectFields();
-    
     const sql = `
-      SELECT ${selectFields}
-      FROM "public"."pricing_rule"
+      SELECT * FROM "${this.tableName}"
       ${whereClause}
-      ORDER BY "${orderByField}" ${direction}
+      ORDER BY "${orderBy}" ${direction}
       LIMIT $${params.length - 1} OFFSET $${params.length}
     `;
     
-    const results = await query<Record<string, any>[]>(sql, params) || [];
-    
-    return this.transformArrayDbToTs(results);
+    const results = await query<Record<string, any>[]>(sql, params);
+    return this.transformRecords(results || []);
   }
 
   /**
    * Count pricing rules with filters
    */
   async countRules(filters: {
-    status?: PricingRuleStatus | PricingRuleStatus[];
     type?: string | string[];
     scope?: string | string[];
     productId?: string;
     categoryId?: string;
     customerId?: string;
     customerGroupId?: string;
-    merchantId?: string;
     activeOnly?: boolean;
   } = {}): Promise<number> {
     const params: any[] = [];
     const conditions: string[] = [];
     
-    // Add filters for status
-    if (filters.status) {
-      if (Array.isArray(filters.status)) {
-        const placeholders = filters.status.map((_, i) => `$${params.length + i + 1}`).join(', ');
-        params.push(...filters.status);
-        conditions.push(`"status" IN (${placeholders})`);
-      } else {
-        params.push(filters.status);
-        conditions.push(`"status" = $${params.length}`);
-      }
+    // Add filter for active rules only
+    if (filters.activeOnly) {
+      const now = new Date();
+      params.push(now);
+      conditions.push(`
+        "isActive" = true AND
+        ("startDate" IS NULL OR "startDate" <= $${params.length}) AND
+        ("endDate" IS NULL OR "endDate" >= $${params.length})
+      `);
     }
     
     // Add filter for type
@@ -349,10 +256,10 @@ export class PricingRuleRepo {
       if (Array.isArray(filters.type)) {
         const placeholders = filters.type.map((_, i) => `$${params.length + i + 1}`).join(', ');
         params.push(...filters.type);
-        conditions.push(`"type" IN (${placeholders})`);
+        conditions.push(`"ruleType" IN (${placeholders})`);
       } else {
         params.push(filters.type);
-        conditions.push(`"type" = $${params.length}`);
+        conditions.push(`"ruleType" = $${params.length}`);
       }
     }
     
@@ -368,60 +275,17 @@ export class PricingRuleRepo {
       }
     }
     
-    // Add filter for product
-    if (filters.productId) {
-      params.push(filters.productId);
-      conditions.push(`"product_ids" @> ARRAY[$${params.length}]::uuid[]`);
-    }
-    
-    // Add filter for category
-    if (filters.categoryId) {
-      params.push(filters.categoryId);
-      conditions.push(`"category_ids" @> ARRAY[$${params.length}]::uuid[]`);
-    }
-    
-    // Add filter for customer
-    if (filters.customerId) {
-      params.push(filters.customerId);
-      conditions.push(`"customer_ids" @> ARRAY[$${params.length}]::uuid[]`);
-    }
-    
-    // Add filter for customer group
-    if (filters.customerGroupId) {
-      params.push(filters.customerGroupId);
-      conditions.push(`"customer_group_ids" @> ARRAY[$${params.length}]::uuid[]`);
-    }
-    
-    // Add filter for merchant
-    if (filters.merchantId) {
-      params.push(filters.merchantId);
-      conditions.push(`"merchantId" = $${params.length}`);
-    }
-    
-    // Add filter for active rules only
-    if (filters.activeOnly) {
-      const now = new Date();
-      params.push(now);
-      conditions.push(`
-        "status" = 'active' AND
-        ("start_date" IS NULL OR "start_date" <= $${params.length}) AND
-        ("end_date" IS NULL OR "end_date" >= $${params.length})
-      `);
-    }
-    
-    // Prepare SQL parts
     const whereClause = conditions.length > 0
       ? `WHERE ${conditions.join(' AND ')}`
       : '';
     
     const sql = `
       SELECT COUNT(*) as count
-      FROM "public"."pricing_rule"
+      FROM "${this.tableName}"
       ${whereClause}
     `;
     
     const result = await queryOne<{ count: string }>(sql, params);
-    
     return result ? parseInt(result.count, 10) : 0;
   }
 
@@ -430,49 +294,43 @@ export class PricingRuleRepo {
    */
   async create(data: PricingRuleCreateProps): Promise<PricingRule> {
     const now = new Date();
-    const id = generateUUID();
-    
-    const dbFields: string[] = [];
-    const placeholders: string[] = [];
-    const values: any[] = [id, now, now];
-    
-    dbFields.push('id', 'created_at', 'updated_at');
-    placeholders.push('$1', '$2', '$3');
-    
-    // Process each field from the input data
-    let placeholderIndex = 4;
-    
-    for (const [key, value] of Object.entries(data)) {
-      if (value === undefined) continue;
-      
-      const dbField = this.tsToDb(key);
-      dbFields.push(dbField);
-      placeholders.push(`$${placeholderIndex}`);
-      
-      // Handle JSON fields
-      if (
-        key === 'conditions' || 
-        key === 'adjustments' || 
-        key === 'metadata'
-      ) {
-        values.push(JSON.stringify(value));
-      } else {
-        values.push(value);
-      }
-      
-      placeholderIndex++;
-    }
-    
-    const fieldList = dbFields.map(f => `"${f}"`).join(', ');
-    const placeholderList = placeholders.join(', ');
-    
-    const selectFields = this.generateSelectFields();
     
     const sql = `
-      INSERT INTO "public"."pricing_rule" (${fieldList})
-      VALUES (${placeholderList})
-      RETURNING ${selectFields}
+      INSERT INTO "${this.tableName}" (
+        "name", "description", "ruleType", "scope", 
+        "product_ids", "category_ids", "customer_ids", "customer_group_ids",
+        "minimum_quantity", "maximum_quantity", "minimum_order_amount",
+        "startDate", "endDate", "priority", "isActive",
+        "metadata", "currencyCode", "regionCode",
+        "createdAt", "updatedAt"
+      ) VALUES (
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20
+      )
+      RETURNING *
     `;
+    
+    const values = [
+      data.name,
+      data.description || null,
+      data.ruleType || 'percentage',
+      data.scope || 'global',
+      data.productIds || null,
+      data.categoryIds || null,
+      data.customerIds || null,
+      data.customerGroupIds || null,
+      data.minimumQuantity || null,
+      data.maximumQuantity || null,
+      data.minimumOrderAmount || null,
+      data.startDate || null,
+      data.endDate || null,
+      data.priority || 0,
+      data.isActive !== false,
+      (data as any).metadata ? JSON.stringify((data as any).metadata) : null,
+      (data as any).currencyCode || null,
+      (data as any).regionCode || null,
+      now,
+      now
+    ];
     
     const result = await queryOne<Record<string, any>>(sql, values);
     
@@ -480,7 +338,7 @@ export class PricingRuleRepo {
       throw new Error('Failed to create pricing rule');
     }
     
-    return this.transformDbToTs(result);
+    return this.transformRecord(result);
   }
 
   /**
@@ -489,42 +347,45 @@ export class PricingRuleRepo {
   async update(id: string, data: PricingRuleUpdateProps): Promise<PricingRule> {
     const now = new Date();
     
-    const setStatements: string[] = [];
-    const values: any[] = [id, now]; // Start with ID and updated_at
+    const setStatements: string[] = ['"updatedAt" = $2'];
+    const values: any[] = [id, now];
+    let paramIndex = 3;
     
-    setStatements.push(`"updatedAt" = $2`);
-    
-    // Process each field from the input data
-    let placeholderIndex = 3;
+    const fieldMap: Record<string, string> = {
+      name: 'name',
+      description: 'description',
+      ruleType: 'ruleType',
+      scope: 'scope',
+      productIds: 'product_ids',
+      categoryIds: 'category_ids',
+      customerIds: 'customer_ids',
+      customerGroupIds: 'customer_group_ids',
+      minimumQuantity: 'minimum_quantity',
+      maximumQuantity: 'maximum_quantity',
+      minimumOrderAmount: 'minimum_order_amount',
+      startDate: 'startDate',
+      endDate: 'endDate',
+      priority: 'priority',
+      isActive: 'isActive',
+      metadata: 'metadata',
+      currencyCode: 'currencyCode',
+      regionCode: 'regionCode'
+    };
     
     for (const [key, value] of Object.entries(data)) {
       if (value === undefined) continue;
       
-      const dbField = this.tsToDb(key);
-      setStatements.push(`"${dbField}" = $${placeholderIndex}`);
-      
-      // Handle JSON fields
-      if (
-        key === 'conditions' || 
-        key === 'adjustments' || 
-        key === 'metadata'
-      ) {
-        values.push(JSON.stringify(value));
-      } else {
-        values.push(value);
-      }
-      
-      placeholderIndex++;
+      const dbField = fieldMap[key] || key;
+      setStatements.push(`"${dbField}" = $${paramIndex}`);
+      values.push(value);
+      paramIndex++;
     }
     
-    const setClause = setStatements.join(', ');
-    const selectFields = this.generateSelectFields();
-    
     const sql = `
-      UPDATE "public"."pricing_rule"
-      SET ${setClause}
-      WHERE "id" = $1
-      RETURNING ${selectFields}
+      UPDATE "${this.tableName}"
+      SET ${setStatements.join(', ')}
+      WHERE "pricingRuleId" = $1
+      RETURNING *
     `;
     
     const result = await queryOne<Record<string, any>>(sql, values);
@@ -533,24 +394,23 @@ export class PricingRuleRepo {
       throw new Error('Pricing rule not found or update failed');
     }
     
-    return this.transformDbToTs(result);
+    return this.transformRecord(result);
   }
 
   /**
    * Delete a pricing rule
    */
   async delete(id: string): Promise<boolean> {
-    const sql = `DELETE FROM "public"."pricing_rule" WHERE "id" = $1`;
+    const sql = `DELETE FROM "${this.tableName}" WHERE "pricingRuleId" = $1`;
     const result = await query(sql, [id]);
-    
     return result !== null;
   }
 
   /**
    * Update status of a pricing rule
    */
-  async updateStatus(id: string, status: PricingRuleStatus): Promise<PricingRule> {
-    return this.update(id, { status });
+  async updateStatus(id: string, isActive: boolean): Promise<PricingRule> {
+    return this.update(id, { isActive });
   }
 }
 

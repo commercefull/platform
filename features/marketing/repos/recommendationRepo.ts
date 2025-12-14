@@ -66,7 +66,7 @@ export interface CustomerProductView {
 
 export async function getRecommendation(productRecommendationId: string): Promise<ProductRecommendation | null> {
   const row = await queryOne<Record<string, any>>(
-    'SELECT * FROM "productRecommendation" WHERE "productRecommendationId" = $1',
+    'SELECT * FROM "marketingProductRecommendation" WHERE "productRecommendationId" = $1',
     [productRecommendationId]
   );
   return row ? mapToRecommendation(row) : null;
@@ -89,7 +89,7 @@ export async function getRecommendationsForProduct(
   params.push(limit);
 
   const rows = await query<Record<string, any>[]>(
-    `SELECT * FROM "productRecommendation" 
+    `SELECT * FROM "marketingProductRecommendation" 
      WHERE ${whereClause}
      ORDER BY "score" DESC, "rank" ASC NULLS LAST
      LIMIT $${paramIndex}`,
@@ -124,7 +124,7 @@ export async function saveRecommendation(rec: Partial<ProductRecommendation> & {
 
   // Use upsert to handle duplicates
   const result = await queryOne<Record<string, any>>(
-    `INSERT INTO "productRecommendation" (
+    `INSERT INTO "marketingProductRecommendation" (
       "productId", "recommendedProductId", "recommendationType", "score", "rank",
       "purchaseCount", "viewCount", "clickCount", "conversionRate", "isActive", "isManual",
       "computedAt", "expiresAt", "metadata", "createdAt", "updatedAt"
@@ -156,21 +156,21 @@ export async function saveRecommendation(rec: Partial<ProductRecommendation> & {
 
 export async function deleteRecommendation(productRecommendationId: string): Promise<void> {
   await query(
-    'DELETE FROM "productRecommendation" WHERE "productRecommendationId" = $1',
+    'DELETE FROM "marketingProductRecommendation" WHERE "productRecommendationId" = $1',
     [productRecommendationId]
   );
 }
 
 export async function deactivateRecommendation(productRecommendationId: string): Promise<void> {
   await query(
-    'UPDATE "productRecommendation" SET "isActive" = false, "updatedAt" = $1 WHERE "productRecommendationId" = $2',
+    'UPDATE "marketingProductRecommendation" SET "isActive" = false, "updatedAt" = $1 WHERE "productRecommendationId" = $2',
     [new Date().toISOString(), productRecommendationId]
   );
 }
 
 export async function incrementClickCount(productRecommendationId: string): Promise<void> {
   await query(
-    `UPDATE "productRecommendation" SET 
+    `UPDATE "marketingProductRecommendation" SET 
       "clickCount" = "clickCount" + 1, 
       "updatedAt" = $1 
      WHERE "productRecommendationId" = $2`,
@@ -180,7 +180,7 @@ export async function incrementClickCount(productRecommendationId: string): Prom
 
 export async function incrementPurchaseCount(productId: string, recommendedProductId: string): Promise<void> {
   await query(
-    `UPDATE "productRecommendation" SET 
+    `UPDATE "marketingProductRecommendation" SET 
       "purchaseCount" = "purchaseCount" + 1,
       "conversionRate" = CASE WHEN "clickCount" > 0 THEN ("purchaseCount" + 1)::decimal / "clickCount" ELSE 0 END,
       "updatedAt" = $1 
@@ -337,7 +337,7 @@ export async function computeFrequentlyBoughtTogether(minPurchases: number = 3):
       GROUP BY oi1."productId", oi2."productId"
       HAVING COUNT(DISTINCT oi1."orderId") >= $1
     )
-    INSERT INTO "productRecommendation" (
+    INSERT INTO "marketingProductRecommendation" (
       "productId", "recommendedProductId", "recommendationType", "score", "purchaseCount",
       "isActive", "computedAt", "createdAt", "updatedAt"
     )
@@ -380,7 +380,7 @@ export async function computeCustomersAlsoViewed(minViews: number = 5): Promise<
       GROUP BY v1."productId", v2."productId"
       HAVING COUNT(DISTINCT v1."customerId") >= $1
     )
-    INSERT INTO "productRecommendation" (
+    INSERT INTO "marketingProductRecommendation" (
       "productId", "recommendedProductId", "recommendationType", "score", "viewCount",
       "isActive", "computedAt", "createdAt", "updatedAt"
     )

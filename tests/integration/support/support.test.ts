@@ -81,8 +81,7 @@ describe('Support Feature Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
 
-      // May return 200 or error if agent doesn't exist
-      expect([200, 400, 404]).toContain(response.status);
+      expect(response.status).toBe(200);
     });
 
     it('UC-SUP-012: should add agent message', async () => {
@@ -268,8 +267,7 @@ describe('Support Feature Tests', () => {
         headers: { Authorization: `Bearer ${customerToken}` }
       });
 
-      // May return 201 or error depending on product existence
-      expect([201, 400, 404]).toContain(response.status);
+      expect(response.status).toBe(201);
     });
 
     it('UC-SUP-039: should create price alert (customer)', async () => {
@@ -280,7 +278,7 @@ describe('Support Feature Tests', () => {
         headers: { Authorization: `Bearer ${customerToken}` }
       });
 
-      expect([201, 400, 404]).toContain(response.status);
+      expect(response.status).toBe(201);
     });
 
     it('UC-SUP-023: should get stock alerts (admin)', async () => {
@@ -309,12 +307,12 @@ describe('Support Feature Tests', () => {
   describe('Authorization', () => {
     it('should require auth for admin ticket list', async () => {
       const response = await client.get('/business/support/tickets');
-      expect([401, 403]).toContain(response.status);
+      expect(response.status).toBe(401);
     });
 
     it('should require auth for customer tickets', async () => {
       const response = await client.get('/api/support/tickets/mine');
-      expect([401, 403]).toContain(response.status);
+      expect(response.status).toBe(401);
     });
   });
 });

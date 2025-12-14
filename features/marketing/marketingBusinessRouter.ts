@@ -1,6 +1,8 @@
 /**
  * Marketing Business Router
- * Routes for admin/merchant marketing operations
+ * 
+ * Routes for admin/merchant marketing operations.
+ * Mounted at /business/marketing
  */
 
 import { Router } from 'express';
@@ -50,55 +52,54 @@ router.use(isMerchantLoggedIn);
 // Email Campaign Routes
 // ============================================================================
 
-router.get('/campaigns', getCampaigns);
-router.get('/campaigns/:id', getCampaign);
-router.post('/campaigns', createCampaign);
-router.put('/campaigns/:id', updateCampaign);
-router.delete('/campaigns/:id', deleteCampaign);
-router.get('/campaigns/:id/recipients', getCampaignRecipients);
-router.post('/campaigns/:id/recipients', addCampaignRecipients);
+router.get('/marketing/campaigns', getCampaigns);
+router.get('/marketing/campaigns/:id', getCampaign);
+router.post('/marketing/campaigns', createCampaign);
+router.put('/marketing/campaigns/:id', updateCampaign);
+router.delete('/marketing/campaigns/:id', deleteCampaign);
+router.get('/marketing/campaigns/:id/recipients', getCampaignRecipients);
+router.post('/marketing/campaigns/:id/recipients', addCampaignRecipients);
 
 // ============================================================================
 // Email Template Routes
 // ============================================================================
 
-router.get('/templates', getTemplates);
-router.get('/templates/:id', getTemplate);
-router.post('/templates', createTemplate);
-router.put('/templates/:id', updateTemplate);
-router.delete('/templates/:id', deleteTemplate);
+router.get('/marketing/templates', getTemplates);
+router.get('/marketing/templates/:id', getTemplate);
+router.post('/marketing/templates', createTemplate);
+router.put('/marketing/templates/:id', updateTemplate);
+router.delete('/marketing/templates/:id', deleteTemplate);
 
 // ============================================================================
 // Abandoned Cart Routes
 // ============================================================================
 
-router.get('/abandoned-carts', getAbandonedCarts);
-router.get('/abandoned-carts/stats', getAbandonedCartStats);
-router.get('/abandoned-carts/:id', getAbandonedCart);
+router.get('/marketing/abandoned-carts', getAbandonedCarts);
+router.get('/marketing/abandoned-carts/stats', getAbandonedCartStats);
+router.get('/marketing/abandoned-carts/:id', getAbandonedCart);
 
 // ============================================================================
 // Product Recommendation Routes
 // ============================================================================
 
-router.get('/recommendations', getRecommendations);
-router.post('/recommendations', createRecommendation);
-router.delete('/recommendations/:id', deleteRecommendation);
-router.post('/recommendations/compute', computeRecommendations);
-router.get('/products/:productId/view-stats', getProductViewStats);
+router.get('/marketing/recommendations', getRecommendations);
+router.post('/marketing/recommendations', createRecommendation);
+router.delete('/marketing/recommendations/:id', deleteRecommendation);
+router.post('/marketing/recommendations/compute', computeRecommendations);
+router.get('/marketing/products/:productId/view-stats', getProductViewStats);
 
 // ============================================================================
 // Affiliate Routes
 // ============================================================================
 
-router.get('/affiliates', getAffiliates);
-router.get('/affiliates/:id', getAffiliate);
-router.put('/affiliates/:id', updateAffiliate);
-router.post('/affiliates/:id/approve', approveAffiliate);
-router.post('/affiliates/:id/reject', rejectAffiliate);
-router.post('/affiliates/:id/suspend', suspendAffiliate);
-router.get('/affiliates/:id/commissions', getAffiliateCommissions);
-router.post('/commissions/:commissionId/approve', approveCommission);
-router.post('/commissions/:commissionId/reject', rejectCommission);
+router.get('/marketing/affiliates', getAffiliates);
+router.get('/marketing/affiliates/:id', getAffiliate);
+router.put('/marketing/affiliates/:id', updateAffiliate);
+router.post('/marketing/affiliates/:id/approve', approveAffiliate);
+router.post('/marketing/affiliates/:id/reject', rejectAffiliate);
+router.post('/marketing/affiliates/:id/suspend', suspendAffiliate);
+router.get('/marketing/affiliates/:id/commissions', getAffiliateCommissions);
+router.post('/marketing/commissions/:commissionId/approve', approveCommission);
+router.post('/marketing/commissions/:commissionId/reject', rejectCommission);
 
 export const marketingBusinessRouter = router;
-export default router;

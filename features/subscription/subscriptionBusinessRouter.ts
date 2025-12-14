@@ -92,4 +92,3 @@ router.get('/billing/due', getSubscriptionsDueBilling);
 router.post('/subscriptions/:id/bill', processBillingCycle);
 
 export const subscriptionBusinessRouter = router;
-export default router;

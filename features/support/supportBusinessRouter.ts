@@ -99,4 +99,3 @@ router.post('/alerts/stock/notify', notifyStockAlerts);
 router.post('/alerts/price/notify', notifyPriceAlerts);
 
 export const supportBusinessRouter = router;
-export default router;

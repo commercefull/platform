@@ -42,28 +42,31 @@ export async function setupPricingTests() {
 export function createTestPricingRule(overrides: Partial<any> = {}) {
   return {
     name: `Test Rule ${Date.now()}`,
-    ruleType: 'percentage',
-    discountValue: 10,
-    conditions: {
-      minQuantity: 1
-    },
+    type: 'quantity_based',
+    scope: 'global',
+    status: 'active',
     priority: 1,
-    isActive: true,
+    adjustments: [
+      { type: 'percentage', value: 10 }
+    ],
+    conditions: [
+      { type: 'min_quantity', parameters: { value: 1 } }
+    ],
     ...overrides
   };
 }
 
+// Valid UUID format for test data
+const TEST_PRODUCT_UUID = '00000000-0000-0000-0000-000000000001';
+
 /**
  * Create test tier price data
  */
-export function createTestTierPrice(productId: string, overrides: Partial<any> = {}) {
+export function createTestTierPrice(productId: string = TEST_PRODUCT_UUID, overrides: Partial<any> = {}) {
   return {
     productId,
-    minQuantity: 10,
-    maxQuantity: 50,
+    quantityMin: 10,
     price: 9.99,
-    discountType: 'percentage',
-    discountValue: 5,
     ...overrides
   };
 }
@@ -89,7 +92,10 @@ export function createTestCurrency(overrides: Partial<any> = {}) {
     code: 'TST',
     symbol: 'T$',
     name: 'Test Currency',
-    exchangeRate: 1.5,
+    decimalPlaces: 2,
+    symbolPosition: 'before',
+    thousandsSeparator: ',',
+    decimalSeparator: '.',
     isActive: true,
     isDefault: false,
     ...overrides
@@ -101,6 +107,7 @@ export function createTestCurrency(overrides: Partial<any> = {}) {
  */
 export function createTestCurrencyRegion(overrides: Partial<any> = {}) {
   return {
+    code: `TR${Date.now().toString().slice(-6)}`,
     name: `Test Region ${Date.now()}`,
     countries: ['XX', 'YY'],
     currencyCode: 'USD',
@@ -114,12 +121,15 @@ export function createTestCurrencyRegion(overrides: Partial<any> = {}) {
  */
 export function createTestCurrencyPriceRule(overrides: Partial<any> = {}) {
   return {
-    currencyCode: 'EUR',
-    adjustmentType: 'percentage',
-    adjustmentValue: 5,
-    roundingMethod: 'nearest',
-    roundingPrecision: 2,
-    isActive: true,
+    name: `Test Currency Price Rule ${Date.now()}`,
+    currencyCode: 'USD',
+    priority: 1,
+    type: 'currency_conversion',
+    scope: 'global',
+    status: 'active',
+    adjustments: [
+      { type: 'percentage', value: 5 }
+    ],
     ...overrides
   };
 }

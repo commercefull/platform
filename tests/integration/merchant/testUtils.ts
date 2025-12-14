@@ -1,5 +1,5 @@
 import { AxiosInstance } from 'axios';
-import { createTestClient, loginTestUser } from '../testUtils';
+import { createTestClient, loginTestAdmin } from '../testUtils';
 import { Merchant, MerchantAddress, MerchantPaymentInfo } from '../../../features/merchant/repos/merchantRepo';
 
 // Common test data for merchant
@@ -47,7 +47,7 @@ export const createTestMerchant = async (
   expect(response.status).toBe(201);
   expect(response.data.success).toBe(true);
   
-  return response.data.data.id;
+  return response.data.data.merchantId;
 };
 
 // Helper function to create a test merchant address
@@ -68,7 +68,7 @@ export const createTestMerchantAddress = async (
   expect(response.status).toBe(201);
   expect(response.data.success).toBe(true);
   
-  return response.data.data.id;
+  return response.data.data.merchantAddressId;
 };
 
 // Helper function to create test merchant payment info
@@ -89,7 +89,7 @@ export const createTestMerchantPaymentInfo = async (
   expect(response.status).toBe(201);
   expect(response.data.success).toBe(true);
   
-  return response.data.data.id;
+  return response.data.data.merchantPaymentInfoId;
 };
 
 // Setup function to initialize client and test data for merchant tests
@@ -97,8 +97,8 @@ export const setupMerchantTests = async () => {
   // Create test client
   const client = createTestClient();
   
-  // Login as admin
-  const adminToken = await loginTestUser(client, 'admin');
+  // Login as admin/merchant
+  const adminToken = await loginTestAdmin(client);
   
   // Create test merchant
   const testMerchantId = await createTestMerchant(client, adminToken);

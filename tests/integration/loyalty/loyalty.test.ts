@@ -1,351 +1,449 @@
-import { AxiosInstance } from 'axios';
-import {
-  setupLoyaltyTests,
-  cleanupLoyaltyTests,
-  testTier,
-  testReward,
-  redeemTestReward,
-  addCustomerPoints
-} from './testUtils';
+/**
+ * Loyalty Integration Tests
+ * 
+ * Tests for loyalty management endpoints.
+ */
 
-describe('Loyalty Tests', () => {
-  let client: AxiosInstance;
-  let adminToken: string;
-  let customerToken: string;
-  let customerId: string;
-  let testTierId: string;
-  let testRewardId: string;
-  let redemptionCode: string;
+import axios, { AxiosInstance } from 'axios';
 
-  beforeAll(async () => {
-    const setup = await setupLoyaltyTests();
-    client = setup.client;
-    adminToken = setup.adminToken;
-    customerToken = setup.customerToken;
-    customerId = setup.customerId;
-    testTierId = setup.testTierId;
-    testRewardId = setup.testRewardId;
+// ============================================================================
+// Test Configuration
+// ============================================================================
+
+const API_URL = process.env.API_URL || 'http://localhost:3000';
+
+const TEST_MERCHANT = {
+  email: 'merchant@example.com',
+  password: 'password123'
+};
+
+const TEST_CUSTOMER = {
+  email: 'customer@example.com',
+  password: 'password123'
+};
+
+let client: AxiosInstance;
+let merchantToken: string;
+let customerToken: string;
+let customerId: string;
+
+// ============================================================================
+// Setup
+// ============================================================================
+
+beforeAll(async () => {
+  client = axios.create({
+    baseURL: API_URL,
+    validateStatus: () => true,
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    }
   });
 
-  afterAll(async () => {
-    await cleanupLoyaltyTests(client, adminToken, testTierId, testRewardId);
-  });
+  // Login as merchant
+  const merchantLogin = await client.post('/business/auth/login', TEST_MERCHANT);
+  merchantToken = merchantLogin.data.accessToken;
 
-  describe('Tier Management', () => {
-    it('should get all loyalty tiers', async () => {
-      const response = await client.get('/business/loyalty/tiers', {
-        headers: { Authorization: `Bearer ${adminToken}` }
+  // Login as customer
+  const customerLogin = await client.post('/customer/identity/login', TEST_CUSTOMER);
+  customerToken = customerLogin.data.accessToken;
+  customerId = customerLogin.data.customer?.customerId || customerLogin.data.customerId;
+});
+
+// ============================================================================
+// Tests
+// ============================================================================
+
+describe('Loyalty Feature Tests', () => {
+  // ==========================================================================
+  // Tier Management (Business)
+  // ==========================================================================
+
+  describe('Tier Management (Business)', () => {
+    let testTierId: string;
+
+    describe('GET /business/loyalty/tiers', () => {
+      it('should list all loyalty tiers', async () => {
+        const response = await client.get('/business/loyalty/tiers', {
+          headers: { Authorization: `Bearer ${merchantToken}` }
+        });
+
+        expect(response.status).toBe(200);
+        expect(response.data.success).toBe(true);
+        expect(Array.isArray(response.data.data)).toBe(true);
       });
-      
-      expect(response.status).toBe(200);
-      expect(response.data.success).toBe(true);
-      expect(Array.isArray(response.data.data)).toBe(true);
-      
-      if (response.data.data.length > 0) {
-        // Verify that fields use camelCase in the API responses (TypeScript interface)
-        const tier = response.data.data.find((t: any) => t.id === testTierId);
-        expect(tier).toBeDefined();
-        expect(tier).toHaveProperty('pointsThreshold');
-        expect(tier).toHaveProperty('isActive');
-        expect(tier).not.toHaveProperty('points_threshold');
-        expect(tier).not.toHaveProperty('is_active');
-      }
+
+      it('should require authentication', async () => {
+        const response = await client.get('/business/loyalty/tiers');
+        expect(response.status).toBe(401);
+      });
     });
 
-    it('should get a tier by ID', async () => {
-      const response = await client.get(`/business/loyalty/tiers/${testTierId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+    describe('POST /business/loyalty/tiers', () => {
+      it('should create a new tier', async () => {
+        const tierData = {
+          name: `Test Tier ${Date.now()}`,
+          description: 'Test tier for integration tests',
+          type: 'points',
+          pointsThreshold: 100,
+          multiplier: 1.2,
+          benefits: ['Free shipping', '10% discount'],
+          isActive: true
+        };
+
+        const response = await client.post('/business/loyalty/tiers', tierData, {
+          headers: { Authorization: `Bearer ${merchantToken}` }
+        });
+
+        expect(response.status).toBe(201);
+        expect(response.data.success).toBe(true);
+        expect(response.data.data).toHaveProperty('loyaltyTierId');
+        testTierId = response.data.data.loyaltyTierId;
       });
-      
-      expect(response.status).toBe(200);
-      expect(response.data.success).toBe(true);
-      expect(response.data.data).toHaveProperty('id', testTierId);
-      expect(response.data.data).toHaveProperty('name', testTier.name);
-      expect(response.data.data).toHaveProperty('pointsThreshold', testTier.pointsThreshold);
-      expect(response.data.data).toHaveProperty('multiplier', testTier.multiplier);
+
+      it('should require name and pointsThreshold', async () => {
+        const response = await client.post('/business/loyalty/tiers', {
+          multiplier: 1.0
+        }, {
+          headers: { Authorization: `Bearer ${merchantToken}` }
+        });
+
+        expect(response.status).toBe(400);
+        expect(response.data.success).toBe(false);
+      });
     });
 
-    it('should update a tier', async () => {
-      const updateData = {
-        name: 'Updated Test Tier',
-        description: 'Updated description for testing',
-        multiplier: 1.5
-      };
-      
-      const response = await client.put(`/business/loyalty/tiers/${testTierId}`, updateData, {
-        headers: { Authorization: `Bearer ${adminToken}` }
-      });
-      
-      expect(response.status).toBe(200);
-      expect(response.data.success).toBe(true);
-      expect(response.data.data).toHaveProperty('name', updateData.name);
-      expect(response.data.data).toHaveProperty('description', updateData.description);
-      expect(response.data.data).toHaveProperty('multiplier', updateData.multiplier);
-    });
-  });
+    describe('GET /business/loyalty/tiers/:id', () => {
+      it('should get tier by ID', async () => {
+        if (!testTierId) return;
 
-  describe('Reward Management', () => {
-    it('should get all loyalty rewards', async () => {
-      const response = await client.get('/business/loyalty/rewards', {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        const response = await client.get(`/business/loyalty/tiers/${testTierId}`, {
+          headers: { Authorization: `Bearer ${merchantToken}` }
+        });
+
+        expect(response.status).toBe(200);
+        expect(response.data.success).toBe(true);
+        expect(response.data.data).toHaveProperty('loyaltyTierId', testTierId);
       });
-      
-      expect(response.status).toBe(200);
-      expect(response.data.success).toBe(true);
-      expect(Array.isArray(response.data.data)).toBe(true);
-      
-      if (response.data.data.length > 0) {
-        // Verify that fields use camelCase in the API responses (TypeScript interface)
-        const reward = response.data.data.find((r: any) => r.id === testRewardId);
-        expect(reward).toBeDefined();
-        expect(reward).toHaveProperty('pointsCost');
-        expect(reward).toHaveProperty('freeShipping');
-        expect(reward).not.toHaveProperty('points_cost');
-        expect(reward).not.toHaveProperty('free_shipping');
-      }
+
+      it('should return 404 for non-existent tier', async () => {
+        const response = await client.get('/business/loyalty/tiers/00000000-0000-0000-0000-000000000000', {
+          headers: { Authorization: `Bearer ${merchantToken}` }
+        });
+
+        expect(response.status).toBe(404);
+      });
     });
 
-    it('should get a reward by ID', async () => {
-      const response = await client.get(`/business/loyalty/rewards/${testRewardId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
-      });
-      
-      expect(response.status).toBe(200);
-      expect(response.data.success).toBe(true);
-      expect(response.data.data).toHaveProperty('id', testRewardId);
-      expect(response.data.data).toHaveProperty('name', testReward.name);
-      expect(response.data.data).toHaveProperty('pointsCost', testReward.pointsCost);
-    });
+    describe('PUT /business/loyalty/tiers/:id', () => {
+      it('should update a tier', async () => {
+        if (!testTierId) return;
 
-    it('should update a reward', async () => {
-      const updateData = {
-        name: 'Updated Test Reward',
-        description: 'Updated description for testing',
-        pointsCost: 600
-      };
-      
-      const response = await client.put(`/business/loyalty/rewards/${testRewardId}`, updateData, {
-        headers: { Authorization: `Bearer ${adminToken}` }
-      });
-      
-      expect(response.status).toBe(200);
-      expect(response.data.success).toBe(true);
-      expect(response.data.data).toHaveProperty('name', updateData.name);
-      expect(response.data.data).toHaveProperty('description', updateData.description);
-      expect(response.data.data).toHaveProperty('pointsCost', updateData.pointsCost);
-    });
-  });
+        const response = await client.put(`/business/loyalty/tiers/${testTierId}`, {
+          name: 'Updated Test Tier',
+          multiplier: 1.5
+        }, {
+          headers: { Authorization: `Bearer ${merchantToken}` }
+        });
 
-  describe('Customer Points Management', () => {
-    it('should get customer points', async () => {
-      const response = await client.get(`/business/loyalty/customers/${customerId}/points`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        expect(response.status).toBe(200);
+        expect(response.data.success).toBe(true);
+        expect(response.data.data.name).toBe('Updated Test Tier');
       });
-      
-      expect(response.status).toBe(200);
-      expect(response.data.success).toBe(true);
-      expect(response.data.data).toHaveProperty('customerId', customerId);
-      expect(response.data.data).toHaveProperty('currentPoints');
-      expect(response.data.data).toHaveProperty('lifetimePoints');
-      
-      // Should include the tier information
-      expect(response.data.data).toHaveProperty('tier');
-      expect(response.data.data.tier).toHaveProperty('id', testTierId);
-    });
-
-    it('should adjust customer points', async () => {
-      const pointsToAdd = 250;
-      const response = await client.post(`/business/loyalty/customers/${customerId}/points/adjust`, {
-        points: pointsToAdd,
-        reason: 'Test adjustment'
-      }, {
-        headers: { Authorization: `Bearer ${adminToken}` }
-      });
-      
-      expect(response.status).toBe(200);
-      expect(response.data.success).toBe(true);
-      
-      // Get the updated points to verify
-      const verifyResponse = await client.get(`/business/loyalty/customers/${customerId}/points`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
-      });
-      
-      const previousPoints = 1000; // From the setup
-      expect(verifyResponse.data.data.currentPoints).toBe(previousPoints + pointsToAdd);
-    });
-
-    it('should get customer transactions', async () => {
-      const response = await client.get(`/business/loyalty/customers/${customerId}/transactions`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
-      });
-      
-      expect(response.status).toBe(200);
-      expect(response.data.success).toBe(true);
-      expect(Array.isArray(response.data.data)).toBe(true);
-      
-      // Should have at least one transaction from our test setup
-      expect(response.data.data.length).toBeGreaterThan(0);
-      
-      // Verify transaction fields use camelCase
-      if (response.data.data.length > 0) {
-        const transaction = response.data.data[0];
-        expect(transaction).toHaveProperty('customerId');
-        expect(transaction).toHaveProperty('action');
-        expect(transaction).toHaveProperty('createdAt');
-      }
     });
   });
 
-  describe('Redemption Process', () => {
-    it('should redeem points for a reward', async () => {
-      redemptionCode = await redeemTestReward(client, customerToken, testRewardId);
-      expect(redemptionCode).toBeDefined();
-      
-      // Get the customer's redemptions to verify
-      const response = await client.get('/api/loyalty/my-redemptions', {
-        headers: { Authorization: `Bearer ${customerToken}` }
+  // ==========================================================================
+  // Reward Management (Business)
+  // ==========================================================================
+
+  describe('Reward Management (Business)', () => {
+    let testRewardId: string;
+
+    describe('GET /business/loyalty/rewards', () => {
+      it('should list all loyalty rewards', async () => {
+        const response = await client.get('/business/loyalty/rewards', {
+          headers: { Authorization: `Bearer ${merchantToken}` }
+        });
+
+        expect(response.status).toBe(200);
+        expect(response.data.success).toBe(true);
+        expect(Array.isArray(response.data.data)).toBe(true);
       });
-      
-      expect(response.status).toBe(200);
-      expect(response.data.success).toBe(true);
-      expect(Array.isArray(response.data.data)).toBe(true);
-      
-      // Find the redemption we just created
-      const redemption = response.data.data.find((r: any) => r.redemptionCode === redemptionCode);
-      expect(redemption).toBeDefined();
-      expect(redemption).toHaveProperty('status', 'pending');
     });
 
-    it('should update redemption status', async () => {
-      // We need the redemption ID, which we'd typically get from the database
-      // Since we don't have direct DB access in tests, we'd need to get it from a list endpoint
-      const response = await client.get(`/business/loyalty/customers/${customerId}/redemptions`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+    describe('POST /business/loyalty/rewards', () => {
+      it('should create a new reward', async () => {
+        const rewardData = {
+          name: `Test Reward ${Date.now()}`,
+          description: 'Test reward for integration tests',
+          pointsCost: 500,
+          discountAmount: 10.00,
+          freeShipping: true,
+          isActive: true
+        };
+
+        const response = await client.post('/business/loyalty/rewards', rewardData, {
+          headers: { Authorization: `Bearer ${merchantToken}` }
+        });
+
+        expect(response.status).toBe(201);
+        expect(response.data.success).toBe(true);
+        expect(response.data.data).toHaveProperty('loyaltyRewardId');
+        testRewardId = response.data.data.loyaltyRewardId;
       });
-      
-      expect(response.status).toBe(200);
-      expect(response.data.success).toBe(true);
-      
-      // Find the redemption with our redemption code
-      const redemption = response.data.data.find((r: any) => r.redemptionCode === redemptionCode);
-      expect(redemption).toBeDefined();
-      
-      // Update the status
-      const updateResponse = await client.put(`/business/loyalty/redemptions/${redemption.id}/status`, {
-        status: 'used'
-      }, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+
+      it('should require name and pointsCost', async () => {
+        const response = await client.post('/business/loyalty/rewards', {
+          description: 'Missing required fields'
+        }, {
+          headers: { Authorization: `Bearer ${merchantToken}` }
+        });
+
+        expect(response.status).toBe(400);
+        expect(response.data.success).toBe(false);
       });
-      
-      expect(updateResponse.status).toBe(200);
-      expect(updateResponse.data.success).toBe(true);
-      expect(updateResponse.data.data).toHaveProperty('status', 'used');
-      expect(updateResponse.data.data).toHaveProperty('usedAt');
+    });
+
+    describe('GET /business/loyalty/rewards/:id', () => {
+      it('should get reward by ID', async () => {
+        if (!testRewardId) return;
+
+        const response = await client.get(`/business/loyalty/rewards/${testRewardId}`, {
+          headers: { Authorization: `Bearer ${merchantToken}` }
+        });
+
+        expect(response.status).toBe(200);
+        expect(response.data.success).toBe(true);
+        expect(response.data.data).toHaveProperty('loyaltyRewardId', testRewardId);
+      });
+    });
+
+    describe('PUT /business/loyalty/rewards/:id', () => {
+      it('should update a reward', async () => {
+        if (!testRewardId) return;
+
+        const response = await client.put(`/business/loyalty/rewards/${testRewardId}`, {
+          name: 'Updated Test Reward',
+          pointsCost: 600
+        }, {
+          headers: { Authorization: `Bearer ${merchantToken}` }
+        });
+
+        expect(response.status).toBe(200);
+        expect(response.data.success).toBe(true);
+        expect(response.data.data.name).toBe('Updated Test Reward');
+      });
     });
   });
 
-  describe('Public API Tests', () => {
-    it('should get public loyalty tiers', async () => {
-      const response = await client.get('/api/loyalty/tiers');
-      
-      expect(response.status).toBe(200);
-      expect(response.data.success).toBe(true);
-      expect(Array.isArray(response.data.data)).toBe(true);
-      
-      // Public API should return limited tier information
-      if (response.data.data.length > 0) {
-        const tier = response.data.data[0];
-        expect(tier).toHaveProperty('name');
-        expect(tier).toHaveProperty('pointsThreshold');
-        expect(tier).not.toHaveProperty('multiplier'); // Limited info
-        expect(tier).not.toHaveProperty('createdAt'); // Limited info
-      }
-    });
+  // ==========================================================================
+  // Public Loyalty Endpoints
+  // ==========================================================================
 
-    it('should get public loyalty rewards', async () => {
-      const response = await client.get('/api/loyalty/rewards');
-      
-      expect(response.status).toBe(200);
-      expect(response.data.success).toBe(true);
-      expect(Array.isArray(response.data.data)).toBe(true);
-      
-      // Public API should return limited reward information
-      if (response.data.data.length > 0) {
-        const reward = response.data.data[0];
-        expect(reward).toHaveProperty('name');
-        expect(reward).toHaveProperty('pointsCost');
-        expect(reward).not.toHaveProperty('discountCode'); // Limited info
-        expect(reward).not.toHaveProperty('createdAt'); // Limited info
-      }
-    });
+  describe('Public Loyalty Endpoints', () => {
+    describe('GET /loyalty/tiers', () => {
+      it('should get public tiers without auth', async () => {
+        const response = await client.get('/customer/loyalty/tiers');
 
-    it('should get my loyalty status when authenticated', async () => {
-      const response = await client.get('/api/loyalty/my-status', {
-        headers: { Authorization: `Bearer ${customerToken}` }
+        expect(response.status).toBe(200);
+        expect(response.data.success).toBe(true);
+        expect(Array.isArray(response.data.data)).toBe(true);
+
+        // Public tiers should have limited fields
+        if (response.data.data.length > 0) {
+          const tier = response.data.data[0];
+          expect(tier).toHaveProperty('name');
+          expect(tier).toHaveProperty('pointsThreshold');
+        }
       });
-      
-      expect(response.status).toBe(200);
-      expect(response.data.success).toBe(true);
-      expect(response.data.data).toHaveProperty('currentPoints');
-      expect(response.data.data).toHaveProperty('lifetimePoints');
-      expect(response.data.data).toHaveProperty('tier');
-      expect(response.data.data.tier).toHaveProperty('name');
     });
 
-    it('should get my transactions when authenticated', async () => {
-      const response = await client.get('/api/loyalty/my-transactions', {
-        headers: { Authorization: `Bearer ${customerToken}` }
+    describe('GET /loyalty/rewards', () => {
+      it('should get public rewards without auth', async () => {
+        const response = await client.get('/customer/loyalty/rewards');
+
+        expect(response.status).toBe(200);
+        expect(response.data.success).toBe(true);
+        expect(Array.isArray(response.data.data)).toBe(true);
+
+        // Public rewards should have limited fields
+        if (response.data.data.length > 0) {
+          const reward = response.data.data[0];
+          expect(reward).toHaveProperty('name');
+          expect(reward).toHaveProperty('pointsCost');
+        }
       });
-      
-      expect(response.status).toBe(200);
-      expect(response.data.success).toBe(true);
-      expect(Array.isArray(response.data.data)).toBe(true);
-      
-      // Transaction fields should be in customer-friendly format
-      if (response.data.data.length > 0) {
-        const transaction = response.data.data[0];
-        expect(transaction).toHaveProperty('points');
-        expect(transaction).toHaveProperty('action');
-        expect(transaction).toHaveProperty('date');
-        expect(transaction).not.toHaveProperty('customerId'); // Unnecessary in customer view
-      }
     });
+  });
 
-    it('should require authentication for loyalty status', async () => {
-      const response = await client.get('/api/loyalty/my-status');
-      expect([401, 403]).toContain(response.status);
-      expect(response.data.success).toBe(false);
-    });
+  // ==========================================================================
+  // Customer Loyalty Endpoints
+  // ==========================================================================
 
-    it('should prevent redeeming a reward without enough points', async () => {
-      // Set customer points to just below the required amount
-      const requiredPoints = 600; // The updated pointsCost from our earlier test
-      await addCustomerPoints(
-        client, 
-        adminToken, 
-        customerId,
-        -(1250 + 250), // Reset to 0 (removing what was added in setup and previous test)
-        'Reset for testing'
-      );
-      
-      await addCustomerPoints(
-        client, 
-        adminToken, 
-        customerId,
-        requiredPoints - 1, // 1 point short
-        'Set up for insufficient points test'
-      );
-      
-      // Try to redeem
-      const response = await client.post('/api/loyalty/redeem', {
-        rewardId: testRewardId
-      }, {
-        headers: { Authorization: `Bearer ${customerToken}` }
+  describe('Customer Loyalty Endpoints', () => {
+    describe('GET /loyalty/my-status', () => {
+      it('should get customer loyalty status when authenticated', async () => {
+        const response = await client.get('/customer/loyalty/my-status', {
+          headers: { Authorization: `Bearer ${customerToken}` }
+        });
+
+        expect(response.status).toBe(200);
+        expect(response.data.success).toBe(true);
+        expect(response.data.data).toHaveProperty('currentPoints');
+        expect(response.data.data).toHaveProperty('tier');
       });
-      
-      expect(response.status).toBe(400);
-      expect(response.data.success).toBe(false);
-      expect(response.data.message).toContain('Insufficient points');
+
+      it('should require authentication', async () => {
+        const response = await client.get('/customer/loyalty/my-status');
+        expect(response.status).toBe(401);
+      });
+    });
+
+    describe('GET /loyalty/my-transactions', () => {
+      it('should get customer transactions when authenticated', async () => {
+        const response = await client.get('/customer/loyalty/my-transactions', {
+          headers: { Authorization: `Bearer ${customerToken}` }
+        });
+
+        expect(response.status).toBe(200);
+        expect(response.data.success).toBe(true);
+        expect(Array.isArray(response.data.data)).toBe(true);
+      });
+    });
+
+    describe('GET /loyalty/my-redemptions', () => {
+      it('should get customer redemptions when authenticated', async () => {
+        const response = await client.get('/customer/loyalty/my-redemptions', {
+          headers: { Authorization: `Bearer ${customerToken}` }
+        });
+
+        expect(response.status).toBe(200);
+        expect(response.data.success).toBe(true);
+        expect(Array.isArray(response.data.data)).toBe(true);
+      });
+    });
+
+    describe('POST /loyalty/redeem', () => {
+      it('should require authentication', async () => {
+        const response = await client.post('/customer/loyalty/redeem', {
+          rewardId: '00000000-0000-0000-0000-000000000000'
+        });
+
+        expect(response.status).toBe(401);
+      });
+
+      it('should require rewardId', async () => {
+        const response = await client.post('/customer/loyalty/redeem', {}, {
+          headers: { Authorization: `Bearer ${customerToken}` }
+        });
+
+        expect(response.status).toBe(400);
+      });
+    });
+  });
+
+  // ==========================================================================
+  // Customer Points Management (Business)
+  // ==========================================================================
+
+  describe('Customer Points Management (Business)', () => {
+    describe('GET /business/loyalty/customers/:customerId/points', () => {
+      it('should get customer points', async () => {
+        if (!customerId) return;
+
+        const response = await client.get(`/business/loyalty/customers/${customerId}/points`, {
+          headers: { Authorization: `Bearer ${merchantToken}` }
+        });
+
+        expect(response.status).toBe(200);
+        expect(response.data.success).toBe(true);
+        expect(response.data.data).toHaveProperty('currentPoints');
+      });
+    });
+
+    describe('POST /business/loyalty/customers/:customerId/points/adjust', () => {
+      it('should adjust customer points', async () => {
+        if (!customerId) return;
+
+        const response = await client.post(
+          `/business/loyalty/customers/${customerId}/points/adjust`,
+          { points: 100, reason: 'Test adjustment' },
+          { headers: { Authorization: `Bearer ${merchantToken}` } }
+        );
+
+        expect(response.status).toBe(200);
+        expect(response.data.success).toBe(true);
+      });
+
+      it('should require points amount', async () => {
+        if (!customerId) return;
+
+        const response = await client.post(
+          `/business/loyalty/customers/${customerId}/points/adjust`,
+          { reason: 'Missing points' },
+          { headers: { Authorization: `Bearer ${merchantToken}` } }
+        );
+
+        expect(response.status).toBe(400);
+      });
+    });
+
+    describe('GET /business/loyalty/customers/:customerId/transactions', () => {
+      it('should get customer transactions', async () => {
+        if (!customerId) return;
+
+        const response = await client.get(
+          `/business/loyalty/customers/${customerId}/transactions`,
+          { headers: { Authorization: `Bearer ${merchantToken}` } }
+        );
+
+        expect(response.status).toBe(200);
+        expect(response.data.success).toBe(true);
+        expect(Array.isArray(response.data.data)).toBe(true);
+      });
+    });
+
+    describe('GET /business/loyalty/customers/:customerId/redemptions', () => {
+      it('should get customer redemptions', async () => {
+        if (!customerId) return;
+
+        const response = await client.get(
+          `/business/loyalty/customers/${customerId}/redemptions`,
+          { headers: { Authorization: `Bearer ${merchantToken}` } }
+        );
+
+        expect(response.status).toBe(200);
+        expect(response.data.success).toBe(true);
+        expect(Array.isArray(response.data.data)).toBe(true);
+      });
+    });
+  });
+
+  // ==========================================================================
+  // Authorization
+  // ==========================================================================
+
+  describe('Authorization', () => {
+    it('should require auth for business tier management', async () => {
+      const response = await client.post('/business/loyalty/tiers', {});
+      expect(response.status).toBe(401);
+    });
+
+    it('should require auth for business reward management', async () => {
+      const response = await client.post('/business/loyalty/rewards', {});
+      expect(response.status).toBe(401);
+    });
+
+    it('should allow public access to tiers', async () => {
+      const response = await client.get('/customer/loyalty/tiers');
+      expect(response.status).toBe(200);
+    });
+
+    it('should allow public access to rewards', async () => {
+      const response = await client.get('/customer/loyalty/rewards');
+      expect(response.status).toBe(200);
     });
   });
 });

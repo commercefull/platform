@@ -19,23 +19,22 @@ const router = Router();
 // -------------------- Public Auth Routes --------------------
 
 // Simple login (returns access token only)
-router.post('/login', loginCustomer);
+router.post('/identity/login', loginCustomer);
 
 // Register new customer account
-router.post('/register', registerCustomer);
+router.post('/identity/register', registerCustomer);
 
 // Token-based auth (returns access + refresh tokens)
-router.post('/token', issueTokenPair);
+router.post('/identity/token', issueTokenPair);
 
 // Refresh access token
-router.post('/refresh', renewAccessToken);
+router.post('/identity/refresh', renewAccessToken);
 
 // Validate token
-router.post('/validate', checkTokenValidity);
+router.post('/identity/validate', checkTokenValidity);
 
 // Password reset flow
-router.post('/forgot-password', requestPasswordReset);
-router.post('/reset-password', resetPassword);
+router.post('/identity/forgot-password', requestPasswordReset);
+router.post('/identity/reset-password', resetPassword);
 
 export const identityCustomerRouter = router;
-export default router;

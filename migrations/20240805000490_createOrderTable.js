@@ -43,6 +43,7 @@ exports.up = function(knex) {
     t.uuid('parentOrderId').references('orderId').inTable('order');
     t.specificType('tags', 'text[]');
     t.jsonb('metadata').defaultTo('{}');
+    t.timestamp('deletedAt').nullable();
 
     t.index('orderNumber');
     t.index('customerId');

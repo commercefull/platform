@@ -18,4 +18,3 @@ router.get('/gift-cards/mine', giftCardController.getMyGiftCards);
 router.post('/gift-cards/reload', giftCardController.reloadGiftCard);
 
 export const promotionCustomerRouter = router;
-export default router;

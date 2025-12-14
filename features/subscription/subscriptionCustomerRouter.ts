@@ -30,34 +30,33 @@ const router = Router();
 // Public Routes (Browse Subscription Products)
 // ============================================================================
 
-router.get('/products', getAvailableSubscriptionProducts);
-router.get('/products/:productId', getSubscriptionProductDetails);
-router.get('/plans/:planId', getSubscriptionPlanDetails);
+router.get('/subscriptions/products', getAvailableSubscriptionProducts);
+router.get('/subscriptions/products/:productId', getSubscriptionProductDetails);
+router.get('/subscriptions/plans/:planId', getSubscriptionPlanDetails);
 
 // ============================================================================
 // Authenticated Routes (My Subscriptions)
 // ============================================================================
 
 // List and view subscriptions
-router.get('/mine', getMySubscriptions);
-router.get('/mine/:id', getMySubscription);
+router.get('/subscriptions/mine', getMySubscriptions);
+router.get('/subscriptions/mine/:id', getMySubscription);
 
 // Create subscription
-router.post('/subscribe', createSubscription);
+router.post('/subscriptions/subscribe', createSubscription);
 
 // Manage subscription
-router.put('/mine/:id', updateMySubscription);
-router.post('/mine/:id/change-plan', changePlan);
-router.post('/mine/:id/pause', pauseMySubscription);
-router.post('/mine/:id/resume', resumeMySubscription);
-router.post('/mine/:id/cancel', cancelMySubscription);
-router.post('/mine/:id/reactivate', reactivateMySubscription);
+router.put('/subscriptions/mine/:id', updateMySubscription);
+router.post('/subscriptions/mine/:id/change-plan', changePlan);
+router.post('/subscriptions/mine/:id/pause', pauseMySubscription);
+router.post('/subscriptions/mine/:id/resume', resumeMySubscription);
+router.post('/subscriptions/mine/:id/cancel', cancelMySubscription);
+router.post('/subscriptions/mine/:id/reactivate', reactivateMySubscription);
 
 // Skip delivery
-router.post('/mine/:id/skip', skipNextDelivery);
+router.post('/subscriptions/mine/:id/skip', skipNextDelivery);
 
 // Billing history
-router.get('/mine/:id/orders', getMySubscriptionOrders);
+router.get('/subscriptions/mine/:id/orders', getMySubscriptionOrders);
 
 export const subscriptionCustomerRouter = router;
-export default router;

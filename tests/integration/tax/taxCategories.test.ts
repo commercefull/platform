@@ -33,7 +33,7 @@ describe('Tax Categories API Integration Tests', () => {
 
     it('should reject access when not authenticated', async () => {
       const response = await client.get('/business/tax/categories');
-      expect([401, 403]).toContain(response.status);
+      expect(response.status).toBe(401);
     });
 
     it('should reject access when authenticated as non-admin user', async () => {

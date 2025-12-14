@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { 
   MembershipRepo, 
   MembershipTier, 
-  MembershipBenefit, 
+  LegacyMembershipBenefit as MembershipBenefit, 
   UserMembership 
 } from '../repos/membershipRepo';
 

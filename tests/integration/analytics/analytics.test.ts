@@ -461,7 +461,7 @@ describe('Analytics Feature Tests', () => {
     it('should require authentication for analytics endpoints', async () => {
       const response = await client.get('/business/analytics/sales/dashboard');
       
-      expect([401, 403]).toContain(response.status);
+      expect(response.status).toBe(401);
     });
 
     it('should reject invalid tokens', async () => {
@@ -469,7 +469,7 @@ describe('Analytics Feature Tests', () => {
         headers: { Authorization: 'Bearer invalid-token' }
       });
       
-      expect([401, 403]).toContain(response.status);
+      expect(response.status).toBe(401);
     });
   });
 });

@@ -51,7 +51,7 @@ export class CurrencyPriceRuleRepo {
    * Create a new currency price rule
    */
   async create(data: CurrencyPriceRuleCreateProps): Promise<CurrencyPriceRule> {
-    // Store currency-specific fields in the metadata
+    // Store currency-specific fields in the metadata and directly on the rule
     const metadata = {
       currencyCode: data.currencyCode,
       regionCode: data.regionCode,
@@ -59,14 +59,16 @@ export class CurrencyPriceRuleRepo {
       maxOrderValue: data.maxOrderValue
     };
     
-    // Create the base pricing rule
+    // Create the base pricing rule with currencyCode stored directly
     const pricingRuleData = {
       ...data,
-      type: PricingRuleType.CURRENCY_CONVERSION,
+      ruleType: 'percentage' as const,
+      currencyCode: data.currencyCode,
+      regionCode: data.regionCode,
       metadata
     };
     
-    const rule = await pricingRuleRepo.create(pricingRuleData);
+    const rule = await pricingRuleRepo.create(pricingRuleData as any);
     
     return this.transformToCurrencyPriceRule(rule);
   }
@@ -90,10 +92,10 @@ export class CurrencyPriceRuleRepo {
       ...(data.maxOrderValue !== undefined ? { maxOrderValue: data.maxOrderValue } : {})
     };
     
-    // Update the rule
+    // Update the rule - remove type/ruleType to avoid column issues
+    const { type, ruleType, ...updateData } = data as any;
     const updatedRule = await pricingRuleRepo.update(id, {
-      ...data,
-      type: PricingRuleType.CURRENCY_CONVERSION, // Ensure type doesn't change
+      ...updateData,
       metadata
     });
     
@@ -112,7 +114,15 @@ export class CurrencyPriceRuleRepo {
    */
   async findById(id: string): Promise<CurrencyPriceRule | null> {
     const rule = await pricingRuleRepo.findById(id);
-    if (!rule || rule.type !== PricingRuleType.CURRENCY_CONVERSION) {
+    if (!rule) {
+      return null;
+    }
+    
+    // Check if this is a currency price rule by checking currencyCode or metadata
+    const hasCurrencyCode = (rule as any).currencyCode || 
+      ((rule as any).metadata && (rule as any).metadata.currencyCode);
+    
+    if (!hasCurrencyCode) {
       return null;
     }
     
@@ -123,7 +133,8 @@ export class CurrencyPriceRuleRepo {
    * Update status of a currency price rule
    */
   async updateStatus(id: string, status: PricingRuleStatus): Promise<CurrencyPriceRule> {
-    const updatedRule = await pricingRuleRepo.updateStatus(id, status);
+    const isActive = status === PricingRuleStatus.ACTIVE;
+    const updatedRule = await pricingRuleRepo.updateStatus(id, isActive);
     
     if (updatedRule.type !== PricingRuleType.CURRENCY_CONVERSION) {
       throw new Error(`Rule with ID ${id} is not a currency price rule`);
@@ -138,13 +149,13 @@ export class CurrencyPriceRuleRepo {
   private transformToCurrencyPriceRule(rule: any): CurrencyPriceRule {
     if (!rule) return null as any;
     
-    // Extract currency-specific properties from metadata
+    // Extract currency-specific properties from direct fields or metadata
     const metadata = rule.metadata || {};
     
     return {
       ...rule,
-      currencyCode: metadata.currencyCode || '',
-      regionCode: metadata.regionCode,
+      currencyCode: rule.currencyCode || metadata.currencyCode || '',
+      regionCode: rule.regionCode || metadata.regionCode,
       minOrderValue: metadata.minOrderValue,
       maxOrderValue: metadata.maxOrderValue
     };

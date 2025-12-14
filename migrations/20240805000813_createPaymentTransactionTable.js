@@ -16,6 +16,18 @@ exports.up = function(knex) {
     t.string('errorCode', 100);
     t.text('errorMessage');
     t.jsonb('gatewayResponse');
+    t.uuid('customerId').references('customerId').inTable('customer').onDelete('SET NULL');
+    t.uuid('paymentMethodId').references('paymentMethodId').inTable('paymentMethod').onDelete('SET NULL');
+    t.uuid('paymentGatewayId').references('paymentGatewayId').inTable('paymentGateway').onDelete('SET NULL');
+    t.string('externalTransactionId', 255);
+    t.string('currency', 3).defaultTo('USD');
+    t.jsonb('paymentMethodDetails');
+    t.decimal('refundedAmount', 15, 2).defaultTo(0);
+    t.jsonb('metadata');
+    t.string('customerIp', 45);
+    t.timestamp('authorizedAt');
+    t.timestamp('capturedAt');
+    t.timestamp('deletedAt');
     
 
     t.index('orderPaymentId');
@@ -24,6 +36,10 @@ exports.up = function(knex) {
     t.index('status');
     t.index('transactionId');
     t.index('createdAt');
+    t.index('customerId');
+    t.index('paymentMethodId');
+    t.index('paymentGatewayId');
+    t.index('externalTransactionId');
   });
 };
 

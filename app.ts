@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express";
+import express, { Request, Response, NextFunction } from "express";
 import path from "path";
 import cookieParser from "cookie-parser";
 import logger from "morgan";
@@ -10,95 +10,136 @@ import i18nextMiddleware from 'i18next-http-middleware';
 import helmet from "helmet";
 import compression from "compression";
 import session from "express-session";
+import rateLimit from 'express-rate-limit';
+import cors from 'cors';
+import hpp from 'hpp';
 import { pool } from "./libs/db/pool";
 import passport from "passport";
 import { formCheckbox, formHidden, formInput, formLegend, formMultiSelect, formSelect, formSubmit, formText } from "./libs/form";
-import { storefrontCustomerRouter } from "./storefront/storefrontRouter";
-import { distributionBusinessRouter } from "./features/distribution/distributionBusinessRouter";
-import { merchantMerchantRouter } from "./features/merchant/merchantBusinessRouter";
-import { taxBusinessRouter } from "./features/tax/taxBusinessRouter";
-import { taxCustomerRouter } from "./features/tax/taxCustomerRouter";
-import { distributionCustomerRouter } from "./features/distribution/distributionCustomerRouter";
-import gdprRouter from "./features/gdpr/gdprRouter";
-import { gdprBusinessRouter } from "./features/gdpr/gdprBusinessRouter";
-import { basketCustomerRouter } from "./features/basket/interface/routers/basketRouter";
-import { orderBusinessRouter } from "./features/order/interface/routers/businessRouter";
-import { orderCustomerRouter } from "./features/order/interface/routers/customerRouter";
-import { checkoutCustomerRouter } from "./features/checkout/interface/routers/checkoutRouter";
-import { productBusinessRouter } from "./features/product/interface/routers/businessRouter";
-import { promotionBusinessRouter } from "./features/promotion/interface/routers/businessRouter";
-import { inventoryCustomerRouter } from "./features/inventory/interface/routers/customerRouter";
-import { paymentCustomerRouter } from "./features/payment/interface/routers/customerRouter";
-import { productCustomerRouter } from "./features/product/interface/routers/customerRouter";
-import { customerRouter } from "./features/customer/interface/routers/customerRouter";
-import { customerBusinessRouter } from "./features/customer/interface/routers/businessRouter";
-import { identityBusinessRouter } from "./features/identity/interface/routers/identityBusinessRouter";
-import { identityCustomerRouter } from "./features/identity/interface/routers/identityCustomerRouter";
-import { marketingBusinessRouter } from "./features/marketing/marketingBusinessRouter";
-import { marketingCustomerRouter } from "./features/marketing/marketingCustomerRouter";
-import { b2bBusinessRouter } from "./features/b2b/b2bBusinessRouter";
-import { b2bCustomerRouter } from "./features/b2b/b2bCustomerRouter";
-import { subscriptionBusinessRouter } from "./features/subscription/subscriptionBusinessRouter";
-import { subscriptionCustomerRouter } from "./features/subscription/subscriptionCustomerRouter";
-import { supportBusinessRouter } from "./features/support/supportBusinessRouter";
-import { supportCustomerRouter } from "./features/support/supportCustomerRouter";
-import { analyticsBusinessRouter } from "./features/analytics/analyticsBusinessRouter";
+import { createSessionStore } from './libs/session/sessionStoreFactory';
 import { initializeAnalyticsHandlers } from "./features/analytics/services/analyticsEventHandler";
-import { warehouseMerchantRouter } from "./features/warehouse/warehouseBusinessRouter";
-import { warehouseCustomerRouter } from "./features/warehouse/warehouseCustomerRouter";
-import { supplierMerchantRouter } from "./features/supplier/supplierBusinessRouter";
-import { localizationMerchantRouter } from "./features/localization/localizationBusinessRouter";
-import { localizationCustomerRouter } from "./features/localization/localizationCustomerRouter";
-import { pricingMerchantRouter } from "./features/pricing/pricingBusinessRouter";
-import { loyaltyMerchantRouter } from "./features/loyalty/loyaltyBusinessRouter";
-import { loyaltyCustomerRouter } from "./features/loyalty/loyaltyCustomerRouter";
-import { notificationMerchantRouter } from "./features/notification/notificationBusinessRouter";
-import { contentRouterAdmin } from "./features/content/contentBusinessRouter";
-const pgSession = require('connect-pg-simple')(session);
+import { configureRoutes } from "./routes";
 
 // Initialize analytics event handlers
 initializeAnalyticsHandlers();
 
 const app = express();
+const isProduction = process.env.NODE_ENV === 'production';
 let loadPath;
 
-if (process.env.NODE_ENV === 'production') {
-  const __dirname = path.resolve();
-  app.set("views", path.join(__dirname, "views"));
-  app.use(express.static(path.join(__dirname, "public")));
+// ============================================================================
+// Security Middleware (applied in ALL environments)
+// ============================================================================
 
-  app.use(
-    helmet({
-      contentSecurityPolicy: {
-        directives: {
-          "default-src": ["'self'"],
-          "style-src": ["'self'", "https:", "'unsafe-inline'"],
-          "script-src": ["'self'", "'unsafe-inline'", 'https://www.google-analytics.com', 'https://ssl.google-analytics.com', 'https://www.googletagmanager.com'], // <2>
-          "img-src": ["'self'", "data:", 'https://www.google-analytics.com', 'https://www.googletagmanager.com'], // <1>
-          "connect-src": ["'self'", 'https://www.google-analytics.com'],
-          "font-src": ["'self'", 'https://fonts.gstatic.com'],
-          "base-uri": ["'self'"],
-          "form-action": ["'self'"],
-          "frame-ancestors": ["'self'"],
-          "object-src": ["'none'"],
-          "script-src-attr": ["'none'"],
-        },
+// Trust proxy when behind load balancer/reverse proxy
+if (isProduction) {
+  app.set('trust proxy', 1);
+}
+
+// Helmet security headers - always enabled
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        "default-src": ["'self'"],
+        "style-src": ["'self'", "https://fonts.googleapis.com"],
+        "script-src": ["'self'", 'https://www.google-analytics.com', 'https://ssl.google-analytics.com', 'https://www.googletagmanager.com'],
+        "img-src": ["'self'", "data:", "https:", 'https://www.google-analytics.com', 'https://www.googletagmanager.com'],
+        "connect-src": ["'self'", 'https://www.google-analytics.com', 'https://api.stripe.com'],
+        "font-src": ["'self'", 'https://fonts.gstatic.com'],
+        "base-uri": ["'self'"],
+        "form-action": ["'self'"],
+        "frame-ancestors": ["'self'"],
+        "object-src": ["'none'"],
+        "script-src-attr": ["'none'"],
+        "upgrade-insecure-requests": isProduction ? [] : null,
       },
-    }),
-  );
+    },
+    crossOriginEmbedderPolicy: false, // May need adjustment for external resources
+    hsts: isProduction ? { maxAge: 31536000, includeSubDomains: true, preload: true } : false,
+  }),
+);
 
+// CORS configuration
+const corsOptions: cors.CorsOptions = {
+  origin: isProduction 
+    ? process.env.ALLOWED_ORIGINS?.split(',') || ['https://yourdomain.com']
+    : ['http://localhost:3000', 'http://localhost:10000', 'http://127.0.0.1:3000'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+  maxAge: 86400, // 24 hours
+};
+app.use(cors(corsOptions));
+
+// Rate limiting - protect against brute force and DDoS
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: isProduction ? 100 : 1000, // Limit each IP
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: 'Too many requests, please try again later.' },
+  skip: (req: Request) => req.path.startsWith('/health'), // Skip health checks
+});
+
+// Stricter rate limit for authentication endpoints
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: isProduction ? 5 : 50, // 5 attempts per 15 min in production
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: 'Too many login attempts, please try again later.' },
+});
+
+// Apply rate limiters
+app.use('/identity/login', authLimiter);
+app.use('/identity/register', authLimiter);
+app.use('/business/auth/login', authLimiter);
+app.use(apiLimiter);
+
+// HTTP Parameter Pollution protection
+// Prevents attackers from polluting query/body parameters
+app.use(hpp({
+  whitelist: [
+    // Allow arrays for these common filter parameters
+    'ids',
+    'tags',
+    'categories',
+    'status',
+    'types',
+    'fields',
+    'include',
+    'sort',
+  ],
+}));
+
+// Compression (production only for performance)
+if (isProduction) {
   app.use(compression({
     filter: (req: Request, res: Response) => {
       if (req.headers['x-no-compression']) {
-        return false
+        return false;
       }
-      return compression.filter(req, res)
-    }
-  }))
-  loadPath = path.join(__dirname, 'locales/{{lng}}/{{ns}}.json');
+      return compression.filter(req, res);
+    },
+    level: 6,
+  }));
+}
 
+// ============================================================================
+// View Engine & Static Files
+// ============================================================================
+
+if (isProduction) {
+  const __dirname = path.resolve();
+  app.set("views", path.join(__dirname, "templates"));
+  app.use(express.static(path.join(__dirname, "public"), {
+    maxAge: '1d',
+    etag: true,
+  }));
+  loadPath = path.join(__dirname, 'locales/{{lng}}/{{ns}}.json');
 } else {
-  app.set("views", path.join(__dirname, "views"));
+  app.set("views", path.join(__dirname, "templates"));
   app.use(express.static(path.join(__dirname, "public")));
   loadPath = __dirname + '/locales/{{lng}}/{{ns}}.json';
 }
@@ -133,26 +174,56 @@ app.use(
   })
 )
 
-app.use(bodyParser.urlencoded({ limit: "10mb", extended: true }))
+app.use(bodyParser.urlencoded({ limit: "10mb", extended: true, parameterLimit: 1000 }))
 
 app.set("view engine", "ejs");
 app.locals.t = function (key: string) {
   return i18next.t(key);
 };
 
-app.use(logger("short"));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
+app.use(logger(isProduction ? "combined" : "short"));
+app.use(express.json({ limit: '1mb' })); // Limit JSON body size
+app.use(express.urlencoded({ extended: false, limit: '1mb' }));
+app.use(cookieParser(process.env.COOKIE_SECRET));
+
+// Session configuration with secure defaults
+const sessionSecret = process.env.SESSION_SECRET;
+if (!sessionSecret || sessionSecret.length < 32) {
+  if (isProduction) {
+    throw new Error('SESSION_SECRET must be set and at least 32 characters in production');
+  }
+  console.warn('WARNING: SESSION_SECRET is not set or too short. Using insecure default for development.');
+}
+
+// Create session store - uses Redis if REDIS_URL/REDIS_HOST is set, otherwise PostgreSQL
+const sessionStoreResult = createSessionStore({
+  type: 'auto', // Automatically choose based on environment
+  postgres: {
+    pool: pool,
+    tableName: 'session',
+    pruneSessionInterval: 60 * 15, // 15 minutes
+  },
+  redis: {
+    keyPrefix: 'sess:',
+  },
+});
+console.log(`Session store: ${sessionStoreResult.type}`);
+
 app.use(
   session({
-    secret: process.env.SESSION_SECRET ?? "",
-    store: new pgSession({
-      pool: pool,
-    }),
-    resave: true,
-    saveUninitialized: true,
-    cookie: { maxAge: 60 * 1000 * 60 * 3 }, //session expires after 3 hours
+    secret: sessionSecret || 'dev-only-insecure-secret-do-not-use-in-production',
+    name: 'sid', // Don't use default 'connect.sid' - reveals tech stack
+    store: sessionStoreResult.store,
+    resave: false, // Don't save session if unmodified
+    saveUninitialized: false, // Don't create session until something stored (GDPR)
+    rolling: true, // Reset expiry on each request
+    cookie: {
+      maxAge: 60 * 1000 * 60 * 3, // 3 hours
+      secure: isProduction, // HTTPS only in production
+      httpOnly: true, // Prevent XSS access to cookie
+      sameSite: 'lax', // CSRF protection
+      domain: isProduction ? process.env.COOKIE_DOMAIN : undefined,
+    },
   })
 );
 app.use(flash());
@@ -171,63 +242,36 @@ app.use(async (req: Request, res: Response, next) => {
   }
 });
 
-//routes config
-app.use("/", storefrontCustomerRouter);
-app.use("/identity", identityCustomerRouter);
-app.use("/customer", customerRouter);
-app.use("/basket", basketCustomerRouter);
-app.use("/order", orderCustomerRouter);
-app.use("/checkout", checkoutCustomerRouter);
-app.use("/tax", taxCustomerRouter);
-app.use("/products", productCustomerRouter);
-app.use("/payment", paymentCustomerRouter);
-app.use("/inventory", inventoryCustomerRouter);
-app.use("/distribution", distributionCustomerRouter);
-app.use("/gdpr", gdprRouter);
-app.use("/marketing", marketingCustomerRouter);
-app.use("/b2b", b2bCustomerRouter);
-app.use("/subscriptions", subscriptionCustomerRouter);
-app.use("/support", supportCustomerRouter);
-app.use("/warehouse", warehouseCustomerRouter);
-app.use("/localization", localizationCustomerRouter);
-app.use("/loyalty", loyaltyCustomerRouter);
-app.use("/business", [
-  identityBusinessRouter,
-  merchantMerchantRouter,
-  promotionBusinessRouter,
-  productBusinessRouter,
-  orderBusinessRouter,
-  distributionBusinessRouter,
-  taxBusinessRouter,
-  customerBusinessRouter,
-  gdprBusinessRouter,
-  marketingBusinessRouter,
-  b2bBusinessRouter,
-  subscriptionBusinessRouter,
-  supportBusinessRouter,
-  analyticsBusinessRouter,
-  warehouseMerchantRouter,
-  supplierMerchantRouter,
-  localizationMerchantRouter,
-  pricingMerchantRouter,
-  loyaltyMerchantRouter,
-  notificationMerchantRouter,
-  contentRouterAdmin
-]);
+// Configure all routes
+configureRoutes(app);
 
+// Global error handler - never expose stack traces in production
+app.use(function (err: any, req: Request, res: Response, _next: NextFunction) {
+  // Log error for debugging (use proper logging in production)
+  console.error('Error:', {
+    message: err.message,
+    stack: isProduction ? undefined : err.stack,
+    path: req.path,
+    method: req.method,
+  });
 
-// catch 404 and forward to error handler
-app.use(function (req, res) {
-  res.status(404);
-  res.render("404");
-});
-
-// error handler
-app.use(function (err: any, req: any, res: any) {
-  res.locals.message = err.message;
-  res.locals.error = req.app.get("env") === "development" ? err : {};
-  res.status(err.status || 500);
-  res.render("error");
+  // Don't leak error details in production
+  res.locals.message = isProduction ? 'An error occurred' : err.message;
+  res.locals.error = isProduction ? {} : err;
+  
+  const status = err.status || 500;
+  res.status(status);
+  
+  // Return JSON for API requests
+  if (req.xhr || req.headers.accept?.includes('application/json')) {
+    res.json({
+      success: false,
+      message: isProduction ? 'Internal server error' : err.message,
+      ...(isProduction ? {} : { stack: err.stack }),
+    });
+  } else {
+    res.render("storefront/views/error");
+  }
 });
 
 app.locals.formText = formText;

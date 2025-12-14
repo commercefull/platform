@@ -1,26 +1,40 @@
+/**
+ * Loyalty Business Controller
+ * 
+ * Handles business/admin endpoints for loyalty management.
+ */
+
 import { Request, Response } from 'express';
-import { LoyaltyRepo, LoyaltyTier, LoyaltyPointsAction, LoyaltyReward } from '../repos/loyaltyRepo';
+import loyaltyRepo, { LoyaltyPointsAction } from '../repos/loyaltyRepo';
 
-// Create a single instance of the repository to be shared across handlers
-const loyaltyRepo = new LoyaltyRepo();
+// ============================================================================
+// Helper Functions
+// ============================================================================
 
+function respond(res: Response, data: unknown, statusCode: number = 200): void {
+  res.status(statusCode).json({ success: true, data });
+}
+
+function respondWithMessage(res: Response, data: unknown, message: string, statusCode: number = 200): void {
+  res.status(statusCode).json({ success: true, data, message });
+}
+
+function respondError(res: Response, message: string, statusCode: number = 500): void {
+  res.status(statusCode).json({ success: false, message });
+}
+
+// ============================================================================
 // Tier Management
+// ============================================================================
+
 export const getTiers = async (req: Request, res: Response): Promise<void> => {
   try {
     const includeInactive = req.query.includeInactive === 'true';
     const tiers = await loyaltyRepo.findAllTiers(includeInactive);
-
-    res.status(200).json({
-      success: true,
-      data: tiers
-    });
+    respond(res, tiers);
   } catch (error) {
     console.error('Error fetching loyalty tiers:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch loyalty tiers',
-      error: (error as Error).message
-    });
+    respondError(res, 'Failed to fetch loyalty tiers');
   }
 };
 
@@ -30,85 +44,47 @@ export const getTierById = async (req: Request, res: Response): Promise<void> =>
     const tier = await loyaltyRepo.findTierById(id);
 
     if (!tier) {
-      res.status(404).json({
-        success: false,
-        message: `Loyalty tier with ID ${id} not found`
-      });
+      respondError(res, `Loyalty tier with ID ${id} not found`, 404);
       return;
     }
 
-    res.status(200).json({
-      success: true,
-      data: tier
-    });
+    respond(res, tier);
   } catch (error) {
     console.error('Error fetching loyalty tier:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch loyalty tier',
-      error: (error as Error).message
-    });
+    respondError(res, 'Failed to fetch loyalty tier');
   }
 };
 
 export const createTier = async (req: Request, res: Response): Promise<void> => {
   try {
-    const {
-      name,
-      description,
-      type,
-      pointsThreshold,
-      multiplier,
-      benefits,
-      isActive = true
-    } = req.body;
+    const { name, description, type, pointsThreshold, multiplier, benefits, isActive } = req.body;
 
-    // Validate inputs
     if (!name || pointsThreshold === undefined || multiplier === undefined) {
-      res.status(400).json({
-        success: false,
-        message: 'Name, pointsThreshold, and multiplier are required'
-      });
+      respondError(res, 'Name, pointsThreshold, and multiplier are required', 400);
       return;
     }
 
     const tier = await loyaltyRepo.createTier({
       name,
       description,
-      type,
+      type: type || 'points',
       pointsThreshold,
       multiplier,
       benefits,
       isActive
     });
 
-    res.status(201).json({
-      success: true,
-      data: tier,
-      message: 'Loyalty tier created successfully'
-    });
+    respondWithMessage(res, tier, 'Loyalty tier created successfully', 201);
   } catch (error) {
     console.error('Error creating loyalty tier:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to create loyalty tier',
-      error: (error as Error).message
-    });
+    respondError(res, 'Failed to create loyalty tier');
   }
 };
 
 export const updateTier = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const {
-      name,
-      description,
-      type,
-      pointsThreshold,
-      multiplier,
-      benefits,
-      isActive
-    } = req.body;
+    const { name, description, type, pointsThreshold, multiplier, benefits, isActive } = req.body;
 
     const tier = await loyaltyRepo.updateTier(id, {
       name,
@@ -120,38 +96,25 @@ export const updateTier = async (req: Request, res: Response): Promise<void> => 
       isActive
     });
 
-    res.status(200).json({
-      success: true,
-      data: tier,
-      message: 'Loyalty tier updated successfully'
-    });
+    respondWithMessage(res, tier, 'Loyalty tier updated successfully');
   } catch (error) {
     console.error('Error updating loyalty tier:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to update loyalty tier',
-      error: (error as Error).message
-    });
+    respondError(res, 'Failed to update loyalty tier');
   }
 };
 
-// Rewards Management
+// ============================================================================
+// Reward Management
+// ============================================================================
+
 export const getRewards = async (req: Request, res: Response): Promise<void> => {
   try {
     const includeInactive = req.query.includeInactive === 'true';
     const rewards = await loyaltyRepo.findAllRewards(includeInactive);
-
-    res.status(200).json({
-      success: true,
-      data: rewards
-    });
+    respond(res, rewards);
   } catch (error) {
     console.error('Error fetching loyalty rewards:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch loyalty rewards',
-      error: (error as Error).message
-    });
+    respondError(res, 'Failed to fetch loyalty rewards');
   }
 };
 
@@ -161,48 +124,26 @@ export const getRewardById = async (req: Request, res: Response): Promise<void> 
     const reward = await loyaltyRepo.findRewardById(id);
 
     if (!reward) {
-      res.status(404).json({
-        success: false,
-        message: `Loyalty reward with ID ${id} not found`
-      });
+      respondError(res, `Loyalty reward with ID ${id} not found`, 404);
       return;
     }
 
-    res.status(200).json({
-      success: true,
-      data: reward
-    });
+    respond(res, reward);
   } catch (error) {
     console.error('Error fetching loyalty reward:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch loyalty reward',
-      error: (error as Error).message
-    });
+    respondError(res, 'Failed to fetch loyalty reward');
   }
 };
 
 export const createReward = async (req: Request, res: Response): Promise<void> => {
   try {
     const {
-      name,
-      description,
-      pointsCost,
-      discountAmount,
-      discountPercent,
-      discountCode,
-      freeShipping = false,
-      productIds,
-      expiresAt,
-      isActive = true
+      name, description, pointsCost, discountAmount, discountPercent,
+      discountCode, freeShipping, productIds, expiresAt, isActive
     } = req.body;
 
-    // Validate inputs
     if (!name || pointsCost === undefined) {
-      res.status(400).json({
-        success: false,
-        message: 'Name and pointsCost are required'
-      });
+      respondError(res, 'Name and pointsCost are required', 400);
       return;
     }
 
@@ -215,22 +156,14 @@ export const createReward = async (req: Request, res: Response): Promise<void> =
       discountCode,
       freeShipping,
       productIds,
-      expiresAt,
+      expiresAt: expiresAt ? new Date(expiresAt) : undefined,
       isActive
     });
 
-    res.status(201).json({
-      success: true,
-      data: reward,
-      message: 'Loyalty reward created successfully'
-    });
+    respondWithMessage(res, reward, 'Loyalty reward created successfully', 201);
   } catch (error) {
     console.error('Error creating loyalty reward:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to create loyalty reward',
-      error: (error as Error).message
-    });
+    respondError(res, 'Failed to create loyalty reward');
   }
 };
 
@@ -238,16 +171,8 @@ export const updateReward = async (req: Request, res: Response): Promise<void> =
   try {
     const { id } = req.params;
     const {
-      name,
-      description,
-      pointsCost,
-      discountAmount,
-      discountPercent,
-      discountCode,
-      freeShipping,
-      productIds,
-      expiresAt,
-      isActive
+      name, description, pointsCost, discountAmount, discountPercent,
+      discountCode, freeShipping, productIds, expiresAt, isActive
     } = req.body;
 
     const reward = await loyaltyRepo.updateReward(id, {
@@ -259,56 +184,38 @@ export const updateReward = async (req: Request, res: Response): Promise<void> =
       discountCode,
       freeShipping,
       productIds,
-      expiresAt,
+      expiresAt: expiresAt ? new Date(expiresAt) : undefined,
       isActive
     });
 
-    res.status(200).json({
-      success: true,
-      data: reward,
-      message: 'Loyalty reward updated successfully'
-    });
+    respondWithMessage(res, reward, 'Loyalty reward updated successfully');
   } catch (error) {
     console.error('Error updating loyalty reward:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to update loyalty reward',
-      error: (error as Error).message
-    });
+    respondError(res, 'Failed to update loyalty reward');
   }
 };
 
+// ============================================================================
 // Customer Points Management
+// ============================================================================
+
 export const getCustomerPoints = async (req: Request, res: Response): Promise<void> => {
   try {
     const { customerId } = req.params;
-    const customerPoints = await loyaltyRepo.findCustomerPoints(customerId);
+    const pointsData = await loyaltyRepo.findCustomerPointsWithTier(customerId);
 
-    if (!customerPoints) {
-      res.status(404).json({
-        success: false,
-        message: `No loyalty points found for customer ${customerId}`
-      });
+    if (!pointsData) {
+      respondError(res, `No loyalty points found for customer ${customerId}`, 404);
       return;
     }
 
-    // Get the customer's tier
-    const tier = await loyaltyRepo.findTierById(customerPoints.tierId);
-
-    res.status(200).json({
-      success: true,
-      data: {
-        ...customerPoints,
-        tier: tier || undefined
-      }
+    respond(res, {
+      ...pointsData.points,
+      tier: pointsData.tier
     });
   } catch (error) {
     console.error('Error fetching customer loyalty points:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch customer loyalty points',
-      error: (error as Error).message
-    });
+    respondError(res, 'Failed to fetch customer loyalty points');
   }
 };
 
@@ -316,88 +223,70 @@ export const getCustomerPointsTransactions = async (req: Request, res: Response)
   try {
     const { customerId } = req.params;
     const limit = parseInt(req.query.limit as string) || 50;
-    const offset = parseInt(req.query.offset as string) || 0;
-    const action = req.query.action as string | undefined;
 
-    const transactions = await loyaltyRepo.getCustomerTransactions(
-      customerId,
-      limit,
-      offset
-    );
+    const transactions = await loyaltyRepo.findCustomerTransactions(customerId, limit);
 
-    res.status(200).json({
+    res.json({
       success: true,
       data: transactions,
-      pagination: {
-        limit,
-        offset
-      }
+      pagination: { limit }
     });
   } catch (error) {
     console.error('Error fetching customer loyalty transactions:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch customer loyalty transactions',
-      error: (error as Error).message
-    });
+    respondError(res, 'Failed to fetch customer loyalty transactions');
   }
 };
 
 export const adjustCustomerPoints = async (req: Request, res: Response): Promise<void> => {
   try {
     const { customerId } = req.params;
-    const { points, reason } = req.body;
+    const { points, reason, tierId } = req.body;
 
     if (points === undefined) {
-      res.status(400).json({
-        success: false,
-        message: 'Points adjustment amount is required'
-      });
+      respondError(res, 'Points adjustment amount is required', 400);
       return;
     }
 
-    const updatedPoints = await loyaltyRepo.addPoints(
+    // If tierId provided and customer has no points, initialize first
+    if (tierId) {
+      const existing = await loyaltyRepo.findCustomerPoints(customerId);
+      if (!existing) {
+        await loyaltyRepo.initializeCustomerPoints(customerId, tierId);
+      }
+    }
+
+    const updatedPoints = await loyaltyRepo.adjustCustomerPoints(
       customerId,
       parseInt(points),
       LoyaltyPointsAction.MANUAL_ADJUSTMENT,
-      undefined,
       reason || 'Manual adjustment by admin'
     );
 
-    res.status(200).json({
-      success: true,
-      data: updatedPoints,
-      message: `Customer points ${points >= 0 ? 'increased' : 'decreased'} successfully`
-    });
+    respondWithMessage(
+      res, 
+      updatedPoints, 
+      `Customer points ${points >= 0 ? 'increased' : 'decreased'} successfully`
+    );
   } catch (error) {
     console.error('Error adjusting customer loyalty points:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to adjust customer loyalty points',
-      error: (error as Error).message
-    });
+    respondError(res, 'Failed to adjust customer loyalty points');
   }
 };
 
+// ============================================================================
 // Redemption Management
+// ============================================================================
+
 export const getCustomerRedemptions = async (req: Request, res: Response): Promise<void> => {
   try {
     const { customerId } = req.params;
-    const status = req.query.status as string | undefined;
+    const limit = parseInt(req.query.limit as string) || 50;
 
-    const redemptions = await loyaltyRepo.getCustomerRedemptions(customerId, status);
-
-    res.status(200).json({
-      success: true,
-      data: redemptions
-    });
+    const redemptions = await loyaltyRepo.findCustomerRedemptions(customerId, limit);
+    respond(res, redemptions);
   } catch (error) {
     console.error('Error fetching customer redemptions:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch customer redemptions',
-      error: (error as Error).message
-    });
+    respondError(res, 'Failed to fetch customer redemptions');
   }
 };
 
@@ -406,65 +295,46 @@ export const updateRedemptionStatus = async (req: Request, res: Response): Promi
     const { id } = req.params;
     const { status } = req.body;
 
-    if (!status || !['used', 'expired', 'cancelled'].includes(status)) {
-      res.status(400).json({
-        success: false,
-        message: 'Valid status (used, expired, or cancelled) is required'
-      });
+    if (!status || !['pending', 'used', 'expired', 'cancelled'].includes(status)) {
+      respondError(res, 'Valid status (pending, used, expired, or cancelled) is required', 400);
       return;
     }
 
     const redemption = await loyaltyRepo.updateRedemptionStatus(
       id,
-      status as 'used' | 'expired' | 'cancelled'
+      status as 'pending' | 'used' | 'expired' | 'cancelled'
     );
 
-    res.status(200).json({
-      success: true,
-      data: redemption,
-      message: `Redemption status updated to ${status}`
-    });
+    respondWithMessage(res, redemption, `Redemption status updated to ${status}`);
   } catch (error) {
     console.error('Error updating redemption status:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to update redemption status',
-      error: (error as Error).message
-    });
+    respondError(res, 'Failed to update redemption status');
   }
 };
 
+// ============================================================================
 // Order Processing
+// ============================================================================
+
 export const processOrderPoints = async (req: Request, res: Response): Promise<void> => {
   try {
     const { orderId } = req.params;
     const { orderAmount, customerId } = req.body;
 
     if (!orderAmount || !customerId) {
-      res.status(400).json({
-        success: false,
-        message: 'Order amount and customer ID are required'
-      });
+      respondError(res, 'Order amount and customer ID are required', 400);
       return;
     }
 
     const updatedPoints = await loyaltyRepo.processOrderPoints(
+      customerId,
       orderId,
-      parseFloat(orderAmount),
-      customerId
+      parseFloat(orderAmount)
     );
 
-    res.status(200).json({
-      success: true,
-      data: updatedPoints,
-      message: 'Order points processed successfully'
-    });
+    respondWithMessage(res, updatedPoints, 'Order points processed successfully');
   } catch (error) {
     console.error('Error processing order points:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to process order points',
-      error: (error as Error).message
-    });
+    respondError(res, 'Failed to process order points');
   }
 };

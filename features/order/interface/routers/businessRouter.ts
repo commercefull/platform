@@ -59,4 +59,3 @@ router.post('/orders/:orderId/cancel', orderController.cancelOrder);
 router.post('/orders/:orderId/refund', orderController.processRefund);
 
 export const orderBusinessRouter = router;
-export default router;

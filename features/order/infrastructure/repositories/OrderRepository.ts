@@ -326,15 +326,15 @@ export class OrderRepo implements IOrderRepository {
     if (existing) {
       await query(
         `UPDATE "orderAddress" SET
-          "firstName" = $1, "lastName" = $2, "company" = $3, "address1" = $4,
-          "address2" = $5, "city" = $6, "state" = $7, "postalCode" = $8,
-          "country" = $9, "countryCode" = $10, "phone" = $11, "email" = $12,
-          "isDefault" = $13, "metadata" = $14, "updatedAt" = $15
-        WHERE "orderAddressId" = $16`,
+          "firstName" = $1, "lastName" = $2, "company" = $3, "addressLine1" = $4,
+          "addressLine2" = $5, "city" = $6, "state" = $7, "postalCode" = $8,
+          "country" = $9, "phoneNumber" = $10, "email" = $11,
+          "isDefault" = $12, "additionalInfo" = $13, "updatedAt" = $14
+        WHERE "orderAddressId" = $15`,
         [
           address.firstName, address.lastName, address.company || null,
           address.address1, address.address2 || null, address.city, address.state,
-          address.postalCode, address.country, address.countryCode,
+          address.postalCode, address.country,
           address.phone || null, address.email || null, address.isDefault,
           address.metadata ? JSON.stringify(address.metadata) : null, now,
           address.orderAddressId
@@ -344,15 +344,15 @@ export class OrderRepo implements IOrderRepository {
       await query(
         `INSERT INTO "orderAddress" (
           "orderAddressId", "orderId", "addressType", "firstName", "lastName",
-          "company", "address1", "address2", "city", "state", "postalCode",
-          "country", "countryCode", "phone", "email", "isDefault", "metadata",
+          "company", "addressLine1", "addressLine2", "city", "state", "postalCode",
+          "country", "phoneNumber", "email", "isDefault", "additionalInfo",
           "createdAt", "updatedAt"
-        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)`,
+        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)`,
         [
           address.orderAddressId, address.orderId, address.addressType,
           address.firstName, address.lastName, address.company || null,
           address.address1, address.address2 || null, address.city, address.state,
-          address.postalCode, address.country, address.countryCode,
+          address.postalCode, address.country,
           address.phone || null, address.email || null, address.isDefault,
           address.metadata ? JSON.stringify(address.metadata) : null, now, now
         ]
@@ -622,14 +622,14 @@ export class OrderRepo implements IOrderRepository {
       firstName: row.firstName,
       lastName: row.lastName,
       company: row.company || undefined,
-      address1: row.address1,
-      address2: row.address2 || undefined,
+      address1: row.addressLine1,
+      address2: row.addressLine2 || undefined,
       city: row.city,
       state: row.state,
       postalCode: row.postalCode,
       country: row.country,
-      countryCode: row.countryCode,
-      phone: row.phone || undefined,
+      countryCode: row.country, // country is 2-char code
+      phone: row.phoneNumber || undefined,
       email: row.email || undefined,
       isDefault: Boolean(row.isDefault),
       metadata: row.metadata ? (typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata) : undefined,

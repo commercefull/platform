@@ -1,101 +1,24 @@
 import { queryOne, query } from "../../../libs/db";
 import { generateUUID } from "../../../libs/uuid";
+import { Table } from "../../../libs/db/types";
 import { CustomerPrice, CustomerPriceList, PricingRuleStatus } from "../domain/pricingRule";
 
-// Define DB column to TS property mapping for price list
-const priceListDbToTs: Record<string, string> = {
-  id: 'id',
-  name: 'name',
-  description: 'description',
-  customer_ids: 'customerIds',
-  customer_group_ids: 'customerGroupIds',
-  priority: 'priority',
-  start_date: 'startDate',
-  end_date: 'endDate',
-  status: 'status',
-  created_at: 'createdAt',
-  updated_at: 'updatedAt',
-  merchant_id: 'merchantId'
-};
-
-// Define DB column to TS property mapping for customer price
-const customerPriceDbToTs: Record<string, string> = {
-  id: 'id',
-  price_list_id: 'priceListId',
-  product_id: 'productId',
-  variant_id: 'variantId',
-  adjustment_type: 'adjustmentType',
-  adjustment_value: 'adjustmentValue',
-  created_at: 'createdAt',
-  updated_at: 'updatedAt'
-};
-
-// Define TS property to DB column mapping for price list
-const priceListTsToDb = Object.entries(priceListDbToTs).reduce((acc, [dbCol, tsProp]) => {
-  acc[tsProp] = dbCol;
-  return acc;
-}, {} as Record<string, string>);
-
-// Define TS property to DB column mapping for customer price
-const customerPriceTsToDb = Object.entries(customerPriceDbToTs).reduce((acc, [dbCol, tsProp]) => {
-  acc[tsProp] = dbCol;
-  return acc;
-}, {} as Record<string, string>);
-
+/**
+ * Customer Price Repository
+ * 
+ * Uses camelCase for table and column names as per platform convention.
+ * Tables: priceList, customerPriceList, customerPrice (from db/types.ts)
+ */
 export class CustomerPriceRepo {
-  /**
-   * Convert snake_case column name to camelCase property name for price lists
-   */
-  private priceListDbToTs(columnName: string): string {
-    return priceListDbToTs[columnName] || columnName;
-  }
-
-  /**
-   * Convert camelCase property name to snake_case column name for price lists
-   */
-  private priceListTsToDb(propertyName: string): string {
-    return priceListTsToDb[propertyName] || propertyName;
-  }
-
-  /**
-   * Convert snake_case column name to camelCase property name for customer prices
-   */
-  private customerPriceDbToTs(columnName: string): string {
-    return customerPriceDbToTs[columnName] || columnName;
-  }
-
-  /**
-   * Convert camelCase property name to snake_case column name for customer prices
-   */
-  private customerPriceTsToDb(propertyName: string): string {
-    return customerPriceTsToDb[propertyName] || propertyName;
-  }
-
-  /**
-   * Generate field mapping for SELECT statements for price lists
-   */
-  private generatePriceListSelectFields(fields: string[] = Object.keys(priceListDbToTs)): string {
-    return fields.map(field => {
-      return `"${field}" AS "${this.priceListDbToTs(field)}"`;
-    }).join(', ');
-  }
-
-  /**
-   * Generate field mapping for SELECT statements for customer prices
-   */
-  private generateCustomerPriceSelectFields(fields: string[] = Object.keys(customerPriceDbToTs)): string {
-    return fields.map(field => {
-      return `"${field}" AS "${this.customerPriceDbToTs(field)}"`;
-    }).join(', ');
-  }
+  private readonly priceListTable = Table.PriceList;
+  private readonly customerPriceListTable = Table.CustomerPriceList;
+  private readonly customerPriceTable = Table.CustomerPrice;
 
   /**
    * Find a price list by ID
    */
   async findPriceListById(id: string): Promise<CustomerPriceList | null> {
-    const selectFields = this.generatePriceListSelectFields();
-    const sql = `SELECT ${selectFields} FROM "public"."customer_price_list" WHERE "id" = $1`;
-    
+    const sql = `SELECT * FROM "${this.priceListTable}" WHERE "priceListId" = $1`;
     return await queryOne<CustomerPriceList>(sql, [id]);
   }
 
@@ -106,34 +29,30 @@ export class CustomerPriceRepo {
     customerId: string,
     customerGroupIds?: string[]
   ): Promise<CustomerPriceList[]> {
-    const selectFields = this.generatePriceListSelectFields();
     const now = new Date();
     
     let conditions = [
-      `"status" = $1`,
-      `("start_date" IS NULL OR "start_date" <= $2)`,
-      `("end_date" IS NULL OR "end_date" >= $2)`,
+      `"isActive" = true`,
+      `("startDate" IS NULL OR "startDate" <= $1)`,
+      `("endDate" IS NULL OR "endDate" >= $1)`,
     ];
     
-    const params: any[] = [PricingRuleStatus.ACTIVE, now];
+    const params: any[] = [now];
     
     // Customer ID condition
     params.push(customerId);
-    conditions.push(`"customer_ids" @> ARRAY[$${params.length}]::uuid[]`);
+    conditions.push(`"customerIds" @> ARRAY[$${params.length}]::uuid[]`);
     
     // Customer Group IDs condition (if provided)
     if (customerGroupIds && customerGroupIds.length > 0) {
       const placeholders = customerGroupIds.map((_, i) => `$${params.length + i + 1}`).join(', ');
       params.push(...customerGroupIds);
-      conditions.push(`"customer_group_ids" && ARRAY[${placeholders}]::uuid[]`);
+      conditions.push(`"customerGroupIds" && ARRAY[${placeholders}]::uuid[]`);
     }
     
-    const whereClause = conditions.join(' AND ');
-    
     const sql = `
-      SELECT ${selectFields}
-      FROM "public"."customer_price_list"
-      WHERE ${whereClause}
+      SELECT * FROM "${this.customerPriceListTable}"
+      WHERE ${conditions.join(' AND ')}
       ORDER BY "priority" DESC, "createdAt" ASC
     `;
     
@@ -145,39 +64,22 @@ export class CustomerPriceRepo {
    */
   async createPriceList(priceList: Omit<CustomerPriceList, 'id' | 'createdAt' | 'updatedAt'>): Promise<CustomerPriceList> {
     const now = new Date();
-    const id = generateUUID();
-    
-    const dbFields: string[] = [];
-    const placeholders: string[] = [];
-    const values: any[] = [id, now, now];
-    
-    dbFields.push('id', 'created_at', 'updated_at');
-    placeholders.push('$1', '$2', '$3');
-    
-    // Process each field from the input data
-    let placeholderIndex = 4;
-    
-    for (const [key, value] of Object.entries(priceList)) {
-      if (value === undefined) continue;
-      
-      const dbField = this.priceListTsToDb(key);
-      dbFields.push(dbField);
-      placeholders.push(`$${placeholderIndex}`);
-      values.push(value);
-      
-      placeholderIndex++;
-    }
-    
-    const fieldList = dbFields.map(f => `"${f}"`).join(', ');
-    const placeholderList = placeholders.join(', ');
-    
-    const selectFields = this.generatePriceListSelectFields();
     
     const sql = `
-      INSERT INTO "public"."customer_price_list" (${fieldList})
-      VALUES (${placeholderList})
-      RETURNING ${selectFields}
+      INSERT INTO "${this.priceListTable}" (
+        "name", "description", "priority", "isActive", "createdAt", "updatedAt"
+      ) VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING *
     `;
+    
+    const values = [
+      priceList.name,
+      priceList.description || null,
+      priceList.priority || 0,
+      true,
+      now,
+      now
+    ];
     
     const result = await queryOne<CustomerPriceList>(sql, values);
     
@@ -194,32 +96,22 @@ export class CustomerPriceRepo {
   async updatePriceList(id: string, priceList: Partial<Omit<CustomerPriceList, 'id' | 'createdAt' | 'updatedAt'>>): Promise<CustomerPriceList> {
     const now = new Date();
     
-    const setStatements: string[] = [];
+    const setStatements: string[] = ['"updatedAt" = $2'];
     const values: any[] = [id, now];
-    
-    setStatements.push(`"updatedAt" = $2`);
-    
-    // Process each field from the input data
-    let placeholderIndex = 3;
+    let paramIndex = 3;
     
     for (const [key, value] of Object.entries(priceList)) {
       if (value === undefined) continue;
-      
-      const dbField = this.priceListTsToDb(key);
-      setStatements.push(`"${dbField}" = $${placeholderIndex}`);
+      setStatements.push(`"${key}" = $${paramIndex}`);
       values.push(value);
-      
-      placeholderIndex++;
+      paramIndex++;
     }
     
-    const setClause = setStatements.join(', ');
-    const selectFields = this.generatePriceListSelectFields();
-    
     const sql = `
-      UPDATE "public"."customer_price_list"
-      SET ${setClause}
-      WHERE "id" = $1
-      RETURNING ${selectFields}
+      UPDATE "${this.priceListTable}"
+      SET ${setStatements.join(', ')}
+      WHERE "priceListId" = $1
+      RETURNING *
     `;
     
     const result = await queryOne<CustomerPriceList>(sql, values);
@@ -236,10 +128,10 @@ export class CustomerPriceRepo {
    */
   async deletePriceList(id: string): Promise<boolean> {
     // First, delete all associated customer prices
-    await query(`DELETE FROM "public"."customer_price" WHERE "price_list_id" = $1`, [id]);
+    await query(`DELETE FROM "${this.customerPriceTable}" WHERE "priceListId" = $1`, [id]);
     
     // Then delete the price list
-    const sql = `DELETE FROM "public"."customer_price_list" WHERE "id" = $1`;
+    const sql = `DELETE FROM "${this.priceListTable}" WHERE "priceListId" = $1`;
     const result = await query(sql, [id]);
     
     return result !== null;
@@ -249,9 +141,7 @@ export class CustomerPriceRepo {
    * Find a specific customer price by ID
    */
   async findPriceById(id: string): Promise<CustomerPrice | null> {
-    const selectFields = this.generateCustomerPriceSelectFields();
-    const sql = `SELECT ${selectFields} FROM "public"."customer_price" WHERE "id" = $1`;
-    
+    const sql = `SELECT * FROM "${this.customerPriceTable}" WHERE "customerPriceId" = $1`;
     return await queryOne<CustomerPrice>(sql, [id]);
   }
 
@@ -259,13 +149,7 @@ export class CustomerPriceRepo {
    * Find customer prices by price list ID
    */
   async findPricesByPriceListId(priceListId: string): Promise<CustomerPrice[]> {
-    const selectFields = this.generateCustomerPriceSelectFields();
-    const sql = `
-      SELECT ${selectFields}
-      FROM "public"."customer_price"
-      WHERE "price_list_id" = $1
-    `;
-    
+    const sql = `SELECT * FROM "${this.customerPriceTable}" WHERE "priceListId" = $1`;
     return await query<CustomerPrice[]>(sql, [priceListId]) || [];
   }
 
@@ -277,28 +161,23 @@ export class CustomerPriceRepo {
     variantId?: string,
     customerPriceLists?: string[]
   ): Promise<CustomerPrice[]> {
-    const selectFields = this.generateCustomerPriceSelectFields();
-    
     const conditions = [`"productId" = $1`];
     const params: any[] = [productId];
     
     if (variantId) {
       params.push(variantId);
-      conditions.push(`("variant_id" = $${params.length} OR "variant_id" IS NULL)`);
+      conditions.push(`("productVariantId" = $${params.length} OR "productVariantId" IS NULL)`);
     }
     
     if (customerPriceLists && customerPriceLists.length > 0) {
       const placeholders = customerPriceLists.map((_, i) => `$${params.length + i + 1}`).join(', ');
       params.push(...customerPriceLists);
-      conditions.push(`"price_list_id" IN (${placeholders})`);
+      conditions.push(`"priceListId" IN (${placeholders})`);
     }
     
-    const whereClause = conditions.join(' AND ');
-    
     const sql = `
-      SELECT ${selectFields}
-      FROM "public"."customer_price"
-      WHERE ${whereClause}
+      SELECT * FROM "${this.customerPriceTable}"
+      WHERE ${conditions.join(' AND ')}
     `;
     
     return await query<CustomerPrice[]>(sql, params) || [];
@@ -309,39 +188,21 @@ export class CustomerPriceRepo {
    */
   async createPrice(customerPrice: Omit<CustomerPrice, 'id' | 'createdAt' | 'updatedAt'>): Promise<CustomerPrice> {
     const now = new Date();
-    const id = generateUUID();
-    
-    const dbFields: string[] = [];
-    const placeholders: string[] = [];
-    const values: any[] = [id, now, now];
-    
-    dbFields.push('id', 'created_at', 'updated_at');
-    placeholders.push('$1', '$2', '$3');
-    
-    // Process each field from the input data
-    let placeholderIndex = 4;
-    
-    for (const [key, value] of Object.entries(customerPrice)) {
-      if (value === undefined) continue;
-      
-      const dbField = this.customerPriceTsToDb(key);
-      dbFields.push(dbField);
-      placeholders.push(`$${placeholderIndex}`);
-      values.push(value);
-      
-      placeholderIndex++;
-    }
-    
-    const fieldList = dbFields.map(f => `"${f}"`).join(', ');
-    const placeholderList = placeholders.join(', ');
-    
-    const selectFields = this.generateCustomerPriceSelectFields();
     
     const sql = `
-      INSERT INTO "public"."customer_price" (${fieldList})
-      VALUES (${placeholderList})
-      RETURNING ${selectFields}
+      INSERT INTO "${this.customerPriceTable}" (
+        "priceListId", "productId", "productVariantId", "adjustmentType", "adjustmentValue"
+      ) VALUES ($1, $2, $3, $4, $5)
+      RETURNING *
     `;
+    
+    const values = [
+      customerPrice.priceListId,
+      customerPrice.productId,
+      customerPrice.variantId || (customerPrice as any).productVariantId || null,
+      customerPrice.adjustmentType,
+      customerPrice.adjustmentValue
+    ];
     
     const result = await queryOne<CustomerPrice>(sql, values);
     
@@ -358,32 +219,22 @@ export class CustomerPriceRepo {
   async updatePrice(id: string, customerPrice: Partial<Omit<CustomerPrice, 'id' | 'createdAt' | 'updatedAt'>>): Promise<CustomerPrice> {
     const now = new Date();
     
-    const setStatements: string[] = [];
+    const setStatements: string[] = ['"updatedAt" = $2'];
     const values: any[] = [id, now];
-    
-    setStatements.push(`"updatedAt" = $2`);
-    
-    // Process each field from the input data
-    let placeholderIndex = 3;
+    let paramIndex = 3;
     
     for (const [key, value] of Object.entries(customerPrice)) {
       if (value === undefined) continue;
-      
-      const dbField = this.customerPriceTsToDb(key);
-      setStatements.push(`"${dbField}" = $${placeholderIndex}`);
+      setStatements.push(`"${key}" = $${paramIndex}`);
       values.push(value);
-      
-      placeholderIndex++;
+      paramIndex++;
     }
     
-    const setClause = setStatements.join(', ');
-    const selectFields = this.generateCustomerPriceSelectFields();
-    
     const sql = `
-      UPDATE "public"."customer_price"
-      SET ${setClause}
-      WHERE "id" = $1
-      RETURNING ${selectFields}
+      UPDATE "${this.customerPriceTable}"
+      SET ${setStatements.join(', ')}
+      WHERE "customerPriceId" = $1
+      RETURNING *
     `;
     
     const result = await queryOne<CustomerPrice>(sql, values);
@@ -399,9 +250,8 @@ export class CustomerPriceRepo {
    * Delete a customer price
    */
   async deletePrice(id: string): Promise<boolean> {
-    const sql = `DELETE FROM "public"."customer_price" WHERE "id" = $1`;
+    const sql = `DELETE FROM "${this.customerPriceTable}" WHERE "customerPriceId" = $1`;
     const result = await query(sql, [id]);
-    
     return result !== null;
   }
 
@@ -409,9 +259,8 @@ export class CustomerPriceRepo {
    * Delete all prices for a price list
    */
   async deletePricesForPriceList(priceListId: string): Promise<boolean> {
-    const sql = `DELETE FROM "public"."customer_price" WHERE "price_list_id" = $1`;
+    const sql = `DELETE FROM "${this.customerPriceTable}" WHERE "priceListId" = $1`;
     const result = await query(sql, [priceListId]);
-    
     return result !== null;
   }
 }

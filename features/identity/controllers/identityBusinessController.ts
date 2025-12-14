@@ -6,6 +6,11 @@ import {
   verifyAccessToken,
   parseExpirationDate
 } from '../utils/jwtHelpers';
+import {
+  emitMerchantLogin,
+  emitMerchantRegistered,
+  emitMerchantTokenRefreshed
+} from '../domain/events/emitIdentityEvent';
 
 // Environment configuration with secure defaults
 const MERCHANT_JWT_SECRET = process.env.MERCHANT_JWT_SECRET || 'merchant-secret-key-should-be-in-env';
@@ -50,6 +55,15 @@ export const loginMerchant = async (req: Request, res: Response): Promise<void> 
       });
       return;
     }
+
+    // Emit login event
+    emitMerchantLogin({
+      merchantId: merchant.merchantId,
+      email: merchant.email,
+      name: merchant.name || '',
+      ipAddress: req.ip,
+      userAgent: req.headers['user-agent']
+    });
 
     // Generate access token
     const accessToken = generateAccessToken(
@@ -116,6 +130,14 @@ export const registerMerchant = async (req: Request, res: Response): Promise<voi
       description,
       status: 'pending',
       password
+    });
+
+    // Emit registration event
+    emitMerchantRegistered({
+      merchantId: newMerchant.merchantId,
+      email: newMerchant.email,
+      name: newMerchant.name || '',
+      status: newMerchant.status || 'pending'
     });
 
     res.status(201).json({
@@ -285,6 +307,12 @@ export const renewAccessToken = async (req: Request, res: Response): Promise<voi
 
     // Mark refresh token as used (optional - for tracking)
     await refreshTokenRepo.markUsed(refreshToken);
+
+    // Emit token refreshed event
+    emitMerchantTokenRefreshed({
+      userId: merchant.merchantId,
+      ipAddress: req.ip
+    });
 
     res.json({
       success: true,

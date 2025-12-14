@@ -38,45 +38,44 @@ const router = Router();
 // Company Registration (Public)
 // ============================================================================
 
-router.post('/register', registerCompany);
-router.post('/invite/accept', acceptInvite);
+router.post('/b2b/register', registerCompany);
+router.post('/b2b/invite/accept', acceptInvite);
 
 // ============================================================================
 // My Company (Requires B2B auth)
 // ============================================================================
 
-router.get('/company', getMyCompany);
-router.put('/company', updateMyCompany);
+router.get('/b2b/company', getMyCompany);
+router.put('/b2b/company', updateMyCompany);
 
 // Company Users
-router.get('/company/users', getMyCompanyUsers);
-router.post('/company/users/invite', inviteCompanyUser);
-router.put('/company/users/:userId', updateCompanyUser);
-router.delete('/company/users/:userId', removeCompanyUser);
+router.get('/b2b/company/users', getMyCompanyUsers);
+router.post('/b2b/company/users/invite', inviteCompanyUser);
+router.put('/b2b/company/users/:userId', updateCompanyUser);
+router.delete('/b2b/company/users/:userId', removeCompanyUser);
 
 // Company Addresses
-router.get('/company/addresses', getMyCompanyAddresses);
-router.post('/company/addresses', addCompanyAddress);
-router.put('/company/addresses/:addressId', updateCompanyAddress);
-router.delete('/company/addresses/:addressId', deleteCompanyAddress);
+router.get('/b2b/company/addresses', getMyCompanyAddresses);
+router.post('/b2b/company/addresses', addCompanyAddress);
+router.put('/b2b/company/addresses/:addressId', updateCompanyAddress);
+router.delete('/b2b/company/addresses/:addressId', deleteCompanyAddress);
 
 // ============================================================================
 // Quotes
 // ============================================================================
 
-router.get('/quotes', getMyQuotes);
-router.get('/quotes/:id', getQuote);
-router.post('/quotes/request', requestQuote);
-router.post('/quotes/:id/accept', acceptQuote);
-router.post('/quotes/:id/reject', rejectQuote);
+router.get('/b2b/quotes', getMyQuotes);
+router.get('/b2b/quotes/:id', getQuote);
+router.post('/b2b/quotes/request', requestQuote);
+router.post('/b2b/quotes/:id/accept', acceptQuote);
+router.post('/b2b/quotes/:id/reject', rejectQuote);
 
 // ============================================================================
 // Approvals
 // ============================================================================
 
-router.get('/approvals/mine', getMyApprovalRequests);
-router.get('/approvals/pending', getPendingApprovals);
-router.post('/approvals/:id/action', processApproval);
+router.get('/b2b/approvals/mine', getMyApprovalRequests);
+router.get('/b2b/approvals/pending', getPendingApprovals);
+router.post('/b2b/approvals/:id/action', processApproval);
 
 export const b2bCustomerRouter = router;
-export default router;

@@ -35,39 +35,38 @@ const router = Router();
 // FAQ Routes (Public)
 // ============================================================================
 
-router.get('/faq/categories', getFaqCategories);
-router.get('/faq/categories/featured', getFeaturedFaqCategories);
-router.get('/faq/categories/:slug', getFaqCategoryBySlug);
-router.get('/faq/articles/popular', getPopularFaqArticles);
-router.get('/faq/articles/:slug', getFaqArticleBySlug);
-router.get('/faq/search', searchFaq);
-router.post('/faq/articles/:id/feedback', submitFaqFeedback);
+router.get('/support/faq/categories', getFaqCategories);
+router.get('/support/faq/categories/featured', getFeaturedFaqCategories);
+router.get('/support/faq/categories/:slug', getFaqCategoryBySlug);
+router.get('/support/faq/articles/popular', getPopularFaqArticles);
+router.get('/support/faq/articles/:slug', getFaqArticleBySlug);
+router.get('/support/faq/search', searchFaq);
+router.post('/support/faq/articles/:id/feedback', submitFaqFeedback);
 
 // ============================================================================
 // Ticket Routes (Authenticated)
 // ============================================================================
 
-router.post('/tickets', createTicket);
-router.get('/tickets/mine', getMyTickets);
-router.get('/tickets/mine/:id', getMyTicket);
-router.post('/tickets/mine/:id/messages', addCustomerMessage);
-router.post('/tickets/mine/:id/feedback', submitTicketFeedback);
+router.post('/support/tickets', createTicket);
+router.get('/support/tickets/mine', getMyTickets);
+router.get('/support/tickets/mine/:id', getMyTicket);
+router.post('/support/tickets/mine/:id/messages', addCustomerMessage);
+router.post('/support/tickets/mine/:id/feedback', submitTicketFeedback);
 
 // ============================================================================
 // Stock Alert Routes
 // ============================================================================
 
-router.post('/alerts/stock', createStockAlert);
-router.get('/alerts/stock/mine', getMyStockAlerts);
-router.delete('/alerts/stock/mine/:id', cancelMyStockAlert);
+router.post('/support/alerts/stock', createStockAlert);
+router.get('/support/alerts/stock/mine', getMyStockAlerts);
+router.delete('/support/alerts/stock/mine/:id', cancelMyStockAlert);
 
 // ============================================================================
 // Price Alert Routes
 // ============================================================================
 
-router.post('/alerts/price', createPriceAlert);
-router.get('/alerts/price/mine', getMyPriceAlerts);
-router.delete('/alerts/price/mine/:id', cancelMyPriceAlert);
+router.post('/support/alerts/price', createPriceAlert);
+router.get('/support/alerts/price/mine', getMyPriceAlerts);
+router.delete('/support/alerts/price/mine/:id', cancelMyPriceAlert);
 
 export const supportCustomerRouter = router;
-export default router;

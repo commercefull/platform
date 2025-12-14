@@ -1,29 +1,38 @@
 import { AxiosInstance } from 'axios';
-import { createTestClient, loginTestUser } from '../testUtils';
-import { Product, ProductStatus, ProductVisibility } from '../../../features/product/repos/productRepo';
+import { createTestClient, loginTestAdmin } from '../testUtils';
+
+// Fixed UUIDs from seed data for consistent testing
+export const SEEDED_PRODUCT_1_ID = '10000000-0000-0000-0000-000000000001';
+export const SEEDED_PRODUCT_2_ID = '10000000-0000-0000-0000-000000000002';
+export const SEEDED_PRODUCT_3_ID = '10000000-0000-0000-0000-000000000003';
+export const SEEDED_VARIANT_1_ID = '20000000-0000-0000-0000-000000000001';
+export const SEEDED_VARIANT_2_ID = '20000000-0000-0000-0000-000000000002';
 
 // Common test data for product
-export const testProduct: Partial<Product> = {
+export const testProduct = {
   name: 'Test Product',
   description: 'Test product for integration tests',
   slug: `test-product-${Math.floor(Math.random() * 10000)}`,
-  status: ProductStatus.ACTIVE,
-  visibility: ProductVisibility.VISIBLE,
+  status: 'active',
+  visibility: 'visible',
+  price: 99.99,
   basePrice: 99.99,
   salePrice: 79.99,
-  cost: 50.00,
+  costPrice: 50.00,
   sku: `TST${Math.floor(Math.random() * 10000)}`,
   weight: 1.5,
+  weightUnit: 'kg',
   length: 10,
   width: 5,
   height: 2,
+  dimensionUnit: 'cm',
   isFeatured: true,
   isVirtual: false,
   isDownloadable: false,
   isSubscription: false,
   isTaxable: true,
   hasVariants: false,
-  productTypeId: '1' // Assuming a default product type ID
+  type: 'simple'
 };
 
 // Common test data for attribute group
@@ -64,11 +73,11 @@ export const testCategory = {
 };
 
 // Helper function to create a test product
-export async function createTestProduct(client: AxiosInstance, adminToken: string, categoryId?: string) {
-  const productData: Partial<Product> = { ...testProduct };
+export async function createTestProduct(client: AxiosInstance, adminToken: string, brandId?: string) {
+  const productData: any = { ...testProduct };
   
-  if (categoryId) {
-    productData.categoryId = categoryId;
+  if (brandId) {
+    productData.brandId = brandId;
   }
   
   const response = await client.post('/business/products', productData, {
@@ -162,46 +171,23 @@ export async function createTestAttributeOption(client: AxiosInstance, adminToke
 }
 
 // Setup function to initialize client and test data for product tests
+// Uses seeded data from seeds/20240805001058_seedProductTestData.js
 export async function setupProductTests() {
   const client = createTestClient();
   // Use merchant login for business routes
-  const loginResponse = await client.post('/business/auth/login', {
-    email: 'merchant@example.com',
-    password: 'password123'
-  });
-  const adminToken = loginResponse.data.accessToken;
+  const adminToken = await loginTestAdmin(client);
   
-  if (!adminToken) {
-    throw new Error('Failed to get admin token for product tests');
-  }
-  
-  // Create test category
-  const testCategoryId = await createTestCategory(client, adminToken);
-  
-  // Create test product
-  const testProductId = await createTestProduct(client, adminToken, testCategoryId);
-  
-  // Create test variant
-  const testVariantId = await createTestProductVariant(client, adminToken, testProductId);
-  
-  // Create test attribute group
-  const testAttributeGroupId = await createTestAttributeGroup(client, adminToken);
-  
-  // Create test attribute
-  const testAttributeId = await createTestAttribute(client, adminToken, testAttributeGroupId);
-  
-  // Create test attribute option
-  const testAttributeOptionId = await createTestAttributeOption(client, adminToken, testAttributeId);
-  
+  // Use seeded product data - these products are created by the seed file
+  // with fixed UUIDs for consistent testing
   return {
     client,
     adminToken,
-    testCategoryId,
-    testProductId,
-    testVariantId,
-    testAttributeGroupId,
-    testAttributeId,
-    testAttributeOptionId
+    testCategoryId: null as string | null,
+    testProductId: SEEDED_PRODUCT_1_ID,
+    testVariantId: SEEDED_VARIANT_1_ID,
+    testAttributeGroupId: null as string | null,
+    testAttributeId: null as string | null,
+    testAttributeOptionId: null as string | null
   };
 }
 

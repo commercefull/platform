@@ -76,7 +76,7 @@ export interface AbandonedCartEmail {
 
 export async function getAbandonedCart(abandonedCartId: string): Promise<AbandonedCart | null> {
   const row = await queryOne<Record<string, any>>(
-    'SELECT * FROM "abandonedCart" WHERE "abandonedCartId" = $1',
+    'SELECT * FROM "marketingAbandonedCart" WHERE "abandonedCartId" = $1',
     [abandonedCartId]
   );
   return row ? mapToAbandonedCart(row) : null;
@@ -84,7 +84,7 @@ export async function getAbandonedCart(abandonedCartId: string): Promise<Abandon
 
 export async function getAbandonedCartByBasket(basketId: string): Promise<AbandonedCart | null> {
   const row = await queryOne<Record<string, any>>(
-    'SELECT * FROM "abandonedCart" WHERE "basketId" = $1',
+    'SELECT * FROM "marketingAbandonedCart" WHERE "basketId" = $1',
     [basketId]
   );
   return row ? mapToAbandonedCart(row) : null;
@@ -131,7 +131,7 @@ export async function getAbandonedCarts(
   }
 
   const countResult = await queryOne<{ count: string }>(
-    `SELECT COUNT(*) as count FROM "abandonedCart" WHERE ${whereClause}`,
+    `SELECT COUNT(*) as count FROM "marketingAbandonedCart" WHERE ${whereClause}`,
     params
   );
 
@@ -139,7 +139,7 @@ export async function getAbandonedCarts(
   const offset = pagination?.offset || 0;
 
   const rows = await query<Record<string, any>[]>(
-    `SELECT * FROM "abandonedCart" WHERE ${whereClause} 
+    `SELECT * FROM "marketingAbandonedCart" WHERE ${whereClause} 
      ORDER BY "abandonedAt" DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
     [...params, limit, offset]
   );
@@ -152,7 +152,7 @@ export async function getAbandonedCarts(
 
 export async function getCartsToRemind(limit: number = 100): Promise<AbandonedCart[]> {
   const rows = await query<Record<string, any>[]>(
-    `SELECT * FROM "abandonedCart" 
+    `SELECT * FROM "marketingAbandonedCart" 
      WHERE "status" IN ('abandoned', 'reminded')
      AND "optedOut" = false
      AND "nextEmailScheduledAt" IS NOT NULL
@@ -169,7 +169,7 @@ export async function saveAbandonedCart(cart: Partial<AbandonedCart> & { basketI
 
   if (cart.abandonedCartId) {
     await query(
-      `UPDATE "abandonedCart" SET
+      `UPDATE "marketingAbandonedCart" SET
         "email" = $1, "firstName" = $2, "status" = $3, "cartValue" = $4, "currency" = $5,
         "itemCount" = $6, "cartSnapshot" = $7, "emailSequence" = $8, "emailsSent" = $9,
         "lastEmailSentAt" = $10, "nextEmailScheduledAt" = $11, "recoveredOrderId" = $12,
@@ -191,7 +191,7 @@ export async function saveAbandonedCart(cart: Partial<AbandonedCart> & { basketI
     return (await getAbandonedCart(cart.abandonedCartId))!;
   } else {
     const result = await queryOne<Record<string, any>>(
-      `INSERT INTO "abandonedCart" (
+      `INSERT INTO "marketingAbandonedCart" (
         "basketId", "customerId", "email", "firstName", "status", "cartValue", "currency",
         "itemCount", "cartSnapshot", "abandonedAt", "ipAddress", "userAgent", "deviceType",
         "country", "metadata", "createdAt", "updatedAt"
@@ -217,7 +217,7 @@ export async function markRecovered(
   source?: string
 ): Promise<void> {
   await query(
-    `UPDATE "abandonedCart" SET
+    `UPDATE "marketingAbandonedCart" SET
       "status" = 'recovered', "recoveredOrderId" = $1, "recoveredAt" = $2,
       "recoveredValue" = $3, "recoverySource" = $4, "updatedAt" = $2
     WHERE "abandonedCartId" = $5`,
@@ -228,7 +228,7 @@ export async function markRecovered(
 export async function optOut(abandonedCartId: string): Promise<void> {
   const now = new Date().toISOString();
   await query(
-    `UPDATE "abandonedCart" SET "optedOut" = true, "optedOutAt" = $1, "status" = 'opted_out', "updatedAt" = $1
+    `UPDATE "marketingAbandonedCart" SET "optedOut" = true, "optedOutAt" = $1, "status" = 'opted_out', "updatedAt" = $1
      WHERE "abandonedCartId" = $2`,
     [now, abandonedCartId]
   );
@@ -240,7 +240,7 @@ export async function scheduleNextEmail(
   sequenceNumber: number
 ): Promise<void> {
   await query(
-    `UPDATE "abandonedCart" SET 
+    `UPDATE "marketingAbandonedCart" SET 
       "nextEmailScheduledAt" = $1, "emailSequence" = $2, "updatedAt" = $3
      WHERE "abandonedCartId" = $4`,
     [scheduledAt.toISOString(), sequenceNumber, new Date().toISOString(), abandonedCartId]
@@ -253,7 +253,7 @@ export async function scheduleNextEmail(
 
 export async function getAbandonedCartEmails(abandonedCartId: string): Promise<AbandonedCartEmail[]> {
   const rows = await query<Record<string, any>[]>(
-    'SELECT * FROM "abandonedCartEmail" WHERE "abandonedCartId" = $1 ORDER BY "sequenceNumber" ASC',
+    'SELECT * FROM "marketingAbandonedCartEmail" WHERE "abandonedCartId" = $1 ORDER BY "sequenceNumber" ASC',
     [abandonedCartId]
   );
   return (rows || []).map(mapToAbandonedCartEmail);
@@ -267,7 +267,7 @@ export async function saveAbandonedCartEmail(email: Partial<AbandonedCartEmail> 
 
   if (email.abandonedCartEmailId) {
     await query(
-      `UPDATE "abandonedCartEmail" SET
+      `UPDATE "marketingAbandonedCartEmail" SET
         "status" = $1, "sentAt" = $2, "deliveredAt" = $3, "openedAt" = $4, "openCount" = $5,
         "clickedAt" = $6, "clickCount" = $7, "messageId" = $8, "failureReason" = $9, "updatedAt" = $10
       WHERE "abandonedCartEmailId" = $11`,
@@ -278,13 +278,13 @@ export async function saveAbandonedCartEmail(email: Partial<AbandonedCartEmail> 
       ]
     );
     const result = await queryOne<Record<string, any>>(
-      'SELECT * FROM "abandonedCartEmail" WHERE "abandonedCartEmailId" = $1',
+      'SELECT * FROM "marketingAbandonedCartEmail" WHERE "abandonedCartEmailId" = $1',
       [email.abandonedCartEmailId]
     );
     return mapToAbandonedCartEmail(result!);
   } else {
     const result = await queryOne<Record<string, any>>(
-      `INSERT INTO "abandonedCartEmail" (
+      `INSERT INTO "marketingAbandonedCartEmail" (
         "abandonedCartId", "emailTemplateId", "sequenceNumber", "subject", "bodyHtml", "bodyText",
         "status", "scheduledAt", "discountCode", "discountAmount", "discountType", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
@@ -307,13 +307,13 @@ export async function recordEmailSent(
   const now = new Date().toISOString();
   
   await query(
-    `UPDATE "abandonedCartEmail" SET "status" = 'sent', "sentAt" = $1, "messageId" = $2, "updatedAt" = $1
+    `UPDATE "marketingAbandonedCartEmail" SET "status" = 'sent', "sentAt" = $1, "messageId" = $2, "updatedAt" = $1
      WHERE "abandonedCartEmailId" = $3`,
     [now, messageId, abandonedCartEmailId]
   );
 
   await query(
-    `UPDATE "abandonedCart" SET 
+    `UPDATE "marketingAbandonedCart" SET 
       "emailsSent" = "emailsSent" + 1, "lastEmailSentAt" = $1, "status" = 'reminded', "updatedAt" = $1
      WHERE "abandonedCartId" = $2`,
     [now, abandonedCartId]
@@ -355,7 +355,7 @@ export async function getAbandonedCartStats(
       COALESCE(SUM("cartValue"), 0) as "totalAbandonedValue",
       COALESCE(SUM("recoveredValue"), 0) as "totalRecoveredValue",
       COALESCE(AVG("cartValue"), 0) as "averageCartValue"
-    FROM "abandonedCart" WHERE ${whereClause}`,
+    FROM "marketingAbandonedCart" WHERE ${whereClause}`,
     params
   );
 

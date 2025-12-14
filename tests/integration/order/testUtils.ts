@@ -7,7 +7,7 @@ export const loginTestUser = async (
   email: string = 'customer@example.com', 
   password: string = 'password123'
 ): Promise<string> => {
-  const response = await client.post('/identity/login', {
+  const response = await client.post('/customer/identity/login', {
     email,
     password
   });
@@ -35,6 +35,25 @@ export const loginTestMerchant = async (
   }
   
   return response.data.accessToken;
+};
+
+// Test data for order items (used in order creation)
+export const testOrderItemData = {
+  productId: '00000000-0000-0000-0000-000000000001', // Valid UUID for test product
+  sku: 'TEST-SKU-123',
+  name: 'Test Product',
+  description: 'Test product description',
+  quantity: 2,
+  unitPrice: 49.99,
+  discountedUnitPrice: 44.99,
+  lineTotal: 89.98,
+  discountTotal: 10.00,
+  taxTotal: 7.50,
+  taxRate: 0.075,
+  taxExempt: false,
+  fulfillmentStatus: 'unfulfilled',
+  giftWrapped: false,
+  isDigital: false
 };
 
 // Test data for orders
@@ -78,30 +97,9 @@ export const testOrderData = {
     postalCode: '12345',
     country: 'US',
     phone: '555-123-4567'
-  }
-};
-
-// Test data for order items
-export const testOrderItemData = {
-  productId: 'test-product-id',
-  variantId: 'test-variant-id',
-  sku: 'TEST-SKU-123',
-  name: 'Test Product',
-  description: 'Test product description',
-  quantity: 2,
-  unitPrice: 49.99,
-  price: 49.99,
-  subtotal: 99.98,
-  discountTotal: 10.00,
-  taxTotal: 7.50,
-  total: 97.48,
-  weight: 1.5,
-  taxRate: 0.075,
-  taxClass: 'standard',
-  options: {
-    color: 'Blue',
-    size: 'Medium'
-  }
+  },
+  // Include items for order creation
+  items: [testOrderItemData]
 };
 
 /**
@@ -113,10 +111,10 @@ export const setupOrderTests = async () => {
   const adminToken = await loginTestAdmin(client);
   const customerToken = await loginTestUser(client);
   
-  // Create test order
-  const createOrderResponse = await client.post('/order', {
+  // Create test order (items are included in testOrderData)
+  const createOrderResponse = await client.post('/customer/order', {
     ...testOrderData,
-    customerId: 'test-customer-id-123' // Will be overwritten by the actual customer ID in the createOrder endpoint
+    orderNumber: `TEST-${Date.now()}` // Ensure unique order number
   }, {
     headers: { Authorization: `Bearer ${customerToken}` }
   });
@@ -125,21 +123,11 @@ export const setupOrderTests = async () => {
     throw new Error(`Failed to create test order: ${createOrderResponse.data.error}`);
   }
   
-  const testOrderId = createOrderResponse.data.data.id;
+  const testOrderId = createOrderResponse.data.data.orderId;
   
-  // Create test order item
-  const createOrderItemResponse = await client.post('/business/order-items', {
-    ...testOrderItemData,
-    orderId: testOrderId
-  }, {
-    headers: { Authorization: `Bearer ${adminToken}` }
-  });
-  
-  if (!createOrderItemResponse.data.success) {
-    throw new Error(`Failed to create test order item: ${createOrderItemResponse.data.error}`);
-  }
-  
-  const testOrderItemId = createOrderItemResponse.data.data.id;
+  // Get the order item ID from the created order's items
+  const orderItems = createOrderResponse.data.data.items || [];
+  const testOrderItemId = orderItems.length > 0 ? orderItems[0].orderItemId : null;
   
   return {
     client,
@@ -157,16 +145,10 @@ export const setupOrderTests = async () => {
 export const cleanupOrderTests = async (
   client: AxiosInstance, 
   adminToken: string, 
-  testOrderId: string, 
-  testOrderItemId: string
+  testOrderId: string
 ) => {
   try {
-    // Delete test order item
-    await client.delete(`/business/order-items/${testOrderItemId}`, {
-      headers: { Authorization: `Bearer ${adminToken}` }
-    });
-    
-    // Delete test order
+    // Delete test order (cascade deletes items)
     await client.delete(`/business/orders/${testOrderId}`, {
       headers: { Authorization: `Bearer ${adminToken}` }
     });

@@ -20,31 +20,30 @@ router.use(isCustomerLoggedIn);
  * Get customer's orders
  * GET /api/orders
  */
-router.get('/', orderController.getMyOrders);
+router.get('/order', orderController.getMyOrders);
 
 /**
  * Get order by order number
  * GET /api/orders/number/:orderNumber
  */
-router.get('/number/:orderNumber', orderController.getOrderByNumber);
+router.get('/order/number/:orderNumber', orderController.getOrderByNumber);
 
 /**
  * Get order by ID
  * GET /api/orders/:orderId
  */
-router.get('/:orderId', orderController.getOrder);
+router.get('/order/:orderId', orderController.getOrder);
 
 /**
  * Create a new order
  * POST /api/orders
  */
-router.post('/', orderController.createOrder);
+router.post('/order', orderController.createOrder);
 
 /**
  * Cancel an order
  * POST /api/orders/:orderId/cancel
  */
-router.post('/:orderId/cancel', orderController.cancelOrder);
+router.post('/order/:orderId/cancel', orderController.cancelOrder);
 
 export const orderCustomerRouter = router;
-export default router;

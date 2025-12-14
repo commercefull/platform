@@ -133,7 +133,7 @@ describe('Tax Calculation API Integration Tests', () => {
         shippingAddress: { country: 'US' }
       });
       
-      expect([401, 403]).toContain(response.status);
+      expect(response.status).toBe(401);
     });
   });
 
@@ -212,7 +212,7 @@ describe('Tax Calculation API Integration Tests', () => {
     it('should require authentication for checking exemptions', async () => {
       const response = await client.get('/api/tax/exemption/any-customer-id');
       
-      expect([401, 403]).toContain(response.status);
+      expect(response.status).toBe(401);
     });
   });
 

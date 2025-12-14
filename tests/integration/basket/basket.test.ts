@@ -50,7 +50,7 @@ describe('Basket Feature Tests', () => {
     
     // Try to get customer token (optional)
     try {
-      const customerLoginResponse = await client.post('/identity/login', CUSTOMER_CREDENTIALS);
+      const customerLoginResponse = await client.post('/customer/identity/login', CUSTOMER_CREDENTIALS);
       customerToken = customerLoginResponse.data.accessToken;
       customerId = customerLoginResponse.data.customer?.id;
     } catch (error) {
@@ -58,13 +58,13 @@ describe('Basket Feature Tests', () => {
     }
     
     // Use pre-seeded basket or create one
-    const basketResponse = await client.get(`/basket/${TEST_GUEST_BASKET_ID}`);
+    const basketResponse = await client.get(`/customer/basket/${TEST_GUEST_BASKET_ID}`);
     if (basketResponse.status === 200) {
       guestBasketId = TEST_GUEST_BASKET_ID;
       customerBasketId = TEST_CUSTOMER_BASKET_ID;
     } else {
       // Create basket dynamically if seeded data doesn't exist
-      const newBasketResponse = await client.post('/basket', { sessionId: 'test-guest-session-' + Date.now() });
+      const newBasketResponse = await client.post('/customer/basket', { sessionId: 'test-guest-session-' + Date.now() });
       guestBasketId = newBasketResponse.data.data.basketId;
     }
   });
@@ -75,7 +75,7 @@ describe('Basket Feature Tests', () => {
 
   describe('Basket Creation API', () => {
     it('should get or create a basket with session', async () => {
-      const response = await client.post('/basket', {
+      const response = await client.post('/customer/basket', {
         sessionId: 'test-session-' + Date.now()
       });
       
@@ -97,7 +97,7 @@ describe('Basket Feature Tests', () => {
       expect(response.data.data).not.toHaveProperty('created_at');
       
       // Clean up this test basket
-      await client.delete(`/basket/${response.data.data.basketId}`);
+      await client.delete(`/customer/basket/${response.data.data.basketId}`);
     });
 
     it('should create a customer basket with proper association', async () => {
@@ -106,7 +106,7 @@ describe('Basket Feature Tests', () => {
         return;
       }
       
-      const response = await client.post('/basket', {}, {
+      const response = await client.post('/customer/basket', {}, {
         headers: { Authorization: `Bearer ${customerToken}` }
       });
       
@@ -127,7 +127,7 @@ describe('Basket Feature Tests', () => {
 
   describe('Basket Retrieval API', () => {
     it('should get a basket by ID with camelCase properties', async () => {
-      const response = await client.get(`/basket/${guestBasketId}`);
+      const response = await client.get(`/customer/basket/${guestBasketId}`);
       
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
@@ -147,7 +147,7 @@ describe('Basket Feature Tests', () => {
     });
     
     it('should get basket summary', async () => {
-      const response = await client.get(`/basket/${guestBasketId}/summary`);
+      const response = await client.get(`/customer/basket/${guestBasketId}/summary`);
       
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
@@ -158,14 +158,14 @@ describe('Basket Feature Tests', () => {
     });
 
     it('should get current user basket via /me endpoint', async () => {
-      const response = await client.get('/basket/me');
+      const response = await client.get('/customer/basket/me');
       
-      // Should return 200 or 401 depending on session
-      expect([200, 401]).toContain(response.status);
+      // Without auth, should return 401
+      expect(response.status).toBe(401);
     });
 
     it('should return 404 for non-existent basket', async () => {
-      const response = await client.get('/basket/00000000-0000-0000-0000-000000000000');
+      const response = await client.get('/customer/basket/00000000-0000-0000-0000-000000000000');
       
       expect(response.status).toBe(404);
       expect(response.data.success).toBe(false);
@@ -178,7 +178,7 @@ describe('Basket Feature Tests', () => {
 
   describe('Basket Items API', () => {
     it('should add an item to a basket', async () => {
-      const response = await client.post(`/basket/${guestBasketId}/items`, {
+      const response = await client.post(`/customer/basket/${guestBasketId}/items`, {
         productId: basketItem1.productId || 'test-product-1',
         sku: 'TEST-SKU-001',
         name: 'Test Product',
@@ -186,15 +186,7 @@ describe('Basket Feature Tests', () => {
         unitPrice: 29.99
       });
       
-      // Accept 201 (created), 200 (updated), or 500 (server error - may need restart)
-      if (response.status === 500) {
-        console.log('Add item failed with 500 - server may need restart for code changes');
-        console.log('Error:', response.data.error || response.data.message);
-        // Skip rest of test if server error
-        return;
-      }
-      
-      expect([200, 201]).toContain(response.status);
+      expect(response.status).toBe(201);
       expect(response.data.success).toBe(true);
       
       const basket = response.data.data;
@@ -225,7 +217,7 @@ describe('Basket Feature Tests', () => {
         return;
       }
 
-      const response = await client.patch(`/basket/${guestBasketId}/items/${createdBasketItemId}`, {
+      const response = await client.patch(`/customer/basket/${guestBasketId}/items/${createdBasketItemId}`, {
         quantity: 5
       });
       
@@ -247,7 +239,7 @@ describe('Basket Feature Tests', () => {
         return;
       }
 
-      const response = await client.post(`/basket/${guestBasketId}/items/${createdBasketItemId}/gift`, {
+      const response = await client.post(`/customer/basket/${guestBasketId}/items/${createdBasketItemId}/gift`, {
         giftMessage: 'Happy Birthday!'
       });
       
@@ -266,7 +258,7 @@ describe('Basket Feature Tests', () => {
         return;
       }
 
-      const response = await client.delete(`/basket/${guestBasketId}/items/${createdBasketItemId}`);
+      const response = await client.delete(`/customer/basket/${guestBasketId}/items/${createdBasketItemId}`);
       
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
@@ -287,7 +279,7 @@ describe('Basket Feature Tests', () => {
   describe('Basket Operations API', () => {
     it('should clear a basket', async () => {
       // First, add an item to make sure the basket isn't empty
-      await client.post(`/basket/${guestBasketId}/items`, {
+      await client.post(`/customer/basket/${guestBasketId}/items`, {
         productId: basketItem2.productId,
         sku: 'TEST-SKU-002',
         name: 'Test Product 2',
@@ -296,7 +288,7 @@ describe('Basket Feature Tests', () => {
       });
       
       // Now clear the basket
-      const response = await client.delete(`/basket/${guestBasketId}/items`);
+      const response = await client.delete(`/customer/basket/${guestBasketId}/items`);
       
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
@@ -319,7 +311,7 @@ describe('Basket Feature Tests', () => {
       }
       
       // Add items to source basket
-      const addResult1 = await client.post(`/basket/${guestBasketId}/items`, {
+      const addResult1 = await client.post(`/customer/basket/${guestBasketId}/items`, {
         productId: basketItem1.productId || 'merge-product-1',
         sku: 'MERGE-SKU-001',
         name: 'Merge Test Product 1',
@@ -328,7 +320,7 @@ describe('Basket Feature Tests', () => {
       });
       
       // Merge the guest basket into the customer basket
-      const response = await client.post('/basket/merge', {
+      const response = await client.post('/customer/basket/merge', {
         sourceBasketId: guestBasketId,
         targetBasketId: customerBasketId
       });
@@ -350,13 +342,13 @@ describe('Basket Feature Tests', () => {
       }
 
       // Create a new session basket
-      const createResponse = await client.post('/basket', {
+      const createResponse = await client.post('/customer/basket', {
         sessionId: 'assign-test-session-' + Date.now()
       });
       
       const newBasketId = createResponse.data.data.basketId;
       
-      const response = await client.post(`/basket/${newBasketId}/assign`, {
+      const response = await client.post(`/customer/basket/${newBasketId}/assign`, {
         customerId
       });
       
@@ -365,7 +357,7 @@ describe('Basket Feature Tests', () => {
       expect(response.data.data.customerId).toBe(customerId);
       
       // Clean up
-      await client.delete(`/basket/${newBasketId}`);
+      await client.delete(`/customer/basket/${newBasketId}`);
     });
   });
 
@@ -375,7 +367,7 @@ describe('Basket Feature Tests', () => {
 
   describe('Basket Expiration API', () => {
     it('should extend basket expiration', async () => {
-      const response = await client.put(`/basket/${guestBasketId}/expiration`, {
+      const response = await client.put(`/customer/basket/${guestBasketId}/expiration`, {
         days: 14
       });
       
@@ -383,18 +375,16 @@ describe('Basket Feature Tests', () => {
       expect(response.data.success).toBe(true);
       
       // Verify the basket was updated
-      const verifyResponse = await client.get(`/basket/${guestBasketId}`);
+      const verifyResponse = await client.get(`/customer/basket/${guestBasketId}`);
       expect(verifyResponse.status).toBe(200);
     });
 
     it('should reject invalid expiration days', async () => {
-      const response = await client.put(`/basket/${guestBasketId}/expiration`, {
+      const response = await client.put(`/customer/basket/${guestBasketId}/expiration`, {
         days: -5
       });
       
-      // Should return 400 for invalid days, but may return 200 if validation not implemented
-      // TODO: Add validation in ExtendExpiration use case for negative days
-      expect([200, 400, 500]).toContain(response.status);
+      expect(response.status).toBe(400);
     });
   });
 
@@ -404,7 +394,7 @@ describe('Basket Feature Tests', () => {
 
   describe('Basket Validation', () => {
     it('should reject adding item with invalid quantity', async () => {
-      const response = await client.post(`/basket/${guestBasketId}/items`, {
+      const response = await client.post(`/customer/basket/${guestBasketId}/items`, {
         productId: 'test-product',
         sku: 'TEST-SKU',
         name: 'Test Product',
@@ -416,7 +406,7 @@ describe('Basket Feature Tests', () => {
     });
 
     it('should reject adding item without required fields', async () => {
-      const response = await client.post(`/basket/${guestBasketId}/items`, {
+      const response = await client.post(`/customer/basket/${guestBasketId}/items`, {
         productId: 'test-product'
         // Missing sku, name, quantity, unitPrice
       });
@@ -427,16 +417,15 @@ describe('Basket Feature Tests', () => {
     it('should handle non-existent basket gracefully', async () => {
       const fakeBasketId = '00000000-0000-0000-0000-000000000000';
       
-      const response = await client.get(`/basket/${fakeBasketId}`);
+      const response = await client.get(`/customer/basket/${fakeBasketId}`);
       expect(response.status).toBe(404);
     });
 
     it('should handle non-existent item in basket gracefully', async () => {
       const fakeItemId = '00000000-0000-0000-0000-000000000000';
       
-      const response = await client.delete(`/basket/${guestBasketId}/items/${fakeItemId}`);
-      // Should return 404 or handle gracefully
-      expect([200, 404, 500]).toContain(response.status);
+      const response = await client.delete(`/customer/basket/${guestBasketId}/items/${fakeItemId}`);
+      expect(response.status).toBe(404);
     });
   });
 
@@ -447,14 +436,14 @@ describe('Basket Feature Tests', () => {
   describe('Basket Delete API', () => {
     it('should delete a basket', async () => {
       // Create a basket to delete
-      const createResponse = await client.post('/basket', {
+      const createResponse = await client.post('/customer/basket', {
         sessionId: 'delete-test-session-' + Date.now()
       });
       
       expect(createResponse.status).toBe(200);
       const deleteBasketId = createResponse.data.data.basketId;
       
-      const response = await client.delete(`/basket/${deleteBasketId}`);
+      const response = await client.delete(`/customer/basket/${deleteBasketId}`);
       
       // Delete may fail due to foreign key constraints in analytics tables
       // or server may need restart for code changes
@@ -468,7 +457,7 @@ describe('Basket Feature Tests', () => {
         expect(response.data.success).toBe(true);
         
         // Verify basket is deleted
-        const verifyResponse = await client.get(`/basket/${deleteBasketId}`);
+        const verifyResponse = await client.get(`/customer/basket/${deleteBasketId}`);
         expect(verifyResponse.status).toBe(404);
       }
     });

@@ -2,12 +2,6 @@
 // Do not touch them, or risk, your modifications being lost.
 
 export enum Table {
-  AbandonedCart = "abandonedCart",
-  AbandonedCartEmail = "abandonedCartEmail",
-  Affiliate = "affiliate",
-  AffiliateCommission = "affiliateCommission",
-  AffiliateLink = "affiliateLink",
-  AffiliatePayout = "affiliatePayout",
   AnalyticsChannelAttribution = "analyticsChannelAttribution",
   AnalyticsCustomer = "analyticsCustomer",
   AnalyticsCustomerCohort = "analyticsCustomerCohort",
@@ -115,10 +109,6 @@ export enum Table {
   DistributionWarehouseBin = "distributionWarehouseBin",
   DistributionWarehouseZone = "distributionWarehouseZone",
   DunningAttempt = "dunningAttempt",
-  EmailCampaign = "emailCampaign",
-  EmailCampaignLink = "emailCampaignLink",
-  EmailCampaignRecipient = "emailCampaignRecipient",
-  EmailTemplate = "emailTemplate",
   FaqArticle = "faqArticle",
   FaqCategory = "faqCategory",
   FraudBlacklist = "fraudBlacklist",
@@ -132,6 +122,7 @@ export enum Table {
   IdentityCustomerSession = "identityCustomerSession",
   IdentityMerchantSession = "identityMerchantSession",
   IdentityRefreshTokens = "identityRefreshTokens",
+  IdentitySocialAccount = "identitySocialAccount",
   IdentityTokenBlacklist = "identityTokenBlacklist",
   InventoryCount = "inventoryCount",
   InventoryCountItem = "inventoryCountItem",
@@ -151,6 +142,17 @@ export enum Table {
   LoyaltyReward = "loyaltyReward",
   LoyaltyTier = "loyaltyTier",
   LoyaltyTransaction = "loyaltyTransaction",
+  MarketingAbandonedCart = "marketingAbandonedCart",
+  MarketingAbandonedCartEmail = "marketingAbandonedCartEmail",
+  MarketingAffiliate = "marketingAffiliate",
+  MarketingAffiliateCommission = "marketingAffiliateCommission",
+  MarketingAffiliateLink = "marketingAffiliateLink",
+  MarketingAffiliatePayout = "marketingAffiliatePayout",
+  MarketingEmailCampaign = "marketingEmailCampaign",
+  MarketingEmailCampaignLink = "marketingEmailCampaignLink",
+  MarketingEmailCampaignRecipient = "marketingEmailCampaignRecipient",
+  MarketingEmailTemplate = "marketingEmailTemplate",
+  MarketingProductRecommendation = "marketingProductRecommendation",
   MembershipBenefit = "membershipBenefit",
   MembershipBenefitUsage = "membershipBenefitUsage",
   MembershipContentAccess = "membershipContentAccess",
@@ -259,7 +261,6 @@ export enum Table {
   ProductQa = "productQa",
   ProductQaAnswer = "productQaAnswer",
   ProductQaVote = "productQaVote",
-  ProductRecommendation = "productRecommendation",
   ProductRelated = "productRelated",
   ProductReview = "productReview",
   ProductReviewMedia = "productReviewMedia",
@@ -324,12 +325,6 @@ export enum Table {
 }
 
 export type Tables = {
-  "abandonedCart": AbandonedCart,
-  "abandonedCartEmail": AbandonedCartEmail,
-  "affiliate": Affiliate,
-  "affiliateCommission": AffiliateCommission,
-  "affiliateLink": AffiliateLink,
-  "affiliatePayout": AffiliatePayout,
   "analyticsChannelAttribution": AnalyticsChannelAttribution,
   "analyticsCustomer": AnalyticsCustomer,
   "analyticsCustomerCohort": AnalyticsCustomerCohort,
@@ -437,10 +432,6 @@ export type Tables = {
   "distributionWarehouseBin": DistributionWarehouseBin,
   "distributionWarehouseZone": DistributionWarehouseZone,
   "dunningAttempt": DunningAttempt,
-  "emailCampaign": EmailCampaign,
-  "emailCampaignLink": EmailCampaignLink,
-  "emailCampaignRecipient": EmailCampaignRecipient,
-  "emailTemplate": EmailTemplate,
   "faqArticle": FaqArticle,
   "faqCategory": FaqCategory,
   "fraudBlacklist": FraudBlacklist,
@@ -454,6 +445,7 @@ export type Tables = {
   "identityCustomerSession": IdentityCustomerSession,
   "identityMerchantSession": IdentityMerchantSession,
   "identityRefreshTokens": IdentityRefreshTokens,
+  "identitySocialAccount": IdentitySocialAccount,
   "identityTokenBlacklist": IdentityTokenBlacklist,
   "inventoryCount": InventoryCount,
   "inventoryCountItem": InventoryCountItem,
@@ -473,6 +465,17 @@ export type Tables = {
   "loyaltyReward": LoyaltyReward,
   "loyaltyTier": LoyaltyTier,
   "loyaltyTransaction": LoyaltyTransaction,
+  "marketingAbandonedCart": MarketingAbandonedCart,
+  "marketingAbandonedCartEmail": MarketingAbandonedCartEmail,
+  "marketingAffiliate": MarketingAffiliate,
+  "marketingAffiliateCommission": MarketingAffiliateCommission,
+  "marketingAffiliateLink": MarketingAffiliateLink,
+  "marketingAffiliatePayout": MarketingAffiliatePayout,
+  "marketingEmailCampaign": MarketingEmailCampaign,
+  "marketingEmailCampaignLink": MarketingEmailCampaignLink,
+  "marketingEmailCampaignRecipient": MarketingEmailCampaignRecipient,
+  "marketingEmailTemplate": MarketingEmailTemplate,
+  "marketingProductRecommendation": MarketingProductRecommendation,
   "membershipBenefit": MembershipBenefit,
   "membershipBenefitUsage": MembershipBenefitUsage,
   "membershipContentAccess": MembershipContentAccess,
@@ -581,7 +584,6 @@ export type Tables = {
   "productQa": ProductQa,
   "productQaAnswer": ProductQaAnswer,
   "productQaVote": ProductQaVote,
-  "productRecommendation": ProductRecommendation,
   "productRelated": ProductRelated,
   "productReview": ProductReview,
   "productReviewMedia": ProductReviewMedia,
@@ -643,176 +645,6 @@ export type Tables = {
   "vatOssReportLine": VatOssReportLine,
   "vatRegistration": VatRegistration,
   "vatValidationLog": VatValidationLog,
-};
-
-export type AbandonedCart = {
-  abandonedCartId: string;
-  basketId: string;
-  customerId: string | null;
-  email: string | null;
-  firstName: string | null;
-  status: string | null;
-  cartValue: string | null;
-  currency: string | null;
-  itemCount: number | null;
-  cartSnapshot: unknown | null;
-  abandonedAt: Date;
-  emailSequence: number | null;
-  emailsSent: number | null;
-  lastEmailSentAt: Date | null;
-  nextEmailScheduledAt: Date | null;
-  recoveredOrderId: string | null;
-  recoveredAt: Date | null;
-  recoveredValue: string | null;
-  recoverySource: string | null;
-  discountCode: string | null;
-  discountAmount: string | null;
-  optedOut: boolean | null;
-  optedOutAt: Date | null;
-  ipAddress: string | null;
-  userAgent: string | null;
-  deviceType: string | null;
-  country: string | null;
-  metadata: unknown | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-};
-
-export type AbandonedCartEmail = {
-  abandonedCartEmailId: string;
-  abandonedCartId: string;
-  emailTemplateId: string | null;
-  sequenceNumber: number;
-  subject: string | null;
-  bodyHtml: string | null;
-  bodyText: string | null;
-  status: string | null;
-  scheduledAt: Date | null;
-  sentAt: Date | null;
-  deliveredAt: Date | null;
-  openedAt: Date | null;
-  openCount: number | null;
-  clickedAt: Date | null;
-  clickCount: number | null;
-  messageId: string | null;
-  failureReason: string | null;
-  discountCode: string | null;
-  discountAmount: string | null;
-  discountType: string | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-};
-
-export type Affiliate = {
-  affiliateId: string;
-  customerId: string | null;
-  email: string;
-  firstName: string | null;
-  lastName: string | null;
-  companyName: string | null;
-  website: string | null;
-  socialMedia: string | null;
-  affiliateCode: string;
-  status: string | null;
-  tier: string | null;
-  commissionRate: string | null;
-  commissionType: string | null;
-  cookieDurationDays: number | null;
-  lifetimeEarnings: string | null;
-  pendingBalance: string | null;
-  availableBalance: string | null;
-  totalPaidOut: string | null;
-  totalClicks: number | null;
-  totalConversions: number | null;
-  conversionRate: string | null;
-  averageOrderValue: string | null;
-  paymentMethod: string | null;
-  paypalEmail: string | null;
-  bankDetails: unknown | null;
-  minimumPayout: string | null;
-  currency: string | null;
-  bio: string | null;
-  categories: unknown | null;
-  rejectionReason: string | null;
-  approvedAt: Date | null;
-  approvedBy: string | null;
-  lastLoginAt: Date | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-  deletedAt: Date | null;
-};
-
-export type AffiliateCommission = {
-  affiliateCommissionId: string;
-  affiliateId: string;
-  affiliateLinkId: string | null;
-  orderId: string;
-  customerId: string | null;
-  orderTotal: string;
-  commissionableAmount: string;
-  commissionRate: string;
-  commissionType: string;
-  commissionAmount: string;
-  currency: string | null;
-  status: string | null;
-  isFirstOrder: boolean | null;
-  notes: string | null;
-  rejectionReason: string | null;
-  approvedAt: Date | null;
-  approvedBy: string | null;
-  payoutId: string | null;
-  paidAt: Date | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-};
-
-export type AffiliateLink = {
-  affiliateLinkId: string;
-  affiliateId: string;
-  name: string | null;
-  shortCode: string;
-  destinationUrl: string;
-  productId: string | null;
-  productCategoryId: string | null;
-  campaignId: string | null;
-  utmSource: string | null;
-  utmMedium: string | null;
-  utmCampaign: string | null;
-  clickCount: number | null;
-  uniqueClickCount: number | null;
-  conversionCount: number | null;
-  revenue: string | null;
-  commission: string | null;
-  isActive: boolean | null;
-  lastClickedAt: Date | null;
-  expiresAt: Date | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-};
-
-export type AffiliatePayout = {
-  affiliatePayoutId: string;
-  affiliateId: string;
-  amount: string;
-  currency: string | null;
-  paymentMethod: string;
-  status: string | null;
-  paypalEmail: string | null;
-  paypalTransactionId: string | null;
-  bankDetails: unknown | null;
-  bankReference: string | null;
-  checkNumber: string | null;
-  storeCreditCode: string | null;
-  commissionsCount: number | null;
-  periodStart: string | null;
-  periodEnd: string | null;
-  notes: string | null;
-  failureReason: string | null;
-  processedAt: Date | null;
-  processedBy: string | null;
-  completedAt: Date | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
 };
 
 export type AnalyticsChannelAttribution = {
@@ -3018,117 +2850,6 @@ export type DunningAttempt = {
   updatedAt: Date | null;
 };
 
-export type EmailCampaign = {
-  emailCampaignId: string;
-  merchantId: string | null;
-  name: string;
-  subject: string;
-  preheader: string | null;
-  fromName: string | null;
-  fromEmail: string | null;
-  replyTo: string | null;
-  bodyHtml: string | null;
-  bodyText: string | null;
-  status: string | null;
-  campaignType: string | null;
-  templateId: string | null;
-  segmentIds: unknown[] | null;
-  tags: unknown[] | null;
-  scheduledAt: Date | null;
-  sentAt: Date | null;
-  totalRecipients: number | null;
-  sentCount: number | null;
-  deliveredCount: number | null;
-  openCount: number | null;
-  uniqueOpenCount: number | null;
-  clickCount: number | null;
-  uniqueClickCount: number | null;
-  bounceCount: number | null;
-  softBounceCount: number | null;
-  hardBounceCount: number | null;
-  unsubscribeCount: number | null;
-  complaintCount: number | null;
-  revenue: string | null;
-  conversionCount: number | null;
-  openRate: string | null;
-  clickRate: string | null;
-  abTestConfig: unknown | null;
-  winningVariant: string | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-  deletedAt: Date | null;
-};
-
-export type EmailCampaignLink = {
-  emailCampaignLinkId: string;
-  emailCampaignId: string;
-  originalUrl: string;
-  trackingUrl: string | null;
-  linkText: string | null;
-  position: number | null;
-  clickCount: number | null;
-  uniqueClickCount: number | null;
-  firstClickedAt: Date | null;
-  lastClickedAt: Date | null;
-  createdAt: Date | null;
-};
-
-export type EmailCampaignRecipient = {
-  emailCampaignRecipientId: string;
-  emailCampaignId: string;
-  customerId: string | null;
-  email: string;
-  firstName: string | null;
-  lastName: string | null;
-  status: string | null;
-  variant: string | null;
-  sentAt: Date | null;
-  deliveredAt: Date | null;
-  firstOpenedAt: Date | null;
-  lastOpenedAt: Date | null;
-  openCount: number | null;
-  firstClickedAt: Date | null;
-  lastClickedAt: Date | null;
-  clickCount: number | null;
-  bouncedAt: Date | null;
-  bounceType: string | null;
-  bounceReason: string | null;
-  unsubscribedAt: Date | null;
-  complainedAt: Date | null;
-  failureReason: string | null;
-  messageId: string | null;
-  ipAddress: string | null;
-  userAgent: string | null;
-  deviceType: string | null;
-  country: string | null;
-  city: string | null;
-  metadata: unknown | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-};
-
-export type EmailTemplate = {
-  emailTemplateId: string;
-  merchantId: string | null;
-  name: string;
-  slug: string | null;
-  category: string | null;
-  description: string | null;
-  subject: string | null;
-  preheader: string | null;
-  bodyHtml: string | null;
-  bodyText: string | null;
-  variables: unknown[] | null;
-  thumbnailUrl: string | null;
-  isDefault: boolean | null;
-  isActive: boolean | null;
-  usageCount: number | null;
-  lastUsedAt: Date | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-  deletedAt: Date | null;
-};
-
 export type FaqArticle = {
   faqArticleId: string;
   faqCategoryId: string | null;
@@ -3401,6 +3122,31 @@ export type IdentityRefreshTokens = {
   lastUsedAt: Date | null;
   userAgent: string | null;
   ipAddress: string | null;
+};
+
+export type IdentitySocialAccount = {
+  socialAccountId: string;
+  userId: string;
+  userType: string;
+  provider: string;
+  providerUserId: string;
+  providerEmail: string | null;
+  displayName: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  avatarUrl: string | null;
+  profileUrl: string | null;
+  accessToken: string | null;
+  refreshToken: string | null;
+  tokenExpiresAt: Date | null;
+  scopes: string | null;
+  isActive: boolean;
+  isPrimary: boolean;
+  providerData: unknown | null;
+  lastUsedAt: Date | null;
+  lastLoginIp: string | null;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 export type IdentityTokenBlacklist = {
@@ -3715,6 +3461,307 @@ export type LoyaltyTransaction = {
   referenceId: string | null;
 };
 
+export type MarketingAbandonedCart = {
+  marketingAbandonedCartId: string;
+  basketId: string;
+  customerId: string | null;
+  email: string | null;
+  firstName: string | null;
+  status: string | null;
+  cartValue: string | null;
+  currency: string | null;
+  itemCount: number | null;
+  cartSnapshot: unknown | null;
+  abandonedAt: Date;
+  emailSequence: number | null;
+  emailsSent: number | null;
+  lastEmailSentAt: Date | null;
+  nextEmailScheduledAt: Date | null;
+  recoveredOrderId: string | null;
+  recoveredAt: Date | null;
+  recoveredValue: string | null;
+  recoverySource: string | null;
+  discountCode: string | null;
+  discountAmount: string | null;
+  optedOut: boolean | null;
+  optedOutAt: Date | null;
+  ipAddress: string | null;
+  userAgent: string | null;
+  deviceType: string | null;
+  country: string | null;
+  metadata: unknown | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
+
+export type MarketingAbandonedCartEmail = {
+  marketingAbandonedCartEmailId: string;
+  marketingAbandonedCartId: string;
+  marketingEmailTemplateId: string | null;
+  sequenceNumber: number;
+  subject: string | null;
+  bodyHtml: string | null;
+  bodyText: string | null;
+  status: string | null;
+  scheduledAt: Date | null;
+  sentAt: Date | null;
+  deliveredAt: Date | null;
+  openedAt: Date | null;
+  openCount: number | null;
+  clickedAt: Date | null;
+  clickCount: number | null;
+  messageId: string | null;
+  failureReason: string | null;
+  discountCode: string | null;
+  discountAmount: string | null;
+  discountType: string | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
+
+export type MarketingAffiliate = {
+  marketingAffiliateId: string;
+  customerId: string | null;
+  email: string;
+  firstName: string | null;
+  lastName: string | null;
+  companyName: string | null;
+  website: string | null;
+  socialMedia: string | null;
+  affiliateCode: string;
+  status: string | null;
+  tier: string | null;
+  commissionRate: string | null;
+  commissionType: string | null;
+  cookieDurationDays: number | null;
+  lifetimeEarnings: string | null;
+  pendingBalance: string | null;
+  availableBalance: string | null;
+  totalPaidOut: string | null;
+  totalClicks: number | null;
+  totalConversions: number | null;
+  conversionRate: string | null;
+  averageOrderValue: string | null;
+  paymentMethod: string | null;
+  paypalEmail: string | null;
+  bankDetails: unknown | null;
+  minimumPayout: string | null;
+  currency: string | null;
+  bio: string | null;
+  categories: unknown | null;
+  rejectionReason: string | null;
+  approvedAt: Date | null;
+  approvedBy: string | null;
+  lastLoginAt: Date | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+  deletedAt: Date | null;
+};
+
+export type MarketingAffiliateCommission = {
+  marketingAffiliateCommissionId: string;
+  marketingAffiliateId: string;
+  marketingAffiliateLinkId: string | null;
+  orderId: string;
+  customerId: string | null;
+  orderTotal: string;
+  commissionableAmount: string;
+  commissionRate: string;
+  commissionType: string;
+  commissionAmount: string;
+  currency: string | null;
+  status: string | null;
+  isFirstOrder: boolean | null;
+  notes: string | null;
+  rejectionReason: string | null;
+  approvedAt: Date | null;
+  approvedBy: string | null;
+  payoutId: string | null;
+  paidAt: Date | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
+
+export type MarketingAffiliateLink = {
+  marketingAffiliateLinkId: string;
+  marketingAffiliateId: string;
+  name: string | null;
+  shortCode: string;
+  destinationUrl: string;
+  productId: string | null;
+  productCategoryId: string | null;
+  campaignId: string | null;
+  utmSource: string | null;
+  utmMedium: string | null;
+  utmCampaign: string | null;
+  clickCount: number | null;
+  uniqueClickCount: number | null;
+  conversionCount: number | null;
+  revenue: string | null;
+  commission: string | null;
+  isActive: boolean | null;
+  lastClickedAt: Date | null;
+  expiresAt: Date | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
+
+export type MarketingAffiliatePayout = {
+  marketingAffiliatePayoutId: string;
+  marketingAffiliateId: string;
+  amount: string;
+  currency: string | null;
+  paymentMethod: string;
+  status: string | null;
+  paypalEmail: string | null;
+  paypalTransactionId: string | null;
+  bankDetails: unknown | null;
+  bankReference: string | null;
+  checkNumber: string | null;
+  storeCreditCode: string | null;
+  commissionsCount: number | null;
+  periodStart: string | null;
+  periodEnd: string | null;
+  notes: string | null;
+  failureReason: string | null;
+  processedAt: Date | null;
+  processedBy: string | null;
+  completedAt: Date | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
+
+export type MarketingEmailCampaign = {
+  marketingEmailCampaignId: string;
+  merchantId: string | null;
+  name: string;
+  subject: string;
+  preheader: string | null;
+  fromName: string | null;
+  fromEmail: string | null;
+  replyTo: string | null;
+  bodyHtml: string | null;
+  bodyText: string | null;
+  status: string | null;
+  campaignType: string | null;
+  templateId: string | null;
+  segmentIds: unknown[] | null;
+  tags: unknown[] | null;
+  scheduledAt: Date | null;
+  sentAt: Date | null;
+  totalRecipients: number | null;
+  sentCount: number | null;
+  deliveredCount: number | null;
+  openCount: number | null;
+  uniqueOpenCount: number | null;
+  clickCount: number | null;
+  uniqueClickCount: number | null;
+  bounceCount: number | null;
+  softBounceCount: number | null;
+  hardBounceCount: number | null;
+  unsubscribeCount: number | null;
+  complaintCount: number | null;
+  revenue: string | null;
+  conversionCount: number | null;
+  openRate: string | null;
+  clickRate: string | null;
+  abTestConfig: unknown | null;
+  winningVariant: string | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+  deletedAt: Date | null;
+};
+
+export type MarketingEmailCampaignLink = {
+  marketingEmailCampaignLinkId: string;
+  marketingEmailCampaignId: string;
+  originalUrl: string;
+  trackingUrl: string | null;
+  linkText: string | null;
+  position: number | null;
+  clickCount: number | null;
+  uniqueClickCount: number | null;
+  firstClickedAt: Date | null;
+  lastClickedAt: Date | null;
+  createdAt: Date | null;
+};
+
+export type MarketingEmailCampaignRecipient = {
+  marketingEmailCampaignRecipientId: string;
+  marketingEmailCampaignId: string;
+  customerId: string | null;
+  email: string;
+  firstName: string | null;
+  lastName: string | null;
+  status: string | null;
+  variant: string | null;
+  sentAt: Date | null;
+  deliveredAt: Date | null;
+  firstOpenedAt: Date | null;
+  lastOpenedAt: Date | null;
+  openCount: number | null;
+  firstClickedAt: Date | null;
+  lastClickedAt: Date | null;
+  clickCount: number | null;
+  bouncedAt: Date | null;
+  bounceType: string | null;
+  bounceReason: string | null;
+  unsubscribedAt: Date | null;
+  complainedAt: Date | null;
+  failureReason: string | null;
+  messageId: string | null;
+  ipAddress: string | null;
+  userAgent: string | null;
+  deviceType: string | null;
+  country: string | null;
+  city: string | null;
+  metadata: unknown | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
+
+export type MarketingEmailTemplate = {
+  marketingEmailTemplateId: string;
+  merchantId: string | null;
+  name: string;
+  slug: string | null;
+  category: string | null;
+  description: string | null;
+  subject: string | null;
+  preheader: string | null;
+  bodyHtml: string | null;
+  bodyText: string | null;
+  variables: unknown[] | null;
+  thumbnailUrl: string | null;
+  isDefault: boolean | null;
+  isActive: boolean | null;
+  usageCount: number | null;
+  lastUsedAt: Date | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+  deletedAt: Date | null;
+};
+
+export type MarketingProductRecommendation = {
+  marketingProductRecommendationId: string;
+  productId: string;
+  recommendedProductId: string;
+  recommendationType: string;
+  score: string | null;
+  rank: number | null;
+  purchaseCount: number | null;
+  viewCount: number | null;
+  clickCount: number | null;
+  conversionRate: string | null;
+  isActive: boolean | null;
+  isManual: boolean | null;
+  computedAt: Date | null;
+  expiresAt: Date | null;
+  metadata: unknown | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
+
 export type MembershipBenefit = {
   membershipBenefitId: string;
   name: string;
@@ -3870,33 +3917,33 @@ export type MembershipPlan = {
   name: string;
   code: string;
   description: string | null;
-  short_description: string | null;
-  is_active: boolean;
-  is_public: boolean;
-  is_default: boolean;
+  shortDescription: string | null;
+  isActive: boolean;
+  isPublic: boolean;
+  isDefault: boolean;
   priority: number | null;
   level: number | null;
-  trial_days: number | null;
+  trialDays: number | null;
   price: string;
-  sale_price: string | null;
-  setup_fee: string | null;
+  salePrice: string | null;
+  setupFee: string | null;
   currency: string;
-  billing_cycle: string;
-  billing_period: number | null;
-  max_members: number | null;
-  auto_renew: boolean;
+  billingCycle: string;
+  billingPeriod: number | null;
+  maxMembers: number | null;
+  autoRenew: boolean;
   duration: number | null;
-  grace_periods_allowed: number | null;
-  grace_period_days: number | null;
-  membership_image: string | null;
-  public_details: unknown | null;
-  private_meta: unknown | null;
-  visibility_rules: unknown | null;
-  availability_rules: unknown | null;
-  custom_fields: unknown | null;
-  created_at: Date;
-  updated_at: Date;
-  created_by: string | null;
+  gracePeriodsAllowed: number | null;
+  gracePeriodDays: number | null;
+  membershipImage: string | null;
+  publicDetails: unknown | null;
+  privateMeta: unknown | null;
+  visibilityRules: unknown | null;
+  availabilityRules: unknown | null;
+  customFields: unknown | null;
+  createdAt: Date;
+  updatedAt: Date;
+  createdBy: string | null;
 };
 
 export type MembershipPlanBenefit = {
@@ -4616,6 +4663,7 @@ export type Order = {
   parentOrderId: string | null;
   tags: string[] | null;
   metadata: Record<string, unknown> | null;
+  deletedAt: Date | null;
 };
 
 export type OrderAddress = {
@@ -4736,6 +4784,7 @@ export type OrderItem = {
   downloadExpiryDate: Date | null;
   downloadLimit: number | null;
   subscriptionInfo: unknown | null;
+  metadata: unknown | null;
 };
 
 export type OrderNote = {
@@ -4981,6 +5030,11 @@ export type PaymentGateway = {
   webhookSecret: string | null;
   apiEndpoint: string | null;
   supportedPaymentMethods: string;
+  supportedCurrencies: string[] | null;
+  processingFees: unknown | null;
+  checkoutSettings: unknown | null;
+  metadata: unknown | null;
+  deletedAt: Date | null;
 };
 
 export type PaymentMethod = {
@@ -5020,6 +5074,8 @@ export type PaymentMethodConfig = {
   countries: string[] | null;
   gatewayId: string | null;
   configuration: unknown | null;
+  metadata: unknown | null;
+  deletedAt: Date | null;
 };
 
 export type PaymentPlan = {
@@ -5056,6 +5112,14 @@ export type PaymentRefund = {
   reason: string | null;
   status: string;
   refundId: string | null;
+  paymentTransactionId: string | null;
+  externalRefundId: string | null;
+  currency: string | null;
+  gatewayResponse: unknown | null;
+  errorCode: string | null;
+  errorMessage: string | null;
+  processedAt: Date | null;
+  metadata: unknown | null;
 };
 
 export type PaymentReport = {
@@ -5140,6 +5204,18 @@ export type PaymentTransaction = {
   errorCode: string | null;
   errorMessage: string | null;
   gatewayResponse: unknown | null;
+  customerId: string | null;
+  paymentMethodId: string | null;
+  paymentGatewayId: string | null;
+  externalTransactionId: string | null;
+  currency: string | null;
+  paymentMethodDetails: unknown | null;
+  refundedAmount: string | null;
+  metadata: unknown | null;
+  customerIp: string | null;
+  authorizedAt: Date | null;
+  capturedAt: Date | null;
+  deletedAt: Date | null;
 };
 
 export type PaymentWebhook = {
@@ -5782,26 +5858,6 @@ export type ProductQaVote = {
   isHelpful: boolean;
   ipAddress: string | null;
   userAgent: string | null;
-};
-
-export type ProductRecommendation = {
-  productRecommendationId: string;
-  productId: string;
-  recommendedProductId: string;
-  recommendationType: string;
-  score: string | null;
-  rank: number | null;
-  purchaseCount: number | null;
-  viewCount: number | null;
-  clickCount: number | null;
-  conversionRate: string | null;
-  isActive: boolean | null;
-  isManual: boolean | null;
-  computedAt: Date | null;
-  expiresAt: Date | null;
-  metadata: unknown | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
 };
 
 export type ProductRelated = {

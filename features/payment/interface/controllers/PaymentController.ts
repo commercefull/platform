@@ -8,6 +8,7 @@ import { InitiatePaymentCommand, InitiatePaymentUseCase } from '../../applicatio
 import { ProcessPaymentRefundCommand, ProcessPaymentRefundUseCase } from '../../application/useCases/ProcessRefund';
 import { GetTransactionCommand, GetTransactionUseCase, ListTransactionsCommand, ListTransactionsUseCase } from '../../application/useCases/GetTransactions';
 import { TransactionStatus } from '../../domain/valueObjects/PaymentStatus';
+import { query, queryOne } from '../../../../libs/db';
 
 function respond(req: Request, res: Response, data: any, statusCode: number = 200): void {
   res.status(statusCode).json({ success: true, data });
@@ -178,5 +179,292 @@ export const getRefunds = async (req: Request, res: Response): Promise<void> => 
   } catch (error: any) {
     console.error('Error getting refunds:', error);
     respondError(req, res, error.message || 'Failed to get refunds', 500);
+  }
+};
+
+// ============================================================================
+// Gateway Management Endpoints
+// ============================================================================
+
+export const listGateways = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const merchantId = (req as any).user?.merchantId || (req as any).user?._id;
+    if (!merchantId) {
+      respondError(req, res, 'Authentication required', 401);
+      return;
+    }
+
+    const rows = await query<Record<string, any>[]>(
+      'SELECT * FROM "paymentGateway" WHERE "merchantId" = $1 AND "deletedAt" IS NULL ORDER BY "name" ASC',
+      [merchantId]
+    );
+    respond(req, res, rows || []);
+  } catch (error: any) {
+    console.error('Error listing gateways:', error);
+    respondError(req, res, error.message || 'Failed to list gateways', 500);
+  }
+};
+
+export const getGateway = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { gatewayId } = req.params;
+    const gateway = await queryOne<Record<string, any>>(
+      'SELECT * FROM "paymentGateway" WHERE "paymentGatewayId" = $1 AND "deletedAt" IS NULL',
+      [gatewayId]
+    );
+    
+    if (!gateway) {
+      respondError(req, res, 'Gateway not found', 404);
+      return;
+    }
+    respond(req, res, gateway);
+  } catch (error: any) {
+    console.error('Error getting gateway:', error);
+    respondError(req, res, error.message || 'Failed to get gateway', 500);
+  }
+};
+
+export const createGateway = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const merchantId = (req as any).user?.merchantId || (req as any).user?._id;
+    if (!merchantId) {
+      respondError(req, res, 'Authentication required', 401);
+      return;
+    }
+
+    const { name, provider, isActive, isDefault, isTestMode, apiKey, apiSecret, publicKey, webhookSecret, apiEndpoint, supportedPaymentMethods } = req.body;
+    
+    if (!name || !provider) {
+      respondError(req, res, 'Name and provider are required', 400);
+      return;
+    }
+
+    const now = new Date().toISOString();
+    
+    const result = await queryOne<Record<string, any>>(
+      `INSERT INTO "paymentGateway" (
+        "merchantId", name, provider, "isActive", "isDefault", "isTestMode",
+        "apiKey", "apiSecret", "publicKey", "webhookSecret", "apiEndpoint", "supportedPaymentMethods",
+        "createdAt", "updatedAt"
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+      RETURNING *`,
+      [
+        merchantId, name, provider, isActive ?? true, isDefault ?? false, isTestMode ?? false,
+        apiKey, apiSecret, publicKey, webhookSecret, apiEndpoint, supportedPaymentMethods || 'creditCard',
+        now, now
+      ]
+    );
+
+    respond(req, res, result, 201);
+  } catch (error: any) {
+    console.error('Error creating gateway:', error);
+    respondError(req, res, error.message || 'Failed to create gateway', 500);
+  }
+};
+
+export const updateGateway = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { gatewayId } = req.params;
+    const updates = req.body;
+    
+    const now = new Date().toISOString();
+    
+    // Build dynamic update
+    const allowedFields = ['name', 'provider', 'isActive', 'isDefault', 'isTestMode', 'apiKey', 'apiSecret', 'publicKey', 'webhookSecret', 'apiEndpoint', 'supportedPaymentMethods'];
+    const setStatements: string[] = ['"updatedAt" = $1'];
+    const values: any[] = [now];
+    let paramIndex = 2;
+    
+    for (const field of allowedFields) {
+      if (updates[field] !== undefined) {
+        setStatements.push(`"${field}" = $${paramIndex++}`);
+        values.push(updates[field]);
+      }
+    }
+    
+    values.push(gatewayId);
+    
+    const result = await queryOne<Record<string, any>>(
+      `UPDATE "paymentGateway" SET ${setStatements.join(', ')} WHERE "paymentGatewayId" = $${paramIndex} AND "deletedAt" IS NULL RETURNING *`,
+      values
+    );
+
+    if (!result) {
+      respondError(req, res, 'Gateway not found', 404);
+      return;
+    }
+    respond(req, res, result);
+  } catch (error: any) {
+    console.error('Error updating gateway:', error);
+    respondError(req, res, error.message || 'Failed to update gateway', 500);
+  }
+};
+
+export const deleteGateway = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { gatewayId } = req.params;
+    const now = new Date().toISOString();
+    
+    await query(
+      'UPDATE "paymentGateway" SET "deletedAt" = $1 WHERE "paymentGatewayId" = $2',
+      [now, gatewayId]
+    );
+
+    respond(req, res, { success: true });
+  } catch (error: any) {
+    console.error('Error deleting gateway:', error);
+    respondError(req, res, error.message || 'Failed to delete gateway', 500);
+  }
+};
+
+// ============================================================================
+// Method Config Management Endpoints
+// ============================================================================
+
+export const listMethodConfigs = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const merchantId = (req as any).user?.merchantId || (req as any).user?._id;
+    if (!merchantId) {
+      respondError(req, res, 'Authentication required', 401);
+      return;
+    }
+
+    const rows = await query<Record<string, any>[]>(
+      'SELECT * FROM "paymentMethodConfig" WHERE "merchantId" = $1 AND "deletedAt" IS NULL ORDER BY "displayOrder" ASC',
+      [merchantId]
+    );
+    respond(req, res, rows || []);
+  } catch (error: any) {
+    console.error('Error listing method configs:', error);
+    respondError(req, res, error.message || 'Failed to list method configs', 500);
+  }
+};
+
+export const getMethodConfig = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { methodConfigId } = req.params;
+    const config = await queryOne<Record<string, any>>(
+      'SELECT * FROM "paymentMethodConfig" WHERE "paymentMethodConfigId" = $1 AND "deletedAt" IS NULL',
+      [methodConfigId]
+    );
+    
+    if (!config) {
+      respondError(req, res, 'Method config not found', 404);
+      return;
+    }
+    respond(req, res, config);
+  } catch (error: any) {
+    console.error('Error getting method config:', error);
+    respondError(req, res, error.message || 'Failed to get method config', 500);
+  }
+};
+
+export const createMethodConfig = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const merchantId = (req as any).user?.merchantId || (req as any).user?._id;
+    if (!merchantId) {
+      respondError(req, res, 'Authentication required', 401);
+      return;
+    }
+
+    const { paymentMethod, isEnabled, displayName, description, processingFee, minimumAmount, maximumAmount, displayOrder, icon, supportedCurrencies, countries, gatewayId, configuration } = req.body;
+    
+    if (!paymentMethod) {
+      respondError(req, res, 'Payment method is required', 400);
+      return;
+    }
+
+    const now = new Date().toISOString();
+    
+    const result = await queryOne<Record<string, any>>(
+      `INSERT INTO "paymentMethodConfig" (
+        "merchantId", "paymentMethod", "isEnabled", "displayName", description, "processingFee",
+        "minimumAmount", "maximumAmount", "displayOrder", icon, "supportedCurrencies", countries,
+        "gatewayId", configuration, "createdAt", "updatedAt"
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+      RETURNING *`,
+      [
+        merchantId, paymentMethod, isEnabled ?? true, displayName, description, processingFee,
+        minimumAmount, maximumAmount, displayOrder ?? 0, icon, supportedCurrencies || ['USD'], countries,
+        gatewayId, configuration ? JSON.stringify(configuration) : null, now, now
+      ]
+    );
+
+    respond(req, res, result, 201);
+  } catch (error: any) {
+    console.error('Error creating method config:', error);
+    respondError(req, res, error.message || 'Failed to create method config', 500);
+  }
+};
+
+export const updateMethodConfig = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { methodConfigId } = req.params;
+    const updates = req.body;
+    
+    const now = new Date().toISOString();
+    
+    // Build dynamic update
+    const allowedFields = ['paymentMethod', 'isEnabled', 'displayName', 'description', 'processingFee', 'minimumAmount', 'maximumAmount', 'displayOrder', 'icon', 'supportedCurrencies', 'countries', 'gatewayId', 'configuration'];
+    const setStatements: string[] = ['"updatedAt" = $1'];
+    const values: any[] = [now];
+    let paramIndex = 2;
+    
+    for (const field of allowedFields) {
+      if (updates[field] !== undefined) {
+        setStatements.push(`"${field}" = $${paramIndex++}`);
+        values.push(field === 'configuration' ? JSON.stringify(updates[field]) : updates[field]);
+      }
+    }
+    
+    values.push(methodConfigId);
+    
+    const result = await queryOne<Record<string, any>>(
+      `UPDATE "paymentMethodConfig" SET ${setStatements.join(', ')} WHERE "paymentMethodConfigId" = $${paramIndex} AND "deletedAt" IS NULL RETURNING *`,
+      values
+    );
+
+    if (!result) {
+      respondError(req, res, 'Method config not found', 404);
+      return;
+    }
+    respond(req, res, result);
+  } catch (error: any) {
+    console.error('Error updating method config:', error);
+    respondError(req, res, error.message || 'Failed to update method config', 500);
+  }
+};
+
+export const deleteMethodConfig = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { methodConfigId } = req.params;
+    const now = new Date().toISOString();
+    
+    await query(
+      'UPDATE "paymentMethodConfig" SET "deletedAt" = $1 WHERE "paymentMethodConfigId" = $2',
+      [now, methodConfigId]
+    );
+
+    respond(req, res, { success: true });
+  } catch (error: any) {
+    console.error('Error deleting method config:', error);
+    respondError(req, res, error.message || 'Failed to delete method config', 500);
+  }
+};
+
+export const deleteTransaction = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { transactionId } = req.params;
+    const now = new Date().toISOString();
+    
+    await query(
+      'UPDATE "paymentTransaction" SET "deletedAt" = $1 WHERE "paymentTransactionId" = $2',
+      [now, transactionId]
+    );
+
+    respond(req, res, { success: true });
+  } catch (error: any) {
+    console.error('Error deleting transaction:', error);
+    respondError(req, res, error.message || 'Failed to delete transaction', 500);
   }
 };

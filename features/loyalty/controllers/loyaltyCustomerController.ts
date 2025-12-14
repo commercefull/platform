@@ -1,56 +1,80 @@
-import { Request, Response } from 'express';
+/**
+ * Loyalty Customer Controller
+ * 
+ * Handles public and customer-facing loyalty endpoints.
+ */
 
-// Define interface for authenticated user request
+import { Request, Response } from 'express';
+import loyaltyRepo from '../repos/loyaltyRepo';
+
+// ============================================================================
+// Types
+// ============================================================================
+
 interface UserRequest extends Request {
   user?: {
     id?: string;
-    _id?: string;
-    role?: string;
+    customerId?: string;
   };
 }
-import { LoyaltyRepo } from '../repos/loyaltyRepo';
 
-// Create a single instance of the repository to be shared across handlers
-const loyaltyRepo = new LoyaltyRepo();
+// ============================================================================
+// Helper Functions
+// ============================================================================
 
-// Get publicly available loyalty tiers
+function respond(res: Response, data: unknown, statusCode: number = 200): void {
+  res.status(statusCode).json({ success: true, data });
+}
+
+function respondWithMessage(res: Response, data: unknown, message: string, statusCode: number = 200): void {
+  res.status(statusCode).json({ success: true, data, message });
+}
+
+function respondError(res: Response, message: string, statusCode: number = 500): void {
+  res.status(statusCode).json({ success: false, message });
+}
+
+function getCustomerId(req: UserRequest): string | null {
+  return req.user?.customerId || req.user?.id || null;
+}
+
+// ============================================================================
+// Public Endpoints
+// ============================================================================
+
+/**
+ * Get publicly available loyalty tiers
+ */
 export const getPublicTiers = async (req: Request, res: Response): Promise<void> => {
   try {
-    // Only get active tiers for public API
     const tiers = await loyaltyRepo.findAllTiers(false);
 
     // Return limited tier information for public view
     const publicTiers = tiers.map(tier => ({
-      id: tier.id,
+      id: tier.loyaltyTierId,
       name: tier.name,
       description: tier.description,
       pointsThreshold: tier.pointsThreshold,
       benefits: tier.benefits
     }));
 
-    res.status(200).json({
-      success: true,
-      data: publicTiers
-    });
+    respond(res, publicTiers);
   } catch (error) {
     console.error('Error fetching public loyalty tiers:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch loyalty tiers',
-      error: (error as Error).message
-    });
+    respondError(res, 'Failed to fetch loyalty tiers');
   }
 };
 
-// Get publicly available loyalty rewards
+/**
+ * Get publicly available loyalty rewards
+ */
 export const getPublicRewards = async (req: Request, res: Response): Promise<void> => {
   try {
-    // Only get active rewards for public API
     const rewards = await loyaltyRepo.findAllRewards(false);
 
     // Return limited reward information for public view
     const publicRewards = rewards.map(reward => ({
-      id: reward.id,
+      id: reward.loyaltyRewardId,
       name: reward.name,
       description: reward.description,
       pointsCost: reward.pointsCost,
@@ -58,213 +82,161 @@ export const getPublicRewards = async (req: Request, res: Response): Promise<voi
       expiresAt: reward.expiresAt
     }));
 
-    res.status(200).json({
-      success: true,
-      data: publicRewards
-    });
+    respond(res, publicRewards);
   } catch (error) {
     console.error('Error fetching public loyalty rewards:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch loyalty rewards',
-      error: (error as Error).message
-    });
+    respondError(res, 'Failed to fetch loyalty rewards');
   }
 };
 
-// Get customer's loyalty status and points
+// ============================================================================
+// Authenticated Customer Endpoints
+// ============================================================================
+
+/**
+ * Get customer's loyalty status and points
+ */
 export const getMyLoyaltyStatus = async (req: UserRequest, res: Response): Promise<void> => {
   try {
-    // Customer ID would come from authenticated user session
-    const customerId = req.user?.id;
+    const customerId = getCustomerId(req);
 
     if (!customerId) {
-      res.status(401).json({
-        success: false,
-        message: 'Authentication required'
-      });
+      respondError(res, 'Authentication required', 401);
       return;
     }
 
-    const points = await loyaltyRepo.findCustomerPoints(customerId);
+    const pointsData = await loyaltyRepo.findCustomerPointsWithTier(customerId);
 
-    if (!points) {
+    if (!pointsData) {
       // Return default values for new customers
-      res.status(200).json({
-        success: true,
-        data: {
-          currentPoints: 0,
-          lifetimePoints: 0,
-          tier: {
-            name: 'Not Enrolled',
-            description: 'Enroll in our loyalty program to start earning points',
-            pointsThreshold: 0
-          }
+      respond(res, {
+        currentPoints: 0,
+        lifetimePoints: 0,
+        tier: {
+          name: 'Not Enrolled',
+          description: 'Enroll in our loyalty program to start earning points',
+          pointsThreshold: 0
         }
       });
       return;
     }
 
-    // Get the customer's tier
-    const tier = await loyaltyRepo.findTierById(points.tierId);
+    const { points, tier } = pointsData;
 
-    // Return customer-friendly response
-    res.status(200).json({
-      success: true,
-      data: {
-        currentPoints: points.currentPoints,
-        lifetimePoints: points.lifetimePoints,
-        lastActivity: points.lastActivity,
-        expiryDate: points.expiryDate,
-        tier: tier ? {
-          name: tier.name,
-          description: tier.description,
-          pointsThreshold: tier.pointsThreshold,
-          benefits: tier.benefits
-        } : undefined,
-        pointsToNextTier: tier ? calculatePointsToNextTier(points.lifetimePoints, tier) : 0
+    respond(res, {
+      currentPoints: points.currentPoints,
+      lifetimePoints: points.lifetimePoints,
+      lastActivity: points.lastActivity,
+      expiryDate: points.expiryDate,
+      tier: {
+        name: tier.name,
+        description: tier.description,
+        pointsThreshold: tier.pointsThreshold,
+        benefits: tier.benefits
       }
     });
   } catch (error) {
     console.error('Error fetching customer loyalty status:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch loyalty status',
-      error: (error as Error).message
-    });
+    respondError(res, 'Failed to fetch loyalty status');
   }
 };
 
-// Get my loyalty transactions
+/**
+ * Get my loyalty transactions
+ */
 export const getMyTransactions = async (req: UserRequest, res: Response): Promise<void> => {
   try {
-    // Customer ID would come from authenticated user session
-    const customerId = req.user?.id;
+    const customerId = getCustomerId(req);
 
     if (!customerId) {
-      res.status(401).json({
-        success: false,
-        message: 'Authentication required'
-      });
+      respondError(res, 'Authentication required', 401);
       return;
     }
 
     const limit = parseInt(req.query.limit as string) || 20;
-    const offset = parseInt(req.query.offset as string) || 0;
-
-    const transactions = await loyaltyRepo.getCustomerTransactions(customerId, limit, offset);
+    const transactions = await loyaltyRepo.findCustomerTransactions(customerId, limit);
 
     // Format transactions for customer view
     const formattedTransactions = transactions.map(transaction => ({
-      id: transaction.id,
+      id: transaction.loyaltyTransactionId,
       action: transaction.action,
       points: transaction.points,
       description: transaction.description,
       date: transaction.createdAt
     }));
 
-    res.status(200).json({
+    res.json({
       success: true,
       data: formattedTransactions,
-      pagination: {
-        limit,
-        offset
-      }
+      pagination: { limit }
     });
   } catch (error) {
     console.error('Error fetching customer transactions:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch loyalty transactions',
-      error: (error as Error).message
-    });
+    respondError(res, 'Failed to fetch loyalty transactions');
   }
 };
 
-// Redeem points for a reward
+/**
+ * Redeem points for a reward
+ */
 export const redeemReward = async (req: UserRequest, res: Response): Promise<void> => {
   try {
-    // Customer ID would come from authenticated user session
-    const customerId = req.user?.id;
+    const customerId = getCustomerId(req);
 
     if (!customerId) {
-      res.status(401).json({
-        success: false,
-        message: 'Authentication required'
-      });
+      respondError(res, 'Authentication required', 401);
       return;
     }
 
     const { rewardId } = req.body;
 
     if (!rewardId) {
-      res.status(400).json({
-        success: false,
-        message: 'Reward ID is required'
-      });
+      respondError(res, 'Reward ID is required', 400);
       return;
     }
 
     const redemption = await loyaltyRepo.redeemReward(customerId, rewardId);
 
-    res.status(200).json({
-      success: true,
-      data: {
-        redemptionCode: redemption.redemptionCode,
-        pointsSpent: redemption.pointsSpent,
-        expiresAt: redemption.expiresAt
-      },
-      message: 'Reward redeemed successfully'
-    });
+    respondWithMessage(res, {
+      redemptionCode: redemption.redemptionCode,
+      pointsSpent: redemption.pointsSpent,
+      expiresAt: redemption.expiresAt
+    }, 'Reward redeemed successfully');
   } catch (error) {
     console.error('Error redeeming reward:', error);
+    const errorMessage = (error as Error).message;
 
-    // Provide friendly error messages for common issues
-    if ((error as Error).message.includes('Insufficient points')) {
-      res.status(400).json({
-        success: false,
-        message: (error as Error).message
-      });
-    } else if ((error as Error).message.includes('not active')) {
-      res.status(400).json({
-        success: false,
-        message: 'This reward is no longer available'
-      });
+    if (errorMessage.includes('Insufficient points')) {
+      respondError(res, errorMessage, 400);
+    } else if (errorMessage.includes('not active')) {
+      respondError(res, 'This reward is no longer available', 400);
     } else {
-      res.status(500).json({
-        success: false,
-        message: 'Failed to redeem reward',
-        error: (error as Error).message
-      });
+      respondError(res, 'Failed to redeem reward');
     }
   }
 };
 
-// Get my active redemptions
+/**
+ * Get my active redemptions
+ */
 export const getMyRedemptions = async (req: UserRequest, res: Response): Promise<void> => {
   try {
-    // Customer ID would come from authenticated user session
-    const customerId = req.user?.id;
+    const customerId = getCustomerId(req);
 
     if (!customerId) {
-      res.status(401).json({
-        success: false,
-        message: 'Authentication required'
-      });
+      respondError(res, 'Authentication required', 401);
       return;
     }
 
-    // Default to only active (pending) redemptions
-    const status = req.query.status as string || 'pending';
-
-    const redemptions = await loyaltyRepo.getCustomerRedemptions(customerId, status);
+    const limit = parseInt(req.query.limit as string) || 50;
+    const redemptions = await loyaltyRepo.findCustomerRedemptions(customerId, limit);
 
     // Add reward details to each redemption
     const detailedRedemptions = await Promise.all(
       redemptions.map(async (redemption) => {
         const reward = await loyaltyRepo.findRewardById(redemption.rewardId);
         return {
-          id: redemption.id,
+          id: redemption.loyaltyRedemptionId,
           redemptionCode: redemption.redemptionCode,
           pointsSpent: redemption.pointsSpent,
           status: redemption.status,
@@ -278,28 +250,9 @@ export const getMyRedemptions = async (req: UserRequest, res: Response): Promise
       })
     );
 
-    res.status(200).json({
-      success: true,
-      data: detailedRedemptions
-    });
+    respond(res, detailedRedemptions);
   } catch (error) {
     console.error('Error fetching customer redemptions:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch redemptions',
-      error: (error as Error).message
-    });
-  }
-};
-
-// Helper method to calculate points needed for the next tier
-const calculatePointsToNextTier = (currentLifetimePoints: number, currentTier: any): number => {
-  try {
-    // This would need to be implemented based on the tiers in the system
-    // For now, a simplified version that assumes tiers are ordered
-    return 0; // Placeholder
-  } catch (error) {
-    console.error('Error calculating points to next tier:', error);
-    return 0;
+    respondError(res, 'Failed to fetch redemptions');
   }
 };

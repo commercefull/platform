@@ -38,4 +38,3 @@ router.post('/auth/forgot-password', requestPasswordReset);
 router.post('/auth/reset-password', resetPassword);
 
 export const identityBusinessRouter = router;
-export default router;

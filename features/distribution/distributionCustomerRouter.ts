@@ -14,35 +14,35 @@ const router = express.Router();
 // These provide limited access compared to admin routes
 
 // Get active distribution centers with limited information
-router.get("/centers", getActiveDistributionCenters);
+router.get("/distribution/centers", getActiveDistributionCenters);
 
 // Get active shipping methods with limited information
-router.get("/shipping-methods", getActiveShippingMethods);
+router.get("/distribution/shipping-methods", getActiveShippingMethods);
 
 // Get shipping methods available for a specific address (requires country, optional region and postalCode)
-router.get("/shipping-methods/available", getAvailableShippingMethods);
+router.get("/distribution/shipping-methods/available", getAvailableShippingMethods);
 
 // Get tracking information for an order
-router.get("/tracking/:orderId", getOrderTracking);
+router.get("/distribution/tracking/:orderId", getOrderTracking);
 
 // Store Location routes (Click & Collect)
-router.get("/locations/nearby", pickupController.findNearbyLocations);
-router.get("/locations/pickup", pickupController.getPickupLocations);
-router.get("/locations/:id", pickupController.getLocationDetails);
+router.get("/distribution/locations/nearby", pickupController.findNearbyLocations);
+router.get("/distribution/locations/pickup", pickupController.getPickupLocations);
+router.get("/distribution/locations/:id", pickupController.getLocationDetails);
 
 // Pickup Order routes
-router.post("/pickups", pickupController.createPickupOrder);
-router.get("/pickups/mine", pickupController.getMyPickupOrders);
-router.get("/pickups/mine/:id", pickupController.getMyPickupOrder);
-router.post("/pickups/mine/:id/cancel", pickupController.cancelMyPickup);
-router.post("/pickups/:id/verify", pickupController.verifyPickupCode);
+router.post("/distribution/pickups", pickupController.createPickupOrder);
+router.get("/distribution/pickups/mine", pickupController.getMyPickupOrders);
+router.get("/distribution/pickups/mine/:id", pickupController.getMyPickupOrder);
+router.post("/distribution/pickups/mine/:id/cancel", pickupController.cancelMyPickup);
+router.post("/distribution/pickups/:id/verify", pickupController.verifyPickupCode);
 
 // Pre-Order routes
-router.get("/pre-orders/product/:productId", preOrderController.getProductPreOrder);
-router.get("/pre-orders/product/:productId/:productVariantId", preOrderController.getProductPreOrder);
-router.post("/pre-orders/reserve", preOrderController.createPreOrderReservation);
-router.get("/pre-orders/mine", preOrderController.getMyReservations);
-router.get("/pre-orders/mine/:id", preOrderController.getMyReservation);
-router.post("/pre-orders/mine/:id/cancel", preOrderController.cancelMyReservation);
+router.get("/distribution/pre-orders/product/:productId", preOrderController.getProductPreOrder);
+router.get("/distribution/pre-orders/product/:productId/:productVariantId", preOrderController.getProductPreOrder);
+router.post("/distribution/pre-orders/reserve", preOrderController.createPreOrderReservation);
+router.get("/distribution/pre-orders/mine", preOrderController.getMyReservations);
+router.get("/distribution/pre-orders/mine/:id", preOrderController.getMyReservation);
+router.post("/distribution/pre-orders/mine/:id/cancel", preOrderController.cancelMyReservation);
 
 export const distributionCustomerRouter = router;

@@ -182,7 +182,7 @@ export interface ReferralReward {
 
 export async function getAffiliate(affiliateId: string): Promise<Affiliate | null> {
   const row = await queryOne<Record<string, any>>(
-    'SELECT * FROM "affiliate" WHERE "affiliateId" = $1 AND "deletedAt" IS NULL',
+    'SELECT * FROM "marketingAffiliate" WHERE "marketingAffiliateId" = $1 AND "deletedAt" IS NULL',
     [affiliateId]
   );
   return row ? mapToAffiliate(row) : null;
@@ -190,7 +190,7 @@ export async function getAffiliate(affiliateId: string): Promise<Affiliate | nul
 
 export async function getAffiliateByCode(affiliateCode: string): Promise<Affiliate | null> {
   const row = await queryOne<Record<string, any>>(
-    'SELECT * FROM "affiliate" WHERE "affiliateCode" = $1 AND "deletedAt" IS NULL',
+    'SELECT * FROM "marketingAffiliate" WHERE "affiliateCode" = $1 AND "deletedAt" IS NULL',
     [affiliateCode]
   );
   return row ? mapToAffiliate(row) : null;
@@ -198,7 +198,7 @@ export async function getAffiliateByCode(affiliateCode: string): Promise<Affilia
 
 export async function getAffiliateByEmail(email: string): Promise<Affiliate | null> {
   const row = await queryOne<Record<string, any>>(
-    'SELECT * FROM "affiliate" WHERE "email" = $1 AND "deletedAt" IS NULL',
+    'SELECT * FROM "marketingAffiliate" WHERE "email" = $1 AND "deletedAt" IS NULL',
     [email]
   );
   return row ? mapToAffiliate(row) : null;
@@ -222,7 +222,7 @@ export async function getAffiliates(
   }
 
   const countResult = await queryOne<{ count: string }>(
-    `SELECT COUNT(*) as count FROM "affiliate" WHERE ${whereClause}`,
+    `SELECT COUNT(*) as count FROM "marketingAffiliate" WHERE ${whereClause}`,
     params
   );
 
@@ -230,7 +230,7 @@ export async function getAffiliates(
   const offset = pagination?.offset || 0;
 
   const rows = await query<Record<string, any>[]>(
-    `SELECT * FROM "affiliate" WHERE ${whereClause} 
+    `SELECT * FROM "marketingAffiliate" WHERE ${whereClause} 
      ORDER BY "createdAt" DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
     [...params, limit, offset]
   );
@@ -246,13 +246,13 @@ export async function saveAffiliate(affiliate: Partial<Affiliate> & { email: str
 
   if (affiliate.affiliateId) {
     await query(
-      `UPDATE "affiliate" SET
+      `UPDATE "marketingAffiliate" SET
         "firstName" = $1, "lastName" = $2, "companyName" = $3, "website" = $4,
         "socialMedia" = $5, "status" = $6, "tier" = $7, "commissionRate" = $8,
         "commissionType" = $9, "cookieDurationDays" = $10, "paymentMethod" = $11,
         "paypalEmail" = $12, "bankDetails" = $13, "minimumPayout" = $14, "bio" = $15,
         "categories" = $16, "updatedAt" = $17
-      WHERE "affiliateId" = $18`,
+      WHERE "marketingAffiliateId" = $18`,
       [
         affiliate.firstName, affiliate.lastName, affiliate.companyName, affiliate.website,
         affiliate.socialMedia, affiliate.status || 'pending', affiliate.tier || 'standard',
@@ -270,7 +270,7 @@ export async function saveAffiliate(affiliate: Partial<Affiliate> & { email: str
     const code = affiliate.affiliateCode || generateAffiliateCode();
     
     const result = await queryOne<Record<string, any>>(
-      `INSERT INTO "affiliate" (
+      `INSERT INTO "marketingAffiliate" (
         "customerId", "email", "firstName", "lastName", "companyName", "website",
         "socialMedia", "affiliateCode", "status", "tier", "commissionRate", "commissionType",
         "cookieDurationDays", "minimumPayout", "currency", "bio", "categories",
@@ -294,37 +294,37 @@ export async function saveAffiliate(affiliate: Partial<Affiliate> & { email: str
 export async function approveAffiliate(affiliateId: string, approvedBy: string): Promise<void> {
   const now = new Date().toISOString();
   await query(
-    `UPDATE "affiliate" SET "status" = 'active', "approvedAt" = $1, "approvedBy" = $2, "updatedAt" = $1
-     WHERE "affiliateId" = $3`,
+    `UPDATE "marketingAffiliate" SET "status" = 'active', "approvedAt" = $1, "approvedBy" = $2, "updatedAt" = $1
+     WHERE "marketingAffiliateId" = $3`,
     [now, approvedBy, affiliateId]
   );
 }
 
 export async function rejectAffiliate(affiliateId: string, reason: string): Promise<void> {
   await query(
-    `UPDATE "affiliate" SET "status" = 'rejected', "rejectionReason" = $1, "updatedAt" = $2
-     WHERE "affiliateId" = $3`,
+    `UPDATE "marketingAffiliate" SET "status" = 'rejected', "rejectionReason" = $1, "updatedAt" = $2
+     WHERE "marketingAffiliateId" = $3`,
     [reason, new Date().toISOString(), affiliateId]
   );
 }
 
 export async function suspendAffiliate(affiliateId: string): Promise<void> {
   await query(
-    `UPDATE "affiliate" SET "status" = 'suspended', "updatedAt" = $1 WHERE "affiliateId" = $2`,
+    `UPDATE "marketingAffiliate" SET "status" = 'suspended', "updatedAt" = $1 WHERE "marketingAffiliateId" = $2`,
     [new Date().toISOString(), affiliateId]
   );
 }
 
 export async function updateAffiliateStats(affiliateId: string): Promise<void> {
   await query(
-    `UPDATE "affiliate" SET
-      "totalClicks" = (SELECT COALESCE(SUM("clickCount"), 0) FROM "affiliateLink" WHERE "affiliateId" = $1),
-      "totalConversions" = (SELECT COUNT(*) FROM "affiliateCommission" WHERE "affiliateId" = $1 AND "status" != 'rejected'),
-      "lifetimeEarnings" = (SELECT COALESCE(SUM("commissionAmount"), 0) FROM "affiliateCommission" WHERE "affiliateId" = $1 AND "status" IN ('approved', 'paid')),
-      "pendingBalance" = (SELECT COALESCE(SUM("commissionAmount"), 0) FROM "affiliateCommission" WHERE "affiliateId" = $1 AND "status" = 'pending'),
-      "availableBalance" = (SELECT COALESCE(SUM("commissionAmount"), 0) FROM "affiliateCommission" WHERE "affiliateId" = $1 AND "status" = 'approved'),
+    `UPDATE "marketingAffiliate" SET
+      "totalClicks" = (SELECT COALESCE(SUM("clickCount"), 0) FROM "marketingAffiliateLink" WHERE "marketingAffiliateId" = $1),
+      "totalConversions" = (SELECT COUNT(*) FROM "marketingAffiliateCommission" WHERE "marketingAffiliateId" = $1 AND "status" != 'rejected'),
+      "lifetimeEarnings" = (SELECT COALESCE(SUM("commissionAmount"), 0) FROM "marketingAffiliateCommission" WHERE "marketingAffiliateId" = $1 AND "status" IN ('approved', 'paid')),
+      "pendingBalance" = (SELECT COALESCE(SUM("commissionAmount"), 0) FROM "marketingAffiliateCommission" WHERE "marketingAffiliateId" = $1 AND "status" = 'pending'),
+      "availableBalance" = (SELECT COALESCE(SUM("commissionAmount"), 0) FROM "marketingAffiliateCommission" WHERE "marketingAffiliateId" = $1 AND "status" = 'approved'),
       "updatedAt" = $2
-    WHERE "affiliateId" = $1`,
+    WHERE "marketingAffiliateId" = $1`,
     [affiliateId, new Date().toISOString()]
   );
 }
@@ -335,7 +335,7 @@ export async function updateAffiliateStats(affiliateId: string): Promise<void> {
 
 export async function getAffiliateLink(affiliateLinkId: string): Promise<AffiliateLink | null> {
   const row = await queryOne<Record<string, any>>(
-    'SELECT * FROM "affiliateLink" WHERE "affiliateLinkId" = $1',
+    'SELECT * FROM "marketingAffiliateLink" WHERE "affiliateLinkId" = $1',
     [affiliateLinkId]
   );
   return row ? mapToAffiliateLink(row) : null;
@@ -343,7 +343,7 @@ export async function getAffiliateLink(affiliateLinkId: string): Promise<Affilia
 
 export async function getAffiliateLinkByCode(shortCode: string): Promise<AffiliateLink | null> {
   const row = await queryOne<Record<string, any>>(
-    'SELECT * FROM "affiliateLink" WHERE "shortCode" = $1',
+    'SELECT * FROM "marketingAffiliateLink" WHERE "shortCode" = $1',
     [shortCode]
   );
   return row ? mapToAffiliateLink(row) : null;
@@ -351,7 +351,7 @@ export async function getAffiliateLinkByCode(shortCode: string): Promise<Affilia
 
 export async function getAffiliateLinks(affiliateId: string): Promise<AffiliateLink[]> {
   const rows = await query<Record<string, any>[]>(
-    'SELECT * FROM "affiliateLink" WHERE "affiliateId" = $1 ORDER BY "createdAt" DESC',
+    'SELECT * FROM "marketingAffiliateLink" WHERE "marketingAffiliateId" = $1 ORDER BY "createdAt" DESC',
     [affiliateId]
   );
   return (rows || []).map(mapToAffiliateLink);
@@ -365,7 +365,7 @@ export async function saveAffiliateLink(link: Partial<AffiliateLink> & {
 
   if (link.affiliateLinkId) {
     await query(
-      `UPDATE "affiliateLink" SET
+      `UPDATE "marketingAffiliateLink" SET
         "name" = $1, "destinationUrl" = $2, "productId" = $3, "productCategoryId" = $4,
         "utmSource" = $5, "utmMedium" = $6, "utmCampaign" = $7, "isActive" = $8, "updatedAt" = $9
       WHERE "affiliateLinkId" = $10`,
@@ -380,7 +380,7 @@ export async function saveAffiliateLink(link: Partial<AffiliateLink> & {
     const shortCode = link.shortCode || generateShortCode();
     
     const result = await queryOne<Record<string, any>>(
-      `INSERT INTO "affiliateLink" (
+      `INSERT INTO "marketingAffiliateLink" (
         "affiliateId", "name", "shortCode", "destinationUrl", "productId", "productCategoryId",
         "utmSource", "utmMedium", "utmCampaign", "isActive", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
@@ -398,7 +398,7 @@ export async function saveAffiliateLink(link: Partial<AffiliateLink> & {
 export async function recordLinkClick(affiliateLinkId: string, isUnique: boolean): Promise<void> {
   const now = new Date().toISOString();
   await query(
-    `UPDATE "affiliateLink" SET 
+    `UPDATE "marketingAffiliateLink" SET 
       "clickCount" = "clickCount" + 1,
       "uniqueClickCount" = "uniqueClickCount" + $1,
       "lastClickedAt" = $2,
@@ -428,7 +428,7 @@ export async function createCommission(commission: {
   const now = new Date().toISOString();
   
   const result = await queryOne<Record<string, any>>(
-    `INSERT INTO "affiliateCommission" (
+    `INSERT INTO "marketingAffiliateCommission" (
       "affiliateId", "affiliateLinkId", "orderId", "customerId", "orderTotal",
       "commissionableAmount", "commissionRate", "commissionType", "commissionAmount",
       "currency", "status", "isFirstOrder", "createdAt", "updatedAt"
@@ -453,7 +453,7 @@ export async function getCommissions(
   filters?: { status?: CommissionStatus },
   pagination?: { limit?: number; offset?: number }
 ): Promise<{ data: AffiliateCommission[]; total: number }> {
-  let whereClause = '"affiliateId" = $1';
+  let whereClause = '"marketingAffiliateId" = $1';
   const params: any[] = [affiliateId];
   let paramIndex = 2;
 
@@ -463,7 +463,7 @@ export async function getCommissions(
   }
 
   const countResult = await queryOne<{ count: string }>(
-    `SELECT COUNT(*) as count FROM "affiliateCommission" WHERE ${whereClause}`,
+    `SELECT COUNT(*) as count FROM "marketingAffiliateCommission" WHERE ${whereClause}`,
     params
   );
 
@@ -471,7 +471,7 @@ export async function getCommissions(
   const offset = pagination?.offset || 0;
 
   const rows = await query<Record<string, any>[]>(
-    `SELECT * FROM "affiliateCommission" WHERE ${whereClause} 
+    `SELECT * FROM "marketingAffiliateCommission" WHERE ${whereClause} 
      ORDER BY "createdAt" DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
     [...params, limit, offset]
   );
@@ -485,7 +485,7 @@ export async function getCommissions(
 export async function approveCommission(affiliateCommissionId: string, approvedBy: string): Promise<void> {
   const now = new Date().toISOString();
   await query(
-    `UPDATE "affiliateCommission" SET "status" = 'approved', "approvedAt" = $1, "approvedBy" = $2, "updatedAt" = $1
+    `UPDATE "marketingAffiliateCommission" SET "status" = 'approved', "approvedAt" = $1, "approvedBy" = $2, "updatedAt" = $1
      WHERE "affiliateCommissionId" = $3`,
     [now, approvedBy, affiliateCommissionId]
   );
@@ -493,7 +493,7 @@ export async function approveCommission(affiliateCommissionId: string, approvedB
 
 export async function rejectCommission(affiliateCommissionId: string, reason: string): Promise<void> {
   await query(
-    `UPDATE "affiliateCommission" SET "status" = 'rejected', "rejectionReason" = $1, "updatedAt" = $2
+    `UPDATE "marketingAffiliateCommission" SET "status" = 'rejected', "rejectionReason" = $1, "updatedAt" = $2
      WHERE "affiliateCommissionId" = $3`,
     [reason, new Date().toISOString(), affiliateCommissionId]
   );
@@ -651,7 +651,7 @@ function generateShortCode(): string {
 
 function mapToAffiliate(row: Record<string, any>): Affiliate {
   return {
-    affiliateId: row.affiliateId,
+    affiliateId: row.marketingAffiliateId,
     customerId: row.customerId,
     email: row.email,
     firstName: row.firstName,
@@ -692,8 +692,8 @@ function mapToAffiliate(row: Record<string, any>): Affiliate {
 
 function mapToAffiliateLink(row: Record<string, any>): AffiliateLink {
   return {
-    affiliateLinkId: row.affiliateLinkId,
-    affiliateId: row.affiliateId,
+    affiliateLinkId: row.marketingAffiliateLinkId,
+    affiliateId: row.marketingAffiliateId,
     name: row.name,
     shortCode: row.shortCode,
     destinationUrl: row.destinationUrl,
@@ -718,9 +718,9 @@ function mapToAffiliateLink(row: Record<string, any>): AffiliateLink {
 
 function mapToCommission(row: Record<string, any>): AffiliateCommission {
   return {
-    affiliateCommissionId: row.affiliateCommissionId,
-    affiliateId: row.affiliateId,
-    affiliateLinkId: row.affiliateLinkId,
+    affiliateCommissionId: row.marketingAffiliateCommissionId,
+    affiliateId: row.marketingAffiliateId,
+    affiliateLinkId: row.marketingAffiliateLinkId,
     orderId: row.orderId,
     customerId: row.customerId,
     orderTotal: parseFloat(row.orderTotal) || 0,

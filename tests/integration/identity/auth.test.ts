@@ -48,7 +48,7 @@ describe('Auth Feature Tests', () => {
 
   describe('Authentication API', () => {
     it('should authenticate a customer with camelCase properties', async () => {
-      const response = await client.post('/identity/login', {
+      const response = await client.post('/customer/identity/login', {
         email: testCustomer.email,
         password: testCustomer.password
       });
@@ -116,12 +116,12 @@ describe('Auth Feature Tests', () => {
     });
 
     it('should return appropriate error for invalid credentials', async () => {
-      const response = await client.post('/identity/login', {
+      const response = await client.post('/customer/identity/login', {
         email: testCustomer.email,
         password: 'wrong-password'
       });
       
-      expect([401, 403]).toContain(response.status);
+      expect(response.status).toBe(401);
       expect(response.data.success).toBe(false);
       expect(response.data).toHaveProperty('error');
     });
@@ -133,7 +133,7 @@ describe('Auth Feature Tests', () => {
     
     // Get tokens for subsequent tests
     beforeAll(async () => {
-      const response = await client.post('/identity/login', {
+      const response = await client.post('/customer/identity/login', {
         email: testCustomer.email,
         password: testCustomer.password
       });
@@ -260,7 +260,7 @@ describe('Auth Feature Tests', () => {
       expect(response.data.success).toBe(true);
       
       // Verify can log in with new password
-      const loginResponse = await client.post('/identity/login', {
+      const loginResponse = await client.post('/customer/identity/login', {
         email: testCustomer.email,
         password: newPassword
       });
@@ -341,14 +341,14 @@ describe('Auth Feature Tests', () => {
     it('should enforce rate limiting for failed login attempts', async () => {
       // Make several failed login attempts in rapid succession
       for (let i = 0; i < 5; i++) {
-        await client.post('/identity/login', {
+        await client.post('/customer/identity/login', {
           email: testCustomer.email,
           password: 'wrong-password-' + i
         });
       }
       
       // Check that rate limiting kicks in
-      const response = await client.post('/identity/login', {
+      const response = await client.post('/customer/identity/login', {
         email: testCustomer.email,
         password: 'wrong-password-again'
       });
@@ -360,7 +360,7 @@ describe('Auth Feature Tests', () => {
         expect(response.data.error).toContain('rate');
       } else {
         // Some implementations use 401 with a message about too many attempts
-        expect([401, 403]).toContain(response.status);
+        expect(response.status).toBe(401);
         // Test will pass even if rate limiting isn't implemented, but in a real app it should be
       }
     });
@@ -414,7 +414,7 @@ describe('Auth Feature Tests', () => {
       expect(response.data.success).toBe(true);
       
       // Verify can log in with new password
-      const loginResponse = await client.post('/identity/login', {
+      const loginResponse = await client.post('/customer/identity/login', {
         email: testCustomer.email,
         password: 'ForcedReset123!'
       });

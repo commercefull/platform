@@ -1,6 +1,5 @@
-import { NotificationRepo } from '../repos/notificationRepo';
+import { NotificationRepo, Notification, NotificationCreateParams } from '../repos/notificationRepo';
 import { 
-  BaseNotification, 
   NotificationBuilder, 
   NotificationChannel 
 } from '../domain/notification';
@@ -9,7 +8,7 @@ import {
  * Interface for notification delivery providers
  */
 interface NotificationDeliveryProvider {
-  send(notification: BaseNotification): Promise<boolean>;
+  send(notification: Notification): Promise<boolean>;
   supportsChannel(channel: NotificationChannel): boolean;
 }
 
@@ -22,7 +21,7 @@ class EmailDeliveryProvider implements NotificationDeliveryProvider {
     return channel === 'email';
   }
 
-  async send(notification: BaseNotification): Promise<boolean> {
+  async send(notification: Notification): Promise<boolean> {
     try {
       // This would be replaced with actual email service integration
       console.log(`Sending email notification: ${notification.title} to user ${notification.userId}`);
@@ -48,7 +47,7 @@ class SmsDeliveryProvider implements NotificationDeliveryProvider {
     return channel === 'sms';
   }
 
-  async send(notification: BaseNotification): Promise<boolean> {
+  async send(notification: Notification): Promise<boolean> {
     try {
       // This would be replaced with actual SMS service integration
       console.log(`Sending SMS notification to user ${notification.userId}`);
@@ -73,7 +72,7 @@ class PushDeliveryProvider implements NotificationDeliveryProvider {
     return channel === 'push';
   }
 
-  async send(notification: BaseNotification): Promise<boolean> {
+  async send(notification: Notification): Promise<boolean> {
     try {
       // This would be replaced with actual push notification service integration
       console.log(`Sending push notification to user ${notification.userId}`);
@@ -100,7 +99,7 @@ class InAppDeliveryProvider implements NotificationDeliveryProvider {
     return channel === 'in_app';
   }
 
-  async send(notification: BaseNotification): Promise<boolean> {
+  async send(notification: Notification): Promise<boolean> {
     try {
       // In-app notifications are already stored in the database
       // This method would just mark them as available for in-app display
@@ -137,15 +136,25 @@ export class NotificationService {
    */
   async sendNotification<T extends Record<string, unknown>>(
     notificationBuilder: NotificationBuilder<T>
-  ): Promise<BaseNotification> {
+  ): Promise<Notification> {
     // Build the notification
-    const notification = notificationBuilder.build();
+    const notificationData = notificationBuilder.build();
     
     // Save to database
-    const savedNotification = await this.notificationRepo.create(notification);
+    const savedNotification = await this.notificationRepo.create({
+      userId: notificationData.userId,
+      userType: notificationData.userType,
+      type: notificationData.type,
+      title: notificationData.title,
+      content: notificationData.content,
+      channel: Array.isArray(notificationData.channel) ? notificationData.channel[0] : notificationData.channel,
+      isRead: false,
+      priority: notificationData.priority || 'normal',
+      metadata: notificationData.metadata
+    });
     
     // Send through appropriate channels
-    const channels = Array.isArray(notification.channel) ? notification.channel : [notification.channel];
+    const channels = Array.isArray(notificationData.channel) ? notificationData.channel : [notificationData.channel];
     const deliveryPromises = channels.map((channel: NotificationChannel) => 
       this.deliverToChannel(savedNotification, channel)
     );
@@ -153,9 +162,7 @@ export class NotificationService {
     await Promise.all(deliveryPromises);
     
     // Mark as sent
-    if (savedNotification.id) {
-      await this.notificationRepo.markAsSent(savedNotification.id);
-    }
+    await this.notificationRepo.markAsSent(savedNotification.notificationId);
     
     return savedNotification;
   }
@@ -165,8 +172,8 @@ export class NotificationService {
    */
   async sendBatchNotifications<T extends Record<string, unknown>>(
     notificationBuilders: NotificationBuilder<T>[]
-  ): Promise<BaseNotification[]> {
-    const results: BaseNotification[] = [];
+  ): Promise<Notification[]> {
+    const results: Notification[] = [];
     
     for (const builder of notificationBuilders) {
       try {
@@ -183,21 +190,21 @@ export class NotificationService {
   /**
    * Get unread notifications for a user
    */
-  async getUnreadNotifications(userId: string): Promise<BaseNotification[] | null> {
+  async getUnreadNotifications(userId: string): Promise<Notification[]> {
     return await this.notificationRepo.findUnreadByUser(userId);
   }
 
   /**
    * Get recent notifications for a user
    */
-  async getRecentNotifications(userId: string, limit: number = 50): Promise<BaseNotification[] | null> {
+  async getRecentNotifications(userId: string, limit: number = 50): Promise<Notification[]> {
     return await this.notificationRepo.findByUser(userId, limit);
   }
 
   /**
    * Mark a notification as read
    */
-  async markAsRead(notificationId: string): Promise<BaseNotification | null> {
+  async markAsRead(notificationId: string): Promise<Notification | null> {
     return await this.notificationRepo.markAsRead(notificationId);
   }
 
@@ -233,7 +240,7 @@ export class NotificationService {
    * Deliver a notification through a specific channel
    */
   private async deliverToChannel(
-    notification: BaseNotification, 
+    notification: Notification, 
     channel: NotificationChannel
   ): Promise<boolean> {
     const provider = this.deliveryProviders.find(p => p.supportsChannel(channel));

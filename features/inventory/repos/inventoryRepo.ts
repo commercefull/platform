@@ -1,509 +1,526 @@
-import { queryOne, query } from "../../../libs/db";
-import { unixTimestamp } from "../../../libs/date";
+/**
+ * Inventory Repository
+ * 
+ * Handles persistence for inventory-related entities using the actual database schema.
+ */
 
-// TypeScript interfaces with camelCase properties
-export interface InventoryItem {
-  id: string;
+import { query, queryOne } from '../../../libs/db';
+import { generateUUID } from '../../../libs/uuid';
+import { 
+  InventoryLocation as DbInventoryLocation,
+  InventoryTransaction as DbInventoryTransaction,
+  InventoryLevel as DbInventoryLevel,
+  InventoryLot as DbInventoryLot,
+  InventoryTransactionType as DbInventoryTransactionType,
+  InventoryTransfer as DbInventoryTransfer,
+  InventoryCount as DbInventoryCount
+} from '../../../libs/db/types';
+
+// ============================================================================
+// Re-export types for external use
+// ============================================================================
+
+export type InventoryLocation = DbInventoryLocation;
+export type InventoryTransaction = DbInventoryTransaction;
+export type InventoryLevel = DbInventoryLevel;
+export type InventoryLot = DbInventoryLot;
+export type InventoryTransactionType = DbInventoryTransactionType;
+export type InventoryTransfer = DbInventoryTransfer;
+export type InventoryCount = DbInventoryCount;
+
+// ============================================================================
+// Input Types
+// ============================================================================
+
+export interface CreateInventoryLocationInput {
+  distributionWarehouseId: string;
+  distributionWarehouseBinId?: string;
   productId: string;
+  productVariantId?: string;
   sku: string;
-  locationId: string;
-  quantity: number;
-  reservedQuantity: number;
-  availableQuantity: number;
-  lowStockThreshold: number;
-  reorderPoint: number;
-  reorderQuantity: number;
-  lastRestockDate: string;
-  createdAt: string;
-  updatedAt: string;
+  quantity?: number;
+  minimumStockLevel?: number;
+  maximumStockLevel?: number;
+  lotNumber?: string;
+  serialNumber?: string;
+  expiryDate?: Date;
+  status?: string;
 }
 
-export interface InventoryLocation {
-  id: string;
-  name: string;
-  type: 'warehouse' | 'store' | 'fulfillment_center' | 'supplier' | 'other';
-  address?: string;
-  city?: string;
-  state?: string;
-  country?: string;
-  postalCode?: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
+export interface UpdateInventoryLocationInput {
+  quantity?: number;
+  reservedQuantity?: number;
+  minimumStockLevel?: number;
+  maximumStockLevel?: number;
+  status?: string;
 }
 
-export interface InventoryTransaction {
-  id: string;
-  inventoryId: string;
-  transactionType: 'restock' | 'sale' | 'return' | 'adjustment' | 'transfer' | 'reservation' | 'release';
+export interface CreateInventoryTransactionInput {
+  typeId: string;
+  distributionWarehouseId: string;
+  distributionWarehouseBinId?: string;
+  productId: string;
+  productVariantId?: string;
+  sku: string;
   quantity: number;
-  sourceLocationId?: string;
-  destinationLocationId?: string;
-  reference?: string;
+  previousQuantity?: number;
+  newQuantity?: number;
+  referenceType?: string;
+  referenceId?: string;
+  lotNumber?: string;
+  serialNumber?: string;
   notes?: string;
-  createdBy: string;
-  createdAt: string;
+  reason?: string;
 }
 
-export interface InventoryReservation {
-  id: string;
-  inventoryId: string;
-  quantity: number;
-  orderId?: string;
-  cartId?: string;
-  expiresAt: string;
-  status: 'active' | 'fulfilled' | 'expired' | 'cancelled';
-  createdAt: string;
-  updatedAt: string;
+export interface InventoryLocationFilter {
+  distributionWarehouseId?: string;
+  productId?: string;
+  sku?: string;
+  status?: string;
+  lowStock?: boolean;
+  outOfStock?: boolean;
 }
 
-type InventoryItemCreateParams = Omit<InventoryItem, 'id' | 'createdAt' | 'updatedAt'>;
-type InventoryItemUpdateParams = Partial<Omit<InventoryItem, 'id' | 'productId' | 'sku' | 'locationId' | 'createdAt' | 'updatedAt'>>;
-type InventoryLocationCreateParams = Omit<InventoryLocation, 'id' | 'createdAt' | 'updatedAt'>;
-type InventoryLocationUpdateParams = Partial<Omit<InventoryLocation, 'id' | 'createdAt' | 'updatedAt'>>;
-type InventoryTransactionCreateParams = Omit<InventoryTransaction, 'id' | 'createdAt'>;
-type InventoryReservationCreateParams = Omit<InventoryReservation, 'id' | 'createdAt' | 'updatedAt'>;
-
-// Field mapping dictionaries: TypeScript camelCase -> Database snake_case
-const inventoryItemFields: Record<string, string> = {
-  id: 'id',
-  productId: 'product_id',
-  sku: 'sku',
-  locationId: 'location_id',
-  quantity: 'quantity',
-  reservedQuantity: 'reserved_quantity',
-  availableQuantity: 'available_quantity',
-  lowStockThreshold: 'low_stock_threshold',
-  reorderPoint: 'reorder_point',
-  reorderQuantity: 'reorder_quantity',
-  lastRestockDate: 'last_restock_date',
-  createdAt: 'created_at',
-  updatedAt: 'updated_at'
-};
-
-const inventoryLocationFields: Record<string, string> = {
-  id: 'id',
-  name: 'name',
-  type: 'type',
-  address: 'address',
-  city: 'city',
-  state: 'state',
-  country: 'country',
-  postalCode: 'postal_code',
-  isActive: 'is_active',
-  createdAt: 'created_at',
-  updatedAt: 'updated_at'
-};
-
-const inventoryTransactionFields: Record<string, string> = {
-  id: 'id',
-  inventoryId: 'inventory_id',
-  transactionType: 'transaction_type',
-  quantity: 'quantity',
-  sourceLocationId: 'source_location_id',
-  destinationLocationId: 'destination_location_id',
-  reference: 'reference',
-  notes: 'notes',
-  createdBy: 'created_by',
-  createdAt: 'created_at'
-};
-
-const inventoryReservationFields: Record<string, string> = {
-  id: 'id',
-  inventoryId: 'inventory_id',
-  quantity: 'quantity',
-  orderId: 'order_id',
-  cartId: 'cart_id',
-  expiresAt: 'expires_at',
-  status: 'status',
-  createdAt: 'created_at',
-  updatedAt: 'updated_at'
-};
-
-// Transformation helper functions
-function transformDbToTs<T>(dbRecord: any, fieldMap: Record<string, string>): T | null {
-  if (!dbRecord) return null;
-  
-  const result: any = {};
-  Object.entries(fieldMap).forEach(([tsKey, dbKey]) => {
-    if (dbRecord[dbKey] !== undefined) {
-      result[tsKey] = dbRecord[dbKey];
-    }
-  });
-  
-  return result as T;
-}
-
-function transformArrayDbToTs<T>(dbRecords: any[], fieldMap: Record<string, string>): T[] {
-  if (!dbRecords || !Array.isArray(dbRecords)) return [];
-  return dbRecords.map(record => transformDbToTs<T>(record, fieldMap)).filter(Boolean) as T[];
-}
-
-function generateSelectFields(fieldMap: Record<string, string>): string {
-  return Object.entries(fieldMap)
-    .map(([tsKey, dbKey]) => `"${dbKey}" AS "${tsKey}"`)
-    .join(', ');
-}
-
-function tsToDbField(tsKey: string, fieldMap: Record<string, string>): string {
-  return fieldMap[tsKey] || tsKey;
-}
+// ============================================================================
+// Repository
+// ============================================================================
 
 export class InventoryRepo {
-  // =============== Inventory Item Methods ===============
-  
-  async findInventoryItemById(id: string): Promise<InventoryItem | null> {
-    const result = await queryOne<Record<string, any>>(
-      `SELECT ${generateSelectFields(inventoryItemFields)} FROM "public"."inventory_item" WHERE "id" = $1`,
-      [id]
-    );
-    return transformDbToTs<InventoryItem>(result, inventoryItemFields);
+  // ==========================================================================
+  // Inventory Location Methods (Stock at specific warehouse locations)
+  // ==========================================================================
+
+  async findLocationById(inventoryLocationId: string): Promise<InventoryLocation | null> {
+    const sql = `SELECT * FROM "inventoryLocation" WHERE "inventoryLocationId" = $1`;
+    return await queryOne<InventoryLocation>(sql, [inventoryLocationId]);
   }
 
-  async findInventoryItemBySku(sku: string, locationId?: string): Promise<InventoryItem | null> {
-    let sql = `SELECT ${generateSelectFields(inventoryItemFields)} FROM "public"."inventory_item" WHERE "sku" = $1`;
-    const params: any[] = [sku];
-    
-    if (locationId) {
-      sql += ' AND "location_id" = $2';
-      params.push(locationId);
+  async findLocationBySku(sku: string, distributionWarehouseId?: string): Promise<InventoryLocation | null> {
+    let sql = `SELECT * FROM "inventoryLocation" WHERE "sku" = $1`;
+    const params: unknown[] = [sku];
+
+    if (distributionWarehouseId) {
+      sql += ` AND "distributionWarehouseId" = $2`;
+      params.push(distributionWarehouseId);
     }
-    
-    const result = await queryOne<Record<string, any>>(sql, params);
-    return transformDbToTs<InventoryItem>(result, inventoryItemFields);
+
+    sql += ` LIMIT 1`;
+    return await queryOne<InventoryLocation>(sql, params);
   }
 
-  async findInventoryItemsByProductId(productId: string): Promise<InventoryItem[]> {
-    const results = await query<Record<string, any>[]>(
-      `SELECT ${generateSelectFields(inventoryItemFields)} FROM "public"."inventory_item" WHERE "productId" = $1`,
-      [productId]
-    );
-    return transformArrayDbToTs<InventoryItem>(results || [], inventoryItemFields);
+  async findLocationsByProductId(productId: string): Promise<InventoryLocation[]> {
+    const sql = `SELECT * FROM "inventoryLocation" WHERE "productId" = $1 ORDER BY "createdAt" DESC`;
+    const results = await query<InventoryLocation[]>(sql, [productId]);
+    return results || [];
   }
 
-  async findInventoryItemsByLocationId(locationId: string): Promise<InventoryItem[]> {
-    const results = await query<Record<string, any>[]>(
-      `SELECT ${generateSelectFields(inventoryItemFields)} FROM "public"."inventory_item" WHERE "location_id" = $1`,
-      [locationId]
-    );
-    return transformArrayDbToTs<InventoryItem>(results || [], inventoryItemFields);
+  async findLocationsByWarehouseId(distributionWarehouseId: string): Promise<InventoryLocation[]> {
+    const sql = `SELECT * FROM "inventoryLocation" WHERE "distributionWarehouseId" = $1 ORDER BY "sku" ASC`;
+    const results = await query<InventoryLocation[]>(sql, [distributionWarehouseId]);
+    return results || [];
   }
 
-  async findLowStockItems(): Promise<InventoryItem[]> {
-    const results = await query<Record<string, any>[]>(
-      `SELECT ${generateSelectFields(inventoryItemFields)} FROM "public"."inventory_item" 
-       WHERE "available_quantity" <= "low_stock_threshold"`,
-      []
-    );
-    return transformArrayDbToTs<InventoryItem>(results || [], inventoryItemFields);
-  }
-
-  async findOutOfStockItems(): Promise<InventoryItem[]> {
-    const results = await query<Record<string, any>[]>(
-      `SELECT ${generateSelectFields(inventoryItemFields)} FROM "public"."inventory_item" 
-       WHERE "available_quantity" <= 0`,
-      []
-    );
-    return transformArrayDbToTs<InventoryItem>(results || [], inventoryItemFields);
-  }
-
-  async findInventoryItems(
+  async findLocations(
+    filter?: InventoryLocationFilter,
     limit: number = 50,
-    offset: number = 0,
-    filter?: {
-      locationId?: string;
-      lowStock?: boolean;
-      outOfStock?: boolean;
-    }
-  ): Promise<InventoryItem[]> {
-    let sql = `SELECT ${generateSelectFields(inventoryItemFields)} FROM "public"."inventory_item" WHERE 1=1`;
-    const params: any[] = [];
+    offset: number = 0
+  ): Promise<InventoryLocation[]> {
+    let sql = `SELECT * FROM "inventoryLocation" WHERE 1=1`;
+    const params: unknown[] = [];
     let paramIndex = 1;
-    
-    if (filter?.locationId) {
-      sql += ` AND "location_id" = $${paramIndex}`;
-      params.push(filter.locationId);
+
+    if (filter?.distributionWarehouseId) {
+      sql += ` AND "distributionWarehouseId" = $${paramIndex}`;
+      params.push(filter.distributionWarehouseId);
       paramIndex++;
     }
-    
+
+    if (filter?.productId) {
+      sql += ` AND "productId" = $${paramIndex}`;
+      params.push(filter.productId);
+      paramIndex++;
+    }
+
+    if (filter?.sku) {
+      sql += ` AND "sku" = $${paramIndex}`;
+      params.push(filter.sku);
+      paramIndex++;
+    }
+
+    if (filter?.status) {
+      sql += ` AND "status" = $${paramIndex}`;
+      params.push(filter.status);
+      paramIndex++;
+    }
+
     if (filter?.lowStock) {
-      sql += ` AND "available_quantity" <= "low_stock_threshold"`;
+      sql += ` AND "availableQuantity" <= "minimumStockLevel"`;
     }
-    
+
     if (filter?.outOfStock) {
-      sql += ` AND "available_quantity" <= 0`;
+      sql += ` AND "availableQuantity" <= 0`;
     }
-    
-    sql += ' ORDER BY "updatedAt" DESC';
-    sql += ` LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
+
+    sql += ` ORDER BY "updatedAt" DESC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
     params.push(limit, offset);
-    
-    const results = await query<Record<string, any>[]>(sql, params);
-    return transformArrayDbToTs<InventoryItem>(results || [], inventoryItemFields);
+
+    const results = await query<InventoryLocation[]>(sql, params);
+    return results || [];
   }
 
-  async createInventoryItem(params: InventoryItemCreateParams): Promise<InventoryItem> {
-    const now = unixTimestamp();
-    
-    // Check if item already exists
-    const existingItem = await this.findInventoryItemBySku(params.sku, params.locationId);
-    if (existingItem) {
-      throw new Error(`Inventory item with SKU ${params.sku} already exists at location ${params.locationId}`);
-    }
-
-    const result = await queryOne<Record<string, any>>(
-      `INSERT INTO "public"."inventory_item" 
-      ("productId", "sku", "location_id", "quantity", "reserved_quantity", "available_quantity", 
-      "low_stock_threshold", "reorder_point", "reorder_quantity", "last_restock_date", "createdAt", "updatedAt") 
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) 
-      RETURNING ${generateSelectFields(inventoryItemFields)}`,
-      [
-        params.productId,
-        params.sku,
-        params.locationId,
-        params.quantity,
-        params.reservedQuantity,
-        params.availableQuantity,
-        params.lowStockThreshold,
-        params.reorderPoint,
-        params.reorderQuantity,
-        params.lastRestockDate,
-        now,
-        now
-      ]
-    );
-
-    if (!result) {
-      throw new Error('Failed to create inventory item');
-    }
-
-    return transformDbToTs<InventoryItem>(result, inventoryItemFields)!;
+  async findLowStockLocations(): Promise<InventoryLocation[]> {
+    const sql = `
+      SELECT * FROM "inventoryLocation" 
+      WHERE "availableQuantity" <= COALESCE("minimumStockLevel", 0)
+      ORDER BY "availableQuantity" ASC
+    `;
+    const results = await query<InventoryLocation[]>(sql, []);
+    return results || [];
   }
 
-  async updateInventoryItem(id: string, params: InventoryItemUpdateParams): Promise<InventoryItem> {
-    const now = unixTimestamp();
-    const updateFields: string[] = [];
-    const values: any[] = [];
-    let paramIndex = 1;
+  async findOutOfStockLocations(): Promise<InventoryLocation[]> {
+    const sql = `SELECT * FROM "inventoryLocation" WHERE "availableQuantity" <= 0 ORDER BY "sku" ASC`;
+    const results = await query<InventoryLocation[]>(sql, []);
+    return results || [];
+  }
 
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined) {
-        const dbField = tsToDbField(key, inventoryItemFields);
-        updateFields.push(`"${dbField}" = $${paramIndex}`);
-        values.push(value);
-        paramIndex++;
-      }
-    });
-
-    updateFields.push(`"updatedAt" = $${paramIndex}`);
-    values.push(now);
-    paramIndex++;
-    values.push(id);
+  async createLocation(input: CreateInventoryLocationInput): Promise<InventoryLocation> {
+    const now = new Date();
+    const quantity = input.quantity || 0;
 
     const sql = `
-      UPDATE "public"."inventory_item" 
-      SET ${updateFields.join(', ')} 
-      WHERE "id" = $${paramIndex} 
-      RETURNING ${generateSelectFields(inventoryItemFields)}
+      INSERT INTO "inventoryLocation" (
+        "distributionWarehouseId", "distributionWarehouseBinId", "productId", "productVariantId",
+        "sku", "quantity", "reservedQuantity", "availableQuantity", "minimumStockLevel", "maximumStockLevel",
+        "lotNumber", "serialNumber", "expiryDate", "status", "createdAt", "updatedAt"
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+      RETURNING *
     `;
 
-    const result = await queryOne<Record<string, any>>(sql, values);
-    if (!result) {
-      throw new Error(`Failed to update inventory item with ID ${id}`);
-    }
-
-    return transformDbToTs<InventoryItem>(result, inventoryItemFields)!;
-  }
-
-  // =============== Inventory Location Methods ===============
-  
-  async findLocationById(id: string): Promise<InventoryLocation | null> {
-    const result = await queryOne<Record<string, any>>(
-      `SELECT ${generateSelectFields(inventoryLocationFields)} FROM "public"."inventory_location" WHERE "id" = $1`,
-      [id]
-    );
-    return transformDbToTs<InventoryLocation>(result, inventoryLocationFields);
-  }
-
-  async findAllLocations(): Promise<InventoryLocation[]> {
-    const results = await query<Record<string, any>[]>(
-      `SELECT ${generateSelectFields(inventoryLocationFields)} FROM "public"."inventory_location" 
-       ORDER BY "name" ASC`,
-      []
-    );
-    return transformArrayDbToTs<InventoryLocation>(results || [], inventoryLocationFields);
-  }
-
-  async findActiveLocations(): Promise<InventoryLocation[]> {
-    const results = await query<Record<string, any>[]>(
-      `SELECT ${generateSelectFields(inventoryLocationFields)} FROM "public"."inventory_location" 
-       WHERE "isActive" = true ORDER BY "name" ASC`,
-      []
-    );
-    return transformArrayDbToTs<InventoryLocation>(results || [], inventoryLocationFields);
-  }
-
-  async createLocation(params: InventoryLocationCreateParams): Promise<InventoryLocation> {
-    const now = unixTimestamp();
-
-    const result = await queryOne<Record<string, any>>(
-      `INSERT INTO "public"."inventory_location" 
-      ("name", "type", "address", "city", "state", "country", "postalCode", "isActive", "createdAt", "updatedAt") 
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) 
-      RETURNING ${generateSelectFields(inventoryLocationFields)}`,
-      [
-        params.name,
-        params.type,
-        params.address || null,
-        params.city || null,
-        params.state || null,
-        params.country || null,
-        params.postalCode || null,
-        params.isActive,
-        now,
-        now
-      ]
-    );
+    const result = await queryOne<InventoryLocation>(sql, [
+      input.distributionWarehouseId,
+      input.distributionWarehouseBinId || null,
+      input.productId,
+      input.productVariantId || null,
+      input.sku,
+      quantity,
+      0, // reservedQuantity
+      quantity, // availableQuantity
+      input.minimumStockLevel || 0,
+      input.maximumStockLevel || null,
+      input.lotNumber || null,
+      input.serialNumber || null,
+      input.expiryDate || null,
+      input.status || 'available',
+      now,
+      now
+    ]);
 
     if (!result) {
       throw new Error('Failed to create inventory location');
     }
 
-    return transformDbToTs<InventoryLocation>(result, inventoryLocationFields)!;
+    return result;
   }
 
-  // =============== Inventory Transaction Methods ===============
-  
-  async findTransactionById(id: string): Promise<InventoryTransaction | null> {
-    const result = await queryOne<Record<string, any>>(
-      `SELECT ${generateSelectFields(inventoryTransactionFields)} FROM "public"."inventory_transaction" WHERE "id" = $1`,
-      [id]
-    );
-    return transformDbToTs<InventoryTransaction>(result, inventoryTransactionFields);
+  async updateLocation(
+    inventoryLocationId: string, 
+    input: UpdateInventoryLocationInput
+  ): Promise<InventoryLocation> {
+    const now = new Date();
+    const updates: string[] = [];
+    const params: unknown[] = [];
+    let paramIndex = 1;
+
+    if (input.quantity !== undefined) {
+      updates.push(`"quantity" = $${paramIndex}`);
+      params.push(input.quantity);
+      paramIndex++;
+    }
+
+    if (input.reservedQuantity !== undefined) {
+      updates.push(`"reservedQuantity" = $${paramIndex}`);
+      params.push(input.reservedQuantity);
+      paramIndex++;
+    }
+
+    if (input.minimumStockLevel !== undefined) {
+      updates.push(`"minimumStockLevel" = $${paramIndex}`);
+      params.push(input.minimumStockLevel);
+      paramIndex++;
+    }
+
+    if (input.maximumStockLevel !== undefined) {
+      updates.push(`"maximumStockLevel" = $${paramIndex}`);
+      params.push(input.maximumStockLevel);
+      paramIndex++;
+    }
+
+    if (input.status !== undefined) {
+      updates.push(`"status" = $${paramIndex}`);
+      params.push(input.status);
+      paramIndex++;
+    }
+
+    // Recalculate available quantity if quantity or reserved changed
+    if (input.quantity !== undefined || input.reservedQuantity !== undefined) {
+      updates.push(`"availableQuantity" = COALESCE($${paramIndex}, "quantity") - COALESCE($${paramIndex + 1}, "reservedQuantity")`);
+      params.push(input.quantity ?? null, input.reservedQuantity ?? null);
+      paramIndex += 2;
+    }
+
+    updates.push(`"updatedAt" = $${paramIndex}`);
+    params.push(now);
+    paramIndex++;
+
+    params.push(inventoryLocationId);
+
+    const sql = `
+      UPDATE "inventoryLocation" 
+      SET ${updates.join(', ')}
+      WHERE "inventoryLocationId" = $${paramIndex}
+      RETURNING *
+    `;
+
+    const result = await queryOne<InventoryLocation>(sql, params);
+    if (!result) {
+      throw new Error(`Inventory location ${inventoryLocationId} not found`);
+    }
+
+    return result;
   }
 
-  async findTransactionsByInventoryId(inventoryId: string): Promise<InventoryTransaction[]> {
-    const results = await query<Record<string, any>[]>(
-      `SELECT ${generateSelectFields(inventoryTransactionFields)} FROM "public"."inventory_transaction" 
-       WHERE "inventory_id" = $1 ORDER BY "createdAt" DESC`,
-      [inventoryId]
-    );
-    return transformArrayDbToTs<InventoryTransaction>(results || [], inventoryTransactionFields);
+  async adjustQuantity(
+    inventoryLocationId: string,
+    quantityChange: number,
+    reason?: string
+  ): Promise<InventoryLocation> {
+    const sql = `
+      UPDATE "inventoryLocation" 
+      SET 
+        "quantity" = "quantity" + $2,
+        "availableQuantity" = "availableQuantity" + $2,
+        "updatedAt" = $3
+      WHERE "inventoryLocationId" = $1
+      RETURNING *
+    `;
+
+    const result = await queryOne<InventoryLocation>(sql, [
+      inventoryLocationId,
+      quantityChange,
+      new Date()
+    ]);
+
+    if (!result) {
+      throw new Error(`Inventory location ${inventoryLocationId} not found`);
+    }
+
+    return result;
   }
 
-  async createTransaction(params: InventoryTransactionCreateParams): Promise<InventoryTransaction> {
-    const now = unixTimestamp();
+  async reserveQuantity(inventoryLocationId: string, quantity: number): Promise<InventoryLocation> {
+    const sql = `
+      UPDATE "inventoryLocation" 
+      SET 
+        "reservedQuantity" = "reservedQuantity" + $2,
+        "availableQuantity" = "availableQuantity" - $2,
+        "updatedAt" = $3
+      WHERE "inventoryLocationId" = $1 AND "availableQuantity" >= $2
+      RETURNING *
+    `;
 
-    const result = await queryOne<Record<string, any>>(
-      `INSERT INTO "public"."inventory_transaction" 
-      ("inventory_id", "transaction_type", "quantity", "source_location_id", "destination_location_id", 
-       "reference", "notes", "created_by", "createdAt") 
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
-      RETURNING ${generateSelectFields(inventoryTransactionFields)}`,
-      [
-        params.inventoryId,
-        params.transactionType,
-        params.quantity,
-        params.sourceLocationId || null,
-        params.destinationLocationId || null,
-        params.reference || null,
-        params.notes || null,
-        params.createdBy,
-        now
-      ]
-    );
+    const result = await queryOne<InventoryLocation>(sql, [
+      inventoryLocationId,
+      quantity,
+      new Date()
+    ]);
+
+    if (!result) {
+      throw new Error('Insufficient available quantity or location not found');
+    }
+
+    return result;
+  }
+
+  async releaseReservation(inventoryLocationId: string, quantity: number): Promise<InventoryLocation> {
+    const sql = `
+      UPDATE "inventoryLocation" 
+      SET 
+        "reservedQuantity" = GREATEST(0, "reservedQuantity" - $2),
+        "availableQuantity" = "availableQuantity" + $2,
+        "updatedAt" = $3
+      WHERE "inventoryLocationId" = $1
+      RETURNING *
+    `;
+
+    const result = await queryOne<InventoryLocation>(sql, [
+      inventoryLocationId,
+      quantity,
+      new Date()
+    ]);
+
+    if (!result) {
+      throw new Error(`Inventory location ${inventoryLocationId} not found`);
+    }
+
+    return result;
+  }
+
+  async deleteLocation(inventoryLocationId: string): Promise<boolean> {
+    const sql = `DELETE FROM "inventoryLocation" WHERE "inventoryLocationId" = $1`;
+    await query(sql, [inventoryLocationId]);
+    return true;
+  }
+
+  // ==========================================================================
+  // Inventory Transaction Methods
+  // ==========================================================================
+
+  async findTransactionById(inventoryTransactionId: string): Promise<InventoryTransaction | null> {
+    const sql = `SELECT * FROM "inventoryTransaction" WHERE "inventoryTransactionId" = $1`;
+    return await queryOne<InventoryTransaction>(sql, [inventoryTransactionId]);
+  }
+
+  async findTransactionsByProductId(productId: string, limit: number = 50): Promise<InventoryTransaction[]> {
+    const sql = `
+      SELECT * FROM "inventoryTransaction" 
+      WHERE "productId" = $1 
+      ORDER BY "createdAt" DESC 
+      LIMIT $2
+    `;
+    const results = await query<InventoryTransaction[]>(sql, [productId, limit]);
+    return results || [];
+  }
+
+  async findTransactionsByWarehouseId(
+    distributionWarehouseId: string, 
+    limit: number = 50
+  ): Promise<InventoryTransaction[]> {
+    const sql = `
+      SELECT * FROM "inventoryTransaction" 
+      WHERE "distributionWarehouseId" = $1 
+      ORDER BY "createdAt" DESC 
+      LIMIT $2
+    `;
+    const results = await query<InventoryTransaction[]>(sql, [distributionWarehouseId, limit]);
+    return results || [];
+  }
+
+  async createTransaction(input: CreateInventoryTransactionInput): Promise<InventoryTransaction> {
+    const now = new Date();
+
+    const sql = `
+      INSERT INTO "inventoryTransaction" (
+        "typeId", "distributionWarehouseId", "distributionWarehouseBinId",
+        "productId", "productVariantId", "sku", "quantity",
+        "previousQuantity", "newQuantity", "referenceType", "referenceId",
+        "lotNumber", "serialNumber", "notes", "status", "reason",
+        "createdAt", "updatedAt"
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
+      RETURNING *
+    `;
+
+    const result = await queryOne<InventoryTransaction>(sql, [
+      input.typeId,
+      input.distributionWarehouseId,
+      input.distributionWarehouseBinId || null,
+      input.productId,
+      input.productVariantId || null,
+      input.sku,
+      input.quantity,
+      input.previousQuantity || null,
+      input.newQuantity || null,
+      input.referenceType || null,
+      input.referenceId || null,
+      input.lotNumber || null,
+      input.serialNumber || null,
+      input.notes || null,
+      'completed',
+      input.reason || null,
+      now,
+      now
+    ]);
 
     if (!result) {
       throw new Error('Failed to create inventory transaction');
     }
 
-    return transformDbToTs<InventoryTransaction>(result, inventoryTransactionFields)!;
+    return result;
   }
 
-  // =============== Inventory Reservation Methods ===============
-  
-  async findReservationById(id: string): Promise<InventoryReservation | null> {
-    const result = await queryOne<Record<string, any>>(
-      `SELECT ${generateSelectFields(inventoryReservationFields)} FROM "public"."inventory_reservation" WHERE "id" = $1`,
-      [id]
-    );
-    return transformDbToTs<InventoryReservation>(result, inventoryReservationFields);
+  // ==========================================================================
+  // Transaction Type Methods
+  // ==========================================================================
+
+  async findTransactionTypeByCode(code: string): Promise<InventoryTransactionType | null> {
+    const sql = `SELECT * FROM "inventoryTransactionType" WHERE "code" = $1`;
+    return await queryOne<InventoryTransactionType>(sql, [code]);
   }
 
-  async findActiveReservationsByInventoryId(inventoryId: string): Promise<InventoryReservation[]> {
-    const results = await query<Record<string, any>[]>(
-      `SELECT ${generateSelectFields(inventoryReservationFields)} FROM "public"."inventory_reservation" 
-       WHERE "inventory_id" = $1 AND "status" = 'active'`,
-      [inventoryId]
-    );
-    return transformArrayDbToTs<InventoryReservation>(results || [], inventoryReservationFields);
+  async findAllTransactionTypes(): Promise<InventoryTransactionType[]> {
+    const sql = `SELECT * FROM "inventoryTransactionType" ORDER BY "name" ASC`;
+    const results = await query<InventoryTransactionType[]>(sql, []);
+    return results || [];
   }
 
-  async createReservation(params: InventoryReservationCreateParams): Promise<InventoryReservation> {
-    const now = unixTimestamp();
+  // ==========================================================================
+  // Product Availability Methods
+  // ==========================================================================
 
-    const result = await queryOne<Record<string, any>>(
-      `INSERT INTO "public"."inventory_reservation" 
-      ("inventory_id", "quantity", "orderId", "cart_id", "expiresAt", "status", "createdAt", "updatedAt") 
-      VALUES ($1, $2, $3, $4, $5, 'active', $6, $7) 
-      RETURNING ${generateSelectFields(inventoryReservationFields)}`,
-      [
-        params.inventoryId,
-        params.quantity,
-        params.orderId || null,
-        params.cartId || null,
-        params.expiresAt,
-        now,
-        now
-      ]
-    );
+  async checkProductAvailability(
+    productId: string, 
+    variantId?: string, 
+    requiredQuantity: number = 1
+  ): Promise<{ available: boolean; totalAvailable: number; locations: InventoryLocation[] }> {
+    let sql = `SELECT * FROM "inventoryLocation" WHERE "productId" = $1 AND "status" = 'available'`;
+    const params: unknown[] = [productId];
 
-    if (!result) {
-      throw new Error('Failed to create inventory reservation');
+    if (variantId) {
+      sql += ` AND "productVariantId" = $2`;
+      params.push(variantId);
     }
 
-    return transformDbToTs<InventoryReservation>(result, inventoryReservationFields)!;
+    const locations = await query<InventoryLocation[]>(sql, params);
+    const locationList = locations || [];
+
+    const totalAvailable = locationList.reduce((sum, loc) => sum + loc.availableQuantity, 0);
+
+    return {
+      available: totalAvailable >= requiredQuantity,
+      totalAvailable,
+      locations: locationList
+    };
   }
 
-  async updateReservationStatus(id: string, status: 'active' | 'fulfilled' | 'expired' | 'cancelled'): Promise<InventoryReservation> {
-    const now = unixTimestamp();
-
-    const result = await queryOne<Record<string, any>>(
-      `UPDATE "public"."inventory_reservation" 
-       SET "status" = $1, "updatedAt" = $2 
-       WHERE "id" = $3 
-       RETURNING ${generateSelectFields(inventoryReservationFields)}`,
-      [status, now, id]
-    );
-
-    if (!result) {
-      throw new Error(`Failed to update reservation ${id}`);
-    }
-
-    return transformDbToTs<InventoryReservation>(result, inventoryReservationFields)!;
+  async getTotalStockForProduct(productId: string): Promise<number> {
+    const sql = `
+      SELECT COALESCE(SUM("availableQuantity"), 0) as total 
+      FROM "inventoryLocation" 
+      WHERE "productId" = $1 AND "status" = 'available'
+    `;
+    const result = await queryOne<{ total: string }>(sql, [productId]);
+    return parseInt(result?.total || '0', 10);
   }
 
-  // =============== Product Availability Methods ===============
-  
-  async checkProductAvailability(productId: string, variantId?: string, requiredQuantity: number = 1): Promise<boolean> {
-    try {
-      // Get all inventory items for this product
-      const inventoryItems = await this.findInventoryItemsByProductId(productId);
-      
-      if (!inventoryItems || inventoryItems.length === 0) {
-        return false; // No inventory found
-      }
+  // ==========================================================================
+  // Inventory Level Methods (Aggregate stock levels)
+  // ==========================================================================
 
-      // Calculate total available quantity across all locations
-      const totalAvailable = inventoryItems.reduce((total, item) => {
-        return total + Math.max(0, item.availableQuantity - item.reservedQuantity);
-      }, 0);
+  async findLevelById(inventoryLevelId: string): Promise<InventoryLevel | null> {
+    const sql = `SELECT * FROM "inventoryLevel" WHERE "inventoryLevelId" = $1`;
+    return await queryOne<InventoryLevel>(sql, [inventoryLevelId]);
+  }
 
-      return totalAvailable >= requiredQuantity;
-    } catch (error) {
-      console.error('Error checking product availability:', error);
-      return false;
-    }
+  async findLevelByProductAndWarehouse(
+    productId: string, 
+    distributionWarehouseId: string
+  ): Promise<InventoryLevel | null> {
+    const sql = `
+      SELECT * FROM "inventoryLevel" 
+      WHERE "productId" = $1 AND "distributionWarehouseId" = $2
+    `;
+    return await queryOne<InventoryLevel>(sql, [productId, distributionWarehouseId]);
   }
 }
 

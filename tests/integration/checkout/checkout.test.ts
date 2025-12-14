@@ -32,21 +32,21 @@ describe('Checkout Feature Tests', () => {
     adminToken = loginResponse.data.accessToken;
     
     // Use pre-seeded checkout or create one
-    const checkoutResponse = await client.get(`/checkout/${TEST_CHECKOUT_ID}`);
+    const checkoutResponse = await client.get(`/customer/checkout/${TEST_CHECKOUT_ID}`);
     if (checkoutResponse.status === 200) {
       checkoutId = TEST_CHECKOUT_ID;
     } else {
       // Create checkout dynamically if seeded data doesn't exist
-      const basketResponse = await client.post('/basket', { sessionId: 'checkout-test-' + Date.now() });
+      const basketResponse = await client.post('/customer/basket', { sessionId: 'checkout-test-' + Date.now() });
       const basketId = basketResponse.data.data.basketId;
-      await client.post(`/basket/${basketId}/items`, {
+      await client.post(`/customer/basket/${basketId}/items`, {
         productId: TEST_PRODUCT_1_ID,
         sku: 'TEST-SKU-001',
         name: 'Test Product',
         quantity: 1,
         unitPrice: 29.99
       });
-      const newCheckout = await client.post('/checkout', { basketId });
+      const newCheckout = await client.post('/customer/checkout', { basketId });
       checkoutId = newCheckout.data.data.checkoutId;
     }
   });
@@ -54,7 +54,7 @@ describe('Checkout Feature Tests', () => {
   describe('Checkout Session API', () => {
     it('should create a checkout session with camelCase properties', async () => {
       // Create a new basket for this test
-      const basketResponse = await client.post('/basket', {
+      const basketResponse = await client.post('/customer/basket', {
         sessionId: 'checkout-test-session-' + Date.now()
       });
       
@@ -66,7 +66,7 @@ describe('Checkout Feature Tests', () => {
       const testBasketId = basketResponse.data.data.basketId;
       
       // Add an item to the basket (use valid UUID for productId)
-      await client.post(`/basket/${testBasketId}/items`, {
+      await client.post(`/customer/basket/${testBasketId}/items`, {
         productId: '00000000-0000-0000-0000-000000000001',
         sku: 'TEST-SKU-001',
         name: 'Test Product',
@@ -74,7 +74,7 @@ describe('Checkout Feature Tests', () => {
         unitPrice: 29.99
       });
       
-      const response = await client.post('/checkout', {
+      const response = await client.post('/customer/checkout', {
         basketId: testBasketId
       });
       
@@ -103,7 +103,7 @@ describe('Checkout Feature Tests', () => {
     });
 
     it('should get a checkout session by ID with camelCase properties', async () => {
-      const response = await client.get(`/checkout/${checkoutId}`);
+      const response = await client.get(`/customer/checkout/${checkoutId}`);
       
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
@@ -123,14 +123,14 @@ describe('Checkout Feature Tests', () => {
     
     it('should return 404 for non-existent checkout', async () => {
       // Use a valid UUID format that doesn't exist
-      const response = await client.get('/checkout/00000000-0000-0000-0000-000000000000');
-      expect([404, 500]).toContain(response.status); // 500 may occur if DB query fails
+      const response = await client.get('/customer/checkout/00000000-0000-0000-0000-000000000000');
+      expect(response.status).toBe(404);
     });
   });
 
   describe('Shipping and Billing Address API', () => {
     it('should update shipping address with camelCase properties', async () => {
-      const response = await client.put(`/checkout/${checkoutId}/shipping-address`, TEST_SHIPPING_ADDRESS);
+      const response = await client.put(`/customer/checkout/${checkoutId}/shipping-address`, TEST_SHIPPING_ADDRESS);
       
       // Accept 200 or 500 (server may need restart for code changes)
       if (response.status === 500) {
@@ -162,7 +162,7 @@ describe('Checkout Feature Tests', () => {
     });
 
     it('should update billing address with camelCase properties', async () => {
-      const response = await client.put(`/checkout/${checkoutId}/billing-address`, TEST_BILLING_ADDRESS);
+      const response = await client.put(`/customer/checkout/${checkoutId}/billing-address`, TEST_BILLING_ADDRESS);
       
       // Accept 200 or 500 (server may need restart for code changes)
       if (response.status === 500) {
@@ -194,9 +194,9 @@ describe('Checkout Feature Tests', () => {
   describe('Shipping and Payment Method API', () => {
     it('should get shipping methods for a checkout', async () => {
       // First set shipping address (required for shipping methods)
-      await client.put(`/checkout/${checkoutId}/shipping-address`, TEST_SHIPPING_ADDRESS);
+      await client.put(`/customer/checkout/${checkoutId}/shipping-address`, TEST_SHIPPING_ADDRESS);
       
-      const response = await client.get(`/checkout/${checkoutId}/shipping-methods`);
+      const response = await client.get(`/customer/checkout/${checkoutId}/shipping-methods`);
       
       // Accept 200 or 400 (if shipping address not set)
       if (response.status === 400) {
@@ -225,10 +225,10 @@ describe('Checkout Feature Tests', () => {
 
     it('should select a shipping method with camelCase properties', async () => {
       // First set shipping address
-      await client.put(`/checkout/${checkoutId}/shipping-address`, TEST_SHIPPING_ADDRESS);
+      await client.put(`/customer/checkout/${checkoutId}/shipping-address`, TEST_SHIPPING_ADDRESS);
       
       // Get available methods
-      const methodsResponse = await client.get(`/checkout/${checkoutId}/shipping-methods`);
+      const methodsResponse = await client.get(`/customer/checkout/${checkoutId}/shipping-methods`);
       if (methodsResponse.status !== 200 || !methodsResponse.data.data.length) {
         console.log('No shipping methods available');
         return;
@@ -236,7 +236,7 @@ describe('Checkout Feature Tests', () => {
       
       const shippingMethodId = methodsResponse.data.data[0].id;
       
-      const response = await client.put(`/checkout/${checkoutId}/shipping-method`, {
+      const response = await client.put(`/customer/checkout/${checkoutId}/shipping-method`, {
         shippingMethodId
       });
       
@@ -258,7 +258,7 @@ describe('Checkout Feature Tests', () => {
     });
 
     it('should get payment methods with camelCase properties', async () => {
-      const response = await client.get('/checkout/payment-methods');
+      const response = await client.get('/customer/checkout/payment-methods');
       
       // Accept 200 or 500 (may fail if paymentMethod table doesn't exist)
       if (response.status === 500) {
@@ -287,7 +287,7 @@ describe('Checkout Feature Tests', () => {
 
     it('should select a payment method with camelCase properties', async () => {
       // Get available methods
-      const methodsResponse = await client.get('/checkout/payment-methods');
+      const methodsResponse = await client.get('/customer/checkout/payment-methods');
       if (methodsResponse.status !== 200 || !methodsResponse.data.data.length) {
         console.log('No payment methods available');
         return;
@@ -295,7 +295,7 @@ describe('Checkout Feature Tests', () => {
       
       const paymentMethodId = methodsResponse.data.data[0].id;
       
-      const response = await client.put(`/checkout/${checkoutId}/payment-method`, {
+      const response = await client.put(`/customer/checkout/${checkoutId}/payment-method`, {
         paymentMethodId
       });
       
@@ -317,7 +317,7 @@ describe('Checkout Feature Tests', () => {
 
   describe('Coupon API', () => {
     it('should apply a coupon code', async () => {
-      const response = await client.post(`/checkout/${checkoutId}/coupon`, {
+      const response = await client.post(`/customer/checkout/${checkoutId}/coupon`, {
         couponCode: 'TEST10'
       });
       
@@ -338,11 +338,11 @@ describe('Checkout Feature Tests', () => {
     
     it('should remove a coupon code', async () => {
       // First apply a coupon
-      await client.post(`/checkout/${checkoutId}/coupon`, {
+      await client.post(`/customer/checkout/${checkoutId}/coupon`, {
         couponCode: 'TEST10'
       });
       
-      const response = await client.delete(`/checkout/${checkoutId}/coupon`);
+      const response = await client.delete(`/customer/checkout/${checkoutId}/coupon`);
       
       if (response.status === 500) {
         console.log('Remove coupon failed with 500 - server may need restart');
@@ -354,7 +354,7 @@ describe('Checkout Feature Tests', () => {
     });
     
     it('should reject empty coupon code', async () => {
-      const response = await client.post(`/checkout/${checkoutId}/coupon`, {
+      const response = await client.post(`/customer/checkout/${checkoutId}/coupon`, {
         couponCode: ''
       });
       
@@ -365,7 +365,7 @@ describe('Checkout Feature Tests', () => {
   describe('Checkout Completion', () => {
     it('should abandon checkout with proper response format', async () => {
       // Create a new checkout to abandon
-      const basketResponse = await client.post('/basket', {
+      const basketResponse = await client.post('/customer/basket', {
         sessionId: 'abandon-test-session-' + Date.now()
       });
       
@@ -377,7 +377,7 @@ describe('Checkout Feature Tests', () => {
       const testBasketId = basketResponse.data.data.basketId;
       
       // Add an item (use valid UUID for productId)
-      await client.post(`/basket/${testBasketId}/items`, {
+      await client.post(`/customer/basket/${testBasketId}/items`, {
         productId: '00000000-0000-0000-0000-000000000001',
         sku: 'TEST-SKU-001',
         name: 'Test Product',
@@ -386,7 +386,7 @@ describe('Checkout Feature Tests', () => {
       });
       
       // Create checkout
-      const checkoutResponse = await client.post('/checkout', {
+      const checkoutResponse = await client.post('/customer/checkout', {
         basketId: testBasketId
       });
       
@@ -397,7 +397,7 @@ describe('Checkout Feature Tests', () => {
       
       const abandonCheckoutId = checkoutResponse.data.data.checkoutId;
       
-      const response = await client.post(`/checkout/${abandonCheckoutId}/abandon`);
+      const response = await client.post(`/customer/checkout/${abandonCheckoutId}/abandon`);
       
       // Accept 200 or 500 (may fail due to server state)
       if (response.status === 500) {
@@ -412,32 +412,32 @@ describe('Checkout Feature Tests', () => {
     
     it('should fail to complete checkout without required fields', async () => {
       // Try to complete without shipping address/method
-      const response = await client.post(`/checkout/${checkoutId}/complete`);
+      const response = await client.post(`/customer/checkout/${checkoutId}/complete`);
       
       // Should fail because checkout is not ready
-      expect([400, 500]).toContain(response.status);
+      expect(response.status).toBe(400);
     });
   });
   
   describe('Edge Cases', () => {
     it('should handle non-existent checkout gracefully', async () => {
       // Use valid UUID format
-      const response = await client.get('/checkout/00000000-0000-0000-0000-000000000000');
-      expect([404, 500]).toContain(response.status);
+      const response = await client.get('/customer/checkout/00000000-0000-0000-0000-000000000000');
+      expect(response.status).toBe(404);
     });
     
     it('should require basketId when creating checkout', async () => {
-      const response = await client.post('/checkout', {});
+      const response = await client.post('/customer/checkout', {});
       expect(response.status).toBe(400);
     });
     
     it('should require shippingMethodId when setting shipping method', async () => {
-      const response = await client.put(`/checkout/${checkoutId}/shipping-method`, {});
+      const response = await client.put(`/customer/checkout/${checkoutId}/shipping-method`, {});
       expect(response.status).toBe(400);
     });
     
     it('should require paymentMethodId when setting payment method', async () => {
-      const response = await client.put(`/checkout/${checkoutId}/payment-method`, {});
+      const response = await client.put(`/customer/checkout/${checkoutId}/payment-method`, {});
       expect(response.status).toBe(400);
     });
   });

@@ -115,7 +115,7 @@ export interface EmailTemplate {
 
 export async function getCampaign(emailCampaignId: string): Promise<EmailCampaign | null> {
   const row = await queryOne<Record<string, any>>(
-    'SELECT * FROM "emailCampaign" WHERE "emailCampaignId" = $1 AND "deletedAt" IS NULL',
+    'SELECT * FROM "marketingEmailCampaign" WHERE "marketingEmailCampaignId" = $1 AND "deletedAt" IS NULL',
     [emailCampaignId]
   );
   return row ? mapToCampaign(row) : null;
@@ -140,7 +140,7 @@ export async function getCampaignsByMerchant(
   }
 
   const countResult = await queryOne<{ count: string }>(
-    `SELECT COUNT(*) as count FROM "emailCampaign" WHERE ${whereClause}`,
+    `SELECT COUNT(*) as count FROM "marketingEmailCampaign" WHERE ${whereClause}`,
     params
   );
 
@@ -148,7 +148,7 @@ export async function getCampaignsByMerchant(
   const offset = pagination?.offset || 0;
 
   const rows = await query<Record<string, any>[]>(
-    `SELECT * FROM "emailCampaign" WHERE ${whereClause} 
+    `SELECT * FROM "marketingEmailCampaign" WHERE ${whereClause} 
      ORDER BY "createdAt" DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
     [...params, limit, offset]
   );
@@ -164,7 +164,7 @@ export async function saveCampaign(campaign: Partial<EmailCampaign> & { name: st
 
   if (campaign.emailCampaignId) {
     await query(
-      `UPDATE "emailCampaign" SET
+      `UPDATE "marketingEmailCampaign" SET
         "name" = $1, "subject" = $2, "preheader" = $3, "fromName" = $4, "fromEmail" = $5,
         "replyTo" = $6, "bodyHtml" = $7, "bodyText" = $8, "status" = $9, "campaignType" = $10,
         "templateId" = $11, "segmentIds" = $12, "tags" = $13, "scheduledAt" = $14, "sentAt" = $15,
@@ -172,7 +172,7 @@ export async function saveCampaign(campaign: Partial<EmailCampaign> & { name: st
         "uniqueOpenCount" = $20, "clickCount" = $21, "uniqueClickCount" = $22, "bounceCount" = $23,
         "unsubscribeCount" = $24, "revenue" = $25, "conversionCount" = $26, "openRate" = $27,
         "clickRate" = $28, "updatedAt" = $29
-      WHERE "emailCampaignId" = $30`,
+      WHERE "marketingEmailCampaignId" = $30`,
       [
         campaign.name, campaign.subject, campaign.preheader, campaign.fromName, campaign.fromEmail,
         campaign.replyTo, campaign.bodyHtml, campaign.bodyText, campaign.status || 'draft',
@@ -189,7 +189,7 @@ export async function saveCampaign(campaign: Partial<EmailCampaign> & { name: st
     return (await getCampaign(campaign.emailCampaignId))!;
   } else {
     const result = await queryOne<Record<string, any>>(
-      `INSERT INTO "emailCampaign" (
+      `INSERT INTO "marketingEmailCampaign" (
         "merchantId", "name", "subject", "preheader", "fromName", "fromEmail", "replyTo",
         "bodyHtml", "bodyText", "status", "campaignType", "templateId", "segmentIds", "tags",
         "scheduledAt", "createdAt", "updatedAt"
@@ -209,7 +209,7 @@ export async function saveCampaign(campaign: Partial<EmailCampaign> & { name: st
 
 export async function deleteCampaign(emailCampaignId: string): Promise<void> {
   await query(
-    'UPDATE "emailCampaign" SET "deletedAt" = $1 WHERE "emailCampaignId" = $2',
+    'UPDATE "marketingEmailCampaign" SET "deletedAt" = $1 WHERE "marketingEmailCampaignId" = $2',
     [new Date().toISOString(), emailCampaignId]
   );
 }
@@ -244,7 +244,7 @@ export async function updateCampaignStats(emailCampaignId: string, stats: Partia
     params.push(emailCampaignId);
 
     await query(
-      `UPDATE "emailCampaign" SET ${updates.join(', ')} WHERE "emailCampaignId" = $${paramIndex}`,
+      `UPDATE "marketingEmailCampaign" SET ${updates.join(', ')} WHERE "marketingEmailCampaignId" = $${paramIndex}`,
       params
     );
   }
@@ -274,10 +274,10 @@ export async function addRecipients(emailCampaignId: string, recipients: Array<{
   }
 
   await query(
-    `INSERT INTO "emailCampaignRecipient" 
-     ("emailCampaignId", "customerId", "email", "firstName", "lastName", "status", "createdAt", "updatedAt")
+    `INSERT INTO "marketingEmailCampaignRecipient" 
+     ("marketingEmailCampaignId", "customerId", "email", "firstName", "lastName", "status", "createdAt", "updatedAt")
      VALUES ${values.join(', ')}
-     ON CONFLICT ("emailCampaignId", "email") DO NOTHING`,
+     ON CONFLICT ("marketingEmailCampaignId", "email") DO NOTHING`,
     params
   );
 
@@ -289,7 +289,7 @@ export async function getRecipients(
   filters?: { status?: RecipientStatus },
   pagination?: { limit?: number; offset?: number }
 ): Promise<{ data: EmailCampaignRecipient[]; total: number }> {
-  let whereClause = '"emailCampaignId" = $1';
+  let whereClause = '"marketingEmailCampaignId" = $1';
   const params: any[] = [emailCampaignId];
   let paramIndex = 2;
 
@@ -299,7 +299,7 @@ export async function getRecipients(
   }
 
   const countResult = await queryOne<{ count: string }>(
-    `SELECT COUNT(*) as count FROM "emailCampaignRecipient" WHERE ${whereClause}`,
+    `SELECT COUNT(*) as count FROM "marketingEmailCampaignRecipient" WHERE ${whereClause}`,
     params
   );
 
@@ -307,7 +307,7 @@ export async function getRecipients(
   const offset = pagination?.offset || 0;
 
   const rows = await query<Record<string, any>[]>(
-    `SELECT * FROM "emailCampaignRecipient" WHERE ${whereClause} 
+    `SELECT * FROM "marketingEmailCampaignRecipient" WHERE ${whereClause} 
      ORDER BY "createdAt" ASC LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
     [...params, limit, offset]
   );
@@ -339,7 +339,7 @@ export async function updateRecipientStatus(
   params.push(emailCampaignRecipientId);
 
   await query(
-    `UPDATE "emailCampaignRecipient" SET ${updates.join(', ')} WHERE "emailCampaignRecipientId" = $${paramIndex}`,
+    `UPDATE "marketingEmailCampaignRecipient" SET ${updates.join(', ')} WHERE "emailCampaignRecipientId" = $${paramIndex}`,
     params
   );
 }
@@ -350,7 +350,7 @@ export async function updateRecipientStatus(
 
 export async function getTemplate(emailTemplateId: string): Promise<EmailTemplate | null> {
   const row = await queryOne<Record<string, any>>(
-    'SELECT * FROM "emailTemplate" WHERE "emailTemplateId" = $1 AND "deletedAt" IS NULL',
+    'SELECT * FROM "marketingEmailTemplate" WHERE "marketingEmailTemplateId" = $1 AND "deletedAt" IS NULL',
     [emailTemplateId]
   );
   return row ? mapToTemplate(row) : null;
@@ -374,7 +374,7 @@ export async function getTemplatesByMerchant(
   }
 
   const rows = await query<Record<string, any>[]>(
-    `SELECT * FROM "emailTemplate" WHERE ${whereClause} ORDER BY "name" ASC`,
+    `SELECT * FROM "marketingEmailTemplate" WHERE ${whereClause} ORDER BY "name" ASC`,
     params
   );
 
@@ -386,11 +386,11 @@ export async function saveTemplate(template: Partial<EmailTemplate> & { name: st
 
   if (template.emailTemplateId) {
     await query(
-      `UPDATE "emailTemplate" SET
+      `UPDATE "marketingEmailTemplate" SET
         "name" = $1, "slug" = $2, "category" = $3, "description" = $4, "subject" = $5,
         "preheader" = $6, "bodyHtml" = $7, "bodyText" = $8, "variables" = $9,
         "thumbnailUrl" = $10, "isActive" = $11, "updatedAt" = $12
-      WHERE "emailTemplateId" = $13`,
+      WHERE "marketingEmailTemplateId" = $13`,
       [
         template.name, template.slug, template.category || 'custom', template.description,
         template.subject, template.preheader, template.bodyHtml, template.bodyText,
@@ -401,7 +401,7 @@ export async function saveTemplate(template: Partial<EmailTemplate> & { name: st
     return (await getTemplate(template.emailTemplateId))!;
   } else {
     const result = await queryOne<Record<string, any>>(
-      `INSERT INTO "emailTemplate" (
+      `INSERT INTO "marketingEmailTemplate" (
         "merchantId", "name", "slug", "category", "description", "subject", "preheader",
         "bodyHtml", "bodyText", "variables", "thumbnailUrl", "isActive", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
@@ -419,7 +419,7 @@ export async function saveTemplate(template: Partial<EmailTemplate> & { name: st
 
 export async function deleteTemplate(emailTemplateId: string): Promise<void> {
   await query(
-    'UPDATE "emailTemplate" SET "deletedAt" = $1 WHERE "emailTemplateId" = $2',
+    'UPDATE "marketingEmailTemplate" SET "deletedAt" = $1 WHERE "marketingEmailTemplateId" = $2',
     [new Date().toISOString(), emailTemplateId]
   );
 }
@@ -430,7 +430,7 @@ export async function deleteTemplate(emailTemplateId: string): Promise<void> {
 
 function mapToCampaign(row: Record<string, any>): EmailCampaign {
   return {
-    emailCampaignId: row.emailCampaignId,
+    emailCampaignId: row.marketingEmailCampaignId,
     merchantId: row.merchantId,
     name: row.name,
     subject: row.subject,
@@ -473,8 +473,8 @@ function mapToCampaign(row: Record<string, any>): EmailCampaign {
 
 function mapToRecipient(row: Record<string, any>): EmailCampaignRecipient {
   return {
-    emailCampaignRecipientId: row.emailCampaignRecipientId,
-    emailCampaignId: row.emailCampaignId,
+    emailCampaignRecipientId: row.marketingEmailCampaignRecipientId,
+    emailCampaignId: row.marketingEmailCampaignId,
     customerId: row.customerId,
     email: row.email,
     firstName: row.firstName,
@@ -509,7 +509,7 @@ function mapToRecipient(row: Record<string, any>): EmailCampaignRecipient {
 
 function mapToTemplate(row: Record<string, any>): EmailTemplate {
   return {
-    emailTemplateId: row.emailTemplateId,
+    emailTemplateId: row.marketingEmailTemplateId,
     merchantId: row.merchantId,
     name: row.name,
     slug: row.slug,

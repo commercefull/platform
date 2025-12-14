@@ -1,8 +1,8 @@
 import { AxiosInstance } from 'axios';
-import { createTestClient, loginTestUser } from '../testUtils';
+import { createTestClient, loginTestUser, loginTestAdmin } from '../testUtils';
 import { 
   MembershipTier, 
-  MembershipBenefit, 
+  LegacyMembershipBenefit as MembershipBenefit, 
   UserMembership 
 } from '../../../features/membership/repos/membershipRepo';
 
@@ -99,9 +99,9 @@ export const setupMembershipTests = async () => {
   // Create test client
   const client = createTestClient();
   
-  // Login as admin and regular user
-  const adminToken = await loginTestUser(client, 'admin');
-  const userToken = await loginTestUser(client, 'customer');
+  // Login as merchant (admin) for business routes and customer for public routes
+  const adminToken = await loginTestAdmin(client);  // Uses /business/auth/login with merchant@example.com
+  const userToken = await loginTestUser(client, 'customer@example.com', 'password123');
   const userId = 'test-user-id'; // In a real scenario, you would get this from the user profile
   
   // Create test tier

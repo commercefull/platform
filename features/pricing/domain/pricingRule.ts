@@ -47,11 +47,14 @@ export interface PricingAdjustment {
 
 export interface PricingRule {
   id: string;
+  pricingRuleId?: string; // Alias for id
   name: string;
   description?: string;
   type: PricingRuleType;
+  ruleType?: 'percentage' | 'fixed'; // Alias for type
   scope: PricingRuleScope;
   status: PricingRuleStatus;
+  isActive?: boolean; // Alias for status === ACTIVE
   priority: number;
   conditions: PricingCondition[];
   adjustments: PricingAdjustment[];
@@ -71,8 +74,8 @@ export interface PricingRule {
   metadata?: Record<string, any>;
 }
 
-export type PricingRuleCreateProps = Omit<PricingRule, 'id' | 'createdAt' | 'updatedAt'>;
-export type PricingRuleUpdateProps = Partial<Omit<PricingRule, 'id' | 'createdAt' | 'updatedAt'>>;
+export type PricingRuleCreateProps = Omit<PricingRule, 'id' | 'pricingRuleId' | 'createdAt' | 'updatedAt'>;
+export type PricingRuleUpdateProps = Partial<Omit<PricingRule, 'id' | 'pricingRuleId' | 'createdAt' | 'updatedAt'>>;
 
 /**
  * Currency Price Rule - Extended from PricingRule for currency-specific pricing
@@ -119,8 +122,10 @@ export interface PricingResult {
 
 export interface TierPrice {
   id: string;
+  tierPriceId?: string; // Alias for id
   productId: string;
   variantId?: string;
+  productVariantId?: string; // Alias for variantId
   quantityMin: number;
   quantityMax?: number;
   price: number;

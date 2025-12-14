@@ -1,24 +1,48 @@
-import { queryOne, query } from "../../../libs/db";
-import { unixTimestamp } from "../../../libs/date";
+/**
+ * Membership Repository Facade
+ * 
+ * This provides a unified interface for membership operations, maintaining
+ * backward compatibility with existing controllers while delegating to
+ * specialized repositories.
+ * 
+ * For direct access to specific entities, use the specialized repos:
+ * - membershipPlanRepo.ts - Membership plans
+ * - membershipBenefitRepo.ts - Benefits
+ * - membershipPlanBenefitRepo.ts - Plan-benefit associations
+ * - membershipSubscriptionRepo.ts - Customer subscriptions
+ * - membershipPaymentRepo.ts - Payments
+ */
 
+import * as planRepo from './membershipPlanRepo';
+import membershipBenefitRepo from './membershipBenefitRepo';
+import membershipPlanBenefitRepo from './membershipPlanBenefitRepo';
+import membershipSubscriptionRepo from './membershipSubscriptionRepo';
+
+// Re-export types
+export { MembershipPlan, BillingCycle } from './membershipPlanRepo';
+export { MembershipBenefit, BenefitType, ValueType } from './membershipBenefitRepo';
+export { MembershipSubscription, SubscriptionStatus } from './membershipSubscriptionRepo';
+export { MembershipPlanBenefit } from './membershipPlanBenefitRepo';
+
+// Legacy types for backward compatibility with controllers
 export interface MembershipTier {
   id: string;
   name: string;
   description: string;
   monthlyPrice: number;
   annualPrice: number;
-  level: number;          // Numeric level for tier comparison (higher = better)
+  level: number;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface MembershipBenefit {
+export interface LegacyMembershipBenefit {
   id: string;
-  tierIds: string[];      // Array of tier IDs this benefit applies to
+  tierIds: string[];
   name: string;
   description: string;
-  benefitType: 'discount' | 'freeShipping' | 'exclusiveAccess' | 'reward' | 'other';
+  benefitType: string;
   discountPercentage?: number;
   discountAmount?: number;
   isActive: boolean;
@@ -46,559 +70,336 @@ export interface UserMembershipWithTier extends UserMembership {
   tier: MembershipTier;
 }
 
-type MembershipTierCreateParams = Omit<MembershipTier, 'id' | 'createdAt' | 'updatedAt'>;
-type MembershipTierUpdateParams = Partial<Omit<MembershipTier, 'id' | 'createdAt' | 'updatedAt'>>;
-type MembershipBenefitCreateParams = Omit<MembershipBenefit, 'id' | 'createdAt' | 'updatedAt'>;
-type MembershipBenefitUpdateParams = Partial<Omit<MembershipBenefit, 'id' | 'createdAt' | 'updatedAt'>>;
-type UserMembershipCreateParams = Omit<UserMembership, 'id' | 'createdAt' | 'updatedAt'>;
-type UserMembershipUpdateParams = Partial<Omit<UserMembership, 'id' | 'userId' | 'createdAt' | 'updatedAt'>>;
-
-// Field mapping between TypeScript camelCase and database snake_case
-const membershipTierFields = {
-  id: 'id',
-  name: 'name',
-  description: 'description',
-  monthlyPrice: 'monthly_price',
-  annualPrice: 'annual_price',
-  level: 'level',
-  isActive: 'is_active',
-  createdAt: 'created_at',
-  updatedAt: 'updated_at'
-};
-
-const membershipBenefitFields = {
-  id: 'id',
-  tierIds: 'tier_ids',
-  name: 'name',
-  description: 'description',
-  benefitType: 'benefit_type',
-  discountPercentage: 'discount_percentage',
-  discountAmount: 'discount_amount',
-  isActive: 'is_active',
-  createdAt: 'created_at',
-  updatedAt: 'updated_at'
-};
-
-const userMembershipFields = {
-  id: 'id',
-  userId: 'user_id',
-  tierId: 'tier_id',
-  startDate: 'start_date',
-  endDate: 'end_date',
-  isActive: 'is_active',
-  autoRenew: 'auto_renew',
-  membershipType: 'membership_type',
-  lastRenewalDate: 'last_renewal_date',
-  nextRenewalDate: 'next_renewal_date',
-  paymentMethod: 'payment_method',
-  createdAt: 'created_at',
-  updatedAt: 'updated_at'
-};
-
-// Helper to convert TypeScript camelCase field names to database snake_case
-function getDbFieldName(field: string, mappingObject: Record<string, string>): string {
-  return mappingObject[field] || field;
-}
-
-// Helper to build a dynamic UPDATE query with snake_case fields
-function buildUpdateQuery(
-  tableName: string, 
-  params: Record<string, any>, 
-  mappingObject: Record<string, string>, 
-  idField: string = 'id'
-): { sql: string; values: any[]; paramIndex: number } {
-  const updateFields: string[] = [];
-  const values: any[] = [];
-  let paramIndex = 1;
-
-  // Build dynamic query based on provided update params
-  Object.entries(params).forEach(([key, value]) => {
-    if (value !== undefined) {
-      const dbField = getDbFieldName(key, mappingObject);
-      updateFields.push(`"${dbField}" = $${paramIndex}`);
-      values.push(value);
-      paramIndex++;
-    }
-  });
-
-  const sql = `
-    UPDATE "public"."${tableName}" 
-    SET ${updateFields.join(', ')} 
-    WHERE "${getDbFieldName(idField, mappingObject)}" = $${paramIndex} 
-    RETURNING *
-  `;
-
-  return { sql, values, paramIndex };
-}
-
-// Helper functions to transform between database and TypeScript formats
-function transformMembershipTierFromDb(dbRecord: Record<string, any>): MembershipTier {
-  return {
-    id: dbRecord.id,
-    name: dbRecord.name,
-    description: dbRecord.description || '',
-    monthlyPrice: dbRecord.monthly_price,
-    annualPrice: dbRecord.annual_price,
-    level: dbRecord.level,
-    isActive: dbRecord.is_active,
-    createdAt: dbRecord.created_at,
-    updatedAt: dbRecord.updated_at
-  };
-}
-
-function transformMembershipBenefitFromDb(dbRecord: Record<string, any>): MembershipBenefit {
-  return {
-    id: dbRecord.id,
-    tierIds: dbRecord.tier_ids || [],
-    name: dbRecord.name,
-    description: dbRecord.description || '',
-    benefitType: dbRecord.benefit_type,
-    discountPercentage: dbRecord.discount_percentage,
-    discountAmount: dbRecord.discount_amount,
-    isActive: dbRecord.is_active,
-    createdAt: dbRecord.created_at,
-    updatedAt: dbRecord.updated_at
-  };
-}
-
-function transformUserMembershipFromDb(dbRecord: Record<string, any>): UserMembership {
-  return {
-    id: dbRecord.id,
-    userId: dbRecord.user_id,
-    tierId: dbRecord.tier_id,
-    startDate: dbRecord.start_date,
-    endDate: dbRecord.end_date,
-    isActive: dbRecord.is_active,
-    autoRenew: dbRecord.auto_renew,
-    membershipType: dbRecord.membership_type,
-    lastRenewalDate: dbRecord.last_renewal_date || undefined,
-    nextRenewalDate: dbRecord.next_renewal_date || undefined,
-    paymentMethod: dbRecord.paymentMethod || undefined,
-    createdAt: dbRecord.created_at,
-    updatedAt: dbRecord.updated_at
-  };
-}
-
+/**
+ * MembershipRepo class - Facade for membership operations
+ * 
+ * This class maintains backward compatibility with existing controllers
+ * while delegating to the new specialized repositories.
+ */
 export class MembershipRepo {
-  // Membership Tier Methods
+  // ============================================================================
+  // Plan Methods (delegates to planRepo)
+  // ============================================================================
+
   async findTierById(id: string): Promise<MembershipTier | null> {
-    const result = await queryOne<Record<string, any>>(
-      'SELECT * FROM "public"."membership_tier" WHERE "id" = $1',
-      [id]
-    );
-    return result ? transformMembershipTierFromDb(result) : null;
+    const plan = await planRepo.findById(id);
+    if (!plan) return null;
+    return this.planToTier(plan);
   }
 
-  async findAllTiers(includeInactive: boolean = false): Promise<MembershipTier[]> {
-    let sql = 'SELECT * FROM "public"."membership_tier"';
-    const params: any[] = [];
-
-    if (!includeInactive) {
-      sql += ' WHERE "isActive" = true';
-    }
-
-    sql += ' ORDER BY "level" ASC';
-
-    const results = await query<Record<string, any>[]>(sql, params);
-    return results ? results.map(transformMembershipTierFromDb) : [];
+  async findAllTiers(includeInactive = false): Promise<MembershipTier[]> {
+    const plans = await planRepo.findAll(!includeInactive);
+    return plans.map(p => this.planToTier(p));
   }
 
-  async createTier(params: MembershipTierCreateParams): Promise<MembershipTier> {
-    const now = unixTimestamp();
-    const {
-      name,
-      description,
-      monthlyPrice,
-      annualPrice,
-      level,
-      isActive
-    } = params;
-
-    const result = await queryOne<Record<string, any>>(
-      `INSERT INTO "public"."membership_tier" 
-      ("name", "description", "monthly_price", "annual_price", "level", "isActive", "createdAt", "updatedAt") 
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
-      RETURNING *`,
-      [name, description, monthlyPrice, annualPrice, level, isActive, now, now]
-    );
-
-    if (!result) {
-      throw new Error('Failed to create membership tier');
-    }
-
-    return transformMembershipTierFromDb(result);
+  async createTier(params: Omit<MembershipTier, 'id' | 'createdAt' | 'updatedAt'>): Promise<MembershipTier> {
+    const plan = await planRepo.create({
+      name: params.name,
+      code: params.name.toUpperCase().replace(/\s+/g, '_'),
+      description: params.description,
+      price: params.monthlyPrice,
+      level: params.level,
+      isActive: params.isActive,
+      isPublic: true,
+      isDefault: false,
+      priority: 0,
+      trialDays: 0,
+      setupFee: 0,
+      currency: 'USD',
+      billingCycle: 'monthly',
+      billingPeriod: 1,
+      autoRenew: true,
+      gracePeriodsAllowed: 0,
+      gracePeriodDays: 0,
+      shortDescription: null,
+      salePrice: null,
+      maxMembers: null,
+      duration: null,
+      membershipImage: null,
+      publicDetails: null,
+      privateMeta: null,
+      visibilityRules: null,
+      availabilityRules: null,
+      customFields: null,
+      createdBy: null
+    });
+    return this.planToTier(plan);
   }
 
-  async updateTier(id: string, params: MembershipTierUpdateParams): Promise<MembershipTier> {
-    const now = unixTimestamp();
-    const currentTier = await this.findTierById(id);
+  async updateTier(id: string, params: Partial<Omit<MembershipTier, 'id' | 'createdAt' | 'updatedAt'>>): Promise<MembershipTier> {
+    const updateData: any = {};
+    if (params.name !== undefined) updateData.name = params.name;
+    if (params.description !== undefined) updateData.description = params.description;
+    if (params.monthlyPrice !== undefined) updateData.price = params.monthlyPrice;
+    if (params.level !== undefined) updateData.level = params.level;
+    if (params.isActive !== undefined) updateData.isActive = params.isActive;
 
-    if (!currentTier) {
-      throw new Error(`Membership tier with ID ${id} not found`);
-    }
-
-    // Always update the updatedAt timestamp
-    const updatedParams = {
-      ...params,
-      updatedAt: now
-    };
-
-    const { sql, values, paramIndex } = buildUpdateQuery(
-      'membership_tier',
-      updatedParams,
-      membershipTierFields
-    );
-
-    // Add ID for WHERE clause
-    values.push(id);
-
-    const result = await queryOne<Record<string, any>>(sql, values);
-
-    if (!result) {
-      throw new Error(`Failed to update membership tier with ID ${id}`);
-    }
-
-    return transformMembershipTierFromDb(result);
+    const plan = await planRepo.update(id, updateData);
+    if (!plan) throw new Error(`Membership tier with ID ${id} not found`);
+    return this.planToTier(plan);
   }
 
   async deleteTier(id: string): Promise<boolean> {
-    // Check if tier is in use by any users
-    const usersWithTier = await query<Record<string, any>[]>(
-      'SELECT COUNT(*) as count FROM "public"."user_membership" WHERE "tier_id" = $1',
-      [id]
-    );
+    return planRepo.remove(id);
+  }
+
+  // ============================================================================
+  // Benefit Methods (delegates to membershipBenefitRepo)
+  // ============================================================================
+
+  async findBenefitById(id: string): Promise<LegacyMembershipBenefit | null> {
+    const benefit = await membershipBenefitRepo.findById(id);
+    if (!benefit) return null;
+    return this.benefitToLegacy(benefit);
+  }
+
+  async findBenefitsByTierId(tierId: string): Promise<LegacyMembershipBenefit[]> {
+    const planBenefits = await membershipPlanBenefitRepo.findByPlanId(tierId, true);
+    const benefits: LegacyMembershipBenefit[] = [];
     
-    if (usersWithTier && usersWithTier[0] && parseInt(usersWithTier[0].count) > 0) {
-      throw new Error(`Cannot delete tier with ID ${id} as it is assigned to users`);
+    for (const pb of planBenefits) {
+      const benefit = await membershipBenefitRepo.findById(pb.benefitId);
+      if (benefit) {
+        benefits.push(this.benefitToLegacy(benefit, [tierId]));
+      }
     }
-
-    const result = await queryOne(
-      'DELETE FROM "public"."membership_tier" WHERE "id" = $1 RETURNING id',
-      [id]
-    );
-
-    return !!result;
+    
+    return benefits;
   }
 
-  // Membership Benefit Methods
-  async findBenefitById(id: string): Promise<MembershipBenefit | null> {
-    const result = await queryOne<Record<string, any>>(
-      'SELECT * FROM "public"."membership_benefit" WHERE "id" = $1',
-      [id]
-    );
-    return result ? transformMembershipBenefitFromDb(result) : null;
+  async findAllBenefits(includeInactive = false): Promise<LegacyMembershipBenefit[]> {
+    const benefits = await membershipBenefitRepo.findAll(!includeInactive);
+    return benefits.map(b => this.benefitToLegacy(b));
   }
 
-  async findBenefitsByTierId(tierId: string): Promise<MembershipBenefit[]> {
-    const results = await query<Record<string, any>[]>(
-      'SELECT * FROM "public"."membership_benefit" WHERE $1 = ANY("tier_ids") AND "isActive" = true',
-      [tierId]
-    );
-    return results ? results.map(transformMembershipBenefitFromDb) : [];
+  async createBenefit(params: {
+    name: string;
+    description?: string;
+    tierIds: string[];
+    benefitType: string;
+    discountPercentage?: number;
+    discountAmount?: number;
+    isActive?: boolean;
+  }): Promise<LegacyMembershipBenefit> {
+    const benefit = await membershipBenefitRepo.create({
+      name: params.name,
+      code: params.name.toUpperCase().replace(/\s+/g, '_'),
+      description: params.description || null,
+      shortDescription: null,
+      isActive: params.isActive ?? true,
+      priority: 0,
+      benefitType: params.benefitType as any,
+      valueType: params.discountPercentage ? 'percentage' : 'fixed',
+      value: params.discountPercentage 
+        ? { percentage: params.discountPercentage }
+        : params.discountAmount 
+          ? { amount: params.discountAmount }
+          : null,
+      icon: null,
+      rules: null,
+      createdBy: null
+    });
+
+    // Link benefit to plans
+    for (const planId of params.tierIds) {
+      await membershipPlanBenefitRepo.create({
+        planId,
+        benefitId: benefit.membershipBenefitId,
+        isActive: true,
+        priority: 0
+      });
+    }
+
+    return this.benefitToLegacy(benefit, params.tierIds);
   }
 
-  async findAllBenefits(includeInactive: boolean = false): Promise<MembershipBenefit[]> {
-    let sql = 'SELECT * FROM "public"."membership_benefit"';
-    const params: any[] = [];
-
-    if (!includeInactive) {
-      sql += ' WHERE "isActive" = true';
+  async updateBenefit(id: string, params: Partial<{
+    name: string;
+    description: string;
+    tierIds: string[];
+    benefitType: string;
+    discountPercentage: number;
+    discountAmount: number;
+    isActive: boolean;
+  }>): Promise<LegacyMembershipBenefit> {
+    const updateData: any = {};
+    if (params.name !== undefined) updateData.name = params.name;
+    if (params.description !== undefined) updateData.description = params.description;
+    if (params.isActive !== undefined) updateData.isActive = params.isActive;
+    if (params.benefitType !== undefined) updateData.benefitType = params.benefitType;
+    if (params.discountPercentage !== undefined) {
+      updateData.value = { percentage: params.discountPercentage };
+      updateData.valueType = 'percentage';
+    }
+    if (params.discountAmount !== undefined) {
+      updateData.value = { amount: params.discountAmount };
+      updateData.valueType = 'fixed';
     }
 
-    const results = await query<Record<string, any>[]>(sql, params);
-    return results ? results.map(transformMembershipBenefitFromDb) : [];
-  }
-
-  async createBenefit(params: MembershipBenefitCreateParams): Promise<MembershipBenefit> {
-    const now = unixTimestamp();
-    const {
-      tierIds,
-      name,
-      description,
-      benefitType,
-      discountPercentage,
-      discountAmount,
-      isActive
-    } = params;
-
-    const result = await queryOne<Record<string, any>>(
-      `INSERT INTO "public"."membership_benefit" 
-      ("tier_ids", "name", "description", "benefit_type", "discount_percentage", "discountAmount", "isActive", "createdAt", "updatedAt") 
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
-      RETURNING *`,
-      [tierIds, name, description, benefitType, discountPercentage, discountAmount, isActive, now, now]
-    );
-
-    if (!result) {
-      throw new Error('Failed to create membership benefit');
-    }
-
-    return transformMembershipBenefitFromDb(result);
-  }
-
-  async updateBenefit(id: string, params: MembershipBenefitUpdateParams): Promise<MembershipBenefit> {
-    const now = unixTimestamp();
-    const currentBenefit = await this.findBenefitById(id);
-
-    if (!currentBenefit) {
-      throw new Error(`Membership benefit with ID ${id} not found`);
-    }
-
-    // Always update the updatedAt timestamp
-    const updatedParams = {
-      ...params,
-      updatedAt: now
-    };
-
-    const { sql, values, paramIndex } = buildUpdateQuery(
-      'membership_benefit',
-      updatedParams,
-      membershipBenefitFields
-    );
-
-    // Add ID for WHERE clause
-    values.push(id);
-
-    const result = await queryOne<Record<string, any>>(sql, values);
-
-    if (!result) {
-      throw new Error(`Failed to update membership benefit with ID ${id}`);
-    }
-
-    return transformMembershipBenefitFromDb(result);
+    const benefit = await membershipBenefitRepo.update(id, updateData);
+    if (!benefit) throw new Error(`Membership benefit with ID ${id} not found`);
+    return this.benefitToLegacy(benefit);
   }
 
   async deleteBenefit(id: string): Promise<boolean> {
-    const result = await queryOne(
-      'DELETE FROM "public"."membership_benefit" WHERE "id" = $1 RETURNING id',
-      [id]
-    );
-
-    return !!result;
+    return membershipBenefitRepo.delete(id);
   }
 
-  // User Membership Methods
+  // ============================================================================
+  // User Membership Methods (delegates to membershipSubscriptionRepo)
+  // ============================================================================
+
   async findUserMembershipById(id: string): Promise<UserMembership | null> {
-    const result = await queryOne<Record<string, any>>(
-      'SELECT * FROM "public"."user_membership" WHERE "id" = $1',
-      [id]
-    );
-    return result ? transformUserMembershipFromDb(result) : null;
+    const sub = await membershipSubscriptionRepo.findById(id);
+    if (!sub) return null;
+    return this.subscriptionToUserMembership(sub);
   }
 
   async findUserMembershipWithTier(id: string): Promise<UserMembershipWithTier | null> {
-    const result = await queryOne<Record<string, any>>(
-      `SELECT m.*, t.id as t_id, t.name as t_name, t.description as t_description, 
-      t.monthly_price, t.annual_price, t.level, t.is_active as t_is_active, 
-      t.created_at as t_created_at, t.updated_at as t_updated_at
-      FROM "public"."user_membership" m
-      LEFT JOIN "public"."membership_tier" t ON m.tier_id = t.id
-      WHERE m.id = $1`,
-      [id]
-    );
+    const sub = await membershipSubscriptionRepo.findById(id);
+    if (!sub) return null;
+    
+    const plan = await planRepo.findById(sub.membershipPlanId);
+    if (!plan) return null;
 
-    if (!result) {
-      return null;
-    }
-
-    const membership = transformUserMembershipFromDb(result);
-    const tier: MembershipTier = {
-      id: result.t_id,
-      name: result.t_name,
-      description: result.t_description || '',
-      monthlyPrice: result.monthly_price,
-      annualPrice: result.annual_price,
-      level: result.level,
-      isActive: result.t_is_active,
-      createdAt: result.t_created_at,
-      updatedAt: result.t_updated_at
-    };
-
-    return { ...membership, tier };
+    const membership = this.subscriptionToUserMembership(sub);
+    return { ...membership, tier: this.planToTier(plan) };
   }
 
   async findMembershipByUserId(userId: string): Promise<UserMembership | null> {
-    const result = await queryOne<Record<string, any>>(
-      'SELECT * FROM "public"."user_membership" WHERE "userId" = $1 AND "isActive" = true',
-      [userId]
-    );
-    return result ? transformUserMembershipFromDb(result) : null;
+    const subs = await membershipSubscriptionRepo.findActiveByCustomerId(userId);
+    if (!subs.length) return null;
+    return this.subscriptionToUserMembership(subs[0]);
   }
 
   async findMembershipByUserIdWithTier(userId: string): Promise<UserMembershipWithTier | null> {
-    const result = await queryOne<Record<string, any>>(
-      `SELECT m.*, t.id as t_id, t.name as t_name, t.description as t_description, 
-      t.monthly_price, t.annual_price, t.level, t.is_active as t_is_active, 
-      t.created_at as t_created_at, t.updated_at as t_updated_at
-      FROM "public"."user_membership" m
-      LEFT JOIN "public"."membership_tier" t ON m.tier_id = t.id
-      WHERE m.user_id = $1 AND m.is_active = true`,
-      [userId]
-    );
+    const subs = await membershipSubscriptionRepo.findActiveByCustomerId(userId);
+    if (!subs.length) return null;
+    
+    const sub = subs[0];
+    const plan = await planRepo.findById(sub.membershipPlanId);
+    if (!plan) return null;
 
-    if (!result) {
-      return null;
-    }
-
-    const membership = transformUserMembershipFromDb(result);
-    const tier: MembershipTier = {
-      id: result.t_id,
-      name: result.t_name,
-      description: result.t_description || '',
-      monthlyPrice: result.monthly_price,
-      annualPrice: result.annual_price,
-      level: result.level,
-      isActive: result.t_is_active,
-      createdAt: result.t_created_at,
-      updatedAt: result.t_updated_at
-    };
-
-    return { ...membership, tier };
+    const membership = this.subscriptionToUserMembership(sub);
+    return { ...membership, tier: this.planToTier(plan) };
   }
 
   async findAllUserMemberships(
-    limit: number = 50, 
-    offset: number = 0, 
-    filter?: { isActive?: boolean, tierId?: string }
+    limit = 50,
+    offset = 0,
+    filter?: { isActive?: boolean; tierId?: string }
   ): Promise<UserMembership[]> {
-    let sql = 'SELECT * FROM "public"."user_membership"';
-    const params: any[] = [];
-    const conditions: string[] = [];
-
-    if (filter) {
-      let paramIndex = 1;
-
-      if (filter.isActive !== undefined) {
-        conditions.push(`"isActive" = $${paramIndex++}`);
-        params.push(filter.isActive);
-      }
-
-      if (filter.tierId) {
-        conditions.push(`"tier_id" = $${paramIndex++}`);
-        params.push(filter.tierId);
-      }
-
-      if (conditions.length > 0) {
-        sql += ` WHERE ${conditions.join(' AND ')}`;
-      }
+    let subs: any[];
+    
+    if (filter?.tierId) {
+      subs = await membershipSubscriptionRepo.findByPlanId(filter.tierId, limit, offset);
+    } else if (filter?.isActive !== undefined) {
+      subs = await membershipSubscriptionRepo.findByStatus(filter.isActive ? 'active' : 'cancelled', limit);
+    } else {
+      subs = await membershipSubscriptionRepo.findByStatus('active', limit);
     }
-
-    sql += ' ORDER BY "createdAt" DESC';
-    sql += ` LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
-    params.push(limit.toString(), offset.toString());
-
-    const results = await query<Record<string, any>[]>(sql, params);
-    return results ? results.map(transformUserMembershipFromDb) : [];
+    
+    return subs.map(s => this.subscriptionToUserMembership(s));
   }
 
-  async createUserMembership(params: UserMembershipCreateParams): Promise<UserMembership> {
-    const now = unixTimestamp();
-    const {
-      userId,
-      tierId,
-      startDate,
-      endDate,
-      isActive,
-      autoRenew,
-      membershipType,
-      lastRenewalDate,
-      nextRenewalDate,
-      paymentMethod
-    } = params;
+  async createUserMembership(params: Omit<UserMembership, 'id' | 'createdAt' | 'updatedAt'>): Promise<UserMembership> {
+    const sub = await membershipSubscriptionRepo.create({
+      customerId: params.userId,
+      membershipPlanId: params.tierId,
+      status: params.isActive ? 'active' : 'pending',
+      startDate: new Date(params.startDate),
+      endDate: params.endDate ? new Date(params.endDate) : null,
+      trialEndDate: null,
+      nextBillingDate: params.nextRenewalDate ? new Date(params.nextRenewalDate) : null,
+      lastBillingDate: params.lastRenewalDate ? new Date(params.lastRenewalDate) : null,
+      cancelledAt: null,
+      cancelReason: null,
+      isAutoRenew: params.autoRenew,
+      priceOverride: null,
+      billingCycleOverride: null,
+      paymentMethodId: params.paymentMethod || null,
+      notes: null,
+      createdBy: null
+    });
 
-    const result = await queryOne<Record<string, any>>(
-      `INSERT INTO "public"."user_membership" 
-      ("userId", "tier_id", "start_date", "end_date", "isActive", "auto_renew", 
-      "membership_type", "last_renewal_date", "next_renewal_date", "payment_method", "createdAt", "updatedAt") 
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) 
-      RETURNING *`,
-      [
-        userId, 
-        tierId, 
-        startDate, 
-        endDate, 
-        isActive, 
-        autoRenew, 
-        membershipType, 
-        lastRenewalDate || null, 
-        nextRenewalDate || null, 
-        paymentMethod || null, 
-        now, 
-        now
-      ]
-    );
-
-    if (!result) {
-      throw new Error('Failed to create user membership');
-    }
-
-    return transformUserMembershipFromDb(result);
+    return this.subscriptionToUserMembership(sub);
   }
 
-  async updateUserMembership(id: string, params: UserMembershipUpdateParams): Promise<UserMembership> {
-    const now = unixTimestamp();
-    const currentMembership = await this.findUserMembershipById(id);
+  async updateUserMembership(id: string, params: Partial<Omit<UserMembership, 'id' | 'userId' | 'createdAt' | 'updatedAt'>>): Promise<UserMembership> {
+    const updateData: any = {};
+    if (params.tierId !== undefined) updateData.membershipPlanId = params.tierId;
+    if (params.isActive !== undefined) updateData.status = params.isActive ? 'active' : 'cancelled';
+    if (params.autoRenew !== undefined) updateData.isAutoRenew = params.autoRenew;
+    if (params.endDate !== undefined) updateData.endDate = new Date(params.endDate);
+    if (params.nextRenewalDate !== undefined) updateData.nextBillingDate = new Date(params.nextRenewalDate);
+    if (params.paymentMethod !== undefined) updateData.paymentMethodId = params.paymentMethod;
 
-    if (!currentMembership) {
-      throw new Error(`User membership with ID ${id} not found`);
-    }
-
-    // Always update the updatedAt timestamp
-    const updatedParams = {
-      ...params,
-      updatedAt: now
-    };
-
-    const { sql, values, paramIndex } = buildUpdateQuery(
-      'user_membership',
-      updatedParams,
-      userMembershipFields
-    );
-
-    // Add ID for WHERE clause
-    values.push(id);
-
-    const result = await queryOne<Record<string, any>>(sql, values);
-
-    if (!result) {
-      throw new Error(`Failed to update user membership with ID ${id}`);
-    }
-
-    return transformUserMembershipFromDb(result);
+    const sub = await membershipSubscriptionRepo.update(id, updateData);
+    if (!sub) throw new Error(`User membership with ID ${id} not found`);
+    return this.subscriptionToUserMembership(sub);
   }
 
   async cancelUserMembership(id: string): Promise<UserMembership> {
-    const now = unixTimestamp();
-    const currentMembership = await this.findUserMembershipById(id);
-
-    if (!currentMembership) {
-      throw new Error(`User membership with ID ${id} not found`);
-    }
-
-    const result = await queryOne<Record<string, any>>(
-      `UPDATE "public"."user_membership" 
-      SET "isActive" = false, "auto_renew" = false, "updatedAt" = $1
-      WHERE "id" = $2 
-      RETURNING *`,
-      [now, id]
-    );
-
-    if (!result) {
-      throw new Error(`Failed to cancel user membership with ID ${id}`);
-    }
-
-    return transformUserMembershipFromDb(result);
+    const sub = await membershipSubscriptionRepo.cancel(id);
+    if (!sub) throw new Error(`User membership with ID ${id} not found`);
+    return this.subscriptionToUserMembership(sub);
   }
 
-  async getUserMembershipBenefits(userId: string): Promise<MembershipBenefit[]> {
-    // Get user's active membership
+  async getUserMembershipBenefits(userId: string): Promise<LegacyMembershipBenefit[]> {
     const membership = await this.findMembershipByUserId(userId);
-    
-    if (!membership) {
-      return [];
-    }
-    
-    // Get benefits for the tier
+    if (!membership) return [];
     return this.findBenefitsByTierId(membership.tierId);
+  }
+
+  // ============================================================================
+  // Helper Methods
+  // ============================================================================
+
+  private planToTier(plan: planRepo.MembershipPlan): MembershipTier {
+    return {
+      id: plan.membershipPlanId,
+      name: plan.name,
+      description: plan.description || '',
+      monthlyPrice: plan.price,
+      annualPrice: plan.price * 12 * 0.8, // 20% annual discount
+      level: plan.level,
+      isActive: plan.isActive,
+      createdAt: plan.createdAt.toString(),
+      updatedAt: plan.updatedAt.toString()
+    };
+  }
+
+  private benefitToLegacy(benefit: any, tierIds: string[] = []): LegacyMembershipBenefit {
+    const value = benefit.value || {};
+    return {
+      id: benefit.membershipBenefitId,
+      tierIds,
+      name: benefit.name,
+      description: benefit.description || '',
+      benefitType: benefit.benefitType,
+      discountPercentage: value.percentage,
+      discountAmount: value.amount,
+      isActive: benefit.isActive,
+      createdAt: benefit.createdAt.toString(),
+      updatedAt: benefit.updatedAt.toString()
+    };
+  }
+
+  private subscriptionToUserMembership(sub: any): UserMembership {
+    return {
+      id: sub.membershipSubscriptionId,
+      userId: sub.customerId,
+      tierId: sub.membershipPlanId,
+      startDate: sub.startDate?.toString() || '',
+      endDate: sub.endDate?.toString() || '',
+      isActive: sub.status === 'active',
+      autoRenew: sub.isAutoRenew,
+      membershipType: 'monthly',
+      lastRenewalDate: sub.lastBillingDate?.toString(),
+      nextRenewalDate: sub.nextBillingDate?.toString(),
+      paymentMethod: sub.paymentMethodId,
+      createdAt: sub.createdAt.toString(),
+      updatedAt: sub.updatedAt.toString()
+    };
   }
 }

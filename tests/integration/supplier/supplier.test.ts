@@ -110,8 +110,7 @@ describe('Supplier Feature Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
 
-      // May return 201 or error if product doesn't exist
-      expect([201, 400, 404]).toContain(response.status);
+      expect(response.status).toBe(201);
     });
   });
 
@@ -184,8 +183,7 @@ describe('Supplier Feature Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
 
-      // May return 200 or error depending on PO state
-      expect([200, 400]).toContain(response.status);
+      expect(response.status).toBe(200);
     });
   });
 
@@ -196,14 +194,14 @@ describe('Supplier Feature Tests', () => {
   describe('Authorization', () => {
     it('should require auth for supplier list', async () => {
       const response = await client.get('/business/suppliers');
-      expect([401, 403]).toContain(response.status);
+      expect(response.status).toBe(401);
     });
 
     it('should reject invalid tokens', async () => {
       const response = await client.get('/business/suppliers', {
         headers: { Authorization: 'Bearer invalid-token' }
       });
-      expect([401, 403]).toContain(response.status);
+      expect(response.status).toBe(401);
     });
   });
 });

@@ -27,4 +27,3 @@ router.post('/gift-cards/:id/refund', giftCardController.refundToGiftCard);
 router.post('/gift-cards/:id/cancel', giftCardController.cancelGiftCard);
 
 export const promotionBusinessRouter = router;
-export default router;

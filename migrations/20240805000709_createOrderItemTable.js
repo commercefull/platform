@@ -31,7 +31,7 @@ exports.up = function(knex) {
     t.timestamp('downloadExpiryDate');
     t.integer('downloadLimit');
     t.jsonb('subscriptionInfo');
-    
+    t.jsonb('metadata');
 
     t.index('orderId');
     t.index('productId');

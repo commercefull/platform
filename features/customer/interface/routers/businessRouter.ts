@@ -81,4 +81,3 @@ router.get('/customers/:customerId/addresses', customerController.getCustomerAdd
 router.post('/customers/:customerId/addresses', customerController.addCustomerAddress);
 
 export const customerBusinessRouter = router;
-export default router;

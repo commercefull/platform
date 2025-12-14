@@ -109,4 +109,3 @@ router.get('/approvals/:id', getApprovalRequest);
 router.post('/approvals/:id/action', processApprovalAction);
 
 export const b2bBusinessRouter = router;
-export default router;

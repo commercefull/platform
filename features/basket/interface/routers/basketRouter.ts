@@ -16,79 +16,78 @@ const router = express.Router();
  * Get or create basket for current user/session
  * POST /api/basket
  */
-router.post('/', basketController.getOrCreateBasket);
+router.post('/basket', basketController.getOrCreateBasket);
 
 /**
  * Get current user's basket
  * GET /api/basket/me
  */
-router.get('/me', basketController.getMyBasket);
+router.get('/basket/me', basketController.getMyBasket);
 
 /**
  * Merge baskets (typically when guest logs in)
  * POST /api/basket/merge
  */
-router.post('/merge', basketController.mergeBaskets);
+router.post('/basket/merge', basketController.mergeBaskets);
 
 /**
  * Get basket by ID
  * GET /api/basket/:basketId
  */
-router.get('/:basketId', basketController.getBasket);
+router.get('/basket/:basketId', basketController.getBasket);
 
 /**
  * Get basket summary (lightweight response)
  * GET /api/basket/:basketId/summary
  */
-router.get('/:basketId/summary', basketController.getBasketSummary);
+router.get('/basket/:basketId/summary', basketController.getBasketSummary);
 
 /**
  * Add item to basket
  * POST /api/basket/:basketId/items
  */
-router.post('/:basketId/items', basketController.addItem);
+router.post('/basket/:basketId/items', basketController.addItem);
 
 /**
  * Update item quantity
  * PATCH /api/basket/:basketId/items/:basketItemId
  */
-router.patch('/:basketId/items/:basketItemId', basketController.updateItemQuantity);
+router.patch('/basket/:basketId/items/:basketItemId', basketController.updateItemQuantity);
 
 /**
  * Remove item from basket
  * DELETE /api/basket/:basketId/items/:basketItemId
  */
-router.delete('/:basketId/items/:basketItemId', basketController.removeItem);
+router.delete('/basket/:basketId/items/:basketItemId', basketController.removeItem);
 
 /**
  * Clear all items from basket
  * DELETE /api/basket/:basketId/items
  */
-router.delete('/:basketId/items', basketController.clearBasket);
+router.delete('/basket/:basketId/items', basketController.clearBasket);
 
 /**
  * Set item as gift
  * POST /api/basket/:basketId/items/:basketItemId/gift
  */
-router.post('/:basketId/items/:basketItemId/gift', basketController.setItemAsGift);
+router.post('/basket/:basketId/items/:basketItemId/gift', basketController.setItemAsGift);
 
 /**
  * Assign basket to customer
  * POST /api/basket/:basketId/assign
  */
-router.post('/:basketId/assign', basketController.assignToCustomer);
+router.post('/basket/:basketId/assign', basketController.assignToCustomer);
 
 /**
  * Extend basket expiration
  * PUT /api/basket/:basketId/expiration
  */
-router.put('/:basketId/expiration', basketController.extendExpiration);
+router.put('/basket/:basketId/expiration', basketController.extendExpiration);
 
 /**
  * Delete basket
  * DELETE /api/basket/:basketId
  */
-router.delete('/:basketId', basketController.deleteBasket);
+router.delete('/basket/:basketId', basketController.deleteBasket);
 
 export const basketCustomerRouter = router;
-export default router;

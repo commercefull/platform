@@ -379,7 +379,7 @@ describe('B2B Feature Tests', () => {
     it('should require authentication for company list', async () => {
       const response = await client.get('/business/companies');
       // 401 or 403 are both acceptable for unauthenticated requests
-      expect([401, 403]).toContain(response.status);
+      expect(response.status).toBe(401);
     });
 
     it('should reject invalid tokens', async () => {
@@ -387,7 +387,7 @@ describe('B2B Feature Tests', () => {
         headers: { Authorization: 'Bearer invalid-token' }
       });
       // 401 or 403 are both acceptable for invalid tokens
-      expect([401, 403]).toContain(response.status);
+      expect(response.status).toBe(401);
     });
   });
 });

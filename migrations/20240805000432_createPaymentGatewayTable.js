@@ -15,7 +15,12 @@ exports.up = function(knex) {
     t.text('webhookSecret');
     t.text('apiEndpoint');
     t.enum('supportedPaymentMethods', ['creditCard', 'debitCard', 'giftCard', 'storeCredit', 'other']).notNullable();
-
+    t.specificType('supportedCurrencies', 'varchar(3)[]').defaultTo(knex.raw(`'{"USD"}'::varchar[]`));
+    t.jsonb('processingFees');
+    t.jsonb('checkoutSettings');
+    t.jsonb('metadata');
+    t.timestamp('deletedAt');
+    
     t.index('merchantId');
     t.index('provider');
     t.index('isActive');

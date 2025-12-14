@@ -17,7 +17,8 @@ exports.up = function(knex) {
     t.specificType('countries', 'varchar(2)[]');
     t.uuid('gatewayId').references('paymentGatewayId').inTable('paymentGateway').onDelete('CASCADE');
     t.jsonb('configuration');
-    
+    t.jsonb('metadata');
+    t.timestamp('deletedAt');
 
     t.index('merchantId');
     t.index('paymentMethod');

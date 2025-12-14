@@ -33,41 +33,40 @@ const router = Router();
 // ============================================================================
 
 // Get recommendations for a product
-router.get('/products/:productId/recommendations', getProductRecommendations);
-router.get('/products/:productId/frequently-bought-together', getFrequentlyBoughtTogether);
-router.get('/products/:productId/similar', getSimilarProducts);
+router.get('/marketing/products/:productId/recommendations', getProductRecommendations);
+router.get('/marketing/products/:productId/frequently-bought-together', getFrequentlyBoughtTogether);
+router.get('/marketing/products/:productId/similar', getSimilarProducts);
 
 // Track product views
-router.post('/product-views', recordProductView);
-router.put('/product-views/:viewId', updateProductView);
-router.get('/recently-viewed', getRecentlyViewed);
+router.post('/marketing/product-views', recordProductView);
+router.put('/marketing/product-views/:viewId', updateProductView);
+router.get('/marketing/recently-viewed', getRecentlyViewed);
 
 // Track recommendation clicks
-router.post('/recommendations/:recommendationId/click', recordRecommendationClick);
+router.post('/marketing/recommendations/:recommendationId/click', recordRecommendationClick);
 
 // ============================================================================
 // Affiliate Routes (Public)
 // ============================================================================
 
 // Affiliate link tracking (public, no auth)
-router.get('/affiliate/:code', trackAffiliateClick);
+router.get('/marketing/affiliate/:code', trackAffiliateClick);
 
 // Affiliate program application
-router.post('/affiliate/apply', applyForAffiliate);
+router.post('/marketing/affiliate/apply', applyForAffiliate);
 
 // Affiliate dashboard (requires affiliate auth)
-router.get('/affiliate/account', getMyAffiliateAccount);
-router.get('/affiliate/links', getMyAffiliateLinks);
-router.post('/affiliate/links', createAffiliateLink);
-router.get('/affiliate/commissions', getMyCommissions);
+router.get('/marketing/affiliate/account', getMyAffiliateAccount);
+router.get('/marketing/affiliate/links', getMyAffiliateLinks);
+router.post('/marketing/affiliate/links', createAffiliateLink);
+router.get('/marketing/affiliate/commissions', getMyCommissions);
 
 // ============================================================================
 // Referral Routes (Requires customer auth)
 // ============================================================================
 
-router.get('/referrals', getMyReferrals);
-router.post('/referrals', createReferral);
-router.get('/referrals/validate/:code', validateReferralCode);
+router.get('/marketing/referrals', getMyReferrals);
+router.post('/marketing/referrals', createReferral);
+router.get('/marketing/referrals/validate/:code', validateReferralCode);
 
 export const marketingCustomerRouter = router;
-export default router;

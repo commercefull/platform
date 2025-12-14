@@ -37,7 +37,7 @@ export async function setupGdprTests() {
   }
 
   // Get customer token
-  const customerLoginResponse = await client.post('/identity/login', customerCredentials);
+  const customerLoginResponse = await client.post('/customer/identity/login', customerCredentials);
   const customerToken = customerLoginResponse.data?.accessToken || customerLoginResponse.data?.data?.accessToken;
 
   if (customerLoginResponse.status !== 200 || !customerToken) {

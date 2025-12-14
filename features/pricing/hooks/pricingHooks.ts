@@ -143,9 +143,9 @@ export async function calculateOrderPrices(
     const result = await pricingService.calculatePrice(
       item.productId,
       {
-        variantId: item.variantId,
+        variantId: item.variantId || undefined,
         quantity: item.quantity,
-        customerId: order.customerId,
+        customerId: order.customerId || undefined,
         // Pass all the additional pricing options
         additionalData: pricingOptions
       }
@@ -166,10 +166,10 @@ export async function calculateOrderPrices(
     subtotal += result.originalPrice;
   }
   
-  // Update order totals
-  orderWithItems.subtotal = subtotal;
-  orderWithItems.discountTotal = totalDiscount; // Fixed: using discountTotal instead of discountAmount
-  orderWithItems.totalAmount = Math.max(0, orderWithItems.subtotal - orderWithItems.discountTotal); // Updated calculation to use discountTotal
+  // Update order totals (convert to string for decimal fields)
+  orderWithItems.subtotal = String(subtotal);
+  orderWithItems.discountTotal = String(totalDiscount);
+  orderWithItems.totalAmount = String(Math.max(0, subtotal - totalDiscount));
   if (!orderWithItems.metadata) orderWithItems.metadata = {};
   orderWithItems.metadata.pricingCalculated = true;
   orderWithItems.updatedAt = new Date(); // Using proper Date object

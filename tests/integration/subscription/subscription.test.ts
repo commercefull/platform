@@ -219,19 +219,19 @@ describe('Subscription Feature Tests', () => {
   describe('Authorization', () => {
     it('should require auth for admin subscription list', async () => {
       const response = await client.get('/business/subscriptions/subscriptions');
-      expect([401, 403]).toContain(response.status);
+      expect(response.status).toBe(401);
     });
 
     it('should require auth for customer subscriptions', async () => {
       const response = await client.get('/api/subscriptions/mine');
-      expect([401, 403]).toContain(response.status);
+      expect(response.status).toBe(401);
     });
 
     it('should reject invalid tokens', async () => {
       const response = await client.get('/business/subscriptions/products', {
         headers: { Authorization: 'Bearer invalid-token' }
       });
-      expect([401, 403]).toContain(response.status);
+      expect(response.status).toBe(401);
     });
   });
 });

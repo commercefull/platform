@@ -10,18 +10,18 @@ import {
 const router = express.Router();
 
 // Get all active membership tiers
-router.get("/tiers", getMembershipTiers);
+router.get("/membership/tiers", getMembershipTiers);
 
 // Get specific membership tier details
-router.get("/tiers/:id", getMembershipTierById);
+router.get("/membership/tiers/:id", getMembershipTierById);
 
 // Get benefits for a specific tier
-router.get("/tiers/:tierId/benefits", getTierBenefits);
+router.get("/membership/tiers/:tierId/benefits", getTierBenefits);
 
 // Get current user's membership
-router.get("/user/:userId", getUserMembershipByUserId);
+router.get("/membership/user/:userId", getUserMembershipByUserId);
 
 // Get current user's membership benefits
-router.get("/user/:userId/benefits", getUserMembershipBenefits);
+router.get("/membership/user/:userId/benefits", getUserMembershipBenefits);
 
 export const membershipCustomerRouter = router;

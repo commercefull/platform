@@ -122,7 +122,7 @@ export class PricingService {
           
           if (adjustment) {
             // Use basic exchange rate as starting point
-            let exchangeRate = toCurrency.exchangeRate / fromCurrency.exchangeRate;
+            let exchangeRate = (toCurrency.exchangeRate ?? 1) / (fromCurrency.exchangeRate ?? 1);
             let convertedPrice = price * exchangeRate;
             
             // Apply the adjustment
@@ -151,7 +151,7 @@ export class PricingService {
     }
     
     // No special rules, just use the standard exchange rate
-    const exchangeRate = toCurrency.exchangeRate / fromCurrency.exchangeRate;
+    const exchangeRate = (toCurrency.exchangeRate ?? 1) / (fromCurrency.exchangeRate ?? 1);
     const convertedPrice = price * exchangeRate;
     
     return { convertedPrice, exchangeRate, appliedRules };

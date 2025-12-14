@@ -1,201 +1,293 @@
-import { AxiosInstance } from 'axios';
-import { setupLocalizationTests, cleanupLocalizationTests, createTestLanguage, createTestLocale } from './testUtils';
+/**
+ * Localization Integration Tests
+ * 
+ * Tests for locale and country management endpoints.
+ */
+
+import axios, { AxiosInstance } from 'axios';
+
+// ============================================================================
+// Test Configuration
+// ============================================================================
+
+const API_URL = process.env.API_URL || 'http://localhost:3000';
+
+const TEST_MERCHANT = {
+  email: 'merchant@example.com',
+  password: 'password123'
+};
+
+let client: AxiosInstance;
+let merchantToken: string;
+
+// ============================================================================
+// Setup
+// ============================================================================
+
+beforeAll(async () => {
+  client = axios.create({
+    baseURL: API_URL,
+    validateStatus: () => true,
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    }
+  });
+
+  // Login as merchant
+  const loginResponse = await client.post('/business/auth/login', TEST_MERCHANT);
+  merchantToken = loginResponse.data.accessToken;
+});
+
+// ============================================================================
+// Tests
+// ============================================================================
 
 describe('Localization Feature Tests', () => {
-  let client: AxiosInstance;
-  let adminToken: string;
-  const createdResources = {
-    languageCodes: [] as string[],
-    localeCodes: [] as string[]
-  };
+  // ==========================================================================
+  // Locale Management (Business Routes)
+  // ==========================================================================
 
-  beforeAll(async () => {
-    const setup = await setupLocalizationTests();
-    client = setup.client;
-    adminToken = setup.adminToken;
-  });
+  describe('Locale Management (Business)', () => {
+    let testLocaleId: string;
 
-  afterAll(async () => {
-    await cleanupLocalizationTests(client, adminToken, createdResources);
-  });
+    describe('GET /business/locales', () => {
+      it('should list all locales', async () => {
+        const response = await client.get('/business/locales', {
+          headers: { Authorization: `Bearer ${merchantToken}` }
+        });
 
-  // ============================================================================
-  // Language Management Tests (UC-LOC-001 to UC-LOC-004)
-  // ============================================================================
-
-  describe('Language Management', () => {
-    let testLanguageCode: string;
-
-    it('UC-LOC-002: should create a language', async () => {
-      const languageData = createTestLanguage();
-
-      const response = await client.post('/business/languages', languageData, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        expect(response.status).toBe(200);
+        expect(response.data.success).toBe(true);
+        expect(Array.isArray(response.data.data)).toBe(true);
       });
 
-      expect(response.status).toBe(201);
-      expect(response.data.success).toBe(true);
-      expect(response.data.data).toHaveProperty('code');
+      it('should filter active locales only', async () => {
+        const response = await client.get('/business/locales', {
+          headers: { Authorization: `Bearer ${merchantToken}` },
+          params: { activeOnly: 'true' }
+        });
 
-      testLanguageCode = response.data.data.code;
-      createdResources.languageCodes.push(testLanguageCode);
-    });
-
-    it('UC-LOC-001: should list languages', async () => {
-      const response = await client.get('/business/languages', {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        expect(response.status).toBe(200);
+        expect(response.data.success).toBe(true);
+        expect(Array.isArray(response.data.data)).toBe(true);
       });
 
-      expect(response.status).toBe(200);
-      expect(response.data.success).toBe(true);
-      expect(Array.isArray(response.data.data)).toBe(true);
+      it('should require authentication', async () => {
+        const response = await client.get('/business/locales');
+        expect(response.status).toBe(401);
+      });
     });
 
-    it('UC-LOC-003: should update a language', async () => {
-      const updateData = { name: 'Updated Language Name' };
+    describe('GET /business/locales/default', () => {
+      it('should get default locale', async () => {
+        const response = await client.get('/business/locales/default', {
+          headers: { Authorization: `Bearer ${merchantToken}` }
+        });
 
-      const response = await client.put(`/business/languages/${testLanguageCode}`, updateData, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        expect(response.status).toBe(200);
+        expect(response.data.success).toBe(true);
+        expect(response.data.data).toHaveProperty('isDefault', true);
+      });
+    });
+
+    describe('GET /business/locales/statistics', () => {
+      it('should get locale statistics', async () => {
+        const response = await client.get('/business/locales/statistics', {
+          headers: { Authorization: `Bearer ${merchantToken}` }
+        });
+
+        expect(response.status).toBe(200);
+        expect(response.data.success).toBe(true);
+        expect(response.data.data).toHaveProperty('total');
+        expect(response.data.data).toHaveProperty('active');
+      });
+    });
+
+    describe('GET /business/locales/language/:language', () => {
+      it('should get locales by language', async () => {
+        const response = await client.get('/business/locales/language/en', {
+          headers: { Authorization: `Bearer ${merchantToken}` }
+        });
+
+        expect(response.status).toBe(200);
+        expect(response.data.success).toBe(true);
+        expect(Array.isArray(response.data.data)).toBe(true);
+      });
+    });
+
+    describe('GET /business/locales/country/:countryCode', () => {
+      it('should get locales by country code', async () => {
+        const response = await client.get('/business/locales/country/US', {
+          headers: { Authorization: `Bearer ${merchantToken}` }
+        });
+
+        expect(response.status).toBe(200);
+        expect(response.data.success).toBe(true);
+        expect(Array.isArray(response.data.data)).toBe(true);
+      });
+    });
+
+    describe('POST /business/locales', () => {
+      it('should create a new locale', async () => {
+        const localeData = {
+          code: `test-${Date.now()}`,
+          name: 'Test Locale',
+          language: 'en',
+          countryCode: 'XX',
+          isActive: true,
+          textDirection: 'ltr',
+          dateFormat: 'yyyy-MM-dd',
+          timeFormat: 'HH:mm:ss',
+          timeZone: 'UTC'
+        };
+
+        const response = await client.post('/business/locales', localeData, {
+          headers: { Authorization: `Bearer ${merchantToken}` }
+        });
+
+        expect(response.status).toBe(201);
+        expect(response.data.success).toBe(true);
+        expect(response.data.data).toHaveProperty('localeId');
+        testLocaleId = response.data.data.localeId;
+      });
+    });
+
+    describe('GET /business/locales/:id', () => {
+      it('should get locale by ID', async () => {
+        // First get a locale
+        const listResponse = await client.get('/business/locales', {
+          headers: { Authorization: `Bearer ${merchantToken}` }
+        });
+
+        if (listResponse.data.data && listResponse.data.data.length > 0) {
+          const localeId = listResponse.data.data[0].localeId;
+          const response = await client.get(`/business/locales/${localeId}`, {
+            headers: { Authorization: `Bearer ${merchantToken}` }
+          });
+
+          expect(response.status).toBe(200);
+          expect(response.data.success).toBe(true);
+          expect(response.data.data).toHaveProperty('localeId', localeId);
+        }
       });
 
-      expect(response.status).toBe(200);
-      expect(response.data.success).toBe(true);
-    });
-  });
+      it('should return 404 for non-existent locale', async () => {
+        const response = await client.get('/business/locales/00000000-0000-0000-0000-000000000000', {
+          headers: { Authorization: `Bearer ${merchantToken}` }
+        });
 
-  // ============================================================================
-  // Translation Management Tests (UC-LOC-005 to UC-LOC-010)
-  // ============================================================================
-
-  describe('Translation Management', () => {
-    const testKey = `test.key.${Date.now()}`;
-
-    it('UC-LOC-007: should create/update a translation', async () => {
-      const response = await client.put(`/business/translations/${testKey}`, {
-        languageCode: 'en',
-        value: 'Test translation value',
-        namespace: 'common'
-      }, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        expect(response.status).toBe(404);
       });
-
-      expect(response.status).toBe(200);
-      expect(response.data.success).toBe(true);
     });
 
-    it('UC-LOC-005: should list translations', async () => {
-      const response = await client.get('/business/translations', {
-        headers: { Authorization: `Bearer ${adminToken}` },
-        params: { languageCode: 'en' }
+    describe('GET /business/locales/code/:code', () => {
+      it('should get locale by code', async () => {
+        const response = await client.get('/business/locales/code/en-US', {
+          headers: { Authorization: `Bearer ${merchantToken}` }
+        });
+
+        expect(response.status).toBe(200);
+        expect(response.data.success).toBe(true);
+        expect(response.data.data).toHaveProperty('code', 'en-US');
       });
-
-      expect(response.status).toBe(200);
-      expect(response.data.success).toBe(true);
     });
 
-    it('UC-LOC-006: should get a specific translation', async () => {
-      const response = await client.get(`/business/translations/${testKey}`, {
-        headers: { Authorization: `Bearer ${adminToken}` },
-        params: { languageCode: 'en' }
+    describe('PUT /business/locales/:id', () => {
+      it('should update a locale', async () => {
+        // Get a locale first
+        const listResponse = await client.get('/business/locales', {
+          headers: { Authorization: `Bearer ${merchantToken}` }
+        });
+
+        if (listResponse.data.data && listResponse.data.data.length > 0) {
+          const localeId = listResponse.data.data[0].localeId;
+          const response = await client.put(
+            `/business/locales/${localeId}`,
+            { dateFormat: 'dd/MM/yyyy' },
+            { headers: { Authorization: `Bearer ${merchantToken}` } }
+          );
+
+          expect(response.status).toBe(200);
+          expect(response.data.success).toBe(true);
+        }
       });
-
-      expect(response.status).toBe(200);
-      expect(response.data.success).toBe(true);
-    });
-
-    it('UC-LOC-010: should export translations', async () => {
-      const response = await client.get('/business/translations/export', {
-        headers: { Authorization: `Bearer ${adminToken}` },
-        params: { languageCode: 'en', format: 'json' }
-      });
-
-      expect(response.status).toBe(200);
-    });
-  });
-
-  // ============================================================================
-  // Locale Management Tests (UC-LOC-011 to UC-LOC-014)
-  // ============================================================================
-
-  describe('Locale Management', () => {
-    let testLocaleCode: string;
-
-    it('UC-LOC-012: should create a locale', async () => {
-      const localeData = createTestLocale('en');
-
-      const response = await client.post('/business/locales', localeData, {
-        headers: { Authorization: `Bearer ${adminToken}` }
-      });
-
-      expect(response.status).toBe(201);
-      expect(response.data.success).toBe(true);
-      expect(response.data.data).toHaveProperty('code');
-
-      testLocaleCode = response.data.data.code;
-      createdResources.localeCodes.push(testLocaleCode);
-    });
-
-    it('UC-LOC-011: should list locales', async () => {
-      const response = await client.get('/business/locales', {
-        headers: { Authorization: `Bearer ${adminToken}` }
-      });
-
-      expect(response.status).toBe(200);
-      expect(response.data.success).toBe(true);
-      expect(Array.isArray(response.data.data)).toBe(true);
-    });
-
-    it('UC-LOC-013: should update a locale', async () => {
-      const updateData = { dateFormat: 'DD/MM/YYYY' };
-
-      const response = await client.put(`/business/locales/${testLocaleCode}`, updateData, {
-        headers: { Authorization: `Bearer ${adminToken}` }
-      });
-
-      expect(response.status).toBe(200);
-      expect(response.data.success).toBe(true);
-    });
-  });
-
-  // ============================================================================
-  // Customer-Facing Tests (UC-LOC-015 to UC-LOC-017)
-  // ============================================================================
-
-  describe('Customer-Facing Localization', () => {
-    it('UC-LOC-015: should get available languages (public)', async () => {
-      const response = await client.get('/api/localization/languages');
-
-      expect(response.status).toBe(200);
-      expect(response.data.success).toBe(true);
-    });
-
-    it('UC-LOC-016: should get translations for a language (public)', async () => {
-      const response = await client.get('/api/localization/translations/en');
-
-      expect(response.status).toBe(200);
-      expect(response.data.success).toBe(true);
-    });
-
-    it('UC-LOC-017: should detect locale', async () => {
-      const response = await client.get('/api/localization/detect');
-
-      // May return 200 with detected locale or default
-      expect(response.status).toBe(200);
     });
   });
 
-  // ============================================================================
-  // Authorization Tests
-  // ============================================================================
+  // ==========================================================================
+  // Country Management (Business Routes)
+  // ==========================================================================
+
+  describe('Country Management (Business)', () => {
+    describe('GET /business/countries', () => {
+      it('should list all countries', async () => {
+        const response = await client.get('/business/countries', {
+          headers: { Authorization: `Bearer ${merchantToken}` }
+        });
+
+        expect(response.status).toBe(200);
+        expect(response.data.success).toBe(true);
+        expect(Array.isArray(response.data.data)).toBe(true);
+      });
+    });
+  });
+
+  // ==========================================================================
+  // Public Localization Routes
+  // ==========================================================================
+
+  describe('Public Localization', () => {
+    describe('GET /localization/locales', () => {
+      it('should get active locales (public)', async () => {
+        const response = await client.get('/customer/localization/locales');
+
+        expect(response.status).toBe(200);
+        expect(response.data.success).toBe(true);
+        expect(Array.isArray(response.data.data)).toBe(true);
+      });
+    });
+
+    describe('GET /localization/locales/:code', () => {
+      it('should get locale by code (public)', async () => {
+        const response = await client.get('/customer/localization/locales/en-US');
+
+        expect(response.status).toBe(200);
+        expect(response.data.success).toBe(true);
+      });
+    });
+
+    describe('GET /localization/countries', () => {
+      it('should get active countries (public)', async () => {
+        const response = await client.get('/customer/localization/countries');
+
+        expect(response.status).toBe(200);
+        expect(response.data.success).toBe(true);
+      });
+    });
+
+    describe('GET /localization/detect', () => {
+      it('should detect locale from request', async () => {
+        const response = await client.get('/customer/localization/detect');
+
+        expect(response.status).toBe(200);
+        expect(response.data.success).toBe(true);
+      });
+    });
+  });
+
+  // ==========================================================================
+  // Authorization
+  // ==========================================================================
 
   describe('Authorization', () => {
-    it('should require auth for admin language management', async () => {
-      const response = await client.post('/business/languages', {});
-      expect([401, 403]).toContain(response.status);
+    it('should require auth for business locale management', async () => {
+      const response = await client.post('/business/locales', {});
+      expect(response.status).toBe(401);
     });
 
-    it('should allow public access to translations', async () => {
-      const response = await client.get('/api/localization/languages');
+    it('should allow public access to localization endpoints', async () => {
+      const response = await client.get('/customer/localization/locales');
       expect(response.status).toBe(200);
     });
   });

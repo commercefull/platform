@@ -7,8 +7,10 @@ import {
   deleteMerchant,
   getMerchantAddresses,
   addMerchantAddress,
+  updateMerchantAddress,
   getMerchantPaymentInfo,
-  addMerchantPaymentInfo
+  addMerchantPaymentInfo,
+  updateMerchantPaymentInfo
 } from "./controllers/merchantBusinessController";
 import { isMerchantLoggedIn } from "../../libs/auth";
 
@@ -26,9 +28,11 @@ router.delete("/merchants/:id", deleteMerchant);
 // Admin routes for merchant addresses
 router.get("/merchants/:merchantId/addresses", getMerchantAddresses);
 router.post("/merchants/:merchantId/addresses", addMerchantAddress);
+router.put("/merchants/:merchantId/addresses/:addressId", updateMerchantAddress);
 
 // Admin routes for merchant payment information
 router.get("/merchants/:merchantId/payment-info", getMerchantPaymentInfo);
 router.post("/merchants/:merchantId/payment-info", addMerchantPaymentInfo);
+router.put("/merchants/:merchantId/payment-info/:paymentInfoId", updateMerchantPaymentInfo);
 
 export const merchantMerchantRouter = router;
