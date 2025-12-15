@@ -13,7 +13,7 @@ describe('Customer Feature Tests', () => {
   let adminToken: string;
   let testCustomerId: string;
   let testCustomerAddressId: string;
-  let testCustomerGroupId: string;
+  let testCustomerGroupId: string | null;
   let testWishlistId: string | null;
 
   beforeAll(async () => {

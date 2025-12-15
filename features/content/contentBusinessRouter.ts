@@ -1,5 +1,5 @@
 import express from "express";
-import { ContentController } from "./controllers/contentBusinesstController";
+import { ContentController } from "./controllers/contentBusinessController";
 
 const router = express.Router();
 const contentController = new ContentController();

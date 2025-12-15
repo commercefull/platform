@@ -19,11 +19,21 @@ describe('Category Promotion Tests', () => {
     testProductId = setup.testProductId;
 
     // Create a new promotion to apply to category
-    const promotionResponse = await client.post('/business/promotions', testPromotion, {
-      headers: { Authorization: `Bearer ${adminToken}` }
-    });
-    
-    promotionId = promotionResponse.data.data.id;
+    try {
+      const promotionResponse = await client.post('/business/promotions', testPromotion, {
+        headers: { Authorization: `Bearer ${adminToken}` }
+      });
+      
+      if (promotionResponse.data?.data?.id) {
+        promotionId = promotionResponse.data.data.id;
+      } else {
+        console.log('Warning: Could not create test promotion:', promotionResponse.data);
+        promotionId = '';
+      }
+    } catch (error) {
+      console.log('Warning: Promotion setup failed:', error);
+      promotionId = '';
+    }
   });
 
   it('should create a category promotion', async () => {

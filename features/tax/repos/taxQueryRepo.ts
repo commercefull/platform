@@ -29,75 +29,72 @@ const TABLES = {
 
 // Field mapping dictionaries for database to TypeScript conversion
 const taxRateFields: Record<string, string> = {
-  id: 'id',
-  taxCategoryId: 'tax_category_id',
-  taxZoneId: 'tax_zone_id',
+  taxRateId: 'taxRateId',
+  taxCategoryId: 'taxCategoryId',
+  taxZoneId: 'taxZoneId',
   name: 'name',
   description: 'description',
   rate: 'rate',
   type: 'type',
   priority: 'priority',
-  isCompound: 'is_compound',
-  includeInPrice: 'include_in_price',
-  isShippingTaxable: 'is_shipping_taxable',
-  fixedAmount: 'fixed_amount',
-  minimumAmount: 'minimum_amount',
-  maximumAmount: 'maximum_amount',
+  isCompound: 'isCompound',
+  includeInPrice: 'includeInPrice',
+  isShippingTaxable: 'isShippingTaxable',
+  fixedAmount: 'fixedAmount',
+  minimumAmount: 'minimumAmount',
+  maximumAmount: 'maximumAmount',
   threshold: 'threshold',
-  startDate: 'start_date',
-  endDate: 'end_date',
-  isActive: 'is_active',
-  metadata: 'metadata',
-  createdAt: 'created_at',
-  updatedAt: 'updated_at'
+  startDate: 'startDate',
+  endDate: 'endDate',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 };
 
 const taxZoneFields: Record<string, string> = {
-  id: 'id',
+  taxZoneId: 'taxZoneId',
   name: 'name',
   code: 'code',
   description: 'description',
-  isDefault: 'is_default',
+  isDefault: 'isDefault',
   countries: 'countries',
   states: 'states',
   postcodes: 'postcodes',
   cities: 'cities',
-  isActive: 'is_active',
-  metadata: 'metadata',
-  createdAt: 'created_at',
-  updatedAt: 'updated_at'
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 };
 
 const taxCategoryFields: Record<string, string> = {
-  id: 'id',
+  taxCategoryId: 'taxCategoryId',
   name: 'name',
   code: 'code',
   description: 'description',
-  isDefault: 'is_default',
-  sortOrder: 'sort_order',
-  isActive: 'is_active',
-  metadata: 'metadata',
-  createdAt: 'created_at',
-  updatedAt: 'updated_at'
+  isDefault: 'isDefault',
+  sortOrder: 'sortOrder',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 };
 
 const customerTaxExemptionFields: Record<string, string> = {
-  id: 'id',
-  customerId: 'customer_id',
-  taxCategoryId: 'tax_category_id',
-  exemptionNumber: 'exemption_number',
-  exemptionType: 'exemption_type',
-  issuingAuthority: 'issuing_authority',
-  validFrom: 'start_date',
-  validUntil: 'expiry_date',
-  documentUrl: 'document_url',
+  id: 'id', // This one might be snake_case in other migrations, but let's assume consistency for now or check migration 20240805000509
+  customerId: 'customerId',
+  taxCategoryId: 'taxCategoryId',
+  exemptionNumber: 'exemptionNumber',
+  exemptionType: 'exemptionType',
+  issuingAuthority: 'issuingAuthority',
+  validFrom: 'validFrom',
+  validUntil: 'validUntil',
+  documentUrl: 'documentUrl',
   notes: 'notes',
-  isVerified: 'is_verified',
-  verifiedBy: 'verified_by',
-  verifiedAt: 'verified_at',
+  isVerified: 'isVerified',
+  verifiedBy: 'verifiedBy',
+  verifiedAt: 'verifiedAt',
   status: 'status',
-  createdAt: 'created_at',
-  updatedAt: 'updated_at'
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 };
 
 /**

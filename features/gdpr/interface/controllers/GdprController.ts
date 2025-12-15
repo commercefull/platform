@@ -31,14 +31,21 @@ export const createDataRequest: AsyncHandler = async (req, res, next) => {
   try {
     const customerId = (req.user as any)?.id || (req.user as any)?.customerId || (req as any).customerId || req.body.customerId;
     if (!customerId) {
-      res.status(401).json({ error: 'Authentication required' });
+      res.status(401).json({ success: false, error: 'Authentication required' });
+      return;
+    }
+
+    // Validate requestType
+    const validTypes = ['access', 'export', 'deletion', 'rectification', 'objection', 'restriction'];
+    if (!req.body.requestType || !validTypes.includes(req.body.requestType)) {
+      res.status(400).json({ success: false, error: 'Invalid or missing requestType. Valid types: ' + validTypes.join(', ') });
       return;
     }
 
     const command = new CreateDataRequestCommand(
       customerId,
       req.body.requestType,
-      req.body.reason,
+      req.body.reason || '',
       req.body.requestedData,
       req.ip,
       req.get('User-Agent')
@@ -48,7 +55,7 @@ export const createDataRequest: AsyncHandler = async (req, res, next) => {
     res.status(201).json({ success: true, data: result });
   } catch (error: any) {
     console.error('Create data request error:', error);
-    res.status(400).json({ error: error.message });
+    res.status(400).json({ success: false, error: error.message });
   }
 };
 

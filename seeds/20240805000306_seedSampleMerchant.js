@@ -2,18 +2,30 @@
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
+const TEST_MERCHANT_ID = '01911000-0000-7000-8000-000000000001';
+
 exports.seed = async function (knex) {
   await knex.transaction(async trx => {
-    const merchantIds = trx('merchant')
+    // Delete by ID if exists, or by slug
+    await trx('merchantContact').where('merchantId', TEST_MERCHANT_ID).del();
+    await trx('merchantAddress').where('merchantId', TEST_MERCHANT_ID).del();
+    await trx('merchant').where('merchantId', TEST_MERCHANT_ID).del();
+    
+    // Also cleanup by slug just in case
+    const merchantIds = await trx('merchant')
       .select('merchantId')
       .where({ slug: 'sample-merchant' });
-
-    await trx('merchantContact').whereIn('merchantId', merchantIds).del();
-    await trx('merchantAddress').whereIn('merchantId', merchantIds).del();
-    await trx('merchant').where({ slug: 'sample-merchant' }).del();
+      
+    if (merchantIds.length > 0) {
+      const ids = merchantIds.map(m => m.merchantId);
+      await trx('merchantContact').whereIn('merchantId', ids).del();
+      await trx('merchantAddress').whereIn('merchantId', ids).del();
+      await trx('merchant').whereIn('merchantId', ids).del();
+    }
 
     const [inserted] = await trx('merchant')
       .insert({
+        merchantId: TEST_MERCHANT_ID,
         name: 'Sample Merchant',
         slug: 'sample-merchant',
         description: 'This is a sample merchant for demonstration purposes',
@@ -29,7 +41,7 @@ exports.seed = async function (knex) {
       })
       .returning(['merchantId']);
 
-    const merchantId = inserted?.merchantId ?? inserted;
+    const merchantId = inserted?.merchantId ?? inserted ?? TEST_MERCHANT_ID;
 
     await trx('merchantAddress').insert({
       merchantId,

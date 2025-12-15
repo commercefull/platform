@@ -558,8 +558,8 @@ describe('Pricing Feature Tests', () => {
       const response = await client.get('/business/pricing/rules', {
         headers: { Authorization: 'Bearer invalid-token' }
       });
-      // Auth middleware returns 403 for invalid tokens
-      expect(response.status).toBe(403);
+      // Auth middleware returns 401 for invalid tokens (per HTTP standard)
+      expect(response.status).toBe(401);
     });
   });
 });

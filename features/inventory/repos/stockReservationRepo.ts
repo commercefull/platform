@@ -23,7 +23,7 @@ export class StockReservationRepo {
     let sql = `SELECT * FROM "stockReservation" WHERE "productId" = $1`;
     const params: any[] = [productId];
     if (warehouseId) {
-      sql += ` AND "warehouseId" = $2`;
+      sql += ` AND "distributionWarehouseId" = $2`;
       params.push(warehouseId);
     }
     sql += ` ORDER BY "createdAt" DESC`;
@@ -48,11 +48,11 @@ export class StockReservationRepo {
     const now = unixTimestamp();
     const result = await queryOne<StockReservation>(
       `INSERT INTO "stockReservation" (
-        "productId", "productVariantId", "warehouseId", "quantity", "reservationType",
+        "productId", "productVariantId", "distributionWarehouseId", "quantity", "reservationType",
         "referenceId", "referenceType", "expiresAt", "createdBy", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *`,
       [
-        params.productId, params.productVariantId || null, params.warehouseId, params.quantity,
+        params.productId, params.productVariantId || null, params.distributionWarehouseId, params.quantity,
         params.reservationType, params.referenceId || null, params.referenceType || null,
         params.expiresAt || null, params.createdBy || null, now, now
       ]
@@ -105,7 +105,7 @@ export class StockReservationRepo {
     const params: any[] = [productId];
 
     if (warehouseId) {
-      sql += ` AND "warehouseId" = $${params.length + 1}`;
+      sql += ` AND "distributionWarehouseId" = $${params.length + 1}`;
       params.push(warehouseId);
     }
     if (productVariantId) {

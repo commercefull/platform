@@ -402,15 +402,15 @@ export class ContentController {
         status = 'draft',
         publishedAt,
         layout,
-        contentTypeId = '1', // Default content type ID if not provided
+        contentTypeId,
         visibility = 'public' // Default to public visibility
       } = req.body;
 
       // Basic validation
-      if (!title || !slug) {
+      if (!title || !slug || !contentTypeId) {
         res.status(400).json({
           success: false,
-          message: 'Title and slug are required'
+          message: 'Title, slug, and contentTypeId are required'
         });
         return;
       }
@@ -436,8 +436,8 @@ export class ContentController {
         status,
         publishedAt,
         templateId: layout, // Layout corresponds to templateId
-        contentTypeId, // Using default from destructuring
-        visibility // Using default from destructuring
+        contentTypeId,
+        visibility
       });
 
       res.status(201).json({

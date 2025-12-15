@@ -3,14 +3,15 @@ import { createTestClient, loginTestAdmin } from '../testUtils';
 import { Merchant, MerchantAddress, MerchantPaymentInfo } from '../../../features/merchant/repos/merchantRepo';
 
 // Common test data for merchant
-export const testMerchant: Partial<Merchant> = {
+export const testMerchant: Partial<Merchant> & { password?: string } = {
   name: 'Test Merchant',
   email: `test-merchant-${Math.floor(Math.random() * 10000)}@example.com`,
   phone: '123-456-7890',
   website: 'https://testmerchant.com',
   logo: 'https://example.com/logo.png',
   description: 'Test merchant for integration tests',
-  status: 'active'
+  status: 'active',
+  password: 'password123'
 };
 
 // Common test data for merchant address

@@ -22,7 +22,8 @@ const authenticateToken = (req: Request, res: Response, next: NextFunction, secr
     return next();
   } catch (error) {
     console.error('Token validation error:', error);
-    res.status(403).json({ success: false, message: 'Invalid or expired token' });
+    // Return 401 for invalid/expired tokens (not 403 which is for authorization failures)
+    res.status(401).json({ success: false, message: 'Invalid or expired token' });
   }
 };
 

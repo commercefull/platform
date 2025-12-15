@@ -6,19 +6,38 @@ import express from 'express';
 import * as giftCardController from '../../controllers/giftCardBusinessController';
 import * as discountController from '../../controllers/discountController';
 import * as couponController from '../../controllers/couponController';
+import * as promotionController from '../../controllers/promotionController';
+import * as cartPromotionController from '../../controllers/cartPromotionController';
+import * as categoryPromotionController from '../../controllers/categoryPromotionController';
 import { isMerchantLoggedIn } from '../../../../libs/auth';
 
 const router = express.Router();
 router.use(isMerchantLoggedIn);
 
-// Placeholder routes - implement with DDD controllers
-router.get('/promotions', (_req, res) => { res.json({ success: true, message: 'List promotions' }); });
-router.post('/promotions', (_req, res) => { res.json({ success: true, message: 'Create promotion' }); });
-router.get('/promotions/:promotionId', (_req, res) => { res.json({ success: true, message: 'Get promotion' }); });
-router.put('/promotions/:promotionId', (_req, res) => { res.json({ success: true, message: 'Update promotion' }); });
-router.delete('/promotions/:promotionId', (_req, res) => { res.json({ success: true, message: 'Delete promotion' }); });
-router.post('/promotions/:promotionId/activate', (_req, res) => { res.json({ success: true, message: 'Activate promotion' }); });
-router.post('/promotions/:promotionId/pause', (_req, res) => { res.json({ success: true, message: 'Pause promotion' }); });
+// Promotion routes
+router.get('/promotions', promotionController.getPromotions);
+router.get('/promotions/active', promotionController.getActivePromotions);
+router.post('/promotions', promotionController.createPromotion);
+router.get('/promotions/:id', promotionController.getPromotionById);
+router.put('/promotions/:id', promotionController.updatePromotion);
+router.delete('/promotions/:id', promotionController.deletePromotion);
+router.post('/promotions/:id/activate', promotionController.activatePromotion);
+router.post('/promotions/:id/pause', promotionController.pausePromotion);
+
+// Cart Promotion routes
+router.get('/cart-promotions/:id', cartPromotionController.getCartPromotionById);
+router.get('/cart-promotions/cart/:cartId', cartPromotionController.getPromotionsByCartId);
+router.post('/cart-promotions', cartPromotionController.applyPromotion);
+router.put('/cart-promotions/:id', cartPromotionController.updateCartPromotion);
+router.delete('/cart-promotions/:id', cartPromotionController.removePromotion);
+
+// Category Promotion routes
+router.get('/category-promotions/active', categoryPromotionController.getActiveCategoryPromotions);
+router.get('/category-promotions/category/:categoryId', categoryPromotionController.getPromotionsByCategoryId);
+router.get('/category-promotions/:id', categoryPromotionController.getCategoryPromotionById);
+router.post('/category-promotions', categoryPromotionController.createCategoryPromotion);
+router.put('/category-promotions/:id', categoryPromotionController.updateCategoryPromotion);
+router.delete('/category-promotions/:id', categoryPromotionController.deleteCategoryPromotion);
 
 // Gift Card routes
 router.get('/gift-cards', giftCardController.getGiftCards);

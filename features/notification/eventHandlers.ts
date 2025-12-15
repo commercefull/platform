@@ -1,7 +1,5 @@
 import { eventBus, EventPayload, EventType } from '../../libs/events/eventBus';
-import { cacheService, CacheInvalidation } from '../../libs/cache/cacheService';
-import { JobScheduler } from '../../libs/jobs/jobQueue';
-import { NotificationService } from '../notification/services/notificationService';
+import { JobScheduler } from '../../libs/jobs/cronScheduler';
 
 // Event handlers for order events
 export const registerOrderEventHandlers = () => {
@@ -10,9 +8,6 @@ export const registerOrderEventHandlers = () => {
     const { orderId, customerId, orderNumber, total } = payload.data;
 
     console.log(`Order ${orderNumber} created for customer ${customerId}`);
-
-    // Invalidate customer cart cache
-    await cacheService.invalidateCart(`customer:${customerId}`);
 
     // Send order confirmation notification
     await JobScheduler.scheduleNotification({
@@ -160,9 +155,6 @@ export const registerInventoryEventHandlers = () => {
       message: `Product ${sku} is running low on stock.`,
       data: { productId, sku, currentStock, reorderPoint }
     });
-
-    // Invalidate product availability cache
-    await CacheInvalidation.onInventoryUpdate(productId);
   });
 
   eventBus.registerHandler('inventory.out_of_stock', async (payload: EventPayload) => {
@@ -178,27 +170,18 @@ export const registerInventoryEventHandlers = () => {
       message: `Product ${sku} is now out of stock.`,
       data: { productId, sku }
     });
-
-    // Invalidate product availability cache
-    await CacheInvalidation.onInventoryUpdate(productId);
   });
 
   eventBus.registerHandler('inventory.reserved', async (payload: EventPayload) => {
     const { productId, quantity, orderId, cartId } = payload.data;
 
     console.log(`Inventory reserved: ${quantity} units of ${productId} for ${orderId || cartId}`);
-
-    // Invalidate availability cache
-    await CacheInvalidation.onInventoryUpdate(productId);
   });
 
   eventBus.registerHandler('inventory.released', async (payload: EventPayload) => {
     const { productId, quantity, reason } = payload.data;
 
     console.log(`Inventory released: ${quantity} units of ${productId} (${reason})`);
-
-    // Invalidate availability cache
-    await CacheInvalidation.onInventoryUpdate(productId);
   });
 };
 

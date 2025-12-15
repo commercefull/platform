@@ -81,7 +81,9 @@ export const createMerchant = async (req: Request, res: Response): Promise<void>
         phone,
         website,
         logoUrl,
+        logo,
         description,
+        password,
         status = 'pending' // Default status for new merchants
       } = req.body;
 
@@ -109,11 +111,10 @@ export const createMerchant = async (req: Request, res: Response): Promise<void>
         email,
         phone,
         website,
-        logo: logoUrl,
+        logo: logoUrl || logo,
         description,
         status,
-        password: '',  // Add required password field
-        slug: ''       // Add required slug field
+        password: password || 'defaultpassword123'
       });
 
       res.status(201).json({

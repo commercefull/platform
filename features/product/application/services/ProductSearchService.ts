@@ -105,36 +105,47 @@ export class ProductSearchService {
    * Search products with filters and faceted search
    */
   async search(filters: ProductSearchFilters): Promise<ProductSearchResult> {
-    const page = filters.page || 1;
-    const limit = filters.limit || 20;
-    const offset = filters.offset || (page - 1) * limit;
+    try {
+      const page = filters.page || 1;
+      const limit = filters.limit || 20;
+      const offset = filters.offset || (page - 1) * limit;
 
-    // Build the query
-    const { sql, countSql, params } = this.buildSearchQuery(filters, limit, offset);
+      // Build the query
+      const { sql, countSql, params } = this.buildSearchQuery(filters, limit, offset);
 
-    // Execute queries in parallel
-    const [products, countResult] = await Promise.all([
-      query<Product[]>(sql, params),
-      query<Array<{ count: string }>>(countSql, params.slice(0, -2)) // Remove limit/offset params
-    ]);
+      // Execute queries in parallel
+      const [products, countResult] = await Promise.all([
+        query<Product[]>(sql, params),
+        query<Array<{ count: string }>>(countSql, params.slice(0, -2)) // Remove limit/offset params
+      ]);
 
-    const total = countResult ? parseInt(countResult[0]?.count || '0', 10) : 0;
-    const totalPages = Math.ceil(total / limit);
+      const total = countResult ? parseInt(countResult[0]?.count || '0', 10) : 0;
+      const totalPages = Math.ceil(total / limit);
 
-    // Get facets if requested
-    let facets: SearchFacets | undefined;
-    if (filters.query || Object.keys(filters).length > 3) { // Only compute facets for actual searches
-      facets = await this.computeFacets(filters);
+      // Get facets if requested
+      let facets: SearchFacets | undefined;
+      if (filters.query || Object.keys(filters).length > 3) { // Only compute facets for actual searches
+        facets = await this.computeFacets(filters);
+      }
+
+      return {
+        products: products || [],
+        total,
+        page,
+        limit,
+        totalPages,
+        facets
+      };
+    } catch (error) {
+      console.error('Product search error:', error);
+      return {
+        products: [],
+        total: 0,
+        page: filters.page || 1,
+        limit: filters.limit || 20,
+        totalPages: 0
+      };
     }
-
-    return {
-      products: products || [],
-      total,
-      page,
-      limit,
-      totalPages,
-      facets
-    };
   }
 
   /**

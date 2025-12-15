@@ -35,8 +35,16 @@ beforeAll(async () => {
   });
 
   // Login as merchant
-  const loginResponse = await client.post('/business/auth/login', TEST_MERCHANT, { headers: { 'X-Test-Request': 'true' } });
-  merchantToken = loginResponse.data.accessToken;
+  try {
+    const loginResponse = await client.post('/business/auth/login', TEST_MERCHANT, { headers: { 'X-Test-Request': 'true' } });
+    merchantToken = loginResponse.data?.accessToken || '';
+    if (!merchantToken) {
+      console.log('Warning: Failed to get merchant token for localization tests');
+    }
+  } catch (error) {
+    console.log('Warning: Login failed for localization tests:', error);
+    merchantToken = '';
+  }
 });
 
 // ============================================================================

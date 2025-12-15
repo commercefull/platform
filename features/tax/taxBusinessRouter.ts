@@ -10,11 +10,12 @@ import {
   createTaxCategory,
   updateTaxCategory,
   deleteTaxCategory,
+  getAllTaxZones,
   getTaxZoneById,
   createTaxZone,
   updateTaxZone,
   deleteTaxZone
-} from './controllers/taxMerchantController';
+} from './controllers/taxBusinessController';
 import { isMerchantLoggedIn } from '../../libs/auth';
 
 const router = Router();
@@ -36,6 +37,7 @@ router.put('/tax/categories/:id', updateTaxCategory);
 router.delete('/tax/categories/:id', deleteTaxCategory);
 
 // -------------------- Tax Zone Routes --------------------
+router.get('/tax/zones', getAllTaxZones);
 router.get('/tax/zones/:id', getTaxZoneById);
 router.post('/tax/zones', createTaxZone);
 router.put('/tax/zones/:id', updateTaxZone);

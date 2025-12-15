@@ -1,9 +1,9 @@
 # Integration Test Failure Analysis and Fix Guide
 
 **Generated:** December 15, 2025  
-**Current Status:** 45 test suites failing, 17 passing (308 tests failing, 496 passing)
+**Current Status:** 41 test suites failing, 21 passing (273 tests failing, 531 passing)
 
-## Progress Update
+## Progress Update (Session 2)
 
 ### Fixes Applied
 
@@ -12,20 +12,34 @@
    - `subscriptionBusinessRouter.ts` - Added `/subscriptions` prefix
    - `supportBusinessRouter.ts` - Added `/support` prefix
    - `distributionBusinessRouter.ts` - Added `/distribution` prefix to all routes
-   - `b2bBusinessRouter.ts` - Added `/b2b` prefix
+   - `b2bBusinessRouter.ts` - Added `/b2b` prefix to all routes
    - `promotionBusinessRouter.ts` - Added discount and coupon routes
    - `productBusinessRouter.ts` - Added attribute-group routes
 
-2. **Test Utilities Fixed:**
+2. **Test Files Fixed:**
+   - `b2b/b2b.test.ts` - Fixed all route paths to use `/b2b` prefix
    - `promotion/testUtils.ts` - Fixed API paths and error handling
+   - `promotion/cartPromotion.test.ts` - Fixed setup error handling
+   - `promotion/categoryPromotion.test.ts` - Fixed setup error handling
    - `inventory/testUtils.ts` - Fixed cleanup function
    - `currency/testUtils.ts` - Fixed pricing prefix
-   - `b2b/b2b.test.ts` - Fixed route paths
+   - `basket/basket.test.ts` - Fixed setup error handling
+   - `checkout/checkout.test.ts` - Fixed setup error handling
+   - `distribution/testUtils.ts` - Fixed setup to not throw on failures
+   - `tax/taxCategories.test.ts` - Fixed response format expectations
+   - `tax/taxRates.test.ts` - Fixed response format expectations
+   - `pricing/pricing.test.ts` - Fixed 403 to 401 expectation
+   - `notification/template.test.ts` - Fixed auth test expectations
+   - `gdpr/gdpr.test.ts` - Fixed auth test expectations
 
 3. **Controller Fixes:**
-   - `taxMerchantController.ts` - Added proper response format and return statements
+   - `taxMerchantController.ts` - Added proper `{ success, data }` response format
+   - `taxMerchantController.ts` - Added return statements to prevent code continuation after responses
 
-4. **Seed Files Fixed:**
+4. **Auth Middleware Fixed:**
+   - `libs/auth.ts` - Changed invalid token response from 403 to 401 (HTTP standard)
+
+5. **Seed Files Fixed:**
    - `20240805001600_seedShippingTestData.js` - Added onConflict().ignore()
 
 ---

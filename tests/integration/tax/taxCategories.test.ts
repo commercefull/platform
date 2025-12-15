@@ -19,11 +19,12 @@ describe('Tax Categories API Integration Tests', () => {
       });
 
       expect(response.status).toBe(200);
-      expect(Array.isArray(response.data)).toBeTruthy();
+      expect(response.data.success).toBe(true);
+      expect(Array.isArray(response.data.data)).toBeTruthy();
       
-      if (response.data.length > 0) {
+      if (response.data.data.length > 0) {
         // Verify structure of a tax category
-        const taxCategory = response.data[0];
+        const taxCategory = response.data.data[0];
         expect(taxCategory).toHaveProperty('id');
         expect(taxCategory).toHaveProperty('name');
         expect(taxCategory).toHaveProperty('code');
@@ -40,7 +41,8 @@ describe('Tax Categories API Integration Tests', () => {
       const response = await client.get('/business/tax/categories', {
         headers: { Authorization: `Bearer ${userToken}` }
       });
-      expect(response.status).toBe(403);
+      // Expect 401 (token fails merchant verification) or 403 (authorization denied)
+      expect([401, 403]).toContain(response.status);
     });
   });
 

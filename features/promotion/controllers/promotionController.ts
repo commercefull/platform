@@ -396,3 +396,58 @@ export const validatePromotionForCart = async (req: Request, res: Response): Pro
   }
 };
 
+/**
+ * Activate a promotion
+ */
+export const activatePromotion = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    
+    const existingPromotion = await promotionRepo.findById(id);
+    if (!existingPromotion) {
+      res.status(404).json({ success: false, message: 'Promotion not found' });
+      return;
+    }
+    
+    const updatedPromotion = await promotionRepo.update(id, { status: 'active' as PromotionStatus });
+    
+    res.status(200).json({
+      success: true,
+      data: updatedPromotion,
+      message: 'Promotion activated successfully'
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message || 'An error occurred while activating the promotion'
+    });
+  }
+};
+
+/**
+ * Pause a promotion
+ */
+export const pausePromotion = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    
+    const existingPromotion = await promotionRepo.findById(id);
+    if (!existingPromotion) {
+      res.status(404).json({ success: false, message: 'Promotion not found' });
+      return;
+    }
+    
+    const updatedPromotion = await promotionRepo.update(id, { status: 'paused' as PromotionStatus });
+    
+    res.status(200).json({
+      success: true,
+      data: updatedPromotion,
+      message: 'Promotion paused successfully'
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message || 'An error occurred while pausing the promotion'
+    });
+  }
+};

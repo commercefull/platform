@@ -289,24 +289,46 @@ export const deleteTaxCategory = async (req: Request, res: Response) => {
 }
 
 // Tax Zone Methods
+export const getAllTaxZones = async (req: Request, res: Response) => {
+  try {
+    const { status, limit, offset } = req.query;
+    const limitNum = limit ? parseInt(limit as string) : undefined;
+    const offsetNum = offset ? parseInt(offset as string) : undefined;
+
+    let statusFilter: boolean | undefined = undefined;
+    if (status === 'active') {
+      statusFilter = true;
+    } else if (status === 'inactive') {
+      statusFilter = false;
+    }
+
+    const taxZones = await taxQueryRepo.findAllTaxZones(statusFilter, limitNum, offsetNum);
+
+    res.json({ success: true, data: taxZones });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, error: 'Internal Server Error' });
+  }
+}
+
 export const getTaxZoneById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
     if (!id) {
-      res.status(400).json({ error: 'Tax zone ID is required' });
+      return res.status(400).json({ success: false, error: 'Tax zone ID is required' });
     }
 
     const taxZone = await taxQueryRepo.findTaxZoneById(id);
 
     if (!taxZone) {
-      res.status(404).json({ error: 'Tax zone not found' });
+      return res.status(404).json({ success: false, error: 'Tax zone not found' });
     }
 
-    res.json(taxZone);
+    res.json({ success: true, data: taxZone });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
 }
 
@@ -325,7 +347,7 @@ export const createTaxZone = async (req: Request, res: Response) => {
     } = req.body;
 
     if (!name || !code || !countries || !Array.isArray(countries) || countries.length === 0) {
-      res.status(400).json({ error: 'Name, code, and at least one country are required' });
+      return res.status(400).json({ success: false, error: 'Name, code, and at least one country are required' });
     }
 
     const newTaxZone = {
@@ -342,10 +364,10 @@ export const createTaxZone = async (req: Request, res: Response) => {
 
     const createdTaxZone = await (new TaxCommandRepo()).createTaxZone(newTaxZone);
 
-    res.status(201).json(createdTaxZone);
+    res.status(201).json({ success: true, data: createdTaxZone });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
 }
 
@@ -367,7 +389,7 @@ export const updateTaxZone = async (req: Request, res: Response) => {
     const existingTaxZone = await taxQueryRepo.findTaxZoneById(id);
 
     if (!existingTaxZone) {
-      res.status(404).json({ error: 'Tax zone not found' });
+      return res.status(404).json({ success: false, error: 'Tax zone not found' });
     }
 
     const updatedTaxZone: Partial<Omit<TaxZone, "id" | "createdAt" | "updatedAt">> = {};
@@ -378,7 +400,7 @@ export const updateTaxZone = async (req: Request, res: Response) => {
     if (isDefault !== undefined) updatedTaxZone.isDefault = isDefault;
     if (countries !== undefined) {
       if (!Array.isArray(countries) || countries.length === 0) {
-        res.status(400).json({ error: 'At least one country is required' });
+        return res.status(400).json({ success: false, error: 'At least one country is required' });
       }
       updatedTaxZone.countries = countries;
     }
@@ -389,10 +411,10 @@ export const updateTaxZone = async (req: Request, res: Response) => {
 
     const result = await (new TaxCommandRepo()).updateTaxZone(id, updatedTaxZone);
 
-    res.json(result);
+    res.json({ success: true, data: result });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
 }
 
@@ -403,14 +425,14 @@ export const deleteTaxZone = async (req: Request, res: Response) => {
     const existingTaxZone = await taxQueryRepo.findTaxZoneById(id);
 
     if (!existingTaxZone) {
-      res.status(404).json({ error: 'Tax zone not found' });
+      return res.status(404).json({ success: false, error: 'Tax zone not found' });
     }
 
     await (new TaxCommandRepo()).deleteTaxZone(id);
 
-    res.json({ message: 'Tax zone deleted successfully' });
+    res.json({ success: true, message: 'Tax zone deleted successfully' });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
 }

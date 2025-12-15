@@ -11,7 +11,7 @@ describe('Currency Feature Tests', () => {
   let client: AxiosInstance;
   let adminToken: string;
   let testCurrencyCode: string;
-  let testCurrencyRegionId: string;
+  let testCurrencyId: string;
   let testCurrencyRegionCode: string;
   let testPriceRuleId: string;
 
@@ -24,7 +24,7 @@ describe('Currency Feature Tests', () => {
       client = setup.client;
       adminToken = setup.adminToken;
       testCurrencyCode = setup.testCurrencyCode;
-      testCurrencyRegionId = setup.testCurrencyRegionId;
+      testCurrencyId = setup.testCurrencyId;
       testCurrencyRegionCode = setup.testCurrencyRegionCode;
       testPriceRuleId = setup.testPriceRuleId;
     } catch (error) {

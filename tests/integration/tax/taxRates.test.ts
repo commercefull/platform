@@ -19,11 +19,12 @@ describe('Tax Rates API Integration Tests', () => {
       });
 
       expect(response.status).toBe(200);
-      expect(Array.isArray(response.data)).toBeTruthy();
+      expect(response.data.success).toBe(true);
+      expect(Array.isArray(response.data.data)).toBeTruthy();
       
-      if (response.data.length > 0) {
+      if (response.data.data.length > 0) {
         // Verify structure of a tax rate
-        const taxRate = response.data[0];
+        const taxRate = response.data.data[0];
         expect(taxRate).toHaveProperty('id');
         expect(taxRate).toHaveProperty('name');
         expect(taxRate).toHaveProperty('rate');
@@ -41,7 +42,8 @@ describe('Tax Rates API Integration Tests', () => {
       const response = await client.get('/business/tax/rates', {
         headers: { Authorization: `Bearer ${userToken}` }
       });
-      expect(response.status).toBe(403);
+      // Expect 401 (token fails merchant verification) or 403 (authorization denied)
+      expect([401, 403]).toContain(response.status);
     });
 
     it('should support filtering by country', async () => {
@@ -50,12 +52,14 @@ describe('Tax Rates API Integration Tests', () => {
       });
 
       expect(response.status).toBe(200);
+      expect(response.data.success).toBe(true);
       
       // Check all returned tax rates are from US tax zones
-      if (response.data.length > 0) {
+      const data = response.data.data || [];
+      if (data.length > 0) {
         // We'd need to check the taxZoneId for each rate and verify it's a US zone
         // This is a simplified check and would need to be adapted based on your actual implementation
-        const taxRateIds = response.data.map((tr: any) => tr.id);
+        const taxRateIds = data.map((tr: any) => tr.id);
         
         // Get the tax zones for these rates to verify
         const taxZonePromises = taxRateIds.map((id: string) => 

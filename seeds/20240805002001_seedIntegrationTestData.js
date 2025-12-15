@@ -28,6 +28,10 @@ const TEST_CONTENT_BLOCK_ID = '00000000-0000-0000-0000-000000005003';
 const TEST_CONTENT_TEMPLATE_ID = '00000000-0000-0000-0000-000000005004';
 const TEST_BLOCK_TYPE_ID = '00000000-0000-0000-0000-000000005005';
 
+// Subscription test IDs
+const TEST_SUBSCRIPTION_PRODUCT_ID = '00000000-0000-0000-0000-000000007001';
+const TEST_SUBSCRIPTION_PLAN_ID = '00000000-0000-0000-0000-000000007002';
+
 // Customer test IDs
 const TEST_CUSTOMER_ADDRESS_ID = '00000000-0000-0000-0000-000000006001';
 const TEST_CUSTOMER_GROUP_ID = '00000000-0000-0000-0000-000000006002';
@@ -453,6 +457,47 @@ exports.seed = async function(knex) {
     console.log('Skipping content block seed - table may not exist');
   }
 
+  // =========================================================================
+  // Test Subscription Product & Plan
+  // =========================================================================
+  try {
+    const existingSubProduct = await knex('subscriptionProduct')
+      .where('subscriptionProductId', TEST_SUBSCRIPTION_PRODUCT_ID)
+      .first();
+    
+    if (!existingSubProduct) {
+      await knex('subscriptionProduct').insert({
+        subscriptionProductId: TEST_SUBSCRIPTION_PRODUCT_ID,
+        productId: TEST_PRODUCT_1_ID,
+        billingAnchor: 'subscription_start',
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }).onConflict('subscriptionProductId').ignore();
+    }
+
+    const existingSubPlan = await knex('subscriptionPlan')
+      .where('subscriptionPlanId', TEST_SUBSCRIPTION_PLAN_ID)
+      .first();
+    
+    if (!existingSubPlan) {
+      await knex('subscriptionPlan').insert({
+        subscriptionPlanId: TEST_SUBSCRIPTION_PLAN_ID,
+        subscriptionProductId: TEST_SUBSCRIPTION_PRODUCT_ID,
+        name: 'Integration Test Plan',
+        billingInterval: 'month',
+        billingIntervalCount: 1,
+        price: 29.99,
+        currency: 'USD',
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }).onConflict('subscriptionPlanId').ignore();
+    }
+  } catch (e) {
+    console.log('Skipping subscription seed - table may not exist');
+  }
+
   console.log('Integration test data seeded successfully');
 };
 
@@ -473,5 +518,7 @@ exports.TEST_IDS = {
   TEST_CONTENT_PAGE_ID,
   TEST_CONTENT_BLOCK_ID,
   TEST_CONTENT_TEMPLATE_ID,
-  TEST_BLOCK_TYPE_ID
+  TEST_BLOCK_TYPE_ID,
+  TEST_SUBSCRIPTION_PRODUCT_ID,
+  TEST_SUBSCRIPTION_PLAN_ID
 };

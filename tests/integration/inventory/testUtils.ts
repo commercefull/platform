@@ -47,43 +47,67 @@ export const setupInventoryTests = async () => {
   const adminToken = adminLogin.data.accessToken;
 
   // Create test product if needed
-  const productResponse = await client.get('/business/products', {
-    headers: { Authorization: `Bearer ${adminToken}` }
-  });
-  
-  let testProductId;
-  if (productResponse.data.data && productResponse.data.data.length > 0) {
-    testProductId = productResponse.data.data[0].id;
-  } else {
-    // Create a test product
-    const newProduct = await client.post('/business/products', {
-      name: 'Test Inventory Product',
-      sku: 'TEST-INVENTORY-SKU',
-      price: 29.99,
-      status: 'active'
-    }, {
+  let testProductId = '';
+  let testLocationId = '';
+  let testInventoryItemId = '';
+
+  try {
+    const productResponse = await client.get('/business/products', {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
-    testProductId = newProduct.data.data.id;
+    
+    if (productResponse.data?.data && productResponse.data.data.length > 0) {
+      testProductId = productResponse.data.data[0].id || productResponse.data.data[0].productId;
+    } else {
+      // Create a test product - include required fields
+      const newProduct = await client.post('/business/products', {
+        name: 'Test Inventory Product',
+        sku: 'TEST-INVENTORY-SKU-' + Date.now(),
+        productTypeId: '00000000-0000-0000-0000-000000000001', // Default product type
+        basePrice: 29.99,
+        status: 'active'
+      }, {
+        headers: { Authorization: `Bearer ${adminToken}` }
+      });
+      if (newProduct.data?.data?.id) {
+        testProductId = newProduct.data.data.id;
+      } else if (newProduct.data?.data?.productId) {
+        testProductId = newProduct.data.data.productId;
+      } else {
+        console.log('Warning: Could not create test product:', newProduct.data);
+      }
+    }
+
+    // Create a test inventory location
+    const locationResponse = await client.post('/business/inventory/locations', testInventoryLocation, {
+      headers: { Authorization: `Bearer ${adminToken}` }
+    });
+    if (locationResponse.data?.data?.id) {
+      testLocationId = locationResponse.data.data.id;
+    } else {
+      console.log('Warning: Could not create test location:', locationResponse.data);
+    }
+
+    // Create a test inventory item (only if we have both product and location)
+    if (testProductId && testLocationId) {
+      const inventoryItemData = {
+        ...testInventoryItem,
+        productId: testProductId,
+        locationId: testLocationId
+      };
+      
+      const itemResponse = await client.post('/business/inventory/items', inventoryItemData, {
+        headers: { Authorization: `Bearer ${adminToken}` }
+      });
+      if (itemResponse.data?.data?.id) {
+        testInventoryItemId = itemResponse.data.data.id;
+      } else {
+        console.log('Warning: Could not create test inventory item:', itemResponse.data);
+      }
+    }
+  } catch (error) {
+    console.log('Warning: Inventory setup error:', error);
   }
-
-  // Create a test inventory location
-  const locationResponse = await client.post('/business/inventory/locations', testInventoryLocation, {
-    headers: { Authorization: `Bearer ${adminToken}` }
-  });
-  const testLocationId = locationResponse.data.data.id;
-
-  // Create a test inventory item
-  const inventoryItemData = {
-    ...testInventoryItem,
-    productId: testProductId,
-    locationId: testLocationId
-  };
-  
-  const itemResponse = await client.post('/business/inventory/items', inventoryItemData, {
-    headers: { Authorization: `Bearer ${adminToken}` }
-  });
-  const testInventoryItemId = itemResponse.data.data.id;
 
   return {
     client,

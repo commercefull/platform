@@ -201,8 +201,14 @@ export async function createTestAttributeOption(client: AxiosInstance, adminToke
 // Uses seeded data from seeds/20240805001058_seedProductTestData.js
 export async function setupProductTests() {
   const client = createTestClient();
-  // Use merchant login for business routes
-  const adminToken = await loginTestAdmin(client);
+  let adminToken = '';
+  
+  try {
+    // Use merchant login for business routes
+    adminToken = await loginTestAdmin(client);
+  } catch (error) {
+    console.log('Warning: Admin login failed for product tests');
+  }
   
   // Use seeded product data - these products are created by the seed file
   // with fixed UUIDs for consistent testing

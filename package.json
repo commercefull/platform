@@ -22,6 +22,7 @@
     "test:int": "jest ./tests/integration --collectCoverage=false --detectOpenHandles",
     "test:e2e": "npx cypress run --headless --browser chrome",
     "cli:new:merchant": "NODE_ENV=development node -r ts-node/register ./cli/new-merchant.ts",
+    "lint": "npx tsc --noEmit",
     "package:upgrade": "yarn upgrade --latest",
     "code:lint": "knip",
     "security:audit": "yarn audit --groups dependencies",
