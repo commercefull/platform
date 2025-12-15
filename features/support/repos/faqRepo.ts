@@ -4,6 +4,16 @@
  */
 
 import { query, queryOne } from '../../../libs/db';
+import { Table } from '../../../libs/db/types';
+
+// ============================================================================
+// Table Constants
+// ============================================================================
+
+const TABLES = {
+  FAQ_CATEGORY: Table.FaqCategory,
+  FAQ_ARTICLE: Table.FaqArticle
+};
 
 // ============================================================================
 // Types

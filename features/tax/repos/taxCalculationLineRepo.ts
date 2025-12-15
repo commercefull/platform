@@ -1,5 +1,13 @@
+/**
+ * Tax Calculation Line Repository
+ * CRUD operations for tax calculation line items
+ */
+
 import { query, queryOne } from '../../../libs/db';
+import { Table } from '../../../libs/db/types';
 import { unixTimestamp } from '../../../libs/date';
+
+const TABLE = Table.TaxCalculationLine;
 
 export interface TaxCalculationLine {
   taxCalculationLineId: string;

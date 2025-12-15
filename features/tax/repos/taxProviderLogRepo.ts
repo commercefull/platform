@@ -1,5 +1,13 @@
+/**
+ * Tax Provider Log Repository
+ * CRUD operations for tax provider logs
+ */
+
 import { query, queryOne } from '../../../libs/db';
+import { Table } from '../../../libs/db/types';
 import { unixTimestamp } from '../../../libs/date';
+
+const TABLE = Table.TaxProviderLog;
 
 export type TaxProvider = 'internal' | 'avalara' | 'taxjar' | 'external';
 export type TaxProviderRequestType = 'calculation' | 'verification' | 'filing' | 'refund' | 'adjustment' | 'validation';

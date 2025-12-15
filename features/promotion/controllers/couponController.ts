@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 import couponRepo, { 
-  CouponStatus, 
   CreateCouponInput, 
-  UpdateCouponInput 
+  UpdateCouponInput,
+  CouponType 
 } from "../repos/couponRepo";
 
 /**
@@ -83,10 +83,10 @@ export const createCoupon = async (req: Request, res: Response): Promise<void> =
     const couponData: CreateCouponInput = req.body;
     
     // Validate required fields
-    if (!couponData.code || !couponData.name || !couponData.type || couponData.value === undefined || !couponData.startDate) {
+    if (!couponData.code || !couponData.name || !couponData.type) {
       res.status(400).json({
         success: false,
-        message: 'Missing required fields'
+        message: 'Missing required fields: code, name, and type are required'
       });
       return;
     }
@@ -101,18 +101,7 @@ export const createCoupon = async (req: Request, res: Response): Promise<void> =
       return;
     }
     
-    // Set default values if not provided
-    if (couponData.forNewCustomersOnly === undefined) {
-      couponData.forNewCustomersOnly = false;
-    }
-    
-    if (couponData.forAutoApply === undefined) {
-      couponData.forAutoApply = false;
-    }
-    
-    if (!couponData.status) {
-      couponData.status = CouponStatus.ACTIVE;
-    }
+    // Default values are handled by the repository
     
     const coupon = await couponRepo.create(couponData);
     
@@ -144,21 +133,7 @@ export const updateCoupon = async (req: Request, res: Response): Promise<void> =
       return;
     }
     
-    // Check if code is being changed and if it already exists
-    if (couponData.code && couponData.code !== existingCoupon.code) {
-      const codeExists = await couponRepo.findByCode(
-        couponData.code, 
-        couponData.merchantId || existingCoupon.merchantId
-      );
-      
-      if (codeExists) {
-        res.status(400).json({
-          success: false,
-          message: 'Coupon code already exists'
-        });
-        return;
-      }
-    }
+    // Code cannot be changed via update (it's excluded from UpdateCouponInput)
     
     const updatedCoupon = await couponRepo.update(id, couponData);
     
@@ -217,7 +192,7 @@ export const validateCoupon = async (req: Request, res: Response): Promise<void>
     }
     
     // Validate the coupon
-    const result = await couponRepo.validateCoupon(
+    const result = await couponRepo.validate(
       code,
       parseFloat(orderTotal),
       customerId,
@@ -250,7 +225,7 @@ export const getCouponUsage = async (req: Request, res: Response): Promise<void>
       return;
     }
     
-    const usage = await couponRepo.getCouponUsage(id);
+    const usage = await couponRepo.getUsage(id);
     
     res.status(200).json({
       success: true,
@@ -258,8 +233,8 @@ export const getCouponUsage = async (req: Request, res: Response): Promise<void>
         coupon: existingCoupon,
         usage,
         totalUsage: existingCoupon.usageCount,
-        remainingUsage: existingCoupon.usageLimit 
-          ? existingCoupon.usageLimit - existingCoupon.usageCount 
+        remainingUsage: existingCoupon.maxUsage 
+          ? existingCoupon.maxUsage - existingCoupon.usageCount 
           : null
       }
     });
@@ -295,10 +270,9 @@ export const calculateCouponDiscount = async (req: Request, res: Response): Prom
     }
     
     // Calculate discount
-    const discountAmount = await couponRepo.calculateCouponDiscount(
+    const discountAmount = couponRepo.calculateDiscount(
       coupon,
-      parseFloat(orderTotal),
-      items
+      parseFloat(orderTotal)
     );
     
     res.status(200).json({

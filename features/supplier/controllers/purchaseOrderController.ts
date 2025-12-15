@@ -141,7 +141,7 @@ export const createPurchaseOrder = async (req: Request, res: Response): Promise<
     const createdItems = [];
     for (const item of items) {
       const itemParams = {
-        purchaseOrderId: purchaseOrder.purchaseOrderId,
+        supplierPurchaseOrderId: purchaseOrder.supplierPurchaseOrderId,
         ...item
       };
       const createdItem = await purchaseOrderRepo.createItem(itemParams);

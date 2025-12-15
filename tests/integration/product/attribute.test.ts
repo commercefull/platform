@@ -4,10 +4,10 @@ import { setupProductTests, cleanupProductTests, testAttribute } from './testUti
 describe('Attribute Tests', () => {
   let client: AxiosInstance;
   let adminToken: string;
-  let testProductId: string;
-  let testCategoryId: string;
-  let testAttributeGroupId: string;
-  let testAttributeId: string;
+  let testProductId: string | null;
+  let testCategoryId: string | null;
+  let testAttributeGroupId: string | null;
+  let testAttributeId: string | null;
   let createdAttributeId: string;
 
   beforeAll(async () => {

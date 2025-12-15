@@ -60,123 +60,123 @@ const router = express.Router();
 router.use(isMerchantLoggedIn);
 
 // Distribution Center routes
-router.get("/centers", getDistributionCenters);
-router.get("/centers/active", getActiveDistributionCenters);
-router.get("/centers/:id", getDistributionCenterById);
-router.get("/centers/code/:code", getDistributionCenterByCode);
-router.post("/centers", createDistributionCenter);
-router.put("/centers/:id", updateDistributionCenter);
-router.delete("/centers/:id", deleteDistributionCenter);
+router.get("/distribution/centers", getDistributionCenters);
+router.get("/distribution/centers/active", getActiveDistributionCenters);
+router.get("/distribution/centers/:id", getDistributionCenterById);
+router.get("/distribution/centers/code/:code", getDistributionCenterByCode);
+router.post("/distribution/centers", createDistributionCenter);
+router.put("/distribution/centers/:id", updateDistributionCenter);
+router.delete("/distribution/centers/:id", deleteDistributionCenter);
 
 // Distribution Rule routes
-router.get("/rules", getDistributionRules);
-router.get("/rules/active", getActiveDistributionRules);
-router.get("/rules/:id", getDistributionRuleById);
-router.get("/rules/zone/:zoneId", getDistributionRulesByZone);
-router.get("/rules/default", getDefaultDistributionRule);
-router.post("/rules", createDistributionRule);
-router.put("/rules/:id", updateDistributionRule);
-router.delete("/rules/:id", deleteDistributionRule);
+router.get("/distribution/rules", getDistributionRules);
+router.get("/distribution/rules/active", getActiveDistributionRules);
+router.get("/distribution/rules/:id", getDistributionRuleById);
+router.get("/distribution/rules/zone/:zoneId", getDistributionRulesByZone);
+router.get("/distribution/rules/default", getDefaultDistributionRule);
+router.post("/distribution/rules", createDistributionRule);
+router.put("/distribution/rules/:id", updateDistributionRule);
+router.delete("/distribution/rules/:id", deleteDistributionRule);
 
 // Shipping Zone routes
-router.get("/shipping-zones", getShippingZones);
-router.get("/shipping-zones/active", getActiveShippingZones);
-router.get("/shipping-zones/:id", getShippingZoneById);
-router.post("/shipping-zones", createShippingZone);
-router.put("/shipping-zones/:id", updateShippingZone);
-router.delete("/shipping-zones/:id", deleteShippingZone);
+router.get("/distribution/shipping-zones", getShippingZones);
+router.get("/distribution/shipping-zones/active", getActiveShippingZones);
+router.get("/distribution/shipping-zones/:id", getShippingZoneById);
+router.post("/distribution/shipping-zones", createShippingZone);
+router.put("/distribution/shipping-zones/:id", updateShippingZone);
+router.delete("/distribution/shipping-zones/:id", deleteShippingZone);
 
 // Channel routes
-router.get("/channels", getChannels);
-router.get("/channels/active", getActiveChannels);
-router.get("/channels/:id", getChannelById);
-router.get("/channels/code/:code", getChannelByCode);
-router.post("/channels", createChannel);
-router.put("/channels/:id", updateChannel);
-router.delete("/channels/:id", deleteChannel);
+router.get("/distribution/channels", getChannels);
+router.get("/distribution/channels/active", getActiveChannels);
+router.get("/distribution/channels/:id", getChannelById);
+router.get("/distribution/channels/code/:code", getChannelByCode);
+router.post("/distribution/channels", createChannel);
+router.put("/distribution/channels/:id", updateChannel);
+router.delete("/distribution/channels/:id", deleteChannel);
 
 // Channel product routes
-router.get("/channels/:id/products", getChannelProducts);
-router.post("/channels/:id/products", addProductToChannel);
-router.delete("/channels/:id/products/:productId", removeProductFromChannel);
-router.get("/products/:productId/channels", getProductChannels);
+router.get("/distribution/channels/:id/products", getChannelProducts);
+router.post("/distribution/channels/:id/products", addProductToChannel);
+router.delete("/distribution/channels/:id/products/:productId", removeProductFromChannel);
+router.get("/distribution/products/:productId/channels", getProductChannels);
 
 // Shipping Method routes
-router.get("/shipping-methods", getShippingMethods);
-router.get("/shipping-methods/active", getActiveShippingMethods);
-router.get("/shipping-methods/:id", getShippingMethodById);
-router.get("/shipping-methods/carrier/:carrierId", getShippingMethodsByCarrier);
-router.post("/shipping-methods", createShippingMethod);
-router.put("/shipping-methods/:id", updateShippingMethod);
-router.delete("/shipping-methods/:id", deleteShippingMethod);
+router.get("/distribution/shipping-methods", getShippingMethods);
+router.get("/distribution/shipping-methods/active", getActiveShippingMethods);
+router.get("/distribution/shipping-methods/:id", getShippingMethodById);
+router.get("/distribution/shipping-methods/carrier/:carrierId", getShippingMethodsByCarrier);
+router.post("/distribution/shipping-methods", createShippingMethod);
+router.put("/distribution/shipping-methods/:id", updateShippingMethod);
+router.delete("/distribution/shipping-methods/:id", deleteShippingMethod);
 
 // Shipping Carrier routes
-router.get("/shipping-carriers", getShippingCarriers);
-router.get("/shipping-carriers/active", getActiveShippingCarriers);
-router.get("/shipping-carriers/:id", getShippingCarrierById);
-router.get("/shipping-carriers/code/:code", getShippingCarrierByCode);
-router.post("/shipping-carriers", createShippingCarrier);
-router.put("/shipping-carriers/:id", updateShippingCarrier);
-router.delete("/shipping-carriers/:id", deleteShippingCarrier);
+router.get("/distribution/shipping-carriers", getShippingCarriers);
+router.get("/distribution/shipping-carriers/active", getActiveShippingCarriers);
+router.get("/distribution/shipping-carriers/:id", getShippingCarrierById);
+router.get("/distribution/shipping-carriers/code/:code", getShippingCarrierByCode);
+router.post("/distribution/shipping-carriers", createShippingCarrier);
+router.put("/distribution/shipping-carriers/:id", updateShippingCarrier);
+router.delete("/distribution/shipping-carriers/:id", deleteShippingCarrier);
 
 // Shipping Rate routes
-router.get("/shipping-rates", getShippingRates);
-router.get("/shipping-rates/:id", getShippingRateById);
-router.get("/shipping-rates/zone/:zoneId", getShippingRatesByZone);
-router.get("/shipping-rates/method/:methodId", getShippingRatesByMethod);
-router.post("/shipping-rates", createShippingRate);
-router.put("/shipping-rates/:id", updateShippingRate);
-router.delete("/shipping-rates/:id", deleteShippingRate);
+router.get("/distribution/shipping-rates", getShippingRates);
+router.get("/distribution/shipping-rates/:id", getShippingRateById);
+router.get("/distribution/shipping-rates/zone/:zoneId", getShippingRatesByZone);
+router.get("/distribution/shipping-rates/method/:methodId", getShippingRatesByMethod);
+router.post("/distribution/shipping-rates", createShippingRate);
+router.put("/distribution/shipping-rates/:id", updateShippingRate);
+router.delete("/distribution/shipping-rates/:id", deleteShippingRate);
 
 // Shipping Calculation routes (Use Cases)
-router.post("/shipping/calculate-rate", calculateRate);
-router.get("/shipping/available-methods", getAvailableMethods);
+router.post("/distribution/shipping/calculate-rate", calculateRate);
+router.get("/distribution/shipping/available-methods", getAvailableMethods);
 
 // Warehouse Selection routes (Use Cases)
-router.get("/warehouses/best", getBestWarehouse);
+router.get("/distribution/warehouses/best", getBestWarehouse);
 
 // Fulfillment Partner routes
-router.get("/fulfillment-partners", getFulfillmentPartners);
-router.get("/fulfillment-partners/active", getActiveFulfillmentPartners);
-router.get("/fulfillment-partners/:id", getFulfillmentPartnerById);
-router.get("/fulfillment-partners/code/:code", getFulfillmentPartnerByCode);
-router.post("/fulfillment-partners", createFulfillmentPartner);
-router.put("/fulfillment-partners/:id", updateFulfillmentPartner);
-router.delete("/fulfillment-partners/:id", deleteFulfillmentPartner);
+router.get("/distribution/fulfillment-partners", getFulfillmentPartners);
+router.get("/distribution/fulfillment-partners/active", getActiveFulfillmentPartners);
+router.get("/distribution/fulfillment-partners/:id", getFulfillmentPartnerById);
+router.get("/distribution/fulfillment-partners/code/:code", getFulfillmentPartnerByCode);
+router.post("/distribution/fulfillment-partners", createFulfillmentPartner);
+router.put("/distribution/fulfillment-partners/:id", updateFulfillmentPartner);
+router.delete("/distribution/fulfillment-partners/:id", deleteFulfillmentPartner);
 
 // Order Fulfillment routes
-router.get("/fulfillments", getOrderFulfillments);
-router.get("/fulfillments/:id", getOrderFulfillmentById);
-router.get("/fulfillments/order/:orderId", getOrderFulfillmentsByOrderId);
-router.get("/fulfillments/status/:status", getOrderFulfillmentsByStatus);
-router.get("/fulfillments/warehouse/:warehouseId", getOrderFulfillmentsByWarehouse);
-router.post("/fulfillments", createOrderFulfillment);
-router.put("/fulfillments/:id", updateOrderFulfillment);
-router.put("/fulfillments/:id/status", updateOrderFulfillmentStatus);
-router.delete("/fulfillments/:id", deleteOrderFulfillment);
+router.get("/distribution/fulfillments", getOrderFulfillments);
+router.get("/distribution/fulfillments/:id", getOrderFulfillmentById);
+router.get("/distribution/fulfillments/order/:orderId", getOrderFulfillmentsByOrderId);
+router.get("/distribution/fulfillments/status/:status", getOrderFulfillmentsByStatus);
+router.get("/distribution/fulfillments/warehouse/:warehouseId", getOrderFulfillmentsByWarehouse);
+router.post("/distribution/fulfillments", createOrderFulfillment);
+router.put("/distribution/fulfillments/:id", updateOrderFulfillment);
+router.put("/distribution/fulfillments/:id/status", updateOrderFulfillmentStatus);
+router.delete("/distribution/fulfillments/:id", deleteOrderFulfillment);
 
 // Store Location routes (Click & Collect)
-router.get("/locations", pickupController.getLocations);
-router.get("/locations/:id", pickupController.getLocation);
-router.post("/locations", pickupController.createLocation);
-router.put("/locations/:id", pickupController.updateLocation);
-router.delete("/locations/:id", pickupController.deleteLocation);
+router.get("/distribution/locations", pickupController.getLocations);
+router.get("/distribution/locations/:id", pickupController.getLocation);
+router.post("/distribution/locations", pickupController.createLocation);
+router.put("/distribution/locations/:id", pickupController.updateLocation);
+router.delete("/distribution/locations/:id", pickupController.deleteLocation);
 
 // Pickup Order routes
-router.get("/pickups", pickupController.getPickupOrders);
-router.post("/pickups/:id/ready", pickupController.markPickupReady);
-router.post("/pickups/:id/notify", pickupController.notifyPickupReady);
-router.post("/pickups/:id/complete", pickupController.completePickup);
+router.get("/distribution/pickups", pickupController.getPickupOrders);
+router.post("/distribution/pickups/:id/ready", pickupController.markPickupReady);
+router.post("/distribution/pickups/:id/notify", pickupController.notifyPickupReady);
+router.post("/distribution/pickups/:id/complete", pickupController.completePickup);
 
 // Pre-Order routes
-router.get("/pre-orders", preOrderController.getPreOrders);
-router.get("/pre-orders/:id", preOrderController.getPreOrder);
-router.post("/pre-orders", preOrderController.createPreOrder);
-router.put("/pre-orders/:id", preOrderController.updatePreOrder);
+router.get("/distribution/pre-orders", preOrderController.getPreOrders);
+router.get("/distribution/pre-orders/:id", preOrderController.getPreOrder);
+router.post("/distribution/pre-orders", preOrderController.createPreOrder);
+router.put("/distribution/pre-orders/:id", preOrderController.updatePreOrder);
 
 // Pre-Order Reservation routes
-router.get("/reservations", preOrderController.getReservations);
-router.post("/reservations/:id/fulfill", preOrderController.fulfillReservation);
-router.post("/reservations/:id/cancel", preOrderController.cancelReservation);
+router.get("/distribution/reservations", preOrderController.getReservations);
+router.post("/distribution/reservations/:id/fulfill", preOrderController.fulfillReservation);
+router.post("/distribution/reservations/:id/cancel", preOrderController.cancelReservation);
 
 export const distributionBusinessRouter = router;

@@ -18,12 +18,13 @@ export async function setupPricingTests() {
     validateStatus: () => true,
     headers: {
       'Accept': 'application/json',
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      'X-Test-Request': 'true'
     }
   });
 
   // Get admin token
-  const adminLoginResponse = await client.post('/business/auth/login', adminCredentials);
+  const adminLoginResponse = await client.post('/business/auth/login', adminCredentials, { headers: { 'X-Test-Request': 'true' } });
   const adminToken = adminLoginResponse.data.accessToken;
 
   if (!adminLoginResponse.data.success || !adminToken) {

@@ -118,12 +118,12 @@ export class ShippingService {
           const rate = await this.calculateMethodRate(method, packages, zone, fromAddress, toAddress);
           if (rate) {
             quotes.push({
-              carrier: method.carrierId || 'unknown',
+              carrier: method.shippingCarrierId || 'unknown',
               method: method.name,
               serviceCode: method.code,
               rate: rate.total,
               currency,
-              estimatedDays: method.estimatedDeliveryDays || 3,
+              estimatedDays: (method.estimatedDeliveryDays as any)?.min || method.handlingDays || 3,
               guaranteedDelivery: false, // Default value - not stored in interface
               trackingAvailable: true,   // Default value - not stored in interface
               insuranceIncluded: rate.insurance > 0
@@ -210,7 +210,7 @@ export class ShippingService {
         serviceCode,
         status: 'pending',
         shipDate: new Date().toISOString(),
-        estimatedDeliveryDate: this.calculateEstimatedDelivery(method.estimatedDeliveryDays || 3),
+        estimatedDeliveryDate: this.calculateEstimatedDelivery((method.estimatedDeliveryDays as any)?.min || method.handlingDays || 3),
         cost: cost.baseRate,
         insurance: cost.insurance,
         labels: []

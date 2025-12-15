@@ -1,5 +1,13 @@
+/**
+ * Tax Rule Repository
+ * CRUD operations for tax rules
+ */
+
 import { query, queryOne } from '../../../libs/db';
+import { Table } from '../../../libs/db/types';
 import { unixTimestamp } from '../../../libs/date';
+
+const TABLE = Table.TaxRule;
 
 export type TaxRuleConditionType = 'product' | 'category' | 'brand';
 

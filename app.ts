@@ -10,7 +10,6 @@ import i18nextMiddleware from 'i18next-http-middleware';
 import helmet from "helmet";
 import compression from "compression";
 import session from "express-session";
-import rateLimit from 'express-rate-limit';
 import cors from 'cors';
 import hpp from 'hpp';
 import { pool } from "./libs/db/pool";
@@ -71,31 +70,6 @@ const corsOptions: cors.CorsOptions = {
   maxAge: 86400, // 24 hours
 };
 app.use(cors(corsOptions));
-
-// Rate limiting - protect against brute force and DDoS
-const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: isProduction ? 100 : 1000, // Limit each IP
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { success: false, message: 'Too many requests, please try again later.' },
-  skip: (req: Request) => req.path.startsWith('/health'), // Skip health checks
-});
-
-// Stricter rate limit for authentication endpoints
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: isProduction ? 5 : 50, // 5 attempts per 15 min in production
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { success: false, message: 'Too many login attempts, please try again later.' },
-});
-
-// Apply rate limiters
-app.use('/identity/login', authLimiter);
-app.use('/identity/register', authLimiter);
-app.use('/business/auth/login', authLimiter);
-app.use(apiLimiter);
 
 // HTTP Parameter Pollution protection
 // Prevents attackers from polluting query/body parameters

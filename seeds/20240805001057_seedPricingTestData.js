@@ -25,12 +25,16 @@ exports.seed = async function(knex) {
   }
 
   // Clean up existing test data (in reverse order of dependencies)
-  await knex('customerPrice').whereIn('productId', TEST_PRODUCT_IDS).delete();
-  await knex('tierPrice').whereIn('productId', TEST_PRODUCT_IDS).delete();
-  await knex('productCategoryMap').whereIn('productId', TEST_PRODUCT_IDS).delete();
-  await knex('product').whereIn('productId', TEST_PRODUCT_IDS).delete();
-  await knex('priceList').where('priceListId', TEST_PRICE_LIST_ID).delete();
-  await knex('pricingRule').where('pricingRuleId', TEST_PRICING_RULE_ID).delete();
+  // First clean up any order items referencing these products
+  await knex('orderItem').whereIn('productId', TEST_PRODUCT_IDS).delete().catch(() => {});
+  await knex('basketItem').whereIn('productId', TEST_PRODUCT_IDS).delete().catch(() => {});
+  await knex('customerPrice').whereIn('productId', TEST_PRODUCT_IDS).delete().catch(() => {});
+  await knex('tierPrice').whereIn('productId', TEST_PRODUCT_IDS).delete().catch(() => {});
+  await knex('productCategoryMap').whereIn('productId', TEST_PRODUCT_IDS).delete().catch(() => {});
+  await knex('productVariant').whereIn('productId', TEST_PRODUCT_IDS).delete().catch(() => {});
+  await knex('product').whereIn('productId', TEST_PRODUCT_IDS).delete().catch(() => {});
+  await knex('priceList').where('priceListId', TEST_PRICE_LIST_ID).delete().catch(() => {});
+  await knex('pricingRule').where('pricingRuleId', TEST_PRICING_RULE_ID).delete().catch(() => {});
 
   // Create test products with fixed UUIDs
   const testProducts = TEST_PRODUCT_IDS.map((productId, index) => ({

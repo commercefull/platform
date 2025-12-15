@@ -50,7 +50,7 @@ export const findNearestStores = async (req: Request, res: Response): Promise<vo
 
     // Map to public-facing store data (hide internal fields)
     const publicStores = activeStores.map((store: any) => ({
-      storeId: store.warehouseId,
+      storeId: store.distributionWarehouseId,
       name: store.name,
       address: {
         line1: store.addressLine1,
@@ -105,7 +105,7 @@ export const getStoreById = async (req: Request, res: Response): Promise<void> =
 
     // Return public-facing store data
     const publicStore = {
-      storeId: store.warehouseId,
+      storeId: store.distributionWarehouseId,
       name: store.name,
       description: store.description,
       address: {
@@ -159,7 +159,7 @@ export const getStoresByCity = async (req: Request, res: Response): Promise<void
 
     // Map to public-facing store data
     const publicStores = activeStores.map((store: any) => ({
-      storeId: store.warehouseId,
+      storeId: store.distributionWarehouseId,
       name: store.name,
       address: {
         line1: store.addressLine1,
@@ -204,7 +204,7 @@ export const getStoresByCountry = async (req: Request, res: Response): Promise<v
 
     // Map to public-facing store data
     const publicStores = activeStores.map((store: any) => ({
-      storeId: store.warehouseId,
+      storeId: store.distributionWarehouseId,
       name: store.name,
       city: store.city,
       state: store.state,

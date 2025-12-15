@@ -1,5 +1,21 @@
+/**
+ * Tax Zone Repository
+ * CRUD operations for tax zones
+ */
+
 import { query, queryOne } from '../../../libs/db';
+import { Table } from '../../../libs/db/types';
 import { unixTimestamp } from '../../../libs/date';
+
+// ============================================================================
+// Table Constants
+// ============================================================================
+
+const TABLE = Table.TaxZone;
+
+// ============================================================================
+// Types
+// ============================================================================
 
 export interface TaxZone {
   taxZoneId: string;

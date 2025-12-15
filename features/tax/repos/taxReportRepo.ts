@@ -1,5 +1,13 @@
+/**
+ * Tax Report Repository
+ * CRUD operations for tax reports
+ */
+
 import { query, queryOne } from '../../../libs/db';
+import { Table } from '../../../libs/db/types';
 import { unixTimestamp } from '../../../libs/date';
+
+const TABLE = Table.TaxReport;
 
 export type TaxReportType = 'sales' | 'filing' | 'jurisdiction' | 'summary' | 'exemption' | 'audit';
 export type TaxReportStatus = 'pending' | 'processing' | 'completed' | 'failed';

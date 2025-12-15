@@ -1,5 +1,21 @@
+/**
+ * Supplier Repository
+ * Manages supplier data with CRUD operations
+ */
+
 import { query, queryOne } from '../../../libs/db';
+import { Table } from '../../../libs/db/types';
 import { unixTimestamp } from '../../../libs/date';
+
+// ============================================================================
+// Table Constants
+// ============================================================================
+
+const TABLE = Table.Supplier;
+
+// ============================================================================
+// Types
+// ============================================================================
 
 export type SupplierStatus = 'active' | 'inactive' | 'pending' | 'suspended' | 'blacklisted';
 

@@ -55,7 +55,7 @@ export const redeemGiftCard: AsyncHandler = async (req, res, next) => {
     }
 
     const transaction = await giftCardRepo.redeemGiftCard(
-      giftCard.giftCardId,
+      giftCard.promotionGiftCardId,
       amount,
       orderId,
       customerId
@@ -102,7 +102,7 @@ export const reloadGiftCard: AsyncHandler = async (req, res, next) => {
     }
 
     const transaction = await giftCardRepo.reloadGiftCard(
-      giftCard.giftCardId,
+      giftCard.promotionGiftCardId,
       amount,
       orderId,
       customerId

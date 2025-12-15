@@ -39,7 +39,9 @@ describe('GDPR Feature Tests', () => {
         }
       };
 
-      const response = await client.post('/customer/gdpr/cookies/consent', consentData);
+      const response = await client.post('/customer/gdpr/cookies/consent', consentData, {
+        headers: { Authorization: `Bearer ${customerToken}` }
+      });
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
@@ -50,7 +52,8 @@ describe('GDPR Feature Tests', () => {
 
     it('UC-GDP-002: should get cookie consent', async () => {
       const response = await client.get('/customer/gdpr/cookies/consent', {
-        params: { sessionId: testConsentId }
+        params: { sessionId: testConsentId },
+        headers: { Authorization: `Bearer ${customerToken}` }
       });
 
       expect(response.status).toBe(200);
@@ -67,6 +70,8 @@ describe('GDPR Feature Tests', () => {
       
       const response = await client.post('/customer/gdpr/cookies/accept-all', {
         sessionId: newConsentId
+      }, {
+        headers: { Authorization: `Bearer ${customerToken}` }
       });
 
       expect(response.status).toBe(200);
@@ -80,6 +85,8 @@ describe('GDPR Feature Tests', () => {
       
       const response = await client.post('/customer/gdpr/cookies/reject-all', {
         sessionId: newConsentId
+      }, {
+        headers: { Authorization: `Bearer ${customerToken}` }
       });
 
       expect(response.status).toBe(200);
@@ -100,6 +107,8 @@ describe('GDPR Feature Tests', () => {
           marketing: false,
           thirdParty: false
         }
+      }, {
+        headers: { Authorization: `Bearer ${customerToken}` }
       });
 
       expect(createResponse.status).toBe(200);
@@ -111,6 +120,8 @@ describe('GDPR Feature Tests', () => {
           analytics: true,
           marketing: true
         }
+      }, {
+        headers: { Authorization: `Bearer ${customerToken}` }
       });
 
       expect(response.status).toBe(200);

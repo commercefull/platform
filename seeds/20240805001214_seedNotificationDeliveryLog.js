@@ -15,7 +15,7 @@ exports.up = async function (knex) {
       notificationId: notification.notificationId,
       userId: '00000000-0000-0000-0000-000000000001',
       userType: 'customer',
-      type: 'order_status',
+      type: 'orderStatus',
       channel: 'in_app',
       recipient: 'system',
       status: 'delivered',

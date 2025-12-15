@@ -1,9 +1,31 @@
+/**
+ * Tax Query Repository
+ * Read operations for tax data
+ */
+
 import { query, queryOne } from '../../../libs/db';
+import { Table } from '../../../libs/db/types';
 import { 
   TaxZone, TaxRate, TaxCategory, CustomerTaxExemption,
   TaxSettings, AddressInput, TaxCalculationResult,
   TaxBreakdownItem, LineItemTax, TaxExemptionStatus
 } from '../taxTypes';
+
+// ============================================================================
+// Table Constants
+// ============================================================================
+
+const TABLES = {
+  TAX_CATEGORY: Table.TaxCategory,
+  TAX_ZONE: Table.TaxZone,
+  TAX_RATE: Table.TaxRate,
+  TAX_RULE: Table.TaxRule,
+  TAX_SETTINGS: Table.TaxSettings,
+  TAX_CALCULATION: Table.TaxCalculation,
+  TAX_CALCULATION_LINE: Table.TaxCalculationLine,
+  TAX_CALCULATION_APPLIED: Table.TaxCalculationApplied,
+  CUSTOMER_TAX_EXEMPTION: Table.CustomerTaxExemption
+};
 
 // Field mapping dictionaries for database to TypeScript conversion
 const taxRateFields: Record<string, string> = {

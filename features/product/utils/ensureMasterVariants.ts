@@ -36,7 +36,7 @@ export async function ensureAllProductsHaveMasterVariants(): Promise<{
       for (const product of products) {
         try {
           // Check if product has a master variant
-          const masterVariant = await productVariantRepo.findDefaultForProduct(product.id);
+          const masterVariant = await productVariantRepo.findDefaultForProduct(product.productId);
           
           if (!masterVariant) {
             // Create master variant
@@ -45,26 +45,26 @@ export async function ensureAllProductsHaveMasterVariants(): Promise<{
             if (newMasterVariant) {
               result.fixed++;
               result.details.push({ 
-                productId: product.id, 
+                productId: product.productId, 
                 status: 'FIXED' 
               });
             } else {
               result.failed++;
               result.details.push({ 
-                productId: product.id, 
+                productId: product.productId, 
                 status: 'FAILED' 
               });
             }
           } else {
             result.details.push({ 
-              productId: product.id, 
+              productId: product.productId, 
               status: 'OK' 
             });
           }
         } catch (error) {
           result.failed++;
           result.details.push({ 
-            productId: product.id, 
+            productId: product.productId, 
             status: `ERROR: ${(error as Error).message}` 
           });
         }

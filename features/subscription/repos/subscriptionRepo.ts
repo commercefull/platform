@@ -4,6 +4,19 @@
  */
 
 import { query, queryOne } from '../../../libs/db';
+import { Table } from '../../../libs/db/types';
+
+// ============================================================================
+// Table Constants
+// ============================================================================
+
+const TABLES = {
+  SUBSCRIPTION_PRODUCT: Table.SubscriptionProduct,
+  SUBSCRIPTION_PLAN: Table.SubscriptionPlan,
+  CUSTOMER_SUBSCRIPTION: Table.CustomerSubscription,
+  SUBSCRIPTION_ORDER: Table.SubscriptionOrder,
+  SUBSCRIPTION_PAUSE: Table.SubscriptionPause
+};
 
 // ============================================================================
 // Types

@@ -42,7 +42,7 @@ beforeAll(async () => {
   });
 
   // Login as merchant
-  const merchantLogin = await client.post('/business/auth/login', TEST_MERCHANT);
+  const merchantLogin = await client.post('/business/auth/login', TEST_MERCHANT, { headers: { 'X-Test-Request': 'true' } });
   merchantToken = merchantLogin.data.accessToken;
 
   // Login as customer

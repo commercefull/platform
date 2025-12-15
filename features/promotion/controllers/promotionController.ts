@@ -23,7 +23,7 @@ export const getActivePromotions = async (req: Request, res: Response): Promise<
       }
     }
     
-    const promotions = await promotionRepo.findActivePromotions(
+    const promotions = await promotionRepo.findActive(
       scopeFilter,
       merchantId as string | undefined
     );
@@ -77,12 +77,12 @@ export const getPromotions = async (req: Request, res: Response): Promise<void> 
       }
     }
     
-    const promotions = await promotionRepo.findPromotions(
+    const promotions = await promotionRepo.findAll(
       {
         status: statusFilter,
         scope: scopeFilter,
         merchantId: merchantId as string | undefined,
-        withCoupon: withCoupon === 'true' ? true : withCoupon === 'false' ? false : undefined,
+        isActive: withCoupon === 'true' ? true : withCoupon === 'false' ? false : undefined,
         startBefore: startBefore ? new Date(startBefore as string) : undefined,
         endAfter: endAfter ? new Date(endAfter as string) : undefined
       },
@@ -117,7 +117,7 @@ export const getPromotionById = async (req: Request, res: Response): Promise<voi
   try {
     const { id } = req.params;
     
-    const promotionData = await promotionRepo.getPromotionWithDetails(id);
+    const promotionData = await promotionRepo.getWithDetails(id);
     
     if (!promotionData) {
       res.status(404).json({
@@ -160,12 +160,12 @@ export const createPromotion = async (req: Request, res: Response): Promise<void
       promotionData.priority = 10; // Default priority
     }
     
-    if (promotionData.exclusive === undefined) {
-      promotionData.exclusive = false; // Default non-exclusive
+    if (promotionData.isExclusive === undefined) {
+      promotionData.isExclusive = false; // Default non-exclusive
     }
     
     // Create the promotion
-    const promotion = await promotionRepo.createPromotion(promotionData);
+    const promotion = await promotionRepo.create(promotionData);
     
     res.status(201).json({
       success: true,
@@ -189,7 +189,7 @@ export const updatePromotion = async (req: Request, res: Response): Promise<void
     const promotionData: UpdatePromotionInput = req.body;
     
     // Check if promotion exists
-    const existingPromotion = await promotionRepo.findPromotionById(id);
+    const existingPromotion = await promotionRepo.findById(id);
     
     if (!existingPromotion) {
       res.status(404).json({
@@ -200,7 +200,7 @@ export const updatePromotion = async (req: Request, res: Response): Promise<void
     }
     
     // Update the promotion
-    const updatedPromotion = await promotionRepo.updatePromotion(id, promotionData);
+    const updatedPromotion = await promotionRepo.update(id, promotionData);
     
     res.status(200).json({
       success: true,
@@ -223,7 +223,7 @@ export const deletePromotion = async (req: Request, res: Response): Promise<void
     const { id } = req.params;
     
     // Check if promotion exists
-    const existingPromotion = await promotionRepo.findPromotionById(id);
+    const existingPromotion = await promotionRepo.findById(id);
     
     if (!existingPromotion) {
       res.status(404).json({
@@ -234,7 +234,7 @@ export const deletePromotion = async (req: Request, res: Response): Promise<void
     }
     
     // Delete the promotion
-    const deleted = await promotionRepo.deletePromotion(id);
+    const deleted = await promotionRepo.delete(id);
     
     if (!deleted) {
       res.status(500).json({
@@ -273,7 +273,7 @@ export const applyPromotionToCart = async (req: Request, res: Response): Promise
     }
     
     // Check if promotion exists and is active
-    const promotionData = await promotionRepo.getPromotionWithDetails(promotionId);
+    const promotionData = await promotionRepo.getWithDetails(promotionId);
     
     if (!promotionData || promotionData.promotion.status !== 'active') {
       res.status(404).json({
@@ -363,11 +363,10 @@ export const validatePromotionForCart = async (req: Request, res: Response): Pro
     }
     
     // Validate the promotion
-    const isValid = await promotionRepo.isPromotionValidForOrder(
+    const isValid = await promotionRepo.isValidForOrder(
       promotionId,
       parseFloat(cartTotal),
-      customerId,
-      items
+      customerId
     );
     
     if (isValid) {

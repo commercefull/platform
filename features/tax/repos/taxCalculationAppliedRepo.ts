@@ -1,5 +1,13 @@
+/**
+ * Tax Calculation Applied Repository
+ * CRUD operations for applied tax calculations
+ */
+
 import { query, queryOne } from '../../../libs/db';
+import { Table } from '../../../libs/db/types';
 import { unixTimestamp } from '../../../libs/date';
+
+const TABLE = Table.TaxCalculationApplied;
 
 export type TaxJurisdictionLevel = 'country' | 'state' | 'county' | 'city' | 'district' | 'special';
 

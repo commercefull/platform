@@ -32,7 +32,7 @@ describe('Coupon API Tests', () => {
     
     // Validate the coupon data
     expect(response.data.data.code).toBe(testCoupon.code);
-    expect(response.data.data.value).toBe(testCoupon.value);
+    expect(response.data.data.discountAmount).toBe(testCoupon.discountAmount);
   });
 
   it('should get a coupon by ID', async () => {

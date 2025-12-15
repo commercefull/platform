@@ -48,16 +48,15 @@ import { loyaltyMerchantRouter } from "./features/loyalty/loyaltyBusinessRouter"
 import { notificationMerchantRouter } from "./features/notification/notificationBusinessRouter";
 import { contentRouterAdmin } from "./features/content/contentBusinessRouter";
 import { membershipBusinessRouter } from "./features/membership/membershipBusinessRouter";
+import { shippingBusinessRouter } from "./features/shipping/shippingBusinessRouter";
+import { shippingCustomerRouter } from "./features/shipping/shippingCustomerRouter";
+import { inventoryBusinessRouter } from "./features/inventory/interface/routers/businessRouter";
+import { paymentBusinessRouter } from "./features/payment/interface/routers/paymentBusinessRouter";
 
 /**
  * Configure all application routes
  */
 export function configureRoutes(app: Express): void {
-  // Health check endpoint (before other routes for load balancers)
-  app.get('/health', (_req, res) => {
-    res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
-  });
-
   // Storefront routes (public website)
   app.use("/", storefrontCustomerRouter);
 
@@ -83,6 +82,7 @@ export function configureRoutes(app: Express): void {
     distributionCustomerRouter,
     subscriptionCustomerRouter,
     localizationCustomerRouter,
+    shippingCustomerRouter,
   ]);
 
   // Business/Merchant API routes
@@ -108,12 +108,19 @@ export function configureRoutes(app: Express): void {
     loyaltyMerchantRouter,
     notificationMerchantRouter,
     contentRouterAdmin,
-    membershipBusinessRouter
+    membershipBusinessRouter,
+    shippingBusinessRouter,
+    inventoryBusinessRouter,
+    paymentBusinessRouter,
   ]);
 
+  // Health check endpoint (before other routes for load balancers)
+  app.get('/health', (_req, res) => {
+    res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+  });
+
   // 404 handler - catch all unmatched routes
-  app.use(function (req, res) {
-    res.status(404);
-    res.render("storefront/views/404");
+  app.use(function (_req, res) {
+    res.status(404).json({ status: 'not found', timestamp: new Date().toISOString() });
   });
 }

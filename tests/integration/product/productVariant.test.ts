@@ -4,10 +4,10 @@ import { setupProductTests, cleanupProductTests } from './testUtils';
 describe('Product Variant Tests', () => {
   let client: AxiosInstance;
   let adminToken: string;
-  let testProductId: string;
-  let testVariantId: string;
-  let testCategoryId: string;
-  let testAttributeGroupId: string;
+  let testProductId: string | null;
+  let testVariantId: string | null;
+  let testCategoryId: string | null;
+  let testAttributeGroupId: string | null;
 
   beforeAll(async () => {
     const setup = await setupProductTests();

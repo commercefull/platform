@@ -4,7 +4,11 @@
  */
 
 import { query, queryOne } from '../../../libs/db';
-import crypto from 'crypto';
+import { Table } from '../../../libs/db/types';
+
+// Table name constants
+const GIFT_CARD_TABLE = Table.PromotionGiftCard;
+const GIFT_CARD_TRANSACTION_TABLE = Table.PromotionGiftCardTransaction;
 
 // ============================================================================
 // Types
@@ -15,8 +19,8 @@ export type GiftCardStatus = 'pending' | 'active' | 'depleted' | 'expired' | 'ca
 export type DeliveryMethod = 'email' | 'sms' | 'print' | 'physical';
 export type TransactionType = 'purchase' | 'reload' | 'redemption' | 'refund' | 'adjustment' | 'expiration';
 
-export interface GiftCard {
-  giftCardId: string;
+export interface PromotionGiftCard {
+  promotionGiftCardId: string;
   code: string;
   type: GiftCardType;
   initialBalance: number;
@@ -49,9 +53,12 @@ export interface GiftCard {
   updatedAt: Date;
 }
 
-export interface GiftCardTransaction {
-  giftCardTransactionId: string;
-  giftCardId: string;
+// Alias for backward compatibility
+export type GiftCard = PromotionGiftCard;
+
+export interface PromotionGiftCardTransaction {
+  promotionGiftCardTransactionId: string;
+  promotionGiftCardId: string;
   type: TransactionType;
   amount: number;
   balanceBefore: number;
@@ -67,21 +74,24 @@ export interface GiftCardTransaction {
   createdAt: Date;
 }
 
+// Alias for backward compatibility
+export type GiftCardTransaction = PromotionGiftCardTransaction;
+
 // ============================================================================
 // Gift Cards
 // ============================================================================
 
-export async function getGiftCard(giftCardId: string): Promise<GiftCard | null> {
+export async function getGiftCard(giftCardId: string): Promise<PromotionGiftCard | null> {
   const row = await queryOne<Record<string, any>>(
-    'SELECT * FROM "giftCard" WHERE "giftCardId" = $1',
+    `SELECT * FROM "${GIFT_CARD_TABLE}" WHERE "promotionGiftCardId" = $1`,
     [giftCardId]
   );
   return row ? mapToGiftCard(row) : null;
 }
 
-export async function getGiftCardByCode(code: string): Promise<GiftCard | null> {
+export async function getGiftCardByCode(code: string): Promise<PromotionGiftCard | null> {
   const row = await queryOne<Record<string, any>>(
-    'SELECT * FROM "giftCard" WHERE "code" = $1',
+    `SELECT * FROM "${GIFT_CARD_TABLE}" WHERE "code" = $1`,
     [code.toUpperCase()]
   );
   return row ? mapToGiftCard(row) : null;
@@ -90,7 +100,7 @@ export async function getGiftCardByCode(code: string): Promise<GiftCard | null> 
 export async function getGiftCards(
   filters?: { status?: GiftCardStatus; purchasedBy?: string; assignedTo?: string },
   pagination?: { limit?: number; offset?: number }
-): Promise<{ data: GiftCard[]; total: number }> {
+): Promise<{ data: PromotionGiftCard[]; total: number }> {
   let whereClause = '1=1';
   const params: any[] = [];
   let paramIndex = 1;
@@ -109,7 +119,7 @@ export async function getGiftCards(
   }
 
   const countResult = await queryOne<{ count: string }>(
-    `SELECT COUNT(*) as count FROM "giftCard" WHERE ${whereClause}`,
+    `SELECT COUNT(*) as count FROM "${GIFT_CARD_TABLE}" WHERE ${whereClause}`,
     params
   );
 
@@ -117,7 +127,7 @@ export async function getGiftCards(
   const offset = pagination?.offset || 0;
 
   const rows = await query<Record<string, any>[]>(
-    `SELECT * FROM "giftCard" WHERE ${whereClause} 
+    `SELECT * FROM "${GIFT_CARD_TABLE}" WHERE ${whereClause} 
      ORDER BY "createdAt" DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
     [...params, limit, offset]
   );
@@ -142,12 +152,12 @@ export async function createGiftCard(giftCard: {
   expiresAt?: Date;
   isReloadable?: boolean;
   restrictions?: Record<string, any>;
-}): Promise<GiftCard> {
+}): Promise<PromotionGiftCard> {
   const now = new Date().toISOString();
   const code = generateGiftCardCode();
 
   const result = await queryOne<Record<string, any>>(
-    `INSERT INTO "giftCard" (
+    `INSERT INTO "${GIFT_CARD_TABLE}" (
       "code", "type", "initialBalance", "currentBalance", "currency", "status",
       "purchasedBy", "purchaseOrderId", "recipientEmail", "recipientName",
       "personalMessage", "deliveryDate", "deliveryMethod", "expiresAt",
@@ -170,8 +180,8 @@ export async function createGiftCard(giftCard: {
 export async function activateGiftCard(giftCardId: string): Promise<void> {
   const now = new Date().toISOString();
   await query(
-    `UPDATE "giftCard" SET "status" = 'active', "activatedAt" = $1, "updatedAt" = $1
-     WHERE "giftCardId" = $2`,
+    `UPDATE "${GIFT_CARD_TABLE}" SET "status" = 'active', "activatedAt" = $1, "updatedAt" = $1
+     WHERE "promotionGiftCardId" = $2`,
     [now, giftCardId]
   );
 }
@@ -179,8 +189,8 @@ export async function activateGiftCard(giftCardId: string): Promise<void> {
 export async function assignGiftCard(giftCardId: string, customerId: string): Promise<void> {
   const now = new Date().toISOString();
   await query(
-    `UPDATE "giftCard" SET "assignedTo" = $1, "assignedAt" = $2, "updatedAt" = $2
-     WHERE "giftCardId" = $3`,
+    `UPDATE "${GIFT_CARD_TABLE}" SET "assignedTo" = $1, "assignedAt" = $2, "updatedAt" = $2
+     WHERE "promotionGiftCardId" = $3`,
     [customerId, now, giftCardId]
   );
 }
@@ -191,7 +201,7 @@ export async function redeemGiftCard(
   orderId?: string,
   customerId?: string,
   performedBy?: string
-): Promise<GiftCardTransaction> {
+): Promise<PromotionGiftCardTransaction> {
   const giftCard = await getGiftCard(giftCardId);
   if (!giftCard) throw new Error('Gift card not found');
   if (giftCard.status !== 'active') throw new Error('Gift card is not active');
@@ -205,15 +215,15 @@ export async function redeemGiftCard(
   const newStatus = newBalance <= 0 ? 'depleted' : 'active';
 
   await query(
-    `UPDATE "giftCard" SET 
+    `UPDATE "${GIFT_CARD_TABLE}" SET 
       "currentBalance" = $1, "status" = $2, "lastUsedAt" = $3,
       "usageCount" = "usageCount" + 1, "totalRedeemed" = "totalRedeemed" + $4, "updatedAt" = $3
-     WHERE "giftCardId" = $5`,
+     WHERE "promotionGiftCardId" = $5`,
     [newBalance, newStatus, now, amount, giftCardId]
   );
 
   return createTransaction({
-    giftCardId,
+    promotionGiftCardId: giftCardId,
     type: 'redemption',
     amount: -amount,
     balanceBefore: giftCard.currentBalance,
@@ -231,7 +241,7 @@ export async function reloadGiftCard(
   amount: number,
   orderId?: string,
   performedBy?: string
-): Promise<GiftCardTransaction> {
+): Promise<PromotionGiftCardTransaction> {
   const giftCard = await getGiftCard(giftCardId);
   if (!giftCard) throw new Error('Gift card not found');
   if (!giftCard.isReloadable) throw new Error('Gift card is not reloadable');
@@ -251,13 +261,13 @@ export async function reloadGiftCard(
   const newStatus = giftCard.status === 'depleted' ? 'active' : giftCard.status;
 
   await query(
-    `UPDATE "giftCard" SET "currentBalance" = $1, "status" = $2, "updatedAt" = $3
-     WHERE "giftCardId" = $4`,
+    `UPDATE "${GIFT_CARD_TABLE}" SET "currentBalance" = $1, "status" = $2, "updatedAt" = $3
+     WHERE "promotionGiftCardId" = $4`,
     [newBalance, newStatus, now, giftCardId]
   );
 
   return createTransaction({
-    giftCardId,
+    promotionGiftCardId: giftCardId,
     type: 'reload',
     amount,
     balanceBefore: giftCard.currentBalance,
@@ -275,7 +285,7 @@ export async function refundToGiftCard(
   orderId?: string,
   performedBy?: string,
   notes?: string
-): Promise<GiftCardTransaction> {
+): Promise<PromotionGiftCardTransaction> {
   const giftCard = await getGiftCard(giftCardId);
   if (!giftCard) throw new Error('Gift card not found');
 
@@ -284,13 +294,13 @@ export async function refundToGiftCard(
   const newStatus = giftCard.status === 'depleted' ? 'active' : giftCard.status;
 
   await query(
-    `UPDATE "giftCard" SET "currentBalance" = $1, "status" = $2, "updatedAt" = $3
-     WHERE "giftCardId" = $4`,
+    `UPDATE "${GIFT_CARD_TABLE}" SET "currentBalance" = $1, "status" = $2, "updatedAt" = $3
+     WHERE "promotionGiftCardId" = $4`,
     [newBalance, newStatus, now, giftCardId]
   );
 
   return createTransaction({
-    giftCardId,
+    promotionGiftCardId: giftCardId,
     type: 'refund',
     amount,
     balanceBefore: giftCard.currentBalance,
@@ -305,15 +315,15 @@ export async function refundToGiftCard(
 
 export async function cancelGiftCard(giftCardId: string): Promise<void> {
   await query(
-    `UPDATE "giftCard" SET "status" = 'cancelled', "updatedAt" = $1
-     WHERE "giftCardId" = $2`,
+    `UPDATE "${GIFT_CARD_TABLE}" SET "status" = 'cancelled', "updatedAt" = $1
+     WHERE "promotionGiftCardId" = $2`,
     [new Date().toISOString(), giftCardId]
   );
 }
 
 export async function expireGiftCards(): Promise<number> {
   const result = await query(
-    `UPDATE "giftCard" SET "status" = 'expired', "updatedAt" = $1
+    `UPDATE "${GIFT_CARD_TABLE}" SET "status" = 'expired', "updatedAt" = $1
      WHERE "status" = 'active' AND "expiresAt" < NOW()`,
     [new Date().toISOString()]
   );
@@ -325,7 +335,7 @@ export async function expireGiftCards(): Promise<number> {
 // ============================================================================
 
 async function createTransaction(transaction: {
-  giftCardId: string;
+  promotionGiftCardId: string;
   type: TransactionType;
   amount: number;
   balanceBefore: number;
@@ -336,19 +346,19 @@ async function createTransaction(transaction: {
   performedBy?: string;
   performedByType?: string;
   notes?: string;
-}): Promise<GiftCardTransaction> {
+}): Promise<PromotionGiftCardTransaction> {
   const now = new Date().toISOString();
   const referenceNumber = `GCT${Date.now()}`;
 
   const result = await queryOne<Record<string, any>>(
-    `INSERT INTO "giftCardTransaction" (
-      "giftCardId", "type", "amount", "balanceBefore", "balanceAfter", "currency",
+    `INSERT INTO "${GIFT_CARD_TRANSACTION_TABLE}" (
+      "promotionGiftCardId", "type", "amount", "balanceBefore", "balanceAfter", "currency",
       "orderId", "customerId", "performedBy", "performedByType", "notes",
       "referenceNumber", "createdAt"
     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
     RETURNING *`,
     [
-      transaction.giftCardId, transaction.type, transaction.amount,
+      transaction.promotionGiftCardId, transaction.type, transaction.amount,
       transaction.balanceBefore, transaction.balanceAfter, transaction.currency,
       transaction.orderId, transaction.customerId, transaction.performedBy,
       transaction.performedByType, transaction.notes, referenceNumber, now
@@ -358,9 +368,9 @@ async function createTransaction(transaction: {
   return mapToTransaction(result!);
 }
 
-export async function getTransactions(giftCardId: string): Promise<GiftCardTransaction[]> {
+export async function getTransactions(giftCardId: string): Promise<PromotionGiftCardTransaction[]> {
   const rows = await query<Record<string, any>[]>(
-    'SELECT * FROM "giftCardTransaction" WHERE "giftCardId" = $1 ORDER BY "createdAt" DESC',
+    `SELECT * FROM "${GIFT_CARD_TRANSACTION_TABLE}" WHERE "promotionGiftCardId" = $1 ORDER BY "createdAt" DESC`,
     [giftCardId]
   );
   return (rows || []).map(mapToTransaction);
@@ -380,9 +390,9 @@ function generateGiftCardCode(): string {
   return code;
 }
 
-function mapToGiftCard(row: Record<string, any>): GiftCard {
+function mapToGiftCard(row: Record<string, any>): PromotionGiftCard {
   return {
-    giftCardId: row.giftCardId,
+    promotionGiftCardId: row.promotionGiftCardId,
     code: row.code,
     type: row.type,
     initialBalance: parseFloat(row.initialBalance) || 0,
@@ -416,10 +426,10 @@ function mapToGiftCard(row: Record<string, any>): GiftCard {
   };
 }
 
-function mapToTransaction(row: Record<string, any>): GiftCardTransaction {
+function mapToTransaction(row: Record<string, any>): PromotionGiftCardTransaction {
   return {
-    giftCardTransactionId: row.giftCardTransactionId,
-    giftCardId: row.giftCardId,
+    promotionGiftCardTransactionId: row.promotionGiftCardTransactionId,
+    promotionGiftCardId: row.promotionGiftCardId,
     type: row.type,
     amount: parseFloat(row.amount) || 0,
     balanceBefore: parseFloat(row.balanceBefore) || 0,

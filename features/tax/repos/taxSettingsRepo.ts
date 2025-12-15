@@ -1,5 +1,21 @@
+/**
+ * Tax Settings Repository
+ * CRUD operations for tax settings
+ */
+
 import { query, queryOne } from '../../../libs/db';
+import { Table } from '../../../libs/db/types';
 import { unixTimestamp } from '../../../libs/date';
+
+// ============================================================================
+// Table Constants
+// ============================================================================
+
+const TABLE = Table.TaxSettings;
+
+// ============================================================================
+// Types
+// ============================================================================
 
 export type TaxCalculationMethod = 'unitBased' | 'itemBased';
 export type TaxBasedOn = 'shippingAddress' | 'billingAddress';

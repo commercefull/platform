@@ -1,11 +1,30 @@
+/**
+ * Tax Command Repository
+ * Write operations for tax data
+ */
+
 import { unixTimestamp } from '../../../libs/date';
 import { query, queryOne } from '../../../libs/db';
+import { Table } from '../../../libs/db/types';
 import { generateUUID } from '../../../libs/uuid';
 import { 
   TaxZone, TaxRate, TaxCategory, CustomerTaxExemption,
   TaxSettings
 } from '../taxTypes';
 import taxQueryRepo from './taxQueryRepo';
+
+// ============================================================================
+// Table Constants
+// ============================================================================
+
+const TABLES = {
+  TAX_CATEGORY: Table.TaxCategory,
+  TAX_ZONE: Table.TaxZone,
+  TAX_RATE: Table.TaxRate,
+  TAX_RULE: Table.TaxRule,
+  TAX_SETTINGS: Table.TaxSettings,
+  CUSTOMER_TAX_EXEMPTION: Table.CustomerTaxExemption
+};
 
 // Field mapping dictionaries for database to TypeScript conversion
 const taxRateFields: Record<string, string> = {

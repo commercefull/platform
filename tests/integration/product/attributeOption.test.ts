@@ -4,11 +4,11 @@ import { setupProductTests, cleanupProductTests, testAttributeOption } from './t
 describe('Attribute Option Tests', () => {
   let client: AxiosInstance;
   let adminToken: string;
-  let testProductId: string;
-  let testCategoryId: string;
-  let testAttributeGroupId: string;
-  let testAttributeId: string;
-  let testAttributeOptionId: string;
+  let testProductId: string | null;
+  let testCategoryId: string | null;
+  let testAttributeGroupId: string | null;
+  let testAttributeId: string | null;
+  let testAttributeOptionId: string | null;
   let createdOptionId: string;
 
   beforeAll(async () => {

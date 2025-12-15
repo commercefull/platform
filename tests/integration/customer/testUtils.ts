@@ -53,12 +53,13 @@ export async function setupCustomerTests() {
     validateStatus: () => true,
     headers: {
       'Accept': 'application/json',
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      'X-Test-Request': 'true'
     } // Don't throw HTTP errors
   });
 
   // Get admin token - Use the same authentication endpoint as the distribution tests
-  const loginResponse = await client.post('/business/auth/login', adminCredentials);
+  const loginResponse = await client.post('/business/auth/login', adminCredentials, { headers: { 'X-Test-Request': 'true' } });
   const adminToken = loginResponse.data.accessToken;
 
   if (!adminToken) {

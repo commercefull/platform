@@ -117,7 +117,7 @@ export const createReceivingRecord = async (req: Request, res: Response): Promis
     const createdItems = [];
     for (const item of items) {
       const itemParams = {
-        receivingRecordId: receivingRecord.receivingRecordId,
+        supplierReceivingRecordId: receivingRecord.supplierReceivingRecordId,
         ...item
       };
       const createdItem = await receivingItemRepo.create(itemParams);

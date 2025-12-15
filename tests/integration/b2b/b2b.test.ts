@@ -62,7 +62,7 @@ describe('B2B Feature Tests', () => {
     client = createClient();
     
     // Get admin token
-    const loginResponse = await client.post('/business/auth/login', ADMIN_CREDENTIALS);
+    const loginResponse = await client.post('/business/auth/login', ADMIN_CREDENTIALS, { headers: { 'X-Test-Request': 'true' } });
     adminToken = loginResponse.data.accessToken;
   });
 
@@ -96,7 +96,7 @@ describe('B2B Feature Tests', () => {
     it('UC-B2B-003: should create a company', async () => {
       const companyData = createTestCompany();
 
-      const response = await client.post('/business/companies', companyData, {
+      const response = await client.post('/business/b2b/companies', companyData, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
 
@@ -110,7 +110,7 @@ describe('B2B Feature Tests', () => {
     });
 
     it('UC-B2B-001: should list companies', async () => {
-      const response = await client.get('/business/companies', {
+      const response = await client.get('/business/b2b/companies', {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
 
@@ -120,7 +120,7 @@ describe('B2B Feature Tests', () => {
     });
 
     it('UC-B2B-002: should get a specific company', async () => {
-      const response = await client.get(`/business/companies/${testCompanyId}`, {
+      const response = await client.get(`/business/b2b/companies/${testCompanyId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
 
@@ -132,7 +132,7 @@ describe('B2B Feature Tests', () => {
     it('UC-B2B-004: should update a company', async () => {
       const updateData = { creditLimit: 75000 };
 
-      const response = await client.put(`/business/companies/${testCompanyId}`, updateData, {
+      const response = await client.put(`/business/b2b/companies/${testCompanyId}`, updateData, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
 
@@ -141,7 +141,7 @@ describe('B2B Feature Tests', () => {
     });
 
     it('UC-B2B-005: should approve a company', async () => {
-      const response = await client.post(`/business/companies/${testCompanyId}/approve`, {}, {
+      const response = await client.post(`/business/b2b/companies/${testCompanyId}/approve`, {}, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
 
@@ -150,7 +150,7 @@ describe('B2B Feature Tests', () => {
     });
 
     it('UC-B2B-006: should suspend a company', async () => {
-      const response = await client.post(`/business/companies/${testCompanyId}/suspend`, {
+      const response = await client.post(`/business/b2b/companies/${testCompanyId}/suspend`, {
         reason: 'Integration test suspension'
       }, {
         headers: { Authorization: `Bearer ${adminToken}` }
@@ -171,7 +171,7 @@ describe('B2B Feature Tests', () => {
 
     beforeAll(async () => {
       const companyData = createTestCompany();
-      const response = await client.post('/business/companies', companyData, {
+      const response = await client.post('/business/b2b/companies', companyData, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       testCompanyId = response.data.data.b2bCompanyId;
@@ -187,7 +187,7 @@ describe('B2B Feature Tests', () => {
         spendingLimit: 5000
       };
 
-      const response = await client.post(`/business/companies/${testCompanyId}/users`, userData, {
+      const response = await client.post(`/business/b2b/companies/${testCompanyId}/users`, userData, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
 
@@ -199,7 +199,7 @@ describe('B2B Feature Tests', () => {
     });
 
     it('UC-B2B-008: should list company users', async () => {
-      const response = await client.get(`/business/companies/${testCompanyId}/users`, {
+      const response = await client.get(`/business/b2b/companies/${testCompanyId}/users`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
 
@@ -211,7 +211,7 @@ describe('B2B Feature Tests', () => {
     it('UC-B2B-010: should update a company user', async () => {
       const updateData = { spendingLimit: 10000 };
 
-      const response = await client.put(`/business/companies/${testCompanyId}/users/${testUserId}`, updateData, {
+      const response = await client.put(`/business/b2b/companies/${testCompanyId}/users/${testUserId}`, updateData, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
 
@@ -220,7 +220,7 @@ describe('B2B Feature Tests', () => {
     });
 
     it('UC-B2B-011: should delete a company user', async () => {
-      const response = await client.delete(`/business/companies/${testCompanyId}/users/${testUserId}`, {
+      const response = await client.delete(`/business/b2b/companies/${testCompanyId}/users/${testUserId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
 
@@ -239,7 +239,7 @@ describe('B2B Feature Tests', () => {
 
     beforeAll(async () => {
       const companyData = createTestCompany();
-      const response = await client.post('/business/companies', companyData, {
+      const response = await client.post('/business/b2b/companies', companyData, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       testCompanyId = response.data.data.b2bCompanyId;
@@ -249,7 +249,7 @@ describe('B2B Feature Tests', () => {
     it('UC-B2B-018: should create a quote', async () => {
       const quoteData = createTestQuote(testCompanyId);
 
-      const response = await client.post('/business/quotes', quoteData, {
+      const response = await client.post('/business/b2b/quotes', quoteData, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
 
@@ -262,7 +262,7 @@ describe('B2B Feature Tests', () => {
     });
 
     it('UC-B2B-016: should list quotes', async () => {
-      const response = await client.get('/business/quotes', {
+      const response = await client.get('/business/b2b/quotes', {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
 
@@ -272,7 +272,7 @@ describe('B2B Feature Tests', () => {
     });
 
     it('UC-B2B-017: should get a specific quote', async () => {
-      const response = await client.get(`/business/quotes/${testQuoteId}`, {
+      const response = await client.get(`/business/b2b/quotes/${testQuoteId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
 
@@ -284,7 +284,7 @@ describe('B2B Feature Tests', () => {
     it('UC-B2B-019: should update a quote', async () => {
       const updateData = { notes: 'Updated notes' };
 
-      const response = await client.put(`/business/quotes/${testQuoteId}`, updateData, {
+      const response = await client.put(`/business/b2b/quotes/${testQuoteId}`, updateData, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
 
@@ -295,7 +295,7 @@ describe('B2B Feature Tests', () => {
     it('UC-B2B-022: should add a quote item', async () => {
       const itemData = { name: 'Test Product', quantity: 5, unitPrice: 149.99, isCustomItem: true };
 
-      const response = await client.post(`/business/quotes/${testQuoteId}/items`, itemData, {
+      const response = await client.post(`/business/b2b/quotes/${testQuoteId}/items`, itemData, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
 
@@ -304,7 +304,7 @@ describe('B2B Feature Tests', () => {
     });
 
     it('UC-B2B-020: should send a quote', async () => {
-      const response = await client.post(`/business/quotes/${testQuoteId}/send`, {}, {
+      const response = await client.post(`/business/b2b/quotes/${testQuoteId}/send`, {}, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
 
@@ -329,7 +329,7 @@ describe('B2B Feature Tests', () => {
         isActive: true
       };
 
-      const response = await client.post('/business/workflows', workflowData, {
+      const response = await client.post('/business/b2b/workflows', workflowData, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
 
@@ -342,7 +342,7 @@ describe('B2B Feature Tests', () => {
     });
 
     it('UC-B2B-025: should list workflows', async () => {
-      const response = await client.get('/business/workflows', {
+      const response = await client.get('/business/b2b/workflows', {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
 
@@ -352,7 +352,7 @@ describe('B2B Feature Tests', () => {
     });
 
     it('should get a specific workflow', async () => {
-      const response = await client.get(`/business/workflows/${testWorkflowId}`, {
+      const response = await client.get(`/business/b2b/workflows/${testWorkflowId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
 
@@ -361,7 +361,7 @@ describe('B2B Feature Tests', () => {
     });
 
     it('UC-B2B-029: should list approval requests', async () => {
-      const response = await client.get('/business/approvals', {
+      const response = await client.get('/business/b2b/approvals', {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
 
@@ -377,13 +377,13 @@ describe('B2B Feature Tests', () => {
 
   describe('Authorization', () => {
     it('should require authentication for company list', async () => {
-      const response = await client.get('/business/companies');
+      const response = await client.get('/business/b2b/companies');
       // 401 or 403 are both acceptable for unauthenticated requests
       expect(response.status).toBe(401);
     });
 
     it('should reject invalid tokens', async () => {
-      const response = await client.get('/business/companies', {
+      const response = await client.get('/business/b2b/companies', {
         headers: { Authorization: 'Bearer invalid-token' }
       });
       // 401 or 403 are both acceptable for invalid tokens

@@ -24,7 +24,7 @@ describe('Analytics Reports API', () => {
     client = createClient();
     
     // Get auth token
-    const loginResponse = await client.post('/business/auth/login', ADMIN_CREDENTIALS);
+    const loginResponse = await client.post('/business/auth/login', ADMIN_CREDENTIALS, { headers: { 'X-Test-Request': 'true' } });
     if (loginResponse.data.accessToken) {
       client.defaults.headers.common['Authorization'] = `Bearer ${loginResponse.data.accessToken}`;
     }

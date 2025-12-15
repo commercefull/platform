@@ -10,7 +10,8 @@ export const createTestClient = (baseURL: string = 'http://localhost:3000'): Axi
     timeout: 10000, // 10 second timeout to prevent hanging
     headers: {
       'Accept': 'application/json',
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      'X-Test-Request': 'true' // Skip rate limiting for test requests
     }
   });
 };
@@ -22,6 +23,8 @@ export const loginTestUser = async (client: AxiosInstance, email: string = 'cust
   const response = await client.post('/customer/identity/login', {
     email,
     password,
+  }, {
+    headers: { 'X-Test-Request': 'true' }
   });
   
   if (response.status !== 200 || !response.data.accessToken) {
@@ -38,6 +41,8 @@ export const loginTestAdmin = async (client: AxiosInstance): Promise<string> => 
   const response = await client.post('/business/auth/login', {
     email: 'merchant@example.com',
     password: 'password123',
+  }, {
+    headers: { 'X-Test-Request': 'true' }
   });
   
   if (response.status !== 200 || !response.data.accessToken) {

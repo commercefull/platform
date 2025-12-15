@@ -4,6 +4,18 @@
  */
 
 import { query, queryOne } from '../../../libs/db';
+import { Table } from '../../../libs/db/types';
+
+// ============================================================================
+// Table Constants
+// ============================================================================
+
+const TABLES = {
+  AGENT: Table.SupportAgent,
+  TICKET: Table.SupportTicket,
+  MESSAGE: Table.SupportMessage,
+  ATTACHMENT: Table.SupportAttachment
+};
 
 // ============================================================================
 // Types

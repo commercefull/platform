@@ -49,12 +49,13 @@ export async function setupCurrencyTests() {
     validateStatus: () => true,
     headers: {
       'Accept': 'application/json',
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      'X-Test-Request': 'true'
     } // Don't throw HTTP errors
   });
 
   // Get admin token - Use the same authentication endpoint as other features
-  const loginResponse = await client.post('/business/auth/login', adminCredentials);
+  const loginResponse = await client.post('/business/auth/login', adminCredentials, { headers: { 'X-Test-Request': 'true' } });
   const adminToken = loginResponse.data.accessToken;
 
   if (!loginResponse.data.success || !adminToken) {
@@ -63,7 +64,7 @@ export async function setupCurrencyTests() {
 
   // Create test data
   // 1. Create Currency
-  const currencyResponse = await client.post('/business/currencies', testCurrency, {
+  const currencyResponse = await client.post('/business/pricing/currencies', testCurrency, {
     headers: { Authorization: `Bearer ${adminToken}` }
   });
   
@@ -77,7 +78,7 @@ export async function setupCurrencyTests() {
     currencyCode: testCurrency.code
   };
   
-  const regionResponse = await client.post('/business/currency-regions', testRegion, {
+  const regionResponse = await client.post('/business/pricing/currency-regions', testRegion, {
     headers: { Authorization: `Bearer ${adminToken}` }
   });
   
@@ -93,7 +94,7 @@ export async function setupCurrencyTests() {
     currencyCode: testCurrency.code
   };
   
-  const ruleResponse = await client.post('/business/currency-price-rules', testRule, {
+  const ruleResponse = await client.post('/business/pricing/currency-price-rules', testRule, {
     headers: { Authorization: `Bearer ${adminToken}` }
   });
   
@@ -133,21 +134,21 @@ export async function cleanupCurrencyTests(
   // Delete in reverse order of dependencies
   // 1. Delete Price Rule
   if (testPriceRuleId) {
-    await client.delete(`/business/currency-price-rules/${testPriceRuleId}`, {
+    await client.delete(`/business/pricing/currency-price-rules/${testPriceRuleId}`, {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
   }
 
   // 2. Delete Currency Region
   if (testCurrencyRegionCode) {
-    await client.delete(`/business/currency-regions/${testCurrencyRegionCode}`, {
+    await client.delete(`/business/pricing/currency-regions/${testCurrencyRegionCode}`, {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
   }
 
   // 3. Delete Currency
   if (testCurrencyCode) {
-    await client.delete(`/business/currencies/${testCurrencyCode}`, {
+    await client.delete(`/business/pricing/currencies/${testCurrencyCode}`, {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
   }

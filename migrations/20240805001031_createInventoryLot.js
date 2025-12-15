@@ -19,7 +19,7 @@ exports.up = function (knex) {
     t.timestamp('receiptDate').notNullable().defaultTo(knex.fn.now());
     t.string('supplierLotNumber', 100);
     t.uuid('supplierId').references('supplierId').inTable('supplier');
-    t.uuid('purchaseOrderId').references('purchaseOrderId').inTable('purchaseOrder');
+    t.uuid('supplierPurchaseOrderId').references('supplierPurchaseOrderId').inTable('supplierPurchaseOrder');
     t.enum('status', ['available', 'reserved', 'allocated', 'quarantine', 'expired', 'consumed']).notNullable().defaultTo('available');
     t.decimal('cost', 15, 2);
     
@@ -33,7 +33,7 @@ exports.up = function (knex) {
     t.index('quantity');
     t.index('status');
     t.index('supplierId');
-    t.index('purchaseOrderId');
+    t.index('supplierPurchaseOrderId');
     t.index('serialNumbers', null, 'gin');
     t.unique(['productId', 'productVariantId', 'distributionWarehouseId', 'lotNumber'], { nullsNotDistinct: true });
   });

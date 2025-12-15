@@ -45,7 +45,7 @@ describe('Basket Feature Tests', () => {
     client = createClient();
     
     // Get admin token
-    const adminLoginResponse = await client.post('/business/auth/login', ADMIN_CREDENTIALS);
+    const adminLoginResponse = await client.post('/business/auth/login', ADMIN_CREDENTIALS, { headers: { 'X-Test-Request': 'true' } });
     adminToken = adminLoginResponse.data.accessToken;
     
     // Try to get customer token (optional)

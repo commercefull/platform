@@ -45,21 +45,21 @@ router.use(isMerchantLoggedIn);
 // Subscription Product Routes
 // ============================================================================
 
-router.get('/products', getSubscriptionProducts);
-router.get('/products/:id', getSubscriptionProduct);
-router.post('/products', createSubscriptionProduct);
-router.put('/products/:id', updateSubscriptionProduct);
-router.delete('/products/:id', deleteSubscriptionProduct);
+router.get('/subscriptions/products', getSubscriptionProducts);
+router.get('/subscriptions/products/:id', getSubscriptionProduct);
+router.post('/subscriptions/products', createSubscriptionProduct);
+router.put('/subscriptions/products/:id', updateSubscriptionProduct);
+router.delete('/subscriptions/products/:id', deleteSubscriptionProduct);
 
 // ============================================================================
 // Subscription Plan Routes
 // ============================================================================
 
-router.get('/products/:productId/plans', getSubscriptionPlans);
-router.get('/products/:productId/plans/:planId', getSubscriptionPlan);
-router.post('/products/:productId/plans', createSubscriptionPlan);
-router.put('/products/:productId/plans/:planId', updateSubscriptionPlan);
-router.delete('/products/:productId/plans/:planId', deleteSubscriptionPlan);
+router.get('/subscriptions/products/:productId/plans', getSubscriptionPlans);
+router.get('/subscriptions/products/:productId/plans/:planId', getSubscriptionPlan);
+router.post('/subscriptions/products/:productId/plans', createSubscriptionPlan);
+router.put('/subscriptions/products/:productId/plans/:planId', updateSubscriptionPlan);
+router.delete('/subscriptions/products/:productId/plans/:planId', deleteSubscriptionPlan);
 
 // ============================================================================
 // Customer Subscription Routes
@@ -74,21 +74,21 @@ router.put('/subscriptions/:id/status', updateSubscriptionStatus);
 
 // Subscription Orders
 router.get('/subscriptions/:subscriptionId/orders', getSubscriptionOrders);
-router.post('/orders/:orderId/retry', retrySubscriptionOrder);
-router.post('/orders/:orderId/skip', skipSubscriptionOrder);
+router.post('/subscriptions/orders/:orderId/retry', retrySubscriptionOrder);
+router.post('/subscriptions/orders/:orderId/skip', skipSubscriptionOrder);
 
 // ============================================================================
 // Dunning Routes
 // ============================================================================
 
 router.get('/subscriptions/:subscriptionId/dunning', getDunningAttempts);
-router.get('/dunning/pending', getPendingDunning);
+router.get('/subscriptions/dunning/pending', getPendingDunning);
 
 // ============================================================================
 // Billing Operations
 // ============================================================================
 
-router.get('/billing/due', getSubscriptionsDueBilling);
+router.get('/subscriptions/billing/due', getSubscriptionsDueBilling);
 router.post('/subscriptions/:id/bill', processBillingCycle);
 
 export const subscriptionBusinessRouter = router;

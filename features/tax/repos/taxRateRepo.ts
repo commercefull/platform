@@ -1,5 +1,21 @@
+/**
+ * Tax Rate Repository
+ * CRUD operations for tax rates
+ */
+
 import { query, queryOne } from '../../../libs/db';
+import { Table } from '../../../libs/db/types';
 import { unixTimestamp } from '../../../libs/date';
+
+// ============================================================================
+// Table Constants
+// ============================================================================
+
+const TABLE = Table.TaxRate;
+
+// ============================================================================
+// Types
+// ============================================================================
 
 export type TaxRateType = 'percentage' | 'fixed';
 

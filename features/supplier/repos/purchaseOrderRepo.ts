@@ -1,22 +1,41 @@
+/**
+ * Supplier Purchase Order Repository
+ * Manages purchase orders to suppliers
+ */
+
 import { query, queryOne } from '../../../libs/db';
+import { Table } from '../../../libs/db/types';
 import { unixTimestamp } from '../../../libs/date';
 import { generateUUID } from '../../../libs/uuid';
 
-export type PurchaseOrderStatus = 'draft' | 'pending' | 'approved' | 'sent' | 'confirmed' | 'partial' | 'completed' | 'cancelled';
-export type PurchaseOrderType = 'standard' | 'restock' | 'backOrder' | 'special' | 'emergency';
-export type PurchaseOrderPriority = 'low' | 'normal' | 'high' | 'urgent';
-export type PurchaseOrderItemStatus = 'pending' | 'partial' | 'received' | 'cancelled' | 'backOrdered';
+// ============================================================================
+// Table Constants
+// ============================================================================
 
-export interface PurchaseOrder {
-  purchaseOrderId: string;
+const TABLES = {
+  PURCHASE_ORDER: Table.SupplierPurchaseOrder,
+  PURCHASE_ORDER_ITEM: Table.SupplierPurchaseOrderItem
+};
+
+// ============================================================================
+// Types
+// ============================================================================
+
+export type SupplierPurchaseOrderStatus = 'draft' | 'pending' | 'approved' | 'sent' | 'confirmed' | 'partial' | 'completed' | 'cancelled';
+export type SupplierPurchaseOrderType = 'standard' | 'restock' | 'backOrder' | 'special' | 'emergency';
+export type SupplierPurchaseOrderPriority = 'low' | 'normal' | 'high' | 'urgent';
+export type SupplierPurchaseOrderItemStatus = 'pending' | 'partial' | 'received' | 'cancelled' | 'backOrdered';
+
+export interface SupplierPurchaseOrder {
+  supplierPurchaseOrderId: string;
   createdAt: string;
   updatedAt: string;
   poNumber: string;
   supplierId: string;
   warehouseId: string;
-  status: PurchaseOrderStatus;
-  orderType: PurchaseOrderType;
-  priority: PurchaseOrderPriority;
+  status: SupplierPurchaseOrderStatus;
+  orderType: SupplierPurchaseOrderType;
+  priority: SupplierPurchaseOrderPriority;
   orderDate: string;
   expectedDeliveryDate?: string;
   deliveryDate?: string;
@@ -40,11 +59,11 @@ export interface PurchaseOrder {
   cancelledAt?: string;
 }
 
-export interface PurchaseOrderItem {
-  purchaseOrderItemId: string;
+export interface SupplierPurchaseOrderItem {
+  supplierPurchaseOrderItemId: string;
   createdAt: string;
   updatedAt: string;
-  purchaseOrderId: string;
+  supplierPurchaseOrderId: string;
   supplierProductId?: string;
   productId: string;
   productVariantId?: string;
@@ -58,24 +77,24 @@ export interface PurchaseOrderItem {
   tax: number;
   discount: number;
   total: number;
-  status: PurchaseOrderItemStatus;
+  status: SupplierPurchaseOrderItemStatus;
   expectedDeliveryDate?: string;
   receivedAt?: string;
   notes?: string;
 }
 
-export type PurchaseOrderCreateParams = Omit<PurchaseOrder, 'purchaseOrderId' | 'createdAt' | 'updatedAt' | 'poNumber' | 'approvedAt' | 'sentAt' | 'confirmedAt' | 'completedAt' | 'cancelledAt'>;
-export type PurchaseOrderUpdateParams = Partial<Pick<PurchaseOrder, 
+export type SupplierPurchaseOrderCreateParams = Omit<SupplierPurchaseOrder, 'supplierPurchaseOrderId' | 'createdAt' | 'updatedAt' | 'poNumber' | 'approvedAt' | 'sentAt' | 'confirmedAt' | 'completedAt' | 'cancelledAt'>;
+export type SupplierPurchaseOrderUpdateParams = Partial<Pick<SupplierPurchaseOrder, 
   'status' | 'expectedDeliveryDate' | 'deliveryDate' | 'shippingMethod' | 'trackingNumber' | 
   'carrierName' | 'paymentTerms' | 'subtotal' | 'tax' | 'shipping' | 'discount' | 'total' | 'notes' | 'supplierNotes' | 'attachments'
 >>;
 
-export type PurchaseOrderItemCreateParams = Omit<PurchaseOrderItem, 'purchaseOrderItemId' | 'createdAt' | 'updatedAt' | 'receivedAt'>;
-export type PurchaseOrderItemUpdateParams = Partial<Pick<PurchaseOrderItem, 
+export type SupplierPurchaseOrderItemCreateParams = Omit<SupplierPurchaseOrderItem, 'supplierPurchaseOrderItemId' | 'createdAt' | 'updatedAt' | 'receivedAt'>;
+export type SupplierPurchaseOrderItemUpdateParams = Partial<Pick<SupplierPurchaseOrderItem, 
   'quantity' | 'receivedQuantity' | 'unitCost' | 'tax' | 'discount' | 'total' | 'status' | 'expectedDeliveryDate' | 'notes'
 >>;
 
-export class PurchaseOrderRepo {
+export class SupplierPurchaseOrderRepo {
   /**
    * Generate unique PO number
    */
@@ -88,19 +107,19 @@ export class PurchaseOrderRepo {
   /**
    * Find purchase order by ID
    */
-  async findById(purchaseOrderId: string): Promise<PurchaseOrder | null> {
-    return await queryOne<PurchaseOrder>(
-      `SELECT * FROM "public"."purchaseOrder" WHERE "purchaseOrderId" = $1`,
-      [purchaseOrderId]
+  async findById(supplierPurchaseOrderId: string): Promise<SupplierPurchaseOrder | null> {
+    return await queryOne<SupplierPurchaseOrder>(
+      `SELECT * FROM "public"."supplierPurchaseOrder" WHERE "supplierPurchaseOrderId" = $1`,
+      [supplierPurchaseOrderId]
     );
   }
 
   /**
    * Find purchase order by PO number
    */
-  async findByPONumber(poNumber: string): Promise<PurchaseOrder | null> {
-    return await queryOne<PurchaseOrder>(
-      `SELECT * FROM "public"."purchaseOrder" WHERE "poNumber" = $1`,
+  async findByPONumber(poNumber: string): Promise<SupplierPurchaseOrder | null> {
+    return await queryOne<SupplierPurchaseOrder>(
+      `SELECT * FROM "public"."supplierPurchaseOrder" WHERE "poNumber" = $1`,
       [poNumber]
     );
   }
@@ -108,9 +127,9 @@ export class PurchaseOrderRepo {
   /**
    * Find purchase orders by supplier
    */
-  async findBySupplierId(supplierId: string, limit: number = 50, offset: number = 0): Promise<PurchaseOrder[]> {
-    const results = await query<PurchaseOrder[]>(
-      `SELECT * FROM "public"."purchaseOrder" 
+  async findBySupplierId(supplierId: string, limit: number = 50, offset: number = 0): Promise<SupplierPurchaseOrder[]> {
+    const results = await query<SupplierPurchaseOrder[]>(
+      `SELECT * FROM "public"."supplierPurchaseOrder" 
        WHERE "supplierId" = $1 
        ORDER BY "createdAt" DESC 
        LIMIT $2 OFFSET $3`,
@@ -122,9 +141,9 @@ export class PurchaseOrderRepo {
   /**
    * Find purchase orders by warehouse
    */
-  async findByWarehouseId(warehouseId: string, limit: number = 50, offset: number = 0): Promise<PurchaseOrder[]> {
-    const results = await query<PurchaseOrder[]>(
-      `SELECT * FROM "public"."purchaseOrder" 
+  async findByWarehouseId(warehouseId: string, limit: number = 50, offset: number = 0): Promise<SupplierPurchaseOrder[]> {
+    const results = await query<SupplierPurchaseOrder[]>(
+      `SELECT * FROM "public"."supplierPurchaseOrder" 
        WHERE "warehouseId" = $1 
        ORDER BY "createdAt" DESC 
        LIMIT $2 OFFSET $3`,
@@ -136,9 +155,9 @@ export class PurchaseOrderRepo {
   /**
    * Find purchase orders by status
    */
-  async findByStatus(status: PurchaseOrderStatus, limit: number = 50, offset: number = 0): Promise<PurchaseOrder[]> {
-    const results = await query<PurchaseOrder[]>(
-      `SELECT * FROM "public"."purchaseOrder" 
+  async findByStatus(status: SupplierPurchaseOrderStatus, limit: number = 50, offset: number = 0): Promise<SupplierPurchaseOrder[]> {
+    const results = await query<SupplierPurchaseOrder[]>(
+      `SELECT * FROM "public"."supplierPurchaseOrder" 
        WHERE "status" = $1 
        ORDER BY "createdAt" DESC 
        LIMIT $2 OFFSET $3`,
@@ -150,10 +169,10 @@ export class PurchaseOrderRepo {
   /**
    * Find overdue purchase orders
    */
-  async findOverdue(): Promise<PurchaseOrder[]> {
+  async findOverdue(): Promise<SupplierPurchaseOrder[]> {
     const now = unixTimestamp();
-    const results = await query<PurchaseOrder[]>(
-      `SELECT * FROM "public"."purchaseOrder" 
+    const results = await query<SupplierPurchaseOrder[]>(
+      `SELECT * FROM "public"."supplierPurchaseOrder" 
        WHERE "status" NOT IN ('completed', 'cancelled') 
        AND "expectedDeliveryDate" IS NOT NULL 
        AND "expectedDeliveryDate" < $1
@@ -166,12 +185,12 @@ export class PurchaseOrderRepo {
   /**
    * Create purchase order
    */
-  async create(params: PurchaseOrderCreateParams): Promise<PurchaseOrder> {
+  async create(params: SupplierPurchaseOrderCreateParams): Promise<SupplierPurchaseOrder> {
     const now = unixTimestamp();
     const poNumber = await this.generatePONumber();
 
-    const result = await queryOne<PurchaseOrder>(
-      `INSERT INTO "public"."purchaseOrder" (
+    const result = await queryOne<SupplierPurchaseOrder>(
+      `INSERT INTO "public"."supplierPurchaseOrder" (
         "poNumber", "supplierId", "warehouseId", "status", "orderType", "priority",
         "orderDate", "expectedDeliveryDate", "deliveryDate", "shippingMethod",
         "trackingNumber", "carrierName", "paymentTerms", "currency",
@@ -220,7 +239,7 @@ export class PurchaseOrderRepo {
   /**
    * Update purchase order
    */
-  async update(purchaseOrderId: string, params: PurchaseOrderUpdateParams): Promise<PurchaseOrder | null> {
+  async update(supplierPurchaseOrderId: string, params: SupplierPurchaseOrderUpdateParams): Promise<SupplierPurchaseOrder | null> {
     const updateFields: string[] = [];
     const values: any[] = [];
     let paramIndex = 1;
@@ -233,17 +252,17 @@ export class PurchaseOrderRepo {
     });
 
     if (updateFields.length === 0) {
-      return this.findById(purchaseOrderId);
+      return this.findById(supplierPurchaseOrderId);
     }
 
     updateFields.push(`"updatedAt" = $${paramIndex++}`);
     values.push(unixTimestamp());
-    values.push(purchaseOrderId);
+    values.push(supplierPurchaseOrderId);
 
-    const result = await queryOne<PurchaseOrder>(
-      `UPDATE "public"."purchaseOrder" 
+    const result = await queryOne<SupplierPurchaseOrder>(
+      `UPDATE "public"."supplierPurchaseOrder" 
        SET ${updateFields.join(', ')}
-       WHERE "purchaseOrderId" = $${paramIndex}
+       WHERE "supplierPurchaseOrderId" = $${paramIndex}
        RETURNING *`,
       values
     );
@@ -254,7 +273,7 @@ export class PurchaseOrderRepo {
   /**
    * Update status with timestamp
    */
-  async updateStatus(purchaseOrderId: string, status: PurchaseOrderStatus): Promise<PurchaseOrder | null> {
+  async updateStatus(supplierPurchaseOrderId: string, status: SupplierPurchaseOrderStatus): Promise<SupplierPurchaseOrder | null> {
     const updates: any = { status };
     const now = unixTimestamp();
 
@@ -289,12 +308,12 @@ export class PurchaseOrderRepo {
 
     updateFields.push(`"updatedAt" = $${paramIndex++}`);
     values.push(now);
-    values.push(purchaseOrderId);
+    values.push(supplierPurchaseOrderId);
 
-    const result = await queryOne<PurchaseOrder>(
-      `UPDATE "public"."purchaseOrder" 
+    const result = await queryOne<SupplierPurchaseOrder>(
+      `UPDATE "public"."supplierPurchaseOrder" 
        SET ${updateFields.join(', ')}
-       WHERE "purchaseOrderId" = $${paramIndex}
+       WHERE "supplierPurchaseOrderId" = $${paramIndex}
        RETURNING *`,
       values
     );
@@ -305,45 +324,45 @@ export class PurchaseOrderRepo {
   /**
    * Approve purchase order
    */
-  async approve(purchaseOrderId: string): Promise<PurchaseOrder | null> {
-    return this.updateStatus(purchaseOrderId, 'approved');
+  async approve(supplierPurchaseOrderId: string): Promise<SupplierPurchaseOrder | null> {
+    return this.updateStatus(supplierPurchaseOrderId, 'approved');
   }
 
   /**
    * Send purchase order to supplier
    */
-  async send(purchaseOrderId: string): Promise<PurchaseOrder | null> {
-    return this.updateStatus(purchaseOrderId, 'sent');
+  async send(supplierPurchaseOrderId: string): Promise<SupplierPurchaseOrder | null> {
+    return this.updateStatus(supplierPurchaseOrderId, 'sent');
   }
 
   /**
    * Confirm purchase order
    */
-  async confirm(purchaseOrderId: string): Promise<PurchaseOrder | null> {
-    return this.updateStatus(purchaseOrderId, 'confirmed');
+  async confirm(supplierPurchaseOrderId: string): Promise<SupplierPurchaseOrder | null> {
+    return this.updateStatus(supplierPurchaseOrderId, 'confirmed');
   }
 
   /**
    * Complete purchase order
    */
-  async complete(purchaseOrderId: string): Promise<PurchaseOrder | null> {
-    return this.updateStatus(purchaseOrderId, 'completed');
+  async complete(supplierPurchaseOrderId: string): Promise<SupplierPurchaseOrder | null> {
+    return this.updateStatus(supplierPurchaseOrderId, 'completed');
   }
 
   /**
    * Cancel purchase order
    */
-  async cancel(purchaseOrderId: string): Promise<PurchaseOrder | null> {
-    return this.updateStatus(purchaseOrderId, 'cancelled');
+  async cancel(supplierPurchaseOrderId: string): Promise<SupplierPurchaseOrder | null> {
+    return this.updateStatus(supplierPurchaseOrderId, 'cancelled');
   }
 
   /**
    * Delete purchase order
    */
-  async delete(purchaseOrderId: string): Promise<boolean> {
-    const result = await queryOne<{ purchaseOrderId: string }>(
-      `DELETE FROM "public"."purchaseOrder" WHERE "purchaseOrderId" = $1 RETURNING "purchaseOrderId"`,
-      [purchaseOrderId]
+  async delete(supplierPurchaseOrderId: string): Promise<boolean> {
+    const result = await queryOne<{ supplierPurchaseOrderId: string }>(
+      `DELETE FROM "public"."supplierPurchaseOrder" WHERE "supplierPurchaseOrderId" = $1 RETURNING "supplierPurchaseOrderId"`,
+      [supplierPurchaseOrderId]
     );
 
     return !!result;
@@ -354,22 +373,22 @@ export class PurchaseOrderRepo {
   /**
    * Find item by ID
    */
-  async findItemById(purchaseOrderItemId: string): Promise<PurchaseOrderItem | null> {
-    return await queryOne<PurchaseOrderItem>(
-      `SELECT * FROM "public"."purchaseOrderItem" WHERE "purchaseOrderItemId" = $1`,
-      [purchaseOrderItemId]
+  async findItemById(supplierPurchaseOrderItemId: string): Promise<SupplierPurchaseOrderItem | null> {
+    return await queryOne<SupplierPurchaseOrderItem>(
+      `SELECT * FROM "public"."supplierPurchaseOrderItem" WHERE "supplierPurchaseOrderItemId" = $1`,
+      [supplierPurchaseOrderItemId]
     );
   }
 
   /**
    * Find all items for purchase order
    */
-  async findItemsByOrderId(purchaseOrderId: string): Promise<PurchaseOrderItem[]> {
-    const results = await query<PurchaseOrderItem[]>(
-      `SELECT * FROM "public"."purchaseOrderItem" 
-       WHERE "purchaseOrderId" = $1 
+  async findItemsByOrderId(supplierPurchaseOrderId: string): Promise<SupplierPurchaseOrderItem[]> {
+    const results = await query<SupplierPurchaseOrderItem[]>(
+      `SELECT * FROM "public"."supplierPurchaseOrderItem" 
+       WHERE "supplierPurchaseOrderId" = $1 
        ORDER BY "createdAt" ASC`,
-      [purchaseOrderId]
+      [supplierPurchaseOrderId]
     );
     return results || [];
   }
@@ -377,12 +396,12 @@ export class PurchaseOrderRepo {
   /**
    * Create purchase order item
    */
-  async createItem(params: PurchaseOrderItemCreateParams): Promise<PurchaseOrderItem> {
+  async createItem(params: SupplierPurchaseOrderItemCreateParams): Promise<SupplierPurchaseOrderItem> {
     const now = unixTimestamp();
 
-    const result = await queryOne<PurchaseOrderItem>(
-      `INSERT INTO "public"."purchaseOrderItem" (
-        "purchaseOrderId", "supplierProductId", "productId", "productVariantId",
+    const result = await queryOne<SupplierPurchaseOrderItem>(
+      `INSERT INTO "public"."supplierPurchaseOrderItem" (
+        "supplierPurchaseOrderId", "supplierProductId", "productId", "productVariantId",
         "sku", "supplierSku", "name", "description",
         "quantity", "receivedQuantity", "unitCost", "tax", "discount", "total",
         "status", "expectedDeliveryDate", "notes",
@@ -392,7 +411,7 @@ export class PurchaseOrderRepo {
       )
       RETURNING *`,
       [
-        params.purchaseOrderId,
+        params.supplierPurchaseOrderId,
         params.supplierProductId || null,
         params.productId,
         params.productVariantId || null,
@@ -424,7 +443,7 @@ export class PurchaseOrderRepo {
   /**
    * Update purchase order item
    */
-  async updateItem(purchaseOrderItemId: string, params: PurchaseOrderItemUpdateParams): Promise<PurchaseOrderItem | null> {
+  async updateItem(supplierPurchaseOrderItemId: string, params: SupplierPurchaseOrderItemUpdateParams): Promise<SupplierPurchaseOrderItem | null> {
     const updateFields: string[] = [];
     const values: any[] = [];
     let paramIndex = 1;
@@ -437,17 +456,17 @@ export class PurchaseOrderRepo {
     });
 
     if (updateFields.length === 0) {
-      return this.findItemById(purchaseOrderItemId);
+      return this.findItemById(supplierPurchaseOrderItemId);
     }
 
     updateFields.push(`"updatedAt" = $${paramIndex++}`);
     values.push(unixTimestamp());
-    values.push(purchaseOrderItemId);
+    values.push(supplierPurchaseOrderItemId);
 
-    const result = await queryOne<PurchaseOrderItem>(
-      `UPDATE "public"."purchaseOrderItem" 
+    const result = await queryOne<SupplierPurchaseOrderItem>(
+      `UPDATE "public"."supplierPurchaseOrderItem" 
        SET ${updateFields.join(', ')}
-       WHERE "purchaseOrderItemId" = $${paramIndex}
+       WHERE "supplierPurchaseOrderItemId" = $${paramIndex}
        RETURNING *`,
       values
     );
@@ -458,15 +477,15 @@ export class PurchaseOrderRepo {
   /**
    * Receive purchase order item
    */
-  async receiveItem(purchaseOrderItemId: string, quantityReceived: number): Promise<PurchaseOrderItem | null> {
-    const item = await this.findItemById(purchaseOrderItemId);
+  async receiveItem(supplierPurchaseOrderItemId: string, quantityReceived: number): Promise<SupplierPurchaseOrderItem | null> {
+    const item = await this.findItemById(supplierPurchaseOrderItemId);
     
     if (!item) {
-      throw new Error(`Purchase order item ${purchaseOrderItemId} not found`);
+      throw new Error(`Purchase order item ${supplierPurchaseOrderItemId} not found`);
     }
 
     const newReceivedQuantity = item.receivedQuantity + quantityReceived;
-    let newStatus: PurchaseOrderItemStatus = 'pending';
+    let newStatus: SupplierPurchaseOrderItemStatus = 'pending';
 
     if (newReceivedQuantity >= item.quantity) {
       newStatus = 'received';
@@ -474,7 +493,7 @@ export class PurchaseOrderRepo {
       newStatus = 'partial';
     }
 
-    return this.updateItem(purchaseOrderItemId, {
+    return this.updateItem(supplierPurchaseOrderItemId, {
       receivedQuantity: newReceivedQuantity,
       status: newStatus,
       ...(newStatus === 'received' ? { receivedAt: unixTimestamp() as any } : {})
@@ -484,10 +503,10 @@ export class PurchaseOrderRepo {
   /**
    * Delete purchase order item
    */
-  async deleteItem(purchaseOrderItemId: string): Promise<boolean> {
-    const result = await queryOne<{ purchaseOrderItemId: string }>(
-      `DELETE FROM "public"."purchaseOrderItem" WHERE "purchaseOrderItemId" = $1 RETURNING "purchaseOrderItemId"`,
-      [purchaseOrderItemId]
+  async deleteItem(supplierPurchaseOrderItemId: string): Promise<boolean> {
+    const result = await queryOne<{ supplierPurchaseOrderItemId: string }>(
+      `DELETE FROM "public"."supplierPurchaseOrderItem" WHERE "supplierPurchaseOrderItemId" = $1 RETURNING "supplierPurchaseOrderItemId"`,
+      [supplierPurchaseOrderItemId]
     );
 
     return !!result;
@@ -506,8 +525,8 @@ export class PurchaseOrderRepo {
     cancelled: number;
     overdue: number;
   }> {
-    const results = await query<{ status: PurchaseOrderStatus; count: string }[]>(
-      `SELECT "status", COUNT(*) as count FROM "public"."purchaseOrder" GROUP BY "status"`,
+    const results = await query<{ status: SupplierPurchaseOrderStatus; count: string }[]>(
+      `SELECT "status", COUNT(*) as count FROM "public"."supplierPurchaseOrder" GROUP BY "status"`,
       []
     );
 
@@ -536,4 +555,4 @@ export class PurchaseOrderRepo {
   }
 }
 
-export default new PurchaseOrderRepo();
+export default new SupplierPurchaseOrderRepo();

@@ -39,7 +39,8 @@ export async function setupIdentityTests() {
     validateStatus: () => true,
     headers: {
       'Accept': 'application/json',
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      'X-Test-Request': 'true'
     }
   });
 

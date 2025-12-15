@@ -23,12 +23,15 @@ export async function setupGdprTests() {
     validateStatus: () => true,
     headers: {
       'Accept': 'application/json',
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      'X-Test-Request': 'true'
     }
   });
 
   // Get admin token
-  const adminLoginResponse = await client.post('/business/auth/login', adminCredentials);
+  const adminLoginResponse = await client.post('/business/auth/login', adminCredentials, {
+    headers: { 'X-Test-Request': 'true' }
+  });
   const adminToken = adminLoginResponse.data?.accessToken || adminLoginResponse.data?.data?.accessToken;
 
   if (adminLoginResponse.status !== 200 || !adminToken) {
@@ -37,7 +40,9 @@ export async function setupGdprTests() {
   }
 
   // Get customer token
-  const customerLoginResponse = await client.post('/customer/identity/login', customerCredentials);
+  const customerLoginResponse = await client.post('/customer/identity/login', customerCredentials, {
+    headers: { 'X-Test-Request': 'true' }
+  });
   const customerToken = customerLoginResponse.data?.accessToken || customerLoginResponse.data?.data?.accessToken;
 
   if (customerLoginResponse.status !== 200 || !customerToken) {

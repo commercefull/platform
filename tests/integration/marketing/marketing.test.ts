@@ -35,7 +35,7 @@ beforeAll(async () => {
   });
 
   // Login as merchant
-  const loginResponse = await client.post('/business/auth/login', TEST_MERCHANT);
+  const loginResponse = await client.post('/business/auth/login', TEST_MERCHANT, { headers: { 'X-Test-Request': 'true' } });
   merchantToken = loginResponse.data.accessToken;
 });
 

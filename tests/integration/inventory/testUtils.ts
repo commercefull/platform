@@ -33,7 +33,8 @@ export const setupInventoryTests = async () => {
     validateStatus: () => true,
     headers: {
       'Accept': 'application/json',
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      'X-Test-Request': 'true'
     } // Don't throw HTTP errors
   });
 
@@ -95,18 +96,31 @@ export const setupInventoryTests = async () => {
 
 // Cleanup helper function
 export const cleanupInventoryTests = async (
-  client: AxiosInstance,
-  adminToken: string,
-  testInventoryItemId: string,
-  testLocationId: string
+  client: AxiosInstance | undefined,
+  adminToken: string | undefined,
+  testInventoryItemId?: string,
+  testLocationId?: string
 ) => {
-  // Delete test inventory item
-  await client.delete(`/business/inventory/items/${testInventoryItemId}`, {
-    headers: { Authorization: `Bearer ${adminToken}` }
-  });
+  // Skip cleanup if client or token not available
+  if (!client || !adminToken) {
+    return;
+  }
   
-  // Delete test location
-  await client.delete(`/business/inventory/locations/${testLocationId}`, {
-    headers: { Authorization: `Bearer ${adminToken}` }
-  });
+  try {
+    // Delete test inventory item
+    if (testInventoryItemId) {
+      await client.delete(`/business/inventory/items/${testInventoryItemId}`, {
+        headers: { Authorization: `Bearer ${adminToken}` }
+      }).catch(() => {});
+    }
+    
+    // Delete test location
+    if (testLocationId) {
+      await client.delete(`/business/inventory/locations/${testLocationId}`, {
+        headers: { Authorization: `Bearer ${adminToken}` }
+      }).catch(() => {});
+    }
+  } catch (error) {
+    // Silently ignore cleanup errors
+  }
 };

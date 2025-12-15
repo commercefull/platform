@@ -28,7 +28,7 @@ describe('Checkout Feature Tests', () => {
     client = createClient();
     
     // Get admin token
-    const loginResponse = await client.post('/business/auth/login', ADMIN_CREDENTIALS);
+    const loginResponse = await client.post('/business/auth/login', ADMIN_CREDENTIALS, { headers: { 'X-Test-Request': 'true' } });
     adminToken = loginResponse.data.accessToken;
     
     // Use pre-seeded checkout or create one

@@ -1,8 +1,28 @@
+/**
+ * Warehouse Repository
+ * CRUD operations for distribution warehouses
+ */
+
 import { query, queryOne } from '../../../libs/db';
+import { Table } from '../../../libs/db/types';
 import { unixTimestamp } from '../../../libs/date';
 
+// ============================================================================
+// Table Constants
+// ============================================================================
+
+const TABLES = {
+  WAREHOUSE: Table.DistributionWarehouse,
+  ZONE: Table.DistributionWarehouseZone,
+  BIN: Table.DistributionWarehouseBin
+};
+
+// ============================================================================
+// Types
+// ============================================================================
+
 export interface Warehouse {
-  warehouseId: string;
+  distributionWarehouseId: string;
   createdAt: string;
   updatedAt: string;
   name: string;
@@ -34,8 +54,8 @@ export interface Warehouse {
   createdBy?: string;
 }
 
-export type WarehouseCreateParams = Omit<Warehouse, 'warehouseId' | 'createdAt' | 'updatedAt'>;
-export type WarehouseUpdateParams = Partial<Omit<Warehouse, 'warehouseId' | 'code' | 'createdAt' | 'updatedAt' | 'createdBy'>>;
+export type WarehouseCreateParams = Omit<Warehouse, 'distributionWarehouseId' | 'createdAt' | 'updatedAt'>;
+export type WarehouseUpdateParams = Partial<Omit<Warehouse, 'distributionWarehouseId' | 'code' | 'createdAt' | 'updatedAt' | 'createdBy'>>;
 
 export class WarehouseRepo {
   /**
@@ -43,7 +63,7 @@ export class WarehouseRepo {
    */
   async findById(warehouseId: string): Promise<Warehouse | null> {
     return await queryOne<Warehouse>(
-      `SELECT * FROM "public"."warehouse" WHERE "warehouseId" = $1`,
+      `SELECT * FROM "distributionWarehouse" WHERE "distributionWarehouseId" = $1`,
       [warehouseId]
     );
   }
@@ -53,7 +73,7 @@ export class WarehouseRepo {
    */
   async findByCode(code: string): Promise<Warehouse | null> {
     return await queryOne<Warehouse>(
-      `SELECT * FROM "public"."warehouse" WHERE "code" = $1`,
+      `SELECT * FROM "distributionWarehouse" WHERE "code" = $1`,
       [code]
     );
   }
@@ -62,7 +82,7 @@ export class WarehouseRepo {
    * Find all warehouses
    */
   async findAll(activeOnly: boolean = false): Promise<Warehouse[]> {
-    let sql = `SELECT * FROM "public"."warehouse"`;
+    let sql = `SELECT * FROM "distributionWarehouse"`;
     
     if (activeOnly) {
       sql += ` WHERE "isActive" = true`;
@@ -79,7 +99,7 @@ export class WarehouseRepo {
    */
   async findDefault(): Promise<Warehouse | null> {
     return await queryOne<Warehouse>(
-      `SELECT * FROM "public"."warehouse" WHERE "isDefault" = true AND "isActive" = true LIMIT 1`
+      `SELECT * FROM "distributionWarehouse" WHERE "isDefault" = true AND "isActive" = true LIMIT 1`
     );
   }
 
@@ -87,7 +107,7 @@ export class WarehouseRepo {
    * Find fulfillment centers
    */
   async findFulfillmentCenters(activeOnly: boolean = true): Promise<Warehouse[]> {
-    let sql = `SELECT * FROM "public"."warehouse" WHERE "isFulfillmentCenter" = true`;
+    let sql = `SELECT * FROM "distributionWarehouse" WHERE "isFulfillmentCenter" = true`;
     
     if (activeOnly) {
       sql += ` AND "isActive" = true`;
@@ -103,7 +123,7 @@ export class WarehouseRepo {
    * Find return centers
    */
   async findReturnCenters(activeOnly: boolean = true): Promise<Warehouse[]> {
-    let sql = `SELECT * FROM "public"."warehouse" WHERE "isReturnCenter" = true`;
+    let sql = `SELECT * FROM "distributionWarehouse" WHERE "isReturnCenter" = true`;
     
     if (activeOnly) {
       sql += ` AND "isActive" = true`;
@@ -120,7 +140,7 @@ export class WarehouseRepo {
    */
   async findByMerchantId(merchantId: string): Promise<Warehouse[]> {
     const results = await query<Warehouse[]>(
-      `SELECT * FROM "public"."warehouse" WHERE "merchantId" = $1 ORDER BY "name" ASC`,
+      `SELECT * FROM "distributionWarehouse" WHERE "merchantId" = $1 ORDER BY "name" ASC`,
       [merchantId]
     );
     return results || [];
@@ -130,7 +150,7 @@ export class WarehouseRepo {
    * Find warehouses by country
    */
   async findByCountry(country: string, activeOnly: boolean = true): Promise<Warehouse[]> {
-    let sql = `SELECT * FROM "public"."warehouse" WHERE "country" = $1`;
+    let sql = `SELECT * FROM "distributionWarehouse" WHERE "country" = $1`;
     const params: any[] = [country];
     
     if (activeOnly) {
@@ -160,7 +180,7 @@ export class WarehouseRepo {
           cos(radians("longitude") - radians($2)) +
           sin(radians($1)) * sin(radians("latitude"))
         )) AS distance
-       FROM "public"."warehouse"
+       FROM "distributionWarehouse"
        WHERE "latitude" IS NOT NULL 
          AND "longitude" IS NOT NULL
          AND "isActive" = true
@@ -190,7 +210,7 @@ export class WarehouseRepo {
     }
 
     const result = await queryOne<Warehouse>(
-      `INSERT INTO "public"."warehouse" (
+      `INSERT INTO "distributionWarehouse" (
         "name", "code", "description", "isActive", "isDefault",
         "isFulfillmentCenter", "isReturnCenter", "isVirtual", "merchantId",
         "addressLine1", "addressLine2", "city", "state", "postalCode", "country",
@@ -273,9 +293,9 @@ export class WarehouseRepo {
     values.push(warehouseId);
 
     const result = await queryOne<Warehouse>(
-      `UPDATE "public"."warehouse" 
+      `UPDATE "distributionWarehouse" 
        SET ${updateFields.join(', ')}
-       WHERE "warehouseId" = $${paramIndex}
+       WHERE "distributionWarehouseId" = $${paramIndex}
        RETURNING *`,
       values
     );
@@ -294,11 +314,11 @@ export class WarehouseRepo {
    * Unset all defaults (except specified warehouse)
    */
   private async unsetAllDefaults(exceptId?: string): Promise<void> {
-    let sql = `UPDATE "public"."warehouse" SET "isDefault" = false, "updatedAt" = $1 WHERE "isDefault" = true`;
+    let sql = `UPDATE "distributionWarehouse" SET "isDefault" = false, "updatedAt" = $1 WHERE "isDefault" = true`;
     const params: any[] = [unixTimestamp()];
     
     if (exceptId) {
-      sql += ` AND "warehouseId" != $2`;
+      sql += ` AND "distributionWarehouseId" != $2`;
       params.push(exceptId);
     }
     
@@ -324,9 +344,9 @@ export class WarehouseRepo {
    */
   async addShippingMethod(warehouseId: string, method: string): Promise<Warehouse | null> {
     const result = await queryOne<Warehouse>(
-      `UPDATE "public"."warehouse" 
+      `UPDATE "distributionWarehouse" 
        SET "shippingMethods" = array_append("shippingMethods", $1), "updatedAt" = $2
-       WHERE "warehouseId" = $3
+       WHERE "distributionWarehouseId" = $3
        RETURNING *`,
       [method, unixTimestamp(), warehouseId]
     );
@@ -339,9 +359,9 @@ export class WarehouseRepo {
    */
   async removeShippingMethod(warehouseId: string, method: string): Promise<Warehouse | null> {
     const result = await queryOne<Warehouse>(
-      `UPDATE "public"."warehouse" 
+      `UPDATE "distributionWarehouse" 
        SET "shippingMethods" = array_remove("shippingMethods", $1), "updatedAt" = $2
-       WHERE "warehouseId" = $3
+       WHERE "distributionWarehouseId" = $3
        RETURNING *`,
       [method, unixTimestamp(), warehouseId]
     );
@@ -354,7 +374,7 @@ export class WarehouseRepo {
    */
   async delete(warehouseId: string): Promise<boolean> {
     const result = await queryOne<{ warehouseId: string }>(
-      `DELETE FROM "public"."warehouse" WHERE "warehouseId" = $1 RETURNING "warehouseId"`,
+      `DELETE FROM "distributionWarehouse" WHERE "distributionWarehouseId" = $1 RETURNING "distributionWarehouseId"`,
       [warehouseId]
     );
 
@@ -365,7 +385,7 @@ export class WarehouseRepo {
    * Count warehouses
    */
   async count(activeOnly: boolean = false): Promise<number> {
-    let sql = `SELECT COUNT(*) as count FROM "public"."warehouse"`;
+    let sql = `SELECT COUNT(*) as count FROM "distributionWarehouse"`;
     
     if (activeOnly) {
       sql += ` WHERE "isActive" = true`;
@@ -380,7 +400,7 @@ export class WarehouseRepo {
    * Search warehouses
    */
   async search(searchTerm: string, activeOnly: boolean = true): Promise<Warehouse[]> {
-    let sql = `SELECT * FROM "public"."warehouse" 
+    let sql = `SELECT * FROM "distributionWarehouse" 
                WHERE ("name" ILIKE $1 OR "code" ILIKE $1 OR "city" ILIKE $1)`;
     const params: any[] = [`%${searchTerm}%`];
     
@@ -408,17 +428,17 @@ export class WarehouseRepo {
     const active = await this.count(true);
     
     const fcResult = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM "public"."warehouse" WHERE "isFulfillmentCenter" = true AND "isActive" = true`
+      `SELECT COUNT(*) as count FROM "distributionWarehouse" WHERE "isFulfillmentCenter" = true AND "isActive" = true`
     );
     const fulfillmentCenters = fcResult ? parseInt(fcResult.count, 10) : 0;
     
     const rcResult = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM "public"."warehouse" WHERE "isReturnCenter" = true AND "isActive" = true`
+      `SELECT COUNT(*) as count FROM "distributionWarehouse" WHERE "isReturnCenter" = true AND "isActive" = true`
     );
     const returnCenters = rcResult ? parseInt(rcResult.count, 10) : 0;
     
     const vResult = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM "public"."warehouse" WHERE "isVirtual" = true`
+      `SELECT COUNT(*) as count FROM "distributionWarehouse" WHERE "isVirtual" = true`
     );
     const virtual = vResult ? parseInt(vResult.count, 10) : 0;
 

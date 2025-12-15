@@ -12,16 +12,16 @@ export const getTaxRate = async (req: Request, res: Response) => {
     const { id } = req.params;
 
     if (!id) {
-      res.status(400).json({ error: 'Tax rate ID is required' });
+      return res.status(400).json({ success: false, error: 'Tax rate ID is required' });
     }
 
     const taxRate = await taxQueryRepo.findTaxRateById(id);
 
     if (!taxRate) {
-      res.status(404).json({ error: 'Tax rate not found' });
+      return res.status(404).json({ success: false, error: 'Tax rate not found' });
     }
 
-    res.json(taxRate);
+    res.json({ success: true, data: taxRate });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
@@ -50,10 +50,10 @@ export const getAllTaxRates = async (req: Request, res: Response) => {
       offsetNum
     );
 
-    res.json(taxRates);
+    res.json({ success: true, data: taxRates });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
 }
 
@@ -75,7 +75,8 @@ export const createTaxRate = async (req: Request, res: Response) => {
     } = req.body;
 
     if (!name || rate === undefined || !taxCategoryId || !taxZoneId) {
-      res.status(400).json({
+      return res.status(400).json({
+        success: false,
         error: 'Name, rate, tax category ID, and tax zone ID are required'
       });
     }
@@ -97,10 +98,10 @@ export const createTaxRate = async (req: Request, res: Response) => {
 
     const createdTaxRate = await (new TaxCommandRepo()).createTaxRate(newTaxRate);
 
-    res.status(201).json(createdTaxRate);
+    res.status(201).json({ success: true, data: createdTaxRate });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
 }
 
@@ -120,7 +121,7 @@ export const updateTaxRate = async (req: Request, res: Response) => {
     const existingTaxRate = await taxQueryRepo.findTaxRateById(id);
 
     if (!existingTaxRate) {
-      res.status(404).json({ error: 'Tax rate not found' });
+      return res.status(404).json({ success: false, error: 'Tax rate not found' });
     }
 
     const updatedTaxRate: Partial<Omit<TaxRate, "id" | "createdAt" | "updatedAt">> = {};
@@ -135,10 +136,10 @@ export const updateTaxRate = async (req: Request, res: Response) => {
 
     const result = await (new TaxCommandRepo()).updateTaxRate(id, updatedTaxRate);
 
-    res.json(result);
+    res.json({ success: true, data: result });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
 }
 
@@ -149,15 +150,15 @@ export const deleteTaxRate = async (req: Request, res: Response) => {
     const existingTaxRate = await taxQueryRepo.findTaxRateById(id);
 
     if (!existingTaxRate) {
-      res.status(404).json({ error: 'Tax rate not found' });
+      return res.status(404).json({ success: false, error: 'Tax rate not found' });
     }
 
     await (new TaxCommandRepo()).deleteTaxRate(id);
 
-    res.json({ message: 'Tax rate deleted successfully' });
+    res.json({ success: true, message: 'Tax rate deleted successfully' });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
 }
 
@@ -176,10 +177,10 @@ export const getAllTaxCategories = async (req: Request, res: Response) => {
 
     const taxCategories = await taxQueryRepo.findAllTaxCategories(isActive);
 
-    res.json(taxCategories);
+    res.json({ success: true, data: taxCategories });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
 }
 
@@ -189,13 +190,13 @@ export const getTaxCategory = async (req: Request, res: Response) => {
     const taxCategory = await taxQueryRepo.findTaxCategoryById(id);
 
     if (!taxCategory) {
-      res.status(404).json({ error: 'Tax category not found' });
+      return res.status(404).json({ success: false, error: 'Tax category not found' });
     }
 
-    res.json(taxCategory);
+    res.json({ success: true, data: taxCategory });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
 }
 
@@ -211,7 +212,7 @@ export const createTaxCategory = async (req: Request, res: Response) => {
     } = req.body;
 
     if (!name || !code) {
-      res.status(400).json({ error: 'Name and code are required' });
+      return res.status(400).json({ success: false, error: 'Name and code are required' });
     }
 
     const newTaxCategory = {
@@ -225,10 +226,10 @@ export const createTaxCategory = async (req: Request, res: Response) => {
 
     const createdCategory = await (new TaxCommandRepo()).createTaxCategory(newTaxCategory);
 
-    res.status(201).json(createdCategory);
+    res.status(201).json({ success: true, data: createdCategory });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
 }
 
@@ -247,7 +248,7 @@ export const updateTaxCategory = async (req: Request, res: Response) => {
     const existingCategory = await taxQueryRepo.findTaxCategoryById(id);
 
     if (!existingCategory) {
-      res.status(404).json({ error: 'Tax category not found' });
+      return res.status(404).json({ success: false, error: 'Tax category not found' });
     }
 
     const updatedCategory: Partial<Omit<TaxCategory, "id" | "createdAt" | "updatedAt">> = {};
@@ -261,10 +262,10 @@ export const updateTaxCategory = async (req: Request, res: Response) => {
 
     const result = await (new TaxCommandRepo()).updateTaxCategory(id, updatedCategory);
 
-    res.json(result);
+    res.json({ success: true, data: result });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
 }
 
@@ -275,15 +276,15 @@ export const deleteTaxCategory = async (req: Request, res: Response) => {
     const existingCategory = await taxQueryRepo.findTaxCategoryById(id);
 
     if (!existingCategory) {
-      res.status(404).json({ error: 'Tax category not found' });
+      return res.status(404).json({ success: false, error: 'Tax category not found' });
     }
 
     await (new TaxCommandRepo()).deleteTaxCategory(id);
 
-    res.json({ message: 'Tax category deleted successfully' });
+    res.json({ success: true, message: 'Tax category deleted successfully' });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
 }
 

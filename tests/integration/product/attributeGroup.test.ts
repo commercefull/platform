@@ -4,10 +4,10 @@ import { setupProductTests, cleanupProductTests, testAttributeGroup } from './te
 describe('Attribute Group Tests', () => {
   let client: AxiosInstance;
   let adminToken: string;
-  let testProductId: string;
-  let testCategoryId: string;
-  let testAttributeGroupId: string;
-  let testAttributeId: string;
+  let testProductId: string | null;
+  let testCategoryId: string | null;
+  let testAttributeGroupId: string | null;
+  let testAttributeId: string | null;
   let createdGroupId: string;
 
   beforeAll(async () => {

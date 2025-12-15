@@ -1,121 +1,152 @@
-import { query, queryOne } from '../../../libs/db';
-import { unixTimestamp } from '../../../libs/date';
+/**
+ * Shipping Packaging Type Repository
+ * Manages packaging type data with CRUD operations
+ */
 
-export interface PackagingType {
-  packagingTypeId: string;
-  createdAt: string;
-  updatedAt: string;
-  name: string;
-  code: string;
-  description?: string;
-  isActive: boolean;
-  isDefault: boolean;
-  weight: number;
-  length: number;
-  width: number;
-  height: number;
-  volume: number;
-  maxWeight?: number;
-  maxItems?: number;
-  cost?: number;
-  currency: string;
-  recyclable: boolean;
-  imageUrl?: string;
-  validCarriers?: string[];
-  createdBy?: string;
+import { query, queryOne } from '../../../libs/db';
+import { Table, ShippingPackagingType } from '../../../libs/db/types';
+
+export { ShippingPackagingType };
+
+export type CreateShippingPackagingTypeInput = Omit<ShippingPackagingType, 'shippingPackagingTypeId' | 'createdAt' | 'updatedAt'>;
+export type UpdateShippingPackagingTypeInput = Partial<Omit<ShippingPackagingType, 'shippingPackagingTypeId' | 'createdAt' | 'updatedAt'>>;
+
+const TABLE = Table.ShippingPackagingType;
+
+export async function findById(id: string): Promise<ShippingPackagingType | null> {
+  return queryOne<ShippingPackagingType>(
+    `SELECT * FROM "${TABLE}" WHERE "shippingPackagingTypeId" = $1`,
+    [id]
+  );
 }
 
-export type PackagingTypeCreateParams = Omit<PackagingType, 'packagingTypeId' | 'createdAt' | 'updatedAt'>;
-export type PackagingTypeUpdateParams = Partial<Omit<PackagingType, 'packagingTypeId' | 'createdAt' | 'updatedAt'>>;
+export async function findByCode(code: string): Promise<ShippingPackagingType | null> {
+  return queryOne<ShippingPackagingType>(
+    `SELECT * FROM "${TABLE}" WHERE "code" = $1`,
+    [code]
+  );
+}
 
-export class PackagingTypeRepo {
-  async findById(id: string): Promise<PackagingType | null> {
-    return await queryOne<PackagingType>(`SELECT * FROM "packagingType" WHERE "packagingTypeId" = $1`, [id]);
+export async function findAll(activeOnly = false): Promise<ShippingPackagingType[]> {
+  let sql = `SELECT * FROM "${TABLE}"`;
+  if (activeOnly) sql += ` WHERE "isActive" = true`;
+  sql += ` ORDER BY "volume" ASC`;
+  return (await query<ShippingPackagingType[]>(sql)) || [];
+}
+
+export async function findDefault(): Promise<ShippingPackagingType | null> {
+  return queryOne<ShippingPackagingType>(
+    `SELECT * FROM "${TABLE}" WHERE "isDefault" = true AND "isActive" = true LIMIT 1`
+  );
+}
+
+export async function findByMaxWeight(weight: number): Promise<ShippingPackagingType[]> {
+  return (await query<ShippingPackagingType[]>(
+    `SELECT * FROM "${TABLE}" WHERE "isActive" = true AND ("maxWeight" IS NULL OR "maxWeight" >= $1) ORDER BY "volume" ASC`,
+    [weight]
+  )) || [];
+}
+
+export async function create(input: CreateShippingPackagingTypeInput): Promise<ShippingPackagingType> {
+  if (input.isDefault) {
+    await query(`UPDATE "${TABLE}" SET "isDefault" = false, "updatedAt" = NOW() WHERE "isDefault" = true`);
   }
 
-  async findByCode(code: string): Promise<PackagingType | null> {
-    return await queryOne<PackagingType>(`SELECT * FROM "packagingType" WHERE "code" = $1`, [code]);
-  }
+  const result = await queryOne<ShippingPackagingType>(
+    `INSERT INTO "${TABLE}" (
+      "name", "code", "description", "isActive", "isDefault", "weight", "length", "width",
+      "height", "volume", "maxWeight", "maxItems", "cost", "currency", "recyclable",
+      "imageUrl", "validCarriers", "createdBy"
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18) RETURNING *`,
+    [
+      input.name,
+      input.code,
+      input.description || null,
+      input.isActive ?? true,
+      input.isDefault ?? false,
+      input.weight || '0',
+      input.length,
+      input.width,
+      input.height,
+      input.volume,
+      input.maxWeight || null,
+      input.maxItems || null,
+      input.cost || null,
+      input.currency || 'USD',
+      input.recyclable ?? false,
+      input.imageUrl || null,
+      input.validCarriers || null,
+      input.createdBy || null
+    ]
+  );
 
-  async findAll(activeOnly = false): Promise<PackagingType[]> {
-    let sql = `SELECT * FROM "packagingType"`;
-    if (activeOnly) sql += ` WHERE "isActive" = true`;
-    sql += ` ORDER BY "volume" ASC`;
-    return (await query<PackagingType[]>(sql)) || [];
-  }
+  if (!result) throw new Error('Failed to create packaging type');
+  return result;
+}
 
-  async findDefault(): Promise<PackagingType | null> {
-    return await queryOne<PackagingType>(
-      `SELECT * FROM "packagingType" WHERE "isDefault" = true AND "isActive" = true LIMIT 1`
-    );
-  }
-
-  async create(params: PackagingTypeCreateParams): Promise<PackagingType> {
-    const now = unixTimestamp();
-
-    if (params.isDefault) {
-      await query(`UPDATE "packagingType" SET "isDefault" = false, "updatedAt" = $1 WHERE "isDefault" = true`, [now]);
-    }
-
-    const result = await queryOne<PackagingType>(
-      `INSERT INTO "packagingType" (
-        "name", "code", "description", "isActive", "isDefault", "weight", "length", "width",
-        "height", "volume", "maxWeight", "maxItems", "cost", "currency", "recyclable",
-        "imageUrl", "validCarriers", "createdBy", "createdAt", "updatedAt"
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20) RETURNING *`,
-      [
-        params.name, params.code, params.description || null, params.isActive ?? true, params.isDefault || false,
-        params.weight || 0, params.length, params.width, params.height, params.volume, params.maxWeight || null,
-        params.maxItems || null, params.cost || null, params.currency || 'USD', params.recyclable || false,
-        params.imageUrl || null, params.validCarriers || null, params.createdBy || null, now, now
-      ]
-    );
-    if (!result) throw new Error('Failed to create packaging type');
-    return result;
-  }
-
-  async update(id: string, params: PackagingTypeUpdateParams): Promise<PackagingType | null> {
-    if (params.isDefault === true) {
-      await query(
-        `UPDATE "packagingType" SET "isDefault" = false, "updatedAt" = $1 WHERE "isDefault" = true AND "packagingTypeId" != $2`,
-        [unixTimestamp(), id]
-      );
-    }
-
-    const updateFields: string[] = [];
-    const values: any[] = [];
-    let paramIndex = 1;
-
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined) {
-        updateFields.push(`"${key}" = $${paramIndex++}`);
-        values.push(value);
-      }
-    });
-
-    if (updateFields.length === 0) return this.findById(id);
-
-    updateFields.push(`"updatedAt" = $${paramIndex++}`);
-    values.push(unixTimestamp(), id);
-
-    return await queryOne<PackagingType>(
-      `UPDATE "packagingType" SET ${updateFields.join(', ')} WHERE "packagingTypeId" = $${paramIndex} RETURNING *`,
-      values
-    );
-  }
-
-  async delete(id: string): Promise<boolean> {
-    const result = await queryOne<{ packagingTypeId: string }>(
-      `DELETE FROM "packagingType" WHERE "packagingTypeId" = $1 RETURNING "packagingTypeId"`,
+export async function update(id: string, input: UpdateShippingPackagingTypeInput): Promise<ShippingPackagingType | null> {
+  if (input.isDefault === true) {
+    await query(
+      `UPDATE "${TABLE}" SET "isDefault" = false, "updatedAt" = NOW() WHERE "isDefault" = true AND "shippingPackagingTypeId" != $1`,
       [id]
     );
-    return !!result;
   }
 
-  async count(): Promise<number> {
-    const result = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "packagingType"`);
-    return result ? parseInt(result.count, 10) : 0;
-  }
+  const updateFields: string[] = [];
+  const values: any[] = [];
+  let paramIndex = 1;
+
+  Object.entries(input).forEach(([key, value]) => {
+    if (value !== undefined) {
+      updateFields.push(`"${key}" = $${paramIndex++}`);
+      values.push(value);
+    }
+  });
+
+  if (updateFields.length === 0) return findById(id);
+
+  updateFields.push(`"updatedAt" = NOW()`);
+  values.push(id);
+
+  return queryOne<ShippingPackagingType>(
+    `UPDATE "${TABLE}" SET ${updateFields.join(', ')} WHERE "shippingPackagingTypeId" = $${paramIndex} RETURNING *`,
+    values
+  );
 }
 
-export default new PackagingTypeRepo();
+export async function activate(id: string): Promise<ShippingPackagingType | null> {
+  return update(id, { isActive: true });
+}
+
+export async function deactivate(id: string): Promise<ShippingPackagingType | null> {
+  return update(id, { isActive: false });
+}
+
+export async function deletePackagingType(id: string): Promise<boolean> {
+  const result = await queryOne<{ shippingPackagingTypeId: string }>(
+    `DELETE FROM "${TABLE}" WHERE "shippingPackagingTypeId" = $1 RETURNING "shippingPackagingTypeId"`,
+    [id]
+  );
+  return !!result;
+}
+
+export async function count(activeOnly = false): Promise<number> {
+  let sql = `SELECT COUNT(*) as count FROM "${TABLE}"`;
+  if (activeOnly) sql += ` WHERE "isActive" = true`;
+  const result = await queryOne<{ count: string }>(sql);
+  return result ? parseInt(result.count, 10) : 0;
+}
+
+export default {
+  findById,
+  findByCode,
+  findAll,
+  findDefault,
+  findByMaxWeight,
+  create,
+  update,
+  activate,
+  deactivate,
+  delete: deletePackagingType,
+  count
+};

@@ -4,6 +4,16 @@
  */
 
 import { query, queryOne } from '../../../libs/db';
+import { Table } from '../../../libs/db/types';
+
+// ============================================================================
+// Table Constants
+// ============================================================================
+
+const TABLES = {
+  STOCK_ALERT: Table.StockAlert,
+  PRICE_ALERT: Table.PriceAlert
+};
 
 // ============================================================================
 // Types

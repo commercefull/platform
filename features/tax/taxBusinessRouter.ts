@@ -22,23 +22,23 @@ const router = Router();
 router.use(isMerchantLoggedIn);
 
 // -------------------- Tax Rate Routes --------------------
-router.get('/rates', getAllTaxRates);
-router.get('/rates/:id', getTaxRate);
-router.post('/rates', createTaxRate);
-router.put('/rates/:id', updateTaxRate);
-router.delete('/rates/:id', deleteTaxRate);
+router.get('/tax/rates', getAllTaxRates);
+router.get('/tax/rates/:id', getTaxRate);
+router.post('/tax/rates', createTaxRate);
+router.put('/tax/rates/:id', updateTaxRate);
+router.delete('/tax/rates/:id', deleteTaxRate);
 
 // -------------------- Tax Category Routes --------------------
-router.get('/categories', getAllTaxCategories);
-router.get('/categories/:id', getTaxCategory);
-router.post('/categories', createTaxCategory);
-router.put('/categories/:id', updateTaxCategory);
-router.delete('/categories/:id', deleteTaxCategory);
+router.get('/tax/categories', getAllTaxCategories);
+router.get('/tax/categories/:id', getTaxCategory);
+router.post('/tax/categories', createTaxCategory);
+router.put('/tax/categories/:id', updateTaxCategory);
+router.delete('/tax/categories/:id', deleteTaxCategory);
 
 // -------------------- Tax Zone Routes --------------------
-router.get('/zones/:id', getTaxZoneById);
-router.post('/zones', createTaxZone);
-router.put('/zones/:id', updateTaxZone);
-router.delete('/zones/:id', deleteTaxZone);
+router.get('/tax/zones/:id', getTaxZoneById);
+router.post('/tax/zones', createTaxZone);
+router.put('/tax/zones/:id', updateTaxZone);
+router.delete('/tax/zones/:id', deleteTaxZone);
 
 export const taxBusinessRouter = router;

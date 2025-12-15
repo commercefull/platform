@@ -33,7 +33,6 @@ export enum Table {
   BasketSavedItem = "basketSavedItem",
   BrandTranslation = "brandTranslation",
   BundleItem = "bundleItem",
-  BuyXGetYDiscount = "buyXGetYDiscount",
   CartPromotion = "cartPromotion",
   CartPromotionItem = "cartPromotionItem",
   CategoryPromotion = "categoryPromotion",
@@ -57,15 +56,12 @@ export enum Table {
   ContentTemplate = "contentTemplate",
   ContentType = "contentType",
   Country = "country",
-  Coupon = "coupon",
-  CouponBatch = "couponBatch",
-  CouponRestriction = "couponRestriction",
-  CouponUsage = "couponUsage",
   Currency = "currency",
   CurrencyExchangeRate = "currencyExchangeRate",
   CurrencyExchangeRateHistory = "currencyExchangeRateHistory",
   CurrencyLocalization = "currencyLocalization",
   CurrencyProvider = "currencyProvider",
+  CurrencyRegion = "currencyRegion",
   Customer = "customer",
   CustomerActivity = "customerActivity",
   CustomerAddress = "customerAddress",
@@ -117,8 +113,6 @@ export enum Table {
   FulfillmentStatusHistory = "fulfillmentStatusHistory",
   GdprCookieConsent = "gdprCookieConsent",
   GdprDataRequest = "gdprDataRequest",
-  GiftCard = "giftCard",
-  GiftCardTransaction = "giftCardTransaction",
   IdentityCustomerSession = "identityCustomerSession",
   IdentityMerchantSession = "identityMerchantSession",
   IdentityRefreshTokens = "identityRefreshTokens",
@@ -213,7 +207,6 @@ export enum Table {
   OrderShippingRate = "orderShippingRate",
   OrderStatusHistory = "orderStatusHistory",
   OrderTax = "orderTax",
-  PackagingType = "packagingType",
   PaymentBalance = "paymentBalance",
   PaymentDispute = "paymentDispute",
   PaymentFee = "paymentFee",
@@ -249,9 +242,6 @@ export enum Table {
   ProductCollection = "productCollection",
   ProductCollectionMap = "productCollectionMap",
   ProductCurrencyPrice = "productCurrencyPrice",
-  ProductDiscount = "productDiscount",
-  ProductDiscountCustomerGroup = "productDiscountCustomerGroup",
-  ProductDiscountItem = "productDiscountItem",
   ProductDownload = "productDownload",
   ProductImage = "productImage",
   ProductList = "productList",
@@ -278,17 +268,28 @@ export enum Table {
   ProductVariant = "productVariant",
   Promotion = "promotion",
   PromotionAction = "promotionAction",
+  PromotionBuyXGetYDiscount = "promotionBuyXGetYDiscount",
+  PromotionCoupon = "promotionCoupon",
+  PromotionCouponBatch = "promotionCouponBatch",
+  PromotionCouponRestriction = "promotionCouponRestriction",
+  PromotionCouponUsage = "promotionCouponUsage",
+  PromotionGiftCard = "promotionGiftCard",
+  PromotionGiftCardTransaction = "promotionGiftCardTransaction",
+  PromotionProductDiscount = "promotionProductDiscount",
+  PromotionProductDiscountCustomerGroup = "promotionProductDiscountCustomerGroup",
+  PromotionProductDiscountItem = "promotionProductDiscountItem",
   PromotionRule = "promotionRule",
   PromotionUsage = "promotionUsage",
-  PurchaseOrder = "purchaseOrder",
-  PurchaseOrderItem = "purchaseOrderItem",
-  ReceivingItem = "receivingItem",
-  ReceivingRecord = "receivingRecord",
   Referral = "referral",
   ReferralReward = "referralReward",
   RuleAdjustment = "ruleAdjustment",
   RuleCondition = "ruleCondition",
   Session = "session",
+  ShippingCarrier = "shippingCarrier",
+  ShippingMethod = "shippingMethod",
+  ShippingPackagingType = "shippingPackagingType",
+  ShippingRate = "shippingRate",
+  ShippingZone = "shippingZone",
   StockAlert = "stockAlert",
   StockReservation = "stockReservation",
   StoreCurrencySettings = "storeCurrencySettings",
@@ -302,6 +303,10 @@ export enum Table {
   Supplier = "supplier",
   SupplierAddress = "supplierAddress",
   SupplierProduct = "supplierProduct",
+  SupplierPurchaseOrder = "supplierPurchaseOrder",
+  SupplierPurchaseOrderItem = "supplierPurchaseOrderItem",
+  SupplierReceivingItem = "supplierReceivingItem",
+  SupplierReceivingRecord = "supplierReceivingRecord",
   SupportAgent = "supportAgent",
   SupportAttachment = "supportAttachment",
   SupportMessage = "supportMessage",
@@ -356,7 +361,6 @@ export type Tables = {
   "basketSavedItem": BasketSavedItem,
   "brandTranslation": BrandTranslation,
   "bundleItem": BundleItem,
-  "buyXGetYDiscount": BuyXGetYDiscount,
   "cartPromotion": CartPromotion,
   "cartPromotionItem": CartPromotionItem,
   "categoryPromotion": CategoryPromotion,
@@ -380,15 +384,12 @@ export type Tables = {
   "contentTemplate": ContentTemplate,
   "contentType": ContentType,
   "country": Country,
-  "coupon": Coupon,
-  "couponBatch": CouponBatch,
-  "couponRestriction": CouponRestriction,
-  "couponUsage": CouponUsage,
   "currency": Currency,
   "currencyExchangeRate": CurrencyExchangeRate,
   "currencyExchangeRateHistory": CurrencyExchangeRateHistory,
   "currencyLocalization": CurrencyLocalization,
   "currencyProvider": CurrencyProvider,
+  "currencyRegion": CurrencyRegion,
   "customer": Customer,
   "customerActivity": CustomerActivity,
   "customerAddress": CustomerAddress,
@@ -440,8 +441,6 @@ export type Tables = {
   "fulfillmentStatusHistory": FulfillmentStatusHistory,
   "gdprCookieConsent": GdprCookieConsent,
   "gdprDataRequest": GdprDataRequest,
-  "giftCard": GiftCard,
-  "giftCardTransaction": GiftCardTransaction,
   "identityCustomerSession": IdentityCustomerSession,
   "identityMerchantSession": IdentityMerchantSession,
   "identityRefreshTokens": IdentityRefreshTokens,
@@ -536,7 +535,6 @@ export type Tables = {
   "orderShippingRate": OrderShippingRate,
   "orderStatusHistory": OrderStatusHistory,
   "orderTax": OrderTax,
-  "packagingType": PackagingType,
   "paymentBalance": PaymentBalance,
   "paymentDispute": PaymentDispute,
   "paymentFee": PaymentFee,
@@ -572,9 +570,6 @@ export type Tables = {
   "productCollection": ProductCollection,
   "productCollectionMap": ProductCollectionMap,
   "productCurrencyPrice": ProductCurrencyPrice,
-  "productDiscount": ProductDiscount,
-  "productDiscountCustomerGroup": ProductDiscountCustomerGroup,
-  "productDiscountItem": ProductDiscountItem,
   "productDownload": ProductDownload,
   "productImage": ProductImage,
   "productList": ProductList,
@@ -601,17 +596,28 @@ export type Tables = {
   "productVariant": ProductVariant,
   "promotion": Promotion,
   "promotionAction": PromotionAction,
+  "promotionBuyXGetYDiscount": PromotionBuyXGetYDiscount,
+  "promotionCoupon": PromotionCoupon,
+  "promotionCouponBatch": PromotionCouponBatch,
+  "promotionCouponRestriction": PromotionCouponRestriction,
+  "promotionCouponUsage": PromotionCouponUsage,
+  "promotionGiftCard": PromotionGiftCard,
+  "promotionGiftCardTransaction": PromotionGiftCardTransaction,
+  "promotionProductDiscount": PromotionProductDiscount,
+  "promotionProductDiscountCustomerGroup": PromotionProductDiscountCustomerGroup,
+  "promotionProductDiscountItem": PromotionProductDiscountItem,
   "promotionRule": PromotionRule,
   "promotionUsage": PromotionUsage,
-  "purchaseOrder": PurchaseOrder,
-  "purchaseOrderItem": PurchaseOrderItem,
-  "receivingItem": ReceivingItem,
-  "receivingRecord": ReceivingRecord,
   "referral": Referral,
   "referralReward": ReferralReward,
   "ruleAdjustment": RuleAdjustment,
   "ruleCondition": RuleCondition,
   "session": Session,
+  "shippingCarrier": ShippingCarrier,
+  "shippingMethod": ShippingMethod,
+  "shippingPackagingType": ShippingPackagingType,
+  "shippingRate": ShippingRate,
+  "shippingZone": ShippingZone,
   "stockAlert": StockAlert,
   "stockReservation": StockReservation,
   "storeCurrencySettings": StoreCurrencySettings,
@@ -625,6 +631,10 @@ export type Tables = {
   "supplier": Supplier,
   "supplierAddress": SupplierAddress,
   "supplierProduct": SupplierProduct,
+  "supplierPurchaseOrder": SupplierPurchaseOrder,
+  "supplierPurchaseOrderItem": SupplierPurchaseOrderItem,
+  "supplierReceivingItem": SupplierReceivingItem,
+  "supplierReceivingRecord": SupplierReceivingRecord,
   "supportAgent": SupportAgent,
   "supportAttachment": SupportAttachment,
   "supportMessage": SupportMessage,
@@ -1416,28 +1426,13 @@ export type BundleItem = {
   updatedAt: Date | null;
 };
 
-export type BuyXGetYDiscount = {
-  buyXGetYDiscountId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  discountId: string;
-  buyQuantity: number;
-  getQuantity: number;
-  getType: string;
-  productId: string;
-  productVariantId: string;
-  productCategoryId: string;
-  discountPercentage: string;
-  maxFreeItems: number | null;
-};
-
 export type CartPromotion = {
   cartPromotionId: string;
   createdAt: Date;
   updatedAt: Date;
   basketId: string;
   promotionId: string;
-  couponId: string | null;
+  promotionCouponId: string | null;
   couponCode: string | null;
   discountAmount: string;
   currencyCode: string;
@@ -1831,71 +1826,6 @@ export type Country = {
   region: string | null;
 };
 
-export type Coupon = {
-  couponId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  code: string;
-  promotionId: string | null;
-  name: string;
-  description: string | null;
-  type: string;
-  discountAmount: string | null;
-  currencyCode: string | null;
-  minOrderAmount: string | null;
-  maxDiscountAmount: string | null;
-  startDate: Date;
-  endDate: Date | null;
-  isActive: boolean;
-  isOneTimeUse: boolean;
-  maxUsage: number | null;
-  usageCount: number;
-  maxUsagePerCustomer: number | null;
-  generationMethod: string;
-  isReferral: boolean;
-  referrerId: string | null;
-  isPublic: boolean;
-  merchantId: string | null;
-};
-
-export type CouponBatch = {
-  couponBatchId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  name: string;
-  description: string | null;
-  prefix: string | null;
-  suffix: string | null;
-  codePattern: string | null;
-  codeLength: number;
-  quantity: number;
-  generatedCount: number;
-  status: string;
-  expiryDate: Date | null;
-  merchantId: string | null;
-};
-
-export type CouponRestriction = {
-  couponRestrictionId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  couponId: string;
-  restrictionType: string;
-  restrictionValue: unknown;
-};
-
-export type CouponUsage = {
-  couponUsageId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  couponId: string;
-  orderId: string | null;
-  customerId: string | null;
-  discountAmount: string;
-  currencyCode: string;
-  usedAt: Date;
-};
-
 export type Currency = {
   currencyId: string;
   createdAt: Date;
@@ -1967,6 +1897,17 @@ export type CurrencyProvider = {
   isActive: boolean;
   lastSyncAt: Date | null;
   syncFrequency: number | null;
+};
+
+export type CurrencyRegion = {
+  currencyRegionId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  code: string;
+  name: string;
+  currencyCode: string;
+  countries: string[] | null;
+  isActive: boolean;
 };
 
 export type Customer = {
@@ -2747,7 +2688,7 @@ export type DistributionShippingZone = {
   isActive: boolean;
   priority: number | null;
   locationType: string;
-  locations: unknown;
+  locations: unknown[];
   excludedLocations: unknown | null;
   createdBy: string | null;
 };
@@ -3031,58 +2972,6 @@ export type GdprDataRequest = {
   userAgent: string | null;
 };
 
-export type GiftCard = {
-  giftCardId: string;
-  code: string;
-  type: string | null;
-  initialBalance: string;
-  currentBalance: string;
-  currency: string | null;
-  status: string | null;
-  purchasedBy: string | null;
-  purchaseOrderId: string | null;
-  recipientEmail: string | null;
-  recipientName: string | null;
-  personalMessage: string | null;
-  deliveryDate: Date | null;
-  isDelivered: boolean | null;
-  deliveredAt: Date | null;
-  deliveryMethod: string | null;
-  assignedTo: string | null;
-  assignedAt: Date | null;
-  activatedAt: Date | null;
-  expiresAt: Date | null;
-  lastUsedAt: Date | null;
-  usageCount: number | null;
-  totalRedeemed: string | null;
-  isReloadable: boolean | null;
-  minReloadAmount: string | null;
-  maxReloadAmount: string | null;
-  maxBalance: string | null;
-  restrictions: unknown | null;
-  metadata: unknown | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-};
-
-export type GiftCardTransaction = {
-  giftCardTransactionId: string;
-  giftCardId: string;
-  type: string;
-  amount: string;
-  balanceBefore: string;
-  balanceAfter: string;
-  currency: string | null;
-  orderId: string | null;
-  customerId: string | null;
-  performedBy: string | null;
-  performedByType: string | null;
-  notes: string | null;
-  referenceNumber: string | null;
-  metadata: unknown | null;
-  createdAt: Date | null;
-};
-
 export type IdentityCustomerSession = {
   customerSessionId: string;
   createdAt: Date;
@@ -3266,7 +3155,7 @@ export type InventoryLot = {
   receiptDate: Date;
   supplierLotNumber: string | null;
   supplierId: string | null;
-  purchaseOrderId: string | null;
+  supplierPurchaseOrderId: string | null;
   status: string;
   cost: string | null;
   createdBy: string | null;
@@ -4940,30 +4829,6 @@ export type OrderTax = {
   isIncludedInPrice: boolean;
 };
 
-export type PackagingType = {
-  packagingTypeId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  name: string;
-  code: string;
-  description: string | null;
-  isActive: boolean;
-  isDefault: boolean;
-  weight: string;
-  length: string;
-  width: string;
-  height: string;
-  volume: string;
-  maxWeight: string | null;
-  maxItems: number | null;
-  cost: string | null;
-  currency: string;
-  recyclable: boolean;
-  imageUrl: string | null;
-  validCarriers: string[] | null;
-  createdBy: string | null;
-};
-
 export type PaymentBalance = {
   paymentBalanceId: string;
   createdAt: Date;
@@ -5356,6 +5221,9 @@ export type PricingRule = {
   endDate: Date | null;
   priority: number | null;
   isActive: boolean;
+  metadata: unknown | null;
+  currencyCode: string | null;
+  regionCode: string | null;
 };
 
 export type Product = {
@@ -5671,53 +5539,6 @@ export type ProductCurrencyPrice = {
   compareAtPrice: string | null;
   isManual: boolean;
   updatedBy: string | null;
-};
-
-export type ProductDiscount = {
-  productDiscountId: string;
-  promotionId: string | null;
-  name: string;
-  description: string | null;
-  discountType: string;
-  discountValue: string;
-  currencyCode: string | null;
-  startDate: Date;
-  endDate: Date | null;
-  isActive: boolean;
-  priority: number;
-  appliesTo: string;
-  minimumQuantity: number | null;
-  maximumQuantity: number | null;
-  minimumAmount: string | null;
-  maximumDiscountAmount: string | null;
-  stackable: boolean;
-  displayOnProductPage: boolean;
-  displayInListing: boolean;
-  badgeText: string | null;
-  badgeStyle: unknown | null;
-  merchantId: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-};
-
-export type ProductDiscountCustomerGroup = {
-  productDiscountCustomerGroupId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  productDiscountId: string;
-  customerGroupId: string;
-};
-
-export type ProductDiscountItem = {
-  productDiscountItemId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  discountId: string;
-  productId: string | null;
-  productVariantId: string | null;
-  productCategoryId: string;
-  productBrandId: string | null;
-  itemType: string;
 };
 
 export type ProductDownload = {
@@ -6124,6 +5945,185 @@ export type PromotionAction = {
   sortOrder: number;
 };
 
+export type PromotionBuyXGetYDiscount = {
+  promotionBuyXGetYDiscountId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  promotionProductDiscountId: string;
+  buyQuantity: number;
+  getQuantity: number;
+  getType: string;
+  productId: string;
+  productVariantId: string;
+  productCategoryId: string;
+  discountPercentage: string;
+  maxFreeItems: number | null;
+};
+
+export type PromotionCoupon = {
+  promotionCouponId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  code: string;
+  promotionId: string | null;
+  name: string;
+  description: string | null;
+  type: string;
+  discountAmount: string | null;
+  currencyCode: string | null;
+  minOrderAmount: string | null;
+  maxDiscountAmount: string | null;
+  startDate: Date;
+  endDate: Date | null;
+  isActive: boolean;
+  isOneTimeUse: boolean;
+  maxUsage: number | null;
+  usageCount: number;
+  maxUsagePerCustomer: number | null;
+  generationMethod: string;
+  isReferral: boolean;
+  referrerId: string | null;
+  isPublic: boolean;
+  merchantId: string | null;
+};
+
+export type PromotionCouponBatch = {
+  promotionCouponBatchId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  name: string;
+  description: string | null;
+  prefix: string | null;
+  suffix: string | null;
+  codePattern: string | null;
+  codeLength: number;
+  quantity: number;
+  generatedCount: number;
+  status: string;
+  expiryDate: Date | null;
+  merchantId: string | null;
+};
+
+export type PromotionCouponRestriction = {
+  promotionCouponRestrictionId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  promotionCouponId: string;
+  restrictionType: string;
+  restrictionValue: unknown;
+};
+
+export type PromotionCouponUsage = {
+  promotionCouponUsageId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  promotionCouponId: string;
+  orderId: string | null;
+  customerId: string | null;
+  discountAmount: string;
+  currencyCode: string;
+  usedAt: Date;
+};
+
+export type PromotionGiftCard = {
+  promotionGiftCardId: string;
+  code: string;
+  type: string | null;
+  initialBalance: string;
+  currentBalance: string;
+  currency: string | null;
+  status: string | null;
+  purchasedBy: string | null;
+  purchaseOrderId: string | null;
+  recipientEmail: string | null;
+  recipientName: string | null;
+  personalMessage: string | null;
+  deliveryDate: Date | null;
+  isDelivered: boolean | null;
+  deliveredAt: Date | null;
+  deliveryMethod: string | null;
+  assignedTo: string | null;
+  assignedAt: Date | null;
+  activatedAt: Date | null;
+  expiresAt: Date | null;
+  lastUsedAt: Date | null;
+  usageCount: number | null;
+  totalRedeemed: string | null;
+  isReloadable: boolean | null;
+  minReloadAmount: string | null;
+  maxReloadAmount: string | null;
+  maxBalance: string | null;
+  restrictions: unknown | null;
+  metadata: unknown | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
+
+export type PromotionGiftCardTransaction = {
+  promotionGiftCardTransactionId: string;
+  promotionGiftCardId: string;
+  type: string;
+  amount: string;
+  balanceBefore: string;
+  balanceAfter: string;
+  currency: string | null;
+  orderId: string | null;
+  customerId: string | null;
+  performedBy: string | null;
+  performedByType: string | null;
+  notes: string | null;
+  referenceNumber: string | null;
+  metadata: unknown | null;
+  createdAt: Date | null;
+};
+
+export type PromotionProductDiscount = {
+  promotionProductDiscountId: string;
+  promotionId: string | null;
+  name: string;
+  description: string | null;
+  discountType: string;
+  discountValue: string;
+  currencyCode: string | null;
+  startDate: Date;
+  endDate: Date | null;
+  isActive: boolean;
+  priority: number;
+  appliesTo: string;
+  minimumQuantity: number | null;
+  maximumQuantity: number | null;
+  minimumAmount: string | null;
+  maximumDiscountAmount: string | null;
+  stackable: boolean;
+  displayOnProductPage: boolean;
+  displayInListing: boolean;
+  badgeText: string | null;
+  badgeStyle: unknown | null;
+  merchantId: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type PromotionProductDiscountCustomerGroup = {
+  promotionProductDiscountCustomerGroupId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  promotionProductDiscountId: string;
+  customerGroupId: string;
+};
+
+export type PromotionProductDiscountItem = {
+  promotionProductDiscountItemId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  promotionProductDiscountId: string;
+  productId: string | null;
+  productVariantId: string | null;
+  productCategoryId: string;
+  productBrandId: string | null;
+  itemType: string;
+};
+
 export type PromotionRule = {
   promotionRuleId: string;
   createdAt: Date;
@@ -6149,107 +6149,6 @@ export type PromotionUsage = {
   discountAmount: string;
   currencyCode: string;
   usedAt: Date;
-};
-
-export type PurchaseOrder = {
-  purchaseOrderId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  poNumber: string;
-  supplierId: string;
-  distributionWarehouseId: string;
-  status: string;
-  orderType: string;
-  priority: string;
-  orderDate: Date;
-  expectedDeliveryDate: Date | null;
-  deliveryDate: Date | null;
-  shippingMethod: string | null;
-  trackingNumber: string | null;
-  carrierName: string | null;
-  paymentTerms: string | null;
-  currency: string;
-  subtotal: string;
-  tax: string;
-  shipping: string;
-  discount: string;
-  total: string;
-  notes: string | null;
-  supplierNotes: string | null;
-  attachments: unknown | null;
-  approvedAt: Date | null;
-  sentAt: Date | null;
-  confirmedAt: Date | null;
-  completedAt: Date | null;
-  cancelledAt: Date | null;
-};
-
-export type PurchaseOrderItem = {
-  purchaseOrderItemId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  purchaseOrderId: string;
-  supplierProductId: string | null;
-  productId: string;
-  productVariantId: string | null;
-  sku: string;
-  supplierSku: string | null;
-  name: string;
-  description: string | null;
-  quantity: number;
-  receivedQuantity: number;
-  unitCost: string;
-  tax: string;
-  discount: string;
-  total: string;
-  status: string;
-  expectedDeliveryDate: Date | null;
-  receivedAt: Date | null;
-  notes: string | null;
-};
-
-export type ReceivingItem = {
-  receivingItemId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  receivingRecordId: string;
-  purchaseOrderItemId: string | null;
-  productId: string;
-  productVariantId: string | null;
-  sku: string;
-  name: string;
-  expectedQuantity: number | null;
-  receivedQuantity: number;
-  rejectedQuantity: number;
-  distributionWarehouseBinId: string | null;
-  lotNumber: string | null;
-  serialNumbers: string[] | null;
-  expiryDate: Date | null;
-  status: string;
-  acceptanceStatus: string | null;
-  inspectionNotes: string | null;
-  discrepancyReason: string | null;
-  processedAt: Date | null;
-  processedBy: string | null;
-};
-
-export type ReceivingRecord = {
-  receivingRecordId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  receiptNumber: string;
-  purchaseOrderId: string | null;
-  distributionWarehouseId: string;
-  supplierId: string;
-  status: string;
-  receivedDate: Date;
-  carrierName: string | null;
-  trackingNumber: string | null;
-  packageCount: number | null;
-  notes: string | null;
-  discrepancies: boolean;
-  attachments: unknown | null;
-  completedAt: Date | null;
 };
 
 export type Referral = {
@@ -6319,6 +6218,116 @@ export type Session = {
   sid: string;
   sess: unknown;
   expire: Date;
+};
+
+export type ShippingCarrier = {
+  shippingCarrierId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  name: string;
+  code: string;
+  description: string | null;
+  websiteUrl: string | null;
+  trackingUrl: string | null;
+  isActive: boolean;
+  accountNumber: string | null;
+  apiCredentials: unknown | null;
+  supportedRegions: unknown | null;
+  supportedServices: unknown | null;
+  requiresContract: boolean;
+  hasApiIntegration: boolean;
+  customFields: unknown | null;
+  createdBy: string | null;
+};
+
+export type ShippingMethod = {
+  shippingMethodId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  shippingCarrierId: string | null;
+  name: string;
+  code: string;
+  description: string | null;
+  isActive: boolean;
+  isDefault: boolean;
+  serviceCode: string | null;
+  domesticInternational: string;
+  estimatedDeliveryDays: unknown | null;
+  handlingDays: number | null;
+  priority: number | null;
+  displayOnFrontend: boolean;
+  allowFreeShipping: boolean;
+  minWeight: string | null;
+  maxWeight: string | null;
+  minOrderValue: string | null;
+  maxOrderValue: string | null;
+  dimensionRestrictions: unknown | null;
+  shippingClass: string | null;
+  customFields: unknown | null;
+  createdBy: string | null;
+};
+
+export type ShippingPackagingType = {
+  shippingPackagingTypeId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  name: string;
+  code: string;
+  description: string | null;
+  isActive: boolean;
+  isDefault: boolean;
+  weight: string;
+  length: string;
+  width: string;
+  height: string;
+  volume: string;
+  maxWeight: string | null;
+  maxItems: number | null;
+  cost: string | null;
+  currency: string;
+  recyclable: boolean;
+  imageUrl: string | null;
+  validCarriers: string[] | null;
+  createdBy: string | null;
+};
+
+export type ShippingRate = {
+  shippingRateId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  shippingZoneId: string;
+  shippingMethodId: string;
+  name: string | null;
+  description: string | null;
+  isActive: boolean;
+  rateType: string;
+  baseRate: string;
+  perItemRate: string | null;
+  freeThreshold: string | null;
+  rateMatrix: unknown | null;
+  minRate: string | null;
+  maxRate: string | null;
+  currency: string;
+  taxable: boolean;
+  priority: number | null;
+  validFrom: Date | null;
+  validTo: Date | null;
+  conditions: unknown | null;
+  createdBy: string | null;
+};
+
+export type ShippingZone = {
+  shippingZoneId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  name: string;
+  description: string | null;
+  isActive: boolean;
+  priority: number | null;
+  locationType: string;
+  locations: unknown;
+  excludedLocations: unknown | null;
+  createdBy: string | null;
 };
 
 export type StockAlert = {
@@ -6639,6 +6648,107 @@ export type SupplierProduct = {
   weight: string | null;
   lastOrderedAt: Date | null;
   notes: string | null;
+};
+
+export type SupplierPurchaseOrder = {
+  supplierPurchaseOrderId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  poNumber: string;
+  supplierId: string;
+  distributionWarehouseId: string;
+  status: string;
+  orderType: string;
+  priority: string;
+  orderDate: Date;
+  expectedDeliveryDate: Date | null;
+  deliveryDate: Date | null;
+  shippingMethod: string | null;
+  trackingNumber: string | null;
+  carrierName: string | null;
+  paymentTerms: string | null;
+  currency: string;
+  subtotal: string;
+  tax: string;
+  shipping: string;
+  discount: string;
+  total: string;
+  notes: string | null;
+  supplierNotes: string | null;
+  attachments: unknown | null;
+  approvedAt: Date | null;
+  sentAt: Date | null;
+  confirmedAt: Date | null;
+  completedAt: Date | null;
+  cancelledAt: Date | null;
+};
+
+export type SupplierPurchaseOrderItem = {
+  supplierPurchaseOrderItemId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  supplierPurchaseOrderId: string;
+  supplierProductId: string | null;
+  productId: string;
+  productVariantId: string | null;
+  sku: string;
+  supplierSku: string | null;
+  name: string;
+  description: string | null;
+  quantity: number;
+  receivedQuantity: number;
+  unitCost: string;
+  tax: string;
+  discount: string;
+  total: string;
+  status: string;
+  expectedDeliveryDate: Date | null;
+  receivedAt: Date | null;
+  notes: string | null;
+};
+
+export type SupplierReceivingItem = {
+  supplierReceivingItemId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  supplierReceivingRecordId: string;
+  supplierPurchaseOrderItemId: string | null;
+  productId: string;
+  productVariantId: string | null;
+  sku: string;
+  name: string;
+  expectedQuantity: number | null;
+  receivedQuantity: number;
+  rejectedQuantity: number;
+  distributionWarehouseBinId: string | null;
+  lotNumber: string | null;
+  serialNumbers: string[] | null;
+  expiryDate: Date | null;
+  status: string;
+  acceptanceStatus: string | null;
+  inspectionNotes: string | null;
+  discrepancyReason: string | null;
+  processedAt: Date | null;
+  processedBy: string | null;
+};
+
+export type SupplierReceivingRecord = {
+  supplierReceivingRecordId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  receiptNumber: string;
+  supplierPurchaseOrderId: string | null;
+  distributionWarehouseId: string;
+  supplierId: string;
+  status: string;
+  receivedDate: Date;
+  carrierName: string | null;
+  trackingNumber: string | null;
+  packageCount: number | null;
+  notes: string | null;
+  discrepancies: boolean;
+  attachments: unknown | null;
+  completedAt: Date | null;
 };
 
 export type SupportAgent = {
