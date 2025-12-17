@@ -62,10 +62,7 @@ export const updateCategoryPromotion = async (req: Request, res: Response): Prom
     const { id } = req.params;
     const promotionData = req.body;
 
-    // Add audit fields
-    promotionData.updatedBy = (req.user as any)?.id || 'system';
-
-    const promotion = await categoryPromotionRepo.update(promotionData, id);
+    const promotion = await categoryPromotionRepo.update(id, promotionData);
     res.status(200).json({ success: true, data: promotion });
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message });
@@ -76,9 +73,7 @@ export const updateCategoryPromotion = async (req: Request, res: Response): Prom
 export const deleteCategoryPromotion = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const deletedBy = (req.user as any)?.id || 'system';
-
-    await categoryPromotionRepo.delete(id, deletedBy);
+    await categoryPromotionRepo.delete(id);
     res.status(200).json({ success: true, message: "Category promotion deleted successfully" });
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message });

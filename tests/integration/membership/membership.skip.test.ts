@@ -43,7 +43,8 @@ describe('Membership Tests', () => {
       
       if (response.data.data.length > 0) {
         // Verify that fields use camelCase in the API responses (TypeScript interface)
-        const tier = response.data.data.find((t: any) => t.id === testTierId);
+        // DB returns membershipTierId, not id
+        const tier = response.data.data.find((t: any) => (t.membershipTierId || t.id) === testTierId);
         expect(tier).toBeDefined();
         expect(tier).toHaveProperty('monthlyPrice');
         expect(tier).toHaveProperty('annualPrice');
@@ -62,7 +63,9 @@ describe('Membership Tests', () => {
       
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
-      expect(response.data.data).toHaveProperty('id', testTierId);
+      // DB returns membershipTierId, not id
+      const tierId = response.data.data.membershipTierId || response.data.data.id;
+      expect(tierId).toBe(testTierId);
       expect(response.data.data).toHaveProperty('name', testTier.name);
       // Prices may be returned as strings from PostgreSQL decimal type
       expect(parseFloat(response.data.data.monthlyPrice)).toBe(testTier.monthlyPrice);
@@ -103,7 +106,8 @@ describe('Membership Tests', () => {
       
       if (response.data.data.length > 0) {
         // Verify that fields use camelCase in the API responses
-        const benefit = response.data.data.find((b: any) => b.id === testBenefitId);
+        // DB returns membershipBenefitId, not id
+        const benefit = response.data.data.find((b: any) => (b.membershipBenefitId || b.id) === testBenefitId);
         expect(benefit).toBeDefined();
         expect(benefit).toHaveProperty('tierIds');
         expect(benefit).toHaveProperty('benefitType');
@@ -124,7 +128,9 @@ describe('Membership Tests', () => {
       
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
-      expect(response.data.data).toHaveProperty('id', testBenefitId);
+      // DB returns membershipBenefitId, not id
+      const benefitId = response.data.data.membershipBenefitId || response.data.data.id;
+      expect(benefitId).toBe(testBenefitId);
       expect(response.data.data).toHaveProperty('name', testBenefit.name);
       expect(response.data.data).toHaveProperty('benefitType', testBenefit.benefitType);
       expect(response.data.data).toHaveProperty('discountPercentage', testBenefit.discountPercentage);
@@ -182,7 +188,9 @@ describe('Membership Tests', () => {
       
       if (response.status === 200) {
         expect(response.data.success).toBe(true);
-        expect(response.data.data).toHaveProperty('id', testUserMembershipId);
+        // DB returns userMembershipId, not id
+        const membershipId = response.data.data.userMembershipId || response.data.data.id;
+        expect(membershipId).toBe(testUserMembershipId);
       }
     });
 
@@ -198,7 +206,9 @@ describe('Membership Tests', () => {
       
       if (response.status === 200) {
         expect(response.data.success).toBe(true);
-        expect(response.data.data).toHaveProperty('id', testUserMembershipId);
+        // DB returns userMembershipId, not id
+        const membershipId = response.data.data.userMembershipId || response.data.data.id;
+        expect(membershipId).toBe(testUserMembershipId);
       }
     });
 

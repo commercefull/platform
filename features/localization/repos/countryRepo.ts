@@ -1,11 +1,9 @@
 import { query, queryOne } from '../../../libs/db';
+import { Table, Country } from '../../../libs/db/types';
 import { unixTimestamp } from '../../../libs/date';
 
-// Import types from generated DB types - single source of truth
-import { Country as DbCountry } from '../../../libs/db/types';
-
-// Re-export DB type
-export type Country = DbCountry;
+// Use Country type directly from libs/db/types.ts
+export type { Country };
 
 // Derived types for create/update operations
 export type CountryCreateParams = Omit<Country, 'countryId' | 'createdAt' | 'updatedAt'>;
@@ -17,7 +15,7 @@ export class CountryRepo {
    */
   async findById(countryId: string): Promise<Country | null> {
     return await queryOne<Country>(
-      `SELECT * FROM "public"."country" WHERE "countryId" = $1`,
+      `SELECT * FROM "${Table.Country}" WHERE "countryId" = $1`,
       [countryId]
     );
   }
@@ -27,7 +25,7 @@ export class CountryRepo {
    */
   async findByCode(code: string): Promise<Country | null> {
     return await queryOne<Country>(
-      `SELECT * FROM "public"."country" WHERE "code" = $1`,
+      `SELECT * FROM "${Table.Country}" WHERE "code" = $1`,
       [code.toUpperCase()]
     );
   }
@@ -37,7 +35,7 @@ export class CountryRepo {
    */
   async findByAlpha3Code(alpha3Code: string): Promise<Country | null> {
     return await queryOne<Country>(
-      `SELECT * FROM "public"."country" WHERE "alpha3Code" = $1`,
+      `SELECT * FROM "${Table.Country}" WHERE "alpha3Code" = $1`,
       [alpha3Code.toUpperCase()]
     );
   }
@@ -47,7 +45,7 @@ export class CountryRepo {
    */
   async findByNumericCode(numericCode: number): Promise<Country | null> {
     return await queryOne<Country>(
-      `SELECT * FROM "public"."country" WHERE "numericCode" = $1`,
+      `SELECT * FROM "${Table.Country}" WHERE "numericCode" = $1`,
       [numericCode]
     );
   }
@@ -56,7 +54,7 @@ export class CountryRepo {
    * Find all countries
    */
   async findAll(activeOnly: boolean = false): Promise<Country[]> {
-    let sql = `SELECT * FROM "public"."country"`;
+    let sql = `SELECT * FROM "${Table.Country}"`;
     
     if (activeOnly) {
       sql += ` WHERE "isActive" = true`;
@@ -72,7 +70,7 @@ export class CountryRepo {
    * Find countries by region
    */
   async findByRegion(region: string, activeOnly: boolean = true): Promise<Country[]> {
-    let sql = `SELECT * FROM "public"."country" WHERE "region" = $1`;
+    let sql = `SELECT * FROM "${Table.Country}" WHERE "region" = $1`;
     const params: any[] = [region];
     
     if (activeOnly) {
@@ -89,7 +87,7 @@ export class CountryRepo {
    * Find countries by currency
    */
   async findByCurrency(currencyId: string, activeOnly: boolean = true): Promise<Country[]> {
-    let sql = `SELECT * FROM "public"."country" WHERE "defaultCurrencyId" = $1`;
+    let sql = `SELECT * FROM "${Table.Country}" WHERE "defaultCurrencyId" = $1`;
     const params: any[] = [currencyId];
     
     if (activeOnly) {
@@ -106,7 +104,7 @@ export class CountryRepo {
    * Search countries by name
    */
   async search(searchTerm: string, activeOnly: boolean = true): Promise<Country[]> {
-    let sql = `SELECT * FROM "public"."country" WHERE "name" ILIKE $1`;
+    let sql = `SELECT * FROM "${Table.Country}" WHERE "name" ILIKE $1`;
     const params: any[] = [`%${searchTerm}%`];
     
     if (activeOnly) {
@@ -132,7 +130,7 @@ export class CountryRepo {
     }
 
     const result = await queryOne<Country>(
-      `INSERT INTO "public"."country" (
+      `INSERT INTO "${Table.Country}" (
         "code", "name", "numericCode", "alpha3Code", "defaultCurrencyId",
         "isActive", "flagIcon", "region",
         "createdAt", "updatedAt"
@@ -188,7 +186,7 @@ export class CountryRepo {
     values.push(countryId);
 
     const result = await queryOne<Country>(
-      `UPDATE "public"."country" 
+      `UPDATE "${Table.Country}" 
        SET ${updateFields.join(', ')}
        WHERE "countryId" = $${paramIndex}
        RETURNING *`,
@@ -217,7 +215,7 @@ export class CountryRepo {
    */
   async delete(countryId: string): Promise<boolean> {
     const result = await queryOne<{ countryId: string }>(
-      `DELETE FROM "public"."country" WHERE "countryId" = $1 RETURNING "countryId"`,
+      `DELETE FROM "${Table.Country}" WHERE "countryId" = $1 RETURNING "countryId"`,
       [countryId]
     );
 
@@ -228,7 +226,7 @@ export class CountryRepo {
    * Count countries
    */
   async count(activeOnly: boolean = false): Promise<number> {
-    let sql = `SELECT COUNT(*) as count FROM "public"."country"`;
+    let sql = `SELECT COUNT(*) as count FROM "${Table.Country}"`;
     
     if (activeOnly) {
       sql += ` WHERE "isActive" = true`;
@@ -244,7 +242,7 @@ export class CountryRepo {
    */
   async getAllRegions(): Promise<string[]> {
     const results = await query<{ region: string }[]>(
-      `SELECT DISTINCT "region" FROM "public"."country" 
+      `SELECT DISTINCT "region" FROM "${Table.Country}" 
        WHERE "region" IS NOT NULL 
        ORDER BY "region" ASC`,
       []
@@ -266,7 +264,7 @@ export class CountryRepo {
 
     const regionResults = await query<{ region: string; count: string }[]>(
       `SELECT "region", COUNT(*) as count 
-       FROM "public"."country" 
+       FROM "${Table.Country}" 
        WHERE "region" IS NOT NULL 
        GROUP BY "region"`,
       []

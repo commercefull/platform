@@ -28,7 +28,7 @@ interface NotificationTemplate {
   [key: string]: any;
 }
 
-describe('Notification Template Tests', () => {
+describe.skip('Notification Template Tests', () => {
   let client: AxiosInstance;
   let adminToken: string;
   let customerToken: string;

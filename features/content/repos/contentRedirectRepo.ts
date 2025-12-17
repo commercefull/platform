@@ -4,70 +4,15 @@
  */
 
 import { queryOne, query } from '../../../libs/db';
+import { ContentRedirect } from '../../../libs/db/types';
 import { unixTimestamp } from '../../../libs/date';
 
 // ============================================================================
-// Interfaces
+// Types
 // ============================================================================
 
-export interface ContentRedirect {
-  id: string;
-  sourceUrl: string;
-  targetUrl: string;
-  statusCode: 301 | 302 | 303 | 307 | 308;
-  isRegex: boolean;
-  isActive: boolean;
-  hits: number;
-  lastUsed?: string;
-  notes?: string;
-  createdAt: string;
-  updatedAt: string;
-  createdBy?: string;
-  updatedBy?: string;
-}
-
-export type ContentRedirectCreateParams = Omit<ContentRedirect, 'id' | 'hits' | 'lastUsed' | 'createdAt' | 'updatedAt'>;
-export type ContentRedirectUpdateParams = Partial<Omit<ContentRedirect, 'id' | 'hits' | 'lastUsed' | 'createdAt' | 'updatedAt'>>;
-
-// ============================================================================
-// Field Mappings
-// ============================================================================
-
-const redirectFields: Record<string, string> = {
-  id: 'contentRedirectId',
-  sourceUrl: 'sourceUrl',
-  targetUrl: 'targetUrl',
-  statusCode: 'statusCode',
-  isRegex: 'isRegex',
-  isActive: 'isActive',
-  hits: 'hits',
-  lastUsed: 'lastUsed',
-  notes: 'notes',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  createdBy: 'createdBy',
-  updatedBy: 'updatedBy'
-};
-
-// ============================================================================
-// Transform Functions
-// ============================================================================
-
-function transformDbToTs<T>(dbRecord: any, fieldMap: Record<string, string>): T {
-  if (!dbRecord) return null as any;
-  
-  const result: any = {};
-  for (const [tsKey, dbKey] of Object.entries(fieldMap)) {
-    if (dbRecord[dbKey] !== undefined) {
-      result[tsKey] = dbRecord[dbKey];
-    }
-  }
-  return result as T;
-}
-
-function transformArrayDbToTs<T>(dbRecords: any[], fieldMap: Record<string, string>): T[] {
-  return dbRecords.map(record => transformDbToTs<T>(record, fieldMap));
-}
+export type ContentRedirectCreateParams = Omit<ContentRedirect, 'contentRedirectId' | 'hits' | 'lastUsed' | 'createdAt' | 'updatedAt'>;
+export type ContentRedirectUpdateParams = Partial<Omit<ContentRedirect, 'contentRedirectId' | 'hits' | 'lastUsed' | 'createdAt' | 'updatedAt'>>;
 
 // ============================================================================
 // Repository
@@ -75,19 +20,17 @@ function transformArrayDbToTs<T>(dbRecords: any[], fieldMap: Record<string, stri
 
 export class ContentRedirectRepo {
   async findRedirectById(id: string): Promise<ContentRedirect | null> {
-    const result = await queryOne<any>(
+    return queryOne<ContentRedirect>(
       'SELECT * FROM "contentRedirect" WHERE "contentRedirectId" = $1',
       [id]
     );
-    return transformDbToTs<ContentRedirect>(result, redirectFields);
   }
 
   async findRedirectBySourceUrl(sourceUrl: string): Promise<ContentRedirect | null> {
-    const result = await queryOne<any>(
+    return queryOne<ContentRedirect>(
       'SELECT * FROM "contentRedirect" WHERE "sourceUrl" = $1 AND "isActive" = true',
       [sourceUrl]
     );
-    return transformDbToTs<ContentRedirect>(result, redirectFields);
   }
 
   async findMatchingRedirect(url: string): Promise<ContentRedirect | null> {
@@ -98,7 +41,7 @@ export class ContentRedirectRepo {
     }
 
     // Then try regex matches
-    const regexRedirects = await query<any[]>(
+    const regexRedirects = await query<ContentRedirect[]>(
       'SELECT * FROM "contentRedirect" WHERE "isRegex" = true AND "isActive" = true'
     );
 
@@ -107,7 +50,7 @@ export class ContentRedirectRepo {
         try {
           const regex = new RegExp(redirect.sourceUrl);
           if (regex.test(url)) {
-            return transformDbToTs<ContentRedirect>(redirect, redirectFields);
+            return redirect;
           }
         } catch {
           // Invalid regex, skip
@@ -135,15 +78,15 @@ export class ContentRedirectRepo {
     sql += ` ORDER BY "hits" DESC, "createdAt" DESC LIMIT $${paramIndex++} OFFSET $${paramIndex++}`;
     params.push(limit, offset);
 
-    const results = await query<any[]>(sql, params);
-    return transformArrayDbToTs<ContentRedirect>(results || [], redirectFields);
+    const results = await query<ContentRedirect[]>(sql, params);
+    return results || [];
   }
 
   async createRedirect(params: ContentRedirectCreateParams): Promise<ContentRedirect> {
     const now = unixTimestamp();
     
     // Check for duplicate source URL
-    const existing = await queryOne<any>(
+    const existing = await queryOne<ContentRedirect>(
       'SELECT * FROM "contentRedirect" WHERE "sourceUrl" = $1',
       [params.sourceUrl]
     );
@@ -160,7 +103,7 @@ export class ContentRedirectRepo {
       }
     }
 
-    const result = await queryOne<any>(
+    const result = await queryOne<ContentRedirect>(
       `INSERT INTO "contentRedirect" 
       ("sourceUrl", "targetUrl", "statusCode", "isRegex", "isActive", "hits", "notes", 
        "createdAt", "updatedAt", "createdBy", "updatedBy") 
@@ -169,7 +112,7 @@ export class ContentRedirectRepo {
       [
         params.sourceUrl,
         params.targetUrl,
-        params.statusCode || 301,
+        params.statusCode || '301',
         params.isRegex || false,
         params.isActive !== undefined ? params.isActive : true,
         0, // hits
@@ -185,7 +128,7 @@ export class ContentRedirectRepo {
       throw new Error('Failed to create redirect');
     }
 
-    return transformDbToTs<ContentRedirect>(result, redirectFields);
+    return result;
   }
 
   async updateRedirect(id: string, params: ContentRedirectUpdateParams): Promise<ContentRedirect> {
@@ -223,7 +166,7 @@ export class ContentRedirectRepo {
     values.push(now);
     values.push(id);
 
-    const result = await queryOne<any>(
+    const result = await queryOne<ContentRedirect>(
       `UPDATE "contentRedirect" SET ${updateFields.join(', ')} WHERE "contentRedirectId" = $${paramIndex} RETURNING *`,
       values
     );
@@ -232,7 +175,7 @@ export class ContentRedirectRepo {
       throw new Error(`Failed to update redirect with ID ${id}`);
     }
 
-    return transformDbToTs<ContentRedirect>(result, redirectFields);
+    return result;
   }
 
   async deleteRedirect(id: string): Promise<boolean> {
@@ -252,18 +195,18 @@ export class ContentRedirectRepo {
   }
 
   async getTopRedirects(limit: number = 10): Promise<ContentRedirect[]> {
-    const results = await query<any[]>(
+    const results = await query<ContentRedirect[]>(
       'SELECT * FROM "contentRedirect" WHERE "isActive" = true ORDER BY "hits" DESC LIMIT $1',
       [limit]
     );
-    return transformArrayDbToTs<ContentRedirect>(results || [], redirectFields);
+    return results || [];
   }
 
   async getRecentRedirects(limit: number = 10): Promise<ContentRedirect[]> {
-    const results = await query<any[]>(
+    const results = await query<ContentRedirect[]>(
       'SELECT * FROM "contentRedirect" WHERE "lastUsed" IS NOT NULL ORDER BY "lastUsed" DESC LIMIT $1',
       [limit]
     );
-    return transformArrayDbToTs<ContentRedirect>(results || [], redirectFields);
+    return results || [];
   }
 }

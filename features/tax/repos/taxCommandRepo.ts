@@ -26,141 +26,10 @@ const TABLES = {
   CUSTOMER_TAX_EXEMPTION: Table.CustomerTaxExemption
 };
 
-// Field mapping dictionaries for database to TypeScript conversion
-const taxRateFields: Record<string, string> = {
-  id: 'id',
-  taxCategoryId: 'tax_category_id',
-  taxZoneId: 'tax_zone_id',
-  name: 'name',
-  description: 'description',
-  rate: 'rate',
-  type: 'type',
-  priority: 'priority',
-  isCompound: 'is_compound',
-  includeInPrice: 'include_in_price',
-  isShippingTaxable: 'is_shipping_taxable',
-  fixedAmount: 'fixed_amount',
-  minimumAmount: 'minimum_amount',
-  maximumAmount: 'maximum_amount',
-  threshold: 'threshold',
-  startDate: 'start_date',
-  endDate: 'end_date',
-  isActive: 'is_active',
-  metadata: 'metadata',
-  createdAt: 'created_at',
-  updatedAt: 'updated_at'
-};
-
-const taxZoneFields: Record<string, string> = {
-  id: 'id',
-  name: 'name',
-  code: 'code',
-  description: 'description',
-  isDefault: 'is_default',
-  countries: 'countries',
-  states: 'states',
-  postcodes: 'postcodes',
-  cities: 'cities',
-  isActive: 'is_active',
-  metadata: 'metadata',
-  createdAt: 'created_at',
-  updatedAt: 'updated_at'
-};
-
-const taxCategoryFields: Record<string, string> = {
-  id: 'id',
-  name: 'name',
-  code: 'code',
-  description: 'description',
-  isDefault: 'is_default',
-  sortOrder: 'sort_order',
-  isActive: 'is_active',
-  metadata: 'metadata',
-  createdAt: 'created_at',
-  updatedAt: 'updated_at'
-};
-
-const customerTaxExemptionFields: Record<string, string> = {
-  id: 'id',
-  customerId: 'customer_id',
-  taxCategoryId: 'tax_category_id',
-  exemptionNumber: 'exemption_number',
-  exemptionType: 'exemption_type',
-  issuingAuthority: 'issuing_authority',
-  validFrom: 'start_date',
-  validUntil: 'expiry_date',
-  documentUrl: 'document_url',
-  notes: 'notes',
-  isVerified: 'is_verified',
-  verifiedBy: 'verified_by',
-  verifiedAt: 'verified_at',
-  status: 'status',
-  createdAt: 'created_at',
-  updatedAt: 'updated_at'
-};
-
-const taxSettingsFields: Record<string, string> = {
-  id: 'id',
-  merchantId: 'merchant_id',
-  calculationMethod: 'calculation_method',
-  pricesIncludeTax: 'prices_include_tax',
-  displayPricesWithTax: 'display_prices_with_tax',
-  taxBasedOn: 'tax_based_on',
-  shippingTaxClass: 'shipping_tax_class',
-  displayTaxTotals: 'display_tax_totals',
-  applyTaxToShipping: 'apply_tax_to_shipping',
-  applyDiscountBeforeTax: 'apply_discount_before_tax',
-  roundTaxAtSubtotal: 'round_tax_at_subtotal',
-  taxDecimalPlaces: 'tax_decimal_places',
-  defaultTaxCategory: 'default_tax_category',
-  defaultTaxZone: 'default_tax_zone',
-  taxProvider: 'tax_provider',
-  taxProviderSettings: 'tax_provider_settings',
-  metadata: 'metadata',
-  createdAt: 'created_at',
-  updatedAt: 'updated_at'
-};
-
-/**
- * Transform a database record to a TypeScript object using field mapping
- */
-function transformDbToTs<T>(dbRecord: any, fieldMap: Record<string, string>): T {
-  if (!dbRecord) return null as any;
-  
-  const result: any = {};
-  
-  Object.entries(fieldMap).forEach(([tsKey, dbKey]) => {
-    if (dbRecord[dbKey] !== undefined) {
-      result[tsKey] = dbRecord[dbKey];
-    }
-  });
-  
-  return result as T;
-}
-
-/**
- * Transform an array of database records to TypeScript objects
- */
-function transformArrayDbToTs<T>(dbRecords: any[], fieldMap: Record<string, string>): T[] {
-  if (!dbRecords || !Array.isArray(dbRecords)) return [];
-  return dbRecords.map(record => transformDbToTs<T>(record, fieldMap));
-}
-
-/**
- * Transform TypeScript object to database format (camelCase to snake_case)
- */
-function transformTsToDb<T>(tsObject: any, fieldMap: Record<string, string>): T {
-  if (!tsObject) return null as any;
-  
-  const result: any = {};
-  
-  Object.entries(fieldMap).forEach(([tsKey, dbKey]) => {
-    if (tsObject[tsKey] !== undefined) {
-      result[dbKey] = tsObject[tsKey];
-    }
-  });
-  
-  return result as T;
+// Helper to add id field to result
+function addId<T>(result: any, idField: string): T {
+  if (!result) return null as any;
+  return { ...result, id: result[idField] } as T;
 }
 
 /**
@@ -173,40 +42,38 @@ export class TaxCommandRepo {
     const now = unixTimestamp();
     const id = generateUUID();
     
-    // Transform TypeScript object to database format
-    const dbTaxRate = transformTsToDb<any>(taxRate, taxRateFields);
+    
+    // Use taxRate directly - DB uses camelCase
     
     const result = await queryOne<any>(
-      `INSERT INTO "public"."tax_rate" (
-        "id", "tax_category_id", "tax_zone_id", "name", "description",
-        "rate", "type", "priority", "is_compound", "include_in_price",
-        "is_shipping_taxable", "fixed_amount", "minimum_amount", "maximum_amount",
-        "threshold", "start_date", "end_date", "isActive", "metadata",
+      `INSERT INTO "${TABLES.TAX_RATE}" (
+        "taxRateId", "taxCategoryId", "taxZoneId", "name",
+        "rate", "type", "priority", "isCompound", "includeInPrice",
+        "isShippingTaxable", "fixedAmount", "minimumAmount", "maximumAmount",
+        "threshold", "startDate", "endDate", "isActive",
         "createdAt", "updatedAt"
       ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, 
-        $15, $16, $17, $18, $19, $20, $21
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, 
+        $14, $15, $16, $17, $18, $19
       ) RETURNING *`,
       [
         id,
-        dbTaxRate.tax_category_id,
-        dbTaxRate.tax_zone_id,
-        dbTaxRate.name,
-        dbTaxRate.description || null,
-        dbTaxRate.rate,
-        dbTaxRate.type,
-        dbTaxRate.priority,
-        dbTaxRate.is_compound,
-        dbTaxRate.include_in_price,
-        dbTaxRate.is_shipping_taxable,
-        dbTaxRate.fixed_amount || null,
-        dbTaxRate.minimum_amount || null,
-        dbTaxRate.maximum_amount || null,
-        dbTaxRate.threshold || null,
-        dbTaxRate.start_date,
-        dbTaxRate.end_date || null,
-        dbTaxRate.is_active,
-        dbTaxRate.metadata || null,
+        taxRate.taxCategoryId,
+        taxRate.taxZoneId,
+        taxRate.name,
+        taxRate.rate,
+        taxRate.type,
+        taxRate.priority,
+        taxRate.isCompound,
+        taxRate.includeInPrice,
+        taxRate.isShippingTaxable,
+        taxRate.fixedAmount || null,
+        taxRate.minimumAmount || null,
+        taxRate.maximumAmount || null,
+        taxRate.threshold || null,
+        taxRate.startDate,
+        taxRate.endDate || null,
+        taxRate.isActive,
         now,
         now
       ]
@@ -216,110 +83,100 @@ export class TaxCommandRepo {
       throw new Error('Failed to create tax rate');
     }
     
-    // Transform database record to TypeScript object
-    return transformDbToTs<TaxRate>(result, taxRateFields);
+    
+    return addId<TaxRate>(result, 'taxRateId');
   }
 
   async updateTaxRate(id: string, taxRate: Partial<Omit<TaxRate, 'id' | 'createdAt' | 'updatedAt'>>): Promise<TaxRate> {
     const now = unixTimestamp();
     
-    // Transform TypeScript object to database format
-    const dbTaxRate = transformTsToDb<any>(taxRate, taxRateFields);
+    
+    // Use taxRate directly - DB uses camelCase
     
     // Build update fields dynamically
     const sets: string[] = [];
     const params: any[] = [id];
     let paramIndex = 2;
     
-    // Use the database field names (snake_case) for updates
-    if (dbTaxRate.tax_category_id !== undefined) {
-      sets.push(`"tax_category_id" = $${paramIndex++}`);
-      params.push(dbTaxRate.tax_category_id);
+    // Use camelCase database field names for updates
+    if (taxRate.taxCategoryId !== undefined) {
+      sets.push(`"taxCategoryId" = $${paramIndex++}`);
+      params.push(taxRate.taxCategoryId);
     }
     
-    if (dbTaxRate.tax_zone_id !== undefined) {
-      sets.push(`"tax_zone_id" = $${paramIndex++}`);
-      params.push(dbTaxRate.tax_zone_id);
+    if (taxRate.taxZoneId !== undefined) {
+      sets.push(`"taxZoneId" = $${paramIndex++}`);
+      params.push(taxRate.taxZoneId);
     }
     
-    if (dbTaxRate.name !== undefined) {
+    if (taxRate.name !== undefined) {
       sets.push(`"name" = $${paramIndex++}`);
-      params.push(dbTaxRate.name);
+      params.push(taxRate.name);
     }
     
-    if (dbTaxRate.description !== undefined) {
-      sets.push(`"description" = $${paramIndex++}`);
-      params.push(dbTaxRate.description);
-    }
-    
-    if (dbTaxRate.rate !== undefined) {
+    if (taxRate.rate !== undefined) {
       sets.push(`"rate" = $${paramIndex++}`);
-      params.push(dbTaxRate.rate);
+      params.push(taxRate.rate);
     }
     
-    if (dbTaxRate.type !== undefined) {
+    if (taxRate.type !== undefined) {
       sets.push(`"type" = $${paramIndex++}`);
-      params.push(dbTaxRate.type);
+      params.push(taxRate.type);
     }
     
-    if (dbTaxRate.priority !== undefined) {
+    if (taxRate.priority !== undefined) {
       sets.push(`"priority" = $${paramIndex++}`);
-      params.push(dbTaxRate.priority);
+      params.push(taxRate.priority);
     }
     
-    if (dbTaxRate.is_compound !== undefined) {
-      sets.push(`"is_compound" = $${paramIndex++}`);
-      params.push(dbTaxRate.is_compound);
+    if (taxRate.isCompound !== undefined) {
+      sets.push(`"isCompound" = $${paramIndex++}`);
+      params.push(taxRate.isCompound);
     }
     
-    if (dbTaxRate.include_in_price !== undefined) {
-      sets.push(`"include_in_price" = $${paramIndex++}`);
-      params.push(dbTaxRate.include_in_price);
+    if (taxRate.includeInPrice !== undefined) {
+      sets.push(`"includeInPrice" = $${paramIndex++}`);
+      params.push(taxRate.includeInPrice);
     }
     
-    if (dbTaxRate.is_shipping_taxable !== undefined) {
-      sets.push(`"is_shipping_taxable" = $${paramIndex++}`);
-      params.push(dbTaxRate.is_shipping_taxable);
+    if (taxRate.isShippingTaxable !== undefined) {
+      sets.push(`"isShippingTaxable" = $${paramIndex++}`);
+      params.push(taxRate.isShippingTaxable);
     }
     
-    if (dbTaxRate.fixed_amount !== undefined) {
-      sets.push(`"fixed_amount" = $${paramIndex++}`);
-      params.push(dbTaxRate.fixed_amount);
+    if (taxRate.fixedAmount !== undefined) {
+      sets.push(`"fixedAmount" = $${paramIndex++}`);
+      params.push(taxRate.fixedAmount);
     }
     
-    if (dbTaxRate.minimum_amount !== undefined) {
-      sets.push(`"minimum_amount" = $${paramIndex++}`);
-      params.push(dbTaxRate.minimum_amount);
+    if (taxRate.minimumAmount !== undefined) {
+      sets.push(`"minimumAmount" = $${paramIndex++}`);
+      params.push(taxRate.minimumAmount);
     }
     
-    if (dbTaxRate.maximum_amount !== undefined) {
-      sets.push(`"maximum_amount" = $${paramIndex++}`);
-      params.push(dbTaxRate.maximum_amount);
+    if (taxRate.maximumAmount !== undefined) {
+      sets.push(`"maximumAmount" = $${paramIndex++}`);
+      params.push(taxRate.maximumAmount);
     }
     
-    if (dbTaxRate.threshold !== undefined) {
+    if (taxRate.threshold !== undefined) {
       sets.push(`"threshold" = $${paramIndex++}`);
-      params.push(dbTaxRate.threshold);
+      params.push(taxRate.threshold);
     }
     
-    if (dbTaxRate.start_date !== undefined) {
-      sets.push(`"start_date" = $${paramIndex++}`);
-      params.push(dbTaxRate.start_date);
+    if (taxRate.startDate !== undefined) {
+      sets.push(`"startDate" = $${paramIndex++}`);
+      params.push(taxRate.startDate);
     }
     
-    if (dbTaxRate.end_date !== undefined) {
-      sets.push(`"end_date" = $${paramIndex++}`);
-      params.push(dbTaxRate.end_date);
+    if (taxRate.endDate !== undefined) {
+      sets.push(`"endDate" = $${paramIndex++}`);
+      params.push(taxRate.endDate);
     }
     
-    if (dbTaxRate.is_active !== undefined) {
+    if (taxRate.isActive !== undefined) {
       sets.push(`"isActive" = $${paramIndex++}`);
-      params.push(dbTaxRate.is_active);
-    }
-    
-    if (dbTaxRate.metadata !== undefined) {
-      sets.push(`"metadata" = $${paramIndex++}`);
-      params.push(dbTaxRate.metadata);
+      params.push(taxRate.isActive);
     }
     
     // Always update the updatedAt timestamp
@@ -330,9 +187,9 @@ export class TaxCommandRepo {
       throw new Error('No fields to update');
     }
     
-    // Get all columns directly, and then transform to TypeScript objects
+    
     const result = await queryOne<any>(
-      `UPDATE "public"."tax_rate" SET ${sets.join(', ')} WHERE "id" = $1 RETURNING *`,
+      `UPDATE "${TABLES.TAX_RATE}" SET ${sets.join(', ')} WHERE "taxRateId" = $1 RETURNING *`,
       params
     );
     
@@ -340,15 +197,13 @@ export class TaxCommandRepo {
       throw new Error(`Tax rate with ID ${id} not found`);
     }
     
-    // Transform database record to TypeScript object
-    return transformDbToTs<TaxRate>(result, taxRateFields);
+    
+    return addId<TaxRate>(result, 'taxRateId');
   }
 
   async deleteTaxRate(id: string): Promise<boolean> {
-    // For delete operations, we're just returning a boolean indicator of success
-    // No need for transformation in this case
-    const result = await queryOne<{ id: string }>(
-      'DELETE FROM "public"."tax_rate" WHERE "id" = $1 RETURNING id',
+    const result = await queryOne<{ taxRateId: string }>(
+      `DELETE FROM "${TABLES.TAX_RATE}" WHERE "taxRateId" = $1 RETURNING "taxRateId"`,
       [id]
     );
     
@@ -360,25 +215,24 @@ export class TaxCommandRepo {
     const now = unixTimestamp();
     const id = generateUUID();
     
-    // Transform TypeScript object to database format
-    const dbCategory = transformTsToDb<any>(category, taxCategoryFields);
+    
+    // Use category directly - DB uses camelCase
     
     const result = await queryOne<any>(
-      `INSERT INTO "public"."tax_category" (
-        "id", "name", "code", "description", "isDefault", "sort_order",
-        "isActive", "metadata", "createdAt", "updatedAt"
+      `INSERT INTO "${TABLES.TAX_CATEGORY}" (
+        "taxCategoryId", "name", "code", "description", "isDefault", "sortOrder",
+        "isActive", "createdAt", "updatedAt"
       ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
+        $1, $2, $3, $4, $5, $6, $7, $8, $9
       ) RETURNING *`,
       [
         id,
-        dbCategory.name,
-        dbCategory.code,
-        dbCategory.description || null,
-        dbCategory.is_default,
-        dbCategory.sort_order,
-        dbCategory.is_active,
-        dbCategory.metadata || null,
+        category.name,
+        category.code,
+        category.description || null,
+        category.isDefault,
+        category.sortOrder,
+        category.isActive,
         now,
         now
       ]
@@ -388,54 +242,49 @@ export class TaxCommandRepo {
       throw new Error('Failed to create tax category');
     }
     
-    // Transform database record to TypeScript object
-    return transformDbToTs<TaxCategory>(result, taxCategoryFields);
+    
+    return addId<TaxCategory>(result, 'taxCategoryId');
   }
 
   async updateTaxCategory(id: string, category: Partial<Omit<TaxCategory, 'id' | 'createdAt' | 'updatedAt'>>): Promise<TaxCategory> {
     const now = unixTimestamp();
     
-    // Transform TypeScript object to database format
-    const dbCategory = transformTsToDb<any>(category, taxCategoryFields);
+    
+    // Use category directly - DB uses camelCase
     
     // Build update fields dynamically
     const sets: string[] = [];
     const params: any[] = [id];
     let paramIndex = 2;
     
-    if (dbCategory.name !== undefined) {
+    if (category.name !== undefined) {
       sets.push(`"name" = $${paramIndex++}`);
-      params.push(dbCategory.name);
+      params.push(category.name);
     }
     
-    if (dbCategory.code !== undefined) {
+    if (category.code !== undefined) {
       sets.push(`"code" = $${paramIndex++}`);
-      params.push(dbCategory.code);
+      params.push(category.code);
     }
     
-    if (dbCategory.description !== undefined) {
+    if (category.description !== undefined) {
       sets.push(`"description" = $${paramIndex++}`);
-      params.push(dbCategory.description);
+      params.push(category.description);
     }
     
-    if (dbCategory.is_default !== undefined) {
+    if (category.isDefault !== undefined) {
       sets.push(`"isDefault" = $${paramIndex++}`);
-      params.push(dbCategory.is_default);
+      params.push(category.isDefault);
     }
     
-    if (dbCategory.sort_order !== undefined) {
-      sets.push(`"sort_order" = $${paramIndex++}`);
-      params.push(dbCategory.sort_order);
+    if (category.sortOrder !== undefined) {
+      sets.push(`"sortOrder" = $${paramIndex++}`);
+      params.push(category.sortOrder);
     }
     
-    if (dbCategory.is_active !== undefined) {
+    if (category.isActive !== undefined) {
       sets.push(`"isActive" = $${paramIndex++}`);
-      params.push(dbCategory.is_active);
-    }
-    
-    if (dbCategory.metadata !== undefined) {
-      sets.push(`"metadata" = $${paramIndex++}`);
-      params.push(dbCategory.metadata);
+      params.push(category.isActive);
     }
     
     // Always update the updatedAt timestamp
@@ -446,9 +295,9 @@ export class TaxCommandRepo {
       throw new Error('No fields to update');
     }
     
-    // Get all columns directly, and then transform to TypeScript objects
+    
     const result = await queryOne<any>(
-      `UPDATE "public"."tax_category" SET ${sets.join(', ')} WHERE "id" = $1 RETURNING *`,
+      `UPDATE "${TABLES.TAX_CATEGORY}" SET ${sets.join(', ')} WHERE "taxCategoryId" = $1 RETURNING *`,
       params
     );
     
@@ -456,13 +305,13 @@ export class TaxCommandRepo {
       throw new Error(`Tax category with ID ${id} not found`);
     }
     
-    // Transform database record to TypeScript object
-    return transformDbToTs<TaxCategory>(result, taxCategoryFields);
+    
+    return addId<TaxCategory>(result, 'taxCategoryId');
   }
 
   async deleteTaxCategory(id: string): Promise<boolean> {
-    const result = await queryOne<{ id: string }>(
-      'DELETE FROM "public"."tax_category" WHERE "id" = $1 RETURNING id',
+    const result = await queryOne<{ taxCategoryId: string }>(
+      `DELETE FROM "${TABLES.TAX_CATEGORY}" WHERE "taxCategoryId" = $1 RETURNING "taxCategoryId"`,
       [id]
     );
     
@@ -474,26 +323,25 @@ export class TaxCommandRepo {
     const now = unixTimestamp();
     const id = generateUUID();
     
-    // Transform TypeScript object to database format
-    const dbTaxZone = transformTsToDb<any>(taxZone, taxZoneFields);
+    
+    // Use taxZone directly - DB uses camelCase
     
     const result = await queryOne<any>(
-      `INSERT INTO "public"."tax_zone" (
-        "id", "name", "code", "description", "isDefault", "countries", "states", 
-        "postcodes", "cities", "isActive", "metadata", "createdAt", "updatedAt"
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *`,
+      `INSERT INTO "${TABLES.TAX_ZONE}" (
+        "taxZoneId", "name", "code", "description", "isDefault", "countries", "states", 
+        "postcodes", "cities", "isActive", "createdAt", "updatedAt"
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *`,
       [
         id, 
-        dbTaxZone.name, 
-        dbTaxZone.code, 
-        dbTaxZone.description || null, 
-        dbTaxZone.is_default, 
-        dbTaxZone.countries, 
-        dbTaxZone.states || [], 
-        dbTaxZone.postcodes || [], 
-        dbTaxZone.cities || [], 
-        dbTaxZone.is_active,
-        dbTaxZone.metadata || null,
+        taxZone.name, 
+        taxZone.code, 
+        taxZone.description || null, 
+        taxZone.isDefault, 
+        taxZone.countries, 
+        taxZone.states || null, 
+        taxZone.postcodes || null, 
+        taxZone.cities || null, 
+        taxZone.isActive,
         now, 
         now
       ]
@@ -503,69 +351,64 @@ export class TaxCommandRepo {
       throw new Error('Failed to create tax zone');
     }
     
-    // Transform database record to TypeScript object
-    return transformDbToTs<TaxZone>(result, taxZoneFields);
+    
+    return addId<TaxZone>(result, 'taxZoneId');
   }
 
   async updateTaxZone(id: string, taxZone: Partial<Omit<TaxZone, 'id' | 'createdAt' | 'updatedAt'>>): Promise<TaxZone> {
     const now = unixTimestamp();
     
-    // Transform TypeScript object to database format
-    const dbTaxZone = transformTsToDb<any>(taxZone, taxZoneFields);
+    
+    // Use taxZone directly - DB uses camelCase
     
     // Build update fields dynamically
     const sets: string[] = [];
     const params: any[] = [id];
     let paramIndex = 2;
     
-    if (dbTaxZone.name !== undefined) {
+    if (taxZone.name !== undefined) {
       sets.push(`"name" = $${paramIndex++}`);
-      params.push(dbTaxZone.name);
+      params.push(taxZone.name);
     }
     
-    if (dbTaxZone.code !== undefined) {
+    if (taxZone.code !== undefined) {
       sets.push(`"code" = $${paramIndex++}`);
-      params.push(dbTaxZone.code);
+      params.push(taxZone.code);
     }
     
-    if (dbTaxZone.description !== undefined) {
+    if (taxZone.description !== undefined) {
       sets.push(`"description" = $${paramIndex++}`);
-      params.push(dbTaxZone.description);
+      params.push(taxZone.description);
     }
     
-    if (dbTaxZone.is_default !== undefined) {
+    if (taxZone.isDefault !== undefined) {
       sets.push(`"isDefault" = $${paramIndex++}`);
-      params.push(dbTaxZone.is_default);
+      params.push(taxZone.isDefault);
     }
     
-    if (dbTaxZone.countries !== undefined) {
+    if (taxZone.countries !== undefined) {
       sets.push(`"countries" = $${paramIndex++}`);
-      params.push(dbTaxZone.countries);
+      params.push(taxZone.countries);
     }
     
-    if (dbTaxZone.states !== undefined) {
+    if (taxZone.states !== undefined) {
       sets.push(`"states" = $${paramIndex++}`);
-      params.push(dbTaxZone.states);
+      params.push(taxZone.states);
     }
     
-    if (dbTaxZone.postcodes !== undefined) {
+    if (taxZone.postcodes !== undefined) {
       sets.push(`"postcodes" = $${paramIndex++}`);
-      params.push(dbTaxZone.postcodes);
+      params.push(taxZone.postcodes);
     }
     
-    if (dbTaxZone.cities !== undefined) {
+    if (taxZone.cities !== undefined) {
       sets.push(`"cities" = $${paramIndex++}`);
-      params.push(dbTaxZone.cities);
+      params.push(taxZone.cities);
     }
     
-    if (dbTaxZone.is_active !== undefined) {
+    if (taxZone.isActive !== undefined) {
       sets.push(`"isActive" = $${paramIndex++}`);
-      params.push(dbTaxZone.is_active);
-    }
-    
-    if (dbTaxZone.metadata !== undefined) {
-      sets.push(`"metadata" = $${paramIndex++}`);
-      params.push(dbTaxZone.metadata);
+      params.push(taxZone.isActive);
     }
     
     // Always update the updatedAt timestamp
@@ -576,9 +419,9 @@ export class TaxCommandRepo {
       throw new Error('No fields to update');
     }
     
-    // Get all columns directly, and then transform to TypeScript objects
+    
     const result = await queryOne<any>(
-      `UPDATE "public"."tax_zone" SET ${sets.join(', ')} WHERE "id" = $1 RETURNING *`,
+      `UPDATE "${TABLES.TAX_ZONE}" SET ${sets.join(', ')} WHERE "taxZoneId" = $1 RETURNING *`,
       params
     );
     
@@ -586,13 +429,13 @@ export class TaxCommandRepo {
       throw new Error(`Tax zone with ID ${id} not found`);
     }
     
-    // Transform database record to TypeScript object
-    return transformDbToTs<TaxZone>(result, taxZoneFields);
+    
+    return addId<TaxZone>(result, 'taxZoneId');
   }
   
   async deleteTaxZone(id: string): Promise<boolean> {
-    const result = await queryOne<{ id: string }>(
-      'DELETE FROM "public"."tax_zone" WHERE "id" = $1 RETURNING id',
+    const result = await queryOne<{ taxZoneId: string }>(
+      `DELETE FROM "${TABLES.TAX_ZONE}" WHERE "taxZoneId" = $1 RETURNING "taxZoneId"`,
       [id]
     );
     
@@ -604,34 +447,35 @@ export class TaxCommandRepo {
     const now = unixTimestamp();
     const id = generateUUID();
     
-    // Transform TypeScript object to database format
-    const dbExemption = transformTsToDb<any>(exemption, customerTaxExemptionFields);
+    
+    // Use exemption directly - DB uses camelCase
     
     const result = await queryOne<any>(
-      `INSERT INTO "public"."customer_tax_exemption" (
-        "id", "customerId", "tax_category_id", "exemption_type", "status", 
-        "exemption_number", "issuing_authority", "document_url", 
-        "start_date", "expiry_date", "isVerified", "verified_by", 
-        "verified_at", "notes", "metadata", "createdAt", "updatedAt"
+      `INSERT INTO "${TABLES.CUSTOMER_TAX_EXEMPTION}" (
+        "customerTaxExemptionId", "customerId", "taxZoneId", "type", "status", 
+        "name", "exemptionNumber", "businessName", "exemptionReason", "documentUrl", 
+        "startDate", "expiryDate", "isVerified", "verifiedBy", 
+        "verifiedAt", "notes", "createdAt", "updatedAt"
       ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18
       ) RETURNING *`,
       [
         id,
-        dbExemption.customer_id,
-        dbExemption.tax_category_id || null,
-        dbExemption.exemption_type,
-        dbExemption.status,
-        dbExemption.exemption_number,
-        dbExemption.issuing_authority || null,
-        dbExemption.document_url || null,
-        dbExemption.start_date,
-        dbExemption.expiry_date || null,
-        dbExemption.is_verified,
-        dbExemption.verified_by || null,
-        dbExemption.verified_at || null,
-        dbExemption.notes || null,
-        dbExemption.metadata || null,
+        exemption.customerId,
+        exemption.taxZoneId || null,
+        exemption.type,
+        exemption.status,
+        exemption.name,
+        exemption.exemptionNumber,
+        exemption.businessName || null,
+        exemption.exemptionReason || null,
+        exemption.documentUrl || null,
+        exemption.startDate,
+        exemption.expiryDate || null,
+        exemption.isVerified,
+        exemption.verifiedBy || null,
+        exemption.verifiedAt || null,
+        exemption.notes || null,
         now,
         now
       ]
@@ -641,8 +485,8 @@ export class TaxCommandRepo {
       throw new Error('Failed to create tax exemption');
     }
     
-    // Transform database record to TypeScript object
-    return transformDbToTs<CustomerTaxExemption>(result, customerTaxExemptionFields);
+    
+    return addId<CustomerTaxExemption>(result, 'customerTaxExemptionId');
   }
 
   async updateTaxExemption(
@@ -651,77 +495,82 @@ export class TaxCommandRepo {
   ): Promise<CustomerTaxExemption> {
     const now = unixTimestamp();
     
-    // Transform TypeScript object to database format
-    const dbExemption = transformTsToDb<any>(exemption, customerTaxExemptionFields);
+    
+    // Use exemption directly - DB uses camelCase
     
     // Build update fields dynamically
     const sets: string[] = [];
     const params: any[] = [id];
     let paramIndex = 2;
     
-    if (dbExemption.tax_category_id !== undefined) {
-      sets.push(`"tax_category_id" = $${paramIndex++}`);
-      params.push(dbExemption.tax_category_id);
+    if (exemption.taxZoneId !== undefined) {
+      sets.push(`"taxZoneId" = $${paramIndex++}`);
+      params.push(exemption.taxZoneId);
     }
     
-    if (dbExemption.exemption_type !== undefined) {
-      sets.push(`"exemption_type" = $${paramIndex++}`);
-      params.push(dbExemption.exemption_type);
+    if (exemption.type !== undefined) {
+      sets.push(`"type" = $${paramIndex++}`);
+      params.push(exemption.type);
     }
     
-    if (dbExemption.status !== undefined) {
+    if (exemption.status !== undefined) {
       sets.push(`"status" = $${paramIndex++}`);
-      params.push(dbExemption.status);
+      params.push(exemption.status);
     }
     
-    if (dbExemption.exemption_number !== undefined) {
-      sets.push(`"exemption_number" = $${paramIndex++}`);
-      params.push(dbExemption.exemption_number);
+    if (exemption.name !== undefined) {
+      sets.push(`"name" = $${paramIndex++}`);
+      params.push(exemption.name);
     }
     
-    if (dbExemption.issuing_authority !== undefined) {
-      sets.push(`"issuing_authority" = $${paramIndex++}`);
-      params.push(dbExemption.issuing_authority);
+    if (exemption.exemptionNumber !== undefined) {
+      sets.push(`"exemptionNumber" = $${paramIndex++}`);
+      params.push(exemption.exemptionNumber);
     }
     
-    if (dbExemption.document_url !== undefined) {
-      sets.push(`"document_url" = $${paramIndex++}`);
-      params.push(dbExemption.document_url);
+    if (exemption.businessName !== undefined) {
+      sets.push(`"businessName" = $${paramIndex++}`);
+      params.push(exemption.businessName);
     }
     
-    if (dbExemption.start_date !== undefined) {
-      sets.push(`"start_date" = $${paramIndex++}`);
-      params.push(dbExemption.start_date);
+    if (exemption.exemptionReason !== undefined) {
+      sets.push(`"exemptionReason" = $${paramIndex++}`);
+      params.push(exemption.exemptionReason);
     }
     
-    if (dbExemption.expiry_date !== undefined) {
-      sets.push(`"expiry_date" = $${paramIndex++}`);
-      params.push(dbExemption.expiry_date);
+    if (exemption.documentUrl !== undefined) {
+      sets.push(`"documentUrl" = $${paramIndex++}`);
+      params.push(exemption.documentUrl);
     }
     
-    if (dbExemption.is_verified !== undefined) {
+    if (exemption.startDate !== undefined) {
+      sets.push(`"startDate" = $${paramIndex++}`);
+      params.push(exemption.startDate);
+    }
+    
+    if (exemption.expiryDate !== undefined) {
+      sets.push(`"expiryDate" = $${paramIndex++}`);
+      params.push(exemption.expiryDate);
+    }
+    
+    if (exemption.isVerified !== undefined) {
       sets.push(`"isVerified" = $${paramIndex++}`);
-      params.push(dbExemption.is_verified);
+      params.push(exemption.isVerified);
     }
     
-    if (dbExemption.verified_by !== undefined) {
-      sets.push(`"verified_by" = $${paramIndex++}`);
-      params.push(dbExemption.verified_by);
+    if (exemption.verifiedBy !== undefined) {
+      sets.push(`"verifiedBy" = $${paramIndex++}`);
+      params.push(exemption.verifiedBy);
     }
     
-    if (dbExemption.verified_at !== undefined) {
-      sets.push(`"verified_at" = $${paramIndex++}`);
-      params.push(dbExemption.verified_at);
+    if (exemption.verifiedAt !== undefined) {
+      sets.push(`"verifiedAt" = $${paramIndex++}`);
+      params.push(exemption.verifiedAt);
     }
     
-    if (dbExemption.notes !== undefined) {
+    if (exemption.notes !== undefined) {
       sets.push(`"notes" = $${paramIndex++}`);
-      params.push(dbExemption.notes);
-    }
-    
-    if (dbExemption.metadata !== undefined) {
-      sets.push(`"metadata" = $${paramIndex++}`);
-      params.push(dbExemption.metadata);
+      params.push(exemption.notes);
     }
     
     // Always update the updatedAt timestamp
@@ -732,9 +581,9 @@ export class TaxCommandRepo {
       throw new Error('No fields to update');
     }
     
-    // Get all columns directly, and then transform to TypeScript objects
+    
     const result = await queryOne<any>(
-      `UPDATE "public"."customer_tax_exemption" SET ${sets.join(', ')} WHERE "id" = $1 RETURNING *`,
+      `UPDATE "${TABLES.CUSTOMER_TAX_EXEMPTION}" SET ${sets.join(', ')} WHERE "customerTaxExemptionId" = $1 RETURNING *`,
       params
     );
     
@@ -742,13 +591,13 @@ export class TaxCommandRepo {
       throw new Error(`Tax exemption with ID ${id} not found`);
     }
     
-    // Transform database record to TypeScript object
-    return transformDbToTs<CustomerTaxExemption>(result, customerTaxExemptionFields);
+    
+    return addId<CustomerTaxExemption>(result, 'customerTaxExemptionId');
   }
 
   async deleteTaxExemption(id: string): Promise<boolean> {
-    const result = await queryOne<{ id: string }>(
-      'DELETE FROM "public"."customer_tax_exemption" WHERE "id" = $1 RETURNING id',
+    const result = await queryOne<{ customerTaxExemptionId: string }>(
+      `DELETE FROM "${TABLES.CUSTOMER_TAX_EXEMPTION}" WHERE "customerTaxExemptionId" = $1 RETURNING "customerTaxExemptionId"`,
       [id]
     );
     
@@ -760,38 +609,37 @@ export class TaxCommandRepo {
     const now = unixTimestamp();
     const id = generateUUID();
     
-    // Transform TypeScript object to database format
-    const dbSettings = transformTsToDb<any>(settings, taxSettingsFields);
+    
+    // Use settings directly - DB uses camelCase
     
     const result = await queryOne<any>(
-      `INSERT INTO "public"."tax_settings" (
-        "id", "merchantId", "calculation_method", "prices_include_tax", 
-        "display_prices_with_tax", "tax_based_on", "shipping_tax_class", 
-        "display_tax_totals", "apply_tax_to_shipping", "apply_discount_before_tax", 
-        "round_tax_at_subtotal", "tax_decimal_places", "default_tax_category", 
-        "default_tax_zone", "tax_provider", "tax_provider_settings", 
-        "metadata", "createdAt", "updatedAt"
+      `INSERT INTO "${TABLES.TAX_SETTINGS}" (
+        "taxSettingsId", "merchantId", "calculationMethod", "pricesIncludeTax", 
+        "displayPricesWithTax", "taxBasedOn", "shippingTaxClass", 
+        "displayTaxTotals", "applyTaxToShipping", "applyDiscountBeforeTax", 
+        "roundTaxAtSubtotal", "taxDecimalPlaces", "defaultTaxCategory", 
+        "defaultTaxZone", "taxProvider", "taxProviderSettings", 
+        "createdAt", "updatedAt"
       ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18
       ) RETURNING *`,
       [
         id,
-        dbSettings.merchant_id,
-        dbSettings.calculation_method,
-        dbSettings.prices_include_tax,
-        dbSettings.display_prices_with_tax,
-        dbSettings.tax_based_on,
-        dbSettings.shipping_tax_class || null,
-        dbSettings.display_tax_totals,
-        dbSettings.apply_tax_to_shipping,
-        dbSettings.apply_discount_before_tax,
-        dbSettings.round_tax_at_subtotal,
-        dbSettings.tax_decimal_places,
-        dbSettings.default_tax_category || null,
-        dbSettings.default_tax_zone || null,
-        dbSettings.tax_provider || null,
-        dbSettings.tax_provider_settings || null,
-        dbSettings.metadata || null,
+        settings.merchantId,
+        settings.calculationMethod,
+        settings.pricesIncludeTax,
+        settings.displayPricesWithTax,
+        settings.taxBasedOn,
+        settings.shippingTaxClass || null,
+        settings.displayTaxTotals,
+        settings.applyTaxToShipping,
+        settings.applyDiscountBeforeTax,
+        settings.roundTaxAtSubtotal,
+        settings.taxDecimalPlaces,
+        settings.defaultTaxCategory || null,
+        settings.defaultTaxZone || null,
+        settings.taxProvider || null,
+        settings.taxProviderSettings || null,
         now,
         now
       ]
@@ -801,94 +649,89 @@ export class TaxCommandRepo {
       throw new Error('Failed to create tax settings');
     }
     
-    // Transform database record to TypeScript object
-    return transformDbToTs<TaxSettings>(result, taxSettingsFields);
+    
+    return addId<TaxSettings>(result, 'taxSettingsId');
   }
   
   async updateTaxSettings(id: string, settings: Partial<Omit<TaxSettings, 'id' | 'merchantId' | 'createdAt' | 'updatedAt'>>): Promise<TaxSettings> {
     const now = unixTimestamp();
     
-    // Transform TypeScript object to database format
-    const dbSettings = transformTsToDb<any>(settings, taxSettingsFields);
+    
+    // Use settings directly - DB uses camelCase
     
     // Build update fields dynamically
     const sets: string[] = [];
     const params: any[] = [id];
     let paramIndex = 2;
     
-    if (dbSettings.calculation_method !== undefined) {
-      sets.push(`"calculation_method" = $${paramIndex++}`);
-      params.push(dbSettings.calculation_method);
+    if (settings.calculationMethod !== undefined) {
+      sets.push(`"calculationMethod" = $${paramIndex++}`);
+      params.push(settings.calculationMethod);
     }
     
-    if (dbSettings.prices_include_tax !== undefined) {
-      sets.push(`"prices_include_tax" = $${paramIndex++}`);
-      params.push(dbSettings.prices_include_tax);
+    if (settings.pricesIncludeTax !== undefined) {
+      sets.push(`"pricesIncludeTax" = $${paramIndex++}`);
+      params.push(settings.pricesIncludeTax);
     }
     
-    if (dbSettings.display_prices_with_tax !== undefined) {
-      sets.push(`"display_prices_with_tax" = $${paramIndex++}`);
-      params.push(dbSettings.display_prices_with_tax);
+    if (settings.displayPricesWithTax !== undefined) {
+      sets.push(`"displayPricesWithTax" = $${paramIndex++}`);
+      params.push(settings.displayPricesWithTax);
     }
     
-    if (dbSettings.tax_based_on !== undefined) {
-      sets.push(`"tax_based_on" = $${paramIndex++}`);
-      params.push(dbSettings.tax_based_on);
+    if (settings.taxBasedOn !== undefined) {
+      sets.push(`"taxBasedOn" = $${paramIndex++}`);
+      params.push(settings.taxBasedOn);
     }
     
-    if (dbSettings.shipping_tax_class !== undefined) {
-      sets.push(`"shipping_tax_class" = $${paramIndex++}`);
-      params.push(dbSettings.shipping_tax_class);
+    if (settings.shippingTaxClass !== undefined) {
+      sets.push(`"shippingTaxClass" = $${paramIndex++}`);
+      params.push(settings.shippingTaxClass);
     }
     
-    if (dbSettings.display_tax_totals !== undefined) {
-      sets.push(`"display_tax_totals" = $${paramIndex++}`);
-      params.push(dbSettings.display_tax_totals);
+    if (settings.displayTaxTotals !== undefined) {
+      sets.push(`"displayTaxTotals" = $${paramIndex++}`);
+      params.push(settings.displayTaxTotals);
     }
     
-    if (dbSettings.apply_tax_to_shipping !== undefined) {
-      sets.push(`"apply_tax_to_shipping" = $${paramIndex++}`);
-      params.push(dbSettings.apply_tax_to_shipping);
+    if (settings.applyTaxToShipping !== undefined) {
+      sets.push(`"applyTaxToShipping" = $${paramIndex++}`);
+      params.push(settings.applyTaxToShipping);
     }
     
-    if (dbSettings.apply_discount_before_tax !== undefined) {
-      sets.push(`"apply_discount_before_tax" = $${paramIndex++}`);
-      params.push(dbSettings.apply_discount_before_tax);
+    if (settings.applyDiscountBeforeTax !== undefined) {
+      sets.push(`"applyDiscountBeforeTax" = $${paramIndex++}`);
+      params.push(settings.applyDiscountBeforeTax);
     }
     
-    if (dbSettings.round_tax_at_subtotal !== undefined) {
-      sets.push(`"round_tax_at_subtotal" = $${paramIndex++}`);
-      params.push(dbSettings.round_tax_at_subtotal);
+    if (settings.roundTaxAtSubtotal !== undefined) {
+      sets.push(`"roundTaxAtSubtotal" = $${paramIndex++}`);
+      params.push(settings.roundTaxAtSubtotal);
     }
     
-    if (dbSettings.tax_decimal_places !== undefined) {
-      sets.push(`"tax_decimal_places" = $${paramIndex++}`);
-      params.push(dbSettings.tax_decimal_places);
+    if (settings.taxDecimalPlaces !== undefined) {
+      sets.push(`"taxDecimalPlaces" = $${paramIndex++}`);
+      params.push(settings.taxDecimalPlaces);
     }
     
-    if (dbSettings.default_tax_category !== undefined) {
-      sets.push(`"default_tax_category" = $${paramIndex++}`);
-      params.push(dbSettings.default_tax_category);
+    if (settings.defaultTaxCategory !== undefined) {
+      sets.push(`"defaultTaxCategory" = $${paramIndex++}`);
+      params.push(settings.defaultTaxCategory);
     }
     
-    if (dbSettings.default_tax_zone !== undefined) {
-      sets.push(`"default_tax_zone" = $${paramIndex++}`);
-      params.push(dbSettings.default_tax_zone);
+    if (settings.defaultTaxZone !== undefined) {
+      sets.push(`"defaultTaxZone" = $${paramIndex++}`);
+      params.push(settings.defaultTaxZone);
     }
     
-    if (dbSettings.tax_provider !== undefined) {
-      sets.push(`"tax_provider" = $${paramIndex++}`);
-      params.push(dbSettings.tax_provider);
+    if (settings.taxProvider !== undefined) {
+      sets.push(`"taxProvider" = $${paramIndex++}`);
+      params.push(settings.taxProvider);
     }
     
-    if (dbSettings.tax_provider_settings !== undefined) {
-      sets.push(`"tax_provider_settings" = $${paramIndex++}`);
-      params.push(dbSettings.tax_provider_settings);
-    }
-    
-    if (dbSettings.metadata !== undefined) {
-      sets.push(`"metadata" = $${paramIndex++}`);
-      params.push(dbSettings.metadata);
+    if (settings.taxProviderSettings !== undefined) {
+      sets.push(`"taxProviderSettings" = $${paramIndex++}`);
+      params.push(settings.taxProviderSettings);
     }
     
     // Always update the updatedAt timestamp
@@ -900,7 +743,7 @@ export class TaxCommandRepo {
     }
     
     const result = await queryOne<any>(
-      `UPDATE "public"."tax_settings" SET ${sets.join(', ')} WHERE "id" = $1 RETURNING *`,
+      `UPDATE "${TABLES.TAX_SETTINGS}" SET ${sets.join(', ')} WHERE "taxSettingsId" = $1 RETURNING *`,
       params
     );
     
@@ -908,13 +751,13 @@ export class TaxCommandRepo {
       throw new Error(`Tax settings with ID ${id} not found`);
     }
     
-    // Transform database record to TypeScript object
-    return transformDbToTs<TaxSettings>(result, taxSettingsFields);
+    
+    return addId<TaxSettings>(result, 'taxSettingsId');
   }
 
   async deleteTaxSettings(id: string): Promise<boolean> {
-    const result = await queryOne<{ id: string }>(
-      'DELETE FROM "public"."tax_settings" WHERE "id" = $1 RETURNING id',
+    const result = await queryOne<{ taxSettingsId: string }>(
+      `DELETE FROM "${TABLES.TAX_SETTINGS}" WHERE "taxSettingsId" = $1 RETURNING "taxSettingsId"`,
       [id]
     );
     

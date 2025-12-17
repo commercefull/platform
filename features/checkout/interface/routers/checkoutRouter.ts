@@ -14,73 +14,73 @@ const router = express.Router();
 
 /**
  * Get available payment methods (no checkout required)
- * GET /api/checkout/payment-methods
+ * GET /checkout/payment-methods
  */
 router.get('/checkout/payment-methods', checkoutController.getPaymentMethods);
 
 /**
  * Initiate checkout session
- * POST /api/checkout
+ * POST /checkout
  */
 router.post('/checkout', checkoutController.initiateCheckout);
 
 /**
  * Get checkout session
- * GET /api/checkout/:checkoutId
+ * GET /checkout/:checkoutId
  */
 router.get('/checkout/:checkoutId', checkoutController.getCheckout);
 
 /**
  * Set shipping address
- * PUT /api/checkout/:checkoutId/shipping-address
+ * PUT /checkout/:checkoutId/shipping-address
  */
 router.put('/checkout/:checkoutId/shipping-address', checkoutController.setShippingAddress);
 
 /**
  * Set billing address
- * PUT /api/checkout/:checkoutId/billing-address
+ * PUT /checkout/:checkoutId/billing-address
  */
 router.put('/checkout/:checkoutId/billing-address', checkoutController.setBillingAddress);
 
 /**
  * Get available shipping methods
- * GET /api/checkout/:checkoutId/shipping-methods
+ * GET /checkout/:checkoutId/shipping-methods
  */
 router.get('/checkout/:checkoutId/shipping-methods', checkoutController.getShippingMethods);
 
 /**
  * Set shipping method
- * PUT /api/checkout/:checkoutId/shipping-method
+ * PUT /checkout/:checkoutId/shipping-method
  */
 router.put('/checkout/:checkoutId/shipping-method', checkoutController.setShippingMethod);
 
 /**
  * Set payment method
- * PUT /api/checkout/:checkoutId/payment-method
+ * PUT /checkout/:checkoutId/payment-method
  */
 router.put('/checkout/:checkoutId/payment-method', checkoutController.setPaymentMethod);
 
 /**
  * Apply coupon code
- * POST /api/checkout/:checkoutId/coupon
+ * POST /checkout/:checkoutId/coupon
  */
 router.post('/checkout/:checkoutId/coupon', checkoutController.applyCoupon);
 
 /**
  * Remove coupon code
- * DELETE /api/checkout/:checkoutId/coupon
+ * DELETE /checkout/:checkoutId/coupon
  */
 router.delete('/checkout/:checkoutId/coupon', checkoutController.removeCoupon);
 
 /**
  * Complete checkout and create order
- * POST /api/checkout/:checkoutId/complete
+ * POST /checkout/:checkoutId/complete
  */
 router.post('/checkout/:checkoutId/complete', checkoutController.completeCheckout);
 
 /**
  * Abandon checkout
- * POST /api/checkout/:checkoutId/abandon
+ * POST /checkout/:checkoutId/abandon
  */
 router.post('/checkout/:checkoutId/abandon', checkoutController.abandonCheckout);
 

@@ -129,9 +129,11 @@ describe('Support Feature Tests', () => {
 
       expect(response.status).toBe(201);
       expect(response.data.success).toBe(true);
-      expect(response.data.data).toHaveProperty('id');
+      // DB returns faqCategoryId, not id
+      const categoryId = response.data.data.faqCategoryId || response.data.data.id;
+      expect(categoryId).toBeTruthy();
 
-      testCategoryId = response.data.data.id;
+      testCategoryId = categoryId;
       createdResources.categoryIds.push(testCategoryId);
     });
 
@@ -154,9 +156,11 @@ describe('Support Feature Tests', () => {
 
       expect(response.status).toBe(201);
       expect(response.data.success).toBe(true);
-      expect(response.data.data).toHaveProperty('id');
+      // DB returns faqArticleId, not id
+      const articleId = response.data.data.faqArticleId || response.data.data.id;
+      expect(articleId).toBeTruthy();
 
-      testArticleId = response.data.data.id;
+      testArticleId = articleId;
       createdResources.articleIds.push(testArticleId);
     });
 

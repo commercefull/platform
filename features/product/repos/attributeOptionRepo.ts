@@ -1,201 +1,105 @@
 import { queryOne, query } from "../../../libs/db";
-import { unixTimestamp } from "../../../libs/date";
+import { Table, ProductAttributeOption } from "../../../libs/db/types";
 
-export type AttributeOption = {
-  id: string;
-  createdAt: string;
-  updatedAt: string;
-  attributeId: string;
-  value: string;
-  label: string;
-  sortOrder: number;
-};
+// Use ProductAttributeOption type directly from libs/db/types.ts
+export type { ProductAttributeOption };
 
-type AttributeOptionCreateProps = Pick<AttributeOption, "attributeId" | "value" | "label" | "sortOrder">;
-
-type AttributeOptionUpdateProps = Partial<AttributeOptionCreateProps>;
-
-// Define DB column to TS property mapping
-const dbToTsMapping: Record<string, string> = {
-  id: 'id',
-  created_at: 'createdAt',
-  updated_at: 'updatedAt',
-  attribute_id: 'attributeId',
-  value: 'value',
-  label: 'label',
-  sort_order: 'sortOrder'
-};
-
-// Define TS property to DB column mapping
-const tsToDbMapping = Object.entries(dbToTsMapping).reduce((acc, [dbCol, tsProp]) => {
-  acc[tsProp] = dbCol;
-  return acc;
-}, {} as Record<string, string>);
+type CreateProps = Pick<ProductAttributeOption, "attributeId" | "value" | "label" | "position">;
+type UpdateProps = Partial<CreateProps>;
 
 export class AttributeOptionRepo {
-  /**
-   * Convert snake_case column name to camelCase property name
-   */
-  private dbToTs(columnName: string): string {
-    return dbToTsMapping[columnName] || columnName;
+  async findOne(id: string): Promise<ProductAttributeOption | null> {
+    return queryOne<ProductAttributeOption>(
+      `SELECT * FROM "${Table.ProductAttributeOption}" WHERE "productAttributeOptionId" = $1`,
+      [id]
+    );
   }
 
-  /**
-   * Convert camelCase property name to snake_case column name
-   */
-  private tsToDb(propertyName: string): string {
-    return tsToDbMapping[propertyName] || propertyName;
-  }
-
-  /**
-   * Generate field mapping for SELECT statements
-   */
-  private generateSelectFields(): string {
-    return Object.keys(dbToTsMapping).map(dbCol => 
-      `"${dbCol}" AS "${dbToTsMapping[dbCol]}"`
-    ).join(', ');
-  }
-  
-  async findOne(id: string): Promise<AttributeOption | null> {
-    const selectFields = this.generateSelectFields();
-    return await queryOne<AttributeOption>(`SELECT ${selectFields} FROM "public"."attribute_option" WHERE "id" = $1`, [id]);
-  }
-
-  async findByValue(attributeId: string, value: string): Promise<AttributeOption | null> {
-    const selectFields = this.generateSelectFields();
-    return await queryOne<AttributeOption>(
-      `SELECT ${selectFields} FROM "public"."attribute_option" WHERE "attribute_id" = $1 AND "value" = $2`,
+  async findByValue(attributeId: string, value: string): Promise<ProductAttributeOption | null> {
+    return queryOne<ProductAttributeOption>(
+      `SELECT * FROM "${Table.ProductAttributeOption}" WHERE "attributeId" = $1 AND "value" = $2`,
       [attributeId, value]
     );
   }
 
-  async findByAttribute(attributeId: string): Promise<AttributeOption[] | null> {
-    const selectFields = this.generateSelectFields();
-    return await query<AttributeOption[]>(
-      `SELECT ${selectFields} FROM "public"."attribute_option" WHERE "attribute_id" = $1 ORDER BY "sort_order" ASC`,
+  async findByAttribute(attributeId: string): Promise<ProductAttributeOption[]> {
+    return await query<ProductAttributeOption[]>(
+      `SELECT * FROM "${Table.ProductAttributeOption}" WHERE "attributeId" = $1 ORDER BY "position" ASC`,
       [attributeId]
-    );
+    ) || [];
   }
 
-  async create(props: AttributeOptionCreateProps): Promise<AttributeOption> {
-    const { attributeId, value, label, sortOrder } = props;
-
-    // Convert TS property names to DB column names
-    const columnMap = {
-      attribute_id: attributeId,
-      value,
-      label,
-      sort_order: sortOrder
-    };
-
-    // Generate columns and placeholders for query
-    const columns = Object.keys(columnMap)
-      .filter(key => columnMap[key as keyof typeof columnMap] !== undefined)
-      .map(key => `"${key}"`);
-
-    const placeholders = columns.map((_, i) => `$${i + 1}`).join(', ');
-    
-    // Values for the query
-    const values = Object.values(columnMap)
-      .filter(value => value !== undefined);
-
-    // Generate SELECT AS mapping for returning values in camelCase
-    const returnFields = Object.keys(dbToTsMapping).map(dbCol => 
-      `"${dbCol}" AS "${dbToTsMapping[dbCol]}"`
-    ).join(', ');
-
-    const data = await queryOne<AttributeOption>(
-      `INSERT INTO "public"."attribute_option" (${columns.join(', ')}) VALUES (${placeholders}) RETURNING ${returnFields}`,
-      values
+  async create(props: CreateProps): Promise<ProductAttributeOption> {
+    const now = new Date();
+    const row = await queryOne<ProductAttributeOption>(
+      `INSERT INTO "${Table.ProductAttributeOption}" 
+       ("attributeId", "value", "label", "position", "createdAt", "updatedAt") 
+       VALUES ($1, $2, $3, $4, $5, $6) 
+       RETURNING *`,
+      [props.attributeId, props.value, props.label, props.position, now, now]
     );
 
-    if (!data) {
+    if (!row) {
       throw new Error('Attribute option not saved');
     }
-
-    return data;
+    return row;
   }
 
-  async bulkCreate(options: AttributeOptionCreateProps[]): Promise<AttributeOption[] | null> {
-    if (options.length === 0) {
-      return [];
-    }
+  async bulkCreate(options: CreateProps[]): Promise<ProductAttributeOption[]> {
+    if (options.length === 0) return [];
 
-    // Map the column names to their snake_case DB equivalents
-    const dbColumns = [
-      this.tsToDb('attributeId'),
-      this.tsToDb('value'),
-      this.tsToDb('label'),
-      this.tsToDb('sortOrder')
-    ];
-
-    const valueGroups = options.map((option, i) => {
-      const offset = i * 4;
-      return `($${offset + 1}, $${offset + 2}, $${offset + 3}, $${offset + 4})`;
+    const now = new Date();
+    const valueGroups = options.map((_, i) => {
+      const offset = i * 6;
+      return `($${offset + 1}, $${offset + 2}, $${offset + 3}, $${offset + 4}, $${offset + 5}, $${offset + 6})`;
     });
 
-    const values = options.flatMap(option => [
-      option.attributeId,
-      option.value,
-      option.label,
-      option.sortOrder
+    const values = options.flatMap(opt => [
+      opt.attributeId, opt.value, opt.label, opt.position, now, now
     ]);
 
-    // Generate SELECT AS mapping for returning values in camelCase
-    const returnFields = Object.keys(dbToTsMapping).map(dbCol => 
-      `"${dbCol}" AS "${dbToTsMapping[dbCol]}"`
-    ).join(', ');
+    return await query<ProductAttributeOption[]>(
+      `INSERT INTO "${Table.ProductAttributeOption}" 
+       ("attributeId", "value", "label", "position", "createdAt", "updatedAt") 
+       VALUES ${valueGroups.join(', ')} 
+       RETURNING *`,
+      values
+    ) || [];
+  }
 
-    return await query<AttributeOption[]>(
-      `INSERT INTO "public"."attribute_option" (${dbColumns.map(col => `"${col}"`).join(', ')}) VALUES ${valueGroups.join(', ')} RETURNING ${returnFields}`,
+  async update(id: string, props: UpdateProps): Promise<ProductAttributeOption | null> {
+    const now = new Date();
+    const updates: string[] = ['"updatedAt" = $1'];
+    const values: any[] = [now];
+    let paramIndex = 2;
+
+    for (const [key, value] of Object.entries(props)) {
+      if (value !== undefined) {
+        updates.push(`"${key}" = $${paramIndex++}`);
+        values.push(value);
+      }
+    }
+
+    values.push(id);
+    return queryOne<ProductAttributeOption>(
+      `UPDATE "${Table.ProductAttributeOption}" 
+       SET ${updates.join(", ")} 
+       WHERE "productAttributeOptionId" = $${paramIndex} 
+       RETURNING *`,
       values
     );
   }
 
-  async update(id: string, props: AttributeOptionUpdateProps): Promise<AttributeOption | null> {
-    const updates: string[] = [];
-    const values: any[] = [];
-    let paramIndex = 1;
-
-    // Dynamically build the update statement based on provided properties
-    Object.entries(props).forEach(([key, value]) => {
-      if (value !== undefined) {
-        const dbColumn = this.tsToDb(key);
-        updates.push(`"${dbColumn}" = $${paramIndex++}`);
-        values.push(value);
-      }
-    });
-
-    // Add updatedAt and id
-    updates.push(`"updatedAt" = $${paramIndex++}`);
-    values.push(unixTimestamp());
-    values.push(id);
-
-    if (updates.length === 1) {
-      return await this.findOne(id); // No fields to update except updatedAt
-    }
-
-    // Generate SELECT AS mapping for returning values in camelCase
-    const returnFields = Object.keys(dbToTsMapping).map(dbCol => 
-      `"${dbCol}" AS "${dbToTsMapping[dbCol]}"`
-    ).join(', ');
-
-    const queryString = `UPDATE "public"."attribute_option" SET ${updates.join(", ")} WHERE "id" = $${paramIndex - 1} RETURNING ${returnFields}`;
-    return await queryOne<AttributeOption>(queryString, values);
-  }
-
-  async delete(id: string): Promise<AttributeOption | null> {
-    // Generate SELECT AS mapping for returning values in camelCase
-    const returnFields = Object.keys(dbToTsMapping).map(dbCol => 
-      `"${dbCol}" AS "${dbToTsMapping[dbCol]}"`
-    ).join(', ');
-
-    return await queryOne<AttributeOption>(`DELETE FROM "public"."attribute_option" WHERE "id" = $1 RETURNING ${returnFields}`, [id]);
+  async delete(id: string): Promise<ProductAttributeOption | null> {
+    return queryOne<ProductAttributeOption>(
+      `DELETE FROM "${Table.ProductAttributeOption}" WHERE "productAttributeOptionId" = $1 RETURNING *`,
+      [id]
+    );
   }
 
   async deleteByAttribute(attributeId: string): Promise<number> {
     const result = await query<any>(
-      'DELETE FROM "public"."attribute_option" WHERE "attribute_id" = $1',
+      `DELETE FROM "${Table.ProductAttributeOption}" WHERE "attributeId" = $1`,
       [attributeId]
     );
     return result?.rowCount || 0;

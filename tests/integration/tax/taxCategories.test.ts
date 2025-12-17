@@ -23,9 +23,9 @@ describe('Tax Categories API Integration Tests', () => {
       expect(Array.isArray(response.data.data)).toBeTruthy();
       
       if (response.data.data.length > 0) {
-        // Verify structure of a tax category
+        // Verify structure of a tax category - uses taxCategoryId not id
         const taxCategory = response.data.data[0];
-        expect(taxCategory).toHaveProperty('id');
+        expect(taxCategory).toHaveProperty('taxCategoryId');
         expect(taxCategory).toHaveProperty('name');
         expect(taxCategory).toHaveProperty('code');
         expect(taxCategory).toHaveProperty('isActive');
@@ -53,18 +53,19 @@ describe('Tax Categories API Integration Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
-      if (allCategoriesResponse.data.length === 0) {
+      if (!allCategoriesResponse.data?.data?.length) {
         console.log('Skipping test: no tax categories available');
         return;
       }
       
-      const categoryCode = allCategoriesResponse.data[0].code;
+      const categoryCode = allCategoriesResponse.data.data[0].code;
       
       // Test the public endpoint
       const response = await client.get(`/api/tax/categories/${categoryCode}`);
       
       expect(response.status).toBe(200);
-      expect(response.data).toHaveProperty('id');
+      // DB returns taxCategoryId, not id
+      expect(response.data.taxCategoryId || response.data.id).toBeTruthy();
       expect(response.data).toHaveProperty('name');
       expect(response.data.code).toBe(categoryCode);
     });
@@ -91,12 +92,11 @@ describe('Tax Categories API Integration Tests', () => {
       });
       
       expect(response.status).toBe(201);
-      expect(response.data).toHaveProperty('id');
+      // DB returns taxCategoryId, not id
+      const createdTaxCategoryId = response.data.taxCategoryId || response.data.id;
+      expect(createdTaxCategoryId).toBeTruthy();
       expect(response.data.name).toBe(newTaxCategory.name);
       expect(response.data.code).toBe(newTaxCategory.code);
-      
-      // Store the id for use in other tests and cleanup
-      const createdTaxCategoryId = response.data.id;
       
       // Clean up - delete the tax category we just created
       await client.delete(`/business/tax/categories/${createdTaxCategoryId}`, {

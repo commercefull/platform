@@ -113,7 +113,7 @@ export class ProcessDataRequestUseCase {
       // 3. Generate a signed download URL
       
       // For now, we'll simulate with a placeholder
-      const downloadUrl = `/api/gdpr/download/${request.gdprDataRequestId}`;
+      const downloadUrl = `/gdpr/download/${request.gdprDataRequestId}`;
       
       // Complete the request
       request.completeWithDownload(downloadUrl, command.format, command.adminId);

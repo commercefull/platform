@@ -16,8 +16,8 @@ import { pool } from "./libs/db/pool";
 import passport from "passport";
 import { formCheckbox, formHidden, formInput, formLegend, formMultiSelect, formSelect, formSubmit, formText } from "./libs/form";
 import { createSessionStore } from './libs/session/sessionStoreFactory';
-import { initializeAnalyticsHandlers } from "./features/analytics/services/analyticsEventHandler";
-import { configureRoutes } from "./routes";
+import { initializeAnalyticsHandlers } from "./boot/analyticsEventHandler";
+import { configureRoutes } from "./boot/routes";
 
 // Initialize analytics event handlers
 initializeAnalyticsHandlers();

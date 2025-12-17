@@ -78,7 +78,7 @@ describe('B2B Companies API', () => {
 
       expect(response.status).toBe(201);
       expect(response.data.success).toBe(true);
-      expect(response.data.data.id || response.data.data.b2bCompanyId).toBeDefined();
+      expect(response.data.data.b2bCompanyId).toBeDefined();
       expect(response.data.data.name).toBe(companyData.name);
       expect(response.data.data.status).toBe('pending');
 
@@ -97,13 +97,16 @@ describe('B2B Companies API', () => {
 
   describe('GET /b2b/companies/:id', () => {
     it('should return a company by ID', async () => {
-      if (!createdCompanyId) return;
+      if (!createdCompanyId) {
+        console.log('Skipping: company was not created in previous test');
+        return;
+      }
 
       const response = await client.get(`${API_BASE}/companies/${createdCompanyId}`);
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
-      expect(response.data.data.id || response.data.data.b2bCompanyId).toBe(createdCompanyId);
+      expect(response.data.data.b2bCompanyId).toBe(createdCompanyId);
     });
 
     it('should return 404 for non-existent company', async () => {
@@ -116,7 +119,10 @@ describe('B2B Companies API', () => {
 
   describe('PUT /b2b/companies/:id', () => {
     it('should update a company', async () => {
-      if (!createdCompanyId) return;
+      if (!createdCompanyId) {
+        console.log('Skipping: company was not created in previous test');
+        return;
+      }
 
       const updateData = {
         industry: 'Software',
@@ -132,7 +138,10 @@ describe('B2B Companies API', () => {
 
   describe('POST /b2b/companies/:id/approve', () => {
     it('should approve a pending company', async () => {
-      if (!createdCompanyId) return;
+      if (!createdCompanyId) {
+        console.log('Skipping: company was not created in previous test');
+        return;
+      }
 
       const response = await client.post(`${API_BASE}/companies/${createdCompanyId}/approve`, {
         creditLimit: 10000
@@ -146,7 +155,10 @@ describe('B2B Companies API', () => {
 
   describe('POST /b2b/companies/:id/suspend', () => {
     it('should suspend an active company', async () => {
-      if (!createdCompanyId) return;
+      if (!createdCompanyId) {
+        console.log('Skipping: company was not created in previous test');
+        return;
+      }
 
       const response = await client.post(`${API_BASE}/companies/${createdCompanyId}/suspend`);
 
@@ -158,7 +170,10 @@ describe('B2B Companies API', () => {
 
   describe('DELETE /b2b/companies/:id', () => {
     it('should delete a company', async () => {
-      if (!createdCompanyId) return;
+      if (!createdCompanyId) {
+        console.log('Skipping: company was not created in previous test');
+        return;
+      }
 
       const response = await client.delete(`${API_BASE}/companies/${createdCompanyId}`);
 

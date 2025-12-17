@@ -2,8 +2,8 @@ import { Request, Response, NextFunction } from "express";
 import jwt from 'jsonwebtoken';
 
 // Environment variables should be properly loaded in your application
-const MERCHANT_JWT_SECRET = process.env.MERCHANT_JWT_SECRET || 'your-secret-key-should-be-in-env';
-const CUSTOMER_JWT_SECRET = process.env.CUSTOMER_JWT_SECRET || 'your-secret-key-should-be-in-env';
+const MERCHANT_JWT_SECRET = process.env.MERCHANT_JWT_SECRET || 'merchant-secret-key-should-be-in-env';
+const CUSTOMER_JWT_SECRET = process.env.CUSTOMER_JWT_SECRET || 'customer-secret-key-should-be-in-env';
 
 const authenticateToken = (req: Request, res: Response, next: NextFunction, secret: string): void => {
   // Get token from header

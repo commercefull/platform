@@ -66,10 +66,10 @@ describe('Content Media API', () => {
 
         expect(response.status).toBe(201);
         expect(response.data.success).toBe(true);
-        expect(response.data.data.id).toBeDefined();
+        expect(response.data.data.contentMediaFolderId).toBeDefined();
         expect(response.data.data.name).toBe(folderData.name);
 
-        createdFolderId = response.data.data.id;
+        createdFolderId = response.data.data.contentMediaFolderId;
       });
 
       it('should create a child folder', async () => {
@@ -86,7 +86,7 @@ describe('Content Media API', () => {
         expect(response.data.success).toBe(true);
         expect(response.data.data.parentId).toBe(createdFolderId);
 
-        createdChildFolderId = response.data.data.id;
+        createdChildFolderId = response.data.data.contentMediaFolderId;
       });
 
       it('should return 400 if name is missing', async () => {
@@ -157,18 +157,18 @@ describe('Content Media API', () => {
           ...TEST_DATA.media,
           title: `Test Media ${Date.now()}`,
           fileName: `test-media-${Date.now()}.jpg`,
-          folderId: createdFolderId
+          contentMediaFolderId: createdFolderId
         };
 
         const response = await client.post(`${API_BASE}/media`, mediaData);
 
         expect(response.status).toBe(201);
         expect(response.data.success).toBe(true);
-        expect(response.data.data.id).toBeDefined();
+        expect(response.data.data.contentMediaId).toBeDefined();
         expect(response.data.data.title).toBe(mediaData.title);
-        expect(response.data.data.folderId).toBe(createdFolderId);
+        expect(response.data.data.contentMediaFolderId).toBe(createdFolderId);
 
-        createdMediaId = response.data.data.id;
+        createdMediaId = response.data.data.contentMediaId;
       });
 
       it('should return 400 if required fields are missing', async () => {
@@ -187,7 +187,7 @@ describe('Content Media API', () => {
 
         expect(response.status).toBe(200);
         expect(response.data.success).toBe(true);
-        expect(response.data.data.id).toBe(createdMediaId);
+        expect(response.data.data.contentMediaId).toBe(createdMediaId);
       });
 
       it('should return 404 for non-existent media', async () => {
@@ -221,7 +221,7 @@ describe('Content Media API', () => {
 
         const response = await client.post(`${API_BASE}/media/move`, {
           mediaIds: [createdMediaId],
-          folderId: createdChildFolderId
+          contentMediaFolderId: createdChildFolderId
         });
 
         expect(response.status).toBe(200);
@@ -234,7 +234,7 @@ describe('Content Media API', () => {
 
         const response = await client.post(`${API_BASE}/media/move`, {
           mediaIds: [createdMediaId],
-          folderId: null
+          contentMediaFolderId: null
         });
 
         expect(response.status).toBe(200);

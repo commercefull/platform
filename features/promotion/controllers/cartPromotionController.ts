@@ -3,11 +3,11 @@ import { CartPromotionRepo } from "../repos/cartRepo";
 
 const cartPromotionRepo = new CartPromotionRepo();
 
-// Get cart promotions by cart ID
+// Get cart promotions by basket ID
 export const getPromotionsByCartId = async (req: Request, res: Response): Promise<void> => {
   try {
     const { cartId } = req.params;
-    const promotions = await cartPromotionRepo.getByCartId(cartId);
+    const promotions = await cartPromotionRepo.getByBasketId(cartId);
     res.status(200).json({ success: true, data: promotions || [] });
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message });
@@ -53,10 +53,7 @@ export const updateCartPromotion = async (req: Request, res: Response): Promise<
     const { id } = req.params;
     const promotionData = req.body;
 
-    // Add audit fields
-    promotionData.updatedBy = (req.user as any)?.id || 'system';
-
-    const promotion = await cartPromotionRepo.update(promotionData, id);
+    const promotion = await cartPromotionRepo.update(id, promotionData);
     res.status(200).json({ success: true, data: promotion });
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message });
@@ -67,9 +64,7 @@ export const updateCartPromotion = async (req: Request, res: Response): Promise<
 export const removePromotion = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const deletedBy = (req.user as any)?.id || 'system';
-
-    await cartPromotionRepo.delete(id, deletedBy);
+    await cartPromotionRepo.delete(id);
     res.status(200).json({ success: true, message: "Cart promotion removed successfully" });
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message });

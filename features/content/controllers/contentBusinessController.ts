@@ -1249,10 +1249,10 @@ export class ContentController {
 
       const category = await this.categoryRepo.createCategory({
         name, slug, parentId, description, featuredImage, metaTitle, metaDescription,
-        sortOrder: sortOrder || 0, isActive: isActive !== undefined ? isActive : true, depth: 0
+        sortOrder: sortOrder || 0, isActive: isActive !== undefined ? isActive : true, path: null, depth: 0
       });
 
-      eventBus.emit('content.category.created', { categoryId: category.id, name: category.name, slug: category.slug, parentId: category.parentId });
+      eventBus.emit('content.category.created', { categoryId: category.contentCategoryId, name: category.name, slug: category.slug, parentId: category.parentId });
       res.status(201).json({ success: true, data: category, message: 'Category created successfully' });
     } catch (error: any) {
       console.error('Error creating category:', error);
@@ -1348,8 +1348,8 @@ export class ContentController {
         return;
       }
 
-      const navigation = await this.navigationRepo.createNavigation({ name, slug, description, location, isActive: isActive !== undefined ? isActive : true });
-      eventBus.emit('content.navigation.created', { navigationId: navigation.id, name: navigation.name, slug: navigation.slug, location: navigation.location });
+      const navigation = await this.navigationRepo.createNavigation({ name, slug, description, location, isActive: isActive !== undefined ? isActive : true, createdBy: null, updatedBy: null });
+      eventBus.emit('content.navigation.created', { navigationId: navigation.contentNavigationId, name: navigation.name, slug: navigation.slug, location: navigation.location });
       res.status(201).json({ success: true, data: navigation, message: 'Navigation created successfully' });
     } catch (error: any) {
       console.error('Error creating navigation:', error);
@@ -1435,7 +1435,7 @@ export class ContentController {
         openInNewTab: openInNewTab || false, isActive: isActive !== undefined ? isActive : true, sortOrder: sortOrder || 0, conditions, depth: 0
       });
 
-      eventBus.emit('content.navigation.item_added', { navigationId, itemId: item.id, title: item.title, type: item.type });
+      eventBus.emit('content.navigation.item_added', { navigationId, itemId: item.contentNavigationItemId, title: item.title, type: item.type });
       res.status(201).json({ success: true, data: item, message: 'Navigation item added successfully' });
     } catch (error: any) {
       console.error('Error adding navigation item:', error);
@@ -1513,10 +1513,11 @@ export class ContentController {
 
       const media = await this.mediaRepo.createMedia({
         title, fileName, filePath: filePath || '', fileType: fileType || 'application/octet-stream', fileSize: fileSize || 0, url,
-        width, height, duration, altText, caption, description, folderId, thumbnailUrl, sortOrder: 0, tags, isExternal: isExternal || false, externalService, externalId
+        width, height, duration, altText, caption, description, contentMediaFolderId: folderId || null, thumbnailUrl, sortOrder: 0, tags, isExternal: isExternal || false, externalService, externalId,
+        createdBy: null, updatedBy: null
       });
 
-      eventBus.emit('content.media.uploaded', { mediaId: media.id, title: media.title, fileName: media.fileName, fileType: media.fileType, fileSize: media.fileSize });
+      eventBus.emit('content.media.uploaded', { mediaId: media.contentMediaId, title: media.title, fileName: media.fileName, fileType: media.fileType, fileSize: media.fileSize });
       res.status(201).json({ success: true, data: media, message: 'Media uploaded successfully' });
     } catch (error: any) {
       console.error('Error uploading media:', error);
@@ -1544,7 +1545,7 @@ export class ContentController {
       const { id } = req.params;
       const { title, altText, caption, description, folderId, tags, sortOrder } = req.body;
 
-      const updated = await this.mediaRepo.updateMedia(id, { title, altText, caption, description, folderId, tags, sortOrder });
+      const updated = await this.mediaRepo.updateMedia(id, { title, altText, caption, description, contentMediaFolderId: folderId, tags, sortOrder });
       res.status(200).json({ success: true, data: updated, message: 'Media updated successfully' });
     } catch (error: any) {
       console.error('Error updating media:', error);
@@ -1582,7 +1583,7 @@ export class ContentController {
       let movedCount = 0;
       for (const mediaId of mediaIds) {
         try {
-          await this.mediaRepo.updateMedia(mediaId, { folderId: folderId || undefined });
+          await this.mediaRepo.updateMedia(mediaId, { contentMediaFolderId: folderId || undefined });
           movedCount++;
         } catch { /* skip */ }
       }
@@ -1626,7 +1627,7 @@ export class ContentController {
         return;
       }
 
-      const folder = await this.mediaRepo.createFolder({ name, parentId, depth: 0, sortOrder: 0 });
+      const folder = await this.mediaRepo.createFolder({ name, parentId, path: null, depth: 0, sortOrder: 0, createdBy: null, updatedBy: null });
       res.status(201).json({ success: true, data: folder, message: 'Folder created successfully' });
     } catch (error: any) {
       console.error('Error creating media folder:', error);
@@ -1684,10 +1685,10 @@ export class ContentController {
       }
 
       const redirect = await this.redirectRepo.createRedirect({
-        sourceUrl, targetUrl, statusCode: statusCode || 301, isRegex: isRegex || false, isActive: isActive !== undefined ? isActive : true, notes
+        sourceUrl, targetUrl, statusCode: String(statusCode || '301'), isRegex: isRegex || false, isActive: isActive !== undefined ? isActive : true, notes, createdBy: null, updatedBy: null
       });
 
-      eventBus.emit('content.redirect.created', { redirectId: redirect.id, sourceUrl: redirect.sourceUrl, targetUrl: redirect.targetUrl, statusCode: redirect.statusCode });
+      eventBus.emit('content.redirect.created', { redirectId: redirect.contentRedirectId, sourceUrl: redirect.sourceUrl, targetUrl: redirect.targetUrl, statusCode: redirect.statusCode });
       res.status(201).json({ success: true, data: redirect, message: 'Redirect created successfully' });
     } catch (error: any) {
       console.error('Error creating redirect:', error);

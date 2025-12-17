@@ -259,7 +259,7 @@ export class ProductRepo implements IProductRepository {
       await query(
         `INSERT INTO "productVariant" (
           "productVariantId", "productId", sku, name, price, "compareAtPrice",
-          weight, "weightUnit", "isDefault", "isActive", "sortOrder", barcode,
+          weight, "weightUnit", "isDefault", "isActive", position, barcode,
           "createdAt", "updatedAt"
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
         [
@@ -289,14 +289,14 @@ export class ProductRepo implements IProductRepository {
   // Image methods
   async getProductImages(productId: string): Promise<ProductImage[]> {
     const rows = await query<Record<string, any>[]>(
-      'SELECT * FROM "productImage" WHERE "productId" = $1 ORDER BY "sortOrder" ASC',
+      'SELECT * FROM "productImage" WHERE "productId" = $1 ORDER BY position ASC',
       [productId]
     );
     return (rows || []).map(row => ({
       imageId: row.productImageId,
       url: row.url,
       altText: row.altText,
-      position: row.sortOrder,
+      position: row.position,
       isPrimary: Boolean(row.isPrimary)
     }));
   }
@@ -304,7 +304,7 @@ export class ProductRepo implements IProductRepository {
   async addProductImage(productId: string, image: ProductImage): Promise<void> {
     const now = new Date().toISOString();
     await query(
-      `INSERT INTO "productImage" ("productImageId", "productId", url, "altText", "sortOrder", "isPrimary", "createdAt", "updatedAt")
+      `INSERT INTO "productImage" ("productImageId", "productId", url, "altText", position, "isPrimary", "createdAt", "updatedAt")
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
       [image.imageId, productId, image.url, image.altText, image.position, image.isPrimary, now, now]
     );
@@ -320,7 +320,7 @@ export class ProductRepo implements IProductRepository {
       params.push(updates.altText);
     }
     if (updates.position !== undefined) {
-      setClauses.push(`"sortOrder" = $${paramIndex++}`);
+      setClauses.push(`position = $${paramIndex++}`);
       params.push(updates.position);
     }
     if (updates.isPrimary !== undefined) {
@@ -342,7 +342,7 @@ export class ProductRepo implements IProductRepository {
   async reorderProductImages(productId: string, imageIds: string[]): Promise<void> {
     for (let i = 0; i < imageIds.length; i++) {
       await query(
-        'UPDATE "productImage" SET "sortOrder" = $1, "updatedAt" = $2 WHERE "productImageId" = $3 AND "productId" = $4',
+        'UPDATE "productImage" SET position = $1, "updatedAt" = $2 WHERE "productImageId" = $3 AND "productId" = $4',
         [i, new Date().toISOString(), imageIds[i], productId]
       );
     }
@@ -373,8 +373,9 @@ export class ProductRepo implements IProductRepository {
       }
     }
     if (filters?.categoryId) {
-      conditions.push(`"brandId" = $${paramIndex++}`);
-      params.push(filters.categoryId);
+      // Category filtering not implemented in current schema
+      // conditions.push(`"brandId" = $${paramIndex++}`);
+      // params.push(filters.categoryId);
     }
     if (filters?.brandId) {
       conditions.push(`"brandId" = $${paramIndex++}`);
@@ -419,7 +420,7 @@ export class ProductRepo implements IProductRepository {
       sku: row.sku,
       slug: row.slug,
       productTypeId: row.type,
-      categoryId: row.brandId,
+      categoryId: undefined, // Not in current schema
       brandId: row.brandId,
       merchantId: row.merchantId,
       status: row.status as ProductStatus,
@@ -495,7 +496,7 @@ export class ProductRepo implements IProductRepository {
       lowStockThreshold: parseInt(row.lowStockThreshold || 5),
       isDefault: Boolean(row.isDefault),
       isActive: Boolean(row.isActive),
-      position: parseInt(row.sortOrder || 0),
+      position: parseInt(row.position || 0),
       barcode: row.barcode,
       externalId: row.externalId,
       metadata: row.metadata ? (typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata) : undefined,

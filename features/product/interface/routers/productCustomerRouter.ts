@@ -46,31 +46,31 @@ router.get('/products/:productId/similar', productSearchController.findSimilar.b
 
 /**
  * Get featured products
- * GET /api/products/featured
+ * GET /products/featured
  */
 router.get('/products/featured', productController.getFeaturedProducts);
 
 /**
  * Get products by category
- * GET /api/products/category/:categoryId
+ * GET /products/category/:categoryId
  */
 router.get('/products/category/:categoryId', productController.getProductsByCategory);
 
 /**
  * List products
- * GET /api/products
+ * GET /products
  */
 router.get('/products', productController.listProducts);
 
 /**
  * Get related products
- * GET /api/products/:productId/related
+ * GET /products/:productId/related
  */
 router.get('/products/:productId/related', productController.getRelatedProducts);
 
 /**
  * Get product by ID or slug
- * GET /api/products/:identifier
+ * GET /products/:identifier
  */
 router.get('/products/:identifier', productController.getProduct);
 

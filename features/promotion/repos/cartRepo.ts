@@ -1,192 +1,89 @@
 import { queryOne, query } from "../../../libs/db";
+import { Table, CartPromotion } from "../../../libs/db/types";
 
-export type CartPromotionCreateProps = {
-  cartId: string;
-  promotionId: string;
-  discountAmount: number;
-  status: "applied" | "cancelled" | "pending";
-  createdBy: string;
-  updatedBy: string;
-};
+// Use CartPromotion type directly from libs/db/types.ts
+export type { CartPromotion };
 
-export type CartPromotionUpdateProps = Partial<Omit<CartPromotionCreateProps, 'cartId' | 'promotionId'>>;
-
-export interface CartPromotion {
-  cartPromotionId: string;
-  cartId: string;
-  promotionId: string;
-  discountAmount: number;
-  status: "applied" | "cancelled" | "pending";
-  createdDate: Date;
-  updatedDate: Date;
-  deletedDate?: Date;
-  deletedFlag: boolean;
-  createdBy: string;
-  updatedBy: string;
-  deletedBy?: string;
-}
+type CreateProps = Pick<CartPromotion, "basketId" | "promotionId" | "discountAmount" | "status"> & 
+  Partial<Pick<CartPromotion, "promotionCouponId" | "couponCode" | "currencyCode" | "appliedBy">>;
+type UpdateProps = Partial<Pick<CartPromotion, "discountAmount" | "status">>;
 
 export class CartPromotionRepo {
-  async create(props: CartPromotionCreateProps): Promise<CartPromotion> {
-    const {
-      cartId,
-      promotionId,
-      discountAmount,
-      status,
-      createdBy,
-      updatedBy
-    } = props;
+  async create(props: CreateProps): Promise<CartPromotion> {
+    const now = new Date();
+    const row = await queryOne<CartPromotion>(
+      `INSERT INTO "${Table.CartPromotion}" 
+       ("basketId", "promotionId", "promotionCouponId", "couponCode", "discountAmount", "currencyCode", "status", "appliedBy", "appliedAt", "createdAt", "updatedAt") 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) 
+       RETURNING *`,
+      [
+        props.basketId,
+        props.promotionId,
+        props.promotionCouponId || null,
+        props.couponCode || null,
+        props.discountAmount,
+        props.currencyCode || 'USD',
+        props.status,
+        props.appliedBy || null,
+        now,
+        now,
+        now
+      ]
+    );
 
-    const sql = `
-      INSERT INTO "public"."cart_promotion" (
-        "cart_id", "promotion_id", "discountAmount", "status", 
-        "created_date", "updated_date", "deleted_flag", 
-        "created_by", "updated_by"
-      ) VALUES ($1, $2, $3, $4, NOW(), NOW(), false, $5, $6) 
-      RETURNING 
-        cart_promotion_id AS "cartPromotionId",
-        cart_id AS "cartId",
-        promotion_id AS "promotionId",
-        discount_amount AS "discountAmount",
-        status,
-        created_date AS "createdDate",
-        updated_date AS "updatedDate",
-        deleted_date AS "deletedDate",
-        deleted_flag AS "deletedFlag",
-        created_by AS "createdBy",
-        updated_by AS "updatedBy",
-        deleted_by AS "deletedBy";
-    `;
-
-    const data = await queryOne<CartPromotion>(sql, [
-      cartId,
-      promotionId,
-      discountAmount,
-      status,
-      createdBy,
-      updatedBy
-    ]);
-
-    if (!data) {
+    if (!row) {
       throw new Error('Cart promotion not saved');
     }
-
-    return data;
+    return row;
   }
 
-  async update(props: CartPromotionUpdateProps, cartPromotionId: string): Promise<CartPromotion> {
-    // Create dynamic query based on provided properties
-    const updateFields: string[] = [];
-    const params: any[] = [];
-    let paramIndex = 1;
+  async update(id: string, props: UpdateProps): Promise<CartPromotion> {
+    const now = new Date();
+    const updates: string[] = ['"updatedAt" = $1'];
+    const values: any[] = [now];
+    let paramIndex = 2;
 
-    // Map camelCase property names to snake_case column names
-    const fieldMappings: Record<string, string> = {
-      discountAmount: 'discount_amount',
-      createdDate: 'created_date',
-      updatedDate: 'updated_date',
-      deletedDate: 'deleted_date',
-      deletedFlag: 'deleted_flag',
-      createdBy: 'created_by',
-      updatedBy: 'updated_by',
-      deletedBy: 'deleted_by'
-    };
-
-    // Add each property that exists in props to the update query
-    Object.entries(props).forEach(([key, value]) => {
+    for (const [key, value] of Object.entries(props)) {
       if (value !== undefined) {
-        const dbField = fieldMappings[key] || key;
-        updateFields.push(`"${dbField}" = $${paramIndex}`);
-        params.push(value);
-        paramIndex++;
+        updates.push(`"${key}" = $${paramIndex++}`);
+        values.push(value);
       }
-    });
-
-    // Always update the updatedDate
-    updateFields.push(`"updated_date" = NOW()`);
-    
-    // Add the cartPromotionId as the last parameter
-    params.push(cartPromotionId);
-
-    const sql = `
-      UPDATE "public"."cart_promotion"
-      SET ${updateFields.join(', ')}
-      WHERE "cart_promotion_id" = $${paramIndex}
-      RETURNING 
-        cart_promotion_id AS "cartPromotionId",
-        cart_id AS "cartId",
-        promotion_id AS "promotionId",
-        discount_amount AS "discountAmount",
-        status,
-        created_date AS "createdDate",
-        updated_date AS "updatedDate",
-        deleted_date AS "deletedDate",
-        deleted_flag AS "deletedFlag",
-        created_by AS "createdBy",
-        updated_by AS "updatedBy",
-        deleted_by AS "deletedBy";
-    `;
-
-    const data = await queryOne<CartPromotion>(sql, params);
-
-    if (!data) {
-      throw new Error('Cart promotion not found');
     }
 
-    return data;
+    values.push(id);
+    const row = await queryOne<CartPromotion>(
+      `UPDATE "${Table.CartPromotion}" 
+       SET ${updates.join(', ')} 
+       WHERE "cartPromotionId" = $${paramIndex} 
+       RETURNING *`,
+      values
+    );
+
+    if (!row) {
+      throw new Error('Cart promotion not found');
+    }
+    return row;
   }
 
-  async getById(cartPromotionId: string): Promise<CartPromotion | null> {
-    const sql = `
-      SELECT 
-        cart_promotion_id AS "cartPromotionId",
-        cart_id AS "cartId",
-        promotion_id AS "promotionId",
-        discount_amount AS "discountAmount",
-        status,
-        created_date AS "createdDate",
-        updated_date AS "updatedDate",
-        deleted_date AS "deletedDate",
-        deleted_flag AS "deletedFlag",
-        created_by AS "createdBy",
-        updated_by AS "updatedBy",
-        deleted_by AS "deletedBy"
-      FROM "public"."cart_promotion"
-      WHERE "cart_promotion_id" = $1 AND "deleted_flag" = false;
-    `;
-
-    return await queryOne<CartPromotion>(sql, [cartPromotionId]);
+  async getById(id: string): Promise<CartPromotion | null> {
+    return queryOne<CartPromotion>(
+      `SELECT * FROM "${Table.CartPromotion}" WHERE "cartPromotionId" = $1`,
+      [id]
+    );
   }
 
-  async getByCartId(cartId: string): Promise<CartPromotion[] | null> {
-    const sql = `
-      SELECT 
-        cart_promotion_id AS "cartPromotionId",
-        cart_id AS "cartId",
-        promotion_id AS "promotionId",
-        discount_amount AS "discountAmount",
-        status,
-        created_date AS "createdDate",
-        updated_date AS "updatedDate",
-        deleted_date AS "deletedDate",
-        deleted_flag AS "deletedFlag",
-        created_by AS "createdBy",
-        updated_by AS "updatedBy",
-        deleted_by AS "deletedBy"
-      FROM "public"."cart_promotion"
-      WHERE "cart_id" = $1 AND "deleted_flag" = false;
-    `;
-
-    return await query<CartPromotion[]>(sql, [cartId]);
+  async getByBasketId(basketId: string): Promise<CartPromotion[]> {
+    return await query<CartPromotion[]>(
+      `SELECT * FROM "${Table.CartPromotion}" WHERE "basketId" = $1`,
+      [basketId]
+    ) || [];
   }
 
-  async delete(cartPromotionId: string, deletedBy: string): Promise<void> {
-    const sql = `
-      UPDATE "public"."cart_promotion"
-      SET "deleted_flag" = true, "deleted_date" = NOW(), "deleted_by" = $1
-      WHERE "cart_promotion_id" = $2;
-    `;
-
-    await queryOne(sql, [deletedBy, cartPromotionId]);
+  async delete(id: string): Promise<boolean> {
+    const result = await query(
+      `DELETE FROM "${Table.CartPromotion}" WHERE "cartPromotionId" = $1`,
+      [id]
+    );
+    return result !== null;
   }
 }

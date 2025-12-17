@@ -3,9 +3,9 @@
  * Listens to platform events and tracks them for analytics
  */
 
-import { eventBus, EventType } from '../../../libs/events/eventBus';
-import * as reportingRepo from '../repos/reportingRepo';
-import * as analyticsRepo from '../repos/analyticsRepo';
+import { eventBus, EventType } from '../libs/events/eventBus';
+import * as reportingRepo from '../features/analytics/repos/reportingRepo';
+import * as analyticsRepo from '../features/analytics/repos/analyticsRepo';
 
 // ============================================================================
 // Event Handlers

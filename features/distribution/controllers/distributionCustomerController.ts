@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { DistributionRepo } from '../repos/distributionRepo';
+import { DistributionWarehouse, DistributionShippingMethod, DistributionShippingZone } from '../../../libs/db/types';
 
 // Create a single instance of the repo to be used by all functions
 const distributionRepo = new DistributionRepo();
@@ -9,11 +10,11 @@ const distributionRepo = new DistributionRepo();
  */
 export const getActiveDistributionCenters = async (req: Request, res: Response): Promise<void> => {
   try {
-    const centers = await distributionRepo.findActiveDistributionCenters();
+    const centers = await distributionRepo.findActiveWarehouses();
     
     // Return limited public information
-    const publicCenters = centers.map(center => ({
-      id: center.id,
+    const publicCenters = centers.map((center: DistributionWarehouse) => ({
+      id: center.distributionWarehouseId,
       name: center.name,
       city: center.city,
       state: center.state,
@@ -41,12 +42,12 @@ export const getActiveShippingMethods = async (req: Request, res: Response): Pro
     const methods = await distributionRepo.findActiveShippingMethods();
     
     // Return limited public information
-    const publicMethods = methods.map(method => ({
-      id: method.id,
+    const publicMethods = methods.map((method: DistributionShippingMethod) => ({
+      id: method.distributionShippingMethodId,
       name: method.name,
-      carrier: method.carrier,
-      estimatedDeliveryDays: method.estimatedDeliveryDays,
-      basePrice: method.basePrice
+      code: method.code,
+      domesticInternational: method.domesticInternational,
+      estimatedDeliveryDays: method.estimatedDeliveryDays
     }));
     
     res.status(200).json({
@@ -81,17 +82,11 @@ export const getAvailableShippingMethods = async (req: Request, res: Response): 
     const zones = await distributionRepo.findActiveShippingZones();
     
     // Find matching zones based on address
-    const matchingZones = zones.filter(zone => {
-      // Check if country matches
-      const countryMatch = zone.countries.includes(country as string);
-      
-      // Check if region matches (if provided and zone has regions)
-      const regionMatch = !region || !zone.regions.length || zone.regions.includes(region as string);
-      
-      // Check if postal code matches (if provided and zone has postal codes)
-      const postalMatch = !postalCode || !zone.postalCodes.length || zone.postalCodes.includes(postalCode as string);
-      
-      return countryMatch && regionMatch && postalMatch;
+    const matchingZones = zones.filter((zone: DistributionShippingZone) => {
+      const locations = (zone.locations || []) as string[];
+      const countryMatch = locations.includes(country as string);
+      // Basic match on country only for now; extend as needed for regions/postal codes using locations content
+      return countryMatch;
     });
     
     // If no matching zones, return default shipping methods
@@ -106,7 +101,7 @@ export const getAvailableShippingMethods = async (req: Request, res: Response): 
         return;
       }
       
-      const defaultMethod = await distributionRepo.findShippingMethodById(defaultRule.shippingMethodId);
+      const defaultMethod = await distributionRepo.findShippingMethodById(defaultRule.distributionShippingMethodId!);
       
       if (!defaultMethod) {
         res.status(404).json({
@@ -119,18 +114,18 @@ export const getAvailableShippingMethods = async (req: Request, res: Response): 
       res.status(200).json({
         success: true,
         data: [{
-          id: defaultMethod.id,
+          id: defaultMethod.distributionShippingMethodId,
           name: defaultMethod.name,
-          carrier: defaultMethod.carrier,
-          estimatedDeliveryDays: defaultMethod.estimatedDeliveryDays,
-          basePrice: defaultMethod.basePrice
+          code: defaultMethod.code,
+          domesticInternational: defaultMethod.domesticInternational,
+          estimatedDeliveryDays: defaultMethod.estimatedDeliveryDays
         }]
       });
       return;
     }
     
     // Get rules for matching zones
-    const zoneIds = matchingZones.map(zone => zone.id);
+    const zoneIds = matchingZones.map((zone: DistributionShippingZone) => zone.distributionShippingZoneId);
     const availableMethods = [];
     
     // For each zone, get the applicable rules and their shipping methods
@@ -138,15 +133,15 @@ export const getAvailableShippingMethods = async (req: Request, res: Response): 
       const rules = await distributionRepo.findDistributionRulesByZone(zoneId);
       
       for (const rule of rules) {
-        const method = await distributionRepo.findShippingMethodById(rule.shippingMethodId);
+        const method = await distributionRepo.findShippingMethodById(rule.distributionShippingMethodId!);
         
         if (method && method.isActive) {
           availableMethods.push({
-            id: method.id,
+            id: method.distributionShippingMethodId,
             name: method.name,
-            carrier: method.carrier,
-            estimatedDeliveryDays: method.estimatedDeliveryDays,
-            basePrice: method.basePrice
+            code: method.code,
+            domesticInternational: method.domesticInternational,
+            estimatedDeliveryDays: method.estimatedDeliveryDays
           });
         }
       }

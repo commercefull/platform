@@ -73,7 +73,9 @@ export const approveCompany: AsyncHandler = async (req, res, next) => {
   try {
     const adminId = (req as any).adminId || (req as any).userId;
     await companyRepo.approveCompany(req.params.id, adminId);
-    res.json({ success: true, message: 'Company approved' });
+    // Return the updated company data
+    const company = await companyRepo.getCompany(req.params.id);
+    res.json({ success: true, data: company, message: 'Company approved' });
   } catch (error: any) {
     console.error('Approve company error:', error);
     res.status(400).json({ success: false, message: error.message });
@@ -83,7 +85,9 @@ export const approveCompany: AsyncHandler = async (req, res, next) => {
 export const suspendCompany: AsyncHandler = async (req, res, next) => {
   try {
     await companyRepo.suspendCompany(req.params.id);
-    res.json({ success: true, message: 'Company suspended' });
+    // Return the updated company data
+    const company = await companyRepo.getCompany(req.params.id);
+    res.json({ success: true, data: company, message: 'Company suspended' });
   } catch (error: any) {
     console.error('Suspend company error:', error);
     res.status(400).json({ success: false, message: error.message });
@@ -243,9 +247,16 @@ export const getQuote: AsyncHandler = async (req, res, next) => {
 
 export const createQuote: AsyncHandler = async (req, res, next) => {
   try {
+    // Validate required fields
+    if (!req.body.b2bCompanyId && !req.body.companyId) {
+      res.status(400).json({ success: false, message: 'companyId is required' });
+      return;
+    }
+    
     const salesRepId = (req as any).userId || (req as any).merchantId;
     const quote = await quoteRepo.saveQuote({
       salesRepId,
+      b2bCompanyId: req.body.b2bCompanyId || req.body.companyId,
       ...req.body
     });
     res.status(201).json({ success: true, data: quote });
@@ -271,7 +282,9 @@ export const updateQuote: AsyncHandler = async (req, res, next) => {
 export const sendQuote: AsyncHandler = async (req, res, next) => {
   try {
     await quoteRepo.sendQuote(req.params.id);
-    res.json({ success: true, message: 'Quote sent' });
+    // Return the updated quote data
+    const quote = await quoteRepo.getQuote(req.params.id);
+    res.json({ success: true, data: quote, message: 'Quote sent' });
   } catch (error: any) {
     console.error('Send quote error:', error);
     res.status(400).json({ success: false, message: error.message });

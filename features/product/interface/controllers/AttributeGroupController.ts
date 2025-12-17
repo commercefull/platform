@@ -113,7 +113,7 @@ export class AttributeGroupController {
         name,
         code,
         description: description || '',
-        sortOrder: sortOrder || 0
+        position: sortOrder || 0
       });
 
       res.status(201).json({
@@ -150,7 +150,7 @@ export class AttributeGroupController {
       const group = await attributeGroupRepo.update(id, {
         name,
         description,
-        sortOrder
+        position: sortOrder
       });
 
       res.json({

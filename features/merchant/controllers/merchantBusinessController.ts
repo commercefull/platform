@@ -348,17 +348,10 @@ export const getMerchantPaymentInfo = async (req: Request, res: Response): Promi
 
       const paymentInfo = await merchantRepo.findPaymentInfoByMerchantId(merchantId);
 
-      if (!paymentInfo) {
-        res.status(404).json({
-          success: false,
-          message: `Payment information for merchant with ID ${merchantId} not found`
-        });
-        return;
-      }
-
+      // Return the array of payment info (can be empty)
       res.status(200).json({
         success: true,
-        data: paymentInfo
+        data: paymentInfo || []
       });
     } catch (error) {
       console.error('Error fetching merchant payment info:', error);
@@ -396,9 +389,9 @@ export const addMerchantPaymentInfo = async (req: Request, res: Response): Promi
         return;
       }
 
-      // Check if payment info already exists
+      // Check if payment info already exists (returns array, so check length)
       const existingPaymentInfo = await merchantRepo.findPaymentInfoByMerchantId(merchantId);
-      if (existingPaymentInfo) {
+      if (existingPaymentInfo && existingPaymentInfo.length > 0) {
         res.status(409).json({
           success: false,
           message: `Payment information already exists for merchant with ID ${merchantId}`

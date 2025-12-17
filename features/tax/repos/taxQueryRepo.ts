@@ -27,100 +27,6 @@ const TABLES = {
   CUSTOMER_TAX_EXEMPTION: Table.CustomerTaxExemption
 };
 
-// Field mapping dictionaries for database to TypeScript conversion
-const taxRateFields: Record<string, string> = {
-  taxRateId: 'taxRateId',
-  taxCategoryId: 'taxCategoryId',
-  taxZoneId: 'taxZoneId',
-  name: 'name',
-  description: 'description',
-  rate: 'rate',
-  type: 'type',
-  priority: 'priority',
-  isCompound: 'isCompound',
-  includeInPrice: 'includeInPrice',
-  isShippingTaxable: 'isShippingTaxable',
-  fixedAmount: 'fixedAmount',
-  minimumAmount: 'minimumAmount',
-  maximumAmount: 'maximumAmount',
-  threshold: 'threshold',
-  startDate: 'startDate',
-  endDate: 'endDate',
-  isActive: 'isActive',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
-const taxZoneFields: Record<string, string> = {
-  taxZoneId: 'taxZoneId',
-  name: 'name',
-  code: 'code',
-  description: 'description',
-  isDefault: 'isDefault',
-  countries: 'countries',
-  states: 'states',
-  postcodes: 'postcodes',
-  cities: 'cities',
-  isActive: 'isActive',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
-const taxCategoryFields: Record<string, string> = {
-  taxCategoryId: 'taxCategoryId',
-  name: 'name',
-  code: 'code',
-  description: 'description',
-  isDefault: 'isDefault',
-  sortOrder: 'sortOrder',
-  isActive: 'isActive',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
-const customerTaxExemptionFields: Record<string, string> = {
-  id: 'id', // This one might be snake_case in other migrations, but let's assume consistency for now or check migration 20240805000509
-  customerId: 'customerId',
-  taxCategoryId: 'taxCategoryId',
-  exemptionNumber: 'exemptionNumber',
-  exemptionType: 'exemptionType',
-  issuingAuthority: 'issuingAuthority',
-  validFrom: 'validFrom',
-  validUntil: 'validUntil',
-  documentUrl: 'documentUrl',
-  notes: 'notes',
-  isVerified: 'isVerified',
-  verifiedBy: 'verifiedBy',
-  verifiedAt: 'verifiedAt',
-  status: 'status',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
-/**
- * Transform a database record to a TypeScript object using field mapping
- */
-function transformDbToTs<T>(dbRecord: any, fieldMap: Record<string, string>): T {
-  if (!dbRecord) return null as any;
-  
-  const result: any = {};
-  
-  Object.entries(fieldMap).forEach(([tsKey, dbKey]) => {
-    if (dbRecord[dbKey] !== undefined) {
-      result[tsKey] = dbRecord[dbKey];
-    }
-  });
-  
-  return result as T;
-}
-
-/**
- * Transform an array of database records to TypeScript objects
- */
-function transformArrayDbToTs<T>(dbRecords: any[], fieldMap: Record<string, string>): T[] {
-  if (!dbRecords || !Array.isArray(dbRecords)) return [];
-  return dbRecords.map(record => transformDbToTs<T>(record, fieldMap));
-}
 
 /**
  * Repository for tax-related read operations only
@@ -130,11 +36,11 @@ export class TaxQueryRepo {
   // Tax Rate query methods
   async findTaxRateById(id: string): Promise<TaxRate | null> {
     const result = await queryOne<any>(
-      `SELECT * FROM "public"."tax_rate" WHERE "id" = $1`,
+      `SELECT * FROM "taxRate" WHERE "taxRateId" = $1`,
       [id]
     );
-    
-    return transformDbToTs<TaxRate>(result, taxRateFields);
+    if (!result) return null;
+    return { ...result, id: result.taxRateId } as TaxRate;
   }
 
   async findAllTaxRates(
@@ -147,8 +53,8 @@ export class TaxQueryRepo {
     const params: any[] = [status];
     let sql = `
       SELECT tr.*
-      FROM "public"."tax_rate" tr
-      JOIN "public"."tax_zone" tz ON tr."tax_zone_id" = tz."id"
+      FROM "taxRate" tr
+      JOIN "taxZone" tz ON tr."taxZoneId" = tz."taxZoneId"
       WHERE tr."isActive" = $1
     `;
     
@@ -167,7 +73,7 @@ export class TaxQueryRepo {
     params.push(limit, offset);
     
     const results = await query<any[]>(sql, params);
-    return transformArrayDbToTs<TaxRate>(results || [], taxRateFields);
+    return (results || []).map(r => ({ ...r, id: r.taxRateId })) as TaxRate[];
   }
   
   async findTaxRatesByCategoryAndZone(
@@ -177,34 +83,34 @@ export class TaxQueryRepo {
   ): Promise<TaxRate[]> {
     const results = await query<any[]>(
       `SELECT * 
-       FROM "public"."tax_rate" 
-       WHERE "tax_category_id" = $1 
-       AND "tax_zone_id" = $2 
+       FROM "taxRate" 
+       WHERE "taxCategoryId" = $1 
+       AND "taxZoneId" = $2 
        AND "isActive" = $3
        ORDER BY "priority" DESC, "rate" ASC`,
       [categoryId, zoneId, status]
     );
     
-    return transformArrayDbToTs<TaxRate>(results || [], taxRateFields);
+    return (results || []).map(r => ({ ...r, id: r.taxRateId })) as TaxRate[];
   }
 
   // Tax Zone query methods
   async findTaxZoneById(id: string): Promise<TaxZone | null> {
     const result = await queryOne<any>(
-      `SELECT * FROM "public"."tax_zone" WHERE "id" = $1`,
+      `SELECT * FROM "taxZone" WHERE "taxZoneId" = $1`,
       [id]
     );
-    
-    return transformDbToTs<TaxZone>(result, taxZoneFields);
+    if (!result) return null;
+    return { ...result, id: result.taxZoneId } as TaxZone;
   }
   
   async findTaxZoneByCode(code: string): Promise<TaxZone | null> {
     const result = await queryOne<any>(
-      `SELECT * FROM "public"."tax_zone" WHERE "code" = $1`,
+      `SELECT * FROM "taxZone" WHERE "code" = $1`,
       [code]
     );
-    
-    return transformDbToTs<TaxZone>(result, taxZoneFields);
+    if (!result) return null;
+    return { ...result, id: result.taxZoneId } as TaxZone;
   }
   
   async findAllTaxZones(
@@ -214,14 +120,14 @@ export class TaxQueryRepo {
   ): Promise<TaxZone[]> {
     const results = await query<any[]>(
       `SELECT * 
-       FROM "public"."tax_zone" 
+       FROM "taxZone" 
        WHERE "isActive" = $1
        ORDER BY "isDefault" DESC, "name" ASC
        LIMIT $2 OFFSET $3`,
       [status, limit, offset]
     );
     
-    return transformArrayDbToTs<TaxZone>(results || [], taxZoneFields);
+    return (results || []).map(r => ({ ...r, id: r.taxZoneId })) as TaxZone[];
   }
   
   async findTaxZoneForAddress(
@@ -231,7 +137,7 @@ export class TaxQueryRepo {
     city?: string
   ): Promise<TaxZone | null> {
     let sql = `
-      SELECT * FROM "public"."tax_zone"
+      SELECT * FROM "taxZone"
       WHERE "isActive" = true
       AND $1 = ANY("countries")
     `;
@@ -278,26 +184,27 @@ export class TaxQueryRepo {
       LIMIT 1`;
     
     const result = await queryOne<any>(sql, params);
-    return transformDbToTs<TaxZone>(result, taxZoneFields);
+    if (!result) return null;
+    return { ...result, id: result.taxZoneId } as TaxZone;
   }
 
   // Tax Category query methods
   async findTaxCategoryById(id: string): Promise<TaxCategory | null> {
     const result = await queryOne<any>(
-      `SELECT * FROM "public"."tax_category" WHERE "id" = $1`,
+      `SELECT * FROM "taxCategory" WHERE "taxCategoryId" = $1`,
       [id]
     );
-    
-    return transformDbToTs<TaxCategory>(result, taxCategoryFields);
+    if (!result) return null;
+    return { ...result, id: result.taxCategoryId } as TaxCategory;
   }
   
   async findTaxCategoryByCode(code: string): Promise<TaxCategory | null> {
     const result = await queryOne<any>(
-      `SELECT * FROM "public"."tax_category" WHERE "code" = $1`,
+      `SELECT * FROM "taxCategory" WHERE "code" = $1`,
       [code]
     );
-    
-    return transformDbToTs<TaxCategory>(result, taxCategoryFields);
+    if (!result) return null;
+    return { ...result, id: result.taxCategoryId } as TaxCategory;
   }
   
   async findAllTaxCategories(
@@ -307,25 +214,25 @@ export class TaxQueryRepo {
   ): Promise<TaxCategory[]> {
     const results = await query<any[]>(
       `SELECT * 
-       FROM "public"."tax_category" 
+       FROM "taxCategory" 
        WHERE "isActive" = $1
-       ORDER BY "sort_order" ASC, "name" ASC
+       ORDER BY "sortOrder" ASC, "name" ASC
        LIMIT $2 OFFSET $3`,
       [status, limit, offset]
     );
     
-    return transformArrayDbToTs<TaxCategory>(results || [], taxCategoryFields);
+    return (results || []).map(r => ({ ...r, id: r.taxCategoryId })) as TaxCategory[];
   }
   
   async findDefaultTaxCategory(): Promise<TaxCategory | null> {
     const result = await queryOne<any>(
       `SELECT * 
-       FROM "public"."tax_category" 
+       FROM "taxCategory" 
        WHERE "isDefault" = true AND "isActive" = true
        LIMIT 1`
     );
-    
-    return transformDbToTs<TaxCategory>(result, taxCategoryFields);
+    if (!result) return null;
+    return { ...result, id: result.taxCategoryId } as TaxCategory;
   }
 
   // Customer Tax Exemption query methods
@@ -335,15 +242,15 @@ export class TaxQueryRepo {
   ): Promise<CustomerTaxExemption[]> {
     const results = await query<any[]>(
       `SELECT * 
-       FROM "public"."customer_tax_exemption" 
+       FROM "customerTaxExemption" 
        WHERE "customerId" = $1 
        AND "status" = $2
-       AND ("expiry_date" IS NULL OR "expiry_date" > CURRENT_TIMESTAMP)
-       ORDER BY "tax_category_id", "start_date" DESC`,
+       AND ("expiryDate" IS NULL OR "expiryDate" > CURRENT_TIMESTAMP)
+       ORDER BY "taxCategoryId", "startDate" DESC`,
       [customerId, status]
     );
     
-    return transformArrayDbToTs<CustomerTaxExemption>(results || [], customerTaxExemptionFields);
+    return (results || []).map(r => ({ ...r, id: r.customerTaxExemptionId })) as CustomerTaxExemption[];
   }
   
   /**
@@ -363,16 +270,16 @@ export class TaxQueryRepo {
   ): Promise<CustomerTaxExemption[]> {
     const results = await query<any[]>(
       `SELECT * 
-       FROM "public"."customer_tax_exemption" 
+       FROM "customerTaxExemption" 
        WHERE "customerId" = $1 
-       AND "tax_category_id" = $2
+       AND "taxCategoryId" = $2
        AND "status" = $3
-       AND ("expiry_date" IS NULL OR "expiry_date" > CURRENT_TIMESTAMP)
-       ORDER BY "start_date" DESC`,
+       AND ("expiryDate" IS NULL OR "expiryDate" > CURRENT_TIMESTAMP)
+       ORDER BY "startDate" DESC`,
       [customerId, taxCategoryId, status]
     );
     
-    return transformArrayDbToTs<CustomerTaxExemption>(results || [], customerTaxExemptionFields);
+    return (results || []).map(r => ({ ...r, id: r.customerTaxExemptionId })) as CustomerTaxExemption[];
   }
   
   /**

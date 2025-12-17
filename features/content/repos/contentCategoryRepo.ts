@@ -4,72 +4,16 @@
  */
 
 import { queryOne, query } from '../../../libs/db';
+import { ContentCategory } from '../../../libs/db/types';
 import { unixTimestamp } from '../../../libs/date';
 
 // ============================================================================
-// Interfaces
+// Types
 // ============================================================================
 
-export interface ContentCategory {
-  id: string;
-  name: string;
-  slug: string;
-  parentId?: string;
-  description?: string;
-  featuredImage?: string;
-  metaTitle?: string;
-  metaDescription?: string;
-  sortOrder: number;
-  isActive: boolean;
-  path?: string;
-  depth: number;
-  createdAt: string;
-  updatedAt: string;
-}
+export type ContentCategoryCreateParams = Omit<ContentCategory, 'contentCategoryId' | 'createdAt' | 'updatedAt'>;
+export type ContentCategoryUpdateParams = Partial<Omit<ContentCategory, 'contentCategoryId' | 'createdAt' | 'updatedAt'>>;
 
-export type ContentCategoryCreateParams = Omit<ContentCategory, 'id' | 'createdAt' | 'updatedAt'>;
-export type ContentCategoryUpdateParams = Partial<Omit<ContentCategory, 'id' | 'createdAt' | 'updatedAt'>>;
-
-// ============================================================================
-// Field Mappings
-// ============================================================================
-
-const categoryFields: Record<string, string> = {
-  id: 'contentCategoryId',
-  name: 'name',
-  slug: 'slug',
-  parentId: 'parentId',
-  description: 'description',
-  featuredImage: 'featuredImage',
-  metaTitle: 'metaTitle',
-  metaDescription: 'metaDescription',
-  sortOrder: 'sortOrder',
-  isActive: 'isActive',
-  path: 'path',
-  depth: 'depth',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
-// ============================================================================
-// Transform Functions
-// ============================================================================
-
-function transformDbToTs<T>(dbRecord: any, fieldMap: Record<string, string>): T {
-  if (!dbRecord) return null as any;
-  
-  const result: any = {};
-  for (const [tsKey, dbKey] of Object.entries(fieldMap)) {
-    if (dbRecord[dbKey] !== undefined) {
-      result[tsKey] = dbRecord[dbKey];
-    }
-  }
-  return result as T;
-}
-
-function transformArrayDbToTs<T>(dbRecords: any[], fieldMap: Record<string, string>): T[] {
-  return dbRecords.map(record => transformDbToTs<T>(record, fieldMap));
-}
 
 // ============================================================================
 // Repository
@@ -77,19 +21,17 @@ function transformArrayDbToTs<T>(dbRecords: any[], fieldMap: Record<string, stri
 
 export class ContentCategoryRepo {
   async findCategoryById(id: string): Promise<ContentCategory | null> {
-    const result = await queryOne<any>(
+    return queryOne<ContentCategory>(
       'SELECT * FROM "contentCategory" WHERE "contentCategoryId" = $1',
       [id]
     );
-    return transformDbToTs<ContentCategory>(result, categoryFields);
   }
 
   async findCategoryBySlug(slug: string): Promise<ContentCategory | null> {
-    const result = await queryOne<any>(
+    return queryOne<ContentCategory>(
       'SELECT * FROM "contentCategory" WHERE "slug" = $1',
       [slug]
     );
-    return transformDbToTs<ContentCategory>(result, categoryFields);
   }
 
   async findAllCategories(
@@ -124,8 +66,8 @@ export class ContentCategoryRepo {
     sql += ` ORDER BY "sortOrder" ASC, "name" ASC LIMIT $${paramIndex++} OFFSET $${paramIndex++}`;
     params.push(limit, offset);
 
-    const results = await query<any[]>(sql, params);
-    return transformArrayDbToTs<ContentCategory>(results || [], categoryFields);
+    const results = await query<ContentCategory[]>(sql, params);
+    return results || [];
   }
 
   async findRootCategories(isActive?: boolean): Promise<ContentCategory[]> {
@@ -147,15 +89,15 @@ export class ContentCategoryRepo {
 
     sql += ' ORDER BY "depth" ASC, "sortOrder" ASC, "name" ASC';
 
-    const results = await query<any[]>(sql, params);
-    return transformArrayDbToTs<ContentCategory>(results || [], categoryFields);
+    const results = await query<ContentCategory[]>(sql, params);
+    return results || [];
   }
 
   async createCategory(params: ContentCategoryCreateParams): Promise<ContentCategory> {
     const now = unixTimestamp();
     
     // Check slug uniqueness within parent
-    const existing = await queryOne<any>(
+    const existing = await queryOne<ContentCategory>(
       'SELECT * FROM "contentCategory" WHERE "slug" = $1 AND ("parentId" = $2 OR ($2 IS NULL AND "parentId" IS NULL))',
       [params.slug, params.parentId || null]
     );
@@ -175,7 +117,7 @@ export class ContentCategoryRepo {
       }
     }
 
-    const result = await queryOne<any>(
+    const result = await queryOne<ContentCategory>(
       `INSERT INTO "contentCategory" 
       ("name", "slug", "parentId", "description", "featuredImage", "metaTitle", 
        "metaDescription", "sortOrder", "isActive", "path", "depth", "createdAt", "updatedAt") 
@@ -202,7 +144,7 @@ export class ContentCategoryRepo {
       throw new Error('Failed to create category');
     }
 
-    return transformDbToTs<ContentCategory>(result, categoryFields);
+    return result;
   }
 
   async updateCategory(id: string, params: ContentCategoryUpdateParams): Promise<ContentCategory> {
@@ -248,7 +190,7 @@ export class ContentCategoryRepo {
     values.push(now);
     values.push(id);
 
-    const result = await queryOne<any>(
+    const result = await queryOne<ContentCategory>(
       `UPDATE "contentCategory" SET ${updateFields.join(', ')} WHERE "contentCategoryId" = $${paramIndex} RETURNING *`,
       values
     );
@@ -257,7 +199,7 @@ export class ContentCategoryRepo {
       throw new Error(`Failed to update category with ID ${id}`);
     }
 
-    return transformDbToTs<ContentCategory>(result, categoryFields);
+    return result;
   }
 
   async deleteCategory(id: string): Promise<boolean> {

@@ -126,7 +126,7 @@ export async function getQuotes(
   let paramIndex = 1;
 
   if (filters?.companyId) {
-    whereClause += ` AND "companyId" = $${paramIndex++}`;
+    whereClause += ` AND "b2bCompanyId" = $${paramIndex++}`;
     params.push(filters.companyId);
   }
   if (filters?.customerId) {
@@ -328,13 +328,23 @@ export async function getQuoteItems(quoteId: string): Promise<B2bQuoteItem[]> {
   return (rows || []).map(mapToQuoteItem);
 }
 
-export async function saveQuoteItem(item: Partial<B2bQuoteItem> & { b2bQuoteId: string; name: string; unitPrice: number }): Promise<B2bQuoteItem> {
+export async function saveQuoteItem(item: Partial<B2bQuoteItem> & { b2bQuoteId: string }): Promise<B2bQuoteItem> {
   const now = new Date().toISOString();
-  const quantity = item.quantity || 1;
-  const unitPrice = item.unitPrice;
-  const discountAmount = item.discountAmount || 0;
+  
+  // For updates, merge with existing item data
+  let mergedItem = { ...item };
+  if (item.b2bQuoteItemId) {
+    const existingItem = await getQuoteItem(item.b2bQuoteItemId);
+    if (existingItem) {
+      mergedItem = { ...existingItem, ...item };
+    }
+  }
+  
+  const quantity = mergedItem.quantity || 1;
+  const unitPrice = mergedItem.unitPrice || 0;
+  const discountAmount = mergedItem.discountAmount || 0;
   const lineTotal = (quantity * unitPrice) - discountAmount;
-  const taxAmount = lineTotal * ((item.taxRate || 0) / 100);
+  const taxAmount = lineTotal * ((mergedItem.taxRate || 0) / 100);
 
   if (item.b2bQuoteItemId) {
     await query(
@@ -348,18 +358,18 @@ export async function saveQuoteItem(item: Partial<B2bQuoteItem> & { b2bQuoteId: 
         "leadTimeDays" = $22, "customFields" = $23, "metadata" = $24, "updatedAt" = $25
       WHERE "b2bQuoteItemId" = $26`,
       [
-        item.productId, item.productVariantId, item.sku, item.name, item.description,
-        quantity, item.unit || 'each', item.listPrice, unitPrice, item.costPrice,
-        item.discountPercent || 0, discountAmount, lineTotal, item.taxRate || 0,
-        taxAmount, item.isCustomItem || false, item.isPriceOverride || false,
-        item.priceOverrideReason, item.position || 0, item.notes,
-        item.requestedDeliveryDate?.toISOString(), item.leadTimeDays,
-        item.customFields ? JSON.stringify(item.customFields) : null,
-        item.metadata ? JSON.stringify(item.metadata) : null, now, item.b2bQuoteItemId
+        mergedItem.productId, mergedItem.productVariantId, mergedItem.sku, mergedItem.name, mergedItem.description,
+        quantity, mergedItem.unit || 'each', mergedItem.listPrice, unitPrice, mergedItem.costPrice,
+        mergedItem.discountPercent || 0, discountAmount, lineTotal, mergedItem.taxRate || 0,
+        taxAmount, mergedItem.isCustomItem || false, mergedItem.isPriceOverride || false,
+        mergedItem.priceOverrideReason, mergedItem.position || 0, mergedItem.notes,
+        mergedItem.requestedDeliveryDate?.toISOString(), mergedItem.leadTimeDays,
+        mergedItem.customFields ? JSON.stringify(mergedItem.customFields) : null,
+        mergedItem.metadata ? JSON.stringify(mergedItem.metadata) : null, now, item.b2bQuoteItemId
       ]
     );
     
-    await recalculateQuoteTotals(item.b2bQuoteId);
+    await recalculateQuoteTotals(mergedItem.b2bQuoteId);
     return (await getQuoteItem(item.b2bQuoteItemId))!;
   } else {
     const result = await queryOne<Record<string, any>>(

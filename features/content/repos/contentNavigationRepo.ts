@@ -4,108 +4,17 @@
  */
 
 import { queryOne, query } from '../../../libs/db';
+import { ContentNavigation, ContentNavigationItem } from '../../../libs/db/types';
 import { unixTimestamp } from '../../../libs/date';
 
 // ============================================================================
-// Interfaces
+// Types
 // ============================================================================
 
-export interface ContentNavigation {
-  id: string;
-  name: string;
-  slug: string;
-  description?: string;
-  location?: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-  createdBy?: string;
-  updatedBy?: string;
-}
-
-export interface ContentNavigationItem {
-  id: string;
-  navigationId: string;
-  parentId?: string;
-  title: string;
-  type: 'url' | 'page' | 'category' | 'product' | 'blog';
-  url?: string;
-  contentPageId?: string;
-  targetId?: string;
-  targetSlug?: string;
-  icon?: string;
-  cssClasses?: string;
-  openInNewTab: boolean;
-  isActive: boolean;
-  sortOrder: number;
-  conditions?: Record<string, any>;
-  depth: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export type ContentNavigationCreateParams = Omit<ContentNavigation, 'id' | 'createdAt' | 'updatedAt'>;
-export type ContentNavigationUpdateParams = Partial<Omit<ContentNavigation, 'id' | 'createdAt' | 'updatedAt'>>;
-export type ContentNavigationItemCreateParams = Omit<ContentNavigationItem, 'id' | 'createdAt' | 'updatedAt'>;
-export type ContentNavigationItemUpdateParams = Partial<Omit<ContentNavigationItem, 'id' | 'createdAt' | 'updatedAt'>>;
-
-// ============================================================================
-// Field Mappings
-// ============================================================================
-
-const navigationFields: Record<string, string> = {
-  id: 'contentNavigationId',
-  name: 'name',
-  slug: 'slug',
-  description: 'description',
-  location: 'location',
-  isActive: 'isActive',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  createdBy: 'createdBy',
-  updatedBy: 'updatedBy'
-};
-
-const navigationItemFields: Record<string, string> = {
-  id: 'contentNavigationItemId',
-  navigationId: 'navigationId',
-  parentId: 'parentId',
-  title: 'title',
-  type: 'type',
-  url: 'url',
-  contentPageId: 'contentPageId',
-  targetId: 'targetId',
-  targetSlug: 'targetSlug',
-  icon: 'icon',
-  cssClasses: 'cssClasses',
-  openInNewTab: 'openInNewTab',
-  isActive: 'isActive',
-  sortOrder: 'sortOrder',
-  conditions: 'conditions',
-  depth: 'depth',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
-// ============================================================================
-// Transform Functions
-// ============================================================================
-
-function transformDbToTs<T>(dbRecord: any, fieldMap: Record<string, string>): T {
-  if (!dbRecord) return null as any;
-  
-  const result: any = {};
-  for (const [tsKey, dbKey] of Object.entries(fieldMap)) {
-    if (dbRecord[dbKey] !== undefined) {
-      result[tsKey] = dbRecord[dbKey];
-    }
-  }
-  return result as T;
-}
-
-function transformArrayDbToTs<T>(dbRecords: any[], fieldMap: Record<string, string>): T[] {
-  return dbRecords.map(record => transformDbToTs<T>(record, fieldMap));
-}
+export type ContentNavigationCreateParams = Omit<ContentNavigation, 'contentNavigationId' | 'createdAt' | 'updatedAt'>;
+export type ContentNavigationUpdateParams = Partial<Omit<ContentNavigation, 'contentNavigationId' | 'createdAt' | 'updatedAt'>>;
+export type ContentNavigationItemCreateParams = Omit<ContentNavigationItem, 'contentNavigationItemId' | 'createdAt' | 'updatedAt'>;
+export type ContentNavigationItemUpdateParams = Partial<Omit<ContentNavigationItem, 'contentNavigationItemId' | 'createdAt' | 'updatedAt'>>;
 
 // ============================================================================
 // Repository
@@ -114,27 +23,24 @@ function transformArrayDbToTs<T>(dbRecords: any[], fieldMap: Record<string, stri
 export class ContentNavigationRepo {
   // Navigation methods
   async findNavigationById(id: string): Promise<ContentNavigation | null> {
-    const result = await queryOne<any>(
+    return queryOne<ContentNavigation>(
       'SELECT * FROM "contentNavigation" WHERE "contentNavigationId" = $1',
       [id]
     );
-    return transformDbToTs<ContentNavigation>(result, navigationFields);
   }
 
   async findNavigationBySlug(slug: string): Promise<ContentNavigation | null> {
-    const result = await queryOne<any>(
+    return queryOne<ContentNavigation>(
       'SELECT * FROM "contentNavigation" WHERE "slug" = $1',
       [slug]
     );
-    return transformDbToTs<ContentNavigation>(result, navigationFields);
   }
 
   async findNavigationByLocation(location: string): Promise<ContentNavigation | null> {
-    const result = await queryOne<any>(
+    return queryOne<ContentNavigation>(
       'SELECT * FROM "contentNavigation" WHERE "location" = $1 AND "isActive" = true',
       [location]
     );
-    return transformDbToTs<ContentNavigation>(result, navigationFields);
   }
 
   async findAllNavigations(isActive?: boolean): Promise<ContentNavigation[]> {
@@ -148,8 +54,8 @@ export class ContentNavigationRepo {
 
     sql += ' ORDER BY "name" ASC';
 
-    const results = await query<any[]>(sql, params);
-    return transformArrayDbToTs<ContentNavigation>(results || [], navigationFields);
+    const results = await query<ContentNavigation[]>(sql, params);
+    return results || [];
   }
 
   async createNavigation(params: ContentNavigationCreateParams): Promise<ContentNavigation> {
@@ -161,7 +67,7 @@ export class ContentNavigationRepo {
       throw new Error(`Navigation with slug "${params.slug}" already exists`);
     }
 
-    const result = await queryOne<any>(
+    const result = await queryOne<ContentNavigation>(
       `INSERT INTO "contentNavigation" 
       ("name", "slug", "description", "location", "isActive", "createdAt", "updatedAt", "createdBy", "updatedBy") 
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
@@ -183,7 +89,7 @@ export class ContentNavigationRepo {
       throw new Error('Failed to create navigation');
     }
 
-    return transformDbToTs<ContentNavigation>(result, navigationFields);
+    return result;
   }
 
   async updateNavigation(id: string, params: ContentNavigationUpdateParams): Promise<ContentNavigation> {
@@ -217,7 +123,7 @@ export class ContentNavigationRepo {
     values.push(now);
     values.push(id);
 
-    const result = await queryOne<any>(
+    const result = await queryOne<ContentNavigation>(
       `UPDATE "contentNavigation" SET ${updateFields.join(', ')} WHERE "contentNavigationId" = $${paramIndex} RETURNING *`,
       values
     );
@@ -226,7 +132,7 @@ export class ContentNavigationRepo {
       throw new Error(`Failed to update navigation with ID ${id}`);
     }
 
-    return transformDbToTs<ContentNavigation>(result, navigationFields);
+    return result;
   }
 
   async deleteNavigation(id: string): Promise<boolean> {
@@ -242,11 +148,10 @@ export class ContentNavigationRepo {
 
   // Navigation Item methods
   async findNavigationItemById(id: string): Promise<ContentNavigationItem | null> {
-    const result = await queryOne<any>(
+    return queryOne<ContentNavigationItem>(
       'SELECT * FROM "contentNavigationItem" WHERE "contentNavigationItemId" = $1',
       [id]
     );
-    return transformDbToTs<ContentNavigationItem>(result, navigationItemFields);
   }
 
   async findNavigationItems(navigationId: string, parentId?: string): Promise<ContentNavigationItem[]> {
@@ -262,20 +167,20 @@ export class ContentNavigationRepo {
 
     sql += ' ORDER BY "sortOrder" ASC';
 
-    const results = await query<any[]>(sql, params);
-    return transformArrayDbToTs<ContentNavigationItem>(results || [], navigationItemFields);
+    const results = await query<ContentNavigationItem[]>(sql, params);
+    return results || [];
   }
 
   async findAllNavigationItems(navigationId: string): Promise<ContentNavigationItem[]> {
     const sql = 'SELECT * FROM "contentNavigationItem" WHERE "navigationId" = $1 ORDER BY "depth" ASC, "sortOrder" ASC';
-    const results = await query<any[]>(sql, [navigationId]);
-    return transformArrayDbToTs<ContentNavigationItem>(results || [], navigationItemFields);
+    const results = await query<ContentNavigationItem[]>(sql, [navigationId]);
+    return results || [];
   }
 
   async createNavigationItem(params: ContentNavigationItemCreateParams): Promise<ContentNavigationItem> {
     const now = unixTimestamp();
     
-    const result = await queryOne<any>(
+    const result = await queryOne<ContentNavigationItem>(
       `INSERT INTO "contentNavigationItem" 
       ("navigationId", "parentId", "title", "type", "url", "contentPageId", "targetId", 
        "targetSlug", "icon", "cssClasses", "openInNewTab", "isActive", "sortOrder", 
@@ -307,7 +212,7 @@ export class ContentNavigationRepo {
       throw new Error('Failed to create navigation item');
     }
 
-    return transformDbToTs<ContentNavigationItem>(result, navigationItemFields);
+    return result;
   }
 
   async updateNavigationItem(id: string, params: ContentNavigationItemUpdateParams): Promise<ContentNavigationItem> {
@@ -353,7 +258,7 @@ export class ContentNavigationRepo {
     values.push(now);
     values.push(id);
 
-    const result = await queryOne<any>(
+    const result = await queryOne<ContentNavigationItem>(
       `UPDATE "contentNavigationItem" SET ${updateFields.join(', ')} WHERE "contentNavigationItemId" = $${paramIndex} RETURNING *`,
       values
     );
@@ -362,7 +267,7 @@ export class ContentNavigationRepo {
       throw new Error(`Failed to update navigation item with ID ${id}`);
     }
 
-    return transformDbToTs<ContentNavigationItem>(result, navigationItemFields);
+    return result;
   }
 
   async deleteNavigationItem(id: string): Promise<boolean> {

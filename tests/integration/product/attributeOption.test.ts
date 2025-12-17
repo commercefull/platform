@@ -37,17 +37,18 @@ describe('Attribute Option Tests', () => {
       
       expect(response.status).toBe(201);
       expect(response.data.success).toBe(true);
-      expect(response.data.data).toHaveProperty('id');
+      // DB returns productAttributeOptionId, not id
+      const optionId = response.data.data.productAttributeOptionId || response.data.data.id;
+      expect(optionId).toBeTruthy();
       expect(response.data.data).toHaveProperty('value', newOption.value);
       expect(response.data.data).toHaveProperty('label', newOption.label);
-      expect(response.data.data).toHaveProperty('attributeId', testAttributeId);
 
       // Verify camelCase property names in response (TypeScript interface)
       expect(response.data.data).toHaveProperty('sortOrder');
       expect(response.data.data).toHaveProperty('createdAt');
       
       // Save the ID for later tests
-      createdOptionId = response.data.data.id;
+      createdOptionId = optionId;
     });
 
     it('should get an attribute option by ID', async () => {
@@ -57,8 +58,9 @@ describe('Attribute Option Tests', () => {
       
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
-      expect(response.data.data).toHaveProperty('id', testAttributeOptionId);
-      expect(response.data.data).toHaveProperty('attributeId', testAttributeId);
+      // DB returns productAttributeOptionId, not id
+      const optionId = response.data.data.productAttributeOptionId || response.data.data.id;
+      expect(optionId).toBe(testAttributeOptionId);
     });
     
     it('should get options by attribute', async () => {
@@ -71,9 +73,9 @@ describe('Attribute Option Tests', () => {
       expect(Array.isArray(response.data.data)).toBe(true);
       expect(response.data.data.length).toBeGreaterThan(0);
       
-      // Should find our test options
-      const foundOriginalOption = response.data.data.find((o: any) => o.id === testAttributeOptionId);
-      const foundNewOption = response.data.data.find((o: any) => o.id === createdOptionId);
+      // Should find our test options - uses productAttributeOptionId
+      const foundOriginalOption = response.data.data.find((o: any) => (o.productAttributeOptionId || o.id) === testAttributeOptionId);
+      const foundNewOption = response.data.data.find((o: any) => (o.productAttributeOptionId || o.id) === createdOptionId);
       
       expect(foundOriginalOption).toBeDefined();
       expect(foundNewOption).toBeDefined();

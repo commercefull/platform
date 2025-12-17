@@ -13,19 +13,19 @@ router.use(isCustomerLoggedIn);
 
 /**
  * Get available payment methods
- * GET /api/payments/methods
+ * GET /payments/methods
  */
 router.get('/payment/methods', paymentController.getPaymentMethods);
 
 /**
  * Get my transactions
- * GET /api/payments/transactions
+ * GET /payments/transactions
  */
 router.get('/payment/transactions', paymentController.getMyTransactions);
 
 /**
  * Get transactions for an order
- * GET /api/payments/orders/:orderId
+ * GET /payments/orders/:orderId
  */
 router.get('/payment/orders/:orderId', paymentController.getTransactionByOrder);
 

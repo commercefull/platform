@@ -196,8 +196,13 @@ export async function setupDistributionTests() {
   });
 
   // Get admin token
-  const loginResponse = await client.post('/business/auth/login', adminCredentials, { headers: { 'X-Test-Request': 'true' } });
-  const adminToken = loginResponse.data.accessToken;
+  let adminToken = '';
+  try {
+    const loginResponse = await client.post('/business/auth/login', adminCredentials, { headers: { 'X-Test-Request': 'true' } });
+    adminToken = loginResponse.data?.accessToken || '';
+  } catch (error: any) {
+    console.log('Warning: Login request failed:', error.message);
+  }
 
   if (!adminToken) {
     console.log('Warning: Failed to get admin token for distribution tests');
@@ -225,8 +230,9 @@ export async function setupDistributionTests() {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
-    if (centerResponse.data?.success && centerResponse.data?.data?.id) {
-      testDistributionCenterId = centerResponse.data.data.id;
+    // DB returns distributionWarehouseId, not id
+    if (centerResponse.data?.success && centerResponse.data?.data) {
+      testDistributionCenterId = centerResponse.data.data.distributionWarehouseId || centerResponse.data.data.id;
     } else {
       console.log('Warning: Failed to create test distribution center:', centerResponse.data);
     }
@@ -236,8 +242,9 @@ export async function setupDistributionTests() {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
-    if (zoneResponse.data?.success && zoneResponse.data?.data?.id) {
-      testShippingZoneId = zoneResponse.data.data.id;
+    // DB returns distributionShippingZoneId, not id
+    if (zoneResponse.data?.success && zoneResponse.data?.data) {
+      testShippingZoneId = zoneResponse.data.data.distributionShippingZoneId || zoneResponse.data.data.id;
     } else {
       console.log('Warning: Failed to create test shipping zone:', zoneResponse.data);
     }
@@ -247,8 +254,9 @@ export async function setupDistributionTests() {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
-    if (methodResponse.data?.success && methodResponse.data?.data?.id) {
-      testShippingMethodId = methodResponse.data.data.id;
+    // DB returns distributionShippingMethodId, not id
+    if (methodResponse.data?.success && methodResponse.data?.data) {
+      testShippingMethodId = methodResponse.data.data.distributionShippingMethodId || methodResponse.data.data.id;
     } else {
       console.log('Warning: Failed to create test shipping method:', methodResponse.data);
     }
@@ -258,8 +266,9 @@ export async function setupDistributionTests() {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
-    if (partnerResponse.data?.success && partnerResponse.data?.data?.id) {
-      testFulfillmentPartnerId = partnerResponse.data.data.id;
+    // DB returns distributionFulfillmentPartnerId, not id
+    if (partnerResponse.data?.success && partnerResponse.data?.data) {
+      testFulfillmentPartnerId = partnerResponse.data.data.distributionFulfillmentPartnerId || partnerResponse.data.data.id;
     } else {
       console.log('Warning: Failed to create test fulfillment partner:', partnerResponse.data);
     }
@@ -278,8 +287,9 @@ export async function setupDistributionTests() {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
-      if (ruleResponse.data?.success && ruleResponse.data?.data?.id) {
-        testRuleId = ruleResponse.data.data.id;
+      // DB returns distributionRuleId, not id
+      if (ruleResponse.data?.success && ruleResponse.data?.data) {
+        testRuleId = ruleResponse.data.data.distributionRuleId || ruleResponse.data.data.id;
       } else {
         console.log('Warning: Failed to create test distribution rule:', ruleResponse.data);
       }

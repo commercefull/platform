@@ -129,6 +129,8 @@ export class MerchantRepo {
   async create(params: MerchantCreateParams): Promise<Merchant> {
     const now = new Date();
     const slug = params.slug || this.generateSlug(params.name);
+    // Hash password if provided
+    const hashedPassword = params.password ? await this.hashPassword(params.password) : null;
 
     const result = await queryOne<Merchant>(
       `INSERT INTO merchant (
@@ -141,7 +143,7 @@ export class MerchantRepo {
         params.name,
         slug,
         params.email,
-        params.password,
+        hashedPassword,
         params.phone || null,
         params.website || null,
         params.logo || null,

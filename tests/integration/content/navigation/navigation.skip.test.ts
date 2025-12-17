@@ -67,11 +67,11 @@ describe('Content Navigation API', () => {
 
       expect(response.status).toBe(201);
       expect(response.data.success).toBe(true);
-      expect(response.data.data.id).toBeDefined();
+      expect(response.data.data.contentNavigationId).toBeDefined();
       expect(response.data.data.name).toBe(navigationData.name);
       expect(response.data.data.location).toBe(navigationData.location);
 
-      createdNavigationId = response.data.data.id;
+      createdNavigationId = response.data.data.contentNavigationId;
     });
 
     it('should return 400 if name is missing', async () => {
@@ -90,7 +90,7 @@ describe('Content Navigation API', () => {
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
-      expect(response.data.data.id).toBe(createdNavigationId);
+      expect(response.data.data.contentNavigationId).toBe(createdNavigationId);
     });
 
     it('should return 404 for non-existent navigation', async () => {
@@ -131,11 +131,11 @@ describe('Content Navigation API', () => {
 
       expect(response.status).toBe(201);
       expect(response.data.success).toBe(true);
-      expect(response.data.data.id).toBeDefined();
+      expect(response.data.data.contentNavigationItemId).toBeDefined();
       expect(response.data.data.title).toBe(itemData.title);
       expect(response.data.data.navigationId).toBe(createdNavigationId);
 
-      createdItemId = response.data.data.id;
+      createdItemId = response.data.data.contentNavigationItemId;
     });
 
     it('should add a child navigation item', async () => {
@@ -155,7 +155,7 @@ describe('Content Navigation API', () => {
       expect(response.data.success).toBe(true);
       expect(response.data.data.parentId).toBe(createdItemId);
 
-      createdChildItemId = response.data.data.id;
+      createdChildItemId = response.data.data.contentNavigationItemId;
     });
 
     it('should return 400 if title is missing', async () => {

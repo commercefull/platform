@@ -18,31 +18,31 @@ router.use(isCustomerLoggedIn);
 
 /**
  * Get customer's orders
- * GET /api/orders
+ * GET /orders
  */
 router.get('/order', orderController.getMyOrders);
 
 /**
  * Get order by order number
- * GET /api/orders/number/:orderNumber
+ * GET /orders/number/:orderNumber
  */
 router.get('/order/number/:orderNumber', orderController.getOrderByNumber);
 
 /**
  * Get order by ID
- * GET /api/orders/:orderId
+ * GET /orders/:orderId
  */
 router.get('/order/:orderId', orderController.getOrder);
 
 /**
  * Create a new order
- * POST /api/orders
+ * POST /orders
  */
 router.post('/order', orderController.createOrder);
 
 /**
  * Cancel an order
- * POST /api/orders/:orderId/cancel
+ * POST /orders/:orderId/cancel
  */
 router.post('/order/:orderId/cancel', orderController.cancelOrder);
 

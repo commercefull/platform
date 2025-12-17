@@ -4,120 +4,17 @@
  */
 
 import { queryOne, query } from '../../../libs/db';
+import { ContentMedia, ContentMediaFolder } from '../../../libs/db/types';
 import { unixTimestamp } from '../../../libs/date';
 
 // ============================================================================
-// Interfaces
+// Types
 // ============================================================================
 
-export interface ContentMedia {
-  id: string;
-  title: string;
-  fileName: string;
-  filePath: string;
-  fileType: string;
-  fileSize: number;
-  width?: number;
-  height?: number;
-  duration?: number;
-  altText?: string;
-  caption?: string;
-  description?: string;
-  folderId?: string;
-  url: string;
-  thumbnailUrl?: string;
-  sortOrder: number;
-  tags?: string[];
-  isExternal: boolean;
-  externalService?: string;
-  externalId?: string;
-  createdAt: string;
-  updatedAt: string;
-  createdBy?: string;
-  updatedBy?: string;
-}
-
-export interface ContentMediaFolder {
-  id: string;
-  name: string;
-  parentId?: string;
-  path?: string;
-  depth: number;
-  sortOrder: number;
-  createdAt: string;
-  updatedAt: string;
-  createdBy?: string;
-  updatedBy?: string;
-}
-
-export type ContentMediaCreateParams = Omit<ContentMedia, 'id' | 'createdAt' | 'updatedAt'>;
-export type ContentMediaUpdateParams = Partial<Omit<ContentMedia, 'id' | 'createdAt' | 'updatedAt'>>;
-export type ContentMediaFolderCreateParams = Omit<ContentMediaFolder, 'id' | 'createdAt' | 'updatedAt'>;
-export type ContentMediaFolderUpdateParams = Partial<Omit<ContentMediaFolder, 'id' | 'createdAt' | 'updatedAt'>>;
-
-// ============================================================================
-// Field Mappings
-// ============================================================================
-
-const mediaFields: Record<string, string> = {
-  id: 'contentMediaId',
-  title: 'title',
-  fileName: 'fileName',
-  filePath: 'filePath',
-  fileType: 'fileType',
-  fileSize: 'fileSize',
-  width: 'width',
-  height: 'height',
-  duration: 'duration',
-  altText: 'altText',
-  caption: 'caption',
-  description: 'description',
-  folderId: 'contentMediaFolderId',
-  url: 'url',
-  thumbnailUrl: 'thumbnailUrl',
-  sortOrder: 'sortOrder',
-  tags: 'tags',
-  isExternal: 'isExternal',
-  externalService: 'externalService',
-  externalId: 'externalId',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  createdBy: 'createdBy',
-  updatedBy: 'updatedBy'
-};
-
-const folderFields: Record<string, string> = {
-  id: 'contentMediaFolderId',
-  name: 'name',
-  parentId: 'parentId',
-  path: 'path',
-  depth: 'depth',
-  sortOrder: 'sortOrder',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  createdBy: 'createdBy',
-  updatedBy: 'updatedBy'
-};
-
-// ============================================================================
-// Transform Functions
-// ============================================================================
-
-function transformDbToTs<T>(dbRecord: any, fieldMap: Record<string, string>): T {
-  if (!dbRecord) return null as any;
-  
-  const result: any = {};
-  for (const [tsKey, dbKey] of Object.entries(fieldMap)) {
-    if (dbRecord[dbKey] !== undefined) {
-      result[tsKey] = dbRecord[dbKey];
-    }
-  }
-  return result as T;
-}
-
-function transformArrayDbToTs<T>(dbRecords: any[], fieldMap: Record<string, string>): T[] {
-  return dbRecords.map(record => transformDbToTs<T>(record, fieldMap));
-}
+export type ContentMediaCreateParams = Omit<ContentMedia, 'contentMediaId' | 'createdAt' | 'updatedAt'>;
+export type ContentMediaUpdateParams = Partial<Omit<ContentMedia, 'contentMediaId' | 'createdAt' | 'updatedAt'>>;
+export type ContentMediaFolderCreateParams = Omit<ContentMediaFolder, 'contentMediaFolderId' | 'createdAt' | 'updatedAt'>;
+export type ContentMediaFolderUpdateParams = Partial<Omit<ContentMediaFolder, 'contentMediaFolderId' | 'createdAt' | 'updatedAt'>>;
 
 // ============================================================================
 // Repository
@@ -126,11 +23,10 @@ function transformArrayDbToTs<T>(dbRecords: any[], fieldMap: Record<string, stri
 export class ContentMediaRepo {
   // Media methods
   async findMediaById(id: string): Promise<ContentMedia | null> {
-    const result = await queryOne<any>(
+    return queryOne<ContentMedia>(
       'SELECT * FROM "contentMedia" WHERE "contentMediaId" = $1',
       [id]
     );
-    return transformDbToTs<ContentMedia>(result, mediaFields);
   }
 
   async findAllMedia(
@@ -161,8 +57,8 @@ export class ContentMediaRepo {
     sql += ` ORDER BY "sortOrder" ASC, "createdAt" DESC LIMIT $${paramIndex++} OFFSET $${paramIndex++}`;
     params.push(limit, offset);
 
-    const results = await query<any[]>(sql, params);
-    return transformArrayDbToTs<ContentMedia>(results || [], mediaFields);
+    const results = await query<ContentMedia[]>(sql, params);
+    return results || [];
   }
 
   async searchMedia(searchTerm: string, limit: number = 50): Promise<ContentMedia[]> {
@@ -172,14 +68,14 @@ export class ContentMediaRepo {
       ORDER BY "createdAt" DESC 
       LIMIT $2
     `;
-    const results = await query<any[]>(sql, [`%${searchTerm}%`, limit]);
-    return transformArrayDbToTs<ContentMedia>(results || [], mediaFields);
+    const results = await query<ContentMedia[]>(sql, [`%${searchTerm}%`, limit]);
+    return results || [];
   }
 
   async createMedia(params: ContentMediaCreateParams): Promise<ContentMedia> {
     const now = unixTimestamp();
     
-    const result = await queryOne<any>(
+    const result = await queryOne<ContentMedia>(
       `INSERT INTO "contentMedia" 
       ("title", "fileName", "filePath", "fileType", "fileSize", "width", "height", 
        "duration", "altText", "caption", "description", "contentMediaFolderId", 
@@ -199,7 +95,7 @@ export class ContentMediaRepo {
         params.altText || null,
         params.caption || null,
         params.description || null,
-        params.folderId || null,
+        params.contentMediaFolderId || null,
         params.url,
         params.thumbnailUrl || null,
         params.sortOrder || 0,
@@ -218,7 +114,7 @@ export class ContentMediaRepo {
       throw new Error('Failed to create media');
     }
 
-    return transformDbToTs<ContentMedia>(result, mediaFields);
+    return result;
   }
 
   async updateMedia(id: string, params: ContentMediaUpdateParams): Promise<ContentMedia> {
@@ -243,9 +139,9 @@ export class ContentMediaRepo {
       updateFields.push(`"description" = $${paramIndex++}`);
       values.push(params.description);
     }
-    if (params.folderId !== undefined) {
+    if (params.contentMediaFolderId !== undefined) {
       updateFields.push(`"contentMediaFolderId" = $${paramIndex++}`);
-      values.push(params.folderId);
+      values.push(params.contentMediaFolderId);
     }
     if (params.tags !== undefined) {
       updateFields.push(`"tags" = $${paramIndex++}`);
@@ -260,7 +156,7 @@ export class ContentMediaRepo {
     values.push(now);
     values.push(id);
 
-    const result = await queryOne<any>(
+    const result = await queryOne<ContentMedia>(
       `UPDATE "contentMedia" SET ${updateFields.join(', ')} WHERE "contentMediaId" = $${paramIndex} RETURNING *`,
       values
     );
@@ -269,7 +165,7 @@ export class ContentMediaRepo {
       throw new Error(`Failed to update media with ID ${id}`);
     }
 
-    return transformDbToTs<ContentMedia>(result, mediaFields);
+    return result;
   }
 
   async deleteMedia(id: string): Promise<boolean> {
@@ -282,11 +178,10 @@ export class ContentMediaRepo {
 
   // Folder methods
   async findFolderById(id: string): Promise<ContentMediaFolder | null> {
-    const result = await queryOne<any>(
+    return queryOne<ContentMediaFolder>(
       'SELECT * FROM "contentMediaFolder" WHERE "contentMediaFolderId" = $1',
       [id]
     );
-    return transformDbToTs<ContentMediaFolder>(result, folderFields);
   }
 
   async findAllFolders(parentId?: string): Promise<ContentMediaFolder[]> {
@@ -302,14 +197,14 @@ export class ContentMediaRepo {
 
     sql += ' ORDER BY "sortOrder" ASC, "name" ASC';
 
-    const results = await query<any[]>(sql, params);
-    return transformArrayDbToTs<ContentMediaFolder>(results || [], folderFields);
+    const results = await query<ContentMediaFolder[]>(sql, params);
+    return results || [];
   }
 
   async createFolder(params: ContentMediaFolderCreateParams): Promise<ContentMediaFolder> {
     const now = unixTimestamp();
     
-    const result = await queryOne<any>(
+    const result = await queryOne<ContentMediaFolder>(
       `INSERT INTO "contentMediaFolder" 
       ("name", "parentId", "path", "depth", "sortOrder", "createdAt", "updatedAt", "createdBy", "updatedBy") 
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
@@ -331,7 +226,7 @@ export class ContentMediaRepo {
       throw new Error('Failed to create folder');
     }
 
-    return transformDbToTs<ContentMediaFolder>(result, folderFields);
+    return result;
   }
 
   async updateFolder(id: string, params: ContentMediaFolderUpdateParams): Promise<ContentMediaFolder> {
@@ -357,7 +252,7 @@ export class ContentMediaRepo {
     values.push(now);
     values.push(id);
 
-    const result = await queryOne<any>(
+    const result = await queryOne<ContentMediaFolder>(
       `UPDATE "contentMediaFolder" SET ${updateFields.join(', ')} WHERE "contentMediaFolderId" = $${paramIndex} RETURNING *`,
       values
     );
@@ -366,7 +261,7 @@ export class ContentMediaRepo {
       throw new Error(`Failed to update folder with ID ${id}`);
     }
 
-    return transformDbToTs<ContentMediaFolder>(result, folderFields);
+    return result;
   }
 
   async deleteFolder(id: string): Promise<boolean> {

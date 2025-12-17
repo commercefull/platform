@@ -54,7 +54,7 @@ exports.seed = async function(knex) {
       email: 'testcustomer@example.com',
       firstName: 'Test',
       lastName: 'Customer',
-      password: '$2b$10$dummyhashedpasswordfortesting123456789',
+      password: '$2b$10$wADyOBQwHwy0mz49WoGA.OcCrjAAXaYnMhsOrWWQ9FzUmXkrq6.aC', // "password123"
       isActive: true,
       isVerified: true,
       emailVerified: true,

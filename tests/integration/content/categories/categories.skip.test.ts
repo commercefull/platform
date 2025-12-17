@@ -70,11 +70,11 @@ describe('Content Categories API', () => {
 
       expect(response.status).toBe(201);
       expect(response.data.success).toBe(true);
-      expect(response.data.data.id).toBeDefined();
+      expect(response.data.data.contentCategoryId).toBeDefined();
       expect(response.data.data.name).toBe(categoryData.name);
       expect(response.data.data.slug).toBe(categoryData.slug);
 
-      createdCategoryId = response.data.data.id;
+      createdCategoryId = response.data.data.contentCategoryId;
     });
 
     it('should create a child category', async () => {
@@ -93,7 +93,7 @@ describe('Content Categories API', () => {
       expect(response.data.success).toBe(true);
       expect(response.data.data.parentId).toBe(createdCategoryId);
 
-      createdChildCategoryId = response.data.data.id;
+      createdChildCategoryId = response.data.data.contentCategoryId;
     });
 
     it('should return 400 if name is missing', async () => {
@@ -122,7 +122,7 @@ describe('Content Categories API', () => {
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
-      expect(response.data.data.id).toBe(createdCategoryId);
+      expect(response.data.data.contentCategoryId).toBe(createdCategoryId);
     });
 
     it('should return 404 for non-existent category', async () => {

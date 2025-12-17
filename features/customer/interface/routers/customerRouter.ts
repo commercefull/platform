@@ -15,7 +15,7 @@ const router = express.Router();
 
 /**
  * Register a new customer
- * POST /api/customers/register
+ * POST /customers/register
  */
 router.post('/register', customerController.registerCustomer);
 
@@ -28,43 +28,43 @@ router.use(isCustomerLoggedIn);
 
 /**
  * Get my profile
- * GET /api/customers/me
+ * GET /customers/me
  */
 router.get('/me', customerController.getMyProfile);
 
 /**
  * Update my profile
- * PUT /api/customers/me
+ * PUT /customers/me
  */
 router.put('/me', customerController.updateMyProfile);
 
 /**
  * Get my addresses
- * GET /api/customers/me/addresses
+ * GET /customers/me/addresses
  */
 router.get('/me/addresses', customerController.getAddresses);
 
 /**
  * Add a new address
- * POST /api/customers/me/addresses
+ * POST /customers/me/addresses
  */
 router.post('/me/addresses', customerController.addAddress);
 
 /**
  * Update an address
- * PUT /api/customers/me/addresses/:addressId
+ * PUT /customers/me/addresses/:addressId
  */
 router.put('/me/addresses/:addressId', customerController.updateAddress);
 
 /**
  * Delete an address
- * DELETE /api/customers/me/addresses/:addressId
+ * DELETE /customers/me/addresses/:addressId
  */
 router.delete('/me/addresses/:addressId', customerController.deleteAddress);
 
 /**
  * Set default address
- * POST /api/customers/me/addresses/:addressId/default
+ * POST /customers/me/addresses/:addressId/default
  */
 router.post('/me/addresses/:addressId/default', customerController.setDefaultAddress);
 

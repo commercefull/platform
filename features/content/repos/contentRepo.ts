@@ -1,5 +1,14 @@
 import { queryOne, query } from "../../../libs/db";
+import { Table } from "../../../libs/db/types";
 import { unixTimestamp } from "../../../libs/date";
+
+// Table constants
+const TABLES = {
+  CONTENT_TYPE: Table.ContentType,
+  CONTENT_PAGE: Table.ContentPage,
+  CONTENT_BLOCK: Table.ContentBlock,
+  CONTENT_TEMPLATE: Table.ContentTemplate
+};
 
 // Content Type defines the structure of content blocks
 export interface ContentType {
@@ -86,95 +95,15 @@ export interface ContentTemplate {
   updatedBy?: string;
 }
 
-// Field mapping dictionaries for database to TypeScript conversion
-const contentTypeFields: Record<string, string> = {
-  id: 'id',
-  name: 'name',
-  slug: 'slug',
-  description: 'description',
-  schema: 'schema',
-  status: 'status',
-  createdAt: 'created_at',
-  updatedAt: 'updated_at'
-};
-
-const contentPageFields: Record<string, string> = {
-  id: 'id',
-  title: 'title',
-  slug: 'slug',
-  contentTypeId: 'content_type_id',
-  templateId: 'template_id',
-  status: 'status',
-  visibility: 'visibility', 
-  accessPassword: 'access_password',
-  summary: 'summary',
-  featuredImage: 'featured_image',
-  parentId: 'parent_id',
-  sortOrder: 'sort_order',
-  metaTitle: 'meta_title',
-  metaDescription: 'meta_description',
-  metaKeywords: 'meta_keywords',
-  openGraphImage: 'open_graph_image',
-  canonicalUrl: 'canonical_url',
-  noIndex: 'no_index',
-  customFields: 'custom_fields',
-  publishedAt: 'published_at',
-  scheduledAt: 'scheduled_at',
-  expiresAt: 'expires_at',
-  isHomePage: 'is_home_page',
-  path: 'path',
-  depth: 'depth',
-  createdAt: 'created_at',
-  updatedAt: 'updated_at',
-  createdBy: 'created_by'
-};
-
-const contentBlockFields: Record<string, string> = {
-  id: 'id',
-  pageId: 'page_id',
-  contentTypeId: 'content_type_id',
-  name: 'name',
-  order: 'order',
-  content: 'content',
-  status: 'status',
-  createdAt: 'created_at',
-  updatedAt: 'updated_at'
-};
-
-const contentTemplateFields: Record<string, string> = {
-  id: 'id',
-  name: 'name',
-  type: 'type',
-  description: 'description',
-  structure: 'structure',
-  status: 'status',
-  createdAt: 'created_at',
-  updatedAt: 'updated_at'
-};
-
-/**
- * Transform a database record to a TypeScript object using field mapping
- */
-function transformDbToTs<T>(dbRecord: any, fieldMap: Record<string, string>): T {
-  if (!dbRecord) return null as any;
-  
-  const result: any = {};
-  
-  Object.entries(fieldMap).forEach(([tsKey, dbKey]) => {
-    if (dbRecord[dbKey] !== undefined) {
-      result[tsKey] = dbRecord[dbKey];
-    }
-  });
-  
-  return result as T;
+// Helper to add id field from DB primary key
+function addId<T>(result: any, idField: string): T {
+  if (!result) return null as any;
+  return { ...result, id: result[idField] } as T;
 }
 
-/**
- * Transform an array of database records to TypeScript objects
- */
-function transformArrayDbToTs<T>(dbRecords: any[], fieldMap: Record<string, string>): T[] {
-  if (!dbRecords || !Array.isArray(dbRecords)) return [];
-  return dbRecords.map(record => transformDbToTs<T>(record, fieldMap));
+function addIdArray<T>(results: any[], idField: string): T[] {
+  if (!results || !Array.isArray(results)) return [];
+  return results.map(r => ({ ...r, id: r[idField] })) as T[];
 }
 
 type ContentTypeCreateParams = Omit<ContentType, 'id' | 'createdAt' | 'updatedAt'>;
@@ -192,13 +121,13 @@ type ContentTemplateUpdateParams = Partial<Omit<ContentTemplate, 'id' | 'created
 export class ContentRepo {
   // Content Type methods
   async findContentTypeById(id: string): Promise<ContentType | null> {
-    const result = await queryOne<any>('SELECT * FROM "public"."content_type" WHERE "id" = $1', [id]);
-    return transformDbToTs<ContentType>(result, contentTypeFields);
+    const result = await queryOne<any>(`SELECT * FROM "${TABLES.CONTENT_TYPE}" WHERE "contentTypeId" = $1`, [id]);
+    return addId<ContentType>(result, 'contentTypeId');
   }
 
   async findContentTypeBySlug(slug: string): Promise<ContentType | null> {
-    const result = await queryOne<any>('SELECT * FROM "public"."content_type" WHERE "slug" = $1', [slug]);
-    return transformDbToTs<ContentType>(result, contentTypeFields);
+    const result = await queryOne<any>(`SELECT * FROM "${TABLES.CONTENT_TYPE}" WHERE "slug" = $1`, [slug]);
+    return addId<ContentType>(result, 'contentTypeId');
   }
 
   async findAllContentTypes(isActive?: boolean, limit: number = 50, offset: number = 0): Promise<ContentType[]> {
@@ -214,7 +143,7 @@ export class ContentRepo {
     params.push(limit, offset);
     
     const results = await query<any[]>(sql, params);
-    return transformArrayDbToTs<ContentType>(results || [], contentTypeFields);
+    return addIdArray<ContentType>(results || [], 'contentTypeId');
   }
 
   async createContentType(params: ContentTypeCreateParams): Promise<ContentType> {
@@ -252,7 +181,7 @@ export class ContentRepo {
       throw new Error('Failed to create content type');
     }
 
-    return transformDbToTs<ContentType>(result, contentTypeFields);
+    return addId<ContentType>(result, 'contentTypeId');
   }
 
   async updateContentType(id: string, params: ContentTypeUpdateParams): Promise<ContentType> {
@@ -313,9 +242,9 @@ export class ContentRepo {
     values.push(id);
 
     const query = `
-      UPDATE "public"."content_type" 
+      UPDATE "${TABLES.CONTENT_TYPE}" 
       SET ${updateFields.join(', ')} 
-      WHERE "id" = $${paramIndex} 
+      WHERE "contentTypeId" = $${paramIndex} 
       RETURNING *
     `;
 
@@ -325,13 +254,13 @@ export class ContentRepo {
       throw new Error(`Failed to update content type with ID ${id}`);
     }
 
-    return transformDbToTs<ContentType>(result, contentTypeFields);
+    return addId<ContentType>(result, 'contentTypeId');
   }
 
   async deleteContentType(id: string): Promise<boolean> {
     // Check if the content type is being used by any content blocks
     const blocksUsingType = await query<Array<{count: string}>>(
-      'SELECT COUNT(*) as count FROM "public"."content_block" WHERE "content_type_id" = $1', 
+      `SELECT COUNT(*) as count FROM "${TABLES.CONTENT_BLOCK}" WHERE "contentTypeId" = $1`, 
       [id]
     );
     
@@ -340,7 +269,7 @@ export class ContentRepo {
     }
     
     const result = await queryOne<{ id: string }>(
-      'DELETE FROM "public"."content_type" WHERE "id" = $1 RETURNING "id"',
+      `DELETE FROM "${TABLES.CONTENT_TYPE}" WHERE "contentTypeId" = $1 RETURNING "contentTypeId" as id`,
       [id]
     );
     
@@ -349,18 +278,18 @@ export class ContentRepo {
 
   // Content Page methods
   async findPageById(id: string): Promise<ContentPage | null> {
-    const result = await queryOne<any>('SELECT * FROM "public"."content_page" WHERE "id" = $1', [id]);
-    return transformDbToTs<ContentPage>(result, contentPageFields);
+    const result = await queryOne<any>(`SELECT * FROM "${TABLES.CONTENT_PAGE}" WHERE "contentPageId" = $1`, [id]);
+    return addId<ContentPage>(result, 'contentPageId');
   }
 
   async findPageBySlug(slug: string): Promise<ContentPage | null> {
-    const result = await queryOne<any>('SELECT * FROM "public"."content_page" WHERE "slug" = $1', [slug]);
-    return transformDbToTs<ContentPage>(result, contentPageFields);
+    const result = await queryOne<any>(`SELECT * FROM "${TABLES.CONTENT_PAGE}" WHERE "slug" = $1`, [slug]);
+    return addId<ContentPage>(result, 'contentPageId');
   }
 
   async findHomePage(): Promise<ContentPage | null> {
-    const result = await queryOne<any>('SELECT * FROM "public"."content_page" WHERE "is_home_page" = true LIMIT 1');
-    return transformDbToTs<ContentPage>(result, contentPageFields);
+    const result = await queryOne<any>(`SELECT * FROM "${TABLES.CONTENT_PAGE}" WHERE "isHomePage" = true LIMIT 1`);
+    return addId<ContentPage>(result, 'contentPageId');
   }
 
   async findAllPages(
@@ -369,7 +298,7 @@ export class ContentRepo {
     limit: number = 50, 
     offset: number = 0
   ): Promise<ContentPage[]> {
-    let sql = 'SELECT * FROM "public"."content_page"';
+    let sql = `SELECT * FROM "${TABLES.CONTENT_PAGE}"`;
     const whereConditions: string[] = [];
     const params: any[] = [];
     let paramIndex = 1;
@@ -380,7 +309,7 @@ export class ContentRepo {
     }
     
     if (contentTypeId) {
-      whereConditions.push(`"content_type_id" = $${paramIndex++}`);
+      whereConditions.push(`"contentTypeId" = $${paramIndex++}`);
       params.push(contentTypeId);
     }
     
@@ -392,7 +321,7 @@ export class ContentRepo {
     params.push(limit, offset);
     
     const results = await query<any[]>(sql, params);
-    return transformArrayDbToTs<ContentPage>(results || [], contentPageFields);
+    return addIdArray<ContentPage>(results || [], 'contentPageId');
   }
 
   async createPage(params: ContentPageCreateParams): Promise<ContentPage> {
@@ -400,7 +329,7 @@ export class ContentRepo {
     
     // If setting as home page, clear any existing home page
     if (params.isHomePage) {
-      await query('UPDATE "public"."content_page" SET "is_home_page" = false WHERE "is_home_page" = true');
+      await query(`UPDATE "${TABLES.CONTENT_PAGE}" SET "isHomePage" = false WHERE "isHomePage" = true`);
     }
 
     // Validate slug uniqueness
@@ -409,25 +338,22 @@ export class ContentRepo {
       throw new Error(`Page with slug "${params.slug}" already exists`);
     }
 
-    // Convert from camelCase params to snake_case database fields
+    // Build dynamic insert - DB uses camelCase
     const fieldValues: any[] = [];
     const fieldNames: string[] = [];
     const placeholders: string[] = [];
     let paramIndex = 1;
 
-    Object.entries(contentPageFields).forEach(([tsKey, dbKey]) => {
-      // Skip id, createdAt, updatedAt as they're handled separately
-      if (tsKey !== 'id' && tsKey !== 'createdAt' && tsKey !== 'updatedAt') {
-        if (params[tsKey as keyof ContentPageCreateParams] !== undefined) {
-          fieldNames.push(`"${dbKey}"`);
-          placeholders.push(`$${paramIndex++}`);
-          
-          // Special handling for JSON fields
-          if (tsKey === 'customFields') {
-            fieldValues.push(JSON.stringify(params[tsKey as keyof ContentPageCreateParams]));
-          } else {
-            fieldValues.push(params[tsKey as keyof ContentPageCreateParams]);
-          }
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && key !== 'id' && key !== 'createdAt' && key !== 'updatedAt') {
+        fieldNames.push(`"${key}"`);
+        placeholders.push(`$${paramIndex++}`);
+        
+        // Special handling for JSON fields
+        if (key === 'customFields') {
+          fieldValues.push(JSON.stringify(value));
+        } else {
+          fieldValues.push(value);
         }
       }
     });
@@ -438,7 +364,7 @@ export class ContentRepo {
     fieldValues.push(now, now);
 
     const sqlQuery = `
-      INSERT INTO "public"."content_page" (${fieldNames.join(', ')}) 
+      INSERT INTO "${TABLES.CONTENT_PAGE}" (${fieldNames.join(', ')}) 
       VALUES (${placeholders.join(', ')}) 
       RETURNING *
     `;
@@ -449,7 +375,7 @@ export class ContentRepo {
       throw new Error('Failed to create content page');
     }
 
-    return transformDbToTs<ContentPage>(result, contentPageFields);
+    return addId<ContentPage>(result, 'contentPageId');
   }
 
   async updatePage(id: string, params: ContentPageUpdateParams): Promise<ContentPage> {
@@ -462,7 +388,7 @@ export class ContentRepo {
 
     // If setting as home page, clear any existing home page
     if (params.isHomePage) {
-      await query('UPDATE "public"."content_page" SET "is_home_page" = false WHERE "is_home_page" = true');
+      await query('UPDATE "${TABLES.CONTENT_PAGE}" SET "isHomePage" = false WHERE "isHomePage" = true');
     }
 
     // Check slug uniqueness if it's being updated
@@ -473,23 +399,20 @@ export class ContentRepo {
       }
     }
 
-    // Build dynamic query with snake_case field names
+    // Build dynamic update - DB uses camelCase
     const updateFields: string[] = [];
     const values: any[] = [];
     let paramIndex = 1;
 
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && key !== 'id' && key !== 'createdAt' && key !== 'updatedAt') {
-        const dbKey = contentPageFields[key];
-        if (dbKey) {
-          updateFields.push(`"${dbKey}" = $${paramIndex++}`);
-          
-          // Special handling for JSON fields
-          if (key === 'customFields') {
-            values.push(JSON.stringify(value));
-          } else {
-            values.push(value);
-          }
+        updateFields.push(`"${key}" = $${paramIndex++}`);
+        
+        // Special handling for JSON fields
+        if (key === 'customFields') {
+          values.push(JSON.stringify(value));
+        } else {
+          values.push(value);
         }
       }
     });
@@ -502,9 +425,9 @@ export class ContentRepo {
     values.push(id);
 
     const sql = `
-      UPDATE "public"."content_page" 
+      UPDATE "${TABLES.CONTENT_PAGE}" 
       SET ${updateFields.join(', ')} 
-      WHERE "id" = $${paramIndex} 
+      WHERE "contentPageId" = $${paramIndex} 
       RETURNING *
     `;
 
@@ -514,16 +437,16 @@ export class ContentRepo {
       throw new Error(`Failed to update page with ID ${id}`);
     }
 
-    return transformDbToTs<ContentPage>(result, contentPageFields);
+    return addId<ContentPage>(result, 'contentPageId');
   }
 
   async deletePage(id: string): Promise<boolean> {
     // Delete all content blocks associated with the page first
-    await query('DELETE FROM "public"."content_block" WHERE "page_id" = $1', [id]);
+    await query(`DELETE FROM "${TABLES.CONTENT_BLOCK}" WHERE "pageId" = $1`, [id]);
     
     // Now delete the page
     const result = await queryOne<{ id: string }>(
-      'DELETE FROM "public"."content_page" WHERE "id" = $1 RETURNING "id"',
+      `DELETE FROM "${TABLES.CONTENT_PAGE}" WHERE "contentPageId" = $1 RETURNING "contentPageId" as id`,
       [id]
     );
     
@@ -534,9 +457,9 @@ export class ContentRepo {
     const now = unixTimestamp();
     
     const result = await queryOne<any>(
-      `UPDATE "public"."content_page" 
-       SET "status" = 'published', "published_at" = $1, "updatedAt" = $1 
-       WHERE "id" = $2 
+      `UPDATE "${TABLES.CONTENT_PAGE}" 
+       SET "status" = 'published', "publishedAt" = $1, "updatedAt" = $1 
+       WHERE "contentPageId" = $2 
        RETURNING *`,
       [now, id]
     );
@@ -545,22 +468,22 @@ export class ContentRepo {
       throw new Error(`Failed to publish page with ID ${id}`);
     }
     
-    return transformDbToTs<ContentPage>(result, contentPageFields);
+    return addId<ContentPage>(result, 'contentPageId');
   }
 
   // Content Block methods
   async findBlockById(id: string): Promise<ContentBlock | null> {
-    const result = await queryOne<any>('SELECT * FROM "public"."content_block" WHERE "id" = $1', [id]);
-    return transformDbToTs<ContentBlock>(result, contentBlockFields);
+    const result = await queryOne<any>(`SELECT * FROM "${TABLES.CONTENT_BLOCK}" WHERE "contentBlockId" = $1`, [id]);
+    return addId<ContentBlock>(result, 'contentBlockId');
   }
 
   async findBlocksByPageId(pageId: string): Promise<ContentBlock[]> {
     const results = await query<any[]>(
-      'SELECT * FROM "public"."content_block" WHERE "page_id" = $1 ORDER BY "order" ASC',
+      'SELECT * FROM "${TABLES.CONTENT_BLOCK}" WHERE "pageId" = $1 ORDER BY "order" ASC',
       [pageId]
     );
     
-    return transformArrayDbToTs<ContentBlock>(results || [], contentBlockFields);
+    return addIdArray<ContentBlock>(results || [], 'contentBlockId');
   }
 
   async createBlock(params: ContentBlockCreateParams): Promise<ContentBlock> {
@@ -579,8 +502,8 @@ export class ContentRepo {
     }
 
     const result = await queryOne<any>(
-      `INSERT INTO "public"."content_block" 
-      ("page_id", "content_type_id", "name", "order", "content", "status", "createdAt", "updatedAt") 
+      `INSERT INTO "${TABLES.CONTENT_BLOCK}" 
+      ("pageId", "contentTypeId", "name", "order", "content", "status", "createdAt", "updatedAt") 
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
       RETURNING *`,
       [
@@ -599,7 +522,7 @@ export class ContentRepo {
       throw new Error('Failed to create content block');
     }
 
-    return transformDbToTs<ContentBlock>(result, contentBlockFields);
+    return addId<ContentBlock>(result, 'contentBlockId');
   }
 
   async updateBlock(id: string, params: ContentBlockUpdateParams): Promise<ContentBlock> {
@@ -617,12 +540,12 @@ export class ContentRepo {
 
     // Handle each field that might be updated
     if (params.pageId !== undefined) {
-      updateFields.push(`"page_id" = $${paramIndex++}`);
+      updateFields.push(`"pageId" = $${paramIndex++}`);
       values.push(params.pageId);
     }
     
     if (params.contentTypeId !== undefined) {
-      updateFields.push(`"content_type_id" = $${paramIndex++}`);
+      updateFields.push(`"contentTypeId" = $${paramIndex++}`);
       values.push(params.contentTypeId);
     }
     
@@ -659,9 +582,9 @@ export class ContentRepo {
     values.push(id);
 
     const query = `
-      UPDATE "public"."content_block" 
+      UPDATE "${TABLES.CONTENT_BLOCK}" 
       SET ${updateFields.join(', ')} 
-      WHERE "id" = $${paramIndex} 
+      WHERE "contentBlockId" = $${paramIndex} 
       RETURNING *
     `;
 
@@ -671,12 +594,12 @@ export class ContentRepo {
       throw new Error(`Failed to update content block with ID ${id}`);
     }
 
-    return transformDbToTs<ContentBlock>(result, contentBlockFields);
+    return addId<ContentBlock>(result, 'contentBlockId');
   }
 
   async deleteBlock(id: string): Promise<boolean> {
     const result = await queryOne<{ id: string }>(
-      'DELETE FROM "public"."content_block" WHERE "id" = $1 RETURNING "id"',
+      `DELETE FROM "${TABLES.CONTENT_BLOCK}" WHERE "contentBlockId" = $1 RETURNING "contentBlockId" as id`,
       [id]
     );
     
@@ -685,8 +608,8 @@ export class ContentRepo {
 
   // Content Template methods
   async findTemplateById(id: string): Promise<ContentTemplate | null> {
-    const result = await queryOne<any>('SELECT * FROM "public"."content_template" WHERE "id" = $1', [id]);
-    return transformDbToTs<ContentTemplate>(result, contentTemplateFields);
+    const result = await queryOne<any>(`SELECT * FROM "${TABLES.CONTENT_TEMPLATE}" WHERE "contentTemplateId" = $1`, [id]);
+    return addId<ContentTemplate>(result, 'contentTemplateId');
   }
 
   async findAllTemplates(
@@ -712,7 +635,7 @@ export class ContentRepo {
     params.push(limit, offset);
     
     const results = await query<any[]>(sql, params);
-    return transformArrayDbToTs<ContentTemplate>(results || [], contentTemplateFields);
+    return addIdArray<ContentTemplate>(results || [], 'contentTemplateId');
   }
 
   async createTemplate(params: ContentTemplateCreateParams): Promise<ContentTemplate> {
@@ -746,7 +669,7 @@ export class ContentRepo {
       throw new Error('Failed to create content template');
     }
 
-    return transformDbToTs<ContentTemplate>(result, contentTemplateFields);
+    return addId<ContentTemplate>(result, 'contentTemplateId');
   }
 
   async updateTemplate(id: string, params: ContentTemplateUpdateParams): Promise<ContentTemplate> {
@@ -806,9 +729,9 @@ export class ContentRepo {
     values.push(id);
 
     const query = `
-      UPDATE "public"."content_template" 
+      UPDATE "${TABLES.CONTENT_TEMPLATE}" 
       SET ${updateFields.join(', ')} 
-      WHERE "id" = $${paramIndex} 
+      WHERE "contentTemplateId" = $${paramIndex} 
       RETURNING *
     `;
 
@@ -818,13 +741,13 @@ export class ContentRepo {
       throw new Error(`Failed to update content template with ID ${id}`);
     }
 
-    return transformDbToTs<ContentTemplate>(result, contentTemplateFields);
+    return addId<ContentTemplate>(result, 'contentTemplateId');
   }
 
   async deleteTemplate(id: string): Promise<boolean> {
     // Check if any pages are using this template
     const pagesUsingTemplate = await query<Array<{count: string}>>(
-      'SELECT COUNT(*) as count FROM "public"."content_page" WHERE "template_id" = $1', 
+      `SELECT COUNT(*) as count FROM "${TABLES.CONTENT_PAGE}" WHERE "templateId" = $1`, 
       [id]
     );
     
@@ -833,7 +756,7 @@ export class ContentRepo {
     }
     
     const result = await queryOne<{ id: string }>(
-      'DELETE FROM "public"."content_template" WHERE "id" = $1 RETURNING "id"',
+      `DELETE FROM "${TABLES.CONTENT_TEMPLATE}" WHERE "contentTemplateId" = $1 RETURNING "contentTemplateId" as id`,
       [id]
     );
     
@@ -867,7 +790,7 @@ export class ContentRepo {
       
       // Update the block order
       await query(
-        'UPDATE "public"."content_block" SET "order" = $1, "updatedAt" = $2 WHERE "id" = $3',
+        `UPDATE "${TABLES.CONTENT_BLOCK}" SET "order" = $1, "updatedAt" = $2 WHERE "contentBlockId" = $3`,
         [blockOrder.order, unixTimestamp(), blockOrder.id]
       );
     }

@@ -40,7 +40,9 @@ describe('Product Tests', () => {
       expect(response.data.success).toBe(true);
       expect(response.data.data.products).toBeDefined();
       expect(Array.isArray(response.data.data.products)).toBe(true);
-      expect(response.data.data.pagination).toBeDefined();
+      expect(response.data.data.total).toBeDefined();
+      expect(response.data.data.limit).toBeDefined();
+      expect(response.data.data.offset).toBeDefined();
     });
 
     it('should update a product', async () => {
