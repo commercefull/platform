@@ -1,0 +1,47 @@
+# Azure Configuration
+subscription_id = "12345678-1234-1234-1234-123456789012"
+location         = "East US 2"
+
+# Environment
+environment = "prod"
+
+# Application
+app_name        = "commercefull"
+domain          = "yourdomain.com"
+container_image = "commercefullacr.azurecr.io/commercefull:latest"
+
+# Container Resources
+container_cpu    = 0.5
+container_memory = "1Gi"
+
+# Database
+db_sku                    = "GP_Standard_D2s_v3"
+db_storage_mb            = 32768
+db_backup_retention_days = 7
+
+# Storage
+storage_account_tier      = "Standard"
+storage_replication_type  = "LRS"
+
+# Networking
+create_dns_zone  = false
+enable_frontdoor = true
+
+# Monitoring
+log_retention_days = 30
+enable_monitoring  = true
+
+# Security
+enable_key_vault  = true
+key_vault_sku     = "standard"
+
+# Scaling
+min_replicas = 1
+max_replicas = 10
+
+# Tags
+tags = {
+  Environment = "prod"
+  Project     = "commercefull"
+  ManagedBy   = "terraform"
+}

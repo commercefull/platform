@@ -1,0 +1,56 @@
+---
+# Node.js installation and configuration
+
+- name: Add Node.js repository
+  shell: |
+    curl -fsSL https://deb.nodesource.com/setup_{{ node_version }}.x | bash -
+  args:
+    creates: /etc/apt/sources.list.d/nodesource.list
+  tags: ['nodejs', 'repo']
+
+- name: Install Node.js
+  package:
+    name:
+      - nodejs
+      - build-essential
+    state: present
+  tags: ['nodejs', 'install']
+
+- name: Install PM2 globally
+  npm:
+    name: pm2
+    global: yes
+    state: present
+  become_user: "{{ app_user }}"
+  tags: ['nodejs', 'pm2']
+
+- name: Create PM2 startup script
+  command: pm2 startup systemd -u {{ app_user }} --hp /home/{{ app_user }}
+  args:
+    creates: /etc/systemd/system/pm2-{{ app_user }}.service
+  become_user: "{{ app_user }}"
+  tags: ['nodejs', 'pm2']
+
+- name: Enable PM2 service
+  service:
+    name: "pm2-{{ app_user }}"
+    state: started
+    enabled: yes
+  tags: ['nodejs', 'pm2']
+
+- name: Create Node.js ecosystem file
+  template:
+    src: ecosystem.config.js.j2
+    dest: "{{ app_install_dir }}/ecosystem.config.js"
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: '0644'
+  tags: ['nodejs', 'config']
+
+- name: Install application dependencies
+  npm:
+    path: "{{ app_install_dir }}"
+    state: present
+  become_user: "{{ app_user }}"
+  when: app_install_dir is defined
+  tags: ['nodejs', 'deps']

@@ -1,0 +1,89 @@
+---
+# CommerceFull VPS Deployment Playbook
+# This playbook deploys the complete CommerceFull platform to a VPS
+
+- name: Deploy CommerceFull Platform
+  hosts: commercefull
+  become: yes
+  gather_facts: yes
+
+  pre_tasks:
+    - name: Update package cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+      when: ansible_os_family == 'Debian'
+
+    - name: Install basic packages
+      package:
+        name:
+          - curl
+          - wget
+          - git
+          - unzip
+          - software-properties-common
+          - apt-transport-https
+          - ca-certificates
+          - gnupg
+          - lsb-release
+        state: present
+
+  roles:
+    # System setup
+    - role: common
+      tags: ['common', 'system']
+
+    # PostgreSQL database
+    - role: postgresql
+      tags: ['database', 'postgresql']
+
+    # Node.js runtime
+    - role: nodejs
+      tags: ['nodejs', 'runtime']
+
+    # Application deployment
+    - role: app
+      tags: ['app', 'deploy']
+
+    # Web server
+    - role: nginx
+      tags: ['nginx', 'web']
+
+    # SSL certificates
+    - role: ssl
+      tags: ['ssl', 'certificates']
+
+    # Monitoring and security
+    - role: monitoring
+      tags: ['monitoring', 'security']
+
+  post_tasks:
+    - name: Verify deployment
+      uri:
+        url: "http://localhost:{{ app_port }}/health"
+        method: GET
+        status_code: 200
+      register: health_check
+      failed_when: health_check.status != 200
+      tags: ['verify']
+
+    - name: Print deployment summary
+      debug:
+        msg: |
+          🎉 CommerceFull deployment completed successfully!
+
+          Application URL: https://{{ app_domain }}
+          Health Check: https://{{ app_domain }}/health
+
+          Services:
+          - Node.js App: Running on port {{ app_port }}
+          - PostgreSQL: Running on localhost:{{ db_port }}
+          - Nginx: Serving on ports 80/443
+          - SSL: Let's Encrypt certificates installed
+
+          Next steps:
+          1. Update your DNS to point {{ app_domain }} to this server
+          2. Configure your application environment variables
+          3. Set up monitoring alerts
+          4. Configure backups
+      tags: ['summary']

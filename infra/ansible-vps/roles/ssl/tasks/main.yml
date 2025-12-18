@@ -1,0 +1,46 @@
+---
+# SSL certificate setup with Let's Encrypt
+
+- name: Install Certbot
+  package:
+    name:
+      - certbot
+      - python3-certbot-nginx
+    state: present
+  tags: ['ssl', 'certbot']
+
+- name: Create SSL certificate directory
+  file:
+    path: "/etc/letsencrypt/archive/{{ app_domain }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0700'
+  tags: ['ssl', 'dirs']
+
+- name: Obtain SSL certificate
+  command: >
+    certbot certonly --nginx
+    --non-interactive
+    --agree-tos
+    --email {{ ssl_email }}
+    --domain {{ item }}
+    --cert-name {{ app_domain }}
+  with_items: "{{ ssl_domains }}"
+  when: ssl_domains is defined and ssl_domains | length > 0
+  tags: ['ssl', 'certificate']
+
+- name: Create SSL renewal cron job
+  cron:
+    name: "SSL certificate renewal"
+    minute: "0"
+    hour: "12"
+    weekday: "1"
+    job: "certbot renew --quiet --post-hook 'systemctl reload nginx'"
+    user: root
+  tags: ['ssl', 'renewal']
+
+- name: Test SSL certificate renewal
+  command: certbot renew --dry-run
+  ignore_errors: yes
+  tags: ['ssl', 'test']

@@ -1,0 +1,76 @@
+---
+# Monitoring and security setup
+
+- name: Install monitoring packages
+  package:
+    name:
+      - htop
+      - iotop
+      - sysstat
+      - monit
+    state: present
+  tags: ['monitoring', 'packages']
+
+- name: Configure Monit
+  template:
+    src: monitrc.j2
+    dest: /etc/monit/monitrc
+    owner: root
+    group: root
+    mode: '0600'
+  notify: restart monit
+  when: monit_enabled | default(true)
+  tags: ['monitoring', 'monit']
+
+- name: Enable Monit service
+  service:
+    name: monit
+    state: started
+    enabled: yes
+  when: monit_enabled | default(true)
+  tags: ['monitoring', 'monit']
+
+- name: Configure system monitoring scripts
+  template:
+    src: "{{ item }}.j2"
+    dest: "/usr/local/bin/{{ item }}"
+    owner: root
+    group: root
+    mode: '0755'
+  with_items:
+    - system-monitor
+    - disk-monitor
+    - memory-monitor
+  tags: ['monitoring', 'scripts']
+
+- name: Create monitoring cron jobs
+  cron:
+    name: "{{ item.name }}"
+    minute: "{{ item.minute | default('*/5') }}"
+    hour: "{{ item.hour | default('*') }}"
+    job: "{{ item.job }}"
+    user: root
+  with_items:
+    - name: "System monitoring"
+      job: "/usr/local/bin/system-monitor"
+    - name: "Disk monitoring"
+      job: "/usr/local/bin/disk-monitor"
+    - name: "Memory monitoring"
+      job: "/usr/local/bin/memory-monitor"
+  tags: ['monitoring', 'cron']
+
+- name: Configure log shipping (optional)
+  include_tasks: log-shipping.yml
+  when: log_shipping_enabled | default(false)
+  tags: ['monitoring', 'logs']
+
+- name: Install fail2ban filters
+  template:
+    src: fail2ban-nginx.conf.j2
+    dest: /etc/fail2ban/jail.d/nginx.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart fail2ban
+  when: fail2ban_enabled | default(true)
+  tags: ['monitoring', 'security']

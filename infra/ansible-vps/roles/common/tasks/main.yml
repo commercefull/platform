@@ -1,0 +1,98 @@
+---
+# Common system setup tasks
+
+- name: Set system timezone
+  timezone:
+    name: "{{ timezone }}"
+  tags: ['timezone']
+
+- name: Create swap file
+  include_tasks: swap.yml
+  when: swap_size is defined and swap_size != ""
+  tags: ['swap']
+
+- name: Configure system limits
+  include_tasks: limits.yml
+  tags: ['limits']
+
+- name: Configure sysctl
+  include_tasks: sysctl.yml
+  tags: ['sysctl']
+
+- name: Install essential packages
+  package:
+    name:
+      - htop
+      - vim
+      - tree
+      - ncdu
+      - tmux
+      - curl
+      - wget
+      - git
+      - unzip
+      - software-properties-common
+      - apt-transport-https
+      - ca-certificates
+      - gnupg
+      - lsb-release
+      - ufw
+      - fail2ban
+      - logrotate
+      - cron
+    state: present
+  tags: ['packages']
+
+- name: Configure UFW firewall
+  include_tasks: ufw.yml
+  when: ufw_enabled | default(true)
+  tags: ['firewall']
+
+- name: Configure fail2ban
+  include_tasks: fail2ban.yml
+  when: fail2ban_enabled | default(true)
+  tags: ['security']
+
+- name: Configure logrotate
+  include_tasks: logrotate.yml
+  when: logrotate_enabled | default(true)
+  tags: ['logging']
+
+- name: Create application user
+  user:
+    name: "{{ app_user }}"
+    group: "{{ app_group }}"
+    system: yes
+    shell: /bin/bash
+    home: "/home/{{ app_user }}"
+    create_home: yes
+    state: present
+  tags: ['user']
+
+- name: Create application directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: '0755'
+  with_items:
+    - "{{ app_install_dir }}"
+    - "/var/log/{{ app_name }}"
+    - "/var/backups/{{ app_name }}"
+    - "/etc/{{ app_name }}"
+  tags: ['directories']
+
+- name: Install Python pip
+  package:
+    name: python3-pip
+    state: present
+  tags: ['python']
+
+- name: Install Ansible dependencies
+  pip:
+    name:
+      - boto3
+      - botocore
+    state: present
+  tags: ['python']

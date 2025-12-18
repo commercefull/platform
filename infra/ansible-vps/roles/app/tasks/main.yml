@@ -1,0 +1,77 @@
+---
+# Application deployment tasks
+
+- name: Clone application repository
+  git:
+    repo: "{{ app_repo }}"
+    dest: "{{ app_install_dir }}"
+    version: "{{ app_version }}"
+    force: yes
+  become_user: "{{ app_user }}"
+  tags: ['app', 'deploy']
+
+- name: Install application dependencies
+  npm:
+    path: "{{ app_install_dir }}"
+    state: present
+  become_user: "{{ app_user }}"
+  environment:
+    npm_config_cache: "/home/{{ app_user }}/.npm"
+  tags: ['app', 'deps']
+
+- name: Build application
+  command: npm run build
+  args:
+    chdir: "{{ app_install_dir }}"
+  become_user: "{{ app_user }}"
+  environment:
+    NODE_ENV: "{{ environment }}"
+  when: "'build' in lookup('file', app_install_dir + '/package.json') | from_json | default({})"
+  tags: ['app', 'build']
+
+- name: Create environment configuration
+  template:
+    src: .env.j2
+    dest: "{{ app_install_dir }}/.env"
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: '0600'
+  tags: ['app', 'config']
+
+- name: Create systemd service
+  template:
+    src: commercefull.service.j2
+    dest: "/etc/systemd/system/{{ app_name }}.service"
+    owner: root
+    group: root
+    mode: '0644'
+  notify: reload systemd
+  tags: ['app', 'service']
+
+- name: Enable and start application service
+  service:
+    name: "{{ app_name }}"
+    state: started
+    enabled: yes
+  tags: ['app', 'service']
+
+- name: Wait for application to be healthy
+  uri:
+    url: "http://localhost:{{ app_port }}/health"
+    method: GET
+    status_code: 200
+  register: health_check
+  until: health_check.status == 200
+  retries: 30
+  delay: 10
+  tags: ['app', 'health']
+
+- name: Run database migrations
+  command: npm run migrate
+  args:
+    chdir: "{{ app_install_dir }}"
+  become_user: "{{ app_user }}"
+  environment:
+    NODE_ENV: "{{ environment }}"
+  when: "'migrate' in lookup('file', app_install_dir + '/package.json') | from_json | default({})"
+  tags: ['app', 'migrate']

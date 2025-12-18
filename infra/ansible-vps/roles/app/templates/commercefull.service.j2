@@ -1,0 +1,36 @@
+# CommerceFull systemd service
+
+[Unit]
+Description=CommerceFull E-commerce Platform
+After=network.target postgresql.service
+Requires=postgresql.service
+
+[Service]
+Type=simple
+User={{ app_user }}
+Group={{ app_group }}
+WorkingDirectory={{ app_install_dir }}
+Environment=NODE_ENV={{ environment }}
+Environment=PORT={{ app_port }}
+ExecStart=/usr/bin/npm start
+Restart=always
+RestartSec=10
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier={{ app_name }}
+
+# Security settings
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectHome=yes
+ProtectSystem=strict
+ReadWritePaths={{ app_install_dir }}
+ReadWritePaths=/var/log/{{ app_name }}
+ReadWritePaths=/tmp
+
+# Resource limits
+MemoryLimit=512M
+CPUQuota=50%
+
+[Install]
+WantedBy=multi-user.target

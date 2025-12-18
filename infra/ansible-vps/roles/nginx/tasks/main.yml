@@ -1,0 +1,97 @@
+---
+# Nginx installation and configuration
+
+- name: Install Nginx
+  package:
+    name: nginx
+    state: present
+  tags: ['nginx', 'install']
+
+- name: Start and enable Nginx service
+  service:
+    name: nginx
+    state: started
+    enabled: yes
+  tags: ['nginx', 'service']
+
+- name: Configure Nginx worker settings
+  lineinfile:
+    path: /etc/nginx/nginx.conf
+    regexp: "^worker_processes"
+    line: "worker_processes {{ nginx_worker_processes }};"
+  notify: reload nginx
+  tags: ['nginx', 'config']
+
+- name: Configure Nginx worker connections
+  lineinfile:
+    path: /etc/nginx/nginx.conf
+    regexp: "^.*worker_connections"
+    line: "    worker_connections {{ nginx_worker_connections }};"
+  notify: reload nginx
+  tags: ['nginx', 'config']
+
+- name: Configure Nginx client max body size
+  lineinfile:
+    path: /etc/nginx/nginx.conf
+    regexp: "^.*client_max_body_size"
+    line: "    client_max_body_size {{ nginx_client_max_body_size }};"
+  notify: reload nginx
+  tags: ['nginx', 'config']
+
+- name: Configure Nginx keepalive timeout
+  lineinfile:
+    path: /etc/nginx/nginx.conf
+    regexp: "^.*keepalive_timeout"
+    line: "    keepalive_timeout {{ nginx_keepalive_timeout }};"
+  notify: reload nginx
+  tags: ['nginx', 'config']
+
+- name: Create Nginx sites directory
+  file:
+    path: "/etc/nginx/sites-{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  with_items:
+    - available
+    - enabled
+  tags: ['nginx', 'config']
+
+- name: Configure CommerceFull Nginx site
+  template:
+    src: commercefull.nginx.j2
+    dest: "/etc/nginx/sites-available/{{ app_name }}"
+    owner: root
+    group: root
+    mode: '0644'
+  notify: reload nginx
+  tags: ['nginx', 'config']
+
+- name: Enable CommerceFull site
+  file:
+    src: "/etc/nginx/sites-available/{{ app_name }}"
+    dest: "/etc/nginx/sites-enabled/{{ app_name }}"
+    state: link
+  notify: reload nginx
+  tags: ['nginx', 'config']
+
+- name: Remove default Nginx site
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify: reload nginx
+  tags: ['nginx', 'config']
+
+- name: Create web directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: '0755'
+  with_items:
+    - "/var/www/{{ app_name }}"
+    - "/var/www/{{ app_name }}/static"
+    - "/var/www/{{ app_name }}/media"
+  tags: ['nginx', 'directories']

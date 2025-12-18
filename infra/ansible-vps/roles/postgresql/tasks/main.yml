@@ -1,0 +1,111 @@
+---
+# PostgreSQL installation and configuration
+
+- name: Add PostgreSQL APT repository key
+  apt_key:
+    url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+    state: present
+  tags: ['postgresql', 'repo']
+
+- name: Add PostgreSQL APT repository
+  apt_repository:
+    repo: "deb http://apt.postgresql.org/pub/repos/apt {{ ansible_distribution_release }}-pgdg main"
+    state: present
+    filename: postgresql
+  tags: ['postgresql', 'repo']
+
+- name: Update package cache after adding PostgreSQL repo
+  apt:
+    update_cache: yes
+  tags: ['postgresql', 'repo']
+
+- name: Install PostgreSQL
+  package:
+    name:
+      - "postgresql-{{ postgres_version }}"
+      - "postgresql-contrib-{{ postgres_version }}"
+      - "postgresql-client-{{ postgres_version }}"
+      - python3-psycopg2
+    state: present
+  tags: ['postgresql', 'install']
+
+- name: Start and enable PostgreSQL service
+  service:
+    name: "postgresql"
+    state: started
+    enabled: yes
+  tags: ['postgresql', 'service']
+
+- name: Create PostgreSQL database
+  postgresql_db:
+    name: "{{ db_name }}"
+    owner: "{{ db_user }}"
+    encoding: UTF-8
+    lc_collate: en_US.UTF-8
+    lc_ctype: en_US.UTF-8
+    template: template0
+  become_user: postgres
+  tags: ['postgresql', 'database']
+
+- name: Create PostgreSQL user
+  postgresql_user:
+    db: "{{ db_name }}"
+    name: "{{ db_user }}"
+    password: "{{ db_password | default(omit) }}"
+    priv: "ALL"
+    role_attr_flags: CREATEDB,NOSUPERUSER
+  become_user: postgres
+  tags: ['postgresql', 'user']
+
+- name: Configure PostgreSQL for local connections
+  postgresql_pg_hba:
+    dest: "/etc/postgresql/{{ postgres_version }}/main/pg_hba.conf"
+    contype: local
+    databases: "{{ db_name }}"
+    users: "{{ db_user }}"
+    method: trust
+  notify: restart postgresql
+  tags: ['postgresql', 'config']
+
+- name: Configure PostgreSQL listen addresses
+  lineinfile:
+    path: "/etc/postgresql/{{ postgres_version }}/main/postgresql.conf"
+    regexp: "^#?listen_addresses"
+    line: "listen_addresses = '{{ postgres_listen_addresses }}'"
+  notify: restart postgresql
+  tags: ['postgresql', 'config']
+
+- name: Configure PostgreSQL performance settings
+  blockinfile:
+    path: "/etc/postgresql/{{ postgres_version }}/main/postgresql.conf"
+    block: |
+      # CommerceFull optimized settings
+      max_connections = {{ postgres_max_connections }}
+      shared_buffers = {{ postgres_shared_buffers }}
+      effective_cache_size = {{ postgres_effective_cache_size }}
+      maintenance_work_mem = {{ postgres_maintenance_work_mem }}
+      checkpoint_completion_target = {{ postgres_checkpoint_completion_target }}
+      wal_buffers = {{ postgres_wal_buffers }}
+      default_statistics_target = {{ postgres_default_statistics_target }}
+    marker: "# {mark} COMMERCEFULL SETTINGS"
+  notify: restart postgresql
+  tags: ['postgresql', 'config']
+
+- name: Create PostgreSQL backup script
+  template:
+    src: postgresql_backup.sh.j2
+    dest: /usr/local/bin/postgresql-backup
+    mode: '0755'
+    owner: root
+    group: root
+  tags: ['postgresql', 'backup']
+
+- name: Schedule PostgreSQL backups
+  cron:
+    name: "PostgreSQL backup"
+    minute: "0"
+    hour: "2"
+    job: "/usr/local/bin/postgresql-backup"
+    user: postgres
+  when: backup_enabled | default(true)
+  tags: ['postgresql', 'backup']

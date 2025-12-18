@@ -1,0 +1,47 @@
+# GCP Project Configuration
+project_id = "your-commercefull-project"
+region     = "us-central1"
+zone       = "us-central1-a"
+
+# Environment
+environment = "prod"
+
+# Application
+app_name = "commercefull"
+domain   = "yourdomain.com"
+
+# Database
+db_version = "POSTGRES_18"
+db_tier    = "db-f1-micro"
+db_name    = "commercefull"
+db_user    = "commercefull"
+
+# Container
+container_image  = "gcr.io/your-project/commercefull:latest"
+container_port   = 3000
+
+# Storage
+storage_class   = "STANDARD"
+storage_location = "us-central1"
+
+# Networking
+vpc_name    = "commercefull-vpc"
+subnet_cidr = "10.0.0.0/24"
+
+# Security
+enable_ssl = true
+enable_cdn = true
+
+# Monitoring
+enable_monitoring     = true
+log_retention_days   = 30
+
+# Cost Protection
+enable_deletion_protection = true
+
+# Tags
+tags = {
+  Environment = "prod"
+  Project     = "commercefull"
+  ManagedBy   = "terraform"
+}

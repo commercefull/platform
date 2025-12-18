@@ -1,0 +1,73 @@
+# Application Configuration
+app_name: commercefull
+app_domain: yourdomain.com
+app_port: 3000
+node_version: 18
+environment: production
+
+# Database Configuration
+db_name: commercefull_prod
+db_user: commercefull_user
+db_host: localhost
+db_port: 5432
+# db_password: "{{ vault_db_password }}"  # Use Ansible Vault
+
+# SSL Configuration
+ssl_email: admin@yourdomain.com
+ssl_domains:
+  - "{{ app_domain }}"
+  - "www.{{ app_domain }}"
+
+# System Configuration
+timezone: UTC
+swap_size: 1G
+
+# Security Configuration
+ssh_port: 22
+fail2ban_enabled: true
+ufw_enabled: true
+ufw_allowed_ports:
+  - 22    # SSH
+  - 80    # HTTP
+  - 443   # HTTPS
+  - 5432  # PostgreSQL (local only)
+
+# Monitoring Configuration
+monit_enabled: true
+logrotate_enabled: true
+
+# Backup Configuration
+backup_enabled: true
+backup_schedule: "0 2 * * *"  # Daily at 2 AM
+backup_retention_days: 7
+backup_destination: "/var/backups/commercefull"
+
+# Node.js Application Settings
+app_repo: https://github.com/yourorg/commercefull.git
+app_version: main
+app_install_dir: /var/www/commercefull
+app_user: commercefull
+app_group: commercefull
+
+# PostgreSQL Settings
+postgres_version: 18
+postgres_listen_addresses: localhost
+postgres_max_connections: 100
+postgres_shared_buffers: 256MB
+postgres_effective_cache_size: 1GB
+postgres_maintenance_work_mem: 64MB
+postgres_checkpoint_completion_target: 0.9
+postgres_wal_buffers: 16MB
+postgres_default_statistics_target: 100
+
+# Nginx Settings
+nginx_worker_processes: auto
+nginx_worker_connections: 1024
+nginx_client_max_body_size: 50M
+nginx_keepalive_timeout: 65
+
+# SSL Settings
+ssl_protocols: TLSv1.2 TLSv1.3
+ssl_ciphers: ECDHE-RSA-AES256-GCM-SHA512:DHE-RSA-AES256-GCM-SHA512:ECDHE-RSA-AES256-GCM-SHA384
+ssl_session_cache: shared:SSL:10m
+ssl_session_timeout: 10m
