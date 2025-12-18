@@ -28,11 +28,7 @@ describe('Coupon API Tests', () => {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
-    expect([201, 400, 409]).toContain(response.status);
-    if (response.status !== 201) {
-      console.log('Coupon creation failed:', response.data);
-      return;
-    }
+    expect(response.status).toBe(201);
     expect(response.data.success).toBe(true);
     // API returns promotionCouponId, not id
     expect(response.data.data).toHaveProperty('promotionCouponId');

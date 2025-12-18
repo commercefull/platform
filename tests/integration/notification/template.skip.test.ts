@@ -236,8 +236,7 @@ describe.skip('Notification Template Tests', () => {
         headers: { Authorization: `Bearer ${customerToken}` }
       });
       
-      // Expect 401 (token fails merchant verification) or 403 (authorization denied)
-      expect([401, 403]).toContain(response.status);
+      expect(response.status).toBe(401);
       expect(response.data.success).toBe(false);
     });
   });

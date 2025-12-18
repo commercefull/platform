@@ -57,11 +57,7 @@ describe('Category Promotion Tests', () => {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
-    expect([201, 400, 404, 500]).toContain(response.status);
-    if (response.status !== 201) {
-      console.log('Category promotion creation failed:', response.data);
-      return;
-    }
+    expect(response.status).toBe(201);
     expect(response.data.success).toBe(true);
     expect(response.data.data).toHaveProperty('categoryPromotionId');
     
@@ -78,9 +74,7 @@ describe('Category Promotion Tests', () => {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
-    expect([200, 404, 500]).toContain(response.status);
-    if (response.status !== 200) return;
-    
+    expect(response.status).toBe(200);
     expect(response.data.success).toBe(true);
     expect(Array.isArray(response.data.data)).toBe(true);
     
@@ -103,9 +97,7 @@ describe('Category Promotion Tests', () => {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
-    expect([200, 404, 500]).toContain(response.status);
-    if (response.status !== 200) return;
-    
+    expect(response.status).toBe(200);
     expect(response.data.success).toBe(true);
     expect(Array.isArray(response.data.data)).toBe(true);
     
@@ -125,9 +117,7 @@ describe('Category Promotion Tests', () => {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
-    expect([200, 404, 500]).toContain(response.status);
-    if (response.status !== 200) return;
-    
+    expect(response.status).toBe(200);
     expect(response.data.success).toBe(true);
     
     // Verify the category promotion is deleted

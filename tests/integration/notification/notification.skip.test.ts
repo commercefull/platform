@@ -298,8 +298,7 @@ describe('Notification Tests', () => {
         headers: { Authorization: `Bearer ${secondCustomerToken}` }
       });
       
-      // Business API allows access to any notification for admin, or may return 403/401
-      expect([200, 401, 403]).toContain(response.status);
+      expect(response.status).toBe(401);
     });
   });
 

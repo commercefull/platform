@@ -32,13 +32,9 @@ describe('Payment Gateway Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
-      // May return 200 or 500 depending on endpoint implementation
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-        expect(Array.isArray(response.data.data)).toBe(true);
-      } else {
-        expect([200, 401, 500]).toContain(response.status);
-      }
+      expect(response.status).toBe(200);
+      expect(response.data.success).toBe(true);
+      expect(Array.isArray(response.data.data)).toBe(true);
     });
 
     it('should get a gateway by ID', async () => {
@@ -51,14 +47,11 @@ describe('Payment Gateway Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-        expect(response.data.data).toHaveProperty('paymentGatewayId');
-        expect(response.data.data).toHaveProperty('name');
-        expect(response.data.data).toHaveProperty('provider');
-      } else {
-        expect([200, 404, 500]).toContain(response.status);
-      }
+      expect(response.status).toBe(200);
+      expect(response.data.success).toBe(true);
+      expect(response.data.data).toHaveProperty('paymentGatewayId');
+      expect(response.data.data).toHaveProperty('name');
+      expect(response.data.data).toHaveProperty('provider');
     });
 
     it('should create a new payment gateway', async () => {
@@ -74,19 +67,16 @@ describe('Payment Gateway Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
-      if (response.status === 201) {
-        expect(response.data.success).toBe(true);
-        expect(response.data.data).toHaveProperty('paymentGatewayId');
-        expect(response.data.data).toHaveProperty('name', newGateway.name);
-        
-        // Clean up - delete the new gateway
-        const newGatewayId = response.data.data.paymentGatewayId;
-        await client.delete(`/business/gateways/${newGatewayId}`, {
-          headers: { Authorization: `Bearer ${adminToken}` }
-        });
-      } else {
-        expect([201, 400, 500]).toContain(response.status);
-      }
+      expect(response.status).toBe(201);
+      expect(response.data.success).toBe(true);
+      expect(response.data.data).toHaveProperty('paymentGatewayId');
+      expect(response.data.data).toHaveProperty('name', newGateway.name);
+      
+      // Clean up - delete the new gateway
+      const newGatewayId = response.data.data.paymentGatewayId;
+      await client.delete(`/business/gateways/${newGatewayId}`, {
+        headers: { Authorization: `Bearer ${adminToken}` }
+      });
     });
 
     it('should update an existing gateway', async () => {
@@ -104,25 +94,22 @@ describe('Payment Gateway Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-        expect(response.data.data).toHaveProperty('name', updates.name);
-        
-        // Reset to original values
-        await client.put(`/business/gateways/${testGatewayId}`, {
-          name: testGatewayData.name,
-          isActive: testGatewayData.isActive
-        }, {
-          headers: { Authorization: `Bearer ${adminToken}` }
-        });
-      } else {
-        expect([200, 404, 500]).toContain(response.status);
-      }
+      expect(response.status).toBe(200);
+      expect(response.data.success).toBe(true);
+      expect(response.data.data).toHaveProperty('name', updates.name);
+      
+      // Reset to original values
+      await client.put(`/business/gateways/${testGatewayId}`, {
+        name: testGatewayData.name,
+        isActive: testGatewayData.isActive
+      }, {
+        headers: { Authorization: `Bearer ${adminToken}` }
+      });
     });
 
     it('should require authentication for gateway operations', async () => {
       const response = await client.get('/business/gateways');
-      expect([401, 403]).toContain(response.status);
+      expect(response.status).toBe(401);
     });
   });
 });

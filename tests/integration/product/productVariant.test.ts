@@ -63,9 +63,7 @@ describe('Product Variant Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
-      // Route may not be implemented - accept 200 or 404
-      expect([200, 404]).toContain(response.status);
-      if (response.status !== 200) return;
+      expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       // DB returns productVariantId, not id
       const variantId = response.data.data.productVariantId || response.data.data.id;
@@ -83,9 +81,7 @@ describe('Product Variant Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
-      // Route may not be implemented - accept 200 or 404
-      expect([200, 404]).toContain(response.status);
-      if (response.status !== 200) return;
+      expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       expect(Array.isArray(response.data.data)).toBe(true);
       // May have 0 or more variants depending on what was created
@@ -110,9 +106,7 @@ describe('Product Variant Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
-      // Route may not be implemented - accept 201 or 404
-      expect([201, 404]).toContain(response.status);
-      if (response.status !== 201) return;
+      expect(response.status).toBe(201);
       expect(response.data.success).toBe(true);
       // DB returns productVariantId, not id
       const variantId = response.data.data.productVariantId || response.data.data.id;
@@ -146,9 +140,7 @@ describe('Product Variant Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
-      // Route may not be implemented - accept 200 or 404
-      expect([200, 404]).toContain(response.status);
-      if (response.status !== 200) return;
+      expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       expect(response.data.data).toHaveProperty('name', updatedData.name);
       expect(response.data.data).toHaveProperty('price', updatedData.price);
@@ -167,13 +159,9 @@ describe('Product Variant Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
-      // Route may not exist - accept 200 or 404
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-        expect(response.data.data).toHaveProperty('inventory', inventoryData.inventory);
-      } else {
-        expect([200, 404]).toContain(response.status);
-      }
+      expect(response.status).toBe(200);
+      expect(response.data.success).toBe(true);
+      expect(response.data.data).toHaveProperty('inventory', inventoryData.inventory);
     });
   });
 

@@ -410,8 +410,7 @@ describe('GDPR Feature Tests', () => {
         headers: { Authorization: `Bearer ${customerToken}` }
       });
 
-      // Expect 401 (token fails merchant verification), 403 (authorization denied), or 200 (if secrets are same)
-      expect([200, 401, 403]).toContain(response.status);
+      expect(response.status).toBe(401);
     });
 
     it('should reject invalid tokens', async () => {

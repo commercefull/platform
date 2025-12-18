@@ -11,11 +11,6 @@ exports.seed = async function (knex) {
     .where({ email: 'customer@example.com' })
     .first('customerId');
 
-  if (!testCustomer) {
-    console.log('Skipping order seed - test customer not found');
-    return;
-  }
-
   // Delete existing test order and items
   await knex('orderItem').where({ orderId: TEST_ORDER_ID }).del();
   await knex('order').where({ orderId: TEST_ORDER_ID }).del();

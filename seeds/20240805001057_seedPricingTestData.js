@@ -19,11 +19,6 @@ exports.seed = async function(knex) {
   const genericBrand = await knex('productBrand').where({ slug: 'generic' }).first('productBrandId');
   const electronicsCategory = await knex('productCategory').where({ slug: 'electronics' }).first('productCategoryId');
 
-  if (!genericBrand || !electronicsCategory) {
-    console.log('Skipping pricing test data seed - required brand/category not found');
-    return;
-  }
-
   // Clean up existing test data (in reverse order of dependencies)
   // First clean up any order items referencing these products
   await knex('orderItem').whereIn('productId', TEST_PRODUCT_IDS).delete().catch(() => {});

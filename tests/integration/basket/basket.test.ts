@@ -216,12 +216,16 @@ describe('Basket Feature Tests', () => {
 
   describe('Basket Items API', () => {
     it('should add an item to a basket', async () => {
-      if (!customerToken || guestBasketId === 'test-basket-unavailable') {
-        console.log('Skipping test - no customer token or basket');
-        return;
-      }
+      // Create a fresh basket for this test
+      const createResponse = await client.post('/customer/basket', {
+        sessionId: 'add-item-test-session-' + Date.now()
+      }, {
+        headers: { Authorization: `Bearer ${customerToken}` }
+      });
 
-      const response = await client.post(`/customer/basket/${guestBasketId}/items`, {
+      const testBasketId = createResponse.data.data.basketId;
+
+      const response = await client.post(`/customer/basket/${testBasketId}/items`, {
         productId: basketItem1.productId || '00000000-0000-0000-0000-000000000001',
         sku: 'TEST-SKU-001',
         name: 'Test Product',
@@ -235,7 +239,7 @@ describe('Basket Feature Tests', () => {
       expect(response.data.success).toBe(true);
 
       const basket = response.data.data;
-      expect(basket).toHaveProperty('basketId', guestBasketId);
+      expect(basket).toHaveProperty('basketId', testBasketId);
       expect(basket).toHaveProperty('items');
       expect(Array.isArray(basket.items)).toBe(true);
       expect(basket.items.length).toBeGreaterThan(0);
@@ -257,11 +261,6 @@ describe('Basket Feature Tests', () => {
     });
 
     it('should update an item quantity', async () => {
-      if (!customerToken || !createdBasketItemId) {
-        console.log('Skipping update test - no customer token or item created');
-        return;
-      }
-
       const response = await client.patch(`/customer/basket/${guestBasketId}/items/${createdBasketItemId}`, {
         quantity: 5
       }, {
@@ -281,11 +280,6 @@ describe('Basket Feature Tests', () => {
     });
 
     it('should set item as gift', async () => {
-      if (!customerToken || !createdBasketItemId) {
-        console.log('Skipping gift test - no customer token or item created');
-        return;
-      }
-
       const response = await client.post(`/customer/basket/${guestBasketId}/items/${createdBasketItemId}/gift`, {
         giftMessage: 'Happy Birthday!'
       }, {
@@ -302,11 +296,6 @@ describe('Basket Feature Tests', () => {
     });
 
     it('should remove an item from a basket', async () => {
-      if (!customerToken || !createdBasketItemId) {
-        console.log('Skipping remove test - no customer token or item created');
-        return;
-      }
-
       const response = await client.delete(`/customer/basket/${guestBasketId}/items/${createdBasketItemId}`, {
         headers: { Authorization: `Bearer ${customerToken}` }
       });
@@ -329,16 +318,20 @@ describe('Basket Feature Tests', () => {
 
   describe('Basket Operations API', () => {
     it('should clear a basket', async () => {
-      if (!customerToken || guestBasketId === 'test-basket-unavailable') {
-        console.log('Skipping test - no customer token or basket');
-        return;
-      }
+      // Create a fresh basket for this test
+      const createResponse = await client.post('/customer/basket', {
+        sessionId: 'clear-test-session-' + Date.now()
+      }, {
+        headers: { Authorization: `Bearer ${customerToken}` }
+      });
 
-      // First, add an item to make sure the basket isn't empty
-      await client.post(`/customer/basket/${guestBasketId}/items`, {
-        productId: basketItem2.productId,
-        sku: 'TEST-SKU-002',
-        name: 'Test Product 2',
+      const testBasketId = createResponse.data.data.basketId;
+
+      // Add an item to make sure the basket isn't empty
+      await client.post(`/customer/basket/${testBasketId}/items`, {
+        productId: basketItem2.productId || 'clear-product-2',
+        sku: 'CLEAR-SKU-002',
+        name: 'Clear Test Product 2',
         quantity: 1,
         unitPrice: 19.99
       }, {
@@ -346,7 +339,7 @@ describe('Basket Feature Tests', () => {
       });
 
       // Now clear the basket
-      const response = await client.delete(`/customer/basket/${guestBasketId}/items`, {
+      const response = await client.delete(`/customer/basket/${testBasketId}/items`, {
         headers: { Authorization: `Bearer ${customerToken}` }
       });
 
@@ -354,7 +347,7 @@ describe('Basket Feature Tests', () => {
       expect(response.data.success).toBe(true);
 
       const basket = response.data.data;
-      expect(basket).toHaveProperty('basketId', guestBasketId);
+      expect(basket).toHaveProperty('basketId', testBasketId);
       expect(basket).toHaveProperty('items');
       expect(Array.isArray(basket.items)).toBe(true);
       expect(basket.items.length).toBe(0);
@@ -362,21 +355,18 @@ describe('Basket Feature Tests', () => {
       // Verify totals reset
       expect(basket.subtotal).toBe(0);
       expect(basket.itemCount).toBe(0);
+
+      // Clean up test basket
+      await client.delete(`/customer/basket/${testBasketId}`).catch(() => {});
     });
 
     it('should merge baskets', async () => {
-
       // Create fresh session basket for merging
       const sessionBasketResponse = await client.post('/customer/basket', {
         sessionId: 'merge-session-' + Date.now()
       }, {
         headers: { Authorization: `Bearer ${customerToken}` }
       });
-
-      if (sessionBasketResponse.status !== 200 || !sessionBasketResponse.data?.data?.basketId) {
-        console.log('Skipping - could not create session basket');
-        return;
-      }
 
       const sessionBasketId = sessionBasketResponse.data.data.basketId;
 
@@ -386,11 +376,6 @@ describe('Basket Feature Tests', () => {
       }, {
         headers: { Authorization: `Bearer ${customerToken}` }
       });
-
-      if (customerBasketResponse.status !== 200 || !customerBasketResponse.data?.data?.basketId) {
-        console.log('Skipping - could not create customer basket');
-        return;
-      }
 
       const customerBasketId = customerBasketResponse.data.data.basketId;
 
@@ -428,22 +413,12 @@ describe('Basket Feature Tests', () => {
     });
 
     it('should assign basket to customer', async () => {
-      if (!customerToken || !customerId) {
-        console.log('Skipping assign test - no customer token or ID');
-        return;
-      }
-
       // Create a new session basket
       const createResponse = await client.post('/customer/basket', {
         sessionId: 'assign-test-session-' + Date.now()
       }, {
         headers: { Authorization: `Bearer ${customerToken}` }
       });
-
-      if (createResponse.status !== 200 || !createResponse.data?.data?.basketId) {
-        console.log('Skipping - could not create basket');
-        return;
-      }
 
       const newBasketId = createResponse.data.data.basketId;
 
@@ -467,11 +442,6 @@ describe('Basket Feature Tests', () => {
 
     describe('Basket Expiration API', () => {
       it('should extend basket expiration', async () => {
-        if (!customerToken || guestBasketId === 'test-basket-unavailable') {
-          console.log('Skipping test - no customer token or basket');
-          return;
-        }
-
         const response = await client.put(`/customer/basket/${guestBasketId}/expiration`, {
           days: 14
         }, {
@@ -487,11 +457,6 @@ describe('Basket Feature Tests', () => {
       });
 
       it('should reject invalid expiration days', async () => {
-        if (!customerToken || guestBasketId === 'test-basket-unavailable') {
-          console.log('Skipping test - no customer token or basket');
-          return;
-        }
-
         const response = await client.put(`/customer/basket/${guestBasketId}/expiration`, {
           days: -5
         }, {
@@ -508,11 +473,6 @@ describe('Basket Feature Tests', () => {
 
     describe('Basket Validation', () => {
       it('should reject adding item with invalid quantity', async () => {
-        if (!customerToken || guestBasketId === 'test-basket-unavailable') {
-          console.log('Skipping test - no customer token or basket');
-          return;
-        }
-
         const response = await client.post(`/customer/basket/${guestBasketId}/items`, {
           productId: 'test-product',
           sku: 'TEST-SKU',

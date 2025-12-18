@@ -42,8 +42,7 @@ describe('Tax Rates API Integration Tests', () => {
       const response = await client.get('/business/tax/rates', {
         headers: { Authorization: `Bearer ${userToken}` }
       });
-      // Expect 401 (token fails merchant verification) or 403 (authorization denied)
-      expect([401, 403]).toContain(response.status);
+      expect(response.status).toBe(401);
     });
 
     it('should support filtering by country', async () => {

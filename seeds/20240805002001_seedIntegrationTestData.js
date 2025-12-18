@@ -40,14 +40,14 @@ const TEST_CUSTOMER_GROUP_ID = '00000000-0000-0000-0000-000000006002';
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.seed = async function(knex) {
+exports.seed = async function (knex) {
   // =========================================================================
   // Test Customer
   // =========================================================================
   const existingCustomer = await knex('customer')
     .where('customerId', TEST_CUSTOMER_ID)
     .first();
-  
+
   if (!existingCustomer) {
     await knex('customer').insert({
       customerId: TEST_CUSTOMER_ID,
@@ -69,7 +69,7 @@ exports.seed = async function(knex) {
   const existingAddress = await knex('customerAddress')
     .where('customerAddressId', TEST_CUSTOMER_ADDRESS_ID)
     .first();
-  
+
   if (!existingAddress) {
     await knex('customerAddress').insert({
       customerAddressId: TEST_CUSTOMER_ADDRESS_ID,
@@ -94,7 +94,7 @@ exports.seed = async function(knex) {
   const existingGroup = await knex('customerGroup')
     .where('customerGroupId', TEST_CUSTOMER_GROUP_ID)
     .first();
-  
+
   if (!existingGroup) {
     await knex('customerGroup').insert({
       customerGroupId: TEST_CUSTOMER_GROUP_ID,
@@ -114,7 +114,7 @@ exports.seed = async function(knex) {
   const existingProduct1 = await knex('product')
     .where('productId', TEST_PRODUCT_1_ID)
     .first();
-  
+
   if (!existingProduct1) {
     await knex('product').insert({
       productId: TEST_PRODUCT_1_ID,
@@ -135,7 +135,7 @@ exports.seed = async function(knex) {
   const existingProduct2 = await knex('product')
     .where('productId', TEST_PRODUCT_2_ID)
     .first();
-  
+
   if (!existingProduct2) {
     await knex('product').insert({
       productId: TEST_PRODUCT_2_ID,
@@ -156,12 +156,12 @@ exports.seed = async function(knex) {
   // =========================================================================
   // Test Baskets
   // =========================================================================
-  
+
   // Guest basket for basket tests
   const existingGuestBasket = await knex('basket')
     .where('basketId', TEST_GUEST_BASKET_ID)
     .first();
-  
+
   if (!existingGuestBasket) {
     await knex('basket').insert({
       basketId: TEST_GUEST_BASKET_ID,
@@ -184,7 +184,7 @@ exports.seed = async function(knex) {
   const existingCustomerBasket = await knex('basket')
     .where('basketId', TEST_CUSTOMER_BASKET_ID)
     .first();
-  
+
   if (!existingCustomerBasket) {
     await knex('basket').insert({
       basketId: TEST_CUSTOMER_BASKET_ID,
@@ -208,7 +208,7 @@ exports.seed = async function(knex) {
   const existingCheckoutBasket = await knex('basket')
     .where('basketId', TEST_CHECKOUT_BASKET_ID)
     .first();
-  
+
   if (!existingCheckoutBasket) {
     await knex('basket').insert({
       basketId: TEST_CHECKOUT_BASKET_ID,
@@ -252,7 +252,7 @@ exports.seed = async function(knex) {
   const existingCheckout = await knex('checkoutSession')
     .where('checkoutSessionId', TEST_CHECKOUT_ID)
     .first();
-  
+
   if (!existingCheckout) {
     await knex('checkoutSession').insert({
       checkoutSessionId: TEST_CHECKOUT_ID,
@@ -276,467 +276,455 @@ exports.seed = async function(knex) {
   // =========================================================================
   // Test B2B Company
   // =========================================================================
-  try {
-    const existingCompany = await knex('b2bCompany')
-      .where('b2bCompanyId', TEST_B2B_COMPANY_ID)
-      .first();
-    
-    if (!existingCompany) {
-      await knex('b2bCompany').insert({
-        b2bCompanyId: TEST_B2B_COMPANY_ID,
-        name: 'Integration Test Company',
-        legalName: 'Integration Test Company LLC',
-        registrationNumber: 'REG-TEST-001',
-        vatNumber: null,
-        taxId: 'TAX-TEST-001',
-        dunsNumber: null,
-        status: 'active',
-        companyType: 'corporation',
-        industry: 'Technology',
-        industryCode: null,
-        employeeCount: 50,
-        employeeRange: '11-50',
-        annualRevenue: 5000000,
-        revenueRange: null,
-        creditLimit: 50000,
-        availableCredit: 50000,
-        usedCredit: 0,
-        paymentTermsDays: 30,
-        paymentTermsType: 'net',
-        currency: 'USD',
-        primaryContactId: null,
-        billingContactId: null,
-        website: null,
-        phone: null,
-        fax: null,
-        email: null,
-        logoUrl: null,
-        description: null,
-        notes: null,
-        metadata: null,
-        customFields: null,
-        taxExempt: false,
-        taxExemptCertificate: null,
-        taxExemptExpiry: null,
-        parentCompanyId: null,
-        accountManagerId: null,
-        tier: 'standard',
-        discountRate: 0,
-        requiresApproval: false,
-        orderMinimum: null,
-        orderMaximum: null,
-        approvedAt: new Date(),
-        approvedBy: null,
-        lastOrderAt: null,
-        totalOrders: 0,
-        lifetimeValue: 0,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        deletedAt: null
-      }).onConflict('b2bCompanyId').ignore();
-    }
-  } catch (e) {
-    // b2bCompany table may not exist
-    console.log('Skipping B2B company seed - table may not exist');
+
+  await knex('b2bCompany').insert({
+    b2bCompanyId: TEST_B2B_COMPANY_ID,
+    name: 'Integration Test Company',
+    legalName: 'Integration Test Company LLC',
+    registrationNumber: 'REG-TEST-001',
+    vatNumber: null,
+    taxId: 'TAX-TEST-001',
+    dunsNumber: null,
+    status: 'active',
+    companyType: 'corporation',
+    industry: 'Technology',
+    industryCode: null,
+    employeeCount: 50,
+    employeeRange: '11-50',
+    annualRevenue: 5000000,
+    revenueRange: null,
+    creditLimit: 50000,
+    availableCredit: 50000,
+    usedCredit: 0,
+    paymentTermsDays: 30,
+    paymentTermsType: 'net',
+    currency: 'USD',
+    primaryContactId: null,
+    billingContactId: null,
+    website: null,
+    phone: null,
+    fax: null,
+    email: null,
+    logoUrl: null,
+    description: null,
+    notes: null,
+    metadata: null,
+    customFields: null,
+    taxExempt: false,
+    taxExemptCertificate: null,
+    taxExemptExpiry: null,
+    parentCompanyId: null,
+    accountManagerId: null,
+    tier: 'standard',
+    discountRate: 0,
+    requiresApproval: false,
+    orderMinimum: null,
+    orderMaximum: null,
+    approvedAt: new Date(),
+    approvedBy: null,
+    lastOrderAt: null,
+    totalOrders: 0,
+    lifetimeValue: 0,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    deletedAt: null
+  }).onConflict('b2bCompanyId').ignore();
+}
+
+// =========================================================================
+// Test B2B Quote
+// =========================================================================
+try {
+  const existingQuote = await knex('b2bQuote')
+    .where('b2bQuoteId', TEST_B2B_QUOTE_ID)
+    .first();
+
+  if (!existingQuote) {
+    await knex('b2bQuote').insert({
+      b2bQuoteId: TEST_B2B_QUOTE_ID,
+      quoteNumber: 'QT-TEST-001',
+      b2bCompanyId: TEST_B2B_COMPANY_ID,
+      customerId: null,
+      b2bCompanyUserId: null,
+      salesRepId: null,
+      status: 'draft',
+      currency: 'USD',
+      subtotal: 999.90,
+      discountTotal: 0,
+      discountType: null,
+      discountValue: null,
+      discountReason: null,
+      taxTotal: 0,
+      shippingTotal: 0,
+      handlingTotal: 0,
+      grandTotal: 999.90,
+      margin: null,
+      marginPercent: null,
+      validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      validityDays: 30,
+      billingAddressId: null,
+      shippingAddressId: null,
+      shippingMethod: null,
+      customerNotes: 'Integration test quote',
+      internalNotes: null,
+      terms: null,
+      conditions: null,
+      paymentTerms: null,
+      paymentTermsDays: null,
+      convertedOrderId: null,
+      rejectionReason: null,
+      revisionNumber: 1,
+      previousVersionId: null,
+      attachments: JSON.stringify([]),
+      metadata: null,
+      sentAt: null,
+      viewedAt: null,
+      acceptedAt: null,
+      rejectedAt: null,
+      convertedAt: null,
+      expiresAt: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      deletedAt: null
+    }).onConflict('b2bQuoteId').ignore();
+  }
+} catch (e) {
+  // b2bQuote table may not exist
+  console.log('Skipping B2B quote seed - table may not exist');
+}
+
+// =========================================================================
+// Test Content Type
+// =========================================================================
+try {
+  const existingContentType = await knex('contentType')
+    .where('contentTypeId', TEST_CONTENT_TYPE_ID)
+    .first();
+
+  if (!existingContentType) {
+    await knex('contentType').insert({
+      contentTypeId: TEST_CONTENT_TYPE_ID,
+      name: 'Integration Test Content Type',
+      slug: 'integration-test-type',
+      description: 'Content type for integration testing',
+      icon: null,
+      allowedBlocks: null,
+      defaultTemplate: null,
+      requiredFields: null,
+      metaFields: null,
+      isSystem: false,
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      createdBy: null,
+      updatedBy: null
+    }).onConflict('contentTypeId').ignore();
+  }
+} catch (e) {
+  console.log('Skipping content type seed - table may not exist');
+}
+
+// =========================================================================
+// Test Block Type
+// =========================================================================
+try {
+  const existingBlockType = await knex('contentBlockType')
+    .where('contentBlockTypeId', TEST_BLOCK_TYPE_ID)
+    .first();
+
+  if (!existingBlockType) {
+    await knex('contentBlockType').insert({
+      contentBlockTypeId: TEST_BLOCK_TYPE_ID,
+      name: 'Integration Test Block Type',
+      slug: 'integration-test-block-type',
+      description: 'Block type for integration testing',
+      icon: null,
+      category: null,
+      defaultConfig: null,
+      schema: JSON.stringify({ type: 'object', properties: { text: { type: 'string' } } }),
+      isSystem: false,
+      isActive: true,
+      sortOrder: 0,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      createdBy: null,
+      updatedBy: null
+    }).onConflict('contentBlockTypeId').ignore();
+  }
+} catch (e) {
+  console.log('Skipping block type seed - table may not exist');
+}
+
+// =========================================================================
+// Test Content Template
+// =========================================================================
+try {
+  const existingTemplate = await knex('contentTemplate')
+    .where('contentTemplateId', TEST_CONTENT_TEMPLATE_ID)
+    .first();
+
+  if (!existingTemplate) {
+    await knex('contentTemplate').insert({
+      contentTemplateId: TEST_CONTENT_TEMPLATE_ID,
+      name: 'Integration Test Template',
+      slug: 'integration-test-template',
+      description: 'Template for integration testing',
+      thumbnail: null,
+      htmlStructure: null,
+      cssStyles: null,
+      jsScripts: null,
+      areas: JSON.stringify(['main', 'sidebar']),
+      defaultBlocks: null,
+      compatibleContentTypes: null,
+      isSystem: false,
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      createdBy: null,
+      updatedBy: null
+    }).onConflict('contentTemplateId').ignore();
+  }
+} catch (e) {
+  console.log('Skipping content template seed - table may not exist');
+}
+
+// =========================================================================
+// Test Content Page
+// =========================================================================
+try {
+  const existingPage = await knex('contentPage')
+    .where('contentPageId', TEST_CONTENT_PAGE_ID)
+    .first();
+
+  if (!existingPage) {
+    await knex('contentPage').insert({
+      contentPageId: TEST_CONTENT_PAGE_ID,
+      title: 'Integration Test Page',
+      slug: 'integration-test-page',
+      contentTypeId: TEST_CONTENT_TYPE_ID,
+      templateId: TEST_CONTENT_TEMPLATE_ID,
+      status: 'published',
+      visibility: 'public',
+      accessPassword: null,
+      summary: 'Test page for integration testing',
+      featuredImage: null,
+      parentId: null,
+      sortOrder: 0,
+      metaTitle: 'Integration Test Page',
+      metaDescription: 'This is a test page for integration testing',
+      metaKeywords: null,
+      openGraphImage: null,
+      canonicalUrl: null,
+      noIndex: false,
+      customFields: null,
+      publishedAt: new Date(),
+      scheduledAt: null,
+      expiresAt: null,
+      isHomePage: false,
+      path: null,
+      depth: 0,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      createdBy: null,
+      updatedBy: null,
+      publishedBy: null
+    }).onConflict('contentPageId').ignore();
+  }
+} catch (e) {
+  console.log('Skipping content page seed - table may not exist');
+}
+
+// =========================================================================
+// Test Content Block
+// =========================================================================
+try {
+  const existingBlock = await knex('contentBlock')
+    .where('contentBlockId', TEST_CONTENT_BLOCK_ID)
+    .first();
+
+  if (!existingBlock) {
+    await knex('contentBlock').insert({
+      contentBlockId: TEST_CONTENT_BLOCK_ID,
+      contentPageId: TEST_CONTENT_PAGE_ID,
+      blockTypeId: TEST_BLOCK_TYPE_ID,
+      title: 'Integration Test Block',
+      area: 'main',
+      sortOrder: 0,
+      content: JSON.stringify({ text: 'Test content for integration testing' }),
+      settings: JSON.stringify({}),
+      isVisible: true,
+      cssClasses: null,
+      conditions: null,
+      parentBlockId: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      createdBy: null,
+      updatedBy: null
+    }).onConflict('contentBlockId').ignore();
+  }
+} catch (e) {
+  console.log('Skipping content block seed - table may not exist');
+}
+
+// =========================================================================
+// Test Subscription Product & Plan
+// =========================================================================
+try {
+  const existingSubProduct = await knex('subscriptionProduct')
+    .where('subscriptionProductId', TEST_SUBSCRIPTION_PRODUCT_ID)
+    .first();
+
+  if (!existingSubProduct) {
+    // Use the product ID that gets created by the product seed file
+    const productId = '10000000-0000-0000-0000-000000000001';
+    await knex('subscriptionProduct').insert({
+      subscriptionProductId: TEST_SUBSCRIPTION_PRODUCT_ID,
+      productId: productId,
+      isSubscriptionOnly: false,
+      allowOneTimePurchase: true,
+      minSubscriptionLength: null,
+      maxSubscriptionLength: null,
+      trialDays: 0,
+      trialRequiresPayment: false,
+      billingAnchor: 'subscription_start',
+      billingAnchorDay: null,
+      prorateOnChange: true,
+      allowPause: true,
+      maxPauseDays: null,
+      maxPausesPerYear: null,
+      allowSkip: true,
+      maxSkipsPerYear: null,
+      allowEarlyCancel: true,
+      cancelNoticeDays: 0,
+      earlyTerminationFee: null,
+      autoRenew: true,
+      renewalReminderDays: 7,
+      metadata: null,
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }).onConflict('subscriptionProductId').ignore();
   }
 
-  // =========================================================================
-  // Test B2B Quote
-  // =========================================================================
-  try {
-    const existingQuote = await knex('b2bQuote')
-      .where('b2bQuoteId', TEST_B2B_QUOTE_ID)
-      .first();
-    
-    if (!existingQuote) {
-      await knex('b2bQuote').insert({
-        b2bQuoteId: TEST_B2B_QUOTE_ID,
-        quoteNumber: 'QT-TEST-001',
-        b2bCompanyId: TEST_B2B_COMPANY_ID,
-        customerId: null,
-        b2bCompanyUserId: null,
-        salesRepId: null,
-        status: 'draft',
-        currency: 'USD',
-        subtotal: 999.90,
-        discountTotal: 0,
-        discountType: null,
-        discountValue: null,
-        discountReason: null,
-        taxTotal: 0,
-        shippingTotal: 0,
-        handlingTotal: 0,
-        grandTotal: 999.90,
-        margin: null,
-        marginPercent: null,
-        validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-        validityDays: 30,
-        billingAddressId: null,
-        shippingAddressId: null,
-        shippingMethod: null,
-        customerNotes: 'Integration test quote',
-        internalNotes: null,
-        terms: null,
-        conditions: null,
-        paymentTerms: null,
-        paymentTermsDays: null,
-        convertedOrderId: null,
-        rejectionReason: null,
-        revisionNumber: 1,
-        previousVersionId: null,
-        attachments: JSON.stringify([]),
-        metadata: null,
-        sentAt: null,
-        viewedAt: null,
-        acceptedAt: null,
-        rejectedAt: null,
-        convertedAt: null,
-        expiresAt: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        deletedAt: null
-      }).onConflict('b2bQuoteId').ignore();
-    }
-  } catch (e) {
-    // b2bQuote table may not exist
-    console.log('Skipping B2B quote seed - table may not exist');
+  const existingSubPlan = await knex('subscriptionPlan')
+    .where('subscriptionPlanId', TEST_SUBSCRIPTION_PLAN_ID)
+    .first();
+
+  if (!existingSubPlan) {
+    await knex('subscriptionPlan').insert({
+      subscriptionPlanId: TEST_SUBSCRIPTION_PLAN_ID,
+      subscriptionProductId: TEST_SUBSCRIPTION_PRODUCT_ID,
+      name: 'Integration Test Plan',
+      slug: null,
+      description: 'Subscription plan for integration testing',
+      billingInterval: 'month',
+      billingIntervalCount: 1,
+      price: 29.99,
+      compareAtPrice: null,
+      currency: 'USD',
+      setupFee: 0,
+      trialDays: null,
+      contractLength: null,
+      isContractRequired: false,
+      discountPercent: 0,
+      discountAmount: 0,
+      freeShippingThreshold: null,
+      includesFreeShipping: false,
+      includedProducts: null,
+      features: null,
+      metadata: null,
+      sortOrder: 0,
+      isPopular: false,
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }).onConflict('subscriptionPlanId').ignore();
   }
+} catch (e) {
+  console.log('Skipping subscription seed - test product does not exist');
+  console.log('Error:', e.message);
+}
 
-  // =========================================================================
-  // Test Content Type
-  // =========================================================================
-  try {
-    const existingContentType = await knex('contentType')
-      .where('contentTypeId', TEST_CONTENT_TYPE_ID)
-      .first();
-    
-    if (!existingContentType) {
-      await knex('contentType').insert({
-        contentTypeId: TEST_CONTENT_TYPE_ID,
-        name: 'Integration Test Content Type',
-        slug: 'integration-test-type',
-        description: 'Content type for integration testing',
-        icon: null,
-        allowedBlocks: null,
-        defaultTemplate: null,
-        requiredFields: null,
-        metaFields: null,
-        isSystem: false,
-        isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        createdBy: null,
-        updatedBy: null
-      }).onConflict('contentTypeId').ignore();
-    }
-  } catch (e) {
-    console.log('Skipping content type seed - table may not exist');
+// =========================================================================
+// Test Customer
+// =========================================================================
+try {
+  const existingCustomer = await knex('customer')
+    .where('customerId', TEST_CUSTOMER_ID)
+    .first();
+
+  if (!existingCustomer) {
+    await knex('customer').insert({
+      customerId: TEST_CUSTOMER_ID,
+      email: 'testcustomer@example.com',
+      password: '$2b$10$pAWqLUgcde9xhByhHSqt5u0VvqQJZDUVFGJJfBViQXpOfpPUaoSES',
+      firstName: 'Test',
+      lastName: 'Customer',
+      phone: '+1-555-123-4567',
+      dateOfBirth: null,
+      gender: null,
+      status: 'active',
+      emailVerified: true,
+      emailVerifiedAt: new Date(),
+      phoneVerified: false,
+      phoneVerifiedAt: null,
+      lastLoginAt: new Date(),
+      acceptsMarketing: true,
+      acceptsSmsMarketing: false,
+      taxExempt: false,
+      currency: 'USD',
+      language: 'en',
+      timezone: 'America/New_York',
+      metadata: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      deletedAt: null
+    }).onConflict('customerId').ignore();
   }
+} catch (e) {
+  console.log('Skipping customer seed - table may not exist');
+}
 
-  // =========================================================================
-  // Test Block Type
-  // =========================================================================
-  try {
-    const existingBlockType = await knex('contentBlockType')
-      .where('contentBlockTypeId', TEST_BLOCK_TYPE_ID)
-      .first();
-    
-    if (!existingBlockType) {
-      await knex('contentBlockType').insert({
-        contentBlockTypeId: TEST_BLOCK_TYPE_ID,
-        name: 'Integration Test Block Type',
-        slug: 'integration-test-block-type',
-        description: 'Block type for integration testing',
-        icon: null,
-        category: null,
-        defaultConfig: null,
-        schema: JSON.stringify({ type: 'object', properties: { text: { type: 'string' } } }),
-        isSystem: false,
-        isActive: true,
-        sortOrder: 0,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        createdBy: null,
-        updatedBy: null
-      }).onConflict('contentBlockTypeId').ignore();
-    }
-  } catch (e) {
-    console.log('Skipping block type seed - table may not exist');
+// =========================================================================
+// Test Checkout Session
+// =========================================================================
+try {
+  const existingCheckout = await knex('checkoutSession')
+    .where('checkoutSessionId', TEST_CHECKOUT_ID)
+    .first();
+
+  if (!existingCheckout) {
+    await knex('checkoutSession').insert({
+      checkoutSessionId: TEST_CHECKOUT_ID,
+      sessionId: 'test-checkout-session-001',
+      basketId: TEST_CHECKOUT_BASKET_ID,
+      customerId: TEST_CUSTOMER_ID,
+      email: 'testcustomer@example.com',
+      phoneNumber: '+1-555-123-4567',
+      status: 'active',
+      step: 'cart',
+      shippingAddressId: null,
+      billingAddressId: null,
+      sameBillingAsShipping: true,
+      selectedShippingMethodId: null,
+      shippingCalculated: false,
+      taxesCalculated: false,
+      agreeToTerms: false,
+      agreeToMarketing: false,
+      notes: 'Test checkout session for integration testing',
+      ipAddress: '127.0.0.1',
+      userAgent: 'Test User Agent',
+      referrer: 'http://localhost:3000',
+      convertedToOrderId: null,
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours from now
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      lastActivityAt: new Date()
+    }).onConflict('checkoutSessionId').ignore();
   }
-
-  // =========================================================================
-  // Test Content Template
-  // =========================================================================
-  try {
-    const existingTemplate = await knex('contentTemplate')
-      .where('contentTemplateId', TEST_CONTENT_TEMPLATE_ID)
-      .first();
-    
-    if (!existingTemplate) {
-      await knex('contentTemplate').insert({
-        contentTemplateId: TEST_CONTENT_TEMPLATE_ID,
-        name: 'Integration Test Template',
-        slug: 'integration-test-template',
-        description: 'Template for integration testing',
-        thumbnail: null,
-        htmlStructure: null,
-        cssStyles: null,
-        jsScripts: null,
-        areas: JSON.stringify(['main', 'sidebar']),
-        defaultBlocks: null,
-        compatibleContentTypes: null,
-        isSystem: false,
-        isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        createdBy: null,
-        updatedBy: null
-      }).onConflict('contentTemplateId').ignore();
-    }
-  } catch (e) {
-    console.log('Skipping content template seed - table may not exist');
-  }
-
-  // =========================================================================
-  // Test Content Page
-  // =========================================================================
-  try {
-    const existingPage = await knex('contentPage')
-      .where('contentPageId', TEST_CONTENT_PAGE_ID)
-      .first();
-    
-    if (!existingPage) {
-      await knex('contentPage').insert({
-        contentPageId: TEST_CONTENT_PAGE_ID,
-        title: 'Integration Test Page',
-        slug: 'integration-test-page',
-        contentTypeId: TEST_CONTENT_TYPE_ID,
-        templateId: TEST_CONTENT_TEMPLATE_ID,
-        status: 'published',
-        visibility: 'public',
-        accessPassword: null,
-        summary: 'Test page for integration testing',
-        featuredImage: null,
-        parentId: null,
-        sortOrder: 0,
-        metaTitle: 'Integration Test Page',
-        metaDescription: 'This is a test page for integration testing',
-        metaKeywords: null,
-        openGraphImage: null,
-        canonicalUrl: null,
-        noIndex: false,
-        customFields: null,
-        publishedAt: new Date(),
-        scheduledAt: null,
-        expiresAt: null,
-        isHomePage: false,
-        path: null,
-        depth: 0,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        createdBy: null,
-        updatedBy: null,
-        publishedBy: null
-      }).onConflict('contentPageId').ignore();
-    }
-  } catch (e) {
-    console.log('Skipping content page seed - table may not exist');
-  }
-
-  // =========================================================================
-  // Test Content Block
-  // =========================================================================
-  try {
-    const existingBlock = await knex('contentBlock')
-      .where('contentBlockId', TEST_CONTENT_BLOCK_ID)
-      .first();
-    
-    if (!existingBlock) {
-      await knex('contentBlock').insert({
-        contentBlockId: TEST_CONTENT_BLOCK_ID,
-        contentPageId: TEST_CONTENT_PAGE_ID,
-        blockTypeId: TEST_BLOCK_TYPE_ID,
-        title: 'Integration Test Block',
-        area: 'main',
-        sortOrder: 0,
-        content: JSON.stringify({ text: 'Test content for integration testing' }),
-        settings: JSON.stringify({}),
-        isVisible: true,
-        cssClasses: null,
-        conditions: null,
-        parentBlockId: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        createdBy: null,
-        updatedBy: null
-      }).onConflict('contentBlockId').ignore();
-    }
-  } catch (e) {
-    console.log('Skipping content block seed - table may not exist');
-  }
-
-  // =========================================================================
-  // Test Subscription Product & Plan
-  // =========================================================================
-  try {
-    const existingSubProduct = await knex('subscriptionProduct')
-      .where('subscriptionProductId', TEST_SUBSCRIPTION_PRODUCT_ID)
-      .first();
-    
-    if (!existingSubProduct) {
-      // Use the product ID that gets created by the product seed file
-      const productId = '10000000-0000-0000-0000-000000000001';
-      await knex('subscriptionProduct').insert({
-        subscriptionProductId: TEST_SUBSCRIPTION_PRODUCT_ID,
-        productId: productId,
-        isSubscriptionOnly: false,
-        allowOneTimePurchase: true,
-        minSubscriptionLength: null,
-        maxSubscriptionLength: null,
-        trialDays: 0,
-        trialRequiresPayment: false,
-        billingAnchor: 'subscription_start',
-        billingAnchorDay: null,
-        prorateOnChange: true,
-        allowPause: true,
-        maxPauseDays: null,
-        maxPausesPerYear: null,
-        allowSkip: true,
-        maxSkipsPerYear: null,
-        allowEarlyCancel: true,
-        cancelNoticeDays: 0,
-        earlyTerminationFee: null,
-        autoRenew: true,
-        renewalReminderDays: 7,
-        metadata: null,
-        isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      }).onConflict('subscriptionProductId').ignore();
-    }
-
-    const existingSubPlan = await knex('subscriptionPlan')
-      .where('subscriptionPlanId', TEST_SUBSCRIPTION_PLAN_ID)
-      .first();
-    
-    if (!existingSubPlan) {
-      await knex('subscriptionPlan').insert({
-        subscriptionPlanId: TEST_SUBSCRIPTION_PLAN_ID,
-        subscriptionProductId: TEST_SUBSCRIPTION_PRODUCT_ID,
-        name: 'Integration Test Plan',
-        slug: null,
-        description: 'Subscription plan for integration testing',
-        billingInterval: 'month',
-        billingIntervalCount: 1,
-        price: 29.99,
-        compareAtPrice: null,
-        currency: 'USD',
-        setupFee: 0,
-        trialDays: null,
-        contractLength: null,
-        isContractRequired: false,
-        discountPercent: 0,
-        discountAmount: 0,
-        freeShippingThreshold: null,
-        includesFreeShipping: false,
-        includedProducts: null,
-        features: null,
-        metadata: null,
-        sortOrder: 0,
-        isPopular: false,
-        isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      }).onConflict('subscriptionPlanId').ignore();
-    }
-  } catch (e) {
-    console.log('Skipping subscription seed - test product does not exist');
-    console.log('Error:', e.message);
-  }
-
-  // =========================================================================
-  // Test Customer
-  // =========================================================================
-  try {
-    const existingCustomer = await knex('customer')
-      .where('customerId', TEST_CUSTOMER_ID)
-      .first();
-
-    if (!existingCustomer) {
-      await knex('customer').insert({
-        customerId: TEST_CUSTOMER_ID,
-        email: 'testcustomer@example.com',
-        password: '$2b$10$pAWqLUgcde9xhByhHSqt5u0VvqQJZDUVFGJJfBViQXpOfpPUaoSES',
-        firstName: 'Test',
-        lastName: 'Customer',
-        phone: '+1-555-123-4567',
-        dateOfBirth: null,
-        gender: null,
-        status: 'active',
-        emailVerified: true,
-        emailVerifiedAt: new Date(),
-        phoneVerified: false,
-        phoneVerifiedAt: null,
-        lastLoginAt: new Date(),
-        acceptsMarketing: true,
-        acceptsSmsMarketing: false,
-        taxExempt: false,
-        currency: 'USD',
-        language: 'en',
-        timezone: 'America/New_York',
-        metadata: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        deletedAt: null
-      }).onConflict('customerId').ignore();
-    }
-  } catch (e) {
-    console.log('Skipping customer seed - table may not exist');
-  }
-
-  // =========================================================================
-  // Test Checkout Session
-  // =========================================================================
-  try {
-    const existingCheckout = await knex('checkoutSession')
-      .where('checkoutSessionId', TEST_CHECKOUT_ID)
-      .first();
-
-    if (!existingCheckout) {
-      await knex('checkoutSession').insert({
-        checkoutSessionId: TEST_CHECKOUT_ID,
-        sessionId: 'test-checkout-session-001',
-        basketId: TEST_CHECKOUT_BASKET_ID,
-        customerId: TEST_CUSTOMER_ID,
-        email: 'testcustomer@example.com',
-        phoneNumber: '+1-555-123-4567',
-        status: 'active',
-        step: 'cart',
-        shippingAddressId: null,
-        billingAddressId: null,
-        sameBillingAsShipping: true,
-        selectedShippingMethodId: null,
-        shippingCalculated: false,
-        taxesCalculated: false,
-        agreeToTerms: false,
-        agreeToMarketing: false,
-        notes: 'Test checkout session for integration testing',
-        ipAddress: '127.0.0.1',
-        userAgent: 'Test User Agent',
-        referrer: 'http://localhost:3000',
-        convertedToOrderId: null,
-        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours from now
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        lastActivityAt: new Date()
-      }).onConflict('checkoutSessionId').ignore();
-    }
-  } catch (e) {
-    console.log('Skipping checkout seed - table may not exist');
-  }
-
-  console.log('Integration test data seeded successfully');
-};
+} catch (e) {
+  console.log('Skipping checkout seed - table may not exist');
+}
 
 // Export test IDs for use in tests
 exports.TEST_IDS = {

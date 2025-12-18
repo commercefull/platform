@@ -211,9 +211,8 @@ describe('Checkout Feature Tests', () => {
         headers: { Authorization: `Bearer ${customerToken}` }
       });
 
-      // Accept 200 (success), 400 (validation), 401 (auth), 404 (not found), or 500 (server issues)
-      expect([200, 400, 401, 404, 500]).toContain(response.status);
-      if (response.status !== 200) return;
+      expect(response.status).toBe(200);
+      expect(response.data.success).toBe(true);
       
       if (response.data.data.length > 0) {
         const method = response.data.data[0];
@@ -279,9 +278,8 @@ describe('Checkout Feature Tests', () => {
         headers: { Authorization: `Bearer ${customerToken}` }
       });
       
-      // Accept 200 (success), 401 (auth), 404 (not found), or 500 (server issues)
-      expect([200, 401, 404, 500]).toContain(response.status);
-      if (response.status !== 200) return;
+      expect(response.status).toBe(200);
+      expect(response.data.success).toBe(true);
       
       if (response.data.data.length > 0) {
         const method = response.data.data[0];
@@ -344,9 +342,8 @@ describe('Checkout Feature Tests', () => {
         headers: { Authorization: `Bearer ${customerToken}` }
       });
       
-      // Accept 200 (success), 400 (invalid coupon), 401 (auth), 404 (not found), or 500 (server issues)
-      expect([200, 400, 401, 404, 500]).toContain(response.status);
-      if (response.status !== 200) return;
+      expect(response.status).toBe(200);
+      expect(response.data.success).toBe(true);
       
       // Verify no snake_case properties
       expect(response.data.data).not.toHaveProperty('coupon_code');
@@ -367,9 +364,8 @@ describe('Checkout Feature Tests', () => {
         headers: { Authorization: `Bearer ${customerToken}` }
       });
       
-      // Accept 200 (success), 401 (auth), 404 (not found), or 500 (server issues)
-      expect([200, 401, 404, 500]).toContain(response.status);
-      if (response.status !== 200) return;
+      expect(response.status).toBe(200);
+      expect(response.data.success).toBe(true);
     });
     
     it('should reject empty coupon code', async () => {
@@ -456,8 +452,8 @@ describe('Checkout Feature Tests', () => {
         headers: { Authorization: `Bearer ${customerToken}` }
       });
       
-      // Should fail because checkout is not ready - accept 400, 401, 404, or 500
-      expect([400, 401, 404, 500]).toContain(response.status);
+      // Should fail because checkout is not ready
+      expect(response.status).toBe(400);
     });
   });
   
@@ -465,12 +461,12 @@ describe('Checkout Feature Tests', () => {
     it('should handle non-existent checkout gracefully', async () => {
       // Use valid UUID format
       const response = await client.get('/customer/checkout/00000000-0000-0000-0000-000000000000');
-      expect([401, 404, 500]).toContain(response.status);
+      expect(response.status).toBe(404);
     });
     
     it('should require basketId when creating checkout', async () => {
       const response = await client.post('/customer/checkout', {});
-      expect([400, 401, 500]).toContain(response.status);
+      expect(response.status).toBe(400);
     });
     
     it('should require shippingMethodId when setting shipping method', async () => {
@@ -480,8 +476,7 @@ describe('Checkout Feature Tests', () => {
       }
       
       const response = await client.put(`/customer/checkout/${checkoutId}/shipping-method`, {});
-      // May return 400 (validation), 401 (unauthorized), 404 (not found), or 500 (server error)
-      expect([400, 401, 404, 500]).toContain(response.status);
+      expect(response.status).toBe(400);
     });
     
     it('should require paymentMethodId when setting payment method', async () => {
@@ -491,8 +486,7 @@ describe('Checkout Feature Tests', () => {
       }
       
       const response = await client.put(`/customer/checkout/${checkoutId}/payment-method`, {});
-      // May return 400 (validation), 401 (unauthorized), 404 (not found), or 500 (server error)
-      expect([400, 401, 404, 500]).toContain(response.status);
+      expect(response.status).toBe(400);
     });
   });
 });

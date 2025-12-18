@@ -290,8 +290,7 @@ describe('Membership Tests', () => {
       // Customer routes are under /customer/ prefix
       const response = await client.get('/customer/membership/my-membership');
       
-      // May return 401 or redirect
-      expect([401, 302]).toContain(response.status);
+      expect(response.status).toBe(401);
     });
   });
 

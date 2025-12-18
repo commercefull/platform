@@ -32,12 +32,9 @@ describe('Payment Method Configuration Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-        expect(Array.isArray(response.data.data)).toBe(true);
-      } else {
-        expect([200, 401, 500]).toContain(response.status);
-      }
+      expect(response.status).toBe(200);
+      expect(response.data.success).toBe(true);
+      expect(Array.isArray(response.data.data)).toBe(true);
     });
 
     it('should get a method configuration by ID', async () => {
@@ -50,13 +47,10 @@ describe('Payment Method Configuration Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-        expect(response.data.data).toHaveProperty('paymentMethodConfigId');
-        expect(response.data.data).toHaveProperty('paymentMethod');
-      } else {
-        expect([200, 404, 500]).toContain(response.status);
-      }
+      expect(response.status).toBe(200);
+      expect(response.data.success).toBe(true);
+      expect(response.data.data).toHaveProperty('paymentMethodConfigId');
+      expect(response.data.data).toHaveProperty('paymentMethod');
     });
 
     it('should create a new method configuration', async () => {
@@ -78,19 +72,16 @@ describe('Payment Method Configuration Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
-      if (response.status === 201) {
-        expect(response.data.success).toBe(true);
-        expect(response.data.data).toHaveProperty('paymentMethodConfigId');
-        expect(response.data.data).toHaveProperty('displayName', newMethodConfig.displayName);
-        
-        // Clean up - delete the new method config
-        const newMethodConfigId = response.data.data.paymentMethodConfigId;
-        await client.delete(`/business/method-configs/${newMethodConfigId}`, {
-          headers: { Authorization: `Bearer ${adminToken}` }
-        });
-      } else {
-        expect([201, 400, 500]).toContain(response.status);
-      }
+      expect(response.status).toBe(201);
+      expect(response.data.success).toBe(true);
+      expect(response.data.data).toHaveProperty('paymentMethodConfigId');
+      expect(response.data.data).toHaveProperty('displayName', newMethodConfig.displayName);
+      
+      // Clean up - delete the new method config
+      const newMethodConfigId = response.data.data.paymentMethodConfigId;
+      await client.delete(`/business/method-configs/${newMethodConfigId}`, {
+        headers: { Authorization: `Bearer ${adminToken}` }
+      });
     });
 
     it('should update an existing method configuration', async () => {
@@ -108,27 +99,24 @@ describe('Payment Method Configuration Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-        expect(response.data.data).toHaveProperty('displayName', updates.displayName);
-        
-        // Reset to original values
-        await client.put(`/business/method-configs/${testMethodConfigId}`, {
-          displayName: testMethodConfigData.displayName,
-          isEnabled: testMethodConfigData.isEnabled
-        }, {
-          headers: { Authorization: `Bearer ${adminToken}` }
-        });
-      } else {
-        expect([200, 404, 500]).toContain(response.status);
-      }
+      expect(response.status).toBe(200);
+      expect(response.data.success).toBe(true);
+      expect(response.data.data).toHaveProperty('displayName', updates.displayName);
+      
+      // Reset to original values
+      await client.put(`/business/method-configs/${testMethodConfigId}`, {
+        displayName: testMethodConfigData.displayName,
+        isEnabled: testMethodConfigData.isEnabled
+      }, {
+        headers: { Authorization: `Bearer ${adminToken}` }
+      });
     });
   });
 
   describe('Authorization Tests', () => {
     it('should require authentication for method config operations', async () => {
       const response = await client.get('/business/method-configs');
-      expect([401, 403]).toContain(response.status);
+      expect(response.status).toBe(401);
     });
   });
 });

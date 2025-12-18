@@ -53,12 +53,9 @@ describe('Subscription Feature Tests', () => {
         headers: authHeaders()
       });
 
-      // May return 200 (exists) or 404 (not seeded)
-      expect([200, 404]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-        expect(response.data.data).toHaveProperty('subscriptionProductId', SEEDED_SUBSCRIPTION_PRODUCT_IDS.MONTHLY_BOX);
-      }
+      expect(response.status).toBe(200);
+      expect(response.data.success).toBe(true);
+      expect(response.data.data).toHaveProperty('subscriptionProductId', SEEDED_SUBSCRIPTION_PRODUCT_IDS.MONTHLY_BOX);
     });
 
     it('should return 404 for non-existent product', async () => {
@@ -91,12 +88,9 @@ describe('Subscription Feature Tests', () => {
         headers: authHeaders()
       });
 
-      // May return 200 (exists) or 404 (not seeded or product doesn't exist)
-      expect([200, 404]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-        expect(response.data.data).toHaveProperty('name');
-      }
+      expect(response.status).toBe(200);
+      expect(response.data.success).toBe(true);
+      expect(response.data.data).toHaveProperty('name');
     });
 
     it('should get seeded Premium Monthly Box plan (popular)', async () => {
@@ -144,8 +138,7 @@ describe('Subscription Feature Tests', () => {
         headers: authHeaders()
       });
 
-      // May return 404 if customer doesn't exist in test DB
-      expect([200, 404]).toContain(response.status);
+      expect(response.status).toBe(200);
     });
   });
 

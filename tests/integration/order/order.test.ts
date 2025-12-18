@@ -119,8 +119,8 @@ describe('Order Tests', () => {
         });
         expect(getResponse.data.data).toHaveProperty('status', newStatus);
       } else {
-        // Status transition may not be allowed - that's okay
-        expect([200, 400, 500]).toContain(response.status);
+        // Status transition may not be allowed - should return 400 for invalid transition
+        expect(response.status).toBe(400);
       }
     });
   });
@@ -200,8 +200,8 @@ describe('Order Tests', () => {
         headers: { Authorization: `Bearer ${customerToken}` }
       });
       
-      // Should return 404 (not found) or 403 (forbidden)
-      expect([403, 404]).toContain(response.status);
+      // Should return 404 (not found)
+      expect(response.status).toBe(404);
     });
   });
 
@@ -345,8 +345,7 @@ describe('Order Tests', () => {
       const response = await client.get('/business/orders', {
         headers: { Authorization: 'Bearer invalid-token' }
       });
-      // 401 or 403 are both valid for invalid tokens
-      expect([401, 403]).toContain(response.status);
+      expect(response.status).toBe(401);
     });
   });
 });

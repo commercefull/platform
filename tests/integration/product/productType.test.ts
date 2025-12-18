@@ -126,7 +126,7 @@ describe('Product Type Tests', () => {
       });
       
       // Should return 400 for duplicate slug
-      expect([400, 409]).toContain(response.status);
+      expect(response.status).toBe(400);
       expect(response.data.success).toBe(false);
     });
   });

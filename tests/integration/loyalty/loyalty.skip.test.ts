@@ -457,14 +457,12 @@ describe('Loyalty Feature Tests', () => {
 
     it('should allow public access to tiers', async () => {
       const response = await client.get('/customer/loyalty/tiers');
-      // May return 200 (public) or 401 (if auth is required)
-      expect([200, 401]).toContain(response.status);
+      expect(response.status).toBe(200);
     });
 
     it('should allow public access to rewards', async () => {
       const response = await client.get('/customer/loyalty/rewards');
-      // May return 200 (public) or 401 (if auth is required)
-      expect([200, 401]).toContain(response.status);
+      expect(response.status).toBe(200);
     });
   });
 });

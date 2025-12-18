@@ -70,10 +70,7 @@ describe('Order Status Tests', () => {
       });
       
       // May return 200 or 500 depending on order state transitions
-      if (processingResponse.status !== 200) {
-        expect([200, 400, 500]).toContain(processingResponse.status);
-        return;
-      }
+      expect(processingResponse.status).toBe(200);
       expect(processingResponse.data.success).toBe(true);
       expect(processingResponse.data.data).toHaveProperty('status', 'processing');
       
@@ -124,10 +121,7 @@ describe('Order Status Tests', () => {
       });
       
       // May return 200 or 500 depending on endpoint implementation
-      if (authorizedResponse.status !== 200) {
-        expect([200, 404, 500]).toContain(authorizedResponse.status);
-        return;
-      }
+      expect(authorizedResponse.status).toBe(200);
       expect(authorizedResponse.data.success).toBe(true);
       expect(authorizedResponse.data.data).toHaveProperty('paymentStatus', 'authorized');
       
@@ -173,10 +167,7 @@ describe('Order Status Tests', () => {
       });
       
       // May return 200 or 500 depending on endpoint implementation
-      if (partialResponse.status !== 200) {
-        expect([200, 404, 500]).toContain(partialResponse.status);
-        return;
-      }
+      expect(partialResponse.status).toBe(200);
       expect(partialResponse.data.success).toBe(true);
       expect(partialResponse.data.data).toHaveProperty('fulfillmentStatus', 'partiallyFulfilled');
       
@@ -220,9 +211,9 @@ describe('Order Status Tests', () => {
         headers: { Authorization: `Bearer ${customerToken}` }
       });
       
-      // May return 200 or 500 depending on order state
+      // May return 200 or 404 depending on order state
       if (response.status !== 200) {
-        expect([200, 404, 500]).toContain(response.status);
+        expect(response.status).toBe(404);
         return;
       }
       expect(response.data.success).toBe(true);

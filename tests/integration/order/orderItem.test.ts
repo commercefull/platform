@@ -63,7 +63,7 @@ describe('Order Item Tests', () => {
         }
       } else {
         // Endpoint may not be implemented
-        expect([200, 404, 500]).toContain(response.status);
+        expect(response.status).toBe(404);
       }
     });
 
@@ -83,7 +83,7 @@ describe('Order Item Tests', () => {
         expect(item).toHaveProperty('sku');
       } else {
         // Endpoint may not be implemented
-        expect([200, 404, 500]).toContain(response.status);
+        expect(response.status).toBe(404);
       }
     });
 
@@ -115,7 +115,7 @@ describe('Order Item Tests', () => {
         });
       } else {
         // Endpoint may not be implemented
-        expect([201, 404, 500]).toContain(response.status);
+        expect(response.status).toBe(404);
       }
     });
 
@@ -135,7 +135,7 @@ describe('Order Item Tests', () => {
         expect(response.data.data).toHaveProperty('orderItemId');
       } else {
         // Endpoint may not be implemented
-        expect([200, 404, 500]).toContain(response.status);
+        expect(response.status).toBe(404);
       }
     });
 
@@ -163,7 +163,7 @@ describe('Order Item Tests', () => {
       
       // Skip if update endpoint not implemented
       if (updateResponse.status !== 200) {
-        expect([200, 404, 500]).toContain(updateResponse.status);
+        expect(updateResponse.status).toBe(404);
         return;
       }
       

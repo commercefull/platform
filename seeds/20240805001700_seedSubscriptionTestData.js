@@ -39,11 +39,6 @@ exports.seed = async function(knex) {
   await knex('subscriptionPlan').whereIn('subscriptionPlanId', Object.values(SUBSCRIPTION_PLAN_IDS)).del();
   await knex('subscriptionProduct').whereIn('subscriptionProductId', Object.values(SUBSCRIPTION_PRODUCT_IDS)).del();
 
-  if (!productExists) {
-    console.log('Skipping subscription seed - test product does not exist');
-    return;
-  }
-
   // Seed Subscription Products
   await knex('subscriptionProduct').insert([
     {

@@ -28,11 +28,7 @@ describe('Generic Promotion API Tests', () => {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
-    expect([201, 400, 409]).toContain(response.status);
-    if (response.status !== 201) {
-      console.log('Promotion creation failed:', response.data);
-      return;
-    }
+    expect(response.status).toBe(201);
     expect(response.data.success).toBe(true);
     // API returns promotionId, not id
     expect(response.data.data).toHaveProperty('promotionId');
@@ -54,9 +50,7 @@ describe('Generic Promotion API Tests', () => {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
-    expect([200, 404]).toContain(response.status);
-    if (response.status !== 200) return;
-    
+    expect(response.status).toBe(200);
     expect(response.data.success).toBe(true);
     // Single get returns { promotion, rules, actions } structure
     if (response.data.data.promotion) {
@@ -81,9 +75,7 @@ describe('Generic Promotion API Tests', () => {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
-    expect([200, 404, 500]).toContain(response.status);
-    if (response.status !== 200) return;
-    
+    expect(response.status).toBe(200);
     expect(response.data.success).toBe(true);
     expect(response.data.data.name).toBe(updateData.name);
   });
@@ -111,9 +103,7 @@ describe('Generic Promotion API Tests', () => {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
-    expect([200, 400, 404, 500]).toContain(response.status);
-    if (response.status !== 200) return;
-    
+    expect(response.status).toBe(200);
     expect(response.data.success).toBe(true);
   });
 
@@ -130,9 +120,7 @@ describe('Generic Promotion API Tests', () => {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
-    expect([200, 400, 404, 500]).toContain(response.status);
-    if (response.status !== 200) return;
-    
+    expect(response.status).toBe(200);
     expect(response.data.success).toBe(true);
   });
   
@@ -142,9 +130,7 @@ describe('Generic Promotion API Tests', () => {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
-    expect([200, 404, 500]).toContain(response.status);
-    if (response.status !== 200) return;
-    
+    expect(response.status).toBe(200);
     expect(response.data.success).toBe(true);
     
     // Verify the promotion is deleted

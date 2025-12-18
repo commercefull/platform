@@ -32,13 +32,10 @@ describe('Payment Transaction Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-        expect(response.data.data).toHaveProperty('data');
-        expect(Array.isArray(response.data.data.data)).toBe(true);
-      } else {
-        expect([200, 401, 500]).toContain(response.status);
-      }
+      expect(response.status).toBe(200);
+      expect(response.data.success).toBe(true);
+      expect(response.data.data).toHaveProperty('data');
+      expect(Array.isArray(response.data.data.data)).toBe(true);
     });
 
     it('should create a new transaction', async () => {
@@ -58,24 +55,20 @@ describe('Payment Transaction Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
-      if (response.status === 201) {
-        expect(response.data.success).toBe(true);
-        expect(response.data.data).toHaveProperty('transactionId');
-        
-        // Clean up
-        const newTransactionId = response.data.data.transactionId;
-        await client.delete(`/business/transactions/${newTransactionId}`, {
-          headers: { Authorization: `Bearer ${adminToken}` }
-        });
-      } else {
-        // May fail due to missing order or other constraints
-        expect([201, 400, 500]).toContain(response.status);
-      }
+      expect(response.status).toBe(201);
+      expect(response.data.success).toBe(true);
+      expect(response.data.data).toHaveProperty('transactionId');
+      
+      // Clean up
+      const newTransactionId = response.data.data.transactionId;
+      await client.delete(`/business/transactions/${newTransactionId}`, {
+        headers: { Authorization: `Bearer ${adminToken}` }
+      });
     });
 
     it('should require authentication for transaction operations', async () => {
       const response = await client.get('/business/transactions');
-      expect([401, 403]).toContain(response.status);
+      expect(response.status).toBe(401);
     });
   });
 
@@ -88,13 +81,8 @@ describe('Payment Transaction Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-        expect(response.data.data).toHaveProperty('refunds');
-      } else {
-        // May return 404 or 500 if transaction doesn't exist
-        expect([200, 404, 500]).toContain(response.status);
-      }
+      // Transaction may not exist - expect 404
+      expect(response.status).toBe(404);
     });
 
     it('should process a refund for a transaction', async () => {
@@ -110,8 +98,8 @@ describe('Payment Transaction Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
-      // May fail due to missing transaction
-      expect([201, 400, 404, 500]).toContain(response.status);
+      // Transaction doesn't exist - expect 404
+      expect(response.status).toBe(404);
     });
   });
 });

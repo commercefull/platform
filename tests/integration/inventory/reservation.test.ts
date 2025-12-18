@@ -52,8 +52,7 @@ describe('Inventory Reservation Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
-      // Route may not exist - accept 201 (success) or 404 (not found) or 401 (unauthorized)
-      expect([201, 401, 404]).toContain(response.status);
+      expect(response.status).toBe(201);
       if (response.status === 201) {
         expect(response.data.success).toBe(true);
         expect(Array.isArray(response.data.data)).toBe(true);
@@ -91,17 +90,14 @@ describe('Inventory Reservation Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
-      // Route may not exist - accept 200 (success) or 404 (not found)
-      expect([200, 404]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-        expect(Array.isArray(response.data.data)).toBe(true);
-        if (response.data.data.length > 0) {
-          // Verify all returned reservations belong to the test cart
-          response.data.data.forEach((reservation: any) => {
-            expect(reservation.cartId).toBe(testCartId);
-          });
-        }
+      expect(response.status).toBe(200);
+      expect(response.data.success).toBe(true);
+      expect(Array.isArray(response.data.data)).toBe(true);
+      if (response.data.data.length > 0) {
+        // Verify all returned reservations belong to the test cart
+        response.data.data.forEach((reservation: any) => {
+          expect(reservation.cartId).toBe(testCartId);
+        });
       }
     });
 
@@ -117,13 +113,10 @@ describe('Inventory Reservation Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
-      // Route may not exist - accept 200 (success) or 404 (not found)
-      expect([200, 404]).toContain(response.status);
-      if (response.status === 200) {
-        expect(response.data.success).toBe(true);
-        expect(response.data.data).toHaveProperty('inventoryReservationId', testReservationId);
-        expect(response.data.data).toHaveProperty('status', 'fulfilled');
-      }
+      expect(response.status).toBe(200);
+      expect(response.data.success).toBe(true);
+      expect(response.data.data).toHaveProperty('inventoryReservationId', testReservationId);
+      expect(response.data.data).toHaveProperty('status', 'fulfilled');
     });
 
     it('should release inventory when reservation is fulfilled', async () => {
@@ -209,11 +202,8 @@ describe('Inventory Reservation Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
-      // Route may not exist - accept 200 (success) or 404 (not found)
-      expect([200, 404]).toContain(releaseResponse.status);
-      if (releaseResponse.status === 200) {
-        expect(releaseResponse.data.success).toBe(true);
-      }
+      expect(releaseResponse.status).toBe(200);
+      expect(releaseResponse.data.success).toBe(true);
       
       // Check that the inventory has been updated
       const inventoryResponse = await client.get(`/business/inventory/items/${testInventoryItemId}`, {
@@ -245,11 +235,8 @@ describe('Inventory Reservation Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
-      // Route may not exist - accept 200 (success) or 404 (not found)
-      expect([200, 404]).toContain(cleanupResponse.status);
-      if (cleanupResponse.status === 200) {
-        expect(cleanupResponse.data.success).toBe(true);
-      }
+      expect(cleanupResponse.status).toBe(200);
+      expect(cleanupResponse.data.success).toBe(true);
       
       // The expired reservation should now be marked as expired
       const reservationsResponse = await client.get('/business/inventory/reservations', {
@@ -257,18 +244,15 @@ describe('Inventory Reservation Tests', () => {
         params: { status: 'expired' }
       });
       
-      // Route may not exist - accept 200 (success) or 404 (not found)
-      expect([200, 404]).toContain(reservationsResponse.status);
-      if (reservationsResponse.status === 200) {
-        expect(Array.isArray(reservationsResponse.data.data)).toBe(true);
-        
-        // Find our expired reservation
-        const foundExpired = reservationsResponse.data.data.some((res: any) => 
-          res.cartId === expiredReservation.cartId && res.status === 'expired'
-        );
-        
-        expect(foundExpired).toBe(true);
-      }
+      expect(reservationsResponse.status).toBe(200);
+      expect(Array.isArray(reservationsResponse.data.data)).toBe(true);
+      
+      // Find our expired reservation
+      const foundExpired = reservationsResponse.data.data.some((res: any) => 
+        res.cartId === expiredReservation.cartId && res.status === 'expired'
+      );
+      
+      expect(foundExpired).toBe(true);
     });
   });
 });

@@ -29,9 +29,7 @@ describe('Tax Calculation API Integration Tests', () => {
         headers: { Authorization: `Bearer ${userToken}` }
       });
       
-      // May return 200 (success) or 401 (auth), 404/500 (route/server issues)
-      expect([200, 401, 404, 500]).toContain(response.status);
-      if (response.status !== 200) return;
+      expect(response.status).toBe(200);
       
       expect(response.data).toHaveProperty('subtotal');
       expect(response.data).toHaveProperty('taxAmount');
@@ -71,8 +69,7 @@ describe('Tax Calculation API Integration Tests', () => {
         headers: { Authorization: `Bearer ${userToken}` }
       });
       
-      // May return 400 (validation error) or 401 (auth), 404/500
-      expect([400, 401, 404, 500]).toContain(response.status);
+      expect(response.status).toBe(400);
     });
     
     it('should calculate zero tax for countries without tax rates', async () => {
@@ -92,9 +89,7 @@ describe('Tax Calculation API Integration Tests', () => {
         headers: { Authorization: `Bearer ${userToken}` }
       });
       
-      // May return 200 or 401 (auth), 404/500
-      expect([200, 401, 404, 500]).toContain(response.status);
-      if (response.status !== 200) return;
+      expect(response.status).toBe(200);
       
       expect(response.data.taxAmount).toBe(0);
       expect(response.data.subtotal).toBe(10.00);
@@ -122,9 +117,7 @@ describe('Tax Calculation API Integration Tests', () => {
         headers: { Authorization: `Bearer ${userToken}` }
       });
       
-      // May return 200, 404 (basket not found), or 500
-      expect([200, 401, 404, 500]).toContain(response.status);
-      if (response.status !== 200) return;
+      expect(response.status).toBe(200);
       expect(response.data).toHaveProperty('subtotal');
       expect(response.data).toHaveProperty('taxAmount');
       expect(response.data).toHaveProperty('total');
@@ -143,8 +136,7 @@ describe('Tax Calculation API Integration Tests', () => {
         shippingAddress: { country: 'US' }
       });
       
-      // May return 401 (unauthorized) or 404 (route not found)
-      expect([401, 404]).toContain(response.status);
+      expect(response.status).toBe(401);
     });
   });
 
@@ -162,8 +154,7 @@ describe('Tax Calculation API Integration Tests', () => {
         headers: { Authorization: `Bearer ${userToken}` }
       });
       
-      // May return 200 (found) or 401 (auth), 404 (not found)
-      expect([200, 401, 404]).toContain(response.status);
+      expect(response.status).toBe(200);
       
       // If tax zones are found
       if (response.status === 200) {
@@ -184,7 +175,7 @@ describe('Tax Calculation API Integration Tests', () => {
         headers: { Authorization: `Bearer ${userToken}` }
       });
       
-      expect([401, 404]).toContain(response.status);
+      expect(response.status).toBe(404);
     });
     
     it('should require country in the request', async () => {
@@ -198,8 +189,7 @@ describe('Tax Calculation API Integration Tests', () => {
         headers: { Authorization: `Bearer ${userToken}` }
       });
       
-      // May return 400 (validation error), 401 (auth), 404 (not found), or 500 (server error)
-      expect([400, 401, 404, 500]).toContain(response.status);
+      expect(response.status).toBe(400);
     });
   });
 
@@ -211,8 +201,7 @@ describe('Tax Calculation API Integration Tests', () => {
         headers: { Authorization: `Bearer ${userToken}` }
       });
       
-      // May return 200 (found), 404 (not found), 401 (unauthorized), or 500 (server error)
-      expect([200, 401, 404, 500]).toContain(response.status);
+      expect(response.status).toBe(200);
       
       // Only check response data if we got a successful response
       if (response.status === 200) {
@@ -237,8 +226,7 @@ describe('Tax Calculation API Integration Tests', () => {
     it('should require authentication for checking exemptions', async () => {
       const response = await client.get('/customer/tax/exemption/any-customer-id');
       
-      // May return 401 (unauthorized) or 404 (not found) depending on route config
-      expect([401, 404]).toContain(response.status);
+      expect(response.status).toBe(401);
     });
   });
 
@@ -248,9 +236,7 @@ describe('Tax Calculation API Integration Tests', () => {
       
       const response = await client.get(`/customer/tax/settings/${testMerchantId}`);
       
-      // May return 200 or 401 (auth), 404 if merchant doesn't exist
-      expect([200, 401, 404, 500]).toContain(response.status);
-      if (response.status !== 200) return;
+      expect(response.status).toBe(200);
       
       expect(response.data).toHaveProperty('displayPricesWithTax');
       expect(response.data).toHaveProperty('priceDisplaySettings');

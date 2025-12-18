@@ -19,7 +19,7 @@
     "db:types": "ts-node --transpile-only scripts/generate-knex-types.ts",
     "test": "jest",
     "test:unit": "jest ./features --collectCoverage=false",
-    "test:int": "jest ./tests/integration/basket --collectCoverage=false --detectOpenHandles --runInBand",
+    "test:int": "jest ./tests/integration --collectCoverage=false --detectOpenHandles --runInBand",
     "test:e2e": "npx cypress run --headless --browser chrome",
     "cli:new:merchant": "NODE_ENV=development node -r ts-node/register ./cli/new-merchant.ts",
     "lint": "npx tsc --noEmit",

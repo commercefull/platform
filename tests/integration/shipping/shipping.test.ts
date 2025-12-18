@@ -399,8 +399,7 @@ describe('Shipping Feature Tests', () => {
       const response = await client.get('/business/carriers', {
         headers: { Authorization: 'Bearer invalid-token' }
       });
-      // 401 or 403 are both valid auth rejection responses
-      expect([401, 403]).toContain(response.status);
+      expect(response.status).toBe(401);
     });
   });
 });
