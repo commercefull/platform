@@ -10,7 +10,7 @@ import { isCustomerLoggedIn } from '../../../../libs/auth';
 const router = express.Router();
 
 // Apply authentication middleware
-router.use(isCustomerLoggedIn);
+router.use('/order', isCustomerLoggedIn);
 
 // ============================================================================
 // Customer Order Routes

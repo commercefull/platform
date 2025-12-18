@@ -6,6 +6,7 @@
 import { BasketRepository } from '../../domain/repositories/BasketRepository';
 import { eventBus } from '../../../../libs/events/eventBus';
 import { BasketResponse } from './GetOrCreateBasket';
+import { BasketNotFoundError, InvalidExpirationDaysError } from '../../domain/errors/BasketErrors';
 
 // ============================================================================
 // Command
@@ -27,12 +28,12 @@ export class ExtendExpirationUseCase {
 
   async execute(command: ExtendExpirationCommand): Promise<BasketResponse> {
     if (command.days < 1) {
-      throw new Error('Days must be at least 1');
+      throw new InvalidExpirationDaysError(command.days);
     }
 
     const basket = await this.basketRepository.findById(command.basketId);
     if (!basket) {
-      throw new Error('Basket not found');
+      throw new BasketNotFoundError(command.basketId);
     }
 
     basket.extendExpiration(command.days);

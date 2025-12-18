@@ -137,10 +137,6 @@ describe('Generic Promotion API Tests', () => {
   });
   
   it('should delete a promotion', async () => {
-    if (!adminToken || !promotionId) {
-      console.log('Skipping test - no admin token or promotion ID');
-      return;
-    }
     
     const response = await client.delete(`/business/promotions/${promotionId}`, {
       headers: { Authorization: `Bearer ${adminToken}` }

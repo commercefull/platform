@@ -24,7 +24,7 @@ router.post('/register', customerController.registerCustomer);
 // ============================================================================
 
 // Apply authentication middleware for remaining routes
-router.use(isCustomerLoggedIn);
+router.use('/me', isCustomerLoggedIn);
 
 /**
  * Get my profile

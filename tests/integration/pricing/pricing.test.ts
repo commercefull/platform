@@ -1,6 +1,6 @@
 import { AxiosInstance } from 'axios';
+import axios from 'axios';
 import {
-  setupPricingTests,
   cleanupPricingTests,
   createTestPricingRule,
   createTestTierPrice,
@@ -9,6 +9,16 @@ import {
   createTestCurrencyRegion,
   createTestCurrencyPriceRule
 } from './testUtils';
+
+const createClient = () => axios.create({
+  baseURL: process.env.API_URL || 'http://localhost:3000',
+  validateStatus: () => true,
+  headers: {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json',
+    'X-Test-Request': 'true'
+  }
+});
 
 describe('Pricing Feature Tests', () => {
   let client: AxiosInstance;
@@ -23,9 +33,19 @@ describe('Pricing Feature Tests', () => {
   };
 
   beforeAll(async () => {
-    const setup = await setupPricingTests();
-    client = setup.client;
-    adminToken = setup.adminToken;
+    jest.setTimeout(30000);
+    client = createClient();
+    
+    try {
+      const loginResponse = await client.post('/business/auth/login', {
+        email: 'merchant@example.com',
+        password: 'password123'
+      }, { headers: { 'X-Test-Request': 'true' } });
+      
+      adminToken = loginResponse.data?.accessToken || '';
+    } catch (error) {
+      console.log('Warning: Login failed for pricing tests:', error instanceof Error ? error.message : String(error));
+    }
   });
 
   afterAll(async () => {

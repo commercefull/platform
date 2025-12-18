@@ -204,18 +204,6 @@ app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use(async (req: Request, res: Response, next) => {
-  try {
-    res.locals.login = req.isAuthenticated();
-    res.locals.session = req.session;
-    res.locals.currentUser = req.user;
-    next();
-  } catch (error) {
-    console.log(error);
-    res.redirect("/login");
-  }
-});
-
 // Configure all routes
 configureRoutes(app);
 

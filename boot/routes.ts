@@ -26,9 +26,6 @@ import { subscriptionCustomerRouter } from "../features/subscription/subscriptio
 import { localizationCustomerRouter } from "../features/localization/localizationCustomerRouter";
 import { shippingCustomerRouter } from "../features/shipping/shippingCustomerRouter";
 
-// Auth middleware
-import { authenticateCustomerJWT } from "../libs/auth/customerAuth";
-
 // Feature routes - Business/Merchant facing
 import { identityBusinessRouter } from "../features/identity/interface/routers/identityBusinessRouter";
 import { merchantMerchantRouter } from "../features/merchant/merchantBusinessRouter";
@@ -63,8 +60,6 @@ export function configureRoutes(app: Express): void {
   // Storefront routes (public website)
   app.use("/", storefrontCustomerRouter);
 
-  // Customer-facing API routes
-  app.use("/customer", authenticateCustomerJWT);
   app.use("/customer", [
     identityCustomerRouter,  // Must be first - public auth routes
     identitySocialRouter,    // Social login routes

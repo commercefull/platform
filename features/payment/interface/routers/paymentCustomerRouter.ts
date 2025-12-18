@@ -9,7 +9,7 @@ import { isCustomerLoggedIn } from '../../../../libs/auth';
 const router = express.Router();
 
 // Protected routes
-router.use(isCustomerLoggedIn);
+router.use('/payment/transactions', isCustomerLoggedIn);
 
 /**
  * Get available payment methods

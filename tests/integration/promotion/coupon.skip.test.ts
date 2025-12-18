@@ -54,9 +54,7 @@ describe('Coupon API Tests', () => {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
-    expect([200, 404]).toContain(response.status);
-    if (response.status !== 200) return;
-    
+    expect(response.status).toBe(200);
     expect(response.data.success).toBe(true);
     expect(response.data.data.promotionCouponId).toBe(couponId);
   });
@@ -71,9 +69,7 @@ describe('Coupon API Tests', () => {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
-    expect([200, 404]).toContain(response.status);
-    if (response.status !== 200) return;
-    
+    expect(response.status).toBe(200);
     expect(response.data.success).toBe(true);
     expect(response.data.data.promotionCouponId).toBe(couponId);
   });
@@ -91,9 +87,7 @@ describe('Coupon API Tests', () => {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
-    expect([200, 400, 404]).toContain(response.status);
-    if (response.status !== 200) return;
-    
+    expect(response.status).toBe(200);
     expect(response.data.success).toBe(true);
     if (response.data.data) {
       expect(response.data.data).toHaveProperty('valid');
@@ -118,9 +112,7 @@ describe('Coupon API Tests', () => {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
-    expect([200, 400, 404]).toContain(response.status);
-    if (response.status !== 200) return;
-    
+    expect(response.status).toBe(200);
     expect(response.data.success).toBe(true);
   });
 
@@ -139,9 +131,7 @@ describe('Coupon API Tests', () => {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
-    expect([200, 404, 500]).toContain(response.status);
-    if (response.status !== 200) return;
-    
+    expect(response.status).toBe(200);
     expect(response.data.success).toBe(true);
     expect(response.data.data.name).toBe(updateData.name);
   });
@@ -156,9 +146,7 @@ describe('Coupon API Tests', () => {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
-    expect([200, 404, 500]).toContain(response.status);
-    if (response.status !== 200) return;
-    
+    expect(response.status).toBe(200);
     expect(response.data.success).toBe(true);
     
     // Verify the coupon is deleted

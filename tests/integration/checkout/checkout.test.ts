@@ -32,46 +32,19 @@ describe('Checkout Feature Tests', () => {
     const loginResponse = await client.post('/business/auth/login', ADMIN_CREDENTIALS, { headers: { 'X-Test-Request': 'true' } });
     adminToken = loginResponse.data.accessToken;
     
-    // Use pre-seeded checkout or create one
-    const checkoutResponse = await client.get(`/customer/checkout/${TEST_CHECKOUT_ID}`);
-    if (checkoutResponse.status === 200 && checkoutResponse.data?.data?.checkoutId) {
-      checkoutId = TEST_CHECKOUT_ID;
-    } else {
-      // Create checkout dynamically if seeded data doesn't exist
-      try {
-        const basketResponse = await client.post('/customer/basket', { sessionId: 'checkout-test-' + Date.now() });
-        if (basketResponse.status === 200 && basketResponse.data?.data?.basketId) {
-          const basketId = basketResponse.data.data.basketId;
-          await client.post(`/customer/basket/${basketId}/items`, {
-            productId: TEST_PRODUCT_1_ID,
-            sku: 'TEST-SKU-001',
-            name: 'Test Product',
-            quantity: 1,
-            unitPrice: 29.99
-          });
-          const newCheckout = await client.post('/customer/checkout', { basketId });
-          if (newCheckout.data?.data?.checkoutId) {
-            checkoutId = newCheckout.data.data.checkoutId;
-          } else {
-            console.log('Warning: Could not create checkout session');
-            checkoutId = 'test-checkout-unavailable';
-          }
-        } else {
-          console.log('Warning: Could not create basket for checkout');
-          checkoutId = 'test-checkout-unavailable';
-        }
-      } catch (error) {
-        console.log('Warning: Checkout setup failed:', error);
-        checkoutId = 'test-checkout-unavailable';
-      }
-    }
+    // Use pre-seeded checkout data
+    checkoutId = TEST_CHECKOUT_ID;
   });
 
   describe('Checkout Session API', () => {
     it('should create a checkout session with camelCase properties', async () => {
       // Create a new basket for this test
+      const customerToken = await loginTestUser(client);
+      
       const basketResponse = await client.post('/customer/basket', {
         sessionId: 'checkout-test-session-' + Date.now()
+      }, {
+        headers: { Authorization: `Bearer ${customerToken}` }
       });
       
       if (basketResponse.status !== 200) {
@@ -88,10 +61,14 @@ describe('Checkout Feature Tests', () => {
         name: 'Test Product',
         quantity: 1,
         unitPrice: 29.99
+      }, {
+        headers: { Authorization: `Bearer ${customerToken}` }
       });
       
       const response = await client.post('/customer/checkout', {
         basketId: testBasketId
+      }, {
+        headers: { Authorization: `Bearer ${customerToken}` }
       });
       
       expect(response.status).toBe(201);
@@ -119,6 +96,7 @@ describe('Checkout Feature Tests', () => {
     });
 
     it('should get a checkout session by ID with camelCase properties', async () => {
+      
       // Need to authenticate as customer to access checkout
       const customerToken = await loginTestUser(client);
       
@@ -145,7 +123,7 @@ describe('Checkout Feature Tests', () => {
     it('should return 404 for non-existent checkout', async () => {
       // Use a valid UUID format that doesn't exist
       const response = await client.get('/customer/checkout/00000000-0000-0000-0000-000000000000');
-      expect([401, 404]).toContain(response.status);
+      expect(response.status).toBe(404);
     });
   });
 
@@ -395,8 +373,12 @@ describe('Checkout Feature Tests', () => {
     });
     
     it('should reject empty coupon code', async () => {
+      const customerToken = await loginTestUser(client);
+      
       const response = await client.post(`/customer/checkout/${checkoutId}/coupon`, {
         couponCode: ''
+      }, {
+        headers: { Authorization: `Bearer ${customerToken}` }
       });
       
       expect(response.status).toBe(400);
@@ -406,8 +388,12 @@ describe('Checkout Feature Tests', () => {
   describe('Checkout Completion', () => {
     it('should abandon checkout with proper response format', async () => {
       // Create a new checkout to abandon
+      const customerToken = await loginTestUser(client);
+      
       const basketResponse = await client.post('/customer/basket', {
         sessionId: 'abandon-test-session-' + Date.now()
+      }, {
+        headers: { Authorization: `Bearer ${customerToken}` }
       });
       
       if (basketResponse.status !== 200) {
@@ -424,11 +410,15 @@ describe('Checkout Feature Tests', () => {
         name: 'Test Product',
         quantity: 1,
         unitPrice: 29.99
+      }, {
+        headers: { Authorization: `Bearer ${customerToken}` }
       });
       
       // Create checkout
       const checkoutResponse = await client.post('/customer/checkout', {
         basketId: testBasketId
+      }, {
+        headers: { Authorization: `Bearer ${customerToken}` }
       });
       
       if (checkoutResponse.status !== 201) {
@@ -438,7 +428,9 @@ describe('Checkout Feature Tests', () => {
       
       const abandonCheckoutId = checkoutResponse.data.data.checkoutId;
       
-      const response = await client.post(`/customer/checkout/${abandonCheckoutId}/abandon`);
+      const response = await client.post(`/customer/checkout/${abandonCheckoutId}/abandon`, {}, {
+        headers: { Authorization: `Bearer ${customerToken}` }
+      });
       
       // Accept 200 or 500 (may fail due to server state)
       if (response.status === 500) {

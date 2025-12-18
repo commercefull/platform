@@ -32,6 +32,35 @@ export const getAllCurrencies = async (req: Request, res: Response): Promise<voi
 };
 
 /**
+ * Get default currency
+ */
+export const getDefaultCurrency = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const currency = await currencyRepo.getDefaultCurrency();
+    
+    if (!currency) {
+      res.status(404).json({
+        success: false,
+        message: 'No default currency found'
+      });
+      return;
+    }
+    
+    res.json({
+      success: true,
+      data: currency
+    });
+  } catch (error) {
+    console.error('Error fetching default currency:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch default currency',
+      error: (error as Error).message
+    });
+  }
+};
+
+/**
  * Get currency by code
  */
 export const getCurrencyByCode = async (req: Request, res: Response): Promise<void> => {

@@ -27,6 +27,7 @@ import {
   ExtendExpirationCommand,
   ExtendExpirationUseCase
 } from '../../application/useCases';
+import { BasketNotFoundError, BasketItemNotFoundError, InvalidExpirationDaysError, BasketNotActiveError, BasketExpiredError } from '../../domain/errors/BasketErrors';
 
 // ============================================================================
 // Response Mappers
@@ -270,6 +271,10 @@ export const removeItem = async (req: Request, res: Response): Promise<void> => 
     respond(req, res, basket, 200, 'basket/view');
   } catch (error: any) {
     console.error('Error removing item from basket:', error);
+    if (error instanceof BasketNotFoundError || error instanceof BasketItemNotFoundError) {
+      respondError(req, res, error.message, error.statusCode, 'basket/error');
+      return;
+    }
     respondError(req, res, error.message || 'Failed to remove item from basket', 500, 'basket/error');
   }
 };
@@ -342,6 +347,10 @@ export const mergeBaskets = async (req: Request, res: Response): Promise<void> =
     respond(req, res, basket, 200, 'basket/view');
   } catch (error: any) {
     console.error('Error merging baskets:', error);
+    if (error instanceof BasketNotFoundError || error instanceof BasketNotActiveError || error instanceof BasketExpiredError) {
+      respondError(req, res, error.message, error.statusCode, 'basket/error');
+      return;
+    }
     respondError(req, res, error.message || 'Failed to merge baskets', 500, 'basket/error');
   }
 };
@@ -415,8 +424,8 @@ export const extendExpiration = async (req: Request, res: Response): Promise<voi
     respond(req, res, basket, 200, 'basket/view');
   } catch (error: any) {
     console.error('Error extending basket expiration:', error);
-    if (error.message === 'Basket not found') {
-      respondError(req, res, 'Basket not found', 404, 'basket/error');
+    if (error instanceof BasketNotFoundError || error instanceof InvalidExpirationDaysError) {
+      respondError(req, res, error.message, error.statusCode, 'basket/error');
       return;
     }
     respondError(req, res, error.message || 'Failed to extend basket expiration', 500, 'basket/error');

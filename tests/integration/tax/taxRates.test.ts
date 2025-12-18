@@ -91,12 +91,6 @@ describe('Tax Rates API Integration Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
-      if (categoriesResponse.data.length === 0 || zonesResponse.data.length === 0) {
-        // Skip this test if we don't have required data
-        console.log('Skipping test: missing required tax categories or tax zones');
-        return;
-      }
-      
       const taxCategoryId = categoriesResponse.data[0].id;
       const taxZoneId = zonesResponse.data[0].id;
       
@@ -203,11 +197,6 @@ describe('Tax Rates API Integration Tests', () => {
     });
     
     it('should update an existing tax rate when authenticated as admin', async () => {
-      if (!testTaxRateId) {
-        console.log('Skipping test: failed to create test tax rate');
-        return;
-      }
-      
       const updateData = {
         name: 'Updated Tax Rate Name',
         rate: 8.0,
@@ -280,10 +269,6 @@ describe('Tax Rates API Integration Tests', () => {
     });
     
     it('should delete a tax rate when authenticated as admin', async () => {
-      if (!testTaxRateId) {
-        console.log('Skipping test: failed to create test tax rate');
-        return;
-      }
       
       const response = await client.delete(`/business/tax/rates/${testTaxRateId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }

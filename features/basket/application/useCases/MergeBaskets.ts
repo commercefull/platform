@@ -6,6 +6,7 @@
 import { BasketRepository } from '../../domain/repositories/BasketRepository';
 import { eventBus } from '../../../../libs/events/eventBus';
 import { BasketResponse } from './GetOrCreateBasket';
+import { BasketNotFoundError } from '../../domain/errors/BasketErrors';
 
 // ============================================================================
 // Command
@@ -28,12 +29,12 @@ export class MergeBasketsUseCase {
   async execute(command: MergeBasketsCommand): Promise<BasketResponse> {
     const sourceBasket = await this.basketRepository.findById(command.sourceBasketId);
     if (!sourceBasket) {
-      throw new Error('Source basket not found');
+      throw new BasketNotFoundError(command.sourceBasketId);
     }
 
     const targetBasket = await this.basketRepository.findById(command.targetBasketId);
     if (!targetBasket) {
-      throw new Error('Target basket not found');
+      throw new BasketNotFoundError(command.targetBasketId);
     }
 
     const itemsMerged = sourceBasket.items.length;

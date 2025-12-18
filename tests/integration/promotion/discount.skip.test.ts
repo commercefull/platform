@@ -43,12 +43,7 @@ describe('Discount Tests', () => {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
-    // Accept 201 (created) or 400 (validation error if required fields missing)
-    expect([201, 400]).toContain(response.status);
-    if (response.status !== 201) {
-      console.log('Discount creation failed:', response.data);
-      return;
-    }
+    expect(response.status).toBe(201);
     expect(response.data.success).toBe(true);
     expect(response.data.data).toHaveProperty('discountId');
     
@@ -86,10 +81,7 @@ describe('Discount Tests', () => {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
-    // May return 200 or 404 if product doesn't exist
-    expect([200, 404]).toContain(response.status);
-    if (response.status !== 200) return;
-    
+    expect(response.status).toBe(200);
     expect(response.data.success).toBe(true);
     expect(Array.isArray(response.data.data)).toBe(true);
   });
@@ -104,10 +96,7 @@ describe('Discount Tests', () => {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
-    // May return 200 or 404 if category doesn't exist
-    expect([200, 404]).toContain(response.status);
-    if (response.status !== 200) return;
-    
+    expect(response.status).toBe(200);
     expect(response.data.success).toBe(true);
     expect(Array.isArray(response.data.data)).toBe(true);
   });
@@ -127,9 +116,7 @@ describe('Discount Tests', () => {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
-    expect([200, 404, 500]).toContain(response.status);
-    if (response.status !== 200) return;
-    
+    expect(response.status).toBe(200);
     expect(response.data.success).toBe(true);
     expect(response.data.data.name).toBe(updateData.name);
     expect(response.data.data.value).toBe(updateData.value);
@@ -145,9 +132,7 @@ describe('Discount Tests', () => {
       headers: { Authorization: `Bearer ${adminToken}` }
     });
     
-    expect([200, 404, 500]).toContain(response.status);
-    if (response.status !== 200) return;
-    
+    expect(response.status).toBe(200);
     expect(response.data.success).toBe(true);
     
     // Verify the discount is deleted

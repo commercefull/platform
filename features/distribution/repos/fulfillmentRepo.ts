@@ -437,12 +437,13 @@ export async function updateDistributionRule(
 }
 
 export async function deleteDistributionRule(id: string): Promise<boolean> {
-  const result = await query(
+  const result = await queryOne<{ distributionRuleId: string }>(
     `UPDATE "${DISTRIBUTION_RULE_TABLE}" SET "deletedAt" = $1, "updatedAt" = $1 
-     WHERE "distributionRuleId" = $2 AND "deletedAt" IS NULL`,
+     WHERE "distributionRuleId" = $2 AND "deletedAt" IS NULL
+     RETURNING "distributionRuleId"`,
     [new Date().toISOString(), id]
   );
-  return (result as any)?.rowCount > 0;
+  return !!result;
 }
 
 // =============================================================================
@@ -586,7 +587,14 @@ export async function updateOrderFulfillment(
   for (const field of dateFields) {
     if (data[field] !== undefined) {
       updates.push(`"${field}" = $${paramIndex++}`);
-      values.push((data[field] as Date)?.toISOString() || null);
+      const dateValue = data[field];
+      if (dateValue instanceof Date) {
+        values.push(dateValue.toISOString());
+      } else if (typeof dateValue === 'string') {
+        values.push(dateValue);
+      } else {
+        values.push(null);
+      }
     }
   }
 

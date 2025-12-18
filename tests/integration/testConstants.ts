@@ -143,3 +143,45 @@ export const TEST_CONTENT_TEMPLATE = {
   structure: { areas: ['main', 'sidebar'] },
   status: 'active'
 };
+
+// Test Data Objects for API payloads
+export const TEST_DATA = {
+  category: {
+    name: 'Test Category',
+    slug: 'test-category',
+    description: 'Test category description',
+    featuredImage: 'https://example.com/image.jpg',
+    metaTitle: 'Test Category',
+    metaDescription: 'Test category meta description',
+    sortOrder: 0,
+    isActive: true
+  },
+  navigation: {
+    name: 'Test Navigation',
+    slug: 'test-navigation',
+    description: 'Test navigation description',
+    location: 'header'
+  },
+  navigationItem: {
+    title: 'Home',
+    type: 'url',
+    url: '/',
+    sortOrder: 0
+  },
+  media: {
+    fileName: 'test-image.jpg',
+    filePath: '/uploads/test-image.jpg',
+    fileType: 'image/jpeg',
+    fileSize: 1024000,
+    url: 'https://example.com/test-image.jpg',
+    title: 'Test Image',
+    altText: 'Test image alt text',
+    caption: 'Test image caption',
+    description: 'Test image description',
+    width: 1920,
+    height: 1080,
+    sortOrder: 0,
+    tags: ['test', 'image'],
+    isExternal: false
+  }
+};

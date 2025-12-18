@@ -51,6 +51,7 @@ export const isCustomerLoggedIn = (req: Request, res: Response, next: NextFuncti
     if (req.isAuthenticated()) {
         return next();
     }
+    
     res.redirect("/login");
 };
 

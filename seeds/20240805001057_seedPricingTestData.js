@@ -6,9 +6,9 @@
 
 // Fixed UUIDs for test data - these match the test expectations
 const TEST_PRODUCT_IDS = [
-  '00000000-0000-0000-0000-000000000001',
-  '00000000-0000-0000-0000-000000000002',
-  '00000000-0000-0000-0000-000000000003'
+  '10000000-0000-0000-0000-000000000001',
+  '10000000-0000-0000-0000-000000000002',
+  '10000000-0000-0000-0000-000000000003'
 ];
 
 const TEST_PRICE_LIST_ID = '00000000-0000-0000-0000-000000000010';
@@ -39,9 +39,9 @@ exports.seed = async function(knex) {
   // Create test products with fixed UUIDs
   const testProducts = TEST_PRODUCT_IDS.map((productId, index) => ({
     productId,
-    sku: `TEST-PRICING-${index + 1}`,
+    sku: `PRICING-TEST-${index + 1}`,
     name: `Test Pricing Product ${index + 1}`,
-    slug: `test-pricing-product-${index + 1}`,
+    slug: `pricing-test-product-${index + 1}`,
     description: `Test product for pricing integration tests (${index + 1})`,
     shortDescription: `Test pricing product ${index + 1}`,
     brandId: genericBrand.productBrandId,

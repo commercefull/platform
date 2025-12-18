@@ -9,6 +9,7 @@ import { BasketRepository } from '../../domain/repositories/BasketRepository';
 import { Basket, BasketStatus } from '../../domain/entities/Basket';
 import { BasketItem } from '../../domain/entities/BasketItem';
 import { Money } from '../../domain/valueObjects/Money';
+import { BasketNotFoundError, BasketNotActiveError, BasketExpiredError } from '../../domain/errors/BasketErrors';
 
 // Note: Using camelCase column names to match database migrations
 
@@ -339,15 +340,48 @@ export class BasketRepo implements BasketRepository {
 
   async mergeBaskets(sessionBasketId: string, customerBasketId: string): Promise<Basket> {
     const sessionBasket = await this.findById(sessionBasketId);
-    const customerBasket = await this.findById(customerBasketId);
+    if (!sessionBasket) {
+      throw new BasketNotFoundError(sessionBasketId);
+    }
 
-    if (!sessionBasket || !customerBasket) {
-      throw new Error('One or both baskets not found');
+    const customerBasket = await this.findById(customerBasketId);
+    if (!customerBasket) {
+      throw new BasketNotFoundError(customerBasketId);
+    }
+
+    // Ensure both baskets are active and not expired
+    if (!sessionBasket.isActive) {
+      throw new BasketNotActiveError(sessionBasketId);
+    }
+    if (sessionBasket.isExpired) {
+      throw new BasketExpiredError(sessionBasketId);
+    }
+    if (!customerBasket.isActive) {
+      throw new BasketNotActiveError(customerBasketId);
+    }
+    if (customerBasket.isExpired) {
+      throw new BasketExpiredError(customerBasketId);
     }
 
     // Add session basket items to customer basket
     for (const item of sessionBasket.items) {
-      customerBasket.addItem(item);
+      // Create a new BasketItem for the customer basket with new ID
+      const newItem = BasketItem.create({
+        basketItemId: generateUUID(),
+        basketId: customerBasketId,
+        productId: item.productId,
+        productVariantId: item.productVariantId,
+        sku: item.sku,
+        name: item.name,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+        imageUrl: item.imageUrl,
+        attributes: item.attributes,
+        itemType: item.itemType as 'physical' | 'digital' | 'subscription' | 'service',
+        isGift: item.isGift,
+        giftMessage: item.giftMessage
+      });
+      customerBasket.addItem(newItem);
     }
 
     // Save merged basket

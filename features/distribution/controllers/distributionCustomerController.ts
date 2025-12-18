@@ -9,6 +9,7 @@ const distributionRepo = new DistributionRepo();
  * Get active distribution centers with limited information
  */
 export const getActiveDistributionCenters = async (req: Request, res: Response): Promise<void> => {
+  console.log('getActiveDistributionCenters called');
   try {
     const centers = await distributionRepo.findActiveWarehouses();
     

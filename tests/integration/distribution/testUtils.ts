@@ -96,6 +96,7 @@ export const testShippingRate = {
   baseRate: 9.99,
   perItemRate: 1.50,
   freeShippingThreshold: 100,
+  rateType: 'flat',
   isActive: true
 };
 
@@ -103,9 +104,10 @@ export function createTestShippingRate(zoneId: string, methodId: string) {
   return {
     distributionShippingZoneId: zoneId,
     distributionShippingMethodId: methodId,
-    baseRate: 9.99,
-    perItemRate: 1.50,
-    freeShippingThreshold: 100,
+    baseRate: '9.99',
+    perItemRate: '1.50',
+    freeThreshold: '100',
+    rateType: 'flat',
     isActive: true
   };
 }
@@ -156,12 +158,12 @@ export function createTestDistributionRule(warehouseId?: string, zoneId?: string
   };
 }
 
-export function createTestOrderFulfillment(orderId: string, warehouseId?: string, shippingMethodId?: string) {
+export function createTestOrderFulfillment(warehouseId?: string, shippingMethodId?: string) {
   return {
-    orderId,
+    orderId: "12345678-1234-1234-1234-123456789012",
     orderNumber: `ORD-${Date.now()}`,
-    warehouseId,
-    shippingMethodId,
+    distributionWarehouseId: warehouseId,
+    distributionShippingMethodId: shippingMethodId,
     shipToAddress: {
       line1: '456 Customer Street',
       line2: 'Apt 101',

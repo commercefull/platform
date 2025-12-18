@@ -6,6 +6,7 @@
 import { BasketRepository } from '../../domain/repositories/BasketRepository';
 import { eventBus } from '../../../../libs/events/eventBus';
 import { BasketResponse } from './GetOrCreateBasket';
+import { BasketNotFoundError, BasketItemNotFoundError } from '../../domain/errors/BasketErrors';
 
 // ============================================================================
 // Command
@@ -28,12 +29,12 @@ export class RemoveItemUseCase {
   async execute(command: RemoveItemCommand): Promise<BasketResponse> {
     const basket = await this.basketRepository.findById(command.basketId);
     if (!basket) {
-      throw new Error('Basket not found');
+      throw new BasketNotFoundError(command.basketId);
     }
 
     const item = basket.findItem(command.basketItemId);
     if (!item) {
-      throw new Error('Item not found in basket');
+      throw new BasketItemNotFoundError(command.basketItemId);
     }
 
     await this.basketRepository.removeItem(command.basketItemId);

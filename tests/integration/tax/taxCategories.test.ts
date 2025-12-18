@@ -53,11 +53,6 @@ describe('Tax Categories API Integration Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
-      if (!allCategoriesResponse.data?.data?.length) {
-        console.log('Skipping test: no tax categories available');
-        return;
-      }
-      
       const categoryCode = allCategoriesResponse.data.data[0].code;
       
       // Test the public endpoint
@@ -133,11 +128,6 @@ describe('Tax Categories API Integration Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       
-      if (firstResponse.status !== 201) {
-        console.log('Skipping test: failed to create initial tax category');
-        return;
-      }
-      
       const createdTaxCategoryId = firstResponse.data.id;
       
       // Try to create another category with the same code
@@ -196,11 +186,7 @@ describe('Tax Categories API Integration Tests', () => {
     });
     
     it('should update an existing tax category when authenticated as admin', async () => {
-      if (!testCategoryId) {
-        console.log('Skipping test: failed to create test tax category');
-        return;
-      }
-      
+
       const updateData = {
         name: 'Updated Category Name',
         description: 'Updated description',
@@ -250,10 +236,6 @@ describe('Tax Categories API Integration Tests', () => {
     });
     
     it('should delete a tax category when authenticated as admin', async () => {
-      if (!testCategoryId) {
-        console.log('Skipping test: failed to create test tax category');
-        return;
-      }
       
       const response = await client.delete(`/business/tax/categories/${testCategoryId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }

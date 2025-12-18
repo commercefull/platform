@@ -18,21 +18,6 @@ export class PricingRuleRepo {
   private readonly tableName = Table.PricingRule;
 
   /**
-   * Transform database record to PricingRule
-   */
-  private transformRecord(record: Record<string, any>): PricingRule {
-    if (!record) return null as any;
-    return record as PricingRule;
-  }
-
-  /**
-   * Transform array of records
-   */
-  private transformRecords(records: Record<string, any>[]): PricingRule[] {
-    return (records || []).map(r => this.transformRecord(r));
-  }
-
-  /**
    * Find a pricing rule by ID
    */
   async findById(id: string): Promise<PricingRule | null> {
@@ -41,8 +26,8 @@ export class PricingRuleRepo {
       WHERE "pricingRuleId" = $1
     `;
     
-    const result = await queryOne<Record<string, any>>(sql, [id]);
-    return result ? this.transformRecord(result) : null;
+    const result = await queryOne<PricingRule>(sql, [id]);
+    return result;
   }
 
   /**
@@ -112,8 +97,8 @@ export class PricingRuleRepo {
       ORDER BY "priority" DESC, "createdAt" ASC
     `;
     
-    const results = await query<Record<string, any>[]>(sql, params);
-    return this.transformRecords(results || []);
+    const results = await query<PricingRule[]>(sql, params);
+    return results || [];
   }
 
   /**
@@ -221,8 +206,8 @@ export class PricingRuleRepo {
       LIMIT $${params.length - 1} OFFSET $${params.length}
     `;
     
-    const results = await query<Record<string, any>[]>(sql, params);
-    return this.transformRecords(results || []);
+    const results = await query<PricingRule[]>(sql, params);
+    return results || [];
   }
 
   /**
@@ -332,13 +317,13 @@ export class PricingRuleRepo {
       now
     ];
     
-    const result = await queryOne<Record<string, any>>(sql, values);
+    const result = await queryOne<PricingRule>(sql, values);
     
     if (!result) {
       throw new Error('Failed to create pricing rule');
     }
     
-    return this.transformRecord(result);
+    return result;
   }
 
   /**
@@ -388,13 +373,13 @@ export class PricingRuleRepo {
       RETURNING *
     `;
     
-    const result = await queryOne<Record<string, any>>(sql, values);
+    const result = await queryOne<PricingRule>(sql, values);
     
     if (!result) {
       throw new Error('Pricing rule not found or update failed');
     }
     
-    return this.transformRecord(result);
+    return result;
   }
 
   /**

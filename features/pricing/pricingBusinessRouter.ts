@@ -9,7 +9,7 @@ import {
 // Import currency management functions from merchant controller
 import {
   // Currency management routes
-  getAllCurrencies, getCurrencyByCode, saveCurrency, deleteCurrency, updateExchangeRates,
+  getAllCurrencies, getDefaultCurrency, getCurrencyByCode, saveCurrency, deleteCurrency, updateExchangeRates,
   // Currency region routes
   getAllCurrencyRegions, getCurrencyRegionById, createCurrencyRegion, updateCurrencyRegion, deleteCurrencyRegion,
   // Currency price rules
@@ -58,6 +58,7 @@ router.post("/pricing/price-lists/:priceListId/prices", addPriceToList);
  * Currency Management Routes
  */
 router.get("/pricing/currencies", getAllCurrencies);
+router.get("/pricing/currencies/default", getDefaultCurrency);
 router.get("/pricing/currencies/:code", getCurrencyByCode);
 router.post("/pricing/currencies", saveCurrency);
 router.delete("/pricing/currencies/:code", deleteCurrency);

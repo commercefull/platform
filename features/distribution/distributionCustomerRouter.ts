@@ -10,9 +10,6 @@ import * as preOrderController from "./controllers/preOrderCustomerController";
 
 const router = express.Router();
 
-// Public routes for distribution information
-// These provide limited access compared to admin routes
-
 // Get active distribution centers with limited information
 router.get("/distribution/centers", getActiveDistributionCenters);
 
