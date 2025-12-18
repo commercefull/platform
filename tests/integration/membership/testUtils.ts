@@ -4,7 +4,7 @@ import {
   MembershipTier, 
   LegacyMembershipBenefit as MembershipBenefit, 
   UserMembership 
-} from '../../../features/membership/repos/membershipRepo';
+} from '../../../modules/membership/repos/membershipRepo';
 
 // Common test data for membership tier
 export const testTier: Partial<MembershipTier> = {

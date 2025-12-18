@@ -4,8 +4,8 @@
  */
 
 import { eventBus, EventType } from '../libs/events/eventBus';
-import * as reportingRepo from '../features/analytics/repos/reportingRepo';
-import * as analyticsRepo from '../features/analytics/repos/analyticsRepo';
+import * as reportingRepo from '../modules/analytics/repos/reportingRepo';
+import * as analyticsRepo from '../modules/analytics/repos/analyticsRepo';
 
 // ============================================================================
 // Event Handlers

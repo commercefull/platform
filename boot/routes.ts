@@ -1,57 +1,58 @@
 import { Express } from "express";
 
 // Storefront routes
-import { storefrontCustomerRouter } from "../templates/storefront/storefrontRouter";
+import { storefrontCustomerRouter } from "../web/storefront/storefrontRouter";
 
 // Feature routes - Customer facing
-import { identityCustomerRouter } from "../features/identity/interface/routers/identityCustomerRouter";
-import { identitySocialRouter } from "../features/identity/interface/routers/identitySocialRouter";
-import { customerRouter } from "../features/customer/interface/routers/customerRouter";
-import { taxCustomerRouter } from "../features/tax/taxCustomerRouter";
-import { b2bCustomerRouter } from "../features/b2b/b2bCustomerRouter";
-import { gdprCustomerRouter } from "../features/gdpr/gdprCustomerRouter";
-import { orderCustomerRouter } from "../features/order/interface/routers/customerRouter";
-import { basketCustomerRouter } from "../features/basket/interface/routers/basketRouter";
-import { productCustomerRouter } from "../features/product/interface/routers/productCustomerRouter";
-import { loyaltyCustomerRouter } from "../features/loyalty/loyaltyCustomerRouter";
-import { paymentCustomerRouter } from "../features/payment/interface/routers/paymentCustomerRouter";
-import { supportCustomerRouter } from "../features/support/supportCustomerRouter";
-import { checkoutCustomerRouter } from "../features/checkout/interface/routers/checkoutRouter";
-import { inventoryCustomerRouter } from "../features/inventory/interface/routers/customerRouter";
-import { marketingCustomerRouter } from "../features/marketing/marketingCustomerRouter";
-import { warehouseCustomerRouter } from "../features/warehouse/warehouseCustomerRouter";
-import { membershipCustomerRouter } from "../features/membership/membershipCustomerRouter";
-import { distributionCustomerRouter } from "../features/distribution/distributionCustomerRouter";
-import { subscriptionCustomerRouter } from "../features/subscription/subscriptionCustomerRouter";
-import { localizationCustomerRouter } from "../features/localization/localizationCustomerRouter";
-import { shippingCustomerRouter } from "../features/shipping/shippingCustomerRouter";
+import { identityCustomerRouter } from "../modules/identity/interface/routers/identityCustomerRouter";
+import { identitySocialRouter } from "../modules/identity/interface/routers/identitySocialRouter";
+import { customerRouter } from "../modules/customer/interface/routers/customerRouter";
+import { taxCustomerRouter } from "../modules/tax/taxCustomerRouter";
+import { b2bCustomerRouter } from "../modules/b2b/b2bCustomerRouter";
+import { gdprCustomerRouter } from "../modules/gdpr/gdprCustomerRouter";
+import { orderCustomerRouter } from "../modules/order/interface/routers/customerRouter";
+import { basketCustomerRouter } from "../modules/basket/interface/routers/basketRouter";
+import { productCustomerRouter } from "../modules/product/interface/routers/productCustomerRouter";
+import { loyaltyCustomerRouter } from "../modules/loyalty/loyaltyCustomerRouter";
+import { paymentCustomerRouter } from "../modules/payment/interface/routers/paymentCustomerRouter";
+import { supportCustomerRouter } from "../modules/support/supportCustomerRouter";
+import { checkoutCustomerRouter } from "../modules/checkout/interface/routers/checkoutRouter";
+import { inventoryCustomerRouter } from "../modules/inventory/interface/routers/customerRouter";
+import { marketingCustomerRouter } from "../modules/marketing/marketingCustomerRouter";
+import { warehouseCustomerRouter } from "../modules/warehouse/warehouseCustomerRouter";
+import { membershipCustomerRouter } from "../modules/membership/membershipCustomerRouter";
+import { distributionCustomerRouter } from "../modules/distribution/distributionCustomerRouter";
+import { subscriptionCustomerRouter } from "../modules/subscription/subscriptionCustomerRouter";
+import { localizationCustomerRouter } from "../modules/localization/localizationCustomerRouter";
+import { shippingCustomerRouter } from "../modules/shipping/shippingCustomerRouter";
 
 // Feature routes - Business/Merchant facing
-import { identityBusinessRouter } from "../features/identity/interface/routers/identityBusinessRouter";
-import { merchantMerchantRouter } from "../features/merchant/merchantBusinessRouter";
-import { promotionBusinessRouter } from "../features/promotion/interface/routers/businessRouter";
-import { productBusinessRouter } from "../features/product/interface/routers/productBusinessRouter";
-import { orderBusinessRouter } from "../features/order/interface/routers/businessRouter";
-import { distributionBusinessRouter } from "../features/distribution/distributionBusinessRouter";
-import { taxBusinessRouter } from "../features/tax/taxBusinessRouter";
-import { customerBusinessRouter } from "../features/customer/interface/routers/businessRouter";
-import { gdprBusinessRouter } from "../features/gdpr/gdprBusinessRouter";
-import { marketingBusinessRouter } from "../features/marketing/marketingBusinessRouter";
-import { b2bBusinessRouter } from "../features/b2b/b2bBusinessRouter";
-import { subscriptionBusinessRouter } from "../features/subscription/subscriptionBusinessRouter";
-import { supportBusinessRouter } from "../features/support/supportBusinessRouter";
-import { analyticsBusinessRouter } from "../features/analytics/analyticsBusinessRouter";
-import { warehouseMerchantRouter } from "../features/warehouse/warehouseBusinessRouter";
-import { supplierMerchantRouter } from "../features/supplier/supplierBusinessRouter";
-import { localizationMerchantRouter } from "../features/localization/localizationBusinessRouter";
-import { pricingMerchantRouter } from "../features/pricing/pricingBusinessRouter";
-import { loyaltyMerchantRouter } from "../features/loyalty/loyaltyBusinessRouter";
-import { notificationMerchantRouter } from "../features/notification/notificationBusinessRouter";
-import { contentRouterAdmin } from "../features/content/contentBusinessRouter";
-import { membershipBusinessRouter } from "../features/membership/membershipBusinessRouter";
-import { shippingBusinessRouter } from "../features/shipping/shippingBusinessRouter";
-import { inventoryBusinessRouter } from "../features/inventory/interface/routers/businessRouter";
-import { paymentBusinessRouter } from "../features/payment/interface/routers/paymentBusinessRouter";
+import { identityBusinessRouter } from "../modules/identity/interface/routers/identityBusinessRouter";
+import { merchantMerchantRouter } from "../modules/merchant/merchantBusinessRouter";
+import { promotionBusinessRouter } from "../modules/promotion/interface/routers/businessRouter";
+import { productBusinessRouter } from "../modules/product/interface/routers/productBusinessRouter";
+import { orderBusinessRouter } from "../modules/order/interface/routers/businessRouter";
+import { distributionBusinessRouter } from "../modules/distribution/distributionBusinessRouter";
+import { taxBusinessRouter } from "../modules/tax/taxBusinessRouter";
+import { customerBusinessRouter } from "../modules/customer/interface/routers/businessRouter";
+import { gdprBusinessRouter } from "../modules/gdpr/gdprBusinessRouter";
+import { marketingBusinessRouter } from "../modules/marketing/marketingBusinessRouter";
+import { b2bBusinessRouter } from "../modules/b2b/b2bBusinessRouter";
+import { subscriptionBusinessRouter } from "../modules/subscription/subscriptionBusinessRouter";
+import { supportBusinessRouter } from "../modules/support/supportBusinessRouter";
+import { analyticsBusinessRouter } from "../modules/analytics/analyticsBusinessRouter";
+import { warehouseMerchantRouter } from "../modules/warehouse/warehouseBusinessRouter";
+import { supplierMerchantRouter } from "../modules/supplier/supplierBusinessRouter";
+import { localizationMerchantRouter } from "../modules/localization/localizationBusinessRouter";
+import { pricingMerchantRouter } from "../modules/pricing/pricingBusinessRouter";
+import { loyaltyMerchantRouter } from "../modules/loyalty/loyaltyBusinessRouter";
+import { notificationMerchantRouter } from "../modules/notification/notificationBusinessRouter";
+import { contentRouterAdmin } from "../modules/content/contentBusinessRouter";
+import { membershipBusinessRouter } from "../modules/membership/membershipBusinessRouter";
+import { shippingBusinessRouter } from "../modules/shipping/shippingBusinessRouter";
+import { inventoryBusinessRouter } from "../modules/inventory/interface/routers/businessRouter";
+import { paymentBusinessRouter } from "../modules/payment/interface/routers/paymentBusinessRouter";
+import { hubRouter } from "../web/hub/hubRouters";
 
 /**
  * Configure all application routes
@@ -59,6 +60,8 @@ import { paymentBusinessRouter } from "../features/payment/interface/routers/pay
 export function configureRoutes(app: Express): void {
   // Storefront routes (public website)
   app.use("/", storefrontCustomerRouter);
+
+  app.use("/hub", hubRouter);
 
   app.use("/customer", [
     identityCustomerRouter,  // Must be first - public auth routes

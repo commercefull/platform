@@ -1,0 +1,192 @@
+<%- include("../layout") %>
+
+<%- include("../partials/navbar") %>
+
+<%- include("../partials/sidebar") %>
+
+<!-- Content Wrapper -->
+<div class="content-wrapper">
+  <!-- Content Header -->
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0"><%= pageName %></h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="/hub">Home</a></li>
+            <li class="breadcrumb-item active"><%= pageName %></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <section class="content">
+    <div class="container-fluid">
+      <%- include("../partials/alerts") %>
+
+      <!-- Filters -->
+      <div class="card collapsed-card">
+        <div class="card-header">
+          <h3 class="card-title">Filters</h3>
+          <div class="card-tools">
+            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+              <i class="fas fa-plus"></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <form method="GET" class="row">
+            <div class="col-md-2">
+              <div class="form-group">
+                <label for="status">Order Status</label>
+                <select class="form-control" id="status" name="status">
+                  <option value="">All Status</option>
+                  <% orderStatuses.forEach(s => { %>
+                    <option value="<%= s %>" <%= filters.status === s ? 'selected' : '' %>><%= s %></option>
+                  <% }); %>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-2">
+              <div class="form-group">
+                <label for="paymentStatus">Payment</label>
+                <select class="form-control" id="paymentStatus" name="paymentStatus">
+                  <option value="">All</option>
+                  <% paymentStatuses.forEach(s => { %>
+                    <option value="<%= s %>" <%= filters.paymentStatus === s ? 'selected' : '' %>><%= s %></option>
+                  <% }); %>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-2">
+              <div class="form-group">
+                <label for="startDate">From Date</label>
+                <input type="date" class="form-control" id="startDate" name="startDate" value="<%= filters.startDate %>">
+              </div>
+            </div>
+            <div class="col-md-2">
+              <div class="form-group">
+                <label for="endDate">To Date</label>
+                <input type="date" class="form-control" id="endDate" name="endDate" value="<%= filters.endDate %>">
+              </div>
+            </div>
+            <div class="col-md-2">
+              <div class="form-group">
+                <label for="search">Search</label>
+                <input type="text" class="form-control" id="search" name="search" value="<%= filters.search %>" placeholder="Order #, Email...">
+              </div>
+            </div>
+            <div class="col-md-2">
+              <div class="form-group">
+                <label>&nbsp;</label>
+                <div>
+                  <button type="submit" class="btn btn-primary">Filter</button>
+                  <a href="/hub/orders" class="btn btn-secondary">Clear</a>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Orders Table -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Orders (<%= pagination.total %>)</h3>
+        </div>
+        <div class="card-body table-responsive p-0">
+          <table class="table table-hover text-nowrap">
+            <thead>
+              <tr>
+                <th>Order #</th>
+                <th>Customer</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Payment</th>
+                <th>Fulfillment</th>
+                <th>Items</th>
+                <th>Total</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% orders.forEach(order => { %>
+              <tr>
+                <td>
+                  <a href="/hub/orders/<%= order.orderId %>">
+                    <strong>#<%= order.orderNumber %></strong>
+                  </a>
+                </td>
+                <td>
+                  <%= order.customerName || 'Guest' %><br>
+                  <small class="text-muted"><%= order.customerEmail %></small>
+                </td>
+                <td><%= new Date(order.orderDate).toLocaleDateString() %></td>
+                <td>
+                  <span class="badge badge-<%= 
+                    order.status === 'completed' ? 'success' :
+                    order.status === 'cancelled' ? 'danger' :
+                    order.status === 'pending' ? 'warning' :
+                    order.status === 'processing' ? 'info' : 'secondary' %>">
+                    <%= order.status %>
+                  </span>
+                </td>
+                <td>
+                  <span class="badge badge-<%= 
+                    order.paymentStatus === 'paid' ? 'success' :
+                    order.paymentStatus === 'refunded' ? 'danger' :
+                    order.paymentStatus === 'pending' ? 'warning' : 'secondary' %>">
+                    <%= order.paymentStatus %>
+                  </span>
+                </td>
+                <td>
+                  <span class="badge badge-<%= 
+                    order.fulfillmentStatus === 'fulfilled' ? 'success' :
+                    order.fulfillmentStatus === 'shipped' ? 'info' :
+                    order.fulfillmentStatus === 'pending' ? 'warning' : 'secondary' %>">
+                    <%= order.fulfillmentStatus %>
+                  </span>
+                </td>
+                <td><%= order.totalItems %></td>
+                <td><strong>$<%= order.totalAmount.toFixed(2) %></strong></td>
+                <td>
+                  <div class="btn-group">
+                    <a href="/hub/orders/<%= order.orderId %>" class="btn btn-sm btn-info" title="View">
+                      <i class="fas fa-eye"></i>
+                    </a>
+                    <% if (order.paymentStatus === 'paid' && order.status !== 'refunded') { %>
+                    <a href="/hub/orders/<%= order.orderId %>/refund" class="btn btn-sm btn-warning" title="Refund">
+                      <i class="fas fa-undo"></i>
+                    </a>
+                    <% } %>
+                  </div>
+                </td>
+              </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+        <!-- Pagination -->
+        <% if (pagination.pages > 1) { %>
+        <div class="card-footer">
+          <nav>
+            <ul class="pagination pagination-sm m-0">
+              <% for (let i = 1; i <= pagination.pages; i++) { %>
+                <li class="page-item <%= i === pagination.page ? 'active' : '' %>">
+                  <a class="page-link" href="?page=<%= i %>&status=<%= filters.status %>&paymentStatus=<%= filters.paymentStatus %>"><%= i %></a>
+                </li>
+              <% } %>
+            </ul>
+          </nav>
+        </div>
+        <% } %>
+      </div>
+    </div>
+  </section>
+</div>
+
+<%- include("../partials/footer") %>

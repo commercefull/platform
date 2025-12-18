@@ -1,0 +1,242 @@
+<%- include("../layout") %>
+
+<%- include("../partials/navbar") %>
+
+<%- include("../partials/sidebar") %>
+
+<!-- Content Wrapper -->
+<div class="content-wrapper">
+  <!-- Content Header -->
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0"><%= pageName %></h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="/hub">Home</a></li>
+            <li class="breadcrumb-item"><a href="/hub/customers">Customers</a></li>
+            <li class="breadcrumb-item active"><%= customer.firstName %> <%= customer.lastName %></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <section class="content">
+    <div class="container-fluid">
+      <%- include("../partials/alerts") %>
+
+      <div class="row">
+        <!-- Customer Profile -->
+        <div class="col-md-4">
+          <div class="card card-primary card-outline">
+            <div class="card-body box-profile">
+              <div class="text-center">
+                <img class="profile-user-img img-fluid img-circle"
+                     src="https://cdn.jsdelivr.net/npm/admin-lte@4.0.0-beta3/dist/img/user2-160x160.jpg"
+                     alt="Customer avatar">
+              </div>
+
+              <h3 class="profile-username text-center">
+                <%= customer.firstName %> <%= customer.lastName %>
+              </h3>
+
+              <p class="text-muted text-center">
+                Customer since <%= new Date(customer.createdAt).toLocaleDateString() %>
+              </p>
+
+              <ul class="list-group list-group-unbordered mb-3">
+                <li class="list-group-item">
+                  <b>Email</b> <a class="float-right"><%= customer.email %></a>
+                </li>
+                <% if (customer.phone) { %>
+                <li class="list-group-item">
+                  <b>Phone</b> <a class="float-right"><%= customer.phone %></a>
+                </li>
+                <% } %>
+                <li class="list-group-item">
+                  <b>Status</b> 
+                  <span class="badge float-right badge-<%= customer.isActive ? 'success' : 'secondary' %>">
+                    <%= customer.isActive ? 'Active' : 'Inactive' %>
+                  </span>
+                </li>
+                <li class="list-group-item">
+                  <b>Verified</b>
+                  <span class="float-right">
+                    <% if (customer.isVerified) { %>
+                      <i class="fas fa-check-circle text-success"></i> Yes
+                    <% } else { %>
+                      <i class="fas fa-times-circle text-danger"></i> No
+                    <% } %>
+                  </span>
+                </li>
+                <% if (customer.lastLoginAt) { %>
+                <li class="list-group-item">
+                  <b>Last Login</b> <span class="float-right"><%= new Date(customer.lastLoginAt).toLocaleString() %></span>
+                </li>
+                <% } %>
+              </ul>
+
+              <a href="/hub/customers/<%= customer.customerId %>/edit" class="btn btn-primary btn-block">
+                <i class="fas fa-edit"></i> Edit Profile
+              </a>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Actions</h3>
+            </div>
+            <div class="card-body">
+              <% if (!customer.isVerified) { %>
+                <button onclick="verifyCustomer('<%= customer.customerId %>')" class="btn btn-success btn-block mb-2">
+                  <i class="fas fa-check"></i> Verify Customer
+                </button>
+              <% } %>
+              
+              <% if (customer.isActive) { %>
+                <button onclick="deactivateCustomer('<%= customer.customerId %>')" class="btn btn-warning btn-block mb-2">
+                  <i class="fas fa-user-slash"></i> Deactivate
+                </button>
+              <% } else { %>
+                <button onclick="reactivateCustomer('<%= customer.customerId %>')" class="btn btn-success btn-block mb-2">
+                  <i class="fas fa-user-check"></i> Reactivate
+                </button>
+              <% } %>
+
+              <a href="/hub/customers/<%= customer.customerId %>/addresses" class="btn btn-info btn-block mb-2">
+                <i class="fas fa-map-marker-alt"></i> Manage Addresses
+              </a>
+
+              <a href="/hub/customers" class="btn btn-secondary btn-block">
+                <i class="fas fa-arrow-left"></i> Back to Customers
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Customer Details -->
+        <div class="col-md-8">
+          <!-- Addresses -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-map-marker-alt mr-2"></i>Addresses</h3>
+              <div class="card-tools">
+                <a href="/hub/customers/<%= customer.customerId %>/addresses" class="btn btn-sm btn-primary">
+                  <i class="fas fa-plus"></i> Add
+                </a>
+              </div>
+            </div>
+            <div class="card-body">
+              <% if (addresses && addresses.length > 0) { %>
+                <div class="row">
+                  <% addresses.forEach(addr => { %>
+                  <div class="col-md-6 mb-3">
+                    <div class="card card-outline card-<%= addr.isDefault ? 'primary' : 'secondary' %>">
+                      <div class="card-header">
+                        <h5 class="card-title">
+                          <%= addr.addressType.charAt(0).toUpperCase() + addr.addressType.slice(1) %>
+                          <% if (addr.isDefault) { %>
+                            <span class="badge badge-primary">Default</span>
+                          <% } %>
+                        </h5>
+                      </div>
+                      <div class="card-body">
+                        <% if (addr.firstName) { %>
+                          <p><strong><%= addr.firstName %> <%= addr.lastName %></strong></p>
+                        <% } %>
+                        <% if (addr.company) { %>
+                          <p><%= addr.company %></p>
+                        <% } %>
+                        <p><%= addr.addressLine1 %></p>
+                        <% if (addr.addressLine2) { %>
+                          <p><%= addr.addressLine2 %></p>
+                        <% } %>
+                        <p><%= addr.city %>, <%= addr.state %> <%= addr.postalCode %></p>
+                        <p><%= addr.country %></p>
+                        <% if (addr.phone) { %>
+                          <p><i class="fas fa-phone"></i> <%= addr.phone %></p>
+                        <% } %>
+                      </div>
+                    </div>
+                  </div>
+                  <% }); %>
+                </div>
+              <% } else { %>
+                <p class="text-muted">No addresses on file.</p>
+              <% } %>
+            </div>
+          </div>
+
+          <!-- Customer Notes -->
+          <% if (customer.note) { %>
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-sticky-note mr-2"></i>Notes</h3>
+            </div>
+            <div class="card-body">
+              <p><%= customer.note %></p>
+            </div>
+          </div>
+          <% } %>
+
+          <!-- Recent Orders placeholder -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-shopping-cart mr-2"></i>Recent Orders</h3>
+              <div class="card-tools">
+                <a href="/hub/orders?customerId=<%= customer.customerId %>" class="btn btn-sm btn-primary">
+                  View All
+                </a>
+              </div>
+            </div>
+            <div class="card-body">
+              <p class="text-muted">Order history will be displayed here.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<%- include("../partials/footer") %>
+
+<script>
+function verifyCustomer(customerId) {
+  if (confirm('Verify this customer?')) {
+    fetch(`/hub/customers/${customerId}/verify`, { method: 'POST' })
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) location.reload();
+        else alert('Error: ' + data.message);
+      });
+  }
+}
+
+function deactivateCustomer(customerId) {
+  if (confirm('Deactivate this customer?')) {
+    fetch(`/hub/customers/${customerId}/deactivate`, { method: 'POST' })
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) location.reload();
+        else alert('Error: ' + data.message);
+      });
+  }
+}
+
+function reactivateCustomer(customerId) {
+  if (confirm('Reactivate this customer?')) {
+    fetch(`/hub/customers/${customerId}/reactivate`, { method: 'POST' })
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) location.reload();
+        else alert('Error: ' + data.message);
+      });
+  }
+}
+</script>

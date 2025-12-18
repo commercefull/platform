@@ -1,6 +1,6 @@
 import { AxiosInstance } from 'axios';
 import { createTestClient, loginTestAdmin } from '../testUtils';
-import { Merchant, MerchantAddress, MerchantPaymentInfo } from '../../../features/merchant/repos/merchantRepo';
+import { Merchant, MerchantAddress, MerchantPaymentInfo } from '../../../modules/merchant/repos/merchantRepo';
 
 // Common test data for merchant
 const uniqueId = Math.floor(Math.random() * 100000);

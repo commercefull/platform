@@ -1,0 +1,258 @@
+<%- include("../layout") %>
+
+<%- include("../partials/navbar") %>
+
+<%- include("../partials/sidebar") %>
+
+<!-- Content Wrapper -->
+<div class="content-wrapper">
+  <!-- Content Header -->
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0"><%= pageName %></h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="/hub">Home</a></li>
+            <li class="breadcrumb-item"><a href="/hub/products">Products</a></li>
+            <li class="breadcrumb-item active"><%= product.name %></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <section class="content">
+    <div class="container-fluid">
+      <%- include("../partials/alerts") %>
+
+      <div class="row">
+        <!-- Product Details -->
+        <div class="col-md-8">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Product Details</h3>
+              <div class="card-tools">
+                <span class="badge badge-<%= product.status === 'active' ? 'success' : product.status === 'draft' ? 'warning' : 'secondary' %>">
+                  <%= product.status.toUpperCase() %>
+                </span>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <!-- Product Image -->
+                <div class="col-md-4">
+                  <% if (product.primaryImageUrl) { %>
+                    <img src="<%= product.primaryImageUrl %>" alt="<%= product.name %>" class="img-fluid rounded">
+                  <% } else { %>
+                    <div class="bg-light d-flex align-items-center justify-content-center rounded" style="height: 200px;">
+                      <i class="fas fa-image fa-4x text-muted"></i>
+                    </div>
+                  <% } %>
+                </div>
+
+                <!-- Product Info -->
+                <div class="col-md-8">
+                  <h3><%= product.name %></h3>
+                  <p class="text-muted">
+                    SKU: <code><%= product.sku || 'N/A' %></code> | 
+                    Slug: <code><%= product.slug %></code>
+                  </p>
+
+                  <hr>
+
+                  <div class="row">
+                    <div class="col-6">
+                      <h4 class="text-primary">$<%= product.effectivePrice.toFixed(2) %></h4>
+                      <% if (product.isOnSale && product.salePrice) { %>
+                        <p><s class="text-muted">$<%= product.basePrice.toFixed(2) %></s></p>
+                      <% } %>
+                    </div>
+                    <div class="col-6 text-right">
+                      <p>
+                        <strong>Visibility:</strong>
+                        <span class="badge badge-<%= product.visibility === 'visible' ? 'success' : 'secondary' %>">
+                          <%= product.visibility %>
+                        </span>
+                      </p>
+                      <% if (product.isFeatured) { %>
+                        <span class="badge badge-warning"><i class="fas fa-star"></i> Featured</span>
+                      <% } %>
+                      <% if (product.isOnSale) { %>
+                        <span class="badge badge-danger">On Sale</span>
+                      <% } %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Description</h3>
+            </div>
+            <div class="card-body">
+              <% if (product.description) { %>
+                <p><%= product.description %></p>
+              <% } else { %>
+                <p class="text-muted">No description available.</p>
+              <% } %>
+            </div>
+          </div>
+
+          <!-- Variants (if applicable) -->
+          <% if (product.hasVariants && product.variants && product.variants.length > 0) { %>
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Variants (<%= product.variants.length %>)</h3>
+            </div>
+            <div class="card-body table-responsive p-0">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>SKU</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                    <th>Default</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% product.variants.forEach(variant => { %>
+                  <tr>
+                    <td><%= variant.name %></td>
+                    <td><code><%= variant.sku %></code></td>
+                    <td>$<%= variant.price.toFixed(2) %></td>
+                    <td><%= variant.stock %></td>
+                    <td>
+                      <% if (variant.isDefault) { %>
+                        <i class="fas fa-check text-success"></i>
+                      <% } %>
+                    </td>
+                  </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <% } %>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-md-4">
+          <!-- Actions -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Actions</h3>
+            </div>
+            <div class="card-body">
+              <a href="/hub/products/<%= product.productId %>/edit" class="btn btn-primary btn-block mb-2">
+                <i class="fas fa-edit"></i> Edit Product
+              </a>
+
+              <% if (product.status === 'draft') { %>
+                <button onclick="publishProduct('<%= product.productId %>')" class="btn btn-success btn-block mb-2">
+                  <i class="fas fa-globe"></i> Publish
+                </button>
+              <% } else if (product.status === 'active') { %>
+                <button onclick="unpublishProduct('<%= product.productId %>')" class="btn btn-warning btn-block mb-2">
+                  <i class="fas fa-eye-slash"></i> Unpublish
+                </button>
+              <% } %>
+
+              <button onclick="deleteProduct('<%= product.productId %>', '<%= product.name %>')" class="btn btn-danger btn-block mb-2">
+                <i class="fas fa-trash"></i> Delete
+              </button>
+
+              <hr>
+
+              <a href="/hub/products" class="btn btn-secondary btn-block">
+                <i class="fas fa-arrow-left"></i> Back to Products
+              </a>
+            </div>
+          </div>
+
+          <!-- Quick Info -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Quick Info</h3>
+            </div>
+            <div class="card-body">
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item d-flex justify-content-between">
+                  <span>ID</span>
+                  <code><%= product.productId.substring(0, 8) %>...</code>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                  <span>Created</span>
+                  <span><%= new Date(product.createdAt).toLocaleDateString() %></span>
+                </li>
+                <% if (product.categoryId) { %>
+                <li class="list-group-item d-flex justify-content-between">
+                  <span>Category</span>
+                  <span><%= product.categoryId %></span>
+                </li>
+                <% } %>
+                <li class="list-group-item d-flex justify-content-between">
+                  <span>Has Variants</span>
+                  <span><%= product.hasVariants ? 'Yes' : 'No' %></span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<%- include("../partials/footer") %>
+
+<%- include("../partials/modals/confirm-delete") %>
+
+<script>
+function publishProduct(productId) {
+  if (confirm('Publish this product?')) {
+    fetch(`/hub/products/${productId}/publish`, { method: 'POST' })
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) location.reload();
+        else alert('Error: ' + data.message);
+      });
+  }
+}
+
+function unpublishProduct(productId) {
+  if (confirm('Unpublish this product?')) {
+    fetch(`/hub/products/${productId}/unpublish`, { method: 'POST' })
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) location.reload();
+        else alert('Error: ' + data.message);
+      });
+  }
+}
+
+function deleteProduct(productId, productName) {
+  const modal = document.getElementById('confirm-delete-modal');
+  const message = document.getElementById('confirm-delete-message');
+  const confirmBtn = document.getElementById('confirm-delete-btn');
+
+  message.textContent = `Are you sure you want to delete "${productName}"?`;
+  confirmBtn.onclick = () => {
+    fetch(`/hub/products/${productId}`, { method: 'DELETE' })
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) window.location.href = '/hub/products?success=Product deleted';
+        else alert('Error: ' + data.message);
+      });
+  };
+
+  $(modal).modal('show');
+}
+</script>

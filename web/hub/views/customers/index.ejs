@@ -1,0 +1,199 @@
+<%- include("../layout") %>
+
+<%- include("../partials/navbar") %>
+
+<%- include("../partials/sidebar") %>
+
+<!-- Content Wrapper -->
+<div class="content-wrapper">
+  <!-- Content Header -->
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0"><%= pageName %></h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="/hub">Home</a></li>
+            <li class="breadcrumb-item active"><%= pageName %></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <section class="content">
+    <div class="container-fluid">
+      <%- include("../partials/alerts") %>
+
+      <!-- Filters -->
+      <div class="card collapsed-card">
+        <div class="card-header">
+          <h3 class="card-title">Filters</h3>
+          <div class="card-tools">
+            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+              <i class="fas fa-plus"></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <form method="GET" class="row">
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="search">Search</label>
+                <input type="text" class="form-control" id="search" name="search" value="<%= filters.search %>" placeholder="Name, Email, Phone...">
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="form-group">
+                <label for="status">Status</label>
+                <select class="form-control" id="status" name="status">
+                  <option value="">All</option>
+                  <option value="active" <%= filters.status === 'active' ? 'selected' : '' %>>Active</option>
+                  <option value="inactive" <%= filters.status === 'inactive' ? 'selected' : '' %>>Inactive</option>
+                  <option value="verified" <%= filters.status === 'verified' ? 'selected' : '' %>>Verified</option>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="form-group">
+                <label for="orderBy">Sort By</label>
+                <select class="form-control" id="orderBy" name="orderBy">
+                  <option value="createdAt" <%= filters.orderBy === 'createdAt' ? 'selected' : '' %>>Date Registered</option>
+                  <option value="lastName" <%= filters.orderBy === 'lastName' ? 'selected' : '' %>>Last Name</option>
+                  <option value="email" <%= filters.orderBy === 'email' ? 'selected' : '' %>>Email</option>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-2">
+              <div class="form-group">
+                <label>&nbsp;</label>
+                <div>
+                  <button type="submit" class="btn btn-primary">Filter</button>
+                  <a href="/hub/customers" class="btn btn-secondary">Clear</a>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Customers Table -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Customers (<%= pagination.total %>)</h3>
+        </div>
+        <div class="card-body table-responsive p-0">
+          <table class="table table-hover text-nowrap">
+            <thead>
+              <tr>
+                <th>Customer</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Status</th>
+                <th>Verified</th>
+                <th>Registered</th>
+                <th>Last Login</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% customers.forEach(customer => { %>
+              <tr>
+                <td>
+                  <a href="/hub/customers/<%= customer.customerId %>">
+                    <strong><%= customer.firstName %> <%= customer.lastName %></strong>
+                  </a>
+                </td>
+                <td><%= customer.email %></td>
+                <td><%= customer.phone || '-' %></td>
+                <td>
+                  <span class="badge badge-<%= customer.isActive ? 'success' : 'secondary' %>">
+                    <%= customer.isActive ? 'Active' : 'Inactive' %>
+                  </span>
+                </td>
+                <td>
+                  <% if (customer.isVerified) { %>
+                    <i class="fas fa-check-circle text-success" title="Verified"></i>
+                  <% } else { %>
+                    <i class="fas fa-times-circle text-muted" title="Not Verified"></i>
+                  <% } %>
+                </td>
+                <td><%= new Date(customer.createdAt).toLocaleDateString() %></td>
+                <td>
+                  <% if (customer.lastLoginAt) { %>
+                    <%= new Date(customer.lastLoginAt).toLocaleDateString() %>
+                  <% } else { %>
+                    Never
+                  <% } %>
+                </td>
+                <td>
+                  <div class="btn-group">
+                    <a href="/hub/customers/<%= customer.customerId %>" class="btn btn-sm btn-info" title="View">
+                      <i class="fas fa-eye"></i>
+                    </a>
+                    <a href="/hub/customers/<%= customer.customerId %>/edit" class="btn btn-sm btn-primary" title="Edit">
+                      <i class="fas fa-edit"></i>
+                    </a>
+                    <% if (customer.isActive) { %>
+                      <button class="btn btn-sm btn-warning" onclick="deactivateCustomer('<%= customer.customerId %>')" title="Deactivate">
+                        <i class="fas fa-user-slash"></i>
+                      </button>
+                    <% } else { %>
+                      <button class="btn btn-sm btn-success" onclick="reactivateCustomer('<%= customer.customerId %>')" title="Reactivate">
+                        <i class="fas fa-user-check"></i>
+                      </button>
+                    <% } %>
+                  </div>
+                </td>
+              </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+        <!-- Pagination -->
+        <% if (pagination.pages > 1) { %>
+        <div class="card-footer">
+          <nav>
+            <ul class="pagination pagination-sm m-0">
+              <% for (let i = 1; i <= pagination.pages; i++) { %>
+                <li class="page-item <%= i === pagination.page ? 'active' : '' %>">
+                  <a class="page-link" href="?page=<%= i %>&search=<%= filters.search %>&status=<%= filters.status %>"><%= i %></a>
+                </li>
+              <% } %>
+            </ul>
+          </nav>
+        </div>
+        <% } %>
+      </div>
+    </div>
+  </section>
+</div>
+
+<%- include("../partials/footer") %>
+
+<script>
+function deactivateCustomer(customerId) {
+  if (confirm('Deactivate this customer?')) {
+    fetch(`/hub/customers/${customerId}/deactivate`, { method: 'POST' })
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) location.reload();
+        else alert('Error: ' + data.message);
+      });
+  }
+}
+
+function reactivateCustomer(customerId) {
+  if (confirm('Reactivate this customer?')) {
+    fetch(`/hub/customers/${customerId}/reactivate`, { method: 'POST' })
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) location.reload();
+        else alert('Error: ' + data.message);
+      });
+  }
+}
+</script>

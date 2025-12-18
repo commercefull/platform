@@ -1,0 +1,267 @@
+<%- include("../layout") %>
+
+<%- include("../partials/navbar") %>
+
+<%- include("../partials/sidebar") %>
+
+<!-- Content Wrapper -->
+<div class="content-wrapper">
+  <!-- Content Header -->
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0"><%= pageName %></h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="/hub">Home</a></li>
+            <li class="breadcrumb-item"><a href="/hub/orders">Orders</a></li>
+            <li class="breadcrumb-item active">#<%= order.orderNumber %></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <section class="content">
+    <div class="container-fluid">
+      <%- include("../partials/alerts") %>
+
+      <div class="row">
+        <!-- Order Info -->
+        <div class="col-md-8">
+          <!-- Order Details Card -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Order #<%= order.orderNumber %></h3>
+              <div class="card-tools">
+                <span class="badge badge-<%= 
+                  order.status === 'completed' ? 'success' :
+                  order.status === 'cancelled' ? 'danger' :
+                  order.status === 'pending' ? 'warning' : 'info' %>">
+                  <%= order.status.toUpperCase() %>
+                </span>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-6">
+                  <p><strong>Order Date:</strong> <%= new Date(order.orderDate).toLocaleString() %></p>
+                  <p><strong>Customer:</strong> <%= order.customerName || 'Guest' %></p>
+                  <p><strong>Email:</strong> <%= order.customerEmail %></p>
+                  <% if (order.customerPhone) { %>
+                    <p><strong>Phone:</strong> <%= order.customerPhone %></p>
+                  <% } %>
+                </div>
+                <div class="col-md-6">
+                  <p><strong>Payment:</strong> 
+                    <span class="badge badge-<%= order.paymentStatus === 'paid' ? 'success' : 'warning' %>">
+                      <%= order.paymentStatus %>
+                    </span>
+                  </p>
+                  <p><strong>Fulfillment:</strong> 
+                    <span class="badge badge-<%= order.fulfillmentStatus === 'fulfilled' ? 'success' : 'info' %>">
+                      <%= order.fulfillmentStatus %>
+                    </span>
+                  </p>
+                  <p><strong>Currency:</strong> <%= order.currencyCode %></p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Order Items -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Order Items (<%= order.totalItems %>)</h3>
+            </div>
+            <div class="card-body table-responsive p-0">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>SKU</th>
+                    <th>Qty</th>
+                    <th>Unit Price</th>
+                    <th>Discount</th>
+                    <th>Tax</th>
+                    <th>Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% order.items.forEach(item => { %>
+                  <tr>
+                    <td>
+                      <strong><%= item.name %></strong>
+                      <% if (item.description) { %>
+                        <br><small class="text-muted"><%= item.description %></small>
+                      <% } %>
+                    </td>
+                    <td><code><%= item.sku %></code></td>
+                    <td><%= item.quantity %></td>
+                    <td>$<%= item.unitPrice.toFixed(2) %></td>
+                    <td class="text-danger">-$<%= item.discountTotal.toFixed(2) %></td>
+                    <td>$<%= item.taxTotal.toFixed(2) %></td>
+                    <td><strong>$<%= item.lineTotal.toFixed(2) %></strong></td>
+                  </tr>
+                  <% }); %>
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <td colspan="6" class="text-right"><strong>Subtotal:</strong></td>
+                    <td>$<%= order.subtotal.toFixed(2) %></td>
+                  </tr>
+                  <tr>
+                    <td colspan="6" class="text-right">Discount:</td>
+                    <td class="text-danger">-$<%= order.discountTotal.toFixed(2) %></td>
+                  </tr>
+                  <tr>
+                    <td colspan="6" class="text-right">Tax:</td>
+                    <td>$<%= order.taxTotal.toFixed(2) %></td>
+                  </tr>
+                  <tr>
+                    <td colspan="6" class="text-right">Shipping:</td>
+                    <td>$<%= order.shippingTotal.toFixed(2) %></td>
+                  </tr>
+                  <tr class="table-active">
+                    <td colspan="6" class="text-right"><strong>Total:</strong></td>
+                    <td><strong>$<%= order.totalAmount.toFixed(2) %></strong></td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+
+          <!-- Addresses -->
+          <div class="row">
+            <% if (order.shippingAddress) { %>
+            <div class="col-md-6">
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title"><i class="fas fa-shipping-fast mr-2"></i>Shipping Address</h3>
+                </div>
+                <div class="card-body">
+                  <p><strong><%= order.shippingAddress.fullName %></strong></p>
+                  <% if (order.shippingAddress.company) { %>
+                    <p><%= order.shippingAddress.company %></p>
+                  <% } %>
+                  <p><%= order.shippingAddress.address1 %></p>
+                  <% if (order.shippingAddress.address2) { %>
+                    <p><%= order.shippingAddress.address2 %></p>
+                  <% } %>
+                  <p><%= order.shippingAddress.city %>, <%= order.shippingAddress.state %> <%= order.shippingAddress.postalCode %></p>
+                  <p><%= order.shippingAddress.country %></p>
+                  <% if (order.shippingAddress.phone) { %>
+                    <p><i class="fas fa-phone mr-1"></i><%= order.shippingAddress.phone %></p>
+                  <% } %>
+                </div>
+              </div>
+            </div>
+            <% } %>
+            <% if (order.billingAddress) { %>
+            <div class="col-md-6">
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title"><i class="fas fa-file-invoice mr-2"></i>Billing Address</h3>
+                </div>
+                <div class="card-body">
+                  <p><strong><%= order.billingAddress.fullName %></strong></p>
+                  <% if (order.billingAddress.company) { %>
+                    <p><%= order.billingAddress.company %></p>
+                  <% } %>
+                  <p><%= order.billingAddress.address1 %></p>
+                  <% if (order.billingAddress.address2) { %>
+                    <p><%= order.billingAddress.address2 %></p>
+                  <% } %>
+                  <p><%= order.billingAddress.city %>, <%= order.billingAddress.state %> <%= order.billingAddress.postalCode %></p>
+                  <p><%= order.billingAddress.country %></p>
+                </div>
+              </div>
+            </div>
+            <% } %>
+          </div>
+        </div>
+
+        <!-- Sidebar Actions -->
+        <div class="col-md-4">
+          <!-- Actions Card -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Actions</h3>
+            </div>
+            <div class="card-body">
+              <!-- Update Status -->
+              <form action="/hub/orders/<%= order.orderId %>/status" method="POST" class="mb-3">
+                <div class="form-group">
+                  <label>Update Status</label>
+                  <select name="status" class="form-control" required>
+                    <% orderStatuses.forEach(s => { %>
+                      <option value="<%= s %>" <%= order.status === s ? 'selected' : '' %>><%= s %></option>
+                    <% }); %>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Note (optional)</label>
+                  <input type="text" name="note" class="form-control" placeholder="Status change reason">
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Update Status</button>
+              </form>
+
+              <hr>
+
+              <!-- Quick Actions -->
+              <% if (order.status !== 'cancelled' && order.status !== 'refunded') { %>
+                <form action="/hub/orders/<%= order.orderId %>/cancel" method="POST" class="mb-2">
+                  <input type="hidden" name="reason" value="Cancelled by admin">
+                  <button type="submit" class="btn btn-danger btn-block" onclick="return confirm('Cancel this order?')">
+                    <i class="fas fa-times mr-1"></i>Cancel Order
+                  </button>
+                </form>
+              <% } %>
+
+              <% if (order.paymentStatus === 'paid' && order.status !== 'refunded') { %>
+                <a href="/hub/orders/<%= order.orderId %>/refund" class="btn btn-warning btn-block">
+                  <i class="fas fa-undo mr-1"></i>Process Refund
+                </a>
+              <% } %>
+
+              <a href="/hub/orders" class="btn btn-secondary btn-block mt-3">
+                <i class="fas fa-arrow-left mr-1"></i>Back to Orders
+              </a>
+            </div>
+          </div>
+
+          <!-- Customer Notes -->
+          <% if (order.customerNotes) { %>
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Customer Notes</h3>
+            </div>
+            <div class="card-body">
+              <p><%= order.customerNotes %></p>
+            </div>
+          </div>
+          <% } %>
+
+          <!-- Tags -->
+          <% if (order.tags && order.tags.length > 0) { %>
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Tags</h3>
+            </div>
+            <div class="card-body">
+              <% order.tags.forEach(tag => { %>
+                <span class="badge badge-info mr-1"><%= tag %></span>
+              <% }); %>
+            </div>
+          </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<%- include("../partials/footer") %>
