@@ -2,37 +2,55 @@
 <%- include("../partials/categories-navbar") %>
 
 <div class="container">
-  <div class="row">
-    <div class="col-md-8 m-auto">
-      <h1 class="mt-4 mb-4">Sign In Page</h1>
-      <!-- Flash message -->
-      <% if(errorMsg !=null && errorMsg.length>0) {%>
-      <div id="flash-msg" class="alert alert-danger">
-        <%=errorMsg %>
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card mt-5">
+        <div class="card-header">
+          <h4 class="mb-0">Sign In</h4>
+        </div>
+        <div class="card-body">
+          <!-- Flash messages -->
+          <% if (errorMsg) { %>
+          <div class="alert alert-danger">
+            <%= errorMsg %>
+          </div>
+          <% } %>
+          <% if (successMsg) { %>
+          <div class="alert alert-success">
+            <%= successMsg %>
+          </div>
+          <% } %>
+
+          <form action="/signin" method="POST">
+            <div class="form-group mb-3">
+              <label for="email">Email address</label>
+              <input type="email" class="form-control" name="email" id="email"
+                     value="<%= typeof email !== 'undefined' ? email : '' %>" required>
+            </div>
+            <div class="form-group mb-3">
+              <label for="password">Password</label>
+              <input type="password" class="form-control" name="password" id="password" required>
+            </div>
+
+            <input type="hidden" name="redirectTo" value="<%= redirectTo || '/' %>" />
+
+            <div class="form-group mb-3">
+              <button type="submit" class="btn btn-primary btn-block button-style w-100">
+                Sign In
+              </button>
+            </div>
+
+            <div class="text-center">
+              <p class="mb-0">
+                Don't have an account? <a href="/signup">Sign Up</a>
+              </p>
+              <p class="mb-0">
+                <a href="/forgot-password">Forgot your password?</a>
+              </p>
+            </div>
+          </form>
+        </div>
       </div>
-      <%}%>
-      <form action="/user/signin" method="POST">
-        <div class="form-group">
-          <label for="email">Email address</label>
-          <input type="email" class="form-control" name="email" id="email" />
-        </div>
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input
-            type="password"
-            class="form-control"
-            name="password"
-            id="password"
-          />
-        </div>
-        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-        <button type="submit" class="btn btn-primary button-style">
-          Sign In
-        </button>
-      </form>
-      <p class="mt-3">
-        Don't have an account? <a href="/user/signup"> Sign Up!</a>
-      </p>
     </div>
   </div>
 </div>

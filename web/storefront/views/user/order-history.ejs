@@ -1,0 +1,103 @@
+<%- include("../partials/header") %>
+<%- include("../partials/categories-navbar") %>
+
+<div class="container mt-4 mb-5">
+  <div class="row">
+    <div class="col-12">
+      <h1 class="mb-4">Order History</h1>
+
+      <!-- Filters -->
+      <div class="card mb-4">
+        <div class="card-body">
+          <form action="/orders" method="GET" class="row g-3">
+            <div class="col-md-4">
+              <label for="status" class="form-label">Filter by Status</label>
+              <select class="form-select" id="status" name="status">
+                <option value="all" <%= filters.status === 'all' || !filters.status ? 'selected' : '' %>>All Orders</option>
+                <option value="pending" <%= filters.status === 'pending' ? 'selected' : '' %>>Pending</option>
+                <option value="processing" <%= filters.status === 'processing' ? 'selected' : '' %>>Processing</option>
+                <option value="shipped" <%= filters.status === 'shipped' ? 'selected' : '' %>>Shipped</option>
+                <option value="delivered" <%= filters.status === 'delivered' ? 'selected' : '' %>>Delivered</option>
+                <option value="cancelled" <%= filters.status === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
+              </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+              <button type="submit" class="btn btn-primary">Filter</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <% if (orders && orders.length > 0) { %>
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead class="table-light">
+              <tr>
+                <th>Order #</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Items</th>
+                <th>Total</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% orders.forEach(order => { %>
+                <tr>
+                  <td>
+                    <a href="/orders/<%= order.orderId %>"><%= order.orderNumber %></a>
+                  </td>
+                  <td><%= new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) %></td>
+                  <td>
+                    <% 
+                      let statusClass = 'secondary';
+                      if (order.status === 'delivered') statusClass = 'success';
+                      else if (order.status === 'shipped') statusClass = 'info';
+                      else if (order.status === 'processing') statusClass = 'primary';
+                      else if (order.status === 'cancelled') statusClass = 'danger';
+                      else if (order.status === 'pending') statusClass = 'warning';
+                    %>
+                    <span class="badge bg-<%= statusClass %>"><%= order.status %></span>
+                  </td>
+                  <td><%= order.itemCount || (order.items ? order.items.length : 0) %> items</td>
+                  <td>$<%= order.total ? order.total.toFixed(2) : '0.00' %></td>
+                  <td>
+                    <a href="/orders/<%= order.orderId %>" class="btn btn-sm btn-outline-primary">View</a>
+                    <a href="/track/<%= order.orderNumber %>" class="btn btn-sm btn-outline-secondary">Track</a>
+                  </td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <% if (pagination.totalPages > 1) { %>
+          <nav aria-label="Order pagination">
+            <ul class="pagination justify-content-center">
+              <li class="page-item <%= !pagination.hasPrev ? 'disabled' : '' %>">
+                <a class="page-link" href="/orders?page=<%= pagination.currentPage - 1 %>&status=<%= filters.status || 'all' %>">Previous</a>
+              </li>
+              <% for (let i = 1; i <= pagination.totalPages; i++) { %>
+                <li class="page-item <%= pagination.currentPage === i ? 'active' : '' %>">
+                  <a class="page-link" href="/orders?page=<%= i %>&status=<%= filters.status || 'all' %>"><%= i %></a>
+                </li>
+              <% } %>
+              <li class="page-item <%= !pagination.hasNext ? 'disabled' : '' %>">
+                <a class="page-link" href="/orders?page=<%= pagination.currentPage + 1 %>&status=<%= filters.status || 'all' %>">Next</a>
+              </li>
+            </ul>
+          </nav>
+        <% } %>
+
+      <% } else { %>
+        <div class="alert alert-info">
+          <h5>No orders found</h5>
+          <p class="mb-0">You haven't placed any orders yet. <a href="/products">Start shopping</a> to see your orders here.</p>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<%- include("../partials/footer") %>

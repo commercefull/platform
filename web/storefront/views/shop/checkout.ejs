@@ -3,7 +3,7 @@
 <div class="container mt-4 mb-5">
   <!-- Flash messages -->
   <div class="row mt-3 mb-3">
-    <div class="col-md-8 m-auto">
+    <div class="col-md-12">
       <% if (errorMsg) { %>
       <div id="error" class="alert alert-danger">
         <%= errorMsg %>
@@ -11,47 +11,267 @@
       <% } else { %>
       <div id="error" class="alert alert-danger d-none"></div>
       <% } %>
+      <% if (successMsg) { %>
+      <div id="success" class="alert alert-success">
+        <%= successMsg %>
+      </div>
+      <% } else { %>
+      <div id="success" class="alert alert-success d-none"></div>
+      <% } %>
     </div>
   </div>
-  <div class="col-md-8 m-auto">
-    <!-- Checkout form -->
-    <form action="/checkout" method="POST" id="checkout-form">
-      <div class="row">
-        <div class="col-md-12">
-          <div class="form-group">
-            <label for="card-name">Card Holder Name</label>
-            <input type="text" id="card-name" class="form-control" required />
+
+  <% if (basket && basket.items && basket.items.length > 0) { %>
+  <div class="row">
+    <!-- Order Summary -->
+    <div class="col-md-4 order-md-2 mb-4">
+      <h4 class="d-flex justify-content-between align-items-center mb-3">
+        <span class="text-muted">Your cart</span>
+        <span class="badge badge-secondary badge-pill"><%= basket.items.length %></span>
+      </h4>
+      <ul class="list-group mb-3">
+        <% basket.items.forEach(item => { %>
+        <li class="list-group-item d-flex justify-content-between lh-condensed">
+          <div>
+            <h6 class="my-0"><%= item.name %></h6>
+            <small class="text-muted">Qty: <%= item.quantity %></small>
+          </div>
+          <span class="text-muted">$<%= (parseFloat(item.price) * item.quantity).toFixed(2) %></span>
+        </li>
+        <% }) %>
+        <li class="list-group-item d-flex justify-content-between">
+          <span>Subtotal</span>
+          <strong>$<%= totals.subtotal %></strong>
+        </li>
+        <li class="list-group-item d-flex justify-content-between">
+          <span>Tax</span>
+          <strong>$<%= totals.tax %></strong>
+        </li>
+        <li class="list-group-item d-flex justify-content-between">
+          <span>Shipping</span>
+          <strong>$<%= totals.shipping %></strong>
+        </li>
+        <li class="list-group-item d-flex justify-content-between bg-light">
+          <div class="text-success">
+            <h6 class="my-0">Total</h6>
+          </div>
+          <span class="text-success"><strong>$<%= totals.total %></strong></span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Checkout Form -->
+    <div class="col-md-8 order-md-1">
+      <h4 class="mb-3">Billing address</h4>
+      <form action="/checkout" method="POST" id="checkout-form">
+        <!-- Customer Information -->
+        <% if (customer) { %>
+        <div class="mb-3">
+          <label class="form-label">Customer</label>
+          <div class="form-control-plaintext">
+            <%= customer.firstName %> <%= customer.lastName %> (<%= customer.email %>)
           </div>
         </div>
-        <div class="col-md-12">
-          <div class="form-group">
-            <label for="address">Address</label>
-            <input
-              type="text"
-              id="address"
-              class="form-control"
-              required
-              name="address"
-            />
+        <% } %>
+
+        <!-- Billing Address -->
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="billingFirstName">First name</label>
+            <input type="text" class="form-control" id="billingFirstName" name="billingFirstName"
+                   value="<%= customer ? customer.firstName : '' %>" required>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="billingLastName">Last name</label>
+            <input type="text" class="form-control" id="billingLastName" name="billingLastName"
+                   value="<%= customer ? customer.lastName : '' %>" required>
           </div>
         </div>
-        <div class="col-md-12">
-          <label for="card-element">Card Information</label>
-          <!-- A Stripe Element will be inserted here. -->
-          <div id="card-element" class="StripeElement"></div>
-          <!-- Used to display form errors. -->
-          <div id="card-errors" role="alert" class="text-danger mb-3"></div>
+
+        <div class="mb-3">
+          <label for="billingEmail">Email</label>
+          <input type="email" class="form-control" id="billingEmail" name="billingEmail"
+                 value="<%= customer ? customer.email : '' %>" required>
         </div>
-        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-      </div>
-      <button id="submit-btn" type="submit" class="btn btn-dark button-style">
-        Buy now
-      </button>
-    </form>
+
+        <div class="mb-3">
+          <label for="billingAddress">Address</label>
+          <input type="text" class="form-control" id="billingAddress" name="billingAddress" required>
+        </div>
+
+        <div class="row">
+          <div class="col-md-5 mb-3">
+            <label for="billingCity">City</label>
+            <input type="text" class="form-control" id="billingCity" name="billingCity" required>
+          </div>
+          <div class="col-md-4 mb-3">
+            <label for="billingState">State</label>
+            <input type="text" class="form-control" id="billingState" name="billingState" required>
+          </div>
+          <div class="col-md-3 mb-3">
+            <label for="billingZip">Zip</label>
+            <input type="text" class="form-control" id="billingZip" name="billingZip" required>
+          </div>
+        </div>
+
+        <!-- Shipping Address (same as billing by default) -->
+        <hr class="mb-4">
+        <div class="custom-control custom-checkbox">
+          <input type="checkbox" class="custom-control-input" id="sameAddress" checked>
+          <label class="custom-control-label" for="sameAddress">Shipping address is the same as billing address</label>
+        </div>
+
+        <div id="shippingAddress" style="display: none;">
+          <hr class="mb-4">
+          <h4 class="mb-3">Shipping address</h4>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="shippingFirstName">First name</label>
+              <input type="text" class="form-control" id="shippingFirstName" name="shippingFirstName">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="shippingLastName">Last name</label>
+              <input type="text" class="form-control" id="shippingLastName" name="shippingLastName">
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="shippingAddress">Address</label>
+            <input type="text" class="form-control" id="shippingAddress" name="shippingAddress">
+          </div>
+
+          <div class="row">
+            <div class="col-md-5 mb-3">
+              <label for="shippingCity">City</label>
+              <input type="text" class="form-control" id="shippingCity" name="shippingCity">
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="shippingState">State</label>
+              <input type="text" class="form-control" id="shippingState" name="shippingState">
+            </div>
+            <div class="col-md-3 mb-3">
+              <label for="shippingZip">Zip</label>
+              <input type="text" class="form-control" id="shippingZip" name="shippingZip">
+            </div>
+          </div>
+        </div>
+
+        <!-- Shipping Method -->
+        <hr class="mb-4">
+        <h4 class="mb-3">Shipping method</h4>
+        <% shippingMethods.forEach(method => { %>
+        <div class="custom-control custom-radio">
+          <input id="shipping-<%= method.shippingMethodId %>" name="shippingMethodId" type="radio"
+                 class="custom-control-input" value="<%= method.shippingMethodId %>"
+                 <%= shippingMethods.indexOf(method) === 0 ? 'checked' : '' %> required>
+          <label class="custom-control-label" for="shipping-<%= method.shippingMethodId %>">
+            <%= method.name %> - $<%= parseFloat(method.cost).toFixed(2) %>
+          </label>
+        </div>
+        <% }) %>
+
+        <!-- Payment Method -->
+        <hr class="mb-4">
+        <h4 class="mb-3">Payment</h4>
+        <div class="d-block my-3">
+          <div class="custom-control custom-radio">
+            <input id="credit" name="paymentMethod" type="radio" class="custom-control-input" value="credit_card" checked required>
+            <label class="custom-control-label" for="credit">Credit card</label>
+          </div>
+          <div class="custom-control custom-radio">
+            <input id="paypal" name="paymentMethod" type="radio" class="custom-control-input" value="paypal" required>
+            <label class="custom-control-label" for="paypal">PayPal</label>
+          </div>
+        </div>
+
+        <!-- Payment Form (Credit Card) -->
+        <div id="credit-card-form">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="cc-name">Name on card</label>
+              <input type="text" class="form-control" id="cc-name" placeholder="" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="cc-number">Credit card number</label>
+              <input type="text" class="form-control" id="cc-number" placeholder="" required>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-3 mb-3">
+              <label for="cc-expiration">Expiration</label>
+              <input type="text" class="form-control" id="cc-expiration" placeholder="MM/YY" required>
+            </div>
+            <div class="col-md-3 mb-3">
+              <label for="cc-cvv">CVV</label>
+              <input type="text" class="form-control" id="cc-cvv" placeholder="" required>
+            </div>
+          </div>
+        </div>
+
+        <!-- PayPal Placeholder -->
+        <div id="paypal-form" style="display: none;">
+          <p>You will be redirected to PayPal to complete your payment.</p>
+        </div>
+
+        <!-- Special Instructions -->
+        <hr class="mb-4">
+        <div class="mb-3">
+          <label for="specialInstructions">Special Instructions (Optional)</label>
+          <textarea class="form-control" id="specialInstructions" name="specialInstructions" rows="3"
+                    placeholder="Any special delivery instructions..."></textarea>
+        </div>
+
+        <button class="btn btn-primary btn-lg btn-block" type="submit" id="checkout-btn">
+          Complete Order - $<%= totals.total %>
+        </button>
+      </form>
+    </div>
   </div>
+  <% } else { %>
+  <div class="row">
+    <div class="col-md-12 text-center">
+      <div class="alert alert-warning">
+        <h4>No items in cart</h4>
+        <p>You need to add items to your cart before you can checkout.</p>
+        <a href="/products" class="btn btn-primary">Continue Shopping</a>
+      </div>
+    </div>
+  </div>
+  <% } %>
 </div>
 
-<script type="text/javascript" src="https://js.stripe.com/v3/"></script>
-<script type="text/javascript" src="javascripts/checkout.js"></script>
+<script>
+// Toggle shipping address visibility
+document.getElementById('sameAddress').addEventListener('change', function() {
+  const shippingSection = document.getElementById('shippingAddress');
+  shippingSection.style.display = this.checked ? 'none' : 'block';
+
+  // Copy billing to shipping if same address
+  if (this.checked) {
+    document.getElementById('shippingFirstName').value = document.getElementById('billingFirstName').value;
+    document.getElementById('shippingLastName').value = document.getElementById('billingLastName').value;
+    document.getElementById('shippingAddress').value = document.getElementById('billingAddress').value;
+    document.getElementById('shippingCity').value = document.getElementById('billingCity').value;
+    document.getElementById('shippingState').value = document.getElementById('billingState').value;
+    document.getElementById('shippingZip').value = document.getElementById('billingZip').value;
+  }
+});
+
+// Toggle payment forms
+document.querySelectorAll('input[name="paymentMethod"]').forEach(radio => {
+  radio.addEventListener('change', function() {
+    const creditForm = document.getElementById('credit-card-form');
+    const paypalForm = document.getElementById('paypal-form');
+
+    if (this.value === 'credit_card') {
+      creditForm.style.display = 'block';
+      paypalForm.style.display = 'none';
+    } else {
+      creditForm.style.display = 'none';
+      paypalForm.style.display = 'block';
+    }
+  });
+});
+</script>
 
 <%- include("../partials/footer") %>

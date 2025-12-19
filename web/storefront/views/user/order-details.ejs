@@ -1,0 +1,173 @@
+<%- include("../partials/header") %>
+<%- include("../partials/categories-navbar") %>
+
+<div class="container mt-4 mb-5">
+  <div class="row">
+    <div class="col-12">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="/">Home</a></li>
+          <li class="breadcrumb-item"><a href="/orders">Orders</a></li>
+          <li class="breadcrumb-item active" aria-current="page"><%= order.orderNumber %></li>
+        </ol>
+      </nav>
+
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Order <%= order.orderNumber %></h1>
+        <a href="/track/<%= order.orderNumber %>" class="btn btn-outline-primary">Track Order</a>
+      </div>
+
+      <div class="row">
+        <!-- Order Summary -->
+        <div class="col-md-8">
+          <div class="card mb-4">
+            <div class="card-header">
+              <h5 class="mb-0">Order Items</h5>
+            </div>
+            <div class="card-body">
+              <% if (order.items && order.items.length > 0) { %>
+                <div class="table-responsive">
+                  <table class="table">
+                    <thead>
+                      <tr>
+                        <th>Product</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Total</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <% order.items.forEach(item => { %>
+                        <tr>
+                          <td>
+                            <strong><%= item.name %></strong>
+                            <% if (item.sku) { %><br><small class="text-muted">SKU: <%= item.sku %></small><% } %>
+                          </td>
+                          <td><%= item.quantity %></td>
+                          <td>$<%= (item.unitPrice || item.price || 0).toFixed(2) %></td>
+                          <td>$<%= (item.lineTotal || (item.unitPrice || item.price || 0) * item.quantity).toFixed(2) %></td>
+                        </tr>
+                      <% }); %>
+                    </tbody>
+                  </table>
+                </div>
+              <% } else { %>
+                <p class="text-muted">No items found</p>
+              <% } %>
+            </div>
+          </div>
+
+          <!-- Addresses -->
+          <div class="row">
+            <div class="col-md-6">
+              <div class="card mb-4">
+                <div class="card-header">
+                  <h6 class="mb-0">Shipping Address</h6>
+                </div>
+                <div class="card-body">
+                  <% if (order.shippingAddress) { %>
+                    <address class="mb-0">
+                      <%= order.shippingAddress.firstName %> <%= order.shippingAddress.lastName %><br>
+                      <%= order.shippingAddress.address1 || order.shippingAddress.addressLine1 %><br>
+                      <% if (order.shippingAddress.address2 || order.shippingAddress.addressLine2) { %>
+                        <%= order.shippingAddress.address2 || order.shippingAddress.addressLine2 %><br>
+                      <% } %>
+                      <%= order.shippingAddress.city %>, <%= order.shippingAddress.state %> <%= order.shippingAddress.postalCode %><br>
+                      <%= order.shippingAddress.country %>
+                    </address>
+                  <% } else { %>
+                    <p class="text-muted mb-0">No shipping address</p>
+                  <% } %>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="card mb-4">
+                <div class="card-header">
+                  <h6 class="mb-0">Billing Address</h6>
+                </div>
+                <div class="card-body">
+                  <% if (order.billingAddress) { %>
+                    <address class="mb-0">
+                      <%= order.billingAddress.firstName %> <%= order.billingAddress.lastName %><br>
+                      <%= order.billingAddress.address1 || order.billingAddress.addressLine1 %><br>
+                      <% if (order.billingAddress.address2 || order.billingAddress.addressLine2) { %>
+                        <%= order.billingAddress.address2 || order.billingAddress.addressLine2 %><br>
+                      <% } %>
+                      <%= order.billingAddress.city %>, <%= order.billingAddress.state %> <%= order.billingAddress.postalCode %><br>
+                      <%= order.billingAddress.country %>
+                    </address>
+                  <% } else { %>
+                    <p class="text-muted mb-0">Same as shipping</p>
+                  <% } %>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Order Info Sidebar -->
+        <div class="col-md-4">
+          <div class="card mb-4">
+            <div class="card-header">
+              <h5 class="mb-0">Order Summary</h5>
+            </div>
+            <div class="card-body">
+              <dl class="row mb-0">
+                <dt class="col-6">Order Date:</dt>
+                <dd class="col-6"><%= new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) %></dd>
+
+                <dt class="col-6">Status:</dt>
+                <dd class="col-6">
+                  <% 
+                    let statusClass = 'secondary';
+                    if (order.status === 'delivered') statusClass = 'success';
+                    else if (order.status === 'shipped') statusClass = 'info';
+                    else if (order.status === 'processing') statusClass = 'primary';
+                    else if (order.status === 'cancelled') statusClass = 'danger';
+                    else if (order.status === 'pending') statusClass = 'warning';
+                  %>
+                  <span class="badge bg-<%= statusClass %>"><%= order.status %></span>
+                </dd>
+
+                <dt class="col-6">Payment:</dt>
+                <dd class="col-6">
+                  <span class="badge bg-<%= order.paymentStatus === 'paid' ? 'success' : 'warning' %>">
+                    <%= order.paymentStatus || 'pending' %>
+                  </span>
+                </dd>
+              </dl>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0">Order Totals</h5>
+            </div>
+            <div class="card-body">
+              <dl class="row mb-0">
+                <dt class="col-6">Subtotal:</dt>
+                <dd class="col-6 text-end">$<%= order.totals ? order.totals.subtotal : '0.00' %></dd>
+
+                <dt class="col-6">Shipping:</dt>
+                <dd class="col-6 text-end">$<%= order.totals ? order.totals.shipping : '0.00' %></dd>
+
+                <dt class="col-6">Tax:</dt>
+                <dd class="col-6 text-end">$<%= order.totals ? order.totals.tax : '0.00' %></dd>
+
+                <dt class="col-6 border-top pt-2"><strong>Total:</strong></dt>
+                <dd class="col-6 text-end border-top pt-2"><strong>$<%= order.totals ? order.totals.total : '0.00' %></strong></dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4">
+        <a href="/orders" class="btn btn-secondary">Back to Orders</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include("../partials/footer") %>

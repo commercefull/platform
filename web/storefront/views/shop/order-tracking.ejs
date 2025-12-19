@@ -1,0 +1,178 @@
+<%- include("../partials/header") %>
+<%- include("../partials/categories-navbar") %>
+
+<div class="container mt-4 mb-5">
+  <div class="row justify-content-center">
+    <div class="col-md-10">
+      <h1 class="mb-4">Track Order <%= order.orderNumber %></h1>
+
+      <div class="row">
+        <!-- Order Timeline -->
+        <div class="col-md-8">
+          <div class="card mb-4">
+            <div class="card-header">
+              <h5 class="mb-0">Order Progress</h5>
+            </div>
+            <div class="card-body">
+              <div class="timeline">
+                <% if (order.timeline && order.timeline.length > 0) { %>
+                  <% order.timeline.forEach((event, index) => { %>
+                    <div class="timeline-item <%= event.completed ? 'completed' : '' %>">
+                      <div class="timeline-marker <%= event.completed ? 'bg-success' : 'bg-secondary' %>">
+                        <% if (event.completed) { %>
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="white" viewBox="0 0 16 16">
+                            <path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z"/>
+                          </svg>
+                        <% } %>
+                      </div>
+                      <div class="timeline-content">
+                        <h6 class="mb-1"><%= event.title %></h6>
+                        <p class="text-muted mb-1"><%= event.description %></p>
+                        <% if (event.date) { %>
+                          <small class="text-muted">
+                            <%= new Date(event.date).toLocaleDateString('en-US', { 
+                              month: 'short', 
+                              day: 'numeric',
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            }) %>
+                          </small>
+                        <% } %>
+                      </div>
+                    </div>
+                  <% }); %>
+                <% } else { %>
+                  <p class="text-muted">No tracking information available yet.</p>
+                <% } %>
+              </div>
+            </div>
+          </div>
+
+          <!-- Shipping Info -->
+          <% if (order.trackingNumber) { %>
+            <div class="card mb-4">
+              <div class="card-header">
+                <h5 class="mb-0">Shipping Information</h5>
+              </div>
+              <div class="card-body">
+                <dl class="row mb-0">
+                  <dt class="col-sm-4">Carrier:</dt>
+                  <dd class="col-sm-8"><%= order.carrier || 'Standard Shipping' %></dd>
+
+                  <dt class="col-sm-4">Tracking Number:</dt>
+                  <dd class="col-sm-8">
+                    <% if (order.trackingUrl) { %>
+                      <a href="<%= order.trackingUrl %>" target="_blank"><%= order.trackingNumber %></a>
+                    <% } else { %>
+                      <%= order.trackingNumber %>
+                    <% } %>
+                  </dd>
+                </dl>
+              </div>
+            </div>
+          <% } %>
+        </div>
+
+        <!-- Order Summary Sidebar -->
+        <div class="col-md-4">
+          <div class="card mb-4">
+            <div class="card-header">
+              <h5 class="mb-0">Order Summary</h5>
+            </div>
+            <div class="card-body">
+              <dl class="row mb-0">
+                <dt class="col-6">Order #:</dt>
+                <dd class="col-6"><%= order.orderNumber %></dd>
+
+                <dt class="col-6">Date:</dt>
+                <dd class="col-6"><%= new Date(order.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></dd>
+
+                <dt class="col-6">Status:</dt>
+                <dd class="col-6">
+                  <% 
+                    let statusClass = 'secondary';
+                    if (order.status === 'delivered') statusClass = 'success';
+                    else if (order.status === 'shipped') statusClass = 'info';
+                    else if (order.status === 'processing') statusClass = 'primary';
+                    else if (order.status === 'cancelled') statusClass = 'danger';
+                    else if (order.status === 'pending') statusClass = 'warning';
+                  %>
+                  <span class="badge bg-<%= statusClass %>"><%= order.status %></span>
+                </dd>
+
+                <% if (order.totals) { %>
+                  <dt class="col-6 border-top pt-2 mt-2">Total:</dt>
+                  <dd class="col-6 border-top pt-2 mt-2"><strong>$<%= order.totals.total %></strong></dd>
+                <% } %>
+              </dl>
+            </div>
+          </div>
+
+          <% if (order.shippingAddress) { %>
+            <div class="card mb-4">
+              <div class="card-header">
+                <h6 class="mb-0">Shipping To</h6>
+              </div>
+              <div class="card-body">
+                <address class="mb-0">
+                  <%= order.shippingAddress.firstName %> <%= order.shippingAddress.lastName %><br>
+                  <%= order.shippingAddress.address1 || order.shippingAddress.addressLine1 %><br>
+                  <% if (order.shippingAddress.address2 || order.shippingAddress.addressLine2) { %>
+                    <%= order.shippingAddress.address2 || order.shippingAddress.addressLine2 %><br>
+                  <% } %>
+                  <%= order.shippingAddress.city %>, <%= order.shippingAddress.state %> <%= order.shippingAddress.postalCode %><br>
+                  <%= order.shippingAddress.country %>
+                </address>
+              </div>
+            </div>
+          <% } %>
+
+          <div class="d-grid gap-2">
+            <% if (user) { %>
+              <a href="/orders/<%= order.orderId %>" class="btn btn-outline-primary">View Full Order</a>
+            <% } %>
+            <a href="/contact-us" class="btn btn-outline-secondary">Need Help?</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.timeline {
+  position: relative;
+  padding-left: 30px;
+}
+.timeline-item {
+  position: relative;
+  padding-bottom: 20px;
+  border-left: 2px solid #dee2e6;
+  padding-left: 20px;
+  margin-left: 10px;
+}
+.timeline-item:last-child {
+  border-left: 2px solid transparent;
+  padding-bottom: 0;
+}
+.timeline-item.completed {
+  border-left-color: #198754;
+}
+.timeline-marker {
+  position: absolute;
+  left: -11px;
+  top: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.timeline-content {
+  padding-top: 0;
+}
+</style>
+
+<%- include("../partials/footer") %>

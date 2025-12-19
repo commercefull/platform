@@ -1,55 +1,156 @@
 <%- include("../partials/header") %>
 <%- include("../partials/categories-navbar") %>
 
-<div class="container">
+<div class="container mt-4 mb-5">
   <!-- Flash messages -->
-      <div class="row mt-3 mb-3">
-        <div class="col-md-8 m-auto">
-          <% if (successMsg) { %>
-          <div id="success" class="alert alert-success">
-            <%= successMsg %>
-          </div>
-          <% } else { %>
-          <div id="success" class="alert alert-success d-none"></div>
-          <% } %>
-        </div>
-        <div class="col-md-8 m-auto">
-          <% if (errorMsg) { %>
-          <div id="error" class="alert alert-danger">
-            <%= errorMsg %>
-          </div>
-          <% } else { %>
-          <div id="error" class="alert alert-danger d-none"></div>
-          <% } %>
-        </div>
+  <div class="row mt-3 mb-3">
+    <div class="col-md-12">
+      <% if (successMsg) { %>
+      <div id="success" class="alert alert-success">
+        <%= successMsg %>
       </div>
-  <!-- User's orders -->
-  <div class="row mt-4">
-    <div class="col-md-8 m-auto">
-      <% if (orders != null && orders.length > 0) { %>
-      <h3>My orders</h3>
-      <% orders.forEach( order => { %>
-      <div class="card m-3">
+      <% } %>
+      <% if (errorMsg) { %>
+      <div id="error" class="alert alert-danger">
+        <%= errorMsg %>
+      </div>
+      <% } %>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Profile Information -->
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header">
+          <h4 class="mb-0">My Profile</h4>
+        </div>
         <div class="card-body">
-          <p class="card-text ">
-            <ul class="list-group">
-              <% order.cart.items.forEach( item => { %>
-              <li class="list-group-item d-flex justify-content-between align-items-center">
-                <%= item.title %> | <%= item.qty %> Units
-                <span class="badge badge-info badge-pill"><%= item.price %></span>
-              </li>
-              <%}) %>
-            </ul>
-          </p>
-        </div>
-        <div class="card-footer">
-          <strong>Total Price: $<%= order.cart.totalCost %></strong>
+          <form action="/profile" method="POST">
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="firstName">First Name</label>
+                <input type="text" class="form-control" id="firstName" name="firstName"
+                       value="<%= customer ? customer.firstName : '' %>" required>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="lastName">Last Name</label>
+                <input type="text" class="form-control" id="lastName" name="lastName"
+                       value="<%= customer ? customer.lastName : '' %>" required>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="email">Email Address</label>
+              <input type="email" class="form-control" id="email" name="email"
+                     value="<%= customer ? customer.email : '' %>" readonly>
+              <small class="form-text text-muted">Email cannot be changed. Contact support if needed.</small>
+            </div>
+
+            <div class="mb-3">
+              <label for="phone">Phone Number</label>
+              <input type="tel" class="form-control" id="phone" name="phone"
+                     value="<%= customer ? customer.phone : '' %>">
+            </div>
+
+            <!-- Marketing Preferences -->
+            <hr>
+            <h5>Email Preferences</h5>
+
+            <div class="form-check mb-3">
+              <input class="form-check-input" type="checkbox" name="acceptsMarketing" id="acceptsMarketing"
+                     <%= customer && customer.acceptsMarketing ? 'checked' : '' %>>
+              <label class="form-check-label" for="acceptsMarketing">
+                I would like to receive marketing emails and newsletters
+              </label>
+            </div>
+
+            <div class="form-check mb-3">
+              <input class="form-check-input" type="checkbox" name="acceptsAnalytics" id="acceptsAnalytics"
+                     <%= customer && customer.acceptsAnalytics ? 'checked' : '' %>>
+              <label class="form-check-label" for="acceptsAnalytics">
+                I agree to analytics tracking for improved user experience
+              </label>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Update Profile</button>
+          </form>
         </div>
       </div>
-      <%}) %>
-      <%} else { %>
-        <h3 class="text-center" >You have not made any orders yet</h3>
-      <%} %>
+
+      <!-- Change Password -->
+      <div class="card mt-4">
+        <div class="card-header">
+          <h4 class="mb-0">Change Password</h4>
+        </div>
+        <div class="card-body">
+          <form action="/profile/change-password" method="POST">
+            <div class="mb-3">
+              <label for="currentPassword">Current Password</label>
+              <input type="password" class="form-control" id="currentPassword" name="currentPassword" required>
+            </div>
+
+            <div class="mb-3">
+              <label for="newPassword">New Password</label>
+              <input type="password" class="form-control" id="newPassword" name="newPassword" required
+                     minlength="8" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}">
+              <small class="form-text text-muted">
+                Must be at least 8 characters with uppercase, lowercase, and number.
+              </small>
+            </div>
+
+            <div class="mb-3">
+              <label for="confirmPassword">Confirm New Password</label>
+              <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
+            </div>
+
+            <button type="submit" class="btn btn-secondary">Change Password</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Account Summary -->
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">Account Summary</h5>
+        </div>
+        <div class="card-body">
+          <p><strong>Member since:</strong><br>
+          <%= customer && customer.createdAt ? new Date(customer.createdAt).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          }) : 'N/A' %></p>
+
+          <p><strong>Account Status:</strong><br>
+          <span class="badge badge-success">Active</span></p>
+
+          <hr>
+          <div class="d-grid gap-2">
+            <a href="/orders" class="btn btn-outline-primary">View Order History</a>
+            <form action="/signout" method="POST" class="d-inline">
+              <button type="submit" class="btn btn-outline-danger btn-block">Sign Out</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Links -->
+      <div class="card mt-3">
+        <div class="card-header">
+          <h6 class="mb-0">Quick Links</h6>
+        </div>
+        <div class="card-body">
+          <ul class="list-unstyled">
+            <li><a href="/basket">Shopping Cart</a></li>
+            <li><a href="/orders">Order History</a></li>
+            <li><a href="/profile">Account Settings</a></li>
+            <li><a href="/contact-us">Contact Support</a></li>
+          </ul>
+        </div>
+      </div>
     </div>
   </div>
 </div>

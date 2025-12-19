@@ -15,6 +15,8 @@ export interface ProductFilters {
   categoryId?: string;
   brandId?: string;
   merchantId?: string;
+  businessId?: string;
+  storeId?: string;
   isFeatured?: boolean;
   isVirtual?: boolean;
   hasVariants?: boolean;
@@ -54,6 +56,9 @@ export interface ProductRepository {
   findByCategory(categoryId: string, pagination?: PaginationOptions): Promise<PaginatedResult<Product>>;
   findByBrand(brandId: string, pagination?: PaginationOptions): Promise<PaginatedResult<Product>>;
   findByMerchant(merchantId: string, pagination?: PaginationOptions): Promise<PaginatedResult<Product>>;
+  findByBusiness(businessId: string, pagination?: PaginationOptions): Promise<PaginatedResult<Product>>;
+  findByStore(storeId: string, pagination?: PaginationOptions): Promise<PaginatedResult<Product>>;
+  findByBusinessAndStore(businessId: string, storeId: string, pagination?: PaginationOptions): Promise<PaginatedResult<Product>>;
   findFeatured(pagination?: PaginationOptions): Promise<PaginatedResult<Product>>;
   findRelated(productId: string, limit?: number): Promise<Product[]>;
   search(query: string, filters?: ProductFilters, pagination?: PaginationOptions): Promise<PaginatedResult<Product>>;

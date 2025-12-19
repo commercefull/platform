@@ -26,7 +26,9 @@ export interface ProductProps {
   productTypeId: string;
   categoryId?: string;
   brandId?: string;
-  merchantId?: string;
+  merchantId?: string;  // For marketplace products owned by merchants
+  businessId?: string;  // For multi-store products owned by businesses
+  storeId?: string;     // For store-specific product overrides
   status: ProductStatus;
   visibility: ProductVisibility;
   price: Price;
@@ -75,6 +77,8 @@ export class Product {
     categoryId?: string;
     brandId?: string;
     merchantId?: string;
+    businessId?: string;
+    storeId?: string;
     basePrice?: number;
     salePrice?: number;
     cost?: number;
@@ -107,6 +111,11 @@ export class Product {
     const now = new Date();
     const slug = props.slug || Product.generateSlug(props.name);
 
+    // Validate ownership - products must be owned by either merchant or business
+    if (!props.merchantId && !props.businessId) {
+      throw new Error('Product must be owned by either a merchant or business');
+    }
+
     return new Product({
       productId: props.productId,
       name: props.name,
@@ -118,6 +127,8 @@ export class Product {
       categoryId: props.categoryId,
       brandId: props.brandId,
       merchantId: props.merchantId,
+      businessId: props.businessId,
+      storeId: props.storeId,
       status: ProductStatus.DRAFT,
       visibility: ProductVisibility.HIDDEN,
       price: Price.create(
@@ -173,6 +184,12 @@ export class Product {
   get categoryId(): string | undefined { return this.props.categoryId; }
   get brandId(): string | undefined { return this.props.brandId; }
   get merchantId(): string | undefined { return this.props.merchantId; }
+  get businessId(): string | undefined { return this.props.businessId; }
+  get storeId(): string | undefined { return this.props.storeId; }
+  get ownerId(): string { return this.props.merchantId || this.props.businessId!; }
+  get isMerchantOwned(): boolean { return !!this.props.merchantId; }
+  get isBusinessOwned(): boolean { return !!this.props.businessId; }
+  get isStoreSpecific(): boolean { return !!this.props.storeId; }
   get status(): ProductStatus { return this.props.status; }
   get visibility(): ProductVisibility { return this.props.visibility; }
   get price(): Price { return this.props.price; }
@@ -451,6 +468,12 @@ export class Product {
       categoryId: this.props.categoryId,
       brandId: this.props.brandId,
       merchantId: this.props.merchantId,
+      businessId: this.props.businessId,
+      storeId: this.props.storeId,
+      ownerId: this.ownerId,
+      isMerchantOwned: this.isMerchantOwned,
+      isBusinessOwned: this.isBusinessOwned,
+      isStoreSpecific: this.isStoreSpecific,
       status: this.props.status,
       visibility: this.props.visibility,
       price: this.props.price.toJSON(),

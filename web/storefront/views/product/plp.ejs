@@ -30,18 +30,18 @@
   <div class="text-center hero-container">
     <img
       class="d-block w-100 hero-image"
-      src="/images/banner-all-products.jpg"
+      src="/storefront/images/banner-all-products.jpg"
     />
     <div class="hero-text">
       <h1><%=pageName%></h1>
     </div>
   </div>
   <%} else {%> <%categories.forEach( category => {%> <%if(pageName ==
-  category.title){%>
+  category.name){%>
   <div class="text-center hero-container">
     <img
       class="d-block w-100 hero-image"
-      src="/images/banner-<%=category.slug%>.jpg"
+      src="/storefront/images/banner-<%=category.slug%>.jpg"
     />
     <div class="hero-text">
       <h1><%=pageName%></h1>
@@ -57,22 +57,22 @@
       <div class="single-product d-flex flex-column h-100">
         <a
           class="title-link"
-          href="/products/<%=product.category.slug%>/<%=product._id%>"
+          href="/products/<%=product.categorySlug || 'general'%>/<%=product.productId%>"
         >
-          <img src="<%= product.imagePath %>" alt="Bag" class="img-fluid"
+          <img src="<%= product.images && product.images.length > 0 ? product.images[0] : '/storefront/images/placeholder.jpg' %>" alt="<%= product.name %>" class="img-fluid"
         /></a>
         <div class="product-info">
           <a
             class="title-link"
-            href="/products/<%=product.category.slug%>/<%=product._id%>"
+            href="/products/<%=product.categorySlug || 'general'%>/<%=product.productId%>"
           >
-            <h6 class="mt-2 mb-2"><%= product.title %></h6></a
+            <h6 class="mt-2 mb-2"><%= product.name %></h6></a
           >
-          <div class="price">$<%= product.price %></div>
+          <div class="price">$<%= product.price ? parseFloat(product.price).toFixed(2) : '0.00' %></div>
         </div>
-        <% if(product.available) {%>
+        <% if(product.isActive && product.stock > 0) {%>
         <a
-          href="/add-to-cart/<%=product._id%>"
+          href="/basket/add/<%=product.productId%>"
           class="btn btn-block btn-secondary button-style mt-auto mb-2"
         >
           Add to Shopping Cart
@@ -82,7 +82,7 @@
           href="#"
           class="btn btn-block btn-danger button-style-danger mt-2 mb-2"
         >
-          Sold out
+          <%= product.stock > 0 ? 'Coming Soon' : 'Sold out' %>
         </a>
         <%} %>
       </div>

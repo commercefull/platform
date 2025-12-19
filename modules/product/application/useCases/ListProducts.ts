@@ -20,6 +20,8 @@ export class ListProductsCommand {
       categoryId?: string;
       brandId?: string;
       merchantId?: string;
+      businessId?: string;
+      storeId?: string;
       isFeatured?: boolean;
       isVirtual?: boolean;
       hasVariants?: boolean;

@@ -46,13 +46,13 @@
 <!-- Store's categories section -->
 <div class="container">
   <h3 class="text-center mb-3 mt-4">Store's Categories</h3>
-  <% if (categories) { %>
+  <% if (categories && categories.length > 0) { %>
   <div class="row text-center m-auto">
-    <% for(let i=0; i<3; i++){ %>
+    <% for(let i=0; i<Math.min(3, categories.length); i++){ %>
     <div class="col-lg-3 col-md-3 col-sm-12 text-center ml-2">
-      <a class="title-link" href="/products/<%=categories[i].slug%>">
-        <img src="images/dept<%=i%>.jpg" alt="category" class="circle-img" />
-        <h4 class="mb-3 mt-3"><%=categories[i].title%></h4>
+      <a class="title-link" href="/products/category/<%=categories[i].slug%>">
+        <img src="/storefront/images/dept<%=i%>.jpg" alt="category" class="circle-img" />
+        <h4 class="mb-3 mt-3"><%=categories[i].name%></h4>
       </a>
     </div>
     <%} %>
@@ -104,30 +104,30 @@
       <!--First slide-->
       <div class="carousel-item active">
         <div class="row">
-          <% for(let i=0; i<3; i++) { %>
+          <% for(let i=0; i<Math.min(3, products.length); i++) { %>
           <div class="col-md-4 product-index-box">
             <div class="single-product d-flex flex-column h-100">
               <a
                 class="title-link"
-                href="/products/<%=products[i].category.slug%>/<%=products[i]._id%>"
+                href="/products/<%=products[i].categorySlug || 'general'%>/<%=products[i].productId%>"
               >
                 <img
-                  src="<%= products[i].imagePath %>"
-                  alt="Bag"
+                  src="<%= products[i].images && products[i].images.length > 0 ? products[i].images[0] : '/storefront/images/placeholder.jpg' %>"
+                  alt="<%= products[i].name %>"
                   class="img-fluid"
               /></a>
               <div class="product-info">
                 <a
                   class="title-link"
-                  href="/products/<%=products[i].category.slug%>/<%=products[i]._id%>"
+                  href="/products/<%=products[i].categorySlug || 'general'%>/<%=products[i].productId%>"
                 >
-                  <h6 class="mt-2 mb-2"><%= products[i].title %></h6></a
+                  <h6 class="mt-2 mb-2"><%= products[i].name %></h6></a
                 >
-                <div class="price">$<%= products[i].price %></div>
+                <div class="price">$<%= products[i].price ? parseFloat(products[i].price).toFixed(2) : '0.00' %></div>
               </div>
-              <% if(products[i].available) {%>
+              <% if(products[i].isActive && products[i].stock > 0) {%>
               <a
-                href="/add-to-cart/<%=products[i]._id%>"
+                href="/basket/add/<%=products[i].productId%>"
                 class="btn btn-block btn-secondary button-style mt-auto mb-2"
               >
                 Add to Shopping Cart
@@ -137,7 +137,7 @@
                 href="#"
                 class="btn btn-block btn-danger button-style-danger mt-2 mb-2"
               >
-                Sold out
+                <%= products[i].stock > 0 ? 'Coming Soon' : 'Sold out' %>
               </a>
               <%} %>
             </div>
@@ -148,32 +148,33 @@
       <!--/.First slide-->
 
       <!--Second slide-->
+      <% if(products.length > 3) { %>
       <div class="carousel-item">
         <div class="row">
-          <% for(let i=3; i<6; i++) { %>
+          <% for(let i=3; i<Math.min(6, products.length); i++) { %>
           <div class="col-md-4 product-index-box">
             <div class="single-product d-flex flex-column h-100">
               <a
                 class="title-link"
-                href="/products/<%=products[i].category.slug%>/<%=products[i]._id%>"
+                href="/products/<%=products[i].categorySlug || 'general'%>/<%=products[i].productId%>"
               >
                 <img
-                  src="<%= products[i].imagePath %>"
-                  alt="Bag"
+                  src="<%= products[i].images && products[i].images.length > 0 ? products[i].images[0] : '/storefront/images/placeholder.jpg' %>"
+                  alt="<%= products[i].name %>"
                   class="img-fluid"
               /></a>
               <div class="product-info">
                 <a
                   class="title-link"
-                  href="/products/<%=products[i].category.slug%>/<%=products[i]._id%>"
+                  href="/products/<%=products[i].categorySlug || 'general'%>/<%=products[i].productId%>"
                 >
-                  <h6 class="mt-2 mb-2"><%= products[i].title %></h6></a
+                  <h6 class="mt-2 mb-2"><%= products[i].name %></h6></a
                 >
-                <div class="price">$<%= products[i].price %></div>
+                <div class="price">$<%= products[i].price ? parseFloat(products[i].price).toFixed(2) : '0.00' %></div>
               </div>
-              <% if(products[i].available) {%>
+              <% if(products[i].isActive && products[i].stock > 0) {%>
               <a
-                href="/add-to-cart/<%=products[i]._id%>"
+                href="/basket/add/<%=products[i].productId%>"
                 class="btn btn-block btn-secondary button-style mt-auto mb-2"
               >
                 Add to Shopping Cart
@@ -183,7 +184,7 @@
                 href="#"
                 class="btn btn-block btn-danger button-style-danger mt-2 mb-2"
               >
-                Sold out
+                <%= products[i].stock > 0 ? 'Coming Soon' : 'Sold out' %>
               </a>
               <%} %>
             </div>
@@ -191,35 +192,37 @@
           <%}%>
         </div>
       </div>
+      <% } %>
       <!--/.Second slide-->
 
       <!--Third slide-->
+      <% if(products.length > 6) { %>
       <div class="carousel-item">
         <div class="row">
-          <% for(let i=6; i<9; i++) { %>
+          <% for(let i=6; i<Math.min(9, products.length); i++) { %>
           <div class="col-md-4 product-index-box">
             <div class="single-product d-flex flex-column h-100">
               <a
                 class="title-link"
-                href="/products/<%=products[i].category.slug%>/<%=products[i]._id%>"
+                href="/products/<%=products[i].categorySlug || 'general'%>/<%=products[i].productId%>"
               >
                 <img
-                  src="<%= products[i].imagePath %>"
-                  alt="Bag"
+                  src="<%= products[i].images && products[i].images.length > 0 ? products[i].images[0] : '/storefront/images/placeholder.jpg' %>"
+                  alt="<%= products[i].name %>"
                   class="img-fluid"
               /></a>
               <div class="product-info">
                 <a
                   class="title-link"
-                  href="/products/<%=products[i].category.slug%>/<%=products[i]._id%>"
+                  href="/products/<%=products[i].categorySlug || 'general'%>/<%=products[i].productId%>"
                 >
-                  <h6 class="mt-2 mb-2"><%= products[i].title %></h6></a
+                  <h6 class="mt-2 mb-2"><%= products[i].name %></h6></a
                 >
-                <div class="price">$<%= products[i].price %></div>
+                <div class="price">$<%= products[i].price ? parseFloat(products[i].price).toFixed(2) : '0.00' %></div>
               </div>
-              <% if(products[i].available) {%>
+              <% if(products[i].isActive && products[i].stock > 0) {%>
               <a
-                href="/add-to-cart/<%=products[i]._id%>"
+                href="/basket/add/<%=products[i].productId%>"
                 class="btn btn-block btn-secondary button-style mt-auto mb-2"
               >
                 Add to Shopping Cart
@@ -229,7 +232,7 @@
                 href="#"
                 class="btn btn-block btn-danger button-style-danger mt-2 mb-2"
               >
-                Sold out
+                <%= products[i].stock > 0 ? 'Coming Soon' : 'Sold out' %>
               </a>
               <%} %>
             </div>
@@ -237,6 +240,7 @@
           <%}%>
         </div>
       </div>
+      <% } %>
       <!--/.Third slide-->
     </div>
     <!--/.Slides-->

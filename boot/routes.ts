@@ -52,7 +52,7 @@ import { membershipBusinessRouter } from "../modules/membership/membershipBusine
 import { shippingBusinessRouter } from "../modules/shipping/shippingBusinessRouter";
 import { inventoryBusinessRouter } from "../modules/inventory/interface/routers/businessRouter";
 import { paymentBusinessRouter } from "../modules/payment/interface/routers/paymentBusinessRouter";
-import { hubRouter } from "../web/hub/hubRouters";
+import { adminRouter } from "../web/admin/adminRouters";
 
 /**
  * Configure all application routes
@@ -61,7 +61,7 @@ export function configureRoutes(app: Express): void {
   // Storefront routes (public website)
   app.use("/", storefrontCustomerRouter);
 
-  app.use("/hub", hubRouter);
+  app.use("/admin", adminRouter);
 
   app.use("/customer", [
     identityCustomerRouter,  // Must be first - public auth routes

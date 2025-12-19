@@ -98,8 +98,8 @@ export class ProductRepo implements IProductRepository {
           weight = $18, "weightUnit" = $19, length = $20, width = $21, height = $22,
           "dimensionUnit" = $23, "metaTitle" = $24, "metaDescription" = $25, "metaKeywords" = $26,
           "isFeatured" = $27, "isNew" = $28, "isBestseller" = $29, "hasVariants" = $30,
-          "merchantId" = $31, "publishedAt" = $32, "updatedAt" = $33
-        WHERE "productId" = $34`,
+          "merchantId" = $31, "businessId" = $32, "storeId" = $33, "publishedAt" = $34, "updatedAt" = $35
+        WHERE "productId" = $36`,
         [
           product.name, product.description, product.shortDescription, product.sku, product.slug,
           product.brandId || null, 'simple', product.status, product.visibility,
@@ -110,7 +110,8 @@ export class ProductRepo implements IProductRepository {
           product.dimensions.height, product.dimensions.dimensionUnit,
           product.metaTitle || null, product.metaDescription || null, product.metaKeywords || null,
           product.isFeatured, false, false, product.hasVariants,
-          product.merchantId || null, product.publishedAt?.toISOString() || null, now,
+          product.merchantId || null, product.businessId || null, product.storeId || null,
+          product.publishedAt?.toISOString() || null, now,
           product.productId
         ]
       );
@@ -123,10 +124,10 @@ export class ProductRepo implements IProductRepository {
           weight, "weightUnit", length, width, height, "dimensionUnit",
           "metaTitle", "metaDescription", "metaKeywords",
           "isFeatured", "isNew", "isBestseller", "hasVariants",
-          "merchantId", "publishedAt", "createdAt", "updatedAt"
+          "merchantId", "businessId", "storeId", "publishedAt", "createdAt", "updatedAt"
         ) VALUES (
           $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18,
-          $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35
+          $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36
         )`,
         [
           product.productId, product.name, product.description, product.shortDescription,
@@ -139,7 +140,8 @@ export class ProductRepo implements IProductRepository {
           product.dimensions.dimensionUnit, product.metaTitle || null,
           product.metaDescription || null, product.metaKeywords || null,
           product.isFeatured, false, false, product.hasVariants,
-          product.merchantId || null, product.publishedAt?.toISOString() || null, now, now
+          product.merchantId || null, product.businessId || null, product.storeId || null,
+          product.publishedAt?.toISOString() || null, now, now
         ]
       );
     }
@@ -178,6 +180,18 @@ export class ProductRepo implements IProductRepository {
 
   async findByMerchant(merchantId: string, pagination?: PaginationOptions): Promise<PaginatedResult<Product>> {
     return this.findAll({ merchantId }, pagination);
+  }
+
+  async findByBusiness(businessId: string, pagination?: PaginationOptions): Promise<PaginatedResult<Product>> {
+    return this.findAll({ businessId }, pagination);
+  }
+
+  async findByStore(storeId: string, pagination?: PaginationOptions): Promise<PaginatedResult<Product>> {
+    return this.findAll({ storeId }, pagination);
+  }
+
+  async findByBusinessAndStore(businessId: string, storeId: string, pagination?: PaginationOptions): Promise<PaginatedResult<Product>> {
+    return this.findAll({ businessId, storeId }, pagination);
   }
 
   async findFeatured(pagination?: PaginationOptions): Promise<PaginatedResult<Product>> {
@@ -385,6 +399,14 @@ export class ProductRepo implements IProductRepository {
       conditions.push(`"merchantId" = $${paramIndex++}`);
       params.push(filters.merchantId);
     }
+    if (filters?.businessId) {
+      conditions.push(`"businessId" = $${paramIndex++}`);
+      params.push(filters.businessId);
+    }
+    if (filters?.storeId) {
+      conditions.push(`"storeId" = $${paramIndex++}`);
+      params.push(filters.storeId);
+    }
     if (filters?.isFeatured !== undefined) {
       conditions.push(`"isFeatured" = $${paramIndex++}`);
       params.push(filters.isFeatured);
@@ -423,6 +445,8 @@ export class ProductRepo implements IProductRepository {
       categoryId: undefined, // Not in current schema
       brandId: row.brandId,
       merchantId: row.merchantId,
+      businessId: row.businessId,
+      storeId: row.storeId,
       status: row.status as ProductStatus,
       visibility: row.visibility as ProductVisibility,
       price: Price.create(

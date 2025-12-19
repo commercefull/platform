@@ -6,7 +6,7 @@ import {
   getAdminProfile,
   postAdminLogin,
   postAdminLogout
-} from "./hubController";
+} from "./controllers/adminController";
 
 // Import feature controllers
 import * as productController from "./controllers/productController";
@@ -603,4 +603,4 @@ router.post("/settings/currencies", settingsController.createCurrency);
 router.put("/settings/currencies/:currencyId", settingsController.updateCurrency);
 router.delete("/settings/currencies/:currencyId", settingsController.deleteCurrency);
 
-export const hubRouter = router;
+export const adminRouter = router;
