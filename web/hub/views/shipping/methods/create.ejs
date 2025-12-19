@@ -1,0 +1,188 @@
+<%- include('../../layout') %>
+
+<% content %>
+<div class="content-wrapper">
+  <!-- Content Header (Page header) -->
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0">Create Shipping Method</h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/hub/shipping">Shipping</a></li>
+            <li class="breadcrumb-item"><a href="/hub/shipping/methods">Methods</a></li>
+            <li class="breadcrumb-item active">Create</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <section class="content">
+    <div class="container-fluid">
+      <!-- Error Messages -->
+      <% if (error) { %>
+        <div class="alert alert-danger alert-dismissible">
+          <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+          <i class="icon fas fa-ban"></i> <%= error %>
+        </div>
+      <% } %>
+
+      <div class="row">
+        <div class="col-md-12">
+          <div class="card card-primary">
+            <div class="card-header">
+              <h3 class="card-title">Shipping Method Details</h3>
+            </div>
+
+            <form action="/hub/shipping/methods" method="POST">
+              <div class="card-body">
+                <!-- Basic Information -->
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="name">Method Name *</label>
+                      <input type="text" class="form-control" id="name" name="name"
+                             value="<%= formData?.name || '' %>" required>
+                      <small class="form-text text-muted">Display name for this shipping method</small>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="code">Method Code *</label>
+                      <input type="text" class="form-control" id="code" name="code"
+                             value="<%= formData?.code || '' %>" required>
+                      <small class="form-text text-muted">Unique code for this method</small>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="description">Description</label>
+                  <textarea class="form-control" id="description" name="description" rows="3"><%= formData?.description || '' %></textarea>
+                  <small class="form-text text-muted">Optional description of the shipping method</small>
+                </div>
+
+                <!-- Configuration -->
+                <div class="row">
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="domesticInternational">Type</label>
+                      <select class="form-control" id="domesticInternational" name="domesticInternational">
+                        <option value="domestic" <%= (formData?.domesticInternational || 'both') === 'domestic' ? 'selected' : '' %>>Domestic</option>
+                        <option value="international" <%= (formData?.domesticInternational || 'both') === 'international' ? 'selected' : '' %>>International</option>
+                        <option value="both" <%= (formData?.domesticInternational || 'both') === 'both' ? 'selected' : '' %>>Both</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="priority">Priority</label>
+                      <input type="number" class="form-control" id="priority" name="priority"
+                             value="<%= formData?.priority || 0 %>" min="0">
+                      <small class="form-text text-muted">Higher priority methods appear first</small>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="handlingDays">Handling Days</label>
+                      <input type="number" class="form-control" id="handlingDays" name="handlingDays"
+                             value="<%= formData?.handlingDays || 1 %>" min="0">
+                      <small class="form-text text-muted">Days needed to prepare shipment</small>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Status and Display -->
+                <div class="row">
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="isActive">Status</label>
+                      <div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input" id="isActive" name="isActive" value="true"
+                               <%= (formData?.isActive !== false) ? 'checked' : '' %>>
+                        <label class="custom-control-label" for="isActive">Active</label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="isDefault">Default Method</label>
+                      <div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input" id="isDefault" name="isDefault" value="true"
+                               <%= (formData?.isDefault === true) ? 'checked' : '' %>>
+                        <label class="custom-control-label" for="isDefault">Set as Default</label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="displayOnFrontend">Display on Frontend</label>
+                      <div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input" id="displayOnFrontend" name="displayOnFrontend" value="true"
+                               <%= (formData?.displayOnFrontend !== false) ? 'checked' : '' %>>
+                        <label class="custom-control-label" for="displayOnFrontend">Show to Customers</label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Order Value and Weight Restrictions -->
+                <h5 class="mt-4 mb-3">Restrictions</h5>
+                <div class="row">
+                  <div class="col-md-3">
+                    <div class="form-group">
+                      <label for="minOrderValue">Min Order Value</label>
+                      <input type="number" class="form-control" id="minOrderValue" name="minOrderValue"
+                             value="<%= formData?.minOrderValue || '' %>" step="0.01" min="0">
+                    </div>
+                  </div>
+                  <div class="col-md-3">
+                    <div class="form-group">
+                      <label for="maxOrderValue">Max Order Value</label>
+                      <input type="number" class="form-control" id="maxOrderValue" name="maxOrderValue"
+                             value="<%= formData?.maxOrderValue || '' %>" step="0.01" min="0">
+                    </div>
+                  </div>
+                  <div class="col-md-3">
+                    <div class="form-group">
+                      <label for="minWeight">Min Weight (kg)</label>
+                      <input type="number" class="form-control" id="minWeight" name="minWeight"
+                             value="<%= formData?.minWeight || '' %>" step="0.01" min="0">
+                    </div>
+                  </div>
+                  <div class="col-md-3">
+                    <div class="form-group">
+                      <label for="maxWeight">Max Weight (kg)</label>
+                      <input type="number" class="form-control" id="maxWeight" name="maxWeight"
+                             value="<%= formData?.maxWeight || '' %>" step="0.01" min="0">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="alert alert-info">
+                  <i class="icon fas fa-info"></i>
+                  <strong>Note:</strong> Delivery time estimates and carrier integration will be available in future updates.
+                </div>
+              </div>
+
+              <div class="card-footer">
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-save"></i> Create Shipping Method
+                </button>
+                <a href="/hub/shipping/methods" class="btn btn-secondary">
+                  <i class="fas fa-times"></i> Cancel
+                </a>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+<% endcontent %>

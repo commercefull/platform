@@ -1,0 +1,190 @@
+<%- include('../partials/header', { title: pageName }) %>
+
+<div class="content-wrapper">
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0"><i class="fas fa-key me-2"></i><%= pageName %></h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-end">
+            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item active">API Keys</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="content">
+    <div class="container-fluid">
+      <!-- Create API Key Button -->
+      <div class="row mb-3">
+        <div class="col-12">
+          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createApiKeyModal">
+            <i class="fas fa-plus me-2"></i>Create API Key
+          </button>
+        </div>
+      </div>
+
+      <!-- API Keys List -->
+      <div class="row">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-list me-2"></i>API Keys</h3>
+            </div>
+            <div class="card-body table-responsive p-0">
+              <table class="table table-hover text-nowrap">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Key Prefix</th>
+                    <th>Permissions</th>
+                    <th>Rate Limit</th>
+                    <th>Last Used</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% (apiKeys || []).forEach(function(key) { %>
+                  <tr>
+                    <td><%= key.name %></td>
+                    <td><code><%= key.keyPrefix %>...</code></td>
+                    <td>
+                      <% (key.permissions || []).slice(0, 2).forEach(function(perm) { %>
+                        <span class="badge bg-secondary me-1"><%= perm %></span>
+                      <% }); %>
+                      <% if ((key.permissions || []).length > 2) { %>
+                        <span class="badge bg-light text-dark">+<%= key.permissions.length - 2 %></span>
+                      <% } %>
+                    </td>
+                    <td><%= key.rateLimit %>/min</td>
+                    <td><%= key.lastUsedAt ? new Date(key.lastUsedAt).toLocaleDateString() : 'Never' %></td>
+                    <td>
+                      <span class="badge bg-<%= key.isActive ? 'success' : 'secondary' %>">
+                        <%= key.isActive ? 'Active' : 'Inactive' %>
+                      </span>
+                    </td>
+                    <td>
+                      <button class="btn btn-sm btn-outline-warning" title="Revoke">
+                        <i class="fas fa-ban"></i>
+                      </button>
+                      <button class="btn btn-sm btn-outline-danger" title="Delete">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
+                  <% }); %>
+                  <% if ((apiKeys || []).length === 0) { %>
+                  <tr>
+                    <td colspan="7" class="text-center text-muted">
+                      No API keys created yet. Click "Create API Key" to get started.
+                    </td>
+                  </tr>
+                  <% } %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- API Key Best Practices -->
+      <div class="row">
+        <div class="col-12">
+          <div class="card card-outline card-info">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-shield-alt me-2"></i>API Key Best Practices</h3>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-4">
+                  <h5><i class="fas fa-lock text-success me-2"></i>Keep Keys Secure</h5>
+                  <p class="text-muted">Never expose API keys in client-side code or public repositories.</p>
+                </div>
+                <div class="col-md-4">
+                  <h5><i class="fas fa-sync text-warning me-2"></i>Rotate Regularly</h5>
+                  <p class="text-muted">Rotate API keys periodically and immediately if compromised.</p>
+                </div>
+                <div class="col-md-4">
+                  <h5><i class="fas fa-user-shield text-info me-2"></i>Least Privilege</h5>
+                  <p class="text-muted">Grant only the minimum permissions required for each integration.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- Create API Key Modal -->
+<div class="modal fade" id="createApiKeyModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Create API Key</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="createApiKeyForm">
+          <div class="mb-3">
+            <label class="form-label">Name</label>
+            <input type="text" class="form-control" name="name" required placeholder="My Integration">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Permissions</label>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="permissions" value="read:products" id="perm_read_products">
+              <label class="form-check-label" for="perm_read_products">Read Products</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="permissions" value="write:products" id="perm_write_products">
+              <label class="form-check-label" for="perm_write_products">Write Products</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="permissions" value="read:orders" id="perm_read_orders">
+              <label class="form-check-label" for="perm_read_orders">Read Orders</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="permissions" value="write:orders" id="perm_write_orders">
+              <label class="form-check-label" for="perm_write_orders">Write Orders</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="permissions" value="read:customers" id="perm_read_customers">
+              <label class="form-check-label" for="perm_read_customers">Read Customers</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="permissions" value="write:customers" id="perm_write_customers">
+              <label class="form-check-label" for="perm_write_customers">Write Customers</label>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Rate Limit (requests/minute)</label>
+            <input type="number" class="form-control" name="rateLimit" value="1000" min="1" max="10000">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Expiration (optional)</label>
+            <input type="date" class="form-control" name="expiresAt">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="createApiKey()">Create API Key</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  async function createApiKey() {
+    alert('API Key creation not yet implemented. This is a placeholder for Phase 8.');
+  }
+</script>
+
+<%- include('../partials/footer') %>

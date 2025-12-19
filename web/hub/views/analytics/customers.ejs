@@ -1,0 +1,215 @@
+<%- include('../partials/header', { title: pageName }) %>
+
+<div class="content-wrapper">
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0"><i class="fas fa-users me-2"></i><%= pageName %></h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-end">
+            <li class="breadcrumb-item"><a href="/hub/analytics">Analytics</a></li>
+            <li class="breadcrumb-item active">Customers</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="content">
+    <div class="container-fluid">
+      <!-- Customer Lifetime Value Overview -->
+      <div class="row">
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-info">
+            <div class="inner">
+              <h3>$<%= (lifetimeValue.averageCLV || 0).toFixed(2) %></h3>
+              <p>Average CLV</p>
+            </div>
+            <div class="icon"><i class="fas fa-dollar-sign"></i></div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-success">
+            <div class="inner">
+              <h3><%= (segmentationAnalysis.segments || []).length %></h3>
+              <p>Customer Segments</p>
+            </div>
+            <div class="icon"><i class="fas fa-layer-group"></i></div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-warning">
+            <div class="inner">
+              <h3><%= (segmentationAnalysis.segments || []).reduce((sum, s) => sum + s.size, 0) %></h3>
+              <p>Total Customers</p>
+            </div>
+            <div class="icon"><i class="fas fa-users"></i></div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-danger">
+            <div class="inner">
+              <h3><%= ((segmentationAnalysis.segments || []).find(s => s.id === 'at_risk')?.size || 0) %></h3>
+              <p>At Risk Customers</p>
+            </div>
+            <div class="icon"><i class="fas fa-exclamation-triangle"></i></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Customer Segments -->
+      <div class="row">
+        <div class="col-lg-8">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-chart-pie me-2"></i>Customer Segments</h3>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-6">
+                  <canvas id="segmentChart" height="300"></canvas>
+                </div>
+                <div class="col-md-6">
+                  <% (segmentationAnalysis.segments || []).forEach(function(segment) { %>
+                  <div class="mb-3">
+                    <div class="d-flex justify-content-between">
+                      <strong><%= segment.name %></strong>
+                      <span><%= segment.size %> customers</span>
+                    </div>
+                    <div class="progress" style="height: 10px;">
+                      <div class="progress-bar bg-<%= segment.id === 'champions' ? 'success' : segment.id === 'loyal' ? 'info' : segment.id === 'at_risk' ? 'warning' : 'danger' %>" 
+                           style="width: <%= ((segment.size / ((segmentationAnalysis.segments || []).reduce((sum, s) => sum + s.size, 0) || 1)) * 100).toFixed(0) %>%">
+                      </div>
+                    </div>
+                    <small class="text-muted">Avg CLV: $<%= (segment.avgLifetimeValue || 0).toFixed(2) %> | Churn: <%= ((segment.churnRate || 0) * 100).toFixed(1) %>%</small>
+                  </div>
+                  <% }); %>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-4">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-info-circle me-2"></i>Segment Insights</h3>
+            </div>
+            <div class="card-body">
+              <% (segmentationAnalysis.segments || []).forEach(function(segment) { %>
+              <div class="callout callout-<%= segment.id === 'champions' ? 'success' : segment.id === 'loyal' ? 'info' : segment.id === 'at_risk' ? 'warning' : 'danger' %> mb-2">
+                <h5><%= segment.name %></h5>
+                <p class="mb-0">
+                  <small>
+                    <% Object.entries(segment.characteristics || {}).forEach(function([key, value]) { %>
+                      <strong><%= key %>:</strong> <%= value %><br>
+                    <% }); %>
+                  </small>
+                </p>
+              </div>
+              <% }); %>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CLV by Segment -->
+      <div class="row">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-chart-bar me-2"></i>Customer Lifetime Value by Segment</h3>
+            </div>
+            <div class="card-body">
+              <canvas id="clvChart" height="200"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Segment Details Table -->
+      <div class="row">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-table me-2"></i>Segment Analysis Details</h3>
+            </div>
+            <div class="card-body table-responsive p-0">
+              <table class="table table-hover text-nowrap">
+                <thead>
+                  <tr>
+                    <th>Segment</th>
+                    <th>Size</th>
+                    <th>Avg CLV</th>
+                    <th>Churn Rate</th>
+                    <th>Characteristics</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% (customerInsights.segmentAnalysis || []).forEach(function(segment) { %>
+                  <tr>
+                    <td>
+                      <span class="badge bg-<%= segment.segmentId === 'champions' ? 'success' : segment.segmentId === 'loyal' ? 'info' : segment.segmentId === 'at_risk' ? 'warning' : 'secondary' %>">
+                        <%= segment.segmentName %>
+                      </span>
+                    </td>
+                    <td><%= segment.customerCount %></td>
+                    <td>$<%= (segment.avgLifetimeValue || 0).toFixed(2) %></td>
+                    <td><%= ((segment.churnRate || 0) * 100).toFixed(1) %>%</td>
+                    <td>
+                      <% Object.entries(segment.keyCharacteristics || {}).slice(0, 2).forEach(function([key, value]) { %>
+                        <span class="badge bg-light text-dark me-1"><%= key %>: <%= value %></span>
+                      <% }); %>
+                    </td>
+                  </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  // Segment Distribution Chart
+  const segmentCtx = document.getElementById('segmentChart').getContext('2d');
+  new Chart(segmentCtx, {
+    type: 'doughnut',
+    data: {
+      labels: <%- JSON.stringify((segmentationAnalysis.segments || []).map(s => s.name)) %>,
+      datasets: [{
+        data: <%- JSON.stringify((segmentationAnalysis.segments || []).map(s => s.size)) %>,
+        backgroundColor: ['#28a745', '#17a2b8', '#ffc107', '#dc3545']
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false
+    }
+  });
+
+  // CLV by Segment Chart
+  const clvCtx = document.getElementById('clvChart').getContext('2d');
+  new Chart(clvCtx, {
+    type: 'bar',
+    data: {
+      labels: <%- JSON.stringify((lifetimeValue.clvBySegment || []).map(s => s.segment)) %>,
+      datasets: [{
+        label: 'Average CLV',
+        data: <%- JSON.stringify((lifetimeValue.clvBySegment || []).map(s => s.clv)) %>,
+        backgroundColor: ['#28a745', '#17a2b8', '#ffc107', '#dc3545']
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false
+    }
+  });
+</script>
+
+<%- include('../partials/footer') %>

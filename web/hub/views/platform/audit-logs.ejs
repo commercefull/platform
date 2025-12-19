@@ -1,0 +1,230 @@
+<%- include('../partials/header', { title: pageName }) %>
+
+<div class="content-wrapper">
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0"><i class="fas fa-history me-2"></i><%= pageName %></h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-end">
+            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item active">Audit Logs</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="content">
+    <div class="container-fluid">
+      <!-- Summary Stats -->
+      <div class="row">
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-info">
+            <div class="inner">
+              <h3><%= summary.totalActions %></h3>
+              <p>Total Actions (30 days)</p>
+            </div>
+            <div class="icon"><i class="fas fa-list"></i></div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-success">
+            <div class="inner">
+              <h3><%= Object.keys(summary.byEntityType || {}).length %></h3>
+              <p>Entity Types</p>
+            </div>
+            <div class="icon"><i class="fas fa-database"></i></div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-warning">
+            <div class="inner">
+              <h3><%= Object.keys(summary.byAction || {}).length %></h3>
+              <p>Action Types</p>
+            </div>
+            <div class="icon"><i class="fas fa-bolt"></i></div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-danger">
+            <div class="inner">
+              <h3><%= summary.failureRate.toFixed(2) %>%</h3>
+              <p>Failure Rate</p>
+            </div>
+            <div class="icon"><i class="fas fa-exclamation-triangle"></i></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="row">
+        <div class="col-12">
+          <div class="card collapsed-card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-filter me-2"></i>Filters</h3>
+              <div class="card-tools">
+                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                  <i class="fas fa-plus"></i>
+                </button>
+              </div>
+            </div>
+            <div class="card-body">
+              <form method="GET" action="/hub/platform/audit-logs">
+                <div class="row">
+                  <div class="col-md-2">
+                    <div class="form-group">
+                      <label>Entity Type</label>
+                      <input type="text" class="form-control" name="entityType" value="<%= filters.entityType || '' %>" placeholder="e.g., order">
+                    </div>
+                  </div>
+                  <div class="col-md-2">
+                    <div class="form-group">
+                      <label>Action</label>
+                      <select class="form-control" name="action">
+                        <option value="">All</option>
+                        <option value="create" <%= filters.action === 'create' ? 'selected' : '' %>>Create</option>
+                        <option value="update" <%= filters.action === 'update' ? 'selected' : '' %>>Update</option>
+                        <option value="delete" <%= filters.action === 'delete' ? 'selected' : '' %>>Delete</option>
+                        <option value="read" <%= filters.action === 'read' ? 'selected' : '' %>>Read</option>
+                        <option value="login" <%= filters.action === 'login' ? 'selected' : '' %>>Login</option>
+                        <option value="logout" <%= filters.action === 'logout' ? 'selected' : '' %>>Logout</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-md-2">
+                    <div class="form-group">
+                      <label>Actor Type</label>
+                      <select class="form-control" name="actorType">
+                        <option value="">All</option>
+                        <option value="user" <%= filters.actorType === 'user' ? 'selected' : '' %>>User</option>
+                        <option value="admin" <%= filters.actorType === 'admin' ? 'selected' : '' %>>Admin</option>
+                        <option value="system" <%= filters.actorType === 'system' ? 'selected' : '' %>>System</option>
+                        <option value="api" <%= filters.actorType === 'api' ? 'selected' : '' %>>API</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-md-2">
+                    <div class="form-group">
+                      <label>Start Date</label>
+                      <input type="date" class="form-control" name="startDate" value="<%= filters.startDate || '' %>">
+                    </div>
+                  </div>
+                  <div class="col-md-2">
+                    <div class="form-group">
+                      <label>End Date</label>
+                      <input type="date" class="form-control" name="endDate" value="<%= filters.endDate || '' %>">
+                    </div>
+                  </div>
+                  <div class="col-md-2">
+                    <div class="form-group">
+                      <label>&nbsp;</label>
+                      <button type="submit" class="btn btn-primary btn-block w-100">
+                        <i class="fas fa-search me-1"></i>Filter
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Audit Logs Table -->
+      <div class="row">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-list me-2"></i>Audit Log Entries</h3>
+              <span class="float-end text-muted">Total: <%= total %></span>
+            </div>
+            <div class="card-body table-responsive p-0">
+              <table class="table table-hover text-nowrap">
+                <thead>
+                  <tr>
+                    <th>Timestamp</th>
+                    <th>Entity</th>
+                    <th>Action</th>
+                    <th>Actor</th>
+                    <th>Status</th>
+                    <th>Changes</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% (auditLogs || []).forEach(function(log) { %>
+                  <tr>
+                    <td><%= new Date(log.createdAt).toLocaleString() %></td>
+                    <td>
+                      <span class="badge bg-secondary"><%= log.entityType %></span>
+                      <br><small class="text-muted"><%= log.entityId.substring(0, 8) %>...</small>
+                    </td>
+                    <td>
+                      <span class="badge bg-<%= log.action === 'create' ? 'success' : log.action === 'update' ? 'info' : log.action === 'delete' ? 'danger' : 'secondary' %>">
+                        <%= log.action %>
+                      </span>
+                    </td>
+                    <td>
+                      <span class="badge bg-light text-dark"><%= log.actorType %></span>
+                      <% if (log.actorEmail) { %>
+                        <br><small><%= log.actorEmail %></small>
+                      <% } %>
+                    </td>
+                    <td>
+                      <span class="badge bg-<%= log.status === 'success' ? 'success' : log.status === 'failure' ? 'danger' : 'warning' %>">
+                        <%= log.status %>
+                      </span>
+                    </td>
+                    <td>
+                      <% if (log.changedFields && log.changedFields.length > 0) { %>
+                        <% log.changedFields.slice(0, 3).forEach(function(field) { %>
+                          <span class="badge bg-light text-dark me-1"><%= field %></span>
+                        <% }); %>
+                        <% if (log.changedFields.length > 3) { %>
+                          <span class="badge bg-light text-dark">+<%= log.changedFields.length - 3 %></span>
+                        <% } %>
+                      <% } else { %>
+                        <span class="text-muted">-</span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <a href="/hub/platform/audit-logs/<%= log.auditLogId %>" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-eye"></i>
+                      </a>
+                    </td>
+                  </tr>
+                  <% }); %>
+                  <% if ((auditLogs || []).length === 0) { %>
+                  <tr>
+                    <td colspan="7" class="text-center text-muted">No audit logs found</td>
+                  </tr>
+                  <% } %>
+                </tbody>
+              </table>
+            </div>
+            <% if (totalPages > 1) { %>
+            <div class="card-footer">
+              <nav>
+                <ul class="pagination justify-content-center mb-0">
+                  <% for (let i = 1; i <= totalPages; i++) { %>
+                  <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                    <a class="page-link" href="?page=<%= i %>&entityType=<%= filters.entityType || '' %>&action=<%= filters.action || '' %>&actorType=<%= filters.actorType || '' %>&startDate=<%= filters.startDate || '' %>&endDate=<%= filters.endDate || '' %>">
+                      <%= i %>
+                    </a>
+                  </li>
+                  <% } %>
+                </ul>
+              </nav>
+            </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<%- include('../partials/footer') %>

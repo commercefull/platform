@@ -1,0 +1,215 @@
+<%- include('../../partials/header', { title: pageName }) %>
+
+<div class="content-wrapper">
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0"><i class="fas fa-cogs me-2"></i><%= pageName %></h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-end">
+            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item active">Operations</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="content">
+    <div class="container-fluid">
+      <!-- Stats Overview -->
+      <div class="row">
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-info">
+            <div class="inner">
+              <h3><%= stats.pendingFulfillments || 0 %></h3>
+              <p>Pending Fulfillments</p>
+            </div>
+            <div class="icon"><i class="fas fa-box-open"></i></div>
+            <a href="/hub/operations/fulfillments" class="small-box-footer">View <i class="fas fa-arrow-circle-right"></i></a>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-success">
+            <div class="inner">
+              <h3><%= stats.activeWarehouses || 0 %></h3>
+              <p>Active Warehouses</p>
+            </div>
+            <div class="icon"><i class="fas fa-warehouse"></i></div>
+            <a href="/hub/operations/warehouses" class="small-box-footer">View <i class="fas fa-arrow-circle-right"></i></a>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-warning">
+            <div class="inner">
+              <h3><%= stats.abandonedCarts || 0 %></h3>
+              <p>Abandoned Carts</p>
+            </div>
+            <div class="icon"><i class="fas fa-shopping-cart"></i></div>
+            <a href="/hub/operations/baskets/abandoned" class="small-box-footer">View <i class="fas fa-arrow-circle-right"></i></a>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-danger">
+            <div class="inner">
+              <h3><%= stats.lowStockItems || 0 %></h3>
+              <p>Low Stock Items</p>
+            </div>
+            <div class="icon"><i class="fas fa-exclamation-triangle"></i></div>
+            <a href="/hub/inventory/low-stock" class="small-box-footer">View <i class="fas fa-arrow-circle-right"></i></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <!-- Recent Fulfillments -->
+        <div class="col-lg-6">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-truck me-2"></i>Recent Fulfillments</h3>
+              <a href="/hub/operations/fulfillments" class="btn btn-sm btn-primary float-end">View All</a>
+            </div>
+            <div class="card-body table-responsive p-0">
+              <table class="table table-sm">
+                <thead>
+                  <tr>
+                    <th>Order</th>
+                    <th>Status</th>
+                    <th>Carrier</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% (recentFulfillments || []).slice(0, 5).forEach(function(f) { %>
+                  <tr>
+                    <td><a href="/hub/orders/<%= f.orderId %>">#<%= f.orderNumber %></a></td>
+                    <td>
+                      <span class="badge bg-<%= f.status === 'delivered' ? 'success' : f.status === 'shipped' ? 'info' : 'warning' %>">
+                        <%= f.status %>
+                      </span>
+                    </td>
+                    <td><%= f.carrier || '-' %></td>
+                    <td><%= new Date(f.createdAt).toLocaleDateString() %></td>
+                  </tr>
+                  <% }); %>
+                  <% if ((recentFulfillments || []).length === 0) { %>
+                  <tr><td colspan="4" class="text-center text-muted">No recent fulfillments</td></tr>
+                  <% } %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Warehouse Status -->
+        <div class="col-lg-6">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-warehouse me-2"></i>Warehouse Status</h3>
+              <a href="/hub/operations/warehouses" class="btn btn-sm btn-primary float-end">Manage</a>
+            </div>
+            <div class="card-body table-responsive p-0">
+              <table class="table table-sm">
+                <thead>
+                  <tr>
+                    <th>Warehouse</th>
+                    <th>Products</th>
+                    <th>Capacity</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% (warehouses || []).slice(0, 5).forEach(function(w) { %>
+                  <tr>
+                    <td><strong><%= w.name %></strong></td>
+                    <td><%= w.productCount || 0 %></td>
+                    <td>
+                      <div class="progress" style="height: 10px;">
+                        <div class="progress-bar bg-<%= (w.capacityUsed || 0) > 90 ? 'danger' : (w.capacityUsed || 0) > 70 ? 'warning' : 'success' %>" 
+                             style="width: <%= w.capacityUsed || 0 %>%"></div>
+                      </div>
+                    </td>
+                    <td>
+                      <span class="badge bg-<%= w.isActive ? 'success' : 'secondary' %>">
+                        <%= w.isActive ? 'Active' : 'Inactive' %>
+                      </span>
+                    </td>
+                  </tr>
+                  <% }); %>
+                  <% if ((warehouses || []).length === 0) { %>
+                  <tr><td colspan="4" class="text-center text-muted">No warehouses configured</td></tr>
+                  <% } %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <!-- Supplier Overview -->
+        <div class="col-lg-6">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-truck-loading me-2"></i>Suppliers</h3>
+              <a href="/hub/operations/suppliers" class="btn btn-sm btn-primary float-end">Manage</a>
+            </div>
+            <div class="card-body">
+              <div class="row text-center">
+                <div class="col-4">
+                  <h4><%= stats.totalSuppliers || 0 %></h4>
+                  <small class="text-muted">Total</small>
+                </div>
+                <div class="col-4">
+                  <h4><%= stats.activeSuppliers || 0 %></h4>
+                  <small class="text-muted">Active</small>
+                </div>
+                <div class="col-4">
+                  <h4><%= stats.pendingOrders || 0 %></h4>
+                  <small class="text-muted">Pending POs</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="col-lg-6">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-bolt me-2"></i>Quick Actions</h3>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-6 mb-2">
+                  <a href="/hub/operations/fulfillments?status=pending" class="btn btn-outline-primary w-100">
+                    <i class="fas fa-box me-1"></i>Process Orders
+                  </a>
+                </div>
+                <div class="col-6 mb-2">
+                  <a href="/hub/inventory" class="btn btn-outline-info w-100">
+                    <i class="fas fa-boxes me-1"></i>Check Inventory
+                  </a>
+                </div>
+                <div class="col-6 mb-2">
+                  <a href="/hub/operations/baskets/abandoned" class="btn btn-outline-warning w-100">
+                    <i class="fas fa-cart-arrow-down me-1"></i>Abandoned Carts
+                  </a>
+                </div>
+                <div class="col-6 mb-2">
+                  <a href="/hub/operations/suppliers" class="btn btn-outline-success w-100">
+                    <i class="fas fa-plus me-1"></i>New PO
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<%- include('../../partials/footer') %>

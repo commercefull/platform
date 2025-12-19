@@ -143,6 +143,50 @@ export class MembershipSubscriptionRepo {
     return this.update(id, { endDate, nextBillingDate, lastBillingDate: new Date() });
   }
 
+  async changePlan(id: string, newPlanId: string, notes?: string): Promise<MembershipSubscription | null> {
+    const now = unixTimestamp();
+    const result = await queryOne<MembershipSubscription>(
+      `UPDATE "membershipSubscription" SET 
+        "membershipPlanId" = $1, "notes" = $2, "updatedAt" = $3 
+       WHERE "membershipSubscriptionId" = $4 RETURNING *`,
+      [newPlanId, notes || null, now, id]
+    );
+    return result;
+  }
+
+  async findAll(options?: { status?: SubscriptionStatus; planId?: string; limit?: number; offset?: number }): Promise<{ data: MembershipSubscription[]; total: number }> {
+    let whereClause = '1=1';
+    const params: any[] = [];
+    let paramIndex = 1;
+
+    if (options?.status) {
+      whereClause += ` AND "status" = $${paramIndex++}`;
+      params.push(options.status);
+    }
+    if (options?.planId) {
+      whereClause += ` AND "membershipPlanId" = $${paramIndex++}`;
+      params.push(options.planId);
+    }
+
+    const limit = options?.limit || 50;
+    const offset = options?.offset || 0;
+
+    const countResult = await queryOne<{ count: string }>(
+      `SELECT COUNT(*) as count FROM "membershipSubscription" WHERE ${whereClause}`,
+      params
+    );
+
+    const rows = await query<MembershipSubscription[]>(
+      `SELECT * FROM "membershipSubscription" WHERE ${whereClause} ORDER BY "createdAt" DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
+      [...params, limit, offset]
+    );
+
+    return {
+      data: rows || [],
+      total: parseInt(countResult?.count || '0')
+    };
+  }
+
   async delete(id: string): Promise<boolean> {
     const result = await queryOne<{ membershipSubscriptionId: string }>(
       `DELETE FROM "membershipSubscription" WHERE "membershipSubscriptionId" = $1 RETURNING "membershipSubscriptionId"`,

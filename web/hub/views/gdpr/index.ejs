@@ -1,0 +1,216 @@
+<%- include('../partials/header', { title: pageName }) %>
+
+<div class="content-wrapper">
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0"><i class="fas fa-shield-alt me-2"></i><%= pageName %></h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-end">
+            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item active">GDPR Compliance</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="content">
+    <div class="container-fluid">
+      <!-- Stats -->
+      <div class="row">
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-info">
+            <div class="inner">
+              <h3><%= stats.pendingRequests || 0 %></h3>
+              <p>Pending Requests</p>
+            </div>
+            <div class="icon"><i class="fas fa-clock"></i></div>
+            <a href="#requests" class="small-box-footer">View <i class="fas fa-arrow-circle-right"></i></a>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-success">
+            <div class="inner">
+              <h3><%= stats.completedRequests || 0 %></h3>
+              <p>Completed This Month</p>
+            </div>
+            <div class="icon"><i class="fas fa-check-circle"></i></div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-warning">
+            <div class="inner">
+              <h3><%= stats.avgProcessingDays || 0 %></h3>
+              <p>Avg Processing Days</p>
+            </div>
+            <div class="icon"><i class="fas fa-calendar-alt"></i></div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-danger">
+            <div class="inner">
+              <h3><%= stats.consentRate || 0 %>%</h3>
+              <p>Marketing Consent Rate</p>
+            </div>
+            <div class="icon"><i class="fas fa-percentage"></i></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Data Access Requests -->
+      <div id="requests" class="card">
+        <div class="card-header">
+          <h3 class="card-title"><i class="fas fa-user-shield me-2"></i>Data Access Requests</h3>
+          <button class="btn btn-sm btn-success float-end" data-bs-toggle="modal" data-bs-target="#newRequestModal">
+            <i class="fas fa-plus me-1"></i>New Request
+          </button>
+        </div>
+        <div class="card-body table-responsive p-0">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Request ID</th>
+                <th>Type</th>
+                <th>Customer</th>
+                <th>Email</th>
+                <th>Status</th>
+                <th>Requested</th>
+                <th>Due Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% (requests || []).forEach(function(request) { %>
+              <tr>
+                <td><code><%= request.requestId.substring(0, 8) %>...</code></td>
+                <td>
+                  <span class="badge bg-<%= request.requestType === 'access' ? 'info' : request.requestType === 'delete' ? 'danger' : 'warning' %>">
+                    <%= request.requestType === 'access' ? 'Data Access' : request.requestType === 'delete' ? 'Data Deletion' : 'Rectification' %>
+                  </span>
+                </td>
+                <td><%= request.customerName || '-' %></td>
+                <td><%= request.customerEmail %></td>
+                <td>
+                  <span class="badge bg-<%= request.status === 'completed' ? 'success' : request.status === 'processing' ? 'warning' : 'secondary' %>">
+                    <%= request.status %>
+                  </span>
+                </td>
+                <td><%= new Date(request.createdAt).toLocaleDateString() %></td>
+                <td><%= request.dueDate ? new Date(request.dueDate).toLocaleDateString() : '-' %></td>
+                <td>
+                  <a href="/hub/gdpr/requests/<%= request.requestId %>" class="btn btn-sm btn-outline-info">
+                    <i class="fas fa-eye"></i>
+                  </a>
+                  <% if (request.status === 'pending') { %>
+                  <button class="btn btn-sm btn-outline-success" onclick="processRequest('<%= request.requestId %>')">
+                    <i class="fas fa-play"></i>
+                  </button>
+                  <% } %>
+                </td>
+              </tr>
+              <% }); %>
+              <% if ((requests || []).length === 0) { %>
+              <tr>
+                <td colspan="8" class="text-center text-muted py-4">No GDPR requests yet.</td>
+              </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Consent Management -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title"><i class="fas fa-check-circle me-2"></i>Consent Management</h3>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="info-box">
+                <span class="info-box-icon bg-success"><i class="fas fa-thumbs-up"></i></span>
+                <div class="info-box-content">
+                  <span class="info-box-text">Marketing Consent</span>
+                  <span class="info-box-number"><%= stats.marketingConsent || 0 %></span>
+                  <div class="progress">
+                    <div class="progress-bar bg-success" style="width: <%= stats.marketingConsentRate || 0 %>%"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="info-box">
+                <span class="info-box-icon bg-info"><i class="fas fa-cookie-bite"></i></span>
+                <div class="info-box-content">
+                  <span class="info-box-text">Analytics Consent</span>
+                  <span class="info-box-number"><%= stats.analyticsConsent || 0 %></span>
+                  <div class="progress">
+                    <div class="progress-bar bg-info" style="width: <%= stats.analyticsConsentRate || 0 %>%"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="mt-3">
+            <a href="/hub/gdpr/consent" class="btn btn-outline-primary">
+              <i class="fas fa-cog me-1"></i>Manage Consent Settings
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- New Request Modal -->
+<div class="modal fade" id="newRequestModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Create GDPR Request</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST" action="/hub/gdpr/requests">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Request Type <span class="text-danger">*</span></label>
+            <select class="form-select" name="requestType" required>
+              <option value="access">Data Access Request (SAR)</option>
+              <option value="delete">Data Deletion Request</option>
+              <option value="rectify">Data Rectification Request</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Customer Email <span class="text-danger">*</span></label>
+            <input type="email" class="form-control" name="customerEmail" required placeholder="customer@example.com">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Customer Name</label>
+            <input type="text" class="form-control" name="customerName" placeholder="Optional">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea class="form-control" name="description" rows="3" placeholder="Additional details about the request"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create Request</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  async function processRequest(requestId) {
+    if (!confirm('Mark this request as processing?')) return;
+    const res = await fetch(`/hub/gdpr/requests/${requestId}/process`, { method: 'POST' });
+    if ((await res.json()).success) location.reload();
+  }
+</script>
+
+<%- include('../partials/footer') %>

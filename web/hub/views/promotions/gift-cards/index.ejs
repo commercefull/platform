@@ -1,0 +1,276 @@
+<%- include('../../layout') %>
+
+<% content %>
+<div class="content-wrapper">
+  <!-- Content Header (Page header) -->
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0">Gift Card Management</h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/hub/promotions">Promotions</a></li>
+            <li class="breadcrumb-item active">Gift Cards</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <section class="content">
+    <div class="container-fluid">
+      <!-- Success/Error Messages -->
+      <% if (success) { %>
+        <div class="alert alert-success alert-dismissible">
+          <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+          <i class="icon fas fa-check"></i> <%= success %>
+        </div>
+      <% } %>
+
+      <!-- Stats Cards -->
+      <div class="row mb-3">
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-info">
+            <div class="inner">
+              <h3><%= stats.totalCards %></h3>
+              <p>Total Gift Cards</p>
+            </div>
+            <div class="icon">
+              <i class="fas fa-gift"></i>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-success">
+            <div class="inner">
+              <h3><%= stats.activeCards %></h3>
+              <p>Active Cards</p>
+            </div>
+            <div class="icon">
+              <i class="fas fa-check-circle"></i>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-warning">
+            <div class="inner">
+              <h3><%= stats.totalValue.toFixed(2) %></h3>
+              <p>Total Value</p>
+            </div>
+            <div class="icon">
+              <i class="fas fa-dollar-sign"></i>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <a href="/hub/promotions/gift-cards/create" class="small-box bg-primary">
+            <div class="inner">
+              <h3>+</h3>
+              <p>Create Card</p>
+            </div>
+            <div class="icon">
+              <i class="fas fa-plus"></i>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="row mb-3">
+        <div class="col-md-12">
+          <div class="card">
+            <div class="card-body">
+              <form method="GET" class="form-inline">
+                <div class="form-group mr-3">
+                  <label for="status" class="mr-2">Status:</label>
+                  <select name="status" id="status" class="form-control">
+                    <option value="">All Status</option>
+                    <option value="pending" <%= filters.status === 'pending' ? 'selected' : '' %>>Pending</option>
+                    <option value="active" <%= filters.status === 'active' ? 'selected' : '' %>>Active</option>
+                    <option value="depleted" <%= filters.status === 'depleted' ? 'selected' : '' %>>Depleted</option>
+                    <option value="expired" <%= filters.status === 'expired' ? 'selected' : '' %>>Expired</option>
+                    <option value="cancelled" <%= filters.status === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
+                  </select>
+                </div>
+                <button type="submit" class="btn btn-secondary mr-2">
+                  <i class="fas fa-filter"></i> Filter
+                </button>
+                <a href="/hub/promotions/gift-cards" class="btn btn-outline-secondary">
+                  <i class="fas fa-times"></i> Clear
+                </a>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gift Cards Table -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Gift Cards</h3>
+        </div>
+        <div class="card-body table-responsive p-0">
+          <table class="table table-hover text-nowrap">
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Type</th>
+                <th>Balance</th>
+                <th>Status</th>
+                <th>Recipient</th>
+                <th>Expires</th>
+                <th>Usage</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (giftCards.length === 0) { %>
+                <tr>
+                  <td colspan="8" class="text-center py-4">
+                    <em>No gift cards found. <a href="/hub/promotions/gift-cards/create">Create your first gift card</a>.</em>
+                  </td>
+                </tr>
+              <% } else { %>
+                <% giftCards.forEach(card => { %>
+                  <tr>
+                    <td>
+                      <strong><code><%= card.code %></code></strong>
+                      <br><small class="text-muted">ID: <%= card.promotionGiftCardId %></small>
+                    </td>
+                    <td>
+                      <span class="badge badge-secondary"><%= card.type %></span>
+                    </td>
+                    <td>
+                      <strong><%= card.currency %> <%= card.currentBalance.toFixed(2) %></strong>
+                      <% if (card.initialBalance !== card.currentBalance) { %>
+                        <br><small class="text-muted">of <%= card.initialBalance.toFixed(2) %></small>
+                      <% } %>
+                    </td>
+                    <td>
+                      <span class="badge badge-<%= card.status === 'active' ? 'success' : card.status === 'pending' ? 'warning' : card.status === 'depleted' ? 'info' : 'secondary' %>">
+                        <%= card.status %>
+                      </span>
+                    </td>
+                    <td>
+                      <% if (card.recipientName) { %>
+                        <%= card.recipientName %>
+                        <% if (card.recipientEmail) { %>
+                          <br><small class="text-muted"><%= card.recipientEmail %></small>
+                        <% } %>
+                      <% } else { %>
+                        <span class="text-muted">-</span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <% if (card.expiresAt) { %>
+                        <%= new Date(card.expiresAt).toLocaleDateString() %>
+                      <% } else { %>
+                        <span class="text-muted">Never</span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <%= card.usageCount %> uses
+                      <% if (card.totalRedeemed > 0) { %>
+                        <br><small class="text-muted"><%= card.currency %> <%= card.totalRedeemed.toFixed(2) %> redeemed</small>
+                      <% } %>
+                    </td>
+                    <td>
+                      <a href="/hub/promotions/gift-cards/<%= card.promotionGiftCardId %>" class="btn btn-sm btn-info">
+                        <i class="fas fa-eye"></i>
+                      </a>
+                      <a href="/hub/promotions/gift-cards/<%= card.promotionGiftCardId %>/edit" class="btn btn-sm btn-primary">
+                        <i class="fas fa-edit"></i>
+                      </a>
+                      <% if (card.status === 'pending') { %>
+                        <button class="btn btn-sm btn-success" onclick="activateCard('<%= card.promotionGiftCardId %>')">
+                          <i class="fas fa-play"></i>
+                        </button>
+                      <% } %>
+                      <button class="btn btn-sm btn-danger" onclick="cancelCard('<%= card.promotionGiftCardId %>')">
+                        <i class="fas fa-ban"></i>
+                      </button>
+                    </td>
+                  </tr>
+                <% }); %>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- Cancel Confirmation Modal -->
+<div class="modal fade" id="cancelModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Cancel Gift Card</h4>
+        <button type="button" class="close" data-dismiss="modal">
+          <span>&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to cancel this gift card?</p>
+        <p class="text-danger"><small>This action will permanently deactivate the card and cannot be undone.</small></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirmCancelBtn">Cancel Card</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function activateCard(cardId) {
+  fetch(`/hub/promotions/gift-cards/${cardId}/activate`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      location.reload();
+    } else {
+      alert('Error: ' + data.message);
+    }
+  })
+  .catch(error => {
+    alert('Error activating gift card');
+    console.error('Error:', error);
+  });
+}
+
+function cancelCard(cardId) {
+  document.getElementById('confirmCancelBtn').onclick = function() {
+    fetch(`/hub/promotions/gift-cards/${cardId}/cancel`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        location.reload();
+      } else {
+        alert('Error: ' + data.message);
+      }
+    })
+    .catch(error => {
+      alert('Error cancelling gift card');
+      console.error('Error:', error);
+    });
+  };
+  $('#cancelModal').modal('show');
+}
+</script>
+<% endcontent %>

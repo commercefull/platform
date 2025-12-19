@@ -1,0 +1,259 @@
+<%- include('../../layout') %>
+
+<% content %>
+<div class="content-wrapper">
+  <!-- Content Header (Page header) -->
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0">Notification Templates</h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item active">Notifications</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <section class="content">
+    <div class="container-fluid">
+      <!-- Success/Error Messages -->
+      <% if (success) { %>
+        <div class="alert alert-success alert-dismissible">
+          <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+          <i class="icon fas fa-check"></i> <%= success %>
+        </div>
+      <% } %>
+
+      <!-- Action Bar -->
+      <div class="row mb-3">
+        <div class="col-12">
+          <a href="/hub/notifications/templates/create" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Create Template
+          </a>
+          <div class="float-right">
+            <span class="badge badge-info">Total: <%= templates.length %></span>
+            <span class="badge badge-success ml-2">Active: <%= stats.active %></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="row mb-3">
+        <div class="col-md-12">
+          <div class="card">
+            <div class="card-body">
+              <form method="GET" class="form-inline">
+                <div class="form-group mr-3">
+                  <label for="category" class="mr-2">Category:</label>
+                  <select name="category" id="category" class="form-control">
+                    <option value="">All Categories</option>
+                    <% categories.forEach(category => { %>
+                      <option value="<%= category %>" <%= filters.category === category ? 'selected' : '' %>>
+                        <%= category %>
+                      </option>
+                    <% }); %>
+                  </select>
+                </div>
+                <div class="form-group mr-3">
+                  <label for="activeOnly" class="mr-2">Status:</label>
+                  <select name="activeOnly" id="activeOnly" class="form-control">
+                    <option value="false" <%= filters.activeOnly === false ? 'selected' : '' %>>All Templates</option>
+                    <option value="true" <%= filters.activeOnly !== false ? 'selected' : '' %>>Active Only</option>
+                  </select>
+                </div>
+                <button type="submit" class="btn btn-secondary mr-2">
+                  <i class="fas fa-filter"></i> Filter
+                </button>
+                <a href="/hub/notifications/templates" class="btn btn-outline-secondary">
+                  <i class="fas fa-times"></i> Clear
+                </a>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Templates Table -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Notification Templates</h3>
+        </div>
+        <div class="card-body table-responsive p-0">
+          <table class="table table-hover text-nowrap">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Channels</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (templates.length === 0) { %>
+                <tr>
+                  <td colspan="6" class="text-center py-4">
+                    <em>No notification templates found. <a href="/hub/notifications/templates/create">Create your first template</a>.</em>
+                  </td>
+                </tr>
+              <% } else { %>
+                <% templates.forEach(template => { %>
+                  <tr>
+                    <td>
+                      <strong><%= template.name %></strong>
+                      <% if (template.description) { %>
+                        <br><small class="text-muted"><%= template.description %></small>
+                      <% } %>
+                    </td>
+                    <td>
+                      <span class="badge badge-secondary"><%= template.type.replace('_', ' ') %></span>
+                    </td>
+                    <td>
+                      <small><%= template.supportedChannels %></small>
+                      <% if (template.defaultChannel !== template.supportedChannels) { %>
+                        <br><small class="text-muted">Default: <%= template.defaultChannel %></small>
+                      <% } %>
+                    </td>
+                    <td>
+                      <% if (template.categoryCode) { %>
+                        <span class="badge badge-info"><%= template.categoryCode %></span>
+                      <% } else { %>
+                        <span class="text-muted">-</span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <% if (template.isActive) { %>
+                        <span class="badge badge-success">Active</span>
+                      <% } else { %>
+                        <span class="badge badge-secondary">Inactive</span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <a href="/hub/notifications/templates/<%= template.notificationTemplateId %>" class="btn btn-sm btn-info">
+                        <i class="fas fa-eye"></i>
+                      </a>
+                      <a href="/hub/notifications/templates/<%= template.notificationTemplateId %>/edit" class="btn btn-sm btn-primary">
+                        <i class="fas fa-edit"></i>
+                      </a>
+                      <% if (template.isActive) { %>
+                        <button class="btn btn-sm btn-warning" onclick="deactivateTemplate('<%= template.notificationTemplateId %>')">
+                          <i class="fas fa-pause"></i>
+                        </button>
+                      <% } else { %>
+                        <button class="btn btn-sm btn-success" onclick="activateTemplate('<%= template.notificationTemplateId %>')">
+                          <i class="fas fa-play"></i>
+                        </button>
+                      <% } %>
+                      <button class="btn btn-sm btn-danger" onclick="deleteTemplate('<%= template.notificationTemplateId %>', '<%= template.name %>')">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
+                <% }); %>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Delete Notification Template</h4>
+        <button type="button" class="close" data-dismiss="modal">
+          <span>&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete the notification template "<strong id="deleteTemplateName"></strong>"?</p>
+        <p class="text-danger"><small>This action cannot be undone.</small></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete Template</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function activateTemplate(templateId) {
+  fetch(`/hub/notifications/templates/${templateId}/activate`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      location.reload();
+    } else {
+      alert('Error: ' + data.message);
+    }
+  })
+  .catch(error => {
+    alert('Error activating template');
+    console.error('Error:', error);
+  });
+}
+
+function deactivateTemplate(templateId) {
+  fetch(`/hub/notifications/templates/${templateId}/deactivate`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      location.reload();
+    } else {
+      alert('Error: ' + data.message);
+    }
+  })
+  .catch(error => {
+    alert('Error deactivating template');
+    console.error('Error:', error);
+  });
+}
+
+function deleteTemplate(templateId, templateName) {
+  document.getElementById('deleteTemplateName').textContent = templateName;
+  document.getElementById('confirmDeleteBtn').onclick = function() {
+    fetch(`/hub/notifications/templates/${templateId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        location.reload();
+      } else {
+        alert('Error: ' + data.message);
+      }
+    })
+    .catch(error => {
+      alert('Error deleting template');
+      console.error('Error:', error);
+    });
+  };
+  $('#deleteModal').modal('show');
+}
+</script>
+<% endcontent %>

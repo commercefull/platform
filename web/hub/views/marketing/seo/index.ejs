@@ -1,0 +1,217 @@
+<%- include('../../layout') %>
+
+<% content %>
+<div class="content-wrapper">
+  <!-- Content Header (Page header) -->
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0">SEO Settings</h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/hub/marketing">Marketing</a></li>
+            <li class="breadcrumb-item active">SEO</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <section class="content">
+    <div class="container-fluid">
+      <!-- Success/Error Messages -->
+      <% if (success) { %>
+        <div class="alert alert-success alert-dismissible">
+          <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+          <i class="icon fas fa-check"></i> <%= success %>
+        </div>
+      <% } %>
+
+      <% if (error) { %>
+        <div class="alert alert-danger alert-dismissible">
+          <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+          <i class="icon fas fa-ban"></i> <%= error %>
+        </div>
+      <% } %>
+
+      <!-- SEO Tools -->
+      <div class="row mb-4">
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">SEO Tools</h3>
+            </div>
+            <div class="card-body">
+              <p>Generate essential SEO files for your website:</p>
+              <div class="btn-group-vertical d-block">
+                <button onclick="generateRobotsTxt()" class="btn btn-outline-primary mb-2">
+                  <i class="fas fa-robot"></i> Generate robots.txt
+                </button>
+                <button onclick="generateSitemap()" class="btn btn-outline-success">
+                  <i class="fas fa-sitemap"></i> Generate sitemap.xml
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Last Updated</h3>
+            </div>
+            <div class="card-body">
+              <p class="text-muted">SEO settings were last updated:</p>
+              <p class="font-weight-bold"><%= seoSettings.lastUpdated.toLocaleDateString() %> <%= seoSettings.lastUpdated.toLocaleTimeString() %></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SEO Settings Form -->
+      <form method="POST" action="/hub/marketing/seo">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Global SEO Settings</h3>
+            <div class="card-tools">
+              <button type="submit" class="btn btn-primary btn-sm">
+                <i class="fas fa-save"></i> Save Settings
+              </button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="siteName">Site Name</label>
+                  <input type="text" class="form-control" id="siteName" name="siteName" value="<%= seoSettings.siteName %>" required>
+                  <small class="form-text text-muted">The name of your website/store</small>
+                </div>
+
+                <div class="form-group">
+                  <label for="siteDescription">Site Description</label>
+                  <textarea class="form-control" id="siteDescription" name="siteDescription" rows="3" required><%= seoSettings.siteDescription %></textarea>
+                  <small class="form-text text-muted">Brief description of your website/store</small>
+                </div>
+
+                <div class="form-group">
+                  <label for="defaultMetaTitle">Default Meta Title</label>
+                  <input type="text" class="form-control" id="defaultMetaTitle" name="defaultMetaTitle" value="<%= seoSettings.defaultMetaTitle %>" required>
+                  <small class="form-text text-muted">Default title tag for pages without specific titles</small>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="defaultMetaDescription">Default Meta Description</label>
+                  <textarea class="form-control" id="defaultMetaDescription" name="defaultMetaDescription" rows="3" required><%= seoSettings.defaultMetaDescription %></textarea>
+                  <small class="form-text text-muted">Default description for pages without specific descriptions</small>
+                </div>
+
+                <div class="form-group">
+                  <label for="defaultKeywords">Default Keywords</label>
+                  <input type="text" class="form-control" id="defaultKeywords" name="defaultKeywords" value="<%= seoSettings.defaultKeywords %>" required>
+                  <small class="form-text text-muted">Comma-separated keywords</small>
+                </div>
+
+                <div class="form-group">
+                  <label for="ogImageUrl">Open Graph Image URL</label>
+                  <input type="url" class="form-control" id="ogImageUrl" name="ogImageUrl" value="<%= seoSettings.ogImageUrl %>">
+                  <small class="form-text text-muted">Default image for social media sharing</small>
+                </div>
+              </div>
+            </div>
+
+            <hr>
+
+            <div class="row">
+              <div class="col-md-6">
+                <h5>Analytics & Tracking</h5>
+
+                <div class="form-group">
+                  <label for="googleAnalyticsId">Google Analytics ID</label>
+                  <input type="text" class="form-control" id="googleAnalyticsId" name="googleAnalyticsId" value="<%= seoSettings.googleAnalyticsId %>" placeholder="G-XXXXXXXXXX or UA-XXXXXXXXX-X">
+                  <small class="form-text text-muted">Your Google Analytics tracking ID</small>
+                </div>
+
+                <div class="form-group">
+                  <label for="facebookPixelId">Facebook Pixel ID</label>
+                  <input type="text" class="form-control" id="facebookPixelId" name="facebookPixelId" value="<%= seoSettings.facebookPixelId %>" placeholder="123456789012345">
+                  <small class="form-text text-muted">Your Facebook Pixel ID for tracking</small>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <h5>Social Media</h5>
+
+                <div class="form-group">
+                  <label for="twitterCardType">Twitter Card Type</label>
+                  <select class="form-control" id="twitterCardType" name="twitterCardType">
+                    <option value="summary" <%= seoSettings.twitterCardType === 'summary' ? 'selected' : '' %>>Summary</option>
+                    <option value="summary_large_image" <%= seoSettings.twitterCardType === 'summary_large_image' ? 'selected' : '' %>>Summary Large Image</option>
+                    <option value="app" <%= seoSettings.twitterCardType === 'app' ? 'selected' : '' %>>App</option>
+                    <option value="player" <%= seoSettings.twitterCardType === 'player' ? 'selected' : '' %>>Player</option>
+                  </select>
+                  <small class="form-text text-muted">Type of Twitter card to use for sharing</small>
+                </div>
+              </div>
+            </div>
+
+            <hr>
+
+            <div class="row">
+              <div class="col-md-6">
+                <h5>Advanced Settings</h5>
+
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" id="structuredData" name="structuredData" <%= seoSettings.structuredData ? 'checked' : '' %>>
+                  <label class="form-check-label" for="structuredData">
+                    Enable Structured Data (JSON-LD)
+                  </label>
+                  <small class="form-text text-muted d-block">Add schema.org markup for better search results</small>
+                </div>
+
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" id="canonicalUrls" name="canonicalUrls" <%= seoSettings.canonicalUrls ? 'checked' : '' %>>
+                  <label class="form-check-label" for="canonicalUrls">
+                    Enable Canonical URLs
+                  </label>
+                  <small class="form-text text-muted d-block">Prevent duplicate content issues</small>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <h5>Robots.txt Content</h5>
+                <div class="form-group">
+                  <textarea class="form-control" id="robotsTxt" name="robotsTxt" rows="6" placeholder="User-agent: *
+Allow: /
+
+Sitemap: https://yourdomain.com/sitemap.xml"><%= seoSettings.robotsTxt %></textarea>
+                  <small class="form-text text-muted">Custom robots.txt content for search engines</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </section>
+</div>
+
+<script>
+function generateRobotsTxt() {
+  if (confirm('This will download a robots.txt file. Continue?')) {
+    window.open('/hub/marketing/seo/robots.txt', '_blank');
+  }
+}
+
+function generateSitemap() {
+  if (confirm('This will download a sitemap.xml file. Continue?')) {
+    window.open('/hub/marketing/seo/sitemap.xml', '_blank');
+  }
+}
+</script>
+<% endcontent %>

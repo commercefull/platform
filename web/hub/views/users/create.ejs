@@ -1,0 +1,128 @@
+<%- include('../partials/header', { title: pageName }) %>
+
+<div class="content-wrapper">
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0"><i class="fas fa-user-plus me-2"></i><%= pageName %></h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-end">
+            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/hub/users">Admin Users</a></li>
+            <li class="breadcrumb-item active">Create</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="content">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-lg-8">
+          <div class="card card-primary">
+            <div class="card-header">
+              <h3 class="card-title">New Admin User</h3>
+            </div>
+            <form id="createUserForm">
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group mb-3">
+                      <label class="form-label">First Name</label>
+                      <input type="text" class="form-control" name="firstName" placeholder="John">
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group mb-3">
+                      <label class="form-label">Last Name</label>
+                      <input type="text" class="form-control" name="lastName" placeholder="Doe">
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group mb-3">
+                  <label class="form-label">Email <span class="text-danger">*</span></label>
+                  <input type="email" class="form-control" name="email" required placeholder="admin@example.com">
+                </div>
+                <div class="form-group mb-3">
+                  <label class="form-label">Password <span class="text-danger">*</span></label>
+                  <input type="password" class="form-control" name="password" required minlength="8" placeholder="Minimum 8 characters">
+                </div>
+                <div class="form-group mb-3">
+                  <label class="form-label">Confirm Password <span class="text-danger">*</span></label>
+                  <input type="password" class="form-control" name="confirmPassword" required placeholder="Confirm password">
+                </div>
+                <div class="form-group mb-3">
+                  <label class="form-label">Role</label>
+                  <select class="form-control" name="roleId">
+                    <option value="">No Role</option>
+                    <% (roles || []).forEach(function(role) { %>
+                    <option value="<%= role.roleId %>"><%= role.name %></option>
+                    <% }); %>
+                  </select>
+                </div>
+              </div>
+              <div class="card-footer">
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-save me-2"></i>Create User
+                </button>
+                <a href="/hub/users" class="btn btn-secondary ms-2">Cancel</a>
+              </div>
+            </form>
+          </div>
+        </div>
+        <div class="col-lg-4">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-info-circle me-2"></i>Password Requirements</h3>
+            </div>
+            <div class="card-body">
+              <ul class="list-unstyled mb-0">
+                <li><i class="fas fa-check text-success me-2"></i>Minimum 8 characters</li>
+                <li><i class="fas fa-check text-success me-2"></i>At least one uppercase letter</li>
+                <li><i class="fas fa-check text-success me-2"></i>At least one lowercase letter</li>
+                <li><i class="fas fa-check text-success me-2"></i>At least one number</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+  document.getElementById('createUserForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const data = Object.fromEntries(formData);
+
+    if (data.password !== data.confirmPassword) {
+      alert('Passwords do not match');
+      return;
+    }
+
+    delete data.confirmPassword;
+
+    try {
+      const response = await fetch('/hub/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const result = await response.json();
+      if (result.success) {
+        window.location.href = '/hub/users/' + result.userId;
+      } else {
+        alert('Error: ' + result.message);
+      }
+    } catch (error) {
+      alert('Error: ' + error.message);
+    }
+  });
+</script>
+
+<%- include('../partials/footer') %>

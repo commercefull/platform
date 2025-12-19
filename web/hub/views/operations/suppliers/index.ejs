@@ -1,0 +1,329 @@
+<%- include('../../layout') %>
+
+<% content %>
+<div class="content-wrapper">
+  <!-- Content Header (Page header) -->
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0">Suppliers</h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item">Operations</li>
+            <li class="breadcrumb-item active">Suppliers</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <section class="content">
+    <div class="container-fluid">
+      <!-- Success/Error Messages -->
+      <% if (success) { %>
+        <div class="alert alert-success alert-dismissible">
+          <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+          <i class="icon fas fa-check"></i> <%= success %>
+        </div>
+      <% } %>
+
+      <!-- Stats Cards -->
+      <div class="row mb-4">
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-info">
+            <div class="inner">
+              <h3><%= stats.total %></h3>
+              <p>Total Suppliers</p>
+            </div>
+            <div class="icon">
+              <i class="fas fa-building"></i>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-success">
+            <div class="inner">
+              <h3><%= stats.active %></h3>
+              <p>Active Suppliers</p>
+            </div>
+            <div class="icon">
+              <i class="fas fa-check-circle"></i>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-warning">
+            <div class="inner">
+              <h3><%= stats.pending %></h3>
+              <p>Pending Approval</p>
+            </div>
+            <div class="icon">
+              <i class="fas fa-clock"></i>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <a href="/hub/suppliers/create" class="small-box bg-primary">
+            <div class="inner">
+              <h3>+</h3>
+              <p>Add Supplier</p>
+            </div>
+            <div class="icon">
+              <i class="fas fa-plus"></i>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="row mb-3">
+        <div class="col-md-12">
+          <div class="card">
+            <div class="card-body">
+              <form method="GET" class="form-inline">
+                <div class="form-group mr-3">
+                  <label for="status" class="mr-2">Status:</label>
+                  <select name="status" id="status" class="form-control">
+                    <option value="">All Status</option>
+                    <option value="active" <%= filters.status === 'active' ? 'selected' : '' %>>Active</option>
+                    <option value="inactive" <%= filters.status === 'inactive' ? 'selected' : '' %>>Inactive</option>
+                    <option value="pending" <%= filters.status === 'pending' ? 'selected' : '' %>>Pending</option>
+                    <option value="suspended" <%= filters.status === 'suspended' ? 'selected' : '' %>>Suspended</option>
+                    <option value="blacklisted" <%= filters.status === 'blacklisted' ? 'selected' : '' %>>Blacklisted</option>
+                  </select>
+                </div>
+                <button type="submit" class="btn btn-secondary mr-2">
+                  <i class="fas fa-filter"></i> Filter
+                </button>
+                <a href="/hub/suppliers" class="btn btn-outline-secondary">
+                  <i class="fas fa-times"></i> Clear
+                </a>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Suppliers Table -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Supplier Management</h3>
+        </div>
+        <div class="card-body table-responsive p-0">
+          <table class="table table-hover text-nowrap">
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Status</th>
+                <th>Rating</th>
+                <th>Currency</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (suppliers.length === 0) { %>
+                <tr>
+                  <td colspan="7" class="text-center py-4">
+                    <em>No suppliers found. <a href="/hub/suppliers/create">Create your first supplier</a>.</em>
+                  </td>
+                </tr>
+              <% } else { %>
+                <% suppliers.forEach(supplier => { %>
+                  <tr>
+                    <td>
+                      <strong><code><%= supplier.code %></code></strong>
+                    </td>
+                    <td>
+                      <%= supplier.name %>
+                      <% if (supplier.description) { %>
+                        <br><small class="text-muted"><%= supplier.description %></small>
+                      <% } %>
+                    </td>
+                    <td>
+                      <% if (supplier.email) { %>
+                        <a href="mailto:<%= supplier.email %>"><%= supplier.email %></a>
+                      <% } else { %>
+                        <span class="text-muted">-</span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <% if (supplier.status === 'active') { %>
+                        <span class="badge badge-success">Active</span>
+                      <% } else if (supplier.status === 'pending') { %>
+                        <span class="badge badge-warning">Pending</span>
+                      <% } else if (supplier.status === 'inactive') { %>
+                        <span class="badge badge-secondary">Inactive</span>
+                      <% } else if (supplier.status === 'suspended') { %>
+                        <span class="badge badge-danger">Suspended</span>
+                      <% } else if (supplier.status === 'blacklisted') { %>
+                        <span class="badge badge-dark">Blacklisted</span>
+                      <% } else { %>
+                        <span class="badge badge-light"><%= supplier.status %></span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <% if (supplier.rating) { %>
+                        <span class="text-warning">
+                          <% for (let i = 1; i <= 5; i++) { %>
+                            <% if (i <= supplier.rating) { %>★<% } else { %>☆<% } %>
+                          <% } %>
+                        </span>
+                        <small class="text-muted">(<%= supplier.rating %>)</small>
+                      <% } else { %>
+                        <span class="text-muted">-</span>
+                      <% } %>
+                    </td>
+                    <td><%= supplier.currency %></td>
+                    <td>
+                      <a href="/hub/suppliers/<%= supplier.supplierId %>" class="btn btn-sm btn-info">
+                        <i class="fas fa-eye"></i>
+                      </a>
+                      <a href="/hub/suppliers/<%= supplier.supplierId %>/edit" class="btn btn-sm btn-primary">
+                        <i class="fas fa-edit"></i>
+                      </a>
+                      <% if (supplier.status === 'pending') { %>
+                        <button class="btn btn-sm btn-success" onclick="approveSupplier('<%= supplier.supplierId %>')">
+                          <i class="fas fa-check"></i> Approve
+                        </button>
+                      <% } else if (supplier.status === 'active') { %>
+                        <button class="btn btn-sm btn-warning" onclick="suspendSupplier('<%= supplier.supplierId %>')">
+                          <i class="fas fa-pause"></i> Suspend
+                        </button>
+                      <% } else if (supplier.status === 'suspended') { %>
+                        <button class="btn btn-sm btn-success" onclick="activateSupplier('<%= supplier.supplierId %>')">
+                          <i class="fas fa-play"></i> Activate
+                        </button>
+                      <% } %>
+                      <button class="btn btn-sm btn-danger" onclick="deleteSupplier('<%= supplier.supplierId %>', '<%= supplier.name %>')">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
+                <% }); %>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Delete Supplier</h4>
+        <button type="button" class="close" data-dismiss="modal">
+          <span>&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete the supplier "<strong id="deleteSupplierName"></strong>"?</p>
+        <p class="text-danger"><small>This action cannot be undone.</small></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete Supplier</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function approveSupplier(supplierId) {
+  fetch(`/hub/suppliers/${supplierId}/approve`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      location.reload();
+    } else {
+      alert('Error: ' + data.message);
+    }
+  })
+  .catch(error => {
+    alert('Error approving supplier');
+    console.error('Error:', error);
+  });
+}
+
+function suspendSupplier(supplierId) {
+  fetch(`/hub/suppliers/${supplierId}/suspend`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      location.reload();
+    } else {
+      alert('Error: ' + data.message);
+    }
+  })
+  .catch(error => {
+    alert('Error suspending supplier');
+    console.error('Error:', error);
+  });
+}
+
+function activateSupplier(supplierId) {
+  fetch(`/hub/suppliers/${supplierId}/activate`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      location.reload();
+    } else {
+      alert('Error: ' + data.message);
+    }
+  })
+  .catch(error => {
+    alert('Error activating supplier');
+    console.error('Error:', error);
+  });
+}
+
+function deleteSupplier(supplierId, supplierName) {
+  document.getElementById('deleteSupplierName').textContent = supplierName;
+  document.getElementById('confirmDeleteBtn').onclick = function() {
+    fetch(`/hub/suppliers/${supplierId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        location.reload();
+      } else {
+        alert('Error: ' + data.message);
+      }
+    })
+    .catch(error => {
+      alert('Error deleting supplier');
+      console.error('Error:', error);
+    });
+  };
+  $('#deleteModal').modal('show');
+}
+</script>
+<% endcontent %>

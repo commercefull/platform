@@ -689,6 +689,25 @@ export async function getSubscriptionOrders(customerSubscriptionId: string): Pro
   return (rows || []).map(mapToSubscriptionOrder);
 }
 
+export async function getSubscriptionOrdersPending(): Promise<SubscriptionOrder[]> {
+  const rows = await query<Record<string, any>[]>(
+    `SELECT * FROM "subscriptionOrder" 
+     WHERE "status" = 'pending' 
+     ORDER BY "scheduledAt" ASC`
+  );
+  return (rows || []).map(mapToSubscriptionOrder);
+}
+
+export async function getFailedSubscriptionPayments(): Promise<SubscriptionOrder[]> {
+  const rows = await query<Record<string, any>[]>(
+    `SELECT * FROM "subscriptionOrder" 
+     WHERE "status" = 'failed' 
+     ORDER BY "failedAt" DESC 
+     LIMIT 100`
+  );
+  return (rows || []).map(mapToSubscriptionOrder);
+}
+
 export async function createSubscriptionOrder(order: {
   customerSubscriptionId: string;
   billingCycleNumber: number;

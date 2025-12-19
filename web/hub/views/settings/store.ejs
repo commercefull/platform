@@ -1,0 +1,200 @@
+<%- include('../partials/header', { title: pageName }) %>
+
+<div class="content-wrapper">
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0"><i class="fas fa-store me-2"></i><%= pageName %></h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-end">
+            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item active">Store Settings</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="content">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-lg-8">
+          <form id="storeSettingsForm">
+            <!-- Basic Info -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-info-circle me-2"></i>Basic Information</h3>
+              </div>
+              <div class="card-body">
+                <div class="form-group mb-3">
+                  <label class="form-label">Store Name</label>
+                  <input type="text" class="form-control" name="storeName" value="<%= settings.storeName || '' %>" required>
+                </div>
+                <div class="form-group mb-3">
+                  <label class="form-label">Store URL</label>
+                  <input type="url" class="form-control" name="storeUrl" value="<%= settings.storeUrl || '' %>" placeholder="https://www.example.com">
+                </div>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group mb-3">
+                      <label class="form-label">Store Email</label>
+                      <input type="email" class="form-control" name="storeEmail" value="<%= settings.storeEmail || '' %>" placeholder="store@example.com">
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group mb-3">
+                      <label class="form-label">Store Phone</label>
+                      <input type="tel" class="form-control" name="storePhone" value="<%= settings.storePhone || '' %>" placeholder="+1 (555) 123-4567">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Address -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-map-marker-alt me-2"></i>Store Address</h3>
+              </div>
+              <div class="card-body">
+                <% const address = settings.storeAddress ? (typeof settings.storeAddress === 'string' ? JSON.parse(settings.storeAddress) : settings.storeAddress) : {}; %>
+                <div class="form-group mb-3">
+                  <label class="form-label">Address Line 1</label>
+                  <input type="text" class="form-control" name="addressLine1" value="<%= address.line1 || '' %>">
+                </div>
+                <div class="form-group mb-3">
+                  <label class="form-label">Address Line 2</label>
+                  <input type="text" class="form-control" name="addressLine2" value="<%= address.line2 || '' %>">
+                </div>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group mb-3">
+                      <label class="form-label">City</label>
+                      <input type="text" class="form-control" name="city" value="<%= address.city || '' %>">
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group mb-3">
+                      <label class="form-label">State/Province</label>
+                      <input type="text" class="form-control" name="state" value="<%= address.state || '' %>">
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group mb-3">
+                      <label class="form-label">Postal Code</label>
+                      <input type="text" class="form-control" name="postalCode" value="<%= address.postalCode || '' %>">
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group mb-3">
+                      <label class="form-label">Country</label>
+                      <input type="text" class="form-control" name="country" value="<%= address.country || '' %>">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Regional Settings -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-globe me-2"></i>Regional Settings</h3>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-4">
+                    <div class="form-group mb-3">
+                      <label class="form-label">Timezone</label>
+                      <select class="form-control" name="timezone">
+                        <% (timezones || []).forEach(function(tz) { %>
+                        <option value="<%= tz %>" <%= settings.timezone === tz ? 'selected' : '' %>><%= tz %></option>
+                        <% }); %>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-group mb-3">
+                      <label class="form-label">Currency</label>
+                      <select class="form-control" name="currency">
+                        <% (currencies || []).forEach(function(curr) { %>
+                        <option value="<%= curr.code %>" <%= settings.currency === curr.code ? 'selected' : '' %>><%= curr.code %> - <%= curr.name %></option>
+                        <% }); %>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-group mb-3">
+                      <label class="form-label">Locale</label>
+                      <select class="form-control" name="locale">
+                        <% (locales || []).forEach(function(loc) { %>
+                        <option value="<%= loc.code %>" <%= settings.locale === loc.code ? 'selected' : '' %>><%= loc.name %></option>
+                        <% }); %>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg">
+              <i class="fas fa-save me-2"></i>Save Settings
+            </button>
+          </form>
+        </div>
+        <div class="col-lg-4">
+          <!-- Quick Links -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-link me-2"></i>Settings</h3>
+            </div>
+            <div class="list-group list-group-flush">
+              <a href="/hub/settings/store" class="list-group-item list-group-item-action active">
+                <i class="fas fa-store me-2"></i>Store Settings
+              </a>
+              <a href="/hub/settings/business" class="list-group-item list-group-item-action">
+                <i class="fas fa-building me-2"></i>Business Information
+              </a>
+              <a href="/hub/settings/localization" class="list-group-item list-group-item-action">
+                <i class="fas fa-language me-2"></i>Localization
+              </a>
+              <a href="/hub/platform/configuration" class="list-group-item list-group-item-action">
+                <i class="fas fa-cog me-2"></i>Platform Configuration
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+  document.getElementById('storeSettingsForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const data = Object.fromEntries(formData);
+
+    try {
+      const response = await fetch('/hub/settings/store', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const result = await response.json();
+      if (result.success) {
+        alert('Settings saved successfully');
+      } else {
+        alert('Error: ' + result.message);
+      }
+    } catch (error) {
+      alert('Error: ' + error.message);
+    }
+  });
+</script>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,249 @@
+<%- include('../../layout') %>
+
+<% content %>
+<div class="content-wrapper">
+  <!-- Content Header (Page header) -->
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0">Content Pages</h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/hub/content">Content</a></li>
+            <li class="breadcrumb-item active">Pages</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <section class="content">
+    <div class="container-fluid">
+      <!-- Success/Error Messages -->
+      <% if (success) { %>
+        <div class="alert alert-success alert-dismissible">
+          <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+          <i class="icon fas fa-check"></i> <%= success %>
+        </div>
+      <% } %>
+
+      <!-- Action Bar -->
+      <div class="row mb-3">
+        <div class="col-12">
+          <a href="/hub/content/pages/create" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Create Page
+          </a>
+          <div class="float-right">
+            <span class="badge badge-info">Total: <%= pages.length %></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="row mb-3">
+        <div class="col-md-12">
+          <div class="card">
+            <div class="card-body">
+              <form method="GET" class="form-inline">
+                <div class="form-group mr-3">
+                  <label for="status" class="mr-2">Status:</label>
+                  <select name="status" id="status" class="form-control">
+                    <option value="">All Status</option>
+                    <option value="draft" <%= filters.status === 'draft' ? 'selected' : '' %>>Draft</option>
+                    <option value="published" <%= filters.status === 'published' ? 'selected' : '' %>>Published</option>
+                    <option value="scheduled" <%= filters.status === 'scheduled' ? 'selected' : '' %>>Scheduled</option>
+                    <option value="archived" <%= filters.status === 'archived' ? 'selected' : '' %>>Archived</option>
+                  </select>
+                </div>
+                <div class="form-group mr-3">
+                  <label for="contentTypeId" class="mr-2">Content Type:</label>
+                  <select name="contentTypeId" id="contentTypeId" class="form-control">
+                    <option value="">All Types</option>
+                    <% contentTypes.forEach(type => { %>
+                      <option value="<%= type.id %>" <%= filters.contentTypeId === type.id ? 'selected' : '' %>>
+                        <%= type.name %>
+                      </option>
+                    <% }); %>
+                  </select>
+                </div>
+                <button type="submit" class="btn btn-secondary mr-2">
+                  <i class="fas fa-filter"></i> Filter
+                </button>
+                <a href="/hub/content/pages" class="btn btn-outline-secondary">
+                  <i class="fas fa-times"></i> Clear
+                </a>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pages Table -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Content Pages</h3>
+        </div>
+        <div class="card-body table-responsive p-0">
+          <table class="table table-hover text-nowrap">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Slug</th>
+                <th>Status</th>
+                <th>Type</th>
+                <th>Visibility</th>
+                <th>Home Page</th>
+                <th>Published</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (pages.length === 0) { %>
+                <tr>
+                  <td colspan="8" class="text-center py-4">
+                    <em>No content pages found. <a href="/hub/content/pages/create">Create your first page</a>.</em>
+                  </td>
+                </tr>
+              <% } else { %>
+                <% pages.forEach(page => { %>
+                  <tr>
+                    <td>
+                      <strong><%= page.title %></strong>
+                      <% if (page.summary) { %>
+                        <br><small class="text-muted"><%= page.summary.substring(0, 100) %>...</small>
+                      <% } %>
+                    </td>
+                    <td>
+                      <code><%= page.slug %></code>
+                    </td>
+                    <td>
+                      <span class="badge badge-<%= page.status === 'published' ? 'success' : page.status === 'draft' ? 'secondary' : page.status === 'scheduled' ? 'info' : 'warning' %>">
+                        <%= page.status %>
+                      </span>
+                    </td>
+                    <td>
+                      <% const contentType = contentTypes.find(ct => ct.id === page.contentTypeId); %>
+                      <%= contentType ? contentType.name : 'Unknown' %>
+                    </td>
+                    <td>
+                      <span class="badge badge-<%= page.visibility === 'public' ? 'success' : page.visibility === 'private' ? 'warning' : 'info' %>">
+                        <%= page.visibility.replace('_', ' ') %>
+                      </span>
+                    </td>
+                    <td>
+                      <% if (page.isHomePage) { %>
+                        <i class="fas fa-home text-primary"></i> Yes
+                      <% } else { %>
+                        <span class="text-muted">-</span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <% if (page.publishedAt) { %>
+                        <%= new Date(page.publishedAt).toLocaleDateString() %>
+                      <% } else { %>
+                        <span class="text-muted">-</span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <a href="/hub/content/pages/<%= page.id %>" class="btn btn-sm btn-info">
+                        <i class="fas fa-eye"></i>
+                      </a>
+                      <a href="/hub/content/pages/<%= page.id %>/edit" class="btn btn-sm btn-primary">
+                        <i class="fas fa-edit"></i>
+                      </a>
+                      <% if (page.status === 'draft') { %>
+                        <button class="btn btn-sm btn-success" onclick="publishPage('<%= page.id %>', '<%= page.title %>')">
+                          <i class="fas fa-paper-plane"></i>
+                        </button>
+                      <% } %>
+                      <button class="btn btn-sm btn-danger" onclick="deletePage('<%= page.id %>', '<%= page.title %>')">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
+                <% }); %>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Delete Content Page</h4>
+        <button type="button" class="close" data-dismiss="modal">
+          <span>&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete the content page "<strong id="deletePageTitle"></strong>"?</p>
+        <p class="text-danger"><small>This action will also delete all associated content blocks and cannot be undone.</small></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete Page</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function deletePage(pageId, pageTitle) {
+  document.getElementById('deletePageTitle').textContent = pageTitle;
+  document.getElementById('confirmDeleteBtn').onclick = function() {
+    fetch(`/hub/content/pages/${pageId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        location.reload();
+      } else {
+        alert('Error: ' + data.message);
+      }
+    })
+    .catch(error => {
+      alert('Error deleting content page');
+      console.error('Error:', error);
+    });
+  };
+  $('#deleteModal').modal('show');
+}
+
+function publishPage(pageId, pageTitle) {
+  if (confirm(`Are you sure you want to publish "${pageTitle}"?`)) {
+    fetch(`/hub/content/pages/${pageId}/publish`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        location.reload();
+      } else {
+        alert('Error: ' + data.message);
+      }
+    })
+    .catch(error => {
+      alert('Error publishing page');
+      console.error('Error:', error);
+    });
+  }
+}
+</script>
+<% endcontent %>

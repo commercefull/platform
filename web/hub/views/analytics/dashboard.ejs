@@ -1,0 +1,239 @@
+<%- include('../partials/header', { title: pageName }) %>
+
+<div class="content-wrapper">
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0"><i class="fas fa-chart-line me-2"></i><%= pageName %></h1>
+        </div>
+        <div class="col-sm-6">
+          <div class="float-sm-end">
+            <div class="btn-group me-2">
+              <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                <i class="fas fa-calendar me-1"></i> <%= filters.period %>
+              </button>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="?period=7d">Last 7 Days</a></li>
+                <li><a class="dropdown-item" href="?period=30d">Last 30 Days</a></li>
+                <li><a class="dropdown-item" href="?period=90d">Last 90 Days</a></li>
+                <li><a class="dropdown-item" href="?period=1y">Last Year</a></li>
+              </ul>
+            </div>
+            <button class="btn btn-primary" onclick="window.location.reload()">
+              <i class="fas fa-sync-alt me-1"></i> Refresh
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="content">
+    <div class="container-fluid">
+      <!-- Revenue Overview -->
+      <div class="row">
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-info">
+            <div class="inner">
+              <h3>$<%= (dashboardData.revenue.total || 0).toLocaleString() %></h3>
+              <p>Total Revenue</p>
+            </div>
+            <div class="icon"><i class="fas fa-dollar-sign"></i></div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-success">
+            <div class="inner">
+              <h3><%= dashboardData.customers.total || 0 %></h3>
+              <p>Total Customers</p>
+            </div>
+            <div class="icon"><i class="fas fa-users"></i></div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-warning">
+            <div class="inner">
+              <h3><%= dashboardData.customers.new || 0 %></h3>
+              <p>New Customers</p>
+            </div>
+            <div class="icon"><i class="fas fa-user-plus"></i></div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-danger">
+            <div class="inner">
+              <h3><%= (dashboardData.customers.churnRate * 100 || 0).toFixed(1) %>%</h3>
+              <p>Churn Rate</p>
+            </div>
+            <div class="icon"><i class="fas fa-user-minus"></i></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Row -->
+      <div class="row">
+        <div class="col-lg-8">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-chart-area me-2"></i>Revenue Trend</h3>
+            </div>
+            <div class="card-body">
+              <canvas id="revenueChart" height="300"></canvas>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-4">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-chart-pie me-2"></i>Customer Segments</h3>
+            </div>
+            <div class="card-body">
+              <canvas id="segmentChart" height="300"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top Products -->
+      <div class="row">
+        <div class="col-lg-6">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-trophy me-2"></i>Top Selling Products</h3>
+            </div>
+            <div class="card-body table-responsive p-0">
+              <table class="table table-hover text-nowrap">
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>Sales</th>
+                    <th>Revenue</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% (dashboardData.products.topSelling || []).forEach(function(product) { %>
+                  <tr>
+                    <td><%= product.name %></td>
+                    <td><%= product.sales %></td>
+                    <td>$<%= (product.revenue || 0).toLocaleString() %></td>
+                  </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-eye me-2"></i>Product Performance</h3>
+            </div>
+            <div class="card-body table-responsive p-0">
+              <table class="table table-hover text-nowrap">
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>Views</th>
+                    <th>Conversions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% (dashboardData.products.performance || []).forEach(function(product) { %>
+                  <tr>
+                    <td><%= product.name %></td>
+                    <td><%= product.views %></td>
+                    <td><%= product.conversions %></td>
+                  </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Links -->
+      <div class="row">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-link me-2"></i>Analytics Modules</h3>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-3">
+                  <a href="/hub/analytics/predictive" class="btn btn-outline-primary btn-block mb-2 w-100">
+                    <i class="fas fa-brain me-2"></i>Predictive Analytics
+                  </a>
+                </div>
+                <div class="col-md-3">
+                  <a href="/hub/analytics/customers" class="btn btn-outline-success btn-block mb-2 w-100">
+                    <i class="fas fa-users me-2"></i>Customer Analytics
+                  </a>
+                </div>
+                <div class="col-md-3">
+                  <a href="/hub/analytics/ai-recommendations" class="btn btn-outline-warning btn-block mb-2 w-100">
+                    <i class="fas fa-robot me-2"></i>AI Recommendations
+                  </a>
+                </div>
+                <div class="col-md-3">
+                  <a href="/hub/analytics/executive" class="btn btn-outline-danger btn-block mb-2 w-100">
+                    <i class="fas fa-briefcase me-2"></i>Executive Dashboard
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  // Revenue Chart
+  const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+  new Chart(revenueCtx, {
+    type: 'line',
+    data: {
+      labels: <%= JSON.stringify((dashboardData.revenue.byPeriod || []).map(d => d.date)) %>,
+      datasets: [{
+        label: 'Revenue',
+        data: <%= JSON.stringify((dashboardData.revenue.byPeriod || []).map(d => d.revenue)) %>,
+        borderColor: 'rgb(75, 192, 192)',
+        tension: 0.1,
+        fill: true,
+        backgroundColor: 'rgba(75, 192, 192, 0.2)'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false
+    }
+  });
+
+  // Segment Chart
+  const segmentCtx = document.getElementById('segmentChart').getContext('2d');
+  new Chart(segmentCtx, {
+    type: 'doughnut',
+    data: {
+      labels: ['New', 'Returning', 'Churned'],
+      datasets: [{
+        data: [
+          <%= dashboardData.customers.new || 0 %>,
+          <%= dashboardData.customers.returning || 0 %>,
+          <%= Math.round((dashboardData.customers.total || 0) * (dashboardData.customers.churnRate || 0)) %>
+        ],
+        backgroundColor: ['#28a745', '#17a2b8', '#dc3545']
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false
+    }
+  });
+</script>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,178 @@
+<%- include('../../partials/header', { title: pageName }) %>
+
+<div class="content-wrapper">
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0"><i class="fas fa-exchange-alt me-2"></i><%= pageName %></h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-end">
+            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item active">Transactions</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="content">
+    <div class="container-fluid">
+      <!-- Stats -->
+      <div class="row">
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-success">
+            <div class="inner">
+              <h3>$<%= ((stats.totalSuccessful || 0) / 1000).toFixed(1) %>k</h3>
+              <p>Successful</p>
+            </div>
+            <div class="icon"><i class="fas fa-check-circle"></i></div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-warning">
+            <div class="inner">
+              <h3><%= stats.pendingCount || 0 %></h3>
+              <p>Pending</p>
+            </div>
+            <div class="icon"><i class="fas fa-clock"></i></div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-danger">
+            <div class="inner">
+              <h3><%= stats.failedCount || 0 %></h3>
+              <p>Failed</p>
+            </div>
+            <div class="icon"><i class="fas fa-times-circle"></i></div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-info">
+            <div class="inner">
+              <h3>$<%= ((stats.totalRefunded || 0) / 1000).toFixed(1) %>k</h3>
+              <p>Refunded</p>
+            </div>
+            <div class="icon"><i class="fas fa-undo"></i></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="card mb-3">
+        <div class="card-body">
+          <form method="GET" class="row g-3">
+            <div class="col-md-2">
+              <input type="text" class="form-control" name="search" value="<%= filters.search || '' %>" placeholder="Search...">
+            </div>
+            <div class="col-md-2">
+              <select class="form-select" name="status">
+                <option value="">All Status</option>
+                <option value="pending" <%= filters.status === 'pending' ? 'selected' : '' %>>Pending</option>
+                <option value="completed" <%= filters.status === 'completed' ? 'selected' : '' %>>Completed</option>
+                <option value="failed" <%= filters.status === 'failed' ? 'selected' : '' %>>Failed</option>
+                <option value="refunded" <%= filters.status === 'refunded' ? 'selected' : '' %>>Refunded</option>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <select class="form-select" name="gateway">
+                <option value="">All Gateways</option>
+                <% (gateways || []).forEach(function(gw) { %>
+                <option value="<%= gw.gatewayId %>" <%= filters.gateway === gw.gatewayId ? 'selected' : '' %>><%= gw.name %></option>
+                <% }); %>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <input type="date" class="form-control" name="startDate" value="<%= filters.startDate || '' %>">
+            </div>
+            <div class="col-md-2">
+              <input type="date" class="form-control" name="endDate" value="<%= filters.endDate || '' %>">
+            </div>
+            <div class="col-md-2">
+              <button type="submit" class="btn btn-primary w-100">
+                <i class="fas fa-search me-1"></i>Filter
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Transactions Table -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title"><i class="fas fa-list me-2"></i>Transactions</h3>
+          <span class="float-end text-muted">Total: <%= pagination.total %></span>
+        </div>
+        <div class="card-body table-responsive p-0">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Transaction ID</th>
+                <th>Order</th>
+                <th>Customer</th>
+                <th>Amount</th>
+                <th>Gateway</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% (transactions || []).forEach(function(tx) { %>
+              <tr>
+                <td><code><%= tx.transactionId.substring(0, 8) %>...</code></td>
+                <td>
+                  <% if (tx.orderId) { %>
+                  <a href="/hub/orders/<%= tx.orderId %>">#<%= tx.orderNumber %></a>
+                  <% } else { %>
+                  -
+                  <% } %>
+                </td>
+                <td><%= tx.customerName || tx.customerEmail || '-' %></td>
+                <td>
+                  <strong class="<%= tx.type === 'refund' ? 'text-danger' : '' %>">
+                    <%= tx.type === 'refund' ? '-' : '' %>$<%= (tx.amount || 0).toFixed(2) %>
+                  </strong>
+                </td>
+                <td><span class="badge bg-secondary"><%= tx.gatewayName || tx.gateway %></span></td>
+                <td>
+                  <span class="badge bg-<%= tx.status === 'completed' ? 'success' : tx.status === 'pending' ? 'warning' : tx.status === 'failed' ? 'danger' : 'info' %>">
+                    <%= tx.status %>
+                  </span>
+                </td>
+                <td><%= new Date(tx.createdAt).toLocaleString() %></td>
+                <td>
+                  <a href="/hub/payments/transactions/<%= tx.transactionId %>" class="btn btn-sm btn-outline-info">
+                    <i class="fas fa-eye"></i>
+                  </a>
+                </td>
+              </tr>
+              <% }); %>
+              <% if ((transactions || []).length === 0) { %>
+              <tr>
+                <td colspan="8" class="text-center text-muted py-4">No transactions found.</td>
+              </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+        <% if (pagination.pages > 1) { %>
+        <div class="card-footer">
+          <nav>
+            <ul class="pagination justify-content-center mb-0">
+              <% for (let i = 1; i <= Math.min(pagination.pages, 10); i++) { %>
+              <li class="page-item <%= pagination.page === i ? 'active' : '' %>">
+                <a class="page-link" href="?page=<%= i %>&status=<%= filters.status || '' %>&gateway=<%= filters.gateway || '' %>"><%= i %></a>
+              </li>
+              <% } %>
+            </ul>
+          </nav>
+        </div>
+        <% } %>
+      </div>
+    </div>
+  </section>
+</div>
+
+<%- include('../../partials/footer') %>

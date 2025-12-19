@@ -7,6 +7,9 @@ import { MembershipBenefit as DbMembershipBenefit } from '../../../libs/db/types
 // Re-export DB type
 export type MembershipBenefit = DbMembershipBenefit;
 
+// Import junction table repo for findByPlanId
+import membershipPlanBenefitRepo from './membershipPlanBenefitRepo';
+
 // Type aliases for benefit and value types (used in application logic)
 export type BenefitType = 'discount' | 'freeShipping' | 'contentAccess' | 'prioritySupport' | 'rewardPoints' | 'gift' | 'earlyAccess' | 'custom';
 export type ValueType = 'fixed' | 'percentage' | 'boolean' | 'text' | 'json';
@@ -18,6 +21,22 @@ export type MembershipBenefitUpdateParams = Partial<Omit<MembershipBenefit, 'mem
 export class MembershipBenefitRepo {
   async findById(id: string): Promise<MembershipBenefit | null> {
     return await queryOne<MembershipBenefit>(`SELECT * FROM "membershipBenefit" WHERE "membershipBenefitId" = $1`, [id]);
+  }
+
+  async findByPlanId(planId: string, activeOnly = false): Promise<MembershipBenefit[]> {
+    // Get plan-benefit relationships from junction table
+    const planBenefits = await membershipPlanBenefitRepo.findByPlanId(planId, activeOnly);
+
+    // Get the actual benefit details
+    const benefits: MembershipBenefit[] = [];
+    for (const planBenefit of planBenefits) {
+      const benefit = await this.findById(planBenefit.benefitId);
+      if (benefit) {
+        benefits.push(benefit);
+      }
+    }
+
+    return benefits;
   }
 
   async findByCode(code: string): Promise<MembershipBenefit | null> {

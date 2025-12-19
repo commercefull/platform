@@ -27,70 +27,89 @@
   <!-- Main content -->
   <section class="content">
     <div class="container-fluid">
-      <!-- Small boxes (Stat box) -->
+      <!-- Primary Stats Row -->
       <div class="row">
         <div class="col-lg-3 col-6">
-          <!-- small box -->
           <div class="small-box bg-info">
             <div class="inner">
               <h3><%= stats.totalOrders %></h3>
-
               <p>Total Orders</p>
             </div>
-            <div class="icon">
-              <i class="ion ion-bag"></i>
-            </div>
-            <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+            <div class="icon"><i class="fas fa-shopping-cart"></i></div>
+            <a href="/hub/orders" class="small-box-footer">View Orders <i class="fas fa-arrow-circle-right"></i></a>
           </div>
         </div>
-        <!-- ./col -->
         <div class="col-lg-3 col-6">
-          <!-- small box -->
           <div class="small-box bg-success">
             <div class="inner">
-              <h3>$<%= stats.totalRevenue %></h3>
-
+              <h3>$<%= (stats.totalRevenue || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></h3>
               <p>Total Revenue</p>
             </div>
-            <div class="icon">
-              <i class="ion ion-stats-bars"></i>
-            </div>
-            <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+            <div class="icon"><i class="fas fa-dollar-sign"></i></div>
+            <a href="/hub/analytics" class="small-box-footer">View Analytics <i class="fas fa-arrow-circle-right"></i></a>
           </div>
         </div>
-        <!-- ./col -->
         <div class="col-lg-3 col-6">
-          <!-- small box -->
           <div class="small-box bg-warning">
             <div class="inner">
               <h3><%= stats.totalCustomers %></h3>
-
-              <p>User Registrations</p>
+              <p>Total Customers</p>
             </div>
-            <div class="icon">
-              <i class="ion ion-person-add"></i>
-            </div>
-            <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+            <div class="icon"><i class="fas fa-users"></i></div>
+            <a href="/hub/customers" class="small-box-footer">View Customers <i class="fas fa-arrow-circle-right"></i></a>
           </div>
         </div>
-        <!-- ./col -->
         <div class="col-lg-3 col-6">
-          <!-- small box -->
           <div class="small-box bg-danger">
             <div class="inner">
               <h3><%= stats.totalProducts %></h3>
-
               <p>Total Products</p>
             </div>
-            <div class="icon">
-              <i class="ion ion-pie-graph"></i>
-            </div>
-            <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+            <div class="icon"><i class="fas fa-box"></i></div>
+            <a href="/hub/products" class="small-box-footer">View Products <i class="fas fa-arrow-circle-right"></i></a>
           </div>
         </div>
-        <!-- ./col -->
       </div>
-      <!-- /.row -->
+
+      <!-- Secondary Stats Row -->
+      <div class="row">
+        <div class="col-lg-3 col-6">
+          <div class="info-box">
+            <span class="info-box-icon bg-primary"><i class="fas fa-clock"></i></span>
+            <div class="info-box-content">
+              <span class="info-box-text">Pending Orders</span>
+              <span class="info-box-number"><%= stats.pendingOrders %></span>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="info-box">
+            <span class="info-box-icon bg-warning"><i class="fas fa-exclamation-triangle"></i></span>
+            <div class="info-box-content">
+              <span class="info-box-text">Low Stock Items</span>
+              <span class="info-box-number"><%= stats.lowStockProducts %></span>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="info-box">
+            <span class="info-box-icon bg-info"><i class="fas fa-shopping-bag"></i></span>
+            <div class="info-box-content">
+              <span class="info-box-text">Today's Orders</span>
+              <span class="info-box-number"><%= stats.todayOrders %></span>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="info-box">
+            <span class="info-box-icon bg-success"><i class="fas fa-money-bill-wave"></i></span>
+            <div class="info-box-content">
+              <span class="info-box-text">Today's Revenue</span>
+              <span class="info-box-number">$<%= (stats.todayRevenue || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></span>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <!-- Main row -->
       <div class="row">
@@ -131,65 +150,92 @@
           <!-- Recent Orders -->
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title">Recent Orders</h3>
+              <h3 class="card-title"><i class="fas fa-shopping-cart mr-1"></i>Recent Orders</h3>
               <div class="card-tools">
                 <button type="button" class="btn btn-tool" data-card-widget="collapse">
                   <i class="fas fa-minus"></i>
                 </button>
-                <button type="button" class="btn btn-tool" data-card-widget="remove">
-                  <i class="fas fa-times"></i>
-                </button>
               </div>
             </div>
-            <!-- /.card-header -->
             <div class="card-body p-0">
               <div class="table-responsive">
                 <table class="table m-0">
                   <thead>
-                  <tr>
-                    <th>Order ID</th>
-                    <th>Customer</th>
-                    <th>Status</th>
-                    <th>Amount</th>
-                  </tr>
+                    <tr>
+                      <th>Order #</th>
+                      <th>Customer</th>
+                      <th>Status</th>
+                      <th>Amount</th>
+                      <th>Date</th>
+                    </tr>
                   </thead>
                   <tbody>
-                  <tr>
-                    <td><a href="#">OR9842</a></td>
-                    <td>John Doe</td>
-                    <td><span class="badge badge-success">Shipped</span></td>
-                    <td>$123.21</td>
-                  </tr>
-                  <tr>
-                    <td><a href="#">OR1848</a></td>
-                    <td>Jacob Thornton</td>
-                    <td><span class="badge badge-warning">Pending</span></td>
-                    <td>$82.00</td>
-                  </tr>
-                  <tr>
-                    <td><a href="#">OR7429</a></td>
-                    <td>Larry the Bird</td>
-                    <td><span class="badge badge-danger">Delivered</span></td>
-                    <td>$45.50</td>
-                  </tr>
-                  <tr>
-                    <td><a href="#">OR7429</a></td>
-                    <td>Obrien</td>
-                    <td><span class="badge badge-info">Processing</span></td>
-                    <td>$32.10</td>
-                  </tr>
+                    <% (recentOrders || []).forEach(function(order) { %>
+                    <tr>
+                      <td><a href="/hub/orders/<%= order.orderId %>">#<%= order.orderNumber %></a></td>
+                      <td><%= order.customerName %></td>
+                      <td>
+                        <span class="badge badge-<%= order.status === 'completed' ? 'success' : order.status === 'pending' ? 'warning' : order.status === 'cancelled' ? 'danger' : 'info' %>">
+                          <%= order.status %>
+                        </span>
+                      </td>
+                      <td>$<%= (order.totalAmount || 0).toFixed(2) %></td>
+                      <td><%= new Date(order.createdAt).toLocaleDateString() %></td>
+                    </tr>
+                    <% }); %>
+                    <% if ((recentOrders || []).length === 0) { %>
+                    <tr>
+                      <td colspan="5" class="text-center text-muted py-3">No orders yet</td>
+                    </tr>
+                    <% } %>
                   </tbody>
                 </table>
               </div>
-              <!-- /.table-responsive -->
             </div>
-            <!-- /.card-body -->
             <div class="card-footer text-center">
-              <a href="#" class="uppercase">View All Orders</a>
+              <a href="/hub/orders" class="uppercase">View All Orders</a>
             </div>
-            <!-- /.card-footer -->
           </div>
-          <!-- /.card -->
+
+          <!-- Top Products -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-star mr-1"></i>Top Products</h3>
+              <div class="card-tools">
+                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                  <i class="fas fa-minus"></i>
+                </button>
+              </div>
+            </div>
+            <div class="card-body p-0">
+              <ul class="products-list product-list-in-card pl-2 pr-2">
+                <% (topProducts || []).forEach(function(product) { %>
+                <li class="item">
+                  <div class="product-img">
+                    <div class="bg-secondary d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; border-radius: 4px;">
+                      <i class="fas fa-box text-white"></i>
+                    </div>
+                  </div>
+                  <div class="product-info">
+                    <a href="/hub/products/<%= product.productId %>" class="product-title">
+                      <%= product.name %>
+                      <span class="badge badge-success float-right">$<%= (product.revenue || 0).toFixed(2) %></span>
+                    </a>
+                    <span class="product-description">
+                      <%= product.totalSold %> sold
+                    </span>
+                  </div>
+                </li>
+                <% }); %>
+                <% if ((topProducts || []).length === 0) { %>
+                <li class="item text-center text-muted py-3">No product sales yet</li>
+                <% } %>
+              </ul>
+            </div>
+            <div class="card-footer text-center">
+              <a href="/hub/products" class="uppercase">View All Products</a>
+            </div>
+          </div>
         </section>
         <!-- /.Left col -->
 

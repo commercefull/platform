@@ -1,0 +1,259 @@
+<%- include('../../partials/header', { title: pageName }) %>
+
+<div class="content-wrapper">
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0"><i class="fas fa-building me-2"></i><%= pageName %></h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-end">
+            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item active">B2B</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="content">
+    <div class="container-fluid">
+      <!-- Stats -->
+      <div class="row">
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-info">
+            <div class="inner">
+              <h3><%= stats.totalCompanies || 0 %></h3>
+              <p>Companies</p>
+            </div>
+            <div class="icon"><i class="fas fa-building"></i></div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-success">
+            <div class="inner">
+              <h3><%= stats.activeCompanies || 0 %></h3>
+              <p>Active</p>
+            </div>
+            <div class="icon"><i class="fas fa-check-circle"></i></div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-warning">
+            <div class="inner">
+              <h3><%= stats.pendingQuotes || 0 %></h3>
+              <p>Pending Quotes</p>
+            </div>
+            <div class="icon"><i class="fas fa-file-invoice"></i></div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-danger">
+            <div class="inner">
+              <h3>$<%= ((stats.totalB2BRevenue || 0) / 1000).toFixed(0) %>k</h3>
+              <p>B2B Revenue</p>
+            </div>
+            <div class="icon"><i class="fas fa-dollar-sign"></i></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Companies -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title"><i class="fas fa-building me-2"></i>Companies</h3>
+          <button class="btn btn-sm btn-success float-end" data-bs-toggle="modal" data-bs-target="#addCompanyModal">
+            <i class="fas fa-plus me-1"></i>Add Company
+          </button>
+        </div>
+        <div class="card-body table-responsive p-0">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Company</th>
+                <th>Contact</th>
+                <th>Credit Limit</th>
+                <th>Orders</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% (companies || []).forEach(function(company) { %>
+              <tr>
+                <td>
+                  <strong><%= company.name %></strong>
+                  <br><small class="text-muted"><%= company.taxId || '' %></small>
+                </td>
+                <td>
+                  <%= company.contactName || '-' %>
+                  <br><small class="text-muted"><%= company.email %></small>
+                </td>
+                <td>$<%= (company.creditLimit || 0).toLocaleString() %></td>
+                <td><%= company.orderCount || 0 %></td>
+                <td>
+                  <span class="badge bg-<%= company.status === 'approved' ? 'success' : company.status === 'pending' ? 'warning' : 'danger' %>">
+                    <%= company.status %>
+                  </span>
+                </td>
+                <td>
+                  <a href="/hub/programs/b2b/companies/<%= company.b2bCompanyId %>" class="btn btn-sm btn-outline-info">
+                    <i class="fas fa-eye"></i>
+                  </a>
+                  <button class="btn btn-sm btn-outline-primary" onclick="editCompany('<%= company.b2bCompanyId %>')">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <% if (company.status === 'pending') { %>
+                  <button class="btn btn-sm btn-outline-success" onclick="approveCompany('<%= company.b2bCompanyId %>')">
+                    <i class="fas fa-check"></i>
+                  </button>
+                  <% } %>
+                </td>
+              </tr>
+              <% }); %>
+              <% if ((companies || []).length === 0) { %>
+              <tr>
+                <td colspan="6" class="text-center text-muted py-4">No companies registered.</td>
+              </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Quotes -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title"><i class="fas fa-file-invoice me-2"></i>Recent Quotes</h3>
+          <a href="/hub/programs/b2b/quotes" class="btn btn-sm btn-primary float-end">View All</a>
+        </div>
+        <div class="card-body table-responsive p-0">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Quote #</th>
+                <th>Company</th>
+                <th>Items</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Expires</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% (quotes || []).slice(0, 10).forEach(function(quote) { %>
+              <tr>
+                <td><a href="/hub/programs/b2b/quotes/<%= quote.quoteId %>">#<%= quote.quoteNumber %></a></td>
+                <td><%= quote.companyName %></td>
+                <td><%= quote.itemCount || 0 %></td>
+                <td>$<%= (quote.totalAmount || 0).toFixed(2) %></td>
+                <td>
+                  <span class="badge bg-<%= quote.status === 'accepted' ? 'success' : quote.status === 'pending' ? 'warning' : quote.status === 'rejected' ? 'danger' : 'secondary' %>">
+                    <%= quote.status %>
+                  </span>
+                </td>
+                <td><%= quote.expiresAt ? new Date(quote.expiresAt).toLocaleDateString() : '-' %></td>
+                <td>
+                  <a href="/hub/programs/b2b/quotes/<%= quote.quoteId %>" class="btn btn-sm btn-outline-info">
+                    <i class="fas fa-eye"></i>
+                  </a>
+                </td>
+              </tr>
+              <% }); %>
+              <% if ((quotes || []).length === 0) { %>
+              <tr>
+                <td colspan="7" class="text-center text-muted py-4">No quotes yet.</td>
+              </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- Add Company Modal -->
+<div class="modal fade" id="addCompanyModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Add B2B Company</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST" action="/hub/programs/b2b/companies">
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label">Company Name <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" name="name" required>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label">Tax ID / VAT</label>
+                <input type="text" class="form-control" name="taxId">
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label">Contact Name</label>
+                <input type="text" class="form-control" name="contactName">
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label">Email <span class="text-danger">*</span></label>
+                <input type="email" class="form-control" name="email" required>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label">Phone</label>
+                <input type="tel" class="form-control" name="phone">
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label">Credit Limit</label>
+                <div class="input-group">
+                  <span class="input-group-text">$</span>
+                  <input type="number" class="form-control" name="creditLimit" min="0" value="0">
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Address</label>
+            <textarea class="form-control" name="address" rows="2"></textarea>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="autoApprove" value="true" id="autoApprove">
+            <label class="form-check-label" for="autoApprove">Auto-approve this company</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create Company</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  function editCompany(id) { window.location.href = `/hub/programs/b2b/companies/${id}/edit`; }
+  async function approveCompany(id) {
+    if (!confirm('Approve this company?')) return;
+    const res = await fetch(`/hub/programs/b2b/companies/${id}/approve`, { method: 'POST' });
+    if ((await res.json()).success) location.reload();
+  }
+</script>
+
+<%- include('../../partials/footer') %>

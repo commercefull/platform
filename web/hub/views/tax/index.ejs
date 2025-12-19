@@ -1,0 +1,318 @@
+<%- include('../partials/header', { title: pageName }) %>
+
+<div class="content-wrapper">
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0"><i class="fas fa-percentage me-2"></i><%= pageName %></h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-end">
+            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item active">Tax Management</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="content">
+    <div class="container-fluid">
+      <% if (typeof success !== 'undefined' && success) { %>
+      <div class="alert alert-success alert-dismissible">
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <i class="fas fa-check-circle me-2"></i><%= success %>
+      </div>
+      <% } %>
+
+      <!-- Tax Rates -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title"><i class="fas fa-list me-2"></i>Tax Rates</h3>
+          <button class="btn btn-sm btn-success float-end" data-bs-toggle="modal" data-bs-target="#addTaxRateModal">
+            <i class="fas fa-plus me-1"></i>Add Tax Rate
+          </button>
+        </div>
+        <div class="card-body table-responsive p-0">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Rate</th>
+                <th>Country</th>
+                <th>State/Region</th>
+                <th>Tax Class</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% (taxRates || []).forEach(function(rate) { %>
+              <tr>
+                <td><strong><%= rate.name %></strong></td>
+                <td><%= rate.rate %>%</td>
+                <td><%= rate.country || 'All' %></td>
+                <td><%= rate.state || 'All' %></td>
+                <td><span class="badge bg-secondary"><%= rate.taxClass || 'Standard' %></span></td>
+                <td>
+                  <span class="badge bg-<%= rate.isActive ? 'success' : 'secondary' %>">
+                    <%= rate.isActive ? 'Active' : 'Inactive' %>
+                  </span>
+                </td>
+                <td>
+                  <button class="btn btn-sm btn-outline-primary" onclick="editTaxRate('<%= rate.taxRateId %>')">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button class="btn btn-sm btn-outline-danger" onclick="deleteTaxRate('<%= rate.taxRateId %>')">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+              <% }); %>
+              <% if ((taxRates || []).length === 0) { %>
+              <tr>
+                <td colspan="7" class="text-center text-muted py-4">
+                  <i class="fas fa-percentage fa-3x mb-3 d-block"></i>
+                  No tax rates configured. Add your first tax rate.
+                </td>
+              </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tax Zones -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title"><i class="fas fa-globe me-2"></i>Tax Zones</h3>
+          <button class="btn btn-sm btn-success float-end" data-bs-toggle="modal" data-bs-target="#addTaxZoneModal">
+            <i class="fas fa-plus me-1"></i>Add Tax Zone
+          </button>
+        </div>
+        <div class="card-body table-responsive p-0">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Zone Name</th>
+                <th>Countries</th>
+                <th>Tax Rates</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% (taxZones || []).forEach(function(zone) { %>
+              <tr>
+                <td><strong><%= zone.name %></strong></td>
+                <td><%= (zone.countries || []).length %> countries</td>
+                <td><%= (zone.taxRates || []).length %> rates</td>
+                <td>
+                  <span class="badge bg-<%= zone.isActive ? 'success' : 'secondary' %>">
+                    <%= zone.isActive ? 'Active' : 'Inactive' %>
+                  </span>
+                </td>
+                <td>
+                  <button class="btn btn-sm btn-outline-primary" onclick="editTaxZone('<%= zone.taxZoneId %>')">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button class="btn btn-sm btn-outline-danger" onclick="deleteTaxZone('<%= zone.taxZoneId %>')">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+              <% }); %>
+              <% if ((taxZones || []).length === 0) { %>
+              <tr>
+                <td colspan="5" class="text-center text-muted py-4">No tax zones configured.</td>
+              </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tax Classes -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title"><i class="fas fa-tags me-2"></i>Tax Classes</h3>
+          <button class="btn btn-sm btn-success float-end" data-bs-toggle="modal" data-bs-target="#addTaxClassModal">
+            <i class="fas fa-plus me-1"></i>Add Tax Class
+          </button>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <% (taxClasses || []).forEach(function(taxClass) { %>
+            <div class="col-md-4 mb-3">
+              <div class="card h-100">
+                <div class="card-body">
+                  <h5 class="card-title"><%= taxClass.name %></h5>
+                  <p class="card-text text-muted"><%= taxClass.description || 'No description' %></p>
+                  <span class="badge bg-info"><%= taxClass.productCount || 0 %> products</span>
+                </div>
+                <div class="card-footer">
+                  <button class="btn btn-sm btn-outline-primary" onclick="editTaxClass('<%= taxClass.taxClassId %>')">
+                    <i class="fas fa-edit"></i> Edit
+                  </button>
+                  <button class="btn btn-sm btn-outline-danger" onclick="deleteTaxClass('<%= taxClass.taxClassId %>')">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <% }); %>
+            <% if ((taxClasses || []).length === 0) { %>
+            <div class="col-12 text-center text-muted py-4">
+              <i class="fas fa-tags fa-3x mb-3 d-block"></i>
+              No tax classes configured.
+            </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- Add Tax Rate Modal -->
+<div class="modal fade" id="addTaxRateModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Add Tax Rate</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST" action="/hub/tax/rates">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Name <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" name="name" required placeholder="e.g., US Sales Tax">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Rate (%) <span class="text-danger">*</span></label>
+            <input type="number" class="form-control" name="rate" step="0.001" min="0" max="100" required>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label">Country</label>
+                <input type="text" class="form-control" name="country" placeholder="Leave empty for all">
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label">State/Region</label>
+                <input type="text" class="form-control" name="state" placeholder="Leave empty for all">
+              </div>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Tax Class</label>
+            <select class="form-select" name="taxClass">
+              <option value="">Standard</option>
+              <option value="reduced">Reduced</option>
+              <option value="zero">Zero Rate</option>
+            </select>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="isActive" value="true" id="rateIsActive" checked>
+            <label class="form-check-label" for="rateIsActive">Active</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Add Tax Rate</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Add Tax Zone Modal -->
+<div class="modal fade" id="addTaxZoneModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Add Tax Zone</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST" action="/hub/tax/zones">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Zone Name <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" name="name" required placeholder="e.g., North America">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea class="form-control" name="description" rows="2"></textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Countries</label>
+            <input type="text" class="form-control" name="countries" placeholder="US, CA, MX (comma separated)">
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="isActive" value="true" id="zoneIsActive" checked>
+            <label class="form-check-label" for="zoneIsActive">Active</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Add Tax Zone</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Add Tax Class Modal -->
+<div class="modal fade" id="addTaxClassModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Add Tax Class</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST" action="/hub/tax/classes">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Name <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" name="name" required placeholder="e.g., Digital Goods">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea class="form-control" name="description" rows="2"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Add Tax Class</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  function editTaxRate(id) { window.location.href = `/hub/tax/rates/${id}/edit`; }
+  function editTaxZone(id) { window.location.href = `/hub/tax/zones/${id}/edit`; }
+  function editTaxClass(id) { window.location.href = `/hub/tax/classes/${id}/edit`; }
+  
+  async function deleteTaxRate(id) {
+    if (!confirm('Delete this tax rate?')) return;
+    const res = await fetch(`/hub/tax/rates/${id}`, { method: 'DELETE' });
+    if ((await res.json()).success) location.reload();
+  }
+  async function deleteTaxZone(id) {
+    if (!confirm('Delete this tax zone?')) return;
+    const res = await fetch(`/hub/tax/zones/${id}`, { method: 'DELETE' });
+    if ((await res.json()).success) location.reload();
+  }
+  async function deleteTaxClass(id) {
+    if (!confirm('Delete this tax class?')) return;
+    const res = await fetch(`/hub/tax/classes/${id}`, { method: 'DELETE' });
+    if ((await res.json()).success) location.reload();
+  }
+</script>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,288 @@
+<%- include('../partials/header', { title: pageName }) %>
+
+<div class="content-wrapper">
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0"><i class="fas fa-plus-circle me-2"></i><%= pageName %></h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-end">
+            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/hub/products">Products</a></li>
+            <li class="breadcrumb-item active">Create</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="content">
+    <div class="container-fluid">
+      <% if (typeof error !== 'undefined' && error) { %>
+      <div class="alert alert-danger alert-dismissible">
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <i class="fas fa-exclamation-triangle me-2"></i><%= error %>
+      </div>
+      <% } %>
+
+      <form method="POST" action="/hub/products" enctype="multipart/form-data">
+        <div class="row">
+          <!-- Main Content -->
+          <div class="col-lg-8">
+            <!-- Basic Info -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-info-circle me-2"></i>Basic Information</h3>
+              </div>
+              <div class="card-body">
+                <div class="form-group mb-3">
+                  <label class="form-label">Product Name <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control" name="name" value="<%= formData.name || '' %>" required placeholder="Enter product name">
+                </div>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group mb-3">
+                      <label class="form-label">SKU</label>
+                      <input type="text" class="form-control" name="sku" value="<%= formData.sku || '' %>" placeholder="Stock Keeping Unit">
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group mb-3">
+                      <label class="form-label">Slug</label>
+                      <input type="text" class="form-control" name="slug" value="<%= formData.slug || '' %>" placeholder="url-friendly-name">
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group mb-3">
+                  <label class="form-label">Short Description</label>
+                  <textarea class="form-control" name="shortDescription" rows="2" placeholder="Brief product summary"><%= formData.shortDescription || '' %></textarea>
+                </div>
+                <div class="form-group mb-3">
+                  <label class="form-label">Full Description</label>
+                  <textarea class="form-control" name="description" rows="5" placeholder="Detailed product description"><%= formData.description || '' %></textarea>
+                </div>
+              </div>
+            </div>
+
+            <!-- Pricing -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-dollar-sign me-2"></i>Pricing</h3>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-4">
+                    <div class="form-group mb-3">
+                      <label class="form-label">Base Price <span class="text-danger">*</span></label>
+                      <div class="input-group">
+                        <span class="input-group-text">$</span>
+                        <input type="number" class="form-control" name="basePrice" value="<%= formData.basePrice || '0.00' %>" step="0.01" min="0" required>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-group mb-3">
+                      <label class="form-label">Sale Price</label>
+                      <div class="input-group">
+                        <span class="input-group-text">$</span>
+                        <input type="number" class="form-control" name="salePrice" value="<%= formData.salePrice || '' %>" step="0.01" min="0">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-group mb-3">
+                      <label class="form-label">Cost</label>
+                      <div class="input-group">
+                        <span class="input-group-text">$</span>
+                        <input type="number" class="form-control" name="cost" value="<%= formData.cost || '' %>" step="0.01" min="0">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group mb-3">
+                      <label class="form-label">Currency</label>
+                      <select class="form-select" name="currencyCode">
+                        <option value="USD" <%= formData.currencyCode === 'USD' ? 'selected' : '' %>>USD - US Dollar</option>
+                        <option value="EUR" <%= formData.currencyCode === 'EUR' ? 'selected' : '' %>>EUR - Euro</option>
+                        <option value="GBP" <%= formData.currencyCode === 'GBP' ? 'selected' : '' %>>GBP - British Pound</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group mb-3">
+                      <label class="form-label">Tax Class</label>
+                      <select class="form-select" name="taxClass">
+                        <option value="">Standard</option>
+                        <option value="reduced" <%= formData.taxClass === 'reduced' ? 'selected' : '' %>>Reduced</option>
+                        <option value="zero" <%= formData.taxClass === 'zero' ? 'selected' : '' %>>Zero Rate</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Dimensions -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-ruler-combined me-2"></i>Dimensions & Weight</h3>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group mb-3">
+                      <label class="form-label">Weight</label>
+                      <div class="input-group">
+                        <input type="number" class="form-control" name="weight" value="<%= formData.weight || '' %>" step="0.01" min="0">
+                        <select class="form-select" name="weightUnit" style="max-width: 100px;">
+                          <option value="kg" <%= formData.weightUnit === 'kg' ? 'selected' : '' %>>kg</option>
+                          <option value="lb" <%= formData.weightUnit === 'lb' ? 'selected' : '' %>>lb</option>
+                          <option value="g" <%= formData.weightUnit === 'g' ? 'selected' : '' %>>g</option>
+                          <option value="oz" <%= formData.weightUnit === 'oz' ? 'selected' : '' %>>oz</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-4">
+                    <div class="form-group mb-3">
+                      <label class="form-label">Length</label>
+                      <input type="number" class="form-control" name="length" value="<%= formData.length || '' %>" step="0.01" min="0">
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-group mb-3">
+                      <label class="form-label">Width</label>
+                      <input type="number" class="form-control" name="width" value="<%= formData.width || '' %>" step="0.01" min="0">
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-group mb-3">
+                      <label class="form-label">Height</label>
+                      <div class="input-group">
+                        <input type="number" class="form-control" name="height" value="<%= formData.height || '' %>" step="0.01" min="0">
+                        <select class="form-select" name="dimensionUnit" style="max-width: 80px;">
+                          <option value="cm" <%= formData.dimensionUnit === 'cm' ? 'selected' : '' %>>cm</option>
+                          <option value="in" <%= formData.dimensionUnit === 'in' ? 'selected' : '' %>>in</option>
+                          <option value="m" <%= formData.dimensionUnit === 'm' ? 'selected' : '' %>>m</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- SEO -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-search me-2"></i>SEO</h3>
+              </div>
+              <div class="card-body">
+                <div class="form-group mb-3">
+                  <label class="form-label">Meta Title</label>
+                  <input type="text" class="form-control" name="metaTitle" value="<%= formData.metaTitle || '' %>" maxlength="70">
+                  <small class="text-muted">Recommended: 50-60 characters</small>
+                </div>
+                <div class="form-group mb-3">
+                  <label class="form-label">Meta Description</label>
+                  <textarea class="form-control" name="metaDescription" rows="2" maxlength="160"><%= formData.metaDescription || '' %></textarea>
+                  <small class="text-muted">Recommended: 150-160 characters</small>
+                </div>
+                <div class="form-group mb-3">
+                  <label class="form-label">Meta Keywords</label>
+                  <input type="text" class="form-control" name="metaKeywords" value="<%= formData.metaKeywords || '' %>" placeholder="keyword1, keyword2, keyword3">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sidebar -->
+          <div class="col-lg-4">
+            <!-- Publish -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-paper-plane me-2"></i>Publish</h3>
+              </div>
+              <div class="card-body">
+                <button type="submit" class="btn btn-primary btn-lg w-100 mb-3">
+                  <i class="fas fa-save me-2"></i>Create Product
+                </button>
+                <a href="/hub/products" class="btn btn-secondary w-100">
+                  <i class="fas fa-times me-2"></i>Cancel
+                </a>
+              </div>
+            </div>
+
+            <!-- Organization -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-folder me-2"></i>Organization</h3>
+              </div>
+              <div class="card-body">
+                <div class="form-group mb-3">
+                  <label class="form-label">Product Type</label>
+                  <select class="form-select" name="productTypeId">
+                    <option value="">Select Type</option>
+                    <% (productTypes || []).forEach(function(type) { %>
+                    <option value="<%= type.productTypeId %>" <%= formData.productTypeId === type.productTypeId ? 'selected' : '' %>><%= type.name %></option>
+                    <% }); %>
+                  </select>
+                </div>
+                <div class="form-group mb-3">
+                  <label class="form-label">Category</label>
+                  <select class="form-select" name="categoryId">
+                    <option value="">Select Category</option>
+                    <% (categories || []).forEach(function(cat) { %>
+                    <option value="<%= cat.categoryId %>" <%= formData.categoryId === cat.categoryId ? 'selected' : '' %>><%= cat.name %></option>
+                    <% }); %>
+                  </select>
+                </div>
+                <div class="form-group mb-3">
+                  <label class="form-label">Tags</label>
+                  <input type="text" class="form-control" name="tags" value="<%= formData.tags || '' %>" placeholder="tag1, tag2, tag3">
+                </div>
+              </div>
+            </div>
+
+            <!-- Options -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-cog me-2"></i>Options</h3>
+              </div>
+              <div class="card-body">
+                <div class="form-check mb-2">
+                  <input class="form-check-input" type="checkbox" name="isFeatured" value="true" id="isFeatured" <%= formData.isFeatured ? 'checked' : '' %>>
+                  <label class="form-check-label" for="isFeatured">Featured Product</label>
+                </div>
+                <div class="form-check mb-2">
+                  <input class="form-check-input" type="checkbox" name="isTaxable" value="true" id="isTaxable" <%= formData.isTaxable !== false ? 'checked' : '' %>>
+                  <label class="form-check-label" for="isTaxable">Taxable</label>
+                </div>
+                <div class="form-check mb-2">
+                  <input class="form-check-input" type="checkbox" name="isVirtual" value="true" id="isVirtual" <%= formData.isVirtual ? 'checked' : '' %>>
+                  <label class="form-check-label" for="isVirtual">Virtual Product</label>
+                </div>
+                <div class="form-check mb-2">
+                  <input class="form-check-input" type="checkbox" name="isDownloadable" value="true" id="isDownloadable" <%= formData.isDownloadable ? 'checked' : '' %>>
+                  <label class="form-check-label" for="isDownloadable">Downloadable</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="isSubscription" value="true" id="isSubscription" <%= formData.isSubscription ? 'checked' : '' %>>
+                  <label class="form-check-label" for="isSubscription">Subscription Product</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </section>
+</div>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,196 @@
+<%- include('../partials/header', { title: pageName }) %>
+
+<div class="content-wrapper">
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0"><i class="fas fa-brain me-2"></i><%= pageName %></h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-end">
+            <li class="breadcrumb-item"><a href="/hub/analytics">Analytics</a></li>
+            <li class="breadcrumb-item active">Predictive</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="content">
+    <div class="container-fluid">
+      <!-- Sales Forecasting -->
+      <div class="row">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-chart-line me-2"></i>Sales Forecasting</h3>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-8">
+                  <canvas id="forecastChart" height="300"></canvas>
+                </div>
+                <div class="col-md-4">
+                  <div class="info-box bg-info">
+                    <span class="info-box-icon"><i class="fas fa-dollar-sign"></i></span>
+                    <div class="info-box-content">
+                      <span class="info-box-text">Predicted Revenue (30 days)</span>
+                      <span class="info-box-number">$<%= (forecasts.predictions || []).reduce((sum, p) => sum + p.revenue, 0).toLocaleString() %></span>
+                    </div>
+                  </div>
+                  <div class="info-box bg-success">
+                    <span class="info-box-icon"><i class="fas fa-percentage"></i></span>
+                    <div class="info-box-content">
+                      <span class="info-box-text">Confidence Level</span>
+                      <span class="info-box-number"><%= ((forecasts.confidence || 0) * 100).toFixed(1) %>%</span>
+                    </div>
+                  </div>
+                  <div class="info-box bg-warning">
+                    <span class="info-box-icon"><i class="fas fa-chart-bar"></i></span>
+                    <div class="info-box-content">
+                      <span class="info-box-text">Trend</span>
+                      <span class="info-box-number"><%= forecasts.trend || 'Stable' %></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Inventory Optimization -->
+      <div class="row">
+        <div class="col-lg-6">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-boxes me-2"></i>Inventory Recommendations</h3>
+            </div>
+            <div class="card-body table-responsive p-0" style="max-height: 400px;">
+              <table class="table table-hover text-nowrap">
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>Current</th>
+                    <th>Recommended</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% (inventoryPredictions.recommendations || []).slice(0, 10).forEach(function(rec) { %>
+                  <tr>
+                    <td><%= rec.productId.slice(-8) %></td>
+                    <td><%= rec.currentStock %></td>
+                    <td><%= rec.recommendedStock %></td>
+                    <td>
+                      <% if (rec.currentStock < rec.recommendedStock) { %>
+                        <span class="badge bg-warning">Reorder</span>
+                      <% } else if (rec.currentStock > rec.recommendedStock * 1.5) { %>
+                        <span class="badge bg-info">Overstock</span>
+                      <% } else { %>
+                        <span class="badge bg-success">Optimal</span>
+                      <% } %>
+                    </td>
+                  </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-exclamation-triangle me-2"></i>Inventory Alerts</h3>
+            </div>
+            <div class="card-body">
+              <% (inventoryPredictions.alerts || []).slice(0, 5).forEach(function(alert) { %>
+              <div class="alert alert-<%= alert.severity === 'high' ? 'danger' : 'warning' %>" role="alert">
+                <i class="fas fa-<%= alert.alertType === 'reorder' ? 'shopping-cart' : 'warehouse' %> me-2"></i>
+                <%= alert.message %>
+              </div>
+              <% }); %>
+              <% if ((inventoryPredictions.alerts || []).length === 0) { %>
+              <div class="alert alert-success" role="alert">
+                <i class="fas fa-check-circle me-2"></i>No inventory alerts at this time.
+              </div>
+              <% } %>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Customer Churn Risk -->
+      <div class="row">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-user-minus me-2"></i>Customer Churn Risk Analysis</h3>
+            </div>
+            <div class="card-body table-responsive p-0">
+              <table class="table table-hover text-nowrap">
+                <thead>
+                  <tr>
+                    <th>Customer ID</th>
+                    <th>Churn Probability</th>
+                    <th>Risk Level</th>
+                    <th>Key Factors</th>
+                    <th>Recommendations</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% (customerChurnRisk || []).forEach(function(customer) { %>
+                  <tr>
+                    <td><%= customer.customerId.slice(-8) %></td>
+                    <td>
+                      <div class="progress" style="height: 20px;">
+                        <div class="progress-bar bg-<%= customer.riskLevel === 'high' ? 'danger' : customer.riskLevel === 'medium' ? 'warning' : 'success' %>" 
+                             style="width: <%= (customer.churnProbability * 100).toFixed(0) %>%">
+                          <%= (customer.churnProbability * 100).toFixed(1) %>%
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <span class="badge bg-<%= customer.riskLevel === 'high' ? 'danger' : customer.riskLevel === 'medium' ? 'warning' : 'success' %>">
+                        <%= customer.riskLevel.toUpperCase() %>
+                      </span>
+                    </td>
+                    <td><%= (customer.factors || []).slice(0, 2).join(', ') || 'N/A' %></td>
+                    <td><%= (customer.recommendations || []).slice(0, 1).join(', ') || 'Monitor' %></td>
+                  </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const forecastCtx = document.getElementById('forecastChart').getContext('2d');
+  new Chart(forecastCtx, {
+    type: 'line',
+    data: {
+      labels: <%- JSON.stringify((forecasts.predictions || []).map(p => p.date)) %>,
+      datasets: [{
+        label: 'Predicted Revenue',
+        data: <%- JSON.stringify((forecasts.predictions || []).map(p => p.revenue)) %>,
+        borderColor: 'rgb(75, 192, 192)',
+        tension: 0.1,
+        fill: true,
+        backgroundColor: 'rgba(75, 192, 192, 0.2)'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false
+    }
+  });
+</script>
+
+<%- include('../partials/footer') %>

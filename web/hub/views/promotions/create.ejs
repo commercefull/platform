@@ -1,0 +1,221 @@
+<%- include('../layout') %>
+
+<% content %>
+<div class="content-wrapper">
+  <!-- Content Header (Page header) -->
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0">Create Promotion</h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/hub/promotions">Promotions</a></li>
+            <li class="breadcrumb-item active">Create</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <section class="content">
+    <div class="container-fluid">
+      <!-- Error Messages -->
+      <% if (error) { %>
+        <div class="alert alert-danger alert-dismissible">
+          <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+          <i class="icon fas fa-ban"></i> <%= error %>
+        </div>
+      <% } %>
+
+      <div class="row">
+        <div class="col-md-12">
+          <div class="card card-primary">
+            <div class="card-header">
+              <h3 class="card-title">Promotion Details</h3>
+            </div>
+
+            <form action="/hub/promotions" method="POST">
+              <div class="card-body">
+                <!-- Basic Information -->
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="code">Promotion Code *</label>
+                      <input type="text" class="form-control" id="code" name="code"
+                             value="<%= formData?.code || '' %>" required>
+                      <small class="form-text text-muted">Unique code that customers will enter</small>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="name">Promotion Name *</label>
+                      <input type="text" class="form-control" id="name" name="name"
+                             value="<%= formData?.name || '' %>" required>
+                      <small class="form-text text-muted">Internal name for this promotion</small>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="description">Description</label>
+                  <textarea class="form-control" id="description" name="description" rows="3"><%= formData?.description || '' %></textarea>
+                  <small class="form-text text-muted">Optional description of the promotion</small>
+                </div>
+
+                <!-- Promotion Type and Value -->
+                <div class="row">
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="type">Promotion Type *</label>
+                      <select class="form-control" id="type" name="type" required onchange="updateDiscountLabel()">
+                        <option value="">Select Type</option>
+                        <option value="percentage" <%= (formData?.type === 'percentage') ? 'selected' : '' %>>Percentage Discount</option>
+                        <option value="fixed_amount" <%= (formData?.type === 'fixed_amount') ? 'selected' : '' %>>Fixed Amount Discount</option>
+                        <option value="free_shipping" <%= (formData?.type === 'free_shipping') ? 'selected' : '' %>>Free Shipping</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="discountValue" id="discountLabel">Discount Value *</label>
+                      <input type="number" class="form-control" id="discountValue" name="value"
+                             value="<%= formData?.value || '' %>" step="0.01" min="0" required>
+                      <small class="form-text text-muted" id="discountHelp">Amount to discount</small>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="isActive">Status</label>
+                      <div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input" id="isActive" name="isActive" value="true"
+                               <%= (formData?.isActive !== false) ? 'checked' : '' %>>
+                        <label class="custom-control-label" for="isActive">Active</label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Conditions -->
+                <h5 class="mt-4 mb-3">Conditions</h5>
+                <div class="row">
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="minimumOrderAmount">Minimum Order Amount</label>
+                      <input type="number" class="form-control" id="minimumOrderAmount" name="minOrderAmount"
+                             value="<%= formData?.minOrderAmount || '' %>" step="0.01" min="0">
+                      <small class="form-text text-muted">Minimum order total to qualify</small>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="maximumDiscountAmount">Maximum Discount Amount</label>
+                      <input type="number" class="form-control" id="maximumDiscountAmount" name="maxDiscountAmount"
+                             value="<%= formData?.maxDiscountAmount || '' %>" step="0.01" min="0">
+                      <small class="form-text text-muted">Maximum discount for percentage promotions</small>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="usageLimit">Usage Limit</label>
+                      <input type="number" class="form-control" id="usageLimit" name="usageLimit"
+                             value="<%= formData?.usageLimit || '' %>" min="1">
+                      <small class="form-text text-muted">Total times this promotion can be used</small>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="usageLimitPerCustomer">Usage Limit Per Customer</label>
+                      <input type="number" class="form-control" id="usageLimitPerCustomer" name="usageLimitPerCustomer"
+                             value="<%= formData?.usageLimitPerCustomer || '' %>" min="1">
+                      <small class="form-text text-muted">Times each customer can use this promotion</small>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Validity Period -->
+                <h5 class="mt-4 mb-3">Validity Period</h5>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="startsAt">Start Date</label>
+                      <input type="datetime-local" class="form-control" id="startsAt" name="startsAt"
+                             value="<%= formData?.startsAt ? new Date(formData.startsAt).toISOString().slice(0,16) : '' %>">
+                      <small class="form-text text-muted">When the promotion becomes active (leave empty for immediate)</small>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="endsAt">End Date</label>
+                      <input type="datetime-local" class="form-control" id="endsAt" name="endsAt"
+                             value="<%= formData?.endsAt ? new Date(formData.endsAt).toISOString().slice(0,16) : '' %>">
+                      <small class="form-text text-muted">When the promotion expires (leave empty for no expiry)</small>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- TODO: Add product/category/customer group selection in future iterations -->
+                <div class="alert alert-info">
+                  <i class="icon fas fa-info"></i>
+                  <strong>Note:</strong> Product, category, and customer group restrictions will be available in a future update.
+                </div>
+              </div>
+
+              <div class="card-footer">
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-save"></i> Create Promotion
+                </button>
+                <a href="/hub/promotions" class="btn btn-secondary">
+                  <i class="fas fa-times"></i> Cancel
+                </a>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+function updateDiscountLabel() {
+  const type = document.getElementById('type').value;
+  const label = document.getElementById('discountLabel');
+  const help = document.getElementById('discountHelp');
+
+  switch(type) {
+    case 'percentage':
+      label.textContent = 'Discount Percentage *';
+      help.textContent = 'Percentage off (e.g., 10 for 10% off)';
+      document.getElementById('discountValue').placeholder = '10';
+      break;
+    case 'fixed_amount':
+      label.textContent = 'Discount Amount *';
+      help.textContent = 'Fixed amount to subtract (e.g., 5.00)';
+      document.getElementById('discountValue').placeholder = '5.00';
+      break;
+    case 'free_shipping':
+      label.textContent = 'Discount Value';
+      help.textContent = 'Not used for free shipping promotions';
+      document.getElementById('discountValue').value = '0';
+      document.getElementById('discountValue').disabled = true;
+      break;
+    default:
+      label.textContent = 'Discount Value *';
+      help.textContent = 'Amount to discount';
+      document.getElementById('discountValue').disabled = false;
+  }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+  updateDiscountLabel();
+});
+</script>
+<% endcontent %>

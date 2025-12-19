@@ -1,0 +1,201 @@
+<%- include('../partials/header', { title: pageName }) %>
+
+<div class="content-wrapper">
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0"><i class="fas fa-file-alt me-2"></i><%= pageName %></h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-end">
+            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/hub/platform/audit-logs">Audit Logs</a></li>
+            <li class="breadcrumb-item active">Detail</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="content">
+    <div class="container-fluid">
+      <!-- Basic Info -->
+      <div class="row">
+        <div class="col-lg-6">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-info-circle me-2"></i>Basic Information</h3>
+            </div>
+            <div class="card-body">
+              <table class="table table-borderless">
+                <tr>
+                  <th style="width: 30%">Audit Log ID</th>
+                  <td><code><%= auditLog.auditLogId %></code></td>
+                </tr>
+                <tr>
+                  <th>Timestamp</th>
+                  <td><%= new Date(auditLog.createdAt).toLocaleString() %></td>
+                </tr>
+                <tr>
+                  <th>Entity Type</th>
+                  <td><span class="badge bg-secondary"><%= auditLog.entityType %></span></td>
+                </tr>
+                <tr>
+                  <th>Entity ID</th>
+                  <td><code><%= auditLog.entityId %></code></td>
+                </tr>
+                <tr>
+                  <th>Action</th>
+                  <td>
+                    <span class="badge bg-<%= auditLog.action === 'create' ? 'success' : auditLog.action === 'update' ? 'info' : auditLog.action === 'delete' ? 'danger' : 'secondary' %>">
+                      <%= auditLog.action %>
+                    </span>
+                  </td>
+                </tr>
+                <tr>
+                  <th>Status</th>
+                  <td>
+                    <span class="badge bg-<%= auditLog.status === 'success' ? 'success' : auditLog.status === 'failure' ? 'danger' : 'warning' %>">
+                      <%= auditLog.status %>
+                    </span>
+                  </td>
+                </tr>
+                <% if (auditLog.duration) { %>
+                <tr>
+                  <th>Duration</th>
+                  <td><%= auditLog.duration %>ms</td>
+                </tr>
+                <% } %>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-user me-2"></i>Actor Information</h3>
+            </div>
+            <div class="card-body">
+              <table class="table table-borderless">
+                <tr>
+                  <th style="width: 30%">Actor Type</th>
+                  <td><span class="badge bg-light text-dark"><%= auditLog.actorType %></span></td>
+                </tr>
+                <% if (auditLog.actorId) { %>
+                <tr>
+                  <th>Actor ID</th>
+                  <td><code><%= auditLog.actorId %></code></td>
+                </tr>
+                <% } %>
+                <% if (auditLog.actorEmail) { %>
+                <tr>
+                  <th>Actor Email</th>
+                  <td><%= auditLog.actorEmail %></td>
+                </tr>
+                <% } %>
+                <% if (auditLog.actorIp) { %>
+                <tr>
+                  <th>IP Address</th>
+                  <td><code><%= auditLog.actorIp %></code></td>
+                </tr>
+                <% } %>
+                <% if (auditLog.userAgent) { %>
+                <tr>
+                  <th>User Agent</th>
+                  <td><small><%= auditLog.userAgent %></small></td>
+                </tr>
+                <% } %>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Changed Fields -->
+      <% if (auditLog.changedFields && auditLog.changedFields.length > 0) { %>
+      <div class="row">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-exchange-alt me-2"></i>Changed Fields</h3>
+            </div>
+            <div class="card-body">
+              <% auditLog.changedFields.forEach(function(field) { %>
+                <span class="badge bg-info me-2 mb-2"><%= field %></span>
+              <% }); %>
+            </div>
+          </div>
+        </div>
+      </div>
+      <% } %>
+
+      <!-- Data Comparison -->
+      <div class="row">
+        <% if (auditLog.previousData) { %>
+        <div class="col-lg-6">
+          <div class="card">
+            <div class="card-header bg-danger text-white">
+              <h3 class="card-title"><i class="fas fa-minus-circle me-2"></i>Previous Data</h3>
+            </div>
+            <div class="card-body">
+              <pre class="bg-light p-3 rounded" style="max-height: 400px; overflow: auto;"><%= JSON.stringify(auditLog.previousData, null, 2) %></pre>
+            </div>
+          </div>
+        </div>
+        <% } %>
+        <% if (auditLog.newData) { %>
+        <div class="col-lg-<%= auditLog.previousData ? '6' : '12' %>">
+          <div class="card">
+            <div class="card-header bg-success text-white">
+              <h3 class="card-title"><i class="fas fa-plus-circle me-2"></i>New Data</h3>
+            </div>
+            <div class="card-body">
+              <pre class="bg-light p-3 rounded" style="max-height: 400px; overflow: auto;"><%= JSON.stringify(auditLog.newData, null, 2) %></pre>
+            </div>
+          </div>
+        </div>
+        <% } %>
+      </div>
+
+      <!-- Metadata -->
+      <% if (auditLog.metadata) { %>
+      <div class="row">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-tags me-2"></i>Metadata</h3>
+            </div>
+            <div class="card-body">
+              <pre class="bg-light p-3 rounded"><%= JSON.stringify(auditLog.metadata, null, 2) %></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+      <% } %>
+
+      <!-- Error Message -->
+      <% if (auditLog.errorMessage) { %>
+      <div class="row">
+        <div class="col-12">
+          <div class="alert alert-danger">
+            <h5><i class="fas fa-exclamation-triangle me-2"></i>Error Message</h5>
+            <p class="mb-0"><%= auditLog.errorMessage %></p>
+          </div>
+        </div>
+      </div>
+      <% } %>
+
+      <!-- Back Button -->
+      <div class="row">
+        <div class="col-12">
+          <a href="/hub/platform/audit-logs" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Audit Logs
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,216 @@
+<%- include('../partials/header', { title: pageName }) %>
+
+<div class="content-wrapper">
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0"><i class="fas fa-box me-2"></i><%= pageName %></h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-end">
+            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item active">Products</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="content">
+    <div class="container-fluid">
+      <% if (success) { %>
+      <div class="alert alert-success alert-dismissible">
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <i class="fas fa-check-circle me-2"></i><%= success %>
+      </div>
+      <% } %>
+
+      <!-- Filters & Actions -->
+      <div class="card mb-3">
+        <div class="card-body">
+          <form method="GET" action="/hub/products" class="row g-3">
+            <div class="col-md-3">
+              <label class="form-label">Search</label>
+              <input type="text" class="form-control" name="search" value="<%= filters.search %>" placeholder="Search products...">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Status</label>
+              <select class="form-select" name="status">
+                <option value="">All Statuses</option>
+                <option value="draft" <%= filters.status === 'draft' ? 'selected' : '' %>>Draft</option>
+                <option value="active" <%= filters.status === 'active' ? 'selected' : '' %>>Active</option>
+                <option value="inactive" <%= filters.status === 'inactive' ? 'selected' : '' %>>Inactive</option>
+                <option value="archived" <%= filters.status === 'archived' ? 'selected' : '' %>>Archived</option>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Visibility</label>
+              <select class="form-select" name="visibility">
+                <option value="">All</option>
+                <option value="visible" <%= filters.visibility === 'visible' ? 'selected' : '' %>>Visible</option>
+                <option value="hidden" <%= filters.visibility === 'hidden' ? 'selected' : '' %>>Hidden</option>
+                <option value="catalog" <%= filters.visibility === 'catalog' ? 'selected' : '' %>>Catalog Only</option>
+                <option value="search" <%= filters.visibility === 'search' ? 'selected' : '' %>>Search Only</option>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Sort By</label>
+              <select class="form-select" name="orderBy">
+                <option value="createdAt" <%= filters.orderBy === 'createdAt' ? 'selected' : '' %>>Created Date</option>
+                <option value="name" <%= filters.orderBy === 'name' ? 'selected' : '' %>>Name</option>
+                <option value="basePrice" <%= filters.orderBy === 'basePrice' ? 'selected' : '' %>>Price</option>
+              </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+              <button type="submit" class="btn btn-primary me-2">
+                <i class="fas fa-search me-1"></i>Filter
+              </button>
+              <a href="/hub/products" class="btn btn-secondary me-2">
+                <i class="fas fa-times me-1"></i>Clear
+              </a>
+              <a href="/hub/products/create" class="btn btn-success">
+                <i class="fas fa-plus me-1"></i>Add Product
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Products Table -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title"><i class="fas fa-list me-2"></i>Products</h3>
+          <span class="float-end text-muted">Total: <%= pagination.total %></span>
+        </div>
+        <div class="card-body table-responsive p-0">
+          <table class="table table-hover text-nowrap">
+            <thead>
+              <tr>
+                <th style="width: 60px">Image</th>
+                <th>Name</th>
+                <th>SKU</th>
+                <th>Price</th>
+                <th>Status</th>
+                <th>Visibility</th>
+                <th>Created</th>
+                <th style="width: 150px">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% (products || []).forEach(function(product) { %>
+              <tr>
+                <td>
+                  <% if (product.images && product.images.length > 0) { %>
+                    <img src="<%= product.images[0].url %>" alt="<%= product.name %>" class="img-thumbnail" style="width: 50px; height: 50px; object-fit: cover;">
+                  <% } else { %>
+                    <div class="bg-secondary d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                      <i class="fas fa-image text-white"></i>
+                    </div>
+                  <% } %>
+                </td>
+                <td>
+                  <a href="/hub/products/<%= product.productId %>" class="fw-bold text-decoration-none">
+                    <%= product.name %>
+                  </a>
+                  <% if (product.isFeatured) { %>
+                    <span class="badge bg-warning ms-1"><i class="fas fa-star"></i></span>
+                  <% } %>
+                </td>
+                <td><code><%= product.sku || '-' %></code></td>
+                <td>
+                  <% if (product.salePrice && product.salePrice < product.basePrice) { %>
+                    <span class="text-decoration-line-through text-muted">$<%= product.basePrice.toFixed(2) %></span>
+                    <span class="text-success fw-bold">$<%= product.salePrice.toFixed(2) %></span>
+                  <% } else { %>
+                    $<%= (product.basePrice || 0).toFixed(2) %>
+                  <% } %>
+                </td>
+                <td>
+                  <span class="badge bg-<%= product.status === 'active' ? 'success' : product.status === 'draft' ? 'warning' : product.status === 'inactive' ? 'secondary' : 'danger' %>">
+                    <%= product.status %>
+                  </span>
+                </td>
+                <td>
+                  <span class="badge bg-<%= product.visibility === 'visible' ? 'info' : 'secondary' %>">
+                    <%= product.visibility %>
+                  </span>
+                </td>
+                <td><%= new Date(product.createdAt).toLocaleDateString() %></td>
+                <td>
+                  <a href="/hub/products/<%= product.productId %>" class="btn btn-sm btn-outline-info" title="View">
+                    <i class="fas fa-eye"></i>
+                  </a>
+                  <a href="/hub/products/<%= product.productId %>/edit" class="btn btn-sm btn-outline-primary" title="Edit">
+                    <i class="fas fa-edit"></i>
+                  </a>
+                  <button class="btn btn-sm btn-outline-danger" onclick="deleteProduct('<%= product.productId %>', '<%= product.name %>')" title="Delete">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+              <% }); %>
+              <% if ((products || []).length === 0) { %>
+              <tr>
+                <td colspan="8" class="text-center text-muted py-4">
+                  <i class="fas fa-box-open fa-3x mb-3 d-block"></i>
+                  No products found. <a href="/hub/products/create">Create your first product</a>
+                </td>
+              </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+        <% if (pagination.pages > 1) { %>
+        <div class="card-footer">
+          <nav>
+            <ul class="pagination justify-content-center mb-0">
+              <% if (pagination.page > 1) { %>
+              <li class="page-item">
+                <a class="page-link" href="?page=<%= pagination.page - 1 %>&search=<%= filters.search %>&status=<%= filters.status %>&visibility=<%= filters.visibility %>&orderBy=<%= filters.orderBy %>">
+                  <i class="fas fa-chevron-left"></i>
+                </a>
+              </li>
+              <% } %>
+              <% for (let i = Math.max(1, pagination.page - 2); i <= Math.min(pagination.pages, pagination.page + 2); i++) { %>
+              <li class="page-item <%= pagination.page === i ? 'active' : '' %>">
+                <a class="page-link" href="?page=<%= i %>&offset=<%= (i - 1) * pagination.limit %>&search=<%= filters.search %>&status=<%= filters.status %>&visibility=<%= filters.visibility %>&orderBy=<%= filters.orderBy %>">
+                  <%= i %>
+                </a>
+              </li>
+              <% } %>
+              <% if (pagination.page < pagination.pages) { %>
+              <li class="page-item">
+                <a class="page-link" href="?page=<%= pagination.page + 1 %>&offset=<%= pagination.page * pagination.limit %>&search=<%= filters.search %>&status=<%= filters.status %>&visibility=<%= filters.visibility %>&orderBy=<%= filters.orderBy %>">
+                  <i class="fas fa-chevron-right"></i>
+                </a>
+              </li>
+              <% } %>
+            </ul>
+          </nav>
+        </div>
+        <% } %>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+  async function deleteProduct(productId, productName) {
+    if (!confirm(`Are you sure you want to delete "${productName}"?`)) return;
+
+    try {
+      const response = await fetch(`/hub/products/${productId}`, { method: 'DELETE' });
+      const result = await response.json();
+      if (result.success) {
+        location.reload();
+      } else {
+        alert('Error: ' + result.message);
+      }
+    } catch (error) {
+      alert('Error: ' + error.message);
+    }
+  }
+</script>
+
+<%- include('../partials/footer') %>

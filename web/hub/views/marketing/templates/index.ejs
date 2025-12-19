@@ -1,0 +1,176 @@
+<%- include('../../partials/header', { title: pageName }) %>
+
+<div class="content-wrapper">
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0"><i class="fas fa-envelope-open-text me-2"></i><%= pageName %></h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-end">
+            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/hub/marketing/campaigns">Marketing</a></li>
+            <li class="breadcrumb-item active">Email Templates</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="content">
+    <div class="container-fluid">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title"><i class="fas fa-list me-2"></i>Email Templates</h3>
+          <button class="btn btn-sm btn-success float-end" data-bs-toggle="modal" data-bs-target="#addTemplateModal">
+            <i class="fas fa-plus me-1"></i>Create Template
+          </button>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <% (templates || []).forEach(function(template) { %>
+            <div class="col-md-4 mb-3">
+              <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                  <span><%= template.name %></span>
+                  <span class="badge bg-<%= template.isActive ? 'success' : 'secondary' %>">
+                    <%= template.isActive ? 'Active' : 'Draft' %>
+                  </span>
+                </div>
+                <div class="card-body">
+                  <p class="text-muted small"><%= template.description || 'No description' %></p>
+                  <div class="mb-2">
+                    <span class="badge bg-info"><%= template.templateType || 'custom' %></span>
+                  </div>
+                  <small class="text-muted">Subject: <%= template.subject || '-' %></small>
+                </div>
+                <div class="card-footer">
+                  <a href="/hub/marketing/templates/<%= template.emailTemplateId %>/edit" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-edit"></i> Edit
+                  </a>
+                  <button class="btn btn-sm btn-outline-info" onclick="previewTemplate('<%= template.emailTemplateId %>')">
+                    <i class="fas fa-eye"></i> Preview
+                  </button>
+                  <button class="btn btn-sm btn-outline-secondary" onclick="duplicateTemplate('<%= template.emailTemplateId %>')">
+                    <i class="fas fa-copy"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <% }); %>
+            <% if ((templates || []).length === 0) { %>
+            <div class="col-12 text-center text-muted py-4">
+              <i class="fas fa-envelope-open-text fa-3x mb-3 d-block"></i>
+              No email templates yet.
+            </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+
+      <!-- System Templates -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title"><i class="fas fa-cog me-2"></i>System Templates</h3>
+        </div>
+        <div class="card-body table-responsive p-0">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Template</th>
+                <th>Trigger</th>
+                <th>Last Modified</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% const systemTemplates = [
+                { id: 'order-confirmation', name: 'Order Confirmation', trigger: 'Order placed' },
+                { id: 'shipping-notification', name: 'Shipping Notification', trigger: 'Order shipped' },
+                { id: 'password-reset', name: 'Password Reset', trigger: 'Password reset requested' },
+                { id: 'welcome-email', name: 'Welcome Email', trigger: 'Account created' },
+                { id: 'abandoned-cart', name: 'Abandoned Cart', trigger: 'Cart abandoned (24h)' }
+              ]; %>
+              <% systemTemplates.forEach(function(st) { %>
+              <tr>
+                <td><strong><%= st.name %></strong></td>
+                <td><span class="badge bg-secondary"><%= st.trigger %></span></td>
+                <td>-</td>
+                <td>
+                  <a href="/hub/marketing/templates/system/<%= st.id %>/edit" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-edit"></i> Customize
+                  </a>
+                </td>
+              </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- Add Template Modal -->
+<div class="modal fade" id="addTemplateModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Create Email Template</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST" action="/hub/marketing/templates">
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label">Template Name <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" name="name" required>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label">Template Type</label>
+                <select class="form-select" name="templateType">
+                  <option value="promotional">Promotional</option>
+                  <option value="transactional">Transactional</option>
+                  <option value="newsletter">Newsletter</option>
+                  <option value="custom">Custom</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Subject Line <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" name="subject" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea class="form-control" name="description" rows="2"></textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Email Content (HTML)</label>
+            <textarea class="form-control font-monospace" name="content" rows="10"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create Template</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  function previewTemplate(id) {
+    window.open(`/hub/marketing/templates/${id}/preview`, '_blank');
+  }
+  async function duplicateTemplate(id) {
+    const res = await fetch(`/hub/marketing/templates/${id}/duplicate`, { method: 'POST' });
+    if ((await res.json()).success) location.reload();
+  }
+</script>
+
+<%- include('../../partials/footer') %>

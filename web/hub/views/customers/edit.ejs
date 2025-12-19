@@ -1,0 +1,220 @@
+<%- include('../partials/header', { title: pageName }) %>
+
+<div class="content-wrapper">
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0"><i class="fas fa-user-edit me-2"></i><%= pageName %></h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-end">
+            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/hub/customers">Customers</a></li>
+            <li class="breadcrumb-item active">Edit</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="content">
+    <div class="container-fluid">
+      <% if (typeof error !== 'undefined' && error) { %>
+      <div class="alert alert-danger alert-dismissible">
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <i class="fas fa-exclamation-triangle me-2"></i><%= error %>
+      </div>
+      <% } %>
+
+      <form method="POST" action="/hub/customers/<%= customer.customerId %>">
+        <div class="row">
+          <!-- Main Content -->
+          <div class="col-lg-8">
+            <!-- Personal Info -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-user me-2"></i>Personal Information</h3>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group mb-3">
+                      <label class="form-label">First Name <span class="text-danger">*</span></label>
+                      <input type="text" class="form-control" name="firstName" value="<%= customer.firstName || '' %>" required>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group mb-3">
+                      <label class="form-label">Last Name <span class="text-danger">*</span></label>
+                      <input type="text" class="form-control" name="lastName" value="<%= customer.lastName || '' %>" required>
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group mb-3">
+                      <label class="form-label">Email <span class="text-danger">*</span></label>
+                      <input type="email" class="form-control" name="email" value="<%= customer.email || '' %>" required>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group mb-3">
+                      <label class="form-label">Phone</label>
+                      <input type="tel" class="form-control" name="phone" value="<%= customer.phone || '' %>">
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group mb-3">
+                      <label class="form-label">Date of Birth</label>
+                      <input type="date" class="form-control" name="dateOfBirth" value="<%= customer.dateOfBirth ? new Date(customer.dateOfBirth).toISOString().split('T')[0] : '' %>">
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group mb-3">
+                      <label class="form-label">Gender</label>
+                      <select class="form-select" name="gender">
+                        <option value="">Not specified</option>
+                        <option value="male" <%= customer.gender === 'male' ? 'selected' : '' %>>Male</option>
+                        <option value="female" <%= customer.gender === 'female' ? 'selected' : '' %>>Female</option>
+                        <option value="other" <%= customer.gender === 'other' ? 'selected' : '' %>>Other</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Company Info -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-building me-2"></i>Company Information</h3>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group mb-3">
+                      <label class="form-label">Company Name</label>
+                      <input type="text" class="form-control" name="companyName" value="<%= customer.companyName || '' %>">
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group mb-3">
+                      <label class="form-label">Tax ID / VAT Number</label>
+                      <input type="text" class="form-control" name="taxId" value="<%= customer.taxId || '' %>">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Marketing Preferences -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-envelope me-2"></i>Marketing Preferences</h3>
+              </div>
+              <div class="card-body">
+                <div class="form-check mb-2">
+                  <input class="form-check-input" type="checkbox" name="acceptsMarketing" value="true" id="acceptsMarketing" <%= customer.acceptsMarketing ? 'checked' : '' %>>
+                  <label class="form-check-label" for="acceptsMarketing">
+                    Accepts marketing emails
+                  </label>
+                </div>
+                <div class="form-check mb-2">
+                  <input class="form-check-input" type="checkbox" name="acceptsSms" value="true" id="acceptsSms" <%= customer.acceptsSms ? 'checked' : '' %>>
+                  <label class="form-check-label" for="acceptsSms">
+                    Accepts SMS marketing
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Notes -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-sticky-note me-2"></i>Notes</h3>
+              </div>
+              <div class="card-body">
+                <textarea class="form-control" name="notes" rows="4" placeholder="Internal notes about this customer..."><%= customer.notes || '' %></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sidebar -->
+          <div class="col-lg-4">
+            <!-- Actions -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-save me-2"></i>Actions</h3>
+              </div>
+              <div class="card-body">
+                <button type="submit" class="btn btn-primary btn-lg w-100 mb-2">
+                  <i class="fas fa-save me-2"></i>Save Changes
+                </button>
+                <a href="/hub/customers/<%= customer.customerId %>" class="btn btn-secondary w-100">
+                  <i class="fas fa-times me-2"></i>Cancel
+                </a>
+              </div>
+            </div>
+
+            <!-- Status -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-toggle-on me-2"></i>Status</h3>
+              </div>
+              <div class="card-body">
+                <div class="d-flex justify-content-between mb-3">
+                  <span>Account Status:</span>
+                  <span class="badge bg-<%= customer.status === 'active' ? 'success' : customer.status === 'inactive' ? 'secondary' : 'danger' %>">
+                    <%= customer.status %>
+                  </span>
+                </div>
+                <div class="d-flex justify-content-between mb-3">
+                  <span>Email Verified:</span>
+                  <span class="badge bg-<%= customer.emailVerified ? 'success' : 'warning' %>">
+                    <%= customer.emailVerified ? 'Yes' : 'No' %>
+                  </span>
+                </div>
+                <div class="d-flex justify-content-between">
+                  <span>Phone Verified:</span>
+                  <span class="badge bg-<%= customer.phoneVerified ? 'success' : 'warning' %>">
+                    <%= customer.phoneVerified ? 'Yes' : 'No' %>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Customer Groups -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-users me-2"></i>Customer Groups</h3>
+              </div>
+              <div class="card-body">
+                <select class="form-select" name="customerGroupId">
+                  <option value="">No Group</option>
+                  <!-- Customer groups would be populated here -->
+                </select>
+                <small class="text-muted">Assign customer to a group for special pricing or promotions</small>
+              </div>
+            </div>
+
+            <!-- Tags -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-tags me-2"></i>Tags</h3>
+              </div>
+              <div class="card-body">
+                <input type="text" class="form-control" name="tags" value="<%= (customer.tags || []).join(', ') %>" placeholder="vip, wholesale, etc.">
+                <small class="text-muted">Separate tags with commas</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </section>
+</div>
+
+<%- include('../partials/footer') %>

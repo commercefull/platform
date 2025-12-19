@@ -1,0 +1,237 @@
+<%- include('../../partials/header', { title: pageName }) %>
+
+<div class="content-wrapper">
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0"><i class="fas fa-sync-alt me-2"></i><%= pageName %></h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-end">
+            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item active">Subscriptions</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="content">
+    <div class="container-fluid">
+      <!-- Stats -->
+      <div class="row">
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-info">
+            <div class="inner">
+              <h3><%= stats.totalSubscriptions || 0 %></h3>
+              <p>Total Subscriptions</p>
+            </div>
+            <div class="icon"><i class="fas fa-sync-alt"></i></div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-success">
+            <div class="inner">
+              <h3><%= stats.activeSubscriptions || 0 %></h3>
+              <p>Active</p>
+            </div>
+            <div class="icon"><i class="fas fa-check-circle"></i></div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-warning">
+            <div class="inner">
+              <h3>$<%= (stats.mrr || 0).toLocaleString() %></h3>
+              <p>Monthly Recurring Revenue</p>
+            </div>
+            <div class="icon"><i class="fas fa-dollar-sign"></i></div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-danger">
+            <div class="inner">
+              <h3><%= stats.churnRate || 0 %>%</h3>
+              <p>Churn Rate</p>
+            </div>
+            <div class="icon"><i class="fas fa-chart-line"></i></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Subscription Plans -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title"><i class="fas fa-box me-2"></i>Subscription Plans</h3>
+          <button class="btn btn-sm btn-success float-end" data-bs-toggle="modal" data-bs-target="#addPlanModal">
+            <i class="fas fa-plus me-1"></i>Add Plan
+          </button>
+        </div>
+        <div class="card-body table-responsive p-0">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Plan Name</th>
+                <th>Price</th>
+                <th>Billing Cycle</th>
+                <th>Subscribers</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% (plans || []).forEach(function(plan) { %>
+              <tr>
+                <td>
+                  <strong><%= plan.name %></strong>
+                  <br><small class="text-muted"><%= plan.description || '' %></small>
+                </td>
+                <td>$<%= (plan.price || 0).toFixed(2) %></td>
+                <td><%= plan.billingCycle || 'monthly' %></td>
+                <td><%= plan.subscriberCount || 0 %></td>
+                <td>
+                  <span class="badge bg-<%= plan.isActive ? 'success' : 'secondary' %>">
+                    <%= plan.isActive ? 'Active' : 'Inactive' %>
+                  </span>
+                </td>
+                <td>
+                  <button class="btn btn-sm btn-outline-primary" onclick="editPlan('<%= plan.subscriptionPlanId %>')">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button class="btn btn-sm btn-outline-danger" onclick="deletePlan('<%= plan.subscriptionPlanId %>')">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+              <% }); %>
+              <% if ((plans || []).length === 0) { %>
+              <tr>
+                <td colspan="6" class="text-center text-muted py-4">No subscription plans configured.</td>
+              </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Active Subscriptions -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title"><i class="fas fa-users me-2"></i>Active Subscriptions</h3>
+          <a href="/hub/programs/subscription/all" class="btn btn-sm btn-primary float-end">View All</a>
+        </div>
+        <div class="card-body table-responsive p-0">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Customer</th>
+                <th>Plan</th>
+                <th>Status</th>
+                <th>Started</th>
+                <th>Next Billing</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% (subscriptions || []).slice(0, 10).forEach(function(sub) { %>
+              <tr>
+                <td>
+                  <strong><%= sub.customerName || sub.email %></strong>
+                  <br><small class="text-muted"><%= sub.email %></small>
+                </td>
+                <td><span class="badge bg-info"><%= sub.planName %></span></td>
+                <td>
+                  <span class="badge bg-<%= sub.status === 'active' ? 'success' : sub.status === 'cancelled' ? 'danger' : sub.status === 'paused' ? 'warning' : 'secondary' %>">
+                    <%= sub.status %>
+                  </span>
+                </td>
+                <td><%= new Date(sub.startDate).toLocaleDateString() %></td>
+                <td><%= sub.nextBillingDate ? new Date(sub.nextBillingDate).toLocaleDateString() : '-' %></td>
+                <td>
+                  <a href="/hub/programs/subscription/<%= sub.subscriptionId %>" class="btn btn-sm btn-outline-info">
+                    <i class="fas fa-eye"></i>
+                  </a>
+                </td>
+              </tr>
+              <% }); %>
+              <% if ((subscriptions || []).length === 0) { %>
+              <tr>
+                <td colspan="6" class="text-center text-muted py-4">No active subscriptions.</td>
+              </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- Add Plan Modal -->
+<div class="modal fade" id="addPlanModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Add Subscription Plan</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST" action="/hub/programs/subscription/plans">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Plan Name <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" name="name" required>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label">Price <span class="text-danger">*</span></label>
+                <div class="input-group">
+                  <span class="input-group-text">$</span>
+                  <input type="number" class="form-control" name="price" step="0.01" min="0" required>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label">Billing Cycle</label>
+                <select class="form-select" name="billingCycle">
+                  <option value="weekly">Weekly</option>
+                  <option value="monthly" selected>Monthly</option>
+                  <option value="quarterly">Quarterly</option>
+                  <option value="yearly">Yearly</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea class="form-control" name="description" rows="2"></textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Trial Days</label>
+            <input type="number" class="form-control" name="trialDays" min="0" value="0">
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="isActive" value="true" id="planIsActive" checked>
+            <label class="form-check-label" for="planIsActive">Active</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create Plan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  function editPlan(id) { window.location.href = `/hub/programs/subscription/plans/${id}/edit`; }
+  async function deletePlan(id) {
+    if (!confirm('Delete this plan?')) return;
+    const res = await fetch(`/hub/programs/subscription/plans/${id}`, { method: 'DELETE' });
+    if ((await res.json()).success) location.reload();
+  }
+</script>
+
+<%- include('../../partials/footer') %>

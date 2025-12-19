@@ -1,0 +1,258 @@
+<%- include('../partials/header', { title: pageName }) %>
+
+<div class="content-wrapper">
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0"><i class="fas fa-heartbeat me-2"></i><%= pageName %></h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-end">
+            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item active">System Health</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="content">
+    <div class="container-fluid">
+      <!-- Overall Status -->
+      <div class="row">
+        <div class="col-12">
+          <div class="alert alert-<%= healthStatus.status === 'healthy' ? 'success' : healthStatus.status === 'degraded' ? 'warning' : 'danger' %>" role="alert">
+            <h4 class="alert-heading">
+              <i class="fas fa-<%= healthStatus.status === 'healthy' ? 'check-circle' : healthStatus.status === 'degraded' ? 'exclamation-triangle' : 'times-circle' %> me-2"></i>
+              System Status: <%= healthStatus.status.toUpperCase() %>
+            </h4>
+            <p class="mb-0">
+              Version: <%= healthStatus.version %> | 
+              Uptime: <%= Math.floor(healthStatus.uptime / 3600) %>h <%= Math.floor((healthStatus.uptime % 3600) / 60) %>m |
+              Last Check: <%= new Date(healthStatus.timestamp).toLocaleString() %>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Health Checks -->
+      <div class="row">
+        <div class="col-lg-6">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-tasks me-2"></i>Health Checks</h3>
+            </div>
+            <div class="card-body p-0">
+              <table class="table table-hover mb-0">
+                <thead>
+                  <tr>
+                    <th>Check</th>
+                    <th>Status</th>
+                    <th>Message</th>
+                    <th>Duration</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% (healthStatus.checks || []).forEach(function(check) { %>
+                  <tr>
+                    <td><%= check.name %></td>
+                    <td>
+                      <span class="badge bg-<%= check.status === 'pass' ? 'success' : check.status === 'warn' ? 'warning' : 'danger' %>">
+                        <%= check.status.toUpperCase() %>
+                      </span>
+                    </td>
+                    <td><%= check.message || '-' %></td>
+                    <td><%= check.duration ? check.duration + 'ms' : '-' %></td>
+                  </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-plug me-2"></i>Dependencies</h3>
+            </div>
+            <div class="card-body p-0">
+              <table class="table table-hover mb-0">
+                <thead>
+                  <tr>
+                    <th>Service</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th>Latency</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% (dependencies || []).forEach(function(dep) { %>
+                  <tr>
+                    <td><%= dep.name %></td>
+                    <td><%= dep.type %></td>
+                    <td>
+                      <span class="badge bg-<%= dep.status === 'up' ? 'success' : dep.status === 'degraded' ? 'warning' : 'danger' %>">
+                        <%= dep.status.toUpperCase() %>
+                      </span>
+                    </td>
+                    <td><%= dep.latency ? dep.latency + 'ms' : '-' %></td>
+                  </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- System Metrics -->
+      <div class="row">
+        <div class="col-lg-3 col-6">
+          <div class="info-box">
+            <span class="info-box-icon bg-info"><i class="fas fa-memory"></i></span>
+            <div class="info-box-content">
+              <span class="info-box-text">Memory Usage</span>
+              <span class="info-box-number"><%= healthStatus.metrics.memory.used %>MB / <%= healthStatus.metrics.memory.total %>MB</span>
+              <div class="progress">
+                <div class="progress-bar bg-info" style="width: <%= healthStatus.metrics.memory.percentage %>%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="info-box">
+            <span class="info-box-icon bg-success"><i class="fas fa-microchip"></i></span>
+            <div class="info-box-content">
+              <span class="info-box-text">CPU Cores</span>
+              <span class="info-box-number"><%= healthStatus.metrics.cpu.cores %></span>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="info-box">
+            <span class="info-box-icon bg-warning"><i class="fas fa-database"></i></span>
+            <div class="info-box-content">
+              <span class="info-box-text">DB Response</span>
+              <span class="info-box-number"><%= healthStatus.metrics.database.responseTime %>ms</span>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="info-box">
+            <span class="info-box-icon bg-danger"><i class="fas fa-clock"></i></span>
+            <div class="info-box-content">
+              <span class="info-box-text">Uptime</span>
+              <span class="info-box-number"><%= Math.floor(healthStatus.uptime / 3600) %>h <%= Math.floor((healthStatus.uptime % 3600) / 60) %>m</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Performance Metrics -->
+      <div class="row">
+        <div class="col-lg-6">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-tachometer-alt me-2"></i>Response Times</h3>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-3 text-center">
+                  <h4><%= performanceMetrics.responseTime.avg %>ms</h4>
+                  <small class="text-muted">Average</small>
+                </div>
+                <div class="col-3 text-center">
+                  <h4><%= performanceMetrics.responseTime.p50 %>ms</h4>
+                  <small class="text-muted">P50</small>
+                </div>
+                <div class="col-3 text-center">
+                  <h4><%= performanceMetrics.responseTime.p95 %>ms</h4>
+                  <small class="text-muted">P95</small>
+                </div>
+                <div class="col-3 text-center">
+                  <h4><%= performanceMetrics.responseTime.p99 %>ms</h4>
+                  <small class="text-muted">P99</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-exclamation-circle me-2"></i>Error Rate</h3>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-4 text-center">
+                  <h4><%= performanceMetrics.errors.total %></h4>
+                  <small class="text-muted">Total Errors</small>
+                </div>
+                <div class="col-4 text-center">
+                  <h4><%= (performanceMetrics.errors.rate * 100).toFixed(2) %>%</h4>
+                  <small class="text-muted">Error Rate</small>
+                </div>
+                <div class="col-4 text-center">
+                  <h4><%= performanceMetrics.throughput.requestsPerSecond %></h4>
+                  <small class="text-muted">Req/sec</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Alerts -->
+      <div class="row">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-bell me-2"></i>Active Alerts</h3>
+            </div>
+            <div class="card-body">
+              <% if ((alerts || []).length === 0) { %>
+              <div class="alert alert-success mb-0">
+                <i class="fas fa-check-circle me-2"></i>No active alerts
+              </div>
+              <% } else { %>
+              <% alerts.forEach(function(alert) { %>
+              <div class="alert alert-<%= alert.severity === 'critical' ? 'danger' : alert.severity === 'warning' ? 'warning' : 'info' %> d-flex justify-content-between align-items-center">
+                <div>
+                  <strong><%= alert.component %>:</strong> <%= alert.message %>
+                  <br><small class="text-muted"><%= new Date(alert.timestamp).toLocaleString() %></small>
+                </div>
+                <button class="btn btn-sm btn-outline-secondary" onclick="acknowledgeAlert('<%= alert.id %>')">
+                  <i class="fas fa-check"></i> Acknowledge
+                </button>
+              </div>
+              <% }); %>
+              <% } %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+  async function acknowledgeAlert(alertId) {
+    try {
+      const response = await fetch(`/hub/platform/alerts/${alertId}/acknowledge`, { method: 'POST' });
+      const result = await response.json();
+      if (result.success) {
+        location.reload();
+      } else {
+        alert('Failed to acknowledge alert');
+      }
+    } catch (error) {
+      alert('Error: ' + error.message);
+    }
+  }
+
+  // Auto-refresh every 30 seconds
+  setTimeout(() => location.reload(), 30000);
+</script>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,311 @@
+<%- include('../../layout') %>
+
+<% content %>
+<div class="content-wrapper">
+  <!-- Content Header (Page header) -->
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0">Order Fulfillments</h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item">Operations</li>
+            <li class="breadcrumb-item active">Fulfillments</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <section class="content">
+    <div class="container-fluid">
+      <!-- Success/Error Messages -->
+      <% if (success) { %>
+        <div class="alert alert-success alert-dismissible">
+          <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+          <i class="icon fas fa-check"></i> <%= success %>
+        </div>
+      <% } %>
+
+      <!-- Stats Cards -->
+      <div class="row mb-4">
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-info">
+            <div class="inner">
+              <h3><%= stats.pending || 0 %></h3>
+              <p>Pending</p>
+            </div>
+            <div class="icon">
+              <i class="fas fa-clock"></i>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-warning">
+            <div class="inner">
+              <h3><%= stats.processing || 0 %></h3>
+              <p>Processing</p>
+            </div>
+            <div class="icon">
+              <i class="fas fa-cog"></i>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-primary">
+            <div class="inner">
+              <h3><%= stats.shipped || 0 %></h3>
+              <p>Shipped</p>
+            </div>
+            <div class="icon">
+              <i class="fas fa-truck"></i>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-success">
+            <div class="inner">
+              <h3><%= stats.delivered || 0 %></h3>
+              <p>Delivered</p>
+            </div>
+            <div class="icon">
+              <i class="fas fa-check-circle"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="row mb-3">
+        <div class="col-md-12">
+          <div class="card">
+            <div class="card-body">
+              <form method="GET" class="form-inline">
+                <div class="form-group mr-3">
+                  <label for="status" class="mr-2">Status:</label>
+                  <select name="status" id="status" class="form-control">
+                    <option value="">All Status</option>
+                    <option value="pending" <%= filters.status === 'pending' ? 'selected' : '' %>>Pending</option>
+                    <option value="processing" <%= filters.status === 'processing' ? 'selected' : '' %>>Processing</option>
+                    <option value="shipped" <%= filters.status === 'shipped' ? 'selected' : '' %>>Shipped</option>
+                    <option value="delivered" <%= filters.status === 'delivered' ? 'selected' : '' %>>Delivered</option>
+                    <option value="failed" <%= filters.status === 'failed' ? 'selected' : '' %>>Failed</option>
+                    <option value="cancelled" <%= filters.status === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
+                  </select>
+                </div>
+                <button type="submit" class="btn btn-secondary mr-2">
+                  <i class="fas fa-filter"></i> Filter
+                </button>
+                <a href="/hub/fulfillments" class="btn btn-outline-secondary">
+                  <i class="fas fa-times"></i> Clear
+                </a>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fulfillments Table -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Order Fulfillments</h3>
+        </div>
+        <div class="card-body table-responsive p-0">
+          <table class="table table-hover text-nowrap">
+            <thead>
+              <tr>
+                <th>Fulfillment #</th>
+                <th>Order #</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th>Carrier</th>
+                <th>Tracking</th>
+                <th>Created</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (fulfillments.length === 0) { %>
+                <tr>
+                  <td colspan="8" class="text-center py-4">
+                    <em>No fulfillments found. Orders will appear here when they need fulfillment.</em>
+                  </td>
+                </tr>
+              <% } else { %>
+                <% fulfillments.forEach(fulfillment => { %>
+                  <tr>
+                    <td>
+                      <strong><code><%= fulfillment.fulfillmentNumber %></code></strong>
+                    </td>
+                    <td>
+                      <a href="/hub/orders/<%= fulfillment.orderId %>">
+                        <%= fulfillment.orderId.substring(0, 8) %>...
+                      </a>
+                    </td>
+                    <td>
+                      <span class="badge badge-secondary"><%= fulfillment.type %></span>
+                    </td>
+                    <td>
+                      <% if (fulfillment.status === 'pending') { %>
+                        <span class="badge badge-warning">Pending</span>
+                      <% } else if (fulfillment.status === 'processing') { %>
+                        <span class="badge badge-info">Processing</span>
+                      <% } else if (fulfillment.status === 'shipped') { %>
+                        <span class="badge badge-primary">Shipped</span>
+                      <% } else if (fulfillment.status === 'delivered') { %>
+                        <span class="badge badge-success">Delivered</span>
+                      <% } else if (fulfillment.status === 'failed') { %>
+                        <span class="badge badge-danger">Failed</span>
+                      <% } else { %>
+                        <span class="badge badge-secondary"><%= fulfillment.status %></span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <% if (fulfillment.carrierName) { %>
+                        <%= fulfillment.carrierName %>
+                      <% } else { %>
+                        <span class="text-muted">-</span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <% if (fulfillment.trackingNumber) { %>
+                        <a href="<%= fulfillment.trackingUrl %>" target="_blank">
+                          <%= fulfillment.trackingNumber %>
+                        </a>
+                      <% } else { %>
+                        <span class="text-muted">-</span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <%= new Date(fulfillment.createdAt).toLocaleDateString() %>
+                    </td>
+                    <td>
+                      <a href="/hub/fulfillments/<%= fulfillment.orderFulfillmentId %>" class="btn btn-sm btn-info">
+                        <i class="fas fa-eye"></i>
+                      </a>
+                      <% if (fulfillment.status === 'pending') { %>
+                        <button class="btn btn-sm btn-success" onclick="updateStatus('<%= fulfillment.orderFulfillmentId %>', 'processing')">
+                          <i class="fas fa-play"></i> Start
+                        </button>
+                      <% } else if (fulfillment.status === 'processing') { %>
+                        <button class="btn btn-sm btn-primary" onclick="markShipped('<%= fulfillment.orderFulfillmentId %>')">
+                          <i class="fas fa-truck"></i> Ship
+                        </button>
+                      <% } %>
+                    </td>
+                  </tr>
+                <% }); %>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- Shipping Modal -->
+<div class="modal fade" id="shippingModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Mark as Shipped</h4>
+        <button type="button" class="close" data-dismiss="modal">
+          <span>&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="shippingForm">
+          <div class="form-group">
+            <label for="trackingNumber">Tracking Number:</label>
+            <input type="text" class="form-control" id="trackingNumber" name="trackingNumber" required>
+          </div>
+          <div class="form-group">
+            <label for="carrierCode">Carrier:</label>
+            <select class="form-control" id="carrierCode" name="carrierCode" required>
+              <option value="">Select Carrier</option>
+              <option value="ups">UPS</option>
+              <option value="fedex">FedEx</option>
+              <option value="usps">USPS</option>
+              <option value="dhl">DHL</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="carrierName">Carrier Name:</label>
+            <input type="text" class="form-control" id="carrierName" name="carrierName" required>
+          </div>
+          <div class="form-group">
+            <label for="trackingUrl">Tracking URL (optional):</label>
+            <input type="url" class="form-control" id="trackingUrl" name="trackingUrl">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="confirmShippingBtn">Mark as Shipped</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentFulfillmentId = null;
+
+function updateStatus(fulfillmentId, status) {
+  fetch(`/hub/fulfillments/${fulfillmentId}/status`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ status })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      location.reload();
+    } else {
+      alert('Error: ' + data.message);
+    }
+  })
+  .catch(error => {
+    alert('Error updating status');
+    console.error('Error:', error);
+  });
+}
+
+function markShipped(fulfillmentId) {
+  currentFulfillmentId = fulfillmentId;
+  $('#shippingModal').modal('show');
+}
+
+document.getElementById('confirmShippingBtn').onclick = function() {
+  const form = document.getElementById('shippingForm');
+  const formData = new FormData(form);
+
+  fetch(`/hub/fulfillments/${currentFulfillmentId}/shipped`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: new URLSearchParams(formData)
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      $('#shippingModal').modal('hide');
+      location.reload();
+    } else {
+      alert('Error: ' + data.message);
+    }
+  })
+  .catch(error => {
+    alert('Error marking as shipped');
+    console.error('Error:', error);
+  });
+};
+</script>
+<% endcontent %>

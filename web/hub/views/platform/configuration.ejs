@@ -1,0 +1,267 @@
+<%- include('../partials/header', { title: pageName }) %>
+
+<div class="content-wrapper">
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0"><i class="fas fa-cog me-2"></i><%= pageName %></h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-end">
+            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item active">Configuration</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="content">
+    <div class="container-fluid">
+      <!-- Feature Flags -->
+      <div class="row">
+        <div class="col-12">
+          <div class="card card-primary">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-toggle-on me-2"></i>Feature Flags</h3>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <% Object.entries(featureFlags || {}).forEach(function([key, enabled]) { %>
+                <div class="col-md-4 col-sm-6 mb-3">
+                  <div class="d-flex justify-content-between align-items-center p-2 border rounded">
+                    <span><%= key %></span>
+                    <div class="form-check form-switch">
+                      <input class="form-check-input" type="checkbox" 
+                             id="feature_<%= key %>" 
+                             <%= enabled ? 'checked' : '' %>
+                             onchange="toggleFeature('<%= key %>', this.checked)">
+                    </div>
+                  </div>
+                </div>
+                <% }); %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Configuration Categories -->
+      <% (categories || []).forEach(function(category) { %>
+      <div class="row">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">
+                <i class="fas fa-folder me-2"></i><%= category.name.charAt(0).toUpperCase() + category.name.slice(1) %>
+              </h3>
+              <span class="float-end text-muted"><%= category.description %></span>
+            </div>
+            <div class="card-body table-responsive p-0">
+              <table class="table table-hover mb-0">
+                <thead>
+                  <tr>
+                    <th>Key</th>
+                    <th>Value</th>
+                    <th>Type</th>
+                    <th>Description</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% (category.configs || []).forEach(function(config) { %>
+                  <tr>
+                    <td><code><%= config.key %></code></td>
+                    <td>
+                      <% if (config.isSecret) { %>
+                        <span class="text-muted">••••••••</span>
+                      <% } else if (config.type === 'boolean') { %>
+                        <span class="badge bg-<%= config.value === 'true' ? 'success' : 'secondary' %>">
+                          <%= config.value %>
+                        </span>
+                      <% } else { %>
+                        <%= String(config.value).substring(0, 50) %><%= String(config.value).length > 50 ? '...' : '' %>
+                      <% } %>
+                    </td>
+                    <td><span class="badge bg-light text-dark"><%= config.type %></span></td>
+                    <td><%= config.description || '-' %></td>
+                    <td>
+                      <% if (config.isEditable) { %>
+                      <button class="btn btn-sm btn-outline-primary" onclick="editConfig('<%= config.key %>', '<%= config.value %>', '<%= config.type %>')">
+                        <i class="fas fa-edit"></i>
+                      </button>
+                      <% } %>
+                    </td>
+                  </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <% }); %>
+
+      <!-- Add New Config -->
+      <div class="row">
+        <div class="col-12">
+          <div class="card card-outline card-success">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-plus me-2"></i>Add New Configuration</h3>
+            </div>
+            <div class="card-body">
+              <form id="addConfigForm">
+                <div class="row">
+                  <div class="col-md-3">
+                    <div class="form-group">
+                      <label>Key</label>
+                      <input type="text" class="form-control" name="key" placeholder="category.setting" required>
+                    </div>
+                  </div>
+                  <div class="col-md-3">
+                    <div class="form-group">
+                      <label>Value</label>
+                      <input type="text" class="form-control" name="value" placeholder="value" required>
+                    </div>
+                  </div>
+                  <div class="col-md-2">
+                    <div class="form-group">
+                      <label>Type</label>
+                      <select class="form-control" name="type">
+                        <option value="string">String</option>
+                        <option value="number">Number</option>
+                        <option value="boolean">Boolean</option>
+                        <option value="json">JSON</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-md-3">
+                    <div class="form-group">
+                      <label>Description</label>
+                      <input type="text" class="form-control" name="description" placeholder="Description">
+                    </div>
+                  </div>
+                  <div class="col-md-1">
+                    <div class="form-group">
+                      <label>&nbsp;</label>
+                      <button type="submit" class="btn btn-success btn-block w-100">
+                        <i class="fas fa-plus"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- Edit Config Modal -->
+<div class="modal fade" id="editConfigModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Configuration</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="editConfigForm">
+          <div class="mb-3">
+            <label class="form-label">Key</label>
+            <input type="text" class="form-control" name="key" readonly>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Value</label>
+            <input type="text" class="form-control" name="value" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Type</label>
+            <input type="text" class="form-control" name="type" readonly>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="saveConfig()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  async function toggleFeature(featureKey, enabled) {
+    try {
+      const response = await fetch(`/hub/platform/features/${featureKey}/toggle`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enabled })
+      });
+      const result = await response.json();
+      if (!result.success) {
+        alert('Error: ' + result.message);
+        location.reload();
+      }
+    } catch (error) {
+      alert('Error: ' + error.message);
+      location.reload();
+    }
+  }
+
+  function editConfig(key, value, type) {
+    const form = document.getElementById('editConfigForm');
+    form.querySelector('[name="key"]').value = key;
+    form.querySelector('[name="value"]').value = value;
+    form.querySelector('[name="type"]').value = type;
+    new bootstrap.Modal(document.getElementById('editConfigModal')).show();
+  }
+
+  async function saveConfig() {
+    const form = document.getElementById('editConfigForm');
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData);
+
+    try {
+      const response = await fetch('/hub/platform/configuration', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const result = await response.json();
+      if (result.success) {
+        location.reload();
+      } else {
+        alert('Error: ' + result.message);
+      }
+    } catch (error) {
+      alert('Error: ' + error.message);
+    }
+  }
+
+  document.getElementById('addConfigForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    const data = Object.fromEntries(formData);
+
+    try {
+      const response = await fetch('/hub/platform/configuration', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const result = await response.json();
+      if (result.success) {
+        location.reload();
+      } else {
+        alert('Error: ' + result.message);
+      }
+    } catch (error) {
+      alert('Error: ' + error.message);
+    }
+  });
+</script>
+
+<%- include('../partials/footer') %>

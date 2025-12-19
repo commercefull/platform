@@ -1,0 +1,288 @@
+<%- include('../partials/header', { title: pageName }) %>
+
+<div class="content-wrapper">
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0"><i class="fas fa-undo me-2"></i><%= pageName %></h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-end">
+            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/hub/orders">Orders</a></li>
+            <li class="breadcrumb-item"><a href="/hub/orders/<%= order.orderId %>">Order #<%= order.orderNumber %></a></li>
+            <li class="breadcrumb-item active">Refund</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="content">
+    <div class="container-fluid">
+      <% if (typeof error !== 'undefined' && error) { %>
+      <div class="alert alert-danger alert-dismissible">
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <i class="fas fa-exclamation-triangle me-2"></i><%= error %>
+      </div>
+      <% } %>
+
+      <div class="row">
+        <!-- Refund Form -->
+        <div class="col-lg-8">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-money-bill-wave me-2"></i>Process Refund</h3>
+            </div>
+            <form method="POST" action="/hub/orders/<%= order.orderId %>/refund">
+              <div class="card-body">
+                <!-- Order Items -->
+                <h5 class="mb-3">Order Items</h5>
+                <table class="table table-bordered mb-4">
+                  <thead class="table-light">
+                    <tr>
+                      <th>
+                        <input type="checkbox" id="selectAll" onchange="toggleAllItems()">
+                      </th>
+                      <th>Product</th>
+                      <th>Quantity</th>
+                      <th>Unit Price</th>
+                      <th>Total</th>
+                      <th>Refund Qty</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% (order.items || []).forEach(function(item, index) { %>
+                    <tr>
+                      <td>
+                        <input type="checkbox" class="item-checkbox" name="refundItems[<%= index %>][selected]" value="true" onchange="calculateTotal()">
+                      </td>
+                      <td>
+                        <strong><%= item.productName || item.name %></strong>
+                        <% if (item.sku) { %><br><small class="text-muted">SKU: <%= item.sku %></small><% } %>
+                      </td>
+                      <td><%= item.quantity %></td>
+                      <td>$<%= (item.unitPrice || item.price || 0).toFixed(2) %></td>
+                      <td>$<%= ((item.unitPrice || item.price || 0) * item.quantity).toFixed(2) %></td>
+                      <td style="width: 100px;">
+                        <input type="hidden" name="refundItems[<%= index %>][orderItemId]" value="<%= item.orderItemId %>">
+                        <input type="number" class="form-control form-control-sm refund-qty" 
+                               name="refundItems[<%= index %>][quantity]" 
+                               min="0" max="<%= item.quantity %>" value="<%= item.quantity %>"
+                               data-price="<%= item.unitPrice || item.price || 0 %>"
+                               onchange="calculateTotal()">
+                      </td>
+                    </tr>
+                    <% }); %>
+                  </tbody>
+                </table>
+
+                <!-- Refund Amount -->
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group mb-3">
+                      <label class="form-label">Refund Amount <span class="text-danger">*</span></label>
+                      <div class="input-group">
+                        <span class="input-group-text">$</span>
+                        <input type="number" class="form-control" name="amount" id="refundAmount" 
+                               step="0.01" min="0" max="<%= order.totalAmount %>" 
+                               value="<%= (typeof formData !== 'undefined' && formData.amount) || order.totalAmount %>" required>
+                      </div>
+                      <small class="text-muted">Maximum refundable: $<%= order.totalAmount.toFixed(2) %></small>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group mb-3">
+                      <label class="form-label">Refund Type</label>
+                      <select class="form-select" name="refundType">
+                        <option value="full">Full Refund</option>
+                        <option value="partial">Partial Refund</option>
+                        <option value="items">Selected Items Only</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Reason -->
+                <div class="form-group mb-3">
+                  <label class="form-label">Reason for Refund <span class="text-danger">*</span></label>
+                  <select class="form-select mb-2" name="reasonType" onchange="updateReasonText(this)">
+                    <option value="">Select a reason...</option>
+                    <option value="customer_request">Customer Request</option>
+                    <option value="defective_product">Defective Product</option>
+                    <option value="wrong_item">Wrong Item Shipped</option>
+                    <option value="not_as_described">Not as Described</option>
+                    <option value="damaged_in_shipping">Damaged in Shipping</option>
+                    <option value="late_delivery">Late Delivery</option>
+                    <option value="duplicate_order">Duplicate Order</option>
+                    <option value="other">Other</option>
+                  </select>
+                  <textarea class="form-control" name="reason" id="refundReason" rows="3" 
+                            placeholder="Provide additional details about the refund..." required><%= (typeof formData !== 'undefined' && formData.reason) || '' %></textarea>
+                </div>
+
+                <!-- Options -->
+                <div class="form-group mb-3">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="restockItems" value="true" id="restockItems" checked>
+                    <label class="form-check-label" for="restockItems">
+                      Restock refunded items
+                    </label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="notifyCustomer" value="true" id="notifyCustomer" checked>
+                    <label class="form-check-label" for="notifyCustomer">
+                      Send refund notification to customer
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div class="card-footer">
+                <button type="submit" class="btn btn-danger">
+                  <i class="fas fa-undo me-2"></i>Process Refund
+                </button>
+                <a href="/hub/orders/<%= order.orderId %>" class="btn btn-secondary">
+                  <i class="fas fa-times me-2"></i>Cancel
+                </a>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="col-lg-4">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-receipt me-2"></i>Order Summary</h3>
+            </div>
+            <div class="card-body">
+              <table class="table table-sm">
+                <tr>
+                  <td>Order Number:</td>
+                  <td class="text-end"><strong>#<%= order.orderNumber %></strong></td>
+                </tr>
+                <tr>
+                  <td>Order Date:</td>
+                  <td class="text-end"><%= new Date(order.createdAt).toLocaleDateString() %></td>
+                </tr>
+                <tr>
+                  <td>Status:</td>
+                  <td class="text-end">
+                    <span class="badge bg-<%= order.status === 'completed' ? 'success' : order.status === 'cancelled' ? 'danger' : 'warning' %>">
+                      <%= order.status %>
+                    </span>
+                  </td>
+                </tr>
+                <tr>
+                  <td>Payment Status:</td>
+                  <td class="text-end">
+                    <span class="badge bg-<%= order.paymentStatus === 'paid' ? 'success' : 'warning' %>">
+                      <%= order.paymentStatus %>
+                    </span>
+                  </td>
+                </tr>
+                <tr class="table-light">
+                  <td><strong>Subtotal:</strong></td>
+                  <td class="text-end">$<%= (order.subtotal || 0).toFixed(2) %></td>
+                </tr>
+                <% if (order.discountAmount > 0) { %>
+                <tr>
+                  <td>Discount:</td>
+                  <td class="text-end text-danger">-$<%= order.discountAmount.toFixed(2) %></td>
+                </tr>
+                <% } %>
+                <% if (order.taxAmount > 0) { %>
+                <tr>
+                  <td>Tax:</td>
+                  <td class="text-end">$<%= order.taxAmount.toFixed(2) %></td>
+                </tr>
+                <% } %>
+                <% if (order.shippingAmount > 0) { %>
+                <tr>
+                  <td>Shipping:</td>
+                  <td class="text-end">$<%= order.shippingAmount.toFixed(2) %></td>
+                </tr>
+                <% } %>
+                <tr class="table-primary">
+                  <td><strong>Total:</strong></td>
+                  <td class="text-end"><strong>$<%= order.totalAmount.toFixed(2) %></strong></td>
+                </tr>
+                <% if (order.refundedAmount > 0) { %>
+                <tr class="table-warning">
+                  <td>Already Refunded:</td>
+                  <td class="text-end text-danger">-$<%= order.refundedAmount.toFixed(2) %></td>
+                </tr>
+                <tr class="table-info">
+                  <td><strong>Refundable:</strong></td>
+                  <td class="text-end"><strong>$<%= (order.totalAmount - (order.refundedAmount || 0)).toFixed(2) %></strong></td>
+                </tr>
+                <% } %>
+              </table>
+            </div>
+          </div>
+
+          <!-- Customer Info -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-user me-2"></i>Customer</h3>
+            </div>
+            <div class="card-body">
+              <% if (order.customer) { %>
+              <p class="mb-1"><strong><%= order.customer.firstName %> <%= order.customer.lastName %></strong></p>
+              <p class="mb-1 text-muted"><%= order.customer.email %></p>
+              <% if (order.customer.phone) { %>
+              <p class="mb-0 text-muted"><%= order.customer.phone %></p>
+              <% } %>
+              <% } else { %>
+              <p class="text-muted mb-0">Guest checkout</p>
+              <% } %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+  function toggleAllItems() {
+    const selectAll = document.getElementById('selectAll');
+    const checkboxes = document.querySelectorAll('.item-checkbox');
+    checkboxes.forEach(cb => cb.checked = selectAll.checked);
+    calculateTotal();
+  }
+
+  function calculateTotal() {
+    let total = 0;
+    const checkboxes = document.querySelectorAll('.item-checkbox');
+    checkboxes.forEach((cb, index) => {
+      if (cb.checked) {
+        const qtyInput = document.querySelectorAll('.refund-qty')[index];
+        const price = parseFloat(qtyInput.dataset.price) || 0;
+        const qty = parseInt(qtyInput.value) || 0;
+        total += price * qty;
+      }
+    });
+    document.getElementById('refundAmount').value = total.toFixed(2);
+  }
+
+  function updateReasonText(select) {
+    const reasonMap = {
+      'customer_request': 'Customer requested refund',
+      'defective_product': 'Product was defective',
+      'wrong_item': 'Wrong item was shipped',
+      'not_as_described': 'Product not as described',
+      'damaged_in_shipping': 'Product damaged during shipping',
+      'late_delivery': 'Order delivered late',
+      'duplicate_order': 'Duplicate order placed',
+      'other': ''
+    };
+    const textarea = document.getElementById('refundReason');
+    if (select.value && reasonMap[select.value]) {
+      textarea.value = reasonMap[select.value];
+    }
+  }
+</script>
+
+<%- include('../partials/footer') %>

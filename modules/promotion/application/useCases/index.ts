@@ -3,6 +3,12 @@
  * Export all use cases for the promotion domain
  */
 
+// Promotion Management
+export * from './ListPromotions';
+export * from './CreatePromotion';
+export * from './UpdatePromotion';
+export * from './DeletePromotion';
+
 // Promotion
 export * from './ApplyPromotion';
 

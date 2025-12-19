@@ -1,0 +1,328 @@
+<%- include('../../layout') %>
+
+<% content %>
+<div class="content-wrapper">
+  <!-- Content Header (Page header) -->
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0">Abandoned Carts</h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item">Operations</li>
+            <li class="breadcrumb-item active">Abandoned Carts</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <section class="content">
+    <div class="container-fluid">
+      <!-- Success/Error Messages -->
+      <% if (success) { %>
+        <div class="alert alert-success alert-dismissible">
+          <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+          <i class="icon fas fa-check"></i> <%= success %>
+        </div>
+      <% } %>
+
+      <!-- Stats Cards -->
+      <div class="row mb-4">
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-warning">
+            <div class="inner">
+              <h3><%= stats.totalAbandoned %></h3>
+              <p>Abandoned Carts</p>
+            </div>
+            <div class="icon">
+              <i class="fas fa-shopping-cart"></i>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-danger">
+            <div class="inner">
+              <h3><%= stats.totalExpired %></h3>
+              <p>Expired Carts</p>
+            </div>
+            <div class="icon">
+              <i class="fas fa-clock"></i>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-success">
+            <div class="inner">
+              <h3><%= stats.recoveryPotential.toFixed(2) %></h3>
+              <p>Recovery Value</p>
+            </div>
+            <div class="icon">
+              <i class="fas fa-dollar-sign"></i>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-info">
+            <div class="inner">
+              <h3><%= stats.avgCartValue.toFixed(2) %></h3>
+              <p>Avg Cart Value</p>
+            </div>
+            <div class="icon">
+              <i class="fas fa-chart-line"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="row mb-3">
+        <div class="col-md-12">
+          <div class="card">
+            <div class="card-body">
+              <form method="GET" class="form-inline">
+                <div class="form-group mr-3">
+                  <label for="days" class="mr-2">Abandoned for (days):</label>
+                  <select name="days" id="days" class="form-control">
+                    <option value="1" <%= filters.olderThanDays === 1 ? 'selected' : '' %>>1 day</option>
+                    <option value="3" <%= filters.olderThanDays === 3 ? 'selected' : '' %>>3 days</option>
+                    <option value="7" <%= filters.olderThanDays === 7 ? 'selected' : '' %>>7 days</option>
+                    <option value="14" <%= filters.olderThanDays === 14 ? 'selected' : '' %>>14 days</option>
+                    <option value="30" <%= filters.olderThanDays === 30 ? 'selected' : '' %>>30 days</option>
+                  </select>
+                </div>
+                <button type="submit" class="btn btn-secondary mr-2">
+                  <i class="fas fa-filter"></i> Filter
+                </button>
+                <a href="/hub/baskets/abandoned" class="btn btn-outline-secondary">
+                  <i class="fas fa-times"></i> Clear
+                </a>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Abandoned Carts Table -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Abandoned Shopping Carts</h3>
+        </div>
+        <div class="card-body table-responsive p-0">
+          <table class="table table-hover text-nowrap">
+            <thead>
+              <tr>
+                <th>Cart ID</th>
+                <th>Items</th>
+                <th>Cart Value</th>
+                <th>Last Activity</th>
+                <th>Days Abandoned</th>
+                <th>Customer</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (abandonedBaskets.length === 0) { %>
+                <tr>
+                  <td colspan="7" class="text-center py-4">
+                    <em>No abandoned carts found for the selected time period.</em>
+                  </td>
+                </tr>
+              <% } else { %>
+                <% abandonedBaskets.forEach(basket => { %>
+                  <% const cartValue = basket.items.reduce((total, item) => total + (item.unitPrice.amount * item.quantity), 0); %>
+                  <% const daysAbandoned = Math.floor((Date.now() - basket.lastActivityAt.getTime()) / (1000 * 60 * 60 * 24)); %>
+                  <tr>
+                    <td>
+                      <code><%= basket.basketId.substring(0, 8) %>...</code>
+                    </td>
+                    <td>
+                      <%= basket.items.length %> item<%= basket.items.length > 1 ? 's' : '' %>
+                      <% if (basket.items.length > 0) { %>
+                        <br><small class="text-muted"><%= basket.items[0].name %><%= basket.items.length > 1 ? ` +${basket.items.length - 1} more` : '' %></small>
+                      <% } %>
+                    </td>
+                    <td>
+                      <strong><%= basket.currency %> <%= cartValue.toFixed(2) %></strong>
+                    </td>
+                    <td>
+                      <%= basket.lastActivityAt.toLocaleDateString() %>
+                      <br><small class="text-muted"><%= basket.lastActivityAt.toLocaleTimeString() %></small>
+                    </td>
+                    <td>
+                      <% if (daysAbandoned <= 1) { %>
+                        <span class="badge badge-success"><%= daysAbandoned %> day</span>
+                      <% } else if (daysAbandoned <= 7) { %>
+                        <span class="badge badge-warning"><%= daysAbandoned %> days</span>
+                      <% } else { %>
+                        <span class="badge badge-danger"><%= daysAbandoned %> days</span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <% if (basket.customerId) { %>
+                        Customer: <%= basket.customerId.substring(0, 8) %>...
+                      <% } else { %>
+                        <span class="text-muted">Guest</span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <a href="/hub/baskets/abandoned/<%= basket.basketId %>" class="btn btn-sm btn-info">
+                        <i class="fas fa-eye"></i> View
+                      </a>
+                      <button class="btn btn-sm btn-primary" onclick="recoverCart('<%= basket.basketId %>')">
+                        <i class="fas fa-envelope"></i> Recover
+                      </button>
+                    </td>
+                  </tr>
+                <% }); %>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Expired Carts Section -->
+      <% if (expiredBaskets.length > 0) { %>
+        <div class="card mt-4">
+          <div class="card-header">
+            <h3 class="card-title">Expired Carts (Cleanup Required)</h3>
+          </div>
+          <div class="card-body">
+            <p class="text-muted">
+              These carts have expired and should be cleaned up to free up storage space.
+              <button class="btn btn-sm btn-danger ml-2" onclick="cleanupExpired()">
+                <i class="fas fa-trash"></i> Clean Up Expired Carts
+              </button>
+            </p>
+            <div class="table-responsive">
+              <table class="table table-sm">
+                <thead>
+                  <tr>
+                    <th>Cart ID</th>
+                    <th>Items</th>
+                    <th>Expired</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% expiredBaskets.slice(0, 5).forEach(basket => { %>
+                    <tr>
+                      <td><code><%= basket.basketId.substring(0, 8) %>...</code></td>
+                      <td><%= basket.items.length %> item<%= basket.items.length > 1 ? 's' : '' %></td>
+                      <td><%= basket.expiresAt ? basket.expiresAt.toLocaleDateString() : 'N/A' %></td>
+                    </tr>
+                  <% }); %>
+                  <% if (expiredBaskets.length > 5) { %>
+                    <tr>
+                      <td colspan="3" class="text-center text-muted">
+                        ... and <%= expiredBaskets.length - 5 %> more expired carts
+                      </td>
+                    </tr>
+                  <% } %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      <% } %>
+    </div>
+  </section>
+</div>
+
+<!-- Recovery Modal -->
+<div class="modal fade" id="recoveryModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Recover Abandoned Cart</h4>
+        <button type="button" class="close" data-dismiss="modal">
+          <span>&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="recoveryForm">
+          <div class="form-group">
+            <label for="recoveryMethod">Recovery Method:</label>
+            <select class="form-control" id="recoveryMethod" name="recoveryMethod" required>
+              <option value="email">Send Recovery Email</option>
+              <option value="discount">Apply Discount Code</option>
+              <option value="reminder">Send Reminder SMS</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="message">Message (optional):</label>
+            <textarea class="form-control" id="message" name="message" rows="3" placeholder="Personalized message to include..."></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="confirmRecoveryBtn">Send Recovery</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentCartId = null;
+
+function recoverCart(cartId) {
+  currentCartId = cartId;
+  $('#recoveryModal').modal('show');
+}
+
+document.getElementById('confirmRecoveryBtn').onclick = function() {
+  const form = document.getElementById('recoveryForm');
+  const formData = new FormData(form);
+
+  fetch(`/hub/baskets/abandoned/${currentCartId}/recover`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: new URLSearchParams(formData)
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      $('#recoveryModal').modal('hide');
+      alert('Recovery action initiated successfully!');
+      location.reload();
+    } else {
+      alert('Error: ' + data.message);
+    }
+  })
+  .catch(error => {
+    alert('Error sending recovery');
+    console.error('Error:', error);
+  });
+};
+
+function cleanupExpired() {
+  if (confirm('This will permanently delete all expired carts. Continue?')) {
+    fetch('/hub/baskets/cleanup-expired', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        alert(`Successfully cleaned up ${data.deletedCount} expired carts`);
+        location.reload();
+      } else {
+        alert('Error: ' + data.message);
+      }
+    })
+    .catch(error => {
+      alert('Error cleaning up expired carts');
+      console.error('Error:', error);
+    });
+  }
+}
+</script>
+<% endcontent %>

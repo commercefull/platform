@@ -1,0 +1,280 @@
+<%- include('../../layout') %>
+
+<% content %>
+<div class="content-wrapper">
+  <!-- Content Header (Page header) -->
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0">Cart Analytics</h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item">Operations</li>
+            <li class="breadcrumb-item active">Cart Analytics</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <section class="content">
+    <div class="container-fluid">
+      <!-- Key Metrics Cards -->
+      <div class="row mb-4">
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-warning">
+            <div class="inner">
+              <h3><%= stats.totalAbandoned %></h3>
+              <p>Abandoned Carts</p>
+            </div>
+            <div class="icon">
+              <i class="fas fa-shopping-cart"></i>
+            </div>
+            <div class="small-box-footer">
+              Last 30 days
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-danger">
+            <div class="inner">
+              <h3><%= stats.totalExpired %></h3>
+              <p>Expired Carts</p>
+            </div>
+            <div class="icon">
+              <i class="fas fa-clock"></i>
+            </div>
+            <div class="small-box-footer">
+              Need cleanup
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-success">
+            <div class="inner">
+              <h3><%= stats.totalValue.toFixed(0) %></h3>
+              <p>Recovery Value ($)</p>
+            </div>
+            <div class="icon">
+              <i class="fas fa-dollar-sign"></i>
+            </div>
+            <div class="small-box-footer">
+              Potential revenue
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-info">
+            <div class="inner">
+              <h3><%= stats.avgCartValue.toFixed(0) %></h3>
+              <p>Avg Cart Value ($)</p>
+            </div>
+            <div class="icon">
+              <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="small-box-footer">
+              Per abandoned cart
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recovery Potential by Age -->
+      <div class="row mb-4">
+        <div class="col-md-12">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Recovery Potential by Cart Age</h3>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="info-box">
+                    <span class="info-box-icon bg-success"><i class="fas fa-clock"></i></span>
+                    <div class="info-box-content">
+                      <span class="info-box-text">Recent Carts (≤7 days)</span>
+                      <span class="info-box-number"><%= stats.recentAbandoned %> carts</span>
+                      <div class="progress">
+                        <div class="progress-bar bg-success" style="width: <%= Math.round((stats.recentAbandoned / Math.max(stats.recentAbandoned + stats.olderAbandoned, 1)) * 100) %>%"></div>
+                      </div>
+                      <span class="progress-description">
+                        $<%= stats.recentValue.toFixed(0) %> potential recovery
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="info-box">
+                    <span class="info-box-icon bg-warning"><i class="fas fa-calendar-alt"></i></span>
+                    <div class="info-box-content">
+                      <span class="info-box-text">Older Carts (>7 days)</span>
+                      <span class="info-box-number"><%= stats.olderAbandoned %> carts</span>
+                      <div class="progress">
+                        <div class="progress-bar bg-warning" style="width: <%= Math.round((stats.olderAbandoned / Math.max(stats.recentAbandoned + stats.olderAbandoned, 1)) * 100) %>%"></div>
+                      </div>
+                      <span class="progress-description">
+                        $<%= stats.olderValue.toFixed(0) %> potential recovery
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recovery Strategies -->
+      <div class="row mb-4">
+        <div class="col-md-12">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Recovery Strategies</h3>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-4">
+                  <div class="card card-outline card-primary">
+                    <div class="card-header">
+                      <h5 class="card-title">Email Recovery</h5>
+                    </div>
+                    <div class="card-body">
+                      <p>Send personalized emails with cart contents and discount offers.</p>
+                      <button class="btn btn-primary btn-sm" onclick="runEmailCampaign()">
+                        <i class="fas fa-envelope"></i> Run Email Campaign
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="card card-outline card-success">
+                    <div class="card-header">
+                      <h5 class="card-title">SMS Recovery</h5>
+                    </div>
+                    <div class="card-body">
+                      <p>Send text reminders with direct links to complete purchase.</p>
+                      <button class="btn btn-success btn-sm" onclick="runSMSCampaign()">
+                        <i class="fas fa-sms"></i> Run SMS Campaign
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="card card-outline card-warning">
+                    <div class="card-header">
+                      <h5 class="card-title">Discount Offers</h5>
+                    </div>
+                    <div class="card-body">
+                      <p>Automatically apply discount codes to abandoned carts.</p>
+                      <button class="btn btn-warning btn-sm" onclick="applyDiscounts()">
+                        <i class="fas fa-percent"></i> Apply Discounts
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Performance Metrics -->
+      <div class="row">
+        <div class="col-md-12">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Performance Metrics</h3>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-3">
+                  <div class="text-center">
+                    <div class="h4 text-info"><%= stats.recoveryRate %>%</div>
+                    <div class="text-muted">Recovery Rate</div>
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <div class="text-center">
+                    <div class="h4 text-success">$<%= (stats.totalValue * stats.recoveryRate / 100).toFixed(0) %></div>
+                    <div class="text-muted">Recovered Revenue</div>
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <div class="text-center">
+                    <div class="h4 text-warning"><%= Math.round((stats.recentAbandoned / (stats.recentAbandoned + stats.olderAbandoned)) * 100) %>%</div>
+                    <div class="text-muted">Recent Cart %</div>
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <div class="text-center">
+                    <div class="h4 text-danger"><%= stats.totalExpired %></div>
+                    <div class="text-muted">Expired Carts</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="row mt-4">
+        <div class="col-md-12">
+          <div class="card">
+            <div class="card-body">
+              <h5>Quick Actions</h5>
+              <div class="btn-group">
+                <button class="btn btn-primary" onclick="exportAbandonedCarts()">
+                  <i class="fas fa-download"></i> Export Abandoned Carts
+                </button>
+                <button class="btn btn-secondary" onclick="scheduleReport()">
+                  <i class="fas fa-calendar"></i> Schedule Report
+                </button>
+                <button class="btn btn-info" onclick="viewDetailedAnalytics()">
+                  <i class="fas fa-chart-bar"></i> Detailed Analytics
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+function runEmailCampaign() {
+  alert('Email recovery campaign feature coming soon!');
+  // TODO: Implement email campaign functionality
+}
+
+function runSMSCampaign() {
+  alert('SMS recovery campaign feature coming soon!');
+  // TODO: Implement SMS campaign functionality
+}
+
+function applyDiscounts() {
+  alert('Automatic discount application feature coming soon!');
+  // TODO: Implement discount application functionality
+}
+
+function exportAbandonedCarts() {
+  alert('Cart export feature coming soon!');
+  // TODO: Implement cart export functionality
+}
+
+function scheduleReport() {
+  alert('Report scheduling feature coming soon!');
+  // TODO: Implement report scheduling functionality
+}
+
+function viewDetailedAnalytics() {
+  alert('Detailed analytics feature coming soon!');
+  // TODO: Implement detailed analytics functionality
+}
+</script>
+<% endcontent %>

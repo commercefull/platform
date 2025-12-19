@@ -1,0 +1,187 @@
+<%- include('../../layout') %>
+
+<% content %>
+<div class="content-wrapper">
+  <!-- Content Header (Page header) -->
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0">Payment Gateways</h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/hub/payments">Payments</a></li>
+            <li class="breadcrumb-item active">Gateways</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <section class="content">
+    <div class="container-fluid">
+      <!-- Success/Error Messages -->
+      <% if (success) { %>
+        <div class="alert alert-success alert-dismissible">
+          <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+          <i class="icon fas fa-check"></i> <%= success %>
+        </div>
+      <% } %>
+
+      <!-- Action Bar -->
+      <div class="row mb-3">
+        <div class="col-12">
+          <a href="/hub/payments/gateways/create" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Add Payment Gateway
+          </a>
+          <div class="float-right">
+            <span class="badge badge-info">Total: <%= gateways.length %></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gateways Table -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Payment Gateways</h3>
+        </div>
+        <div class="card-body table-responsive p-0">
+          <table class="table table-hover text-nowrap">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Provider</th>
+                <th>Status</th>
+                <th>Test Mode</th>
+                <th>Default</th>
+                <th>Methods</th>
+                <th>Currencies</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (gateways.length === 0) { %>
+                <tr>
+                  <td colspan="8" class="text-center py-4">
+                    <em>No payment gateways configured. <a href="/hub/payments/gateways/create">Add your first gateway</a>.</em>
+                  </td>
+                </tr>
+              <% } else { %>
+                <% gateways.forEach(gateway => { %>
+                  <tr>
+                    <td>
+                      <strong><%= gateway.name %></strong>
+                      <% if (gateway.description) { %>
+                        <br><small class="text-muted"><%= gateway.description %></small>
+                      <% } %>
+                    </td>
+                    <td>
+                      <span class="badge badge-secondary"><%= gateway.provider %></span>
+                    </td>
+                    <td>
+                      <span class="badge badge-<%= gateway.isActive ? 'success' : 'danger' %>">
+                        <%= gateway.isActive ? 'Active' : 'Inactive' %>
+                      </span>
+                    </td>
+                    <td>
+                      <% if (gateway.isTestMode) { %>
+                        <span class="badge badge-warning">Test</span>
+                      <% } else { %>
+                        <span class="badge badge-success">Live</span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <% if (gateway.isDefault) { %>
+                        <i class="fas fa-star text-warning"></i> Default
+                      <% } else { %>
+                        <span class="text-muted">-</span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <% if (gateway.supportedPaymentMethods) { %>
+                        <%= gateway.supportedPaymentMethods.length %> methods
+                      <% } else { %>
+                        <span class="text-muted">-</span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <% if (gateway.supportedCurrencies) { %>
+                        <%= gateway.supportedCurrencies.join(', ') %>
+                      <% } else { %>
+                        <span class="text-muted">-</span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <a href="/hub/payments/gateways/<%= gateway.paymentGatewayId %>" class="btn btn-sm btn-info">
+                        <i class="fas fa-eye"></i>
+                      </a>
+                      <a href="/hub/payments/gateways/<%= gateway.paymentGatewayId %>/edit" class="btn btn-sm btn-primary">
+                        <i class="fas fa-edit"></i>
+                      </a>
+                      <button class="btn btn-sm btn-danger" onclick="deleteGateway('<%= gateway.paymentGatewayId %>', '<%= gateway.name %>')">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
+                <% }); %>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Delete Payment Gateway</h4>
+        <button type="button" class="close" data-dismiss="modal">
+          <span>&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete the payment gateway "<strong id="deleteGatewayName"></strong>"?</p>
+        <p class="text-danger"><small>This action may affect active payment processing and cannot be undone.</small></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete Gateway</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function deleteGateway(gatewayId, gatewayName) {
+  document.getElementById('deleteGatewayName').textContent = gatewayName;
+  document.getElementById('confirmDeleteBtn').onclick = function() {
+    fetch(`/hub/payments/gateways/${gatewayId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        location.reload();
+      } else {
+        alert('Error: ' + data.message);
+      }
+    })
+    .catch(error => {
+      alert('Error deleting payment gateway');
+      console.error('Error:', error);
+    });
+  };
+  $('#deleteModal').modal('show');
+}
+</script>
+<% endcontent %>

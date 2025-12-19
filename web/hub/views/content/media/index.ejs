@@ -1,0 +1,153 @@
+<%- include('../../partials/header', { title: pageName }) %>
+
+<div class="content-wrapper">
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0"><i class="fas fa-photo-video me-2"></i><%= pageName %></h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-end">
+            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/hub/content/pages">Content</a></li>
+            <li class="breadcrumb-item active">Media Library</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="content">
+    <div class="container-fluid">
+      <!-- Upload Area -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title"><i class="fas fa-upload me-2"></i>Upload Media</h3>
+        </div>
+        <div class="card-body">
+          <form method="POST" action="/hub/content/media" enctype="multipart/form-data" id="uploadForm">
+            <div class="upload-area border border-dashed rounded p-5 text-center" id="dropZone">
+              <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+              <p class="mb-2">Drag and drop files here or click to browse</p>
+              <input type="file" name="files" multiple class="d-none" id="fileInput" accept="image/*,video/*,application/pdf">
+              <button type="button" class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                <i class="fas fa-folder-open me-1"></i>Browse Files
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="card mb-3">
+        <div class="card-body">
+          <form method="GET" class="row g-3">
+            <div class="col-md-3">
+              <input type="text" class="form-control" name="search" value="<%= filters.search || '' %>" placeholder="Search media...">
+            </div>
+            <div class="col-md-2">
+              <select class="form-select" name="type">
+                <option value="">All Types</option>
+                <option value="image" <%= filters.type === 'image' ? 'selected' : '' %>>Images</option>
+                <option value="video" <%= filters.type === 'video' ? 'selected' : '' %>>Videos</option>
+                <option value="document" <%= filters.type === 'document' ? 'selected' : '' %>>Documents</option>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-search me-1"></i>Filter
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Media Grid -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title"><i class="fas fa-images me-2"></i>Media Files</h3>
+          <span class="float-end text-muted"><%= (media || []).length %> files</span>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <% (media || []).forEach(function(item) { %>
+            <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-3">
+              <div class="card h-100 media-item" data-id="<%= item.mediaId %>">
+                <div class="media-preview" style="height: 120px; overflow: hidden;">
+                  <% if (item.mimeType && item.mimeType.startsWith('image/')) { %>
+                  <img src="<%= item.url %>" alt="<%= item.filename %>" class="w-100 h-100" style="object-fit: cover;">
+                  <% } else if (item.mimeType && item.mimeType.startsWith('video/')) { %>
+                  <div class="bg-dark d-flex align-items-center justify-content-center h-100">
+                    <i class="fas fa-video fa-2x text-white"></i>
+                  </div>
+                  <% } else { %>
+                  <div class="bg-secondary d-flex align-items-center justify-content-center h-100">
+                    <i class="fas fa-file fa-2x text-white"></i>
+                  </div>
+                  <% } %>
+                </div>
+                <div class="card-body p-2">
+                  <small class="text-truncate d-block" title="<%= item.filename %>"><%= item.filename %></small>
+                  <small class="text-muted"><%= (item.size / 1024).toFixed(1) %> KB</small>
+                </div>
+                <div class="card-footer p-1">
+                  <button class="btn btn-sm btn-outline-primary" onclick="copyUrl('<%= item.url %>')" title="Copy URL">
+                    <i class="fas fa-link"></i>
+                  </button>
+                  <button class="btn btn-sm btn-outline-danger" onclick="deleteMedia('<%= item.mediaId %>')" title="Delete">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <% }); %>
+            <% if ((media || []).length === 0) { %>
+            <div class="col-12 text-center text-muted py-5">
+              <i class="fas fa-photo-video fa-3x mb-3 d-block"></i>
+              No media files yet. Upload your first file above.
+            </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<style>
+  .upload-area { cursor: pointer; transition: background-color 0.2s; }
+  .upload-area:hover, .upload-area.dragover { background-color: #f8f9fa; }
+  .media-item { cursor: pointer; transition: transform 0.2s; }
+  .media-item:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+</style>
+
+<script>
+  const dropZone = document.getElementById('dropZone');
+  const fileInput = document.getElementById('fileInput');
+  const uploadForm = document.getElementById('uploadForm');
+
+  dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+  dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+    fileInput.files = e.dataTransfer.files;
+    uploadForm.submit();
+  });
+
+  fileInput.addEventListener('change', () => uploadForm.submit());
+
+  function copyUrl(url) {
+    navigator.clipboard.writeText(url);
+    alert('URL copied to clipboard');
+  }
+
+  async function deleteMedia(id) {
+    if (!confirm('Delete this media file?')) return;
+    const res = await fetch(`/hub/content/media/${id}`, { method: 'DELETE' });
+    if ((await res.json()).success) location.reload();
+  }
+</script>
+
+<%- include('../../partials/footer') %>

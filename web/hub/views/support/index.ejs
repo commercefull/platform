@@ -1,0 +1,247 @@
+<%- include('../partials/header', { title: pageName }) %>
+
+<div class="content-wrapper">
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0"><i class="fas fa-ticket-alt me-2"></i><%= pageName %></h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-end">
+            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item active">Support</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="content">
+    <div class="container-fluid">
+      <!-- Stats -->
+      <div class="row">
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-info">
+            <div class="inner">
+              <h3><%= stats.openTickets || 0 %></h3>
+              <p>Open Tickets</p>
+            </div>
+            <div class="icon"><i class="fas fa-ticket-alt"></i></div>
+            <a href="#tickets" class="small-box-footer">View <i class="fas fa-arrow-circle-right"></i></a>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-success">
+            <div class="inner">
+              <h3><%= stats.resolvedToday || 0 %></h3>
+              <p>Resolved Today</p>
+            </div>
+            <div class="icon"><i class="fas fa-check-circle"></i></div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-warning">
+            <div class="inner">
+              <h3><%= stats.avgResponseTime || 0 %>h</h3>
+              <p>Avg Response Time</p>
+            </div>
+            <div class="icon"><i class="fas fa-clock"></i></div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-danger">
+            <div class="inner">
+              <h3><%= stats.customerSatisfaction || 0 %>%</h3>
+              <p>Customer Satisfaction</p>
+            </div>
+            <div class="icon"><i class="fas fa-smile"></i></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Support Tickets -->
+      <div id="tickets" class="card">
+        <div class="card-header">
+          <h3 class="card-title"><i class="fas fa-list me-2"></i>Support Tickets</h3>
+          <div class="card-tools">
+            <div class="input-group input-group-sm" style="width: 200px;">
+              <input type="text" name="table_search" class="form-control float-right" placeholder="Search">
+              <div class="input-group-append">
+                <button type="submit" class="btn btn-default"><i class="fas fa-search"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-body table-responsive p-0">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Ticket #</th>
+                <th>Subject</th>
+                <th>Customer</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Last Updated</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% (tickets || []).forEach(function(ticket) { %>
+              <tr>
+                <td><code><%= ticket.ticketNumber %></code></td>
+                <td><strong><%= ticket.subject %></strong></td>
+                <td><%= ticket.customerName || ticket.customerEmail %></td>
+                <td>
+                  <span class="badge bg-<%= ticket.priority === 'urgent' ? 'danger' : ticket.priority === 'high' ? 'warning' : ticket.priority === 'medium' ? 'info' : 'secondary' %>">
+                    <%= ticket.priority %>
+                  </span>
+                </td>
+                <td>
+                  <span class="badge bg-<%= ticket.status === 'open' ? 'success' : ticket.status === 'pending' ? 'warning' : ticket.status === 'resolved' ? 'info' : 'secondary' %>">
+                    <%= ticket.status %>
+                  </span>
+                </td>
+                <td><%= new Date(ticket.createdAt).toLocaleDateString() %></td>
+                <td><%= ticket.updatedAt ? new Date(ticket.updatedAt).toLocaleDateString() : '-' %></td>
+                <td>
+                  <a href="/hub/support/tickets/<%= ticket.ticketId %>" class="btn btn-sm btn-outline-info">
+                    <i class="fas fa-eye"></i>
+                  </a>
+                  <% if (ticket.status !== 'resolved') { %>
+                  <button class="btn btn-sm btn-outline-success" onclick="updateStatus('<%= ticket.ticketId %>', 'resolved')">
+                    <i class="fas fa-check"></i>
+                  </button>
+                  <% } %>
+                </td>
+              </tr>
+              <% }); %>
+              <% if ((tickets || []).length === 0) { %>
+              <tr>
+                <td colspan="8" class="text-center text-muted py-4">No support tickets yet.</td>
+              </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+        <div class="card-footer">
+          <nav>
+            <ul class="pagination justify-content-center mb-0">
+              <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
+              <li class="page-item active"><a class="page-link" href="#">1</a></li>
+              <li class="page-item"><a class="page-link" href="#">Next</a></li>
+            </ul>
+          </nav>
+        </div>
+      </div>
+
+      <!-- FAQ Management -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title"><i class="fas fa-question-circle me-2"></i>Frequently Asked Questions</h3>
+          <button class="btn btn-sm btn-success float-end" data-bs-toggle="modal" data-bs-target="#addFaqModal">
+            <i class="fas fa-plus me-1"></i>Add FAQ
+          </button>
+        </div>
+        <div class="card-body">
+          <div class="accordion" id="faqAccordion">
+            <% (faqs || []).forEach(function(faq, index) { %>
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+                <button class="accordion-button <%= index === 0 ? '' : 'collapsed' %>" type="button" data-bs-toggle="collapse" data-bs-target="#faq<%= index %>">
+                  <%= faq.question %>
+                </button>
+              </h2>
+              <div id="faq<%= index %>" class="accordion-collapse collapse <%= index === 0 ? 'show' : '' %>">
+                <div class="accordion-body">
+                  <%= faq.answer %>
+                  <div class="mt-3">
+                    <span class="badge bg-info"><%= faq.category %></span>
+                    <span class="badge bg-secondary">Views: <%= faq.viewCount || 0 %></span>
+                    <button class="btn btn-sm btn-outline-primary ms-2" onclick="editFaq('<%= faq.faqId %>')">
+                      <i class="fas fa-edit"></i> Edit
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <% }); %>
+            <% if ((faqs || []).length === 0) { %>
+            <div class="text-center text-muted py-4">No FAQs configured.</div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- Add FAQ Modal -->
+<div class="modal fade" id="addFaqModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Add FAQ</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST" action="/hub/support/faqs">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Question <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" name="question" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Answer <span class="text-danger">*</span></label>
+            <textarea class="form-control" name="answer" rows="4" required></textarea>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label">Category</label>
+                <select class="form-select" name="category">
+                  <option value="general">General</option>
+                  <option value="orders">Orders</option>
+                  <option value="shipping">Shipping</option>
+                  <option value="returns">Returns</option>
+                  <option value="account">Account</option>
+                  <option value="technical">Technical</option>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label">Sort Order</label>
+                <input type="number" class="form-control" name="sortOrder" value="0">
+              </div>
+            </div>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="isPublished" value="true" id="isPublished" checked>
+            <label class="form-check-label" for="isPublished">Published</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create FAQ</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  async function updateStatus(ticketId, status) {
+    if (!confirm('Update ticket status?')) return;
+    const res = await fetch(`/hub/support/tickets/${ticketId}/status`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status })
+    });
+    if ((await res.json()).success) location.reload();
+  }
+
+  function editFaq(faqId) { window.location.href = `/hub/support/faqs/${faqId}/edit`; }
+</script>
+
+<%- include('../partials/footer') %>

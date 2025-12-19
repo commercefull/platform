@@ -1,0 +1,147 @@
+<%- include('../../partials/header', { title: pageName }) %>
+
+<div class="content-wrapper">
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0"><i class="fas fa-cubes me-2"></i><%= pageName %></h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-end">
+            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/hub/content/pages">Content</a></li>
+            <li class="breadcrumb-item active">Blocks</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="content">
+    <div class="container-fluid">
+      <% if (typeof success !== 'undefined' && success) { %>
+      <div class="alert alert-success alert-dismissible">
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <i class="fas fa-check-circle me-2"></i><%= success %>
+      </div>
+      <% } %>
+
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title"><i class="fas fa-list me-2"></i>Content Blocks</h3>
+          <button class="btn btn-sm btn-success float-end" data-bs-toggle="modal" data-bs-target="#addBlockModal">
+            <i class="fas fa-plus me-1"></i>Add Block
+          </button>
+        </div>
+        <div class="card-body table-responsive p-0">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Identifier</th>
+                <th>Status</th>
+                <th>Updated</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% (blocks || []).forEach(function(block) { %>
+              <tr>
+                <td><strong><%= block.name %></strong></td>
+                <td><span class="badge bg-secondary"><%= block.blockType || 'html' %></span></td>
+                <td><code><%= block.identifier %></code></td>
+                <td>
+                  <span class="badge bg-<%= block.isActive ? 'success' : 'secondary' %>">
+                    <%= block.isActive ? 'Active' : 'Inactive' %>
+                  </span>
+                </td>
+                <td><%= new Date(block.updatedAt).toLocaleDateString() %></td>
+                <td>
+                  <a href="/hub/content/blocks/<%= block.contentBlockId %>/edit" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-edit"></i>
+                  </a>
+                  <button class="btn btn-sm btn-outline-danger" onclick="deleteBlock('<%= block.contentBlockId %>')">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+              <% }); %>
+              <% if ((blocks || []).length === 0) { %>
+              <tr>
+                <td colspan="6" class="text-center text-muted py-4">
+                  <i class="fas fa-cubes fa-3x mb-3 d-block"></i>
+                  No content blocks yet.
+                </td>
+              </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- Add Block Modal -->
+<div class="modal fade" id="addBlockModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Add Content Block</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST" action="/hub/content/blocks">
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label">Block Name <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" name="name" required>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label">Identifier <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" name="identifier" required placeholder="e.g., homepage-banner">
+              </div>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Block Type</label>
+            <select class="form-select" name="blockType">
+              <option value="html">HTML</option>
+              <option value="text">Plain Text</option>
+              <option value="image">Image</option>
+              <option value="video">Video</option>
+              <option value="widget">Widget</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Content</label>
+            <textarea class="form-control" name="content" rows="6"></textarea>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="isActive" value="true" id="blockIsActive" checked>
+            <label class="form-check-label" for="blockIsActive">Active</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create Block</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  async function deleteBlock(id) {
+    if (!confirm('Delete this content block?')) return;
+    const res = await fetch(`/hub/content/blocks/${id}`, { method: 'DELETE' });
+    if ((await res.json()).success) location.reload();
+  }
+</script>
+
+<%- include('../../partials/footer') %>

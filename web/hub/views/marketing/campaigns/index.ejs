@@ -1,0 +1,250 @@
+<%- include('../../layout') %>
+
+<% content %>
+<div class="content-wrapper">
+  <!-- Content Header (Page header) -->
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0">Email Campaigns</h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/hub/marketing">Marketing</a></li>
+            <li class="breadcrumb-item active">Campaigns</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <section class="content">
+    <div class="container-fluid">
+      <!-- Success/Error Messages -->
+      <% if (success) { %>
+        <div class="alert alert-success alert-dismissible">
+          <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+          <i class="icon fas fa-check"></i> <%= success %>
+        </div>
+      <% } %>
+
+      <!-- Action Bar -->
+      <div class="row mb-3">
+        <div class="col-12">
+          <a href="/hub/marketing/campaigns/create" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Create Campaign
+          </a>
+          <div class="float-right">
+            <span class="badge badge-info">Total: <%= campaigns.length %></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="row mb-3">
+        <div class="col-md-12">
+          <div class="card">
+            <div class="card-body">
+              <form method="GET" class="form-inline">
+                <div class="form-group mr-3">
+                  <label for="status" class="mr-2">Status:</label>
+                  <select name="status" id="status" class="form-control">
+                    <option value="">All Status</option>
+                    <option value="draft" <%= filters.status === 'draft' ? 'selected' : '' %>>Draft</option>
+                    <option value="scheduled" <%= filters.status === 'scheduled' ? 'selected' : '' %>>Scheduled</option>
+                    <option value="sending" <%= filters.status === 'sending' ? 'selected' : '' %>>Sending</option>
+                    <option value="sent" <%= filters.status === 'sent' ? 'selected' : '' %>>Sent</option>
+                    <option value="cancelled" <%= filters.status === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
+                  </select>
+                </div>
+                <button type="submit" class="btn btn-secondary mr-2">
+                  <i class="fas fa-filter"></i> Filter
+                </button>
+                <a href="/hub/marketing/campaigns" class="btn btn-outline-secondary">
+                  <i class="fas fa-times"></i> Clear
+                </a>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Campaigns Table -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Email Campaigns</h3>
+        </div>
+        <div class="card-body table-responsive p-0">
+          <table class="table table-hover text-nowrap">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Subject</th>
+                <th>Status</th>
+                <th>Recipients</th>
+                <th>Sent</th>
+                <th>Open Rate</th>
+                <th>Click Rate</th>
+                <th>Scheduled</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (campaigns.length === 0) { %>
+                <tr>
+                  <td colspan="9" class="text-center py-4">
+                    <em>No email campaigns found. <a href="/hub/marketing/campaigns/create">Create your first campaign</a>.</em>
+                  </td>
+                </tr>
+              <% } else { %>
+                <% campaigns.forEach(campaign => { %>
+                  <tr>
+                    <td>
+                      <strong><%= campaign.name %></strong>
+                      <% if (campaign.senderName) { %>
+                        <br><small class="text-muted">From: <%= campaign.senderName %></small>
+                      <% } %>
+                    </td>
+                    <td><%= campaign.subject %></td>
+                    <td>
+                      <span class="badge badge-<%= campaign.status === 'sent' ? 'success' : campaign.status === 'sending' ? 'info' : campaign.status === 'scheduled' ? 'warning' : 'secondary' %>">
+                        <%= campaign.status %>
+                      </span>
+                    </td>
+                    <td>
+                      <% if (campaign.recipientCount !== undefined) { %>
+                        <%= campaign.recipientCount.toLocaleString() %>
+                      <% } else { %>
+                        <span class="text-muted">-</span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <% if (campaign.sentAt) { %>
+                        <%= new Date(campaign.sentAt).toLocaleDateString() %>
+                      <% } else { %>
+                        <span class="text-muted">-</span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <% if (campaign.openRate !== undefined) { %>
+                        <%= campaign.openRate.toFixed(1) %>%
+                      <% } else { %>
+                        <span class="text-muted">-</span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <% if (campaign.clickRate !== undefined) { %>
+                        <%= campaign.clickRate.toFixed(1) %>%
+                      <% } else { %>
+                        <span class="text-muted">-</span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <% if (campaign.scheduledAt) { %>
+                        <%= new Date(campaign.scheduledAt).toLocaleString() %>
+                      <% } else { %>
+                        <span class="text-muted">-</span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <a href="/hub/marketing/campaigns/<%= campaign.emailCampaignId %>" class="btn btn-sm btn-info">
+                        <i class="fas fa-eye"></i>
+                      </a>
+                      <a href="/hub/marketing/campaigns/<%= campaign.emailCampaignId %>/edit" class="btn btn-sm btn-primary">
+                        <i class="fas fa-edit"></i>
+                      </a>
+                      <% if (campaign.status === 'draft') { %>
+                        <button class="btn btn-sm btn-success" onclick="sendCampaign('<%= campaign.emailCampaignId %>', '<%= campaign.name %>')">
+                          <i class="fas fa-paper-plane"></i>
+                        </button>
+                      <% } %>
+                      <button class="btn btn-sm btn-danger" onclick="deleteCampaign('<%= campaign.emailCampaignId %>', '<%= campaign.name %>')">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
+                <% }); %>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Delete Email Campaign</h4>
+        <button type="button" class="close" data-dismiss="modal">
+          <span>&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete the email campaign "<strong id="deleteCampaignName"></strong>"?</p>
+        <p class="text-danger"><small>This action will permanently delete the campaign and all associated data.</small></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete Campaign</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function deleteCampaign(campaignId, campaignName) {
+  document.getElementById('deleteCampaignName').textContent = campaignName;
+  document.getElementById('confirmDeleteBtn').onclick = function() {
+    fetch(`/hub/marketing/campaigns/${campaignId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        location.reload();
+      } else {
+        alert('Error: ' + data.message);
+      }
+    })
+    .catch(error => {
+      alert('Error deleting email campaign');
+      console.error('Error:', error);
+    });
+  };
+  $('#deleteModal').modal('show');
+}
+
+function sendCampaign(campaignId, campaignName) {
+  if (confirm(`Are you sure you want to send the campaign "${campaignName}" immediately?`)) {
+    fetch(`/hub/marketing/campaigns/${campaignId}/send`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        location.reload();
+      } else {
+        alert('Error: ' + data.message);
+      }
+    })
+    .catch(error => {
+      alert('Error sending campaign');
+      console.error('Error:', error);
+    });
+  }
+}
+</script>
+<% endcontent %>

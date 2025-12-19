@@ -1,0 +1,306 @@
+<%- include('../partials/header', { title: pageName }) %>
+
+<div class="content-wrapper">
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0"><i class="fas fa-warehouse me-2"></i><%= pageName %></h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-end">
+            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item active">Inventory</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="content">
+    <div class="container-fluid">
+      <!-- Stats Cards -->
+      <div class="row">
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-info">
+            <div class="inner">
+              <h3><%= stats.totalProducts || 0 %></h3>
+              <p>Total Products</p>
+            </div>
+            <div class="icon"><i class="fas fa-boxes"></i></div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-success">
+            <div class="inner">
+              <h3><%= stats.inStock || 0 %></h3>
+              <p>In Stock</p>
+            </div>
+            <div class="icon"><i class="fas fa-check-circle"></i></div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-warning">
+            <div class="inner">
+              <h3><%= stats.lowStock || 0 %></h3>
+              <p>Low Stock</p>
+            </div>
+            <div class="icon"><i class="fas fa-exclamation-triangle"></i></div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="small-box bg-danger">
+            <div class="inner">
+              <h3><%= stats.outOfStock || 0 %></h3>
+              <p>Out of Stock</p>
+            </div>
+            <div class="icon"><i class="fas fa-times-circle"></i></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="card mb-3">
+        <div class="card-body">
+          <form method="GET" action="/hub/inventory" class="row g-3">
+            <div class="col-md-3">
+              <label class="form-label">Search</label>
+              <input type="text" class="form-control" name="search" value="<%= filters.search || '' %>" placeholder="Search by product name or SKU...">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Stock Status</label>
+              <select class="form-select" name="stockStatus">
+                <option value="">All</option>
+                <option value="in_stock" <%= filters.stockStatus === 'in_stock' ? 'selected' : '' %>>In Stock</option>
+                <option value="low_stock" <%= filters.stockStatus === 'low_stock' ? 'selected' : '' %>>Low Stock</option>
+                <option value="out_of_stock" <%= filters.stockStatus === 'out_of_stock' ? 'selected' : '' %>>Out of Stock</option>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Location</label>
+              <select class="form-select" name="locationId">
+                <option value="">All Locations</option>
+                <% (locations || []).forEach(function(loc) { %>
+                <option value="<%= loc.locationId %>" <%= filters.locationId === loc.locationId ? 'selected' : '' %>><%= loc.name %></option>
+                <% }); %>
+              </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+              <button type="submit" class="btn btn-primary me-2">
+                <i class="fas fa-search me-1"></i>Filter
+              </button>
+              <a href="/hub/inventory" class="btn btn-secondary me-2">
+                <i class="fas fa-times me-1"></i>Clear
+              </a>
+              <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#adjustStockModal">
+                <i class="fas fa-plus me-1"></i>Adjust Stock
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Inventory Table -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title"><i class="fas fa-list me-2"></i>Inventory Levels</h3>
+          <span class="float-end text-muted">Total: <%= pagination.total %></span>
+        </div>
+        <div class="card-body table-responsive p-0">
+          <table class="table table-hover text-nowrap">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>SKU</th>
+                <th>Location</th>
+                <th>Quantity</th>
+                <th>Reserved</th>
+                <th>Available</th>
+                <th>Reorder Point</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% (inventory || []).forEach(function(item) { %>
+              <tr>
+                <td>
+                  <a href="/hub/products/<%= item.productId %>" class="text-decoration-none">
+                    <%= item.productName || 'Unknown Product' %>
+                  </a>
+                </td>
+                <td><code><%= item.sku || '-' %></code></td>
+                <td><%= item.locationName || 'Default' %></td>
+                <td><%= item.quantity || 0 %></td>
+                <td><%= item.reserved || 0 %></td>
+                <td>
+                  <strong class="<%= (item.quantity - item.reserved) <= 0 ? 'text-danger' : (item.quantity - item.reserved) <= item.reorderPoint ? 'text-warning' : 'text-success' %>">
+                    <%= (item.quantity || 0) - (item.reserved || 0) %>
+                  </strong>
+                </td>
+                <td><%= item.reorderPoint || 10 %></td>
+                <td>
+                  <% 
+                    const available = (item.quantity || 0) - (item.reserved || 0);
+                    let statusClass = 'success';
+                    let statusText = 'In Stock';
+                    if (available <= 0) {
+                      statusClass = 'danger';
+                      statusText = 'Out of Stock';
+                    } else if (available <= (item.reorderPoint || 10)) {
+                      statusClass = 'warning';
+                      statusText = 'Low Stock';
+                    }
+                  %>
+                  <span class="badge bg-<%= statusClass %>"><%= statusText %></span>
+                </td>
+                <td>
+                  <button class="btn btn-sm btn-outline-primary" onclick="openAdjustModal('<%= item.inventoryLevelId %>', '<%= item.productName %>', <%= item.quantity %>)" title="Adjust">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <a href="/hub/inventory/<%= item.inventoryLevelId %>/history" class="btn btn-sm btn-outline-info" title="History">
+                    <i class="fas fa-history"></i>
+                  </a>
+                </td>
+              </tr>
+              <% }); %>
+              <% if ((inventory || []).length === 0) { %>
+              <tr>
+                <td colspan="9" class="text-center text-muted py-4">
+                  <i class="fas fa-warehouse fa-3x mb-3 d-block"></i>
+                  No inventory records found.
+                </td>
+              </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+        <% if (pagination.pages > 1) { %>
+        <div class="card-footer">
+          <nav>
+            <ul class="pagination justify-content-center mb-0">
+              <% for (let i = 1; i <= pagination.pages; i++) { %>
+              <li class="page-item <%= pagination.page === i ? 'active' : '' %>">
+                <a class="page-link" href="?page=<%= i %>&search=<%= filters.search || '' %>&stockStatus=<%= filters.stockStatus || '' %>">
+                  <%= i %>
+                </a>
+              </li>
+              <% } %>
+            </ul>
+          </nav>
+        </div>
+        <% } %>
+      </div>
+
+      <!-- Low Stock Alerts -->
+      <% if ((lowStockItems || []).length > 0) { %>
+      <div class="card card-warning">
+        <div class="card-header">
+          <h3 class="card-title"><i class="fas fa-exclamation-triangle me-2"></i>Low Stock Alerts</h3>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <% lowStockItems.slice(0, 6).forEach(function(item) { %>
+            <div class="col-md-4 mb-3">
+              <div class="alert alert-warning mb-0">
+                <strong><%= item.productName %></strong><br>
+                <small>SKU: <%= item.sku %> | Available: <%= item.available %></small>
+              </div>
+            </div>
+            <% }); %>
+          </div>
+        </div>
+      </div>
+      <% } %>
+    </div>
+  </section>
+</div>
+
+<!-- Adjust Stock Modal -->
+<div class="modal fade" id="adjustStockModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Adjust Stock</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="adjustStockForm">
+          <input type="hidden" name="inventoryLevelId" id="adjustInventoryLevelId">
+          <div class="mb-3">
+            <label class="form-label">Product</label>
+            <input type="text" class="form-control" id="adjustProductName" readonly>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Current Quantity</label>
+            <input type="number" class="form-control" id="adjustCurrentQty" readonly>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Adjustment Type</label>
+            <select class="form-select" name="adjustmentType" id="adjustmentType">
+              <option value="add">Add Stock</option>
+              <option value="remove">Remove Stock</option>
+              <option value="set">Set Quantity</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Quantity</label>
+            <input type="number" class="form-control" name="quantity" id="adjustQuantity" min="0" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Reason</label>
+            <select class="form-select" name="reason">
+              <option value="manual_adjustment">Manual Adjustment</option>
+              <option value="received">Received from Supplier</option>
+              <option value="returned">Customer Return</option>
+              <option value="damaged">Damaged/Lost</option>
+              <option value="count_correction">Inventory Count Correction</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Notes</label>
+            <textarea class="form-control" name="notes" rows="2"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="submitAdjustment()">Save Adjustment</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function openAdjustModal(inventoryLevelId, productName, currentQty) {
+    document.getElementById('adjustInventoryLevelId').value = inventoryLevelId;
+    document.getElementById('adjustProductName').value = productName;
+    document.getElementById('adjustCurrentQty').value = currentQty;
+    document.getElementById('adjustQuantity').value = '';
+    new bootstrap.Modal(document.getElementById('adjustStockModal')).show();
+  }
+
+  async function submitAdjustment() {
+    const form = document.getElementById('adjustStockForm');
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData);
+
+    try {
+      const response = await fetch('/hub/inventory/adjust', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const result = await response.json();
+      if (result.success) {
+        location.reload();
+      } else {
+        alert('Error: ' + result.message);
+      }
+    } catch (error) {
+      alert('Error: ' + error.message);
+    }
+  }
+</script>
+
+<%- include('../partials/footer') %>

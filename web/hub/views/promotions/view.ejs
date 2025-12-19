@@ -1,0 +1,241 @@
+<%- include('../layout') %>
+
+<% content %>
+<div class="content-wrapper">
+  <!-- Content Header (Page header) -->
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0"><%= promotion.name %></h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/hub/promotions">Promotions</a></li>
+            <li class="breadcrumb-item active"><%= promotion.code %></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <section class="content">
+    <div class="container-fluid">
+      <!-- Success Messages -->
+      <% if (success) { %>
+        <div class="alert alert-success alert-dismissible">
+          <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+          <i class="icon fas fa-check"></i> <%= success %>
+        </div>
+      <% } %>
+
+      <!-- Action Bar -->
+      <div class="row mb-3">
+        <div class="col-12">
+          <a href="<%= `/hub/promotions/${promotion.promotionId}/edit` %>" class="btn btn-primary">
+            <i class="fas fa-edit"></i> Edit Promotion
+          </a>
+          <button class="btn btn-danger ml-2" onclick="deletePromotion('<%= promotion.promotionId %>', '<%= promotion.name %>')">
+            <i class="fas fa-trash"></i> Delete Promotion
+          </button>
+          <a href="/hub/promotions" class="btn btn-secondary ml-2">
+            <i class="fas fa-arrow-left"></i> Back to Promotions
+          </a>
+        </div>
+      </div>
+
+      <div class="row">
+        <!-- Promotion Details -->
+        <div class="col-md-8">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Promotion Details</h3>
+            </div>
+            <div class="card-body">
+              <dl class="row">
+                <dt class="col-sm-3">Code:</dt>
+                <dd class="col-sm-9"><code><%= promotion.code %></code></dd>
+
+                <dt class="col-sm-3">Name:</dt>
+                <dd class="col-sm-9"><%= promotion.name %></dd>
+
+                <% if (promotion.description) { %>
+                  <dt class="col-sm-3">Description:</dt>
+                  <dd class="col-sm-9"><%= promotion.description %></dd>
+                <% } %>
+
+                <dt class="col-sm-3">Type:</dt>
+                <dd class="col-sm-9">
+                  <span class="badge badge-secondary"><%= promotion.type.replace('_', ' ') %></span>
+                </dd>
+
+                <dt class="col-sm-3">Discount:</dt>
+                <dd class="col-sm-9">
+                  <% if (promotion.type === 'percentage') { %>
+                    <%= promotion.value %>% off
+                  <% } else if (promotion.type === 'fixed_amount') { %>
+                    $<%= promotion.value.toFixed(2) %>
+                  <% } else { %>
+                    Free Shipping
+                  <% } %>
+                </dd>
+
+                <% if (promotion.minOrderAmount) { %>
+                  <dt class="col-sm-3">Minimum Order:</dt>
+                  <dd class="col-sm-9">$<%= promotion.minOrderAmount.toFixed(2) %></dd>
+                <% } %>
+
+                <% if (promotion.maxDiscountAmount) { %>
+                  <dt class="col-sm-3">Max Discount:</dt>
+                  <dd class="col-sm-9">$<%= promotion.maxDiscountAmount.toFixed(2) %></dd>
+                <% } %>
+
+                <dt class="col-sm-3">Usage:</dt>
+                <dd class="col-sm-9">
+                  <%= promotion.usageCount || 0 %>
+                  <% if (promotion.maxUsage) { %>
+                    / <%= promotion.maxUsage %>
+                  <% } %>
+                </dd>
+
+                <% if (promotion.maxUsagePerCustomer) { %>
+                  <dt class="col-sm-3">Per Customer:</dt>
+                  <dd class="col-sm-9"><%= promotion.maxUsagePerCustomer %> uses</dd>
+                <% } %>
+
+                <% if (promotion.startDate) { %>
+                  <dt class="col-sm-3">Starts:</dt>
+                  <dd class="col-sm-9"><%= new Date(promotion.startDate).toLocaleString() %></dd>
+                <% } %>
+
+                <% if (promotion.endDate) { %>
+                  <dt class="col-sm-3">Ends:</dt>
+                  <dd class="col-sm-9"><%= new Date(promotion.endDate).toLocaleString() %></dd>
+                <% } %>
+
+                <dt class="col-sm-3">Status:</dt>
+                <dd class="col-sm-9">
+                  <span class="badge badge-<%= promotion.status === 'active' ? 'success' : promotion.status === 'expired' ? 'warning' : 'secondary' %>">
+                    <%= promotion.status %>
+                  </span>
+                  <% if (!promotion.isActive) { %>
+                    <small class="text-muted">(Inactive)</small>
+                  <% } %>
+                </dd>
+
+                <dt class="col-sm-3">Created:</dt>
+                <dd class="col-sm-9"><%= new Date(promotion.createdAt).toLocaleString() %></dd>
+
+                <% if (promotion.updatedAt !== promotion.createdAt) { %>
+                  <dt class="col-sm-3">Updated:</dt>
+                  <dd class="col-sm-9"><%= new Date(promotion.updatedAt).toLocaleString() %></dd>
+                <% } %>
+              </dl>
+            </div>
+          </div>
+        </div>
+
+        <!-- Statistics Sidebar -->
+        <div class="col-md-4">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Statistics</h3>
+            </div>
+            <div class="card-body">
+              <div class="row text-center">
+                <div class="col-6">
+                  <div class="description-block">
+                    <h5 class="description-header"><%= promotion.usageCount || 0 %></h5>
+                    <span class="description-text">TOTAL USES</span>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="description-block">
+                    <h5 class="description-header">
+                      <% if (promotion.usageLimit) { %>
+                        <%= Math.round(((promotion.usageCount || 0) / promotion.usageLimit) * 100) %>%
+                      <% } else { %>
+                        N/A
+                      <% } %>
+                    </h5>
+                    <span class="description-text">USAGE RATE</span>
+                  </div>
+                </div>
+              </div>
+
+              <% if (promotion.applicableProducts && promotion.applicableProducts.length > 0) { %>
+                <hr>
+                <h6>Applicable Products</h6>
+                <small class="text-muted"><%= promotion.applicableProducts.length %> products</small>
+              <% } %>
+
+              <% if (promotion.applicableCategories && promotion.applicableCategories.length > 0) { %>
+                <hr>
+                <h6>Applicable Categories</h6>
+                <small class="text-muted"><%= promotion.applicableCategories.length %> categories</small>
+              <% } %>
+
+              <% if (promotion.applicableCustomerGroups && promotion.applicableCustomerGroups.length > 0) { %>
+                <hr>
+                <h6>Customer Groups</h6>
+                <small class="text-muted"><%= promotion.applicableCustomerGroups.length %> groups</small>
+              <% } %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Delete Promotion</h4>
+        <button type="button" class="close" data-dismiss="modal">
+          <span>&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete the promotion "<strong id="deletePromotionName"></strong>"?</p>
+        <p class="text-danger"><small>This action cannot be undone and will affect any active orders using this promotion.</small></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete Promotion</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function deletePromotion(promotionId, promotionName) {
+  document.getElementById('deletePromotionName').textContent = promotionName;
+  document.getElementById('confirmDeleteBtn').onclick = function() {
+    fetch(`/hub/promotions/${promotionId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        window.location.href = '/hub/promotions?success=Promotion deleted successfully';
+      } else {
+        alert('Error: ' + data.message);
+      }
+    })
+    .catch(error => {
+      alert('Error deleting promotion');
+      console.error('Error:', error);
+    });
+  };
+  $('#deleteModal').modal('show');
+}
+</script>
+<% endcontent %>

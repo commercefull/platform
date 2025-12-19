@@ -1,0 +1,236 @@
+<%- include('../../layout') %>
+
+<% content %>
+<div class="content-wrapper">
+  <!-- Content Header (Page header) -->
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0">Shipping Methods</h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/hub/shipping">Shipping</a></li>
+            <li class="breadcrumb-item active">Methods</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <section class="content">
+    <div class="container-fluid">
+      <!-- Success/Error Messages -->
+      <% if (success) { %>
+        <div class="alert alert-success alert-dismissible">
+          <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+          <i class="icon fas fa-check"></i> <%= success %>
+        </div>
+      <% } %>
+
+      <!-- Action Bar -->
+      <div class="row mb-3">
+        <div class="col-12">
+          <a href="/hub/shipping/methods/create" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Add Shipping Method
+          </a>
+          <div class="float-right">
+            <span class="badge badge-info">Total: <%= methods.length %></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Methods Table -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Shipping Methods</h3>
+        </div>
+        <div class="card-body table-responsive p-0">
+          <table class="table table-hover text-nowrap">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Code</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th>Default</th>
+                <th>Display</th>
+                <th>Priority</th>
+                <th>Delivery</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (methods.length === 0) { %>
+                <tr>
+                  <td colspan="9" class="text-center py-4">
+                    <em>No shipping methods configured. <a href="/hub/shipping/methods/create">Add your first method</a>.</em>
+                  </td>
+                </tr>
+              <% } else { %>
+                <% methods.forEach(method => { %>
+                  <tr>
+                    <td>
+                      <strong><%= method.name %></strong>
+                      <% if (method.description) { %>
+                        <br><small class="text-muted"><%= method.description %></small>
+                      <% } %>
+                    </td>
+                    <td>
+                      <code><%= method.code %></code>
+                    </td>
+                    <td>
+                      <span class="badge badge-secondary"><%= method.domesticInternational %></span>
+                    </td>
+                    <td>
+                      <span class="badge badge-<%= method.isActive ? 'success' : 'danger' %>">
+                        <%= method.isActive ? 'Active' : 'Inactive' %>
+                      </span>
+                    </td>
+                    <td>
+                      <% if (method.isDefault) { %>
+                        <i class="fas fa-star text-warning"></i> Default
+                      <% } else { %>
+                        <span class="text-muted">-</span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <% if (method.displayOnFrontend) { %>
+                        <i class="fas fa-eye text-success"></i> Yes
+                      <% } else { %>
+                        <i class="fas fa-eye-slash text-muted"></i> No
+                      <% } %>
+                    </td>
+                    <td><%= method.priority %></td>
+                    <td>
+                      <% if (method.estimatedDeliveryDays) { %>
+                        <%= method.estimatedDeliveryDays.min %>-<%= method.estimatedDeliveryDays.max %> days
+                      <% } else { %>
+                        <span class="text-muted">-</span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <a href="/hub/shipping/methods/<%= method.shippingMethodId %>" class="btn btn-sm btn-info">
+                        <i class="fas fa-eye"></i>
+                      </a>
+                      <a href="/hub/shipping/methods/<%= method.shippingMethodId %>/edit" class="btn btn-sm btn-primary">
+                        <i class="fas fa-edit"></i>
+                      </a>
+                      <% if (method.isActive) { %>
+                        <button class="btn btn-sm btn-warning" onclick="deactivateMethod('<%= method.shippingMethodId %>', '<%= method.name %>')">
+                          <i class="fas fa-pause"></i>
+                        </button>
+                      <% } else { %>
+                        <button class="btn btn-sm btn-success" onclick="activateMethod('<%= method.shippingMethodId %>', '<%= method.name %>')">
+                          <i class="fas fa-play"></i>
+                        </button>
+                      <% } %>
+                      <button class="btn btn-sm btn-danger" onclick="deleteMethod('<%= method.shippingMethodId %>', '<%= method.name %>')">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
+                <% }); %>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Delete Shipping Method</h4>
+        <button type="button" class="close" data-dismiss="modal">
+          <span>&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete the shipping method "<strong id="deleteMethodName"></strong>"?</p>
+        <p class="text-danger"><small>This action may affect active orders and cannot be undone.</small></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete Method</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function deleteMethod(methodId, methodName) {
+  document.getElementById('deleteMethodName').textContent = methodName;
+  document.getElementById('confirmDeleteBtn').onclick = function() {
+    fetch(`/hub/shipping/methods/${methodId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        location.reload();
+      } else {
+        alert('Error: ' + data.message);
+      }
+    })
+    .catch(error => {
+      alert('Error deleting shipping method');
+      console.error('Error:', error);
+    });
+  };
+  $('#deleteModal').modal('show');
+}
+
+function activateMethod(methodId, methodName) {
+  fetch(`/hub/shipping/methods/${methodId}/activate`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      location.reload();
+    } else {
+      alert('Error: ' + data.message);
+    }
+  })
+  .catch(error => {
+    alert('Error activating shipping method');
+    console.error('Error:', error);
+  });
+}
+
+function deactivateMethod(methodId, methodName) {
+  fetch(`/hub/shipping/methods/${methodId}/deactivate`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      location.reload();
+    } else {
+      alert('Error: ' + data.message);
+    }
+  })
+  .catch(error => {
+    alert('Error deactivating shipping method');
+    console.error('Error:', error);
+  });
+}
+</script>
+<% endcontent %>

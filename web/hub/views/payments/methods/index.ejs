@@ -1,0 +1,91 @@
+<%- include('../../partials/header', { title: pageName }) %>
+
+<div class="content-wrapper">
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0"><i class="fas fa-credit-card me-2"></i><%= pageName %></h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-end">
+            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item active">Payment Methods</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="content">
+    <div class="container-fluid">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title"><i class="fas fa-list me-2"></i>Configured Payment Methods</h3>
+        </div>
+        <div class="card-body table-responsive p-0">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Method</th>
+                <th>Gateway</th>
+                <th>Countries</th>
+                <th>Min/Max Amount</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% (methods || []).forEach(function(method) { %>
+              <tr>
+                <td>
+                  <i class="fas fa-<%= method.icon || 'credit-card' %> me-2"></i>
+                  <strong><%= method.name %></strong>
+                </td>
+                <td><span class="badge bg-secondary"><%= method.gatewayName || method.gateway %></span></td>
+                <td><%= (method.countries || []).length > 0 ? method.countries.join(', ') : 'All' %></td>
+                <td>
+                  <% if (method.minAmount || method.maxAmount) { %>
+                  $<%= method.minAmount || 0 %> - $<%= method.maxAmount || '∞' %>
+                  <% } else { %>
+                  No limits
+                  <% } %>
+                </td>
+                <td>
+                  <span class="badge bg-<%= method.isActive ? 'success' : 'secondary' %>">
+                    <%= method.isActive ? 'Active' : 'Inactive' %>
+                  </span>
+                </td>
+                <td>
+                  <button class="btn btn-sm btn-outline-<%= method.isActive ? 'warning' : 'success' %>" onclick="toggleMethod('<%= method.paymentMethodId %>')">
+                    <i class="fas fa-<%= method.isActive ? 'pause' : 'play' %>"></i>
+                  </button>
+                  <a href="/hub/payments/methods/<%= method.paymentMethodId %>/edit" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-edit"></i>
+                  </a>
+                </td>
+              </tr>
+              <% }); %>
+              <% if ((methods || []).length === 0) { %>
+              <tr>
+                <td colspan="6" class="text-center text-muted py-4">
+                  No payment methods configured. Configure a gateway first.
+                </td>
+              </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+  async function toggleMethod(id) {
+    const res = await fetch(`/hub/payments/methods/${id}/toggle`, { method: 'POST' });
+    if ((await res.json()).success) location.reload();
+  }
+</script>
+
+<%- include('../../partials/footer') %>
