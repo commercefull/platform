@@ -8,7 +8,7 @@
     "prd": "yarn prd:build && yarn prd:run",
     "prd:run": "NODE_ENV=production node --env-file=.env --watch ./app.mjs",
     "prd:run:pm2": "NODE_ENV=production pm2 start -i max node --env-file=.env --name commercefull -- ./app.mjs",
-    "prd:build": "npx esbuild app.ts --bundle --minify --platform=node --target=es2022 --format=esm --outfile=app.mjs --external:./node_modules/* --banner:js='import { createRequire as topLevelCreateRequire } from \"module\"; const require = topLevelCreateRequire(import.meta.url);'",
+    "prd:build": "yarn css:build && npx esbuild app.ts --bundle --minify --platform=node --target=es2022 --format=esm --outfile=app.mjs --external:./node_modules/* --banner:js='import { createRequire as topLevelCreateRequire } from \"module\"; const require = topLevelCreateRequire(import.meta.url);'",
     "db": "docker run --rm -d -P -p 127.0.0.1:5433:5432 --env-file ./.env --name commerce-db postgres:18-alpine",
     "db:stop": "docker stop commerce-db",
     "db:migrate": "knex migrate:latest --env development",
@@ -26,7 +26,9 @@
     "package:upgrade": "yarn upgrade --latest",
     "code:lint": "knip",
     "sec:audit": "yarn audit --groups dependencies",
-    "sec:check": "yarn audit --groups dependencies --level high"
+    "sec:check": "yarn audit --groups dependencies --level high",
+    "css:build": "npx tailwindcss -i ./public/stylesheets/storefront/main.css -o ./public/stylesheets/storefront/compiled.css --minify",
+    "css:watch": "npx tailwindcss -i ./public/stylesheets/storefront/main.css -o ./public/stylesheets/storefront/compiled.css --watch"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.400.0",
@@ -84,6 +86,7 @@
     "@types/sharp": "^0.31.0",
     "@types/supertest": "^6.0.3",
     "@types/uuid": "^9.0.8",
+    "autoprefixer": "^10.4.23",
     "axios": "1.13.2",
     "cypress": "15.7.1",
     "cypress-cucumber-preprocessor": "4.3.1",
@@ -94,7 +97,9 @@
     "knex-types": "0.5.0",
     "knip": "5.73.3",
     "nodemon": "3.1.11",
+    "postcss": "^8.5.6",
     "supertest": "^7.1.4",
+    "tailwindcss": "^3.4.0",
     "ts-jest": "29.4.6",
     "ts-node": "10.9.2",
     "typescript": "5.9.3"

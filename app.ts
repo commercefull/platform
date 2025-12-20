@@ -36,17 +36,17 @@ if (isProduction) {
 }
 
 // Static file serving - must be before security middleware
-app.use('/javascripts', express.static(path.join(__dirname, 'public/storefront/javascripts'), {
+app.use('/javascripts', express.static(path.join(__dirname, 'public/javascripts'), {
   maxAge: isProduction ? '1y' : 0, // Cache for 1 year in production
   etag: true,
   lastModified: true,
 }));
-app.use('/stylesheets', express.static(path.join(__dirname, 'public/storefront/stylesheets'), {
+app.use('/stylesheets', express.static(path.join(__dirname, 'public/stylesheets'), {
   maxAge: isProduction ? '1y' : 0,
   etag: true,
   lastModified: true,
 }));
-app.use('/images', express.static(path.join(__dirname, 'public/storefront/images'), {
+app.use('/images', express.static(path.join(__dirname, 'public/images'), {
   maxAge: isProduction ? '1y' : 0,
   etag: true,
   lastModified: true,
@@ -68,7 +68,7 @@ app.use(
       directives: {
         "default-src": ["'self'"],
         "style-src": ["'self'", "https://fonts.googleapis.com", "'unsafe-inline'"],
-        "script-src": ["'self'", 'https://www.google-analytics.com', 'https://ssl.google-analytics.com', 'https://www.googletagmanager.com', 'https://cdn.tailwindcss.com', 'https://unpkg.com'],
+        "script-src": ["'self'", 'https://www.google-analytics.com', 'https://ssl.google-analytics.com', 'https://www.googletagmanager.com', 'https://unpkg.com'],
         "img-src": ["'self'", "data:", "https:", 'https://www.google-analytics.com', 'https://www.googletagmanager.com'],
         "connect-src": ["'self'", 'https://www.google-analytics.com', 'https://api.stripe.com'],
         "font-src": ["'self'", 'https://fonts.gstatic.com'],
