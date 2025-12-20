@@ -1,28 +1,9 @@
 import { query, queryOne } from '../../../libs/db';
+import { Table, StoreCurrencySettings } from '../../../libs/db/types';
 import { unixTimestamp } from '../../../libs/date';
 
 export type RoundingMethod = 'up' | 'down' | 'ceiling' | 'floor' | 'half_up' | 'half_down' | 'half_even';
 export type PriceDisplayFormat = 'symbol' | 'code' | 'symbol_code' | 'name';
-
-export interface StoreCurrencySettings {
-  storeCurrencySettingsId: string;
-  createdAt: string;
-  updatedAt: string;
-  storeCurrencyId: string;
-  baseCurrencyId: string;
-  displayCurrencyId: string;
-  allowCustomerCurrencySelection: boolean;
-  showCurrencySelector: boolean;
-  autoUpdateRates: boolean;
-  rateUpdateFrequency?: number;
-  activeProviderCode?: string;
-  markupPercentage: number;
-  roundPrecision: number;
-  roundingMethod: RoundingMethod;
-  enabledCurrencies?: string[];
-  priceDisplayFormat: PriceDisplayFormat;
-  updatedBy?: string;
-}
 
 export type StoreCurrencySettingsCreateParams = Omit<StoreCurrencySettings, 'storeCurrencySettingsId' | 'createdAt' | 'updatedAt'>;
 export type StoreCurrencySettingsUpdateParams = Partial<Omit<StoreCurrencySettings, 'storeCurrencySettingsId' | 'createdAt' | 'updatedAt'>>;
@@ -33,7 +14,7 @@ export class StoreCurrencySettingsRepo {
    */
   async findById(storeCurrencySettingsId: string): Promise<StoreCurrencySettings | null> {
     return await queryOne<StoreCurrencySettings>(
-      `SELECT * FROM "public"."storeCurrencySettings" WHERE "storeCurrencySettingsId" = $1`,
+      `SELECT * FROM "${Table.StoreCurrencySettings}" WHERE "storeCurrencySettingsId" = $1`,
       [storeCurrencySettingsId]
     );
   }
@@ -43,7 +24,7 @@ export class StoreCurrencySettingsRepo {
    */
   async findByStoreCurrency(storeCurrencyId: string): Promise<StoreCurrencySettings | null> {
     return await queryOne<StoreCurrencySettings>(
-      `SELECT * FROM "public"."storeCurrencySettings" WHERE "storeCurrencyId" = $1`,
+      `SELECT * FROM "${Table.StoreCurrencySettings}" WHERE "storeCurrencyId" = $1`,
       [storeCurrencyId]
     );
   }
@@ -53,7 +34,7 @@ export class StoreCurrencySettingsRepo {
    */
   async findDefault(): Promise<StoreCurrencySettings | null> {
     return await queryOne<StoreCurrencySettings>(
-      `SELECT * FROM "public"."storeCurrencySettings" ORDER BY "createdAt" ASC LIMIT 1`
+      `SELECT * FROM "${Table.StoreCurrencySettings}" ORDER BY "createdAt" ASC LIMIT 1`
     );
   }
 
@@ -62,7 +43,7 @@ export class StoreCurrencySettingsRepo {
    */
   async findAll(): Promise<StoreCurrencySettings[]> {
     const results = await query<StoreCurrencySettings[]>(
-      `SELECT * FROM "public"."storeCurrencySettings" ORDER BY "createdAt" ASC`
+      `SELECT * FROM "${Table.StoreCurrencySettings}" ORDER BY "createdAt" ASC`
     );
     return results || [];
   }
@@ -72,7 +53,7 @@ export class StoreCurrencySettingsRepo {
    */
   async findByBaseCurrency(baseCurrencyId: string): Promise<StoreCurrencySettings[]> {
     const results = await query<StoreCurrencySettings[]>(
-      `SELECT * FROM "public"."storeCurrencySettings" WHERE "baseCurrencyId" = $1`,
+      `SELECT * FROM "${Table.StoreCurrencySettings}" WHERE "baseCurrencyId" = $1`,
       [baseCurrencyId]
     );
     return results || [];
@@ -83,7 +64,7 @@ export class StoreCurrencySettingsRepo {
    */
   async findWithAutoUpdate(): Promise<StoreCurrencySettings[]> {
     const results = await query<StoreCurrencySettings[]>(
-      `SELECT * FROM "public"."storeCurrencySettings" WHERE "autoUpdateRates" = true`,
+      `SELECT * FROM "${Table.StoreCurrencySettings}" WHERE "autoUpdateRates" = true`,
       []
     );
     return results || [];
@@ -102,7 +83,7 @@ export class StoreCurrencySettingsRepo {
     }
 
     const result = await queryOne<StoreCurrencySettings>(
-      `INSERT INTO "public"."storeCurrencySettings" (
+      `INSERT INTO "${Table.StoreCurrencySettings}" (
         "storeCurrencyId", "baseCurrencyId", "displayCurrencyId",
         "allowCustomerCurrencySelection", "showCurrencySelector", "autoUpdateRates",
         "rateUpdateFrequency", "activeProviderCode", "markupPercentage",
@@ -161,7 +142,7 @@ export class StoreCurrencySettingsRepo {
     values.push(storeCurrencySettingsId);
 
     const result = await queryOne<StoreCurrencySettings>(
-      `UPDATE "public"."storeCurrencySettings" 
+      `UPDATE "${Table.StoreCurrencySettings}" 
        SET ${updateFields.join(', ')}
        WHERE "storeCurrencySettingsId" = $${paramIndex}
        RETURNING *`,
@@ -212,7 +193,7 @@ export class StoreCurrencySettingsRepo {
    */
   async addEnabledCurrency(storeCurrencySettingsId: string, currencyCode: string): Promise<StoreCurrencySettings | null> {
     const result = await queryOne<StoreCurrencySettings>(
-      `UPDATE "public"."storeCurrencySettings" 
+      `UPDATE "${Table.StoreCurrencySettings}" 
        SET "enabledCurrencies" = array_append("enabledCurrencies", $1), "updatedAt" = $2
        WHERE "storeCurrencySettingsId" = $3
        RETURNING *`,
@@ -227,7 +208,7 @@ export class StoreCurrencySettingsRepo {
    */
   async removeEnabledCurrency(storeCurrencySettingsId: string, currencyCode: string): Promise<StoreCurrencySettings | null> {
     const result = await queryOne<StoreCurrencySettings>(
-      `UPDATE "public"."storeCurrencySettings" 
+      `UPDATE "${Table.StoreCurrencySettings}" 
        SET "enabledCurrencies" = array_remove("enabledCurrencies", $1), "updatedAt" = $2
        WHERE "storeCurrencySettingsId" = $3
        RETURNING *`,
@@ -281,7 +262,7 @@ export class StoreCurrencySettingsRepo {
    */
   async delete(storeCurrencySettingsId: string): Promise<boolean> {
     const result = await queryOne<{ storeCurrencySettingsId: string }>(
-      `DELETE FROM "public"."storeCurrencySettings" WHERE "storeCurrencySettingsId" = $1 RETURNING "storeCurrencySettingsId"`,
+      `DELETE FROM "${Table.StoreCurrencySettings}" WHERE "storeCurrencySettingsId" = $1 RETURNING "storeCurrencySettingsId"`,
       [storeCurrencySettingsId]
     );
 
@@ -293,7 +274,7 @@ export class StoreCurrencySettingsRepo {
    */
   async count(): Promise<number> {
     const result = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM "public"."storeCurrencySettings"`,
+      `SELECT COUNT(*) as count FROM "${Table.StoreCurrencySettings}"`,
       []
     );
 
@@ -313,19 +294,19 @@ export class StoreCurrencySettingsRepo {
     const total = await this.count();
 
     const autoUpdateResult = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM "public"."storeCurrencySettings" WHERE "autoUpdateRates" = true`,
+      `SELECT COUNT(*) as count FROM "${Table.StoreCurrencySettings}" WHERE "autoUpdateRates" = true`,
       []
     );
     const withAutoUpdate = autoUpdateResult ? parseInt(autoUpdateResult.count, 10) : 0;
 
     const avgResult = await queryOne<{ avg: string }>(
-      `SELECT AVG("markupPercentage") as avg FROM "public"."storeCurrencySettings"`,
+      `SELECT AVG("markupPercentage") as avg FROM "${Table.StoreCurrencySettings}"`,
       []
     );
     const avgMarkup = avgResult && avgResult.avg ? parseFloat(avgResult.avg) : 0;
 
     const roundingResults = await query<{ roundingMethod: RoundingMethod; count: string }[]>(
-      `SELECT "roundingMethod", COUNT(*) as count FROM "public"."storeCurrencySettings" GROUP BY "roundingMethod"`,
+      `SELECT "roundingMethod", COUNT(*) as count FROM "${Table.StoreCurrencySettings}" GROUP BY "roundingMethod"`,
       []
     );
 
@@ -337,7 +318,7 @@ export class StoreCurrencySettingsRepo {
     }
 
     const displayResults = await query<{ priceDisplayFormat: PriceDisplayFormat; count: string }[]>(
-      `SELECT "priceDisplayFormat", COUNT(*) as count FROM "public"."storeCurrencySettings" GROUP BY "priceDisplayFormat"`,
+      `SELECT "priceDisplayFormat", COUNT(*) as count FROM "${Table.StoreCurrencySettings}" GROUP BY "priceDisplayFormat"`,
       []
     );
 

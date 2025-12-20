@@ -11,7 +11,7 @@ export class SystemConfigurationRepo implements ISystemConfigurationRepository {
 
   async findById(configId: string): Promise<SystemConfiguration | null> {
     const row = await queryOne<Record<string, any>>(
-      'SELECT * FROM system_configuration WHERE "configId" = $1',
+      'SELECT * FROM "systemConfiguration" WHERE "configId" = $1',
       [configId]
     );
     return row ? this.mapToSystemConfiguration(row) : null;
@@ -19,7 +19,7 @@ export class SystemConfigurationRepo implements ISystemConfigurationRepository {
 
   async findActive(): Promise<SystemConfiguration | null> {
     const row = await queryOne<Record<string, any>>(
-      'SELECT * FROM system_configuration WHERE "isActive" = true ORDER BY "createdAt" DESC LIMIT 1',
+      'SELECT * FROM "systemConfiguration" WHERE "isActive" = true ORDER BY "createdAt" DESC LIMIT 1',
       []
     );
     return row ? this.mapToSystemConfiguration(row) : null;
@@ -27,7 +27,7 @@ export class SystemConfigurationRepo implements ISystemConfigurationRepository {
 
   async findAll(): Promise<SystemConfiguration[]> {
     const rows = await query<Record<string, any>[]>(
-      'SELECT * FROM system_configuration ORDER BY "createdAt" DESC',
+      'SELECT * FROM "systemConfiguration" ORDER BY "createdAt" DESC',
       []
     );
     return (rows || []).map(row => this.mapToSystemConfiguration(row));
@@ -37,13 +37,13 @@ export class SystemConfigurationRepo implements ISystemConfigurationRepository {
     const now = new Date().toISOString();
 
     const existing = await queryOne<Record<string, any>>(
-      'SELECT "configId" FROM system_configuration WHERE "configId" = $1',
+      'SELECT "configId" FROM "systemConfiguration" WHERE "configId" = $1',
       [config.configId]
     );
 
     if (existing) {
       await query(
-        `UPDATE system_configuration SET
+        `UPDATE "systemConfiguration" SET
           "systemMode" = $1, features = $2, "businessSettings" = $3,
           "platformSettings" = $4, "securitySettings" = $5, "notificationSettings" = $6,
           "integrationSettings" = $7, metadata = $8, "updatedAt" = $9
@@ -58,7 +58,7 @@ export class SystemConfigurationRepo implements ISystemConfigurationRepository {
       );
     } else {
       await query(
-        `INSERT INTO system_configuration (
+        `INSERT INTO "systemConfiguration" (
           "configId", "systemMode", features, "businessSettings",
           "platformSettings", "securitySettings", "notificationSettings",
           "integrationSettings", metadata, "createdAt", "updatedAt"
@@ -77,12 +77,12 @@ export class SystemConfigurationRepo implements ISystemConfigurationRepository {
   }
 
   async delete(configId: string): Promise<void> {
-    await query('DELETE FROM system_configuration WHERE "configId" = $1', [configId]);
+    await query('DELETE FROM "systemConfiguration" WHERE "configId" = $1', [configId]);
   }
 
   async count(): Promise<number> {
     const result = await queryOne<{ count: string }>(
-      'SELECT COUNT(*) as count FROM system_configuration',
+      'SELECT COUNT(*) as count FROM "systemConfiguration"',
       []
     );
     return parseInt(result?.count || '0');

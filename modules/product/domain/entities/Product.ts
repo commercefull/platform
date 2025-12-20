@@ -14,6 +14,16 @@ export interface ProductImage {
   altText?: string;
   position: number;
   isPrimary: boolean;
+  // New fields for processed images
+  webpUrl?: string;
+  thumbnailUrl?: string;
+  responsiveUrls?: Record<string, string>;
+  metadata?: {
+    width?: number;
+    height?: number;
+    size?: number;
+    format?: string;
+  };
 }
 
 export interface ProductProps {

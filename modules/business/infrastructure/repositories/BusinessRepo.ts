@@ -4,6 +4,7 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
+import { Table } from '../../../../libs/db/types';
 import { BusinessRepository as IBusinessRepository, BusinessFilters } from '../../domain/repositories/BusinessRepository';
 import { Business } from '../../domain/entities/Business';
 
@@ -11,7 +12,7 @@ export class BusinessRepo implements IBusinessRepository {
 
   async findById(businessId: string): Promise<Business | null> {
     const row = await queryOne<Record<string, any>>(
-      'SELECT * FROM business WHERE "businessId" = $1',
+      'SELECT * FROM "business" WHERE "businessId" = $1',
       [businessId]
     );
     return row ? this.mapToBusiness(row) : null;
@@ -19,7 +20,7 @@ export class BusinessRepo implements IBusinessRepository {
 
   async findBySlug(slug: string): Promise<Business | null> {
     const row = await queryOne<Record<string, any>>(
-      'SELECT * FROM business WHERE slug = $1',
+      'SELECT * FROM "business" WHERE "slug" = $1',
       [slug]
     );
     return row ? this.mapToBusiness(row) : null;
@@ -27,7 +28,7 @@ export class BusinessRepo implements IBusinessRepository {
 
   async findByDomain(domain: string): Promise<Business | null> {
     const row = await queryOne<Record<string, any>>(
-      'SELECT * FROM business WHERE domain = $1',
+      'SELECT * FROM "business" WHERE "domain" = $1',
       [domain]
     );
     return row ? this.mapToBusiness(row) : null;
@@ -37,7 +38,7 @@ export class BusinessRepo implements IBusinessRepository {
     const { whereClause, params } = this.buildWhereClause(filters);
 
     const rows = await query<Record<string, any>[]>(
-      `SELECT * FROM business ${whereClause} ORDER BY "createdAt" DESC`,
+      `SELECT * FROM "business" ${whereClause} ORDER BY "createdAt" DESC`,
       params
     );
 
@@ -48,18 +49,18 @@ export class BusinessRepo implements IBusinessRepository {
     const now = new Date().toISOString();
 
     const existing = await queryOne<Record<string, any>>(
-      'SELECT "businessId" FROM business WHERE "businessId" = $1',
+      'SELECT "businessId" FROM "business" WHERE "businessId" = $1',
       [business.businessId]
     );
 
     if (existing) {
       await query(
-        `UPDATE business SET
-          name = $1, slug = $2, description = $3, "businessType" = $4, domain = $5,
-          logo = $6, "favicon" = $7, "primaryColor" = $8, "secondaryColor" = $9,
+        `UPDATE "business" SET
+          "name" = $1, "slug" = $2, "description" = $3, "businessType" = $4, "domain" = $5,
+          "logo" = $6, "favicon" = $7, "primaryColor" = $8, "secondaryColor" = $9,
           "isActive" = $10, "allowMultipleStores" = $11, "allowMultipleWarehouses" = $12,
           "enableMarketplace" = $13, "defaultCurrency" = $14, "defaultLanguage" = $15,
-          timezone = $16, metadata = $17, "updatedAt" = $18
+          "timezone" = $16, "metadata" = $17, "updatedAt" = $18
         WHERE "businessId" = $19`,
         [
           business.name, business.slug, business.description, business.businessType,
@@ -73,7 +74,7 @@ export class BusinessRepo implements IBusinessRepository {
       );
     } else {
       await query(
-        `INSERT INTO business (
+        `INSERT INTO "business" (
           "businessId", name, slug, description, "businessType", domain,
           logo, "favicon", "primaryColor", "secondaryColor", "isActive",
           "allowMultipleStores", "allowMultipleWarehouses", "enableMarketplace",
@@ -95,13 +96,13 @@ export class BusinessRepo implements IBusinessRepository {
   }
 
   async delete(businessId: string): Promise<void> {
-    await query('DELETE FROM business WHERE "businessId" = $1', [businessId]);
+    await query('DELETE FROM "business" WHERE "businessId" = $1', [businessId]);
   }
 
   async count(filters?: BusinessFilters): Promise<number> {
     const { whereClause, params } = this.buildWhereClause(filters);
     const result = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM business ${whereClause}`,
+      `SELECT COUNT(*) as count FROM "business" ${whereClause}`,
       params
     );
     return parseInt(result?.count || '0');

@@ -41,8 +41,8 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         "default-src": ["'self'"],
-        "style-src": ["'self'", "https://fonts.googleapis.com"],
-        "script-src": ["'self'", 'https://www.google-analytics.com', 'https://ssl.google-analytics.com', 'https://www.googletagmanager.com'],
+        "style-src": ["'self'", "https://fonts.googleapis.com", "'unsafe-inline'"],
+        "script-src": ["'self'", 'https://www.google-analytics.com', 'https://ssl.google-analytics.com', 'https://www.googletagmanager.com', 'https://cdn.tailwindcss.com', 'https://unpkg.com'],
         "img-src": ["'self'", "data:", "https:", 'https://www.google-analytics.com', 'https://www.googletagmanager.com'],
         "connect-src": ["'self'", 'https://www.google-analytics.com', 'https://api.stripe.com'],
         "font-src": ["'self'", 'https://fonts.gstatic.com'],
@@ -106,14 +106,14 @@ if (isProduction) {
 
 if (isProduction) {
   const __dirname = path.resolve();
-  app.set("views", path.join(__dirname, "templates"));
+  app.set("views", path.join(__dirname, "web"));
   app.use(express.static(path.join(__dirname, "public"), {
     maxAge: '1d',
     etag: true,
   }));
   loadPath = path.join(__dirname, 'locales/{{lng}}/{{ns}}.json');
 } else {
-  app.set("views", path.join(__dirname, "templates"));
+  app.set("views", path.join(__dirname, "web"));
   app.use(express.static(path.join(__dirname, "public")));
   loadPath = __dirname + '/locales/{{lng}}/{{ns}}.json';
 }
@@ -204,6 +204,15 @@ app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
 
+// Make session data available in templates
+app.use((req, res, next) => {
+  res.locals.session = req.session;
+  // Make flash messages available to templates (take first message from array)
+  res.locals.successMsg = req.flash('success')[0] || null;
+  res.locals.errorMsg = req.flash('error')[0] || null;
+  next();
+});
+
 // Configure all routes
 configureRoutes(app);
 
@@ -232,7 +241,16 @@ app.use(function (err: any, req: Request, res: Response, _next: NextFunction) {
       ...(isProduction ? {} : { stack: err.stack }),
     });
   } else {
-    res.render("storefront/views/error");
+    res.render("storefront/views/error", {
+      pageName: "Error",
+      message: res.locals.message,
+      error: res.locals.error,
+      user: req.user,
+      session: req.session,
+      successMsg: res.locals.successMsg,
+      errorMsg: res.locals.errorMsg,
+      categories: []
+    });
   }
 });
 

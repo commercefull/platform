@@ -1,3 +1,70 @@
-<h1><%= message %></h1>
-<h2><%= error.status %></h2>
-<pre><%= error.stack %></pre>
+<%- include("partials/header") %>
+<%- include("partials/categories-navbar") %>
+
+<main class="min-h-screen bg-gray-50 flex items-center justify-center px-4 sm:px-6 lg:px-8">
+  <div class="max-w-md w-full text-center">
+    <!-- Error Icon -->
+    <div class="mx-auto h-24 w-24 bg-yellow-100 rounded-full flex items-center justify-center mb-8">
+      <svg class="h-12 w-12 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+      </svg>
+    </div>
+
+    <!-- Error Content -->
+    <h1 class="text-6xl font-bold text-gray-900 mb-4">403</h1>
+    <h2 class="text-2xl font-semibold text-gray-900 mb-4">Access Forbidden</h2>
+    <p class="text-gray-600 mb-8 leading-relaxed">
+      Sorry, you don't have permission to access this page. This might be due to insufficient privileges or authentication requirements.
+    </p>
+
+    <!-- Action Buttons -->
+    <div class="space-y-4">
+      <a
+        href="/"
+        class="w-full flex items-center justify-center px-8 py-4 border border-transparent text-lg font-semibold rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+      >
+        <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+        </svg>
+        Go to Homepage
+      </a>
+
+      <a
+        href="/signin"
+        class="w-full flex items-center justify-center px-8 py-4 border border-gray-300 text-lg font-semibold rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+      >
+        <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+        </svg>
+        Sign In
+      </a>
+    </div>
+
+    <!-- Help Section -->
+    <div class="mt-12 pt-8 border-t border-gray-200">
+      <p class="text-sm text-gray-500 mb-4">Need access or have questions?</p>
+      <div class="flex justify-center space-x-6">
+        <a href="/contact-us" class="text-blue-600 hover:text-blue-500 transition-colors text-sm font-medium">
+          Contact Support
+        </a>
+        <a href="/faq" class="text-blue-600 hover:text-blue-500 transition-colors text-sm font-medium">
+          FAQ
+        </a>
+      </div>
+    </div>
+
+    <!-- Debug Info (only in development) -->
+    <% if (process.env.NODE_ENV === 'development') { %>
+    <details class="mt-8 text-left">
+      <summary class="cursor-pointer text-sm text-gray-500 hover:text-gray-700">Technical Details</summary>
+      <div class="mt-4 p-4 bg-gray-100 rounded-lg text-xs font-mono text-gray-800 overflow-x-auto">
+        <p><strong>Message:</strong> <%= message %></p>
+        <p><strong>Status:</strong> <%= error.status %></p>
+        <pre class="mt-2 whitespace-pre-wrap"><%= error.stack %></pre>
+      </div>
+    </details>
+    <% } %>
+  </div>
+</main>
+
+<%- include("partials/footer") %>

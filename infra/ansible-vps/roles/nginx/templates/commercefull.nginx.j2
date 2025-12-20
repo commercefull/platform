@@ -44,10 +44,32 @@ server {
         add_header Cache-Control "public, immutable";
     }
 
-    # Media files
+    # Media files with WebP support
     location /media/ {
         alias /var/www/{{ app_name }}/media/;
         expires 30d;
+        add_header Cache-Control "public, immutable";
+
+        # WebP conversion support - check if WebP version exists
+        location ~* ^/media/(.+)\.(jpg|jpeg|png)$ {
+            try_files /media/$1.webp /media/$1.$2;
+        }
+
+        # Responsive images
+        location ~* ^/media/(.+)_(\d+)x(\d+)\.(jpg|jpeg|png|webp)$ {
+            try_files /media/$1_$2x$3.$4 @media_fallback;
+        }
+
+        # Thumbnails
+        location ~* ^/media/(.+)/thumbnail\.webp$ {
+            try_files /media/$1/thumbnail.webp @media_fallback;
+        }
+    }
+
+    # Media fallback for missing files
+    location @media_fallback {
+        alias /var/www/{{ app_name }}/media/;
+        expires 1d;
         add_header Cache-Control "public";
     }
 

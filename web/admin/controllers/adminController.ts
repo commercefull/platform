@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import { isMerchantLoggedIn } from "../../libs/auth";
-import MerchantRepo from "../../modules/merchant/repos/merchantRepo";
-import { query, queryOne } from "../../libs/db";
+import { isMerchantLoggedIn } from "../../../libs/auth";
+import MerchantRepo from "../../../modules/merchant/repos/merchantRepo";
+import { query, queryOne } from "../../../libs/db";
 
 // ============================================================================
 // Dashboard Stats Queries

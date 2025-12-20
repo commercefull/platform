@@ -1,117 +1,175 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <% if (pageName) { %>
-    <title>BestBags | <%= pageName %></title>
+    <title>CommerceFull | <%= pageName %></title>
     <%} else {%>
-    <title>Shopping Cart</title>
+    <title>CommerceFull - Premium Shopping Experience</title>
     <% } %>
-    <script
-      src="https://code.jquery.com/jquery-3.5.1.js"
-      integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="
-      crossorigin="anonymous"
-    ></script>
 
-    <script
-      src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
-      integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
-      crossorigin="anonymous"
-    ></script>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: {
+                50: '#f0f9ff',
+                100: '#e0f2fe',
+                500: '#3b82f6',
+                600: '#2563eb',
+                700: '#1d4ed8',
+                900: '#1e3a8a'
+              }
+            }
+          }
+        }
+      }
+    </script>
 
-    <link
-      rel="stylesheet"
-      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
-      crossorigin="anonymous"
-    />
+    <!-- Inter Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <script
-      src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
-      integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
-      crossorigin="anonymous"
-    ></script>
+    <!-- Heroicons -->
+    <script src="https://unpkg.com/heroicons@2.0.18/24/outline/index.js" type="module"></script>
 
-    <script
-      src="https://kit.fontawesome.com/91abd10b8f.js"
-      crossorigin="anonymous"
-    ></script>
+    <!-- Alpine.js for interactivity -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
-    <link rel="stylesheet" href="/stylesheets/style.css" />
-
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <!-- Mapbox -->
-    <script src="https://api.mapbox.com/mapbox-gl-js/v1.10.0/mapbox-gl.js"></script>
-    <link
-      href="https://api.mapbox.com/mapbox-gl-js/v1.10.0/mapbox-gl.css"
-      rel="stylesheet"
-    />
+    <style>
+      body { font-family: 'Inter', sans-serif; }
+      .hero-gradient { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    </style>
   </head>
 
-  <body>
-    <div id="page-container">
-      <div id="content-wrap">
-    <div class="row nav-container mx-auto">
-      <div class="col-md-4 col-sm-12 col-xs-12">
-        <div class="search-container">
-          <form class="form-inline" action="/products/search" method="GET">
-            <input
-              class="search-input"
-              type="search"
-              placeholder="Search"
-              name="search"
-            />
+  <body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+          <!-- Logo -->
+          <div class="flex items-center">
+            <a href="/" class="flex items-center space-x-2">
+              <div class="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                </svg>
+              </div>
+              <span class="text-xl font-bold text-gray-900">CommerceFull</span>
+            </a>
+          </div>
+
+          <!-- Search Bar -->
+          <div class="hidden md:flex flex-1 max-w-md mx-8">
+            <form class="w-full" action="/search" method="GET">
+              <div class="relative">
+                <input
+                  type="search"
+                  name="q"
+                  placeholder="Search products..."
+                  class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                  </svg>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <!-- Right Navigation -->
+          <div class="flex items-center space-x-4">
+            <!-- Cart -->
+            <a href="/basket" class="relative p-2 text-gray-600 hover:text-blue-600 transition-colors">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.1 5H19M7 13v8a2 2 0 002 2h10a2 2 0 002-2v-3"></path>
+              </svg>
+              <% if ((session && session.cart && session.cart.totalQty) || (typeof cartCount !== 'undefined' && cartCount > 0)) { %>
+              <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                <%= (session && session.cart && session.cart.totalQty) ? session.cart.totalQty : cartCount %>
+              </span>
+              <% } %>
+            </a>
+
+            <!-- User Menu -->
+            <% if (user) { %>
+            <div class="relative" x-data="{ open: false }">
+              <button @click="open = !open" class="flex items-center space-x-2 text-gray-700 hover:text-blue-600 transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+                <span class="hidden md:block text-sm font-medium"><%= user.username || user.email || 'Account' %></span>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </button>
+
+              <div x-show="open" @click.away="open = false" x-transition class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                <a href="/profile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                  <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                  </svg>
+                  My Account
+                </a>
+                <a href="/orders" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                  <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                  </svg>
+                  My Orders
+                </a>
+                <div class="border-t border-gray-100"></div>
+                <a href="/signout" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                  <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                  </svg>
+                  Sign Out
+                </a>
+              </div>
+            </div>
+            <% } else { %>
+            <div class="flex items-center space-x-4">
+              <a href="/signin" class="text-gray-600 hover:text-blue-600 transition-colors text-sm font-medium">
+                Sign In
+              </a>
+              <a href="/signup" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">
+                Sign Up
+              </a>
+            </div>
+            <% } %>
+
+            <!-- Mobile menu button -->
+            <button class="md:hidden p-2" @click="mobileMenu = !mobileMenu" x-data="{ mobileMenu: false }">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Mobile Search -->
+        <div class="md:hidden pb-4">
+          <form action="/search" method="GET">
+            <div class="relative">
+              <input
+                type="search"
+                name="q"
+                placeholder="Search products..."
+                class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+              </div>
+            </div>
           </form>
         </div>
       </div>
-
-      <div class="col-md-4 col-sm-12 col-xs-12 logo-container">
-        <a href="/">
-          <img class="logo-img img-fluid" src="/images/shop-icon.png" alt="logo" />
-          <h4 class="logo-title">BestBags</h4>
-        </a>
-      </div>
-
-      <div class="col-md-4 col-sm-12 col-xs-12 right-nav">
-        <ul>
-          <li>
-            <a href="/shopping-cart">
-              <i class="fas fa-shopping-cart"></i> <% if(session.cart) { %>
-              <span class="badge badge-pill badge-info"
-                ><%= session.cart.totalQty %></span
-              >
-              <% } else { %>
-              <span class="badge badge-pill badge-info">0</span>
-              <% } %>
-            </a>
-          </li>
-          <% if (login) { %>
-          <li>
-            <a
-              class="dropdown-toggle"
-              href="#"
-              role="button"
-              data-toggle="dropdown"
-              aria-haspopup="true"
-              aria-expanded="false"
-            >
-              <i class="fas fa-user"></i> Welcome <%=currentUser.username%>
-            </a>
-            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-              <a class="dropdown-item" href="/user/profile">User Account</a>
-              <div class="dropdown-divider"></div>
-              <a class="dropdown-item" href="/user/logout">Logout</a>
-            </div>
-          </li>
-          <% } else {%>
-          <li>
-            <a href="/user/signup"> Sign Up</a>
-          </li>
-          <li>
-            <a href="/user/signin"> Sign In</a>
-          </li>
-          <% }%>
-        </ul>
-      </div>
-    </div>
+    </nav>
 

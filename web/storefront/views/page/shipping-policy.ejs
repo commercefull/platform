@@ -1,54 +1,205 @@
 <%- include("../partials/header") %>
 <%- include("../partials/categories-navbar") %>
 
-<div class="container">
-  <div class="row">
-    <div class="col-lg-8 col-md-12 m-auto text-justify">
-      <h1 class="mt-4 mb-5 text-center">Shipping Policy</h1>
-      <p>
-        On this page you will find information about our shipping duration and
-        costs.
-      </p>
+<main class="min-h-screen bg-gray-50 py-16 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-4xl mx-auto">
+    <!-- Header Section -->
+    <div class="text-center mb-16">
+      <div class="mx-auto h-20 w-20 bg-blue-600 rounded-full flex items-center justify-center mb-6">
+        <svg class="h-10 w-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+        </svg>
+      </div>
+      <h1 class="text-4xl font-bold text-gray-900 mb-4">Shipping Policy</h1>
+      <p class="text-xl text-gray-600 max-w-2xl mx-auto">Learn about our shipping duration, costs, and delivery options.</p>
+    </div>
 
-      <h4>Order Processing Duration</h4>
-      <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Asperiores nam
-        voluptatem adipisci sed amet ipsa quod reiciendis eos. Magnam ad
-        sapiente aut a libero aliquam veritatis incidunt molestiae tempora?
-      </p>
+    <!-- Main Content -->
+    <div class="space-y-8">
+      <!-- Overview -->
+      <div class="bg-white shadow-lg rounded-xl overflow-hidden">
+        <div class="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4">
+          <h2 class="text-xl font-semibold text-white flex items-center">
+            <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            Shipping Information
+          </h2>
+        </div>
+        <div class="p-6">
+          <p class="text-gray-700 leading-relaxed">
+            On this page you will find information about our shipping duration and costs.
+            We strive to deliver your orders quickly and safely to ensure you receive your products in perfect condition.
+          </p>
+        </div>
+      </div>
 
-      <h4>Order Delivery</h4>
-      <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Eum laborum
-        dolor, totam quidem expedita impedit sequi natus molestias quae
-        similique officiis? Eos, quas earum! Similique nobis enim unde amet
-        suscipit.
-      </p>
+      <!-- Shipping Sections -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Order Processing -->
+        <div class="bg-white shadow-lg rounded-xl overflow-hidden">
+          <div class="bg-gradient-to-r from-green-600 to-teal-600 px-6 py-4">
+            <h3 class="text-lg font-semibold text-white flex items-center">
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+              </svg>
+              Order Processing
+            </h3>
+          </div>
+          <div class="p-6">
+            <p class="text-gray-700 leading-relaxed mb-4">
+              Lorem ipsum dolor sit amet consectetur adipisicing elit. Asperiores nam
+              voluptatem adipisci sed amet ipsa quod reiciendis eos. Magnam ad
+              sapiente aut a libero aliquam veritatis incidunt molestiae tempora?
+            </p>
+            <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+              <div class="flex items-center">
+                <svg class="w-5 h-5 text-green-600 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <div>
+                  <p class="text-sm font-medium text-green-900">Processing Time</p>
+                  <p class="text-sm text-green-700">Orders are processed within 1-2 business days</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-      <h4>Shipping Rates</h4>
-      <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Expedita libero
-        perspiciatis atque corrupti amet dignissimos reprehenderit excepturi aut
-        ea distinctio mollitia nulla voluptatum deleniti, ipsum saepe soluta
-        omnis debitis! Beatae.
-      </p>
+        <!-- Delivery Options -->
+        <div class="bg-white shadow-lg rounded-xl overflow-hidden">
+          <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
+            <h3 class="text-lg font-semibold text-white flex items-center">
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+              </svg>
+              Delivery Options
+            </h3>
+          </div>
+          <div class="p-6">
+            <p class="text-gray-700 leading-relaxed mb-4">
+              Lorem ipsum dolor sit amet consectetur adipisicing elit. Eum laborum
+              dolor, totam quidem expedita impedit sequi natus molestias quae
+              similique officiis? Eos, quas earum! Similique nobis enim unde amet
+              suscipit.
+            </p>
+            <div class="space-y-3">
+              <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <span class="text-sm font-medium text-gray-900">Standard Shipping</span>
+                <span class="text-sm text-gray-600">3-5 business days</span>
+              </div>
+              <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <span class="text-sm font-medium text-gray-900">Express Shipping</span>
+                <span class="text-sm text-gray-600">1-2 business days</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-      <h4>Returning Products</h4>
-      <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Vero, dicta.
-        Consequatur praesentium esse aut minus ullam exercitationem nostrum!
-        Provident minus dolores asperiores velit. Nulla, repellat magnam. Ab
-        corrupti voluptatibus quos.
-      </p>
+      <!-- Shipping Rates -->
+      <div class="bg-white shadow-lg rounded-xl overflow-hidden">
+        <div class="bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-4">
+          <h3 class="text-lg font-semibold text-white flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+            </svg>
+            Shipping Rates
+          </h3>
+        </div>
+        <div class="p-6">
+          <p class="text-gray-700 leading-relaxed mb-6">
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Expedita libero
+            perspiciatis atque corrupti amet dignissimos reprehenderit excepturi aut
+            ea distinctio mollitia nulla voluptatum deleniti, ipsum saepe soluta
+            omnis debitis! Beatae.
+          </p>
+          <div class="bg-gray-50 rounded-lg p-6">
+            <table class="w-full">
+              <thead>
+                <tr class="border-b border-gray-200">
+                  <th class="text-left py-2 px-4 font-medium text-gray-900">Order Value</th>
+                  <th class="text-left py-2 px-4 font-medium text-gray-900">Standard Shipping</th>
+                  <th class="text-left py-2 px-4 font-medium text-gray-900">Express Shipping</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200">
+                <tr>
+                  <td class="py-3 px-4 text-sm text-gray-700">Under $50</td>
+                  <td class="py-3 px-4 text-sm text-gray-700">$5.99</td>
+                  <td class="py-3 px-4 text-sm text-gray-700">$12.99</td>
+                </tr>
+                <tr>
+                  <td class="py-3 px-4 text-sm text-gray-700">$50 - $100</td>
+                  <td class="py-3 px-4 text-sm text-gray-700">$3.99</td>
+                  <td class="py-3 px-4 text-sm text-gray-700">$9.99</td>
+                </tr>
+                <tr>
+                  <td class="py-3 px-4 text-sm text-gray-700">Over $100</td>
+                  <td class="py-3 px-4 text-sm text-gray-700">FREE</td>
+                  <td class="py-3 px-4 text-sm text-gray-700">$4.99</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
 
-      <h4>Do you have questions?</h4>
-      <p>
-        Please do not hesitate to
-        <a href="/pages/contact-us"><u>contact us</u></a> through our emails or
-        phone numbers
-      </p>
+      <!-- Returns & Questions -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Returns -->
+        <div class="bg-white shadow-lg rounded-xl overflow-hidden">
+          <div class="bg-gradient-to-r from-red-600 to-orange-600 px-6 py-4">
+            <h3 class="text-lg font-semibold text-white flex items-center">
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path>
+              </svg>
+              Returns & Exchanges
+            </h3>
+          </div>
+          <div class="p-6">
+            <p class="text-gray-700 leading-relaxed mb-4">
+              Lorem ipsum dolor sit amet consectetur adipisicing elit. Vero, dicta.
+              Consequatur praesentium esse aut minus ullam exercitationem nostrum!
+              Provident minus dolores asperiores velit. Nulla, repellat magnam. Ab
+              corrupti voluptatibus quos.
+            </p>
+            <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+              <p class="text-sm text-red-800">
+                <strong>Return Window:</strong> 30 days from delivery date
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Questions -->
+        <div class="bg-white shadow-lg rounded-xl overflow-hidden">
+          <div class="bg-gradient-to-r from-indigo-600 to-blue-600 px-6 py-4">
+            <h3 class="text-lg font-semibold text-white flex items-center">
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              Questions?
+            </h3>
+          </div>
+          <div class="p-6">
+            <p class="text-gray-700 leading-relaxed mb-6">
+              Please do not hesitate to contact us through our emails or phone numbers if you have any questions about shipping.
+            </p>
+            <a
+              href="/contact-us"
+              class="w-full flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 transition-colors"
+            >
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+              </svg>
+              Contact Us
+            </a>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
-</div>
+</main>
 
 <%- include("../partials/footer") %>

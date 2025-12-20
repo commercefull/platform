@@ -2,6 +2,7 @@
 // Do not touch them, or risk, your modifications being lost.
 
 export enum Table {
+  AdminUserRole = "adminUserRole",
   AnalyticsChannelAttribution = "analyticsChannelAttribution",
   AnalyticsCustomer = "analyticsCustomer",
   AnalyticsCustomerCohort = "analyticsCustomerCohort",
@@ -11,8 +12,10 @@ export enum Table {
   AnalyticsReportSnapshot = "analyticsReportSnapshot",
   AnalyticsSalesDaily = "analyticsSalesDaily",
   AnalyticsSearchQuery = "analyticsSearchQuery",
+  ApiKey = "apiKey",
   AttributeOptionTranslation = "attributeOptionTranslation",
   AttributeTranslation = "attributeTranslation",
+  AuditLog = "auditLog",
   B2BApprovalAction = "b2bApprovalAction",
   B2BApprovalRequest = "b2bApprovalRequest",
   B2BApprovalWorkflow = "b2bApprovalWorkflow",
@@ -33,6 +36,7 @@ export enum Table {
   BasketSavedItem = "basketSavedItem",
   BrandTranslation = "brandTranslation",
   BundleItem = "bundleItem",
+  Business = "business",
   CartPromotion = "cartPromotion",
   CartPromotionItem = "cartPromotionItem",
   CategoryPromotion = "categoryPromotion",
@@ -129,6 +133,7 @@ export enum Table {
   InventoryTransferItem = "inventoryTransferItem",
   KnexMigrations = "knexMigrations",
   KnexMigrationsLock = "knexMigrations_lock",
+  Language = "language",
   Locale = "locale",
   LowStockNotification = "lowStockNotification",
   LoyaltyPoints = "loyaltyPoints",
@@ -147,6 +152,7 @@ export enum Table {
   MarketingEmailCampaignRecipient = "marketingEmailCampaignRecipient",
   MarketingEmailTemplate = "marketingEmailTemplate",
   MarketingProductRecommendation = "marketingProductRecommendation",
+  Media = "media",
   MembershipBenefit = "membershipBenefit",
   MembershipBenefitUsage = "membershipBenefitUsage",
   MembershipContentAccess = "membershipContentAccess",
@@ -175,6 +181,7 @@ export enum Table {
   MerchantProduct = "merchantProduct",
   MerchantProductVariant = "merchantProductVariant",
   MerchantReview = "merchantReview",
+  MerchantSettings = "merchantSettings",
   MerchantShippingTemplate = "merchantShippingTemplate",
   MerchantStore = "merchantStore",
   MerchantTaxInfo = "merchantTaxInfo",
@@ -223,6 +230,7 @@ export enum Table {
   Payout = "payout",
   PayoutItem = "payoutItem",
   PayoutSettings = "payoutSettings",
+  PlatformConfig = "platformConfig",
   PriceAlert = "priceAlert",
   PriceList = "priceList",
   PricingRule = "pricingRule",
@@ -282,6 +290,9 @@ export enum Table {
   PromotionUsage = "promotionUsage",
   Referral = "referral",
   ReferralReward = "referralReward",
+  ReportExecution = "reportExecution",
+  ReportSchedule = "reportSchedule",
+  Role = "role",
   RuleAdjustment = "ruleAdjustment",
   RuleCondition = "ruleCondition",
   Session = "session",
@@ -292,6 +303,7 @@ export enum Table {
   ShippingZone = "shippingZone",
   StockAlert = "stockAlert",
   StockReservation = "stockReservation",
+  Store = "store",
   StoreCurrencySettings = "storeCurrencySettings",
   StoreLocation = "storeLocation",
   StoredPaymentMethod = "storedPaymentMethod",
@@ -311,6 +323,7 @@ export enum Table {
   SupportAttachment = "supportAttachment",
   SupportMessage = "supportMessage",
   SupportTicket = "supportTicket",
+  SystemConfiguration = "systemConfiguration",
   TaxCalculation = "taxCalculation",
   TaxCalculationApplied = "taxCalculationApplied",
   TaxCalculationLine = "taxCalculationLine",
@@ -323,13 +336,17 @@ export enum Table {
   TaxSettings = "taxSettings",
   TaxZone = "taxZone",
   TierPrice = "tierPrice",
+  User = "user",
   VatOssReport = "vatOssReport",
   VatOssReportLine = "vatOssReportLine",
   VatRegistration = "vatRegistration",
   VatValidationLog = "vatValidationLog",
+  WebhookDelivery = "webhookDelivery",
+  WebhookEndpoint = "webhookEndpoint",
 }
 
 export type Tables = {
+  "adminUserRole": AdminUserRole,
   "analyticsChannelAttribution": AnalyticsChannelAttribution,
   "analyticsCustomer": AnalyticsCustomer,
   "analyticsCustomerCohort": AnalyticsCustomerCohort,
@@ -339,8 +356,10 @@ export type Tables = {
   "analyticsReportSnapshot": AnalyticsReportSnapshot,
   "analyticsSalesDaily": AnalyticsSalesDaily,
   "analyticsSearchQuery": AnalyticsSearchQuery,
+  "apiKey": ApiKey,
   "attributeOptionTranslation": AttributeOptionTranslation,
   "attributeTranslation": AttributeTranslation,
+  "auditLog": AuditLog,
   "b2bApprovalAction": B2BApprovalAction,
   "b2bApprovalRequest": B2BApprovalRequest,
   "b2bApprovalWorkflow": B2BApprovalWorkflow,
@@ -361,6 +380,7 @@ export type Tables = {
   "basketSavedItem": BasketSavedItem,
   "brandTranslation": BrandTranslation,
   "bundleItem": BundleItem,
+  "business": Business,
   "cartPromotion": CartPromotion,
   "cartPromotionItem": CartPromotionItem,
   "categoryPromotion": CategoryPromotion,
@@ -457,6 +477,7 @@ export type Tables = {
   "inventoryTransferItem": InventoryTransferItem,
   "knexMigrations": KnexMigrations,
   "knexMigrations_lock": KnexMigrationsLock,
+  "language": Language,
   "locale": Locale,
   "lowStockNotification": LowStockNotification,
   "loyaltyPoints": LoyaltyPoints,
@@ -475,6 +496,7 @@ export type Tables = {
   "marketingEmailCampaignRecipient": MarketingEmailCampaignRecipient,
   "marketingEmailTemplate": MarketingEmailTemplate,
   "marketingProductRecommendation": MarketingProductRecommendation,
+  "media": Media,
   "membershipBenefit": MembershipBenefit,
   "membershipBenefitUsage": MembershipBenefitUsage,
   "membershipContentAccess": MembershipContentAccess,
@@ -503,6 +525,7 @@ export type Tables = {
   "merchantProduct": MerchantProduct,
   "merchantProductVariant": MerchantProductVariant,
   "merchantReview": MerchantReview,
+  "merchantSettings": MerchantSettings,
   "merchantShippingTemplate": MerchantShippingTemplate,
   "merchantStore": MerchantStore,
   "merchantTaxInfo": MerchantTaxInfo,
@@ -551,6 +574,7 @@ export type Tables = {
   "payout": Payout,
   "payoutItem": PayoutItem,
   "payoutSettings": PayoutSettings,
+  "platformConfig": PlatformConfig,
   "priceAlert": PriceAlert,
   "priceList": PriceList,
   "pricingRule": PricingRule,
@@ -610,6 +634,9 @@ export type Tables = {
   "promotionUsage": PromotionUsage,
   "referral": Referral,
   "referralReward": ReferralReward,
+  "reportExecution": ReportExecution,
+  "reportSchedule": ReportSchedule,
+  "role": Role,
   "ruleAdjustment": RuleAdjustment,
   "ruleCondition": RuleCondition,
   "session": Session,
@@ -620,6 +647,7 @@ export type Tables = {
   "shippingZone": ShippingZone,
   "stockAlert": StockAlert,
   "stockReservation": StockReservation,
+  "store": Store,
   "storeCurrencySettings": StoreCurrencySettings,
   "storeLocation": StoreLocation,
   "storedPaymentMethod": StoredPaymentMethod,
@@ -639,6 +667,7 @@ export type Tables = {
   "supportAttachment": SupportAttachment,
   "supportMessage": SupportMessage,
   "supportTicket": SupportTicket,
+  "systemConfiguration": SystemConfiguration,
   "taxCalculation": TaxCalculation,
   "taxCalculationApplied": TaxCalculationApplied,
   "taxCalculationLine": TaxCalculationLine,
@@ -651,10 +680,19 @@ export type Tables = {
   "taxSettings": TaxSettings,
   "taxZone": TaxZone,
   "tierPrice": TierPrice,
+  "user": User,
   "vatOssReport": VatOssReport,
   "vatOssReportLine": VatOssReportLine,
   "vatRegistration": VatRegistration,
   "vatValidationLog": VatValidationLog,
+  "webhookDelivery": WebhookDelivery,
+  "webhookEndpoint": WebhookEndpoint,
+};
+
+export type AdminUserRole = {
+  userId: string;
+  roleId: string;
+  createdAt: Date;
 };
 
 export type AnalyticsChannelAttribution = {
@@ -896,6 +934,21 @@ export type AnalyticsSearchQuery = {
   updatedAt: Date | null;
 };
 
+export type ApiKey = {
+  apiKeyId: string;
+  merchantId: string | null;
+  name: string;
+  keyHash: string;
+  keyPrefix: string;
+  permissions: unknown[];
+  rateLimit: number;
+  expiresAt: Date | null;
+  lastUsedAt: Date | null;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
 export type AttributeOptionTranslation = {
   attributeOptionTranslationId: string;
   createdAt: Date;
@@ -922,6 +975,26 @@ export type AttributeTranslation = {
   isAutoTranslated: boolean;
   translationSource: string | null;
   isApproved: boolean;
+};
+
+export type AuditLog = {
+  auditLogId: string;
+  entityType: string;
+  entityId: string;
+  action: string;
+  actorType: string;
+  actorId: string | null;
+  actorEmail: string | null;
+  actorIp: string | null;
+  userAgent: string | null;
+  previousData: unknown | null;
+  newData: unknown | null;
+  changedFields: unknown | null;
+  metadata: unknown | null;
+  status: string;
+  errorMessage: string | null;
+  duration: number | null;
+  createdAt: Date;
 };
 
 export type B2BApprovalAction = {
@@ -1424,6 +1497,31 @@ export type BundleItem = {
   metadata: unknown | null;
   createdAt: Date | null;
   updatedAt: Date | null;
+};
+
+export type Business = {
+  businessId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  name: string;
+  slug: string;
+  description: string | null;
+  businessType: string;
+  domain: string | null;
+  logo: string | null;
+  favicon: string | null;
+  primaryColor: string | null;
+  secondaryColor: string | null;
+  theme: string | null;
+  colorScheme: unknown | null;
+  isActive: boolean;
+  allowMultipleStores: boolean;
+  allowMultipleWarehouses: boolean;
+  enableMarketplace: boolean;
+  defaultCurrency: string;
+  defaultLanguage: string;
+  timezone: string;
+  metadata: unknown | null;
 };
 
 export type CartPromotion = {
@@ -2724,6 +2822,8 @@ export type DistributionWarehouse = {
   createdAt: Date;
   updatedAt: Date;
   createdBy: string | null;
+  businessId: string | null;
+  storeId: string | null;
 };
 
 export type DistributionWarehouseBin = {
@@ -3246,6 +3346,17 @@ export type KnexMigrationsLock = {
   is_locked: number | null;
 };
 
+export type Language = {
+  languageId: string;
+  code: string;
+  name: string;
+  nativeName: string | null;
+  isDefault: boolean;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
 export type Locale = {
   localeId: string;
   createdAt: Date;
@@ -3649,6 +3760,23 @@ export type MarketingProductRecommendation = {
   metadata: unknown | null;
   createdAt: Date | null;
   updatedAt: Date | null;
+};
+
+export type Media = {
+  mediaId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  originalName: string;
+  mimeType: string;
+  size: string;
+  originalUrl: string;
+  processedFiles: unknown[] | null;
+  thumbnailUrl: string | null;
+  altText: string | null;
+  title: string | null;
+  description: string | null;
+  tags: string[] | null;
+  metadata: Record<string, unknown> | null;
 };
 
 export type MembershipBenefit = {
@@ -4193,6 +4321,24 @@ export type MerchantReview = {
   reviewedAt: Date | null;
   reviewedBy: string | null;
   reviewNotes: string | null;
+};
+
+export type MerchantSettings = {
+  merchantId: string;
+  storeName: string;
+  storeUrl: string | null;
+  storeEmail: string | null;
+  storePhone: string | null;
+  storeAddress: unknown | null;
+  timezone: string;
+  currency: string;
+  locale: string;
+  logo: string | null;
+  favicon: string | null;
+  socialLinks: unknown | null;
+  businessInfo: unknown | null;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 export type MerchantShippingTemplate = {
@@ -5160,6 +5306,21 @@ export type PayoutSettings = {
   providerSettings: unknown | null;
 };
 
+export type PlatformConfig = {
+  configId: string;
+  key: string;
+  value: string;
+  type: string;
+  category: string;
+  description: string | null;
+  isSecret: boolean;
+  isEditable: boolean;
+  validationRules: unknown | null;
+  merchantId: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
 export type PriceAlert = {
   priceAlertId: string;
   customerId: string | null;
@@ -5293,6 +5454,8 @@ export type Product = {
   variantAttributes: unknown | null;
   createdBy: string | null;
   updatedBy: string | null;
+  businessId: string | null;
+  storeId: string | null;
 };
 
 export type ProductAttribute = {
@@ -6196,6 +6359,44 @@ export type ReferralReward = {
   updatedAt: Date | null;
 };
 
+export type ReportExecution = {
+  reportExecutionId: string;
+  reportScheduleId: string;
+  status: string;
+  startedAt: Date;
+  completedAt: Date | null;
+  fileUrl: string | null;
+  fileSize: number | null;
+  errorMessage: string | null;
+  metadata: unknown | null;
+};
+
+export type ReportSchedule = {
+  reportScheduleId: string;
+  merchantId: string | null;
+  name: string;
+  reportType: string;
+  type: string;
+  parameters: Record<string, unknown>;
+  recipients: unknown[];
+  format: string;
+  isActive: boolean;
+  lastRunAt: Date | null;
+  nextRunAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type Role = {
+  roleId: string;
+  name: string;
+  description: string | null;
+  permissions: unknown[];
+  isSystem: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
 export type RuleAdjustment = {
   ruleAdjustmentId: string;
   pricingRuleId: string;
@@ -6369,6 +6570,51 @@ export type StockReservation = {
   referenceType: string | null;
   expiresAt: Date | null;
   createdBy: string | null;
+};
+
+export type Store = {
+  storeId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  name: string;
+  slug: string;
+  description: string | null;
+  storeType: string;
+  merchantId: string | null;
+  businessId: string | null;
+  logo: string | null;
+  banner: string | null;
+  favicon: string | null;
+  primaryColor: string | null;
+  secondaryColor: string | null;
+  theme: string | null;
+  colorScheme: unknown | null;
+  storeUrl: string | null;
+  storeEmail: string | null;
+  storePhone: string | null;
+  address: unknown | null;
+  isActive: boolean;
+  isVerified: boolean;
+  isFeatured: boolean;
+  storeRating: string | null;
+  reviewCount: number | null;
+  followerCount: number | null;
+  productCount: number | null;
+  orderCount: number | null;
+  storePolicies: unknown | null;
+  shippingMethods: string[] | null;
+  paymentMethods: string[] | null;
+  supportedCurrencies: string[] | null;
+  defaultCurrency: string;
+  settings: unknown | null;
+  metaTitle: string | null;
+  metaDescription: string | null;
+  metaKeywords: string[] | null;
+  socialLinks: unknown | null;
+  openingHours: unknown | null;
+  customPages: unknown | null;
+  customFields: unknown | null;
+  metadata: unknown | null;
 };
 
 export type StoreCurrencySettings = {
@@ -6862,6 +7108,21 @@ export type SupportTicket = {
   dueAt: Date | null;
 };
 
+export type SystemConfiguration = {
+  configId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  systemMode: string;
+  isActive: boolean;
+  features: unknown | null;
+  businessSettings: unknown | null;
+  platformSettings: unknown | null;
+  securitySettings: unknown | null;
+  notificationSettings: unknown | null;
+  integrationSettings: unknown | null;
+  metadata: unknown | null;
+};
+
 export type TaxCalculation = {
   taxCalculationId: string;
   createdAt: Date;
@@ -7081,6 +7342,27 @@ export type TierPrice = {
   price: string;
 };
 
+export type User = {
+  userId: string;
+  email: string;
+  passwordHash: string;
+  userType: string;
+  status: string;
+  firstName: string | null;
+  lastName: string | null;
+  phone: string | null;
+  emailVerified: boolean;
+  phoneVerified: boolean;
+  mfaEnabled: boolean;
+  mfaSecret: string | null;
+  loginCount: number;
+  failedLoginAttempts: number;
+  lastLoginAt: Date | null;
+  lockedUntil: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
 export type VatOssReport = {
   vatOssReportId: string;
   createdAt: Date;
@@ -7175,5 +7457,37 @@ export type VatValidationLog = {
   reverseChargeApplicable: boolean | null;
   ipAddress: string | null;
   context: string | null;
+};
+
+export type WebhookDelivery = {
+  webhookDeliveryId: string;
+  webhookEndpointId: string;
+  eventType: string;
+  eventId: string;
+  payload: unknown;
+  status: string;
+  attempts: number;
+  lastAttemptAt: Date | null;
+  nextRetryAt: Date | null;
+  responseStatus: number | null;
+  responseBody: string | null;
+  errorMessage: string | null;
+  duration: number | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type WebhookEndpoint = {
+  webhookEndpointId: string;
+  merchantId: string | null;
+  name: string;
+  url: string;
+  secret: string;
+  events: unknown[];
+  isActive: boolean;
+  headers: unknown | null;
+  retryPolicy: Record<string, unknown>;
+  createdAt: Date;
+  updatedAt: Date;
 };
 

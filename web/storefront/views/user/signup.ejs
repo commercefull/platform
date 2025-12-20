@@ -1,92 +1,242 @@
 <%- include("../partials/header") %>
 <%- include("../partials/categories-navbar") %>
 
-<div class="container">
-  <div class="row justify-content-center">
-    <div class="col-md-8">
-      <div class="card mt-5">
-        <div class="card-header">
-          <h4 class="mb-0">Create Account</h4>
-        </div>
-        <div class="card-body">
-          <!-- Flash messages -->
-          <% if (errorMsg) { %>
-          <div class="alert alert-danger">
-            <%= errorMsg %>
-          </div>
-          <% } %>
-          <% if (successMsg) { %>
-          <div class="alert alert-success">
-            <%= successMsg %>
-          </div>
-          <% } %>
+<main class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-2xl mx-auto">
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <div class="mx-auto h-16 w-16 bg-green-600 rounded-full flex items-center justify-center">
+        <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+        </svg>
+      </div>
+      <h2 class="mt-6 text-3xl font-bold text-gray-900">Create your account</h2>
+      <p class="mt-2 text-sm text-gray-600">
+        Join thousands of satisfied customers shopping with us
+      </p>
+    </div>
 
-          <form action="/signup" method="POST">
-            <div class="row">
-              <div class="col-md-6 mb-3">
-                <label for="firstName">First Name</label>
-                <input type="text" class="form-control" name="firstName" id="firstName"
-                       value="<%= typeof firstName !== 'undefined' ? firstName : '' %>" required>
-              </div>
-              <div class="col-md-6 mb-3">
-                <label for="lastName">Last Name</label>
-                <input type="text" class="form-control" name="lastName" id="lastName"
-                       value="<%= typeof lastName !== 'undefined' ? lastName : '' %>" required>
-              </div>
-            </div>
-
-            <div class="form-group mb-3">
-              <label for="email">Email address</label>
-              <input type="email" class="form-control" name="email" id="email"
-                     value="<%= typeof email !== 'undefined' ? email : '' %>" required>
-              <small class="form-text text-muted">We'll never share your email with anyone else.</small>
-            </div>
-
-            <div class="form-group mb-3">
-              <label for="password">Password</label>
-              <input type="password" class="form-control" name="password" id="password" required
-                     minlength="8" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}">
-              <small class="form-text text-muted">
-                Must be at least 8 characters with uppercase, lowercase, and number.
-              </small>
-            </div>
-
-            <div class="form-group mb-3">
-              <label for="confirmPassword">Confirm Password</label>
-              <input type="password" class="form-control" name="confirmPassword" id="confirmPassword" required>
-            </div>
-
-            <!-- Marketing Preferences -->
-            <div class="form-check mb-3">
-              <input class="form-check-input" type="checkbox" name="acceptsMarketing" id="acceptsMarketing" value="on">
-              <label class="form-check-label" for="acceptsMarketing">
-                I would like to receive marketing emails and newsletters
-              </label>
-            </div>
-
-            <div class="form-check mb-3">
-              <input class="form-check-input" type="checkbox" name="acceptsAnalytics" id="acceptsAnalytics" value="on" checked>
-              <label class="form-check-label" for="acceptsAnalytics">
-                I agree to analytics tracking for improved user experience
-              </label>
-            </div>
-
-            <div class="form-group mb-3">
-              <button type="submit" class="btn btn-primary btn-block button-style w-100">
-                Create Account
-              </button>
-            </div>
-
-            <div class="text-center">
-              <p class="mb-0">
-                Already have an account? <a href="/signin">Sign In</a>
-              </p>
-            </div>
-          </form>
+    <!-- Flash Messages -->
+    <% if (successMsg || errorMsg) { %>
+    <div class="mb-8 space-y-3">
+      <% if (errorMsg) { %>
+      <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+        <div class="flex items-center">
+          <svg class="w-5 h-5 text-red-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+          </svg>
+          <p class="text-sm text-red-800"><%= errorMsg %></p>
         </div>
       </div>
+      <% } %>
+
+      <% if (successMsg) { %>
+      <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+        <div class="flex items-center">
+          <svg class="w-5 h-5 text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <p class="text-sm text-green-800"><%= successMsg %></p>
+        </div>
+      </div>
+      <% } %>
+    </div>
+    <% } %>
+
+    <!-- Sign Up Form -->
+    <div class="bg-white py-8 px-6 shadow-lg rounded-xl">
+      <form class="space-y-6" action="/signup" method="POST">
+        <!-- Name Fields -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label for="firstName" class="block text-sm font-medium text-gray-700 mb-2">
+              First Name
+            </label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+              </div>
+              <input
+                id="firstName"
+                name="firstName"
+                type="text"
+                autocomplete="given-name"
+                required
+                value="<%= typeof firstName !== 'undefined' ? firstName : '' %>"
+                class="appearance-none relative block w-full px-10 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent focus:z-10 sm:text-sm"
+                placeholder="Enter your first name"
+              >
+            </div>
+          </div>
+
+          <div>
+            <label for="lastName" class="block text-sm font-medium text-gray-700 mb-2">
+              Last Name
+            </label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+              </div>
+              <input
+                id="lastName"
+                name="lastName"
+                type="text"
+                autocomplete="family-name"
+                required
+                value="<%= typeof lastName !== 'undefined' ? lastName : '' %>"
+                class="appearance-none relative block w-full px-10 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent focus:z-10 sm:text-sm"
+                placeholder="Enter your last name"
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- Email Field -->
+        <div>
+          <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+            Email address
+          </label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"></path>
+              </svg>
+            </div>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              autocomplete="email"
+              required
+              value="<%= typeof email !== 'undefined' ? email : '' %>"
+              class="appearance-none relative block w-full px-10 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent focus:z-10 sm:text-sm"
+              placeholder="Enter your email"
+            >
+          </div>
+          <p class="mt-1 text-sm text-gray-500">We'll never share your email with anyone else.</p>
+        </div>
+
+        <!-- Password Fields -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+              Password
+            </label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                </svg>
+              </div>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                autocomplete="new-password"
+                required
+                minlength="8"
+                pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
+                class="appearance-none relative block w-full px-10 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent focus:z-10 sm:text-sm"
+                placeholder="Create a password"
+              >
+            </div>
+            <p class="mt-1 text-sm text-gray-500">
+              At least 8 characters with uppercase, lowercase, and number.
+            </p>
+          </div>
+
+          <div>
+            <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-2">
+              Confirm Password
+            </label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                </svg>
+              </div>
+              <input
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                autocomplete="new-password"
+                required
+                class="appearance-none relative block w-full px-10 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent focus:z-10 sm:text-sm"
+                placeholder="Confirm your password"
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- Preferences -->
+        <div class="space-y-4">
+          <div class="flex items-start">
+            <div class="flex items-center h-5">
+              <input
+                id="acceptsMarketing"
+                name="acceptsMarketing"
+                type="checkbox"
+                value="on"
+                class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+              >
+            </div>
+            <div class="ml-3 text-sm">
+              <label for="acceptsMarketing" class="font-medium text-gray-700">
+                Marketing emails
+              </label>
+              <p class="text-gray-500">Receive updates about new products and special offers.</p>
+            </div>
+          </div>
+
+          <div class="flex items-start">
+            <div class="flex items-center h-5">
+              <input
+                id="acceptsAnalytics"
+                name="acceptsAnalytics"
+                type="checkbox"
+                value="on"
+                checked
+                class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+              >
+            </div>
+            <div class="ml-3 text-sm">
+              <label for="acceptsAnalytics" class="font-medium text-gray-700">
+                Analytics tracking
+              </label>
+              <p class="text-gray-500">Help us improve your experience with anonymous usage data.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div>
+          <button
+            type="submit"
+            class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
+          >
+            <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+              <svg class="h-5 w-5 text-green-500 group-hover:text-green-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+              </svg>
+            </span>
+            Create Account
+          </button>
+        </div>
+
+        <!-- Sign In Link -->
+        <div class="text-center">
+          <span class="text-sm text-gray-600">Already have an account?</span>
+          <a href="/signin" class="text-sm font-medium text-green-600 hover:text-green-500 transition-colors ml-1">
+            Sign in here
+          </a>
+        </div>
+      </form>
     </div>
   </div>
-</div>
+</main>
 
 <%- include("../partials/footer") %>

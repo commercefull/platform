@@ -8,6 +8,7 @@ exports.up = function (knex) {
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     t.enum('systemMode', ['marketplace', 'multi_store', 'single_store']).notNullable().defaultTo('single_store');
+    t.boolean('isActive').notNullable().defaultTo(true);
     t.jsonb('features');
     t.jsonb('businessSettings');
     t.jsonb('platformSettings');
@@ -17,6 +18,7 @@ exports.up = function (knex) {
     t.jsonb('metadata');
 
     t.index('systemMode');
+    t.index('isActive');
   });
 };
 

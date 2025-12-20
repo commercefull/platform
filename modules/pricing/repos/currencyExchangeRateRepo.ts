@@ -1,22 +1,6 @@
 import { query, queryOne } from '../../../libs/db';
+import { Table, CurrencyExchangeRate } from '../../../libs/db/types';
 import { unixTimestamp } from '../../../libs/date';
-
-export interface CurrencyExchangeRate {
-  currencyExchangeRateId: string;
-  createdAt: string;
-  updatedAt: string;
-  sourceCurrencyId: string;
-  targetCurrencyId: string;
-  rate: number;
-  inverseRate: number;
-  provider: string;
-  providerReference?: string;
-  effectiveFrom: string;
-  effectiveTo?: string;
-  isActive: boolean;
-  lastUpdated: string;
-  updatedBy?: string;
-}
 
 export type CurrencyExchangeRateCreateParams = Omit<CurrencyExchangeRate, 
   'currencyExchangeRateId' | 'createdAt' | 'updatedAt' | 'inverseRate' | 'lastUpdated'
@@ -32,7 +16,7 @@ export class CurrencyExchangeRateRepo {
    */
   async findById(currencyExchangeRateId: string): Promise<CurrencyExchangeRate | null> {
     return await queryOne<CurrencyExchangeRate>(
-      `SELECT * FROM "public"."currencyExchangeRate" WHERE "currencyExchangeRateId" = $1`,
+      `SELECT * FROM "${Table.CurrencyExchangeRate}" WHERE "currencyExchangeRateId" = $1`,
       [currencyExchangeRateId]
     );
   }
@@ -44,7 +28,7 @@ export class CurrencyExchangeRateRepo {
     const now = unixTimestamp();
     
     return await queryOne<CurrencyExchangeRate>(
-      `SELECT * FROM "public"."currencyExchangeRate" 
+      `SELECT * FROM "${Table.CurrencyExchangeRate}" 
        WHERE "sourceCurrencyId" = $1 
        AND "targetCurrencyId" = $2 
        AND "isActive" = true
@@ -60,7 +44,7 @@ export class CurrencyExchangeRateRepo {
    * Find all rates for source currency
    */
   async findBySourceCurrency(sourceCurrencyId: string, activeOnly: boolean = true): Promise<CurrencyExchangeRate[]> {
-    let sql = `SELECT * FROM "public"."currencyExchangeRate" WHERE "sourceCurrencyId" = $1`;
+    let sql = `SELECT * FROM "${Table.CurrencyExchangeRate}" WHERE "sourceCurrencyId" = $1`;
     const params: any[] = [sourceCurrencyId];
     
     if (activeOnly) {
@@ -77,7 +61,7 @@ export class CurrencyExchangeRateRepo {
    * Find all rates for target currency
    */
   async findByTargetCurrency(targetCurrencyId: string, activeOnly: boolean = true): Promise<CurrencyExchangeRate[]> {
-    let sql = `SELECT * FROM "public"."currencyExchangeRate" WHERE "targetCurrencyId" = $1`;
+    let sql = `SELECT * FROM "${Table.CurrencyExchangeRate}" WHERE "targetCurrencyId" = $1`;
     const params: any[] = [targetCurrencyId];
     
     if (activeOnly) {
@@ -94,7 +78,7 @@ export class CurrencyExchangeRateRepo {
    * Find rates by provider
    */
   async findByProvider(provider: string, activeOnly: boolean = true): Promise<CurrencyExchangeRate[]> {
-    let sql = `SELECT * FROM "public"."currencyExchangeRate" WHERE "provider" = $1`;
+    let sql = `SELECT * FROM "${Table.CurrencyExchangeRate}" WHERE "provider" = $1`;
     const params: any[] = [provider];
     
     if (activeOnly) {
@@ -114,7 +98,7 @@ export class CurrencyExchangeRateRepo {
     const now = unixTimestamp();
     
     const results = await query<CurrencyExchangeRate[]>(
-      `SELECT * FROM "public"."currencyExchangeRate" 
+      `SELECT * FROM "${Table.CurrencyExchangeRate}" 
        WHERE "effectiveTo" IS NOT NULL 
        AND "effectiveTo" < $1
        AND "isActive" = true
@@ -129,7 +113,7 @@ export class CurrencyExchangeRateRepo {
    */
   async findEffectiveAt(effectiveDate: string): Promise<CurrencyExchangeRate[]> {
     const results = await query<CurrencyExchangeRate[]>(
-      `SELECT * FROM "public"."currencyExchangeRate" 
+      `SELECT * FROM "${Table.CurrencyExchangeRate}" 
        WHERE "effectiveFrom" <= $1
        AND ("effectiveTo" IS NULL OR "effectiveTo" >= $1)
        AND "isActive" = true
@@ -154,7 +138,7 @@ export class CurrencyExchangeRateRepo {
     const inverseRate = 1 / params.rate;
 
     const result = await queryOne<CurrencyExchangeRate>(
-      `INSERT INTO "public"."currencyExchangeRate" (
+      `INSERT INTO "${Table.CurrencyExchangeRate}" (
         "sourceCurrencyId", "targetCurrencyId", "rate", "inverseRate",
         "provider", "providerReference", "effectiveFrom", "effectiveTo",
         "isActive", "lastUpdated", "updatedBy",
@@ -220,7 +204,7 @@ export class CurrencyExchangeRateRepo {
     values.push(currencyExchangeRateId);
 
     const result = await queryOne<CurrencyExchangeRate>(
-      `UPDATE "public"."currencyExchangeRate" 
+      `UPDATE "${Table.CurrencyExchangeRate}" 
        SET ${updateFields.join(', ')}
        WHERE "currencyExchangeRateId" = $${paramIndex}
        RETURNING *`,
@@ -269,7 +253,7 @@ export class CurrencyExchangeRateRepo {
    */
   async delete(currencyExchangeRateId: string): Promise<boolean> {
     const result = await queryOne<{ currencyExchangeRateId: string }>(
-      `DELETE FROM "public"."currencyExchangeRate" WHERE "currencyExchangeRateId" = $1 RETURNING "currencyExchangeRateId"`,
+      `DELETE FROM "${Table.CurrencyExchangeRate}" WHERE "currencyExchangeRateId" = $1 RETURNING "currencyExchangeRateId"`,
       [currencyExchangeRateId]
     );
 
@@ -365,20 +349,20 @@ export class CurrencyExchangeRateRepo {
     expired: number;
   }> {
     const totalResult = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM "public"."currencyExchangeRate"`,
+      `SELECT COUNT(*) as count FROM "${Table.CurrencyExchangeRate}"`,
       []
     );
     const total = totalResult ? parseInt(totalResult.count, 10) : 0;
 
     const activeResult = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM "public"."currencyExchangeRate" WHERE "isActive" = true`,
+      `SELECT COUNT(*) as count FROM "${Table.CurrencyExchangeRate}" WHERE "isActive" = true`,
       []
     );
     const active = activeResult ? parseInt(activeResult.count, 10) : 0;
 
     const providerResults = await query<{ provider: string; count: string }[]>(
       `SELECT "provider", COUNT(*) as count 
-       FROM "public"."currencyExchangeRate" 
+       FROM "${Table.CurrencyExchangeRate}" 
        WHERE "isActive" = true
        GROUP BY "provider"`,
       []

@@ -23,13 +23,8 @@ export const signInForm = async (req: Request, res: Response): Promise<void> => 
     return;
   }
 
-  const errorMsg = req.flash('error')[0];
-  const successMsg = req.flash('success')[0];
-
   storefrontRespond(req, res, 'user/signin', {
     pageName: 'Sign In',
-    errorMsg,
-    successMsg,
     redirectTo: req.query.redirect || '/'
   });
 };
@@ -45,13 +40,8 @@ export const signUpForm = async (req: Request, res: Response): Promise<void> => 
     return;
   }
 
-  const errorMsg = req.flash('error')[0];
-  const successMsg = req.flash('success')[0];
-
   storefrontRespond(req, res, 'user/signup', {
-    pageName: 'Sign Up',
-    errorMsg,
-    successMsg
+    pageName: 'Sign Up'
   });
 };
 
@@ -177,22 +167,15 @@ export const profile = async (req: Request, res: Response): Promise<void> => {
       return res.redirect('/signin');
     }
 
-    const successMsg = req.flash('success')[0];
-    const errorMsg = req.flash('error')[0];
-
     storefrontRespond(req, res, 'user/profile', {
       pageName: 'My Profile',
-      customer,
-      successMsg,
-      errorMsg,
-      user: req.user
+      customer
     });
   } catch (error: any) {
     console.error('Error loading profile:', error);
     storefrontRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load profile',
-      user: req.user
+      error: error.message || 'Failed to load profile'
     });
   }
 };

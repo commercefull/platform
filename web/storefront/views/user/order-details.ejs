@@ -1,173 +1,299 @@
 <%- include("../partials/header") %>
 <%- include("../partials/categories-navbar") %>
 
-<div class="container mt-4 mb-5">
-  <div class="row">
-    <div class="col-12">
-      <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="/">Home</a></li>
-          <li class="breadcrumb-item"><a href="/orders">Orders</a></li>
-          <li class="breadcrumb-item active" aria-current="page"><%= order.orderNumber %></li>
-        </ol>
-      </nav>
+<main class="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-7xl mx-auto">
+    <!-- Breadcrumb -->
+    <nav class="mb-6">
+      <ol class="flex items-center space-x-2 text-sm text-gray-600">
+        <li>
+          <a href="/" class="hover:text-blue-600 transition-colors">Home</a>
+        </li>
+        <li>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </li>
+        <li>
+          <a href="/orders" class="hover:text-blue-600 transition-colors">Orders</a>
+        </li>
+        <li>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </li>
+        <li class="text-gray-900 font-medium"><%= order.orderNumber %></li>
+      </ol>
+    </nav>
 
-      <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Order <%= order.orderNumber %></h1>
-        <a href="/track/<%= order.orderNumber %>" class="btn btn-outline-primary">Track Order</a>
+    <!-- Header -->
+    <div class="bg-white shadow-lg rounded-xl overflow-hidden mb-8">
+      <div class="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="text-2xl font-bold text-white">Order <%= order.orderNumber %></h1>
+            <p class="text-blue-100 text-sm mt-1">Placed on <%= new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></p>
+          </div>
+          <a
+            href="/track/<%= order.orderNumber %>"
+            class="inline-flex items-center px-4 py-2 border border-white text-white rounded-lg hover:bg-white hover:text-blue-600 transition-colors"
+          >
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
+            </svg>
+            Track Order
+          </a>
+        </div>
       </div>
 
-      <div class="row">
-        <!-- Order Summary -->
-        <div class="col-md-8">
-          <div class="card mb-4">
-            <div class="card-header">
-              <h5 class="mb-0">Order Items</h5>
+      <!-- Order Status Bar -->
+      <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-4">
+            <div class="flex items-center">
+              <div class="text-sm font-medium text-gray-500 mr-2">Status:</div>
+              <%
+                let statusColor = 'gray';
+                let statusText = order.status;
+                if (order.status === 'delivered') statusColor = 'green';
+                else if (order.status === 'shipped') statusColor = 'blue';
+                else if (order.status === 'processing') statusColor = 'yellow';
+                else if (order.status === 'cancelled') statusColor = 'red';
+                else if (order.status === 'pending') statusColor = 'yellow';
+              %>
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-<%= statusColor %>-100 text-<%= statusColor %>-800">
+                <%= statusText.charAt(0).toUpperCase() + statusText.slice(1) %>
+              </span>
             </div>
-            <div class="card-body">
-              <% if (order.items && order.items.length > 0) { %>
-                <div class="table-responsive">
-                  <table class="table">
-                    <thead>
-                      <tr>
-                        <th>Product</th>
-                        <th>Quantity</th>
-                        <th>Price</th>
-                        <th>Total</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <% order.items.forEach(item => { %>
-                        <tr>
-                          <td>
-                            <strong><%= item.name %></strong>
-                            <% if (item.sku) { %><br><small class="text-muted">SKU: <%= item.sku %></small><% } %>
-                          </td>
-                          <td><%= item.quantity %></td>
-                          <td>$<%= (item.unitPrice || item.price || 0).toFixed(2) %></td>
-                          <td>$<%= (item.lineTotal || (item.unitPrice || item.price || 0) * item.quantity).toFixed(2) %></td>
-                        </tr>
-                      <% }); %>
-                    </tbody>
-                  </table>
+            <div class="flex items-center">
+              <div class="text-sm font-medium text-gray-500 mr-2">Payment:</div>
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-<%= order.paymentStatus === 'paid' ? 'green' : 'yellow' %>-100 text-<%= order.paymentStatus === 'paid' ? 'green' : 'yellow' %>-800">
+                <%= (order.paymentStatus || 'pending').charAt(0).toUpperCase() + (order.paymentStatus || 'pending').slice(1) %>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- Main Content -->
+      <div class="lg:col-span-2 space-y-8">
+        <!-- Order Items -->
+        <div class="bg-white shadow-lg rounded-xl overflow-hidden">
+          <div class="bg-gradient-to-r from-green-600 to-teal-600 px-6 py-4">
+            <h2 class="text-xl font-semibold text-white flex items-center">
+              <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+              </svg>
+              Order Items
+            </h2>
+          </div>
+          <div class="p-6">
+            <% if (order.items && order.items.length > 0) { %>
+              <div class="space-y-6">
+                <% order.items.forEach(item => { %>
+                  <div class="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg">
+                    <!-- Product Image Placeholder -->
+                    <div class="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                      </svg>
+                    </div>
+
+                    <!-- Product Details -->
+                    <div class="flex-1 min-w-0">
+                      <h3 class="text-lg font-semibold text-gray-900 truncate"><%= item.name %></h3>
+                      <% if (item.sku) { %>
+                        <p class="text-sm text-gray-500">SKU: <%= item.sku %></p>
+                      <% } %>
+                    </div>
+
+                    <!-- Quantity & Pricing -->
+                    <div class="flex items-center space-x-6 text-sm">
+                      <div class="text-center">
+                        <p class="text-gray-500">Qty</p>
+                        <p class="font-semibold text-gray-900"><%= item.quantity %></p>
+                      </div>
+                      <div class="text-center">
+                        <p class="text-gray-500">Price</p>
+                        <p class="font-semibold text-gray-900">$<%= (item.unitPrice || item.price || 0).toFixed(2) %></p>
+                      </div>
+                      <div class="text-center">
+                        <p class="text-gray-500">Total</p>
+                        <p class="font-bold text-gray-900">$<%= (item.lineTotal || (item.unitPrice || item.price || 0) * item.quantity).toFixed(2) %></p>
+                      </div>
+                    </div>
+                  </div>
+                <% }); %>
+              </div>
+            <% } else { %>
+              <div class="text-center py-8">
+                <svg class="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2M4 13h2m8-5v2m0 0v2m0-2h2m-2 0h-2"></path>
+                </svg>
+                <p class="text-gray-500">No items found in this order</p>
+              </div>
+            <% } %>
+          </div>
+        </div>
+
+        <!-- Addresses -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Shipping Address -->
+          <div class="bg-white shadow-lg rounded-xl overflow-hidden">
+            <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
+              <h3 class="text-lg font-semibold text-white flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                Shipping Address
+              </h3>
+            </div>
+            <div class="p-6">
+              <% if (order.shippingAddress) { %>
+                <div class="text-sm text-gray-900 space-y-1">
+                  <p class="font-semibold"><%= order.shippingAddress.firstName %> <%= order.shippingAddress.lastName %></p>
+                  <p><%= order.shippingAddress.address1 || order.shippingAddress.addressLine1 %></p>
+                  <% if (order.shippingAddress.address2 || order.shippingAddress.addressLine2) { %>
+                    <p><%= order.shippingAddress.address2 || order.shippingAddress.addressLine2 %></p>
+                  <% } %>
+                  <p><%= order.shippingAddress.city %>, <%= order.shippingAddress.state %> <%= order.shippingAddress.postalCode %></p>
+                  <p><%= order.shippingAddress.country %></p>
                 </div>
               <% } else { %>
-                <p class="text-muted">No items found</p>
+                <p class="text-gray-500 italic">No shipping address available</p>
               <% } %>
             </div>
           </div>
 
-          <!-- Addresses -->
-          <div class="row">
-            <div class="col-md-6">
-              <div class="card mb-4">
-                <div class="card-header">
-                  <h6 class="mb-0">Shipping Address</h6>
-                </div>
-                <div class="card-body">
-                  <% if (order.shippingAddress) { %>
-                    <address class="mb-0">
-                      <%= order.shippingAddress.firstName %> <%= order.shippingAddress.lastName %><br>
-                      <%= order.shippingAddress.address1 || order.shippingAddress.addressLine1 %><br>
-                      <% if (order.shippingAddress.address2 || order.shippingAddress.addressLine2) { %>
-                        <%= order.shippingAddress.address2 || order.shippingAddress.addressLine2 %><br>
-                      <% } %>
-                      <%= order.shippingAddress.city %>, <%= order.shippingAddress.state %> <%= order.shippingAddress.postalCode %><br>
-                      <%= order.shippingAddress.country %>
-                    </address>
-                  <% } else { %>
-                    <p class="text-muted mb-0">No shipping address</p>
+          <!-- Billing Address -->
+          <div class="bg-white shadow-lg rounded-xl overflow-hidden">
+            <div class="bg-gradient-to-r from-purple-600 to-purple-700 px-6 py-4">
+              <h3 class="text-lg font-semibold text-white flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                </svg>
+                Billing Address
+              </h3>
+            </div>
+            <div class="p-6">
+              <% if (order.billingAddress) { %>
+                <div class="text-sm text-gray-900 space-y-1">
+                  <p class="font-semibold"><%= order.billingAddress.firstName %> <%= order.billingAddress.lastName %></p>
+                  <p><%= order.billingAddress.address1 || order.billingAddress.addressLine1 %></p>
+                  <% if (order.billingAddress.address2 || order.billingAddress.addressLine2) { %>
+                    <p><%= order.billingAddress.address2 || order.billingAddress.addressLine2 %></p>
                   <% } %>
+                  <p><%= order.billingAddress.city %>, <%= order.billingAddress.state %> <%= order.billingAddress.postalCode %></p>
+                  <p><%= order.billingAddress.country %></p>
                 </div>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="card mb-4">
-                <div class="card-header">
-                  <h6 class="mb-0">Billing Address</h6>
-                </div>
-                <div class="card-body">
-                  <% if (order.billingAddress) { %>
-                    <address class="mb-0">
-                      <%= order.billingAddress.firstName %> <%= order.billingAddress.lastName %><br>
-                      <%= order.billingAddress.address1 || order.billingAddress.addressLine1 %><br>
-                      <% if (order.billingAddress.address2 || order.billingAddress.addressLine2) { %>
-                        <%= order.billingAddress.address2 || order.billingAddress.addressLine2 %><br>
-                      <% } %>
-                      <%= order.billingAddress.city %>, <%= order.billingAddress.state %> <%= order.billingAddress.postalCode %><br>
-                      <%= order.billingAddress.country %>
-                    </address>
-                  <% } else { %>
-                    <p class="text-muted mb-0">Same as shipping</p>
-                  <% } %>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Order Info Sidebar -->
-        <div class="col-md-4">
-          <div class="card mb-4">
-            <div class="card-header">
-              <h5 class="mb-0">Order Summary</h5>
-            </div>
-            <div class="card-body">
-              <dl class="row mb-0">
-                <dt class="col-6">Order Date:</dt>
-                <dd class="col-6"><%= new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) %></dd>
-
-                <dt class="col-6">Status:</dt>
-                <dd class="col-6">
-                  <% 
-                    let statusClass = 'secondary';
-                    if (order.status === 'delivered') statusClass = 'success';
-                    else if (order.status === 'shipped') statusClass = 'info';
-                    else if (order.status === 'processing') statusClass = 'primary';
-                    else if (order.status === 'cancelled') statusClass = 'danger';
-                    else if (order.status === 'pending') statusClass = 'warning';
-                  %>
-                  <span class="badge bg-<%= statusClass %>"><%= order.status %></span>
-                </dd>
-
-                <dt class="col-6">Payment:</dt>
-                <dd class="col-6">
-                  <span class="badge bg-<%= order.paymentStatus === 'paid' ? 'success' : 'warning' %>">
-                    <%= order.paymentStatus || 'pending' %>
-                  </span>
-                </dd>
-              </dl>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="card-header">
-              <h5 class="mb-0">Order Totals</h5>
-            </div>
-            <div class="card-body">
-              <dl class="row mb-0">
-                <dt class="col-6">Subtotal:</dt>
-                <dd class="col-6 text-end">$<%= order.totals ? order.totals.subtotal : '0.00' %></dd>
-
-                <dt class="col-6">Shipping:</dt>
-                <dd class="col-6 text-end">$<%= order.totals ? order.totals.shipping : '0.00' %></dd>
-
-                <dt class="col-6">Tax:</dt>
-                <dd class="col-6 text-end">$<%= order.totals ? order.totals.tax : '0.00' %></dd>
-
-                <dt class="col-6 border-top pt-2"><strong>Total:</strong></dt>
-                <dd class="col-6 text-end border-top pt-2"><strong>$<%= order.totals ? order.totals.total : '0.00' %></strong></dd>
-              </dl>
+              <% } else { %>
+                <p class="text-gray-500 italic">Same as shipping address</p>
+              <% } %>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="mt-4">
-        <a href="/orders" class="btn btn-secondary">Back to Orders</a>
+      <!-- Sidebar -->
+      <div class="space-y-6">
+        <!-- Order Summary -->
+        <div class="bg-white shadow-lg rounded-xl overflow-hidden">
+          <div class="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4">
+            <h3 class="text-lg font-semibold text-white flex items-center">
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+              </svg>
+              Order Summary
+            </h3>
+          </div>
+          <div class="p-6 space-y-4">
+            <div class="flex justify-between items-center py-2 border-b border-gray-100">
+              <span class="text-sm font-medium text-gray-600">Order Date</span>
+              <span class="text-sm text-gray-900"><%= new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) %></span>
+            </div>
+
+            <div class="flex justify-between items-center py-2 border-b border-gray-100">
+              <span class="text-sm font-medium text-gray-600">Order Number</span>
+              <span class="text-sm text-gray-900 font-mono"><%= order.orderNumber %></span>
+            </div>
+
+            <div class="flex justify-between items-center py-2 border-b border-gray-100">
+              <span class="text-sm font-medium text-gray-600">Status</span>
+              <%
+                let statusColor = 'gray';
+                if (order.status === 'delivered') statusColor = 'green';
+                else if (order.status === 'shipped') statusColor = 'blue';
+                else if (order.status === 'processing') statusColor = 'yellow';
+                else if (order.status === 'cancelled') statusColor = 'red';
+                else if (order.status === 'pending') statusColor = 'yellow';
+              %>
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-<%= statusColor %>-100 text-<%= statusColor %>-800">
+                <%= order.status.charAt(0).toUpperCase() + order.status.slice(1) %>
+              </span>
+            </div>
+
+            <div class="flex justify-between items-center py-2">
+              <span class="text-sm font-medium text-gray-600">Payment</span>
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-<%= order.paymentStatus === 'paid' ? 'green' : 'yellow' %>-100 text-<%= order.paymentStatus === 'paid' ? 'green' : 'yellow' %>-800">
+                <%= (order.paymentStatus || 'pending').charAt(0).toUpperCase() + (order.paymentStatus || 'pending').slice(1) %>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Order Totals -->
+        <div class="bg-white shadow-lg rounded-xl overflow-hidden">
+          <div class="bg-gradient-to-r from-emerald-600 to-green-600 px-6 py-4">
+            <h3 class="text-lg font-semibold text-white flex items-center">
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+              </svg>
+              Order Totals
+            </h3>
+          </div>
+          <div class="p-6 space-y-3">
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-gray-600">Subtotal</span>
+              <span class="text-sm text-gray-900">$<%= order.totals ? order.totals.subtotal : '0.00' %></span>
+            </div>
+
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-gray-600">Shipping</span>
+              <span class="text-sm text-gray-900">$<%= order.totals ? order.totals.shipping : '0.00' %></span>
+            </div>
+
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-gray-600">Tax</span>
+              <span class="text-sm text-gray-900">$<%= order.totals ? order.totals.tax : '0.00' %></span>
+            </div>
+
+            <hr class="border-gray-200">
+
+            <div class="flex justify-between items-center">
+              <span class="text-lg font-semibold text-gray-900">Total</span>
+              <span class="text-lg font-bold text-gray-900">$<%= order.totals ? order.totals.total : '0.00' %></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Back to Orders -->
+        <div class="flex justify-center">
+          <a
+            href="/orders"
+            class="inline-flex items-center px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+            Back to Orders
+          </a>
+        </div>
       </div>
     </div>
   </div>
-</div>
+</main>
 
 <%- include("../partials/footer") %>

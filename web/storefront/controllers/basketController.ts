@@ -33,15 +33,13 @@ export const viewBasket = async (req: Request, res: Response): Promise<void> => 
 
     storefrontRespond(req, res, 'basket/basket', {
       pageName: 'Shopping Cart',
-      basket: { ...basket, totals },
-      user: req.user
+      basket: { ...basket, totals }
     });
   } catch (error: any) {
     console.error('Error viewing basket:', error);
     storefrontRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load shopping cart',
-      user: req.user
+      error: error.message || 'Failed to load shopping cart'
     });
   }
 };

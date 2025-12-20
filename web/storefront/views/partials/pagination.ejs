@@ -1,29 +1,79 @@
-<% if (pages > 0) { %>
-<ul class="pagination text-center">
+<% if (pagination.totalPages > 1) { %>
+<%
+  var pages = pagination.totalPages;
+  var current = pagination.currentPage;
+  var home = '/products?';
+  // Add existing query parameters
+  if (filters.category && filters.category !== 'all') {
+    home += 'category=' + encodeURIComponent(filters.category) + '&';
+  }
+  if (filters.search) {
+    home += 'search=' + encodeURIComponent(filters.search) + '&';
+  }
+  if (filters.sort) {
+    home += 'sort=' + encodeURIComponent(filters.sort) + '&';
+  }
+  if (filters.order) {
+    home += 'order=' + encodeURIComponent(filters.order) + '&';
+  }
+  home += 'limit=12&';
+%>
+<nav class="flex items-center justify-center space-x-2 mt-8">
   <% if (current == 1) { %>
-  <li class="page-item disabled"><a class="page-link">First</a></li>
+  <span class="px-3 py-2 text-sm font-medium text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed">
+    First
+  </span>
   <% } else { %>
-  <li class="page-item">
-    <a class="page-link" href="<%=home%>page=1">First</a>
-  </li>
-  <% } %> <% var i = (Number(current) > 5 ? Number(current) - 4 : 1) %> <% if (i
-  !== 1) { %>
-  <li class="page-item disabled"><a class="page-link">...</a></li>
-  <% } %> <% for (; i <= (Number(current) + 4) && i <= pages; i++) { %> <% if (i
-  == current) { %>
-  <li class="page-item active"><a class="page-link"><%= i %></a></li>
-  <% } else { %>
-  <li class="page-item">
-    <a class="page-link" href="<%=home%>page=<%= i %>"><%= i %></a>
-  </li>
-  <% } %> <% if (i == Number(current) + 4 && i < pages) { %>
-  <li class="page-item disabled"><a class="page-link">...</a></li>
-  <% } %> <% } %> <% if (current == pages) { %>
-  <li class="page-item disabled"><a class="page-link">Last</a></li>
-  <% } else { %>
-  <li class="page-item">
-    <a class="page-link" href="<%=home%>page=<%= pages %>">Last</a>
-  </li>
+  <a class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-blue-600 transition-colors" href="<%= home %>page=1">
+    First
+  </a>
   <% } %>
-</ul>
+
+  <% if (current > 1) { %>
+  <a class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-blue-600 transition-colors" href="<%= home %>page=<%= current - 1 %>">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+    </svg>
+  </a>
+  <% } %>
+
+  <% var i = (Number(current) > 5 ? Number(current) - 4 : 1) %>
+  <% if (i !== 1) { %>
+  <span class="px-3 py-2 text-sm font-medium text-gray-400">...</span>
+  <% } %>
+
+  <% for (; i <= (Number(current) + 4) && i <= pages; i++) { %>
+  <% if (i == current) { %>
+  <span class="px-3 py-2 text-sm font-medium text-white bg-blue-600 border border-blue-600 rounded-lg">
+    <%= i %>
+  </span>
+  <% } else { %>
+  <a class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-blue-600 transition-colors" href="<%= home %>page=<%= i %>">
+    <%= i %>
+  </a>
+  <% } %>
+  <% } %>
+
+  <% if (i == Number(current) + 4 && i < pages) { %>
+  <span class="px-3 py-2 text-sm font-medium text-gray-400">...</span>
+  <% } %>
+
+  <% if (current < pages) { %>
+  <a class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-blue-600 transition-colors" href="<%= home %>page=<%= current + 1 %>">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+    </svg>
+  </a>
+  <% } %>
+
+  <% if (current == pages) { %>
+  <span class="px-3 py-2 text-sm font-medium text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed">
+    Last
+  </span>
+  <% } else { %>
+  <a class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-blue-600 transition-colors" href="<%= home %>page=<%= pages %>">
+    Last
+  </a>
+  <% } %>
+</nav>
 <% } %>

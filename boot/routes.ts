@@ -52,6 +52,10 @@ import { membershipBusinessRouter } from "../modules/membership/membershipBusine
 import { shippingBusinessRouter } from "../modules/shipping/shippingBusinessRouter";
 import { inventoryBusinessRouter } from "../modules/inventory/interface/routers/businessRouter";
 import { paymentBusinessRouter } from "../modules/payment/interface/routers/paymentBusinessRouter";
+import { businessRouter } from "../modules/business/interface/http/BusinessRouter";
+import { storeRouter } from "../modules/store/interface/http/StoreRouter";
+import { systemConfigurationRouter } from "../modules/configuration/interface/http/SystemConfigurationRouter";
+import { mediaRouter } from "../modules/media/interface/http/MediaRouter";
 import { adminRouter } from "../web/admin/adminRouters";
 
 /**
@@ -114,6 +118,10 @@ export function configureRoutes(app: Express): void {
     shippingBusinessRouter,
     inventoryBusinessRouter,
     paymentBusinessRouter,
+    mediaRouter,
+    businessRouter,
+    storeRouter,
+    systemConfigurationRouter,
   ]);
 
   // Health check endpoint (before other routes for load balancers)
@@ -122,7 +130,22 @@ export function configureRoutes(app: Express): void {
   });
 
   // 404 handler - catch all unmatched routes
-  app.use(function (_req, res) {
-    res.status(404).json({ status: 'not found', timestamp: new Date().toISOString() });
+  app.use(function (req, res) {
+    // Return JSON for API requests
+    if (req.xhr || req.headers.accept?.includes('application/json')) {
+      res.status(404).json({ status: 'not found', timestamp: new Date().toISOString() });
+    } else {
+      // Render 404 page for HTML requests
+      res.status(404).render("storefront/views/404", {
+        pageName: "Page Not Found",
+        message: "The page you're looking for doesn't exist.",
+        error: { status: 404 },
+        user: req.user ?? null,
+        session: req.session ?? null,
+        successMsg: res.locals.successMsg ?? null,
+        errorMsg: res.locals.errorMsg ?? null,
+        categories: []
+      });
+    }
   });
 }

@@ -1,38 +1,80 @@
-<nav class="navbar navbar-expand-md navbar-custom navbar-dark">
-  <button
-    class="navbar-toggler"
-    type="button"
-    data-toggle="collapse"
-    data-target="#navbarNav"
-    aria-controls="navbarNav"
-    aria-expanded="false"
-    aria-label="Toggle navigation"
-  >
-    <span class="navbar-toggler-icon"></span>
-  </button>
-  <div class="collapse navbar-collapse mx-auto order-0" id="navbarNav">
-    <ul class="navbar-nav mx-auto">
-      <li <% if (pageName === "All Products") { %>
-        class="nav-item active"
-        <%} else {%>
-          class="nav-item"
-        <%} %> 
-      >
-        <a class="nav-link" href="/products/">All</a>
-      </li>
+<!-- Categories Navigation -->
+<div class="bg-white border-b border-gray-200">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-center py-4">
+      <!-- Mobile Menu Button -->
+      <button class="md:hidden mr-4 p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition-colors" onclick="toggleCategoriesMenu()">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </button>
 
-      <% if (categories) { %>
-        <% categories.forEach( category => { %>
-          <li <% if (pageName === category.title) { %>
-            class="nav-item active"
-            <% } else { %>
-              class="nav-item"
-            <% } %> 
-          >
-          <a class="nav-link" href="/products/<%= category.slug %>"><%= category.title %></a>
-        </li>
+      <!-- Categories List -->
+      <nav class="hidden md:flex items-center space-x-1" id="categories-nav">
+        <a
+          href="/products/"
+          class="<%= pageName === 'All Products' ? 'bg-blue-600 text-white' : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50' %> px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+        >
+          All Products
+        </a>
+
+        <% if (categories) { %>
+          <% categories.forEach( category => { %>
+            <a
+              href="/products/<%= category.slug %>"
+              class="<%= pageName === category.title ? 'bg-blue-600 text-white' : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50' %> px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+            >
+              <%= category.title %>
+            </a>
           <% }) %>
-      <% } %>
-    </ul>
+        <% } %>
+      </nav>
+
+      <!-- Mobile Categories Menu (Hidden by default) -->
+      <div class="md:hidden fixed inset-x-0 top-0 z-50 bg-white border-b border-gray-200 transform -translate-y-full transition-transform duration-300 ease-in-out" id="mobile-categories-menu">
+        <div class="flex items-center justify-between p-4 border-b border-gray-200">
+          <h3 class="text-lg font-semibold text-gray-900">Categories</h3>
+          <button onclick="toggleCategoriesMenu()" class="p-2 text-gray-600 hover:text-gray-900">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+        <div class="py-4">
+          <a
+            href="/products/"
+            class="<%= pageName === 'All Products' ? 'bg-blue-600 text-white' : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50' %> block px-6 py-3 text-base font-medium transition-colors"
+            onclick="toggleCategoriesMenu()"
+          >
+            All Products
+          </a>
+
+          <% if (categories) { %>
+            <% categories.forEach( category => { %>
+              <a
+                href="/products/<%= category.slug %>"
+                class="<%= pageName === category.title ? 'bg-blue-600 text-white' : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50' %> block px-6 py-3 text-base font-medium transition-colors"
+                onclick="toggleCategoriesMenu()"
+              >
+                <%= category.title %>
+              </a>
+            <% }) %>
+          <% } %>
+        </div>
+      </div>
+    </div>
   </div>
-</nav>
+</div>
+
+<script>
+function toggleCategoriesMenu() {
+  const menu = document.getElementById('mobile-categories-menu');
+  const isHidden = menu.classList.contains('-translate-y-full');
+
+  if (isHidden) {
+    menu.classList.remove('-translate-y-full');
+  } else {
+    menu.classList.add('-translate-y-full');
+  }
+}
+</script>

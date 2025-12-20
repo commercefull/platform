@@ -1,26 +1,131 @@
 <%- include("../partials/header") %>
 <%- include("../partials/categories-navbar") %>
 
-<div class="container">
-  <div class="row">
-    <div class="col-lg-8 col-md-12 m-auto text-justify">
-      <h1 class="mt-4 mb-5 text-center">Work With Us</h1>
-      <h3>We are always looking to hire enthusiastic people!</h3>
-      <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Asperiores nam
-        voluptatem adipisci sed amet ipsa quod reiciendis eos. Magnam ad
-        sapiente aut a libero aliquam veritatis incidunt molestiae tempora?
-      </p>
-      <p>
-        If you are interested in working with us, please send your CV to the
-        following email and we will get back to you. <br />
-        <a href="mailto:hr@email.com">
-          <i class="fa fa-envelope" aria-hidden="true"></i>
-          <u>hr@email.com</u>
-        </a>
-      </p>
+<main class="min-h-screen bg-gray-50 py-16 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-4xl mx-auto">
+    <!-- Header Section -->
+    <div class="text-center mb-16">
+      <div class="mx-auto h-20 w-20 bg-green-600 rounded-full flex items-center justify-center mb-6">
+        <svg class="h-10 w-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m8 0V8a2 2 0 01-2 2H8a2 2 0 01-2-2V6m8 0H8m0 0V4"></path>
+        </svg>
+      </div>
+      <h1 class="text-4xl font-bold text-gray-900 mb-4">Work With Us</h1>
+      <p class="text-xl text-gray-600 max-w-2xl mx-auto">Join our growing team and help us build amazing experiences for our customers.</p>
+    </div>
+
+    <!-- Main Content -->
+    <div class="bg-white shadow-lg rounded-xl overflow-hidden">
+      <div class="px-8 py-12">
+        <div class="prose prose-lg max-w-none">
+          <h2 class="text-2xl font-bold text-gray-900 mb-6">We are always looking to hire enthusiastic people!</h2>
+
+          <p class="text-gray-700 leading-relaxed mb-6">
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Asperiores nam
+            voluptatem adipisci sed amet ipsa quod reiciendis eos. Magnam ad
+            sapiente aut a libero aliquam veritatis incidunt molestiae tempora?
+          </p>
+
+          <!-- Open Positions -->
+          <div class="bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-8 mb-8">
+            <h3 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+              <svg class="w-6 h-6 mr-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+              Current Openings
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
+                <h4 class="text-lg font-semibold text-gray-900 mb-2">Customer Service Representative</h4>
+                <p class="text-gray-600 text-sm mb-4">Full-time • Remote Available</p>
+                <p class="text-gray-700 text-sm mb-4">Help our customers with their orders and provide exceptional support.</p>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  Actively Hiring
+                </span>
+              </div>
+
+              <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
+                <h4 class="text-lg font-semibold text-gray-900 mb-2">E-commerce Specialist</h4>
+                <p class="text-gray-600 text-sm mb-4">Full-time • On-site</p>
+                <p class="text-gray-700 text-sm mb-4">Manage our online store and optimize the customer experience.</p>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                  New Position
+                </span>
+              </div>
+
+              <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
+                <h4 class="text-lg font-semibold text-gray-900 mb-2">Warehouse Associate</h4>
+                <p class="text-gray-600 text-sm mb-4">Full-time • Warehouse</p>
+                <p class="text-gray-700 text-sm mb-4">Handle inventory management and order fulfillment.</p>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                  Multiple Positions
+                </span>
+              </div>
+
+              <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
+                <h4 class="text-lg font-semibold text-gray-900 mb-2">Marketing Coordinator</h4>
+                <p class="text-gray-600 text-sm mb-4">Full-time • Hybrid</p>
+                <p class="text-gray-700 text-sm mb-4">Develop and execute marketing campaigns to grow our brand.</p>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                  Senior Level
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Company Values -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+            <div class="text-center">
+              <div class="mx-auto h-16 w-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                <svg class="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                </svg>
+              </div>
+              <h4 class="text-lg font-semibold text-gray-900 mb-2">Team Work</h4>
+              <p class="text-gray-600 text-sm">We believe in collaboration and supporting each other to achieve our goals.</p>
+            </div>
+
+            <div class="text-center">
+              <div class="mx-auto h-16 w-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                </svg>
+              </div>
+              <h4 class="text-lg font-semibold text-gray-900 mb-2">Growth</h4>
+              <p class="text-gray-600 text-sm">We provide opportunities for professional development and career advancement.</p>
+            </div>
+
+            <div class="text-center">
+              <div class="mx-auto h-16 w-16 bg-purple-100 rounded-full flex items-center justify-center mb-4">
+                <svg class="h-8 w-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                </svg>
+              </div>
+              <h4 class="text-lg font-semibold text-gray-900 mb-2">Passion</h4>
+              <p class="text-gray-600 text-sm">We are passionate about our work and creating positive impact.</p>
+            </div>
+          </div>
+
+          <!-- Contact Section -->
+          <div class="bg-gray-900 rounded-xl p-8 text-center">
+            <h3 class="text-xl font-semibold text-white mb-4">Ready to Join Our Team?</h3>
+            <p class="text-gray-300 mb-6">
+              If you are interested in working with us, please send your CV to the following email and we will get back to you.
+            </p>
+            <a
+              href="mailto:hr@email.com"
+              class="inline-flex items-center px-8 py-4 border border-transparent text-lg font-semibold rounded-lg text-white bg-green-600 hover:bg-green-700 transition-colors"
+            >
+              <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+              </svg>
+              Send Your CV
+            </a>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
-</div>
+</main>
 
 <%- include("../partials/footer") %>
