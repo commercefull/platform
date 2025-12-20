@@ -21,14 +21,15 @@
     "test:unit": "jest ./features --collectCoverage=false",
     "test:int": "jest ./tests/integration --collectCoverage=false --detectOpenHandles --runInBand",
     "test:e2e": "npx cypress run --headless --browser chrome",
-    "cli:new:merchant": "NODE_ENV=development node -r ts-node/register ./cli/new-merchant.ts",
     "lint": "npx tsc --noEmit",
     "package:upgrade": "yarn upgrade --latest",
     "code:lint": "knip",
     "sec:audit": "yarn audit --groups dependencies",
     "sec:check": "yarn audit --groups dependencies --level high",
     "css:build": "npx tailwindcss -i ./public/stylesheets/storefront/main.css -o ./public/stylesheets/storefront/compiled.css --minify",
-    "css:watch": "npx tailwindcss -i ./public/stylesheets/storefront/main.css -o ./public/stylesheets/storefront/compiled.css --watch"
+    "css:watch": "npx tailwindcss -i ./public/stylesheets/storefront/main.css -o ./public/stylesheets/storefront/compiled.css --watch",
+    "job:new:merchant": "NODE_ENV=development node -r ts-node/register ./modules/merchant/interface/jobs/new-merchant.ts",
+    "job:new:business": "NODE_ENV=development node -r ts-node/register ./modules/business/interface/jobs/new-business.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.400.0",

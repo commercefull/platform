@@ -3,7 +3,7 @@ module.exports = {
   content: [
     "./web/storefront/views/**/*.{ejs,html,js}",
     "./web/storefront/views/partials/**/*.{ejs,html,js}",
-    "./public/storefront/javascripts/**/*.js"
+    "./public/javascripts/storefront/**/*.js"
   ],
   theme: {
     extend: {

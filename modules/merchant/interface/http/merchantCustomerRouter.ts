@@ -2,7 +2,7 @@ import express from "express";
 import {
   getActiveMerchants,
   getMerchantById
-} from "./controllers/merchantCustomerController";
+} from "../../controllers/merchantCustomerController";
 
 const router = express.Router();
 

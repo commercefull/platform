@@ -1,4 +1,4 @@
-import { pool, queryOne } from "../libs/db/pool";
+import { pool, queryOne } from "../../../../libs/db/pool";
 
 async function run() {
     console.log("Start...");
@@ -18,7 +18,7 @@ async function run() {
     } catch (e) {
         console.error(e);
     } finally {
-        console.log("Done.");
+        console.log("Business Done.");
     }
 }
 

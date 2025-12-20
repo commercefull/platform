@@ -11,8 +11,8 @@ import {
   getMerchantPaymentInfo,
   addMerchantPaymentInfo,
   updateMerchantPaymentInfo
-} from "./controllers/merchantBusinessController";
-import { isMerchantLoggedIn } from "../../libs/auth";
+} from "../../controllers/merchantBusinessController";
+import { isMerchantLoggedIn } from "../../../../libs/auth";
 
 const router = express.Router();
 

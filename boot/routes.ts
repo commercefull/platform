@@ -28,7 +28,7 @@ import { shippingCustomerRouter } from "../modules/shipping/shippingCustomerRout
 
 // Feature routes - Business/Merchant facing
 import { identityBusinessRouter } from "../modules/identity/interface/routers/identityBusinessRouter";
-import { merchantMerchantRouter } from "../modules/merchant/merchantBusinessRouter";
+import { merchantMerchantRouter } from "../modules/merchant/interface/http/merchantBusinessRouter";
 import { promotionBusinessRouter } from "../modules/promotion/interface/routers/businessRouter";
 import { productBusinessRouter } from "../modules/product/interface/routers/productBusinessRouter";
 import { orderBusinessRouter } from "../modules/order/interface/routers/businessRouter";
