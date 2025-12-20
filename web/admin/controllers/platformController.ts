@@ -1,7 +1,7 @@
 /**
  * Platform Controller
  * Handles platform administration, configuration, and monitoring
- * for the CommerceFull Admin Hub - Phase 8
+ * for the Commercefull Admin Hub - Phase 8
  */
 
 import { Request, Response } from 'express';

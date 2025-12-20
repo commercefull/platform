@@ -3,7 +3,7 @@ import { Request, Response } from "express";
 type ResponseData = Record<string, any>;
 
 export async function merchantRespond(req: any, res: Response, view: string, data: ResponseData) {
-  res.render(`hub/views/${view}`, {
+  res.render(`admin/views/${view}`, {
     ...data
   });
 }
@@ -17,7 +17,7 @@ export async function storefrontRespond(req: Request, res: Response, view: strin
     // Common variables needed by header/navbar partials
     user: (req as any).user,
     session: req.session,
-    categories: [], // TODO: Load actual categories when available
+    categories: res.locals.categories || [],
     successMsg,
     errorMsg,
     // User-provided data

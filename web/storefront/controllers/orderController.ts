@@ -4,7 +4,7 @@
  */
 
 import { Request, Response } from 'express';
-import { storefrontRespond } from '../../../libs/templates';
+import { storefrontRespond } from '../../respond';
 import OrderRepo from '../../../modules/order/infrastructure/repositories/OrderRepository';
 import { ListOrdersCommand, ListOrdersUseCase } from '../../../modules/order/application/useCases/ListOrders';
 import { GetOrderCommand, GetOrderUseCase } from '../../../modules/order/application/useCases/GetOrder';

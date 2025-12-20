@@ -1,7 +1,7 @@
 /**
  * Settings Controller
  * Handles merchant settings and store configuration
- * for the CommerceFull Admin Hub - Phase 8
+ * for the Commercefull Admin Hub - Phase 8
  */
 
 import { Request, Response } from 'express';

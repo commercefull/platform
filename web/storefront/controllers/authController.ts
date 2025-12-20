@@ -4,7 +4,7 @@
  */
 
 import { Request, Response } from 'express';
-import { storefrontRespond } from '../../../libs/templates';
+import { storefrontRespond } from '../../respond';
 import CustomerRepo from '../../../modules/customer/infrastructure/repositories/CustomerRepository';
 import { AuthenticateCustomerCommand, AuthenticateCustomerUseCase } from '../../../modules/customer/useCases/AuthenticateCustomer';
 import { RegisterCustomerCommand, RegisterCustomerUseCase } from '../../../modules/customer/useCases/RegisterCustomer';

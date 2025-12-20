@@ -14,9 +14,9 @@ export const listSEOSettings = async (req: Request, res: Response): Promise<void
     // For now, show basic SEO settings interface
     // In a real implementation, this would load from a database
     const seoSettings = {
-      siteName: 'CommerceFull Store',
+      siteName: 'Commercefull Store',
       siteDescription: 'Your complete e-commerce solution',
-      defaultMetaTitle: 'CommerceFull - Complete E-Commerce Platform',
+      defaultMetaTitle: 'Commercefull - Complete E-Commerce Platform',
       defaultMetaDescription: 'Shop the best products with our comprehensive e-commerce platform featuring advanced product management, secure payments, and fast shipping.',
       defaultKeywords: 'ecommerce, online shopping, products, store',
       robotsTxt: 'User-agent: *\nAllow: /\n\nSitemap: https://commercefull.com/sitemap.xml',

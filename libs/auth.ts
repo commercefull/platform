@@ -27,6 +27,22 @@ const authenticateToken = (req: Request, res: Response, next: NextFunction, secr
   }
 };
 
+export const isAdminLoggedIn = (req: Request, res: Response, next: NextFunction) => {
+
+    // Check if it's an AJAX request or API call
+    if (req.xhr || req.headers.accept?.indexOf('json') !== -1) {
+        return authenticateToken(req, res, next, MERCHANT_JWT_SECRET);
+    }
+
+    // Check if the request is authenticated
+    if (req.isAuthenticated()) {
+        return next();
+    }
+    
+    // Redirect for regular HTTP requests
+    res.redirect("/admin/login");
+};
+
 export const isMerchantLoggedIn = (req: Request, res: Response, next: NextFunction) => {
 
     // Check if it's an AJAX request or API call

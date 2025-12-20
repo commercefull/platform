@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { storefrontRespond } from "../../../libs/templates";
+import { storefrontRespond } from "../../respond";
 import ProductRepo from "../../../modules/product/infrastructure/repositories/ProductRepository";
 import { ListProductsCommand, ListProductsUseCase } from "../../../modules/product/application/useCases/ListProducts";
 

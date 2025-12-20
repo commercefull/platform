@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { MerchantRepo } from '../repos/merchantRepo';
-import { storefrontRespond } from '../../../libs/templates';
+import { storefrontRespond } from '../../../web/respond';
 
 // Define interfaces for public-facing data
 interface Product {

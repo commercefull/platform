@@ -35,6 +35,32 @@ if (isProduction) {
   app.set('trust proxy', 1);
 }
 
+// Static file serving - must be before security middleware
+app.use('/javascripts', express.static(path.join(__dirname, 'public/storefront/javascripts'), {
+  maxAge: isProduction ? '1y' : 0, // Cache for 1 year in production
+  etag: true,
+  lastModified: true,
+}));
+app.use('/stylesheets', express.static(path.join(__dirname, 'public/storefront/stylesheets'), {
+  maxAge: isProduction ? '1y' : 0,
+  etag: true,
+  lastModified: true,
+}));
+app.use('/images', express.static(path.join(__dirname, 'public/storefront/images'), {
+  maxAge: isProduction ? '1y' : 0,
+  etag: true,
+  lastModified: true,
+}));
+
+// ============================================================================
+// Security Middleware (applied in ALL environments)
+// ============================================================================
+
+// Trust proxy when behind load balancer/reverse proxy
+if (isProduction) {
+  app.set('trust proxy', 1);
+}
+
 // Helmet security headers - always enabled
 app.use(
   helmet({

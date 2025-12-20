@@ -4,7 +4,7 @@
  */
 
 import { Request, Response } from 'express';
-import { storefrontRespond } from '../../../libs/templates';
+import { storefrontRespond } from '../../respond';
 import BasketRepo from '../../../modules/basket/infrastructure/repositories/BasketRepository';
 import OrderRepo from '../../../modules/order/infrastructure/repositories/OrderRepository';
 import CustomerRepo from '../../../modules/customer/infrastructure/repositories/CustomerRepository';

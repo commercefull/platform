@@ -1,7 +1,7 @@
 /**
  * Advanced Analytics Controller
  * Provides comprehensive business intelligence, predictive analytics, and real-time insights
- * for the CommerceFull Admin Hub - Phase 7
+ * for the Commercefull Admin Hub - Phase 7
  */
 
 import { Request, Response } from 'express';

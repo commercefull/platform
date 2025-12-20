@@ -16,8 +16,16 @@ import * as basketController from "./controllers/basketController";
 import * as authController from "./controllers/authController";
 import * as checkoutController from "./controllers/checkoutController";
 import * as orderController from "./controllers/orderController";
+import * as categoryController from "./controllers/categoryController";
 
 const router = express.Router();
+
+// ============================================================================
+// Category Navigation Middleware
+// ============================================================================
+
+// Load categories for navigation on all routes
+router.use(categoryController.loadCategoriesForNavigation);
 
 // ============================================================================
 // Page Routes
@@ -27,20 +35,20 @@ const router = express.Router();
 router.get("/", getHomePage);
 
 // GET: display about us page
-router.get("/about-us", getAboutUsPage);
+router.get("/pages/about-us", getAboutUsPage);
 
 // GET: display shipping policy page
-router.get("/shipping-policy", getShippingPolicyPage);
+router.get("/pages/shipping-policy", getShippingPolicyPage);
 
 // GET: display careers page
-router.get("/careers", getCareersPage);
+router.get("/pages/careers", getCareersPage);
 
 // GET: display contact us page
-router.get("/contact-us", getContactUsPage);
+router.get("/pages/contact-us", getContactUsPage);
 
 // POST: handle contact us form
 router.post(
-  "/contact-us",
+  "/pages/contact-us",
   [userContactUsValidationRules, validateContactUs],
   submitContactForm
 );
@@ -60,6 +68,22 @@ router.get("/products/:categorySlug/:productId", productController.getProduct);
 
 // GET: search products
 router.get("/search", productController.searchProducts);
+
+// ============================================================================
+// Category Routes
+// ============================================================================
+
+// GET: categories for navigation (API)
+router.get("/api/categories/navigation", categoryController.getCategoriesForNavigation);
+
+// GET: all categories (API)
+router.get("/api/categories", categoryController.getAllCategories);
+
+// GET: category details (API)
+router.get("/api/categories/:categoryId", categoryController.getCategoryDetails);
+
+// GET: category landing page
+router.get("/categories/:categorySlug", categoryController.getCategoryPage);
 
 // ============================================================================
 // Basket/Cart Routes

@@ -4,7 +4,7 @@
  */
 
 import { Request, Response } from 'express';
-import { storefrontRespond } from '../../../libs/templates';
+import { storefrontRespond } from '../../respond';
 import ProductRepo from '../../../modules/product/infrastructure/repositories/ProductRepository';
 import { ListProductsCommand, ListProductsUseCase } from '../../../modules/product/application/useCases/ListProducts';
 import { GetProductCommand, GetProductUseCase } from '../../../modules/product/application/useCases/GetProduct';
@@ -43,14 +43,12 @@ export const listProducts = async (req: Request, res: Response): Promise<void> =
     const useCase = new ListProductsUseCase(ProductRepo);
     const result = await useCase.execute(command);
 
-    // Categories not yet implemented in this module - provide empty array
-    const categories: any[] = [];
+    // Categories are now loaded automatically by storefrontRespond
     const currentCategory = null;
 
     storefrontRespond(req, res, 'product/plp', {
       pageName: category && category !== 'all' ? `Category: ${category}` : 'All Products',
       products: result.products,
-      categories,
       currentCategory,
       pagination: {
         currentPage: parseInt(page as string),
@@ -59,15 +57,13 @@ export const listProducts = async (req: Request, res: Response): Promise<void> =
         hasNext: (parseInt(page as string) * parseInt(limit as string)) < result.total,
         hasPrev: parseInt(page as string) > 1
       },
-      filters: { category, search, sort, order },
-      user: req.user
+      filters: { category, search, sort, order }
     });
   } catch (error: any) {
     console.error('Error listing products:', error);
     storefrontRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load products',
-      user: req.user
+      error: error.message || 'Failed to load products'
     });
   }
 };
@@ -108,15 +104,13 @@ export const getProduct = async (req: Request, res: Response): Promise<void> => 
     storefrontRespond(req, res, 'product/pdp', {
       pageName: product.name,
       product,
-      relatedProducts,
-      user: req.user
+      relatedProducts
     });
   } catch (error: any) {
     console.error('Error getting product:', error);
     storefrontRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load product',
-      user: req.user
+      error: error.message || 'Failed to load product'
     });
   }
 };
@@ -140,13 +134,11 @@ export const getCategoryProducts = async (req: Request, res: Response): Promise<
     const useCase = new ListProductsUseCase(ProductRepo);
     const result = await useCase.execute(command);
 
-    // Categories not yet implemented
-    const categories: any[] = [];
+    // Categories are now loaded automatically by storefrontRespond
 
     storefrontRespond(req, res, 'product/plp', {
       pageName: `Category: ${categorySlug}`,
       products: result.products,
-      categories,
       currentCategory: null,
       pagination: {
         currentPage: parseInt(page as string),
@@ -155,15 +147,13 @@ export const getCategoryProducts = async (req: Request, res: Response): Promise<
         hasNext: (parseInt(page as string) * parseInt(limit as string)) < result.total,
         hasPrev: parseInt(page as string) > 1
       },
-      filters: { category: categorySlug, sort, order },
-      user: req.user
+      filters: { category: categorySlug, sort, order }
     });
   } catch (error: any) {
     console.error('Error getting category products:', error);
     storefrontRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load category products',
-      user: req.user
+      error: error.message || 'Failed to load category products'
     });
   }
 };
@@ -189,13 +179,11 @@ export const searchProducts = async (req: Request, res: Response): Promise<void>
     const useCase = new ListProductsUseCase(ProductRepo);
     const result = await useCase.execute(command);
 
-    // Categories not yet implemented
-    const categories: any[] = [];
+    // Categories are now loaded automatically by storefrontRespond
 
     storefrontRespond(req, res, 'product/plp', {
       pageName: `Search Results for "${search}"`,
       products: result.products,
-      categories,
       pagination: {
         currentPage: parseInt(page as string),
         totalPages: Math.ceil(result.total / parseInt(limit as string)),
@@ -204,15 +192,13 @@ export const searchProducts = async (req: Request, res: Response): Promise<void>
         hasPrev: parseInt(page as string) > 1
       },
       filters: { search, sort: 'relevance' },
-      searchQuery: search,
-      user: req.user
+      searchQuery: search
     });
   } catch (error: any) {
     console.error('Error searching products:', error);
     storefrontRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to search products',
-      user: req.user
+      error: error.message || 'Failed to search products'
     });
   }
 };

@@ -1,5 +1,4 @@
 <%- include("../partials/header") %>
-<%- include("../partials/categories-navbar") %>
 
 <main class="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
   <div class="max-w-7xl mx-auto">
@@ -569,38 +568,6 @@
   </div>
 </main>
 
-<script>
-// Toggle shipping address visibility
-document.getElementById('sameAddress').addEventListener('change', function() {
-  const shippingSection = document.getElementById('shippingAddress');
-  shippingSection.classList.toggle('hidden');
-
-  // Copy billing to shipping if same address
-  if (this.checked) {
-    document.getElementById('shippingFirstName').value = document.getElementById('billingFirstName').value;
-    document.getElementById('shippingLastName').value = document.getElementById('billingLastName').value;
-    document.getElementById('shippingAddressInput').value = document.getElementById('billingAddress').value;
-    document.getElementById('shippingCity').value = document.getElementById('billingCity').value;
-    document.getElementById('shippingState').value = document.getElementById('billingState').value;
-    document.getElementById('shippingZip').value = document.getElementById('billingZip').value;
-  }
-});
-
-// Toggle payment forms
-document.querySelectorAll('input[name="paymentMethod"]').forEach(radio => {
-  radio.addEventListener('change', function() {
-    const creditForm = document.getElementById('credit-card-form');
-    const paypalForm = document.getElementById('paypal-form');
-
-    if (this.value === 'credit_card') {
-      creditForm.classList.remove('hidden');
-      paypalForm.classList.add('hidden');
-    } else {
-      creditForm.classList.add('hidden');
-      paypalForm.classList.remove('hidden');
-    }
-  });
-});
-</script>
+<script type="text/javascript" src="/storefront/javascripts/checkout.js"></script>
 
 <%- include("../partials/footer") %>

@@ -4,7 +4,7 @@
  */
 
 import { Request, Response } from 'express';
-import { storefrontRespond } from '../../../libs/templates';
+import { storefrontRespond } from '../../respond';
 import BasketRepo from '../../../modules/basket/infrastructure/repositories/BasketRepository';
 import ProductRepo from '../../../modules/product/infrastructure/repositories/ProductRepository';
 import { GetOrCreateBasketCommand, GetOrCreateBasketUseCase } from '../../../modules/basket/application/useCases/GetOrCreateBasket';

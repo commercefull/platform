@@ -1,0 +1,169 @@
+<%- include("../partials/header") %>
+
+<main class="min-h-screen bg-gray-50">
+  <!-- Category Hero Section -->
+  <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div class="text-center">
+        <h1 class="text-4xl md:text-5xl font-bold mb-4"><%= category.name %></h1>
+        <% if (category.description) { %>
+        <p class="text-xl text-blue-100 max-w-3xl mx-auto mb-8"><%= category.description %></p>
+        <% } %>
+
+        <!-- Breadcrumb -->
+        <nav class="flex justify-center mb-8" aria-label="Breadcrumb">
+          <ol class="flex items-center space-x-2">
+            <li>
+              <a href="/" class="text-blue-200 hover:text-white transition-colors">Home</a>
+            </li>
+            <li class="flex items-center">
+              <svg class="w-4 h-4 text-blue-300 mx-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+              </svg>
+              <span class="text-blue-200"><%= category.name %></span>
+            </li>
+          </ol>
+        </nav>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Subcategories Section -->
+    <% if (subcategories && subcategories.length > 0) { %>
+    <section class="mb-16">
+      <h2 class="text-3xl font-bold text-gray-900 mb-8">Shop by Category</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <% subcategories.forEach(subcategory => { %>
+        <a href="/products/category/<%= subcategory.slug %>"
+           class="group bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-200 hover:border-blue-300">
+          <div class="aspect-w-16 aspect-h-9 bg-gradient-to-br from-blue-50 to-purple-50 p-8 flex items-center justify-center">
+            <% if (subcategory.iconUrl) { %>
+            <img src="<%= subcategory.iconUrl %>" alt="<%= subcategory.name %>" class="w-16 h-16 object-contain">
+            <% } else { %>
+            <svg class="w-16 h-16 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+            </svg>
+            <% } %>
+          </div>
+          <div class="p-6">
+            <h3 class="text-xl font-semibold text-gray-900 group-hover:text-blue-600 transition-colors mb-2">
+              <%= subcategory.name %>
+            </h3>
+            <% if (subcategory.description) { %>
+            <p class="text-gray-600 text-sm line-clamp-2"><%= subcategory.description %></p>
+            <% } %>
+            <div class="mt-4 flex items-center text-blue-600 group-hover:text-blue-700 font-medium">
+              <span>Shop Now</span>
+              <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+              </svg>
+            </div>
+          </div>
+        </a>
+        <% }) %>
+      </div>
+    </section>
+    <% } %>
+
+    <!-- Featured Products Section -->
+    <% if (featuredProducts && featuredProducts.length > 0) { %>
+    <section class="mb-16">
+      <div class="flex items-center justify-between mb-8">
+        <h2 class="text-3xl font-bold text-gray-900">Featured Products</h2>
+        <a href="/products/category/<%= category.slug %>"
+           class="text-blue-600 hover:text-blue-700 font-medium flex items-center">
+          View All
+          <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </a>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <% featuredProducts.slice(0, 8).forEach(product => { %>
+        <div class="bg-white rounded-xl shadow-sm hover:shadow-lg transition-shadow duration-300 overflow-hidden group">
+          <a href="/products/<%= category.slug %>/<%= product.productId %>">
+            <div class="aspect-square bg-gray-100 relative overflow-hidden">
+              <% if (product.images && product.images.length > 0) { %>
+              <img src="<%= product.images[0] %>" alt="<%= product.name %>"
+                   class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+              <% } else { %>
+              <div class="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+                <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+              </div>
+              <% } %>
+            </div>
+            <div class="p-4">
+              <h3 class="font-semibold text-gray-900 mb-1 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                <%= product.name %>
+              </h3>
+              <% if (product.price) { %>
+              <p class="text-lg font-bold text-gray-900">
+                $<%= product.price.toFixed(2) %>
+              </p>
+              <% } %>
+            </div>
+          </a>
+        </div>
+        <% }) %>
+      </div>
+    </section>
+    <% } %>
+
+    <!-- Category Info Section -->
+    <section class="bg-white rounded-xl shadow-sm p-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div>
+          <h3 class="text-2xl font-bold text-gray-900 mb-4">About <%= category.name %></h3>
+          <% if (category.description) { %>
+          <p class="text-gray-600 mb-6"><%= category.description %></p>
+          <% } %>
+
+          <div class="space-y-4">
+            <div class="flex items-center">
+              <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              <span class="text-gray-700">High-quality products</span>
+            </div>
+            <div class="flex items-center">
+              <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              <span class="text-gray-700">Fast shipping</span>
+            </div>
+            <div class="flex items-center">
+              <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              <span class="text-gray-700">30-day returns</span>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h3 class="text-2xl font-bold text-gray-900 mb-4">Shop <%= category.name %></h3>
+          <p class="text-gray-600 mb-6">
+            Discover our curated selection of <%= category.name.toLowerCase() %> products.
+            From the latest trends to timeless classics, find exactly what you're looking for.
+          </p>
+
+          <div class="space-y-3">
+            <a href="/products/category/<%= category.slug %>"
+               class="block w-full bg-blue-600 text-white text-center px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium">
+              Browse All Products
+            </a>
+            <a href="/search?q=<%= encodeURIComponent(category.name) %>"
+               class="block w-full bg-white text-blue-600 text-center px-6 py-3 rounded-lg border border-blue-600 hover:bg-blue-50 transition-colors font-medium">
+              Search in <%= category.name %>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<%- include("../partials/footer") %>
