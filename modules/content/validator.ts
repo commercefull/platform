@@ -16,6 +16,29 @@ export const userContactUsValidationRules = () => {
   ];
 };
 
+export const userContactFormValidationRules = () => {
+  return [
+    check("name", "Please enter a valid name (minimum 2 characters)")
+      .not()
+      .isEmpty()
+      .isLength({ min: 2 }),
+    check("email", "Please enter a valid email address")
+      .not()
+      .isEmpty()
+      .isEmail(),
+    check("subject", "Please select a subject")
+      .not()
+      .isEmpty(),
+    check("message", "Please enter a message (minimum 10 characters)")
+      .not()
+      .isEmpty()
+      .isLength({ min: 10 }),
+    check("phone", "Please enter a valid phone number")
+      .optional()
+      .isMobilePhone("any"),
+  ];
+};
+
 export const validateContactUs = (req: Request, res: Response, next: NextFunction) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -26,6 +49,20 @@ export const validateContactUs = (req: Request, res: Response, next: NextFunctio
     console.log(messages);
     req.flash("error", messages);
     return res.redirect("/pages/contact-us");
+  }
+  next();
+};
+
+export const validateContactForm = (req: Request, res: Response, next: NextFunction) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    let messages: string[] = [];
+    errors.array().forEach((error: any) => {
+      messages.push(error.msg);
+    });
+    console.log(messages);
+    req.flash("error", messages);
+    return res.redirect("/contact-form");
   }
   next();
 };

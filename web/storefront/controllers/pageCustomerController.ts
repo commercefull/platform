@@ -72,5 +72,73 @@ export const getContactUsPage = (req: Request, res: Response): void => {
 export const submitContactForm = (req: Request, res: Response): void => {
   // This would typically send an email, but for now we'll just redirect with success
   req.flash("success", "Thank you for your message! We'll get back to you soon.");
-  res.redirect("/contact-us");
+  res.redirect("/pages/contact-us");
+};
+
+// GET: display contact form page
+export const getContactFormPage = (req: Request, res: Response): void => {
+  const successMsg = req.flash("success")[0];
+  const errorMsg = req.flash("error");
+  storefrontRespond(req, res, "page/contact-form", {
+    pageName: "Contact Form",
+    successMsg,
+    errorMsg,
+    user: req.user
+  });
+};
+
+// GET: display FAQ page
+export const getFaqPage = (req: Request, res: Response): void => {
+  const successMsg = req.flash("success")[0];
+  const errorMsg = req.flash("error");
+  storefrontRespond(req, res, "page/faq", {
+    pageName: "FAQ",
+    successMsg,
+    errorMsg,
+    user: req.user
+  });
+};
+
+// GET: display returns page
+export const getReturnsPage = (req: Request, res: Response): void => {
+  const successMsg = req.flash("success")[0];
+  const errorMsg = req.flash("error");
+  storefrontRespond(req, res, "page/returns", {
+    pageName: "Returns & Exchanges",
+    successMsg,
+    errorMsg,
+    user: req.user
+  });
+};
+
+// GET: display support page
+export const getSupportPage = (req: Request, res: Response): void => {
+  const successMsg = req.flash("success")[0];
+  const errorMsg = req.flash("error");
+  storefrontRespond(req, res, "page/support", {
+    pageName: "Support Center",
+    successMsg,
+    errorMsg,
+    user: req.user
+  });
+};
+
+// POST: handle contact form submission
+export const submitContactFormAdvanced = (req: Request, res: Response): void => {
+  // Validation is handled by middleware, so we can proceed with processing
+  const { name, email, phone, subject, message } = req.body;
+
+  // TODO: Add email sending logic here using nodemailer
+  // For now, we'll just log the form data and show success
+  console.log("Advanced contact form submission:", {
+    name: name.trim(),
+    email: email.trim(),
+    phone: phone?.trim() || null,
+    subject,
+    message: message.trim(),
+    submittedAt: new Date()
+  });
+
+  req.flash("success", "Thank you for your message! We've received your inquiry and will get back to you within 24 hours.");
+  res.redirect("/contact-form");
 };

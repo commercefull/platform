@@ -1,12 +1,17 @@
 import express from "express";
-import { userContactUsValidationRules, validateContactUs } from "../../modules/content/validator";
+import { userContactUsValidationRules, validateContactUs, userContactFormValidationRules, validateContactForm } from "../../modules/content/validator";
 import {
   getHomePage,
   getAboutUsPage,
   getShippingPolicyPage,
   getCareersPage,
   getContactUsPage,
-  submitContactForm
+  submitContactForm,
+  getContactFormPage,
+  submitContactFormAdvanced,
+  getFaqPage,
+  getReturnsPage,
+  getSupportPage
 } from "./controllers/pageCustomerController";
 import { getActiveContentTypes, getPublishedPageBySlug, getPublishedPages } from "../../modules/content/controllers/contentCustomerController";
 
@@ -46,11 +51,30 @@ router.get("/pages/careers", getCareersPage);
 // GET: display contact us page
 router.get("/pages/contact-us", getContactUsPage);
 
+// GET: display contact form page
+router.get("/contact-form", getContactFormPage);
+
+// GET: display FAQ page
+router.get("/faq", getFaqPage);
+
+// GET: display returns page
+router.get("/returns", getReturnsPage);
+
+// GET: display support page
+router.get("/support", getSupportPage);
+
 // POST: handle contact us form
 router.post(
   "/pages/contact-us",
   [userContactUsValidationRules, validateContactUs],
   submitContactForm
+);
+
+// POST: handle contact form submission
+router.post(
+  "/contact-form",
+  [userContactFormValidationRules, validateContactForm],
+  submitContactFormAdvanced
 );
 
 // ============================================================================
