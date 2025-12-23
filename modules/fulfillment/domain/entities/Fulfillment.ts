@@ -1,11 +1,11 @@
 /**
  * Fulfillment Entity
- * 
+ *
  * Represents the fulfillment of an order, including picking, packing,
  * shipping, and delivery tracking.
  */
 
-export type FulfillmentStatus = 
+export type FulfillmentStatus =
   | 'pending'
   | 'assigned'
   | 'picking'
@@ -41,26 +41,26 @@ export interface FulfillmentProps {
   fulfillmentId: string;
   orderId: string;
   orderNumber?: string;
-  
+
   // Source context - WHO is fulfilling
   sourceType: SourceType;
   sourceId: string;
-  
+
   // For marketplace - which merchant
   merchantId?: string;
-  
+
   // For B2B - which supplier
   supplierId?: string;
-  
+
   // For multi-store - which store
   storeId?: string;
-  
+
   // Channel context
   channelId?: string;
-  
+
   // Fulfillment details
   status: FulfillmentStatus;
-  
+
   // Shipping
   carrierId?: string;
   carrierName?: string;
@@ -68,28 +68,28 @@ export interface FulfillmentProps {
   shippingMethodName?: string;
   trackingNumber?: string;
   trackingUrl?: string;
-  
+
   // Addresses
   shipFromAddress: Address;
   shipToAddress: Address;
-  
+
   // Partner (3PL)
   fulfillmentPartnerId?: string;
-  
+
   // Weight/dimensions
   weightGrams?: number;
   lengthCm?: number;
   widthCm?: number;
   heightCm?: number;
-  
+
   // Costs
   shippingCost?: number;
   insuranceCost?: number;
-  
+
   // Notes
   notes?: string;
   internalNotes?: string;
-  
+
   // Workflow tracking
   assignedAt?: Date;
   pickingStartedAt?: Date;
@@ -101,7 +101,7 @@ export interface FulfillmentProps {
   cancelledAt?: Date;
   failedAt?: Date;
   failureReason?: string;
-  
+
   // Audit
   createdAt: Date;
   updatedAt: Date;
@@ -115,35 +115,93 @@ export class Fulfillment {
   }
 
   // Getters
-  get fulfillmentId(): string { return this.props.fulfillmentId; }
-  get orderId(): string { return this.props.orderId; }
-  get orderNumber(): string | undefined { return this.props.orderNumber; }
-  get sourceType(): SourceType { return this.props.sourceType; }
-  get sourceId(): string { return this.props.sourceId; }
-  get merchantId(): string | undefined { return this.props.merchantId; }
-  get supplierId(): string | undefined { return this.props.supplierId; }
-  get storeId(): string | undefined { return this.props.storeId; }
-  get channelId(): string | undefined { return this.props.channelId; }
-  get status(): FulfillmentStatus { return this.props.status; }
-  get carrierId(): string | undefined { return this.props.carrierId; }
-  get carrierName(): string | undefined { return this.props.carrierName; }
-  get shippingMethodId(): string | undefined { return this.props.shippingMethodId; }
-  get shippingMethodName(): string | undefined { return this.props.shippingMethodName; }
-  get trackingNumber(): string | undefined { return this.props.trackingNumber; }
-  get trackingUrl(): string | undefined { return this.props.trackingUrl; }
-  get shipFromAddress(): Address { return this.props.shipFromAddress; }
-  get shipToAddress(): Address { return this.props.shipToAddress; }
-  get fulfillmentPartnerId(): string | undefined { return this.props.fulfillmentPartnerId; }
-  get weightGrams(): number | undefined { return this.props.weightGrams; }
-  get shippingCost(): number | undefined { return this.props.shippingCost; }
-  get notes(): string | undefined { return this.props.notes; }
-  get assignedAt(): Date | undefined { return this.props.assignedAt; }
-  get pickedAt(): Date | undefined { return this.props.pickedAt; }
-  get packedAt(): Date | undefined { return this.props.packedAt; }
-  get shippedAt(): Date | undefined { return this.props.shippedAt; }
-  get deliveredAt(): Date | undefined { return this.props.deliveredAt; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get fulfillmentId(): string {
+    return this.props.fulfillmentId;
+  }
+  get orderId(): string {
+    return this.props.orderId;
+  }
+  get orderNumber(): string | undefined {
+    return this.props.orderNumber;
+  }
+  get sourceType(): SourceType {
+    return this.props.sourceType;
+  }
+  get sourceId(): string {
+    return this.props.sourceId;
+  }
+  get merchantId(): string | undefined {
+    return this.props.merchantId;
+  }
+  get supplierId(): string | undefined {
+    return this.props.supplierId;
+  }
+  get storeId(): string | undefined {
+    return this.props.storeId;
+  }
+  get channelId(): string | undefined {
+    return this.props.channelId;
+  }
+  get status(): FulfillmentStatus {
+    return this.props.status;
+  }
+  get carrierId(): string | undefined {
+    return this.props.carrierId;
+  }
+  get carrierName(): string | undefined {
+    return this.props.carrierName;
+  }
+  get shippingMethodId(): string | undefined {
+    return this.props.shippingMethodId;
+  }
+  get shippingMethodName(): string | undefined {
+    return this.props.shippingMethodName;
+  }
+  get trackingNumber(): string | undefined {
+    return this.props.trackingNumber;
+  }
+  get trackingUrl(): string | undefined {
+    return this.props.trackingUrl;
+  }
+  get shipFromAddress(): Address {
+    return this.props.shipFromAddress;
+  }
+  get shipToAddress(): Address {
+    return this.props.shipToAddress;
+  }
+  get fulfillmentPartnerId(): string | undefined {
+    return this.props.fulfillmentPartnerId;
+  }
+  get weightGrams(): number | undefined {
+    return this.props.weightGrams;
+  }
+  get shippingCost(): number | undefined {
+    return this.props.shippingCost;
+  }
+  get notes(): string | undefined {
+    return this.props.notes;
+  }
+  get assignedAt(): Date | undefined {
+    return this.props.assignedAt;
+  }
+  get pickedAt(): Date | undefined {
+    return this.props.pickedAt;
+  }
+  get packedAt(): Date | undefined {
+    return this.props.packedAt;
+  }
+  get shippedAt(): Date | undefined {
+    return this.props.shippedAt;
+  }
+  get deliveredAt(): Date | undefined {
+    return this.props.deliveredAt;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   /**
    * Create a new Fulfillment
@@ -310,20 +368,20 @@ export class Fulfillment {
    */
   private validateTransition(newStatus: FulfillmentStatus): void {
     const validTransitions: Record<FulfillmentStatus, FulfillmentStatus[]> = {
-      'pending': ['assigned', 'cancelled'],
-      'assigned': ['picking', 'cancelled'],
-      'picking': ['picked', 'failed', 'cancelled'],
-      'picked': ['packing', 'failed', 'cancelled'],
-      'packing': ['packed', 'failed', 'cancelled'],
-      'packed': ['ready_to_ship', 'failed', 'cancelled'],
-      'ready_to_ship': ['shipped', 'failed', 'cancelled'],
-      'shipped': ['in_transit', 'delivered', 'failed'],
-      'in_transit': ['out_for_delivery', 'delivered', 'failed'],
-      'out_for_delivery': ['delivered', 'failed'],
-      'delivered': ['returned'],
-      'failed': [],
-      'cancelled': [],
-      'returned': [],
+      pending: ['assigned', 'cancelled'],
+      assigned: ['picking', 'cancelled'],
+      picking: ['picked', 'failed', 'cancelled'],
+      picked: ['packing', 'failed', 'cancelled'],
+      packing: ['packed', 'failed', 'cancelled'],
+      packed: ['ready_to_ship', 'failed', 'cancelled'],
+      ready_to_ship: ['shipped', 'failed', 'cancelled'],
+      shipped: ['in_transit', 'delivered', 'failed'],
+      in_transit: ['out_for_delivery', 'delivered', 'failed'],
+      out_for_delivery: ['delivered', 'failed'],
+      delivered: ['returned'],
+      failed: [],
+      cancelled: [],
+      returned: [],
     };
 
     const allowed = validTransitions[this.props.status];

@@ -3,9 +3,9 @@
  * Phase 1: Foundation - Multi-tenant root entity
  */
 
-exports.up = async function(knex) {
+exports.up = async function (knex) {
   // Create organization table
-  await knex.schema.createTable('organization', (table) => {
+  await knex.schema.createTable('organization', table => {
     table.string('organizationId', 50).primary();
     table.string('name', 255).notNullable();
     table.string('slug', 100).unique().notNullable();
@@ -14,7 +14,7 @@ exports.up = async function(knex) {
     table.timestamp('createdAt').defaultTo(knex.fn.now());
     table.timestamp('updatedAt').defaultTo(knex.fn.now());
     table.timestamp('deletedAt').nullable();
-    
+
     table.index('slug');
     table.index('type');
   });
@@ -22,7 +22,7 @@ exports.up = async function(knex) {
   // Add organizationId to store table
   const hasStoreOrgId = await knex.schema.hasColumn('store', 'organizationId');
   if (!hasStoreOrgId) {
-    await knex.schema.alterTable('store', (table) => {
+    await knex.schema.alterTable('store', table => {
       table.string('organizationId', 50).nullable();
       table.string('taxZoneId', 50).nullable();
       table.jsonb('priceRoundingRules').defaultTo('{}');
@@ -34,7 +34,7 @@ exports.up = async function(knex) {
   // Add organizationId to channel table
   const hasChannelOrgId = await knex.schema.hasColumn('channel', 'organizationId');
   if (!hasChannelOrgId) {
-    await knex.schema.alterTable('channel', (table) => {
+    await knex.schema.alterTable('channel', table => {
       table.string('organizationId', 50).nullable();
       table.string('region', 50).nullable();
       table.string('domain', 255).nullable();
@@ -45,7 +45,7 @@ exports.up = async function(knex) {
   // Add organizationId to product table
   const hasProductOrgId = await knex.schema.hasColumn('product', 'organizationId');
   if (!hasProductOrgId) {
-    await knex.schema.alterTable('product', (table) => {
+    await knex.schema.alterTable('product', table => {
       table.string('organizationId', 50).nullable();
       table.string('approvalStatus', 20).defaultTo('approved');
       table.boolean('platformVisible').defaultTo(true);
@@ -55,7 +55,7 @@ exports.up = async function(knex) {
   // Create storeChannel junction table
   const hasStoreChannel = await knex.schema.hasTable('storeChannel');
   if (!hasStoreChannel) {
-    await knex.schema.createTable('storeChannel', (table) => {
+    await knex.schema.createTable('storeChannel', table => {
       table.string('storeChannelId', 50).primary();
       table.string('storeId', 50).notNullable();
       table.string('channelId', 50).notNullable();
@@ -64,7 +64,7 @@ exports.up = async function(knex) {
       table.jsonb('settings').defaultTo('{}');
       table.timestamp('createdAt').defaultTo(knex.fn.now());
       table.timestamp('updatedAt').defaultTo(knex.fn.now());
-      
+
       table.unique(['storeId', 'channelId']);
       table.index('storeId');
       table.index('channelId');
@@ -88,14 +88,14 @@ exports.up = async function(knex) {
   await knex('store').whereNull('organizationId').update({ organizationId: 'org_default' });
 };
 
-exports.down = async function(knex) {
+exports.down = async function (knex) {
   // Remove storeChannel table
   await knex.schema.dropTableIfExists('storeChannel');
 
   // Remove added columns from product
   const hasProductOrgId = await knex.schema.hasColumn('product', 'organizationId');
   if (hasProductOrgId) {
-    await knex.schema.alterTable('product', (table) => {
+    await knex.schema.alterTable('product', table => {
       table.dropColumn('organizationId');
       table.dropColumn('approvalStatus');
       table.dropColumn('platformVisible');
@@ -105,7 +105,7 @@ exports.down = async function(knex) {
   // Remove added columns from channel
   const hasChannelOrgId = await knex.schema.hasColumn('channel', 'organizationId');
   if (hasChannelOrgId) {
-    await knex.schema.alterTable('channel', (table) => {
+    await knex.schema.alterTable('channel', table => {
       table.dropColumn('organizationId');
       table.dropColumn('region');
       table.dropColumn('domain');
@@ -116,7 +116,7 @@ exports.down = async function(knex) {
   // Remove added columns from store
   const hasStoreOrgId = await knex.schema.hasColumn('store', 'organizationId');
   if (hasStoreOrgId) {
-    await knex.schema.alterTable('store', (table) => {
+    await knex.schema.alterTable('store', table => {
       table.dropColumn('organizationId');
       table.dropColumn('taxZoneId');
       table.dropColumn('priceRoundingRules');

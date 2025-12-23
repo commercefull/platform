@@ -1,6 +1,6 @@
 /**
  * Identity Use Cases
- * 
+ *
  * Barrel export for all identity-related use cases.
  */
 

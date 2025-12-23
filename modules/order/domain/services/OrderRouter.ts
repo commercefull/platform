@@ -1,6 +1,6 @@
 /**
  * OrderRouter Domain Service
- * 
+ *
  * Routes orders to appropriate store/warehouse for fulfillment.
  */
 
@@ -46,7 +46,7 @@ export interface RoutingResult {
 export class OrderRouter {
   constructor(
     private readonly storeRepository: any,
-    private readonly inventoryRepository: any
+    private readonly inventoryRepository: any,
   ) {}
 
   /**
@@ -93,11 +93,7 @@ export class OrderRouter {
   /**
    * Determine pickup store based on customer location
    */
-  async determinePickupStore(
-    order: Order,
-    customerLocation: CustomerLocation,
-    availableStores: Store[]
-  ): Promise<RoutingResult> {
+  async determinePickupStore(order: Order, customerLocation: CustomerLocation, availableStores: Store[]): Promise<RoutingResult> {
     const pickupStores = availableStores.filter(s => s.canPickupInStore);
 
     if (pickupStores.length === 0) {
@@ -137,10 +133,7 @@ export class OrderRouter {
   /**
    * Determine fulfillment store for online orders
    */
-  async determineFulfillmentStore(
-    order: Order,
-    availableStores: Store[]
-  ): Promise<RoutingResult> {
+  async determineFulfillmentStore(order: Order, availableStores: Store[]): Promise<RoutingResult> {
     const fulfillmentStores = availableStores.filter(s => s.canFulfillOnline);
 
     if (fulfillmentStores.length === 0) {
@@ -156,9 +149,7 @@ export class OrderRouter {
         storesWithInventory.push({
           ...store,
           inventoryScore,
-          distance: order.customerLocation
-            ? this.calculateDistance(order.customerLocation, store)
-            : Infinity,
+          distance: order.customerLocation ? this.calculateDistance(order.customerLocation, store) : Infinity,
         });
       }
     }
@@ -180,9 +171,7 @@ export class OrderRouter {
       storeId: selectedStore.storeId,
       storeName: selectedStore.name,
       distance: selectedStore.distance,
-      reason: selectedStore.inventoryScore === 100
-        ? 'Full inventory available at store'
-        : 'Best inventory availability',
+      reason: selectedStore.inventoryScore === 100 ? 'Full inventory available at store' : 'Best inventory availability',
     };
   }
 
@@ -213,9 +202,7 @@ export class OrderRouter {
     return stores
       .map(store => ({
         ...store,
-        distance: order.customerLocation
-          ? this.calculateDistance(order.customerLocation, store)
-          : Infinity,
+        distance: order.customerLocation ? this.calculateDistance(order.customerLocation, store) : Infinity,
       }))
       .sort((a, b) => {
         // Priority first
@@ -229,11 +216,7 @@ export class OrderRouter {
 
   private async storeHasAllItems(storeId: string, items: Order['items']): Promise<boolean> {
     for (const item of items) {
-      const available = await this.inventoryRepository.getAvailableQuantity(
-        storeId,
-        item.productId,
-        item.variantId
-      );
+      const available = await this.inventoryRepository.getAvailableQuantity(storeId, item.productId, item.variantId);
       if (available < item.quantity) {
         return false;
       }
@@ -244,11 +227,7 @@ export class OrderRouter {
   private async calculateInventoryScore(storeId: string, items: Order['items']): Promise<number> {
     let fulfilledItems = 0;
     for (const item of items) {
-      const available = await this.inventoryRepository.getAvailableQuantity(
-        storeId,
-        item.productId,
-        item.variantId
-      );
+      const available = await this.inventoryRepository.getAvailableQuantity(storeId, item.productId, item.variantId);
       if (available >= item.quantity) {
         fulfilledItems++;
       }
@@ -266,10 +245,7 @@ export class OrderRouter {
     const dLon = this.toRad(store.longitude - location.longitude);
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(this.toRad(location.latitude)) *
-        Math.cos(this.toRad(store.latitude)) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
+      Math.cos(this.toRad(location.latitude)) * Math.cos(this.toRad(store.latitude)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   }

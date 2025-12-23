@@ -16,7 +16,7 @@ export class GetOrCreateBasketCommand {
   constructor(
     public readonly customerId?: string,
     public readonly sessionId?: string,
-    public readonly currency: string = 'USD'
+    public readonly currency: string = 'USD',
   ) {}
 }
 
@@ -65,12 +65,12 @@ function mapBasketToResponse(basket: Basket): BasketResponse {
       unitPrice: item.unitPrice.amount,
       lineTotal: item.lineTotal.amount,
       imageUrl: item.imageUrl,
-      isGift: item.isGift
+      isGift: item.isGift,
     })),
     itemCount: basket.itemCount,
     subtotal: basket.subtotal.amount,
     createdAt: basket.createdAt.toISOString(),
-    updatedAt: basket.updatedAt.toISOString()
+    updatedAt: basket.updatedAt.toISOString(),
   };
 }
 
@@ -82,17 +82,14 @@ export class GetOrCreateBasketUseCase {
   constructor(private readonly basketRepository: BasketRepository) {}
 
   async execute(command: GetOrCreateBasketCommand): Promise<BasketResponse> {
-    let basket = await this.basketRepository.findActiveBasket(
-      command.customerId,
-      command.sessionId
-    );
+    let basket = await this.basketRepository.findActiveBasket(command.customerId, command.sessionId);
 
     if (!basket) {
       basket = Basket.create({
         basketId: generateUUID(),
         customerId: command.customerId,
         sessionId: command.sessionId,
-        currency: command.currency
+        currency: command.currency,
       });
 
       await this.basketRepository.save(basket);
@@ -100,7 +97,7 @@ export class GetOrCreateBasketUseCase {
       eventBus.emit('basket.created', {
         basketId: basket.basketId,
         customerId: command.customerId,
-        sessionId: command.sessionId
+        sessionId: command.sessionId,
       });
     }
 

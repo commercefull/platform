@@ -24,7 +24,7 @@ exports.up = function (knex) {
     t.timestamp('processedAt');
     t.timestamp('completedAt');
     t.text('failureReason');
-    
+
     t.uuid('createdBy');
     t.uuid('updatedBy');
     t.index('merchantId');

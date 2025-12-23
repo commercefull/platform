@@ -26,7 +26,7 @@ export class CreateProductVariantCommand {
     public readonly lowStockThreshold?: number,
     public readonly isDefault?: boolean,
     public readonly sortOrder?: number,
-    public readonly metadata?: Record<string, any>
+    public readonly metadata?: Record<string, any>,
   ) {}
 }
 
@@ -42,7 +42,7 @@ export class CreateProductVariantUseCase {
       attributeName: attr.attributeName,
       value: attr.value,
       displayValue: attr.displayValue || attr.value,
-      displayOrder: attr.displayOrder || index
+      displayOrder: attr.displayOrder || index,
     }));
 
     const variantName = `${command.productId} - ${attributes.map(a => a.displayValue).join(' - ')}`;
@@ -60,7 +60,7 @@ export class CreateProductVariantUseCase {
       lowStockThreshold: command.lowStockThreshold,
       isDefault: command.isDefault,
       position: command.sortOrder,
-      metadata: command.metadata
+      metadata: command.metadata,
     });
 
     return await this.variantRepository.save(variant);

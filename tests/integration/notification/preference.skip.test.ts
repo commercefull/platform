@@ -38,26 +38,20 @@ describe.skip('Notification Preference Tests', () => {
   });
 
   afterAll(async () => {
-    await cleanupNotificationTests(
-      client,
-      adminToken,
-      testNotificationId,
-      testTemplateId,
-      testPreferenceId
-    );
+    await cleanupNotificationTests(client, adminToken, testNotificationId, testTemplateId, testPreferenceId);
   });
 
   describe('Customer Preference Operations', () => {
     it('should get all preferences for customer', async () => {
       const response = await client.get('/api/account/notification-preferences', {
-        headers: { Authorization: `Bearer ${customerToken}` }
+        headers: { Authorization: `Bearer ${customerToken}` },
       });
-      
+
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       expect(Array.isArray(response.data.data)).toBe(true);
       expect(response.data.data.length).toBeGreaterThan(0);
-      
+
       // Verify camelCase in response data (TypeScript interface)
       const preferences = response.data.data as NotificationPreference[];
       expect(preferences[0]).toHaveProperty('userId');
@@ -65,7 +59,7 @@ describe.skip('Notification Preference Tests', () => {
       expect(preferences[0]).toHaveProperty('channelPreferences');
       expect(preferences[0]).toHaveProperty('isEnabled');
       expect(preferences[0]).toHaveProperty('updatedAt');
-      
+
       // Verify no snake_case properties are exposed in the API
       expect(preferences[0]).not.toHaveProperty('user_id');
       expect(preferences[0]).not.toHaveProperty('user_type');
@@ -76,13 +70,13 @@ describe.skip('Notification Preference Tests', () => {
 
     it('should get a preference by ID for customer', async () => {
       const response = await client.get(`/api/account/notification-preferences/${testPreferenceId}`, {
-        headers: { Authorization: `Bearer ${customerToken}` }
+        headers: { Authorization: `Bearer ${customerToken}` },
       });
-      
+
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       expect(response.data.data).toHaveProperty('id', testPreferenceId);
-      
+
       // Check preference properties match our test data
       const preference = response.data.data as NotificationPreference;
       expect(preference.type).toBe(testPreferenceData.type);
@@ -93,13 +87,13 @@ describe.skip('Notification Preference Tests', () => {
 
     it('should get preference by notification type for customer', async () => {
       const response = await client.get(`/api/account/notification-preferences/type/${testPreferenceData.type}`, {
-        headers: { Authorization: `Bearer ${customerToken}` }
+        headers: { Authorization: `Bearer ${customerToken}` },
       });
-      
+
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       expect(response.data.data).toHaveProperty('type', testPreferenceData.type);
-      
+
       // Should match our test preference
       const preference = response.data.data as NotificationPreference;
       expect(preference.id).toBe(testPreferenceId);
@@ -113,29 +107,29 @@ describe.skip('Notification Preference Tests', () => {
           email: true,
           sms: true,
           in_app: false,
-          push: false
+          push: false,
         },
-        isEnabled: true
+        isEnabled: true,
       };
-      
+
       const response = await client.post('/api/account/notification-preferences', newPreferenceData, {
-        headers: { Authorization: `Bearer ${customerToken}` }
+        headers: { Authorization: `Bearer ${customerToken}` },
       });
-      
+
       expect(response.status).toBe(201);
       expect(response.data.success).toBe(true);
       expect(response.data.data).toHaveProperty('id');
-      
+
       // Verify properties
       const createdPreference = response.data.data as NotificationPreference;
       expect(createdPreference.type).toBe(newPreferenceData.type);
       expect(createdPreference.isEnabled).toBe(newPreferenceData.isEnabled);
       expect(createdPreference.channelPreferences).toEqual(newPreferenceData.channelPreferences);
       expect(createdPreference.userId).toBe(testUserId);
-      
+
       // Clean up
       await client.delete(`/api/account/notification-preferences/${createdPreference.id}`, {
-        headers: { Authorization: `Bearer ${customerToken}` }
+        headers: { Authorization: `Bearer ${customerToken}` },
       });
     });
 
@@ -145,23 +139,23 @@ describe.skip('Notification Preference Tests', () => {
           email: false,
           sms: true,
           in_app: true,
-          push: false
+          push: false,
         },
-        isEnabled: false
+        isEnabled: false,
       };
-      
+
       const response = await client.put(`/api/account/notification-preferences/${testPreferenceId}`, updateData, {
-        headers: { Authorization: `Bearer ${customerToken}` }
+        headers: { Authorization: `Bearer ${customerToken}` },
       });
-      
+
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
-      
+
       // Verify updates
       const updatedPreference = response.data.data as NotificationPreference;
       expect(updatedPreference.channelPreferences).toEqual(updateData.channelPreferences);
       expect(updatedPreference.isEnabled).toBe(updateData.isEnabled);
-      
+
       // Original data should remain unchanged
       expect(updatedPreference.type).toBe(testPreferenceData.type);
       expect(updatedPreference.userId).toBe(testUserId);
@@ -173,17 +167,17 @@ describe.skip('Notification Preference Tests', () => {
           doNotDisturbStart: '23:00',
           doNotDisturbEnd: '07:00',
           timezone: 'Europe/London',
-          weekendOnly: true
-        }
+          weekendOnly: true,
+        },
       };
-      
+
       const response = await client.put(`/api/account/notification-preferences/${testPreferenceId}/schedule`, scheduleData, {
-        headers: { Authorization: `Bearer ${customerToken}` }
+        headers: { Authorization: `Bearer ${customerToken}` },
       });
-      
+
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
-      
+
       // Verify updates
       const updatedPreference = response.data.data as NotificationPreference;
       expect(updatedPreference.schedulePreferences).toEqual(scheduleData.schedulePreferences);
@@ -197,30 +191,30 @@ describe.skip('Notification Preference Tests', () => {
           email: true,
           sms: false,
           in_app: true,
-          push: false
+          push: false,
         },
-        isEnabled: true
+        isEnabled: true,
       };
-      
+
       const createResponse = await client.post('/api/account/notification-preferences', deletePreferenceData, {
-        headers: { Authorization: `Bearer ${customerToken}` }
+        headers: { Authorization: `Bearer ${customerToken}` },
       });
-      
+
       const deleteId = createResponse.data.data.id;
-      
+
       // Delete the preference
       const response = await client.delete(`/api/account/notification-preferences/${deleteId}`, {
-        headers: { Authorization: `Bearer ${customerToken}` }
+        headers: { Authorization: `Bearer ${customerToken}` },
       });
-      
+
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
-      
+
       // Verify deletion
       const getResponse = await client.get(`/api/account/notification-preferences/${deleteId}`, {
-        headers: { Authorization: `Bearer ${customerToken}` }
+        headers: { Authorization: `Bearer ${customerToken}` },
       });
-      
+
       expect(getResponse.status).toBe(404);
       expect(getResponse.data.success).toBe(false);
     });
@@ -229,9 +223,9 @@ describe.skip('Notification Preference Tests', () => {
   describe('Admin Preference Operations', () => {
     it('should get all preferences for all users (admin)', async () => {
       const response = await client.get('/business/notification-preferences', {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       expect(Array.isArray(response.data.data)).toBe(true);
@@ -240,17 +234,17 @@ describe.skip('Notification Preference Tests', () => {
 
     it('should get all preferences for a specific user (admin)', async () => {
       const response = await client.get(`/business/notification-preferences/user/${testUserId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       expect(Array.isArray(response.data.data)).toBe(true);
-      
+
       // All preferences should be for the specific user
       const preferences = response.data.data as NotificationPreference[];
       expect(preferences.every(p => p.userId === testUserId)).toBe(true);
-      
+
       // Should include our test preference
       const testPreference = preferences.find(p => p.id === testPreferenceId);
       expect(testPreference).toBeDefined();
@@ -262,22 +256,22 @@ describe.skip('Notification Preference Tests', () => {
           email: true,
           sms: false,
           in_app: true,
-          push: true
+          push: true,
         },
         isEnabled: true,
         metadata: {
           updatedByAdmin: true,
-          reason: 'Integration test'
-        }
+          reason: 'Integration test',
+        },
       };
-      
+
       const response = await client.put(`/business/notification-preferences/${testPreferenceId}`, updateData, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
-      
+
       // Verify updates
       const updatedPreference = response.data.data as NotificationPreference;
       expect(updatedPreference.channelPreferences).toEqual(updateData.channelPreferences);
@@ -297,8 +291,8 @@ describe.skip('Notification Preference Tests', () => {
               email: false,
               sms: false,
               in_app: false,
-              push: false
-            }
+              push: false,
+            },
           },
           // Add another preference to update or create
           {
@@ -308,34 +302,34 @@ describe.skip('Notification Preference Tests', () => {
               email: true,
               sms: false,
               in_app: true,
-              push: false
-            }
-          }
-        ]
+              push: false,
+            },
+          },
+        ],
       };
-      
+
       const response = await client.post('/api/account/notification-preferences/bulk', bulkUpdateData, {
-        headers: { Authorization: `Bearer ${customerToken}` }
+        headers: { Authorization: `Bearer ${customerToken}` },
       });
-      
+
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       expect(response.data.data).toHaveProperty('updated');
       expect(response.data.data).toHaveProperty('created');
       expect(response.data.data.updated + response.data.data.created).toBe(bulkUpdateData.updates.length);
-      
+
       // Verify the updates worked
       const getResponse = await client.get(`/api/account/notification-preferences/type/${testPreferenceData.type}`, {
-        headers: { Authorization: `Bearer ${customerToken}` }
+        headers: { Authorization: `Bearer ${customerToken}` },
       });
-      
+
       const updatedPreference = getResponse.data.data as NotificationPreference;
       expect(updatedPreference.isEnabled).toBe(false);
       expect(updatedPreference.channelPreferences).toEqual({
         email: false,
         sms: false,
         in_app: false,
-        push: false
+        push: false,
       });
     });
   });

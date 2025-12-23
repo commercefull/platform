@@ -3,13 +3,7 @@
  */
 
 import { Router } from 'express';
-import {
-  createBrand,
-  getBrand,
-  updateBrand,
-  deleteBrand,
-  listBrands,
-} from '../controllers/BrandController';
+import { createBrand, getBrand, updateBrand, deleteBrand, listBrands } from '../controllers/BrandController';
 
 const router = Router();
 

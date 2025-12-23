@@ -4,7 +4,6 @@ export class Review {
     public userId: string,
     public rating: number,
     public review: string,
-    public createdAt?: Date
+    public createdAt?: Date,
   ) {}
 }
-

@@ -1,8 +1,5 @@
 import { NotificationRepo, Notification, NotificationCreateParams } from '../repos/notificationRepo';
-import { 
-  NotificationBuilder, 
-  NotificationChannel 
-} from '../domain/notification';
+import { NotificationBuilder, NotificationChannel } from '../domain/notification';
 
 /**
  * Interface for notification delivery providers
@@ -24,7 +21,7 @@ class EmailDeliveryProvider implements NotificationDeliveryProvider {
   async send(notification: Notification): Promise<boolean> {
     try {
       // This would be replaced with actual email service integration
-      
+
       // Example: await emailClient.send({
       //  to: getUserEmail(notification.userId),
       //  subject: notification.title,
@@ -32,7 +29,6 @@ class EmailDeliveryProvider implements NotificationDeliveryProvider {
       // });
       return true;
     } catch (error) {
-      
       return false;
     }
   }
@@ -50,14 +46,13 @@ class SmsDeliveryProvider implements NotificationDeliveryProvider {
   async send(notification: Notification): Promise<boolean> {
     try {
       // This would be replaced with actual SMS service integration
-      
+
       // Example: await smsClient.send({
       //  to: getUserPhone(notification.userId),
       //  message: `${notification.title}: ${notification.content.substring(0, 160)}`
       // });
       return true;
     } catch (error) {
-      
       return false;
     }
   }
@@ -75,7 +70,7 @@ class PushDeliveryProvider implements NotificationDeliveryProvider {
   async send(notification: Notification): Promise<boolean> {
     try {
       // This would be replaced with actual push notification service integration
-      
+
       // Example: await pushClient.send({
       //  userId: notification.userId,
       //  title: notification.title,
@@ -84,7 +79,6 @@ class PushDeliveryProvider implements NotificationDeliveryProvider {
       // });
       return true;
     } catch (error) {
-      
       return false;
     }
   }
@@ -103,10 +97,9 @@ class InAppDeliveryProvider implements NotificationDeliveryProvider {
     try {
       // In-app notifications are already stored in the database
       // This method would just mark them as available for in-app display
-      
+
       return true;
     } catch (error) {
-      
       return false;
     }
   }
@@ -121,25 +114,23 @@ export class NotificationService {
 
   constructor() {
     this.notificationRepo = new NotificationRepo();
-    
+
     // Register delivery providers
     this.deliveryProviders = [
       new EmailDeliveryProvider(),
       new SmsDeliveryProvider(),
       new PushDeliveryProvider(),
-      new InAppDeliveryProvider()
+      new InAppDeliveryProvider(),
     ];
   }
 
   /**
    * Create and send a notification
    */
-  async sendNotification<T extends Record<string, unknown>>(
-    notificationBuilder: NotificationBuilder<T>
-  ): Promise<Notification> {
+  async sendNotification<T extends Record<string, unknown>>(notificationBuilder: NotificationBuilder<T>): Promise<Notification> {
     // Build the notification
     const notificationData = notificationBuilder.build();
-    
+
     // Save to database
     const savedNotification = await this.notificationRepo.create({
       userId: notificationData.userId,
@@ -150,40 +141,34 @@ export class NotificationService {
       channel: Array.isArray(notificationData.channel) ? notificationData.channel[0] : notificationData.channel,
       isRead: false,
       priority: notificationData.priority || 'normal',
-      metadata: notificationData.metadata
+      metadata: notificationData.metadata,
     });
-    
+
     // Send through appropriate channels
     const channels = Array.isArray(notificationData.channel) ? notificationData.channel : [notificationData.channel];
-    const deliveryPromises = channels.map((channel: NotificationChannel) => 
-      this.deliverToChannel(savedNotification, channel)
-    );
-    
+    const deliveryPromises = channels.map((channel: NotificationChannel) => this.deliverToChannel(savedNotification, channel));
+
     await Promise.all(deliveryPromises);
-    
+
     // Mark as sent
     await this.notificationRepo.markAsSent(savedNotification.notificationId);
-    
+
     return savedNotification;
   }
 
   /**
    * Send a batch of notifications (useful for marketing campaigns)
    */
-  async sendBatchNotifications<T extends Record<string, unknown>>(
-    notificationBuilders: NotificationBuilder<T>[]
-  ): Promise<Notification[]> {
+  async sendBatchNotifications<T extends Record<string, unknown>>(notificationBuilders: NotificationBuilder<T>[]): Promise<Notification[]> {
     const results: Notification[] = [];
-    
+
     for (const builder of notificationBuilders) {
       try {
         const notification = await this.sendNotification(builder);
         results.push(notification);
-      } catch (error) {
-        
-      }
+      } catch (error) {}
     }
-    
+
     return results;
   }
 
@@ -239,17 +224,13 @@ export class NotificationService {
   /**
    * Deliver a notification through a specific channel
    */
-  private async deliverToChannel(
-    notification: Notification, 
-    channel: NotificationChannel
-  ): Promise<boolean> {
+  private async deliverToChannel(notification: Notification, channel: NotificationChannel): Promise<boolean> {
     const provider = this.deliveryProviders.find(p => p.supportsChannel(channel));
-    
+
     if (!provider) {
-      
       return false;
     }
-    
+
     return await provider.send(notification);
   }
 }

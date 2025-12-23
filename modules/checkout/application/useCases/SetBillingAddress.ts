@@ -25,7 +25,7 @@ export class SetBillingAddressCommand {
     public readonly addressLine2?: string,
     public readonly region?: string,
     public readonly phone?: string,
-    public readonly sameAsShipping: boolean = false
+    public readonly sameAsShipping: boolean = false,
   ) {}
 }
 
@@ -52,7 +52,7 @@ export class SetBillingAddressUseCase {
       region: command.region,
       postalCode: command.postalCode,
       country: command.country,
-      phone: command.phone
+      phone: command.phone,
     });
 
     session.setBillingAddress(address, command.sameAsShipping);
@@ -61,7 +61,7 @@ export class SetBillingAddressUseCase {
     eventBus.emit('checkout.updated', {
       checkoutId: session.id,
       field: 'billingAddress',
-      country: command.country
+      country: command.country,
     });
 
     return mapCheckoutToResponse(session);

@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function (knex) {
   return knex.schema.createTable('paymentGateway', t => {
     t.uuid('paymentGatewayId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
@@ -20,14 +20,13 @@ exports.up = function(knex) {
     t.jsonb('checkoutSettings');
     t.jsonb('metadata');
     t.timestamp('deletedAt');
-    
+
     t.index('merchantId');
     t.index('provider');
     t.index('isActive');
-
   });
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTable('paymentGateway');
 };

@@ -5,13 +5,13 @@
 
 import { query, queryOne } from '../../../../libs/db';
 import { GdprDataRequest as GdprDataRequestDb, GdprCookieConsent as GdprCookieConsentDb } from '../../../../libs/db/types';
-import { 
-  GdprDataRequestRepository, 
+import {
+  GdprDataRequestRepository,
   GdprCookieConsentRepository,
   GdprService,
   GdprRequestFilters,
   PaginationOptions,
-  PaginatedResult
+  PaginatedResult,
 } from '../../domain/repositories/GdprRepository';
 import { GdprDataRequest, GdprRequestType, GdprRequestStatus } from '../../domain/entities/GdprDataRequest';
 import { GdprCookieConsent, CookiePreferences } from '../../domain/entities/GdprCookieConsent';
@@ -25,27 +25,19 @@ const GDPR_COOKIE_CONSENT_TABLE = 'gdprCookieConsent';
 // ============================================================================
 
 export class GdprDataRequestRepo implements GdprDataRequestRepository {
-  
   async findById(gdprDataRequestId: string): Promise<GdprDataRequest | null> {
-    const row = await queryOne<Record<string, any>>(
-      'SELECT * FROM "gdprDataRequest" WHERE "gdprDataRequestId" = $1',
-      [gdprDataRequestId]
-    );
+    const row = await queryOne<Record<string, any>>('SELECT * FROM "gdprDataRequest" WHERE "gdprDataRequestId" = $1', [gdprDataRequestId]);
     return row ? this.mapToEntity(row) : null;
   }
 
   async findByCustomerId(customerId: string): Promise<GdprDataRequest[]> {
-    const rows = await query<Record<string, any>[]>(
-      'SELECT * FROM "gdprDataRequest" WHERE "customerId" = $1 ORDER BY "createdAt" DESC',
-      [customerId]
-    );
+    const rows = await query<Record<string, any>[]>('SELECT * FROM "gdprDataRequest" WHERE "customerId" = $1 ORDER BY "createdAt" DESC', [
+      customerId,
+    ]);
     return (rows || []).map(row => this.mapToEntity(row));
   }
 
-  async findAll(
-    filters?: GdprRequestFilters, 
-    pagination?: PaginationOptions
-  ): Promise<PaginatedResult<GdprDataRequest>> {
+  async findAll(filters?: GdprRequestFilters, pagination?: PaginationOptions): Promise<PaginatedResult<GdprDataRequest>> {
     const conditions: string[] = [];
     const params: any[] = [];
     let paramIndex = 1;
@@ -84,17 +76,14 @@ export class GdprDataRequestRepo implements GdprDataRequestRepository {
     const orderBy = pagination?.orderBy || 'createdAt';
     const orderDir = pagination?.orderDirection || 'desc';
 
-    const countResult = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM "gdprDataRequest" ${whereClause}`,
-      params
-    );
+    const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "gdprDataRequest" ${whereClause}`, params);
     const total = parseInt(countResult?.count || '0', 10);
 
     const rows = await query<Record<string, any>[]>(
       `SELECT * FROM "gdprDataRequest" ${whereClause} 
        ORDER BY "${orderBy}" ${orderDir.toUpperCase()}
        LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
-      [...params, limit, offset]
+      [...params, limit, offset],
     );
 
     return {
@@ -102,16 +91,16 @@ export class GdprDataRequestRepo implements GdprDataRequestRepository {
       total,
       limit,
       offset,
-      hasMore: offset + limit < total
+      hasMore: offset + limit < total,
     };
   }
 
   async save(request: GdprDataRequest): Promise<GdprDataRequest> {
     const now = new Date().toISOString();
-    
+
     const existing = await queryOne<Record<string, any>>(
       'SELECT "gdprDataRequestId" FROM "gdprDataRequest" WHERE "gdprDataRequestId" = $1',
-      [request.gdprDataRequestId]
+      [request.gdprDataRequestId],
     );
 
     if (existing) {
@@ -125,13 +114,26 @@ export class GdprDataRequestRepo implements GdprDataRequestRepository {
           "updatedAt" = $18
         WHERE "gdprDataRequestId" = $19`,
         [
-          request.status, request.reason, JSON.stringify(request.requestedData),
-          request.downloadUrl, request.downloadExpiresAt?.toISOString(), request.downloadFormat,
-          request.processedAt?.toISOString(), request.processedBy, request.adminNotes, request.rejectionReason,
-          request.identityVerified, request.verificationMethod, request.verifiedAt?.toISOString(),
-          request.deadlineAt.toISOString(), request.extensionRequested, request.extensionReason, request.extendedDeadlineAt?.toISOString(),
-          now, request.gdprDataRequestId
-        ]
+          request.status,
+          request.reason,
+          JSON.stringify(request.requestedData),
+          request.downloadUrl,
+          request.downloadExpiresAt?.toISOString(),
+          request.downloadFormat,
+          request.processedAt?.toISOString(),
+          request.processedBy,
+          request.adminNotes,
+          request.rejectionReason,
+          request.identityVerified,
+          request.verificationMethod,
+          request.verifiedAt?.toISOString(),
+          request.deadlineAt.toISOString(),
+          request.extensionRequested,
+          request.extensionReason,
+          request.extendedDeadlineAt?.toISOString(),
+          now,
+          request.gdprDataRequestId,
+        ],
       );
     } else {
       await query(
@@ -141,11 +143,20 @@ export class GdprDataRequestRepo implements GdprDataRequestRepository {
           "ipAddress", "userAgent", "createdAt", "updatedAt"
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
         [
-          request.gdprDataRequestId, request.customerId, request.requestType, request.status,
-          request.reason, JSON.stringify(request.requestedData),
-          request.identityVerified, request.deadlineAt.toISOString(), request.extensionRequested,
-          request.ipAddress, request.userAgent, now, now
-        ]
+          request.gdprDataRequestId,
+          request.customerId,
+          request.requestType,
+          request.status,
+          request.reason,
+          JSON.stringify(request.requestedData),
+          request.identityVerified,
+          request.deadlineAt.toISOString(),
+          request.extensionRequested,
+          request.ipAddress,
+          request.userAgent,
+          now,
+          now,
+        ],
       );
     }
 
@@ -165,7 +176,7 @@ export class GdprDataRequestRepo implements GdprDataRequestRepository {
       `SELECT * FROM "gdprDataRequest" 
        WHERE ("deadlineAt" < NOW() OR ("extendedDeadlineAt" IS NOT NULL AND "extendedDeadlineAt" < NOW()))
        AND "status" IN ('pending', 'processing')
-       ORDER BY "deadlineAt" ASC`
+       ORDER BY "deadlineAt" ASC`,
     );
     return (rows || []).map(row => this.mapToEntity(row));
   }
@@ -176,16 +187,16 @@ export class GdprDataRequestRepo implements GdprDataRequestRepository {
 
   async countByStatus(): Promise<Record<GdprRequestStatus, number>> {
     const rows = await query<Array<{ status: GdprRequestStatus; count: string }>>(
-      `SELECT "status", COUNT(*) as count FROM "gdprDataRequest" GROUP BY "status"`
+      `SELECT "status", COUNT(*) as count FROM "gdprDataRequest" GROUP BY "status"`,
     );
-    
+
     const result: Record<GdprRequestStatus, number> = {
       pending: 0,
       processing: 0,
       completed: 0,
       rejected: 0,
       cancelled: 0,
-      failed: 0
+      failed: 0,
     };
 
     for (const row of rows || []) {
@@ -196,16 +207,16 @@ export class GdprDataRequestRepo implements GdprDataRequestRepository {
 
   async countByType(): Promise<Record<GdprRequestType, number>> {
     const rows = await query<Array<{ requestType: GdprRequestType; count: string }>>(
-      `SELECT "requestType", COUNT(*) as count FROM "gdprDataRequest" GROUP BY "requestType"`
+      `SELECT "requestType", COUNT(*) as count FROM "gdprDataRequest" GROUP BY "requestType"`,
     );
-    
+
     const result: Record<GdprRequestType, number> = {
       export: 0,
       deletion: 0,
       rectification: 0,
       restriction: 0,
       access: 0,
-      objection: 0
+      objection: 0,
     };
 
     for (const row of rows || []) {
@@ -218,7 +229,7 @@ export class GdprDataRequestRepo implements GdprDataRequestRepository {
     const result = await queryOne<{ avg: string }>(
       `SELECT AVG(EXTRACT(EPOCH FROM ("processedAt" - "createdAt")) / 86400) as avg 
        FROM "gdprDataRequest" 
-       WHERE "processedAt" IS NOT NULL`
+       WHERE "processedAt" IS NOT NULL`,
     );
     return parseFloat(result?.avg || '0');
   }
@@ -248,7 +259,7 @@ export class GdprDataRequestRepo implements GdprDataRequestRepository {
       ipAddress: row.ipAddress,
       userAgent: row.userAgent,
       createdAt: new Date(row.createdAt),
-      updatedAt: new Date(row.updatedAt)
+      updatedAt: new Date(row.updatedAt),
     });
   }
 }
@@ -258,19 +269,17 @@ export class GdprDataRequestRepo implements GdprDataRequestRepository {
 // ============================================================================
 
 export class GdprCookieConsentRepo implements GdprCookieConsentRepository {
-
   async findById(gdprCookieConsentId: string): Promise<GdprCookieConsent | null> {
-    const row = await queryOne<GdprCookieConsentDb>(
-      `SELECT * FROM "${GDPR_COOKIE_CONSENT_TABLE}" WHERE "gdprCookieConsentId" = $1`,
-      [gdprCookieConsentId]
-    );
+    const row = await queryOne<GdprCookieConsentDb>(`SELECT * FROM "${GDPR_COOKIE_CONSENT_TABLE}" WHERE "gdprCookieConsentId" = $1`, [
+      gdprCookieConsentId,
+    ]);
     return row ? this.mapToEntity(row) : null;
   }
 
   async findByCustomerId(customerId: string): Promise<GdprCookieConsent | null> {
     const row = await queryOne<GdprCookieConsentDb>(
       `SELECT * FROM "${GDPR_COOKIE_CONSENT_TABLE}" WHERE "customerId" = $1 ORDER BY "consentedAt" DESC LIMIT 1`,
-      [customerId]
+      [customerId],
     );
     return row ? this.mapToEntity(row) : null;
   }
@@ -278,7 +287,7 @@ export class GdprCookieConsentRepo implements GdprCookieConsentRepository {
   async findBySessionId(sessionId: string): Promise<GdprCookieConsent | null> {
     const row = await queryOne<GdprCookieConsentDb>(
       `SELECT * FROM "${GDPR_COOKIE_CONSENT_TABLE}" WHERE "sessionId" = $1 ORDER BY "consentedAt" DESC LIMIT 1`,
-      [sessionId]
+      [sessionId],
     );
     return row ? this.mapToEntity(row) : null;
   }
@@ -286,17 +295,17 @@ export class GdprCookieConsentRepo implements GdprCookieConsentRepository {
   async findByBrowserFingerprint(fingerprint: string): Promise<GdprCookieConsent | null> {
     const row = await queryOne<GdprCookieConsentDb>(
       `SELECT * FROM "${GDPR_COOKIE_CONSENT_TABLE}" WHERE "browserFingerprint" = $1 ORDER BY "consentedAt" DESC LIMIT 1`,
-      [fingerprint]
+      [fingerprint],
     );
     return row ? this.mapToEntity(row) : null;
   }
 
   async save(consent: GdprCookieConsent): Promise<GdprCookieConsent> {
     const now = new Date().toISOString();
-    
+
     const existing = await queryOne<{ gdprCookieConsentId: string }>(
       `SELECT "gdprCookieConsentId" FROM "${GDPR_COOKIE_CONSENT_TABLE}" WHERE "gdprCookieConsentId" = $1`,
-      [consent.gdprCookieConsentId]
+      [consent.gdprCookieConsentId],
     );
 
     if (existing) {
@@ -307,11 +316,18 @@ export class GdprCookieConsentRepo implements GdprCookieConsentRepository {
           "linkedAt" = $9, "updatedAt" = $10
         WHERE "gdprCookieConsentId" = $11`,
         [
-          consent.customerId, consent.necessary, consent.functional, consent.analytics,
-          consent.marketing, consent.thirdParty, consent.consentedAt.toISOString(),
-          consent.expiresAt?.toISOString(), consent.linkedAt?.toISOString(), now,
-          consent.gdprCookieConsentId
-        ]
+          consent.customerId,
+          consent.necessary,
+          consent.functional,
+          consent.analytics,
+          consent.marketing,
+          consent.thirdParty,
+          consent.consentedAt.toISOString(),
+          consent.expiresAt?.toISOString(),
+          consent.linkedAt?.toISOString(),
+          now,
+          consent.gdprCookieConsentId,
+        ],
       );
     } else {
       await query(
@@ -323,12 +339,26 @@ export class GdprCookieConsentRepo implements GdprCookieConsentRepository {
           "createdAt", "updatedAt"
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)`,
         [
-          consent.gdprCookieConsentId, consent.customerId, consent.sessionId, consent.browserFingerprint,
-          consent.necessary, consent.functional, consent.analytics, consent.marketing, consent.thirdParty,
-          consent.ipAddress, consent.userAgent, consent.country, consent.region,
-          consent.consentBannerVersion, consent.consentMethod, consent.consentedAt.toISOString(),
-          consent.expiresAt?.toISOString(), now, now
-        ]
+          consent.gdprCookieConsentId,
+          consent.customerId,
+          consent.sessionId,
+          consent.browserFingerprint,
+          consent.necessary,
+          consent.functional,
+          consent.analytics,
+          consent.marketing,
+          consent.thirdParty,
+          consent.ipAddress,
+          consent.userAgent,
+          consent.country,
+          consent.region,
+          consent.consentBannerVersion,
+          consent.consentMethod,
+          consent.consentedAt.toISOString(),
+          consent.expiresAt?.toISOString(),
+          now,
+          now,
+        ],
       );
     }
 
@@ -340,9 +370,7 @@ export class GdprCookieConsentRepo implements GdprCookieConsentRepository {
   }
 
   async findExpiredConsents(): Promise<GdprCookieConsent[]> {
-    const rows = await query<GdprCookieConsentDb[]>(
-      `SELECT * FROM "${GDPR_COOKIE_CONSENT_TABLE}" WHERE "expiresAt" < NOW()`
-    );
+    const rows = await query<GdprCookieConsentDb[]>(`SELECT * FROM "${GDPR_COOKIE_CONSENT_TABLE}" WHERE "expiresAt" < NOW()`);
     return (rows || []).map(row => this.mapToEntity(row));
   }
 
@@ -352,14 +380,14 @@ export class GdprCookieConsentRepo implements GdprCookieConsentRepository {
 
     const countResult = await queryOne<{ count: string }>(
       `SELECT COUNT(*) as count FROM "${GDPR_COOKIE_CONSENT_TABLE}" WHERE "country" = $1`,
-      [country]
+      [country],
     );
     const total = parseInt(countResult?.count || '0', 10);
 
     const rows = await query<GdprCookieConsentDb[]>(
       `SELECT * FROM "${GDPR_COOKIE_CONSENT_TABLE}" WHERE "country" = $1 
        ORDER BY "consentedAt" DESC LIMIT $2 OFFSET $3`,
-      [country, limit, offset]
+      [country, limit, offset],
     );
 
     return {
@@ -367,7 +395,7 @@ export class GdprCookieConsentRepo implements GdprCookieConsentRepository {
       total,
       limit,
       offset,
-      hasMore: offset + limit < total
+      hasMore: offset + limit < total,
     };
   }
 
@@ -399,7 +427,7 @@ export class GdprCookieConsentRepo implements GdprCookieConsentRepository {
       marketing: parseInt(result?.marketing || '0', 10),
       thirdParty: parseInt(result?.thirdParty || '0', 10),
       acceptAll: parseInt(result?.acceptAll || '0', 10),
-      rejectAll: parseInt(result?.rejectAll || '0', 10)
+      rejectAll: parseInt(result?.rejectAll || '0', 10),
     };
   }
 
@@ -418,9 +446,7 @@ export class GdprCookieConsentRepo implements GdprCookieConsentRepository {
     return (rows || []).map(row => ({
       country: row.country,
       total: parseInt(row.total, 10),
-      acceptRate: parseInt(row.total, 10) > 0 
-        ? parseInt(row.acceptAll, 10) / parseInt(row.total, 10) 
-        : 0
+      acceptRate: parseInt(row.total, 10) > 0 ? parseInt(row.acceptAll, 10) / parseInt(row.total, 10) : 0,
     }));
   }
 
@@ -445,7 +471,7 @@ export class GdprCookieConsentRepo implements GdprCookieConsentRepository {
       expiresAt: row.expiresAt ? new Date(row.expiresAt) : undefined,
       linkedAt: row.linkedAt ? new Date(row.linkedAt) : undefined,
       createdAt: new Date(row.createdAt),
-      updatedAt: new Date(row.updatedAt)
+      updatedAt: new Date(row.updatedAt),
     });
   }
 }

@@ -1,46 +1,42 @@
-import productSearchService, { 
-  ProductSearchFilters, 
-  ProductSearchResult,
-  AttributeFilter 
-} from '../../services/ProductSearchService';
+import productSearchService, { ProductSearchFilters, ProductSearchResult, AttributeFilter } from '../../services/ProductSearchService';
 
 export interface SearchProductsQuery {
   // Text search
   query?: string;
-  
+
   // Basic filters
   categoryId?: string;
   categoryIds?: string[];
   brandId?: string;
   brandIds?: string[];
   productTypeId?: string;
-  
+
   // Price filters
   minPrice?: number;
   maxPrice?: number;
-  
+
   // Status filters
   status?: string;
   visibility?: string;
-  
+
   // Boolean filters
   isFeatured?: boolean;
   isNew?: boolean;
   isBestseller?: boolean;
   hasVariants?: boolean;
   inStock?: boolean;
-  
+
   // Dynamic attribute filters
   attributes?: AttributeFilter[];
-  
+
   // Sorting
   sortBy?: 'name' | 'price' | 'createdAt' | 'popularity' | 'rating' | 'relevance';
   sortOrder?: 'asc' | 'desc';
-  
+
   // Pagination
   page?: number;
   limit?: number;
-  
+
   // Include facets
   includeFacets?: boolean;
 }
@@ -74,19 +70,19 @@ export class SearchProductsUseCase {
         sortBy: query.sortBy,
         sortOrder: query.sortOrder,
         page: query.page || 1,
-        limit: query.limit || 20
+        limit: query.limit || 20,
       };
 
       const result = await productSearchService.search(filters);
 
       return {
         success: true,
-        data: result
+        data: result,
       };
     } catch (error) {
       return {
         success: false,
-        error: `Search failed: ${(error as Error).message}`
+        error: `Search failed: ${(error as Error).message}`,
       };
     }
   }
@@ -111,23 +107,20 @@ export class GetSearchSuggestionsUseCase {
       if (!query.query || query.query.length < 2) {
         return {
           success: true,
-          data: []
+          data: [],
         };
       }
 
-      const suggestions = await productSearchService.getSuggestions(
-        query.query, 
-        query.limit || 10
-      );
+      const suggestions = await productSearchService.getSuggestions(query.query, query.limit || 10);
 
       return {
         success: true,
-        data: suggestions
+        data: suggestions,
       };
     } catch (error) {
       return {
         success: false,
-        error: `Failed to get suggestions: ${(error as Error).message}`
+        error: `Failed to get suggestions: ${(error as Error).message}`,
       };
     }
   }
@@ -149,19 +142,16 @@ export interface FindSimilarProductsResponse {
 export class FindSimilarProductsUseCase {
   async execute(query: FindSimilarProductsQuery): Promise<FindSimilarProductsResponse> {
     try {
-      const products = await productSearchService.findSimilar(
-        query.productId,
-        query.limit || 10
-      );
+      const products = await productSearchService.findSimilar(query.productId, query.limit || 10);
 
       return {
         success: true,
-        data: products
+        data: products,
       };
     } catch (error) {
       return {
         success: false,
-        error: `Failed to find similar products: ${(error as Error).message}`
+        error: `Failed to find similar products: ${(error as Error).message}`,
       };
     }
   }
@@ -183,19 +173,16 @@ export interface FindByAttributeResponse {
 export class FindByAttributeUseCase {
   async execute(query: FindByAttributeQuery): Promise<FindByAttributeResponse> {
     try {
-      const products = await productSearchService.findByAttribute(
-        query.attributeCode,
-        query.value
-      );
+      const products = await productSearchService.findByAttribute(query.attributeCode, query.value);
 
       return {
         success: true,
-        data: products
+        data: products,
       };
     } catch (error) {
       return {
         success: false,
-        error: `Failed to find products by attribute: ${(error as Error).message}`
+        error: `Failed to find products by attribute: ${(error as Error).message}`,
       };
     }
   }

@@ -4,7 +4,6 @@ import taxQueryRepo from '../repos/taxQueryRepo';
 import { AddressInput } from '../taxTypes';
 import basketRepo from '../../basket/infrastructure/repositories/BasketRepository';
 
-
 // Define interfaces needed for the controller - keeping application layer in camelCase
 interface TaxableItem {
   productId: string;
@@ -21,22 +20,14 @@ interface BasketItem {
   [key: string]: any;
 }
 
-
 export const calculateTaxForLineItem = async (req: Request, res: Response) => {
   try {
-    const {
-      productId,
-      quantity,
-      price,
-      shippingAddress,
-      customerId,
-      merchantId
-    } = req.body;
+    const { productId, quantity, price, shippingAddress, customerId, merchantId } = req.body;
 
     // Validate required fields
     if (!productId || !quantity || !price || !shippingAddress || !shippingAddress.country) {
       res.status(400).json({
-        error: 'Product ID, quantity, price, and shipping country are required'
+        error: 'Product ID, quantity, price, and shipping country are required',
       });
     }
 
@@ -61,28 +52,30 @@ export const calculateTaxForLineItem = async (req: Request, res: Response) => {
         {
           country: shippingAddress.country,
           region: shippingAddress.region,
-          postalCode: shippingAddress.postalCode
+          postalCode: shippingAddress.postalCode,
         },
-        customerId
+        customerId,
       );
 
       res.json(taxResult);
     }
 
     // Otherwise use the new complex tax calculation
-    const items: TaxableItem[] = [{
-      productId,
-      quantity: parsedQuantity,
-      price: parsedPrice,
-      taxCategoryId: undefined // Will be determined by the tax repo
-    }];
+    const items: TaxableItem[] = [
+      {
+        productId,
+        quantity: parsedQuantity,
+        price: parsedPrice,
+        taxCategoryId: undefined, // Will be determined by the tax repo
+      },
+    ];
 
     // Transform the input address to the expected format (camelCase for application layer)
     const address: AddressInput = {
       country: shippingAddress.country,
       region: shippingAddress.region,
       postalCode: shippingAddress.postalCode,
-      city: shippingAddress.city
+      city: shippingAddress.city,
     };
 
     // DB uses camelCase - pass items and address directly
@@ -90,13 +83,13 @@ export const calculateTaxForLineItem = async (req: Request, res: Response) => {
       product_id: item.productId,
       quantity: item.quantity,
       price: item.price,
-      tax_category_id: item.taxCategoryId
+      tax_category_id: item.taxCategoryId,
     }));
     const dbAddress = {
       country: address.country,
       region: address.region,
       postal_code: address.postalCode,
-      city: address.city
+      city: address.city,
     };
 
     const taxResult = await taxQueryRepo.calculateComplexTax(
@@ -106,16 +99,16 @@ export const calculateTaxForLineItem = async (req: Request, res: Response) => {
       parsedPrice * parsedQuantity, // Subtotal
       0, // No shipping amount for single line item
       customerId,
-      merchantId
+      merchantId,
     );
 
     res.json(taxResult);
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ error: 'Internal Server Error' });
   }
-}
+};
 
 /**
  * Calculate tax for an entire basket
@@ -128,7 +121,7 @@ export const calculateTaxForBasket = async (req: Request, res: Response) => {
     // Validate required fields
     if (!basketId || !shippingAddress || !shippingAddress.country) {
       res.status(400).json({
-        error: 'Basket ID and shipping country are required'
+        error: 'Basket ID and shipping country are required',
       });
     }
 
@@ -139,9 +132,9 @@ export const calculateTaxForBasket = async (req: Request, res: Response) => {
         {
           country: shippingAddress.country,
           region: shippingAddress.region,
-          postal_code: shippingAddress.postalCode
+          postal_code: shippingAddress.postalCode,
         },
-        customerId
+        customerId,
       );
 
       res.json(taxResult);
@@ -162,10 +155,10 @@ export const calculateTaxForBasket = async (req: Request, res: Response) => {
       // Format the items for tax calculation (in application camelCase format)
       // TODO: Basket interface doesn't have items property - needs basketItemRepo
       const items: TaxableItem[] = []; // basket.items.map((item: BasketItem) => ({
-        // productId: item.productId,
-        // quantity: item.quantity,
-        // price: item.price,
-        // taxCategoryId: item.taxCategoryId
+      // productId: item.productId,
+      // quantity: item.quantity,
+      // price: item.price,
+      // taxCategoryId: item.taxCategoryId
       // }));
 
       // Transform addresses to the expected format (camelCase for application layer)
@@ -173,34 +166,36 @@ export const calculateTaxForBasket = async (req: Request, res: Response) => {
         country: shippingAddress.country,
         region: shippingAddress.region,
         postalCode: shippingAddress.postalCode,
-        city: shippingAddress.city
+        city: shippingAddress.city,
       };
 
-      const billingAddrInput: AddressInput = billingAddress ? {
-        country: billingAddress.country,
-        region: billingAddress.region,
-        postalCode: billingAddress.postalCode,
-        city: billingAddress.city
-      } : shippingAddrInput;
+      const billingAddrInput: AddressInput = billingAddress
+        ? {
+            country: billingAddress.country,
+            region: billingAddress.region,
+            postalCode: billingAddress.postalCode,
+            city: billingAddress.city,
+          }
+        : shippingAddrInput;
 
       // Convert to format expected by calculateComplexTax
       const dbItems = items.map(item => ({
         product_id: item.productId,
         quantity: item.quantity,
         price: item.price,
-        tax_category_id: item.taxCategoryId
+        tax_category_id: item.taxCategoryId,
       }));
       const dbShippingAddr = {
         country: shippingAddrInput.country,
         region: shippingAddrInput.region,
         postal_code: shippingAddrInput.postalCode,
-        city: shippingAddrInput.city
+        city: shippingAddrInput.city,
       };
       const dbBillingAddr = {
         country: billingAddrInput.country,
         region: billingAddrInput.region,
         postal_code: billingAddrInput.postalCode,
-        city: billingAddrInput.city
+        city: billingAddrInput.city,
       };
 
       // Calculate tax using the enhanced method
@@ -211,21 +206,21 @@ export const calculateTaxForBasket = async (req: Request, res: Response) => {
         basket.subtotal.amount,
         0,
         customerId,
-        merchantId
+        merchantId,
       );
 
       res.json(taxResult);
     } catch (error) {
       logger.error('Error:', error);
-      
+
       res.status(500).json({ error: 'Internal Server Error' });
     }
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ error: 'Internal Server Error' });
   }
-}
+};
 
 /**
  * Get a tax category by its code
@@ -248,10 +243,10 @@ export const getTaxCategoryByCode = async (req: Request, res: Response) => {
     res.json(taxCategory);
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ error: 'Internal Server Error' });
   }
-}
+};
 
 /**
  * Get active tax rates
@@ -261,19 +256,15 @@ export const getTaxRates = async (req: Request, res: Response) => {
     const { country, region } = req.query;
 
     // Call repository - returns data with id field already added
-    const taxRates = await taxQueryRepo.findAllTaxRates(
-      true,
-      country as string,
-      region as string
-    );
+    const taxRates = await taxQueryRepo.findAllTaxRates(true, country as string, region as string);
 
     res.json(taxRates);
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ error: 'Internal Server Error' });
   }
-}
+};
 
 /**
  * Check if a customer has tax exemptions
@@ -292,14 +283,14 @@ export const checkCustomerTaxExemption = async (req: Request, res: Response) => 
     // Format response in camelCase as per platform convention
     res.json({
       hasExemption: exemptions.length > 0,
-      exemptions
+      exemptions,
     });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ error: 'Internal Server Error' });
   }
-}
+};
 
 /**
  * Find the tax zone for a given address
@@ -317,7 +308,7 @@ export const findTaxZoneForAddress = async (req: Request, res: Response) => {
       country,
       region,
       postalCode,
-      city
+      city,
     };
 
     //  just the country-based tax zone for now
@@ -337,18 +328,17 @@ export const findTaxZoneForAddress = async (req: Request, res: Response) => {
         name: `${country} Tax Zone`,
         description: `Default tax zone for ${country}`,
         countries: [country],
-        isDefault: true
+        isDefault: true,
       });
     } catch (err) {
-      
       res.status(404).json({ error: 'No matching tax zone found' });
     }
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ error: 'Internal Server Error' });
   }
-}
+};
 
 /**
  * Get customer tax settings (for display on storefront)
@@ -368,12 +358,12 @@ export const getCustomerTaxSettings = async (req: Request, res: Response) => {
       displayPricesWithTax: false,
       priceDisplaySettings: {
         includesTax: false,
-        showTaxSeparately: true
-      }
+        showTaxSeparately: true,
+      },
     });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ error: 'Internal Server Error' });
   }
-}
+};

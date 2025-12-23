@@ -1,21 +1,12 @@
 /**
  * AdjustStock Use Case
- * 
+ *
  * Adjusts inventory quantities for corrections, counts, damage, etc.
  */
 
 import { eventBus } from '../../../../libs/events/eventBus';
 
-export type AdjustmentReason = 
-  | 'correction'
-  | 'count'
-  | 'damage'
-  | 'return'
-  | 'shrinkage'
-  | 'expired'
-  | 'received'
-  | 'manual'
-  | 'other';
+export type AdjustmentReason = 'correction' | 'count' | 'damage' | 'return' | 'shrinkage' | 'expired' | 'received' | 'manual' | 'other';
 
 export interface AdjustStockInput {
   productId: string;
@@ -43,16 +34,12 @@ export interface AdjustStockOutput {
 
 export class AdjustStockUseCase {
   constructor(
-    private readonly inventoryRepository: any // InventoryRepository
+    private readonly inventoryRepository: any, // InventoryRepository
   ) {}
 
   async execute(input: AdjustStockInput): Promise<AdjustStockOutput> {
     // Get current inventory
-    let inventory = await this.inventoryRepository.findByProduct(
-      input.productId,
-      input.variantId,
-      input.locationId
-    );
+    let inventory = await this.inventoryRepository.findByProduct(input.productId, input.variantId, input.locationId);
 
     const previousQuantity = inventory?.quantity || 0;
     let newQuantity: number;
@@ -83,10 +70,7 @@ export class AdjustStockUseCase {
 
     // Update or create inventory record
     if (inventory) {
-      await this.inventoryRepository.updateQuantity(
-        inventory.inventoryItemId,
-        newQuantity
-      );
+      await this.inventoryRepository.updateQuantity(inventory.inventoryItemId, newQuantity);
     } else {
       // Create new inventory item
       inventory = await this.inventoryRepository.create({

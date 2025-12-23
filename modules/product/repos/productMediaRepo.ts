@@ -24,19 +24,16 @@ export interface ProductMedia {
 }
 
 export type ProductMediaCreateParams = Omit<ProductMedia, 'productMediaId' | 'createdAt' | 'updatedAt'>;
-export type ProductMediaUpdateParams = Partial<Pick<ProductMedia, 
-  'url' | 'filename' | 'altText' | 'title' | 'sortOrder' | 'isPrimary' | 'width' | 'height' | 'duration'
->>;
+export type ProductMediaUpdateParams = Partial<
+  Pick<ProductMedia, 'url' | 'filename' | 'altText' | 'title' | 'sortOrder' | 'isPrimary' | 'width' | 'height' | 'duration'>
+>;
 
 export class ProductMediaRepo {
   /**
    * Find media by ID
    */
   async findById(productMediaId: string): Promise<ProductMedia | null> {
-    return await queryOne<ProductMedia>(
-      `SELECT * FROM "public"."productMedia" WHERE "productMediaId" = $1`,
-      [productMediaId]
-    );
+    return await queryOne<ProductMedia>(`SELECT * FROM "public"."productMedia" WHERE "productMediaId" = $1`, [productMediaId]);
   }
 
   /**
@@ -45,14 +42,14 @@ export class ProductMediaRepo {
   async findByProductId(productId: string, type?: MediaType): Promise<ProductMedia[]> {
     let sql = `SELECT * FROM "public"."productMedia" WHERE "productId" = $1`;
     const params: any[] = [productId];
-    
+
     if (type) {
       sql += ` AND "type" = $2`;
       params.push(type);
     }
-    
+
     sql += ` ORDER BY "sortOrder" ASC, "createdAt" ASC`;
-    
+
     const results = await query<ProductMedia[]>(sql, params);
     return results || [];
   }
@@ -63,14 +60,14 @@ export class ProductMediaRepo {
   async findByVariantId(productVariantId: string, type?: MediaType): Promise<ProductMedia[]> {
     let sql = `SELECT * FROM "public"."productMedia" WHERE "productVariantId" = $1`;
     const params: any[] = [productVariantId];
-    
+
     if (type) {
       sql += ` AND "type" = $2`;
       params.push(type);
     }
-    
+
     sql += ` ORDER BY "sortOrder" ASC, "createdAt" ASC`;
-    
+
     const results = await query<ProductMedia[]>(sql, params);
     return results || [];
   }
@@ -82,7 +79,7 @@ export class ProductMediaRepo {
     return await queryOne<ProductMedia>(
       `SELECT * FROM "public"."productMedia" 
        WHERE "productId" = $1 AND "isPrimary" = true AND "productVariantId" IS NULL`,
-      [productId]
+      [productId],
     );
   }
 
@@ -93,7 +90,7 @@ export class ProductMediaRepo {
     return await queryOne<ProductMedia>(
       `SELECT * FROM "public"."productMedia" 
        WHERE "productVariantId" = $1 AND "isPrimary" = true`,
-      [productVariantId]
+      [productVariantId],
     );
   }
 
@@ -106,7 +103,7 @@ export class ProductMediaRepo {
        WHERE "type" = $1 
        ORDER BY "createdAt" DESC 
        LIMIT $2 OFFSET $3`,
-      [type, limit, offset]
+      [type, limit, offset],
     );
     return results || [];
   }
@@ -150,8 +147,8 @@ export class ProductMediaRepo {
         params.height || null,
         params.duration || null,
         now,
-        now
-      ]
+        now,
+      ],
     );
 
     if (!result) {
@@ -201,7 +198,7 @@ export class ProductMediaRepo {
        SET ${updateFields.join(', ')}
        WHERE "productMediaId" = $${paramIndex}
        RETURNING *`,
-      values
+      values,
     );
 
     return result;
@@ -222,12 +219,12 @@ export class ProductMediaRepo {
                SET "isPrimary" = false, "updatedAt" = $1
                WHERE "productId" = $2 AND "productVariantId" IS NULL AND "isPrimary" = true`;
     const params: any[] = [unixTimestamp(), productId];
-    
+
     if (exceptId) {
       sql += ` AND "productMediaId" != $3`;
       params.push(exceptId);
     }
-    
+
     await query(sql, params);
   }
 
@@ -239,12 +236,12 @@ export class ProductMediaRepo {
                SET "isPrimary" = false, "updatedAt" = $1
                WHERE "productVariantId" = $2 AND "isPrimary" = true`;
     const params: any[] = [unixTimestamp(), productVariantId];
-    
+
     if (exceptId) {
       sql += ` AND "productMediaId" != $3`;
       params.push(exceptId);
     }
-    
+
     await query(sql, params);
   }
 
@@ -260,16 +257,16 @@ export class ProductMediaRepo {
    */
   async bulkReorder(updates: Array<{ productMediaId: string; sortOrder: number }>): Promise<boolean> {
     const now = unixTimestamp();
-    
+
     for (const update of updates) {
       await query(
         `UPDATE "public"."productMedia" 
          SET "sortOrder" = $1, "updatedAt" = $2 
          WHERE "productMediaId" = $3`,
-        [update.sortOrder, now, update.productMediaId]
+        [update.sortOrder, now, update.productMediaId],
       );
     }
-    
+
     return true;
   }
 
@@ -279,7 +276,7 @@ export class ProductMediaRepo {
   async delete(productMediaId: string): Promise<boolean> {
     const result = await queryOne<{ productMediaId: string }>(
       `DELETE FROM "public"."productMedia" WHERE "productMediaId" = $1 RETURNING "productMediaId"`,
-      [productMediaId]
+      [productMediaId],
     );
 
     return !!result;
@@ -291,7 +288,7 @@ export class ProductMediaRepo {
   async deleteByProductId(productId: string): Promise<number> {
     const result = await queryOne<{ count: string }>(
       `DELETE FROM "public"."productMedia" WHERE "productId" = $1 RETURNING COUNT(*) as count`,
-      [productId]
+      [productId],
     );
 
     return result ? parseInt(result.count, 10) : 0;
@@ -303,7 +300,7 @@ export class ProductMediaRepo {
   async deleteByVariantId(productVariantId: string): Promise<number> {
     const result = await queryOne<{ count: string }>(
       `DELETE FROM "public"."productMedia" WHERE "productVariantId" = $1 RETURNING COUNT(*) as count`,
-      [productVariantId]
+      [productVariantId],
     );
 
     return result ? parseInt(result.count, 10) : 0;
@@ -313,10 +310,9 @@ export class ProductMediaRepo {
    * Count media by product
    */
   async countByProductId(productId: string): Promise<number> {
-    const result = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM "public"."productMedia" WHERE "productId" = $1`,
-      [productId]
-    );
+    const result = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "public"."productMedia" WHERE "productId" = $1`, [
+      productId,
+    ]);
 
     return result ? parseInt(result.count, 10) : 0;
   }
@@ -325,10 +321,7 @@ export class ProductMediaRepo {
    * Count media by type
    */
   async countByType(type: MediaType): Promise<number> {
-    const result = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM "public"."productMedia" WHERE "type" = $1`,
-      [type]
-    );
+    const result = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "public"."productMedia" WHERE "type" = $1`, [type]);
 
     return result ? parseInt(result.count, 10) : 0;
   }
@@ -339,7 +332,7 @@ export class ProductMediaRepo {
   async getStatistics(): Promise<Record<MediaType, number>> {
     const results = await query<{ type: MediaType; count: string }[]>(
       `SELECT "type", COUNT(*) as count FROM "public"."productMedia" GROUP BY "type"`,
-      []
+      [],
     );
 
     const stats: Record<string, number> = {
@@ -347,7 +340,7 @@ export class ProductMediaRepo {
       video: 0,
       document: 0,
       '3d_model': 0,
-      audio: 0
+      audio: 0,
     };
 
     if (results) {
@@ -363,10 +356,7 @@ export class ProductMediaRepo {
    * Get total storage size
    */
   async getTotalStorageSize(): Promise<number> {
-    const result = await queryOne<{ total: string }>(
-      `SELECT COALESCE(SUM("filesize"), 0) as total FROM "public"."productMedia"`,
-      []
-    );
+    const result = await queryOne<{ total: string }>(`SELECT COALESCE(SUM("filesize"), 0) as total FROM "public"."productMedia"`, []);
 
     return result ? parseInt(result.total, 10) : 0;
   }

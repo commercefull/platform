@@ -14,7 +14,7 @@ export class AddBlockToPageCommand {
     public readonly content: Record<string, any>,
     public readonly order?: number,
     public readonly status?: 'active' | 'inactive',
-    public readonly createdBy?: string
+    public readonly createdBy?: string,
   ) {}
 }
 
@@ -62,7 +62,7 @@ export class AddBlockToPageUseCase {
       name: command.name,
       order,
       content: command.content,
-      status: command.status || 'active'
+      status: command.status || 'active',
     });
 
     eventBus.emit('content.block.created', {
@@ -70,7 +70,7 @@ export class AddBlockToPageUseCase {
       pageId: block.pageId,
       name: block.name,
       contentTypeId: block.contentTypeId,
-      order: block.order
+      order: block.order,
     });
 
     return {
@@ -81,7 +81,7 @@ export class AddBlockToPageUseCase {
       order: block.order,
       content: block.content,
       status: block.status,
-      createdAt: block.createdAt
+      createdAt: block.createdAt,
     };
   }
 }

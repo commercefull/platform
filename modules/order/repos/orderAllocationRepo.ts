@@ -1,6 +1,6 @@
 /**
  * Order Allocation Repository
- * 
+ *
  * Manages order line allocations to fulfillment locations.
  */
 
@@ -45,24 +45,18 @@ export async function create(params: CreateAllocationParams): Promise<OrderAlloc
 }
 
 export async function findById(allocationId: string): Promise<OrderAllocation | null> {
-  return queryOne<OrderAllocation>(
-    'SELECT * FROM "orderAllocation" WHERE "allocationId" = $1',
-    [allocationId]
-  );
+  return queryOne<OrderAllocation>('SELECT * FROM "orderAllocation" WHERE "allocationId" = $1', [allocationId]);
 }
 
 export async function findByOrderLine(orderLineId: string): Promise<OrderAllocation[]> {
   const result = await query<{ rows: OrderAllocation[] }>(
     'SELECT * FROM "orderAllocation" WHERE "orderLineId" = $1 ORDER BY "createdAt" ASC',
-    [orderLineId]
+    [orderLineId],
   );
   return result?.rows ?? [];
 }
 
-export async function findByLocation(
-  locationId: string,
-  status?: string
-): Promise<OrderAllocation[]> {
+export async function findByLocation(locationId: string, status?: string): Promise<OrderAllocation[]> {
   let sql = 'SELECT * FROM "orderAllocation" WHERE "locationId" = $1';
   const params: unknown[] = [locationId];
 
@@ -77,10 +71,7 @@ export async function findByLocation(
   return result?.rows ?? [];
 }
 
-export async function findBySeller(
-  sellerId: string,
-  status?: string
-): Promise<OrderAllocation[]> {
+export async function findBySeller(sellerId: string, status?: string): Promise<OrderAllocation[]> {
   let sql = 'SELECT * FROM "orderAllocation" WHERE "sellerId" = $1';
   const params: unknown[] = [sellerId];
 
@@ -95,13 +86,10 @@ export async function findBySeller(
   return result?.rows ?? [];
 }
 
-export async function updateStatus(
-  allocationId: string,
-  status: 'allocated' | 'picked' | 'packed' | 'shipped'
-): Promise<boolean> {
+export async function updateStatus(allocationId: string, status: 'allocated' | 'picked' | 'packed' | 'shipped'): Promise<boolean> {
   const result = await query<{ rowCount: number }>(
     'UPDATE "orderAllocation" SET "status" = $1, "updatedAt" = $2 WHERE "allocationId" = $3',
-    [status, new Date(), allocationId]
+    [status, new Date(), allocationId],
   );
   return (result?.rowCount ?? 0) > 0;
 }

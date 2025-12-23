@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function (knex) {
   return knex.schema.createTable('paymentWebhook', t => {
     t.uuid('paymentWebhookId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
@@ -15,7 +15,6 @@ exports.up = function(knex) {
     t.text('error');
     t.string('relatedEntityType', 50);
     t.uuid('relatedEntityId');
-    
 
     t.index('merchantId');
     t.index('gatewayId');
@@ -28,6 +27,6 @@ exports.up = function(knex) {
   });
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTable('paymentWebhook');
 };

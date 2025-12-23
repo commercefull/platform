@@ -14,11 +14,7 @@ module.exports = {
   // Detect open handles for debugging (can be disabled in CI)
   detectOpenHandles: false,
   collectCoverage: true,
-  collectCoverageFrom: [
-    'features/**/*.ts',
-    '!**/node_modules/**',
-    '!**/dist/**',
-  ],
+  collectCoverageFrom: ['features/**/*.ts', '!**/node_modules/**', '!**/dist/**'],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov'],
   globals: {

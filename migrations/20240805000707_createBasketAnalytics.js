@@ -21,7 +21,7 @@ exports.up = function (knex) {
     t.integer('itemsBrowsed').defaultTo(0);
     t.decimal('addToCartRate', 5, 2);
     t.enum('conversionOutcome', ['purchased', 'abandoned', 'savedForLater', 'expired']);
-    
+
     t.index('basketId');
     t.index('customerId');
     t.index('sessionId');

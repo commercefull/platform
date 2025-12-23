@@ -19,7 +19,7 @@ exports.up = function (knex) {
     t.string('serialNumber', 100);
     t.timestamp('expiryDate');
     t.enum('status', ['pending', 'counted', 'verified', 'adjusted', 'skipped']).notNullable().defaultTo('pending');
-    t.text('notes');    
+    t.text('notes');
     t.timestamp('countedAt');
     t.uuid('countedBy');
     t.timestamp('verifiedAt');

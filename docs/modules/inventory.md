@@ -9,6 +9,7 @@ The Inventory feature manages product stock levels, reservations, and availabili
 ## Use Cases
 
 ### UC-INV-001: Check Product Availability (Customer)
+
 **Actor:** Customer/Guest  
 **Priority:** High
 
@@ -19,11 +20,13 @@ The Inventory feature manages product stock levels, reservations, and availabili
 **Then** the system returns stock availability information
 
 #### API Endpoint
+
 ```
 GET /inventory/availability/:sku
 ```
 
 #### Business Rules
+
 - Returns available quantity
 - Returns stock status (in_stock, low_stock, out_of_stock)
 - May include location-based availability
@@ -32,6 +35,7 @@ GET /inventory/availability/:sku
 ---
 
 ### UC-INV-002: Get Inventory Levels (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** High
 
@@ -42,12 +46,14 @@ GET /inventory/availability/:sku
 **Then** the system returns stock levels for all products/locations
 
 #### API Endpoint
+
 ```
 GET /business/inventory/levels
 Query: productId, locationId, status, limit, offset
 ```
 
 #### Business Rules
+
 - Returns detailed inventory levels
 - Supports filtering by product, location, status
 - Includes reserved and available quantities
@@ -55,6 +61,7 @@ Query: productId, locationId, status, limit, offset
 ---
 
 ### UC-INV-003: Update Inventory Level (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** High
 
@@ -67,12 +74,14 @@ Query: productId, locationId, status, limit, offset
 **And** creates an inventory transaction
 
 #### API Endpoint
+
 ```
 PUT /business/inventory/levels/:id
 Body: { quantity, reason, notes? }
 ```
 
 #### Business Rules
+
 - Requires reason for audit trail
 - Creates inventory transaction record
 - Triggers low stock alert if threshold reached
@@ -81,6 +90,7 @@ Body: { quantity, reason, notes? }
 ---
 
 ### UC-INV-004: Create Stock Reservation (Business)
+
 **Actor:** System/Checkout  
 **Priority:** High
 
@@ -93,12 +103,14 @@ Body: { quantity, reason, notes? }
 **And** emits inventory.reserved event
 
 #### API Endpoint
+
 ```
 POST /business/inventory/reservations
 Body: { orderId, items: [{ productId, variantId, quantity, locationId? }] }
 ```
 
 #### Business Rules
+
 - Reservation expires after checkout timeout
 - Reserved quantity is deducted from available
 - Multiple items can be reserved atomically
@@ -107,6 +119,7 @@ Body: { orderId, items: [{ productId, variantId, quantity, locationId? }] }
 ---
 
 ### UC-INV-005: Release Stock Reservation (Business)
+
 **Actor:** System/Checkout  
 **Priority:** High
 
@@ -118,11 +131,13 @@ Body: { orderId, items: [{ productId, variantId, quantity, locationId? }] }
 **And** emits inventory.released event
 
 #### API Endpoint
+
 ```
 DELETE /business/inventory/reservations/:id
 ```
 
 #### Business Rules
+
 - Returns reserved quantity to available
 - Used on checkout abandonment or order cancellation
 - Idempotent - can be called multiple times safely
@@ -130,6 +145,7 @@ DELETE /business/inventory/reservations/:id
 ---
 
 ### UC-INV-006: Confirm Reservation (Business)
+
 **Actor:** System/Order  
 **Priority:** High
 
@@ -141,12 +157,14 @@ DELETE /business/inventory/reservations/:id
 **Then** inventory is permanently deducted
 
 #### API Endpoint
+
 ```
 POST /business/inventory/reservations/:id/confirm
 Body: { orderId }
 ```
 
 #### Business Rules
+
 - Converts reservation to permanent deduction
 - Creates inventory transaction record
 - Reservation is marked as fulfilled
@@ -154,6 +172,7 @@ Body: { orderId }
 ---
 
 ### UC-INV-007: Get Inventory Transactions (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
@@ -164,12 +183,14 @@ Body: { orderId }
 **Then** the system returns the transaction history
 
 #### API Endpoint
+
 ```
 GET /business/inventory/transactions
 Query: productId, locationId, type, dateFrom, dateTo, limit, offset
 ```
 
 #### Business Rules
+
 - Transaction types: adjustment, sale, return, transfer, reservation, release
 - Full audit trail of all inventory changes
 - Supports date range filtering
@@ -177,6 +198,7 @@ Query: productId, locationId, type, dateFrom, dateTo, limit, offset
 ---
 
 ### UC-INV-008: Create Inventory Adjustment (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** High
 
@@ -189,12 +211,14 @@ Query: productId, locationId, type, dateFrom, dateTo, limit, offset
 **And** transaction is recorded
 
 #### API Endpoint
+
 ```
 POST /business/inventory/adjustments
 Body: { productId, variantId, locationId, quantity, reason, notes }
 ```
 
 #### Business Rules
+
 - Positive or negative adjustments
 - Reason is required (damaged, lost, found, correction, etc.)
 - Creates audit trail
@@ -202,6 +226,7 @@ Body: { productId, variantId, locationId, quantity, reason, notes }
 ---
 
 ### UC-INV-009: Transfer Inventory (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
@@ -213,17 +238,19 @@ Body: { productId, variantId, locationId, quantity, reason, notes }
 **Then** stock moves from source to destination
 
 #### API Endpoint
+
 ```
 POST /business/inventory/transfers
-Body: { 
-  fromLocationId, 
-  toLocationId, 
+Body: {
+  fromLocationId,
+  toLocationId,
   items: [{ productId, variantId, quantity }],
   notes?
 }
 ```
 
 #### Business Rules
+
 - Source location must have sufficient stock
 - Creates transfer record
 - Updates both location inventories atomically
@@ -231,6 +258,7 @@ Body: {
 ---
 
 ### UC-INV-010: Get Low Stock Products (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
@@ -241,12 +269,14 @@ Body: {
 **Then** the system returns products below threshold
 
 #### API Endpoint
+
 ```
 GET /business/inventory/low-stock
 Query: threshold, locationId, limit
 ```
 
 #### Business Rules
+
 - Uses product-specific or default threshold
 - Useful for reorder planning
 - Can filter by location
@@ -254,6 +284,7 @@ Query: threshold, locationId, limit
 ---
 
 ### UC-INV-011: Get Out of Stock Products (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
@@ -264,18 +295,21 @@ Query: threshold, locationId, limit
 **Then** the system returns products with zero available
 
 #### API Endpoint
+
 ```
 GET /business/inventory/out-of-stock
 Query: locationId, limit
 ```
 
 #### Business Rules
+
 - Includes products with reservations depleting stock
 - Critical for inventory management
 
 ---
 
 ### UC-INV-012: Set Low Stock Threshold (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Low
 
@@ -287,6 +321,7 @@ Query: locationId, limit
 **Then** alerts trigger at that level
 
 #### API Endpoint
+
 ```
 PUT /business/inventory/products/:productId/threshold
 Body: { threshold: number }
@@ -296,28 +331,28 @@ Body: { threshold: number }
 
 ## Events Emitted
 
-| Event | Trigger | Payload |
-|-------|---------|---------|
-| `inventory.low` | Stock below threshold | productId, locationId, quantity |
-| `inventory.out_of_stock` | Stock reaches zero | productId, locationId |
-| `inventory.reserved` | Stock reserved | reservationId, productId, quantity |
-| `inventory.released` | Reservation released | reservationId, quantity |
+| Event                    | Trigger               | Payload                            |
+| ------------------------ | --------------------- | ---------------------------------- |
+| `inventory.low`          | Stock below threshold | productId, locationId, quantity    |
+| `inventory.out_of_stock` | Stock reaches zero    | productId, locationId              |
+| `inventory.reserved`     | Stock reserved        | reservationId, productId, quantity |
+| `inventory.released`     | Reservation released  | reservationId, quantity            |
 
 ---
 
 ## Integration Test Coverage
 
-| Use Case | Test File | Status |
-|----------|-----------|--------|
-| UC-INV-001 | `inventory/inventory.test.ts` | ✅ |
-| UC-INV-002 | `inventory/inventory.test.ts` | 🟡 |
-| UC-INV-003 | `inventory/inventory.test.ts` | ❌ |
-| UC-INV-004 | `inventory/inventory.test.ts` | ❌ |
-| UC-INV-005 | `inventory/inventory.test.ts` | ❌ |
-| UC-INV-006 | `inventory/inventory.test.ts` | ❌ |
-| UC-INV-007 | `inventory/inventory.test.ts` | ❌ |
-| UC-INV-008 | `inventory/inventory.test.ts` | ❌ |
-| UC-INV-009 | `inventory/inventory.test.ts` | ❌ |
-| UC-INV-010 | `inventory/inventory.test.ts` | ❌ |
-| UC-INV-011 | `inventory/inventory.test.ts` | ❌ |
-| UC-INV-012 | `inventory/inventory.test.ts` | ❌ |
+| Use Case   | Test File                     | Status |
+| ---------- | ----------------------------- | ------ |
+| UC-INV-001 | `inventory/inventory.test.ts` | ✅     |
+| UC-INV-002 | `inventory/inventory.test.ts` | 🟡     |
+| UC-INV-003 | `inventory/inventory.test.ts` | ❌     |
+| UC-INV-004 | `inventory/inventory.test.ts` | ❌     |
+| UC-INV-005 | `inventory/inventory.test.ts` | ❌     |
+| UC-INV-006 | `inventory/inventory.test.ts` | ❌     |
+| UC-INV-007 | `inventory/inventory.test.ts` | ❌     |
+| UC-INV-008 | `inventory/inventory.test.ts` | ❌     |
+| UC-INV-009 | `inventory/inventory.test.ts` | ❌     |
+| UC-INV-010 | `inventory/inventory.test.ts` | ❌     |
+| UC-INV-011 | `inventory/inventory.test.ts` | ❌     |
+| UC-INV-012 | `inventory/inventory.test.ts` | ❌     |

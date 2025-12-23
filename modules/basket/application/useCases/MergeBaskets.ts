@@ -15,7 +15,7 @@ import { BasketNotFoundError } from '../../domain/errors/BasketErrors';
 export class MergeBasketsCommand {
   constructor(
     public readonly sourceBasketId: string,
-    public readonly targetBasketId: string
+    public readonly targetBasketId: string,
   ) {}
 }
 
@@ -39,15 +39,12 @@ export class MergeBasketsUseCase {
 
     const itemsMerged = sourceBasket.items.length;
 
-    const mergedBasket = await this.basketRepository.mergeBaskets(
-      command.sourceBasketId,
-      command.targetBasketId
-    );
+    const mergedBasket = await this.basketRepository.mergeBaskets(command.sourceBasketId, command.targetBasketId);
 
     eventBus.emit('basket.merged', {
       sourceBasketId: command.sourceBasketId,
       targetBasketId: command.targetBasketId,
-      itemsMerged
+      itemsMerged,
     });
 
     return this.mapToResponse(mergedBasket);
@@ -70,12 +67,12 @@ export class MergeBasketsUseCase {
         unitPrice: item.unitPrice.amount,
         lineTotal: item.lineTotal.amount,
         imageUrl: item.imageUrl,
-        isGift: item.isGift
+        isGift: item.isGift,
       })),
       itemCount: basket.itemCount,
       subtotal: basket.subtotal.amount,
       createdAt: basket.createdAt.toISOString(),
-      updatedAt: basket.updatedAt.toISOString()
+      updatedAt: basket.updatedAt.toISOString(),
     };
   }
 }

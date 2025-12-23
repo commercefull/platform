@@ -15,7 +15,7 @@ exports.up = function (knex) {
     t.timestamp('startDate');
     t.timestamp('endDate');
     t.text('notes');
-    
+
     t.index('distributionWarehouseId');
     t.index('referenceNumber');
     t.index('countType');

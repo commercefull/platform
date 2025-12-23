@@ -11,6 +11,7 @@ The Promotion feature manages discounts, coupons, gift cards, and promotional ca
 ### Promotions (Business)
 
 ### UC-PRO-001: List Promotions (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** High
 
@@ -21,6 +22,7 @@ The Promotion feature manages discounts, coupons, gift cards, and promotional ca
 **Then** the system returns all promotional campaigns
 
 #### API Endpoint
+
 ```
 GET /business/promotions
 Query: status?, type?, limit, offset
@@ -29,6 +31,7 @@ Query: status?, type?, limit, offset
 ---
 
 ### UC-PRO-002: Create Promotion (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** High
 
@@ -40,6 +43,7 @@ Query: status?, type?, limit, offset
 **Then** the promotion is created
 
 #### API Endpoint
+
 ```
 POST /business/promotions
 Body: {
@@ -55,6 +59,7 @@ Body: {
 ```
 
 #### Business Rules
+
 - Various promotion types supported
 - Can apply conditions (min order, specific products, etc.)
 - Can have usage limits
@@ -63,10 +68,12 @@ Body: {
 ---
 
 ### UC-PRO-003: Get Promotion (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
 #### API Endpoint
+
 ```
 GET /business/promotions/:promotionId
 ```
@@ -74,10 +81,12 @@ GET /business/promotions/:promotionId
 ---
 
 ### UC-PRO-004: Update Promotion (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
 #### API Endpoint
+
 ```
 PUT /business/promotions/:promotionId
 ```
@@ -85,10 +94,12 @@ PUT /business/promotions/:promotionId
 ---
 
 ### UC-PRO-005: Delete Promotion (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Low
 
 #### API Endpoint
+
 ```
 DELETE /business/promotions/:promotionId
 ```
@@ -96,6 +107,7 @@ DELETE /business/promotions/:promotionId
 ---
 
 ### UC-PRO-006: Activate Promotion (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
@@ -107,6 +119,7 @@ DELETE /business/promotions/:promotionId
 **Then** the promotion becomes active
 
 #### API Endpoint
+
 ```
 POST /business/promotions/:promotionId/activate
 ```
@@ -114,10 +127,12 @@ POST /business/promotions/:promotionId/activate
 ---
 
 ### UC-PRO-007: Pause Promotion (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
 #### API Endpoint
+
 ```
 POST /business/promotions/:promotionId/pause
 ```
@@ -127,6 +142,7 @@ POST /business/promotions/:promotionId/pause
 ### Gift Cards (Business)
 
 ### UC-PRO-008: List Gift Cards (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
@@ -137,6 +153,7 @@ POST /business/promotions/:promotionId/pause
 **Then** the system returns all gift cards
 
 #### API Endpoint
+
 ```
 GET /business/promotions/gift-cards
 Query: status?, limit, offset
@@ -145,10 +162,12 @@ Query: status?, limit, offset
 ---
 
 ### UC-PRO-009: Get Gift Card (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
 #### API Endpoint
+
 ```
 GET /business/promotions/gift-cards/:id
 ```
@@ -156,6 +175,7 @@ GET /business/promotions/gift-cards/:id
 ---
 
 ### UC-PRO-010: Create Gift Card (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
@@ -167,6 +187,7 @@ GET /business/promotions/gift-cards/:id
 **Then** the gift card is generated
 
 #### API Endpoint
+
 ```
 POST /business/promotions/gift-cards
 Body: {
@@ -180,6 +201,7 @@ Body: {
 ```
 
 #### Business Rules
+
 - Unique code is generated
 - Can be physical or digital
 - Optional expiration date
@@ -188,6 +210,7 @@ Body: {
 ---
 
 ### UC-PRO-011: Activate Gift Card (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
@@ -198,6 +221,7 @@ Body: {
 **Then** it can be used for purchases
 
 #### API Endpoint
+
 ```
 POST /business/promotions/gift-cards/:id/activate
 ```
@@ -205,6 +229,7 @@ POST /business/promotions/gift-cards/:id/activate
 ---
 
 ### UC-PRO-012: Refund to Gift Card (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Low
 
@@ -215,6 +240,7 @@ POST /business/promotions/gift-cards/:id/activate
 **Then** the gift card balance is increased
 
 #### API Endpoint
+
 ```
 POST /business/promotions/gift-cards/:id/refund
 Body: { amount, reason }
@@ -223,10 +249,12 @@ Body: { amount, reason }
 ---
 
 ### UC-PRO-013: Cancel Gift Card (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Low
 
 #### API Endpoint
+
 ```
 POST /business/promotions/gift-cards/:id/cancel
 Body: { reason }
@@ -237,6 +265,7 @@ Body: { reason }
 ### Coupons (Customer)
 
 ### UC-PRO-014: Apply Coupon (Customer)
+
 **Actor:** Customer  
 **Priority:** High
 
@@ -248,12 +277,14 @@ Body: { reason }
 **Then** the discount is applied to the cart
 
 #### API Endpoint
+
 ```
 POST /checkout/coupon
 Body: { code }
 ```
 
 #### Business Rules
+
 - Validates coupon exists and is active
 - Checks conditions (min order, eligible products)
 - Checks usage limits
@@ -262,10 +293,12 @@ Body: { code }
 ---
 
 ### UC-PRO-015: Remove Coupon (Customer)
+
 **Actor:** Customer  
 **Priority:** Medium
 
 #### API Endpoint
+
 ```
 DELETE /checkout/coupon
 ```
@@ -275,6 +308,7 @@ DELETE /checkout/coupon
 ### Gift Card Usage (Customer)
 
 ### UC-PRO-016: Check Gift Card Balance (Customer)
+
 **Actor:** Customer/Guest  
 **Priority:** Medium
 
@@ -285,6 +319,7 @@ DELETE /checkout/coupon
 **Then** the current balance is returned
 
 #### API Endpoint
+
 ```
 GET /gift-cards/:code/balance
 ```
@@ -292,6 +327,7 @@ GET /gift-cards/:code/balance
 ---
 
 ### UC-PRO-017: Apply Gift Card (Customer)
+
 **Actor:** Customer  
 **Priority:** Medium
 
@@ -303,12 +339,14 @@ GET /gift-cards/:code/balance
 **Then** the balance is applied to the order
 
 #### API Endpoint
+
 ```
 POST /checkout/gift-card
 Body: { code }
 ```
 
 #### Business Rules
+
 - Partial redemption supported
 - Remaining balance available for future orders
 - Can combine with other payment methods
@@ -317,26 +355,26 @@ Body: { code }
 
 ## Events Emitted
 
-| Event | Trigger | Payload |
-|-------|---------|---------|
-| `promotion.created` | Promotion created | promotionId, type |
-| `promotion.activated` | Promotion activated | promotionId |
-| `promotion.paused` | Promotion paused | promotionId |
-| `promotion.used` | Promotion applied to order | promotionId, orderId, discount |
-| `coupon.created` | Coupon created | couponId, code |
-| `coupon.redeemed` | Coupon used | couponId, orderId |
-| `giftcard.created` | Gift card created | giftCardId |
-| `giftcard.activated` | Gift card activated | giftCardId |
-| `giftcard.redeemed` | Gift card used | giftCardId, amount, orderId |
-| `giftcard.refunded` | Refund to gift card | giftCardId, amount |
+| Event                 | Trigger                    | Payload                        |
+| --------------------- | -------------------------- | ------------------------------ |
+| `promotion.created`   | Promotion created          | promotionId, type              |
+| `promotion.activated` | Promotion activated        | promotionId                    |
+| `promotion.paused`    | Promotion paused           | promotionId                    |
+| `promotion.used`      | Promotion applied to order | promotionId, orderId, discount |
+| `coupon.created`      | Coupon created             | couponId, code                 |
+| `coupon.redeemed`     | Coupon used                | couponId, orderId              |
+| `giftcard.created`    | Gift card created          | giftCardId                     |
+| `giftcard.activated`  | Gift card activated        | giftCardId                     |
+| `giftcard.redeemed`   | Gift card used             | giftCardId, amount, orderId    |
+| `giftcard.refunded`   | Refund to gift card        | giftCardId, amount             |
 
 ---
 
 ## Integration Test Coverage
 
-| Use Case | Test File | Status |
-|----------|-----------|--------|
-| UC-PRO-001 to UC-PRO-007 | `promotion/promotion.test.ts` | 🟡 |
-| UC-PRO-008 to UC-PRO-013 | `promotion/giftcard.test.ts` | ❌ |
-| UC-PRO-014 to UC-PRO-015 | `promotion/coupon.test.ts` | 🟡 |
-| UC-PRO-016 to UC-PRO-017 | `promotion/giftcard-customer.test.ts` | ❌ |
+| Use Case                 | Test File                             | Status |
+| ------------------------ | ------------------------------------- | ------ |
+| UC-PRO-001 to UC-PRO-007 | `promotion/promotion.test.ts`         | 🟡     |
+| UC-PRO-008 to UC-PRO-013 | `promotion/giftcard.test.ts`          | ❌     |
+| UC-PRO-014 to UC-PRO-015 | `promotion/coupon.test.ts`            | 🟡     |
+| UC-PRO-016 to UC-PRO-017 | `promotion/giftcard-customer.test.ts` | ❌     |

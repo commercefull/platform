@@ -1,6 +1,6 @@
 /**
  * Social Account Entity
- * 
+ *
  * Represents a linked OAuth/social login provider account.
  */
 
@@ -8,14 +8,7 @@
 // Types
 // ============================================================================
 
-export type SocialProvider = 
-  | 'google' 
-  | 'facebook' 
-  | 'apple' 
-  | 'github' 
-  | 'twitter' 
-  | 'linkedin' 
-  | 'microsoft';
+export type SocialProvider = 'google' | 'facebook' | 'apple' | 'github' | 'twitter' | 'linkedin' | 'microsoft';
 
 export type UserType = 'customer' | 'merchant';
 
@@ -75,12 +68,7 @@ export class SocialAccount {
     return new SocialAccount(props);
   }
 
-  static createNew(
-    userId: string,
-    userType: UserType,
-    provider: SocialProvider,
-    profile: SocialProfileData
-  ): SocialAccount {
+  static createNew(userId: string, userType: UserType, provider: SocialProvider, profile: SocialProfileData): SocialAccount {
     const now = new Date();
     return new SocialAccount({
       socialAccountId: '', // Will be set by repository
@@ -103,33 +91,77 @@ export class SocialAccount {
       providerData: profile.rawData,
       lastUsedAt: now,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     });
   }
 
   // Getters
-  get socialAccountId(): string { return this.props.socialAccountId; }
-  get userId(): string { return this.props.userId; }
-  get userType(): UserType { return this.props.userType; }
-  get provider(): SocialProvider { return this.props.provider; }
-  get providerUserId(): string { return this.props.providerUserId; }
-  get providerEmail(): string | undefined { return this.props.providerEmail; }
-  get displayName(): string | undefined { return this.props.displayName; }
-  get firstName(): string | undefined { return this.props.firstName; }
-  get lastName(): string | undefined { return this.props.lastName; }
-  get avatarUrl(): string | undefined { return this.props.avatarUrl; }
-  get profileUrl(): string | undefined { return this.props.profileUrl; }
-  get accessToken(): string | undefined { return this.props.accessToken; }
-  get refreshToken(): string | undefined { return this.props.refreshToken; }
-  get tokenExpiresAt(): Date | undefined { return this.props.tokenExpiresAt; }
-  get scopes(): string[] | undefined { return this.props.scopes; }
-  get isActive(): boolean { return this.props.isActive; }
-  get isPrimary(): boolean { return this.props.isPrimary; }
-  get providerData(): Record<string, any> | undefined { return this.props.providerData; }
-  get lastUsedAt(): Date | undefined { return this.props.lastUsedAt; }
-  get lastLoginIp(): string | undefined { return this.props.lastLoginIp; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get socialAccountId(): string {
+    return this.props.socialAccountId;
+  }
+  get userId(): string {
+    return this.props.userId;
+  }
+  get userType(): UserType {
+    return this.props.userType;
+  }
+  get provider(): SocialProvider {
+    return this.props.provider;
+  }
+  get providerUserId(): string {
+    return this.props.providerUserId;
+  }
+  get providerEmail(): string | undefined {
+    return this.props.providerEmail;
+  }
+  get displayName(): string | undefined {
+    return this.props.displayName;
+  }
+  get firstName(): string | undefined {
+    return this.props.firstName;
+  }
+  get lastName(): string | undefined {
+    return this.props.lastName;
+  }
+  get avatarUrl(): string | undefined {
+    return this.props.avatarUrl;
+  }
+  get profileUrl(): string | undefined {
+    return this.props.profileUrl;
+  }
+  get accessToken(): string | undefined {
+    return this.props.accessToken;
+  }
+  get refreshToken(): string | undefined {
+    return this.props.refreshToken;
+  }
+  get tokenExpiresAt(): Date | undefined {
+    return this.props.tokenExpiresAt;
+  }
+  get scopes(): string[] | undefined {
+    return this.props.scopes;
+  }
+  get isActive(): boolean {
+    return this.props.isActive;
+  }
+  get isPrimary(): boolean {
+    return this.props.isPrimary;
+  }
+  get providerData(): Record<string, any> | undefined {
+    return this.props.providerData;
+  }
+  get lastUsedAt(): Date | undefined {
+    return this.props.lastUsedAt;
+  }
+  get lastLoginIp(): string | undefined {
+    return this.props.lastLoginIp;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   // Domain methods
   updateTokens(accessToken: string, refreshToken?: string, expiresAt?: Date): void {

@@ -1,6 +1,6 @@
 /**
  * Social Login Use Cases
- * 
+ *
  * Handles OAuth/social login authentication flows.
  */
 
@@ -71,8 +71,8 @@ export class SocialLoginUseCase {
     private readonly findOrCreateUser: (
       email: string,
       profile: SocialProfileData,
-      userType: UserType
-    ) => Promise<{ userId: string; isNew: boolean }>
+      userType: UserType,
+    ) => Promise<{ userId: string; isNew: boolean }>,
   ) {}
 
   /**
@@ -82,10 +82,7 @@ export class SocialLoginUseCase {
     const { provider, profile, userType, ip } = command;
 
     // Check if this social account is already linked
-    let socialAccount = await this.socialAccountRepo.findByProviderUserId(
-      provider,
-      profile.providerUserId
-    );
+    let socialAccount = await this.socialAccountRepo.findByProviderUserId(provider, profile.providerUserId);
 
     let userId: string;
     let isNewUser = false;
@@ -93,14 +90,14 @@ export class SocialLoginUseCase {
     if (socialAccount) {
       // Existing social account - update tokens and record login
       userId = socialAccount.userId;
-      
+
       await this.socialAccountRepo.updateTokens(
         socialAccount.socialAccountId,
         profile.accessToken,
         profile.refreshToken,
-        profile.tokenExpiresAt
+        profile.tokenExpiresAt,
       );
-      
+
       await this.socialAccountRepo.recordLogin(socialAccount.socialAccountId, ip);
     } else {
       // New social login - find or create user
@@ -130,7 +127,7 @@ export class SocialLoginUseCase {
         tokenExpiresAt: profile.tokenExpiresAt,
         scopes: profile.scopes,
         providerData: profile.rawData,
-        lastLoginIp: ip
+        lastLoginIp: ip,
       });
 
       // Emit event
@@ -141,7 +138,7 @@ export class SocialLoginUseCase {
         isSocialLogin: true,
         isNewUser,
         ipAddress: ip,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
     }
 
@@ -156,8 +153,8 @@ export class SocialLoginUseCase {
         displayName: profile.displayName,
         firstName: profile.firstName,
         lastName: profile.lastName,
-        avatarUrl: profile.avatarUrl
-      }
+        avatarUrl: profile.avatarUrl,
+      },
     };
   }
 }
@@ -172,21 +169,14 @@ export class LinkSocialAccountUseCase {
     const { userId, userType, provider, profile } = command;
 
     // Check if this provider is already linked to another user
-    const existing = await this.socialAccountRepo.findByProviderUserId(
-      provider,
-      profile.providerUserId
-    );
+    const existing = await this.socialAccountRepo.findByProviderUserId(provider, profile.providerUserId);
 
     if (existing && existing.userId !== userId) {
       throw new Error(`This ${provider} account is already linked to another user`);
     }
 
     // Check if user already has this provider linked
-    const userExisting = await this.socialAccountRepo.findByUserAndProvider(
-      userId,
-      userType,
-      provider
-    );
+    const userExisting = await this.socialAccountRepo.findByUserAndProvider(userId, userType, provider);
 
     if (userExisting) {
       // Update existing link
@@ -194,7 +184,7 @@ export class LinkSocialAccountUseCase {
         userExisting.socialAccountId,
         profile.accessToken,
         profile.refreshToken,
-        profile.tokenExpiresAt
+        profile.tokenExpiresAt,
       );
 
       return {
@@ -204,7 +194,7 @@ export class LinkSocialAccountUseCase {
         displayName: profile.displayName,
         avatarUrl: profile.avatarUrl,
         isPrimary: userExisting.isPrimary,
-        lastUsedAt: new Date()
+        lastUsedAt: new Date(),
       };
     }
 
@@ -224,7 +214,7 @@ export class LinkSocialAccountUseCase {
       refreshToken: profile.refreshToken,
       tokenExpiresAt: profile.tokenExpiresAt,
       scopes: profile.scopes,
-      providerData: profile.rawData
+      providerData: profile.rawData,
     });
 
     return {
@@ -234,7 +224,7 @@ export class LinkSocialAccountUseCase {
       displayName: profile.displayName,
       avatarUrl: profile.avatarUrl,
       isPrimary: false,
-      lastUsedAt: new Date()
+      lastUsedAt: new Date(),
     };
   }
 }
@@ -249,11 +239,7 @@ export class UnlinkSocialAccountUseCase {
     const { userId, userType, provider } = command;
 
     // Find the social account
-    const socialAccount = await this.socialAccountRepo.findByUserAndProvider(
-      userId,
-      userType,
-      provider
-    );
+    const socialAccount = await this.socialAccountRepo.findByUserAndProvider(userId, userType, provider);
 
     if (!socialAccount) {
       throw new Error(`No ${provider} account linked to this user`);
@@ -261,7 +247,7 @@ export class UnlinkSocialAccountUseCase {
 
     // Check if this is the only login method
     const linkedCount = await this.socialAccountRepo.getLinkedProviderCount(userId, userType);
-    
+
     // Note: In a real implementation, you'd also check if the user has a password set
     // For now, we'll allow unlinking as long as there's at least one other social account
     if (linkedCount <= 1) {
@@ -291,7 +277,7 @@ export class GetLinkedAccountsUseCase {
         displayName: account.displayName,
         avatarUrl: account.avatarUrl,
         isPrimary: account.isPrimary,
-        lastUsedAt: account.lastUsedAt
+        lastUsedAt: account.lastUsedAt,
       }));
   }
 }

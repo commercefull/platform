@@ -12,7 +12,7 @@ exports.up = function (knex) {
     t.decimal('amount', 15, 2).notNullable();
     t.text('description');
     t.enum('type', ['order', 'adjustment', 'fee', 'refund']).notNullable().defaultTo('order');
-    
+
     t.index('merchantPayoutId');
     t.index('orderId');
     t.index('merchantOrderId');

@@ -1,7 +1,7 @@
-import dynamicAttributeRepository, { 
-  ProductAttributeCreateInput, 
+import dynamicAttributeRepository, {
+  ProductAttributeCreateInput,
   ProductAttribute,
-  AttributeValueCreateInput 
+  AttributeValueCreateInput,
 } from '../../../infrastructure/repositories/DynamicAttributeRepository';
 
 export interface CreateAttributeCommand {
@@ -9,7 +9,22 @@ export interface CreateAttributeCommand {
   code: string;
   description?: string;
   groupId?: string;
-  type?: 'text' | 'number' | 'select' | 'multiselect' | 'checkbox' | 'radio' | 'date' | 'datetime' | 'time' | 'file' | 'image' | 'video' | 'document' | 'color' | 'boolean';
+  type?:
+    | 'text'
+    | 'number'
+    | 'select'
+    | 'multiselect'
+    | 'checkbox'
+    | 'radio'
+    | 'date'
+    | 'datetime'
+    | 'time'
+    | 'file'
+    | 'image'
+    | 'video'
+    | 'document'
+    | 'color'
+    | 'boolean';
   inputType?: string;
   isRequired?: boolean;
   isUnique?: boolean;
@@ -41,7 +56,7 @@ export class CreateAttributeUseCase {
       if (!command.name || !command.code) {
         return {
           success: false,
-          error: 'Name and code are required'
+          error: 'Name and code are required',
         };
       }
 
@@ -50,7 +65,7 @@ export class CreateAttributeUseCase {
       if (existing) {
         return {
           success: false,
-          error: `Attribute with code "${command.code}" already exists`
+          error: `Attribute with code "${command.code}" already exists`,
         };
       }
 
@@ -61,7 +76,7 @@ export class CreateAttributeUseCase {
         description: command.description,
         groupId: command.groupId,
         type: (command.type || 'text') as any,
-        inputType: command.inputType as any || command.type || 'text',
+        inputType: (command.inputType as any) || command.type || 'text',
         isRequired: command.isRequired,
         isUnique: command.isUnique,
         isSearchable: command.isSearchable,
@@ -75,7 +90,7 @@ export class CreateAttributeUseCase {
         defaultValue: command.defaultValue,
         validationRules: command.validationRules,
         merchantId: command.merchantId,
-        isGlobal: command.isGlobal
+        isGlobal: command.isGlobal,
       };
 
       const attribute = await dynamicAttributeRepository.createAttribute(input);
@@ -88,19 +103,19 @@ export class CreateAttributeUseCase {
             value: option.value,
             displayValue: option.displayValue,
             position: option.position,
-            isDefault: option.isDefault
+            isDefault: option.isDefault,
           });
         }
       }
 
       return {
         success: true,
-        data: attribute
+        data: attribute,
       };
     } catch (error) {
       return {
         success: false,
-        error: `Failed to create attribute: ${(error as Error).message}`
+        error: `Failed to create attribute: ${(error as Error).message}`,
       };
     }
   }

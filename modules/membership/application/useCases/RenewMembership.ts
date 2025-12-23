@@ -1,6 +1,6 @@
 /**
  * RenewMembership Use Case
- * 
+ *
  * Renews a membership for another billing period.
  */
 
@@ -55,7 +55,7 @@ export class RenewMembershipUseCase {
     }
 
     const now = new Date();
-    const newPeriodStart = membership.currentPeriodEnd 
+    const newPeriodStart = membership.currentPeriodEnd
       ? new Date(Math.max(now.getTime(), new Date(membership.currentPeriodEnd).getTime()))
       : now;
 
@@ -78,11 +78,7 @@ export class RenewMembershipUseCase {
     // Process payment
     let paymentStatus = 'pending';
     try {
-      const payment = await this.processRenewalPayment(
-        membership,
-        tier.price,
-        paymentMethodId || membership.defaultPaymentMethodId
-      );
+      const payment = await this.processRenewalPayment(membership, tier.price, paymentMethodId || membership.defaultPaymentMethodId);
       paymentStatus = payment.status;
     } catch (error: any) {
       paymentStatus = 'failed';
@@ -140,7 +136,7 @@ export class RenewMembershipUseCase {
   private async processRenewalPayment(
     membership: any,
     amount: number,
-    paymentMethodId?: string
+    paymentMethodId?: string,
   ): Promise<{ status: string; transactionId?: string }> {
     // This would integrate with the payment module
     // For now, return a mock successful payment

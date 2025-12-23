@@ -1,6 +1,6 @@
 /**
  * Fulfillment Controller
- * 
+ *
  * HTTP interface for fulfillment management.
  */
 
@@ -131,7 +131,7 @@ export const listFulfillments = async (req: Request, res: Response): Promise<voi
       {
         page: req.query.page ? parseInt(req.query.page as string, 10) : 1,
         limit: req.query.limit ? parseInt(req.query.limit as string, 10) : 20,
-      }
+      },
     );
     res.json({ success: true, data: result });
   } catch (error: any) {

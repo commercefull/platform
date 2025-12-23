@@ -17,11 +17,7 @@ export class StoreController {
     const storeRepository = new StoreRepo();
     const businessRepository = new BusinessRepo();
     const systemConfigRepository = new SystemConfigurationRepo();
-    this.createStoreUseCase = new CreateStoreUseCase(
-      storeRepository,
-      businessRepository,
-      systemConfigRepository
-    );
+    this.createStoreUseCase = new CreateStoreUseCase(storeRepository, businessRepository, systemConfigRepository);
   }
 
   /**
@@ -60,23 +56,23 @@ export class StoreController {
         openingHours: req.body.openingHours,
         customPages: req.body.customPages,
         customFields: req.body.customFields,
-        metadata: req.body.metadata
+        metadata: req.body.metadata,
       });
 
       const result = await this.createStoreUseCase.execute(command);
 
       res.status(201).json({
         success: true,
-        data: result
+        data: result,
       });
     } catch (error) {
       logger.error('Error:', error);
-      
+
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       res.status(400).json({
         success: false,
         message: 'Failed to create store',
-        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
       });
     }
   }
@@ -93,22 +89,22 @@ export class StoreController {
       if (!store) {
         return res.status(404).json({
           success: false,
-          message: 'Store not found'
+          message: 'Store not found',
         });
       }
 
       res.json({
         success: true,
-        data: store.toJSON()
+        data: store.toJSON(),
       });
     } catch (error) {
       logger.error('Error:', error);
-      
+
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       res.status(500).json({
         success: false,
         message: 'Failed to get store',
-        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
       });
     }
   }
@@ -125,22 +121,22 @@ export class StoreController {
       if (!store) {
         return res.status(404).json({
           success: false,
-          message: 'Store not found'
+          message: 'Store not found',
         });
       }
 
       res.json({
         success: true,
-        data: store.toJSON()
+        data: store.toJSON(),
       });
     } catch (error) {
       logger.error('Error:', error);
-      
+
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       res.status(500).json({
         success: false,
         message: 'Failed to get store',
-        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
       });
     }
   }
@@ -157,16 +153,16 @@ export class StoreController {
       res.json({
         success: true,
         data: stores.map(store => store.toJSON()),
-        count: stores.length
+        count: stores.length,
       });
     } catch (error) {
       logger.error('Error:', error);
-      
+
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       res.status(500).json({
         success: false,
         message: 'Failed to get stores',
-        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
       });
     }
   }
@@ -183,16 +179,16 @@ export class StoreController {
       res.json({
         success: true,
         data: stores.map(store => store.toJSON()),
-        count: stores.length
+        count: stores.length,
       });
     } catch (error) {
       logger.error('Error:', error);
-      
+
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       res.status(500).json({
         success: false,
         message: 'Failed to get active stores',
-        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
       });
     }
   }

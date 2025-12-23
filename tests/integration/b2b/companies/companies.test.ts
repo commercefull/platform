@@ -8,14 +8,15 @@ import { ADMIN_CREDENTIALS } from '../../testConstants';
 
 const API_BASE = '/business/b2b';
 
-const createClient = (): AxiosInstance => axios.create({
-  baseURL: process.env.API_URL || 'http://localhost:3000',
-  validateStatus: () => true,
-  headers: {
-    'Accept': 'application/json',
-    'Content-Type': 'application/json'
-  }
-});
+const createClient = (): AxiosInstance =>
+  axios.create({
+    baseURL: process.env.API_URL || 'http://localhost:3000',
+    validateStatus: () => true,
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+  });
 
 describe('B2B Companies API', () => {
   let client: AxiosInstance;
@@ -23,7 +24,7 @@ describe('B2B Companies API', () => {
 
   beforeAll(async () => {
     client = createClient();
-    
+
     // Get auth token
     const loginResponse = await client.post('/business/auth/login', ADMIN_CREDENTIALS, { headers: { 'X-Test-Request': 'true' } });
     if (loginResponse.data.accessToken) {
@@ -71,7 +72,7 @@ describe('B2B Companies API', () => {
         industry: 'Technology',
         email: `test-${Date.now()}@example.com`,
         phone: '+1-555-0100',
-        website: 'https://example.com'
+        website: 'https://example.com',
       };
 
       const response = await client.post(`${API_BASE}/companies`, companyData);
@@ -87,7 +88,7 @@ describe('B2B Companies API', () => {
 
     it('should return 400 if name is missing', async () => {
       const response = await client.post(`${API_BASE}/companies`, {
-        email: 'test@example.com'
+        email: 'test@example.com',
       });
 
       expect(response.status).toBe(400);
@@ -98,7 +99,6 @@ describe('B2B Companies API', () => {
   describe('GET /b2b/companies/:id', () => {
     it('should return a company by ID', async () => {
       if (!createdCompanyId) {
-        
         return;
       }
 
@@ -120,13 +120,12 @@ describe('B2B Companies API', () => {
   describe('PUT /b2b/companies/:id', () => {
     it('should update a company', async () => {
       if (!createdCompanyId) {
-        
         return;
       }
 
       const updateData = {
         industry: 'Software',
-        website: 'https://updated-example.com'
+        website: 'https://updated-example.com',
       };
 
       const response = await client.put(`${API_BASE}/companies/${createdCompanyId}`, updateData);
@@ -139,12 +138,11 @@ describe('B2B Companies API', () => {
   describe('POST /b2b/companies/:id/approve', () => {
     it('should approve a pending company', async () => {
       if (!createdCompanyId) {
-        
         return;
       }
 
       const response = await client.post(`${API_BASE}/companies/${createdCompanyId}/approve`, {
-        creditLimit: 10000
+        creditLimit: 10000,
       });
 
       expect(response.status).toBe(200);
@@ -156,7 +154,6 @@ describe('B2B Companies API', () => {
   describe('POST /b2b/companies/:id/suspend', () => {
     it('should suspend an active company', async () => {
       if (!createdCompanyId) {
-        
         return;
       }
 
@@ -171,7 +168,6 @@ describe('B2B Companies API', () => {
   describe('DELETE /b2b/companies/:id', () => {
     it('should delete a company', async () => {
       if (!createdCompanyId) {
-        
         return;
       }
 

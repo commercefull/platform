@@ -14,7 +14,7 @@ import { eventBus } from '../../../../libs/events/eventBus';
 export class SetPaymentMethodCommand {
   constructor(
     public readonly checkoutId: string,
-    public readonly paymentMethodId: string
+    public readonly paymentMethodId: string,
   ) {}
 }
 
@@ -33,7 +33,7 @@ export class SetPaymentMethodUseCase {
 
     const methods = await this.checkoutRepository.getAvailablePaymentMethods();
     const selectedMethod = methods.find(m => m.id === command.paymentMethodId);
-    
+
     if (!selectedMethod) {
       throw new Error('Invalid payment method');
     }
@@ -44,7 +44,7 @@ export class SetPaymentMethodUseCase {
     eventBus.emit('checkout.updated', {
       checkoutId: session.id,
       field: 'paymentMethod',
-      methodId: command.paymentMethodId
+      methodId: command.paymentMethodId,
     });
 
     return mapCheckoutToResponse(session);

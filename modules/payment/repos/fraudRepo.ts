@@ -94,10 +94,7 @@ export interface FraudBlacklist {
 // ============================================================================
 
 export async function getRule(fraudRuleId: string): Promise<FraudRule | null> {
-  const row = await queryOne<Record<string, any>>(
-    'SELECT * FROM "fraudRule" WHERE "fraudRuleId" = $1',
-    [fraudRuleId]
-  );
+  const row = await queryOne<Record<string, any>>('SELECT * FROM "fraudRule" WHERE "fraudRuleId" = $1', [fraudRuleId]);
   return row ? mapToRule(row) : null;
 }
 
@@ -108,16 +105,18 @@ export async function getRules(activeOnly: boolean = true): Promise<FraudRule[]>
   }
 
   const rows = await query<Record<string, any>[]>(
-    `SELECT * FROM "fraudRule" WHERE ${whereClause} ORDER BY "priority" DESC, "riskScore" DESC`
+    `SELECT * FROM "fraudRule" WHERE ${whereClause} ORDER BY "priority" DESC, "riskScore" DESC`,
   );
   return (rows || []).map(mapToRule);
 }
 
-export async function saveRule(rule: Partial<FraudRule> & {
-  name: string;
-  ruleType: RuleType;
-  conditions: Record<string, any>;
-}): Promise<FraudRule> {
+export async function saveRule(
+  rule: Partial<FraudRule> & {
+    name: string;
+    ruleType: RuleType;
+    conditions: Record<string, any>;
+  },
+): Promise<FraudRule> {
   const now = new Date().toISOString();
 
   if (rule.fraudRuleId) {
@@ -128,12 +127,19 @@ export async function saveRule(rule: Partial<FraudRule> & {
         "isActive" = $9, "metadata" = $10, "updatedAt" = $11
       WHERE "fraudRuleId" = $12`,
       [
-        rule.name, rule.description, rule.ruleType, rule.entityType || 'order',
-        JSON.stringify(rule.conditions), rule.action || 'flag',
-        rule.riskScore || 0, rule.priority || 0, rule.isActive !== false,
+        rule.name,
+        rule.description,
+        rule.ruleType,
+        rule.entityType || 'order',
+        JSON.stringify(rule.conditions),
+        rule.action || 'flag',
+        rule.riskScore || 0,
+        rule.priority || 0,
+        rule.isActive !== false,
         rule.metadata ? JSON.stringify(rule.metadata) : null,
-        now, rule.fraudRuleId
-      ]
+        now,
+        rule.fraudRuleId,
+      ],
     );
     return (await getRule(rule.fraudRuleId))!;
   } else {
@@ -145,21 +151,29 @@ export async function saveRule(rule: Partial<FraudRule> & {
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
       RETURNING *`,
       [
-        rule.name, rule.description, rule.ruleType, rule.entityType || 'order',
-        JSON.stringify(rule.conditions), rule.action || 'flag',
-        rule.riskScore || 0, rule.priority || 0, true,
-        rule.metadata ? JSON.stringify(rule.metadata) : null, now, now
-      ]
+        rule.name,
+        rule.description,
+        rule.ruleType,
+        rule.entityType || 'order',
+        JSON.stringify(rule.conditions),
+        rule.action || 'flag',
+        rule.riskScore || 0,
+        rule.priority || 0,
+        true,
+        rule.metadata ? JSON.stringify(rule.metadata) : null,
+        now,
+        now,
+      ],
     );
     return mapToRule(result!);
   }
 }
 
 export async function deleteRule(fraudRuleId: string): Promise<void> {
-  await query(
-    'UPDATE "fraudRule" SET "isActive" = false, "updatedAt" = $1 WHERE "fraudRuleId" = $2',
-    [new Date().toISOString(), fraudRuleId]
-  );
+  await query('UPDATE "fraudRule" SET "isActive" = false, "updatedAt" = $1 WHERE "fraudRuleId" = $2', [
+    new Date().toISOString(),
+    fraudRuleId,
+  ]);
 }
 
 export async function incrementRuleTrigger(fraudRuleId: string): Promise<void> {
@@ -167,7 +181,7 @@ export async function incrementRuleTrigger(fraudRuleId: string): Promise<void> {
     `UPDATE "fraudRule" SET 
       "triggerCount" = "triggerCount" + 1, "lastTriggeredAt" = $1, "updatedAt" = $1
      WHERE "fraudRuleId" = $2`,
-    [new Date().toISOString(), fraudRuleId]
+    [new Date().toISOString(), fraudRuleId],
   );
 }
 
@@ -176,24 +190,20 @@ export async function incrementRuleTrigger(fraudRuleId: string): Promise<void> {
 // ============================================================================
 
 export async function getCheck(fraudCheckId: string): Promise<FraudCheck | null> {
-  const row = await queryOne<Record<string, any>>(
-    'SELECT * FROM "fraudCheck" WHERE "fraudCheckId" = $1',
-    [fraudCheckId]
-  );
+  const row = await queryOne<Record<string, any>>('SELECT * FROM "fraudCheck" WHERE "fraudCheckId" = $1', [fraudCheckId]);
   return row ? mapToCheck(row) : null;
 }
 
 export async function getCheckByOrderId(orderId: string): Promise<FraudCheck | null> {
-  const row = await queryOne<Record<string, any>>(
-    'SELECT * FROM "fraudCheck" WHERE "orderId" = $1 ORDER BY "createdAt" DESC LIMIT 1',
-    [orderId]
-  );
+  const row = await queryOne<Record<string, any>>('SELECT * FROM "fraudCheck" WHERE "orderId" = $1 ORDER BY "createdAt" DESC LIMIT 1', [
+    orderId,
+  ]);
   return row ? mapToCheck(row) : null;
 }
 
 export async function getChecks(
   filters?: { status?: CheckStatus; riskLevel?: RiskLevel; customerId?: string },
-  pagination?: { limit?: number; offset?: number }
+  pagination?: { limit?: number; offset?: number },
 ): Promise<{ data: FraudCheck[]; total: number }> {
   let whereClause = '1=1';
   const params: any[] = [];
@@ -212,10 +222,7 @@ export async function getChecks(
     params.push(filters.customerId);
   }
 
-  const countResult = await queryOne<{ count: string }>(
-    `SELECT COUNT(*) as count FROM "fraudCheck" WHERE ${whereClause}`,
-    params
-  );
+  const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "fraudCheck" WHERE ${whereClause}`, params);
 
   const limit = pagination?.limit || 20;
   const offset = pagination?.offset || 0;
@@ -223,19 +230,19 @@ export async function getChecks(
   const rows = await query<Record<string, any>[]>(
     `SELECT * FROM "fraudCheck" WHERE ${whereClause} 
      ORDER BY "createdAt" DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
-    [...params, limit, offset]
+    [...params, limit, offset],
   );
 
   return {
     data: (rows || []).map(mapToCheck),
-    total: parseInt(countResult?.count || '0')
+    total: parseInt(countResult?.count || '0'),
   };
 }
 
 export async function getPendingReviews(): Promise<FraudCheck[]> {
   const rows = await query<Record<string, any>[]>(
     `SELECT * FROM "fraudCheck" WHERE "status" IN ('flagged', 'blocked') 
-     AND "reviewedAt" IS NULL ORDER BY "riskScore" DESC, "createdAt" ASC`
+     AND "reviewedAt" IS NULL ORDER BY "riskScore" DESC, "createdAt" ASC`,
   );
   return (rows || []).map(mapToCheck);
 }
@@ -267,7 +274,7 @@ export async function createCheck(check: {
         COUNT(*) as orders,
         COUNT(*) FILTER (WHERE "status" = 'blocked') as chargebacks
        FROM "fraudCheck" WHERE "customerId" = $1`,
-      [check.customerId]
+      [check.customerId],
     );
     previousOrders = parseInt(history?.orders || '0');
     previousChargebacks = parseInt(history?.chargebacks || '0');
@@ -284,14 +291,25 @@ export async function createCheck(check: {
     ) VALUES ($1, $2, $3, 'pending', 0, 'low', $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
     RETURNING *`,
     [
-      check.orderId, check.customerId, check.checkType,
+      check.orderId,
+      check.customerId,
+      check.checkType,
       check.deviceFingerprint ? JSON.stringify(check.deviceFingerprint) : null,
-      check.ipAddress, check.billingCountry, check.shippingCountry,
+      check.ipAddress,
+      check.billingCountry,
+      check.shippingCountry,
       check.billingCountry !== check.shippingCountry,
-      previousOrders, previousChargebacks, check.orderAmount, check.currency,
-      isFirstOrder, check.isGuestCheckout || false, check.paymentMethod,
-      check.cardBin, now, now
-    ]
+      previousOrders,
+      previousChargebacks,
+      check.orderAmount,
+      check.currency,
+      isFirstOrder,
+      check.isGuestCheckout || false,
+      check.paymentMethod,
+      check.cardBin,
+      now,
+      now,
+    ],
   );
 
   return mapToCheck(result!);
@@ -310,7 +328,7 @@ export async function runFraudCheck(fraudCheckId: string): Promise<FraudCheck> {
   const blacklistChecks = await Promise.all([
     check.ipAddress ? isBlacklisted('ip', check.ipAddress) : false,
     check.customerId ? isBlacklisted('customer', check.customerId) : false,
-    check.cardBin ? isBlacklisted('card_bin', check.cardBin) : false
+    check.cardBin ? isBlacklisted('card_bin', check.cardBin) : false,
   ]);
 
   if (blacklistChecks.some(b => b)) {
@@ -327,7 +345,7 @@ export async function runFraudCheck(fraudCheckId: string): Promise<FraudCheck> {
         fraudRuleId: rule.fraudRuleId,
         name: rule.name,
         action: rule.action,
-        riskScore: rule.riskScore
+        riskScore: rule.riskScore,
       });
       totalRiskScore += rule.riskScore;
       await incrementRuleTrigger(rule.fraudRuleId);
@@ -347,7 +365,7 @@ export async function runFraudCheck(fraudCheckId: string): Promise<FraudCheck> {
     `UPDATE "fraudCheck" SET 
       "status" = $1, "riskScore" = $2, "riskLevel" = $3, "triggeredRules" = $4, "updatedAt" = $5
      WHERE "fraudCheckId" = $6`,
-    [status, Math.min(totalRiskScore, 100), riskLevel, JSON.stringify(triggeredRules), now, fraudCheckId]
+    [status, Math.min(totalRiskScore, 100), riskLevel, JSON.stringify(triggeredRules), now, fraudCheckId],
   );
 
   return (await getCheck(fraudCheckId))!;
@@ -357,7 +375,7 @@ export async function reviewCheck(
   fraudCheckId: string,
   decision: 'approved' | 'rejected',
   reviewedBy: string,
-  notes?: string
+  notes?: string,
 ): Promise<void> {
   const now = new Date().toISOString();
   const newStatus = decision === 'approved' ? 'overridden' : 'blocked';
@@ -367,7 +385,7 @@ export async function reviewCheck(
       "status" = $1, "reviewedBy" = $2, "reviewedAt" = $3, 
       "reviewDecision" = $4, "reviewNotes" = $5, "updatedAt" = $3
      WHERE "fraudCheckId" = $6`,
-    [newStatus, reviewedBy, now, decision, notes, fraudCheckId]
+    [newStatus, reviewedBy, now, decision, notes, fraudCheckId],
   );
 }
 
@@ -376,16 +394,13 @@ export async function reviewCheck(
 // ============================================================================
 
 export async function getBlacklistEntry(fraudBlacklistId: string): Promise<FraudBlacklist | null> {
-  const row = await queryOne<Record<string, any>>(
-    'SELECT * FROM "fraudBlacklist" WHERE "fraudBlacklistId" = $1',
-    [fraudBlacklistId]
-  );
+  const row = await queryOne<Record<string, any>>('SELECT * FROM "fraudBlacklist" WHERE "fraudBlacklistId" = $1', [fraudBlacklistId]);
   return row ? mapToBlacklist(row) : null;
 }
 
 export async function getBlacklist(
   filters?: { type?: BlacklistType; isActive?: boolean },
-  pagination?: { limit?: number; offset?: number }
+  pagination?: { limit?: number; offset?: number },
 ): Promise<{ data: FraudBlacklist[]; total: number }> {
   let whereClause = '1=1';
   const params: any[] = [];
@@ -400,10 +415,7 @@ export async function getBlacklist(
     params.push(filters.isActive);
   }
 
-  const countResult = await queryOne<{ count: string }>(
-    `SELECT COUNT(*) as count FROM "fraudBlacklist" WHERE ${whereClause}`,
-    params
-  );
+  const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "fraudBlacklist" WHERE ${whereClause}`, params);
 
   const limit = pagination?.limit || 20;
   const offset = pagination?.offset || 0;
@@ -411,12 +423,12 @@ export async function getBlacklist(
   const rows = await query<Record<string, any>[]>(
     `SELECT * FROM "fraudBlacklist" WHERE ${whereClause} 
      ORDER BY "createdAt" DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
-    [...params, limit, offset]
+    [...params, limit, offset],
   );
 
   return {
     data: (rows || []).map(mapToBlacklist),
-    total: parseInt(countResult?.count || '0')
+    total: parseInt(countResult?.count || '0'),
   };
 }
 
@@ -425,7 +437,7 @@ export async function isBlacklisted(type: BlacklistType, value: string): Promise
     `SELECT COUNT(*) as count FROM "fraudBlacklist" 
      WHERE "type" = $1 AND "value" = $2 AND "isActive" = true
      AND ("expiresAt" IS NULL OR "expiresAt" > NOW())`,
-    [type, value.toLowerCase()]
+    [type, value.toLowerCase()],
   );
   return parseInt(row?.count || '0') > 0;
 }
@@ -452,27 +464,34 @@ export async function addToBlacklist(entry: {
       "expiresAt" = $7, "updatedAt" = $10
     RETURNING *`,
     [
-      entry.type, entry.value.toLowerCase(), entry.reason,
-      entry.source || 'manual', entry.relatedOrderId, entry.relatedCustomerId,
-      entry.expiresAt?.toISOString(), entry.addedBy, now, now
-    ]
+      entry.type,
+      entry.value.toLowerCase(),
+      entry.reason,
+      entry.source || 'manual',
+      entry.relatedOrderId,
+      entry.relatedCustomerId,
+      entry.expiresAt?.toISOString(),
+      entry.addedBy,
+      now,
+      now,
+    ],
   );
 
   return mapToBlacklist(result!);
 }
 
 export async function removeFromBlacklist(fraudBlacklistId: string): Promise<void> {
-  await query(
-    'UPDATE "fraudBlacklist" SET "isActive" = false, "updatedAt" = $1 WHERE "fraudBlacklistId" = $2',
-    [new Date().toISOString(), fraudBlacklistId]
-  );
+  await query('UPDATE "fraudBlacklist" SET "isActive" = false, "updatedAt" = $1 WHERE "fraudBlacklistId" = $2', [
+    new Date().toISOString(),
+    fraudBlacklistId,
+  ]);
 }
 
 export async function expireBlacklistEntries(): Promise<number> {
   const result = await query(
     `UPDATE "fraudBlacklist" SET "isActive" = false, "updatedAt" = $1
      WHERE "isActive" = true AND "expiresAt" < NOW()`,
-    [new Date().toISOString()]
+    [new Date().toISOString()],
   );
   return (result as any)?.rowCount || 0;
 }
@@ -502,7 +521,8 @@ function evaluateRule(rule: FraudRule, check: FraudCheck): boolean {
 
     case 'pattern':
       if (conditions.firstOrderHighValue && check.isFirstOrder && (check.orderAmount || 0) > (conditions.threshold || 500)) return true;
-      if (conditions.guestCheckoutHighValue && check.isGuestCheckout && (check.orderAmount || 0) > (conditions.threshold || 300)) return true;
+      if (conditions.guestCheckoutHighValue && check.isGuestCheckout && (check.orderAmount || 0) > (conditions.threshold || 300))
+        return true;
       return false;
 
     case 'device':
@@ -518,11 +538,16 @@ function evaluateRule(rule: FraudRule, check: FraudCheck): boolean {
 
 function actionPriority(action: RuleAction): number {
   switch (action) {
-    case 'block': return 4;
-    case 'review': return 3;
-    case 'flag': return 2;
-    case 'allow': return 1;
-    default: return 0;
+    case 'block':
+      return 4;
+    case 'review':
+      return 3;
+    case 'flag':
+      return 2;
+    case 'allow':
+      return 1;
+    default:
+      return 0;
   }
 }
 
@@ -556,7 +581,7 @@ function mapToRule(row: Record<string, any>): FraudRule {
     lastTriggeredAt: row.lastTriggeredAt ? new Date(row.lastTriggeredAt) : undefined,
     metadata: row.metadata,
     createdAt: new Date(row.createdAt),
-    updatedAt: new Date(row.updatedAt)
+    updatedAt: new Date(row.updatedAt),
   };
 }
 
@@ -598,7 +623,7 @@ function mapToCheck(row: Record<string, any>): FraudCheck {
     reviewNotes: row.reviewNotes,
     metadata: row.metadata,
     createdAt: new Date(row.createdAt),
-    updatedAt: new Date(row.updatedAt)
+    updatedAt: new Date(row.updatedAt),
   };
 }
 
@@ -616,6 +641,6 @@ function mapToBlacklist(row: Record<string, any>): FraudBlacklist {
     addedBy: row.addedBy,
     metadata: row.metadata,
     createdAt: new Date(row.createdAt),
-    updatedAt: new Date(row.updatedAt)
+    updatedAt: new Date(row.updatedAt),
   };
 }

@@ -1,6 +1,6 @@
 /**
  * Pricing Hooks
- * 
+ *
  * This module provides hook functions to integrate pricing calculations
  * with basket and checkout processes.
  */
@@ -16,7 +16,7 @@ const pricingService = new PricingService();
  * and updates the basket with calculated prices
  */
 export async function calculateBasketPrices(
-  basket: Basket, 
+  basket: Basket,
   options: {
     applyPromotions?: boolean;
     applyMembershipBenefits?: boolean;
@@ -24,12 +24,12 @@ export async function calculateBasketPrices(
     loyaltyPointsToApply?: number;
     pointsToMoneyRatio?: number;
     includeTax?: boolean;
-  } = {}
+  } = {},
 ): Promise<Basket> {
   // NOTE: This function needs refactoring - Basket interface doesn't have items property
   // TODO: Implement basket item fetching from basketItemRepo
   return basket;
-  
+
   /* COMMENTED OUT UNTIL BASKET ITEMS INTERFACE IS FIXED
   if (!basket || !basket.items || basket.items.length === 0) {
     return basket; // No items to calculate prices for
@@ -114,7 +114,7 @@ export async function calculateOrderPrices(
     loyaltyPointsToApply?: number;
     pointsToMoneyRatio?: number;
     includeTax?: boolean;
-  } = {}
+  } = {},
 ): Promise<Order> {
   // Cast order to OrderWithItems to handle the items property
   const orderWithItems = order as OrderWithItems;
@@ -129,28 +129,25 @@ export async function calculateOrderPrices(
     applyLoyaltyDiscount: options.applyLoyaltyDiscount || false,
     loyaltyPointsToApply: options.loyaltyPointsToApply || 0,
     includeTax: true, // For orders we typically include tax
-    ...options
+    ...options,
   };
-  
+
   let totalDiscount = 0;
   let subtotal = 0;
-  
+
   // Process each item in the order through the pricing service
   for (let i = 0; i < orderWithItems.items.length; i++) {
     const item = orderWithItems.items[i];
-    
+
     // Calculate item price using pricing service
-    const result = await pricingService.calculatePrice(
-      item.productId,
-      {
-        variantId: item.variantId || undefined,
-        quantity: item.quantity,
-        customerId: order.customerId || undefined,
-        // Pass all the additional pricing options
-        additionalData: pricingOptions
-      }
-    );
-    
+    const result = await pricingService.calculatePrice(item.productId, {
+      variantId: item.variantId || undefined,
+      quantity: item.quantity,
+      customerId: order.customerId || undefined,
+      // Pass all the additional pricing options
+      additionalData: pricingOptions,
+    });
+
     // Update the item with calculated price
     orderWithItems.items[i] = {
       ...item,
@@ -158,14 +155,14 @@ export async function calculateOrderPrices(
       price: result.finalPrice / item.quantity, // Per unit final price
       totalPrice: result.finalPrice,
     };
-    
+
     // Track discount and subtotal
     if (result.appliedRules && result.appliedRules.length > 0) {
       totalDiscount += result.appliedRules.reduce((sum, rule) => sum + rule.impact, 0);
     }
     subtotal += result.originalPrice;
   }
-  
+
   // Update order totals (convert to string for decimal fields)
   orderWithItems.subtotal = String(subtotal);
   orderWithItems.discountTotal = String(totalDiscount);
@@ -173,6 +170,6 @@ export async function calculateOrderPrices(
   if (!orderWithItems.metadata) orderWithItems.metadata = {};
   orderWithItems.metadata.pricingCalculated = true;
   orderWithItems.updatedAt = new Date(); // Using proper Date object
-  
+
   return orderWithItems;
 }

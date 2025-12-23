@@ -10,7 +10,7 @@ exports.up = function (knex) {
     t.uuid('customerId').notNullable().references('customerId').inTable('customer').onDelete('CASCADE');
     t.uuid('customerGroupId').notNullable().references('customerGroupId').inTable('customerGroup').onDelete('CASCADE');
     t.boolean('isActive').notNullable().defaultTo(true);
-    
+
     t.timestamp('expiresAt');
     t.uuid('addedBy');
     t.timestamp('deletedAt');

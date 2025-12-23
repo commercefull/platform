@@ -25,7 +25,7 @@ async function getCompanyStats(companyId: string) {
     `SELECT COUNT(*) as count, COALESCE(SUM("totalAmount"), 0) as total
      FROM "order"
      WHERE "b2bCompanyId" = $1 AND "deletedAt" IS NULL`,
-    [companyId]
+    [companyId],
   );
 
   // Pending approvals (for approvers)
@@ -33,7 +33,7 @@ async function getCompanyStats(companyId: string) {
     `SELECT COUNT(*) as count
      FROM "b2bApprovalRequest"
      WHERE "b2bCompanyId" = $1 AND "status" = 'pending'`,
-    [companyId]
+    [companyId],
   );
 
   // Active quotes
@@ -41,7 +41,7 @@ async function getCompanyStats(companyId: string) {
     `SELECT COUNT(*) as count
      FROM "b2bQuote"
      WHERE "b2bCompanyId" = $1 AND "status" IN ('draft', 'sent', 'negotiating')`,
-    [companyId]
+    [companyId],
   );
 
   return {
@@ -62,7 +62,7 @@ async function getCompanyRecentOrders(companyId: string, limit: number = 5) {
      WHERE "b2bCompanyId" = $1 AND "deletedAt" IS NULL
      ORDER BY "createdAt" DESC
      LIMIT $2`,
-    [companyId, limit]
+    [companyId, limit],
   );
   return orders || [];
 }
@@ -83,7 +83,7 @@ async function getPendingApprovals(companyId: string, userId: string, role: stri
      WHERE ar."b2bCompanyId" = $1 AND ar."status" = 'pending'
      ORDER BY ar."createdAt" DESC
      LIMIT $2`,
-    [companyId, limit]
+    [companyId, limit],
   );
   return approvals || [];
 }
@@ -112,7 +112,7 @@ export const getDashboard = async (req: Request, res: Response) => {
     });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     b2bRespond(req, res, 'error', {
       pageName: 'Error',
       error: 'Failed to load dashboard',

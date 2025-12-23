@@ -23,7 +23,7 @@ import {
   advanceBillingCycle,
   createDunningAttempt,
   createSubscriptionOrder,
-  updateSubscriptionOrderStatus
+  updateSubscriptionOrderStatus,
 } from '../../../modules/subscription/repos/subscriptionRepo';
 import { adminRespond } from 'web/respond';
 
@@ -39,7 +39,7 @@ function calculateNextBillingDate(fromDate: Date, interval: string, count: numbe
       result.setDate(result.getDate() + count);
       break;
     case 'week':
-      result.setDate(result.getDate() + (count * 7));
+      result.setDate(result.getDate() + count * 7);
       break;
     case 'month':
       result.setMonth(result.getMonth() + count);
@@ -73,12 +73,12 @@ export const listSubscriptionPlans = async (req: Request, res: Response): Promis
       plans,
       filters: { productId, activeOnly },
       pagination: { limit, offset },
-      
-      success: req.query.success || null
+
+      success: req.query.success || null,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load subscription plans',
@@ -96,7 +96,7 @@ export const createSubscriptionPlanForm = async (req: Request, res: Response): P
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -126,7 +126,7 @@ export const createSubscriptionPlan = async (req: Request, res: Response): Promi
       includedProducts,
       features,
       sortOrder,
-      isPopular
+      isPopular,
     } = req.body;
 
     const plan = await saveSubscriptionPlan({
@@ -149,13 +149,12 @@ export const createSubscriptionPlan = async (req: Request, res: Response): Promi
       includedProducts: includedProducts ? JSON.parse(includedProducts) : undefined,
       features: features ? JSON.parse(features) : undefined,
       sortOrder: sortOrder ? parseInt(sortOrder) : 0,
-      isPopular: isPopular === 'true'
+      isPopular: isPopular === 'true',
     });
 
     res.redirect(`/hub/subscription/plans/${plan.subscriptionPlanId}?success=Subscription plan created successfully`);
   } catch (error: any) {
     logger.error('Error:', error);
-    
 
     adminRespond(req, res, 'programs/subscription/plans/create', {
       pageName: 'Create Subscription Plan',
@@ -182,12 +181,12 @@ export const viewSubscriptionPlan = async (req: Request, res: Response): Promise
     adminRespond(req, res, 'programs/subscription/plans/view', {
       pageName: `Plan: ${plan.name}`,
       plan,
-      
-      success: req.query.success || null
+
+      success: req.query.success || null,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load subscription plan',
@@ -215,7 +214,7 @@ export const editSubscriptionPlanForm = async (req: Request, res: Response): Pro
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -248,7 +247,7 @@ export const updateSubscriptionPlan = async (req: Request, res: Response): Promi
       features,
       sortOrder,
       isPopular,
-      isActive
+      isActive,
     } = req.body;
 
     if (name !== undefined) updates.name = name;
@@ -264,7 +263,8 @@ export const updateSubscriptionPlan = async (req: Request, res: Response): Promi
     if (isContractRequired !== undefined) updates.isContractRequired = isContractRequired === 'true';
     if (discountPercent !== undefined) updates.discountPercent = discountPercent ? parseFloat(discountPercent) : 0;
     if (discountAmount !== undefined) updates.discountAmount = discountAmount ? parseFloat(discountAmount) : 0;
-    if (freeShippingThreshold !== undefined) updates.freeShippingThreshold = freeShippingThreshold ? parseFloat(freeShippingThreshold) : undefined;
+    if (freeShippingThreshold !== undefined)
+      updates.freeShippingThreshold = freeShippingThreshold ? parseFloat(freeShippingThreshold) : undefined;
     if (includesFreeShipping !== undefined) updates.includesFreeShipping = includesFreeShipping === 'true';
     if (includedProducts !== undefined) updates.includedProducts = includedProducts ? JSON.parse(includedProducts) : undefined;
     if (features !== undefined) updates.features = features ? JSON.parse(features) : undefined;
@@ -274,13 +274,12 @@ export const updateSubscriptionPlan = async (req: Request, res: Response): Promi
 
     const plan = await saveSubscriptionPlan({
       subscriptionPlanId: planId,
-      ...updates
+      ...updates,
     });
 
     res.redirect(`/hub/subscription/plans/${planId}?success=Subscription plan updated successfully`);
   } catch (error: any) {
     logger.error('Error:', error);
-    
 
     try {
       const plan = await getSubscriptionPlan(req.params.planId);
@@ -309,7 +308,7 @@ export const deleteSubscriptionPlan = async (req: Request, res: Response): Promi
     res.json({ success: true, message: 'Subscription plan deleted successfully' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to delete subscription plan' });
   }
 };
@@ -325,10 +324,13 @@ export const listCustomerSubscriptions = async (req: Request, res: Response): Pr
     const limit = parseInt(req.query.limit as string) || 50;
     const offset = parseInt(req.query.offset as string) || 0;
 
-    const result = await getCustomerSubscriptions({
-      customerId,
-      status: status as any
-    }, { limit, offset });
+    const result = await getCustomerSubscriptions(
+      {
+        customerId,
+        status: status as any,
+      },
+      { limit, offset },
+    );
 
     adminRespond(req, res, 'programs/subscription/subscriptions/index', {
       pageName: 'Customer Subscriptions',
@@ -336,12 +338,12 @@ export const listCustomerSubscriptions = async (req: Request, res: Response): Pr
       total: result.total,
       filters: { customerId, status },
       pagination: { limit, offset },
-      
-      success: req.query.success || null
+
+      success: req.query.success || null,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load customer subscriptions',
@@ -363,12 +365,12 @@ export const viewCustomerSubscription = async (req: Request, res: Response): Pro
       pageName: `Subscription: ${subscriptionId}`,
       subscription,
       orders,
-      
-      success: req.query.success || null
+
+      success: req.query.success || null,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load customer subscription',
@@ -386,7 +388,7 @@ export const updateSubscriptionStatus = async (req: Request, res: Response): Pro
     res.json({ success: true, message: `Subscription status updated to ${status}` });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to update subscription status' });
   }
 };
@@ -401,7 +403,7 @@ export const cancelCustomerSubscription = async (req: Request, res: Response): P
     res.json({ success: true, message: 'Subscription cancelled successfully' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to cancel subscription' });
   }
 };
@@ -428,12 +430,12 @@ export const subscriptionBilling = async (req: Request, res: Response): Promise<
       stats: {
         dueToday: subscriptionsDue.length,
         pendingOrders: pendingOrders.length,
-        failedPayments: failedPayments.length
+        failedPayments: failedPayments.length,
       },
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load subscription billing',
@@ -467,12 +469,11 @@ export const processSubscriptionBilling = async (req: Request, res: Response): P
       subtotal: subscription.unitPrice * subscription.quantity,
       discountAmount: subscription.discountAmount,
       taxAmount: 0, // Would calculate based on tax rules
-      shippingAmount: 0 // Would calculate based on shipping rules
+      shippingAmount: 0, // Would calculate based on shipping rules
     });
 
     if (processPayment === 'true') {
       // Simulate payment processing
-      
 
       // In a real implementation, this would integrate with payment gateway
       await updateSubscriptionOrderStatus(order.subscriptionOrderId, 'paid');
@@ -487,11 +488,11 @@ export const processSubscriptionBilling = async (req: Request, res: Response): P
     res.json({
       success: true,
       message: `Billing processed for subscription ${subscriptionId}`,
-      orderId: order.subscriptionOrderId
+      orderId: order.subscriptionOrderId,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to process billing' });
   }
 };
@@ -513,7 +514,7 @@ export const manageFailedPayments = async (req: Request, res: Response): Promise
         attemptNumber: subscription.failedPaymentCount + 1,
         amount: subscription.totalPrice,
         currency: subscription.currency,
-        scheduledAt: retryDate ? new Date(retryDate) : new Date()
+        scheduledAt: retryDate ? new Date(retryDate) : new Date(),
       });
 
       res.json({ success: true, message: 'Payment retry scheduled' });
@@ -528,7 +529,7 @@ export const manageFailedPayments = async (req: Request, res: Response): Promise
     }
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to manage failed payment' });
   }
 };

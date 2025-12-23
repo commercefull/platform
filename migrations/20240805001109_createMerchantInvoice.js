@@ -21,7 +21,7 @@ exports.up = function (knex) {
     t.timestamp('startDate');
     t.timestamp('endDate');
     t.text('notes');
-    
+
     t.uuid('createdBy');
     t.uuid('updatedBy');
     t.index('merchantId');

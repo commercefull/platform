@@ -4,36 +4,40 @@ This directory contains deployment configurations and documentation for multiple
 
 ## Deployment Strategies
 
-| Strategy | Infrastructure | Use Case | Complexity | Cost |
-|----------|----------------|----------|------------|------|
-| **Ansible + VPS** | Traditional VPS (DigitalOcean, Linode, etc.) | Simple deployments, full control | Medium | Low |
-| **Docker + GCP** | Google Cloud Platform | Scalable, managed services | Low | Medium |
-| **Docker + Azure** | Microsoft Azure | Enterprise integration | Low | Medium |
-| **ECS + RDS + AWS** | Amazon Web Services | High availability, enterprise | High | High |
+| Strategy            | Infrastructure                               | Use Case                         | Complexity | Cost   |
+| ------------------- | -------------------------------------------- | -------------------------------- | ---------- | ------ |
+| **Ansible + VPS**   | Traditional VPS (DigitalOcean, Linode, etc.) | Simple deployments, full control | Medium     | Low    |
+| **Docker + GCP**    | Google Cloud Platform                        | Scalable, managed services       | Low        | Medium |
+| **Docker + Azure**  | Microsoft Azure                              | Enterprise integration           | Low        | Medium |
+| **ECS + RDS + AWS** | Amazon Web Services                          | High availability, enterprise    | High       | High   |
 
 ## Quick Start
 
 Choose your preferred deployment strategy:
 
 ### 1. Ansible on VPS (Recommended for simplicity)
+
 ```bash
 cd infra/ansible-vps
 ansible-playbook -i inventory.ini deploy.yml
 ```
 
 ### 2. Docker on GCP (Recommended for Google ecosystem)
+
 ```bash
 cd infra/docker-gcp
 gcloud builds submit --config cloudbuild.yaml .
 ```
 
 ### 3. Docker on Azure (Recommended for Microsoft ecosystem)
+
 ```bash
 cd infra/docker-azure
 az deployment group create --resource-group commercefull-rg --template-file azuredeploy.json
 ```
 
 ### 4. ECS + RDS on AWS (Recommended for high availability)
+
 ```bash
 cd infra/ecs-aws
 cdk deploy CommerceFull-App
@@ -41,8 +45,10 @@ cdk deploy CommerceFull-App
 
 ## Infrastructure Implementation Status
 
-### Ansible VPS - 
+### Ansible VPS -
+
 **Full Ansible automation with 7 roles:**
+
 - `common/` - System setup, security, monitoring
 - `postgresql/` - PostgreSQL 18 installation & configuration
 - `nodejs/` - Node.js runtime & PM2 setup
@@ -52,6 +58,7 @@ cdk deploy CommerceFull-App
 - `monitoring/` - System monitoring & security
 
 **Features:**
+
 - Automated PostgreSQL 18 deployment
 - SSL certificate management with Let's Encrypt
 - Systemd service management
@@ -59,8 +66,10 @@ cdk deploy CommerceFull-App
 - Security hardening (UFW, Fail2ban)
 - Backup automation
 
-### Docker GCP - 
+### Docker GCP -
+
 **Terraform infrastructure with:**
+
 - `main.tf` - Complete GCP infrastructure (Cloud Run, Cloud SQL, Cloud Storage)
 - `variables.tf` - Configurable deployment variables
 - `outputs.tf` - Infrastructure outputs
@@ -68,6 +77,7 @@ cdk deploy CommerceFull-App
 - `deploy.sh` - Automated deployment script
 
 **Features:**
+
 - Cloud Run serverless containers
 - Cloud SQL PostgreSQL 18 (when available)
 - Cloud Storage for media files
@@ -75,8 +85,10 @@ cdk deploy CommerceFull-App
 - Auto-scaling & monitoring
 - CI/CD integration ready
 
-### Docker Azure - 
+### Docker Azure -
+
 **Terraform infrastructure with:**
+
 - `main.tf` - Complete Azure infrastructure (Container Apps, PostgreSQL, Storage)
 - `variables.tf` - Configurable deployment variables
 - `outputs.tf` - Infrastructure outputs
@@ -84,6 +96,7 @@ cdk deploy CommerceFull-App
 - `deploy.sh` - Automated deployment script
 
 **Features:**
+
 - Azure Container Apps serverless
 - Azure Database for PostgreSQL 18 (when available)
 - Azure Storage Account & CDN
@@ -91,14 +104,17 @@ cdk deploy CommerceFull-App
 - Azure Monitor & Application Insights
 - Key Vault secrets management
 
-### ECS AWS - 
+### ECS AWS -
+
 **AWS CDK v2 infrastructure with:**
+
 - `lib/commercefull-stack.ts` - Complete AWS stack (VPC, ECS, RDS, ALB, CloudFront)
 - `bin/commercefull.ts` - CDK app entry point
 - `package.json` & `tsconfig.json` - CDK project configuration
 - `deploy.sh` - Automated deployment script
 
 **Features:**
+
 - ECS Fargate containers with auto-scaling
 - RDS PostgreSQL 18 (when available)
 - Application Load Balancer with SSL
@@ -110,6 +126,7 @@ cdk deploy CommerceFull-App
 ## PostgreSQL 18 Support
 
 **Current Status:**
+
 - **AWS RDS**: Supported
 - **Google Cloud SQL**: Check availability (new release)
 - **Azure Database**: Check availability (new release)
@@ -120,6 +137,7 @@ cdk deploy CommerceFull-App
 ## Environment Setup
 
 ### Development
+
 ```bash
 cp .env.example .env
 # Edit .env with your local configuration
@@ -128,21 +146,25 @@ npm run dev
 ```
 
 ### Production
+
 Each deployment strategy includes production environment configurations with proper secrets management.
 
 ## Monitoring & Maintenance
 
 ### Health Checks
+
 - Application: `/health`
 - Database: Connection monitoring
 - Infrastructure: Provider-specific monitoring
 
 ### Backups
+
 - Database: Daily automated backups
 - Files: Cloud storage replication
 - Configuration: Version controlled
 
 ### Scaling
+
 - Horizontal: Load balancer configuration
 - Vertical: Instance size adjustments
 - Database: Read replicas
@@ -150,15 +172,18 @@ Each deployment strategy includes production environment configurations with pro
 ## Security
 
 ### SSL/TLS
+
 - Automatic HTTPS certificates (Let's Encrypt)
 - Certificate rotation automation
 
 ### Secrets Management
+
 - Environment-specific secret storage
 - No hardcoded secrets in code
 - Rotation procedures
 
 ### Network Security
+
 - VPC isolation
 - Security groups/firewalls
 - Private subnets for databases
@@ -170,12 +195,14 @@ See individual deployment directories for specific troubleshooting guides.
 ## Prerequisites
 
 ### Global Requirements
+
 - Node.js 18+ and npm
 - Docker and Docker Compose
 - Git
 - SSH access to target environments
 
 ### Database Requirements
+
 **PostgreSQL 18**: The platform is configured to use PostgreSQL 18. Note that PostgreSQL 18 was released in October 2024 and may not be available on all cloud providers yet:
 
 - **AWS RDS**: Available
@@ -190,6 +217,7 @@ If PostgreSQL 18 is not available on your chosen provider, use PostgreSQL 15 or 
 ## Contributing
 
 When adding new deployment strategies:
+
 1. Follow the established directory structure
 2. Include comprehensive documentation
 3. Provide deployment and rollback scripts

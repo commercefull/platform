@@ -24,7 +24,7 @@ exports.up = function (knex) {
     t.string('barcode', 100);
     t.string('mpn', 100);
     t.integer('position').defaultTo(0);
-    
+
     t.index('productId');
     t.index('sku');
     t.index('status');

@@ -9,15 +9,15 @@ exports.up = function (knex) {
       slug: 'generic',
       description: 'Generic/unbranded products',
       isActive: true,
-      isFeatured: false
+      isFeatured: false,
     },
     {
       name: 'Sample Brand',
       slug: 'sample-brand',
       description: 'Sample brand for testing',
       isActive: true,
-      isFeatured: true
-    }
+      isFeatured: true,
+    },
   ]);
 };
 
@@ -36,21 +36,18 @@ exports.seed = async function (knex) {
       slug: 'generic',
       description: 'Generic/unbranded products',
       isActive: true,
-      isFeatured: false
+      isFeatured: false,
     },
     {
       name: 'Sample Brand',
       slug: 'sample-brand',
       description: 'Sample brand for testing',
       isActive: true,
-      isFeatured: true
-    }
+      isFeatured: true,
+    },
   ];
 
   for (const brand of brands) {
-    await knex('productBrand')
-      .insert(brand)
-      .onConflict('slug')
-      .merge();
+    await knex('productBrand').insert(brand).onConflict('slug').merge();
   }
 };

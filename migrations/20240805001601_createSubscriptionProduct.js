@@ -2,8 +2,8 @@
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.up = function(knex) {
-  return knex.schema.createTable('subscriptionProduct', function(table) {
+exports.up = function (knex) {
+  return knex.schema.createTable('subscriptionProduct', function (table) {
     table.uuid('subscriptionProductId').primary().defaultTo(knex.raw('uuidv7()'));
     table.uuid('productId').notNullable().references('productId').inTable('product').onDelete('CASCADE');
     table.boolean('isSubscriptionOnly').defaultTo(false);
@@ -29,7 +29,7 @@ exports.up = function(knex) {
     table.boolean('isActive').defaultTo(true);
     table.timestamp('createdAt').defaultTo(knex.fn.now());
     table.timestamp('updatedAt').defaultTo(knex.fn.now());
-    
+
     table.unique('productId');
     table.index('isActive');
   });
@@ -39,6 +39,6 @@ exports.up = function(knex) {
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTableIfExists('subscriptionProduct');
 };

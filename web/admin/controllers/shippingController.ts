@@ -19,12 +19,12 @@ export const listShippingMethods = async (req: Request, res: Response): Promise<
     adminRespond(req, res, 'shipping/methods/index', {
       pageName: 'Shipping Methods',
       methods,
-      
-      success: req.query.success || null
+
+      success: req.query.success || null,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load shipping methods',
@@ -39,7 +39,7 @@ export const createShippingMethodForm = async (req: Request, res: Response): Pro
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -66,7 +66,7 @@ export const createShippingMethod = async (req: Request, res: Response): Promise
       maxWeight,
       minOrderValue,
       maxOrderValue,
-      shippingClass
+      shippingClass,
     } = req.body;
 
     const method = await shippingMethodRepo.create({
@@ -90,13 +90,12 @@ export const createShippingMethod = async (req: Request, res: Response): Promise
       dimensionRestrictions: undefined,
       shippingClass: shippingClass || undefined,
       customFields: undefined,
-      createdBy: null
+      createdBy: null,
     });
 
     res.redirect(`/hub/shipping/methods/${method.shippingMethodId}?success=Shipping method created successfully`);
   } catch (error: any) {
     logger.error('Error:', error);
-    
 
     adminRespond(req, res, 'shipping/methods/create', {
       pageName: 'Create Shipping Method',
@@ -123,12 +122,12 @@ export const viewShippingMethod = async (req: Request, res: Response): Promise<v
     adminRespond(req, res, 'shipping/methods/view', {
       pageName: `Method: ${method.name}`,
       method,
-      
-      success: req.query.success || null
+
+      success: req.query.success || null,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load shipping method',
@@ -156,7 +155,7 @@ export const editShippingMethodForm = async (req: Request, res: Response): Promi
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -186,7 +185,7 @@ export const updateShippingMethod = async (req: Request, res: Response): Promise
       maxWeight,
       minOrderValue,
       maxOrderValue,
-      shippingClass
+      shippingClass,
     } = req.body;
 
     if (name !== undefined) updates.name = name;
@@ -196,7 +195,8 @@ export const updateShippingMethod = async (req: Request, res: Response): Promise
     if (isDefault !== undefined) updates.isDefault = isDefault === 'true' || isDefault === true;
     if (serviceCode !== undefined) updates.serviceCode = serviceCode || undefined;
     if (domesticInternational !== undefined) updates.domesticInternational = domesticInternational;
-    if (estimatedDeliveryDays !== undefined) updates.estimatedDeliveryDays = estimatedDeliveryDays ? JSON.parse(estimatedDeliveryDays) : undefined;
+    if (estimatedDeliveryDays !== undefined)
+      updates.estimatedDeliveryDays = estimatedDeliveryDays ? JSON.parse(estimatedDeliveryDays) : undefined;
     if (handlingDays !== undefined) updates.handlingDays = handlingDays ? parseInt(handlingDays) : undefined;
     if (priority !== undefined) updates.priority = priority ? parseInt(priority) : undefined;
     if (displayOnFrontend !== undefined) updates.displayOnFrontend = displayOnFrontend === 'true' || displayOnFrontend === true;
@@ -216,7 +216,6 @@ export const updateShippingMethod = async (req: Request, res: Response): Promise
     res.redirect(`/hub/shipping/methods/${methodId}?success=Shipping method updated successfully`);
   } catch (error: any) {
     logger.error('Error:', error);
-    
 
     try {
       const method = await shippingMethodRepo.findById(req.params.methodId);
@@ -249,7 +248,7 @@ export const deleteShippingMethod = async (req: Request, res: Response): Promise
     res.json({ success: true, message: 'Shipping method deleted successfully' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to delete shipping method' });
   }
 };
@@ -267,7 +266,7 @@ export const activateShippingMethod = async (req: Request, res: Response): Promi
     res.json({ success: true, message: 'Shipping method activated successfully' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to activate shipping method' });
   }
 };
@@ -285,7 +284,7 @@ export const deactivateShippingMethod = async (req: Request, res: Response): Pro
     res.json({ success: true, message: 'Shipping method deactivated successfully' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to deactivate shipping method' });
   }
 };

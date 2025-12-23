@@ -52,7 +52,7 @@ export class CreateSubscriptionUseCase {
       return {
         success: false,
         message: 'Customer ID is required',
-        errors: ['customer_id_required']
+        errors: ['customer_id_required'],
       };
     }
 
@@ -60,7 +60,7 @@ export class CreateSubscriptionUseCase {
       return {
         success: false,
         message: 'Subscription plan ID is required',
-        errors: ['plan_id_required']
+        errors: ['plan_id_required'],
       };
     }
 
@@ -71,7 +71,7 @@ export class CreateSubscriptionUseCase {
         return {
           success: false,
           message: 'Subscription plan not found',
-          errors: ['plan_not_found']
+          errors: ['plan_not_found'],
         };
       }
 
@@ -79,7 +79,7 @@ export class CreateSubscriptionUseCase {
         return {
           success: false,
           message: 'Subscription plan is not active',
-          errors: ['plan_inactive']
+          errors: ['plan_inactive'],
         };
       }
 
@@ -89,7 +89,7 @@ export class CreateSubscriptionUseCase {
         return {
           success: false,
           message: 'Subscription product is not available',
-          errors: ['product_unavailable']
+          errors: ['product_unavailable'],
         };
       }
 
@@ -131,7 +131,7 @@ export class CreateSubscriptionUseCase {
         shippingAddressId: input.shippingAddressId,
         billingAddressId: input.billingAddressId,
         paymentMethodId: input.paymentMethodId,
-        customizations: input.customizations
+        customizations: input.customizations,
       });
 
       // TODO: Emit SubscriptionCreated event
@@ -141,15 +141,13 @@ export class CreateSubscriptionUseCase {
         subscription,
         plan,
         product,
-        message: status === 'trialing' 
-          ? `Subscription created with ${trialDays}-day trial` 
-          : 'Subscription created successfully'
+        message: status === 'trialing' ? `Subscription created with ${trialDays}-day trial` : 'Subscription created successfully',
       };
     } catch (error: any) {
       return {
         success: false,
         message: error.message || 'Failed to create subscription',
-        errors: ['creation_failed']
+        errors: ['creation_failed'],
       };
     }
   }
@@ -161,7 +159,7 @@ export class CreateSubscriptionUseCase {
         end.setDate(end.getDate() + count);
         break;
       case 'week':
-        end.setDate(end.getDate() + (count * 7));
+        end.setDate(end.getDate() + count * 7);
         break;
       case 'month':
         end.setMonth(end.getMonth() + count);

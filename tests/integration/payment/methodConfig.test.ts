@@ -18,20 +18,15 @@ describe('Payment Method Configuration Tests', () => {
   });
 
   afterAll(async () => {
-    await cleanupPaymentTests(
-      client,
-      adminToken,
-      testGatewayId,
-      testMethodConfigId
-    );
+    await cleanupPaymentTests(client, adminToken, testGatewayId, testMethodConfigId);
   });
 
   describe('Admin Method Config Operations', () => {
     it('should get all method configurations for a merchant', async () => {
       const response = await client.get('/business/method-configs', {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       expect(Array.isArray(response.data.data)).toBe(true);
@@ -39,14 +34,13 @@ describe('Payment Method Configuration Tests', () => {
 
     it('should get a method configuration by ID', async () => {
       if (!testMethodConfigId) {
-        
         return;
       }
-      
+
       const response = await client.get(`/business/method-configs/${testMethodConfigId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       expect(response.data.data).toHaveProperty('paymentMethodConfigId');
@@ -55,61 +49,63 @@ describe('Payment Method Configuration Tests', () => {
 
     it('should create a new method configuration', async () => {
       if (!testGatewayId) {
-        
         return;
       }
-      
+
       const newMethodConfig = {
         paymentMethod: 'debitCard',
         isEnabled: true,
         displayName: 'New Test Method',
         displayOrder: 2,
         gatewayId: testGatewayId,
-        supportedCurrencies: ['USD']
+        supportedCurrencies: ['USD'],
       };
-      
+
       const response = await client.post('/business/method-configs', newMethodConfig, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       expect(response.status).toBe(201);
       expect(response.data.success).toBe(true);
       expect(response.data.data).toHaveProperty('paymentMethodConfigId');
       expect(response.data.data).toHaveProperty('displayName', newMethodConfig.displayName);
-      
+
       // Clean up - delete the new method config
       const newMethodConfigId = response.data.data.paymentMethodConfigId;
       await client.delete(`/business/method-configs/${newMethodConfigId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
     });
 
     it('should update an existing method configuration', async () => {
       if (!testMethodConfigId) {
-        
         return;
       }
-      
+
       const updates = {
         displayName: 'Updated Method Name',
-        isEnabled: false
+        isEnabled: false,
       };
-      
+
       const response = await client.put(`/business/method-configs/${testMethodConfigId}`, updates, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       expect(response.data.data).toHaveProperty('displayName', updates.displayName);
-      
+
       // Reset to original values
-      await client.put(`/business/method-configs/${testMethodConfigId}`, {
-        displayName: testMethodConfigData.displayName,
-        isEnabled: testMethodConfigData.isEnabled
-      }, {
-        headers: { Authorization: `Bearer ${adminToken}` }
-      });
+      await client.put(
+        `/business/method-configs/${testMethodConfigId}`,
+        {
+          displayName: testMethodConfigData.displayName,
+          isEnabled: testMethodConfigData.isEnabled,
+        },
+        {
+          headers: { Authorization: `Bearer ${adminToken}` },
+        },
+      );
     });
   });
 

@@ -82,12 +82,25 @@ export class TaxRateRepo {
         "threshold", "startDate", "endDate", "isActive", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18) RETURNING *`,
       [
-        params.taxCategoryId, params.taxZoneId, params.name, params.rate, params.type || 'percentage',
-        params.priority || 0, params.isCompound || false, params.includeInPrice || false,
-        params.isShippingTaxable || false, params.fixedAmount || null, params.minimumAmount || null,
-        params.maximumAmount || null, params.threshold || null, params.startDate || now,
-        params.endDate || null, params.isActive ?? true, now, now
-      ]
+        params.taxCategoryId,
+        params.taxZoneId,
+        params.name,
+        params.rate,
+        params.type || 'percentage',
+        params.priority || 0,
+        params.isCompound || false,
+        params.includeInPrice || false,
+        params.isShippingTaxable || false,
+        params.fixedAmount || null,
+        params.minimumAmount || null,
+        params.maximumAmount || null,
+        params.threshold || null,
+        params.startDate || now,
+        params.endDate || null,
+        params.isActive ?? true,
+        now,
+        now,
+      ],
     );
     if (!result) throw new Error('Failed to create tax rate');
     return result;
@@ -112,7 +125,7 @@ export class TaxRateRepo {
 
     return await queryOne<TaxRate>(
       `UPDATE "taxRate" SET ${updateFields.join(', ')} WHERE "taxRateId" = $${paramIndex} RETURNING *`,
-      values
+      values,
     );
   }
 
@@ -125,10 +138,7 @@ export class TaxRateRepo {
   }
 
   async delete(id: string): Promise<boolean> {
-    const result = await queryOne<{ taxRateId: string }>(
-      `DELETE FROM "taxRate" WHERE "taxRateId" = $1 RETURNING "taxRateId"`,
-      [id]
-    );
+    const result = await queryOne<{ taxRateId: string }>(`DELETE FROM "taxRate" WHERE "taxRateId" = $1 RETURNING "taxRateId"`, [id]);
     return !!result;
   }
 

@@ -15,12 +15,12 @@ yarn cmd:new:merchant --email=test@example.com --pass=Pass@1234
 ```
 
 ## Run
+
 ```bash
 yarn dev
 ```
 
 ## Deploy
-
 
 - Admin template: https://github.com/alexis-luna/bootstrap-simple-admin-template
 - Admin template: https://github.com/iqonicdesignofficial/hope-ui-design-system

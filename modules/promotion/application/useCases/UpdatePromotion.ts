@@ -21,7 +21,7 @@ export class UpdatePromotionCommand {
       startsAt: Date;
       endsAt: Date;
       isActive: boolean;
-    }>
+    }>,
   ) {}
 }
 
@@ -74,7 +74,7 @@ export class UpdatePromotionUseCase {
       promotionId: promotion.promotionId,
       name: promotion.name,
       status: promotion.status,
-      updatedAt: promotion.updatedAt?.toISOString() || new Date().toISOString()
+      updatedAt: promotion.updatedAt?.toISOString() || new Date().toISOString(),
     };
   }
 }

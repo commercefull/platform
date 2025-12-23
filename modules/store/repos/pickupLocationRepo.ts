@@ -1,6 +1,6 @@
 /**
  * Pickup Location Repository
- * 
+ *
  * Manages store pickup locations for BOPIS (Buy Online, Pick Up In Store).
  * Migrated from distribution module.
  */
@@ -107,10 +107,7 @@ export async function saveLocation(params: CreatePickupLocationParams): Promise<
  * Get a pickup location by ID
  */
 export async function getLocation(pickupLocationId: string): Promise<PickupLocation | null> {
-  const result = await queryOne(
-    'SELECT * FROM "pickupLocation" WHERE "pickupLocationId" = $1',
-    [pickupLocationId]
-  );
+  const result = await queryOne('SELECT * FROM "pickupLocation" WHERE "pickupLocationId" = $1', [pickupLocationId]);
 
   return result ? mapToPickupLocation(result) : null;
 }
@@ -121,7 +118,7 @@ export async function getLocation(pickupLocationId: string): Promise<PickupLocat
 export async function getLocations(storeId?: string): Promise<PickupLocation[]> {
   let sql = 'SELECT * FROM "pickupLocation"';
   const params: unknown[] = [];
-  
+
   if (storeId) {
     sql += ' WHERE "storeId" = $1';
     params.push(storeId);
@@ -135,10 +132,7 @@ export async function getLocations(storeId?: string): Promise<PickupLocation[]> 
 /**
  * Update a pickup location
  */
-export async function updateLocation(
-  pickupLocationId: string,
-  params: UpdatePickupLocationParams
-): Promise<PickupLocation | null> {
+export async function updateLocation(pickupLocationId: string, params: UpdatePickupLocationParams): Promise<PickupLocation | null> {
   const updates: Record<string, unknown> = { updatedAt: new Date() };
 
   if (params.name !== undefined) updates.name = params.name;
@@ -183,10 +177,7 @@ export async function updateLocation(
  * Delete a pickup location
  */
 export async function deleteLocation(pickupLocationId: string): Promise<boolean> {
-  const result = await query<{ rowCount: number }>(
-    'DELETE FROM "pickupLocation" WHERE "pickupLocationId" = $1',
-    [pickupLocationId]
-  );
+  const result = await query<{ rowCount: number }>('DELETE FROM "pickupLocation" WHERE "pickupLocationId" = $1', [pickupLocationId]);
 
   return (result?.rowCount ?? 0) > 0;
 }
@@ -197,7 +188,7 @@ export async function deleteLocation(pickupLocationId: string): Promise<boolean>
 export async function getActiveLocations(storeId: string): Promise<PickupLocation[]> {
   const result = await query<{ rows: any[] }>(
     'SELECT * FROM "pickupLocation" WHERE "storeId" = $1 AND "isActive" = true ORDER BY "name" ASC',
-    [storeId]
+    [storeId],
   );
 
   return (result?.rows ?? []).map(mapToPickupLocation);
@@ -210,7 +201,7 @@ export async function findNearestLocations(
   latitude: number,
   longitude: number,
   radiusKm: number = 50,
-  limit: number = 10
+  limit: number = 10,
 ): Promise<Array<PickupLocation & { distance: number }>> {
   // Using Haversine formula approximation in SQL
   const sql = `
@@ -227,32 +218,22 @@ export async function findNearestLocations(
   `;
   const results = await query<{ rows: any[] }>(sql, [latitude, longitude, limit]);
 
-  return (results?.rows ?? []).map((row: any) => {
-    const location = mapToPickupLocation(row);
-    const distance = calculateDistance(
-      latitude,
-      longitude,
-      row.latitude,
-      row.longitude
-    );
-    return { ...location, distance };
-  }).filter((loc: any) => loc.distance <= radiusKm);
+  return (results?.rows ?? [])
+    .map((row: any) => {
+      const location = mapToPickupLocation(row);
+      const distance = calculateDistance(latitude, longitude, row.latitude, row.longitude);
+      return { ...location, distance };
+    })
+    .filter((loc: any) => loc.distance <= radiusKm);
 }
 
 // Helper to calculate distance between two coordinates
-function calculateDistance(
-  lat1: number,
-  lon1: number,
-  lat2: number,
-  lon2: number
-): number {
+function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const R = 6371; // Earth's radius in km
   const dLat = toRad(lat2 - lat1);
   const dLon = toRad(lon2 - lon1);
   const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 }
@@ -277,9 +258,7 @@ function mapToPickupLocation(row: any): PickupLocation {
     },
     latitude: row.latitude ? parseFloat(row.latitude) : undefined,
     longitude: row.longitude ? parseFloat(row.longitude) : undefined,
-    operatingHours: typeof row.operatingHours === 'string'
-      ? JSON.parse(row.operatingHours)
-      : row.operatingHours,
+    operatingHours: typeof row.operatingHours === 'string' ? JSON.parse(row.operatingHours) : row.operatingHours,
     isActive: row.isActive,
     contactPhone: row.contactPhone,
     contactEmail: row.contactEmail,

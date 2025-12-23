@@ -27,7 +27,7 @@ exports.up = async function (knex) {
     t.jsonb('dimensionRestrictions');
     t.string('shippingClass', 50);
     t.jsonb('customFields');
-    
+
     t.uuid('createdBy');
     t.index('shippingCarrierId');
     t.index('code');

@@ -9,21 +9,21 @@ export enum PricingRuleType {
   BUNDLE = 'bundle',
   DYNAMIC = 'dynamic',
   CONTRACT = 'contract',
-  CURRENCY_CONVERSION = 'currency_conversion'
+  CURRENCY_CONVERSION = 'currency_conversion',
 }
 
 export enum PricingRuleStatus {
   ACTIVE = 'active',
   INACTIVE = 'inactive',
   SCHEDULED = 'scheduled',
-  EXPIRED = 'expired'
+  EXPIRED = 'expired',
 }
 
 export enum PricingAdjustmentType {
   FIXED = 'fixed',
   PERCENTAGE = 'percentage',
   OVERRIDE = 'override',
-  EXCHANGE = 'exchange' // For currency exchange rate adjustments
+  EXCHANGE = 'exchange', // For currency exchange rate adjustments
 }
 
 export enum PricingRuleScope {
@@ -31,7 +31,7 @@ export enum PricingRuleScope {
   PRODUCT = 'product',
   CATEGORY = 'category',
   CUSTOMER = 'customer',
-  CUSTOMER_GROUP = 'customer_group'
+  CUSTOMER_GROUP = 'customer_group',
 }
 
 export interface PricingCondition {
@@ -81,8 +81,8 @@ export type PricingRuleUpdateProps = Partial<Omit<PricingRule, 'id' | 'pricingRu
  * Currency Price Rule - Extended from PricingRule for currency-specific pricing
  */
 export interface CurrencyPriceRule extends PricingRule {
-  currencyCode: string;   // Target currency
-  regionCode?: string;    // Optional region specificity
+  currencyCode: string; // Target currency
+  regionCode?: string; // Optional region specificity
   minOrderValue?: number; // Minimum order value for rule to apply
   maxOrderValue?: number; // Maximum order value for rule to apply
 }

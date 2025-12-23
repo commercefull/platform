@@ -21,13 +21,13 @@ export class ProductTypeController {
 
       res.json({
         success: true,
-        data: productTypes
+        data: productTypes,
       });
     } catch (error) {
       logger.error('Error:', error);
       res.status(500).json({
         success: false,
-        error: `Failed to list product types: ${(error as Error).message}`
+        error: `Failed to list product types: ${(error as Error).message}`,
       });
     }
   }
@@ -44,7 +44,7 @@ export class ProductTypeController {
       if (!productType) {
         res.status(404).json({
           success: false,
-          error: 'Product type not found'
+          error: 'Product type not found',
         });
         return;
       }
@@ -56,14 +56,14 @@ export class ProductTypeController {
         success: true,
         data: {
           ...productType,
-          attributeSets
-        }
+          attributeSets,
+        },
       });
     } catch (error) {
       logger.error('Error:', error);
       res.status(500).json({
         success: false,
-        error: `Failed to get product type: ${(error as Error).message}`
+        error: `Failed to get product type: ${(error as Error).message}`,
       });
     }
   }
@@ -80,20 +80,20 @@ export class ProductTypeController {
       if (!productType) {
         res.status(404).json({
           success: false,
-          error: 'Product type not found'
+          error: 'Product type not found',
         });
         return;
       }
 
       res.json({
         success: true,
-        data: productType
+        data: productType,
       });
     } catch (error) {
       logger.error('Error:', error);
       res.status(500).json({
         success: false,
-        error: `Failed to get product type: ${(error as Error).message}`
+        error: `Failed to get product type: ${(error as Error).message}`,
       });
     }
   }
@@ -109,7 +109,7 @@ export class ProductTypeController {
       if (!name) {
         res.status(400).json({
           success: false,
-          error: 'Name is required'
+          error: 'Name is required',
         });
         return;
       }
@@ -120,25 +120,25 @@ export class ProductTypeController {
       if (existing) {
         res.status(400).json({
           success: false,
-          error: `Product type with slug "${checkSlug}" already exists`
+          error: `Product type with slug "${checkSlug}" already exists`,
         });
         return;
       }
 
       const productType = await productTypeRepository.create({
         name,
-        slug
+        slug,
       });
 
       res.status(201).json({
         success: true,
-        data: productType
+        data: productType,
       });
     } catch (error) {
       logger.error('Error:', error);
       res.status(500).json({
         success: false,
-        error: `Failed to create product type: ${(error as Error).message}`
+        error: `Failed to create product type: ${(error as Error).message}`,
       });
     }
   }
@@ -156,7 +156,7 @@ export class ProductTypeController {
       if (!existing) {
         res.status(404).json({
           success: false,
-          error: 'Product type not found'
+          error: 'Product type not found',
         });
         return;
       }
@@ -167,7 +167,7 @@ export class ProductTypeController {
         if (slugExists) {
           res.status(400).json({
             success: false,
-            error: `Product type with slug "${slug}" already exists`
+            error: `Product type with slug "${slug}" already exists`,
           });
           return;
         }
@@ -175,18 +175,18 @@ export class ProductTypeController {
 
       const updated = await productTypeRepository.update(id, {
         name,
-        slug
+        slug,
       });
 
       res.json({
         success: true,
-        data: updated
+        data: updated,
       });
     } catch (error) {
       logger.error('Error:', error);
       res.status(500).json({
         success: false,
-        error: `Failed to update product type: ${(error as Error).message}`
+        error: `Failed to update product type: ${(error as Error).message}`,
       });
     }
   }
@@ -203,7 +203,7 @@ export class ProductTypeController {
       if (!existing) {
         res.status(404).json({
           success: false,
-          error: 'Product type not found'
+          error: 'Product type not found',
         });
         return;
       }
@@ -212,13 +212,13 @@ export class ProductTypeController {
 
       res.json({
         success: true,
-        message: 'Product type deleted successfully'
+        message: 'Product type deleted successfully',
       });
     } catch (error) {
       logger.error('Error:', error);
       res.status(500).json({
         success: false,
-        error: `Failed to delete product type: ${(error as Error).message}`
+        error: `Failed to delete product type: ${(error as Error).message}`,
       });
     }
   }
@@ -235,7 +235,7 @@ export class ProductTypeController {
       if (!productType) {
         res.status(404).json({
           success: false,
-          error: 'Product type not found'
+          error: 'Product type not found',
         });
         return;
       }
@@ -244,13 +244,13 @@ export class ProductTypeController {
 
       res.json({
         success: true,
-        data: attributes
+        data: attributes,
       });
     } catch (error) {
       logger.error('Error:', error);
       res.status(500).json({
         success: false,
-        error: `Failed to get product type attributes: ${(error as Error).message}`
+        error: `Failed to get product type attributes: ${(error as Error).message}`,
       });
     }
   }

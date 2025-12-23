@@ -1,6 +1,6 @@
 /**
  * AllocateFromPool Use Case
- * 
+ *
  * Allocates inventory from a shared pool to fulfill an order.
  */
 
@@ -61,19 +61,10 @@ export class AllocateFromPoolUseCase {
     let fullyAllocated = true;
 
     for (const item of input.items) {
-      const inventoryLocations = await this.inventoryRepository.findAvailableInPool(
-        input.poolId,
-        item.productId,
-        item.variantId
-      );
+      const inventoryLocations = await this.inventoryRepository.findAvailableInPool(input.poolId, item.productId, item.variantId);
 
       // Sort by allocation strategy
-      const sortedLocations = this.sortByStrategy(
-        inventoryLocations,
-        strategy,
-        item.preferredLocationId,
-        input.customerLocation
-      );
+      const sortedLocations = this.sortByStrategy(inventoryLocations, strategy, item.preferredLocationId, input.customerLocation);
 
       const allocations: AllocationResult['allocations'] = [];
       let remainingQuantity = item.quantity;
@@ -82,14 +73,9 @@ export class AllocateFromPoolUseCase {
         if (remainingQuantity <= 0) break;
 
         const allocateQty = Math.min(remainingQuantity, location.availableQuantity);
-        
+
         // Reserve the stock
-        await this.inventoryRepository.reserveStock(
-          location.inventoryId,
-          allocateQty,
-          input.orderId,
-          allocationId
-        );
+        await this.inventoryRepository.reserveStock(location.inventoryId, allocateQty, input.orderId, allocationId);
 
         allocations.push({
           inventoryId: location.inventoryId,
@@ -138,7 +124,7 @@ export class AllocateFromPoolUseCase {
     locations: any[],
     strategy: string,
     preferredLocationId?: string,
-    customerLocation?: { latitude: number; longitude: number }
+    customerLocation?: { latitude: number; longitude: number },
   ): any[] {
     switch (strategy) {
       case 'priority':
@@ -167,23 +153,18 @@ export class AllocateFromPoolUseCase {
       case 'fifo':
       default:
         // First in, first out - by creation date
-        return locations.sort((a, b) => 
-          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-        );
+        return locations.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
     }
   }
 
   private calculateDistance(
     customer: { latitude: number; longitude: number },
-    location: { latitude?: number; longitude?: number }
+    location: { latitude?: number; longitude?: number },
   ): number {
     if (!location.latitude || !location.longitude) {
       return Infinity;
     }
     // Simple Euclidean distance (for proper geo would use Haversine)
-    return Math.sqrt(
-      Math.pow(customer.latitude - location.latitude, 2) +
-      Math.pow(customer.longitude - location.longitude, 2)
-    );
+    return Math.sqrt(Math.pow(customer.latitude - location.latitude, 2) + Math.pow(customer.longitude - location.longitude, 2));
   }
 }

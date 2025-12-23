@@ -1,7 +1,7 @@
 import { AxiosInstance } from 'axios';
-import { 
-  setupShippingTests, 
-  cleanupShippingTests, 
+import {
+  setupShippingTests,
+  cleanupShippingTests,
   createTestCarrier,
   createTestMethod,
   createTestZone,
@@ -10,7 +10,7 @@ import {
   SEEDED_METHOD_IDS,
   SEEDED_ZONE_IDS,
   SEEDED_RATE_IDS,
-  SEEDED_PACKAGING_IDS
+  SEEDED_PACKAGING_IDS,
 } from './testUtils';
 
 describe('Shipping Feature Tests', () => {
@@ -20,7 +20,7 @@ describe('Shipping Feature Tests', () => {
     carrierIds: [] as string[],
     methodIds: [] as string[],
     zoneIds: [] as string[],
-    rateIds: [] as string[]
+    rateIds: [] as string[],
   };
 
   beforeAll(async () => {
@@ -44,7 +44,7 @@ describe('Shipping Feature Tests', () => {
 
     it('should list all carriers', async () => {
       const response = await client.get('/business/carriers', {
-        headers: authHeaders()
+        headers: authHeaders(),
       });
 
       expect(response.status).toBe(200);
@@ -54,7 +54,7 @@ describe('Shipping Feature Tests', () => {
 
     it('should get seeded UPS carrier by ID', async () => {
       const response = await client.get(`/business/carriers/${SEEDED_CARRIER_IDS.UPS}`, {
-        headers: authHeaders()
+        headers: authHeaders(),
       });
 
       expect(response.status).toBe(200);
@@ -66,7 +66,7 @@ describe('Shipping Feature Tests', () => {
       const carrierData = createTestCarrier();
 
       const response = await client.post('/business/carriers', carrierData, {
-        headers: authHeaders()
+        headers: authHeaders(),
       });
 
       expect(response.status).toBe(201);
@@ -81,7 +81,7 @@ describe('Shipping Feature Tests', () => {
       const updateData = { name: 'Updated Carrier Name', description: 'Updated description' };
 
       const response = await client.put(`/business/carriers/${testCarrierId}`, updateData, {
-        headers: authHeaders()
+        headers: authHeaders(),
       });
 
       expect(response.status).toBe(200);
@@ -91,7 +91,7 @@ describe('Shipping Feature Tests', () => {
 
     it('should return 404 for non-existent carrier', async () => {
       const response = await client.get('/business/carriers/00000000-0000-0000-0000-000000000000', {
-        headers: authHeaders()
+        headers: authHeaders(),
       });
 
       expect(response.status).toBe(404);
@@ -107,7 +107,7 @@ describe('Shipping Feature Tests', () => {
 
     it('should list all methods', async () => {
       const response = await client.get('/business/methods', {
-        headers: authHeaders()
+        headers: authHeaders(),
       });
 
       expect(response.status).toBe(200);
@@ -117,7 +117,7 @@ describe('Shipping Feature Tests', () => {
 
     it('should get seeded UPS Ground method by ID', async () => {
       const response = await client.get(`/business/methods/${SEEDED_METHOD_IDS.UPS_GROUND}`, {
-        headers: authHeaders()
+        headers: authHeaders(),
       });
 
       expect(response.status).toBe(200);
@@ -129,7 +129,7 @@ describe('Shipping Feature Tests', () => {
       const methodData = createTestMethod(SEEDED_CARRIER_IDS.UPS);
 
       const response = await client.post('/business/methods', methodData, {
-        headers: authHeaders()
+        headers: authHeaders(),
       });
 
       expect(response.status).toBe(201);
@@ -144,7 +144,7 @@ describe('Shipping Feature Tests', () => {
       const updateData = { name: 'Updated Method Name', priority: 5 };
 
       const response = await client.put(`/business/methods/${testMethodId}`, updateData, {
-        headers: authHeaders()
+        headers: authHeaders(),
       });
 
       expect(response.status).toBe(200);
@@ -162,7 +162,7 @@ describe('Shipping Feature Tests', () => {
 
     it('should list all zones', async () => {
       const response = await client.get('/business/zones', {
-        headers: authHeaders()
+        headers: authHeaders(),
       });
 
       expect(response.status).toBe(200);
@@ -173,7 +173,7 @@ describe('Shipping Feature Tests', () => {
     // TODO: Zone get by ID has server-side issues
     it.skip('should get seeded US Domestic zone by ID', async () => {
       const response = await client.get(`/business/zones/${SEEDED_ZONE_IDS.US_DOMESTIC}`, {
-        headers: authHeaders()
+        headers: authHeaders(),
       });
 
       expect(response.status).toBe(200);
@@ -186,7 +186,7 @@ describe('Shipping Feature Tests', () => {
       const zoneData = createTestZone();
 
       const response = await client.post('/business/zones', zoneData, {
-        headers: authHeaders()
+        headers: authHeaders(),
       });
 
       expect(response.status).toBe(201);
@@ -202,7 +202,7 @@ describe('Shipping Feature Tests', () => {
       const updateData = { name: 'Updated Zone Name', priority: 5 };
 
       const response = await client.put(`/business/zones/${testZoneId}`, updateData, {
-        headers: authHeaders()
+        headers: authHeaders(),
       });
 
       expect(response.status).toBe(200);
@@ -219,7 +219,7 @@ describe('Shipping Feature Tests', () => {
   describe.skip('Shipping Rate Management', () => {
     it('should list all rates', async () => {
       const response = await client.get('/business/rates', {
-        headers: authHeaders()
+        headers: authHeaders(),
       });
 
       expect(response.status).toBe(200);
@@ -229,7 +229,7 @@ describe('Shipping Feature Tests', () => {
 
     it('should get seeded UPS Ground US rate by ID', async () => {
       const response = await client.get(`/business/rates/${SEEDED_RATE_IDS.UPS_GROUND_US}`, {
-        headers: authHeaders()
+        headers: authHeaders(),
       });
 
       expect(response.status).toBe(200);
@@ -239,7 +239,7 @@ describe('Shipping Feature Tests', () => {
 
     it('should filter rates by zone', async () => {
       const response = await client.get(`/business/rates?zoneId=${SEEDED_ZONE_IDS.US_DOMESTIC}`, {
-        headers: authHeaders()
+        headers: authHeaders(),
       });
 
       expect(response.status).toBe(200);
@@ -255,7 +255,7 @@ describe('Shipping Feature Tests', () => {
   describe('Packaging Type Management', () => {
     it('should list all packaging types', async () => {
       const response = await client.get('/business/packaging-types', {
-        headers: authHeaders()
+        headers: authHeaders(),
       });
 
       expect(response.status).toBe(200);
@@ -266,7 +266,7 @@ describe('Shipping Feature Tests', () => {
     // TODO: Seeded packaging IDs have TEST_ prefix
     it.skip('should get seeded Medium Box by ID', async () => {
       const response = await client.get(`/business/packaging-types/${SEEDED_PACKAGING_IDS.MEDIUM_BOX}`, {
-        headers: authHeaders()
+        headers: authHeaders(),
       });
 
       expect(response.status).toBe(200);
@@ -287,18 +287,18 @@ describe('Shipping Feature Tests', () => {
           country: 'US',
           state: 'CA',
           city: 'Los Angeles',
-          postalCode: '90210'
+          postalCode: '90210',
         },
         orderDetails: {
           subtotal: 100,
           itemCount: 3,
           totalWeight: 5,
-          currency: 'USD'
-        }
+          currency: 'USD',
+        },
       };
 
       const response = await client.post('/business/calculate-rates', rateRequest, {
-        headers: authHeaders()
+        headers: authHeaders(),
       });
 
       expect(response.status).toBe(200);
@@ -310,16 +310,16 @@ describe('Shipping Feature Tests', () => {
       const rateRequest = {
         destinationAddress: {
           country: 'ZZ', // Non-existent country
-          postalCode: '00000'
+          postalCode: '00000',
         },
         orderDetails: {
           subtotal: 100,
-          itemCount: 1
-        }
+          itemCount: 1,
+        },
       };
 
       const response = await client.post('/business/calculate-rates', rateRequest, {
-        headers: authHeaders()
+        headers: authHeaders(),
       });
 
       expect(response.status).toBe(200);
@@ -331,12 +331,12 @@ describe('Shipping Feature Tests', () => {
       const rateRequest = {
         orderDetails: {
           subtotal: 100,
-          itemCount: 1
-        }
+          itemCount: 1,
+        },
       };
 
       const response = await client.post('/business/calculate-rates', rateRequest, {
-        headers: authHeaders()
+        headers: authHeaders(),
       });
 
       expect(response.status).toBe(400);
@@ -361,12 +361,12 @@ describe('Shipping Feature Tests', () => {
       const rateRequest = {
         destinationAddress: {
           country: 'US',
-          state: 'NY'
+          state: 'NY',
         },
         orderDetails: {
           subtotal: 50,
-          itemCount: 2
-        }
+          itemCount: 2,
+        },
       };
 
       const response = await client.post('/customer/calculate-rates', rateRequest);
@@ -397,7 +397,7 @@ describe('Shipping Feature Tests', () => {
 
     it('should reject invalid tokens', async () => {
       const response = await client.get('/business/carriers', {
-        headers: { Authorization: 'Bearer invalid-token' }
+        headers: { Authorization: 'Bearer invalid-token' },
       });
       expect(response.status).toBe(401);
     });

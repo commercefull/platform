@@ -1,6 +1,6 @@
 /**
  * CreateFulfillment Use Case
- * 
+ *
  * Creates a new fulfillment for an order.
  */
 

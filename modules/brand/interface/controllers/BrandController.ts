@@ -1,19 +1,13 @@
 /**
  * Brand Controller
- * 
+ *
  * HTTP interface for brand management.
  */
 
 import { logger } from '../../../../libs/logger';
 import { Request, Response } from 'express';
 import { brandRepository } from '../../infrastructure/repositories/BrandRepository';
-import {
-  CreateBrandUseCase,
-  GetBrandUseCase,
-  ListBrandsUseCase,
-  UpdateBrandUseCase,
-  DeleteBrandUseCase,
-} from '../../application/useCases';
+import { CreateBrandUseCase, GetBrandUseCase, ListBrandsUseCase, UpdateBrandUseCase, DeleteBrandUseCase } from '../../application/useCases';
 
 export const createBrand = async (req: Request, res: Response): Promise<void> => {
   try {

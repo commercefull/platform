@@ -1,6 +1,6 @@
 /**
  * TransferBetweenStores Use Case
- * 
+ *
  * Transfers inventory between store locations.
  */
 
@@ -44,16 +44,10 @@ export class TransferBetweenStoresUseCase {
 
     // Validate source store has sufficient inventory
     for (const item of input.items) {
-      const available = await this.inventoryRepository.getAvailableQuantity(
-        input.sourceStoreId,
-        item.productId,
-        item.variantId
-      );
+      const available = await this.inventoryRepository.getAvailableQuantity(input.sourceStoreId, item.productId, item.variantId);
 
       if (available < item.quantity) {
-        throw new Error(
-          `Insufficient inventory for product ${item.productId}: available ${available}, requested ${item.quantity}`
-        );
+        throw new Error(`Insufficient inventory for product ${item.productId}: available ${available}, requested ${item.quantity}`);
       }
     }
 
@@ -62,13 +56,7 @@ export class TransferBetweenStoresUseCase {
 
     // Reserve inventory at source
     for (const item of input.items) {
-      await this.inventoryRepository.reserveForTransfer(
-        input.sourceStoreId,
-        item.productId,
-        item.variantId,
-        item.quantity,
-        transferId
-      );
+      await this.inventoryRepository.reserveForTransfer(input.sourceStoreId, item.productId, item.variantId, item.quantity, transferId);
     }
 
     // Create transfer record
@@ -107,7 +95,7 @@ export class TransferBetweenStoresUseCase {
   private calculateEstimatedArrival(priority?: string): string {
     const now = new Date();
     let daysToAdd = 3; // Default
-    
+
     switch (priority) {
       case 'urgent':
         daysToAdd = 1;
@@ -116,7 +104,7 @@ export class TransferBetweenStoresUseCase {
         daysToAdd = 7;
         break;
     }
-    
+
     now.setDate(now.getDate() + daysToAdd);
     return now.toISOString();
   }

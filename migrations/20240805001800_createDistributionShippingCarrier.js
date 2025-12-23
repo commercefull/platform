@@ -2,12 +2,12 @@
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.up = function(knex) {
-  return knex.schema.createTable('distributionShippingCarrier', (table) => {
+exports.up = function (knex) {
+  return knex.schema.createTable('distributionShippingCarrier', table => {
     table.uuid('distributionShippingCarrierId').primary().defaultTo(knex.raw('uuidv7()'));
     table.timestamp('createdAt').defaultTo(knex.fn.now()).notNullable();
     table.timestamp('updatedAt').defaultTo(knex.fn.now()).notNullable();
-    
+
     table.string('name', 100).notNullable();
     table.string('code', 50).notNullable().unique();
     table.text('description').nullable();
@@ -32,6 +32,6 @@ exports.up = function(knex) {
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTable('distributionShippingCarrier');
 };

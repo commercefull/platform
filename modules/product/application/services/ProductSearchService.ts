@@ -1,6 +1,6 @@
-import { query } from "../../../../libs/db";
-import { Table } from "../../../../libs/db/types";
-import { Product } from "../../repos/productRepo";
+import { query } from '../../../../libs/db';
+import { Table } from '../../../../libs/db/types';
+import { Product } from '../../repos/productRepo';
 
 /**
  * Search filters for product queries
@@ -8,36 +8,36 @@ import { Product } from "../../repos/productRepo";
 export interface ProductSearchFilters {
   // Text search
   query?: string;
-  
+
   // Basic filters
   categoryId?: string;
   categoryIds?: string[];
   brandId?: string;
   brandIds?: string[];
   productTypeId?: string;
-  
+
   // Price filters
   minPrice?: number;
   maxPrice?: number;
-  
+
   // Status filters
   status?: string;
   visibility?: string;
-  
+
   // Boolean filters
   isFeatured?: boolean;
   isNew?: boolean;
   isBestseller?: boolean;
   hasVariants?: boolean;
   inStock?: boolean;
-  
+
   // Dynamic attribute filters
   attributes?: AttributeFilter[];
-  
+
   // Sorting
   sortBy?: 'name' | 'price' | 'createdAt' | 'popularity' | 'rating' | 'relevance';
   sortOrder?: 'asc' | 'desc';
-  
+
   // Pagination
   page?: number;
   limit?: number;
@@ -116,7 +116,7 @@ export class ProductSearchService {
       // Execute queries in parallel
       const [products, countResult] = await Promise.all([
         query<Product[]>(sql, params),
-        query<Array<{ count: string }>>(countSql, params.slice(0, -2)) // Remove limit/offset params
+        query<Array<{ count: string }>>(countSql, params.slice(0, -2)), // Remove limit/offset params
       ]);
 
       const total = countResult ? parseInt(countResult[0]?.count || '0', 10) : 0;
@@ -124,7 +124,8 @@ export class ProductSearchService {
 
       // Get facets if requested
       let facets: SearchFacets | undefined;
-      if (filters.query || Object.keys(filters).length > 3) { // Only compute facets for actual searches
+      if (filters.query || Object.keys(filters).length > 3) {
+        // Only compute facets for actual searches
         facets = await this.computeFacets(filters);
       }
 
@@ -134,16 +135,15 @@ export class ProductSearchService {
         page,
         limit,
         totalPages,
-        facets
+        facets,
       };
     } catch (error) {
-      
       return {
         products: [],
         total: 0,
         page: filters.page || 1,
         limit: filters.limit || 20,
-        totalPages: 0
+        totalPages: 0,
       };
     }
   }
@@ -151,11 +151,7 @@ export class ProductSearchService {
   /**
    * Build the search SQL query
    */
-  private buildSearchQuery(
-    filters: ProductSearchFilters,
-    limit: number,
-    offset: number
-  ): { sql: string; countSql: string; params: any[] } {
+  private buildSearchQuery(filters: ProductSearchFilters, limit: number, offset: number): { sql: string; countSql: string; params: any[] } {
     const conditions: string[] = [];
     const params: any[] = [];
     let paramIndex = 1;
@@ -259,10 +255,10 @@ export class ProductSearchService {
     if (filters.attributes && filters.attributes.length > 0) {
       for (const attrFilter of filters.attributes) {
         const attrAlias = `pav_${paramIndex}`;
-        
+
         // Join to attribute value map
         let attrJoin = `JOIN "${this.attributeValueMapTable}" ${attrAlias} ON ${attrAlias}."productId" = p."productId"`;
-        
+
         // Filter by attribute ID or code
         if (attrFilter.attributeId) {
           attrJoin += ` AND ${attrAlias}."attributeId" = $${paramIndex}`;
@@ -276,12 +272,12 @@ export class ProductSearchService {
           paramIndex++;
           attrJoin += ` AND ${attrAlias}."attributeId" = ${attrTableAlias}."productAttributeId"`;
         }
-        
+
         joins.push(attrJoin);
 
         // Apply value filter based on operator
         const operator = attrFilter.operator || 'eq';
-        
+
         switch (operator) {
           case 'eq':
             if (attrFilter.value) {
@@ -366,7 +362,7 @@ export class ProductSearchService {
     // Build ORDER BY clause
     let orderBy = 'p."createdAt" DESC';
     const sortOrder = filters.sortOrder || 'desc';
-    
+
     switch (filters.sortBy) {
       case 'name':
         orderBy = `p."name" ${sortOrder.toUpperCase()}`;
@@ -400,7 +396,7 @@ export class ProductSearchService {
 
     // Build final queries
     const joinClause = joins.length > 0 ? joins.join(' ') : '';
-    
+
     const sql = `
       SELECT DISTINCT p.*
       FROM ${fromClause}
@@ -409,7 +405,7 @@ export class ProductSearchService {
       ORDER BY ${orderBy}
       LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
     `;
-    
+
     params.push(limit, offset);
 
     const countSql = `
@@ -428,13 +424,13 @@ export class ProductSearchService {
   private async computeFacets(filters: ProductSearchFilters): Promise<SearchFacets> {
     // Get category facets
     const categoryFacets = await this.getCategoryFacets(filters);
-    
+
     // Get brand facets
     const brandFacets = await this.getBrandFacets(filters);
-    
+
     // Get price range facets
     const priceRangeFacets = await this.getPriceRangeFacets(filters);
-    
+
     // Get attribute facets
     const attributeFacets = await this.getAttributeFacets(filters);
 
@@ -442,7 +438,7 @@ export class ProductSearchService {
       categories: categoryFacets,
       brands: brandFacets,
       priceRanges: priceRangeFacets,
-      attributes: attributeFacets
+      attributes: attributeFacets,
     };
   }
 
@@ -465,7 +461,7 @@ export class ProductSearchService {
     return (results || []).map(r => ({
       id: r.id,
       name: r.name,
-      count: parseInt(r.count, 10)
+      count: parseInt(r.count, 10),
     }));
   }
 
@@ -487,7 +483,7 @@ export class ProductSearchService {
     return (results || []).map(r => ({
       id: r.id,
       name: r.name,
-      count: parseInt(r.count, 10)
+      count: parseInt(r.count, 10),
     }));
   }
 
@@ -501,7 +497,7 @@ export class ProductSearchService {
     `;
 
     const result = await query<Array<{ min_price: number; max_price: number }>>(sql);
-    
+
     if (!result || result.length === 0) {
       return [];
     }
@@ -513,19 +509,19 @@ export class ProductSearchService {
     // Generate price range buckets
     const ranges: PriceRangeFacet[] = [];
     for (let i = 0; i < 5; i++) {
-      const min = min_price + (step * i);
-      const max = i === 4 ? max_price : min_price + (step * (i + 1));
-      
+      const min = min_price + step * i;
+      const max = i === 4 ? max_price : min_price + step * (i + 1);
+
       const countSql = `
         SELECT COUNT(*) as count
         FROM "${this.productTable}" p
         WHERE p."deletedAt" IS NULL AND p."status" = 'active'
           AND p."price" >= $1 AND p."price" <= $2
       `;
-      
+
       const countResult = await query<Array<{ count: string }>>(countSql, [min, max]);
       const count = countResult ? parseInt(countResult[0]?.count || '0', 10) : 0;
-      
+
       if (count > 0) {
         ranges.push({ min, max, count });
       }
@@ -556,21 +552,23 @@ export class ProductSearchService {
       ORDER BY pa."position" ASC, count DESC
     `;
 
-    const results = await query<Array<{
-      attributeId: string;
-      attributeCode: string;
-      attributeName: string;
-      type: string;
-      value: string;
-      displayValue: string;
-      count: string;
-    }>>(sql);
+    const results = await query<
+      Array<{
+        attributeId: string;
+        attributeCode: string;
+        attributeName: string;
+        type: string;
+        value: string;
+        displayValue: string;
+        count: string;
+      }>
+    >(sql);
 
     if (!results) return [];
 
     // Group by attribute
     const attributeMap = new Map<string, AttributeFacet>();
-    
+
     for (const row of results) {
       if (!attributeMap.has(row.attributeId)) {
         attributeMap.set(row.attributeId, {
@@ -578,14 +576,14 @@ export class ProductSearchService {
           attributeCode: row.attributeCode,
           attributeName: row.attributeName,
           type: row.type,
-          values: []
+          values: [],
         });
       }
-      
+
       attributeMap.get(row.attributeId)!.values.push({
         value: row.value,
         displayValue: row.displayValue,
-        count: parseInt(row.count, 10)
+        count: parseInt(row.count, 10),
       });
     }
 
@@ -597,7 +595,7 @@ export class ProductSearchService {
    */
   async getSuggestions(partialQuery: string, limit: number = 10): Promise<string[]> {
     const searchTerm = `${partialQuery}%`;
-    
+
     const sql = `
       SELECT DISTINCT p."name"
       FROM "${this.productTable}" p
@@ -628,7 +626,7 @@ export class ProductSearchService {
       ORDER BY p."name"
     `;
 
-    return await query<Product[]>(sql, [attributeCode, value]) || [];
+    return (await query<Product[]>(sql, [attributeCode, value])) || [];
   }
 
   /**
@@ -641,9 +639,9 @@ export class ProductSearchService {
       FROM "${this.attributeValueMapTable}"
       WHERE "productId" = $1
     `;
-    
+
     const productAttrs = await query<Array<{ attributeId: string; value: string }>>(attrSql, [productId]);
-    
+
     if (!productAttrs || productAttrs.length === 0) {
       return [];
     }
@@ -668,7 +666,7 @@ export class ProductSearchService {
     }
     params.push(String(limit));
 
-    return await query<Product[]>(sql, params) || [];
+    return (await query<Product[]>(sql, params)) || [];
   }
 }
 

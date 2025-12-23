@@ -48,15 +48,20 @@ export interface InventoryRepository {
     notes?: string;
     createdBy: string;
   }): Promise<void>;
-  getTransactionHistory(inventoryId: string, limit?: number): Promise<Array<{
-    transactionId: string;
-    type: string;
-    quantity: number;
-    reference?: string;
-    notes?: string;
-    createdBy: string;
-    createdAt: Date;
-  }>>;
+  getTransactionHistory(
+    inventoryId: string,
+    limit?: number,
+  ): Promise<
+    Array<{
+      transactionId: string;
+      type: string;
+      quantity: number;
+      reference?: string;
+      notes?: string;
+      createdBy: string;
+      createdAt: Date;
+    }>
+  >;
 
   // Reservations
   createReservation(reservation: {

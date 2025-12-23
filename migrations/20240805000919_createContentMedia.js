@@ -20,7 +20,7 @@ exports.up = function (knex) {
     t.text('url').notNullable();
     t.text('thumbnailUrl');
     t.integer('sortOrder').notNullable().defaultTo(0);
-    
+
     t.specificType('tags', 'text[]');
     t.boolean('isExternal').notNullable().defaultTo(false);
     t.string('externalService', 100);

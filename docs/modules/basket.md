@@ -9,6 +9,7 @@ The Basket (Shopping Cart) feature manages customer shopping sessions, allowing 
 ## Use Cases
 
 ### UC-BSK-001: Get or Create Basket
+
 **Actor:** Customer/Guest  
 **Priority:** High
 
@@ -19,12 +20,14 @@ The Basket (Shopping Cart) feature manages customer shopping sessions, allowing 
 **Then** the system returns their existing basket OR creates a new one
 
 #### API Endpoint
+
 ```
 POST /basket
 Body: { sessionId?: string, customerId?: string }
 ```
 
 #### Business Rules
+
 - Authenticated users get basket by customerId
 - Anonymous users get basket by sessionId
 - If no basket exists, create a new empty basket
@@ -33,6 +36,7 @@ Body: { sessionId?: string, customerId?: string }
 ---
 
 ### UC-BSK-002: Get My Basket
+
 **Actor:** Customer  
 **Priority:** High
 
@@ -43,11 +47,13 @@ Body: { sessionId?: string, customerId?: string }
 **Then** the system returns their active basket with all items
 
 #### API Endpoint
+
 ```
 GET /basket/me
 ```
 
 #### Business Rules
+
 - Returns null if no active basket exists
 - Only returns non-expired baskets
 - Includes calculated totals and item details
@@ -55,6 +61,7 @@ GET /basket/me
 ---
 
 ### UC-BSK-003: Get Basket by ID
+
 **Actor:** Customer/Guest  
 **Priority:** High
 
@@ -65,11 +72,13 @@ GET /basket/me
 **Then** the system returns the basket with all items and calculations
 
 #### API Endpoint
+
 ```
 GET /basket/:basketId
 ```
 
 #### Business Rules
+
 - Public endpoint (no auth required for anonymous carts)
 - Returns 404 if basket doesn't exist or is expired
 - Includes real-time pricing calculations
@@ -77,6 +86,7 @@ GET /basket/:basketId
 ---
 
 ### UC-BSK-004: Get Basket Summary
+
 **Actor:** Customer/Guest  
 **Priority:** Medium
 
@@ -87,11 +97,13 @@ GET /basket/:basketId
 **Then** the system returns a lightweight summary (item count, totals)
 
 #### API Endpoint
+
 ```
 GET /basket/:basketId/summary
 ```
 
 #### Business Rules
+
 - Optimized for header cart widgets
 - Returns only counts and totals, not full item details
 - Cached for performance
@@ -99,6 +111,7 @@ GET /basket/:basketId/summary
 ---
 
 ### UC-BSK-005: Add Item to Basket
+
 **Actor:** Customer/Guest  
 **Priority:** High
 
@@ -113,12 +126,14 @@ GET /basket/:basketId/summary
 **And** emits basket.item_added event
 
 #### API Endpoint
+
 ```
 POST /basket/:basketId/items
 Body: { productId, productVariantId?, quantity, options?: object }
 ```
 
 #### Business Rules
+
 - If item already exists, quantity is increased
 - Validates product availability
 - Validates maximum quantity limits
@@ -128,6 +143,7 @@ Body: { productId, productVariantId?, quantity, options?: object }
 ---
 
 ### UC-BSK-006: Update Item Quantity
+
 **Actor:** Customer/Guest  
 **Priority:** High
 
@@ -140,12 +156,14 @@ Body: { productId, productVariantId?, quantity, options?: object }
 **And** recalculates totals
 
 #### API Endpoint
+
 ```
 PATCH /basket/:basketId/items/:basketItemId
 Body: { quantity: number }
 ```
 
 #### Business Rules
+
 - Quantity must be > 0 (use delete for removal)
 - Validates against available stock
 - Validates against maximum quantity limits
@@ -154,6 +172,7 @@ Body: { quantity: number }
 ---
 
 ### UC-BSK-007: Remove Item from Basket
+
 **Actor:** Customer/Guest  
 **Priority:** High
 
@@ -167,11 +186,13 @@ Body: { quantity: number }
 **And** emits basket.item_removed event
 
 #### API Endpoint
+
 ```
 DELETE /basket/:basketId/items/:basketItemId
 ```
 
 #### Business Rules
+
 - Item is completely removed
 - Basket totals are recalculated
 - Returns updated basket
@@ -179,6 +200,7 @@ DELETE /basket/:basketId/items/:basketItemId
 ---
 
 ### UC-BSK-008: Clear Basket
+
 **Actor:** Customer/Guest  
 **Priority:** Medium
 
@@ -191,11 +213,13 @@ DELETE /basket/:basketId/items/:basketItemId
 **And** emits basket.cleared event
 
 #### API Endpoint
+
 ```
 DELETE /basket/:basketId/items
 ```
 
 #### Business Rules
+
 - Removes all items but keeps basket
 - Basket can be reused
 - Any applied coupons are also removed
@@ -203,6 +227,7 @@ DELETE /basket/:basketId/items
 ---
 
 ### UC-BSK-009: Merge Guest Basket with Customer Basket
+
 **Actor:** Customer  
 **Priority:** Medium
 
@@ -215,12 +240,14 @@ DELETE /basket/:basketId/items
 **And** the guest basket is marked as merged
 
 #### API Endpoint
+
 ```
 POST /basket/:basketId/merge
 Body: { targetBasketId: string }
 ```
 
 #### Business Rules
+
 - Items from source basket are added to target
 - If same product exists, quantities are combined
 - Source basket is deactivated after merge
@@ -229,6 +256,7 @@ Body: { targetBasketId: string }
 ---
 
 ### UC-BSK-010: Assign Basket to Customer
+
 **Actor:** System/Customer  
 **Priority:** Medium
 
@@ -241,12 +269,14 @@ Body: { targetBasketId: string }
 **And** emits basket.assigned_to_customer event
 
 #### API Endpoint
+
 ```
 POST /basket/:basketId/assign
 Body: { customerId: string }
 ```
 
 #### Business Rules
+
 - Used when anonymous user registers or logs in
 - Customer's previous basket may need merging
 - Triggers basket merge if customer has existing basket
@@ -255,31 +285,31 @@ Body: { customerId: string }
 
 ## Events Emitted
 
-| Event | Trigger | Payload |
-|-------|---------|---------|
-| `basket.created` | New basket created | basketId, customerId, sessionId |
-| `basket.item_added` | Item added | basketId, productId, quantity |
-| `basket.item_removed` | Item removed | basketId, productId |
-| `basket.item_updated` | Quantity changed | basketId, itemId, quantity |
-| `basket.cleared` | All items removed | basketId |
-| `basket.abandoned` | Basket expired/abandoned | basketId, value |
-| `basket.converted_to_order` | Checkout completed | basketId, orderId |
-| `basket.merged` | Baskets merged | sourceId, targetId |
-| `basket.assigned_to_customer` | Assigned to customer | basketId, customerId |
+| Event                         | Trigger                  | Payload                         |
+| ----------------------------- | ------------------------ | ------------------------------- |
+| `basket.created`              | New basket created       | basketId, customerId, sessionId |
+| `basket.item_added`           | Item added               | basketId, productId, quantity   |
+| `basket.item_removed`         | Item removed             | basketId, productId             |
+| `basket.item_updated`         | Quantity changed         | basketId, itemId, quantity      |
+| `basket.cleared`              | All items removed        | basketId                        |
+| `basket.abandoned`            | Basket expired/abandoned | basketId, value                 |
+| `basket.converted_to_order`   | Checkout completed       | basketId, orderId               |
+| `basket.merged`               | Baskets merged           | sourceId, targetId              |
+| `basket.assigned_to_customer` | Assigned to customer     | basketId, customerId            |
 
 ---
 
 ## Integration Test Coverage
 
-| Use Case | Test File | Status |
-|----------|-----------|--------|
-| UC-BSK-001 | `basket/basket.test.ts` | ✅ |
-| UC-BSK-002 | `basket/basket.test.ts` | ✅ |
-| UC-BSK-003 | `basket/basket.test.ts` | ✅ |
-| UC-BSK-004 | `basket/basket.test.ts` | 🟡 |
-| UC-BSK-005 | `basket/basket.test.ts` | ✅ |
-| UC-BSK-006 | `basket/basket.test.ts` | ✅ |
-| UC-BSK-007 | `basket/basket.test.ts` | ✅ |
-| UC-BSK-008 | `basket/basket.test.ts` | 🟡 |
-| UC-BSK-009 | `basket/basket.test.ts` | ❌ |
-| UC-BSK-010 | `basket/basket.test.ts` | ❌ |
+| Use Case   | Test File               | Status |
+| ---------- | ----------------------- | ------ |
+| UC-BSK-001 | `basket/basket.test.ts` | ✅     |
+| UC-BSK-002 | `basket/basket.test.ts` | ✅     |
+| UC-BSK-003 | `basket/basket.test.ts` | ✅     |
+| UC-BSK-004 | `basket/basket.test.ts` | 🟡     |
+| UC-BSK-005 | `basket/basket.test.ts` | ✅     |
+| UC-BSK-006 | `basket/basket.test.ts` | ✅     |
+| UC-BSK-007 | `basket/basket.test.ts` | ✅     |
+| UC-BSK-008 | `basket/basket.test.ts` | 🟡     |
+| UC-BSK-009 | `basket/basket.test.ts` | ❌     |
+| UC-BSK-010 | `basket/basket.test.ts` | ❌     |

@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function (knex) {
   return knex.schema.createTable('taxNexus', t => {
     t.uuid('taxNexusId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
@@ -18,7 +18,6 @@ exports.up = function(knex) {
     t.timestamp('endDate');
     t.boolean('isActive').notNullable().defaultTo(true);
     t.text('notes');
-    
 
     t.index('merchantId');
     t.index('country');
@@ -32,6 +31,6 @@ exports.up = function(knex) {
   });
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTable('taxNexus');
 };

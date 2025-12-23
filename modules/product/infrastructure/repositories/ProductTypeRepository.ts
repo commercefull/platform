@@ -1,5 +1,5 @@
-import { query, queryOne } from "../../../../libs/db";
-import { Table } from "../../../../libs/db/types";
+import { query, queryOne } from '../../../../libs/db';
+import { Table } from '../../../../libs/db/types';
 
 export interface ProductType {
   productTypeId: string;
@@ -34,7 +34,7 @@ export class ProductTypeRepository {
 
   async findAll(): Promise<ProductType[]> {
     const sql = `SELECT * FROM "${this.tableName}" ORDER BY "name" ASC`;
-    return await query<ProductType[]>(sql) || [];
+    return (await query<ProductType[]>(sql)) || [];
   }
 
   async findActive(): Promise<ProductType[]> {
@@ -44,17 +44,14 @@ export class ProductTypeRepository {
 
   async create(input: ProductTypeCreateInput): Promise<ProductType> {
     const slug = input.slug || this.generateSlug(input.name);
-    
+
     const sql = `
       INSERT INTO "${this.tableName}" ("name", "slug")
       VALUES ($1, $2)
       RETURNING *
     `;
-    
-    const result = await queryOne<ProductType>(sql, [
-      input.name,
-      slug
-    ]);
+
+    const result = await queryOne<ProductType>(sql, [input.name, slug]);
 
     if (!result) {
       throw new Error('Failed to create product type');

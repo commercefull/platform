@@ -11,7 +11,7 @@ export class GetNavigationWithItemsQuery {
     public readonly navigationId?: string,
     public readonly slug?: string,
     public readonly location?: string,
-    public readonly includeInactive: boolean = false
+    public readonly includeInactive: boolean = false,
   ) {}
 }
 
@@ -62,11 +62,9 @@ export class GetNavigationWithItemsUseCase {
 
     // Get all items for this navigation
     const items = await this.navigationRepo.findAllNavigationItems(navigation.contentNavigationId);
-    
+
     // Filter inactive items if needed
-    const filteredItems = query.includeInactive 
-      ? items 
-      : items.filter(item => item.isActive);
+    const filteredItems = query.includeInactive ? items : items.filter(item => item.isActive);
 
     // Build tree structure
     const itemTree = this.buildItemTree(filteredItems);
@@ -78,7 +76,7 @@ export class GetNavigationWithItemsUseCase {
       description: navigation.description ?? undefined,
       location: navigation.location ?? undefined,
       isActive: navigation.isActive,
-      items: itemTree
+      items: itemTree,
     };
   }
 
@@ -100,14 +98,14 @@ export class GetNavigationWithItemsUseCase {
         openInNewTab: item.openInNewTab,
         isActive: item.isActive,
         sortOrder: item.sortOrder,
-        children: []
+        children: [],
       });
     }
 
     // Second pass: build hierarchy
     for (const item of items) {
       const node = itemMap.get(item.contentNavigationItemId)!;
-      
+
       if (item.parentId && itemMap.has(item.parentId)) {
         const parent = itemMap.get(item.parentId)!;
         parent.children.push(node);

@@ -1,4 +1,4 @@
-import { Filter } from "./filter";
+import { Filter } from './filter';
 
 export class Category {
   constructor(

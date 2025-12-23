@@ -46,9 +46,15 @@ export class PriceListRepo {
         "name", "description", "priority", "isActive", "startDate", "endDate", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
       [
-        params.name, params.description || null, params.priority || 0, params.isActive ?? true,
-        params.startDate || null, params.endDate || null, now, now
-      ]
+        params.name,
+        params.description || null,
+        params.priority || 0,
+        params.isActive ?? true,
+        params.startDate || null,
+        params.endDate || null,
+        now,
+        now,
+      ],
     );
     if (!result) throw new Error('Failed to create price list');
     return result;
@@ -73,7 +79,7 @@ export class PriceListRepo {
 
     return await queryOne<PriceList>(
       `UPDATE "priceList" SET ${updateFields.join(', ')} WHERE "priceListId" = $${paramIndex} RETURNING *`,
-      values
+      values,
     );
   }
 
@@ -86,10 +92,9 @@ export class PriceListRepo {
   }
 
   async delete(id: string): Promise<boolean> {
-    const result = await queryOne<{ priceListId: string }>(
-      `DELETE FROM "priceList" WHERE "priceListId" = $1 RETURNING "priceListId"`,
-      [id]
-    );
+    const result = await queryOne<{ priceListId: string }>(`DELETE FROM "priceList" WHERE "priceListId" = $1 RETURNING "priceListId"`, [
+      id,
+    ]);
     return !!result;
   }
 

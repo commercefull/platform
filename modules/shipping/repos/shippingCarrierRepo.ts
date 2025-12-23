@@ -18,20 +18,14 @@ const TABLE = Table.ShippingCarrier;
  * Find a shipping carrier by ID
  */
 export async function findById(id: string): Promise<ShippingCarrier | null> {
-  return queryOne<ShippingCarrier>(
-    `SELECT * FROM "${TABLE}" WHERE "shippingCarrierId" = $1`,
-    [id]
-  );
+  return queryOne<ShippingCarrier>(`SELECT * FROM "${TABLE}" WHERE "shippingCarrierId" = $1`, [id]);
 }
 
 /**
  * Find a shipping carrier by code
  */
 export async function findByCode(code: string): Promise<ShippingCarrier | null> {
-  return queryOne<ShippingCarrier>(
-    `SELECT * FROM "${TABLE}" WHERE "code" = $1`,
-    [code]
-  );
+  return queryOne<ShippingCarrier>(`SELECT * FROM "${TABLE}" WHERE "code" = $1`, [code]);
 }
 
 /**
@@ -48,29 +42,35 @@ export async function findAll(activeOnly = false): Promise<ShippingCarrier[]> {
  * Find carriers with API integration
  */
 export async function findWithApiIntegration(): Promise<ShippingCarrier[]> {
-  return (await query<ShippingCarrier[]>(
-    `SELECT * FROM "${TABLE}" WHERE "hasApiIntegration" = true AND "isActive" = true ORDER BY "name" ASC`
-  )) || [];
+  return (
+    (await query<ShippingCarrier[]>(
+      `SELECT * FROM "${TABLE}" WHERE "hasApiIntegration" = true AND "isActive" = true ORDER BY "name" ASC`,
+    )) || []
+  );
 }
 
 /**
  * Find carriers by region
  */
 export async function findByRegion(region: string): Promise<ShippingCarrier[]> {
-  return (await query<ShippingCarrier[]>(
-    `SELECT * FROM "${TABLE}" WHERE "supportedRegions" @> $1::jsonb AND "isActive" = true ORDER BY "name" ASC`,
-    [JSON.stringify([region])]
-  )) || [];
+  return (
+    (await query<ShippingCarrier[]>(
+      `SELECT * FROM "${TABLE}" WHERE "supportedRegions" @> $1::jsonb AND "isActive" = true ORDER BY "name" ASC`,
+      [JSON.stringify([region])],
+    )) || []
+  );
 }
 
 /**
  * Search carriers by name or code
  */
 export async function search(searchTerm: string): Promise<ShippingCarrier[]> {
-  return (await query<ShippingCarrier[]>(
-    `SELECT * FROM "${TABLE}" WHERE ("name" ILIKE $1 OR "code" ILIKE $1) AND "isActive" = true ORDER BY "name" ASC`,
-    [`%${searchTerm}%`]
-  )) || [];
+  return (
+    (await query<ShippingCarrier[]>(
+      `SELECT * FROM "${TABLE}" WHERE ("name" ILIKE $1 OR "code" ILIKE $1) AND "isActive" = true ORDER BY "name" ASC`,
+      [`%${searchTerm}%`],
+    )) || []
+  );
 }
 
 /**
@@ -102,8 +102,8 @@ export async function create(input: CreateShippingCarrierInput): Promise<Shippin
       input.requiresContract ?? false,
       input.hasApiIntegration ?? false,
       input.customFields ? JSON.stringify(input.customFields) : null,
-      input.createdBy || null
-    ]
+      input.createdBy || null,
+    ],
   );
 
   if (!result) throw new Error('Failed to create shipping carrier');
@@ -134,7 +134,7 @@ export async function update(id: string, input: UpdateShippingCarrierInput): Pro
 
   return queryOne<ShippingCarrier>(
     `UPDATE "${TABLE}" SET ${updateFields.join(', ')} WHERE "shippingCarrierId" = $${paramIndex} RETURNING *`,
-    values
+    values,
   );
 }
 
@@ -158,7 +158,7 @@ export async function deactivate(id: string): Promise<ShippingCarrier | null> {
 export async function deleteCarrier(id: string): Promise<boolean> {
   const result = await queryOne<{ shippingCarrierId: string }>(
     `DELETE FROM "${TABLE}" WHERE "shippingCarrierId" = $1 RETURNING "shippingCarrierId"`,
-    [id]
+    [id],
   );
   return !!result;
 }
@@ -186,14 +186,14 @@ export async function getStatistics(): Promise<{
     count(),
     count(true),
     queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "${TABLE}" WHERE "hasApiIntegration" = true`),
-    queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "${TABLE}" WHERE "requiresContract" = true`)
+    queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "${TABLE}" WHERE "requiresContract" = true`),
   ]);
 
   return {
     total,
     active,
     withApi: apiResult ? parseInt(apiResult.count, 10) : 0,
-    withContract: contractResult ? parseInt(contractResult.count, 10) : 0
+    withContract: contractResult ? parseInt(contractResult.count, 10) : 0,
   };
 }
 
@@ -210,5 +210,5 @@ export default {
   deactivate,
   delete: deleteCarrier,
   count,
-  getStatistics
+  getStatistics,
 };

@@ -11,18 +11,24 @@ export enum TransactionStatus {
   VOIDED = 'voided',
   FAILED = 'failed',
   CANCELLED = 'cancelled',
-  EXPIRED = 'expired'
+  EXPIRED = 'expired',
 }
 
 export enum RefundStatus {
   PENDING = 'pending',
   PROCESSING = 'processing',
   COMPLETED = 'completed',
-  FAILED = 'failed'
+  FAILED = 'failed',
 }
 
 export const TransactionStatusTransitions: Record<TransactionStatus, TransactionStatus[]> = {
-  [TransactionStatus.PENDING]: [TransactionStatus.AUTHORIZED, TransactionStatus.PAID, TransactionStatus.FAILED, TransactionStatus.CANCELLED, TransactionStatus.EXPIRED],
+  [TransactionStatus.PENDING]: [
+    TransactionStatus.AUTHORIZED,
+    TransactionStatus.PAID,
+    TransactionStatus.FAILED,
+    TransactionStatus.CANCELLED,
+    TransactionStatus.EXPIRED,
+  ],
   [TransactionStatus.AUTHORIZED]: [TransactionStatus.PAID, TransactionStatus.VOIDED, TransactionStatus.FAILED, TransactionStatus.EXPIRED],
   [TransactionStatus.PAID]: [TransactionStatus.PARTIALLY_REFUNDED, TransactionStatus.REFUNDED],
   [TransactionStatus.PARTIALLY_REFUNDED]: [TransactionStatus.REFUNDED],
@@ -30,7 +36,7 @@ export const TransactionStatusTransitions: Record<TransactionStatus, Transaction
   [TransactionStatus.VOIDED]: [],
   [TransactionStatus.FAILED]: [TransactionStatus.PENDING],
   [TransactionStatus.CANCELLED]: [],
-  [TransactionStatus.EXPIRED]: []
+  [TransactionStatus.EXPIRED]: [],
 };
 
 export function canTransitionTo(current: TransactionStatus, next: TransactionStatus): boolean {
@@ -47,7 +53,7 @@ export function getStatusLabel(status: TransactionStatus): string {
     [TransactionStatus.VOIDED]: 'Voided',
     [TransactionStatus.FAILED]: 'Failed',
     [TransactionStatus.CANCELLED]: 'Cancelled',
-    [TransactionStatus.EXPIRED]: 'Expired'
+    [TransactionStatus.EXPIRED]: 'Expired',
   };
   return labels[status] || status;
 }

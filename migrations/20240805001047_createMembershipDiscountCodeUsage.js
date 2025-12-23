@@ -12,7 +12,7 @@ exports.up = function (knex) {
     t.uuid('customerId').notNullable().references('customerId').inTable('customer').onDelete('CASCADE');
     t.timestamp('usedAt').notNullable().defaultTo(knex.fn.now());
     t.decimal('discountAmount', 10, 2).notNullable();
-    
+
     t.index('discountCodeId');
     t.index('subscriptionId');
     t.index('customerId');

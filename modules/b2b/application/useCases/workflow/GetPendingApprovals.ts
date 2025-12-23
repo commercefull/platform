@@ -39,23 +39,17 @@ export class GetPendingApprovalsUseCase {
     const limit = input.limit || 20;
 
     // Get pending requests where user is an approver for current step
-    const pendingRequests = await this.b2bRepository.findPendingApprovalsForUser(
-      input.approverId,
-      {
-        companyId: input.companyId,
-        requestType: input.requestType,
-        page,
-        limit,
-      }
-    );
+    const pendingRequests = await this.b2bRepository.findPendingApprovalsForUser(input.approverId, {
+      companyId: input.companyId,
+      requestType: input.requestType,
+      page,
+      limit,
+    });
 
-    const total = await this.b2bRepository.countPendingApprovalsForUser(
-      input.approverId,
-      {
-        companyId: input.companyId,
-        requestType: input.requestType,
-      }
-    );
+    const total = await this.b2bRepository.countPendingApprovalsForUser(input.approverId, {
+      companyId: input.companyId,
+      requestType: input.requestType,
+    });
 
     return {
       approvals: pendingRequests.map((r: any) => ({

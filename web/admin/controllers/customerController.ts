@@ -28,7 +28,7 @@ export const listCustomers = async (req: Request, res: Response): Promise<void> 
       limit: parseInt(limit as string) || 50,
       offset: parseInt(offset as string) || 0,
       orderBy: (orderBy as string) || 'createdAt',
-      orderDirection: (orderDirection as 'asc' | 'desc') || 'desc'
+      orderDirection: (orderDirection as 'asc' | 'desc') || 'desc',
     };
 
     if (search) queryOptions.search = search;
@@ -49,20 +49,20 @@ export const listCustomers = async (req: Request, res: Response): Promise<void> 
         offset: queryOptions.offset,
         page,
         pages,
-        hasMore: (result.total || 0) > (queryOptions.offset + queryOptions.limit)
+        hasMore: (result.total || 0) > queryOptions.offset + queryOptions.limit,
       },
       filters: {
         search: search || '',
         status: status || '',
         orderBy: orderBy || 'createdAt',
-        orderDirection: orderDirection || 'desc'
+        orderDirection: orderDirection || 'desc',
       },
-      
-      success: req.query.success || null
+
+      success: req.query.success || null,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load customers',
@@ -97,12 +97,12 @@ export const viewCustomer = async (req: Request, res: Response): Promise<void> =
       pageName: `Customer: ${customer.firstName} ${customer.lastName}`,
       customer,
       addresses,
-      
-      success: req.query.success || null
+
+      success: req.query.success || null,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load customer',
@@ -135,7 +135,7 @@ export const editCustomerForm = async (req: Request, res: Response): Promise<voi
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -158,8 +158,7 @@ export const updateCustomer = async (req: Request, res: Response): Promise<void>
     res.redirect(`/hub/customers/${customerId}?success=Customer updated successfully`);
   } catch (error: any) {
     logger.error('Error:', error);
-    
-    
+
     // Reload form with error
     try {
       const getUseCase = new GetCustomerUseCase(CustomerRepo);
@@ -195,7 +194,7 @@ export const deactivateCustomer = async (req: Request, res: Response): Promise<v
     res.json({ success: true, message: 'Customer deactivated' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to deactivate customer' });
   }
 };
@@ -214,7 +213,7 @@ export const reactivateCustomer = async (req: Request, res: Response): Promise<v
     res.json({ success: true, message: 'Customer reactivated' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to reactivate customer' });
   }
 };
@@ -235,7 +234,7 @@ export const verifyCustomer = async (req: Request, res: Response): Promise<void>
     res.json({ success: true, message: 'Customer verified' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to verify customer' });
   }
 };
@@ -266,12 +265,12 @@ export const customerAddresses = async (req: Request, res: Response): Promise<vo
       pageName: `Addresses: ${customer.firstName} ${customer.lastName}`,
       customer,
       addresses,
-      
-      success: req.query.success || null
+
+      success: req.query.success || null,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load addresses',
@@ -303,7 +302,7 @@ export const addCustomerAddress = async (req: Request, res: Response): Promise<v
       addressData.firstName,
       addressData.lastName,
       addressData.company,
-      addressData.isDefault === 'true' || addressData.isDefault === true
+      addressData.isDefault === 'true' || addressData.isDefault === true,
     );
     await useCase.addAddress(addCommand);
 
@@ -314,7 +313,7 @@ export const addCustomerAddress = async (req: Request, res: Response): Promise<v
     }
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     if (req.xhr || req.headers.accept?.includes('application/json')) {
       res.status(500).json({ success: false, message: error.message || 'Failed to add address' });
     } else {

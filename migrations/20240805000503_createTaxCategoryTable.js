@@ -1,5 +1,5 @@
-exports.up = function(knex) {
-    return knex.schema.createTable('taxCategory', t => {
+exports.up = function (knex) {
+  return knex.schema.createTable('taxCategory', t => {
     t.uuid('taxCategoryId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
@@ -9,7 +9,6 @@ exports.up = function(knex) {
     t.boolean('isDefault').notNullable().defaultTo(false);
     t.integer('sortOrder').notNullable().defaultTo(0);
     t.boolean('isActive').notNullable().defaultTo(true);
-    
 
     t.index('code');
     t.index('isDefault');
@@ -18,6 +17,6 @@ exports.up = function(knex) {
   });
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTable('taxCategory');
 };

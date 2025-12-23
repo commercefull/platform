@@ -14,7 +14,7 @@ const TABLES = {
   AGENT: Table.SupportAgent,
   TICKET: Table.SupportTicket,
   MESSAGE: Table.SupportMessage,
-  ATTACHMENT: Table.SupportAttachment
+  ATTACHMENT: Table.SupportAttachment,
 };
 
 // ============================================================================
@@ -144,26 +144,16 @@ export interface SupportAttachment {
 // ============================================================================
 
 export async function getAgent(supportAgentId: string): Promise<SupportAgent | null> {
-  const row = await queryOne<Record<string, any>>(
-    'SELECT * FROM "supportAgent" WHERE "supportAgentId" = $1',
-    [supportAgentId]
-  );
+  const row = await queryOne<Record<string, any>>('SELECT * FROM "supportAgent" WHERE "supportAgentId" = $1', [supportAgentId]);
   return row ? mapToAgent(row) : null;
 }
 
 export async function getAgentByEmail(email: string): Promise<SupportAgent | null> {
-  const row = await queryOne<Record<string, any>>(
-    'SELECT * FROM "supportAgent" WHERE "email" = $1',
-    [email]
-  );
+  const row = await queryOne<Record<string, any>>('SELECT * FROM "supportAgent" WHERE "email" = $1', [email]);
   return row ? mapToAgent(row) : null;
 }
 
-export async function getAgents(filters?: { 
-  isActive?: boolean; 
-  isAvailable?: boolean;
-  department?: string;
-}): Promise<SupportAgent[]> {
+export async function getAgents(filters?: { isActive?: boolean; isAvailable?: boolean; department?: string }): Promise<SupportAgent[]> {
   let whereClause = '1=1';
   const params: any[] = [];
   let paramIndex = 1;
@@ -183,7 +173,7 @@ export async function getAgents(filters?: {
 
   const rows = await query<Record<string, any>[]>(
     `SELECT * FROM "supportAgent" WHERE ${whereClause} ORDER BY "lastName", "firstName"`,
-    params
+    params,
   );
   return (rows || []).map(mapToAgent);
 }
@@ -194,12 +184,14 @@ export async function getAvailableAgent(category?: string): Promise<SupportAgent
      WHERE "isActive" = true AND "isAvailable" = true 
      AND "currentTickets" < "maxTickets"
      ORDER BY "currentTickets" ASC, "satisfactionScore" DESC NULLS LAST
-     LIMIT 1`
+     LIMIT 1`,
   );
   return row ? mapToAgent(row) : null;
 }
 
-export async function saveAgent(agent: Partial<SupportAgent> & { email: string; firstName: string; lastName: string }): Promise<SupportAgent> {
+export async function saveAgent(
+  agent: Partial<SupportAgent> & { email: string; firstName: string; lastName: string },
+): Promise<SupportAgent> {
   const now = new Date().toISOString();
 
   if (agent.supportAgentId) {
@@ -212,15 +204,24 @@ export async function saveAgent(agent: Partial<SupportAgent> & { email: string; 
         "metadata" = $15, "updatedAt" = $16
       WHERE "supportAgentId" = $17`,
       [
-        agent.firstName, agent.lastName, agent.displayName, agent.avatarUrl,
-        agent.role || 'agent', agent.department, agent.skills, agent.languages,
-        agent.isActive !== false, agent.isAvailable !== false, agent.maxTickets || 20,
+        agent.firstName,
+        agent.lastName,
+        agent.displayName,
+        agent.avatarUrl,
+        agent.role || 'agent',
+        agent.department,
+        agent.skills,
+        agent.languages,
+        agent.isActive !== false,
+        agent.isAvailable !== false,
+        agent.maxTickets || 20,
         agent.timezone || 'UTC',
         agent.workingHours ? JSON.stringify(agent.workingHours) : null,
         agent.notificationPreferences ? JSON.stringify(agent.notificationPreferences) : null,
         agent.metadata ? JSON.stringify(agent.metadata) : null,
-        now, agent.supportAgentId
-      ]
+        now,
+        agent.supportAgentId,
+      ],
     );
     return (await getAgent(agent.supportAgentId))!;
   } else {
@@ -233,13 +234,25 @@ export async function saveAgent(agent: Partial<SupportAgent> & { email: string; 
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
       RETURNING *`,
       [
-        agent.email, agent.firstName, agent.lastName, agent.displayName, agent.avatarUrl,
-        agent.role || 'agent', agent.department, agent.skills, agent.languages,
-        true, true, agent.maxTickets || 20, agent.timezone || 'UTC',
+        agent.email,
+        agent.firstName,
+        agent.lastName,
+        agent.displayName,
+        agent.avatarUrl,
+        agent.role || 'agent',
+        agent.department,
+        agent.skills,
+        agent.languages,
+        true,
+        true,
+        agent.maxTickets || 20,
+        agent.timezone || 'UTC',
         agent.workingHours ? JSON.stringify(agent.workingHours) : null,
         agent.notificationPreferences ? JSON.stringify(agent.notificationPreferences) : null,
-        agent.metadata ? JSON.stringify(agent.metadata) : null, now, now
-      ]
+        agent.metadata ? JSON.stringify(agent.metadata) : null,
+        now,
+        now,
+      ],
     );
     return mapToAgent(result!);
   }
@@ -249,7 +262,7 @@ export async function updateAgentTicketCount(supportAgentId: string, delta: numb
   await query(
     `UPDATE "supportAgent" SET "currentTickets" = GREATEST(0, "currentTickets" + $1), "updatedAt" = $2
      WHERE "supportAgentId" = $3`,
-    [delta, new Date().toISOString(), supportAgentId]
+    [delta, new Date().toISOString(), supportAgentId],
   );
 }
 
@@ -258,18 +271,12 @@ export async function updateAgentTicketCount(supportAgentId: string, delta: numb
 // ============================================================================
 
 export async function getTicket(supportTicketId: string): Promise<SupportTicket | null> {
-  const row = await queryOne<Record<string, any>>(
-    'SELECT * FROM "supportTicket" WHERE "supportTicketId" = $1',
-    [supportTicketId]
-  );
+  const row = await queryOne<Record<string, any>>('SELECT * FROM "supportTicket" WHERE "supportTicketId" = $1', [supportTicketId]);
   return row ? mapToTicket(row) : null;
 }
 
 export async function getTicketByNumber(ticketNumber: string): Promise<SupportTicket | null> {
-  const row = await queryOne<Record<string, any>>(
-    'SELECT * FROM "supportTicket" WHERE "ticketNumber" = $1',
-    [ticketNumber]
-  );
+  const row = await queryOne<Record<string, any>>('SELECT * FROM "supportTicket" WHERE "ticketNumber" = $1', [ticketNumber]);
   return row ? mapToTicket(row) : null;
 }
 
@@ -282,7 +289,7 @@ export async function getTickets(
     category?: TicketCategory;
     isEscalated?: boolean;
   },
-  pagination?: { limit?: number; offset?: number }
+  pagination?: { limit?: number; offset?: number },
 ): Promise<{ data: SupportTicket[]; total: number }> {
   let whereClause = '1=1';
   const params: any[] = [];
@@ -313,10 +320,7 @@ export async function getTickets(
     params.push(filters.isEscalated);
   }
 
-  const countResult = await queryOne<{ count: string }>(
-    `SELECT COUNT(*) as count FROM "supportTicket" WHERE ${whereClause}`,
-    params
-  );
+  const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "supportTicket" WHERE ${whereClause}`, params);
 
   const limit = pagination?.limit || 20;
   const offset = pagination?.offset || 0;
@@ -327,12 +331,12 @@ export async function getTickets(
        CASE "priority" WHEN 'urgent' THEN 1 WHEN 'high' THEN 2 WHEN 'medium' THEN 3 ELSE 4 END,
        "createdAt" DESC
      LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
-    [...params, limit, offset]
+    [...params, limit, offset],
   );
 
   return {
     data: (rows || []).map(mapToTicket),
-    total: parseInt(countResult?.count || '0')
+    total: parseInt(countResult?.count || '0'),
   };
 }
 
@@ -362,11 +366,21 @@ export async function createTicket(ticket: {
     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'open', $9, $10, $11, $12, $13, $14)
     RETURNING *`,
     [
-      ticketNumber, ticket.customerId, ticket.orderId, ticket.email, ticket.name,
-      ticket.phone, ticket.subject, ticket.description, ticket.priority || 'medium',
-      ticket.category || 'other', ticket.channel || 'web',
-      agent?.supportAgentId, now, now
-    ]
+      ticketNumber,
+      ticket.customerId,
+      ticket.orderId,
+      ticket.email,
+      ticket.name,
+      ticket.phone,
+      ticket.subject,
+      ticket.description,
+      ticket.priority || 'medium',
+      ticket.category || 'other',
+      ticket.channel || 'web',
+      agent?.supportAgentId,
+      now,
+      now,
+    ],
   );
 
   // Update agent ticket count
@@ -377,10 +391,7 @@ export async function createTicket(ticket: {
   return mapToTicket(result!);
 }
 
-export async function updateTicket(
-  supportTicketId: string,
-  updates: Partial<SupportTicket>
-): Promise<SupportTicket> {
+export async function updateTicket(supportTicketId: string, updates: Partial<SupportTicket>): Promise<SupportTicket> {
   const now = new Date().toISOString();
   const ticket = await getTicket(supportTicketId);
   if (!ticket) throw new Error('Ticket not found');
@@ -402,34 +413,25 @@ export async function updateTicket(
       "tags" = COALESCE($5, "tags"),
       "updatedAt" = $6
     WHERE "supportTicketId" = $7`,
-    [
-      updates.status, updates.priority, updates.category,
-      updates.assignedAgentId, updates.tags, now, supportTicketId
-    ]
+    [updates.status, updates.priority, updates.category, updates.assignedAgentId, updates.tags, now, supportTicketId],
   );
 
   return (await getTicket(supportTicketId))!;
 }
 
-export async function resolveTicket(
-  supportTicketId: string,
-  resolutionType: string,
-  resolutionNotes?: string
-): Promise<void> {
+export async function resolveTicket(supportTicketId: string, resolutionType: string, resolutionNotes?: string): Promise<void> {
   const now = new Date();
   const ticket = await getTicket(supportTicketId);
   if (!ticket) throw new Error('Ticket not found');
 
-  const resolutionTimeMinutes = Math.floor(
-    (now.getTime() - ticket.createdAt.getTime()) / (1000 * 60)
-  );
+  const resolutionTimeMinutes = Math.floor((now.getTime() - ticket.createdAt.getTime()) / (1000 * 60));
 
   await query(
     `UPDATE "supportTicket" SET 
       "status" = 'resolved', "resolvedAt" = $1, "resolutionTimeMinutes" = $2,
       "resolutionType" = $3, "resolutionNotes" = $4, "updatedAt" = $1
      WHERE "supportTicketId" = $5`,
-    [now.toISOString(), resolutionTimeMinutes, resolutionType, resolutionNotes, supportTicketId]
+    [now.toISOString(), resolutionTimeMinutes, resolutionType, resolutionNotes, supportTicketId],
   );
 
   // Update agent stats
@@ -440,7 +442,7 @@ export async function resolveTicket(
         "totalTicketsHandled" = "totalTicketsHandled" + 1,
         "updatedAt" = $1
        WHERE "supportAgentId" = $2`,
-      [now.toISOString(), ticket.assignedAgentId]
+      [now.toISOString(), ticket.assignedAgentId],
     );
   }
 }
@@ -450,38 +452,30 @@ export async function closeTicket(supportTicketId: string): Promise<void> {
   await query(
     `UPDATE "supportTicket" SET "status" = 'closed', "closedAt" = $1, "updatedAt" = $1
      WHERE "supportTicketId" = $2`,
-    [now, supportTicketId]
+    [now, supportTicketId],
   );
 }
 
-export async function escalateTicket(
-  supportTicketId: string,
-  escalatedTo: string,
-  reason: string
-): Promise<void> {
+export async function escalateTicket(supportTicketId: string, escalatedTo: string, reason: string): Promise<void> {
   const now = new Date().toISOString();
   await query(
     `UPDATE "supportTicket" SET 
       "isEscalated" = true, "escalatedTo" = $1, "escalatedAt" = $2,
       "escalationReason" = $3, "priority" = 'urgent', "updatedAt" = $2
      WHERE "supportTicketId" = $4`,
-    [escalatedTo, now, reason, supportTicketId]
+    [escalatedTo, now, reason, supportTicketId],
   );
 }
 
-export async function submitFeedback(
-  supportTicketId: string,
-  satisfaction: number,
-  feedback?: string
-): Promise<void> {
+export async function submitFeedback(supportTicketId: string, satisfaction: number, feedback?: string): Promise<void> {
   const now = new Date().toISOString();
   const ticket = await getTicket(supportTicketId);
-  
+
   await query(
     `UPDATE "supportTicket" SET 
       "customerSatisfaction" = $1, "customerFeedback" = $2, "updatedAt" = $3
      WHERE "supportTicketId" = $4`,
-    [satisfaction, feedback, now, supportTicketId]
+    [satisfaction, feedback, now, supportTicketId],
   );
 
   // Update agent satisfaction score
@@ -494,7 +488,7 @@ export async function submitFeedback(
         "satisfactionCount" = "satisfactionCount" + 1,
         "updatedAt" = $2
        WHERE "supportAgentId" = $3`,
-      [satisfaction, now, ticket.assignedAgentId]
+      [satisfaction, now, ticket.assignedAgentId],
     );
   }
 }
@@ -504,10 +498,7 @@ export async function submitFeedback(
 // ============================================================================
 
 export async function getMessage(supportMessageId: string): Promise<SupportMessage | null> {
-  const row = await queryOne<Record<string, any>>(
-    'SELECT * FROM "supportMessage" WHERE "supportMessageId" = $1',
-    [supportMessageId]
-  );
+  const row = await queryOne<Record<string, any>>('SELECT * FROM "supportMessage" WHERE "supportMessageId" = $1', [supportMessageId]);
   return row ? mapToMessage(row) : null;
 }
 
@@ -517,10 +508,9 @@ export async function getMessages(supportTicketId: string, includeInternal: bool
     whereClause += ' AND "isInternal" = false';
   }
 
-  const rows = await query<Record<string, any>[]>(
-    `SELECT * FROM "supportMessage" WHERE ${whereClause} ORDER BY "createdAt" ASC`,
-    [supportTicketId]
-  );
+  const rows = await query<Record<string, any>[]>(`SELECT * FROM "supportMessage" WHERE ${whereClause} ORDER BY "createdAt" ASC`, [
+    supportTicketId,
+  ]);
   return (rows || []).map(mapToMessage);
 }
 
@@ -547,11 +537,18 @@ export async function addMessage(message: {
     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
     RETURNING *`,
     [
-      message.supportTicketId, message.senderId, message.senderType,
-      message.senderName, message.senderEmail, message.message, message.messageHtml,
-      message.messageType || 'reply', message.isInternal || false,
-      message.isAutoReply || false, now.toISOString()
-    ]
+      message.supportTicketId,
+      message.senderId,
+      message.senderType,
+      message.senderName,
+      message.senderEmail,
+      message.message,
+      message.messageHtml,
+      message.messageType || 'reply',
+      message.isInternal || false,
+      message.isAutoReply || false,
+      now.toISOString(),
+    ],
   );
 
   // Update ticket
@@ -559,14 +556,12 @@ export async function addMessage(message: {
     lastMessageBy: message.senderId,
     lastMessageByType: message.senderType,
     lastMessageAt: now.toISOString(),
-    updatedAt: now.toISOString()
+    updatedAt: now.toISOString(),
   };
 
   // Track first response time for agent replies
   if (message.senderType === 'agent' && !ticket.firstResponseAt) {
-    const responseTimeMinutes = Math.floor(
-      (now.getTime() - ticket.createdAt.getTime()) / (1000 * 60)
-    );
+    const responseTimeMinutes = Math.floor((now.getTime() - ticket.createdAt.getTime()) / (1000 * 60));
     updateFields.firstResponseAt = now.toISOString();
     updateFields.responseTimeMinutes = responseTimeMinutes;
   }
@@ -586,10 +581,15 @@ export async function addMessage(message: {
       "status" = COALESCE($6, "status"), "updatedAt" = $7
      WHERE "supportTicketId" = $8`,
     [
-      updateFields.lastMessageBy, updateFields.lastMessageByType, updateFields.lastMessageAt,
-      updateFields.firstResponseAt, updateFields.responseTimeMinutes,
-      updateFields.status, updateFields.updatedAt, message.supportTicketId
-    ]
+      updateFields.lastMessageBy,
+      updateFields.lastMessageByType,
+      updateFields.lastMessageAt,
+      updateFields.firstResponseAt,
+      updateFields.responseTimeMinutes,
+      updateFields.status,
+      updateFields.updatedAt,
+      message.supportTicketId,
+    ],
   );
 
   return mapToMessage(result!);
@@ -600,7 +600,7 @@ export async function markMessagesRead(supportTicketId: string, readBy: string):
   await query(
     `UPDATE "supportMessage" SET "isRead" = true, "readAt" = $1, "readBy" = $2
      WHERE "supportTicketId" = $3 AND "isRead" = false`,
-    [now, readBy, supportTicketId]
+    [now, readBy, supportTicketId],
   );
 }
 
@@ -630,11 +630,18 @@ export async function addAttachment(attachment: {
     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
     RETURNING *`,
     [
-      attachment.supportTicketId, attachment.supportMessageId, attachment.fileName,
-      attachment.originalName, attachment.mimeType, attachment.fileSize,
-      attachment.storageUrl, attachment.thumbnailUrl, attachment.uploadedBy,
-      attachment.uploadedByType, now
-    ]
+      attachment.supportTicketId,
+      attachment.supportMessageId,
+      attachment.fileName,
+      attachment.originalName,
+      attachment.mimeType,
+      attachment.fileSize,
+      attachment.storageUrl,
+      attachment.thumbnailUrl,
+      attachment.uploadedBy,
+      attachment.uploadedByType,
+      now,
+    ],
   );
 
   return mapToAttachment(result!);
@@ -643,7 +650,7 @@ export async function addAttachment(attachment: {
 export async function getAttachments(supportTicketId: string): Promise<SupportAttachment[]> {
   const rows = await query<Record<string, any>[]>(
     'SELECT * FROM "supportAttachment" WHERE "supportTicketId" = $1 ORDER BY "createdAt" ASC',
-    [supportTicketId]
+    [supportTicketId],
   );
   return (rows || []).map(mapToAttachment);
 }
@@ -654,10 +661,9 @@ export async function getAttachments(supportTicketId: string): Promise<SupportAt
 
 async function generateTicketNumber(): Promise<string> {
   const year = new Date().getFullYear();
-  const result = await queryOne<{ count: string }>(
-    `SELECT COUNT(*) as count FROM "supportTicket" WHERE "ticketNumber" LIKE $1`,
-    [`TKT${year}%`]
-  );
+  const result = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "supportTicket" WHERE "ticketNumber" LIKE $1`, [
+    `TKT${year}%`,
+  ]);
   const count = parseInt(result?.count || '0') + 1;
   return `TKT${year}-${count.toString().padStart(6, '0')}`;
 }
@@ -689,7 +695,7 @@ function mapToAgent(row: Record<string, any>): SupportAgent {
     metadata: row.metadata,
     lastActiveAt: row.lastActiveAt ? new Date(row.lastActiveAt) : undefined,
     createdAt: new Date(row.createdAt),
-    updatedAt: new Date(row.updatedAt)
+    updatedAt: new Date(row.updatedAt),
   };
 }
 
@@ -735,7 +741,7 @@ function mapToTicket(row: Record<string, any>): SupportTicket {
     createdAt: new Date(row.createdAt),
     updatedAt: new Date(row.updatedAt),
     closedAt: row.closedAt ? new Date(row.closedAt) : undefined,
-    dueAt: row.dueAt ? new Date(row.dueAt) : undefined
+    dueAt: row.dueAt ? new Date(row.dueAt) : undefined,
   };
 }
 
@@ -756,7 +762,7 @@ function mapToMessage(row: Record<string, any>): SupportMessage {
     readAt: row.readAt ? new Date(row.readAt) : undefined,
     readBy: row.readBy,
     metadata: row.metadata,
-    createdAt: new Date(row.createdAt)
+    createdAt: new Date(row.createdAt),
   };
 }
 
@@ -777,6 +783,6 @@ function mapToAttachment(row: Record<string, any>): SupportAttachment {
     isScanned: Boolean(row.isScanned),
     isSafe: Boolean(row.isSafe),
     metadata: row.metadata,
-    createdAt: new Date(row.createdAt)
+    createdAt: new Date(row.createdAt),
   };
 }

@@ -29,21 +29,51 @@ export class ContentType {
   }
 
   // Getters
-  get contentTypeId(): string { return this.props.contentTypeId; }
-  get name(): string { return this.props.name; }
-  get slug(): string { return this.props.slug; }
-  get description(): string | undefined { return this.props.description; }
-  get icon(): string | undefined { return this.props.icon; }
-  get allowedBlocks(): string[] | undefined { return this.props.allowedBlocks; }
-  get defaultTemplate(): string | undefined { return this.props.defaultTemplate; }
-  get requiredFields(): Record<string, any> | undefined { return this.props.requiredFields; }
-  get metaFields(): Record<string, any> | undefined { return this.props.metaFields; }
-  get isSystem(): boolean { return this.props.isSystem; }
-  get isActive(): boolean { return this.props.isActive; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
-  get createdBy(): string | undefined { return this.props.createdBy; }
-  get updatedBy(): string | undefined { return this.props.updatedBy; }
+  get contentTypeId(): string {
+    return this.props.contentTypeId;
+  }
+  get name(): string {
+    return this.props.name;
+  }
+  get slug(): string {
+    return this.props.slug;
+  }
+  get description(): string | undefined {
+    return this.props.description;
+  }
+  get icon(): string | undefined {
+    return this.props.icon;
+  }
+  get allowedBlocks(): string[] | undefined {
+    return this.props.allowedBlocks;
+  }
+  get defaultTemplate(): string | undefined {
+    return this.props.defaultTemplate;
+  }
+  get requiredFields(): Record<string, any> | undefined {
+    return this.props.requiredFields;
+  }
+  get metaFields(): Record<string, any> | undefined {
+    return this.props.metaFields;
+  }
+  get isSystem(): boolean {
+    return this.props.isSystem;
+  }
+  get isActive(): boolean {
+    return this.props.isActive;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
+  get createdBy(): string | undefined {
+    return this.props.createdBy;
+  }
+  get updatedBy(): string | undefined {
+    return this.props.updatedBy;
+  }
 
   // Factory method
   static create(props: Omit<ContentTypeProps, 'createdAt' | 'updatedAt'> & { createdAt?: Date; updatedAt?: Date }): ContentType {
@@ -51,7 +81,7 @@ export class ContentType {
     return new ContentType({
       ...props,
       createdAt: props.createdAt || now,
-      updatedAt: props.updatedAt || now
+      updatedAt: props.updatedAt || now,
     });
   }
 

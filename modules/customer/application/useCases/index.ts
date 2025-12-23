@@ -1,6 +1,6 @@
 /**
  * Customer Use Cases - Barrel Export
- * 
+ *
  * Re-exports from legacy location for backward compatibility.
  * TODO: Migrate useCases/ to application/useCases/ in future refactoring.
  */

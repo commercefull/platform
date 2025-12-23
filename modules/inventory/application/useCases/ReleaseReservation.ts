@@ -1,6 +1,6 @@
 /**
  * ReleaseReservation Use Case
- * 
+ *
  * Releases previously reserved inventory back to available stock.
  * Used when an order is cancelled or reservation expires.
  */
@@ -25,7 +25,7 @@ export interface ReleaseReservationOutput {
 
 export class ReleaseReservationUseCase {
   constructor(
-    private readonly inventoryRepository: any // InventoryRepository
+    private readonly inventoryRepository: any, // InventoryRepository
   ) {}
 
   async execute(input: ReleaseReservationInput): Promise<ReleaseReservationOutput> {
@@ -64,16 +64,13 @@ export class ReleaseReservationUseCase {
 
       // Decrease reserved quantity
       const newReservedQuantity = Math.max(0, (inventory.reservedQuantity || 0) - reservation.quantity);
-      await this.inventoryRepository.updateReservedQuantity(
-        inventory.inventoryItemId,
-        newReservedQuantity
-      );
+      await this.inventoryRepository.updateReservedQuantity(inventory.inventoryItemId, newReservedQuantity);
 
       // Update reservation status
       await this.inventoryRepository.updateReservationStatus(
         reservation.reservationId,
         input.reason === 'fulfilled' ? 'fulfilled' : 'released',
-        input.reason
+        input.reason,
       );
 
       releasedItems.push({

@@ -11,8 +11,25 @@ export type MembershipSubscription = DbMembershipSubscription;
 export type SubscriptionStatus = 'active' | 'cancelled' | 'expired' | 'paused' | 'trial' | 'pending' | 'pastDue';
 
 // Derived types for create/update operations
-export type MembershipSubscriptionCreateParams = Omit<MembershipSubscription, 'membershipSubscriptionId' | 'createdAt' | 'updatedAt' | 'membershipNumber'>;
-export type MembershipSubscriptionUpdateParams = Partial<Pick<MembershipSubscription, 'status' | 'endDate' | 'nextBillingDate' | 'lastBillingDate' | 'cancelledAt' | 'cancelReason' | 'isAutoRenew' | 'priceOverride' | 'paymentMethodId' | 'notes'>>;
+export type MembershipSubscriptionCreateParams = Omit<
+  MembershipSubscription,
+  'membershipSubscriptionId' | 'createdAt' | 'updatedAt' | 'membershipNumber'
+>;
+export type MembershipSubscriptionUpdateParams = Partial<
+  Pick<
+    MembershipSubscription,
+    | 'status'
+    | 'endDate'
+    | 'nextBillingDate'
+    | 'lastBillingDate'
+    | 'cancelledAt'
+    | 'cancelReason'
+    | 'isAutoRenew'
+    | 'priceOverride'
+    | 'paymentMethodId'
+    | 'notes'
+  >
+>;
 
 export class MembershipSubscriptionRepo {
   private async generateMembershipNumber(): Promise<string> {
@@ -26,53 +43,66 @@ export class MembershipSubscriptionRepo {
   }
 
   async findByMembershipNumber(membershipNumber: string): Promise<MembershipSubscription | null> {
-    return await queryOne<MembershipSubscription>(`SELECT * FROM "membershipSubscription" WHERE "membershipNumber" = $1`, [membershipNumber]);
+    return await queryOne<MembershipSubscription>(`SELECT * FROM "membershipSubscription" WHERE "membershipNumber" = $1`, [
+      membershipNumber,
+    ]);
   }
 
   async findByCustomerId(customerId: string): Promise<MembershipSubscription[]> {
-    return (await query<MembershipSubscription[]>(
-      `SELECT * FROM "membershipSubscription" WHERE "customerId" = $1 ORDER BY "createdAt" DESC`,
-      [customerId]
-    )) || [];
+    return (
+      (await query<MembershipSubscription[]>(`SELECT * FROM "membershipSubscription" WHERE "customerId" = $1 ORDER BY "createdAt" DESC`, [
+        customerId,
+      ])) || []
+    );
   }
 
   async findActiveByCustomerId(customerId: string): Promise<MembershipSubscription[]> {
-    return (await query<MembershipSubscription[]>(
-      `SELECT * FROM "membershipSubscription" WHERE "customerId" = $1 AND "status" = 'active' ORDER BY "createdAt" DESC`,
-      [customerId]
-    )) || [];
+    return (
+      (await query<MembershipSubscription[]>(
+        `SELECT * FROM "membershipSubscription" WHERE "customerId" = $1 AND "status" = 'active' ORDER BY "createdAt" DESC`,
+        [customerId],
+      )) || []
+    );
   }
 
   async findByPlanId(planId: string, limit = 50, offset = 0): Promise<MembershipSubscription[]> {
-    return (await query<MembershipSubscription[]>(
-      `SELECT * FROM "membershipSubscription" WHERE "membershipPlanId" = $1 ORDER BY "createdAt" DESC LIMIT $2 OFFSET $3`,
-      [planId, limit, offset]
-    )) || [];
+    return (
+      (await query<MembershipSubscription[]>(
+        `SELECT * FROM "membershipSubscription" WHERE "membershipPlanId" = $1 ORDER BY "createdAt" DESC LIMIT $2 OFFSET $3`,
+        [planId, limit, offset],
+      )) || []
+    );
   }
 
   async findByStatus(status: SubscriptionStatus, limit = 100): Promise<MembershipSubscription[]> {
-    return (await query<MembershipSubscription[]>(
-      `SELECT * FROM "membershipSubscription" WHERE "status" = $1 ORDER BY "createdAt" DESC LIMIT $2`,
-      [status, limit]
-    )) || [];
+    return (
+      (await query<MembershipSubscription[]>(
+        `SELECT * FROM "membershipSubscription" WHERE "status" = $1 ORDER BY "createdAt" DESC LIMIT $2`,
+        [status, limit],
+      )) || []
+    );
   }
 
   async findExpiringSoon(days = 7): Promise<MembershipSubscription[]> {
     const now = unixTimestamp();
-    const futureDate = parseInt(now) + (days * 24 * 60 * 60);
-    return (await query<MembershipSubscription[]>(
-      `SELECT * FROM "membershipSubscription" WHERE "status" = 'active' AND "endDate" IS NOT NULL AND "endDate" BETWEEN $1 AND $2`,
-      [now, futureDate.toString()]
-    )) || [];
+    const futureDate = parseInt(now) + days * 24 * 60 * 60;
+    return (
+      (await query<MembershipSubscription[]>(
+        `SELECT * FROM "membershipSubscription" WHERE "status" = 'active' AND "endDate" IS NOT NULL AND "endDate" BETWEEN $1 AND $2`,
+        [now, futureDate.toString()],
+      )) || []
+    );
   }
 
   async findTrialEnding(days = 3): Promise<MembershipSubscription[]> {
     const now = unixTimestamp();
-    const futureDate = parseInt(now) + (days * 24 * 60 * 60);
-    return (await query<MembershipSubscription[]>(
-      `SELECT * FROM "membershipSubscription" WHERE "status" = 'trial' AND "trialEndDate" BETWEEN $1 AND $2`,
-      [now, futureDate.toString()]
-    )) || [];
+    const futureDate = parseInt(now) + days * 24 * 60 * 60;
+    return (
+      (await query<MembershipSubscription[]>(
+        `SELECT * FROM "membershipSubscription" WHERE "status" = 'trial' AND "trialEndDate" BETWEEN $1 AND $2`,
+        [now, futureDate.toString()],
+      )) || []
+    );
   }
 
   async create(params: MembershipSubscriptionCreateParams): Promise<MembershipSubscription> {
@@ -86,12 +116,24 @@ export class MembershipSubscriptionRepo {
         "billingCycleOverride", "paymentMethodId", "notes", "createdBy", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17) RETURNING *`,
       [
-        params.customerId, params.membershipPlanId, params.status || 'active', membershipNumber,
-        params.startDate || now, params.endDate || null, params.trialEndDate || null,
-        params.nextBillingDate || null, params.lastBillingDate || null, params.isAutoRenew ?? true,
-        params.priceOverride || null, params.billingCycleOverride || null, params.paymentMethodId || null,
-        params.notes || null, params.createdBy || null, now, now
-      ]
+        params.customerId,
+        params.membershipPlanId,
+        params.status || 'active',
+        membershipNumber,
+        params.startDate || now,
+        params.endDate || null,
+        params.trialEndDate || null,
+        params.nextBillingDate || null,
+        params.lastBillingDate || null,
+        params.isAutoRenew ?? true,
+        params.priceOverride || null,
+        params.billingCycleOverride || null,
+        params.paymentMethodId || null,
+        params.notes || null,
+        params.createdBy || null,
+        now,
+        now,
+      ],
     );
 
     if (!result) throw new Error('Failed to create membership subscription');
@@ -117,7 +159,7 @@ export class MembershipSubscriptionRepo {
 
     return await queryOne<MembershipSubscription>(
       `UPDATE "membershipSubscription" SET ${updateFields.join(', ')} WHERE "membershipSubscriptionId" = $${paramIndex} RETURNING *`,
-      values
+      values,
     );
   }
 
@@ -149,12 +191,17 @@ export class MembershipSubscriptionRepo {
       `UPDATE "membershipSubscription" SET 
         "membershipPlanId" = $1, "notes" = $2, "updatedAt" = $3 
        WHERE "membershipSubscriptionId" = $4 RETURNING *`,
-      [newPlanId, notes || null, now, id]
+      [newPlanId, notes || null, now, id],
     );
     return result;
   }
 
-  async findAll(options?: { status?: SubscriptionStatus; planId?: string; limit?: number; offset?: number }): Promise<{ data: MembershipSubscription[]; total: number }> {
+  async findAll(options?: {
+    status?: SubscriptionStatus;
+    planId?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<{ data: MembershipSubscription[]; total: number }> {
     let whereClause = '1=1';
     const params: any[] = [];
     let paramIndex = 1;
@@ -173,34 +220,36 @@ export class MembershipSubscriptionRepo {
 
     const countResult = await queryOne<{ count: string }>(
       `SELECT COUNT(*) as count FROM "membershipSubscription" WHERE ${whereClause}`,
-      params
+      params,
     );
 
     const rows = await query<MembershipSubscription[]>(
       `SELECT * FROM "membershipSubscription" WHERE ${whereClause} ORDER BY "createdAt" DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
-      [...params, limit, offset]
+      [...params, limit, offset],
     );
 
     return {
       data: rows || [],
-      total: parseInt(countResult?.count || '0')
+      total: parseInt(countResult?.count || '0'),
     };
   }
 
   async delete(id: string): Promise<boolean> {
     const result = await queryOne<{ membershipSubscriptionId: string }>(
       `DELETE FROM "membershipSubscription" WHERE "membershipSubscriptionId" = $1 RETURNING "membershipSubscriptionId"`,
-      [id]
+      [id],
     );
     return !!result;
   }
 
   async getStatistics(): Promise<Record<SubscriptionStatus, number>> {
     const results = await query<{ status: SubscriptionStatus; count: string }[]>(
-      `SELECT "status", COUNT(*) as count FROM "membershipSubscription" GROUP BY "status"`
+      `SELECT "status", COUNT(*) as count FROM "membershipSubscription" GROUP BY "status"`,
     );
     const stats: Record<string, number> = {};
-    results?.forEach(row => { stats[row.status] = parseInt(row.count, 10); });
+    results?.forEach(row => {
+      stats[row.status] = parseInt(row.count, 10);
+    });
     return stats as Record<SubscriptionStatus, number>;
   }
 }

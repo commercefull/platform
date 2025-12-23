@@ -1,6 +1,6 @@
 /**
  * ProcessPayout Use Case
- * 
+ *
  * Processes payout to merchant for approved settlements.
  */
 
@@ -25,7 +25,7 @@ export class ProcessPayoutUseCase {
   constructor(
     private readonly settlementRepository: any,
     private readonly payoutRepository: any,
-    private readonly paymentService: any
+    private readonly paymentService: any,
   ) {}
 
   async execute(input: ProcessPayoutInput): Promise<ProcessPayoutOutput> {

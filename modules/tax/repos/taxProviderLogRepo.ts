@@ -59,11 +59,22 @@ export class TaxProviderLogRepo {
         "processingTimeMs", "providerReference", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING *`,
       [
-        params.merchantId, params.provider, params.requestType, params.entityType, params.entityId || null,
-        JSON.stringify(params.requestData || {}), JSON.stringify(params.responseData || {}),
-        params.responseStatus || null, params.isSuccess, params.errorCode || null, params.errorMessage || null,
-        params.processingTimeMs || null, params.providerReference || null, now, now
-      ]
+        params.merchantId,
+        params.provider,
+        params.requestType,
+        params.entityType,
+        params.entityId || null,
+        JSON.stringify(params.requestData || {}),
+        JSON.stringify(params.responseData || {}),
+        params.responseStatus || null,
+        params.isSuccess,
+        params.errorCode || null,
+        params.errorMessage || null,
+        params.processingTimeMs || null,
+        params.providerReference || null,
+        now,
+        now,
+      ],
     );
     if (!result) throw new Error('Failed to create tax provider log');
     return result;

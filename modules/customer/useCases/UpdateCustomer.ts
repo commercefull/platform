@@ -21,7 +21,7 @@ export class UpdateCustomerCommand {
       preferredLanguage?: string;
       notes?: string;
       metadata?: Record<string, any>;
-    }
+    },
   ) {}
 }
 
@@ -47,7 +47,7 @@ export class UpdateCustomerUseCase {
 
   async execute(command: UpdateCustomerCommand): Promise<UpdateCustomerResponse> {
     const customer = await this.customerRepository.findById(command.customerId);
-    
+
     if (!customer) {
       throw new Error('Customer not found');
     }
@@ -55,13 +55,17 @@ export class UpdateCustomerUseCase {
     const updatedFields: string[] = [];
 
     // Update profile
-    if (command.updates.firstName || command.updates.lastName || 
-        command.updates.phone !== undefined || command.updates.dateOfBirth !== undefined) {
+    if (
+      command.updates.firstName ||
+      command.updates.lastName ||
+      command.updates.phone !== undefined ||
+      command.updates.dateOfBirth !== undefined
+    ) {
       customer.updateProfile({
         firstName: command.updates.firstName,
         lastName: command.updates.lastName,
         phone: command.updates.phone,
-        dateOfBirth: command.updates.dateOfBirth
+        dateOfBirth: command.updates.dateOfBirth,
       });
       if (command.updates.firstName) updatedFields.push('firstName');
       if (command.updates.lastName) updatedFields.push('lastName');
@@ -73,7 +77,7 @@ export class UpdateCustomerUseCase {
     if (command.updates.preferredCurrency || command.updates.preferredLanguage) {
       customer.setPreferences({
         currency: command.updates.preferredCurrency,
-        language: command.updates.preferredLanguage
+        language: command.updates.preferredLanguage,
       });
       if (command.updates.preferredCurrency) updatedFields.push('preferredCurrency');
       if (command.updates.preferredLanguage) updatedFields.push('preferredLanguage');
@@ -97,7 +101,7 @@ export class UpdateCustomerUseCase {
     // Emit event
     eventBus.emit('customer.updated', {
       customerId: customer.customerId,
-      updatedFields
+      updatedFields,
     });
 
     return {
@@ -106,7 +110,7 @@ export class UpdateCustomerUseCase {
       firstName: customer.firstName,
       lastName: customer.lastName,
       updatedFields,
-      updatedAt: customer.updatedAt.toISOString()
+      updatedAt: customer.updatedAt.toISOString(),
     };
   }
 }

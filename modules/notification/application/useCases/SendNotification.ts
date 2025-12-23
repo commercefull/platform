@@ -28,7 +28,7 @@ export interface SendNotificationOutput {
 export class SendNotificationUseCase {
   constructor(
     private readonly notificationRepository: any,
-    private readonly notificationService: any
+    private readonly notificationService: any,
   ) {}
 
   async execute(input: SendNotificationInput): Promise<SendNotificationOutput> {

@@ -29,7 +29,7 @@ describe('Identity Feature Tests', () => {
       it('should authenticate customer with valid credentials', async () => {
         const response = await client.post('/customer/identity/login', {
           email: TEST_CUSTOMER.email,
-          password: TEST_CUSTOMER.password
+          password: TEST_CUSTOMER.password,
         });
 
         expect(response.status).toBe(200);
@@ -45,7 +45,7 @@ describe('Identity Feature Tests', () => {
       it('should reject invalid credentials', async () => {
         const response = await client.post('/customer/identity/login', {
           email: TEST_CUSTOMER.email,
-          password: 'wrong-password'
+          password: 'wrong-password',
         });
 
         expect(response.status).toBe(401);
@@ -54,7 +54,7 @@ describe('Identity Feature Tests', () => {
 
       it('should require email and password', async () => {
         const response = await client.post('/customer/identity/login', {
-          email: TEST_CUSTOMER.email
+          email: TEST_CUSTOMER.email,
         });
 
         expect(response.status).toBe(400);
@@ -67,7 +67,7 @@ describe('Identity Feature Tests', () => {
         email: `new-customer-${Date.now()}@example.com`,
         password: 'NewPassword123!',
         firstName: 'New',
-        lastName: 'Customer'
+        lastName: 'Customer',
       };
 
       it('should register a new customer', async () => {
@@ -85,7 +85,7 @@ describe('Identity Feature Tests', () => {
           email: TEST_CUSTOMER.email,
           password: 'Password123!',
           firstName: 'Duplicate',
-          lastName: 'Customer'
+          lastName: 'Customer',
         });
 
         expect(response.status).toBe(409);
@@ -94,7 +94,7 @@ describe('Identity Feature Tests', () => {
 
       it('should require all fields', async () => {
         const response = await client.post('/customer/identity/register', {
-          email: 'incomplete@example.com'
+          email: 'incomplete@example.com',
         });
 
         expect(response.status).toBe(400);
@@ -106,7 +106,7 @@ describe('Identity Feature Tests', () => {
       it('should issue access and refresh tokens', async () => {
         const response = await client.post('/customer/identity/token', {
           email: TEST_CUSTOMER.email,
-          password: TEST_CUSTOMER.password
+          password: TEST_CUSTOMER.password,
         });
 
         expect(response.status).toBe(200);
@@ -125,17 +125,16 @@ describe('Identity Feature Tests', () => {
         // First get a refresh token
         const tokenResponse = await client.post('/customer/identity/token', {
           email: TEST_CUSTOMER.email,
-          password: TEST_CUSTOMER.password
+          password: TEST_CUSTOMER.password,
         });
         const refreshToken = tokenResponse.data.refreshToken;
 
         if (!refreshToken) {
-          
           return;
         }
 
         const response = await client.post('/customer/identity/refresh', {
-          refreshToken
+          refreshToken,
         });
 
         expect(response.status).toBe(200);
@@ -145,7 +144,7 @@ describe('Identity Feature Tests', () => {
 
       it('should reject invalid refresh token', async () => {
         const response = await client.post('/customer/identity/refresh', {
-          refreshToken: 'invalid-token'
+          refreshToken: 'invalid-token',
         });
 
         expect(response.status).toBe(401);
@@ -156,7 +155,7 @@ describe('Identity Feature Tests', () => {
     describe('POST /identity/validate', () => {
       it('should validate a valid token', async () => {
         const response = await client.post('/customer/identity/validate', {
-          token: customerToken
+          token: customerToken,
         });
 
         expect(response.status).toBe(200);
@@ -167,7 +166,7 @@ describe('Identity Feature Tests', () => {
 
       it('should reject invalid token', async () => {
         const response = await client.post('/customer/identity/validate', {
-          token: 'invalid-token'
+          token: 'invalid-token',
         });
 
         expect(response.status).toBe(401);
@@ -179,7 +178,7 @@ describe('Identity Feature Tests', () => {
       // TODO: Password reset has server-side issues
       it.skip('should initiate password reset', async () => {
         const response = await client.post('/customer/identity/forgot-password', {
-          email: TEST_CUSTOMER.email
+          email: TEST_CUSTOMER.email,
         });
 
         expect(response.status).toBe(200);
@@ -189,7 +188,7 @@ describe('Identity Feature Tests', () => {
 
       it('should not reveal if email exists', async () => {
         const response = await client.post('/customer/identity/forgot-password', {
-          email: 'nonexistent@example.com'
+          email: 'nonexistent@example.com',
         });
 
         // Should still return success to prevent email enumeration
@@ -207,7 +206,7 @@ describe('Identity Feature Tests', () => {
       it('should authenticate merchant with valid credentials', async () => {
         const response = await client.post('/business/auth/login', {
           email: TEST_MERCHANT.email,
-          password: TEST_MERCHANT.password
+          password: TEST_MERCHANT.password,
         });
 
         expect(response.status).toBe(200);
@@ -221,7 +220,7 @@ describe('Identity Feature Tests', () => {
       it('should reject invalid credentials', async () => {
         const response = await client.post('/business/auth/login', {
           email: TEST_MERCHANT.email,
-          password: 'wrong-password'
+          password: 'wrong-password',
         });
 
         expect(response.status).toBe(401);
@@ -233,7 +232,7 @@ describe('Identity Feature Tests', () => {
       const newMerchant = {
         email: `new-merchant-${Date.now()}@example.com`,
         password: 'NewPassword123!',
-        name: 'New Merchant Store'
+        name: 'New Merchant Store',
       };
 
       // TODO: Merchant registration has server-side issues
@@ -251,7 +250,7 @@ describe('Identity Feature Tests', () => {
       it('should issue access and refresh tokens for merchant', async () => {
         const response = await client.post('/business/auth/token', {
           email: TEST_MERCHANT.email,
-          password: TEST_MERCHANT.password
+          password: TEST_MERCHANT.password,
         });
 
         expect(response.status).toBe(200);
@@ -268,17 +267,16 @@ describe('Identity Feature Tests', () => {
         // First get a refresh token
         const tokenResponse = await client.post('/business/auth/token', {
           email: TEST_MERCHANT.email,
-          password: TEST_MERCHANT.password
+          password: TEST_MERCHANT.password,
         });
         const refreshToken = tokenResponse.data.refreshToken;
 
         if (!refreshToken) {
-          
           return;
         }
 
         const response = await client.post('/business/auth/refresh', {
-          refreshToken
+          refreshToken,
         });
 
         expect(response.status).toBe(200);
@@ -290,7 +288,7 @@ describe('Identity Feature Tests', () => {
     describe('POST /business/auth/validate', () => {
       it('should validate merchant token', async () => {
         const response = await client.post('/business/auth/validate', {
-          token: merchantToken
+          token: merchantToken,
         });
 
         expect(response.status).toBe(200);
@@ -303,7 +301,7 @@ describe('Identity Feature Tests', () => {
       // TODO: Merchant password reset has server-side issues
       it.skip('should initiate merchant password reset', async () => {
         const response = await client.post('/business/auth/forgot-password', {
-          email: TEST_MERCHANT.email
+          email: TEST_MERCHANT.email,
         });
 
         expect(response.status).toBe(200);
@@ -326,7 +324,7 @@ describe('Identity Feature Tests', () => {
     it('should accept requests with valid customer token', async () => {
       // Use identity/validate endpoint to verify token works
       const response = await client.post('/customer/identity/validate', {
-        token: customerToken
+        token: customerToken,
       });
 
       expect(response.status).toBe(200);

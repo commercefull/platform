@@ -19,7 +19,7 @@ exports.up = function (knex) {
     t.text('notes');
     t.boolean('discrepancies').notNullable().defaultTo(false);
     t.jsonb('attachments');
-    
+
     t.timestamp('completedAt');
     t.index('receiptNumber');
     t.index('supplierPurchaseOrderId');

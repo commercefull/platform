@@ -8,14 +8,14 @@ const TAX_CATEGORY_IDS = {
   STANDARD: '0193a000-0000-7000-8000-000000000001',
   REDUCED: '0193a000-0000-7000-8000-000000000002',
   ZERO: '0193a000-0000-7000-8000-000000000003',
-  EXEMPT: '0193a000-0000-7000-8000-000000000004'
+  EXEMPT: '0193a000-0000-7000-8000-000000000004',
 };
 
 const TAX_ZONE_IDS = {
   US_DOMESTIC: '0193a001-0000-7000-8000-000000000001',
   US_CALIFORNIA: '0193a001-0000-7000-8000-000000000002',
   EU_STANDARD: '0193a001-0000-7000-8000-000000000003',
-  UK: '0193a001-0000-7000-8000-000000000004'
+  UK: '0193a001-0000-7000-8000-000000000004',
 };
 
 const TAX_RATE_IDS = {
@@ -23,28 +23,43 @@ const TAX_RATE_IDS = {
   US_CA_STATE: '0193a002-0000-7000-8000-000000000002',
   EU_VAT_STANDARD: '0193a002-0000-7000-8000-000000000003',
   UK_VAT: '0193a002-0000-7000-8000-000000000004',
-  ZERO_RATE: '0193a002-0000-7000-8000-000000000005'
+  ZERO_RATE: '0193a002-0000-7000-8000-000000000005',
 };
 
 const TAX_RULE_IDS = {
   ELECTRONICS: '0193a003-0000-7000-8000-000000000001',
-  FOOD: '0193a003-0000-7000-8000-000000000002'
+  FOOD: '0193a003-0000-7000-8000-000000000002',
 };
 
 const TAX_SETTINGS_IDS = {
-  DEFAULT: '0193a004-0000-7000-8000-000000000001'
+  DEFAULT: '0193a004-0000-7000-8000-000000000001',
 };
 
 // Test merchant ID (should exist from merchant seeds)
 const TEST_MERCHANT_ID = '01911000-0000-7000-8000-000000000001';
 
-exports.seed = async function(knex) {
+exports.seed = async function (knex) {
   // Clean up existing test data in reverse order of dependencies
-  await knex('taxRule').whereIn('taxRuleId', Object.values(TAX_RULE_IDS)).del().catch(() => {});
-  await knex('taxRate').whereIn('taxRateId', Object.values(TAX_RATE_IDS)).del().catch(() => {});
-  await knex('taxSettings').whereIn('taxSettingsId', Object.values(TAX_SETTINGS_IDS)).del().catch(() => {});
-  await knex('taxZone').whereIn('taxZoneId', Object.values(TAX_ZONE_IDS)).del().catch(() => {});
-  await knex('taxCategory').whereIn('taxCategoryId', Object.values(TAX_CATEGORY_IDS)).del().catch(() => {});
+  await knex('taxRule')
+    .whereIn('taxRuleId', Object.values(TAX_RULE_IDS))
+    .del()
+    .catch(() => {});
+  await knex('taxRate')
+    .whereIn('taxRateId', Object.values(TAX_RATE_IDS))
+    .del()
+    .catch(() => {});
+  await knex('taxSettings')
+    .whereIn('taxSettingsId', Object.values(TAX_SETTINGS_IDS))
+    .del()
+    .catch(() => {});
+  await knex('taxZone')
+    .whereIn('taxZoneId', Object.values(TAX_ZONE_IDS))
+    .del()
+    .catch(() => {});
+  await knex('taxCategory')
+    .whereIn('taxCategoryId', Object.values(TAX_CATEGORY_IDS))
+    .del()
+    .catch(() => {});
 
   // Seed Tax Categories (use test- prefix to avoid conflicts with base seeds)
   await knex('taxCategory').insert([
@@ -55,7 +70,7 @@ exports.seed = async function(knex) {
       description: 'Standard tax rate for most products (test)',
       isDefault: false,
       sortOrder: 101,
-      isActive: true
+      isActive: true,
     },
     {
       taxCategoryId: TAX_CATEGORY_IDS.REDUCED,
@@ -64,7 +79,7 @@ exports.seed = async function(knex) {
       description: 'Reduced tax rate for specific product categories (test)',
       isDefault: false,
       sortOrder: 102,
-      isActive: true
+      isActive: true,
     },
     {
       taxCategoryId: TAX_CATEGORY_IDS.ZERO,
@@ -73,7 +88,7 @@ exports.seed = async function(knex) {
       description: 'Zero tax rate for exempt products (test)',
       isDefault: false,
       sortOrder: 103,
-      isActive: true
+      isActive: true,
     },
     {
       taxCategoryId: TAX_CATEGORY_IDS.EXEMPT,
@@ -82,8 +97,8 @@ exports.seed = async function(knex) {
       description: 'Fully tax exempt items (test)',
       isDefault: false,
       sortOrder: 104,
-      isActive: true
-    }
+      isActive: true,
+    },
   ]);
 
   // Seed Tax Zones (use test- prefix to avoid conflicts)
@@ -95,7 +110,7 @@ exports.seed = async function(knex) {
       description: 'All US states (test)',
       isDefault: false,
       countries: JSON.stringify(['US']),
-      isActive: true
+      isActive: true,
     },
     {
       taxZoneId: TAX_ZONE_IDS.US_CALIFORNIA,
@@ -105,7 +120,7 @@ exports.seed = async function(knex) {
       isDefault: false,
       countries: JSON.stringify(['US']),
       states: JSON.stringify(['CA']),
-      isActive: true
+      isActive: true,
     },
     {
       taxZoneId: TAX_ZONE_IDS.EU_STANDARD,
@@ -114,7 +129,7 @@ exports.seed = async function(knex) {
       description: 'EU member states (test)',
       isDefault: false,
       countries: JSON.stringify(['DE', 'FR', 'IT', 'ES', 'NL', 'BE', 'AT', 'PT', 'IE', 'PL']),
-      isActive: true
+      isActive: true,
     },
     {
       taxZoneId: TAX_ZONE_IDS.UK,
@@ -123,8 +138,8 @@ exports.seed = async function(knex) {
       description: 'United Kingdom (test)',
       isDefault: false,
       countries: JSON.stringify(['GB']),
-      isActive: true
-    }
+      isActive: true,
+    },
   ]);
 
   // Seed Tax Rates
@@ -142,7 +157,7 @@ exports.seed = async function(knex) {
       includeInPrice: false,
       isShippingTaxable: true,
       startDate: now,
-      isActive: true
+      isActive: true,
     },
     {
       taxRateId: TAX_RATE_IDS.US_CA_STATE,
@@ -156,7 +171,7 @@ exports.seed = async function(knex) {
       includeInPrice: false,
       isShippingTaxable: true,
       startDate: now,
-      isActive: true
+      isActive: true,
     },
     {
       taxRateId: TAX_RATE_IDS.EU_VAT_STANDARD,
@@ -170,7 +185,7 @@ exports.seed = async function(knex) {
       includeInPrice: true,
       isShippingTaxable: true,
       startDate: now,
-      isActive: true
+      isActive: true,
     },
     {
       taxRateId: TAX_RATE_IDS.UK_VAT,
@@ -184,7 +199,7 @@ exports.seed = async function(knex) {
       includeInPrice: true,
       isShippingTaxable: true,
       startDate: now,
-      isActive: true
+      isActive: true,
     },
     {
       taxRateId: TAX_RATE_IDS.ZERO_RATE,
@@ -198,8 +213,8 @@ exports.seed = async function(knex) {
       includeInPrice: false,
       isShippingTaxable: false,
       startDate: now,
-      isActive: true
-    }
+      isActive: true,
+    },
   ]);
 
   // Seed Tax Rules
@@ -212,7 +227,7 @@ exports.seed = async function(knex) {
       conditionType: 'category',
       conditionValue: JSON.stringify({ categoryCode: 'electronics' }),
       sortOrder: 1,
-      isActive: true
+      isActive: true,
     },
     {
       taxRuleId: TAX_RULE_IDS.FOOD,
@@ -222,13 +237,13 @@ exports.seed = async function(knex) {
       conditionType: 'category',
       conditionValue: JSON.stringify({ categoryCode: 'food' }),
       sortOrder: 2,
-      isActive: true
-    }
+      isActive: true,
+    },
   ]);
 
   // Check if test merchant exists before seeding tax settings
   const merchantExists = await knex('merchant').where('merchantId', TEST_MERCHANT_ID).first();
-  
+
   if (merchantExists) {
     await knex('taxSettings').insert([
       {
@@ -244,8 +259,8 @@ exports.seed = async function(knex) {
         roundTaxAtSubtotal: false,
         taxDecimalPlaces: 2,
         defaultTaxCategory: TAX_CATEGORY_IDS.STANDARD,
-        defaultTaxZone: TAX_ZONE_IDS.US_DOMESTIC
-      }
+        defaultTaxZone: TAX_ZONE_IDS.US_DOMESTIC,
+      },
     ]);
     console.log('Tax test data seeded successfully (with settings)');
   } else {

@@ -11,7 +11,7 @@ exports.up = function (knex) {
     status: 'published',
     path: '/home',
     isHomePage: true,
-    metaTitle: 'Welcome to Our Store'
+    metaTitle: 'Welcome to Our Store',
   });
 };
 

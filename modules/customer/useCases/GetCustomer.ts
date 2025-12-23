@@ -12,7 +12,7 @@ import { CustomerRepository } from '../domain/repositories/CustomerRepository';
 export class GetCustomerCommand {
   constructor(
     public readonly customerId?: string,
-    public readonly email?: string
+    public readonly email?: string,
   ) {
     if (!customerId && !email) {
       throw new Error('Either customerId or email must be provided');
@@ -107,7 +107,7 @@ export class GetCustomerUseCase {
         country: addr.country,
         addressType: addr.addressType,
         isDefault: addr.isDefault,
-        phone: addr.phone
+        phone: addr.phone,
       })),
       defaultShippingAddressId: customer.defaultShippingAddressId,
       defaultBillingAddressId: customer.defaultBillingAddressId,
@@ -119,7 +119,7 @@ export class GetCustomerUseCase {
       lastLoginAt: customer.lastLoginAt?.toISOString(),
       loginCount: customer.loginCount,
       createdAt: customer.createdAt.toISOString(),
-      updatedAt: customer.updatedAt.toISOString()
+      updatedAt: customer.updatedAt.toISOString(),
     };
   }
 }

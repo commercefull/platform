@@ -2,9 +2,9 @@
  * Migration: Create B2B Approval Workflow Tables
  */
 
-exports.up = async function(knex) {
+exports.up = async function (knex) {
   // Create b2b_approval_workflow table
-  await knex.schema.createTable('b2bApprovalWorkflow', (table) => {
+  await knex.schema.createTable('b2bApprovalWorkflow', table => {
     table.string('workflowId').primary();
     table.string('companyId').notNullable();
     table.string('name').notNullable();
@@ -16,14 +16,14 @@ exports.up = async function(knex) {
     table.boolean('isActive').defaultTo(true);
     table.timestamp('createdAt').defaultTo(knex.fn.now());
     table.timestamp('updatedAt').defaultTo(knex.fn.now());
-    
+
     table.index(['companyId']);
     table.index(['triggerType']);
     table.index(['isActive']);
   });
 
   // Create b2b_approval_request table
-  await knex.schema.createTable('b2bApprovalRequest', (table) => {
+  await knex.schema.createTable('b2bApprovalRequest', table => {
     table.string('requestId').primary();
     table.string('workflowId').notNullable().references('workflowId').inTable('b2bApprovalWorkflow');
     table.string('companyId').notNullable();
@@ -40,7 +40,7 @@ exports.up = async function(knex) {
     table.timestamp('escalatedAt');
     table.timestamp('createdAt').defaultTo(knex.fn.now());
     table.timestamp('updatedAt').defaultTo(knex.fn.now());
-    
+
     table.index(['companyId']);
     table.index(['status']);
     table.index(['requestType', 'referenceId']);
@@ -48,7 +48,7 @@ exports.up = async function(knex) {
   });
 
   // Create b2b_approval_action table (approval history)
-  await knex.schema.createTable('b2bApprovalAction', (table) => {
+  await knex.schema.createTable('b2bApprovalAction', table => {
     table.string('actionId').primary();
     table.string('requestId').notNullable().references('requestId').inTable('b2bApprovalRequest').onDelete('CASCADE');
     table.integer('stepNumber').notNullable();
@@ -57,13 +57,13 @@ exports.up = async function(knex) {
     table.string('actionByRole');
     table.text('comments');
     table.timestamp('actionAt').defaultTo(knex.fn.now());
-    
+
     table.index(['requestId']);
     table.index(['actionById']);
   });
 
   // Create b2b_price_list table
-  await knex.schema.createTable('b2bPriceList', (table) => {
+  await knex.schema.createTable('b2bPriceList', table => {
     table.string('priceListId').primary();
     table.string('name').notNullable();
     table.text('description');
@@ -81,13 +81,13 @@ exports.up = async function(knex) {
     table.boolean('isActive').defaultTo(true);
     table.timestamp('createdAt').defaultTo(knex.fn.now());
     table.timestamp('updatedAt').defaultTo(knex.fn.now());
-    
+
     table.index(['isActive']);
     table.index(['validFrom', 'validTo']);
   });
 
   // Create b2b_price_list_item table
-  await knex.schema.createTable('b2bPriceListItem', (table) => {
+  await knex.schema.createTable('b2bPriceListItem', table => {
     table.string('priceListItemId').primary();
     table.string('priceListId').notNullable().references('priceListId').inTable('b2bPriceList').onDelete('CASCADE');
     table.string('productId').notNullable();
@@ -96,13 +96,13 @@ exports.up = async function(knex) {
     table.decimal('minQuantity', 12, 2).defaultTo(1);
     table.timestamp('createdAt').defaultTo(knex.fn.now());
     table.timestamp('updatedAt').defaultTo(knex.fn.now());
-    
+
     table.unique(['priceListId', 'productId', 'variantId']);
     table.index(['productId']);
   });
 
   // Create b2b_purchase_order table
-  await knex.schema.createTable('b2bPurchaseOrder', (table) => {
+  await knex.schema.createTable('b2bPurchaseOrder', table => {
     table.string('purchaseOrderId').primary();
     table.string('companyId').notNullable();
     table.string('buyerId').notNullable();
@@ -124,7 +124,7 @@ exports.up = async function(knex) {
     table.timestamp('acknowledgedAt');
     table.timestamp('createdAt').defaultTo(knex.fn.now());
     table.timestamp('updatedAt').defaultTo(knex.fn.now());
-    
+
     table.index(['companyId']);
     table.index(['buyerId']);
     table.index(['status']);
@@ -132,7 +132,7 @@ exports.up = async function(knex) {
   });
 
   // Create b2b_purchase_order_item table
-  await knex.schema.createTable('b2bPurchaseOrderItem', (table) => {
+  await knex.schema.createTable('b2bPurchaseOrderItem', table => {
     table.string('purchaseOrderItemId').primary();
     table.string('purchaseOrderId').notNullable().references('purchaseOrderId').inTable('b2bPurchaseOrder').onDelete('CASCADE');
     table.string('productId').notNullable();
@@ -144,13 +144,13 @@ exports.up = async function(knex) {
     table.decimal('discount', 12, 2).defaultTo(0);
     table.decimal('total', 12, 2).notNullable();
     table.timestamp('createdAt').defaultTo(knex.fn.now());
-    
+
     table.index(['purchaseOrderId']);
     table.index(['productId']);
   });
 };
 
-exports.down = async function(knex) {
+exports.down = async function (knex) {
   await knex.schema.dropTableIfExists('b2bPurchaseOrderItem');
   await knex.schema.dropTableIfExists('b2bPurchaseOrder');
   await knex.schema.dropTableIfExists('b2bPriceListItem');

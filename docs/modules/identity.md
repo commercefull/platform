@@ -71,4 +71,3 @@ The Identity feature unifies customer and merchant authentication under `feature
 - **When** they call `POST /identity/merchant/password-reset/request` with their email
 - **Then** the platform issues a reset token and acknowledges the request without revealing merchant existence
 - **And** when the merchant calls `POST /identity/merchant/password-reset/reset` with the token and new password, the platform validates the token and updates the stored password
-

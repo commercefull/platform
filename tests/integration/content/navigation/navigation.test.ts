@@ -7,14 +7,15 @@ import axios, { AxiosInstance } from 'axios';
 import { API_BASE, TEST_DATA } from '../testConstants';
 import { ADMIN_CREDENTIALS } from '../../testConstants';
 
-const createClient = (): AxiosInstance => axios.create({
-  baseURL: process.env.API_URL || 'http://localhost:3000',
-  validateStatus: () => true,
-  headers: {
-    'Accept': 'application/json',
-    'Content-Type': 'application/json'
-  }
-});
+const createClient = (): AxiosInstance =>
+  axios.create({
+    baseURL: process.env.API_URL || 'http://localhost:3000',
+    validateStatus: () => true,
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+  });
 
 describe('Content Navigation API', () => {
   let client: AxiosInstance;
@@ -24,7 +25,7 @@ describe('Content Navigation API', () => {
 
   beforeAll(async () => {
     client = createClient();
-    
+
     // Get auth token
     const loginResponse = await client.post('/business/auth/login', ADMIN_CREDENTIALS, { headers: { 'X-Test-Request': 'true' } });
     if (loginResponse.data.accessToken) {
@@ -60,7 +61,7 @@ describe('Content Navigation API', () => {
       const navigationData = {
         ...TEST_DATA.navigation,
         name: `Test Navigation ${Date.now()}`,
-        slug: `test-navigation-${Date.now()}`
+        slug: `test-navigation-${Date.now()}`,
       };
 
       const response = await client.post(`${API_BASE}/navigations`, navigationData);
@@ -107,7 +108,7 @@ describe('Content Navigation API', () => {
 
       const updateData = {
         name: 'Updated Navigation Name',
-        location: 'footer'
+        location: 'footer',
       };
 
       const response = await client.put(`${API_BASE}/navigations/${createdNavigationId}`, updateData);
@@ -124,7 +125,7 @@ describe('Content Navigation API', () => {
 
       const itemData = {
         ...TEST_DATA.navigationItem,
-        title: 'Home'
+        title: 'Home',
       };
 
       const response = await client.post(`${API_BASE}/navigations/${createdNavigationId}/items`, itemData);
@@ -146,7 +147,7 @@ describe('Content Navigation API', () => {
         type: 'url',
         url: '/about',
         parentId: createdItemId,
-        sortOrder: 0
+        sortOrder: 0,
       };
 
       const response = await client.post(`${API_BASE}/navigations/${createdNavigationId}/items`, childItemData);
@@ -163,7 +164,7 @@ describe('Content Navigation API', () => {
 
       const response = await client.post(`${API_BASE}/navigations/${createdNavigationId}/items`, {
         type: 'url',
-        url: '/test'
+        url: '/test',
       });
 
       expect(response.status).toBe(400);
@@ -191,7 +192,7 @@ describe('Content Navigation API', () => {
 
       const updateData = {
         title: 'Updated Home',
-        url: '/home'
+        url: '/home',
       };
 
       const response = await client.put(`${API_BASE}/navigation-items/${createdItemId}`, updateData);
@@ -209,8 +210,8 @@ describe('Content Navigation API', () => {
       const response = await client.post(`${API_BASE}/navigations/${createdNavigationId}/items/reorder`, {
         itemOrders: [
           { id: createdItemId, order: 1 },
-          { id: createdChildItemId, order: 0 }
-        ]
+          { id: createdChildItemId, order: 0 },
+        ],
       });
 
       expect(response.status).toBe(200);

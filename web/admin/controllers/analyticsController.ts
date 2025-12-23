@@ -7,23 +7,19 @@
 import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import { query, queryOne } from '../../../libs/db';
-import {
-  getSalesSummary,
-  getTopProducts,
-  getCustomerCohorts
-} from '../../../modules/analytics/repos/analyticsRepo';
+import { getSalesSummary, getTopProducts, getCustomerCohorts } from '../../../modules/analytics/repos/analyticsRepo';
 import {
   getScheduledReports,
   getReportExecutionHistory,
   generateReport,
-  scheduleReport
+  scheduleReport,
 } from '../../../modules/analytics/services/automatedReportingService';
 import {
   forecastSalesRevenue,
   predictCustomerChurn,
   optimizeInventoryLevels,
   generateProductRecommendations,
-  performCustomerSegmentation
+  performCustomerSegmentation,
 } from '../../../modules/analytics/services/machineLearningService';
 import { adminRespond } from 'web/respond';
 
@@ -53,7 +49,7 @@ export const analyticsDashboard = async (req: Request, res: Response): Promise<v
         total: salesSummary.totalRevenue,
         growth: 0, // Would calculate from previous period
         byPeriod: [], // Would aggregate from daily sales
-        forecast: [] // Would implement forecasting
+        forecast: [], // Would implement forecasting
       },
       customers: {
         total: salesSummary.newCustomers + salesSummary.totalOrders, // Approximation
@@ -61,14 +57,14 @@ export const analyticsDashboard = async (req: Request, res: Response): Promise<v
         returning: Math.max(0, salesSummary.totalOrders - salesSummary.newCustomers),
         churnRate: 0, // Would calculate from cohorts
         lifetimeValue: 0, // Would calculate from cohorts
-        segments: [] // Would implement segmentation
+        segments: [], // Would implement segmentation
       },
       products: {
         topSelling: topProducts.map((p: any) => ({
           productId: p.productId,
           name: `Product ${p.productId.slice(-8)}`, // Would join with product table
           sales: p.quantitySold,
-          revenue: p.revenue
+          revenue: p.revenue,
         })),
         lowStock: [], // Would implement inventory alerts
         recommendations: [], // Would implement AI recommendations
@@ -76,27 +72,27 @@ export const analyticsDashboard = async (req: Request, res: Response): Promise<v
           productId: p.productId,
           name: `Product ${p.productId.slice(-8)}`,
           views: p.views,
-          conversions: p.purchases
-        }))
+          conversions: p.purchases,
+        })),
       },
       marketing: {
         campaignPerformance: [],
         channelEffectiveness: [],
         conversionRates: [],
-        customerAcquisitionCost: 0
+        customerAcquisitionCost: 0,
       },
       operations: {
         orderFulfillment: 0,
         inventoryTurnover: 0,
         supplierPerformance: [],
-        shippingEfficiency: 0
+        shippingEfficiency: 0,
       },
       subscriptions: {
         activeSubscriptions: 0,
         churnRate: 0,
         upgradeRate: 0,
-        lifetimeValue: 0
-      }
+        lifetimeValue: 0,
+      },
     };
 
     adminRespond(req, res, 'analytics/dashboard', {
@@ -106,7 +102,7 @@ export const analyticsDashboard = async (req: Request, res: Response): Promise<v
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load analytics dashboard',
@@ -125,11 +121,13 @@ export const predictiveAnalytics = async (req: Request, res: Response): Promise<
     const salesData = await getSalesSummary(startDate, new Date());
 
     // Create historical data for forecasting
-    const historicalData = [{
-      date: new Date(),
-      revenue: salesData.totalRevenue,
-      orders: salesData.totalOrders
-    }]; // Simplified - would get daily data
+    const historicalData = [
+      {
+        date: new Date(),
+        revenue: salesData.totalRevenue,
+        orders: salesData.totalOrders,
+      },
+    ]; // Simplified - would get daily data
 
     const forecasts = await forecastSalesRevenue(historicalData, 30);
     const inventoryPredictions = await optimizeInventoryLevels();
@@ -138,10 +136,10 @@ export const predictiveAnalytics = async (req: Request, res: Response): Promise<
     const customerChurnData = await query<Array<{ customer_id: string }>>(
       `SELECT DISTINCT customer_id FROM "order"
        WHERE status = 'completed'
-       ORDER BY customer_id LIMIT 10`
+       ORDER BY customer_id LIMIT 10`,
     );
 
-    const customerChurnPromises = (customerChurnData || []).map(async (customer) => {
+    const customerChurnPromises = (customerChurnData || []).map(async customer => {
       try {
         // Get customer's purchase history
         const history = await query<Array<{ date: Date; orders: number; revenue: number }>>(
@@ -153,17 +151,17 @@ export const predictiveAnalytics = async (req: Request, res: Response): Promise<
            WHERE customer_id = $1 AND status = 'completed'
            GROUP BY DATE(created_at)
            ORDER BY date DESC LIMIT 30`,
-          [customer.customer_id]
+          [customer.customer_id],
         );
 
         const analysis = await predictCustomerChurn(
           customer.customer_id,
-          (history || []).map(h => ({ date: h.date, orders: parseInt(h.orders.toString()), revenue: parseFloat(h.revenue.toString()) }))
+          (history || []).map(h => ({ date: h.date, orders: parseInt(h.orders.toString()), revenue: parseFloat(h.revenue.toString()) })),
         );
 
         return {
           customerId: customer.customer_id,
-          ...analysis
+          ...analysis,
         };
       } catch (error) {
         logger.error('Error:', error);
@@ -172,7 +170,7 @@ export const predictiveAnalytics = async (req: Request, res: Response): Promise<
           churnProbability: 0,
           riskLevel: 'low' as const,
           factors: [],
-          recommendations: []
+          recommendations: [],
         };
       }
     });
@@ -187,7 +185,7 @@ export const predictiveAnalytics = async (req: Request, res: Response): Promise<
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load predictive analytics',
@@ -211,10 +209,10 @@ export const customerAnalytics = async (req: Request, res: Response): Promise<vo
       averageCLV: 0, // Would calculate from cohort data
       clvBySegment: segmentationAnalysis.segments.map(s => ({
         segment: s.name,
-        clv: s.avgLifetimeValue
+        clv: s.avgLifetimeValue,
       })),
       clvDistribution: [],
-      retentionImpact: []
+      retentionImpact: [],
     };
 
     // Get customer insights (simplified)
@@ -225,12 +223,12 @@ export const customerAnalytics = async (req: Request, res: Response): Promise<vo
         customerCount: s.size,
         avgLifetimeValue: s.avgLifetimeValue,
         churnRate: s.churnRate,
-        keyCharacteristics: s.characteristics
+        keyCharacteristics: s.characteristics,
       })),
       behaviorPatterns: [],
       purchaseFrequency: [],
       engagementMetrics: [],
-      loyaltyTrends: []
+      loyaltyTrends: [],
     };
 
     adminRespond(req, res, 'analytics/customers', {
@@ -241,7 +239,7 @@ export const customerAnalytics = async (req: Request, res: Response): Promise<vo
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load customer analytics',
@@ -259,7 +257,7 @@ export const aiRecommendations = async (req: Request, res: Response): Promise<vo
     const sampleCustomer = await queryOne<{ customer_id: string }>(
       `SELECT customer_id FROM "order"
        WHERE status = 'completed'
-       ORDER BY created_at DESC LIMIT 1`
+       ORDER BY created_at DESC LIMIT 1`,
     );
 
     let productRecommendations: {
@@ -279,18 +277,18 @@ export const aiRecommendations = async (req: Request, res: Response): Promise<vo
           name: 'Re-engagement Campaign',
           targetAudience: 'Inactive customers (30+ days)',
           expectedROI: 0.25,
-          confidence: 0.82
+          confidence: 0.82,
         },
         {
           name: 'Cross-sell Campaign',
           targetAudience: 'Recent purchasers',
           expectedROI: 0.18,
-          confidence: 0.76
-        }
+          confidence: 0.76,
+        },
       ],
       audienceTargeting: [],
       contentOptimization: [],
-      timingOptimization: []
+      timingOptimization: [],
     };
 
     // Get cross-sell opportunities
@@ -300,9 +298,9 @@ export const aiRecommendations = async (req: Request, res: Response): Promise<vo
       accessoryRecommendations: productRecommendations.complementary.map(c => ({
         productId: c.productId,
         baseProductId: c.baseProductId,
-        confidence: c.lift / 10 // Normalize lift score
+        confidence: c.lift / 10, // Normalize lift score
       })),
-      serviceAddons: []
+      serviceAddons: [],
     };
 
     adminRespond(req, res, 'analytics/ai-recommendations', {
@@ -313,7 +311,7 @@ export const aiRecommendations = async (req: Request, res: Response): Promise<vo
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load AI recommendations',
@@ -341,38 +339,38 @@ export const executiveDashboard = async (req: Request, res: Response): Promise<v
         current: currentKPIs.revenue,
         target: currentKPIs.revenue * 1.15, // 15% growth target
         growth: ((currentKPIs.revenue - previousKPIs.revenue) / previousKPIs.revenue) * 100,
-        change: currentKPIs.revenue - previousKPIs.revenue
+        change: currentKPIs.revenue - previousKPIs.revenue,
       },
       profit: {
         current: currentKPIs.profit,
         margin: (currentKPIs.profit / currentKPIs.revenue) * 100,
         growth: previousKPIs.profit > 0 ? ((currentKPIs.profit - previousKPIs.profit) / previousKPIs.profit) * 100 : 0,
-        change: currentKPIs.profit - previousKPIs.profit
+        change: currentKPIs.profit - previousKPIs.profit,
       },
       customers: {
         total: currentKPIs.customers.total,
         active: currentKPIs.customers.active,
         growth: ((currentKPIs.customers.total - previousKPIs.customers.total) / previousKPIs.customers.total) * 100,
-        change: currentKPIs.customers.total - previousKPIs.customers.total
+        change: currentKPIs.customers.total - previousKPIs.customers.total,
       },
       orders: {
         total: currentKPIs.orders.total,
         average: currentKPIs.orders.average,
         conversion: currentKPIs.orders.conversion,
-        growth: ((currentKPIs.orders.total - previousKPIs.orders.total) / previousKPIs.orders.total) * 100
+        growth: ((currentKPIs.orders.total - previousKPIs.orders.total) / previousKPIs.orders.total) * 100,
       },
       inventory: {
         turnover: currentKPIs.inventory.turnover,
         stockouts: currentKPIs.inventory.stockouts,
         optimization: 0, // Would calculate optimization score
-        value: currentKPIs.inventory.value
+        value: currentKPIs.inventory.value,
       },
       marketing: {
         roi: currentKPIs.marketing.roi,
         cac: currentKPIs.marketing.cac,
         ltv: currentKPIs.customers.ltv,
-        spend: currentKPIs.marketing.spend
-      }
+        spend: currentKPIs.marketing.spend,
+      },
     };
 
     // Get business alerts
@@ -389,7 +387,7 @@ export const executiveDashboard = async (req: Request, res: Response): Promise<v
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load executive dashboard',
@@ -409,14 +407,14 @@ export const realTimeMetrics = async (req: Request, res: Response): Promise<void
     res.json({
       success: true,
       data: metrics,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({
       success: false,
-      message: error.message || 'Failed to fetch real-time metrics'
+      message: error.message || 'Failed to fetch real-time metrics',
     });
   }
 };
@@ -437,7 +435,7 @@ export const automatedReports = async (req: Request, res: Response): Promise<voi
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load automated reports',
@@ -466,20 +464,20 @@ export const createReportSchedule = async (req: Request, res: Response): Promise
       format: format || 'pdf',
       isActive: true,
       nextRunAt: calculateNextRunTime(type),
-      parameters: parameters || {}
+      parameters: parameters || {},
     });
 
     res.json({
       success: true,
       message: 'Report schedule created successfully',
-      schedule
+      schedule,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({
       success: false,
-      message: error.message || 'Failed to create report schedule'
+      message: error.message || 'Failed to create report schedule',
     });
   }
 };
@@ -490,18 +488,17 @@ export const updateReportSchedule = async (req: Request, res: Response): Promise
     const updates = req.body;
 
     // Placeholder - would update schedule in database
-    
 
     res.json({
       success: true,
-      message: 'Report schedule updated successfully'
+      message: 'Report schedule updated successfully',
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({
       success: false,
-      message: error.message || 'Failed to update report schedule'
+      message: error.message || 'Failed to update report schedule',
     });
   }
 };
@@ -511,18 +508,17 @@ export const deleteReportSchedule = async (req: Request, res: Response): Promise
     const { scheduleId } = req.params;
 
     // Placeholder - would delete schedule from database
-    
 
     res.json({
       success: true,
-      message: 'Report schedule deleted successfully'
+      message: 'Report schedule deleted successfully',
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({
       success: false,
-      message: error.message || 'Failed to delete report schedule'
+      message: error.message || 'Failed to delete report schedule',
     });
   }
 };
@@ -538,20 +534,20 @@ export const runReportNow = async (req: Request, res: Response): Promise<void> =
     // Generate report immediately
     const reportData = await generateReport(reportType, {
       period: period || '30d',
-      ...parameters
+      ...parameters,
     });
 
     res.json({
       success: true,
       message: 'Report generated successfully',
-      report: reportData
+      report: reportData,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({
       success: false,
-      message: error.message || 'Failed to run report'
+      message: error.message || 'Failed to run report',
     });
   }
 };
@@ -651,7 +647,7 @@ async function calculateExecutiveKPIs(startDate: Date, endDate: Date) {
       COUNT(DISTINCT customer_id) as customers
     FROM "order"
     WHERE created_at >= $1 AND created_at <= $2 AND status = 'completed'`,
-    [startDate, endDate]
+    [startDate, endDate],
   );
 
   // Get customer data
@@ -675,7 +671,7 @@ async function calculateExecutiveKPIs(startDate: Date, endDate: Date) {
       COUNT(CASE WHEN last_order >= $3 - INTERVAL '30 days' THEN 1 END) as active,
       COALESCE(AVG(total_spent), 0) as ltv
     FROM customer_stats`,
-    [startDate, endDate, endDate]
+    [startDate, endDate, endDate],
   );
 
   // Get inventory data
@@ -705,7 +701,7 @@ async function calculateExecutiveKPIs(startDate: Date, endDate: Date) {
       i.stockouts,
       i.total_value as value
     FROM sales_data s, inventory_data i`,
-    [startDate, endDate]
+    [startDate, endDate],
   );
 
   return {
@@ -714,23 +710,23 @@ async function calculateExecutiveKPIs(startDate: Date, endDate: Date) {
     customers: {
       total: parseInt(customerData?.total || '0'),
       active: parseInt(customerData?.active || '0'),
-      ltv: parseFloat(customerData?.ltv || '0')
+      ltv: parseFloat(customerData?.ltv || '0'),
     },
     orders: {
       total: parseInt(revenueData?.orders || '0'),
       average: parseFloat(revenueData?.average_order || '0'),
-      conversion: 0.03 // Simplified conversion rate
+      conversion: 0.03, // Simplified conversion rate
     },
     inventory: {
       turnover: parseFloat(inventoryData?.turnover || '0'),
       stockouts: parseInt(inventoryData?.stockouts || '0'),
-      value: parseFloat(inventoryData?.value || '0')
+      value: parseFloat(inventoryData?.value || '0'),
     },
     marketing: {
       roi: 2.5, // Simplified ROI
       cac: 25, // Simplified CAC
-      spend: 1000 // Simplified spend
-    }
+      spend: 1000, // Simplified spend
+    },
   };
 }
 
@@ -746,13 +742,13 @@ async function getBusinessAlerts(kpis: any) {
     alerts.push({
       type: 'critical',
       message: `Revenue decreased by ${Math.abs(kpis.revenue.growth).toFixed(1)}% compared to last period`,
-      action: 'Review sales strategy and marketing campaigns'
+      action: 'Review sales strategy and marketing campaigns',
     });
   } else if (kpis.revenue.growth < -5) {
     alerts.push({
       type: 'warning',
       message: `Revenue slightly down by ${Math.abs(kpis.revenue.growth).toFixed(1)}%`,
-      action: 'Monitor sales trends closely'
+      action: 'Monitor sales trends closely',
     });
   }
 
@@ -761,7 +757,7 @@ async function getBusinessAlerts(kpis: any) {
     alerts.push({
       type: 'critical',
       message: `Customer base decreased by ${Math.abs(kpis.customers.growth).toFixed(1)}%`,
-      action: 'Implement customer retention campaigns'
+      action: 'Implement customer retention campaigns',
     });
   }
 
@@ -770,7 +766,7 @@ async function getBusinessAlerts(kpis: any) {
     alerts.push({
       type: 'warning',
       message: `${kpis.inventory.stockouts} products are out of stock`,
-      action: 'Review inventory management and reorder points'
+      action: 'Review inventory management and reorder points',
     });
   }
 
@@ -779,7 +775,7 @@ async function getBusinessAlerts(kpis: any) {
     alerts.push({
       type: 'warning',
       message: `Profit margin (${kpis.profit.margin.toFixed(1)}%) is below target`,
-      action: 'Review pricing strategy and cost optimization'
+      action: 'Review pricing strategy and cost optimization',
     });
   }
 
@@ -788,7 +784,7 @@ async function getBusinessAlerts(kpis: any) {
     alerts.push({
       type: 'info',
       message: `Marketing ROI (${kpis.marketing.roi.toFixed(1)}) could be improved`,
-      action: 'Optimize marketing spend and campaign targeting'
+      action: 'Optimize marketing spend and campaign targeting',
     });
   }
 
@@ -796,7 +792,7 @@ async function getBusinessAlerts(kpis: any) {
     critical: alerts.filter(a => a.type === 'critical'),
     warnings: alerts.filter(a => a.type === 'warning'),
     opportunities: alerts.filter(a => a.type === 'info'),
-    trends: []
+    trends: [],
   };
 }
 
@@ -813,14 +809,14 @@ async function analyzeBusinessTrends(currentKPIs: any, previousKPIs: any) {
       metric: 'Revenue',
       trend: 'up',
       description: `Strong revenue growth of ${currentKPIs.revenue.growth.toFixed(1)}%`,
-      impact: 'positive'
+      impact: 'positive',
     });
   } else if (currentKPIs.revenue.growth < -5) {
     trends.push({
       metric: 'Revenue',
       trend: 'down',
       description: `Revenue decline of ${Math.abs(currentKPIs.revenue.growth).toFixed(1)}%`,
-      impact: 'negative'
+      impact: 'negative',
     });
   }
 
@@ -830,7 +826,7 @@ async function analyzeBusinessTrends(currentKPIs: any, previousKPIs: any) {
       metric: 'Customer Acquisition',
       trend: 'up',
       description: `Strong customer growth of ${currentKPIs.customers.growth.toFixed(1)}%`,
-      impact: 'positive'
+      impact: 'positive',
     });
   }
 
@@ -841,7 +837,7 @@ async function analyzeBusinessTrends(currentKPIs: any, previousKPIs: any) {
       metric: 'Average Order Value',
       trend: orderValueChange > 0 ? 'up' : 'down',
       description: `AOV ${orderValueChange > 0 ? 'increased' : 'decreased'} by ${Math.abs(orderValueChange).toFixed(1)}%`,
-      impact: orderValueChange > 0 ? 'positive' : 'neutral'
+      impact: orderValueChange > 0 ? 'positive' : 'neutral',
     });
   }
 
@@ -861,7 +857,7 @@ async function getCurrentRealTimeMetrics() {
     `SELECT COUNT(DISTINCT customer_id) as count
      FROM "order"
      WHERE created_at >= $1 AND status IN ('pending', 'processing', 'completed')`,
-    [oneHourAgo]
+    [oneHourAgo],
   );
 
   // Current orders (orders created in last hour)
@@ -869,7 +865,7 @@ async function getCurrentRealTimeMetrics() {
     `SELECT COUNT(*) as count
      FROM "order"
      WHERE created_at >= $1 AND status IN ('pending', 'processing')`,
-    [oneHourAgo]
+    [oneHourAgo],
   );
 
   // Revenue today
@@ -880,20 +876,20 @@ async function getCurrentRealTimeMetrics() {
     `SELECT COALESCE(SUM(total_amount), 0) as revenue
      FROM "order"
      WHERE created_at >= $1 AND status = 'completed'`,
-    [todayStart]
+    [todayStart],
   );
 
   // Conversion rate (simplified)
   const checkoutStartedResult = await queryOne<{ count: string }>(
     `SELECT COUNT(*) as count FROM "analyticsSalesDaily"
      WHERE "date" >= $1 AND "checkoutStarted" > 0`,
-    [todayStart]
+    [todayStart],
   );
 
   const checkoutCompletedResult = await queryOne<{ count: string }>(
     `SELECT COUNT(*) as count FROM "analyticsSalesDaily"
      WHERE "date" >= $1 AND "checkoutCompleted" > 0`,
-    [todayStart]
+    [todayStart],
   );
 
   const checkoutStarted = parseInt(checkoutStartedResult?.count || '0');
@@ -909,6 +905,6 @@ async function getCurrentRealTimeMetrics() {
     revenueToday: parseFloat(revenueTodayResult?.revenue || '0'),
     conversionRate: parseFloat(conversionRate.toFixed(2)),
     serverPerformance: parseFloat(serverPerformance.toFixed(1)),
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   };
 }

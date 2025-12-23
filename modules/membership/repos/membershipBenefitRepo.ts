@@ -11,7 +11,15 @@ export type MembershipBenefit = DbMembershipBenefit;
 import membershipPlanBenefitRepo from './membershipPlanBenefitRepo';
 
 // Type aliases for benefit and value types (used in application logic)
-export type BenefitType = 'discount' | 'freeShipping' | 'contentAccess' | 'prioritySupport' | 'rewardPoints' | 'gift' | 'earlyAccess' | 'custom';
+export type BenefitType =
+  | 'discount'
+  | 'freeShipping'
+  | 'contentAccess'
+  | 'prioritySupport'
+  | 'rewardPoints'
+  | 'gift'
+  | 'earlyAccess'
+  | 'custom';
 export type ValueType = 'fixed' | 'percentage' | 'boolean' | 'text' | 'json';
 
 // Derived types for create/update operations
@@ -68,11 +76,21 @@ export class MembershipBenefitRepo {
         "valueType", "value", "icon", "rules", "createdBy", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING *`,
       [
-        params.name, params.code, params.description || null, params.shortDescription || null,
-        params.isActive ?? true, params.priority || 0, params.benefitType, params.valueType || 'fixed',
-        params.value ? JSON.stringify(params.value) : null, params.icon || null,
-        params.rules ? JSON.stringify(params.rules) : null, params.createdBy || null, now, now
-      ]
+        params.name,
+        params.code,
+        params.description || null,
+        params.shortDescription || null,
+        params.isActive ?? true,
+        params.priority || 0,
+        params.benefitType,
+        params.valueType || 'fixed',
+        params.value ? JSON.stringify(params.value) : null,
+        params.icon || null,
+        params.rules ? JSON.stringify(params.rules) : null,
+        params.createdBy || null,
+        now,
+        now,
+      ],
     );
 
     if (!result) throw new Error('Failed to create membership benefit');
@@ -99,7 +117,7 @@ export class MembershipBenefitRepo {
 
     return await queryOne<MembershipBenefit>(
       `UPDATE "membershipBenefit" SET ${updateFields.join(', ')} WHERE "membershipBenefitId" = $${paramIndex} RETURNING *`,
-      values
+      values,
     );
   }
 
@@ -114,7 +132,7 @@ export class MembershipBenefitRepo {
   async delete(id: string): Promise<boolean> {
     const result = await queryOne<{ membershipBenefitId: string }>(
       `DELETE FROM "membershipBenefit" WHERE "membershipBenefitId" = $1 RETURNING "membershipBenefitId"`,
-      [id]
+      [id],
     );
     return !!result;
   }
@@ -131,10 +149,12 @@ export class MembershipBenefitRepo {
     const active = await this.count(true);
 
     const typeResults = await query<{ benefitType: BenefitType; count: string }[]>(
-      `SELECT "benefitType", COUNT(*) as count FROM "membershipBenefit" WHERE "isActive" = true GROUP BY "benefitType"`
+      `SELECT "benefitType", COUNT(*) as count FROM "membershipBenefit" WHERE "isActive" = true GROUP BY "benefitType"`,
     );
     const byType: Record<string, number> = {};
-    typeResults?.forEach(row => { byType[row.benefitType] = parseInt(row.count, 10); });
+    typeResults?.forEach(row => {
+      byType[row.benefitType] = parseInt(row.count, 10);
+    });
 
     return { total, active, byType: byType as Record<BenefitType, number> };
   }

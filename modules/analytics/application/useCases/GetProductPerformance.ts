@@ -1,6 +1,6 @@
 /**
  * GetProductPerformance Use Case
- * 
+ *
  * Analyzes product performance metrics including sales, views, conversion.
  */
 
@@ -47,15 +47,7 @@ export class GetProductPerformanceUseCase {
   constructor(private readonly analyticsRepository: any) {}
 
   async execute(input: GetProductPerformanceInput): Promise<GetProductPerformanceOutput> {
-    const {
-      storeId,
-      productId,
-      categoryId,
-      startDate,
-      endDate,
-      sortBy = 'revenue',
-      limit = 50,
-    } = input;
+    const { storeId, productId, categoryId, startDate, endDate, sortBy = 'revenue', limit = 50 } = input;
 
     // Build filters
     const filters: Record<string, unknown> = {};
@@ -64,13 +56,7 @@ export class GetProductPerformanceUseCase {
     if (categoryId) filters.categoryId = categoryId;
 
     // Get product performance data
-    const products = await this.analyticsRepository.getProductPerformance(
-      filters,
-      startDate,
-      endDate,
-      sortBy,
-      limit
-    );
+    const products = await this.analyticsRepository.getProductPerformance(filters, startDate, endDate, sortBy, limit);
 
     // Calculate metrics for each product
     const enrichedProducts: ProductPerformanceItem[] = products.map((p: any) => ({
@@ -102,12 +88,10 @@ export class GetProductPerformanceUseCase {
         totalPurchases: 0,
         totalRevenue: 0,
         averageConversionRate: 0,
-      }
+      },
     );
 
-    summary.averageConversionRate = summary.totalViews > 0
-      ? (summary.totalPurchases / summary.totalViews) * 100
-      : 0;
+    summary.averageConversionRate = summary.totalViews > 0 ? (summary.totalPurchases / summary.totalViews) * 100 : 0;
 
     return {
       products: enrichedProducts,

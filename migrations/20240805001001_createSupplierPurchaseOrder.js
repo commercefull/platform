@@ -10,7 +10,9 @@ exports.up = function (knex) {
     t.string('poNumber', 50).notNullable().unique();
     t.uuid('supplierId').notNullable().references('supplierId').inTable('supplier');
     t.uuid('distributionWarehouseId').notNullable().references('distributionWarehouseId').inTable('distributionWarehouse');
-    t.enum('status', ['draft', 'pending', 'approved', 'sent', 'confirmed', 'partial', 'completed', 'cancelled']).notNullable().defaultTo('draft');
+    t.enum('status', ['draft', 'pending', 'approved', 'sent', 'confirmed', 'partial', 'completed', 'cancelled'])
+      .notNullable()
+      .defaultTo('draft');
     t.enum('orderType', ['standard', 'restock', 'backOrder', 'special', 'emergency']).notNullable().defaultTo('standard');
     t.enum('priority', ['low', 'normal', 'high', 'urgent']).notNullable().defaultTo('normal');
     t.timestamp('orderDate').notNullable().defaultTo(knex.fn.now());
@@ -29,7 +31,7 @@ exports.up = function (knex) {
     t.text('notes');
     t.text('supplierNotes');
     t.jsonb('attachments');
-    
+
     t.timestamp('approvedAt');
     t.timestamp('sentAt');
     t.timestamp('confirmedAt');

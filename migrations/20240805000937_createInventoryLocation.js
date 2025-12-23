@@ -7,7 +7,11 @@ exports.up = function (knex) {
     t.uuid('inventoryLocationId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
-    t.uuid('distributionWarehouseId').notNullable().references('distributionWarehouseId').inTable('distributionWarehouse').onDelete('CASCADE');
+    t.uuid('distributionWarehouseId')
+      .notNullable()
+      .references('distributionWarehouseId')
+      .inTable('distributionWarehouse')
+      .onDelete('CASCADE');
     t.uuid('distributionWarehouseBinId').references('distributionWarehouseBinId').inTable('distributionWarehouseBin').onDelete('SET NULL');
     t.uuid('productId').notNullable();
     t.uuid('productVariantId');

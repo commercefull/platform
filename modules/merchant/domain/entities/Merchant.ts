@@ -50,7 +50,7 @@ export class Merchant {
       ...props,
       status: 'pending',
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     });
   }
 
@@ -58,13 +58,27 @@ export class Merchant {
     return new Merchant(props);
   }
 
-  get merchantId(): string { return this.props.merchantId; }
-  get name(): string { return this.props.name; }
-  get code(): string { return this.props.code; }
-  get email(): string { return this.props.email; }
-  get status(): MerchantStatus { return this.props.status; }
-  get isActive(): boolean { return this.props.status === 'active'; }
-  get commissionRate(): number | undefined { return this.props.commissionRate; }
+  get merchantId(): string {
+    return this.props.merchantId;
+  }
+  get name(): string {
+    return this.props.name;
+  }
+  get code(): string {
+    return this.props.code;
+  }
+  get email(): string {
+    return this.props.email;
+  }
+  get status(): MerchantStatus {
+    return this.props.status;
+  }
+  get isActive(): boolean {
+    return this.props.status === 'active';
+  }
+  get commissionRate(): number | undefined {
+    return this.props.commissionRate;
+  }
 
   approve(): void {
     this.props.status = 'approved';

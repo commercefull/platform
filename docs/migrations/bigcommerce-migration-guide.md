@@ -14,12 +14,14 @@ This guide provides detailed instructions for migrating from BigCommerce to Comm
 ## BigCommerce Data Architecture
 
 ### API Structure
+
 - REST API with pagination
 - Rate limits: 60,000 requests per hour
 - Bulk operations for products and customers
 - Webhooks for real-time data sync
 
 ### Key Challenges
+
 - API rate limiting and pagination
 - Complex product modifiers and options
 - Multi-channel inventory management
@@ -40,7 +42,7 @@ class BigCommerceAPI {
       accessToken: config.accessToken,
       storeHash: config.storeHash,
       responseType: 'json',
-      apiVersion: 'v3'
+      apiVersion: 'v3',
     });
   }
 
@@ -65,13 +67,13 @@ class BigCommerceAPI {
 ### 2. Data Assessment
 
 ```javascript
-const assessBigCommerceData = async (bcApi) => {
+const assessBigCommerceData = async bcApi => {
   try {
     const [products, customers, orders, categories] = await Promise.all([
       bcApi.getProducts({ limit: 1 }).then(res => res.meta?.pagination?.total),
       bcApi.getCustomers({ limit: 1 }).then(res => res.meta?.pagination?.total),
       bcApi.getOrders({ limit: 1 }).then(res => res.meta?.pagination?.total),
-      bcApi.client.get('/catalog/categories', { limit: 1 }).then(res => res.meta?.pagination?.total)
+      bcApi.client.get('/catalog/categories', { limit: 1 }).then(res => res.meta?.pagination?.total),
     ]);
 
     return {
@@ -79,10 +81,9 @@ const assessBigCommerceData = async (bcApi) => {
       customers,
       orders,
       categories,
-      estimatedTime: Math.ceil((products + customers + orders) / 1000) // Rough estimate
+      estimatedTime: Math.ceil((products + customers + orders) / 1000), // Rough estimate
     };
   } catch (error) {
-    
     throw error;
   }
 };
@@ -103,7 +104,7 @@ class BigCommerceCategoryMigrator {
     while (true) {
       const response = await bcApi.client.get('/catalog/categories', {
         page,
-        limit: 250
+        limit: 250,
       });
 
       categories.push(...response.data);
@@ -125,7 +126,7 @@ class BigCommerceCategoryMigrator {
         parentId: category.parent_id ? categoryMap.get(category.parent_id) : null,
         isActive: category.is_visible,
         metaTitle: category.page_title,
-        metaDescription: category.meta_description
+        metaDescription: category.meta_description,
       });
 
       categoryMap.set(category.id, cfCategory.id);
@@ -161,7 +162,7 @@ class BigCommerceCategoryMigrator {
   flattenTree(categories) {
     const result = [];
 
-    const flatten = (cats) => {
+    const flatten = cats => {
       for (const cat of cats) {
         result.push(cat);
         if (cat.children) {
@@ -195,7 +196,7 @@ class BigCommerceAttributeMigrator {
     while (true) {
       const response = await bcApi.client.get('/catalog/products/options', {
         page,
-        limit: 250
+        limit: 250,
       });
 
       options.push(...response.data);
@@ -214,7 +215,7 @@ class BigCommerceAttributeMigrator {
         description: `Product ${type.toLowerCase()} options from BigCommerce`,
         position: 1,
         isComparable: true,
-        isGlobal: true
+        isGlobal: true,
       });
 
       for (const option of groupOptions) {
@@ -235,7 +236,7 @@ class BigCommerceAttributeMigrator {
           isUsedInProductListing: true,
           useForVariants: true,
           useForConfigurations: false,
-          position: option.sort_order || 0
+          position: option.sort_order || 0,
         });
 
         // Store option values
@@ -263,7 +264,6 @@ class BigCommerceAttributeMigrator {
   async migrateOptionValues(cf, attributeId, optionValues) {
     // This would typically be handled by CommerceFull's attribute option system
     // Implementation depends on CF's API structure
-    
   }
 }
 ```
@@ -283,7 +283,7 @@ class BigCommerceProductExtractor {
         const response = await bcApi.getProducts({
           page,
           limit: 250,
-          include: 'variants,images,custom_fields,modifiers'
+          include: 'variants,images,custom_fields,modifiers',
         });
 
         products.push(...response.data);
@@ -293,10 +293,8 @@ class BigCommerceProductExtractor {
 
         // Rate limiting
         await this.sleep(100);
-
       } catch (error) {
         if (error.status === 429) {
-          
           await this.sleep(60000); // Wait 1 minute
           continue;
         }
@@ -314,7 +312,7 @@ class BigCommerceProductExtractor {
     while (true) {
       const response = await bcApi.client.get(`/catalog/products/${productId}/variants`, {
         page,
-        limit: 250
+        limit: 250,
       });
 
       variants.push(...response.data);
@@ -359,7 +357,7 @@ class BigCommerceProductTransformer {
       dimensions: {
         length: parseFloat(bcProduct.depth || 0),
         width: parseFloat(bcProduct.width || 0),
-        height: parseFloat(bcProduct.height || 0)
+        height: parseFloat(bcProduct.height || 0),
       },
       stockQuantity: bcProduct.inventory_level,
       stockStatus: bcProduct.inventory_tracking === 'none' || bcProduct.inventory_level > 0 ? 'instock' : 'outofstock',
@@ -373,18 +371,18 @@ class BigCommerceProductTransformer {
       seo: {
         title: bcProduct.page_title,
         description: bcProduct.meta_description,
-        keywords: bcProduct.meta_keywords
+        keywords: bcProduct.meta_keywords,
       },
       customFields: this.transformCustomFields(bcProduct.custom_fields),
       createdAt: bcProduct.date_created,
-      updatedAt: bcProduct.date_modified
+      updatedAt: bcProduct.date_modified,
     };
   }
 
   mapProductType(bcType) {
     const typeMapping = {
-      'physical': 'simple',
-      'digital': 'downloadable'
+      physical: 'simple',
+      digital: 'downloadable',
     };
     return typeMapping[bcType] || 'simple';
   }
@@ -397,11 +395,12 @@ class BigCommerceProductTransformer {
       code: modifier.name.toLowerCase().replace(/\s+/g, '_'),
       type: modifier.type,
       required: modifier.required,
-      options: modifier.option_values?.map(option => ({
-        label: option.label,
-        value: option.value,
-        price: parseFloat(option.adjusters?.price?.adjuster_value || 0)
-      })) || []
+      options:
+        modifier.option_values?.map(option => ({
+          label: option.label,
+          value: option.value,
+          price: parseFloat(option.adjusters?.price?.adjuster_value || 0),
+        })) || [],
     }));
   }
 
@@ -414,7 +413,7 @@ class BigCommerceProductTransformer {
       position: image.sort_order || index,
       width: image.width,
       height: image.height,
-      isMain: index === 0
+      isMain: index === 0,
     }));
   }
 
@@ -432,11 +431,11 @@ class BigCommerceProductTransformer {
       dimensions: {
         length: parseFloat(variant.depth || 0),
         width: parseFloat(variant.width || 0),
-        height: parseFloat(variant.height || 0)
+        height: parseFloat(variant.height || 0),
       },
       options: this.parseVariantOptions(variant.option_values),
       isActive: variant.purchasing_disabled === false,
-      imageUrl: variant.image_url
+      imageUrl: variant.image_url,
     }));
   }
 
@@ -445,7 +444,7 @@ class BigCommerceProductTransformer {
 
     return optionValues.map(option => ({
       name: option.option_display_name,
-      value: option.label
+      value: option.label,
     }));
   }
 
@@ -483,7 +482,7 @@ class BigCommerceCustomerExtractor {
         const response = await bcApi.getCustomers({
           page,
           limit: 250,
-          include: 'addresses'
+          include: 'addresses',
         });
 
         customers.push(...response.data);
@@ -492,7 +491,6 @@ class BigCommerceCustomerExtractor {
         page++;
 
         await this.sleep(100);
-
       } catch (error) {
         if (error.status === 429) {
           await this.sleep(60000);
@@ -543,7 +541,7 @@ class BigCommerceCustomerTransformer {
       storeCredit: parseFloat(bcCustomer.store_credit || 0),
       registrationIpAddress: bcCustomer.registration_ip_address,
       createdAt: bcCustomer.date_created,
-      updatedAt: bcCustomer.date_modified
+      updatedAt: bcCustomer.date_modified,
     };
   }
 
@@ -558,7 +556,7 @@ class BigCommerceCustomerTransformer {
       state: bcAddress.state,
       postcode: bcAddress.zip,
       country: bcAddress.country_iso2,
-      phone: bcAddress.phone
+      phone: bcAddress.phone,
     };
   }
 }
@@ -589,14 +587,14 @@ class BigCommerceRateLimiter {
 
   async throttle() {
     const now = Date.now();
-    const hourAgo = now - (60 * 60 * 1000);
+    const hourAgo = now - 60 * 60 * 1000;
 
     // Clean old requests
     this.requests = this.requests.filter(req => req.timestamp > hourAgo);
 
     if (this.requests.length >= this.requestsPerHour) {
       const oldestRequest = Math.min(...this.requests.map(r => r.timestamp));
-      const waitTime = (60 * 60 * 1000) - (now - oldestRequest);
+      const waitTime = 60 * 60 * 1000 - (now - oldestRequest);
       await this.sleep(waitTime);
     }
   }
@@ -617,22 +615,20 @@ async function runBigCommerceMigration() {
     bigcommerce: {
       storeHash: process.env.BC_STORE_HASH,
       clientId: process.env.BC_CLIENT_ID,
-      accessToken: process.env.BC_ACCESS_TOKEN
+      accessToken: process.env.BC_ACCESS_TOKEN,
     },
     commercefull: {
       baseURL: process.env.COMMERCEFULL_URL,
-      apiKey: process.env.COMMERCEFULL_API_KEY
+      apiKey: process.env.COMMERCEFULL_API_KEY,
     },
     options: {
       batchSize: 50,
       concurrency: 2,
-      continueOnError: true
-    }
+      continueOnError: true,
+    },
   });
 
   try {
-    
-
     // Phase 1: Foundation data
     await runner.migrateCategories();
     await runner.migrateAttributes();
@@ -649,11 +645,8 @@ async function runBigCommerceMigration() {
     // Phase 5: Content
     await runner.migrateContent();
 
-    
     console.log(runner.monitor.generateReport());
-
   } catch (error) {
-    
     console.log('Partial results:', runner.monitor.generateReport());
   }
 }
@@ -674,7 +667,7 @@ const BigCommerceValidation = {
     return {
       bigcommerce: bcCount,
       commercefull: cfCount,
-      difference: Math.abs(bcCount - cfCount)
+      difference: Math.abs(bcCount - cfCount),
     };
   },
 
@@ -685,7 +678,7 @@ const BigCommerceValidation = {
     return {
       bigcommerce: bcCount,
       commercefull: cfCount,
-      difference: Math.abs(bcCount - cfCount)
+      difference: Math.abs(bcCount - cfCount),
     };
   },
 
@@ -693,14 +686,14 @@ const BigCommerceValidation = {
     // For orders, we might need to compare date ranges due to API limitations
     const recentOrders = await bcApi.getOrders({
       limit: 250,
-      'date_created:min': '2023-01-01'
+      'date_created:min': '2023-01-01',
     });
 
     const bcTotal = recentOrders.reduce((sum, order) => sum + parseFloat(order.total_inc_tax), 0);
 
     const cfOrders = await cfApi.orders.list({
       createdAfter: '2023-01-01',
-      limit: 1000
+      limit: 1000,
     });
 
     const cfTotal = cfOrders.reduce((sum, order) => sum + order.total, 0);
@@ -708,9 +701,9 @@ const BigCommerceValidation = {
     return {
       bigcommerce: bcTotal,
       commercefull: cfTotal,
-      difference: Math.abs(bcTotal - cfTotal)
+      difference: Math.abs(bcTotal - cfTotal),
     };
-  }
+  },
 };
 ```
 
@@ -735,7 +728,7 @@ class ExponentialBackoff {
       } catch (error) {
         if (error.status === 429) {
           const delay = Math.min(this.baseDelay * Math.pow(2, attempt), this.maxDelay);
-          
+
           await this.sleep(delay);
           attempt++;
         } else {
@@ -782,8 +775,8 @@ class ModifierTransformer {
       options: modifier.option_values.map(option => ({
         label: option.label,
         value: option.value,
-        priceAdjustment: option.adjusters?.price?.adjuster_value || 0
-      }))
+        priceAdjustment: option.adjusters?.price?.adjuster_value || 0,
+      })),
     };
   }
 }

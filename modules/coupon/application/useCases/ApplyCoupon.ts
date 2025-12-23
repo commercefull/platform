@@ -104,10 +104,7 @@ export class ApplyCouponUseCase {
     }
 
     if (input.customerId && coupon.maxUsagePerCustomer) {
-      const customerUsage = await this.couponRepository.getCustomerUsageCount(
-        coupon.couponId,
-        input.customerId
-      );
+      const customerUsage = await this.couponRepository.getCustomerUsageCount(coupon.couponId, input.customerId);
       if (customerUsage >= coupon.maxUsagePerCustomer) {
         return { valid: false, message: 'You have already used this coupon' };
       }

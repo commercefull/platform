@@ -5,7 +5,7 @@ import {
   SEEDED_PRODUCT_2_ID,
   SEEDED_PRODUCT_3_ID,
   SEEDED_ATTRIBUTE_COLOR_ID,
-  SEEDED_ATTRIBUTE_SIZE_ID
+  SEEDED_ATTRIBUTE_SIZE_ID,
 } from './testUtils';
 
 describe('Product Search Tests', () => {
@@ -17,7 +17,6 @@ describe('Product Search Tests', () => {
     try {
       adminToken = await loginTestAdmin(client);
     } catch (error) {
-      
       adminToken = '';
     }
   });
@@ -51,12 +50,12 @@ describe('Product Search Tests', () => {
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
-      
+
       const products = response.data.data.products;
       if (products.length >= 2) {
         // Verify ascending order
         for (let i = 1; i < products.length; i++) {
-          expect(products[i].name.localeCompare(products[i-1].name)).toBeGreaterThanOrEqual(0);
+          expect(products[i].name.localeCompare(products[i - 1].name)).toBeGreaterThanOrEqual(0);
         }
       }
     });
@@ -66,7 +65,7 @@ describe('Product Search Tests', () => {
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
-      
+
       const products = response.data.data.products;
       products.forEach((product: any) => {
         expect(product.price).toBeGreaterThanOrEqual(10);
@@ -79,7 +78,7 @@ describe('Product Search Tests', () => {
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
-      
+
       const products = response.data.data.products;
       products.forEach((product: any) => {
         expect(product.isFeatured).toBe(true);
@@ -134,7 +133,7 @@ describe('Product Search Tests', () => {
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       expect(Array.isArray(response.data.data)).toBe(true);
-      
+
       // Similar products should not include the original product
       const productIds = response.data.data.map((p: any) => p.productId);
       expect(productIds).not.toContain(SEEDED_PRODUCT_1_ID);
@@ -163,14 +162,14 @@ describe('Product Search Tests', () => {
     it('should return facets with search results', async () => {
       const searchQuery = {
         query: 'product',
-        includeFacets: true
+        includeFacets: true,
       };
 
       const response = await client.post('/customer/products/search', searchQuery);
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
-      
+
       // Facets should be present when there are search results
       if (response.data.data.total > 0) {
         expect(response.data.data).toHaveProperty('facets');

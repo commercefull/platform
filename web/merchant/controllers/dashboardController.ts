@@ -39,7 +39,7 @@ export const getDashboard = async (req: Request, res: Response) => {
     });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     merchantRespond(req, res, 'error', {
       pageName: 'Error',
       error: 'Failed to load dashboard',

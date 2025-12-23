@@ -89,7 +89,7 @@ export class Promotion {
       merchantId: props.merchantId,
       metadata: props.metadata,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     });
   }
 
@@ -98,37 +98,85 @@ export class Promotion {
   }
 
   // Getters
-  get promotionId(): string { return this.props.promotionId; }
-  get name(): string { return this.props.name; }
-  get description(): string | undefined { return this.props.description; }
-  get code(): string | undefined { return this.props.code; }
-  get type(): PromotionType { return this.props.type; }
-  get value(): number { return this.props.value; }
-  get maxDiscount(): number | undefined { return this.props.maxDiscount; }
-  get minPurchase(): number | undefined { return this.props.minPurchase; }
-  get status(): PromotionStatus { return this.props.status; }
-  get conditions(): PromotionCondition[] { return [...this.props.conditions]; }
-  get applicableProducts(): string[] | undefined { return this.props.applicableProducts; }
-  get applicableCategories(): string[] | undefined { return this.props.applicableCategories; }
-  get startDate(): Date { return this.props.startDate; }
-  get endDate(): Date | undefined { return this.props.endDate; }
-  get usageLimit(): number | undefined { return this.props.usageLimit; }
-  get usageCount(): number { return this.props.usageCount; }
-  get perCustomerLimit(): number | undefined { return this.props.perCustomerLimit; }
-  get stackable(): boolean { return this.props.stackable; }
-  get priority(): number { return this.props.priority; }
-  get merchantId(): string | undefined { return this.props.merchantId; }
-  get metadata(): Record<string, any> | undefined { return this.props.metadata; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get promotionId(): string {
+    return this.props.promotionId;
+  }
+  get name(): string {
+    return this.props.name;
+  }
+  get description(): string | undefined {
+    return this.props.description;
+  }
+  get code(): string | undefined {
+    return this.props.code;
+  }
+  get type(): PromotionType {
+    return this.props.type;
+  }
+  get value(): number {
+    return this.props.value;
+  }
+  get maxDiscount(): number | undefined {
+    return this.props.maxDiscount;
+  }
+  get minPurchase(): number | undefined {
+    return this.props.minPurchase;
+  }
+  get status(): PromotionStatus {
+    return this.props.status;
+  }
+  get conditions(): PromotionCondition[] {
+    return [...this.props.conditions];
+  }
+  get applicableProducts(): string[] | undefined {
+    return this.props.applicableProducts;
+  }
+  get applicableCategories(): string[] | undefined {
+    return this.props.applicableCategories;
+  }
+  get startDate(): Date {
+    return this.props.startDate;
+  }
+  get endDate(): Date | undefined {
+    return this.props.endDate;
+  }
+  get usageLimit(): number | undefined {
+    return this.props.usageLimit;
+  }
+  get usageCount(): number {
+    return this.props.usageCount;
+  }
+  get perCustomerLimit(): number | undefined {
+    return this.props.perCustomerLimit;
+  }
+  get stackable(): boolean {
+    return this.props.stackable;
+  }
+  get priority(): number {
+    return this.props.priority;
+  }
+  get merchantId(): string | undefined {
+    return this.props.merchantId;
+  }
+  get metadata(): Record<string, any> | undefined {
+    return this.props.metadata;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   // Computed
-  get isActive(): boolean { return this.props.status === 'active'; }
-  get isExpired(): boolean { 
-    return this.props.endDate ? this.props.endDate < new Date() : false; 
+  get isActive(): boolean {
+    return this.props.status === 'active';
   }
-  get hasUsageLimit(): boolean { 
-    return this.props.usageLimit !== undefined && this.props.usageLimit > 0; 
+  get isExpired(): boolean {
+    return this.props.endDate ? this.props.endDate < new Date() : false;
+  }
+  get hasUsageLimit(): boolean {
+    return this.props.usageLimit !== undefined && this.props.usageLimit > 0;
   }
   get remainingUses(): number | undefined {
     if (!this.hasUsageLimit) return undefined;
@@ -229,7 +277,7 @@ export class Promotion {
       priority: this.props.priority,
       metadata: this.props.metadata,
       createdAt: this.props.createdAt.toISOString(),
-      updatedAt: this.props.updatedAt.toISOString()
+      updatedAt: this.props.updatedAt.toISOString(),
     };
   }
 }

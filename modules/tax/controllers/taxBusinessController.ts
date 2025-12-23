@@ -2,11 +2,7 @@ import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import taxQueryRepo from '../repos/taxQueryRepo';
 import { TaxCommandRepo } from '../repos/taxCommandRepo';
-import {
-  TaxRate,
-  TaxCategory,
-  TaxZone
-} from '../taxTypes';
+import { TaxRate, TaxCategory, TaxZone } from '../taxTypes';
 
 export const getTaxRate = async (req: Request, res: Response) => {
   try {
@@ -25,10 +21,10 @@ export const getTaxRate = async (req: Request, res: Response) => {
     res.json({ success: true, data: taxRate });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ error: 'Internal Server Error' });
   }
-}
+};
 
 export const getAllTaxRates = async (req: Request, res: Response) => {
   try {
@@ -44,21 +40,15 @@ export const getAllTaxRates = async (req: Request, res: Response) => {
       statusFilter = false;
     }
 
-    const taxRates = await taxQueryRepo.findAllTaxRates(
-      statusFilter,
-      country as string,
-      region as string,
-      limitNum,
-      offsetNum
-    );
+    const taxRates = await taxQueryRepo.findAllTaxRates(statusFilter, country as string, region as string, limitNum, offsetNum);
 
     res.json({ success: true, data: taxRates });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
-}
+};
 
 export const createTaxRate = async (req: Request, res: Response) => {
   try {
@@ -74,13 +64,13 @@ export const createTaxRate = async (req: Request, res: Response) => {
       isCompound,
       includeInPrice,
       isShippingTaxable,
-      startDate
+      startDate,
     } = req.body;
 
     if (!name || rate === undefined || !taxCategoryId || !taxZoneId) {
       return res.status(400).json({
         success: false,
-        error: 'Name, rate, tax category ID, and tax zone ID are required'
+        error: 'Name, rate, tax category ID, and tax zone ID are required',
       });
     }
 
@@ -96,31 +86,23 @@ export const createTaxRate = async (req: Request, res: Response) => {
       isCompound: isCompound !== undefined ? isCompound : false,
       includeInPrice: includeInPrice !== undefined ? includeInPrice : false,
       isShippingTaxable: isShippingTaxable !== undefined ? isShippingTaxable : false,
-      startDate: startDate || Math.floor(Date.now() / 1000) // Unix timestamp if not provided
+      startDate: startDate || Math.floor(Date.now() / 1000), // Unix timestamp if not provided
     };
 
-    const createdTaxRate = await (new TaxCommandRepo()).createTaxRate(newTaxRate);
+    const createdTaxRate = await new TaxCommandRepo().createTaxRate(newTaxRate);
 
     res.status(201).json({ success: true, data: createdTaxRate });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
-}
+};
 
 export const updateTaxRate = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const {
-      name,
-      description,
-      rate,
-      taxCategoryId,
-      taxZoneId,
-      priority,
-      isActive
-    } = req.body;
+    const { name, description, rate, taxCategoryId, taxZoneId, priority, isActive } = req.body;
 
     const existingTaxRate = await taxQueryRepo.findTaxRateById(id);
 
@@ -128,7 +110,7 @@ export const updateTaxRate = async (req: Request, res: Response) => {
       return res.status(404).json({ success: false, error: 'Tax rate not found' });
     }
 
-    const updatedTaxRate: Partial<Omit<TaxRate, "id" | "createdAt" | "updatedAt">> = {};
+    const updatedTaxRate: Partial<Omit<TaxRate, 'id' | 'createdAt' | 'updatedAt'>> = {};
 
     if (name !== undefined) updatedTaxRate.name = name;
     if (description !== undefined) updatedTaxRate.description = description;
@@ -138,15 +120,15 @@ export const updateTaxRate = async (req: Request, res: Response) => {
     if (priority !== undefined) updatedTaxRate.priority = parseInt(priority);
     if (isActive !== undefined) updatedTaxRate.isActive = isActive;
 
-    const result = await (new TaxCommandRepo()).updateTaxRate(id, updatedTaxRate);
+    const result = await new TaxCommandRepo().updateTaxRate(id, updatedTaxRate);
 
     res.json({ success: true, data: result });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
-}
+};
 
 export const deleteTaxRate = async (req: Request, res: Response) => {
   try {
@@ -158,15 +140,15 @@ export const deleteTaxRate = async (req: Request, res: Response) => {
       return res.status(404).json({ success: false, error: 'Tax rate not found' });
     }
 
-    await (new TaxCommandRepo()).deleteTaxRate(id);
+    await new TaxCommandRepo().deleteTaxRate(id);
 
     res.json({ success: true, message: 'Tax rate deleted successfully' });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
-}
+};
 
 // Tax Category Methods
 export const getAllTaxCategories = async (req: Request, res: Response) => {
@@ -186,10 +168,10 @@ export const getAllTaxCategories = async (req: Request, res: Response) => {
     res.json({ success: true, data: taxCategories });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
-}
+};
 
 export const getTaxCategory = async (req: Request, res: Response) => {
   try {
@@ -203,21 +185,14 @@ export const getTaxCategory = async (req: Request, res: Response) => {
     res.json({ success: true, data: taxCategory });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
-}
+};
 
 export const createTaxCategory = async (req: Request, res: Response) => {
   try {
-    const {
-      name,
-      code,
-      description,
-      isDefault,
-      sortOrder,
-      isActive
-    } = req.body;
+    const { name, code, description, isDefault, sortOrder, isActive } = req.body;
 
     if (!name || !code) {
       return res.status(400).json({ success: false, error: 'Name and code are required' });
@@ -229,30 +204,23 @@ export const createTaxCategory = async (req: Request, res: Response) => {
       description,
       isDefault: isDefault !== undefined ? isDefault : false,
       sortOrder: sortOrder !== undefined ? parseInt(sortOrder) : 0,
-      isActive: isActive !== undefined ? isActive : true
+      isActive: isActive !== undefined ? isActive : true,
     };
 
-    const createdCategory = await (new TaxCommandRepo()).createTaxCategory(newTaxCategory);
+    const createdCategory = await new TaxCommandRepo().createTaxCategory(newTaxCategory);
 
     res.status(201).json({ success: true, data: createdCategory });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
-}
+};
 
 export const updateTaxCategory = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const {
-      name,
-      code,
-      description,
-      isDefault,
-      sortOrder,
-      isActive
-    } = req.body;
+    const { name, code, description, isDefault, sortOrder, isActive } = req.body;
 
     const existingCategory = await taxQueryRepo.findTaxCategoryById(id);
 
@@ -260,7 +228,7 @@ export const updateTaxCategory = async (req: Request, res: Response) => {
       return res.status(404).json({ success: false, error: 'Tax category not found' });
     }
 
-    const updatedCategory: Partial<Omit<TaxCategory, "id" | "createdAt" | "updatedAt">> = {};
+    const updatedCategory: Partial<Omit<TaxCategory, 'id' | 'createdAt' | 'updatedAt'>> = {};
 
     if (name !== undefined) updatedCategory.name = name;
     if (code !== undefined) updatedCategory.code = code;
@@ -269,15 +237,15 @@ export const updateTaxCategory = async (req: Request, res: Response) => {
     if (sortOrder !== undefined) updatedCategory.sortOrder = parseInt(sortOrder);
     if (isActive !== undefined) updatedCategory.isActive = isActive;
 
-    const result = await (new TaxCommandRepo()).updateTaxCategory(id, updatedCategory);
+    const result = await new TaxCommandRepo().updateTaxCategory(id, updatedCategory);
 
     res.json({ success: true, data: result });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
-}
+};
 
 export const deleteTaxCategory = async (req: Request, res: Response) => {
   try {
@@ -289,15 +257,15 @@ export const deleteTaxCategory = async (req: Request, res: Response) => {
       return res.status(404).json({ success: false, error: 'Tax category not found' });
     }
 
-    await (new TaxCommandRepo()).deleteTaxCategory(id);
+    await new TaxCommandRepo().deleteTaxCategory(id);
 
     res.json({ success: true, message: 'Tax category deleted successfully' });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
-}
+};
 
 // Tax Zone Methods
 export const getAllTaxZones = async (req: Request, res: Response) => {
@@ -318,10 +286,10 @@ export const getAllTaxZones = async (req: Request, res: Response) => {
     res.json({ success: true, data: taxZones });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
-}
+};
 
 export const getTaxZoneById = async (req: Request, res: Response) => {
   try {
@@ -340,24 +308,14 @@ export const getTaxZoneById = async (req: Request, res: Response) => {
     res.json({ success: true, data: taxZone });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
-}
+};
 
 export const createTaxZone = async (req: Request, res: Response) => {
   try {
-    const {
-      name,
-      code,
-      description,
-      isDefault,
-      countries,
-      states,
-      postcodes,
-      cities,
-      isActive
-    } = req.body;
+    const { name, code, description, isDefault, countries, states, postcodes, cities, isActive } = req.body;
 
     if (!name || !code || !countries || !Array.isArray(countries) || countries.length === 0) {
       return res.status(400).json({ success: false, error: 'Name, code, and at least one country are required' });
@@ -372,33 +330,23 @@ export const createTaxZone = async (req: Request, res: Response) => {
       states: states || [],
       postcodes: postcodes || [],
       cities: cities || [],
-      isActive: isActive !== undefined ? isActive : true
+      isActive: isActive !== undefined ? isActive : true,
     };
 
-    const createdTaxZone = await (new TaxCommandRepo()).createTaxZone(newTaxZone);
+    const createdTaxZone = await new TaxCommandRepo().createTaxZone(newTaxZone);
 
     res.status(201).json({ success: true, data: createdTaxZone });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
-}
+};
 
 export const updateTaxZone = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const {
-      name,
-      code,
-      description,
-      isDefault,
-      countries,
-      states,
-      postcodes,
-      cities,
-      isActive
-    } = req.body;
+    const { name, code, description, isDefault, countries, states, postcodes, cities, isActive } = req.body;
 
     const existingTaxZone = await taxQueryRepo.findTaxZoneById(id);
 
@@ -406,7 +354,7 @@ export const updateTaxZone = async (req: Request, res: Response) => {
       return res.status(404).json({ success: false, error: 'Tax zone not found' });
     }
 
-    const updatedTaxZone: Partial<Omit<TaxZone, "id" | "createdAt" | "updatedAt">> = {};
+    const updatedTaxZone: Partial<Omit<TaxZone, 'id' | 'createdAt' | 'updatedAt'>> = {};
 
     if (name !== undefined) updatedTaxZone.name = name;
     if (code !== undefined) updatedTaxZone.code = code;
@@ -423,15 +371,15 @@ export const updateTaxZone = async (req: Request, res: Response) => {
     if (cities !== undefined) updatedTaxZone.cities = cities;
     if (isActive !== undefined) updatedTaxZone.isActive = isActive;
 
-    const result = await (new TaxCommandRepo()).updateTaxZone(id, updatedTaxZone);
+    const result = await new TaxCommandRepo().updateTaxZone(id, updatedTaxZone);
 
     res.json({ success: true, data: result });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
-}
+};
 
 export const deleteTaxZone = async (req: Request, res: Response) => {
   try {
@@ -443,12 +391,12 @@ export const deleteTaxZone = async (req: Request, res: Response) => {
       return res.status(404).json({ success: false, error: 'Tax zone not found' });
     }
 
-    await (new TaxCommandRepo()).deleteTaxZone(id);
+    await new TaxCommandRepo().deleteTaxZone(id);
 
     res.json({ success: true, message: 'Tax zone deleted successfully' });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
-}
+};

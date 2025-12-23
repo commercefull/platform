@@ -87,7 +87,7 @@ export class Money {
   toJSON(): { amount: number; currency: string } {
     return {
       amount: this._amount,
-      currency: this._currency
+      currency: this._currency,
     };
   }
 }

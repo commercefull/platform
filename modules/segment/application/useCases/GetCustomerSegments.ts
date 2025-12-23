@@ -1,6 +1,6 @@
 /**
  * GetCustomerSegments Use Case
- * 
+ *
  * Gets all segments a customer belongs to.
  */
 

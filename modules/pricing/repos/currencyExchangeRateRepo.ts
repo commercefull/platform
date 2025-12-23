@@ -2,23 +2,23 @@ import { query, queryOne } from '../../../libs/db';
 import { Table, CurrencyExchangeRate } from '../../../libs/db/types';
 import { unixTimestamp } from '../../../libs/date';
 
-export type CurrencyExchangeRateCreateParams = Omit<CurrencyExchangeRate, 
+export type CurrencyExchangeRateCreateParams = Omit<
+  CurrencyExchangeRate,
   'currencyExchangeRateId' | 'createdAt' | 'updatedAt' | 'inverseRate' | 'lastUpdated'
 >;
 
-export type CurrencyExchangeRateUpdateParams = Partial<Pick<CurrencyExchangeRate,
-  'rate' | 'provider' | 'providerReference' | 'effectiveFrom' | 'effectiveTo' | 'isActive' | 'updatedBy'
->>;
+export type CurrencyExchangeRateUpdateParams = Partial<
+  Pick<CurrencyExchangeRate, 'rate' | 'provider' | 'providerReference' | 'effectiveFrom' | 'effectiveTo' | 'isActive' | 'updatedBy'>
+>;
 
 export class CurrencyExchangeRateRepo {
   /**
    * Find exchange rate by ID
    */
   async findById(currencyExchangeRateId: string): Promise<CurrencyExchangeRate | null> {
-    return await queryOne<CurrencyExchangeRate>(
-      `SELECT * FROM "${Table.CurrencyExchangeRate}" WHERE "currencyExchangeRateId" = $1`,
-      [currencyExchangeRateId]
-    );
+    return await queryOne<CurrencyExchangeRate>(`SELECT * FROM "${Table.CurrencyExchangeRate}" WHERE "currencyExchangeRateId" = $1`, [
+      currencyExchangeRateId,
+    ]);
   }
 
   /**
@@ -26,7 +26,7 @@ export class CurrencyExchangeRateRepo {
    */
   async findCurrentRate(sourceCurrencyId: string, targetCurrencyId: string): Promise<CurrencyExchangeRate | null> {
     const now = unixTimestamp();
-    
+
     return await queryOne<CurrencyExchangeRate>(
       `SELECT * FROM "${Table.CurrencyExchangeRate}" 
        WHERE "sourceCurrencyId" = $1 
@@ -36,7 +36,7 @@ export class CurrencyExchangeRateRepo {
        AND ("effectiveTo" IS NULL OR "effectiveTo" >= $3)
        ORDER BY "effectiveFrom" DESC
        LIMIT 1`,
-      [sourceCurrencyId, targetCurrencyId, now]
+      [sourceCurrencyId, targetCurrencyId, now],
     );
   }
 
@@ -46,13 +46,13 @@ export class CurrencyExchangeRateRepo {
   async findBySourceCurrency(sourceCurrencyId: string, activeOnly: boolean = true): Promise<CurrencyExchangeRate[]> {
     let sql = `SELECT * FROM "${Table.CurrencyExchangeRate}" WHERE "sourceCurrencyId" = $1`;
     const params: any[] = [sourceCurrencyId];
-    
+
     if (activeOnly) {
       sql += ` AND "isActive" = true`;
     }
-    
+
     sql += ` ORDER BY "targetCurrencyId" ASC, "effectiveFrom" DESC`;
-    
+
     const results = await query<CurrencyExchangeRate[]>(sql, params);
     return results || [];
   }
@@ -63,13 +63,13 @@ export class CurrencyExchangeRateRepo {
   async findByTargetCurrency(targetCurrencyId: string, activeOnly: boolean = true): Promise<CurrencyExchangeRate[]> {
     let sql = `SELECT * FROM "${Table.CurrencyExchangeRate}" WHERE "targetCurrencyId" = $1`;
     const params: any[] = [targetCurrencyId];
-    
+
     if (activeOnly) {
       sql += ` AND "isActive" = true`;
     }
-    
+
     sql += ` ORDER BY "sourceCurrencyId" ASC, "effectiveFrom" DESC`;
-    
+
     const results = await query<CurrencyExchangeRate[]>(sql, params);
     return results || [];
   }
@@ -80,13 +80,13 @@ export class CurrencyExchangeRateRepo {
   async findByProvider(provider: string, activeOnly: boolean = true): Promise<CurrencyExchangeRate[]> {
     let sql = `SELECT * FROM "${Table.CurrencyExchangeRate}" WHERE "provider" = $1`;
     const params: any[] = [provider];
-    
+
     if (activeOnly) {
       sql += ` AND "isActive" = true`;
     }
-    
+
     sql += ` ORDER BY "lastUpdated" DESC`;
-    
+
     const results = await query<CurrencyExchangeRate[]>(sql, params);
     return results || [];
   }
@@ -96,14 +96,14 @@ export class CurrencyExchangeRateRepo {
    */
   async findExpired(): Promise<CurrencyExchangeRate[]> {
     const now = unixTimestamp();
-    
+
     const results = await query<CurrencyExchangeRate[]>(
       `SELECT * FROM "${Table.CurrencyExchangeRate}" 
        WHERE "effectiveTo" IS NOT NULL 
        AND "effectiveTo" < $1
        AND "isActive" = true
        ORDER BY "effectiveTo" ASC`,
-      [now]
+      [now],
     );
     return results || [];
   }
@@ -118,7 +118,7 @@ export class CurrencyExchangeRateRepo {
        AND ("effectiveTo" IS NULL OR "effectiveTo" >= $1)
        AND "isActive" = true
        ORDER BY "sourceCurrencyId", "targetCurrencyId"`,
-      [effectiveDate]
+      [effectiveDate],
     );
     return results || [];
   }
@@ -159,8 +159,8 @@ export class CurrencyExchangeRateRepo {
         now,
         params.updatedBy || null,
         now,
-        now
-      ]
+        now,
+      ],
     );
 
     if (!result) {
@@ -183,7 +183,7 @@ export class CurrencyExchangeRateRepo {
       updateFields.push(`"rate" = $${paramIndex++}`, `"inverseRate" = $${paramIndex++}`);
       const rateNum = typeof params.rate === 'string' ? parseFloat(params.rate) : Number(params.rate);
       values.push(params.rate, (1 / rateNum).toString());
-      
+
       // Remove rate from params since we handled it
       const { rate, ...otherParams } = params;
       params = otherParams as CurrencyExchangeRateUpdateParams;
@@ -210,7 +210,7 @@ export class CurrencyExchangeRateRepo {
        SET ${updateFields.join(', ')}
        WHERE "currencyExchangeRateId" = $${paramIndex}
        RETURNING *`,
-      values
+      values,
     );
 
     return result;
@@ -220,9 +220,9 @@ export class CurrencyExchangeRateRepo {
    * Update rate value
    */
   async updateRate(currencyExchangeRateId: string, newRate: number, updatedBy?: string): Promise<CurrencyExchangeRate | null> {
-    return this.update(currencyExchangeRateId, { 
+    return this.update(currencyExchangeRateId, {
       rate: newRate.toString(),
-      updatedBy: updatedBy ?? null
+      updatedBy: updatedBy ?? null,
     });
   }
 
@@ -244,9 +244,9 @@ export class CurrencyExchangeRateRepo {
    * Expire rate (set effectiveTo to now)
    */
   async expire(currencyExchangeRateId: string): Promise<CurrencyExchangeRate | null> {
-    return this.update(currencyExchangeRateId, { 
+    return this.update(currencyExchangeRateId, {
       effectiveTo: new Date(),
-      isActive: false 
+      isActive: false,
     });
   }
 
@@ -256,7 +256,7 @@ export class CurrencyExchangeRateRepo {
   async delete(currencyExchangeRateId: string): Promise<boolean> {
     const result = await queryOne<{ currencyExchangeRateId: string }>(
       `DELETE FROM "${Table.CurrencyExchangeRate}" WHERE "currencyExchangeRateId" = $1 RETURNING "currencyExchangeRateId"`,
-      [currencyExchangeRateId]
+      [currencyExchangeRateId],
     );
 
     return !!result;
@@ -268,19 +268,19 @@ export class CurrencyExchangeRateRepo {
   async convertAmount(
     amount: number,
     sourceCurrencyId: string,
-    targetCurrencyId: string
+    targetCurrencyId: string,
   ): Promise<{ convertedAmount: number; rate: number; rateId: string } | null> {
     // If same currency, return as-is
     if (sourceCurrencyId === targetCurrencyId) {
       return {
         convertedAmount: amount,
         rate: 1,
-        rateId: 'same-currency'
+        rateId: 'same-currency',
       };
     }
 
     const rate = await this.findCurrentRate(sourceCurrencyId, targetCurrencyId);
-    
+
     if (!rate) {
       return null;
     }
@@ -289,7 +289,7 @@ export class CurrencyExchangeRateRepo {
     return {
       convertedAmount: amount * rateNum,
       rate: rateNum,
-      rateId: rate.currencyExchangeRateId
+      rateId: rate.currencyExchangeRateId,
     };
   }
 
@@ -303,7 +303,7 @@ export class CurrencyExchangeRateRepo {
       rate: number;
     }>,
     provider: string,
-    providerReference?: string
+    providerReference?: string,
   ): Promise<CurrencyExchangeRate[]> {
     const now = unixTimestamp();
     const created: CurrencyExchangeRate[] = [];
@@ -319,7 +319,7 @@ export class CurrencyExchangeRateRepo {
           const updated = await this.update(existing.currencyExchangeRateId, {
             rate: rateData.rate.toString(),
             provider,
-            providerReference: providerReference ?? null
+            providerReference: providerReference ?? null,
           });
           if (updated) created.push(updated);
         } else {
@@ -336,7 +336,7 @@ export class CurrencyExchangeRateRepo {
           effectiveFrom: new Date(),
           effectiveTo: null,
           isActive: true,
-          updatedBy: null
+          updatedBy: null,
         });
         created.push(newRate);
       }
@@ -354,15 +354,12 @@ export class CurrencyExchangeRateRepo {
     byProvider: Record<string, number>;
     expired: number;
   }> {
-    const totalResult = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM "${Table.CurrencyExchangeRate}"`,
-      []
-    );
+    const totalResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "${Table.CurrencyExchangeRate}"`, []);
     const total = totalResult ? parseInt(totalResult.count, 10) : 0;
 
     const activeResult = await queryOne<{ count: string }>(
       `SELECT COUNT(*) as count FROM "${Table.CurrencyExchangeRate}" WHERE "isActive" = true`,
-      []
+      [],
     );
     const active = activeResult ? parseInt(activeResult.count, 10) : 0;
 
@@ -371,7 +368,7 @@ export class CurrencyExchangeRateRepo {
        FROM "${Table.CurrencyExchangeRate}" 
        WHERE "isActive" = true
        GROUP BY "provider"`,
-      []
+      [],
     );
 
     const byProvider: Record<string, number> = {};
@@ -387,7 +384,7 @@ export class CurrencyExchangeRateRepo {
       total,
       active,
       byProvider,
-      expired: expiredRates.length
+      expired: expiredRates.length,
     };
   }
 }

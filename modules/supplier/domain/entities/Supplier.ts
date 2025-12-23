@@ -44,7 +44,7 @@ export class Supplier {
       ...props,
       status: 'pending',
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     });
   }
 
@@ -52,12 +52,24 @@ export class Supplier {
     return new Supplier(props);
   }
 
-  get supplierId(): string { return this.props.supplierId; }
-  get name(): string { return this.props.name; }
-  get code(): string { return this.props.code; }
-  get email(): string { return this.props.email; }
-  get status(): SupplierStatus { return this.props.status; }
-  get isActive(): boolean { return this.props.status === 'active'; }
+  get supplierId(): string {
+    return this.props.supplierId;
+  }
+  get name(): string {
+    return this.props.name;
+  }
+  get code(): string {
+    return this.props.code;
+  }
+  get email(): string {
+    return this.props.email;
+  }
+  get status(): SupplierStatus {
+    return this.props.status;
+  }
+  get isActive(): boolean {
+    return this.props.status === 'active';
+  }
 
   approve(): void {
     this.props.status = 'approved';

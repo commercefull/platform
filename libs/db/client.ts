@@ -18,10 +18,8 @@ export const query = async <T>(text: string, params?: Array<unknown>): Promise<T
     } else {
       res = await client.query(text);
     }
-
   } catch (e) {
-    
-    throw new Error('Query failed')
+    throw new Error('Query failed');
   } finally {
     client.end();
   }
@@ -31,7 +29,7 @@ export const query = async <T>(text: string, params?: Array<unknown>): Promise<T
   }
 
   return null;
-}
+};
 
 export const queryOne = async <T>(text: string, params: Array<unknown>): Promise<T | null> => {
   let res: PG.QueryResult;
@@ -39,8 +37,7 @@ export const queryOne = async <T>(text: string, params: Array<unknown>): Promise
   try {
     res = await client.query(text, params);
   } catch (e) {
-    
-    throw new Error('Query failed')
+    throw new Error('Query failed');
   } finally {
     client.end();
   }
@@ -50,4 +47,4 @@ export const queryOne = async <T>(text: string, params: Array<unknown>): Promise
   }
 
   return null;
-}
+};

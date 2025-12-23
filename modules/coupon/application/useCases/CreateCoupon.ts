@@ -27,7 +27,7 @@ export class CreateCouponCommand {
     public readonly applicableCustomerGroups?: string[],
     public readonly excludedProducts?: string[],
     public readonly excludedCategories?: string[],
-    public readonly metadata?: Record<string, any>
+    public readonly metadata?: Record<string, any>,
   ) {}
 }
 
@@ -64,7 +64,7 @@ export class CreateCouponUseCase {
       applicableCustomerGroups: command.applicableCustomerGroups,
       excludedProducts: command.excludedProducts,
       excludedCategories: command.excludedCategories,
-      metadata: command.metadata
+      metadata: command.metadata,
     });
 
     return await this.couponRepository.save(coupon);

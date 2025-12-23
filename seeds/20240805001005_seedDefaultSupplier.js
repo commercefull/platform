@@ -3,19 +3,21 @@
  * @returns { Promise<void> }
  */
 exports.up = async function (knex) {
-  const [supplier] = await knex('supplier').insert([
-    {
-      name: 'Sample Supplier Inc.',
-      code: 'SAMPLE',
-      description: 'Default sample supplier for testing',
-      isActive: true,
-      isApproved: true,
-      status: 'active',
-      paymentTerms: 'Net 30',
-      currency: 'USD',
-      categories: ['General', 'Electronics', 'Apparel']
-    }
-  ]).returning('supplierId');
+  const [supplier] = await knex('supplier')
+    .insert([
+      {
+        name: 'Sample Supplier Inc.',
+        code: 'SAMPLE',
+        description: 'Default sample supplier for testing',
+        isActive: true,
+        isApproved: true,
+        status: 'active',
+        paymentTerms: 'Net 30',
+        currency: 'USD',
+        categories: ['General', 'Electronics', 'Apparel'],
+      },
+    ])
+    .returning('supplierId');
 
   return knex('supplierAddress').insert([
     {
@@ -28,8 +30,8 @@ exports.up = async function (knex) {
       country: 'US',
       addressType: 'headquarters',
       isDefault: true,
-      isActive: true
-    }
+      isActive: true,
+    },
   ]);
 };
 

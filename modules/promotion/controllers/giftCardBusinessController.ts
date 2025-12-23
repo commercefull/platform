@@ -14,12 +14,12 @@ export const getGiftCards: AsyncHandler = async (req, res, next) => {
     const { status, purchasedBy, assignedTo, limit, offset } = req.query;
     const result = await giftCardRepo.getGiftCards(
       { status: status as any, purchasedBy: purchasedBy as string, assignedTo: assignedTo as string },
-      { limit: parseInt(limit as string) || 20, offset: parseInt(offset as string) || 0 }
+      { limit: parseInt(limit as string) || 20, offset: parseInt(offset as string) || 0 },
     );
     res.json({ success: true, ...result });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -35,7 +35,7 @@ export const getGiftCard: AsyncHandler = async (req, res, next) => {
     res.json({ success: true, data: { ...giftCard, transactions } });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -46,7 +46,7 @@ export const createGiftCard: AsyncHandler = async (req, res, next) => {
     res.status(201).json({ success: true, data: giftCard });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -57,7 +57,7 @@ export const activateGiftCard: AsyncHandler = async (req, res, next) => {
     res.json({ success: true, message: 'Gift card activated' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -65,17 +65,11 @@ export const activateGiftCard: AsyncHandler = async (req, res, next) => {
 export const refundToGiftCard: AsyncHandler = async (req, res, next) => {
   try {
     const adminId = (req as any).userId || (req as any).merchantId;
-    const transaction = await giftCardRepo.refundToGiftCard(
-      req.params.id,
-      req.body.amount,
-      req.body.orderId,
-      adminId,
-      req.body.notes
-    );
+    const transaction = await giftCardRepo.refundToGiftCard(req.params.id, req.body.amount, req.body.orderId, adminId, req.body.notes);
     res.json({ success: true, data: transaction });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -86,7 +80,7 @@ export const cancelGiftCard: AsyncHandler = async (req, res, next) => {
     res.json({ success: true, message: 'Gift card cancelled' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(400).json({ success: false, message: error.message });
   }
 };

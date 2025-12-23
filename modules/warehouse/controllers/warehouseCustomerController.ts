@@ -14,12 +14,7 @@ import { successResponse, errorResponse } from '../../../libs/apiResponse';
  */
 export const findNearestStores = async (req: Request, res: Response): Promise<void> => {
   try {
-    const {
-      latitude,
-      longitude,
-      radiusKm = '50',
-      limit = '5'
-    } = req.query;
+    const { latitude, longitude, radiusKm = '50', limit = '5' } = req.query;
 
     if (!latitude || !longitude) {
       errorResponse(res, 'Latitude and longitude are required', 400);
@@ -39,12 +34,7 @@ export const findNearestStores = async (req: Request, res: Response): Promise<vo
       return;
     }
 
-    const stores = await warehouseRepo.findNearLocation(
-      lat,
-      lng,
-      parseFloat(radiusKm as string),
-      parseInt(limit as string)
-    );
+    const stores = await warehouseRepo.findNearLocation(lat, lng, parseFloat(radiusKm as string), parseInt(limit as string));
 
     // Filter to only return active stores (fulfillment centers that can serve customers)
     const activeStores = stores.filter((store: any) => store.isActive);
@@ -59,22 +49,22 @@ export const findNearestStores = async (req: Request, res: Response): Promise<vo
         city: store.city,
         state: store.state,
         postalCode: store.postalCode,
-        country: store.country
+        country: store.country,
       },
       coordinates: {
         latitude: store.latitude,
-        longitude: store.longitude
+        longitude: store.longitude,
       },
       phone: store.phone,
       email: store.email,
       operatingHours: store.operatingHours,
-      distance: store.distance // Distance from search location
+      distance: store.distance, // Distance from search location
     }));
 
     successResponse(res, publicStores);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to find nearby stores');
   }
 };
@@ -116,24 +106,24 @@ export const getStoreById = async (req: Request, res: Response): Promise<void> =
         city: store.city,
         state: store.state,
         postalCode: store.postalCode,
-        country: store.country
+        country: store.country,
       },
       coordinates: {
         latitude: store.latitude,
-        longitude: store.longitude
+        longitude: store.longitude,
       },
       phone: store.phone,
       email: store.email,
       operatingHours: store.operatingHours,
       shippingMethods: store.shippingMethods,
       isFulfillmentCenter: store.isFulfillmentCenter,
-      isReturnCenter: store.isReturnCenter
+      isReturnCenter: store.isReturnCenter,
     };
 
     successResponse(res, publicStore);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to fetch store');
   }
 };
@@ -153,9 +143,7 @@ export const getStoresByCity = async (req: Request, res: Response): Promise<void
 
     // Find all active warehouses and filter by city
     const allStores = await warehouseRepo.findAll(true);
-    const stores = allStores.filter((store: any) => 
-      store.city.toLowerCase() === city.toLowerCase()
-    );
+    const stores = allStores.filter((store: any) => store.city.toLowerCase() === city.toLowerCase());
 
     // Already filtered to active stores
     const activeStores = stores;
@@ -170,20 +158,20 @@ export const getStoresByCity = async (req: Request, res: Response): Promise<void
         city: store.city,
         state: store.state,
         postalCode: store.postalCode,
-        country: store.country
+        country: store.country,
       },
       coordinates: {
         latitude: store.latitude,
-        longitude: store.longitude
+        longitude: store.longitude,
       },
       phone: store.phone,
-      operatingHours: store.operatingHours
+      operatingHours: store.operatingHours,
     }));
 
     successResponse(res, publicStores);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to fetch stores');
   }
 };
@@ -215,14 +203,14 @@ export const getStoresByCountry = async (req: Request, res: Response): Promise<v
       country: store.country,
       coordinates: {
         latitude: store.latitude,
-        longitude: store.longitude
-      }
+        longitude: store.longitude,
+      },
     }));
 
     successResponse(res, publicStores);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to fetch stores');
   }
 };
@@ -263,13 +251,13 @@ export const checkStoreAvailability = async (req: Request, res: Response): Promi
       available: true,
       quantity: 10,
       pickupAvailable: store.isFulfillmentCenter,
-      estimatedPickupTime: '2 hours'
+      estimatedPickupTime: '2 hours',
     };
 
     successResponse(res, availability);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to check availability');
   }
 };

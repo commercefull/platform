@@ -28,7 +28,7 @@ export class VerifyCustomerEmailUseCase {
     private readonly customerRepo: any,
     private readonly emailVerificationRepo: any,
     private readonly authService: any,
-    private readonly emailService: any
+    private readonly emailService: any,
   ) {}
 
   async verify(input: VerifyEmailInput): Promise<VerifyEmailOutput> {
@@ -108,9 +108,7 @@ export class VerifyCustomerEmailUseCase {
         token,
         firstName: customer.firstName,
       });
-    } catch (error) {
-      
-    }
+    } catch (error) {}
 
     return {
       success: true,

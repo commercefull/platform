@@ -72,7 +72,7 @@ export class ProductCategory {
       metaKeywords: props.metaKeywords,
       metadata: props.metadata,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     });
   }
 
@@ -81,25 +81,63 @@ export class ProductCategory {
   }
 
   // Getters
-  get categoryId(): string { return this.props.categoryId; }
-  get name(): string { return this.props.name; }
-  get description(): string | undefined { return this.props.description; }
-  get slug(): string { return this.props.slug; }
-  get parentId(): string | undefined { return this.props.parentId; }
-  get level(): number { return this.props.level; }
-  get path(): string { return this.props.path; }
-  get imageUrl(): string | undefined { return this.props.imageUrl; }
-  get iconUrl(): string | undefined { return this.props.iconUrl; }
-  get isActive(): boolean { return this.props.isActive; }
-  get isFeatured(): boolean { return this.props.isFeatured; }
-  get position(): number { return this.props.position; }
-  get productCount(): number { return this.props.productCount; }
-  get metaTitle(): string | undefined { return this.props.metaTitle; }
-  get metaDescription(): string | undefined { return this.props.metaDescription; }
-  get metaKeywords(): string | undefined { return this.props.metaKeywords; }
-  get metadata(): Record<string, any> | undefined { return this.props.metadata; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get categoryId(): string {
+    return this.props.categoryId;
+  }
+  get name(): string {
+    return this.props.name;
+  }
+  get description(): string | undefined {
+    return this.props.description;
+  }
+  get slug(): string {
+    return this.props.slug;
+  }
+  get parentId(): string | undefined {
+    return this.props.parentId;
+  }
+  get level(): number {
+    return this.props.level;
+  }
+  get path(): string {
+    return this.props.path;
+  }
+  get imageUrl(): string | undefined {
+    return this.props.imageUrl;
+  }
+  get iconUrl(): string | undefined {
+    return this.props.iconUrl;
+  }
+  get isActive(): boolean {
+    return this.props.isActive;
+  }
+  get isFeatured(): boolean {
+    return this.props.isFeatured;
+  }
+  get position(): number {
+    return this.props.position;
+  }
+  get productCount(): number {
+    return this.props.productCount;
+  }
+  get metaTitle(): string | undefined {
+    return this.props.metaTitle;
+  }
+  get metaDescription(): string | undefined {
+    return this.props.metaDescription;
+  }
+  get metaKeywords(): string | undefined {
+    return this.props.metaKeywords;
+  }
+  get metadata(): Record<string, any> | undefined {
+    return this.props.metadata;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   // Computed properties
   get isRootCategory(): boolean {
@@ -115,11 +153,7 @@ export class ProductCategory {
   }
 
   // Domain methods
-  updateInfo(updates: {
-    name?: string;
-    description?: string;
-    slug?: string;
-  }): void {
+  updateInfo(updates: { name?: string; description?: string; slug?: string }): void {
     if (updates.name) {
       this.props.name = updates.name;
       if (!updates.slug) {
@@ -195,11 +229,7 @@ export class ProductCategory {
     this.touch();
   }
 
-  updateSeo(seo: {
-    metaTitle?: string;
-    metaDescription?: string;
-    metaKeywords?: string;
-  }): void {
+  updateSeo(seo: { metaTitle?: string; metaDescription?: string; metaKeywords?: string }): void {
     if (seo.metaTitle !== undefined) this.props.metaTitle = seo.metaTitle;
     if (seo.metaDescription !== undefined) this.props.metaDescription = seo.metaDescription;
     if (seo.metaKeywords !== undefined) this.props.metaKeywords = seo.metaKeywords;
@@ -244,7 +274,7 @@ export class ProductCategory {
       metaKeywords: this.props.metaKeywords,
       metadata: this.props.metadata,
       createdAt: this.props.createdAt.toISOString(),
-      updatedAt: this.props.updatedAt.toISOString()
+      updatedAt: this.props.updatedAt.toISOString(),
     };
   }
 }

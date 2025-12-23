@@ -4,7 +4,7 @@ import axios, { AxiosInstance } from 'axios';
 export const SEEDED_SUBSCRIPTION_PRODUCT_IDS = {
   MONTHLY_BOX: '01937000-0000-7000-8000-000000000001',
   WEEKLY_DELIVERY: '01937000-0000-7000-8000-000000000002',
-  ANNUAL_MEMBERSHIP: '01937000-0000-7000-8000-000000000003'
+  ANNUAL_MEMBERSHIP: '01937000-0000-7000-8000-000000000003',
 };
 
 export const SEEDED_SUBSCRIPTION_PLAN_IDS = {
@@ -12,23 +12,23 @@ export const SEEDED_SUBSCRIPTION_PLAN_IDS = {
   MONTHLY_BOX_PREMIUM: '01937001-0000-7000-8000-000000000002',
   WEEKLY_DELIVERY_STANDARD: '01937001-0000-7000-8000-000000000003',
   ANNUAL_MEMBERSHIP_BASIC: '01937001-0000-7000-8000-000000000004',
-  ANNUAL_MEMBERSHIP_VIP: '01937001-0000-7000-8000-000000000005'
+  ANNUAL_MEMBERSHIP_VIP: '01937001-0000-7000-8000-000000000005',
 };
 
 export const SEEDED_CUSTOMER_SUBSCRIPTION_IDS = {
   ACTIVE_MONTHLY: '01937002-0000-7000-8000-000000000001',
   PAUSED_WEEKLY: '01937002-0000-7000-8000-000000000002',
-  CANCELLED_ANNUAL: '01937002-0000-7000-8000-000000000003'
+  CANCELLED_ANNUAL: '01937002-0000-7000-8000-000000000003',
 };
 
 const adminCredentials = {
   email: 'merchant@example.com',
-  password: 'password123'
+  password: 'password123',
 };
 
 const customerCredentials = {
   email: 'customer@example.com',
-  password: 'password123'
+  password: 'password123',
 };
 
 export function createTestClient(): AxiosInstance {
@@ -36,10 +36,10 @@ export function createTestClient(): AxiosInstance {
     baseURL: process.env.API_URL || 'http://localhost:3000',
     validateStatus: () => true,
     headers: {
-      'Accept': 'application/json',
+      Accept: 'application/json',
       'Content-Type': 'application/json',
-      'X-Test-Request': 'true'
-    }
+      'X-Test-Request': 'true',
+    },
   });
 }
 
@@ -52,15 +52,14 @@ export async function setupSubscriptionTests() {
     const adminLoginResponse = await client.post('/business/auth/login', adminCredentials, { headers: { 'X-Test-Request': 'true' } });
     adminToken = adminLoginResponse.data?.accessToken || '';
 
-    const customerLoginResponse = await client.post('/customer/identity/login', customerCredentials, { headers: { 'X-Test-Request': 'true' } });
+    const customerLoginResponse = await client.post('/customer/identity/login', customerCredentials, {
+      headers: { 'X-Test-Request': 'true' },
+    });
     customerToken = customerLoginResponse.data?.accessToken || '';
 
     if (!adminToken) {
-      
     }
-  } catch (error) {
-    
-  }
+  } catch (error) {}
 
   return { client, adminToken, customerToken };
 }
@@ -84,7 +83,7 @@ export function createTestSubscriptionProduct(productId: string, overrides: Part
     autoRenew: true,
     renewalReminderDays: 7,
     isActive: true,
-    ...overrides
+    ...overrides,
   };
 }
 
@@ -109,7 +108,7 @@ export function createTestSubscriptionPlan(subscriptionProductId: string, overri
     sortOrder: 0,
     isPopular: false,
     isActive: true,
-    ...overrides
+    ...overrides,
   };
 }
 
@@ -117,7 +116,7 @@ export function createTestCustomerSubscription(
   customerId: string,
   subscriptionPlanId: string,
   subscriptionProductId: string,
-  overrides: Partial<any> = {}
+  overrides: Partial<any> = {},
 ) {
   return {
     customerId,
@@ -126,23 +125,23 @@ export function createTestCustomerSubscription(
     quantity: 1,
     unitPrice: 29.99,
     discountAmount: 0,
-    taxAmount: 2.40,
+    taxAmount: 2.4,
     totalPrice: 32.39,
     currency: 'USD',
     billingInterval: 'month',
     billingIntervalCount: 1,
-    ...overrides
+    ...overrides,
   };
 }
 
 export async function cleanupSubscriptionTests(
   client: AxiosInstance,
   adminToken: string,
-  resources: { 
-    productIds?: string[]; 
-    planIds?: string[]; 
-    subscriptionIds?: string[] 
-  } = {}
+  resources: {
+    productIds?: string[];
+    planIds?: string[];
+    subscriptionIds?: string[];
+  } = {},
 ) {
   const headers = { Authorization: `Bearer ${adminToken}` };
 

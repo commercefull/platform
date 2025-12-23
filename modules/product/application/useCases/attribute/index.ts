@@ -4,19 +4,11 @@
  */
 
 // Create Attribute
-export { 
-  CreateAttributeUseCase, 
-  CreateAttributeCommand, 
-  CreateAttributeResponse 
-} from './CreateAttribute';
+export { CreateAttributeUseCase, CreateAttributeCommand, CreateAttributeResponse } from './CreateAttribute';
 export { default as createAttributeUseCase } from './CreateAttribute';
 
 // Update Attribute
-export { 
-  UpdateAttributeUseCase, 
-  UpdateAttributeCommand, 
-  UpdateAttributeResponse 
-} from './UpdateAttribute';
+export { UpdateAttributeUseCase, UpdateAttributeCommand, UpdateAttributeResponse } from './UpdateAttribute';
 export { default as updateAttributeUseCase } from './UpdateAttribute';
 
 // Manage Attribute Values
@@ -32,7 +24,7 @@ export {
   GetAttributeValuesResponse,
   addAttributeValueUseCase,
   removeAttributeValueUseCase,
-  getAttributeValuesUseCase
+  getAttributeValuesUseCase,
 } from './ManageAttributeValues';
 
 // Assign Product Attributes
@@ -53,7 +45,7 @@ export {
   setProductAttributeUseCase,
   setProductAttributesUseCase,
   getProductAttributesUseCase,
-  removeProductAttributeUseCase
+  removeProductAttributeUseCase,
 } from './AssignProductAttributes';
 
 // Search Products
@@ -73,5 +65,5 @@ export {
   searchProductsUseCase,
   getSearchSuggestionsUseCase,
   findSimilarProductsUseCase,
-  findByAttributeUseCase
+  findByAttributeUseCase,
 } from './SearchProducts';

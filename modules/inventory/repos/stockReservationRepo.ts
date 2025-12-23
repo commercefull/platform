@@ -31,17 +31,21 @@ export class StockReservationRepo {
   }
 
   async findByReference(referenceType: string, referenceId: string): Promise<StockReservation[]> {
-    return (await query<StockReservation[]>(
-      `SELECT * FROM "stockReservation" WHERE "referenceType" = $1 AND "referenceId" = $2 ORDER BY "createdAt" DESC`,
-      [referenceType, referenceId]
-    )) || [];
+    return (
+      (await query<StockReservation[]>(
+        `SELECT * FROM "stockReservation" WHERE "referenceType" = $1 AND "referenceId" = $2 ORDER BY "createdAt" DESC`,
+        [referenceType, referenceId],
+      )) || []
+    );
   }
 
   async findExpired(): Promise<StockReservation[]> {
-    return (await query<StockReservation[]>(
-      `SELECT * FROM "stockReservation" WHERE "expiresAt" IS NOT NULL AND "expiresAt" < $1 ORDER BY "expiresAt" ASC`,
-      [unixTimestamp()]
-    )) || [];
+    return (
+      (await query<StockReservation[]>(
+        `SELECT * FROM "stockReservation" WHERE "expiresAt" IS NOT NULL AND "expiresAt" < $1 ORDER BY "expiresAt" ASC`,
+        [unixTimestamp()],
+      )) || []
+    );
   }
 
   async create(params: StockReservationCreateParams): Promise<StockReservation> {
@@ -52,10 +56,18 @@ export class StockReservationRepo {
         "referenceId", "referenceType", "expiresAt", "createdBy", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *`,
       [
-        params.productId, params.productVariantId || null, params.distributionWarehouseId, params.quantity,
-        params.reservationType, params.referenceId || null, params.referenceType || null,
-        params.expiresAt || null, params.createdBy || null, now, now
-      ]
+        params.productId,
+        params.productVariantId || null,
+        params.distributionWarehouseId,
+        params.quantity,
+        params.reservationType,
+        params.referenceId || null,
+        params.referenceType || null,
+        params.expiresAt || null,
+        params.createdBy || null,
+        now,
+        now,
+      ],
     );
     if (!result) throw new Error('Failed to create stock reservation');
     return result;
@@ -80,14 +92,14 @@ export class StockReservationRepo {
 
     return await queryOne<StockReservation>(
       `UPDATE "stockReservation" SET ${updateFields.join(', ')} WHERE "stockReservationId" = $${paramIndex} RETURNING *`,
-      values
+      values,
     );
   }
 
   async delete(id: string): Promise<boolean> {
     const result = await queryOne<{ stockReservationId: string }>(
       `DELETE FROM "stockReservation" WHERE "stockReservationId" = $1 RETURNING "stockReservationId"`,
-      [id]
+      [id],
     );
     return !!result;
   }
@@ -95,7 +107,7 @@ export class StockReservationRepo {
   async deleteExpired(): Promise<number> {
     const results = await query<{ stockReservationId: string }[]>(
       `DELETE FROM "stockReservation" WHERE "expiresAt" IS NOT NULL AND "expiresAt" < $1 RETURNING "stockReservationId"`,
-      [unixTimestamp()]
+      [unixTimestamp()],
     );
     return results ? results.length : 0;
   }

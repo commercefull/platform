@@ -11,7 +11,8 @@ export class PostgreSQLMediaRepository implements MediaRepository {
   async save(media: Media): Promise<void> {
     const data = media.toJSON();
 
-    await pool.query(`
+    await pool.query(
+      `
       INSERT INTO media (
         "mediaId", "originalName", "mimeType", size, "originalUrl",
         "processedFiles", "thumbnailUrl", "altText", title, description,
@@ -26,28 +27,33 @@ export class PostgreSQLMediaRepository implements MediaRepository {
         tags = EXCLUDED.tags,
         metadata = EXCLUDED.metadata,
         "updatedAt" = EXCLUDED."updatedAt"
-    `, [
-      data.mediaId,
-      data.originalName,
-      data.mimeType,
-      data.size,
-      data.originalUrl,
-      JSON.stringify(data.processedFiles),
-      data.thumbnailUrl,
-      data.altText,
-      data.title,
-      data.description,
-      data.tags,
-      JSON.stringify(data.metadata),
-      data.createdAt,
-      data.updatedAt
-    ]);
+    `,
+      [
+        data.mediaId,
+        data.originalName,
+        data.mimeType,
+        data.size,
+        data.originalUrl,
+        JSON.stringify(data.processedFiles),
+        data.thumbnailUrl,
+        data.altText,
+        data.title,
+        data.description,
+        data.tags,
+        JSON.stringify(data.metadata),
+        data.createdAt,
+        data.updatedAt,
+      ],
+    );
   }
 
   async findById(mediaId: string): Promise<Media | null> {
-    const result = await pool.query(`
+    const result = await pool.query(
+      `
       SELECT * FROM media WHERE "mediaId" = $1
-    `, [mediaId]);
+    `,
+      [mediaId],
+    );
 
     if (result.rows.length === 0) {
       return null;
@@ -61,10 +67,13 @@ export class PostgreSQLMediaRepository implements MediaRepository {
       return [];
     }
 
-    const result = await pool.query(`
+    const result = await pool.query(
+      `
       SELECT * FROM media WHERE "mediaId" = ANY($1)
       ORDER BY "createdAt" DESC
-    `, [mediaIds]);
+    `,
+      [mediaIds],
+    );
 
     return result.rows.map(row => this.mapToMedia(row));
   }
@@ -204,7 +213,7 @@ export class PostgreSQLMediaRepository implements MediaRepository {
       tags: row.tags || [],
       metadata: row.metadata || {},
       createdAt: new Date(row.createdAt),
-      updatedAt: new Date(row.updatedAt)
+      updatedAt: new Date(row.updatedAt),
     });
   }
 }

@@ -36,9 +36,9 @@ export interface ProductProps {
   productTypeId: string;
   categoryId?: string;
   brandId?: string;
-  merchantId?: string;  // For marketplace products owned by merchants
-  businessId?: string;  // For multi-store products owned by businesses
-  storeId?: string;     // For store-specific product overrides
+  merchantId?: string; // For marketplace products owned by merchants
+  businessId?: string; // For multi-store products owned by businesses
+  storeId?: string; // For store-specific product overrides
   status: ProductStatus;
   visibility: ProductVisibility;
   price: Price;
@@ -141,19 +141,14 @@ export class Product {
       storeId: props.storeId,
       status: ProductStatus.DRAFT,
       visibility: ProductVisibility.HIDDEN,
-      price: Price.create(
-        props.basePrice || 0,
-        props.currencyCode || 'USD',
-        props.salePrice,
-        props.cost
-      ),
+      price: Price.create(props.basePrice || 0, props.currencyCode || 'USD', props.salePrice, props.cost),
       dimensions: Dimensions.create({
         weight: props.weight,
         weightUnit: props.weightUnit,
         length: props.length,
         width: props.width,
         height: props.height,
-        dimensionUnit: props.dimensionUnit
+        dimensionUnit: props.dimensionUnit,
       }),
       isFeatured: props.isFeatured || false,
       isVirtual: props.isVirtual || false,
@@ -175,7 +170,7 @@ export class Product {
       tags: props.tags || [],
       metadata: props.metadata,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     });
   }
 
@@ -184,58 +179,156 @@ export class Product {
   }
 
   // Getters
-  get productId(): string { return this.props.productId; }
-  get name(): string { return this.props.name; }
-  get description(): string { return this.props.description; }
-  get shortDescription(): string | undefined { return this.props.shortDescription; }
-  get sku(): string | undefined { return this.props.sku; }
-  get slug(): string { return this.props.slug; }
-  get productTypeId(): string { return this.props.productTypeId; }
-  get categoryId(): string | undefined { return this.props.categoryId; }
-  get brandId(): string | undefined { return this.props.brandId; }
-  get merchantId(): string | undefined { return this.props.merchantId; }
-  get businessId(): string | undefined { return this.props.businessId; }
-  get storeId(): string | undefined { return this.props.storeId; }
-  get ownerId(): string { return this.props.merchantId || this.props.businessId!; }
-  get isMerchantOwned(): boolean { return !!this.props.merchantId; }
-  get isBusinessOwned(): boolean { return !!this.props.businessId; }
-  get isStoreSpecific(): boolean { return !!this.props.storeId; }
-  get status(): ProductStatus { return this.props.status; }
-  get visibility(): ProductVisibility { return this.props.visibility; }
-  get price(): Price { return this.props.price; }
-  get dimensions(): Dimensions { return this.props.dimensions; }
-  get isFeatured(): boolean { return this.props.isFeatured; }
-  get isVirtual(): boolean { return this.props.isVirtual; }
-  get isDownloadable(): boolean { return this.props.isDownloadable; }
-  get isSubscription(): boolean { return this.props.isSubscription; }
-  get isTaxable(): boolean { return this.props.isTaxable; }
-  get taxClass(): string | undefined { return this.props.taxClass; }
-  get hasVariants(): boolean { return this.props.hasVariants; }
-  get variantAttributes(): Record<string, any> | undefined { return this.props.variantAttributes; }
-  get images(): ProductImage[] { return [...this.props.images]; }
-  get primaryImageId(): string | undefined { return this.props.primaryImageId; }
-  get metaTitle(): string | undefined { return this.props.metaTitle; }
-  get metaDescription(): string | undefined { return this.props.metaDescription; }
-  get metaKeywords(): string | undefined { return this.props.metaKeywords; }
-  get minOrderQuantity(): number { return this.props.minOrderQuantity; }
-  get maxOrderQuantity(): number | undefined { return this.props.maxOrderQuantity; }
-  get returnPolicy(): string | undefined { return this.props.returnPolicy; }
-  get warranty(): string | undefined { return this.props.warranty; }
-  get externalId(): string | undefined { return this.props.externalId; }
-  get tags(): string[] { return [...this.props.tags]; }
-  get metadata(): Record<string, any> | undefined { return this.props.metadata; }
-  get publishedAt(): Date | undefined { return this.props.publishedAt; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
-  get deletedAt(): Date | undefined { return this.props.deletedAt; }
+  get productId(): string {
+    return this.props.productId;
+  }
+  get name(): string {
+    return this.props.name;
+  }
+  get description(): string {
+    return this.props.description;
+  }
+  get shortDescription(): string | undefined {
+    return this.props.shortDescription;
+  }
+  get sku(): string | undefined {
+    return this.props.sku;
+  }
+  get slug(): string {
+    return this.props.slug;
+  }
+  get productTypeId(): string {
+    return this.props.productTypeId;
+  }
+  get categoryId(): string | undefined {
+    return this.props.categoryId;
+  }
+  get brandId(): string | undefined {
+    return this.props.brandId;
+  }
+  get merchantId(): string | undefined {
+    return this.props.merchantId;
+  }
+  get businessId(): string | undefined {
+    return this.props.businessId;
+  }
+  get storeId(): string | undefined {
+    return this.props.storeId;
+  }
+  get ownerId(): string {
+    return this.props.merchantId || this.props.businessId!;
+  }
+  get isMerchantOwned(): boolean {
+    return !!this.props.merchantId;
+  }
+  get isBusinessOwned(): boolean {
+    return !!this.props.businessId;
+  }
+  get isStoreSpecific(): boolean {
+    return !!this.props.storeId;
+  }
+  get status(): ProductStatus {
+    return this.props.status;
+  }
+  get visibility(): ProductVisibility {
+    return this.props.visibility;
+  }
+  get price(): Price {
+    return this.props.price;
+  }
+  get dimensions(): Dimensions {
+    return this.props.dimensions;
+  }
+  get isFeatured(): boolean {
+    return this.props.isFeatured;
+  }
+  get isVirtual(): boolean {
+    return this.props.isVirtual;
+  }
+  get isDownloadable(): boolean {
+    return this.props.isDownloadable;
+  }
+  get isSubscription(): boolean {
+    return this.props.isSubscription;
+  }
+  get isTaxable(): boolean {
+    return this.props.isTaxable;
+  }
+  get taxClass(): string | undefined {
+    return this.props.taxClass;
+  }
+  get hasVariants(): boolean {
+    return this.props.hasVariants;
+  }
+  get variantAttributes(): Record<string, any> | undefined {
+    return this.props.variantAttributes;
+  }
+  get images(): ProductImage[] {
+    return [...this.props.images];
+  }
+  get primaryImageId(): string | undefined {
+    return this.props.primaryImageId;
+  }
+  get metaTitle(): string | undefined {
+    return this.props.metaTitle;
+  }
+  get metaDescription(): string | undefined {
+    return this.props.metaDescription;
+  }
+  get metaKeywords(): string | undefined {
+    return this.props.metaKeywords;
+  }
+  get minOrderQuantity(): number {
+    return this.props.minOrderQuantity;
+  }
+  get maxOrderQuantity(): number | undefined {
+    return this.props.maxOrderQuantity;
+  }
+  get returnPolicy(): string | undefined {
+    return this.props.returnPolicy;
+  }
+  get warranty(): string | undefined {
+    return this.props.warranty;
+  }
+  get externalId(): string | undefined {
+    return this.props.externalId;
+  }
+  get tags(): string[] {
+    return [...this.props.tags];
+  }
+  get metadata(): Record<string, any> | undefined {
+    return this.props.metadata;
+  }
+  get publishedAt(): Date | undefined {
+    return this.props.publishedAt;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
+  get deletedAt(): Date | undefined {
+    return this.props.deletedAt;
+  }
 
   // Computed properties
-  get isActive(): boolean { return this.props.status === ProductStatus.ACTIVE; }
-  get isDraft(): boolean { return this.props.status === ProductStatus.DRAFT; }
-  get isArchived(): boolean { return this.props.status === ProductStatus.ARCHIVED; }
-  get isVisible(): boolean { return this.props.visibility === ProductVisibility.VISIBLE; }
-  get isPublished(): boolean { return this.props.publishedAt !== undefined; }
-  
+  get isActive(): boolean {
+    return this.props.status === ProductStatus.ACTIVE;
+  }
+  get isDraft(): boolean {
+    return this.props.status === ProductStatus.DRAFT;
+  }
+  get isArchived(): boolean {
+    return this.props.status === ProductStatus.ARCHIVED;
+  }
+  get isVisible(): boolean {
+    return this.props.visibility === ProductVisibility.VISIBLE;
+  }
+  get isPublished(): boolean {
+    return this.props.publishedAt !== undefined;
+  }
+
   get primaryImage(): ProductImage | undefined {
     return this.props.images.find(img => img.isPrimary) || this.props.images[0];
   }
@@ -245,12 +338,7 @@ export class Product {
   }
 
   // Domain methods
-  updateBasicInfo(updates: {
-    name?: string;
-    description?: string;
-    shortDescription?: string;
-    sku?: string;
-  }): void {
+  updateBasicInfo(updates: { name?: string; description?: string; shortDescription?: string; sku?: string }): void {
     if (updates.name) {
       this.props.name = updates.name;
       this.props.slug = Product.generateSlug(updates.name);
@@ -342,7 +430,7 @@ export class Product {
     } else {
       this.props.images.push(image);
     }
-    
+
     if (image.isPrimary) {
       this.props.primaryImageId = image.imageId;
       this.props.images.forEach(img => {
@@ -351,7 +439,7 @@ export class Product {
         }
       });
     }
-    
+
     this.sortImages();
     this.touch();
   }
@@ -393,12 +481,7 @@ export class Product {
     this.touch();
   }
 
-  updateSeo(seo: {
-    metaTitle?: string;
-    metaDescription?: string;
-    metaKeywords?: string;
-    slug?: string;
-  }): void {
+  updateSeo(seo: { metaTitle?: string; metaDescription?: string; metaKeywords?: string; slug?: string }): void {
     if (seo.metaTitle !== undefined) this.props.metaTitle = seo.metaTitle;
     if (seo.metaDescription !== undefined) this.props.metaDescription = seo.metaDescription;
     if (seo.metaKeywords !== undefined) this.props.metaKeywords = seo.metaKeywords;
@@ -512,7 +595,7 @@ export class Product {
       isPurchasable: this.isPurchasable,
       createdAt: this.props.createdAt.toISOString(),
       updatedAt: this.props.updatedAt.toISOString(),
-      deletedAt: this.props.deletedAt?.toISOString()
+      deletedAt: this.props.deletedAt?.toISOString(),
     };
   }
 }

@@ -10,9 +10,7 @@ import { eventBus } from '../../../libs/events/eventBus';
 // ============================================================================
 
 export class ReactivateCustomerCommand {
-  constructor(
-    public readonly customerId: string
-  ) {}
+  constructor(public readonly customerId: string) {}
 }
 
 // ============================================================================
@@ -52,13 +50,13 @@ export class ReactivateCustomerUseCase {
 
     // Emit event
     (eventBus as any).emit('customer.reactivated', {
-      customerId: customer.customerId
+      customerId: customer.customerId,
     });
 
     return {
       success: true,
       customerId: customer.customerId,
-      reactivatedAt: new Date().toISOString()
+      reactivatedAt: new Date().toISOString(),
     };
   }
 }

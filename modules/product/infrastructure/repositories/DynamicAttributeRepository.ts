@@ -1,5 +1,5 @@
-import { query, queryOne } from "../../../../libs/db";
-import { Table } from "../../../../libs/db/types";
+import { query, queryOne } from '../../../../libs/db';
+import { Table } from '../../../../libs/db/types';
 
 /**
  * Product Attribute - defines an attribute that can be assigned to products
@@ -32,18 +32,18 @@ export interface ProductAttribute {
   updatedAt: Date;
 }
 
-export type AttributeType = 
-  | 'text' 
-  | 'number' 
-  | 'select' 
-  | 'checkbox' 
-  | 'radio' 
-  | 'date' 
-  | 'datetime' 
-  | 'time' 
-  | 'file' 
-  | 'image' 
-  | 'video' 
+export type AttributeType =
+  | 'text'
+  | 'number'
+  | 'select'
+  | 'checkbox'
+  | 'radio'
+  | 'date'
+  | 'datetime'
+  | 'time'
+  | 'file'
+  | 'image'
+  | 'video'
   | 'document';
 
 export type AttributeInputType = AttributeType;
@@ -144,7 +144,7 @@ export class DynamicAttributeRepository {
 
   async findAllAttributes(): Promise<ProductAttribute[]> {
     const sql = `SELECT * FROM "${this.attributeTable}" ORDER BY "position" ASC, "name" ASC`;
-    return await query<ProductAttribute[]>(sql) || [];
+    return (await query<ProductAttribute[]>(sql)) || [];
   }
 
   async findAttributesByGroup(groupId: string): Promise<ProductAttribute[]> {
@@ -153,7 +153,7 @@ export class DynamicAttributeRepository {
       WHERE "groupId" = $1 
       ORDER BY "position" ASC, "name" ASC
     `;
-    return await query<ProductAttribute[]>(sql, [groupId]) || [];
+    return (await query<ProductAttribute[]>(sql, [groupId])) || [];
   }
 
   async findSearchableAttributes(): Promise<ProductAttribute[]> {
@@ -162,7 +162,7 @@ export class DynamicAttributeRepository {
       WHERE "isSearchable" = true 
       ORDER BY "position" ASC
     `;
-    return await query<ProductAttribute[]>(sql) || [];
+    return (await query<ProductAttribute[]>(sql)) || [];
   }
 
   async findFilterableAttributes(): Promise<ProductAttribute[]> {
@@ -171,7 +171,7 @@ export class DynamicAttributeRepository {
       WHERE "isFilterable" = true 
       ORDER BY "position" ASC
     `;
-    return await query<ProductAttribute[]>(sql) || [];
+    return (await query<ProductAttribute[]>(sql)) || [];
   }
 
   async findVariantAttributes(): Promise<ProductAttribute[]> {
@@ -180,7 +180,7 @@ export class DynamicAttributeRepository {
       WHERE "useForVariants" = true 
       ORDER BY "position" ASC
     `;
-    return await query<ProductAttribute[]>(sql) || [];
+    return (await query<ProductAttribute[]>(sql)) || [];
   }
 
   async createAttribute(input: ProductAttributeCreateInput): Promise<ProductAttribute> {
@@ -216,7 +216,7 @@ export class DynamicAttributeRepository {
       input.validationRules ? JSON.stringify(input.validationRules) : null,
       input.options ? JSON.stringify(input.options) : null,
       input.merchantId || null,
-      input.isGlobal !== false
+      input.isGlobal !== false,
     ]);
 
     if (!result) {
@@ -232,10 +232,25 @@ export class DynamicAttributeRepository {
     let paramIndex = 2;
 
     const fields: (keyof ProductAttributeUpdateInput)[] = [
-      'name', 'code', 'description', 'groupId', 'type', 'inputType',
-      'isRequired', 'isUnique', 'isSearchable', 'isFilterable', 'isComparable',
-      'isVisibleOnFront', 'isUsedInProductListing', 'useForVariants', 'useForConfigurations',
-      'position', 'defaultValue', 'validationRules', 'options'
+      'name',
+      'code',
+      'description',
+      'groupId',
+      'type',
+      'inputType',
+      'isRequired',
+      'isUnique',
+      'isSearchable',
+      'isFilterable',
+      'isComparable',
+      'isVisibleOnFront',
+      'isUsedInProductListing',
+      'useForVariants',
+      'useForConfigurations',
+      'position',
+      'defaultValue',
+      'validationRules',
+      'options',
     ];
 
     for (const field of fields) {
@@ -264,7 +279,7 @@ export class DynamicAttributeRepository {
     await query(`DELETE FROM "${this.attributeValueTable}" WHERE "attributeId" = $1`, [id]);
     // Delete product attribute data
     await query(`DELETE FROM "${this.attributeValueMapTable}" WHERE "attributeId" = $1`, [id]);
-    
+
     const sql = `DELETE FROM "${this.attributeTable}" WHERE "productAttributeId" = $1`;
     const result = await query(sql, [id]);
     return result !== null;
@@ -278,7 +293,7 @@ export class DynamicAttributeRepository {
       WHERE "attributeId" = $1 
       ORDER BY "position" ASC
     `;
-    return await query<ProductAttributeValue[]>(sql, [attributeId]) || [];
+    return (await query<ProductAttributeValue[]>(sql, [attributeId])) || [];
   }
 
   async createAttributeValue(input: AttributeValueCreateInput): Promise<ProductAttributeValue> {
@@ -295,7 +310,7 @@ export class DynamicAttributeRepository {
       input.value,
       input.displayValue || input.value,
       input.position || 0,
-      input.isDefault || false
+      input.isDefault || false,
     ]);
 
     if (!result) {
@@ -331,8 +346,8 @@ export class DynamicAttributeRepository {
       WHERE pav."productId" = $1
     `;
 
-    const results = await query<any[]>(sql, [productId]) || [];
-    
+    const results = (await query<any[]>(sql, [productId])) || [];
+
     return results.map(row => ({
       productAttributeValueMapId: row.productAttributeValueMapId,
       productId: row.productId,
@@ -354,8 +369,8 @@ export class DynamicAttributeRepository {
         code: row.attribute_code,
         type: row.attribute_type,
         isFilterable: row.attribute_isFilterable,
-        isSearchable: row.attribute_isSearchable
-      } as ProductAttribute
+        isSearchable: row.attribute_isSearchable,
+      } as ProductAttribute,
     }));
   }
 
@@ -366,7 +381,7 @@ export class DynamicAttributeRepository {
     // Determine value type based on input
     const valueText = typeof input.value === 'string' ? input.value : null;
     const valueNumeric = !isNaN(Number(input.value)) ? Number(input.value) : null;
-    
+
     const sql = `
       INSERT INTO "${this.attributeValueMapTable}" (
         "productId", "attributeId", "value", "valueText", "valueNumeric"
@@ -375,13 +390,7 @@ export class DynamicAttributeRepository {
       RETURNING *
     `;
 
-    const result = await queryOne<ProductAttributeData>(sql, [
-      input.productId,
-      input.attributeId,
-      input.value,
-      valueText,
-      valueNumeric
-    ]);
+    const result = await queryOne<ProductAttributeData>(sql, [input.productId, input.attributeId, input.value, valueText, valueNumeric]);
 
     if (!result) {
       throw new Error('Failed to set product attribute');
@@ -398,7 +407,7 @@ export class DynamicAttributeRepository {
       await this.setProductAttribute({
         productId,
         attributeId: attr.attributeId,
-        value: attr.value
+        value: attr.value,
       });
     }
   }

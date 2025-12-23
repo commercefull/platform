@@ -61,7 +61,7 @@ export class CreateMerchantUseCase {
       logo: input.logo,
       address: input.address,
       bankDetails: input.bankDetails,
-      commissionRate: input.commissionRate || 0.10, // 10% default
+      commissionRate: input.commissionRate || 0.1, // 10% default
       status: 'pending',
       isActive: false,
       isVerified: false,

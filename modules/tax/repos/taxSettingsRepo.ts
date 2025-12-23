@@ -65,14 +65,24 @@ export class TaxSettingsRepo {
         "taxProvider", "taxProviderSettings", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17) RETURNING *`,
       [
-        params.merchantId, params.calculationMethod || 'unitBased', params.pricesIncludeTax || false,
-        params.displayPricesWithTax || false, params.taxBasedOn || 'shippingAddress',
-        params.shippingTaxClass || null, params.displayTaxTotals || 'itemized',
-        params.applyTaxToShipping ?? true, params.applyDiscountBeforeTax ?? true,
-        params.roundTaxAtSubtotal || false, params.taxDecimalPlaces || 2,
-        params.defaultTaxCategory || null, params.defaultTaxZone || null,
-        params.taxProvider || 'internal', JSON.stringify(params.taxProviderSettings || {}), now, now
-      ]
+        params.merchantId,
+        params.calculationMethod || 'unitBased',
+        params.pricesIncludeTax || false,
+        params.displayPricesWithTax || false,
+        params.taxBasedOn || 'shippingAddress',
+        params.shippingTaxClass || null,
+        params.displayTaxTotals || 'itemized',
+        params.applyTaxToShipping ?? true,
+        params.applyDiscountBeforeTax ?? true,
+        params.roundTaxAtSubtotal || false,
+        params.taxDecimalPlaces || 2,
+        params.defaultTaxCategory || null,
+        params.defaultTaxZone || null,
+        params.taxProvider || 'internal',
+        JSON.stringify(params.taxProviderSettings || {}),
+        now,
+        now,
+      ],
     );
     if (!result) throw new Error('Failed to create tax settings');
     return result;
@@ -97,7 +107,7 @@ export class TaxSettingsRepo {
 
     return await queryOne<TaxSettings>(
       `UPDATE "taxSettings" SET ${updateFields.join(', ')} WHERE "taxSettingsId" = $${paramIndex} RETURNING *`,
-      values
+      values,
     );
   }
 
@@ -110,7 +120,7 @@ export class TaxSettingsRepo {
   async delete(id: string): Promise<boolean> {
     const result = await queryOne<{ taxSettingsId: string }>(
       `DELETE FROM "taxSettings" WHERE "taxSettingsId" = $1 RETURNING "taxSettingsId"`,
-      [id]
+      [id],
     );
     return !!result;
   }

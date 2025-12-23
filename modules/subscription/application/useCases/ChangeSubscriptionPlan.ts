@@ -22,7 +22,7 @@ export interface ChangeSubscriptionPlanOutput {
 export class ChangeSubscriptionPlanUseCase {
   constructor(
     private readonly subscriptionRepo: any,
-    private readonly planRepo: any
+    private readonly planRepo: any,
   ) {}
 
   async execute(input: ChangeSubscriptionPlanInput): Promise<ChangeSubscriptionPlanOutput> {
@@ -80,18 +80,18 @@ export class ChangeSubscriptionPlanUseCase {
     const now = new Date();
     const billingStart = new Date(subscription.currentPeriodStart || subscription.startDate);
     const billingEnd = new Date(subscription.nextBillingDate);
-    
+
     const totalDays = (billingEnd.getTime() - billingStart.getTime()) / (1000 * 60 * 60 * 24);
     const remainingDays = (billingEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
-    
+
     if (remainingDays <= 0 || totalDays <= 0) return 0;
 
     const oldDailyRate = (subscription.price || 0) / totalDays;
     const newDailyRate = (newPlan.price || 0) / totalDays;
-    
+
     const unusedCredit = oldDailyRate * remainingDays;
     const newCharge = newDailyRate * remainingDays;
-    
+
     return Math.round((newCharge - unusedCredit) * 100) / 100;
   }
 }

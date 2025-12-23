@@ -38,7 +38,7 @@ export class TaxRate {
       ...props,
       isActive: true,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     });
   }
 
@@ -46,11 +46,21 @@ export class TaxRate {
     return new TaxRate(props);
   }
 
-  get taxRateId(): string { return this.props.taxRateId; }
-  get name(): string { return this.props.name; }
-  get rate(): number { return this.props.rate; }
-  get country(): string { return this.props.country; }
-  get isActive(): boolean { return this.props.isActive; }
+  get taxRateId(): string {
+    return this.props.taxRateId;
+  }
+  get name(): string {
+    return this.props.name;
+  }
+  get rate(): number {
+    return this.props.rate;
+  }
+  get country(): string {
+    return this.props.country;
+  }
+  get isActive(): boolean {
+    return this.props.isActive;
+  }
 
   calculateTax(amount: number): number {
     if (!this.props.isActive) return 0;

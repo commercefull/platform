@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function (knex) {
   return knex.schema.createTable('customerLoyaltyAccount', t => {
     t.uuid('customerLoyaltyAccountId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
@@ -15,7 +15,6 @@ exports.up = function(knex) {
     t.timestamp('enrolledAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('expiresAt');
     t.boolean('isActive').notNullable().defaultTo(true);
-    
 
     t.index('customerId');
     t.index('programId');
@@ -28,6 +27,6 @@ exports.up = function(knex) {
   });
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTable('customerLoyaltyAccount');
 };

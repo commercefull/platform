@@ -14,12 +14,8 @@ import { BasketNotFoundError, BasketNotActiveError, BasketExpiredError } from '.
 // Note: Using camelCase column names to match database migrations
 
 export class BasketRepo implements BasketRepository {
-  
   async findById(basketId: string): Promise<Basket | null> {
-    const basketRow = await queryOne<Record<string, any>>(
-      'SELECT * FROM basket WHERE "basketId" = $1',
-      [basketId]
-    );
+    const basketRow = await queryOne<Record<string, any>>('SELECT * FROM basket WHERE "basketId" = $1', [basketId]);
 
     if (!basketRow) return null;
 
@@ -30,7 +26,7 @@ export class BasketRepo implements BasketRepository {
   async findByCustomerId(customerId: string): Promise<Basket | null> {
     const basketRow = await queryOne<Record<string, any>>(
       'SELECT * FROM basket WHERE "customerId" = $1 AND status = \'active\' ORDER BY "updatedAt" DESC LIMIT 1',
-      [customerId]
+      [customerId],
     );
 
     if (!basketRow) return null;
@@ -42,7 +38,7 @@ export class BasketRepo implements BasketRepository {
   async findBySessionId(sessionId: string): Promise<Basket | null> {
     const basketRow = await queryOne<Record<string, any>>(
       'SELECT * FROM basket WHERE "sessionId" = $1 AND status = \'active\' ORDER BY "updatedAt" DESC LIMIT 1',
-      [sessionId]
+      [sessionId],
     );
 
     if (!basketRow) return null;
@@ -68,12 +64,9 @@ export class BasketRepo implements BasketRepository {
 
   async save(basket: Basket): Promise<Basket> {
     const now = new Date().toISOString();
-    
+
     // Check if basket exists
-    const existing = await queryOne<Record<string, any>>(
-      'SELECT "basketId" FROM basket WHERE "basketId" = $1',
-      [basket.basketId]
-    );
+    const existing = await queryOne<Record<string, any>>('SELECT "basketId" FROM basket WHERE "basketId" = $1', [basket.basketId]);
 
     if (existing) {
       // Update
@@ -99,8 +92,8 @@ export class BasketRepo implements BasketRepository {
           basket.convertedToOrderId || null,
           now,
           basket.lastActivityAt.toISOString(),
-          basket.basketId
-        ]
+          basket.basketId,
+        ],
       );
     } else {
       // Insert
@@ -121,8 +114,8 @@ export class BasketRepo implements BasketRepository {
           basket.convertedToOrderId || null,
           now,
           now,
-          now
-        ]
+          now,
+        ],
       );
     }
 
@@ -135,42 +128,42 @@ export class BasketRepo implements BasketRepository {
   async delete(basketId: string): Promise<void> {
     // Clear related records first to avoid foreign key violations
     await this.clearItems(basketId);
-    
+
     // Clear analytics events referencing this basket (may not exist in all environments)
     try {
       await query('DELETE FROM "analyticsReportEvent" WHERE "basketId" = $1', [basketId]);
     } catch (e) {
       // Table may not exist
     }
-    
+
     // Clear basket analytics (may not exist in all environments)
     try {
       await query('DELETE FROM "basketAnalytics" WHERE "basketId" = $1', [basketId]);
     } catch (e) {
       // Table may not exist
     }
-    
+
     // Clear basket history
     try {
       await query('DELETE FROM "basketHistory" WHERE "basketId" = $1', [basketId]);
     } catch (e) {
       // Table may not exist
     }
-    
+
     // Clear basket discounts
     try {
       await query('DELETE FROM "basketDiscount" WHERE "basketId" = $1', [basketId]);
     } catch (e) {
       // Table may not exist
     }
-    
+
     // Clear basket merge records (both source and target)
     try {
       await query('DELETE FROM "basketMerge" WHERE "sourceBasketId" = $1 OR "targetBasketId" = $1', [basketId]);
     } catch (e) {
       // Table may not exist
     }
-    
+
     // Finally delete the basket
     await query('DELETE FROM basket WHERE "basketId" = $1', [basketId]);
   }
@@ -209,15 +202,12 @@ export class BasketRepo implements BasketRepository {
         item.isGift,
         item.giftMessage || null,
         now,
-        now
-      ]
+        now,
+      ],
     );
 
     // Update basket last activity
-    await query(
-      'UPDATE basket SET "lastActivityAt" = $1, "updatedAt" = $1 WHERE "basketId" = $2',
-      [now, basketId]
-    );
+    await query('UPDATE basket SET "lastActivityAt" = $1, "updatedAt" = $1 WHERE "basketId" = $2', [now, basketId]);
 
     return item;
   }
@@ -241,15 +231,12 @@ export class BasketRepo implements BasketRepository {
         item.isGift,
         item.giftMessage || null,
         now,
-        item.basketItemId
-      ]
+        item.basketItemId,
+      ],
     );
 
     // Update basket last activity
-    await query(
-      'UPDATE basket SET "lastActivityAt" = $1, "updatedAt" = $1 WHERE "basketId" = $2',
-      [now, item.basketId]
-    );
+    await query('UPDATE basket SET "lastActivityAt" = $1, "updatedAt" = $1 WHERE "basketId" = $2', [now, item.basketId]);
 
     return item;
   }
@@ -258,18 +245,12 @@ export class BasketRepo implements BasketRepository {
     const now = new Date().toISOString();
 
     // Get basket ID before deleting
-    const item = await queryOne<Record<string, any>>(
-      'SELECT "basketId" FROM "basketItem" WHERE "basketItemId" = $1',
-      [basketItemId]
-    );
+    const item = await queryOne<Record<string, any>>('SELECT "basketId" FROM "basketItem" WHERE "basketItemId" = $1', [basketItemId]);
 
     await query('DELETE FROM "basketItem" WHERE "basketItemId" = $1', [basketItemId]);
 
     if (item) {
-      await query(
-        'UPDATE basket SET "lastActivityAt" = $1, "updatedAt" = $1 WHERE "basketId" = $2',
-        [now, item.basketId]
-      );
+      await query('UPDATE basket SET "lastActivityAt" = $1, "updatedAt" = $1 WHERE "basketId" = $2', [now, item.basketId]);
     }
   }
 
@@ -278,10 +259,9 @@ export class BasketRepo implements BasketRepository {
   }
 
   private async getItemsWithCurrency(basketId: string, currency: string): Promise<BasketItem[]> {
-    const rows = await query<Record<string, any>[]>(
-      'SELECT * FROM "basketItem" WHERE "basketId" = $1 ORDER BY "createdAt" ASC',
-      [basketId]
-    );
+    const rows = await query<Record<string, any>[]>('SELECT * FROM "basketItem" WHERE "basketId" = $1 ORDER BY "createdAt" ASC', [
+      basketId,
+    ]);
 
     return (rows || []).map(row => this.mapToBasketItem(row, basketId, currency));
   }
@@ -299,7 +279,7 @@ export class BasketRepo implements BasketRepository {
        WHERE status = 'active' 
        AND "lastActivityAt" < $1 
        ORDER BY "lastActivityAt" ASC`,
-      [cutoffDate.toISOString()]
+      [cutoffDate.toISOString()],
     );
 
     const baskets: Basket[] = [];
@@ -319,7 +299,7 @@ export class BasketRepo implements BasketRepository {
        WHERE status = 'active' 
        AND "expiresAt" < $1 
        ORDER BY "expiresAt" ASC`,
-      [now]
+      [now],
     );
 
     const baskets: Basket[] = [];
@@ -332,10 +312,7 @@ export class BasketRepo implements BasketRepository {
   }
 
   async markAsAbandoned(basketId: string): Promise<void> {
-    await query(
-      'UPDATE basket SET status = \'abandoned\', "updatedAt" = $1 WHERE "basketId" = $2',
-      [new Date().toISOString(), basketId]
-    );
+    await query('UPDATE basket SET status = \'abandoned\', "updatedAt" = $1 WHERE "basketId" = $2', [new Date().toISOString(), basketId]);
   }
 
   async mergeBaskets(sessionBasketId: string, customerBasketId: string): Promise<Basket> {
@@ -379,7 +356,7 @@ export class BasketRepo implements BasketRepository {
         attributes: item.attributes,
         itemType: item.itemType as 'physical' | 'digital' | 'subscription' | 'service',
         isGift: item.isGift,
-        giftMessage: item.giftMessage
+        giftMessage: item.giftMessage,
       });
       customerBasket.addItem(newItem);
     }
@@ -388,10 +365,10 @@ export class BasketRepo implements BasketRepository {
     await this.save(customerBasket);
 
     // Mark session basket as merged
-    await query(
-      'UPDATE basket SET status = \'merged\', "updatedAt" = $1 WHERE "basketId" = $2',
-      [new Date().toISOString(), sessionBasketId]
-    );
+    await query('UPDATE basket SET status = \'merged\', "updatedAt" = $1 WHERE "basketId" = $2', [
+      new Date().toISOString(),
+      sessionBasketId,
+    ]);
 
     return customerBasket;
   }
@@ -399,10 +376,9 @@ export class BasketRepo implements BasketRepository {
   // Private helper methods
   private async syncItems(basket: Basket): Promise<void> {
     // Get current items in DB
-    const existingItems = await query<Record<string, any>[]>(
-      'SELECT "basketItemId" FROM "basketItem" WHERE "basketId" = $1',
-      [basket.basketId]
-    );
+    const existingItems = await query<Record<string, any>[]>('SELECT "basketItemId" FROM "basketItem" WHERE "basketId" = $1', [
+      basket.basketId,
+    ]);
     const existingIds = new Set((existingItems || []).map(i => i.basketItemId));
 
     // Track items to keep
@@ -421,7 +397,7 @@ export class BasketRepo implements BasketRepository {
     }
 
     // Remove items no longer in basket
-    Array.from(existingIds).forEach(async (id) => {
+    Array.from(existingIds).forEach(async id => {
       if (!itemsToKeep.has(id)) {
         await this.removeItem(id);
       }
@@ -441,7 +417,7 @@ export class BasketRepo implements BasketRepository {
       convertedToOrderId: row.convertedToOrderId || undefined,
       createdAt: new Date(row.createdAt),
       updatedAt: new Date(row.updatedAt),
-      lastActivityAt: new Date(row.lastActivityAt)
+      lastActivityAt: new Date(row.lastActivityAt),
     });
   }
 
@@ -461,7 +437,7 @@ export class BasketRepo implements BasketRepository {
       isGift: Boolean(row.isGift),
       giftMessage: row.giftMessage || undefined,
       createdAt: new Date(row.createdAt),
-      updatedAt: new Date(row.updatedAt)
+      updatedAt: new Date(row.updatedAt),
     });
   }
 }

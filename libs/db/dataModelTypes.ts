@@ -1,6 +1,6 @@
 /**
  * Data Model Alignment Types
- * 
+ *
  * TypeScript interfaces for the new data model entities supporting
  * multi-store, marketplace, and B2B scenarios.
  */

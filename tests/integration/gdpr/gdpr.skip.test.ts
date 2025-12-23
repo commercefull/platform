@@ -28,37 +28,37 @@ describe('GDPR Feature Tests', () => {
 
     it('UC-GDP-001: should record cookie consent', async () => {
       testConsentId = generateConsentId();
-      
+
       const consentData = {
         sessionId: testConsentId,
         preferences: {
           functional: true,
           analytics: true,
           marketing: false,
-          thirdParty: false
-        }
+          thirdParty: false,
+        },
       };
 
       const response = await client.post('/customer/gdpr/cookies/consent', consentData, {
-        headers: { Authorization: `Bearer ${customerToken}` }
+        headers: { Authorization: `Bearer ${customerToken}` },
       });
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       expect(response.data.data).toHaveProperty('cookieConsentId');
-      
+
       createdConsentIds.push(response.data.data.cookieConsentId);
     });
 
     it('UC-GDP-002: should get cookie consent', async () => {
       const response = await client.get('/customer/gdpr/cookies/consent', {
         params: { sessionId: testConsentId },
-        headers: { Authorization: `Bearer ${customerToken}` }
+        headers: { Authorization: `Bearer ${customerToken}` },
       });
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
-      
+
       if (response.data.data) {
         expect(response.data.data).toHaveProperty('analytics', true);
         expect(response.data.data).toHaveProperty('marketing', false);
@@ -67,12 +67,16 @@ describe('GDPR Feature Tests', () => {
 
     it('UC-GDP-003: should accept all cookies', async () => {
       const newConsentId = generateConsentId();
-      
-      const response = await client.post('/customer/gdpr/cookies/accept-all', {
-        sessionId: newConsentId
-      }, {
-        headers: { Authorization: `Bearer ${customerToken}` }
-      });
+
+      const response = await client.post(
+        '/customer/gdpr/cookies/accept-all',
+        {
+          sessionId: newConsentId,
+        },
+        {
+          headers: { Authorization: `Bearer ${customerToken}` },
+        },
+      );
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
@@ -82,12 +86,16 @@ describe('GDPR Feature Tests', () => {
 
     it('UC-GDP-004: should reject all optional cookies', async () => {
       const newConsentId = generateConsentId();
-      
-      const response = await client.post('/customer/gdpr/cookies/reject-all', {
-        sessionId: newConsentId
-      }, {
-        headers: { Authorization: `Bearer ${customerToken}` }
-      });
+
+      const response = await client.post(
+        '/customer/gdpr/cookies/reject-all',
+        {
+          sessionId: newConsentId,
+        },
+        {
+          headers: { Authorization: `Bearer ${customerToken}` },
+        },
+      );
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
@@ -99,30 +107,38 @@ describe('GDPR Feature Tests', () => {
     it('UC-GDP-005: should update cookie consent', async () => {
       // First create a consent
       const sessionId = generateConsentId();
-      const createResponse = await client.post('/customer/gdpr/cookies/consent', {
-        sessionId,
-        preferences: {
-          functional: false,
-          analytics: false,
-          marketing: false,
-          thirdParty: false
-        }
-      }, {
-        headers: { Authorization: `Bearer ${customerToken}` }
-      });
+      const createResponse = await client.post(
+        '/customer/gdpr/cookies/consent',
+        {
+          sessionId,
+          preferences: {
+            functional: false,
+            analytics: false,
+            marketing: false,
+            thirdParty: false,
+          },
+        },
+        {
+          headers: { Authorization: `Bearer ${customerToken}` },
+        },
+      );
 
       expect(createResponse.status).toBe(200);
       const cookieConsentId = createResponse.data.data.cookieConsentId;
 
       // Then update it
-      const response = await client.put(`/customer/gdpr/cookies/consent/${cookieConsentId}`, {
-        preferences: {
-          analytics: true,
-          marketing: true
-        }
-      }, {
-        headers: { Authorization: `Bearer ${customerToken}` }
-      });
+      const response = await client.put(
+        `/customer/gdpr/cookies/consent/${cookieConsentId}`,
+        {
+          preferences: {
+            analytics: true,
+            marketing: true,
+          },
+        },
+        {
+          headers: { Authorization: `Bearer ${customerToken}` },
+        },
+      );
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
@@ -139,85 +155,103 @@ describe('GDPR Feature Tests', () => {
     let testRequestId: string;
 
     it('UC-GDP-006: should create a data access request', async () => {
-      const response = await client.post('/customer/gdpr/requests', {
-        requestType: 'access',
-        reason: 'Integration test - data access request'
-      }, {
-        headers: { Authorization: `Bearer ${customerToken}` }
-      });
+      const response = await client.post(
+        '/customer/gdpr/requests',
+        {
+          requestType: 'access',
+          reason: 'Integration test - data access request',
+        },
+        {
+          headers: { Authorization: `Bearer ${customerToken}` },
+        },
+      );
 
       expect(response.status).toBe(201);
       expect(response.data.success).toBe(true);
       expect(response.data.data).toHaveProperty('gdprDataRequestId');
       expect(response.data.data).toHaveProperty('requestType', 'access');
       expect(response.data.data).toHaveProperty('status', 'pending');
-      
+
       testRequestId = response.data.data.gdprDataRequestId;
       createdRequestIds.push(testRequestId);
     });
 
     it('should create a data export request', async () => {
-      const response = await client.post('/customer/gdpr/requests', {
-        requestType: 'export',
-        reason: 'Integration test - export request'
-      }, {
-        headers: { Authorization: `Bearer ${customerToken}` }
-      });
+      const response = await client.post(
+        '/customer/gdpr/requests',
+        {
+          requestType: 'export',
+          reason: 'Integration test - export request',
+        },
+        {
+          headers: { Authorization: `Bearer ${customerToken}` },
+        },
+      );
 
       expect(response.status).toBe(201);
       expect(response.data.success).toBe(true);
       expect(response.data.data).toHaveProperty('requestType', 'export');
-      
+
       createdRequestIds.push(response.data.data.gdprDataRequestId);
     });
 
     it('should create a data deletion request', async () => {
-      const response = await client.post('/customer/gdpr/requests', {
-        requestType: 'deletion',
-        reason: 'Integration test - deletion request'
-      }, {
-        headers: { Authorization: `Bearer ${customerToken}` }
-      });
+      const response = await client.post(
+        '/customer/gdpr/requests',
+        {
+          requestType: 'deletion',
+          reason: 'Integration test - deletion request',
+        },
+        {
+          headers: { Authorization: `Bearer ${customerToken}` },
+        },
+      );
 
       expect(response.status).toBe(201);
       expect(response.data.success).toBe(true);
       expect(response.data.data).toHaveProperty('requestType', 'deletion');
-      
+
       createdRequestIds.push(response.data.data.gdprDataRequestId);
     });
 
     it('UC-GDP-007: should get my data requests', async () => {
       const response = await client.get('/customer/gdpr/requests', {
-        headers: { Authorization: `Bearer ${customerToken}` }
+        headers: { Authorization: `Bearer ${customerToken}` },
       });
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       expect(Array.isArray(response.data.data)).toBe(true);
       expect(response.data.data.length).toBeGreaterThan(0);
-      
+
       // Verify our test request is in the list
-      const ourRequest = response.data.data.find(
-        (r: any) => r.gdprDataRequestId === testRequestId
-      );
+      const ourRequest = response.data.data.find((r: any) => r.gdprDataRequestId === testRequestId);
       expect(ourRequest).toBeDefined();
     });
 
     it('UC-GDP-008: should cancel a data request', async () => {
       // Create a new request to cancel
-      const createResponse = await client.post('/customer/gdpr/requests', {
-        requestType: 'rectification',
-        reason: 'Integration test - to be cancelled'
-      }, {
-        headers: { Authorization: `Bearer ${customerToken}` }
-      });
+      const createResponse = await client.post(
+        '/customer/gdpr/requests',
+        {
+          requestType: 'rectification',
+          reason: 'Integration test - to be cancelled',
+        },
+        {
+          headers: { Authorization: `Bearer ${customerToken}` },
+        },
+      );
 
       const requestId = createResponse.data.data.gdprDataRequestId;
 
       // Cancel it
-      const response = await client.post(`/customer/gdpr/requests/${requestId}/cancel`, {}, {
-        headers: { Authorization: `Bearer ${customerToken}` }
-      });
+      const response = await client.post(
+        `/customer/gdpr/requests/${requestId}/cancel`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${customerToken}` },
+        },
+      );
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
@@ -226,7 +260,7 @@ describe('GDPR Feature Tests', () => {
 
     it('should require authentication for data requests', async () => {
       const response = await client.post('/customer/gdpr/requests', {
-        requestType: 'access'
+        requestType: 'access',
       });
 
       expect(response.status).toBe(401);
@@ -242,19 +276,23 @@ describe('GDPR Feature Tests', () => {
 
     beforeAll(async () => {
       // Create a test request for admin tests
-      const response = await client.post('/customer/gdpr/requests', {
-        requestType: 'objection',
-        reason: 'Admin test request'
-      }, {
-        headers: { Authorization: `Bearer ${customerToken}` }
-      });
+      const response = await client.post(
+        '/customer/gdpr/requests',
+        {
+          requestType: 'objection',
+          reason: 'Admin test request',
+        },
+        {
+          headers: { Authorization: `Bearer ${customerToken}` },
+        },
+      );
       testRequestId = response.data.data.gdprDataRequestId;
       createdRequestIds.push(testRequestId);
     });
 
     it('UC-GDP-009: should list all data requests (admin)', async () => {
       const response = await client.get('/business/gdpr/requests', {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
 
       expect(response.status).toBe(200);
@@ -265,12 +303,12 @@ describe('GDPR Feature Tests', () => {
     it('should filter requests by status', async () => {
       const response = await client.get('/business/gdpr/requests', {
         headers: { Authorization: `Bearer ${adminToken}` },
-        params: { status: 'pending' }
+        params: { status: 'pending' },
       });
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
-      
+
       // All returned requests should be pending
       response.data.data.forEach((req: any) => {
         expect(req.status).toBe('pending');
@@ -280,12 +318,12 @@ describe('GDPR Feature Tests', () => {
     it('should filter requests by type', async () => {
       const response = await client.get('/business/gdpr/requests', {
         headers: { Authorization: `Bearer ${adminToken}` },
-        params: { requestType: 'access' }
+        params: { requestType: 'access' },
       });
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
-      
+
       // All returned requests should be access type
       response.data.data.forEach((req: any) => {
         expect(req.requestType).toBe('access');
@@ -294,7 +332,7 @@ describe('GDPR Feature Tests', () => {
 
     it('UC-GDP-010: should get a specific data request (admin)', async () => {
       const response = await client.get(`/business/gdpr/requests/${testRequestId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
 
       expect(response.status).toBe(200);
@@ -306,7 +344,7 @@ describe('GDPR Feature Tests', () => {
 
     it('UC-GDP-011: should get overdue requests (admin)', async () => {
       const response = await client.get('/business/gdpr/requests/overdue', {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
 
       expect(response.status).toBe(200);
@@ -316,7 +354,7 @@ describe('GDPR Feature Tests', () => {
 
     it('UC-GDP-012: should get GDPR statistics (admin)', async () => {
       const response = await client.get('/business/gdpr/statistics', {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
 
       expect(response.status).toBe(200);
@@ -326,12 +364,16 @@ describe('GDPR Feature Tests', () => {
     });
 
     it('UC-GDP-013: should verify customer identity (admin)', async () => {
-      const response = await client.post(`/business/gdpr/requests/${testRequestId}/verify`, {
-        verificationMethod: 'email',
-        notes: 'Verified via email confirmation'
-      }, {
-        headers: { Authorization: `Bearer ${adminToken}` }
-      });
+      const response = await client.post(
+        `/business/gdpr/requests/${testRequestId}/verify`,
+        {
+          verificationMethod: 'email',
+          notes: 'Verified via email confirmation',
+        },
+        {
+          headers: { Authorization: `Bearer ${adminToken}` },
+        },
+      );
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
@@ -340,16 +382,19 @@ describe('GDPR Feature Tests', () => {
 
     it('UC-GDP-014: should process export request (admin)', async () => {
       if (!testRequestId) {
-        
         return;
       }
-      
+
       // Use the testRequestId created in beforeAll (objection type)
       // Note: UC-GDP-013 already verified this request, so we just process export
       // Process export
-      const response = await client.post(`/business/gdpr/requests/${testRequestId}/export`, {}, {
-        headers: { Authorization: `Bearer ${adminToken}` }
-      });
+      const response = await client.post(
+        `/business/gdpr/requests/${testRequestId}/export`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${adminToken}` },
+        },
+      );
 
       // May return 200 (success) or 400 (if request is not in correct state)
       if (response.status === 200) {
@@ -361,26 +406,28 @@ describe('GDPR Feature Tests', () => {
       // Get the pending restriction request from seed data
       const listResponse = await client.get('/business/gdpr/requests', {
         headers: { Authorization: `Bearer ${adminToken}` },
-        params: { status: 'pending' }
+        params: { status: 'pending' },
       });
-      
+
       // Find a pending request that we can reject
-      const pendingRequest = listResponse.data.data.find(
-        (r: any) => r.status === 'pending' && r.gdprDataRequestId !== testRequestId
-      );
-      
+      const pendingRequest = listResponse.data.data.find((r: any) => r.status === 'pending' && r.gdprDataRequestId !== testRequestId);
+
       if (!pendingRequest) {
         // Skip if no pending request available
-        
+
         return;
       }
 
       // Reject it
-      const response = await client.post(`/business/gdpr/requests/${pendingRequest.gdprDataRequestId}/reject`, {
-        reason: 'Integration test - intentional rejection'
-      }, {
-        headers: { Authorization: `Bearer ${adminToken}` }
-      });
+      const response = await client.post(
+        `/business/gdpr/requests/${pendingRequest.gdprDataRequestId}/reject`,
+        {
+          reason: 'Integration test - intentional rejection',
+        },
+        {
+          headers: { Authorization: `Bearer ${adminToken}` },
+        },
+      );
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
@@ -389,7 +436,7 @@ describe('GDPR Feature Tests', () => {
 
     it('UC-GDP-017: should get cookie consent statistics (admin)', async () => {
       const response = await client.get('/business/gdpr/cookies/statistics', {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
 
       expect(response.status).toBe(200);
@@ -407,7 +454,7 @@ describe('GDPR Feature Tests', () => {
       // Note: In test environment, customer and merchant JWT secrets may be the same
       // so this test verifies the endpoint exists and responds
       const response = await client.get('/business/gdpr/requests', {
-        headers: { Authorization: `Bearer ${customerToken}` }
+        headers: { Authorization: `Bearer ${customerToken}` },
       });
 
       expect(response.status).toBe(401);
@@ -415,7 +462,7 @@ describe('GDPR Feature Tests', () => {
 
     it('should reject invalid tokens', async () => {
       const response = await client.get('/business/gdpr/requests', {
-        headers: { Authorization: 'Bearer invalid-token' }
+        headers: { Authorization: 'Bearer invalid-token' },
       });
 
       expect(response.status).toBe(401);

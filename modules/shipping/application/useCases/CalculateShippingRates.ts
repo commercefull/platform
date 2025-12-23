@@ -28,7 +28,7 @@ export interface OrderDetails {
 export class CalculateShippingRatesCommand {
   constructor(
     public readonly destinationAddress: ShippingAddress,
-    public readonly orderDetails: OrderDetails
+    public readonly orderDetails: OrderDetails,
   ) {}
 }
 
@@ -73,23 +73,20 @@ export class CalculateShippingRatesUseCase {
         success: false,
         rates: [],
         message: 'Destination country is required',
-        errors: ['country_required']
+        errors: ['country_required'],
       };
     }
 
     try {
       // 1. Find applicable shipping zone
-      const zones = await shippingZoneRepo.findByLocation(
-        destinationAddress.country,
-        destinationAddress.state
-      );
+      const zones = await shippingZoneRepo.findByLocation(destinationAddress.country, destinationAddress.state);
 
       if (zones.length === 0) {
         return {
           success: false,
           rates: [],
           message: 'No shipping available to this location',
-          errors: ['no_zone_found']
+          errors: ['no_zone_found'],
         };
       }
 
@@ -104,7 +101,7 @@ export class CalculateShippingRatesUseCase {
           rates: [],
           zone,
           message: 'No shipping methods available',
-          errors: ['no_methods_available']
+          errors: ['no_methods_available'],
         };
       }
 
@@ -112,23 +109,20 @@ export class CalculateShippingRatesUseCase {
       const rateOptions: ShippingRateOption[] = [];
 
       for (const method of methods) {
-        const rate = await shippingRateRepo.findByZoneAndMethod(
-          zone.shippingZoneId,
-          method.shippingMethodId
-        );
+        const rate = await shippingRateRepo.findByZoneAndMethod(zone.shippingZoneId, method.shippingMethodId);
 
         if (rate) {
           const calculatedAmount = shippingRateRepo.calculateRate(
             rate,
             orderDetails.subtotal,
             orderDetails.itemCount,
-            orderDetails.totalWeight
+            orderDetails.totalWeight,
           );
 
-          const estimatedDays = method.estimatedDeliveryDays 
-            ? (typeof method.estimatedDeliveryDays === 'object' 
-                ? (method.estimatedDeliveryDays as any).min 
-                : method.estimatedDeliveryDays)
+          const estimatedDays = method.estimatedDeliveryDays
+            ? typeof method.estimatedDeliveryDays === 'object'
+              ? (method.estimatedDeliveryDays as any).min
+              : method.estimatedDeliveryDays
             : method.handlingDays;
 
           rateOptions.push({
@@ -143,7 +137,7 @@ export class CalculateShippingRatesUseCase {
             currency: rate.currency,
             estimatedDeliveryDays: estimatedDays,
             isFreeShipping: calculatedAmount === 0,
-            taxable: rate.taxable
+            taxable: rate.taxable,
           });
         }
       }
@@ -155,16 +149,15 @@ export class CalculateShippingRatesUseCase {
         success: true,
         rates: rateOptions,
         zone,
-        message: rateOptions.length > 0 
-          ? `Found ${rateOptions.length} shipping option(s)` 
-          : 'No shipping rates available for this location'
+        message:
+          rateOptions.length > 0 ? `Found ${rateOptions.length} shipping option(s)` : 'No shipping rates available for this location',
       };
     } catch (error: any) {
       return {
         success: false,
         rates: [],
         message: error.message || 'Failed to calculate shipping rates',
-        errors: ['calculation_failed']
+        errors: ['calculation_failed'],
       };
     }
   }

@@ -3,11 +3,11 @@
  * Adds tables for loyalty rewards, redemptions, and points batches
  */
 
-exports.up = async function(knex) {
+exports.up = async function (knex) {
   // Create loyaltyReward table
   const hasLoyaltyReward = await knex.schema.hasTable('loyaltyReward');
   if (!hasLoyaltyReward) {
-    await knex.schema.createTable('loyaltyReward', (table) => {
+    await knex.schema.createTable('loyaltyReward', table => {
       table.string('rewardId', 50).primary();
       table.string('programId', 50).nullable();
       table.string('name', 255).notNullable();
@@ -40,7 +40,7 @@ exports.up = async function(knex) {
   // Create loyaltyRedemption table
   const hasLoyaltyRedemption = await knex.schema.hasTable('loyaltyRedemption');
   if (!hasLoyaltyRedemption) {
-    await knex.schema.createTable('loyaltyRedemption', (table) => {
+    await knex.schema.createTable('loyaltyRedemption', table => {
       table.string('redemptionId', 50).primary();
       table.string('customerId', 50).notNullable();
       table.string('rewardId', 50).notNullable();
@@ -64,7 +64,7 @@ exports.up = async function(knex) {
   // Create loyaltyPointsBatch table for tracking point expiration
   const hasLoyaltyPointsBatch = await knex.schema.hasTable('loyaltyPointsBatch');
   if (!hasLoyaltyPointsBatch) {
-    await knex.schema.createTable('loyaltyPointsBatch', (table) => {
+    await knex.schema.createTable('loyaltyPointsBatch', table => {
       table.string('batchId', 50).primary();
       table.string('customerId', 50).notNullable();
       table.string('programId', 50).nullable();
@@ -88,7 +88,7 @@ exports.up = async function(knex) {
   // Create loyaltyTier table if not exists
   const hasLoyaltyTier = await knex.schema.hasTable('loyaltyTier');
   if (!hasLoyaltyTier) {
-    await knex.schema.createTable('loyaltyTier', (table) => {
+    await knex.schema.createTable('loyaltyTier', table => {
       table.string('tierId', 50).primary();
       table.string('programId', 50).nullable();
       table.string('name', 100).notNullable();
@@ -111,7 +111,7 @@ exports.up = async function(knex) {
   }
 };
 
-exports.down = async function(knex) {
+exports.down = async function (knex) {
   await knex.schema.dropTableIfExists('loyaltyTier');
   await knex.schema.dropTableIfExists('loyaltyPointsBatch');
   await knex.schema.dropTableIfExists('loyaltyRedemption');

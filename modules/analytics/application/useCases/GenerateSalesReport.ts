@@ -38,11 +38,7 @@ export class GenerateSalesReportUseCase {
       }
 
       // Get sales summary from analytics repo
-      const summary = await analyticsRepo.getSalesSummary(
-        command.startDate,
-        command.endDate,
-        command.merchantId
-      );
+      const summary = await analyticsRepo.getSalesSummary(command.startDate, command.endDate, command.merchantId);
 
       const reportId = `report_${Date.now()}`;
 
@@ -52,11 +48,11 @@ export class GenerateSalesReportUseCase {
         reportType: 'sales',
         dateRange: {
           start: command.startDate.toISOString(),
-          end: command.endDate.toISOString()
+          end: command.endDate.toISOString(),
         },
         generatedBy: command.generatedBy,
         format: 'json',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
 
       return {
@@ -65,16 +61,16 @@ export class GenerateSalesReportUseCase {
           id: reportId,
           dateRange: {
             start: command.startDate.toISOString(),
-            end: command.endDate.toISOString()
+            end: command.endDate.toISOString(),
           },
           summary: {
             totalOrders: summary.totalOrders,
             totalRevenue: summary.totalRevenue,
             averageOrderValue: summary.averageOrderValue,
-            totalItemsSold: 0 // Not available in current summary, would need daily data
+            totalItemsSold: 0, // Not available in current summary, would need daily data
           },
-          generatedAt: new Date()
-        }
+          generatedAt: new Date(),
+        },
       };
     } catch (error: any) {
       return { success: false, error: error.message };

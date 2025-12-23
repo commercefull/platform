@@ -19,7 +19,7 @@ exports.up = function (knex) {
     t.timestamp('invitationSentAt');
     t.timestamp('invitationAcceptedAt');
     t.text('notes');
-    
+
     t.index('groupId');
     t.index('customerId');
     t.index('isPrimary');

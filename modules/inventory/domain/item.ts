@@ -1,4 +1,4 @@
-import { Variant } from "../../product/domain/variant";
+import { Variant } from '../../product/domain/variant';
 
 export class Item {
   constructor(

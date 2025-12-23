@@ -13,8 +13,8 @@ export interface StoreProps {
   storeType: StoreType;
 
   // Ownership - either merchant or business
-  merchantId?: string;  // For marketplace stores
-  businessId?: string;  // For business stores
+  merchantId?: string; // For marketplace stores
+  businessId?: string; // For business stores
 
   // Branding
   logo?: string;
@@ -159,11 +159,11 @@ export class Store {
         enableProductReviews: true,
         enableStoreLocator: false,
         inventoryDisplayMode: 'show_low_stock',
-        priceDisplayMode: 'exclusive_tax'
+        priceDisplayMode: 'exclusive_tax',
       },
       metadata: props.metadata,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     });
   }
 
@@ -172,75 +172,159 @@ export class Store {
   }
 
   // Getters
-  get storeId(): string { return this.props.storeId; }
-  get name(): string { return this.props.name; }
-  get slug(): string { return this.props.slug; }
-  get description(): string | undefined { return this.props.description; }
-  get storeType(): StoreType { return this.props.storeType; }
-  get merchantId(): string | undefined { return this.props.merchantId; }
-  get businessId(): string | undefined { return this.props.businessId; }
-  get ownerId(): string { return this.props.merchantId || this.props.businessId!; }
-  get isMerchantStore(): boolean { return this.props.storeType === 'merchant_store'; }
-  get isBusinessStore(): boolean { return this.props.storeType === 'business_store'; }
+  get storeId(): string {
+    return this.props.storeId;
+  }
+  get name(): string {
+    return this.props.name;
+  }
+  get slug(): string {
+    return this.props.slug;
+  }
+  get description(): string | undefined {
+    return this.props.description;
+  }
+  get storeType(): StoreType {
+    return this.props.storeType;
+  }
+  get merchantId(): string | undefined {
+    return this.props.merchantId;
+  }
+  get businessId(): string | undefined {
+    return this.props.businessId;
+  }
+  get ownerId(): string {
+    return this.props.merchantId || this.props.businessId!;
+  }
+  get isMerchantStore(): boolean {
+    return this.props.storeType === 'merchant_store';
+  }
+  get isBusinessStore(): boolean {
+    return this.props.storeType === 'business_store';
+  }
 
   // Branding getters
-  get logo(): string | undefined { return this.props.logo; }
-  get banner(): string | undefined { return this.props.banner; }
-  get favicon(): string | undefined { return this.props.favicon; }
-  get primaryColor(): string | undefined { return this.props.primaryColor; }
-  get secondaryColor(): string | undefined { return this.props.secondaryColor; }
-  get theme(): string | undefined { return this.props.theme; }
-  get colorScheme(): Record<string, string> | undefined { return this.props.colorScheme; }
+  get logo(): string | undefined {
+    return this.props.logo;
+  }
+  get banner(): string | undefined {
+    return this.props.banner;
+  }
+  get favicon(): string | undefined {
+    return this.props.favicon;
+  }
+  get primaryColor(): string | undefined {
+    return this.props.primaryColor;
+  }
+  get secondaryColor(): string | undefined {
+    return this.props.secondaryColor;
+  }
+  get theme(): string | undefined {
+    return this.props.theme;
+  }
+  get colorScheme(): Record<string, string> | undefined {
+    return this.props.colorScheme;
+  }
 
   // Contact & location getters
-  get storeUrl(): string | undefined { return this.props.storeUrl; }
-  get storeEmail(): string | undefined { return this.props.storeEmail; }
-  get storePhone(): string | undefined { return this.props.storePhone; }
-  get address(): StoreProps['address'] | undefined { return this.props.address; }
+  get storeUrl(): string | undefined {
+    return this.props.storeUrl;
+  }
+  get storeEmail(): string | undefined {
+    return this.props.storeEmail;
+  }
+  get storePhone(): string | undefined {
+    return this.props.storePhone;
+  }
+  get address(): StoreProps['address'] | undefined {
+    return this.props.address;
+  }
 
   // Status getters
-  get isActive(): boolean { return this.props.isActive; }
-  get isVerified(): boolean { return this.props.isVerified; }
-  get isFeatured(): boolean { return this.props.isFeatured; }
+  get isActive(): boolean {
+    return this.props.isActive;
+  }
+  get isVerified(): boolean {
+    return this.props.isVerified;
+  }
+  get isFeatured(): boolean {
+    return this.props.isFeatured;
+  }
 
   // Business info getters
-  get storeRating(): number | undefined { return this.props.storeRating; }
-  get reviewCount(): number | undefined { return this.props.reviewCount; }
-  get followerCount(): number | undefined { return this.props.followerCount; }
-  get productCount(): number | undefined { return this.props.productCount; }
-  get orderCount(): number | undefined { return this.props.orderCount; }
+  get storeRating(): number | undefined {
+    return this.props.storeRating;
+  }
+  get reviewCount(): number | undefined {
+    return this.props.reviewCount;
+  }
+  get followerCount(): number | undefined {
+    return this.props.followerCount;
+  }
+  get productCount(): number | undefined {
+    return this.props.productCount;
+  }
+  get orderCount(): number | undefined {
+    return this.props.orderCount;
+  }
 
   // Settings getters
-  get storePolicies(): StoreProps['storePolicies'] | undefined { return this.props.storePolicies; }
-  get shippingMethods(): string[] | undefined { return this.props.shippingMethods; }
-  get paymentMethods(): string[] | undefined { return this.props.paymentMethods; }
-  get supportedCurrencies(): string[] | undefined { return this.props.supportedCurrencies; }
-  get defaultCurrency(): string | undefined { return this.props.defaultCurrency; }
-  get settings(): StoreProps['settings'] | undefined { return this.props.settings; }
+  get storePolicies(): StoreProps['storePolicies'] | undefined {
+    return this.props.storePolicies;
+  }
+  get shippingMethods(): string[] | undefined {
+    return this.props.shippingMethods;
+  }
+  get paymentMethods(): string[] | undefined {
+    return this.props.paymentMethods;
+  }
+  get supportedCurrencies(): string[] | undefined {
+    return this.props.supportedCurrencies;
+  }
+  get defaultCurrency(): string | undefined {
+    return this.props.defaultCurrency;
+  }
+  get settings(): StoreProps['settings'] | undefined {
+    return this.props.settings;
+  }
 
   // SEO getters
-  get metaTitle(): string | undefined { return this.props.metaTitle; }
-  get metaDescription(): string | undefined { return this.props.metaDescription; }
-  get metaKeywords(): string[] | undefined { return this.props.metaKeywords; }
+  get metaTitle(): string | undefined {
+    return this.props.metaTitle;
+  }
+  get metaDescription(): string | undefined {
+    return this.props.metaDescription;
+  }
+  get metaKeywords(): string[] | undefined {
+    return this.props.metaKeywords;
+  }
 
   // Social getters
-  get socialLinks(): Record<string, string> | undefined { return this.props.socialLinks; }
-  get openingHours(): Record<string, any> | undefined { return this.props.openingHours; }
-  get customPages(): Record<string, any> | undefined { return this.props.customPages; }
-  get customFields(): Record<string, any> | undefined { return this.props.customFields; }
+  get socialLinks(): Record<string, string> | undefined {
+    return this.props.socialLinks;
+  }
+  get openingHours(): Record<string, any> | undefined {
+    return this.props.openingHours;
+  }
+  get customPages(): Record<string, any> | undefined {
+    return this.props.customPages;
+  }
+  get customFields(): Record<string, any> | undefined {
+    return this.props.customFields;
+  }
 
-  get metadata(): Record<string, any> | undefined { return this.props.metadata; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get metadata(): Record<string, any> | undefined {
+    return this.props.metadata;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   // Domain methods
-  updateBasicInfo(updates: {
-    name?: string;
-    description?: string;
-    storeUrl?: string;
-    storeEmail?: string;
-    storePhone?: string;
-  }): void {
+  updateBasicInfo(updates: { name?: string; description?: string; storeUrl?: string; storeEmail?: string; storePhone?: string }): void {
     if (updates.name) {
       this.props.name = updates.name;
       this.props.slug = Store.generateSlug(updates.name);
@@ -297,11 +381,7 @@ export class Store {
     this.touch();
   }
 
-  updateSEO(seo: {
-    metaTitle?: string;
-    metaDescription?: string;
-    metaKeywords?: string[];
-  }): void {
+  updateSEO(seo: { metaTitle?: string; metaDescription?: string; metaKeywords?: string[] }): void {
     if (seo.metaTitle !== undefined) this.props.metaTitle = seo.metaTitle;
     if (seo.metaDescription !== undefined) this.props.metaDescription = seo.metaDescription;
     if (seo.metaKeywords !== undefined) this.props.metaKeywords = seo.metaKeywords;
@@ -319,7 +399,7 @@ export class Store {
       enableProductReviews: true,
       enableStoreLocator: false,
       inventoryDisplayMode: 'show_low_stock' as const,
-      priceDisplayMode: 'exclusive_tax' as const
+      priceDisplayMode: 'exclusive_tax' as const,
     };
 
     const updatedSettings: StoreProps['settings'] = { ...currentSettings };
@@ -372,13 +452,7 @@ export class Store {
   }
 
   // Statistics methods
-  updateStats(stats: {
-    rating?: number;
-    reviewCount?: number;
-    followerCount?: number;
-    productCount?: number;
-    orderCount?: number;
-  }): void {
+  updateStats(stats: { rating?: number; reviewCount?: number; followerCount?: number; productCount?: number; orderCount?: number }): void {
     if (stats.rating !== undefined) this.props.storeRating = stats.rating;
     if (stats.reviewCount !== undefined) this.props.reviewCount = stats.reviewCount;
     if (stats.followerCount !== undefined) this.props.followerCount = stats.followerCount;
@@ -449,7 +523,7 @@ export class Store {
       customFields: this.props.customFields,
       metadata: this.props.metadata,
       createdAt: this.props.createdAt.toISOString(),
-      updatedAt: this.props.updatedAt.toISOString()
+      updatedAt: this.props.updatedAt.toISOString(),
     };
   }
 }

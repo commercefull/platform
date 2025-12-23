@@ -12,7 +12,9 @@ import { unixTimestamp } from '../../../libs/date';
 // ============================================================================
 
 export type ContentRedirectCreateParams = Omit<ContentRedirect, 'contentRedirectId' | 'hits' | 'lastUsed' | 'createdAt' | 'updatedAt'>;
-export type ContentRedirectUpdateParams = Partial<Omit<ContentRedirect, 'contentRedirectId' | 'hits' | 'lastUsed' | 'createdAt' | 'updatedAt'>>;
+export type ContentRedirectUpdateParams = Partial<
+  Omit<ContentRedirect, 'contentRedirectId' | 'hits' | 'lastUsed' | 'createdAt' | 'updatedAt'>
+>;
 
 // ============================================================================
 // Repository
@@ -20,17 +22,11 @@ export type ContentRedirectUpdateParams = Partial<Omit<ContentRedirect, 'content
 
 export class ContentRedirectRepo {
   async findRedirectById(id: string): Promise<ContentRedirect | null> {
-    return queryOne<ContentRedirect>(
-      'SELECT * FROM "contentRedirect" WHERE "contentRedirectId" = $1',
-      [id]
-    );
+    return queryOne<ContentRedirect>('SELECT * FROM "contentRedirect" WHERE "contentRedirectId" = $1', [id]);
   }
 
   async findRedirectBySourceUrl(sourceUrl: string): Promise<ContentRedirect | null> {
-    return queryOne<ContentRedirect>(
-      'SELECT * FROM "contentRedirect" WHERE "sourceUrl" = $1 AND "isActive" = true',
-      [sourceUrl]
-    );
+    return queryOne<ContentRedirect>('SELECT * FROM "contentRedirect" WHERE "sourceUrl" = $1 AND "isActive" = true', [sourceUrl]);
   }
 
   async findMatchingRedirect(url: string): Promise<ContentRedirect | null> {
@@ -41,9 +37,7 @@ export class ContentRedirectRepo {
     }
 
     // Then try regex matches
-    const regexRedirects = await query<ContentRedirect[]>(
-      'SELECT * FROM "contentRedirect" WHERE "isRegex" = true AND "isActive" = true'
-    );
+    const regexRedirects = await query<ContentRedirect[]>('SELECT * FROM "contentRedirect" WHERE "isRegex" = true AND "isActive" = true');
 
     if (regexRedirects) {
       for (const redirect of regexRedirects) {
@@ -61,11 +55,7 @@ export class ContentRedirectRepo {
     return null;
   }
 
-  async findAllRedirects(
-    isActive?: boolean,
-    limit: number = 100,
-    offset: number = 0
-  ): Promise<ContentRedirect[]> {
+  async findAllRedirects(isActive?: boolean, limit: number = 100, offset: number = 0): Promise<ContentRedirect[]> {
     let sql = 'SELECT * FROM "contentRedirect"';
     const params: any[] = [];
     let paramIndex = 1;
@@ -84,12 +74,9 @@ export class ContentRedirectRepo {
 
   async createRedirect(params: ContentRedirectCreateParams): Promise<ContentRedirect> {
     const now = unixTimestamp();
-    
+
     // Check for duplicate source URL
-    const existing = await queryOne<ContentRedirect>(
-      'SELECT * FROM "contentRedirect" WHERE "sourceUrl" = $1',
-      [params.sourceUrl]
-    );
+    const existing = await queryOne<ContentRedirect>('SELECT * FROM "contentRedirect" WHERE "sourceUrl" = $1', [params.sourceUrl]);
     if (existing) {
       throw new Error(`Redirect for source URL "${params.sourceUrl}" already exists`);
     }
@@ -120,8 +107,8 @@ export class ContentRedirectRepo {
         now,
         now,
         params.createdBy || null,
-        params.updatedBy || null
-      ]
+        params.updatedBy || null,
+      ],
     );
 
     if (!result) {
@@ -168,7 +155,7 @@ export class ContentRedirectRepo {
 
     const result = await queryOne<ContentRedirect>(
       `UPDATE "contentRedirect" SET ${updateFields.join(', ')} WHERE "contentRedirectId" = $${paramIndex} RETURNING *`,
-      values
+      values,
     );
 
     if (!result) {
@@ -181,23 +168,20 @@ export class ContentRedirectRepo {
   async deleteRedirect(id: string): Promise<boolean> {
     const result = await queryOne<{ id: string }>(
       'DELETE FROM "contentRedirect" WHERE "contentRedirectId" = $1 RETURNING "contentRedirectId"',
-      [id]
+      [id],
     );
     return !!result;
   }
 
   async recordHit(id: string): Promise<void> {
     const now = unixTimestamp();
-    await query(
-      'UPDATE "contentRedirect" SET "hits" = "hits" + 1, "lastUsed" = $1 WHERE "contentRedirectId" = $2',
-      [now, id]
-    );
+    await query('UPDATE "contentRedirect" SET "hits" = "hits" + 1, "lastUsed" = $1 WHERE "contentRedirectId" = $2', [now, id]);
   }
 
   async getTopRedirects(limit: number = 10): Promise<ContentRedirect[]> {
     const results = await query<ContentRedirect[]>(
       'SELECT * FROM "contentRedirect" WHERE "isActive" = true ORDER BY "hits" DESC LIMIT $1',
-      [limit]
+      [limit],
     );
     return results || [];
   }
@@ -205,7 +189,7 @@ export class ContentRedirectRepo {
   async getRecentRedirects(limit: number = 10): Promise<ContentRedirect[]> {
     const results = await query<ContentRedirect[]>(
       'SELECT * FROM "contentRedirect" WHERE "lastUsed" IS NOT NULL ORDER BY "lastUsed" DESC LIMIT $1',
-      [limit]
+      [limit],
     );
     return results || [];
   }

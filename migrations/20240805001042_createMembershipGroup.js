@@ -14,7 +14,7 @@ exports.up = function (knex) {
     t.integer('currentMembers').notNullable().defaultTo(1);
     t.boolean('isActive').notNullable().defaultTo(true);
     t.text('notes');
-    
+
     t.index('subscriptionId');
     t.index('primaryMemberId');
     t.index('isActive');

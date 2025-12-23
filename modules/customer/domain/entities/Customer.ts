@@ -87,7 +87,7 @@ export class Customer {
       metadata: props.metadata,
       loginCount: 0,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     });
   }
 
@@ -96,30 +96,78 @@ export class Customer {
   }
 
   // Getters
-  get customerId(): string { return this.props.customerId; }
-  get email(): string { return this.props.email; }
-  get firstName(): string { return this.props.firstName; }
-  get lastName(): string { return this.props.lastName; }
-  get phone(): string | undefined { return this.props.phone; }
-  get dateOfBirth(): Date | undefined { return this.props.dateOfBirth; }
-  get status(): CustomerStatus { return this.props.status; }
-  get isVerified(): boolean { return this.props.isVerified; }
-  get emailVerifiedAt(): Date | undefined { return this.props.emailVerifiedAt; }
-  get addresses(): CustomerAddress[] { return [...this.props.addresses]; }
-  get defaultShippingAddressId(): string | undefined { return this.props.defaultShippingAddressId; }
-  get defaultBillingAddressId(): string | undefined { return this.props.defaultBillingAddressId; }
-  get groupIds(): string[] { return [...this.props.groupIds]; }
-  get preferredCurrency(): string | undefined { return this.props.preferredCurrency; }
-  get preferredLanguage(): string | undefined { return this.props.preferredLanguage; }
-  get taxExempt(): boolean { return this.props.taxExempt; }
-  get taxExemptionNumber(): string | undefined { return this.props.taxExemptionNumber; }
-  get notes(): string | undefined { return this.props.notes; }
-  get tags(): string[] { return [...this.props.tags]; }
-  get metadata(): Record<string, any> | undefined { return this.props.metadata; }
-  get lastLoginAt(): Date | undefined { return this.props.lastLoginAt; }
-  get loginCount(): number { return this.props.loginCount; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get customerId(): string {
+    return this.props.customerId;
+  }
+  get email(): string {
+    return this.props.email;
+  }
+  get firstName(): string {
+    return this.props.firstName;
+  }
+  get lastName(): string {
+    return this.props.lastName;
+  }
+  get phone(): string | undefined {
+    return this.props.phone;
+  }
+  get dateOfBirth(): Date | undefined {
+    return this.props.dateOfBirth;
+  }
+  get status(): CustomerStatus {
+    return this.props.status;
+  }
+  get isVerified(): boolean {
+    return this.props.isVerified;
+  }
+  get emailVerifiedAt(): Date | undefined {
+    return this.props.emailVerifiedAt;
+  }
+  get addresses(): CustomerAddress[] {
+    return [...this.props.addresses];
+  }
+  get defaultShippingAddressId(): string | undefined {
+    return this.props.defaultShippingAddressId;
+  }
+  get defaultBillingAddressId(): string | undefined {
+    return this.props.defaultBillingAddressId;
+  }
+  get groupIds(): string[] {
+    return [...this.props.groupIds];
+  }
+  get preferredCurrency(): string | undefined {
+    return this.props.preferredCurrency;
+  }
+  get preferredLanguage(): string | undefined {
+    return this.props.preferredLanguage;
+  }
+  get taxExempt(): boolean {
+    return this.props.taxExempt;
+  }
+  get taxExemptionNumber(): string | undefined {
+    return this.props.taxExemptionNumber;
+  }
+  get notes(): string | undefined {
+    return this.props.notes;
+  }
+  get tags(): string[] {
+    return [...this.props.tags];
+  }
+  get metadata(): Record<string, any> | undefined {
+    return this.props.metadata;
+  }
+  get lastLoginAt(): Date | undefined {
+    return this.props.lastLoginAt;
+  }
+  get loginCount(): number {
+    return this.props.loginCount;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   // Computed properties
   get fullName(): string {
@@ -131,26 +179,19 @@ export class Customer {
   }
 
   get defaultShippingAddress(): CustomerAddress | undefined {
-    return this.props.addresses.find(a => 
-      a.addressId === this.props.defaultShippingAddressId || 
-      (a.addressType === 'shipping' && a.isDefault)
+    return this.props.addresses.find(
+      a => a.addressId === this.props.defaultShippingAddressId || (a.addressType === 'shipping' && a.isDefault),
     );
   }
 
   get defaultBillingAddress(): CustomerAddress | undefined {
-    return this.props.addresses.find(a => 
-      a.addressId === this.props.defaultBillingAddressId || 
-      (a.addressType === 'billing' && a.isDefault)
+    return this.props.addresses.find(
+      a => a.addressId === this.props.defaultBillingAddressId || (a.addressType === 'billing' && a.isDefault),
     );
   }
 
   // Domain methods
-  updateProfile(updates: {
-    firstName?: string;
-    lastName?: string;
-    phone?: string;
-    dateOfBirth?: Date;
-  }): void {
+  updateProfile(updates: { firstName?: string; lastName?: string; phone?: string; dateOfBirth?: Date }): void {
     if (updates.firstName) this.props.firstName = updates.firstName.trim();
     if (updates.lastName) this.props.lastName = updates.lastName.trim();
     if (updates.phone !== undefined) this.props.phone = updates.phone?.trim();
@@ -268,10 +309,7 @@ export class Customer {
     this.touch();
   }
 
-  setPreferences(preferences: {
-    currency?: string;
-    language?: string;
-  }): void {
+  setPreferences(preferences: { currency?: string; language?: string }): void {
     if (preferences.currency) this.props.preferredCurrency = preferences.currency;
     if (preferences.language) this.props.preferredLanguage = preferences.language;
     this.touch();
@@ -332,7 +370,7 @@ export class Customer {
       lastLoginAt: this.props.lastLoginAt?.toISOString(),
       loginCount: this.props.loginCount,
       createdAt: this.props.createdAt.toISOString(),
-      updatedAt: this.props.updatedAt.toISOString()
+      updatedAt: this.props.updatedAt.toISOString(),
     };
   }
 }

@@ -30,11 +30,7 @@ export class ToggleFeatureFlagUseCase {
 
     const scope = input.scope || 'global';
 
-    const existingFlag = await this.configurationRepository.findFeatureFlag(
-      input.key,
-      scope,
-      input.scopeId
-    );
+    const existingFlag = await this.configurationRepository.findFeatureFlag(input.key, scope, input.scopeId);
 
     const previousState = existingFlag?.enabled ?? false;
 

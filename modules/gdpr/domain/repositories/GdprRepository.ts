@@ -51,7 +51,7 @@ export interface GdprDataRequestRepository {
   findPendingRequests(pagination?: PaginationOptions): Promise<PaginatedResult<GdprDataRequest>>;
   findOverdueRequests(): Promise<GdprDataRequest[]>;
   findByStatus(status: GdprRequestStatus, pagination?: PaginationOptions): Promise<PaginatedResult<GdprDataRequest>>;
-  
+
   // Statistics
   countByStatus(): Promise<Record<GdprRequestStatus, number>>;
   countByType(): Promise<Record<GdprRequestType, number>>;
@@ -74,7 +74,7 @@ export interface GdprCookieConsentRepository {
   // Queries
   findExpiredConsents(): Promise<GdprCookieConsent[]>;
   findByCountry(country: string, pagination?: PaginationOptions): Promise<PaginatedResult<GdprCookieConsent>>;
-  
+
   // Statistics
   getConsentStatistics(): Promise<{
     total: number;
@@ -85,11 +85,13 @@ export interface GdprCookieConsentRepository {
     acceptAll: number;
     rejectAll: number;
   }>;
-  getConsentByCountry(): Promise<Array<{
-    country: string;
-    total: number;
-    acceptRate: number;
-  }>>;
+  getConsentByCountry(): Promise<
+    Array<{
+      country: string;
+      total: number;
+      acceptRate: number;
+    }>
+  >;
 }
 
 // ============================================================================
@@ -99,7 +101,7 @@ export interface GdprCookieConsentRepository {
 export interface GdprService {
   // Data Request operations
   dataRequests: GdprDataRequestRepository;
-  
+
   // Cookie Consent operations
   cookieConsents: GdprCookieConsentRepository;
 

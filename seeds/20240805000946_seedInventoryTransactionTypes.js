@@ -15,7 +15,7 @@ exports.up = function (knex) {
     { code: 'EXPIRE', name: 'Expiry Write-Off', description: 'Inventory expired', affectsAvailable: true, direction: 'out' },
     { code: 'RESERVE', name: 'Reserve Stock', description: 'Reserve inventory for orders', affectsAvailable: false, direction: 'adjust' },
     { code: 'UNRESERVE', name: 'Unreserve Stock', description: 'Release reserved inventory', affectsAvailable: false, direction: 'adjust' },
-    { code: 'COUNT', name: 'Inventory Count', description: 'Adjustment from physical count', affectsAvailable: true, direction: 'adjust' }
+    { code: 'COUNT', name: 'Inventory Count', description: 'Adjustment from physical count', affectsAvailable: true, direction: 'adjust' },
   ]);
 };
 
@@ -24,9 +24,22 @@ exports.up = function (knex) {
  * @returns { Promise<void> }
  */
 exports.down = function (knex) {
-  return knex('inventoryTransactionType').whereIn('code', [
-    'RECEIVE', 'SHIP', 'ADJUST_UP', 'ADJUST_DOWN', 'TRANSFER_OUT', 'TRANSFER_IN', 'RETURN', 'DAMAGE', 'EXPIRE', 'RESERVE', 'UNRESERVE', 'COUNT'
-  ]).delete();
+  return knex('inventoryTransactionType')
+    .whereIn('code', [
+      'RECEIVE',
+      'SHIP',
+      'ADJUST_UP',
+      'ADJUST_DOWN',
+      'TRANSFER_OUT',
+      'TRANSFER_IN',
+      'RETURN',
+      'DAMAGE',
+      'EXPIRE',
+      'RESERVE',
+      'UNRESERVE',
+      'COUNT',
+    ])
+    .delete();
 };
 
 exports.seed = async function (knex) {

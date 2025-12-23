@@ -27,12 +27,12 @@ export const listWarehouses = async (req: Request, res: Response): Promise<void>
       stats,
       filters: { activeOnly },
       pagination: { limit, offset },
-      
-      success: req.query.success || null
+
+      success: req.query.success || null,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load warehouses',
@@ -47,7 +47,7 @@ export const createWarehouseForm = async (req: Request, res: Response): Promise<
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -79,7 +79,7 @@ export const createWarehouse = async (req: Request, res: Response): Promise<void
       contactName,
       timezone,
       cutoffTime,
-      processingTime
+      processingTime,
     } = req.body;
 
     const warehouse = await warehouseRepo.create({
@@ -104,13 +104,12 @@ export const createWarehouse = async (req: Request, res: Response): Promise<void
       contactName: contactName || undefined,
       timezone: timezone || 'UTC',
       cutoffTime: cutoffTime || undefined,
-      processingTime: processingTime ? parseInt(processingTime) : undefined
+      processingTime: processingTime ? parseInt(processingTime) : undefined,
     });
 
     res.redirect(`/hub/warehouses/${warehouse.distributionWarehouseId}?success=Warehouse created successfully`);
   } catch (error: any) {
     logger.error('Error:', error);
-    
 
     adminRespond(req, res, 'operations/warehouses/create', {
       pageName: 'Create Warehouse',
@@ -137,12 +136,12 @@ export const viewWarehouse = async (req: Request, res: Response): Promise<void> 
     adminRespond(req, res, 'operations/warehouses/view', {
       pageName: `Warehouse: ${warehouse.name}`,
       warehouse,
-      
-      success: req.query.success || null
+
+      success: req.query.success || null,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load warehouse',
@@ -170,7 +169,7 @@ export const editWarehouseForm = async (req: Request, res: Response): Promise<vo
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -204,7 +203,7 @@ export const updateWarehouse = async (req: Request, res: Response): Promise<void
       contactName,
       timezone,
       cutoffTime,
-      processingTime
+      processingTime,
     } = req.body;
 
     if (name !== undefined) updates.name = name;
@@ -238,7 +237,6 @@ export const updateWarehouse = async (req: Request, res: Response): Promise<void
     res.redirect(`/hub/warehouses/${warehouseId}?success=Warehouse updated successfully`);
   } catch (error: any) {
     logger.error('Error:', error);
-    
 
     try {
       const warehouse = await warehouseRepo.findById(req.params.warehouseId);
@@ -271,7 +269,7 @@ export const activateWarehouse = async (req: Request, res: Response): Promise<vo
     res.json({ success: true, message: 'Warehouse activated successfully' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to activate warehouse' });
   }
 };
@@ -289,7 +287,7 @@ export const deactivateWarehouse = async (req: Request, res: Response): Promise<
     res.json({ success: true, message: 'Warehouse deactivated successfully' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to deactivate warehouse' });
   }
 };
@@ -307,7 +305,7 @@ export const deleteWarehouse = async (req: Request, res: Response): Promise<void
     res.json({ success: true, message: 'Warehouse deleted successfully' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to delete warehouse' });
   }
 };

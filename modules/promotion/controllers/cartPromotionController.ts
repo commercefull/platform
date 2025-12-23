@@ -1,6 +1,6 @@
 import { logger } from '../../../libs/logger';
-import { Request, Response } from "express";
-import { CartPromotionRepo } from "../repos/cartRepo";
+import { Request, Response } from 'express';
+import { CartPromotionRepo } from '../repos/cartRepo';
 
 const cartPromotionRepo = new CartPromotionRepo();
 
@@ -23,7 +23,7 @@ export const getCartPromotionById = async (req: Request, res: Response): Promise
     const promotion = await cartPromotionRepo.getById(id);
 
     if (!promotion) {
-      res.status(404).json({ success: false, message: "Cart promotion not found" });
+      res.status(404).json({ success: false, message: 'Cart promotion not found' });
       return;
     }
 
@@ -70,7 +70,7 @@ export const removePromotion = async (req: Request, res: Response): Promise<void
   try {
     const { id } = req.params;
     await cartPromotionRepo.delete(id);
-    res.status(200).json({ success: true, message: "Cart promotion removed successfully" });
+    res.status(200).json({ success: true, message: 'Cart promotion removed successfully' });
   } catch (error: any) {
     logger.error('Error:', error);
     res.status(500).json({ success: false, message: error.message });

@@ -1,6 +1,6 @@
 /**
  * UpdateMembershipTier Use Case
- * 
+ *
  * Updates an existing membership tier's configuration.
  */
 

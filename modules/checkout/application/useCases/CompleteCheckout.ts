@@ -12,9 +12,7 @@ import { generateUUID } from '../../../../libs/uuid';
 // ============================================================================
 
 export class CompleteCheckoutCommand {
-  constructor(
-    public readonly checkoutId: string
-  ) {}
+  constructor(public readonly checkoutId: string) {}
 }
 
 // ============================================================================
@@ -58,7 +56,7 @@ export class CompleteCheckoutUseCase {
       basketId: session.basketId,
       orderId,
       customerId: session.customerId,
-      total: session.total.amount
+      total: session.total.amount,
     });
 
     return {
@@ -66,7 +64,7 @@ export class CompleteCheckoutUseCase {
       checkoutId: session.id,
       total: session.total.amount,
       currency: session.total.currency,
-      status: 'completed'
+      status: 'completed',
     };
   }
 }

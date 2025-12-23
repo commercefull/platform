@@ -23,24 +23,15 @@ export type ContentNavigationItemUpdateParams = Partial<Omit<ContentNavigationIt
 export class ContentNavigationRepo {
   // Navigation methods
   async findNavigationById(id: string): Promise<ContentNavigation | null> {
-    return queryOne<ContentNavigation>(
-      'SELECT * FROM "contentNavigation" WHERE "contentNavigationId" = $1',
-      [id]
-    );
+    return queryOne<ContentNavigation>('SELECT * FROM "contentNavigation" WHERE "contentNavigationId" = $1', [id]);
   }
 
   async findNavigationBySlug(slug: string): Promise<ContentNavigation | null> {
-    return queryOne<ContentNavigation>(
-      'SELECT * FROM "contentNavigation" WHERE "slug" = $1',
-      [slug]
-    );
+    return queryOne<ContentNavigation>('SELECT * FROM "contentNavigation" WHERE "slug" = $1', [slug]);
   }
 
   async findNavigationByLocation(location: string): Promise<ContentNavigation | null> {
-    return queryOne<ContentNavigation>(
-      'SELECT * FROM "contentNavigation" WHERE "location" = $1 AND "isActive" = true',
-      [location]
-    );
+    return queryOne<ContentNavigation>('SELECT * FROM "contentNavigation" WHERE "location" = $1 AND "isActive" = true', [location]);
   }
 
   async findAllNavigations(isActive?: boolean): Promise<ContentNavigation[]> {
@@ -60,7 +51,7 @@ export class ContentNavigationRepo {
 
   async createNavigation(params: ContentNavigationCreateParams): Promise<ContentNavigation> {
     const now = unixTimestamp();
-    
+
     // Check slug uniqueness
     const existing = await this.findNavigationBySlug(params.slug);
     if (existing) {
@@ -81,8 +72,8 @@ export class ContentNavigationRepo {
         now,
         now,
         params.createdBy || null,
-        params.updatedBy || null
-      ]
+        params.updatedBy || null,
+      ],
     );
 
     if (!result) {
@@ -125,7 +116,7 @@ export class ContentNavigationRepo {
 
     const result = await queryOne<ContentNavigation>(
       `UPDATE "contentNavigation" SET ${updateFields.join(', ')} WHERE "contentNavigationId" = $${paramIndex} RETURNING *`,
-      values
+      values,
     );
 
     if (!result) {
@@ -138,20 +129,17 @@ export class ContentNavigationRepo {
   async deleteNavigation(id: string): Promise<boolean> {
     // Delete all navigation items first
     await query('DELETE FROM "contentNavigationItem" WHERE "navigationId" = $1', [id]);
-    
+
     const result = await queryOne<{ id: string }>(
       'DELETE FROM "contentNavigation" WHERE "contentNavigationId" = $1 RETURNING "contentNavigationId"',
-      [id]
+      [id],
     );
     return !!result;
   }
 
   // Navigation Item methods
   async findNavigationItemById(id: string): Promise<ContentNavigationItem | null> {
-    return queryOne<ContentNavigationItem>(
-      'SELECT * FROM "contentNavigationItem" WHERE "contentNavigationItemId" = $1',
-      [id]
-    );
+    return queryOne<ContentNavigationItem>('SELECT * FROM "contentNavigationItem" WHERE "contentNavigationItemId" = $1', [id]);
   }
 
   async findNavigationItems(navigationId: string, parentId?: string): Promise<ContentNavigationItem[]> {
@@ -179,7 +167,7 @@ export class ContentNavigationRepo {
 
   async createNavigationItem(params: ContentNavigationItemCreateParams): Promise<ContentNavigationItem> {
     const now = unixTimestamp();
-    
+
     const result = await queryOne<ContentNavigationItem>(
       `INSERT INTO "contentNavigationItem" 
       ("navigationId", "parentId", "title", "type", "url", "contentPageId", "targetId", 
@@ -204,8 +192,8 @@ export class ContentNavigationRepo {
         params.conditions ? JSON.stringify(params.conditions) : null,
         params.depth || 0,
         now,
-        now
-      ]
+        now,
+      ],
     );
 
     if (!result) {
@@ -260,7 +248,7 @@ export class ContentNavigationRepo {
 
     const result = await queryOne<ContentNavigationItem>(
       `UPDATE "contentNavigationItem" SET ${updateFields.join(', ')} WHERE "contentNavigationItemId" = $${paramIndex} RETURNING *`,
-      values
+      values,
     );
 
     if (!result) {
@@ -273,21 +261,21 @@ export class ContentNavigationRepo {
   async deleteNavigationItem(id: string): Promise<boolean> {
     // Delete child items first
     await query('DELETE FROM "contentNavigationItem" WHERE "parentId" = $1', [id]);
-    
+
     const result = await queryOne<{ id: string }>(
       'DELETE FROM "contentNavigationItem" WHERE "contentNavigationItemId" = $1 RETURNING "contentNavigationItemId"',
-      [id]
+      [id],
     );
     return !!result;
   }
 
   async reorderNavigationItems(navigationId: string, itemOrders: Array<{ id: string; order: number }>): Promise<void> {
     const now = unixTimestamp();
-    
+
     for (const item of itemOrders) {
       await query(
         'UPDATE "contentNavigationItem" SET "sortOrder" = $1, "updatedAt" = $2 WHERE "contentNavigationItemId" = $3 AND "navigationId" = $4',
-        [item.order, now, item.id, navigationId]
+        [item.order, now, item.id, navigationId],
       );
     }
   }

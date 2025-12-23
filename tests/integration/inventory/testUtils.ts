@@ -12,7 +12,7 @@ export const testInventoryItem = {
   availableQuantity: 100,
   lowStockThreshold: 10,
   reorderPoint: 20,
-  reorderQuantity: 50
+  reorderQuantity: 50,
 };
 
 export const testInventoryLocation = {
@@ -23,7 +23,7 @@ export const testInventoryLocation = {
   state: 'TS',
   country: 'Testland',
   postalCode: '12345',
-  isActive: true
+  isActive: true,
 };
 
 // Setup helper function
@@ -33,10 +33,10 @@ export const setupInventoryTests = async () => {
     validateStatus: () => true,
     timeout: 10000,
     headers: {
-      'Accept': 'application/json',
+      Accept: 'application/json',
       'Content-Type': 'application/json',
-      'X-Test-Request': 'true'
-    } // Don't throw HTTP errors
+      'X-Test-Request': 'true',
+    }, // Don't throw HTTP errors
   });
 
   // Get admin token (merchant login for business routes)
@@ -44,15 +44,12 @@ export const setupInventoryTests = async () => {
   try {
     const adminLogin = await client.post('/business/auth/login', {
       email: 'merchant@example.com',
-      password: 'password123'
+      password: 'password123',
     });
     adminToken = adminLogin.data?.accessToken || '';
     if (!adminToken) {
-      
     }
-  } catch (error: any) {
-    
-  }
+  } catch (error: any) {}
 
   // Create test product if needed
   let testProductId = '';
@@ -61,39 +58,41 @@ export const setupInventoryTests = async () => {
 
   try {
     const productResponse = await client.get('/business/products', {
-      headers: { Authorization: `Bearer ${adminToken}` }
+      headers: { Authorization: `Bearer ${adminToken}` },
     });
-    
+
     if (productResponse.data?.data && productResponse.data.data.length > 0) {
       testProductId = productResponse.data.data[0].id || productResponse.data.data[0].productId;
     } else {
       // Create a test product - include required fields
-      const newProduct = await client.post('/business/products', {
-        name: 'Test Inventory Product',
-        sku: 'TEST-INVENTORY-SKU-' + Date.now(),
-        productTypeId: '00000000-0000-0000-0000-000000000001', // Default product type
-        basePrice: 29.99,
-        status: 'active'
-      }, {
-        headers: { Authorization: `Bearer ${adminToken}` }
-      });
+      const newProduct = await client.post(
+        '/business/products',
+        {
+          name: 'Test Inventory Product',
+          sku: 'TEST-INVENTORY-SKU-' + Date.now(),
+          productTypeId: '00000000-0000-0000-0000-000000000001', // Default product type
+          basePrice: 29.99,
+          status: 'active',
+        },
+        {
+          headers: { Authorization: `Bearer ${adminToken}` },
+        },
+      );
       if (newProduct.data?.data?.id) {
         testProductId = newProduct.data.data.id;
       } else if (newProduct.data?.data?.productId) {
         testProductId = newProduct.data.data.productId;
       } else {
-        
       }
     }
 
     // Create a test inventory location
     const locationResponse = await client.post('/business/inventory/locations', testInventoryLocation, {
-      headers: { Authorization: `Bearer ${adminToken}` }
+      headers: { Authorization: `Bearer ${adminToken}` },
     });
     if (locationResponse.data?.data?.id) {
       testLocationId = locationResponse.data.data.id;
     } else {
-      
     }
 
     // Create a test inventory item (only if we have both product and location)
@@ -101,28 +100,25 @@ export const setupInventoryTests = async () => {
       const inventoryItemData = {
         ...testInventoryItem,
         productId: testProductId,
-        locationId: testLocationId
+        locationId: testLocationId,
       };
-      
+
       const itemResponse = await client.post('/business/inventory/items', inventoryItemData, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
       if (itemResponse.data?.data?.id) {
         testInventoryItemId = itemResponse.data.data.id;
       } else {
-        
       }
     }
-  } catch (error) {
-    
-  }
+  } catch (error) {}
 
   return {
     client,
     adminToken,
     testProductId,
     testLocationId,
-    testInventoryItemId
+    testInventoryItemId,
   };
 };
 
@@ -131,26 +127,30 @@ export const cleanupInventoryTests = async (
   client: AxiosInstance | undefined,
   adminToken: string | undefined,
   testInventoryItemId?: string,
-  testLocationId?: string
+  testLocationId?: string,
 ) => {
   // Skip cleanup if client or token not available
   if (!client || !adminToken) {
     return;
   }
-  
+
   try {
     // Delete test inventory item
     if (testInventoryItemId) {
-      await client.delete(`/business/inventory/items/${testInventoryItemId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
-      }).catch(() => {});
+      await client
+        .delete(`/business/inventory/items/${testInventoryItemId}`, {
+          headers: { Authorization: `Bearer ${adminToken}` },
+        })
+        .catch(() => {});
     }
-    
+
     // Delete test location
     if (testLocationId) {
-      await client.delete(`/business/inventory/locations/${testLocationId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
-      }).catch(() => {});
+      await client
+        .delete(`/business/inventory/locations/${testLocationId}`, {
+          headers: { Authorization: `Bearer ${adminToken}` },
+        })
+        .catch(() => {});
     }
   } catch (error) {
     // Silently ignore cleanup errors

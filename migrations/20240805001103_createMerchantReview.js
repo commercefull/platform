@@ -21,7 +21,7 @@ exports.up = function (knex) {
     t.timestamp('reviewedAt');
     t.uuid('reviewedBy');
     t.text('reviewNotes');
-    
+
     t.check('rating BETWEEN 1 AND 5');
     t.index('merchantId');
     t.index('customerId');

@@ -1,6 +1,6 @@
 /**
  * AssignToStore Use Case
- * 
+ *
  * Assigns a warehouse to a store for inventory fulfillment.
  */
 
@@ -24,7 +24,7 @@ export interface AssignToStoreOutput {
 export class AssignToStoreUseCase {
   constructor(
     private readonly warehouseRepository: any,
-    private readonly storeRepository: any
+    private readonly storeRepository: any,
   ) {}
 
   async execute(input: AssignToStoreInput): Promise<AssignToStoreOutput> {

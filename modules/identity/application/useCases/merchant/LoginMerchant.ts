@@ -23,7 +23,7 @@ export class LoginMerchantUseCase {
   constructor(
     private readonly merchantRepo: any,
     private readonly authService: any,
-    private readonly tokenService: any
+    private readonly tokenService: any,
   ) {}
 
   async execute(input: LoginMerchantInput): Promise<LoginMerchantOutput> {
@@ -38,10 +38,7 @@ export class LoginMerchantUseCase {
     }
 
     // Verify password
-    const isValidPassword = await this.authService.verifyPassword(
-      input.password,
-      merchant.passwordHash
-    );
+    const isValidPassword = await this.authService.verifyPassword(input.password, merchant.passwordHash);
     if (!isValidPassword) {
       eventBus.emit('merchant.login_failed', {
         email: input.email,

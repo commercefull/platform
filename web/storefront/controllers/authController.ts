@@ -26,7 +26,7 @@ export const signInForm = async (req: Request, res: Response): Promise<void> => 
 
   storefrontRespond(req, res, 'user/signin', {
     pageName: 'Sign In',
-    redirectTo: req.query.redirect || '/'
+    redirectTo: req.query.redirect || '/',
   });
 };
 
@@ -42,7 +42,7 @@ export const signUpForm = async (req: Request, res: Response): Promise<void> => 
   }
 
   storefrontRespond(req, res, 'user/signup', {
-    pageName: 'Sign Up'
+    pageName: 'Sign Up',
   });
 };
 
@@ -74,15 +74,14 @@ export const signIn = async (req: Request, res: Response): Promise<void> => {
       email: customer.email,
       firstName: customer.firstName,
       lastName: customer.lastName,
-      isGuest: false
+      isGuest: false,
     };
 
     req.flash('success', `Welcome back, ${customer.firstName}!`);
     res.redirect(redirectTo as string);
-
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     req.flash('error', error.message || 'Failed to sign in');
     res.redirect('/signin');
   }
@@ -94,15 +93,7 @@ export const signIn = async (req: Request, res: Response): Promise<void> => {
 
 export const signUp = async (req: Request, res: Response): Promise<void> => {
   try {
-    const {
-      firstName,
-      lastName,
-      email,
-      password,
-      confirmPassword,
-      acceptsMarketing = false,
-      acceptsAnalytics = false
-    } = req.body;
+    const { firstName, lastName, email, password, confirmPassword, acceptsMarketing = false, acceptsAnalytics = false } = req.body;
 
     // Basic validation
     if (!firstName || !lastName || !email || !password) {
@@ -120,12 +111,7 @@ export const signUp = async (req: Request, res: Response): Promise<void> => {
       return res.redirect('/signup');
     }
 
-    const command = new RegisterCustomerCommand(
-      email,
-      firstName,
-      lastName,
-      password
-    );
+    const command = new RegisterCustomerCommand(email, firstName, lastName, password);
 
     const useCase = new RegisterCustomerUseCase(CustomerRepo);
     const customer = await useCase.execute(command);
@@ -136,15 +122,14 @@ export const signUp = async (req: Request, res: Response): Promise<void> => {
       email: customer.email,
       firstName: customer.firstName,
       lastName: customer.lastName,
-      isGuest: false
+      isGuest: false,
     };
 
     req.flash('success', `Welcome to our store, ${customer.firstName}!`);
     res.redirect('/profile');
-
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     req.flash('error', error.message || 'Failed to create account');
     res.redirect('/signup');
   }
@@ -172,14 +157,14 @@ export const profile = async (req: Request, res: Response): Promise<void> => {
 
     storefrontRespond(req, res, 'user/profile', {
       pageName: 'My Profile',
-      customer
+      customer,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     storefrontRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load profile'
+      error: error.message || 'Failed to load profile',
     });
   }
 };
@@ -194,18 +179,12 @@ export const updateProfile = async (req: Request, res: Response): Promise<void> 
       return res.redirect('/signin');
     }
 
-    const {
-      firstName,
-      lastName,
-      phone,
-      acceptsMarketing,
-      acceptsAnalytics
-    } = req.body;
+    const { firstName, lastName, phone, acceptsMarketing, acceptsAnalytics } = req.body;
 
     const command = new UpdateCustomerCommand((req as any).user.customerId, {
       firstName,
       lastName,
-      phone
+      phone,
     });
 
     const useCase = new UpdateCustomerUseCase(CustomerRepo);
@@ -213,10 +192,9 @@ export const updateProfile = async (req: Request, res: Response): Promise<void> 
 
     req.flash('success', 'Profile updated successfully');
     res.redirect('/profile');
-
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     req.flash('error', error.message || 'Failed to update profile');
     res.redirect('/profile');
   }
@@ -238,7 +216,7 @@ export const signOut = async (req: Request, res: Response): Promise<void> => {
     res.redirect('/');
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.redirect('/');
   }
 };
@@ -271,21 +249,16 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
     }
 
     // Use ChangePassword use case
-    const changeCommand = new ChangePasswordCommand(
-      (req as any).user.customerId,
-      currentPassword,
-      newPassword
-    );
+    const changeCommand = new ChangePasswordCommand((req as any).user.customerId, currentPassword, newPassword);
 
     const changeUseCase = new ChangePasswordUseCase(CustomerRepo);
     await changeUseCase.execute(changeCommand);
 
     req.flash('success', 'Password changed successfully');
     res.redirect('/profile');
-
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     req.flash('error', error.message || 'Failed to change password');
     res.redirect('/profile');
   }

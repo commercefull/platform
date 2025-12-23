@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function (knex) {
   return knex.schema.createTable('paymentSubscription', t => {
     t.uuid('paymentSubscriptionId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
@@ -6,7 +6,10 @@ exports.up = function(knex) {
     t.uuid('customerId').notNullable().references('customerId').inTable('customer').onDelete('CASCADE');
     t.uuid('paymentPlanId').notNullable().references('paymentPlanId').inTable('paymentPlan').onDelete('CASCADE');
     t.uuid('merchantId').notNullable().references('merchantId').inTable('merchant').onDelete('CASCADE');
-    t.string('status', 20).notNullable().checkIn(['active', 'canceled', 'expired', 'pastDue', 'pending', 'paused', 'trial']).defaultTo('pending');
+    t.string('status', 20)
+      .notNullable()
+      .checkIn(['active', 'canceled', 'expired', 'pastDue', 'pending', 'paused', 'trial'])
+      .defaultTo('pending');
     t.uuid('storedPaymentMethodId').references('storedPaymentMethodId').inTable('storedPaymentMethod').onDelete('CASCADE');
     t.timestamp('startDate').notNullable();
     t.timestamp('trialEndDate');
@@ -20,7 +23,6 @@ exports.up = function(knex) {
     t.text('lastPaymentError');
     t.string('gatewaySubscriptionId', 255);
     t.jsonb('planSnapshot');
-    
 
     t.index('customerId');
     t.index('paymentPlanId');
@@ -32,6 +34,6 @@ exports.up = function(knex) {
   });
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTable('paymentSubscription');
 };

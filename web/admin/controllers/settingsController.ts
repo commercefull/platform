@@ -51,10 +51,7 @@ export const storeSettings = async (req: Request, res: Response): Promise<void> 
   try {
     const merchantId = (req as any).merchantId || 'default';
 
-    const settings = await queryOne<any>(
-      `SELECT * FROM "merchantSettings" WHERE "merchantId" = $1`,
-      [merchantId]
-    );
+    const settings = await queryOne<any>(`SELECT * FROM "merchantSettings" WHERE "merchantId" = $1`, [merchantId]);
 
     // Get available timezones and currencies
     const timezones = getTimezones();
@@ -70,7 +67,7 @@ export const storeSettings = async (req: Request, res: Response): Promise<void> 
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load settings',
@@ -94,7 +91,7 @@ export const updateStoreSettings = async (req: Request, res: Response): Promise<
       city,
       state,
       postalCode,
-      country
+      country,
     } = req.body;
 
     const now = new Date();
@@ -104,14 +101,13 @@ export const updateStoreSettings = async (req: Request, res: Response): Promise<
       city,
       state,
       postalCode,
-      country
+      country,
     });
 
     // Check if settings exist
-    const existing = await queryOne<{ merchantId: string }>(
-      `SELECT "merchantId" FROM "merchantSettings" WHERE "merchantId" = $1`,
-      [merchantId]
-    );
+    const existing = await queryOne<{ merchantId: string }>(`SELECT "merchantId" FROM "merchantSettings" WHERE "merchantId" = $1`, [
+      merchantId,
+    ]);
 
     if (existing) {
       await query(
@@ -126,7 +122,7 @@ export const updateStoreSettings = async (req: Request, res: Response): Promise<
           "storeAddress" = $8,
           "updatedAt" = $9
          WHERE "merchantId" = $10`,
-        [storeName, storeUrl, storeEmail, storePhone, timezone, currency, locale, storeAddress, now, merchantId]
+        [storeName, storeUrl, storeEmail, storePhone, timezone, currency, locale, storeAddress, now, merchantId],
       );
     } else {
       await query(
@@ -134,14 +130,14 @@ export const updateStoreSettings = async (req: Request, res: Response): Promise<
           "merchantId", "storeName", "storeUrl", "storeEmail", "storePhone",
           "timezone", "currency", "locale", "storeAddress", "createdAt", "updatedAt"
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
-        [merchantId, storeName, storeUrl, storeEmail, storePhone, timezone, currency, locale, storeAddress, now, now]
+        [merchantId, storeName, storeUrl, storeEmail, storePhone, timezone, currency, locale, storeAddress, now, now],
       );
     }
 
     res.json({ success: true });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -154,10 +150,7 @@ export const businessInfo = async (req: Request, res: Response): Promise<void> =
   try {
     const merchantId = (req as any).merchantId || 'default';
 
-    const settings = await queryOne<any>(
-      `SELECT * FROM "merchantSettings" WHERE "merchantId" = $1`,
-      [merchantId]
-    );
+    const settings = await queryOne<any>(`SELECT * FROM "merchantSettings" WHERE "merchantId" = $1`, [merchantId]);
 
     adminRespond(req, res, 'settings/business', {
       pageName: 'Business Information',
@@ -165,7 +158,7 @@ export const businessInfo = async (req: Request, res: Response): Promise<void> =
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load business info',
@@ -186,13 +179,13 @@ export const updateBusinessInfo = async (req: Request, res: Response): Promise<v
         "businessInfo" = $1,
         "updatedAt" = $2
        WHERE "merchantId" = $3`,
-      [businessInfo, now, merchantId]
+      [businessInfo, now, merchantId],
     );
 
     res.json({ success: true });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -204,19 +197,13 @@ export const updateBusinessInfo = async (req: Request, res: Response): Promise<v
 export const localizationSettings = async (req: Request, res: Response): Promise<void> => {
   try {
     // Get languages
-    const languages = await query<Array<any>>(
-      `SELECT * FROM "language" ORDER BY "name"`
-    );
+    const languages = await query<Array<any>>(`SELECT * FROM "language" ORDER BY "name"`);
 
     // Get currencies
-    const currencies = await query<Array<any>>(
-      `SELECT * FROM "currency" ORDER BY "name"`
-    );
+    const currencies = await query<Array<any>>(`SELECT * FROM "currency" ORDER BY "name"`);
 
     // Get countries
-    const countries = await query<Array<any>>(
-      `SELECT * FROM "country" ORDER BY "name"`
-    );
+    const countries = await query<Array<any>>(`SELECT * FROM "country" ORDER BY "name"`);
 
     adminRespond(req, res, 'settings/localization', {
       pageName: 'Localization',
@@ -226,7 +213,7 @@ export const localizationSettings = async (req: Request, res: Response): Promise
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load localization settings',
@@ -258,13 +245,13 @@ export const createLanguage = async (req: Request, res: Response): Promise<void>
     await query(
       `INSERT INTO "language" ("languageId", "code", "name", "nativeName", "isDefault", "isActive", "createdAt", "updatedAt")
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-      [languageId, code, name, nativeName || name, isDefault || false, isActive !== false, now, now]
+      [languageId, code, name, nativeName || name, isDefault || false, isActive !== false, now, now],
     );
 
     res.json({ success: true, languageId });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -288,13 +275,13 @@ export const updateLanguage = async (req: Request, res: Response): Promise<void>
         "isActive" = COALESCE($4, "isActive"),
         "updatedAt" = $5
        WHERE "languageId" = $6`,
-      [name, nativeName, isDefault, isActive, now, languageId]
+      [name, nativeName, isDefault, isActive, now, languageId],
     );
 
     res.json({ success: true });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -304,10 +291,7 @@ export const deleteLanguage = async (req: Request, res: Response): Promise<void>
     const { languageId } = req.params;
 
     // Check if it's the default language
-    const language = await queryOne<{ isDefault: boolean }>(
-      `SELECT "isDefault" FROM "language" WHERE "languageId" = $1`,
-      [languageId]
-    );
+    const language = await queryOne<{ isDefault: boolean }>(`SELECT "isDefault" FROM "language" WHERE "languageId" = $1`, [languageId]);
 
     if (language?.isDefault) {
       res.status(400).json({ success: false, message: 'Cannot delete the default language' });
@@ -319,7 +303,7 @@ export const deleteLanguage = async (req: Request, res: Response): Promise<void>
     res.json({ success: true });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -348,13 +332,13 @@ export const createCurrency = async (req: Request, res: Response): Promise<void>
     await query(
       `INSERT INTO "currency" ("currencyId", "code", "name", "symbol", "exchangeRate", "isDefault", "isActive", "createdAt", "updatedAt")
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-      [currencyId, code.toUpperCase(), name, symbol || code, exchangeRate || 1, isDefault || false, isActive !== false, now, now]
+      [currencyId, code.toUpperCase(), name, symbol || code, exchangeRate || 1, isDefault || false, isActive !== false, now, now],
     );
 
     res.json({ success: true, currencyId });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -379,13 +363,13 @@ export const updateCurrency = async (req: Request, res: Response): Promise<void>
         "isActive" = COALESCE($5, "isActive"),
         "updatedAt" = $6
        WHERE "currencyId" = $7`,
-      [name, symbol, exchangeRate, isDefault, isActive, now, currencyId]
+      [name, symbol, exchangeRate, isDefault, isActive, now, currencyId],
     );
 
     res.json({ success: true });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -395,10 +379,7 @@ export const deleteCurrency = async (req: Request, res: Response): Promise<void>
     const { currencyId } = req.params;
 
     // Check if it's the default currency
-    const currency = await queryOne<{ isDefault: boolean }>(
-      `SELECT "isDefault" FROM "currency" WHERE "currencyId" = $1`,
-      [currencyId]
-    );
+    const currency = await queryOne<{ isDefault: boolean }>(`SELECT "isDefault" FROM "currency" WHERE "currencyId" = $1`, [currencyId]);
 
     if (currency?.isDefault) {
       res.status(400).json({ success: false, message: 'Cannot delete the default currency' });
@@ -410,7 +391,7 @@ export const deleteCurrency = async (req: Request, res: Response): Promise<void>
     res.json({ success: true });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -427,7 +408,7 @@ function getDefaultSettings(merchantId: string): StoreSettings {
     currency: 'USD',
     locale: 'en-US',
     createdAt: new Date(),
-    updatedAt: new Date()
+    updatedAt: new Date(),
   };
 }
 
@@ -444,13 +425,13 @@ function getTimezones(): string[] {
     'Asia/Tokyo',
     'Asia/Shanghai',
     'Asia/Singapore',
-    'Australia/Sydney'
+    'Australia/Sydney',
   ];
 }
 
 async function getCurrencies(): Promise<Array<{ code: string; name: string }>> {
   const currencies = await query<Array<{ code: string; name: string }>>(
-    `SELECT "code", "name" FROM "currency" WHERE "isActive" = true ORDER BY "name"`
+    `SELECT "code", "name" FROM "currency" WHERE "isActive" = true ORDER BY "name"`,
   );
 
   if (currencies && currencies.length > 0) {
@@ -464,7 +445,7 @@ async function getCurrencies(): Promise<Array<{ code: string; name: string }>> {
     { code: 'GBP', name: 'British Pound' },
     { code: 'CAD', name: 'Canadian Dollar' },
     { code: 'AUD', name: 'Australian Dollar' },
-    { code: 'JPY', name: 'Japanese Yen' }
+    { code: 'JPY', name: 'Japanese Yen' },
   ];
 }
 
@@ -479,6 +460,6 @@ function getLocales(): Array<{ code: string; name: string }> {
     { code: 'it-IT', name: 'Italian (Italy)' },
     { code: 'pt-BR', name: 'Portuguese (Brazil)' },
     { code: 'ja-JP', name: 'Japanese (Japan)' },
-    { code: 'zh-CN', name: 'Chinese (Simplified)' }
+    { code: 'zh-CN', name: 'Chinese (Simplified)' },
   ];
 }

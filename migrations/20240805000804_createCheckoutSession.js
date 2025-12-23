@@ -26,7 +26,7 @@ exports.up = function (knex) {
     t.text('referrer');
     t.uuid('convertedToOrderId').references('orderId').inTable('order');
     t.timestamp('expiresAt');
-    
+
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('lastActivityAt').notNullable().defaultTo(knex.fn.now());

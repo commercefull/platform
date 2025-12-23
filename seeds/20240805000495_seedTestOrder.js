@@ -7,9 +7,7 @@ const TEST_ORDER_ID = '00000000-0000-0000-0000-000000000200';
 
 exports.seed = async function (knex) {
   // Get the test customer ID
-  const testCustomer = await knex('customer')
-    .where({ email: 'customer@example.com' })
-    .first('customerId');
+  const testCustomer = await knex('customer').where({ email: 'customer@example.com' }).first('customerId');
 
   // Delete existing test order and items
   await knex('orderItem').where({ orderId: TEST_ORDER_ID }).del();
@@ -25,8 +23,8 @@ exports.seed = async function (knex) {
     fulfillmentStatus: 'unfulfilled',
     currencyCode: 'USD',
     subtotal: 99.99,
-    discountTotal: 10.00,
-    taxTotal: 7.50,
+    discountTotal: 10.0,
+    taxTotal: 7.5,
     shippingTotal: 5.99,
     handlingFee: 0,
     totalAmount: 103.48,
@@ -48,7 +46,7 @@ exports.seed = async function (knex) {
       state: 'TS',
       postalCode: '12345',
       country: 'US',
-      phone: '555-123-4567'
+      phone: '555-123-4567',
     }),
     billingAddress: JSON.stringify({
       firstName: 'Test',
@@ -58,10 +56,10 @@ exports.seed = async function (knex) {
       state: 'TS',
       postalCode: '12345',
       country: 'US',
-      phone: '555-123-4567'
+      phone: '555-123-4567',
     }),
     createdAt: knex.fn.now(),
-    updatedAt: knex.fn.now()
+    updatedAt: knex.fn.now(),
   });
 
   // Insert test order item (productId is nullable, so we can skip it)
@@ -73,10 +71,10 @@ exports.seed = async function (knex) {
     unitPrice: 49.99,
     discountedUnitPrice: 44.99,
     lineTotal: 89.98,
-    discountTotal: 10.00,
-    taxTotal: 7.50,
+    discountTotal: 10.0,
+    taxTotal: 7.5,
     fulfillmentStatus: 'unfulfilled',
     createdAt: knex.fn.now(),
-    updatedAt: knex.fn.now()
+    updatedAt: knex.fn.now(),
   });
 };

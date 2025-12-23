@@ -45,7 +45,7 @@ export class UpdateProductCommand {
       warranty?: string;
       tags?: string[];
       metadata?: Record<string, any>;
-    }
+    },
   ) {}
 }
 
@@ -71,7 +71,7 @@ export class UpdateProductUseCase {
 
   async execute(command: UpdateProductCommand): Promise<UpdateProductResponse> {
     const product = await this.productRepository.findById(command.productId);
-    
+
     if (!product) {
       throw new Error('Product not found');
     }
@@ -79,13 +79,17 @@ export class UpdateProductUseCase {
     const updatedFields: string[] = [];
 
     // Update basic info
-    if (command.updates.name || command.updates.description !== undefined || 
-        command.updates.shortDescription !== undefined || command.updates.sku !== undefined) {
+    if (
+      command.updates.name ||
+      command.updates.description !== undefined ||
+      command.updates.shortDescription !== undefined ||
+      command.updates.sku !== undefined
+    ) {
       product.updateBasicInfo({
         name: command.updates.name,
         description: command.updates.description,
         shortDescription: command.updates.shortDescription,
-        sku: command.updates.sku
+        sku: command.updates.sku,
       });
       if (command.updates.name) updatedFields.push('name');
       if (command.updates.description !== undefined) updatedFields.push('description');
@@ -104,7 +108,7 @@ export class UpdateProductUseCase {
       product.updatePrice(
         command.updates.basePrice,
         command.updates.salePrice ?? product.price.salePrice ?? undefined,
-        command.updates.cost ?? product.price.cost ?? undefined
+        command.updates.cost ?? product.price.cost ?? undefined,
       );
       updatedFields.push('price');
     } else if (command.updates.salePrice !== undefined) {
@@ -113,15 +117,19 @@ export class UpdateProductUseCase {
     }
 
     // Update dimensions
-    if (command.updates.weight !== undefined || command.updates.length !== undefined ||
-        command.updates.width !== undefined || command.updates.height !== undefined) {
+    if (
+      command.updates.weight !== undefined ||
+      command.updates.length !== undefined ||
+      command.updates.width !== undefined ||
+      command.updates.height !== undefined
+    ) {
       product.updateDimensions({
         weight: command.updates.weight,
         weightUnit: command.updates.weightUnit,
         length: command.updates.length,
         width: command.updates.width,
         height: command.updates.height,
-        dimensionUnit: command.updates.dimensionUnit
+        dimensionUnit: command.updates.dimensionUnit,
       });
       updatedFields.push('dimensions');
     }
@@ -149,12 +157,15 @@ export class UpdateProductUseCase {
     }
 
     // Update SEO
-    if (command.updates.metaTitle !== undefined || command.updates.metaDescription !== undefined ||
-        command.updates.metaKeywords !== undefined) {
+    if (
+      command.updates.metaTitle !== undefined ||
+      command.updates.metaDescription !== undefined ||
+      command.updates.metaKeywords !== undefined
+    ) {
       product.updateSeo({
         metaTitle: command.updates.metaTitle,
         metaDescription: command.updates.metaDescription,
-        metaKeywords: command.updates.metaKeywords
+        metaKeywords: command.updates.metaKeywords,
       });
       updatedFields.push('seo');
     }
@@ -183,7 +194,7 @@ export class UpdateProductUseCase {
     // Emit event
     eventBus.emit('product.updated', {
       productId: product.productId,
-      updatedFields
+      updatedFields,
     });
 
     return {
@@ -192,7 +203,7 @@ export class UpdateProductUseCase {
       slug: product.slug,
       status: product.status,
       updatedFields,
-      updatedAt: product.updatedAt.toISOString()
+      updatedAt: product.updatedAt.toISOString(),
     };
   }
 }

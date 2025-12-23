@@ -39,7 +39,7 @@ exports.up = function (knex) {
     t.jsonb('storeCategories');
     t.jsonb('customPages');
     t.jsonb('customFields');
-    
+
     t.index('name');
     t.index('isActive');
     t.index('isVerified');

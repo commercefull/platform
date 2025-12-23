@@ -1,6 +1,6 @@
 /**
  * MarkDelivered Use Case
- * 
+ *
  * Marks a fulfillment as delivered.
  */
 

@@ -27,7 +27,7 @@ export class CreateBusinessCommand {
       isActive?: boolean;
       settings?: any;
       metadata?: any;
-    }
+    },
   ) {}
 }
 
@@ -52,7 +52,7 @@ export interface CreateBusinessResponse {
 export class CreateBusinessUseCase {
   constructor(
     private readonly businessRepository: BusinessRepository,
-    private readonly systemConfigRepository: SystemConfigurationRepository
+    private readonly systemConfigRepository: SystemConfigurationRepository,
   ) {}
 
   async execute(command: CreateBusinessCommand): Promise<CreateBusinessResponse> {
@@ -107,7 +107,7 @@ export class CreateBusinessUseCase {
       defaultCurrency: command.businessData.settings?.defaultCurrency,
       defaultLanguage: command.businessData.settings?.defaultLanguage,
       timezone: command.businessData.settings?.timezone,
-      metadata: command.businessData.metadata
+      metadata: command.businessData.metadata,
     });
 
     // Save business
@@ -120,7 +120,7 @@ export class CreateBusinessUseCase {
       businessType: savedBusiness.businessType,
       domain: savedBusiness.domain,
       isActive: savedBusiness.isActive,
-      createdAt: savedBusiness.createdAt.toISOString()
+      createdAt: savedBusiness.createdAt.toISOString(),
     };
   }
 

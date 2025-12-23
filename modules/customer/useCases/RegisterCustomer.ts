@@ -21,7 +21,7 @@ export class RegisterCustomerCommand {
     public readonly dateOfBirth?: Date,
     public readonly preferredCurrency?: string,
     public readonly preferredLanguage?: string,
-    public readonly metadata?: Record<string, any>
+    public readonly metadata?: Record<string, any>,
   ) {}
 }
 
@@ -78,7 +78,7 @@ export class RegisterCustomerUseCase {
       dateOfBirth: command.dateOfBirth,
       preferredCurrency: command.preferredCurrency,
       preferredLanguage: command.preferredLanguage,
-      metadata: command.metadata
+      metadata: command.metadata,
     });
 
     // Save customer
@@ -94,7 +94,7 @@ export class RegisterCustomerUseCase {
       customerId: customer.customerId,
       email: customer.email,
       firstName: customer.firstName,
-      lastName: customer.lastName
+      lastName: customer.lastName,
     });
 
     return {
@@ -103,7 +103,7 @@ export class RegisterCustomerUseCase {
       firstName: customer.firstName,
       lastName: customer.lastName,
       isVerified: customer.isVerified,
-      createdAt: customer.createdAt.toISOString()
+      createdAt: customer.createdAt.toISOString(),
     };
   }
 }

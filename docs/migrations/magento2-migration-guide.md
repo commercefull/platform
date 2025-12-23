@@ -15,6 +15,7 @@ This guide provides detailed instructions for migrating from Magento 2 to Commer
 ## Magento 2 Data Architecture
 
 ### Core Tables Structure
+
 - `catalog_product_entity` - Main product table
 - `catalog_product_entity_*` - EAV attribute tables
 - `eav_attribute` - Attribute definitions
@@ -23,6 +24,7 @@ This guide provides detailed instructions for migrating from Magento 2 to Commer
 - `sales_order_item` - Order line items
 
 ### Key Challenges
+
 - EAV (Entity-Attribute-Value) model complexity
 - Multi-store configurations
 - Complex product types (configurable, bundle, grouped)
@@ -98,27 +100,33 @@ class MagentoExtractor {
       database: config.database,
       charset: 'utf8',
       acquireTimeout: 60000,
-      timeout: 60000
+      timeout: 60000,
     });
   }
 
   async getEavValue(entityId, attributeCode, entityType = 'catalog_product') {
-    const [attrRows] = await this.pool.execute(`
+    const [attrRows] = await this.pool.execute(
+      `
       SELECT ea.attribute_id, ea.backend_type
       FROM eav_attribute ea
       JOIN eav_entity_type et ON ea.entity_type_id = et.entity_type_id
       WHERE ea.attribute_code = ? AND et.entity_type_code = ?
-    `, [attributeCode, entityType]);
+    `,
+      [attributeCode, entityType],
+    );
 
     if (attrRows.length === 0) return null;
 
     const { attribute_id, backend_type } = attrRows[0];
     const tableName = `catalog_product_entity_${backend_type}`;
 
-    const [valueRows] = await this.pool.execute(`
+    const [valueRows] = await this.pool.execute(
+      `
       SELECT value FROM ${tableName}
       WHERE entity_id = ? AND attribute_id = ?
-    `, [entityId, attribute_id]);
+    `,
+      [entityId, attribute_id],
+    );
 
     return valueRows.length > 0 ? valueRows[0].value : null;
   }
@@ -128,15 +136,19 @@ class MagentoExtractor {
 ### 2. Data Assessment
 
 ```javascript
-const assessMagentoData = async (db) => {
+const assessMagentoData = async db => {
   const assessment = {
-    products: await db.query('SELECT COUNT(*) as count FROM catalog_product_entity WHERE type_id IN ("simple", "configurable", "bundle", "grouped")'),
+    products: await db.query(
+      'SELECT COUNT(*) as count FROM catalog_product_entity WHERE type_id IN ("simple", "configurable", "bundle", "grouped")',
+    ),
     categories: await db.query('SELECT COUNT(*) as count FROM catalog_category_entity WHERE level > 1'),
     customers: await db.query('SELECT COUNT(*) as count FROM customer_entity'),
     orders: await db.query('SELECT COUNT(*) as count FROM sales_order'),
-    attributes: await db.query('SELECT COUNT(*) as count FROM eav_attribute WHERE entity_type_id = (SELECT entity_type_id FROM eav_entity_type WHERE entity_type_code = "catalog_product")'),
+    attributes: await db.query(
+      'SELECT COUNT(*) as count FROM eav_attribute WHERE entity_type_id = (SELECT entity_type_id FROM eav_entity_type WHERE entity_type_code = "catalog_product")',
+    ),
     stores: await db.query('SELECT COUNT(*) as count FROM store WHERE store_id > 0'),
-    websites: await db.query('SELECT COUNT(*) as count FROM store_website')
+    websites: await db.query('SELECT COUNT(*) as count FROM store_website'),
   };
 
   // Get product type breakdown
@@ -184,7 +196,7 @@ class MagentoAttributeMigrator {
       if (!attributeSets[attr.attribute_set_id]) {
         attributeSets[attr.attribute_set_id] = {
           name: attr.attribute_set_name,
-          attributes: []
+          attributes: [],
         };
       }
       attributeSets[attr.attribute_set_id].attributes.push(attr);
@@ -199,7 +211,7 @@ class MagentoAttributeMigrator {
         description: `Magento attribute set: ${setData.name}`,
         position: 1,
         isComparable: true,
-        isGlobal: true
+        isGlobal: true,
       });
 
       // Create attributes in this group
@@ -221,7 +233,7 @@ class MagentoAttributeMigrator {
           isUsedInProductListing: attr.used_in_product_listing === 1,
           useForVariants: this.isVariantAttribute(attr.attribute_code),
           useForConfigurations: false,
-          position: attr.sort_order || 0
+          position: attr.sort_order || 0,
         });
 
         // Store mapping for later use
@@ -232,15 +244,15 @@ class MagentoAttributeMigrator {
 
   mapAttributeType(frontendInput, backendType) {
     const typeMapping = {
-      'text': 'text',
-      'textarea': 'text',
-      'select': 'select',
-      'multiselect': 'select',
-      'boolean': 'boolean',
-      'price': 'number',
-      'weight': 'number',
-      'date': 'date',
-      'datetime': 'datetime'
+      text: 'text',
+      textarea: 'text',
+      select: 'select',
+      multiselect: 'select',
+      boolean: 'boolean',
+      price: 'number',
+      weight: 'number',
+      date: 'date',
+      datetime: 'datetime',
     };
 
     if (backendType === 'decimal') return 'number';
@@ -251,15 +263,15 @@ class MagentoAttributeMigrator {
 
   mapInputType(frontendInput) {
     const inputMapping = {
-      'text': 'text',
-      'textarea': 'textarea',
-      'select': 'select',
-      'multiselect': 'multiselect',
-      'boolean': 'checkbox',
-      'price': 'number',
-      'weight': 'number',
-      'date': 'date',
-      'datetime': 'datetime'
+      text: 'text',
+      textarea: 'textarea',
+      select: 'select',
+      multiselect: 'multiselect',
+      boolean: 'checkbox',
+      price: 'number',
+      weight: 'number',
+      date: 'date',
+      datetime: 'datetime',
     };
 
     return inputMapping[frontendInput] || 'text';
@@ -304,7 +316,7 @@ class MagentoCategoryMigrator {
         isActive: true,
         position: cat.position,
         metaTitle: cat.name,
-        metaDescription: cat.name
+        metaDescription: cat.name,
       });
 
       categoryMap.set(cat.entity_id, category.id);
@@ -330,7 +342,8 @@ class MagentoCategoryMigrator {
 ```javascript
 class MagentoProductExtractor {
   async extractProducts(db, limit = 1000, offset = 0) {
-    const products = await db.query(`
+    const products = await db.query(
+      `
       SELECT cpe.entity_id, cpe.sku, cpe.type_id, cpe.attribute_set_id,
              cpe.created_at, cpe.updated_at,
              cps.stock_status, cps.qty as stock_quantity,
@@ -357,7 +370,9 @@ class MagentoProductExtractor {
       WHERE cpe.type_id IN ('simple', 'configurable', 'bundle', 'grouped')
       ORDER BY cpe.entity_id
       LIMIT ? OFFSET ?
-    `, [limit, offset]);
+    `,
+      [limit, offset],
+    );
 
     const enrichedProducts = [];
 
@@ -365,15 +380,14 @@ class MagentoProductExtractor {
       const categories = await this.extractProductCategories(db, product.entity_id);
       const attributes = await this.extractProductAttributes(db, product.entity_id);
       const images = await this.extractProductImages(db, product.entity_id);
-      const variants = product.type_id === 'configurable' ?
-        await this.extractProductVariants(db, product.entity_id) : [];
+      const variants = product.type_id === 'configurable' ? await this.extractProductVariants(db, product.entity_id) : [];
 
       enrichedProducts.push({
         ...product,
         categories,
         attributes,
         images,
-        variants
+        variants,
       });
     }
 
@@ -381,7 +395,8 @@ class MagentoProductExtractor {
   }
 
   async extractProductCategories(db, productId) {
-    return await db.query(`
+    return await db.query(
+      `
       SELECT cc.entity_id, cc.parent_id, ccev.value as name
       FROM catalog_category_product ccp
       JOIN catalog_category_entity cc ON ccp.category_id = cc.entity_id
@@ -389,12 +404,15 @@ class MagentoProductExtractor {
         AND ccev.attribute_id = (SELECT attribute_id FROM eav_attribute
                                 WHERE attribute_code = 'name' AND entity_type_id = 3)
       WHERE ccp.product_id = ?
-    `, [productId]);
+    `,
+      [productId],
+    );
   }
 
   async extractProductAttributes(db, productId) {
     // Get all EAV attributes for this product
-    const attributes = await db.query(`
+    const attributes = await db.query(
+      `
       SELECT ea.attribute_code, ea.frontend_label,
              CASE ea.backend_type
                WHEN 'varchar' THEN cpev.value
@@ -413,13 +431,16 @@ class MagentoProductExtractor {
       AND ea.is_user_defined = 1
       AND (cpev.value IS NOT NULL OR cpet.value IS NOT NULL OR cped.value IS NOT NULL
            OR cpei.value IS NOT NULL OR cpedt.value IS NOT NULL)
-    `, [productId, productId, productId, productId, productId]);
+    `,
+      [productId, productId, productId, productId, productId],
+    );
 
     return attributes.filter(attr => attr.value !== null);
   }
 
   async extractProductImages(db, productId) {
-    return await db.query(`
+    return await db.query(
+      `
       SELECT cpg.value as url, cpg.label, cpg.position,
              cpev.value as alt_text
       FROM catalog_product_entity_media_gallery cpg
@@ -430,12 +451,15 @@ class MagentoProductExtractor {
                                 WHERE attribute_code = 'media_gallery' AND entity_type_id = 4)
       WHERE cpgvte.entity_id = ?
       ORDER BY cpg.position
-    `, [productId]);
+    `,
+      [productId],
+    );
   }
 
   async extractProductVariants(db, configurableProductId) {
     // Get simple products associated with this configurable
-    const variants = await db.query(`
+    const variants = await db.query(
+      `
       SELECT cpe.entity_id, cpe.sku, cpr.parent_id,
              GROUP_CONCAT(DISTINCT cpev.value ORDER BY ea.attribute_code) as variant_options,
              cps.qty as stock_quantity, cisp.final_price as price
@@ -450,7 +474,9 @@ class MagentoProductExtractor {
         AND cpev.attribute_id = cpsa.attribute_id
       WHERE cpr.parent_id = ?
       GROUP BY cpe.entity_id, cpe.sku, cpr.parent_id, cps.qty, cisp.final_price
-    `, [configurableProductId]);
+    `,
+      [configurableProductId],
+    );
 
     return variants;
   }
@@ -474,8 +500,7 @@ class MagentoProductTransformer {
       visibility: 'public',
       price: parseFloat(magentoProduct.price || 0),
       regularPrice: parseFloat(magentoProduct.final_price || magentoProduct.price || 0),
-      salePrice: magentoProduct.final_price !== magentoProduct.price ?
-        parseFloat(magentoProduct.final_price) : null,
+      salePrice: magentoProduct.final_price !== magentoProduct.price ? parseFloat(magentoProduct.final_price) : null,
       cost: null, // Would need additional attribute
       weight: parseFloat(magentoProduct.weight || 0),
       dimensions: null, // Would need additional attributes
@@ -491,33 +516,35 @@ class MagentoProductTransformer {
       seo: {
         title: magentoProduct.name,
         description: magentoProduct.short_description,
-        focusKeyword: magentoProduct.name.split(' ')[0]
+        focusKeyword: magentoProduct.name.split(' ')[0],
       },
       createdAt: magentoProduct.created_at,
-      updatedAt: magentoProduct.updated_at
+      updatedAt: magentoProduct.updated_at,
     };
   }
 
   mapProductType(magentoType) {
     const typeMapping = {
-      'simple': 'simple',
-      'configurable': 'configurable',
-      'bundle': 'bundle',
-      'grouped': 'grouped',
-      'virtual': 'virtual',
-      'downloadable': 'downloadable'
+      simple: 'simple',
+      configurable: 'configurable',
+      bundle: 'bundle',
+      grouped: 'grouped',
+      virtual: 'virtual',
+      downloadable: 'downloadable',
     };
     return typeMapping[magentoType] || 'simple';
   }
 
   transformAttributes(attributes, attributeMap) {
-    return attributes.map(attr => ({
-      attributeId: attributeMap.get(attr.attribute_code),
-      name: attr.frontend_label || attr.attribute_code,
-      value: attr.value,
-      isVisible: true,
-      isForVariations: this.isVariationAttribute(attr.attribute_code)
-    })).filter(attr => attr.attributeId);
+    return attributes
+      .map(attr => ({
+        attributeId: attributeMap.get(attr.attribute_code),
+        name: attr.frontend_label || attr.attribute_code,
+        value: attr.value,
+        isVisible: true,
+        isForVariations: this.isVariationAttribute(attr.attribute_code),
+      }))
+      .filter(attr => attr.attributeId);
   }
 
   transformImages(images) {
@@ -525,7 +552,7 @@ class MagentoProductTransformer {
       url: img.url,
       alt: img.alt_text || img.label || '',
       position: parseInt(img.position || 0),
-      isMain: parseInt(img.position || 0) === 1
+      isMain: parseInt(img.position || 0) === 1,
     }));
   }
 
@@ -536,7 +563,7 @@ class MagentoProductTransformer {
       price: parseFloat(variant.price || 0),
       stockQuantity: parseInt(variant.stock_quantity || 0),
       attributes: this.parseVariantOptions(variant.variant_options),
-      isActive: true
+      isActive: true,
     }));
   }
 
@@ -545,7 +572,7 @@ class MagentoProductTransformer {
     // Parse the GROUP_CONCAT result
     return optionsString.split(',').map(option => ({
       name: 'variant_option',
-      value: option.trim()
+      value: option.trim(),
     }));
   }
 
@@ -572,7 +599,8 @@ class MagentoProductTransformer {
 ```javascript
 class MagentoCustomerExtractor {
   async extractCustomers(db, limit = 1000, offset = 0) {
-    const customers = await db.query(`
+    const customers = await db.query(
+      `
       SELECT ce.entity_id, ce.email, ce.created_at, ce.updated_at,
              cev.value as firstname, cel.value as lastname,
              cedob.value as dob, ceg.value as gender,
@@ -592,7 +620,9 @@ class MagentoCustomerExtractor {
                                WHERE attribute_code = 'gender' AND entity_type_id = 1)
       ORDER BY ce.entity_id
       LIMIT ? OFFSET ?
-    `, [limit, offset]);
+    `,
+      [limit, offset],
+    );
 
     const enrichedCustomers = [];
 
@@ -604,7 +634,7 @@ class MagentoCustomerExtractor {
         ...customer,
         addresses,
         orderCount: orders.length,
-        totalSpent: orders.reduce((sum, order) => sum + parseFloat(order.grand_total), 0)
+        totalSpent: orders.reduce((sum, order) => sum + parseFloat(order.grand_total), 0),
       });
     }
 
@@ -612,7 +642,8 @@ class MagentoCustomerExtractor {
   }
 
   async extractCustomerAddresses(db, customerId) {
-    const addresses = await db.query(`
+    const addresses = await db.query(
+      `
       SELECT ca.entity_id, ca.city, ca.country_id, ca.region, ca.postcode,
              ca.street, ca.telephone, ca.fax, ca.is_default_billing, ca.is_default_shipping,
              cavf.value as firstname, cavl.value as lastname, cavc.value as company
@@ -627,7 +658,9 @@ class MagentoCustomerExtractor {
         AND cavc.attribute_id = (SELECT attribute_id FROM eav_attribute
                                 WHERE attribute_code = 'company' AND entity_type_id = 2)
       WHERE ca.parent_id = ?
-    `, [customerId]);
+    `,
+      [customerId],
+    );
 
     return addresses.map(addr => ({
       id: addr.entity_id,
@@ -641,18 +674,21 @@ class MagentoCustomerExtractor {
       country: addr.country_id,
       telephone: addr.telephone,
       isDefaultBilling: addr.is_default_billing === '1',
-      isDefaultShipping: addr.is_default_shipping === '1'
+      isDefaultShipping: addr.is_default_shipping === '1',
     }));
   }
 
   async extractCustomerOrders(db, customerId) {
-    return await db.query(`
+    return await db.query(
+      `
       SELECT entity_id, increment_id, created_at, grand_total, status
       FROM sales_order
       WHERE customer_id = ?
       ORDER BY created_at DESC
       LIMIT 10
-    `, [customerId]);
+    `,
+      [customerId],
+    );
   }
 }
 ```
@@ -684,15 +720,15 @@ class MagentoCustomerTransformer {
       lifetimeValue: magentoCustomer.totalSpent,
       orderCount: magentoCustomer.orderCount,
       createdAt: magentoCustomer.created_at,
-      updatedAt: magentoCustomer.updated_at
+      updatedAt: magentoCustomer.updated_at,
     };
   }
 
   mapGender(genderValue) {
     const genderMap = {
-      '1': 'Male',
-      '2': 'Female',
-      '3': 'Not Specified'
+      1: 'Male',
+      2: 'Female',
+      3: 'Not Specified',
     };
     return genderMap[genderValue] || null;
   }
@@ -707,7 +743,7 @@ class MagentoCustomerTransformer {
       city: magentoAddress.city,
       state: magentoAddress.region,
       postcode: magentoAddress.postcode,
-      country: magentoAddress.country
+      country: magentoAddress.country,
     };
   }
 }
@@ -724,23 +760,21 @@ async function runMagentoMigration() {
       host: process.env.MAGENTO_DB_HOST,
       database: process.env.MAGENTO_DB_NAME,
       username: process.env.MAGENTO_DB_USER,
-      password: process.env.MAGENTO_DB_PASSWORD
+      password: process.env.MAGENTO_DB_PASSWORD,
     },
     commercefull: {
       baseURL: process.env.COMMERCEFULL_URL,
-      apiKey: process.env.COMMERCEFULL_API_KEY
+      apiKey: process.env.COMMERCEFULL_API_KEY,
     },
     options: {
       batchSize: 100,
       concurrency: 3,
       continueOnError: true,
-      tablePrefix: '' // Magento 2 default table prefix
-    }
+      tablePrefix: '', // Magento 2 default table prefix
+    },
   });
 
   try {
-    
-
     // Phase 1: Foundation data
     await runner.migrateAttributes();
     await runner.migrateCategories();
@@ -758,11 +792,8 @@ async function runMagentoMigration() {
     // Phase 5: Content
     await runner.migrateContent();
 
-    
     console.log(runner.monitor.generateReport());
-
   } catch (error) {
-    
     console.log('Partial results:', runner.monitor.generateReport());
   }
 }
@@ -790,7 +821,7 @@ class EavOptimizer {
       this.attributeMap.set(`${attr.entity_type_code}.${attr.attribute_code}`, {
         id: attr.attribute_id,
         type: attr.backend_type,
-        table: `catalog_product_entity_${attr.backend_type}`
+        table: `catalog_product_entity_${attr.backend_type}`,
       });
     }
 
@@ -808,12 +839,15 @@ class EavOptimizer {
       const attrInfo = this.attributeMap.get(`${entityType}.${attrCode}`);
       if (!attrInfo) continue;
 
-      const values = await db.query(`
+      const values = await db.query(
+        `
         SELECT entity_id, value
         FROM ${attrInfo.table}
         WHERE entity_id IN (${placeholders})
         AND attribute_id = ?
-      `, [...entityIds, attrInfo.id]);
+      `,
+        [...entityIds, attrInfo.id],
+      );
 
       for (const value of values) {
         if (!results[value.entity_id]) results[value.entity_id] = {};
@@ -839,7 +873,7 @@ const MagentoValidation = {
     return {
       magento: magentoCount[0].count,
       commercefull: cfCount,
-      difference: Math.abs(magentoCount[0].count - cfCount)
+      difference: Math.abs(magentoCount[0].count - cfCount),
     };
   },
 
@@ -852,13 +886,11 @@ const MagentoValidation = {
     `);
 
     const cfAttrs = await cfApi.productAttributes.list();
-    const criticalAttrs = cfAttrs.filter(attr =>
-      ['name', 'price', 'sku', 'status'].includes(attr.code)
-    );
+    const criticalAttrs = cfAttrs.filter(attr => ['name', 'price', 'sku', 'status'].includes(attr.code));
 
     return {
       magento: magentoAttrs[0].count,
-      commercefull: criticalAttrs.length
+      commercefull: criticalAttrs.length,
     };
   },
 
@@ -871,9 +903,9 @@ const MagentoValidation = {
 
     return {
       magento: magentoConfigurables[0].count,
-      commercefull: cfConfigurables.length
+      commercefull: cfConfigurables.length,
     };
-  }
+  },
 };
 ```
 
@@ -904,11 +936,14 @@ class EavQueryOptimizer {
   }
 
   async getProductsWithAttributes(db, limit, offset) {
-    return await db.query(`
+    return await db.query(
+      `
       SELECT * FROM product_attributes_temp
       ORDER BY entity_id
       LIMIT ? OFFSET ?
-    `, [limit, offset]);
+    `,
+      [limit, offset],
+    );
   }
 }
 ```

@@ -4,24 +4,24 @@ import axios, { AxiosInstance } from 'axios';
 export const SEEDED_SUPPLIER_IDS = {
   ACME_CORP: '01938000-0000-7000-8000-000000000001',
   GLOBAL_PARTS: '01938000-0000-7000-8000-000000000002',
-  QUALITY_GOODS: '01938000-0000-7000-8000-000000000003'
+  QUALITY_GOODS: '01938000-0000-7000-8000-000000000003',
 };
 
 export const SEEDED_SUPPLIER_ADDRESS_IDS = {
   ACME_HQ: '01938001-0000-7000-8000-000000000001',
   ACME_WAREHOUSE: '01938001-0000-7000-8000-000000000002',
-  GLOBAL_HQ: '01938001-0000-7000-8000-000000000003'
+  GLOBAL_HQ: '01938001-0000-7000-8000-000000000003',
 };
 
 export const SEEDED_SUPPLIER_PRODUCT_IDS = {
   WIDGET_A: '01938002-0000-7000-8000-000000000001',
   WIDGET_B: '01938002-0000-7000-8000-000000000002',
-  GADGET_X: '01938002-0000-7000-8000-000000000003'
+  GADGET_X: '01938002-0000-7000-8000-000000000003',
 };
 
 export const SEEDED_PURCHASE_ORDER_IDS = {
   PO_001: '01938003-0000-7000-8000-000000000001',
-  PO_002: '01938003-0000-7000-8000-000000000002'
+  PO_002: '01938003-0000-7000-8000-000000000002',
 };
 
 // Warehouse ID from seeds/20240805002100_seedWarehouseTestData.js
@@ -29,7 +29,7 @@ export const SEEDED_WAREHOUSE_ID = '0193b000-0000-7000-8000-000000000001';
 
 const adminCredentials = {
   email: 'merchant@example.com',
-  password: 'password123'
+  password: 'password123',
 };
 
 export function createTestClient(): AxiosInstance {
@@ -37,10 +37,10 @@ export function createTestClient(): AxiosInstance {
     baseURL: process.env.API_URL || 'http://localhost:3000',
     validateStatus: () => true,
     headers: {
-      'Accept': 'application/json',
+      Accept: 'application/json',
       'Content-Type': 'application/json',
-      'X-Test-Request': 'true'
-    }
+      'X-Test-Request': 'true',
+    },
   });
 }
 
@@ -71,11 +71,11 @@ export function createTestSupplier(overrides: Partial<any> = {}) {
     paymentTerms: 'Net 30',
     paymentMethod: 'wire_transfer',
     currency: 'USD',
-    minOrderValue: 50.00,
+    minOrderValue: 50.0,
     leadTime: 7,
     categories: ['test'],
     tags: ['integration-test'],
-    ...overrides
+    ...overrides,
   };
 }
 
@@ -94,10 +94,10 @@ export function createTestPurchaseOrder(supplierId: string, warehouseId: string,
         sku: 'TEST-SKU-001',
         name: 'Test Product',
         quantity: 10,
-        unitCost: 9.99
-      }
+        unitCost: 9.99,
+      },
     ],
-    ...overrides
+    ...overrides,
   };
 }
 
@@ -113,14 +113,14 @@ export function createTestSupplierAddress(supplierId: string, overrides: Partial
     addressType: 'headquarters',
     isDefault: false,
     isActive: true,
-    ...overrides
+    ...overrides,
   };
 }
 
 export async function cleanupSupplierTests(
   client: AxiosInstance,
   adminToken: string,
-  resources: { supplierIds?: string[]; poIds?: string[] } = {}
+  resources: { supplierIds?: string[]; poIds?: string[] } = {},
 ) {
   const headers = { Authorization: `Bearer ${adminToken}` };
 

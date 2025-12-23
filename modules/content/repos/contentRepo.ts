@@ -1,13 +1,13 @@
-import { queryOne, query } from "../../../libs/db";
-import { Table } from "../../../libs/db/types";
-import { unixTimestamp } from "../../../libs/date";
+import { queryOne, query } from '../../../libs/db';
+import { Table } from '../../../libs/db/types';
+import { unixTimestamp } from '../../../libs/date';
 
 // Table constants
 const TABLES = {
   CONTENT_TYPE: Table.ContentType,
   CONTENT_PAGE: Table.ContentPage,
   CONTENT_BLOCK: Table.ContentBlock,
-  CONTENT_TEMPLATE: Table.ContentTemplate
+  CONTENT_TEMPLATE: Table.ContentTemplate,
 };
 
 // Content Type defines the structure of content blocks
@@ -133,15 +133,15 @@ export class ContentRepo {
   async findAllContentTypes(isActive?: boolean, limit: number = 50, offset: number = 0): Promise<ContentType[]> {
     let sql = 'SELECT * FROM "contentType"';
     const params: any[] = [];
-    
+
     if (isActive !== undefined) {
       sql += ' WHERE "isActive" = $1';
       params.push(isActive);
     }
-    
+
     sql += ' ORDER BY "name" ASC LIMIT $' + (params.length + 1) + ' OFFSET $' + (params.length + 2);
     params.push(limit, offset);
-    
+
     const results = await query<any[]>(sql, params);
     return addIdArray<ContentType>(results || [], 'contentTypeId');
   }
@@ -162,9 +162,9 @@ export class ContentRepo {
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) 
       RETURNING *`,
       [
-        params.name, 
-        params.slug, 
-        params.description || null, 
+        params.name,
+        params.slug,
+        params.description || null,
         params.icon || null,
         params.allowedBlocks || null,
         params.defaultTemplate || null,
@@ -172,9 +172,9 @@ export class ContentRepo {
         params.metaFields ? JSON.stringify(params.metaFields) : null,
         params.isSystem || false,
         params.isActive !== undefined ? params.isActive : true,
-        now, 
-        now
-      ]
+        now,
+        now,
+      ],
     );
 
     if (!result) {
@@ -187,7 +187,7 @@ export class ContentRepo {
   async updateContentType(id: string, params: ContentTypeUpdateParams): Promise<ContentType> {
     const now = unixTimestamp();
     const currentType = await this.findContentTypeById(id);
-    
+
     if (!currentType) {
       throw new Error(`Content type with ID ${id} not found`);
     }
@@ -259,20 +259,20 @@ export class ContentRepo {
 
   async deleteContentType(id: string): Promise<boolean> {
     // Check if the content type is being used by any content blocks
-    const blocksUsingType = await query<Array<{count: string}>>(
-      `SELECT COUNT(*) as count FROM "${TABLES.CONTENT_BLOCK}" WHERE "contentTypeId" = $1`, 
-      [id]
+    const blocksUsingType = await query<Array<{ count: string }>>(
+      `SELECT COUNT(*) as count FROM "${TABLES.CONTENT_BLOCK}" WHERE "contentTypeId" = $1`,
+      [id],
     );
-    
+
     if (blocksUsingType && blocksUsingType.length > 0 && parseInt(blocksUsingType[0].count) > 0) {
       throw new Error(`Cannot delete content type as it is being used by ${blocksUsingType[0].count} content blocks`);
     }
-    
+
     const result = await queryOne<{ id: string }>(
       `DELETE FROM "${TABLES.CONTENT_TYPE}" WHERE "contentTypeId" = $1 RETURNING "contentTypeId" as id`,
-      [id]
+      [id],
     );
-    
+
     return !!result;
   }
 
@@ -293,40 +293,40 @@ export class ContentRepo {
   }
 
   async findAllPages(
-    status?: ContentPage['status'], 
-    contentTypeId?: string, 
-    limit: number = 50, 
-    offset: number = 0
+    status?: ContentPage['status'],
+    contentTypeId?: string,
+    limit: number = 50,
+    offset: number = 0,
   ): Promise<ContentPage[]> {
     let sql = `SELECT * FROM "${TABLES.CONTENT_PAGE}"`;
     const whereConditions: string[] = [];
     const params: any[] = [];
     let paramIndex = 1;
-    
+
     if (status) {
       whereConditions.push(`"status" = $${paramIndex++}`);
       params.push(status);
     }
-    
+
     if (contentTypeId) {
       whereConditions.push(`"contentTypeId" = $${paramIndex++}`);
       params.push(contentTypeId);
     }
-    
+
     if (whereConditions.length > 0) {
       sql += ' WHERE ' + whereConditions.join(' AND ');
     }
-    
-    sql += ' ORDER BY "title" ASC LIMIT $' + (paramIndex++) + ' OFFSET $' + (paramIndex++);
+
+    sql += ' ORDER BY "title" ASC LIMIT $' + paramIndex++ + ' OFFSET $' + paramIndex++;
     params.push(limit, offset);
-    
+
     const results = await query<any[]>(sql, params);
     return addIdArray<ContentPage>(results || [], 'contentPageId');
   }
 
   async createPage(params: ContentPageCreateParams): Promise<ContentPage> {
     const now = unixTimestamp();
-    
+
     // If setting as home page, clear any existing home page
     if (params.isHomePage) {
       await query(`UPDATE "${TABLES.CONTENT_PAGE}" SET "isHomePage" = false WHERE "isHomePage" = true`);
@@ -348,7 +348,7 @@ export class ContentRepo {
       if (value !== undefined && key !== 'id' && key !== 'createdAt' && key !== 'updatedAt') {
         fieldNames.push(`"${key}"`);
         placeholders.push(`$${paramIndex++}`);
-        
+
         // Special handling for JSON fields
         if (key === 'customFields') {
           fieldValues.push(JSON.stringify(value));
@@ -381,7 +381,7 @@ export class ContentRepo {
   async updatePage(id: string, params: ContentPageUpdateParams): Promise<ContentPage> {
     const now = unixTimestamp();
     const currentPage = await this.findPageById(id);
-    
+
     if (!currentPage) {
       throw new Error(`Page with ID ${id} not found`);
     }
@@ -407,7 +407,7 @@ export class ContentRepo {
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && key !== 'id' && key !== 'createdAt' && key !== 'updatedAt') {
         updateFields.push(`"${key}" = $${paramIndex++}`);
-        
+
         // Special handling for JSON fields
         if (key === 'customFields') {
           values.push(JSON.stringify(value));
@@ -443,31 +443,31 @@ export class ContentRepo {
   async deletePage(id: string): Promise<boolean> {
     // Delete all content blocks associated with the page first
     await query(`DELETE FROM "${TABLES.CONTENT_BLOCK}" WHERE "pageId" = $1`, [id]);
-    
+
     // Now delete the page
     const result = await queryOne<{ id: string }>(
       `DELETE FROM "${TABLES.CONTENT_PAGE}" WHERE "contentPageId" = $1 RETURNING "contentPageId" as id`,
-      [id]
+      [id],
     );
-    
+
     return !!result;
   }
 
   async publishPage(id: string): Promise<ContentPage> {
     const now = unixTimestamp();
-    
+
     const result = await queryOne<any>(
       `UPDATE "${TABLES.CONTENT_PAGE}" 
        SET "status" = 'published', "publishedAt" = $1, "updatedAt" = $1 
        WHERE "contentPageId" = $2 
        RETURNING *`,
-      [now, id]
+      [now, id],
     );
-    
+
     if (!result) {
       throw new Error(`Failed to publish page with ID ${id}`);
     }
-    
+
     return addId<ContentPage>(result, 'contentPageId');
   }
 
@@ -478,23 +478,20 @@ export class ContentRepo {
   }
 
   async findBlocksByPageId(pageId: string): Promise<ContentBlock[]> {
-    const results = await query<any[]>(
-      'SELECT * FROM "${TABLES.CONTENT_BLOCK}" WHERE "pageId" = $1 ORDER BY "order" ASC',
-      [pageId]
-    );
-    
+    const results = await query<any[]>('SELECT * FROM "${TABLES.CONTENT_BLOCK}" WHERE "pageId" = $1 ORDER BY "order" ASC', [pageId]);
+
     return addIdArray<ContentBlock>(results || [], 'contentBlockId');
   }
 
   async createBlock(params: ContentBlockCreateParams): Promise<ContentBlock> {
     const now = unixTimestamp();
-    
+
     // Validate that page exists
     const page = await this.findPageById(params.pageId);
     if (!page) {
       throw new Error(`Page with ID ${params.pageId} not found`);
     }
-    
+
     // Validate that content type exists
     const contentType = await this.findContentTypeById(params.contentTypeId);
     if (!contentType) {
@@ -506,16 +503,7 @@ export class ContentRepo {
       ("pageId", "contentTypeId", "name", "order", "content", "status", "createdAt", "updatedAt") 
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
       RETURNING *`,
-      [
-        params.pageId, 
-        params.contentTypeId, 
-        params.name, 
-        params.order, 
-        JSON.stringify(params.content), 
-        params.status,
-        now, 
-        now
-      ]
+      [params.pageId, params.contentTypeId, params.name, params.order, JSON.stringify(params.content), params.status, now, now],
     );
 
     if (!result) {
@@ -528,7 +516,7 @@ export class ContentRepo {
   async updateBlock(id: string, params: ContentBlockUpdateParams): Promise<ContentBlock> {
     const now = unixTimestamp();
     const currentBlock = await this.findBlockById(id);
-    
+
     if (!currentBlock) {
       throw new Error(`Content block with ID ${id} not found`);
     }
@@ -543,27 +531,27 @@ export class ContentRepo {
       updateFields.push(`"pageId" = $${paramIndex++}`);
       values.push(params.pageId);
     }
-    
+
     if (params.contentTypeId !== undefined) {
       updateFields.push(`"contentTypeId" = $${paramIndex++}`);
       values.push(params.contentTypeId);
     }
-    
+
     if (params.name !== undefined) {
       updateFields.push(`"name" = $${paramIndex++}`);
       values.push(params.name);
     }
-    
+
     if (params.order !== undefined) {
       updateFields.push(`"order" = $${paramIndex++}`);
       values.push(params.order);
     }
-    
+
     if (params.content !== undefined) {
       updateFields.push(`"content" = $${paramIndex++}`);
       values.push(JSON.stringify(params.content));
     }
-    
+
     if (params.status !== undefined) {
       updateFields.push(`"status" = $${paramIndex++}`);
       values.push(params.status);
@@ -600,9 +588,9 @@ export class ContentRepo {
   async deleteBlock(id: string): Promise<boolean> {
     const result = await queryOne<{ id: string }>(
       `DELETE FROM "${TABLES.CONTENT_BLOCK}" WHERE "contentBlockId" = $1 RETURNING "contentBlockId" as id`,
-      [id]
+      [id],
     );
-    
+
     return !!result;
   }
 
@@ -612,35 +600,31 @@ export class ContentRepo {
     return addId<ContentTemplate>(result, 'contentTemplateId');
   }
 
-  async findAllTemplates(
-    isActive?: boolean,
-    limit: number = 50,
-    offset: number = 0
-  ): Promise<ContentTemplate[]> {
+  async findAllTemplates(isActive?: boolean, limit: number = 50, offset: number = 0): Promise<ContentTemplate[]> {
     let sql = 'SELECT * FROM "contentTemplate"';
     const whereConditions: string[] = [];
     const params: any[] = [];
     let paramIndex = 1;
-    
+
     if (isActive !== undefined) {
       whereConditions.push(`"isActive" = $${paramIndex++}`);
       params.push(isActive);
     }
-    
+
     if (whereConditions.length > 0) {
       sql += ' WHERE ' + whereConditions.join(' AND ');
     }
-    
-    sql += ' ORDER BY "name" ASC LIMIT $' + (paramIndex++) + ' OFFSET $' + (paramIndex++);
+
+    sql += ' ORDER BY "name" ASC LIMIT $' + paramIndex++ + ' OFFSET $' + paramIndex++;
     params.push(limit, offset);
-    
+
     const results = await query<any[]>(sql, params);
     return addIdArray<ContentTemplate>(results || [], 'contentTemplateId');
   }
 
   async createTemplate(params: ContentTemplateCreateParams): Promise<ContentTemplate> {
     const now = unixTimestamp();
-    
+
     const result = await queryOne<any>(
       `INSERT INTO "contentTemplate" 
       ("name", "slug", "description", "thumbnail", "htmlStructure", "cssStyles", "jsScripts", 
@@ -648,9 +632,9 @@ export class ContentRepo {
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) 
       RETURNING *`,
       [
-        params.name, 
+        params.name,
         params.slug,
-        params.description || null, 
+        params.description || null,
         params.thumbnail || null,
         params.htmlStructure || null,
         params.cssStyles || null,
@@ -660,9 +644,9 @@ export class ContentRepo {
         params.compatibleContentTypes || null,
         params.isSystem || false,
         params.isActive !== undefined ? params.isActive : true,
-        now, 
-        now
-      ]
+        now,
+        now,
+      ],
     );
 
     if (!result) {
@@ -675,7 +659,7 @@ export class ContentRepo {
   async updateTemplate(id: string, params: ContentTemplateUpdateParams): Promise<ContentTemplate> {
     const now = unixTimestamp();
     const currentTemplate = await this.findTemplateById(id);
-    
+
     if (!currentTemplate) {
       throw new Error(`Content template with ID ${id} not found`);
     }
@@ -690,27 +674,27 @@ export class ContentRepo {
       updateFields.push(`"name" = $${paramIndex++}`);
       values.push(params.name);
     }
-    
+
     if (params.slug !== undefined) {
       updateFields.push(`"slug" = $${paramIndex++}`);
       values.push(params.slug);
     }
-    
+
     if (params.description !== undefined) {
       updateFields.push(`"description" = $${paramIndex++}`);
       values.push(params.description);
     }
-    
+
     if (params.htmlStructure !== undefined) {
       updateFields.push(`"htmlStructure" = $${paramIndex++}`);
       values.push(params.htmlStructure);
     }
-    
+
     if (params.areas !== undefined) {
       updateFields.push(`"areas" = $${paramIndex++}`);
       values.push(JSON.stringify(params.areas));
     }
-    
+
     if (params.isActive !== undefined) {
       updateFields.push(`"isActive" = $${paramIndex++}`);
       values.push(params.isActive);
@@ -746,20 +730,20 @@ export class ContentRepo {
 
   async deleteTemplate(id: string): Promise<boolean> {
     // Check if any pages are using this template
-    const pagesUsingTemplate = await query<Array<{count: string}>>(
-      `SELECT COUNT(*) as count FROM "${TABLES.CONTENT_PAGE}" WHERE "templateId" = $1`, 
-      [id]
+    const pagesUsingTemplate = await query<Array<{ count: string }>>(
+      `SELECT COUNT(*) as count FROM "${TABLES.CONTENT_PAGE}" WHERE "templateId" = $1`,
+      [id],
     );
-    
+
     if (pagesUsingTemplate && pagesUsingTemplate.length > 0 && parseInt(pagesUsingTemplate[0].count) > 0) {
       throw new Error(`Cannot delete template as it is being used by ${pagesUsingTemplate[0].count} pages`);
     }
-    
+
     const result = await queryOne<{ id: string }>(
       `DELETE FROM "${TABLES.CONTENT_TEMPLATE}" WHERE "contentTemplateId" = $1 RETURNING "contentTemplateId" as id`,
-      [id]
+      [id],
     );
-    
+
     return !!result;
   }
 
@@ -769,13 +753,13 @@ export class ContentRepo {
    * @param blockOrders Array of {id, order} objects representing new block ordering
    * @returns Promise resolving to true if successful
    */
-  async reorderBlocks(pageId: string, blockOrders: Array<{id: string; order: number}>): Promise<boolean> {
+  async reorderBlocks(pageId: string, blockOrders: Array<{ id: string; order: number }>): Promise<boolean> {
     // Verify page exists
     const page = await this.findPageById(pageId);
     if (!page) {
       throw new Error(`Page with ID ${pageId} not found`);
     }
-    
+
     // Process each block order update individually
     for (const blockOrder of blockOrders) {
       // Verify block exists and belongs to this page
@@ -783,18 +767,19 @@ export class ContentRepo {
       if (!block) {
         throw new Error(`Block with ID ${blockOrder.id} not found`);
       }
-      
+
       if (block.pageId !== pageId) {
         throw new Error(`Block with ID ${blockOrder.id} does not belong to page ${pageId}`);
       }
-      
+
       // Update the block order
-      await query(
-        `UPDATE "${TABLES.CONTENT_BLOCK}" SET "order" = $1, "updatedAt" = $2 WHERE "contentBlockId" = $3`,
-        [blockOrder.order, unixTimestamp(), blockOrder.id]
-      );
+      await query(`UPDATE "${TABLES.CONTENT_BLOCK}" SET "order" = $1, "updatedAt" = $2 WHERE "contentBlockId" = $3`, [
+        blockOrder.order,
+        unixTimestamp(),
+        blockOrder.id,
+      ]);
     }
-    
+
     return true;
   }
 }

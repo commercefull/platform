@@ -1,6 +1,6 @@
 /**
  * AssignProductsToChannel Use Case
- * 
+ *
  * Assigns products to a distribution channel.
  */
 
@@ -31,10 +31,7 @@ export class AssignProductsToChannelUseCase {
     }
 
     // Bulk assign products
-    const channelProducts = await this.channelRepository.bulkAssignProducts(
-      input.channelId,
-      input.productIds
-    );
+    const channelProducts = await this.channelRepository.bulkAssignProducts(input.channelId, input.productIds);
 
     // Emit event
     emitChannelProductsAssigned({

@@ -5,6 +5,7 @@ Deploy CommerceFull platform to Google Cloud Platform using Docker containers.
 ## Overview
 
 This deployment strategy uses Google Cloud Platform services with Docker for containerized deployment:
+
 - Google Cloud Run (serverless containers)
 - Cloud SQL (managed PostgreSQL 18)
 - Cloud Storage (file storage)
@@ -15,23 +16,27 @@ This deployment strategy uses Google Cloud Platform services with Docker for con
 ## Prerequisites
 
 ### GCP Account
+
 - Google Cloud Platform account
 - Billing enabled
 - `gcloud` CLI installed and configured
 - Project created
 
 ### Local Machine
+
 - Docker and Docker Compose
 - Google Cloud SDK
 - Git
 
 ### DNS
+
 - Domain name
 - Ability to configure DNS records
 
 ## Quick Start
 
 ### 1. Setup GCP Project
+
 ```bash
 # Set project
 export PROJECT_ID=your-commercefull-project
@@ -46,6 +51,7 @@ gcloud services enable cloudbuild.googleapis.com
 ```
 
 ### 2. Configure Infrastructure
+
 ```bash
 cd infra/docker-gcp
 
@@ -64,6 +70,7 @@ terraform apply
 ```
 
 ### 3. Deploy Application
+
 ```bash
 # Build and deploy via Cloud Build
 gcloud builds submit --config cloudbuild.yaml --substitutions=_REGION=us-central1 .
@@ -151,6 +158,7 @@ docker-gcp/
 ### 1. Infrastructure Provisioning
 
 #### Cloud SQL Database
+
 ```hcl
 resource "google_sql_database_instance" "postgres" {
   name             = "commercefull-db"
@@ -173,6 +181,7 @@ resource "google_sql_database_instance" "postgres" {
 **Note:** PostgreSQL 18 may not be available on Cloud SQL yet. Check [Cloud SQL version availability](https://cloud.google.com/sql/docs/postgres/db-versions) for the latest supported versions.
 
 #### Cloud Storage Bucket
+
 ```hcl
 resource "google_storage_bucket" "media" {
   name     = "${var.project_id}-media"
@@ -190,6 +199,7 @@ resource "google_storage_bucket" "media" {
 ```
 
 #### Cloud Run Service
+
 ```hcl
 resource "google_cloud_run_service" "app" {
   name     = var.app_name
@@ -225,6 +235,7 @@ resource "google_cloud_run_service" "app" {
 ### 2. Application Container
 
 #### Dockerfile
+
 ```dockerfile
 FROM node:18-alpine
 
@@ -266,6 +277,7 @@ CMD ["npm", "start"]
 ### 3. CI/CD Pipeline
 
 #### Cloud Build Configuration (`cloudbuild.yaml`)
+
 ```yaml
 steps:
   # Build Docker image
@@ -302,6 +314,7 @@ steps:
 ## Deployment
 
 ### Automated Deployment
+
 ```bash
 # Push to main branch triggers deployment
 git push origin main
@@ -311,6 +324,7 @@ gcloud builds submit --config cloudbuild.yaml .
 ```
 
 ### Manual Deployment
+
 ```bash
 # Build and tag image
 docker build -t gcr.io/$PROJECT_ID/commercefull:v1.0.0 .
@@ -336,6 +350,7 @@ gcloud run deploy commercefull-app \
 ## Monitoring & Maintenance
 
 ### GCP Monitoring
+
 ```bash
 # View service logs
 gcloud logging read "resource.type=cloud_run_revision AND resource.labels.service_name=commercefull-app" --limit 50
@@ -348,6 +363,7 @@ gcloud alpha monitoring policies create --policy-from-file=alert-policy.json
 ```
 
 ### Database Management
+
 ```bash
 # Connect to Cloud SQL
 gcloud sql connect commercefull-db --user=postgres
@@ -360,6 +376,7 @@ gcloud sql backups restore BACKUP_ID --restore-instance=commercefull-db
 ```
 
 ### Scaling
+
 ```bash
 # Scale Cloud Run service
 gcloud run services update commercefull-app \
@@ -376,6 +393,7 @@ gcloud sql instances patch commercefull-db --tier=db-g1-small
 ## Security
 
 ### Secret Management
+
 ```bash
 # Create secrets
 echo -n "your-secret-value" | gcloud secrets create SECRET_NAME --data-file=-
@@ -390,6 +408,7 @@ gcloud secrets add-iam-policy-binding SECRET_NAME \
 ```
 
 ### Network Security
+
 - Cloud Run provides automatic SSL
 - VPC Service Controls for data protection
 - Cloud Armor for DDoS protection
@@ -398,12 +417,14 @@ gcloud secrets add-iam-policy-binding SECRET_NAME \
 ## Cost Optimization
 
 ### Pricing Calculator
+
 - Cloud Run: $0.000024 per CPU-second + $0.0000023 per GiB-second
 - Cloud SQL: $0.015/hour for db-f1-micro
 - Cloud Storage: $0.026/GB/month
 - Load Balancer: $0.025/hour + data transfer costs
 
 ### Cost Monitoring
+
 ```bash
 # View current costs
 gcloud billing accounts list
@@ -418,11 +439,13 @@ gcloud alpha monitoring alert-policies create --policy-from-file=cost-alert.json
 ### Common Issues
 
 #### Cold Starts
+
 - Increase min instances: `--min-instances=1`
 - Optimize container size
 - Use global load balancer
 
 #### Database Connection Issues
+
 ```bash
 # Check Cloud SQL connectivity
 gcloud sql instances describe commercefull-db
@@ -432,6 +455,7 @@ gcloud run services exec commercefull-app -- psql $DATABASE_URL -c "SELECT 1"
 ```
 
 #### Memory Issues
+
 ```bash
 # Increase memory allocation
 gcloud run services update commercefull-app --memory 1Gi
@@ -441,6 +465,7 @@ gcloud logging read "resource.type=cloud_run_revision" --filter="textPayload:mem
 ```
 
 #### SSL Certificate Issues
+
 ```bash
 # Check SSL status
 gcloud compute ssl-certificates list
@@ -454,6 +479,7 @@ gcloud compute ssl-certificates create CERT_NAME \
 ## Migration
 
 ### From Other Platforms
+
 ```bash
 # Export data from source
 pg_dump source_db > backup.sql
@@ -467,6 +493,7 @@ gcloud run deploy commercefull-app --source .
 ```
 
 ### Rollback
+
 ```bash
 # Rollback to previous revision
 gcloud run services update-traffic commercefull-app \
@@ -479,6 +506,7 @@ gcloud run revisions delete REVISION_NAME --quiet
 ## Performance
 
 ### Optimization Tips
+
 - Use Cloud CDN for static assets
 - Implement database connection pooling
 - Cache frequently accessed data
@@ -486,6 +514,7 @@ gcloud run revisions delete REVISION_NAME --quiet
 - Monitor and optimize queries
 
 ### Benchmarking
+
 ```bash
 # Load testing
 npm install -g artillery

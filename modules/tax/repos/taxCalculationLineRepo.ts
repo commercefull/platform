@@ -31,7 +31,9 @@ export interface TaxCalculationLine {
 }
 
 export type TaxCalculationLineCreateParams = Omit<TaxCalculationLine, 'taxCalculationLineId' | 'createdAt' | 'updatedAt'>;
-export type TaxCalculationLineUpdateParams = Partial<Omit<TaxCalculationLine, 'taxCalculationLineId' | 'calculationId' | 'createdAt' | 'updatedAt'>>;
+export type TaxCalculationLineUpdateParams = Partial<
+  Omit<TaxCalculationLine, 'taxCalculationLineId' | 'calculationId' | 'createdAt' | 'updatedAt'>
+>;
 
 export class TaxCalculationLineRepo {
   async findById(id: string): Promise<TaxCalculationLine | null> {
@@ -39,17 +41,19 @@ export class TaxCalculationLineRepo {
   }
 
   async findByCalculation(calculationId: string): Promise<TaxCalculationLine[]> {
-    return (await query<TaxCalculationLine[]>(
-      `SELECT * FROM "taxCalculationLine" WHERE "calculationId" = $1 ORDER BY "createdAt" ASC`,
-      [calculationId]
-    )) || [];
+    return (
+      (await query<TaxCalculationLine[]>(`SELECT * FROM "taxCalculationLine" WHERE "calculationId" = $1 ORDER BY "createdAt" ASC`, [
+        calculationId,
+      ])) || []
+    );
   }
 
   async findByLineItem(lineItemId: string): Promise<TaxCalculationLine[]> {
-    return (await query<TaxCalculationLine[]>(
-      `SELECT * FROM "taxCalculationLine" WHERE "lineItemId" = $1 ORDER BY "createdAt" DESC`,
-      [lineItemId]
-    )) || [];
+    return (
+      (await query<TaxCalculationLine[]>(`SELECT * FROM "taxCalculationLine" WHERE "lineItemId" = $1 ORDER BY "createdAt" DESC`, [
+        lineItemId,
+      ])) || []
+    );
   }
 
   async create(params: TaxCalculationLineCreateParams): Promise<TaxCalculationLine> {
@@ -61,11 +65,24 @@ export class TaxCalculationLineRepo {
         "taxExemptAmount", "taxCategoryId", "taxCategoryCode", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17) RETURNING *`,
       [
-        params.calculationId, params.lineItemId || null, params.lineItemType, params.productId || null,
-        params.productVariantId || null, params.sku || null, params.name, params.quantity || 1,
-        params.unitPrice, params.lineTotal, params.discountAmount || 0, params.taxableAmount,
-        params.taxExemptAmount || 0, params.taxCategoryId || null, params.taxCategoryCode || null, now, now
-      ]
+        params.calculationId,
+        params.lineItemId || null,
+        params.lineItemType,
+        params.productId || null,
+        params.productVariantId || null,
+        params.sku || null,
+        params.name,
+        params.quantity || 1,
+        params.unitPrice,
+        params.lineTotal,
+        params.discountAmount || 0,
+        params.taxableAmount,
+        params.taxExemptAmount || 0,
+        params.taxCategoryId || null,
+        params.taxCategoryCode || null,
+        now,
+        now,
+      ],
     );
     if (!result) throw new Error('Failed to create tax calculation line');
     return result;
@@ -90,14 +107,14 @@ export class TaxCalculationLineRepo {
 
     return await queryOne<TaxCalculationLine>(
       `UPDATE "taxCalculationLine" SET ${updateFields.join(', ')} WHERE "taxCalculationLineId" = $${paramIndex} RETURNING *`,
-      values
+      values,
     );
   }
 
   async delete(id: string): Promise<boolean> {
     const result = await queryOne<{ taxCalculationLineId: string }>(
       `DELETE FROM "taxCalculationLine" WHERE "taxCalculationLineId" = $1 RETURNING "taxCalculationLineId"`,
-      [id]
+      [id],
     );
     return !!result;
   }
@@ -105,7 +122,7 @@ export class TaxCalculationLineRepo {
   async deleteByCalculation(calculationId: string): Promise<number> {
     const results = await query<{ taxCalculationLineId: string }[]>(
       `DELETE FROM "taxCalculationLine" WHERE "calculationId" = $1 RETURNING "taxCalculationLineId"`,
-      [calculationId]
+      [calculationId],
     );
     return results ? results.length : 0;
   }

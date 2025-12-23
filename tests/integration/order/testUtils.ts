@@ -3,38 +3,36 @@ import { createTestClient, loginTestAdmin } from '../testUtils';
 
 // Export loginTestUser function (customer login)
 export const loginTestUser = async (
-  client: AxiosInstance, 
-  email: string = 'customer@example.com', 
-  password: string = 'password123'
+  client: AxiosInstance,
+  email: string = 'customer@example.com',
+  password: string = 'password123',
 ): Promise<string> => {
   try {
     const response = await client.post('/customer/identity/login', {
       email,
-      password
+      password,
     });
-    
+
     return response.data?.accessToken || '';
   } catch (error) {
-    
     return '';
   }
 };
 
 // Export loginTestMerchant function (merchant/admin login)
 export const loginTestMerchant = async (
-  client: AxiosInstance, 
-  email: string = 'merchant@example.com', 
-  password: string = 'password123'
+  client: AxiosInstance,
+  email: string = 'merchant@example.com',
+  password: string = 'password123',
 ): Promise<string> => {
   try {
     const response = await client.post('/business/auth/login', {
       email,
-      password
+      password,
     });
-    
+
     return response.data?.accessToken || '';
   } catch (error) {
-    
     return '';
   }
 };
@@ -49,13 +47,13 @@ export const testOrderItemData = {
   unitPrice: 49.99,
   discountedUnitPrice: 44.99,
   lineTotal: 89.98,
-  discountTotal: 10.00,
-  taxTotal: 7.50,
+  discountTotal: 10.0,
+  taxTotal: 7.5,
   taxRate: 0.075,
   taxExempt: false,
   fulfillmentStatus: 'unfulfilled',
   giftWrapped: false,
-  isDigital: false
+  isDigital: false,
 };
 
 // Test data for orders
@@ -66,8 +64,8 @@ export const testOrderData = {
   fulfillmentStatus: 'unfulfilled',
   currencyCode: 'USD',
   subtotal: 99.99,
-  discountTotal: 10.00,
-  taxTotal: 7.50,
+  discountTotal: 10.0,
+  taxTotal: 7.5,
   shippingTotal: 5.99,
   handlingFee: 0,
   totalAmount: 103.48,
@@ -88,7 +86,7 @@ export const testOrderData = {
     state: 'TS',
     postalCode: '12345',
     country: 'US',
-    phone: '555-123-4567'
+    phone: '555-123-4567',
   },
   billingAddress: {
     firstName: 'Test',
@@ -98,10 +96,10 @@ export const testOrderData = {
     state: 'TS',
     postalCode: '12345',
     country: 'US',
-    phone: '555-123-4567'
+    phone: '555-123-4567',
   },
   // Include items for order creation
-  items: [testOrderItemData]
+  items: [testOrderItemData],
 };
 
 /**
@@ -114,49 +112,46 @@ export const setupOrderTests = async () => {
   let customerToken = '';
   let testOrderId = '';
   let testOrderItemId = '';
-  
+
   try {
     adminToken = await loginTestAdmin(client);
-  } catch (error) {
-    
-  }
-  
+  } catch (error) {}
+
   try {
     customerToken = await loginTestUser(client);
-  } catch (error) {
-    
-  }
-  
+  } catch (error) {}
+
   if (customerToken) {
     try {
       // Create test order (items are included in testOrderData)
-      const createOrderResponse = await client.post('/customer/order', {
-        ...testOrderData,
-        orderNumber: `TEST-${Date.now()}` // Ensure unique order number
-      }, {
-        headers: { Authorization: `Bearer ${customerToken}` }
-      });
-      
+      const createOrderResponse = await client.post(
+        '/customer/order',
+        {
+          ...testOrderData,
+          orderNumber: `TEST-${Date.now()}`, // Ensure unique order number
+        },
+        {
+          headers: { Authorization: `Bearer ${customerToken}` },
+        },
+      );
+
       if (createOrderResponse.data?.success && createOrderResponse.data?.data?.orderId) {
         testOrderId = createOrderResponse.data.data.orderId;
-        
+
         // Get the order item ID from the created order's items
         const orderItems = createOrderResponse.data.data.items || [];
         testOrderItemId = orderItems.length > 0 ? orderItems[0].orderItemId : '';
       } else {
-        
       }
-    } catch (error) {
-      
-    }
+    } catch (error) {}
   }
-  
+
   return {
     client,
     adminToken,
     customerToken,
     testOrderId,
-    testOrderItemId
+    testOrderItemId,
   };
 };
 
@@ -164,17 +159,11 @@ export const setupOrderTests = async () => {
  * Cleanup function for order integration tests
  * Removes test data created during setup
  */
-export const cleanupOrderTests = async (
-  client: AxiosInstance, 
-  adminToken: string, 
-  testOrderId: string
-) => {
+export const cleanupOrderTests = async (client: AxiosInstance, adminToken: string, testOrderId: string) => {
   try {
     // Delete test order (cascade deletes items)
     await client.delete(`/business/orders/${testOrderId}`, {
-      headers: { Authorization: `Bearer ${adminToken}` }
+      headers: { Authorization: `Bearer ${adminToken}` },
     });
-  } catch (error) {
-    
-  }
+  } catch (error) {}
 };

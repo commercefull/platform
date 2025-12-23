@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function (knex) {
   return knex.schema.createTable('payout', t => {
     t.uuid('payoutId').primary().defaultTo(knex.raw('uuidv7()'));
     t.uuid('merchantId').notNullable().references('merchantId').inTable('merchant');
@@ -19,7 +19,7 @@ exports.up = function(knex) {
     t.text('failureReason');
     t.string('transactionReference', 255);
     t.string('gatewayPayoutId', 255);
-    
+
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('deletedAt');
@@ -37,6 +37,6 @@ exports.up = function(knex) {
   });
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTable('payout');
 };

@@ -10,7 +10,7 @@ exports.up = function (knex) {
     t.timestamp('followedAt').notNullable().defaultTo(knex.fn.now());
     t.boolean('emailNotifications').notNullable().defaultTo(true);
     t.boolean('pushNotifications').notNullable().defaultTo(false);
-    
+
     t.index('merchantId');
     t.index('customerId');
     t.index('followedAt');

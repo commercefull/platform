@@ -66,7 +66,7 @@ export class Media {
       tags: props.tags || [],
       metadata: props.metadata || {},
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     });
   }
 
@@ -75,20 +75,48 @@ export class Media {
   }
 
   // Getters
-  get mediaId(): string { return this.props.mediaId; }
-  get originalName(): string { return this.props.originalName; }
-  get mimeType(): string { return this.props.mimeType; }
-  get size(): number { return this.props.size; }
-  get originalUrl(): string { return this.props.originalUrl; }
-  get processedFiles(): MediaFile[] { return [...this.props.processedFiles]; }
-  get thumbnailUrl(): string | undefined { return this.props.thumbnailUrl; }
-  get altText(): string | undefined { return this.props.altText; }
-  get title(): string | undefined { return this.props.title; }
-  get description(): string | undefined { return this.props.description; }
-  get tags(): string[] { return [...this.props.tags]; }
-  get metadata(): Record<string, any> { return { ...this.props.metadata }; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get mediaId(): string {
+    return this.props.mediaId;
+  }
+  get originalName(): string {
+    return this.props.originalName;
+  }
+  get mimeType(): string {
+    return this.props.mimeType;
+  }
+  get size(): number {
+    return this.props.size;
+  }
+  get originalUrl(): string {
+    return this.props.originalUrl;
+  }
+  get processedFiles(): MediaFile[] {
+    return [...this.props.processedFiles];
+  }
+  get thumbnailUrl(): string | undefined {
+    return this.props.thumbnailUrl;
+  }
+  get altText(): string | undefined {
+    return this.props.altText;
+  }
+  get title(): string | undefined {
+    return this.props.title;
+  }
+  get description(): string | undefined {
+    return this.props.description;
+  }
+  get tags(): string[] {
+    return [...this.props.tags];
+  }
+  get metadata(): Record<string, any> {
+    return { ...this.props.metadata };
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   // Computed properties
   get isImage(): boolean {
@@ -100,15 +128,17 @@ export class Media {
   }
 
   get primaryFile(): MediaFile | undefined {
-    return this.props.processedFiles.find(f => f.format === 'webp') ||
-           this.props.processedFiles.find(f => f.format === 'original') ||
-           this.props.processedFiles[0];
+    return (
+      this.props.processedFiles.find(f => f.format === 'webp') ||
+      this.props.processedFiles.find(f => f.format === 'original') ||
+      this.props.processedFiles[0]
+    );
   }
 
   // Domain methods
   addProcessedFile(file: MediaFile): void {
-    const existingIndex = this.props.processedFiles.findIndex(f =>
-      f.format === file.format && f.width === file.width && f.height === file.height
+    const existingIndex = this.props.processedFiles.findIndex(
+      f => f.format === file.format && f.width === file.width && f.height === file.height,
     );
 
     if (existingIndex >= 0) {
@@ -121,9 +151,7 @@ export class Media {
   }
 
   removeProcessedFile(format: string, width?: number, height?: number): void {
-    this.props.processedFiles = this.props.processedFiles.filter(f =>
-      !(f.format === format && f.width === width && f.height === height)
-    );
+    this.props.processedFiles = this.props.processedFiles.filter(f => !(f.format === format && f.width === width && f.height === height));
     this.touch();
   }
 
@@ -174,7 +202,7 @@ export class Media {
       isVideo: this.isVideo,
       primaryFile: this.primaryFile,
       createdAt: this.props.createdAt.toISOString(),
-      updatedAt: this.props.updatedAt.toISOString()
+      updatedAt: this.props.updatedAt.toISOString(),
     };
   }
 }

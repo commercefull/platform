@@ -15,7 +15,7 @@ export class UpdateOrderStatusCommand {
   constructor(
     public readonly orderId: string,
     public readonly newStatus: OrderStatus,
-    public readonly reason?: string
+    public readonly reason?: string,
   ) {}
 }
 
@@ -40,7 +40,7 @@ export class UpdateOrderStatusUseCase {
 
   async execute(command: UpdateOrderStatusCommand): Promise<UpdateOrderStatusResponse> {
     const order = await this.orderRepository.findById(command.orderId);
-    
+
     if (!order) {
       throw new Error('Order not found');
     }
@@ -54,11 +54,7 @@ export class UpdateOrderStatusUseCase {
     await this.orderRepository.save(order);
 
     // Record status change in history
-    await this.orderRepository.recordStatusChange(
-      command.orderId,
-      command.newStatus,
-      command.reason
-    );
+    await this.orderRepository.recordStatusChange(command.orderId, command.newStatus, command.reason);
 
     // Emit event
     eventBus.emit('order.status_changed', {
@@ -66,7 +62,7 @@ export class UpdateOrderStatusUseCase {
       orderNumber: order.orderNumber,
       previousStatus,
       newStatus: command.newStatus,
-      reason: command.reason
+      reason: command.reason,
     });
 
     return {
@@ -74,7 +70,7 @@ export class UpdateOrderStatusUseCase {
       orderNumber: order.orderNumber,
       previousStatus,
       newStatus: command.newStatus,
-      updatedAt: order.updatedAt.toISOString()
+      updatedAt: order.updatedAt.toISOString(),
     };
   }
 }

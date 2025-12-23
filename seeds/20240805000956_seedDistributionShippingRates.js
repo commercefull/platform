@@ -17,7 +17,7 @@ exports.up = async function (knex) {
         rateType: 'flat',
         baseRate: 5.99,
         perItemRate: 0.99,
-        currency: 'USD'
+        currency: 'USD',
       },
       {
         distributionShippingZoneId: usZone.distributionShippingZoneId,
@@ -26,7 +26,7 @@ exports.up = async function (knex) {
         rateType: 'flat',
         baseRate: 14.99,
         perItemRate: 1.99,
-        currency: 'USD'
+        currency: 'USD',
       },
       {
         distributionShippingZoneId: usZone.distributionShippingZoneId,
@@ -35,9 +35,9 @@ exports.up = async function (knex) {
         rateType: 'free',
         baseRate: 0,
         perItemRate: 0,
-        freeThreshold: 50.00,
-        currency: 'USD'
-      }
+        freeThreshold: 50.0,
+        currency: 'USD',
+      },
     ]);
   }
 };

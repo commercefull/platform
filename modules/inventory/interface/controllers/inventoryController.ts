@@ -1,13 +1,18 @@
 /**
  * Inventory Controller
- * 
+ *
  * Handles HTTP requests for inventory management.
  */
 
 import { logger } from '../../../../libs/logger';
 import { Request, Response } from 'express';
 import inventoryRepo from '../../repos/inventoryRepo';
-import { saveLocation as saveStoreLocation, getLocation as getStoreLocation, getLocations as listStoreLocations, deleteLocation as deleteStoreLocation } from '../../../store/repos/pickupLocationRepo';
+import {
+  saveLocation as saveStoreLocation,
+  getLocation as getStoreLocation,
+  getLocations as listStoreLocations,
+  deleteLocation as deleteStoreLocation,
+} from '../../../store/repos/pickupLocationRepo';
 import { eventBus } from '../../../../libs/events/eventBus';
 import { updateLocation } from '../../../store/repos/pickupLocationRepo';
 // ============================================================================
@@ -18,16 +23,11 @@ function respond(res: Response, data: unknown, statusCode: number = 200): void {
   res.status(statusCode).json({ success: true, data });
 }
 
-function respondWithPagination(
-  res: Response, 
-  data: unknown[], 
-  limit: number, 
-  offset: number
-): void {
+function respondWithPagination(res: Response, data: unknown[], limit: number, offset: number): void {
   res.json({
     success: true,
     data,
-    pagination: { limit, offset, count: data.length }
+    pagination: { limit, offset, count: data.length },
   });
 }
 
@@ -61,7 +61,6 @@ export const getInventoryLocation = async (req: Request, res: Response): Promise
 
     respond(res, location);
   } catch (error: unknown) {
-    
     respondError(res, error instanceof Error ? error.message : 'Failed to get inventory location');
   }
 };
@@ -81,7 +80,6 @@ export const listInventoryLocations = async (req: Request, res: Response): Promi
     const data = result.map((loc: any) => ({ ...loc, id: loc.pickupLocationId }));
     respondWithPagination(res, data, limit, offset);
   } catch (error: unknown) {
-    
     respondError(res, error instanceof Error ? error.message : 'Failed to list inventory locations');
   }
 };
@@ -123,7 +121,7 @@ export const createInventoryLocation = async (req: Request, res: Response): Prom
       lotNumber,
       serialNumber,
       expiryDate,
-      status
+      status,
     } = req.body;
 
     if (!distributionWarehouseId || !productId || !sku) {
@@ -143,12 +141,11 @@ export const createInventoryLocation = async (req: Request, res: Response): Prom
       lotNumber,
       serialNumber,
       expiryDate: expiryDate ? new Date(expiryDate) : undefined,
-      status
+      status,
     });
 
     respond(res, location, 201);
   } catch (error: unknown) {
-    
     respondError(res, error instanceof Error ? error.message : 'Failed to create inventory location');
   }
 };
@@ -187,12 +184,11 @@ export const updateInventoryLocation = async (req: Request, res: Response): Prom
       reservedQuantity,
       minimumStockLevel,
       maximumStockLevel,
-      status
+      status,
     });
 
     respond(res, location);
   } catch (error: unknown) {
-    
     respondError(res, error instanceof Error ? error.message : 'Failed to update inventory location');
   }
 };
@@ -213,7 +209,6 @@ export const deleteInventoryLocation = async (req: Request, res: Response): Prom
     await inventoryRepo.deleteLocation(inventoryLocationId);
     respond(res, { message: 'Inventory location deleted successfully' });
   } catch (error: unknown) {
-    
     respondError(res, error instanceof Error ? error.message : 'Failed to delete inventory location');
   }
 };
@@ -244,15 +239,11 @@ export const adjustStock = async (req: Request, res: Response): Promise<void> =>
 
     // Get transaction type
     const transactionType = await inventoryRepo.findTransactionTypeByCode(
-      transactionTypeCode || (quantityChange > 0 ? 'ADJUST_UP' : 'ADJUST_DOWN')
+      transactionTypeCode || (quantityChange > 0 ? 'ADJUST_UP' : 'ADJUST_DOWN'),
     );
 
     // Adjust quantity
-    const updatedLocation = await inventoryRepo.adjustQuantity(
-      inventoryLocationId,
-      quantityChange,
-      reason
-    );
+    const updatedLocation = await inventoryRepo.adjustQuantity(inventoryLocationId, quantityChange, reason);
 
     // Record transaction
     if (transactionType) {
@@ -266,7 +257,7 @@ export const adjustStock = async (req: Request, res: Response): Promise<void> =>
         quantity: quantityChange,
         previousQuantity: currentLocation.quantity,
         newQuantity: updatedLocation.quantity,
-        notes: reason
+        notes: reason,
       });
     }
 
@@ -275,13 +266,12 @@ export const adjustStock = async (req: Request, res: Response): Promise<void> =>
       eventBus.emit('inventory.low', {
         inventoryLocationId,
         sku: currentLocation.sku,
-        quantity: updatedLocation.quantity
+        quantity: updatedLocation.quantity,
       });
     }
 
     respond(res, updatedLocation);
   } catch (error: unknown) {
-    
     respondError(res, error instanceof Error ? error.message : 'Failed to adjust stock');
   }
 };
@@ -306,12 +296,11 @@ export const reserveStock = async (req: Request, res: Response): Promise<void> =
       inventoryLocationId,
       quantity,
       orderId,
-      basketId
+      basketId,
     });
 
     respond(res, updatedLocation);
   } catch (error: unknown) {
-    
     respondError(res, error instanceof Error ? error.message : 'Failed to reserve stock');
   }
 };
@@ -334,12 +323,11 @@ export const releaseReservation = async (req: Request, res: Response): Promise<v
     // Emit event
     eventBus.emit('inventory.released', {
       inventoryLocationId,
-      quantity
+      quantity,
     });
 
     respond(res, updatedLocation);
   } catch (error: unknown) {
-    
     respondError(res, error instanceof Error ? error.message : 'Failed to release reservation');
   }
 };
@@ -357,13 +345,13 @@ export const checkAvailability = async (req: Request, res: Response): Promise<vo
     const quantity = parseInt(req.query.quantity as string) || 1;
 
     const location = await inventoryRepo.findLocationBySku(sku);
-    
+
     if (!location) {
-      respond(res, { 
-        sku, 
-        available: false, 
+      respond(res, {
+        sku,
+        available: false,
         totalAvailable: 0,
-        message: 'Product not found in inventory' 
+        message: 'Product not found in inventory',
       });
       return;
     }
@@ -372,10 +360,9 @@ export const checkAvailability = async (req: Request, res: Response): Promise<vo
       sku,
       available: location.availableQuantity >= quantity,
       totalAvailable: location.availableQuantity,
-      requestedQuantity: quantity
+      requestedQuantity: quantity,
     });
   } catch (error: unknown) {
-    
     respondError(res, error instanceof Error ? error.message : 'Failed to check availability');
   }
 };
@@ -388,7 +375,6 @@ export const getLowStock = async (req: Request, res: Response): Promise<void> =>
     const locations = await inventoryRepo.findLowStockLocations();
     respond(res, locations);
   } catch (error: unknown) {
-    
     respondError(res, error instanceof Error ? error.message : 'Failed to get low stock items');
   }
 };
@@ -401,7 +387,6 @@ export const getOutOfStock = async (req: Request, res: Response): Promise<void> 
     const locations = await inventoryRepo.findOutOfStockLocations();
     respond(res, locations);
   } catch (error: unknown) {
-    
     respondError(res, error instanceof Error ? error.message : 'Failed to get out of stock items');
   }
 };
@@ -421,7 +406,6 @@ export const getTransactionHistory = async (req: Request, res: Response): Promis
     const transactions = await inventoryRepo.findTransactionsByProductId(productId, limit);
     respond(res, transactions);
   } catch (error: unknown) {
-    
     respondError(res, error instanceof Error ? error.message : 'Failed to get transaction history');
   }
 };
@@ -434,7 +418,6 @@ export const getTransactionTypes = async (req: Request, res: Response): Promise<
     const types = await inventoryRepo.findAllTransactionTypes();
     respond(res, types);
   } catch (error: unknown) {
-    
     respondError(res, error instanceof Error ? error.message : 'Failed to get transaction types');
   }
 };

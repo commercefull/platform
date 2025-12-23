@@ -28,7 +28,7 @@ export class CreatePageCommand {
     public readonly publishedAt?: string,
     public readonly scheduledAt?: string,
     public readonly isHomePage?: boolean,
-    public readonly createdBy?: string
+    public readonly createdBy?: string,
   ) {}
 }
 
@@ -98,7 +98,7 @@ export class CreatePageUseCase {
       customFields: command.customFields,
       publishedAt: command.publishedAt,
       scheduledAt: command.scheduledAt,
-      isHomePage: command.isHomePage
+      isHomePage: command.isHomePage,
     });
 
     // Emit event
@@ -108,7 +108,7 @@ export class CreatePageUseCase {
       slug: page.slug,
       contentTypeId: page.contentTypeId,
       status: page.status,
-      createdBy: command.createdBy
+      createdBy: command.createdBy,
     });
 
     return this.mapToResponse(page);
@@ -126,7 +126,7 @@ export class CreatePageUseCase {
       summary: page.summary,
       isHomePage: page.isHomePage,
       createdAt: page.createdAt,
-      updatedAt: page.updatedAt
+      updatedAt: page.updatedAt,
     };
   }
 }

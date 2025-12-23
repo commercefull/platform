@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function (knex) {
   return knex.schema.createTable('productQaAnswer', t => {
     t.uuid('productQaAnswerId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
@@ -11,7 +11,6 @@ exports.up = function(knex) {
     t.integer('helpfulCount').notNullable().defaultTo(0);
     t.integer('unhelpfulCount').notNullable().defaultTo(0);
     t.enum('status', ['pending', 'answered', 'unanswered']).notNullable().defaultTo('pending');
-    
 
     t.index('questionId');
     t.index('customerId');
@@ -22,6 +21,6 @@ exports.up = function(knex) {
   });
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTable('productQaAnswer');
 };

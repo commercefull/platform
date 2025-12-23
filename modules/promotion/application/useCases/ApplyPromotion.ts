@@ -12,7 +12,7 @@ export class ApplyPromotionCommand {
   constructor(
     public readonly code: string,
     public readonly subtotal: number,
-    public readonly customerId?: string
+    public readonly customerId?: string,
   ) {}
 }
 
@@ -41,11 +41,7 @@ export class ApplyPromotionUseCase {
       return { valid: false, message: 'Promotion code is required' };
     }
 
-    const result = await this.promotionRepository.validateCode(
-      command.code.toUpperCase(),
-      command.subtotal,
-      command.customerId
-    );
+    const result = await this.promotionRepository.validateCode(command.code.toUpperCase(), command.subtotal, command.customerId);
 
     if (!result.valid) {
       return { valid: false, message: result.message || 'Invalid promotion code' };
@@ -57,7 +53,7 @@ export class ApplyPromotionUseCase {
       code: result.promotion?.code,
       type: result.promotion?.type,
       discountAmount: result.discount,
-      message: 'Promotion applied successfully'
+      message: 'Promotion applied successfully',
     };
   }
 }

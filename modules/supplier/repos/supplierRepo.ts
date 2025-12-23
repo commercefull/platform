@@ -63,20 +63,14 @@ export class SupplierRepo {
    * Find supplier by ID
    */
   async findById(supplierId: string): Promise<Supplier | null> {
-    return await queryOne<Supplier>(
-      `SELECT * FROM "public"."supplier" WHERE "supplierId" = $1`,
-      [supplierId]
-    );
+    return await queryOne<Supplier>(`SELECT * FROM "public"."supplier" WHERE "supplierId" = $1`, [supplierId]);
   }
 
   /**
    * Find supplier by code
    */
   async findByCode(code: string): Promise<Supplier | null> {
-    return await queryOne<Supplier>(
-      `SELECT * FROM "public"."supplier" WHERE "code" = $1`,
-      [code]
-    );
+    return await queryOne<Supplier>(`SELECT * FROM "public"."supplier" WHERE "code" = $1`, [code]);
   }
 
   /**
@@ -84,17 +78,17 @@ export class SupplierRepo {
    */
   async findAll(activeOnly: boolean = false, approvedOnly: boolean = false): Promise<Supplier[]> {
     let sql = `SELECT * FROM "public"."supplier" WHERE 1=1`;
-    
+
     if (activeOnly) {
       sql += ` AND "isActive" = true`;
     }
-    
+
     if (approvedOnly) {
       sql += ` AND "isApproved" = true`;
     }
-    
+
     sql += ` ORDER BY "name" ASC`;
-    
+
     const results = await query<Supplier[]>(sql);
     return results || [];
   }
@@ -143,7 +137,7 @@ export class SupplierRepo {
     }
 
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
-    
+
     params.push(limit, offset);
 
     const results = await query<Supplier[]>(
@@ -151,7 +145,7 @@ export class SupplierRepo {
        ${whereClause}
        ORDER BY "name" ASC 
        LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
-      params
+      params,
     );
 
     return results || [];
@@ -161,10 +155,7 @@ export class SupplierRepo {
    * Find suppliers by status
    */
   async findByStatus(status: SupplierStatus): Promise<Supplier[]> {
-    const results = await query<Supplier[]>(
-      `SELECT * FROM "public"."supplier" WHERE "status" = $1 ORDER BY "name" ASC`,
-      [status]
-    );
+    const results = await query<Supplier[]>(`SELECT * FROM "public"."supplier" WHERE "status" = $1 ORDER BY "name" ASC`, [status]);
     return results || [];
   }
 
@@ -176,7 +167,7 @@ export class SupplierRepo {
       `SELECT * FROM "public"."supplier" 
        WHERE "isApproved" = true AND "isActive" = true 
        ORDER BY "name" ASC`,
-      []
+      [],
     );
     return results || [];
   }
@@ -189,7 +180,7 @@ export class SupplierRepo {
       `SELECT * FROM "public"."supplier" 
        WHERE $1 = ANY("categories") AND "isActive" = true
        ORDER BY "name" ASC`,
-      [category]
+      [category],
     );
     return results || [];
   }
@@ -239,8 +230,8 @@ export class SupplierRepo {
         params.tags || null,
         params.customFields ? JSON.stringify(params.customFields) : null,
         now,
-        now
-      ]
+        now,
+      ],
     );
 
     if (!result) {
@@ -278,7 +269,7 @@ export class SupplierRepo {
        SET ${updateFields.join(', ')}
        WHERE "supplierId" = $${paramIndex}
        RETURNING *`,
-      values
+      values,
     );
 
     return result;
@@ -333,7 +324,7 @@ export class SupplierRepo {
     if (rating < 0 || rating > 5) {
       throw new Error('Rating must be between 0 and 5');
     }
-    
+
     return this.update(supplierId, { rating });
   }
 
@@ -346,7 +337,7 @@ export class SupplierRepo {
        SET "categories" = array_append("categories", $1), "updatedAt" = $2
        WHERE "supplierId" = $3
        RETURNING *`,
-      [category, unixTimestamp(), supplierId]
+      [category, unixTimestamp(), supplierId],
     );
 
     return result;
@@ -361,7 +352,7 @@ export class SupplierRepo {
        SET "categories" = array_remove("categories", $1), "updatedAt" = $2
        WHERE "supplierId" = $3
        RETURNING *`,
-      [category, unixTimestamp(), supplierId]
+      [category, unixTimestamp(), supplierId],
     );
 
     return result;
@@ -376,7 +367,7 @@ export class SupplierRepo {
        SET "tags" = array_append("tags", $1), "updatedAt" = $2
        WHERE "supplierId" = $3
        RETURNING *`,
-      [tag, unixTimestamp(), supplierId]
+      [tag, unixTimestamp(), supplierId],
     );
 
     return result;
@@ -391,7 +382,7 @@ export class SupplierRepo {
        SET "tags" = array_remove("tags", $1), "updatedAt" = $2
        WHERE "supplierId" = $3
        RETURNING *`,
-      [tag, unixTimestamp(), supplierId]
+      [tag, unixTimestamp(), supplierId],
     );
 
     return result;
@@ -403,7 +394,7 @@ export class SupplierRepo {
   async delete(supplierId: string): Promise<boolean> {
     const result = await queryOne<{ supplierId: string }>(
       `DELETE FROM "public"."supplier" WHERE "supplierId" = $1 RETURNING "supplierId"`,
-      [supplierId]
+      [supplierId],
     );
 
     return !!result;
@@ -449,13 +440,13 @@ export class SupplierRepo {
     let sql = `SELECT * FROM "public"."supplier" 
                WHERE ("name" ILIKE $1 OR "description" ILIKE $1 OR "code" ILIKE $1)`;
     const params: any[] = [`%${searchTerm}%`];
-    
+
     if (activeOnly) {
       sql += ` AND "isActive" = true`;
     }
-    
+
     sql += ` ORDER BY "name" ASC`;
-    
+
     const results = await query<Supplier[]>(sql, params);
     return results || [];
   }
@@ -484,7 +475,7 @@ export class SupplierRepo {
       approved,
       pending,
       suspended,
-      blacklisted
+      blacklisted,
     };
   }
 }

@@ -1,6 +1,6 @@
 /**
  * Product Use Cases Barrel Export
- * 
+ *
  * Note: Use direct imports from specific files if there are naming conflicts
  */
 

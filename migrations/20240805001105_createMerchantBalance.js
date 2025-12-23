@@ -17,7 +17,7 @@ exports.up = function (knex) {
     t.timestamp('nextScheduledPayoutDate');
     t.boolean('isPayoutHeld').notNullable().defaultTo(false);
     t.text('payoutHoldReason');
-    
+
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     t.index('availableBalance');
     t.index('pendingBalance');

@@ -19,7 +19,7 @@ export interface LogoutCustomerOutput {
 export class LogoutCustomerUseCase {
   constructor(
     private readonly tokenBlacklistRepo: any,
-    private readonly refreshTokenRepo: any
+    private readonly refreshTokenRepo: any,
   ) {}
 
   async execute(input: LogoutCustomerInput): Promise<LogoutCustomerOutput> {

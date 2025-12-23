@@ -1,6 +1,6 @@
 /**
  * Membership Plan Repository
- * 
+ *
  * Handles all database operations for membership plans.
  * Uses camelCase column names matching the database schema.
  */
@@ -61,20 +61,14 @@ const TABLE = Table.MembershipPlan;
  * Find a membership plan by ID
  */
 export async function findById(id: string): Promise<MembershipPlan | null> {
-  return queryOne<MembershipPlan>(
-    `SELECT * FROM "${TABLE}" WHERE "membershipPlanId" = $1`,
-    [id]
-  );
+  return queryOne<MembershipPlan>(`SELECT * FROM "${TABLE}" WHERE "membershipPlanId" = $1`, [id]);
 }
 
 /**
  * Find a membership plan by code
  */
 export async function findByCode(code: string): Promise<MembershipPlan | null> {
-  return queryOne<MembershipPlan>(
-    `SELECT * FROM "${TABLE}" WHERE "code" = $1`,
-    [code]
-  );
+  return queryOne<MembershipPlan>(`SELECT * FROM "${TABLE}" WHERE "code" = $1`, [code]);
 }
 
 /**
@@ -93,18 +87,16 @@ export async function findAll(activeOnly = false): Promise<MembershipPlan[]> {
  * Find the default membership plan
  */
 export async function findDefault(): Promise<MembershipPlan | null> {
-  return queryOne<MembershipPlan>(
-    `SELECT * FROM "${TABLE}" WHERE "isDefault" = true AND "isActive" = true LIMIT 1`
-  );
+  return queryOne<MembershipPlan>(`SELECT * FROM "${TABLE}" WHERE "isDefault" = true AND "isActive" = true LIMIT 1`);
 }
 
 /**
  * Find all public membership plans
  */
 export async function findPublic(): Promise<MembershipPlan[]> {
-  return (await query<MembershipPlan[]>(
-    `SELECT * FROM "${TABLE}" WHERE "isPublic" = true AND "isActive" = true ORDER BY "priority" DESC`
-  )) || [];
+  return (
+    (await query<MembershipPlan[]>(`SELECT * FROM "${TABLE}" WHERE "isPublic" = true AND "isActive" = true ORDER BY "priority" DESC`)) || []
+  );
 }
 
 /**
@@ -161,8 +153,8 @@ export async function create(input: CreateMembershipPlanInput): Promise<Membersh
       input.visibilityRules ? JSON.stringify(input.visibilityRules) : null,
       input.availabilityRules ? JSON.stringify(input.availabilityRules) : null,
       input.customFields ? JSON.stringify(input.customFields) : null,
-      input.createdBy || null
-    ]
+      input.createdBy || null,
+    ],
   );
 
   if (!result) {
@@ -203,7 +195,7 @@ export async function update(id: string, input: UpdateMembershipPlanInput): Prom
 
   return queryOne<MembershipPlan>(
     `UPDATE "${TABLE}" SET ${updateFields.join(', ')} WHERE "membershipPlanId" = $${paramIndex} RETURNING *`,
-    values
+    values,
   );
 }
 
@@ -213,12 +205,12 @@ export async function update(id: string, input: UpdateMembershipPlanInput): Prom
 async function unsetAllDefaults(exceptId?: string): Promise<void> {
   let sql = `UPDATE "${TABLE}" SET "isDefault" = false, "updatedAt" = NOW() WHERE "isDefault" = true`;
   const params: string[] = [];
-  
+
   if (exceptId) {
     sql += ` AND "membershipPlanId" != $1`;
     params.push(exceptId);
   }
-  
+
   await query(sql, params);
 }
 
@@ -242,7 +234,7 @@ export async function deactivate(id: string): Promise<MembershipPlan | null> {
 export async function remove(id: string): Promise<boolean> {
   const result = await queryOne<{ membershipPlanId: string }>(
     `DELETE FROM "${TABLE}" WHERE "membershipPlanId" = $1 RETURNING "membershipPlanId"`,
-    [id]
+    [id],
   );
   return !!result;
 }
@@ -270,16 +262,16 @@ export async function getStatistics(): Promise<{
 }> {
   const total = await count();
   const active = await count(true);
-  
+
   const publicResult = await queryOne<{ count: string }>(
-    `SELECT COUNT(*) as count FROM "${TABLE}" WHERE "isPublic" = true AND "isActive" = true`
+    `SELECT COUNT(*) as count FROM "${TABLE}" WHERE "isPublic" = true AND "isActive" = true`,
   );
   const publicCount = publicResult ? parseInt(publicResult.count, 10) : 0;
 
   const cycleResults = await query<{ billingCycle: BillingCycle; count: string }[]>(
-    `SELECT "billingCycle", COUNT(*) as count FROM "${TABLE}" WHERE "isActive" = true GROUP BY "billingCycle"`
+    `SELECT "billingCycle", COUNT(*) as count FROM "${TABLE}" WHERE "isActive" = true GROUP BY "billingCycle"`,
   );
-  
+
   const byCycle: Record<string, number> = {};
   cycleResults?.forEach(row => {
     byCycle[row.billingCycle] = parseInt(row.count, 10);
@@ -289,6 +281,6 @@ export async function getStatistics(): Promise<{
     total,
     active,
     public: publicCount,
-    byCycle: byCycle as Record<BillingCycle, number>
+    byCycle: byCycle as Record<BillingCycle, number>,
   };
 }

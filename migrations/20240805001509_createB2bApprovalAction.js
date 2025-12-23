@@ -2,8 +2,8 @@
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.up = function(knex) {
-  return knex.schema.createTable('b2bApprovalAction', function(table) {
+exports.up = function (knex) {
+  return knex.schema.createTable('b2bApprovalAction', function (table) {
     table.uuid('b2bApprovalActionId').primary().defaultTo(knex.raw('uuidv7()'));
     table.uuid('b2bApprovalRequestId').notNullable().references('b2bApprovalRequestId').inTable('b2bApprovalRequest').onDelete('CASCADE');
     table.uuid('b2bApprovalWorkflowStepId').references('b2bApprovalWorkflowStepId').inTable('b2bApprovalWorkflowStep').onDelete('SET NULL');
@@ -31,6 +31,6 @@ exports.up = function(knex) {
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTableIfExists('b2bApprovalAction');
 };

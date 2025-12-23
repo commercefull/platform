@@ -22,9 +22,7 @@ exports.up = function (knex) {
  * @returns { Promise<void> }
  */
 exports.down = function (knex) {
-  return knex('notificationDevice')
-    .where({ deviceToken: 'sample_deviceToken_for_testing' })
-    .del();
+  return knex('notificationDevice').where({ deviceToken: 'sample_deviceToken_for_testing' }).del();
 };
 
 exports.seed = async function (knex) {

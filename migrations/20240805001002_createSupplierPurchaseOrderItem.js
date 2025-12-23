@@ -7,7 +7,11 @@ exports.up = function (knex) {
     t.uuid('supplierPurchaseOrderItemId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
-    t.uuid('supplierPurchaseOrderId').notNullable().references('supplierPurchaseOrderId').inTable('supplierPurchaseOrder').onDelete('CASCADE');
+    t.uuid('supplierPurchaseOrderId')
+      .notNullable()
+      .references('supplierPurchaseOrderId')
+      .inTable('supplierPurchaseOrder')
+      .onDelete('CASCADE');
     t.uuid('supplierProductId').references('supplierProductId').inTable('supplierProduct');
     t.uuid('productId').notNullable();
     t.uuid('productVariantId');
@@ -25,7 +29,7 @@ exports.up = function (knex) {
     t.timestamp('expectedDeliveryDate');
     t.timestamp('receivedAt');
     t.text('notes');
-    
+
     t.index('supplierPurchaseOrderId');
     t.index('supplierProductId');
     t.index('productId');

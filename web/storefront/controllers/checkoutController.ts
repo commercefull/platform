@@ -46,9 +46,7 @@ export const checkout = async (req: Request, res: Response): Promise<void> => {
 
     // Get shipping methods (active + visible on storefront)
     const shippingUseCase = new GetShippingMethodsUseCase();
-    const shippingResult = await shippingUseCase.execute(
-      new GetShippingMethodsQuery(true, true)
-    );
+    const shippingResult = await shippingUseCase.execute(new GetShippingMethodsQuery(true, true));
 
     // Calculate totals with tax
     const totals = await calculateCheckoutTotals(basket, customer);
@@ -59,15 +57,15 @@ export const checkout = async (req: Request, res: Response): Promise<void> => {
       customer,
       shippingMethods: shippingResult.methods || [],
       totals,
-      user: req.user
+      user: req.user,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     storefrontRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load checkout',
-      user: req.user
+      user: req.user,
     });
   }
 };
@@ -90,7 +88,7 @@ export const processCheckout = async (req: Request, res: Response): Promise<void
       paymentMethod,
       billingAddress: billingAddressStr,
       shippingAddress: shippingAddressStr,
-      specialInstructions
+      specialInstructions,
     } = req.body;
 
     // Get or create basket
@@ -118,7 +116,7 @@ export const processCheckout = async (req: Request, res: Response): Promise<void
       sku: item.sku,
       name: item.name,
       quantity: item.quantity,
-      unitPrice: item.unitPrice
+      unitPrice: item.unitPrice,
     }));
 
     // Create order with proper constructor arguments
@@ -136,7 +134,7 @@ export const processCheckout = async (req: Request, res: Response): Promise<void
         postalCode: shippingAddress.postalCode,
         country: shippingAddress.country,
         countryCode: shippingAddress.countryCode || shippingAddress.country,
-        phone: shippingAddress.phone
+        phone: shippingAddress.phone,
       },
       {
         firstName: billingAddress.firstName,
@@ -148,14 +146,14 @@ export const processCheckout = async (req: Request, res: Response): Promise<void
         postalCode: billingAddress.postalCode,
         country: billingAddress.country,
         countryCode: billingAddress.countryCode || billingAddress.country,
-        phone: billingAddress.phone
+        phone: billingAddress.phone,
       },
       basket.basketId,
       basket.currency || 'USD',
       shippingAddress.phone,
       `${shippingAddress.firstName} ${shippingAddress.lastName}`,
       specialInstructions,
-      parseFloat(shippingMethod?.cost || '0')
+      parseFloat(shippingMethod?.cost || '0'),
     );
 
     const orderUseCase = new CreateOrderUseCase(OrderRepo);
@@ -168,14 +166,14 @@ export const processCheckout = async (req: Request, res: Response): Promise<void
       res.json({
         success: true,
         orderId: order.orderId,
-        orderNumber: order.orderNumber
+        orderNumber: order.orderNumber,
       });
     } else {
       res.redirect(`/order-confirmation/${order.orderId}`);
     }
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     if (req.xhr || req.headers.accept?.includes('application/json')) {
       res.status(500).json({ success: false, message: error.message });
     } else {
@@ -205,7 +203,7 @@ export const orderConfirmation = async (req: Request, res: Response): Promise<vo
     if (!order) {
       storefrontRespond(req, res, '404', {
         pageName: 'Order Not Found',
-        user: req.user
+        user: req.user,
       });
       return;
     }
@@ -217,22 +215,22 @@ export const orderConfirmation = async (req: Request, res: Response): Promise<vo
         subtotal: order.subtotal.toFixed(2),
         tax: order.taxTotal.toFixed(2),
         shipping: order.shippingTotal.toFixed(2),
-        total: order.totalAmount.toFixed(2)
-      }
+        total: order.totalAmount.toFixed(2),
+      },
     };
 
     storefrontRespond(req, res, 'shop/order-confirmation', {
       pageName: 'Order Confirmation',
       order: orderWithTotals,
-      user: req.user
+      user: req.user,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     storefrontRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load order confirmation',
-      user: req.user
+      user: req.user,
     });
   }
 };
@@ -243,18 +241,18 @@ export const orderConfirmation = async (req: Request, res: Response): Promise<vo
 
 async function calculateCheckoutTotals(basket: any, customer: any, shippingMethod?: any) {
   // Use basket.subtotal if available, otherwise calculate from items
-  const subtotal = typeof basket.subtotal === 'number'
-    ? basket.subtotal
-    : (basket.items?.reduce((sum: number, item: any) => {
-        return sum + (item.lineTotal ?? (item.unitPrice * item.quantity));
-      }, 0) || 0);
+  const subtotal =
+    typeof basket.subtotal === 'number'
+      ? basket.subtotal
+      : basket.items?.reduce((sum: number, item: any) => {
+          return sum + (item.lineTotal ?? item.unitPrice * item.quantity);
+        }, 0) || 0;
 
   const shippingCost = shippingMethod ? parseFloat(shippingMethod.cost || 0) : 0;
 
   // Use default shipping address or fallback
-  const shippingAddress = customer?.addresses?.find((addr: any) => addr.isDefault && addr.addressType === 'shipping')
-    || customer?.addresses?.[0]
-    || { country: 'US', region: '', postalCode: '', city: '' };
+  const shippingAddress = customer?.addresses?.find((addr: any) => addr.isDefault && addr.addressType === 'shipping') ||
+    customer?.addresses?.[0] || { country: 'US', region: '', postalCode: '', city: '' };
 
   // Calculate tax using the tax service
   const taxCommand = new CalculateOrderTaxCommand(
@@ -262,16 +260,16 @@ async function calculateCheckoutTotals(basket: any, customer: any, shippingMetho
       productId: item.productId,
       name: item.name,
       quantity: item.quantity,
-      unitPrice: item.unitPrice
+      unitPrice: item.unitPrice,
     })) || [],
     {
       country: shippingAddress.country,
       region: shippingAddress.state || shippingAddress.region,
       postalCode: shippingAddress.postalCode,
-      city: shippingAddress.city
+      city: shippingAddress.city,
     },
     shippingCost,
-    customer?.customerId
+    customer?.customerId,
   );
 
   const taxUseCase = new CalculateOrderTaxUseCase();
@@ -284,7 +282,7 @@ async function calculateCheckoutTotals(basket: any, customer: any, shippingMetho
     tax: taxResult.taxAmount.toFixed(2),
     shipping: shippingCost.toFixed(2),
     total: total.toFixed(2),
-    taxRate: taxResult.taxRate
+    taxRate: taxResult.taxRate,
   };
 }
 
@@ -300,7 +298,7 @@ async function getShippingMethod(shippingMethodId: string) {
         shippingMethodId: defaultMethod.shippingMethodId,
         name: defaultMethod.name,
         cost: rate?.baseRate || '0.00',
-        estimatedDeliveryDays: defaultMethod.estimatedDeliveryDays
+        estimatedDeliveryDays: defaultMethod.estimatedDeliveryDays,
       };
     }
     return { cost: '0.00', name: 'Standard Shipping' };
@@ -319,6 +317,6 @@ async function getShippingMethod(shippingMethodId: string) {
     shippingMethodId: method.shippingMethodId,
     name: method.name,
     cost: rate?.baseRate || '0.00',
-    estimatedDeliveryDays: method.estimatedDeliveryDays
+    estimatedDeliveryDays: method.estimatedDeliveryDays,
   };
 }

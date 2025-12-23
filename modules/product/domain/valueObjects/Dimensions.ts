@@ -13,7 +13,7 @@ export class Dimensions {
     private readonly _length: number | null,
     private readonly _width: number | null,
     private readonly _height: number | null,
-    private readonly _dimensionUnit: DimensionUnit
+    private readonly _dimensionUnit: DimensionUnit,
   ) {}
 
   static create(props: {
@@ -30,7 +30,7 @@ export class Dimensions {
       props.length ?? null,
       props.width ?? null,
       props.height ?? null,
-      props.dimensionUnit ?? 'cm'
+      props.dimensionUnit ?? 'cm',
     );
   }
 
@@ -82,14 +82,14 @@ export class Dimensions {
    */
   get weightInKg(): number | null {
     if (this._weight === null) return null;
-    
+
     const conversions: Record<WeightUnit, number> = {
-      'kg': 1,
-      'lb': 0.453592,
-      'oz': 0.0283495,
-      'g': 0.001
+      kg: 1,
+      lb: 0.453592,
+      oz: 0.0283495,
+      g: 0.001,
     };
-    
+
     return this._weight * conversions[this._weightUnit];
   }
 
@@ -98,18 +98,18 @@ export class Dimensions {
    */
   get dimensionsInCm(): { length: number | null; width: number | null; height: number | null } {
     const conversions: Record<DimensionUnit, number> = {
-      'cm': 1,
-      'in': 2.54,
-      'm': 100,
-      'mm': 0.1
+      cm: 1,
+      in: 2.54,
+      m: 100,
+      mm: 0.1,
     };
-    
+
     const factor = conversions[this._dimensionUnit];
-    
+
     return {
       length: this._length !== null ? this._length * factor : null,
       width: this._width !== null ? this._width * factor : null,
-      height: this._height !== null ? this._height * factor : null
+      height: this._height !== null ? this._height * factor : null,
     };
   }
 
@@ -123,7 +123,7 @@ export class Dimensions {
     const parts = [
       this._length !== null ? `L: ${this._length}` : null,
       this._width !== null ? `W: ${this._width}` : null,
-      this._height !== null ? `H: ${this._height}` : null
+      this._height !== null ? `H: ${this._height}` : null,
     ].filter(Boolean);
     return `${parts.join(' x ')} ${this._dimensionUnit}`;
   }
@@ -137,7 +137,7 @@ export class Dimensions {
       height: this._height,
       dimensionUnit: this._dimensionUnit,
       volume: this.volume,
-      weightInKg: this.weightInKg
+      weightInKg: this.weightInKg,
     };
   }
 }

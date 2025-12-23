@@ -12,7 +12,9 @@ exports.up = function (knex) {
     t.string('slug', 255).notNullable().unique();
     t.text('description');
     t.uuid('brandId').references('productBrandId').inTable('productBrand');
-    t.enu('type', ['simple', 'configurable', 'grouped', 'virtual', 'downloadable', 'bundle', 'subscription']).notNullable().defaultTo('simple'  );
+    t.enu('type', ['simple', 'configurable', 'grouped', 'virtual', 'downloadable', 'bundle', 'subscription'])
+      .notNullable()
+      .defaultTo('simple');
     t.enu('status', ['draft', 'active', 'inactive', 'archived', 'discontinued']).notNullable().defaultTo('draft');
     t.enu('visibility', ['visible', 'not_visible', 'catalog', 'search']).notNullable().defaultTo('visible');
     t.decimal('price', 15, 2).notNullable();
@@ -70,7 +72,7 @@ exports.up = function (knex) {
     t.string('externalId', 255);
     t.boolean('hasVariants').notNullable().defaultTo(false);
     t.jsonb('variantAttributes');
-    
+
     t.uuid('createdBy');
     t.uuid('updatedBy');
     t.index('sku');

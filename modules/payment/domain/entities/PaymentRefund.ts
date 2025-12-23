@@ -46,7 +46,7 @@ export class PaymentRefund {
       status: RefundStatus.PENDING,
       metadata: props.metadata,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     });
   }
 
@@ -55,25 +55,59 @@ export class PaymentRefund {
   }
 
   // Getters
-  get refundId(): string { return this.props.refundId; }
-  get transactionId(): string { return this.props.transactionId; }
-  get externalRefundId(): string | undefined { return this.props.externalRefundId; }
-  get amount(): number { return this.props.amount; }
-  get currency(): string { return this.props.currency; }
-  get reason(): string | undefined { return this.props.reason; }
-  get status(): RefundStatus { return this.props.status; }
-  get gatewayResponse(): Record<string, any> | undefined { return this.props.gatewayResponse; }
-  get errorCode(): string | undefined { return this.props.errorCode; }
-  get errorMessage(): string | undefined { return this.props.errorMessage; }
-  get processedAt(): Date | undefined { return this.props.processedAt; }
-  get metadata(): Record<string, any> | undefined { return this.props.metadata; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get refundId(): string {
+    return this.props.refundId;
+  }
+  get transactionId(): string {
+    return this.props.transactionId;
+  }
+  get externalRefundId(): string | undefined {
+    return this.props.externalRefundId;
+  }
+  get amount(): number {
+    return this.props.amount;
+  }
+  get currency(): string {
+    return this.props.currency;
+  }
+  get reason(): string | undefined {
+    return this.props.reason;
+  }
+  get status(): RefundStatus {
+    return this.props.status;
+  }
+  get gatewayResponse(): Record<string, any> | undefined {
+    return this.props.gatewayResponse;
+  }
+  get errorCode(): string | undefined {
+    return this.props.errorCode;
+  }
+  get errorMessage(): string | undefined {
+    return this.props.errorMessage;
+  }
+  get processedAt(): Date | undefined {
+    return this.props.processedAt;
+  }
+  get metadata(): Record<string, any> | undefined {
+    return this.props.metadata;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   // Computed
-  get isPending(): boolean { return this.props.status === RefundStatus.PENDING; }
-  get isCompleted(): boolean { return this.props.status === RefundStatus.COMPLETED; }
-  get isFailed(): boolean { return this.props.status === RefundStatus.FAILED; }
+  get isPending(): boolean {
+    return this.props.status === RefundStatus.PENDING;
+  }
+  get isCompleted(): boolean {
+    return this.props.status === RefundStatus.COMPLETED;
+  }
+  get isFailed(): boolean {
+    return this.props.status === RefundStatus.FAILED;
+  }
 
   // Domain methods
   startProcessing(): void {
@@ -115,7 +149,7 @@ export class PaymentRefund {
       processedAt: this.props.processedAt?.toISOString(),
       metadata: this.props.metadata,
       createdAt: this.props.createdAt.toISOString(),
-      updatedAt: this.props.updatedAt.toISOString()
+      updatedAt: this.props.updatedAt.toISOString(),
     };
   }
 }

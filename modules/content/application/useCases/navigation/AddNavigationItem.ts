@@ -22,7 +22,7 @@ export class AddNavigationItemCommand {
     public readonly openInNewTab?: boolean,
     public readonly isActive?: boolean,
     public readonly sortOrder?: number,
-    public readonly conditions?: Record<string, any>
+    public readonly conditions?: Record<string, any>,
   ) {}
 }
 
@@ -42,7 +42,7 @@ export interface NavigationItemResponse {
 export class AddNavigationItemUseCase {
   constructor(
     private readonly navigationRepo: ContentNavigationRepo,
-    private readonly contentRepo: ContentRepo
+    private readonly contentRepo: ContentRepo,
   ) {}
 
   async execute(command: AddNavigationItemCommand): Promise<NavigationItemResponse> {
@@ -93,14 +93,14 @@ export class AddNavigationItemUseCase {
       isActive: command.isActive !== undefined ? command.isActive : true,
       sortOrder: command.sortOrder || 0,
       conditions: command.conditions ?? null,
-      depth
+      depth,
     });
 
     eventBus.emit('content.navigation.item_added', {
       navigationId: command.navigationId,
       itemId: item.contentNavigationItemId,
       title: item.title,
-      type: item.type
+      type: item.type,
     });
 
     return {
@@ -113,7 +113,7 @@ export class AddNavigationItemUseCase {
       contentPageId: item.contentPageId ?? undefined,
       isActive: item.isActive,
       sortOrder: item.sortOrder,
-      depth: item.depth
+      depth: item.depth,
     };
   }
 }

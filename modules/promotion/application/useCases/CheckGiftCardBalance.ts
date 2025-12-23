@@ -10,9 +10,7 @@ import * as giftCardRepo from '../../repos/giftCardRepo';
 // ============================================================================
 
 export class CheckGiftCardBalanceQuery {
-  constructor(
-    public readonly code: string
-  ) {}
+  constructor(public readonly code: string) {}
 }
 
 // ============================================================================
@@ -44,7 +42,7 @@ export class CheckGiftCardBalanceUseCase {
 
     // Find gift card by code
     const giftCard = await giftCardRepo.getGiftCardByCode(query.code);
-    
+
     if (!giftCard) {
       return { success: false, message: 'Gift card not found', errors: ['gift_card_not_found'] };
     }
@@ -60,9 +58,8 @@ export class CheckGiftCardBalanceUseCase {
       status: isExpired ? 'expired' : giftCard.status,
       expiresAt: giftCard.expiresAt,
       isReloadable: giftCard.isReloadable,
-      message: giftCard.status === 'active' && !isExpired 
-        ? 'Gift card is valid' 
-        : `Gift card is ${isExpired ? 'expired' : giftCard.status}`
+      message:
+        giftCard.status === 'active' && !isExpired ? 'Gift card is valid' : `Gift card is ${isExpired ? 'expired' : giftCard.status}`,
     };
   }
 }

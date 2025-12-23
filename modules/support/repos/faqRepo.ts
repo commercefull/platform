@@ -12,7 +12,7 @@ import { Table } from '../../../libs/db/types';
 
 const TABLES = {
   FAQ_CATEGORY: Table.FaqCategory,
-  FAQ_ARTICLE: Table.FaqArticle
+  FAQ_ARTICLE: Table.FaqArticle,
 };
 
 // ============================================================================
@@ -70,18 +70,12 @@ export interface FaqArticle {
 // ============================================================================
 
 export async function getCategory(faqCategoryId: string): Promise<FaqCategory | null> {
-  const row = await queryOne<Record<string, any>>(
-    'SELECT * FROM "faqCategory" WHERE "faqCategoryId" = $1',
-    [faqCategoryId]
-  );
+  const row = await queryOne<Record<string, any>>('SELECT * FROM "faqCategory" WHERE "faqCategoryId" = $1', [faqCategoryId]);
   return row ? mapToCategory(row) : null;
 }
 
 export async function getCategoryBySlug(slug: string): Promise<FaqCategory | null> {
-  const row = await queryOne<Record<string, any>>(
-    'SELECT * FROM "faqCategory" WHERE "slug" = $1',
-    [slug]
-  );
+  const row = await queryOne<Record<string, any>>('SELECT * FROM "faqCategory" WHERE "slug" = $1', [slug]);
   return row ? mapToCategory(row) : null;
 }
 
@@ -91,23 +85,26 @@ export async function getCategories(activeOnly: boolean = true): Promise<FaqCate
     whereClause = '"isActive" = true';
   }
 
-  const rows = await query<Record<string, any>[]>(
-    `SELECT * FROM "faqCategory" WHERE ${whereClause} ORDER BY "sortOrder" ASC, "name" ASC`
-  );
+  const rows = await query<Record<string, any>[]>(`SELECT * FROM "faqCategory" WHERE ${whereClause} ORDER BY "sortOrder" ASC, "name" ASC`);
   return (rows || []).map(mapToCategory);
 }
 
 export async function getFeaturedCategories(): Promise<FaqCategory[]> {
   const rows = await query<Record<string, any>[]>(
     `SELECT * FROM "faqCategory" WHERE "isActive" = true AND "isFeatured" = true 
-     ORDER BY "sortOrder" ASC`
+     ORDER BY "sortOrder" ASC`,
   );
   return (rows || []).map(mapToCategory);
 }
 
 export async function saveCategory(category: Partial<FaqCategory> & { name: string }): Promise<FaqCategory> {
   const now = new Date().toISOString();
-  const slug = category.slug || category.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+  const slug =
+    category.slug ||
+    category.name
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9-]/g, '');
 
   if (category.faqCategoryId) {
     await query(
@@ -117,12 +114,20 @@ export async function saveCategory(category: Partial<FaqCategory> & { name: stri
         "isActive" = $9, "isFeatured" = $10, "metadata" = $11, "updatedAt" = $12
       WHERE "faqCategoryId" = $13`,
       [
-        category.parentCategoryId, category.name, slug, category.description,
-        category.icon, category.color, category.imageUrl, category.sortOrder || 0,
-        category.isActive !== false, category.isFeatured || false,
+        category.parentCategoryId,
+        category.name,
+        slug,
+        category.description,
+        category.icon,
+        category.color,
+        category.imageUrl,
+        category.sortOrder || 0,
+        category.isActive !== false,
+        category.isFeatured || false,
         category.metadata ? JSON.stringify(category.metadata) : null,
-        now, category.faqCategoryId
-      ]
+        now,
+        category.faqCategoryId,
+      ],
     );
     return (await getCategory(category.faqCategoryId))!;
   } else {
@@ -134,11 +139,20 @@ export async function saveCategory(category: Partial<FaqCategory> & { name: stri
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
       RETURNING *`,
       [
-        category.parentCategoryId, category.name, slug, category.description,
-        category.icon, category.color, category.imageUrl, category.sortOrder || 0,
-        true, category.isFeatured || false,
-        category.metadata ? JSON.stringify(category.metadata) : null, now, now
-      ]
+        category.parentCategoryId,
+        category.name,
+        slug,
+        category.description,
+        category.icon,
+        category.color,
+        category.imageUrl,
+        category.sortOrder || 0,
+        true,
+        category.isFeatured || false,
+        category.metadata ? JSON.stringify(category.metadata) : null,
+        now,
+        now,
+      ],
     );
     return mapToCategory(result!);
   }
@@ -146,10 +160,7 @@ export async function saveCategory(category: Partial<FaqCategory> & { name: stri
 
 export async function deleteCategory(faqCategoryId: string): Promise<void> {
   // Move articles to uncategorized
-  await query(
-    'UPDATE "faqArticle" SET "faqCategoryId" = NULL WHERE "faqCategoryId" = $1',
-    [faqCategoryId]
-  );
+  await query('UPDATE "faqArticle" SET "faqCategoryId" = NULL WHERE "faqCategoryId" = $1', [faqCategoryId]);
   await query('DELETE FROM "faqCategory" WHERE "faqCategoryId" = $1', [faqCategoryId]);
 }
 
@@ -158,24 +169,18 @@ export async function deleteCategory(faqCategoryId: string): Promise<void> {
 // ============================================================================
 
 export async function getArticle(faqArticleId: string): Promise<FaqArticle | null> {
-  const row = await queryOne<Record<string, any>>(
-    'SELECT * FROM "faqArticle" WHERE "faqArticleId" = $1',
-    [faqArticleId]
-  );
+  const row = await queryOne<Record<string, any>>('SELECT * FROM "faqArticle" WHERE "faqArticleId" = $1', [faqArticleId]);
   return row ? mapToArticle(row) : null;
 }
 
 export async function getArticleBySlug(slug: string): Promise<FaqArticle | null> {
-  const row = await queryOne<Record<string, any>>(
-    'SELECT * FROM "faqArticle" WHERE "slug" = $1',
-    [slug]
-  );
+  const row = await queryOne<Record<string, any>>('SELECT * FROM "faqArticle" WHERE "slug" = $1', [slug]);
   return row ? mapToArticle(row) : null;
 }
 
 export async function getArticles(
   filters?: { faqCategoryId?: string; isPublished?: boolean; isFeatured?: boolean },
-  pagination?: { limit?: number; offset?: number }
+  pagination?: { limit?: number; offset?: number },
 ): Promise<{ data: FaqArticle[]; total: number }> {
   let whereClause = '1=1';
   const params: any[] = [];
@@ -194,10 +199,7 @@ export async function getArticles(
     params.push(filters.isFeatured);
   }
 
-  const countResult = await queryOne<{ count: string }>(
-    `SELECT COUNT(*) as count FROM "faqArticle" WHERE ${whereClause}`,
-    params
-  );
+  const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "faqArticle" WHERE ${whereClause}`, params);
 
   const limit = pagination?.limit || 20;
   const offset = pagination?.offset || 0;
@@ -206,12 +208,12 @@ export async function getArticles(
     `SELECT * FROM "faqArticle" WHERE ${whereClause} 
      ORDER BY "isPinned" DESC, "sortOrder" ASC, "views" DESC
      LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
-    [...params, limit, offset]
+    [...params, limit, offset],
   );
 
   return {
     data: (rows || []).map(mapToArticle),
-    total: parseInt(countResult?.count || '0')
+    total: parseInt(countResult?.count || '0'),
   };
 }
 
@@ -222,7 +224,7 @@ export async function searchArticles(searchQuery: string, limit: number = 10): P
      AND ("title" ILIKE $1 OR "content" ILIKE $1 OR $2 = ANY("keywords"))
      ORDER BY "views" DESC
      LIMIT $3`,
-    [`%${searchQuery}%`, searchQuery.toLowerCase(), limit]
+    [`%${searchQuery}%`, searchQuery.toLowerCase(), limit],
   );
   return (rows || []).map(mapToArticle);
 }
@@ -231,7 +233,7 @@ export async function getPopularArticles(limit: number = 10): Promise<FaqArticle
   const rows = await query<Record<string, any>[]>(
     `SELECT * FROM "faqArticle" WHERE "isPublished" = true 
      ORDER BY "views" DESC LIMIT $1`,
-    [limit]
+    [limit],
   );
   return (rows || []).map(mapToArticle);
 }
@@ -246,7 +248,7 @@ export async function getRelatedArticles(faqArticleId: string, limit: number = 5
       `SELECT * FROM "faqArticle" 
        WHERE "faqArticleId" = ANY($1) AND "isPublished" = true
        LIMIT $2`,
-      [article.relatedArticleIds, limit]
+      [article.relatedArticleIds, limit],
     );
     if (rows && rows.length >= limit) {
       return rows.map(mapToArticle);
@@ -258,14 +260,19 @@ export async function getRelatedArticles(faqArticleId: string, limit: number = 5
     `SELECT * FROM "faqArticle" 
      WHERE "faqCategoryId" = $1 AND "faqArticleId" != $2 AND "isPublished" = true
      ORDER BY "views" DESC LIMIT $3`,
-    [article.faqCategoryId, faqArticleId, limit]
+    [article.faqCategoryId, faqArticleId, limit],
   );
   return (rows || []).map(mapToArticle);
 }
 
 export async function saveArticle(article: Partial<FaqArticle> & { title: string; content: string }): Promise<FaqArticle> {
   const now = new Date().toISOString();
-  const slug = article.slug || article.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+  const slug =
+    article.slug ||
+    article.title
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9-]/g, '');
 
   if (article.faqArticleId) {
     await query(
@@ -276,15 +283,24 @@ export async function saveArticle(article: Partial<FaqArticle> & { title: string
         "publishedAt" = $13, "lastEditedBy" = $14, "metadata" = $15, "updatedAt" = $16
       WHERE "faqArticleId" = $17`,
       [
-        article.faqCategoryId, article.title, slug, article.content, article.contentHtml,
-        article.excerpt, article.keywords, article.relatedArticleIds,
-        article.sortOrder || 0, article.isPublished || false,
-        article.isFeatured || false, article.isPinned || false,
+        article.faqCategoryId,
+        article.title,
+        slug,
+        article.content,
+        article.contentHtml,
+        article.excerpt,
+        article.keywords,
+        article.relatedArticleIds,
+        article.sortOrder || 0,
+        article.isPublished || false,
+        article.isFeatured || false,
+        article.isPinned || false,
         article.isPublished && !article.publishedAt ? now : article.publishedAt?.toISOString(),
         article.lastEditedBy,
         article.metadata ? JSON.stringify(article.metadata) : null,
-        now, article.faqArticleId
-      ]
+        now,
+        article.faqArticleId,
+      ],
     );
 
     // Update category article count
@@ -303,13 +319,25 @@ export async function saveArticle(article: Partial<FaqArticle> & { title: string
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
       RETURNING *`,
       [
-        article.faqCategoryId, article.title, slug, article.content, article.contentHtml,
-        article.excerpt, article.keywords, article.relatedArticleIds,
-        article.sortOrder || 0, article.isPublished || false,
-        article.isFeatured || false, article.isPinned || false,
-        article.isPublished ? now : null, article.authorId, article.authorName,
-        article.metadata ? JSON.stringify(article.metadata) : null, now, now
-      ]
+        article.faqCategoryId,
+        article.title,
+        slug,
+        article.content,
+        article.contentHtml,
+        article.excerpt,
+        article.keywords,
+        article.relatedArticleIds,
+        article.sortOrder || 0,
+        article.isPublished || false,
+        article.isFeatured || false,
+        article.isPinned || false,
+        article.isPublished ? now : null,
+        article.authorId,
+        article.authorName,
+        article.metadata ? JSON.stringify(article.metadata) : null,
+        now,
+        now,
+      ],
     );
 
     // Update category article count
@@ -324,11 +352,11 @@ export async function saveArticle(article: Partial<FaqArticle> & { title: string
 export async function publishArticle(faqArticleId: string): Promise<void> {
   const now = new Date().toISOString();
   const article = await getArticle(faqArticleId);
-  
+
   await query(
     `UPDATE "faqArticle" SET "isPublished" = true, "publishedAt" = $1, "updatedAt" = $1
      WHERE "faqArticleId" = $2`,
-    [now, faqArticleId]
+    [now, faqArticleId],
   );
 
   if (article?.faqCategoryId) {
@@ -338,11 +366,11 @@ export async function publishArticle(faqArticleId: string): Promise<void> {
 
 export async function unpublishArticle(faqArticleId: string): Promise<void> {
   const article = await getArticle(faqArticleId);
-  
+
   await query(
     `UPDATE "faqArticle" SET "isPublished" = false, "updatedAt" = $1
      WHERE "faqArticleId" = $2`,
-    [new Date().toISOString(), faqArticleId]
+    [new Date().toISOString(), faqArticleId],
   );
 
   if (article?.faqCategoryId) {
@@ -353,7 +381,7 @@ export async function unpublishArticle(faqArticleId: string): Promise<void> {
 export async function deleteArticle(faqArticleId: string): Promise<void> {
   const article = await getArticle(faqArticleId);
   await query('DELETE FROM "faqArticle" WHERE "faqArticleId" = $1', [faqArticleId]);
-  
+
   if (article?.faqCategoryId) {
     await updateCategoryArticleCount(article.faqCategoryId);
   }
@@ -364,13 +392,10 @@ export async function incrementViews(faqArticleId: string, isUnique: boolean = f
     await query(
       `UPDATE "faqArticle" SET "views" = "views" + 1, "uniqueViews" = "uniqueViews" + 1
        WHERE "faqArticleId" = $1`,
-      [faqArticleId]
+      [faqArticleId],
     );
   } else {
-    await query(
-      'UPDATE "faqArticle" SET "views" = "views" + 1 WHERE "faqArticleId" = $1',
-      [faqArticleId]
-    );
+    await query('UPDATE "faqArticle" SET "views" = "views" + 1 WHERE "faqArticleId" = $1', [faqArticleId]);
   }
 }
 
@@ -381,7 +406,7 @@ export async function submitHelpfulVote(faqArticleId: string, isHelpful: boolean
         "helpfulYes" = "helpfulYes" + 1,
         "helpfulScore" = ("helpfulYes" + 1)::decimal / NULLIF("helpfulYes" + "helpfulNo" + 1, 0)
        WHERE "faqArticleId" = $1`,
-      [faqArticleId]
+      [faqArticleId],
     );
   } else {
     await query(
@@ -389,7 +414,7 @@ export async function submitHelpfulVote(faqArticleId: string, isHelpful: boolean
         "helpfulNo" = "helpfulNo" + 1,
         "helpfulScore" = "helpfulYes"::decimal / NULLIF("helpfulYes" + "helpfulNo" + 1, 0)
        WHERE "faqArticleId" = $1`,
-      [faqArticleId]
+      [faqArticleId],
     );
   }
 }
@@ -403,7 +428,7 @@ async function updateCategoryArticleCount(faqCategoryId: string): Promise<void> 
       ),
       "updatedAt" = $2
      WHERE "faqCategoryId" = $1`,
-    [faqCategoryId, new Date().toISOString()]
+    [faqCategoryId, new Date().toISOString()],
   );
 }
 
@@ -427,7 +452,7 @@ function mapToCategory(row: Record<string, any>): FaqCategory {
     isFeatured: Boolean(row.isFeatured),
     metadata: row.metadata,
     createdAt: new Date(row.createdAt),
-    updatedAt: new Date(row.updatedAt)
+    updatedAt: new Date(row.updatedAt),
   };
 }
 
@@ -457,6 +482,6 @@ function mapToArticle(row: Record<string, any>): FaqArticle {
     lastEditedBy: row.lastEditedBy,
     metadata: row.metadata,
     createdAt: new Date(row.createdAt),
-    updatedAt: new Date(row.updatedAt)
+    updatedAt: new Date(row.updatedAt),
   };
 }

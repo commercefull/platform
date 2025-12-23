@@ -21,7 +21,7 @@ export const gdprDashboard = async (req: Request, res: Response): Promise<void> 
         COUNT(CASE WHEN "status" = 'pending' THEN 1 END) as "pendingRequests",
         COUNT(CASE WHEN "status" = 'completed' AND "updatedAt" >= DATE_TRUNC('month', CURRENT_DATE) THEN 1 END) as "completedRequests",
         AVG(EXTRACT(EPOCH FROM ("updatedAt" - "createdAt")) / 86400) as "avgProcessingDays"
-       FROM "gdprRequest"`
+       FROM "gdprRequest"`,
     );
 
     // Get consent stats
@@ -31,7 +31,7 @@ export const gdprDashboard = async (req: Request, res: Response): Promise<void> 
         ROUND(100.0 * COUNT(CASE WHEN "acceptsMarketing" = true THEN 1 END) / COUNT(*), 1) as "marketingConsentRate",
         COUNT(CASE WHEN "acceptsAnalytics" = true THEN 1 END) as "analyticsConsent",
         ROUND(100.0 * COUNT(CASE WHEN "acceptsAnalytics" = true THEN 1 END) / COUNT(*), 1) as "analyticsConsentRate"
-       FROM "customer"`
+       FROM "customer"`,
     );
 
     // Get recent requests
@@ -41,7 +41,7 @@ export const gdprDashboard = async (req: Request, res: Response): Promise<void> 
        LEFT JOIN "customer" c ON gr."customerId" = c."customerId"
        WHERE gr."deletedAt" IS NULL
        ORDER BY gr."createdAt" DESC
-       LIMIT 20`
+       LIMIT 20`,
     );
 
     adminRespond(req, res, 'gdpr/index', {
@@ -50,13 +50,13 @@ export const gdprDashboard = async (req: Request, res: Response): Promise<void> 
         pendingRequests: parseInt(statsResult?.pendingRequests || '0'),
         completedRequests: parseInt(statsResult?.completedRequests || '0'),
         avgProcessingDays: Math.round(parseFloat(statsResult?.avgProcessingDays || '0')),
-        consentRate: parseFloat(consentResult?.marketingConsentRate || '0')
+        consentRate: parseFloat(consentResult?.marketingConsentRate || '0'),
       },
       requests: requests || [],
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load GDPR dashboard',
@@ -75,7 +75,7 @@ export const createGdprRequest = async (req: Request, res: Response): Promise<vo
     // Find customer by email
     const customer = await queryOne<{ customerId: string }>(
       `SELECT "customerId" FROM "customer" WHERE "email" = $1 AND "deletedAt" IS NULL`,
-      [customerEmail]
+      [customerEmail],
     );
 
     const requestId = uuidv4();
@@ -90,14 +90,14 @@ export const createGdprRequest = async (req: Request, res: Response): Promise<vo
         description || null,
         customerEmail,
         customerName || null,
-        new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days from now
-      ]
+        new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+      ],
     );
 
     res.redirect('/hub/gdpr?success=GDPR request created');
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.redirect('/hub/gdpr?error=' + encodeURIComponent(error.message));
   }
 };
@@ -111,7 +111,7 @@ export const viewGdprRequest = async (req: Request, res: Response): Promise<void
        FROM "gdprRequest" gr
        LEFT JOIN "customer" c ON gr."customerId" = c."customerId"
        WHERE gr."requestId" = $1 AND gr."deletedAt" IS NULL`,
-      [requestId]
+      [requestId],
     );
 
     if (!request) {
@@ -128,7 +128,7 @@ export const viewGdprRequest = async (req: Request, res: Response): Promise<void
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load GDPR request',
@@ -140,15 +140,12 @@ export const processGdprRequest = async (req: Request, res: Response): Promise<v
   try {
     const { requestId } = req.params;
 
-    await query(
-      `UPDATE "gdprRequest" SET "status" = 'processing', "updatedAt" = NOW() WHERE "requestId" = $1`,
-      [requestId]
-    );
+    await query(`UPDATE "gdprRequest" SET "status" = 'processing', "updatedAt" = NOW() WHERE "requestId" = $1`, [requestId]);
 
     res.json({ success: true });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -158,15 +155,15 @@ export const completeGdprRequest = async (req: Request, res: Response): Promise<
     const { requestId } = req.params;
     const { notes } = req.body;
 
-    await query(
-      `UPDATE "gdprRequest" SET "status" = 'completed', "notes" = $1, "updatedAt" = NOW() WHERE "requestId" = $2`,
-      [notes, requestId]
-    );
+    await query(`UPDATE "gdprRequest" SET "status" = 'completed', "notes" = $1, "updatedAt" = NOW() WHERE "requestId" = $2`, [
+      notes,
+      requestId,
+    ]);
 
     res.json({ success: true });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -181,7 +178,7 @@ export const consentManagement = async (req: Request, res: Response): Promise<vo
       cookieConsentRequired: true,
       marketingConsentRequired: true,
       analyticsConsentRequired: true,
-      consentRetentionDays: 365
+      consentRetentionDays: 365,
     };
 
     adminRespond(req, res, 'gdpr/consent', {
@@ -190,7 +187,7 @@ export const consentManagement = async (req: Request, res: Response): Promise<vo
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load consent management',

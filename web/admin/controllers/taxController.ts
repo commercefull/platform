@@ -15,13 +15,9 @@ import { adminRespond } from 'web/respond';
 
 export const listTaxSettings = async (req: Request, res: Response): Promise<void> => {
   try {
-    const taxRates = await query<Array<any>>(
-      `SELECT * FROM "taxRate" WHERE "deletedAt" IS NULL ORDER BY "name"`
-    );
+    const taxRates = await query<Array<any>>(`SELECT * FROM "taxRate" WHERE "deletedAt" IS NULL ORDER BY "name"`);
 
-    const taxZones = await query<Array<any>>(
-      `SELECT * FROM "taxZone" WHERE "deletedAt" IS NULL ORDER BY "name"`
-    );
+    const taxZones = await query<Array<any>>(`SELECT * FROM "taxZone" WHERE "deletedAt" IS NULL ORDER BY "name"`);
 
     const taxClasses = await query<Array<any>>(
       `SELECT tc.*, COUNT(p."productId") as "productCount"
@@ -29,7 +25,7 @@ export const listTaxSettings = async (req: Request, res: Response): Promise<void
        LEFT JOIN "product" p ON tc."taxClassId" = p."taxClass"
        WHERE tc."deletedAt" IS NULL
        GROUP BY tc."taxClassId"
-       ORDER BY tc."name"`
+       ORDER BY tc."name"`,
     );
 
     adminRespond(req, res, 'tax/index', {
@@ -37,12 +33,12 @@ export const listTaxSettings = async (req: Request, res: Response): Promise<void
       taxRates: taxRates || [],
       taxZones: taxZones || [],
       taxClasses: taxClasses || [],
-      
-      success: req.query.success || null
+
+      success: req.query.success || null,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load tax settings',
@@ -61,13 +57,13 @@ export const createTaxRate = async (req: Request, res: Response): Promise<void> 
     await query(
       `INSERT INTO "taxRate" ("taxRateId", "name", "rate", "country", "state", "taxClass", "isActive", "createdAt", "updatedAt")
        VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())`,
-      [uuidv4(), name, parseFloat(rate), country || null, state || null, taxClass || null, isActive === 'true']
+      [uuidv4(), name, parseFloat(rate), country || null, state || null, taxClass || null, isActive === 'true'],
     );
 
     res.redirect('/hub/tax?success=Tax rate created');
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.redirect('/hub/tax?error=' + encodeURIComponent(error.message));
   }
 };
@@ -80,13 +76,13 @@ export const updateTaxRate = async (req: Request, res: Response): Promise<void> 
     await query(
       `UPDATE "taxRate" SET "name" = $1, "rate" = $2, "country" = $3, "state" = $4, "taxClass" = $5, "isActive" = $6, "updatedAt" = NOW()
        WHERE "taxRateId" = $7`,
-      [name, parseFloat(rate), country || null, state || null, taxClass || null, isActive === 'true', taxRateId]
+      [name, parseFloat(rate), country || null, state || null, taxClass || null, isActive === 'true', taxRateId],
     );
 
     res.redirect('/hub/tax?success=Tax rate updated');
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -98,7 +94,7 @@ export const deleteTaxRate = async (req: Request, res: Response): Promise<void> 
     res.json({ success: true });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -115,13 +111,13 @@ export const createTaxZone = async (req: Request, res: Response): Promise<void> 
     await query(
       `INSERT INTO "taxZone" ("taxZoneId", "name", "description", "countries", "isActive", "createdAt", "updatedAt")
        VALUES ($1, $2, $3, $4, $5, NOW(), NOW())`,
-      [uuidv4(), name, description || null, JSON.stringify(countriesArray), isActive === 'true']
+      [uuidv4(), name, description || null, JSON.stringify(countriesArray), isActive === 'true'],
     );
 
     res.redirect('/hub/tax?success=Tax zone created');
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.redirect('/hub/tax?error=' + encodeURIComponent(error.message));
   }
 };
@@ -135,13 +131,13 @@ export const updateTaxZone = async (req: Request, res: Response): Promise<void> 
     await query(
       `UPDATE "taxZone" SET "name" = $1, "description" = $2, "countries" = $3, "isActive" = $4, "updatedAt" = NOW()
        WHERE "taxZoneId" = $5`,
-      [name, description || null, JSON.stringify(countriesArray), isActive === 'true', taxZoneId]
+      [name, description || null, JSON.stringify(countriesArray), isActive === 'true', taxZoneId],
     );
 
     res.redirect('/hub/tax?success=Tax zone updated');
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -153,7 +149,7 @@ export const deleteTaxZone = async (req: Request, res: Response): Promise<void> 
     res.json({ success: true });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -169,13 +165,13 @@ export const createTaxClass = async (req: Request, res: Response): Promise<void>
     await query(
       `INSERT INTO "taxClass" ("taxClassId", "name", "description", "createdAt", "updatedAt")
        VALUES ($1, $2, $3, NOW(), NOW())`,
-      [uuidv4(), name, description || null]
+      [uuidv4(), name, description || null],
     );
 
     res.redirect('/hub/tax?success=Tax class created');
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.redirect('/hub/tax?error=' + encodeURIComponent(error.message));
   }
 };
@@ -185,15 +181,16 @@ export const updateTaxClass = async (req: Request, res: Response): Promise<void>
     const { taxClassId } = req.params;
     const { name, description } = req.body;
 
-    await query(
-      `UPDATE "taxClass" SET "name" = $1, "description" = $2, "updatedAt" = NOW() WHERE "taxClassId" = $3`,
-      [name, description || null, taxClassId]
-    );
+    await query(`UPDATE "taxClass" SET "name" = $1, "description" = $2, "updatedAt" = NOW() WHERE "taxClassId" = $3`, [
+      name,
+      description || null,
+      taxClassId,
+    ]);
 
     res.redirect('/hub/tax?success=Tax class updated');
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -205,7 +202,7 @@ export const deleteTaxClass = async (req: Request, res: Response): Promise<void>
     res.json({ success: true });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message });
   }
 };

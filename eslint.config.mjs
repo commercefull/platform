@@ -1,19 +1,24 @@
 import js from '@eslint/js';
 import tsParser from '@typescript-eslint/parser';
 import tsPlugin from '@typescript-eslint/eslint-plugin';
-import prettierConfig from 'eslint-config-prettier';
-import prettierPlugin from 'eslint-plugin-prettier/recommended';
 import globals from 'globals';
 
 export default [
   js.configs.recommended,
   {
-    files: ['**/*.ts'],
+    files: ['**/*.ts', '**/*.js'],
     languageOptions: {
-      globals: globals.node,
+      globals: {
+        ...globals.node,
+        console: 'readonly',
+        process: 'readonly',
+        Buffer: 'readonly',
+        __dirname: 'readonly',
+        __filename: 'readonly',
+      },
       parser: tsParser,
       parserOptions: {
-        ecmaVersion: 'latest',
+        ecmaVersion: 2020,
         sourceType: 'module',
         project: './tsconfig.json',
       },
@@ -31,54 +36,21 @@ export default [
       'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     },
   },
-  // Enable Jest globals for test files
-  {
-    files: ['**/*.test.ts', '**/*.spec.ts'],
-    languageOptions: {
-      globals: {
-        ...globals.node,
-        ...globals.jest,
-      },
-    },
-  },
-  prettierConfig,
-  prettierPlugin,
   {
     ignores: [
-      'app.mjs',
-      '.git/',
-      '.github/',
-      '.husky/',
-      '.vscode/',
-      'docs/',
-      'infra/',
-      'cypress/',
-      'migrations/',
-      'seeds/',
-      'tsconfig.json',
       'node_modules/',
       'dist/',
+      'build/',
       'coverage/',
+      'public/',
+      'docs/',
+      'migrations/',
+      'seeds/',
       '**/*.d.ts',
       '**/*.js',
-      '!eslint.config.js',
-      'build/',
-      'public/',
-      '.env',
-      '.env.*',
+      '!eslint.config.mjs',
+      '.env*',
       '!.env.example',
-      '*.suo',
-      '*.ntvs*',
-      '*.njsproj',
-      '*.sln',
-      '*.sw?',
-      '.DS_Store',
-      '.DS_Store?',
-      '._*',
-      '.Spotlight-V100',
-      '.Trashes',
-      'ehthumbs.db',
-      'Thumbs.db',
     ],
   },
 ];

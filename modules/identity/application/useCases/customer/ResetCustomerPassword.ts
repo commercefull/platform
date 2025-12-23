@@ -28,7 +28,7 @@ export class ResetCustomerPasswordUseCase {
     private readonly customerRepo: any,
     private readonly passwordResetRepo: any,
     private readonly authService: any,
-    private readonly emailService: any
+    private readonly emailService: any,
   ) {}
 
   async requestReset(input: RequestPasswordResetInput): Promise<RequestPasswordResetOutput> {
@@ -38,7 +38,7 @@ export class ResetCustomerPasswordUseCase {
 
     // Find customer
     const customer = await this.customerRepo.findByEmail(input.email);
-    
+
     // Don't reveal if email exists - always return success
     if (!customer) {
       return {
@@ -66,9 +66,7 @@ export class ResetCustomerPasswordUseCase {
         token,
         firstName: customer.firstName,
       });
-    } catch (error) {
-      
-    }
+    } catch (error) {}
 
     // Emit event
     eventBus.emit('customer.password_reset_requested', {

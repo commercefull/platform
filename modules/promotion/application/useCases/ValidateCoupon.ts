@@ -14,7 +14,7 @@ export class ValidateCouponCommand {
     public readonly code: string,
     public readonly orderTotal: number,
     public readonly customerId?: string,
-    public readonly merchantId?: string
+    public readonly merchantId?: string,
   ) {}
 }
 
@@ -49,7 +49,7 @@ export class ValidateCouponUseCase {
 
     // Find coupon by code
     const coupon = await couponRepo.findByCode(command.code.toUpperCase(), command.merchantId);
-    
+
     if (!coupon) {
       return { valid: false, message: 'Coupon not found', errors: ['coupon_not_found'] };
     }
@@ -76,25 +76,22 @@ export class ValidateCouponUseCase {
 
     // Check minimum order amount
     if (coupon.minOrderAmount && command.orderTotal < Number(coupon.minOrderAmount)) {
-      return { 
-        valid: false, 
-        message: `Minimum order amount of ${coupon.minOrderAmount} required`, 
-        errors: ['min_order_not_met'] 
+      return {
+        valid: false,
+        message: `Minimum order amount of ${coupon.minOrderAmount} required`,
+        errors: ['min_order_not_met'],
       };
     }
 
     // Check per-customer usage if customerId provided
     if (command.customerId && coupon.maxUsagePerCustomer) {
-      const customerUsage = await couponRepo.getCustomerUsageCount(
-        coupon.promotionCouponId, 
-        command.customerId
-      );
-      
+      const customerUsage = await couponRepo.getCustomerUsageCount(coupon.promotionCouponId, command.customerId);
+
       if (customerUsage >= coupon.maxUsagePerCustomer) {
-        return { 
-          valid: false, 
-          message: 'You have reached the usage limit for this coupon', 
-          errors: ['customer_usage_limit_reached'] 
+        return {
+          valid: false,
+          message: 'You have reached the usage limit for this coupon',
+          errors: ['customer_usage_limit_reached'],
         };
       }
     }
@@ -106,7 +103,7 @@ export class ValidateCouponUseCase {
       valid: true,
       coupon,
       discountAmount,
-      message: 'Coupon is valid'
+      message: 'Coupon is valid',
     };
   }
 }

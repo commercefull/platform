@@ -72,25 +72,33 @@ export interface ProductRepository {
   getDefaultVariant(productId: string): Promise<ProductVariant | null>;
 
   // Product Images
-  getProductImages(productId: string): Promise<Array<{
-    imageId: string;
-    url: string;
-    altText?: string;
-    position: number;
-    isPrimary: boolean;
-  }>>;
-  addProductImage(productId: string, image: {
-    imageId: string;
-    url: string;
-    altText?: string;
-    position: number;
-    isPrimary: boolean;
-  }): Promise<void>;
-  updateProductImage(imageId: string, updates: {
-    altText?: string;
-    position?: number;
-    isPrimary?: boolean;
-  }): Promise<void>;
+  getProductImages(productId: string): Promise<
+    Array<{
+      imageId: string;
+      url: string;
+      altText?: string;
+      position: number;
+      isPrimary: boolean;
+    }>
+  >;
+  addProductImage(
+    productId: string,
+    image: {
+      imageId: string;
+      url: string;
+      altText?: string;
+      position: number;
+      isPrimary: boolean;
+    },
+  ): Promise<void>;
+  updateProductImage(
+    imageId: string,
+    updates: {
+      altText?: string;
+      position?: number;
+      isPrimary?: boolean;
+    },
+  ): Promise<void>;
   deleteProductImage(imageId: string): Promise<void>;
   reorderProductImages(productId: string, imageIds: string[]): Promise<void>;
 }
@@ -113,7 +121,7 @@ export interface CategoryRepository {
   getBreadcrumb(categoryId: string): Promise<ProductCategory[]>;
   moveCategory(categoryId: string, newParentId: string | null): Promise<void>;
   reorderCategories(parentId: string | null, categoryIds: string[]): Promise<void>;
-  
+
   // Product counts
   updateProductCount(categoryId: string): Promise<void>;
   recalculateAllProductCounts(): Promise<void>;
@@ -125,7 +133,7 @@ export interface VariantRepository {
   findByProductId(productId: string): Promise<ProductVariant[]>;
   save(variant: ProductVariant): Promise<ProductVariant>;
   delete(variantId: string): Promise<void>;
-  
+
   // Stock management
   updateStock(variantId: string, quantity: number): Promise<void>;
   incrementStock(variantId: string, amount: number): Promise<void>;

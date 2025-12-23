@@ -1,6 +1,6 @@
 /**
  * CreateReward Use Case
- * 
+ *
  * Creates a new reward that can be redeemed with loyalty points.
  */
 

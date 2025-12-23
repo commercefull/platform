@@ -1,16 +1,13 @@
 /**
  * Notification Customer Router
- * 
+ *
  * Customer-facing routes for notification management.
  */
 
-import express from "express";
-import { isCustomerLoggedIn } from "../../libs/auth";
-import {
-  GetNotificationsUseCase,
-  MarkAsReadUseCase,
-} from "./application/useCases";
-import notificationRepo from "./repos/notificationRepo";
+import express from 'express';
+import { isCustomerLoggedIn } from '../../libs/auth';
+import { GetNotificationsUseCase, MarkAsReadUseCase } from './application/useCases';
+import notificationRepo from './repos/notificationRepo';
 
 const router = express.Router();
 
@@ -20,13 +17,13 @@ router.use(isCustomerLoggedIn);
  * Get customer's notifications
  * GET /notifications
  */
-router.get("/notifications", async (req, res) => {
+router.get('/notifications', async (req, res) => {
   try {
     const useCase = new GetNotificationsUseCase(notificationRepo);
     const customerId = (req as any).customer?.customerId;
-    
+
     if (!customerId) {
-      return res.status(401).json({ success: false, error: "Not authenticated" });
+      return res.status(401).json({ success: false, error: 'Not authenticated' });
     }
 
     const result = await useCase.execute({
@@ -47,13 +44,13 @@ router.get("/notifications", async (req, res) => {
  * Get unread notification count
  * GET /notifications/count
  */
-router.get("/notifications/count", async (req, res) => {
+router.get('/notifications/count', async (req, res) => {
   try {
     const useCase = new GetNotificationsUseCase(notificationRepo);
     const customerId = (req as any).customer?.customerId;
-    
+
     if (!customerId) {
-      return res.status(401).json({ success: false, error: "Not authenticated" });
+      return res.status(401).json({ success: false, error: 'Not authenticated' });
     }
 
     const result = await useCase.execute({
@@ -74,13 +71,13 @@ router.get("/notifications/count", async (req, res) => {
  * Mark notification as read
  * PUT /notifications/:notificationId/read
  */
-router.put("/notifications/:notificationId/read", async (req, res) => {
+router.put('/notifications/:notificationId/read', async (req, res) => {
   try {
     const useCase = new MarkAsReadUseCase(notificationRepo);
     const customerId = (req as any).customer?.customerId;
-    
+
     if (!customerId) {
-      return res.status(401).json({ success: false, error: "Not authenticated" });
+      return res.status(401).json({ success: false, error: 'Not authenticated' });
     }
 
     const result = await useCase.execute({
@@ -98,18 +95,18 @@ router.put("/notifications/:notificationId/read", async (req, res) => {
  * Mark multiple notifications as read
  * PUT /notifications/read
  */
-router.put("/notifications/read", async (req, res) => {
+router.put('/notifications/read', async (req, res) => {
   try {
     const useCase = new MarkAsReadUseCase(notificationRepo);
     const customerId = (req as any).customer?.customerId;
-    
+
     if (!customerId) {
-      return res.status(401).json({ success: false, error: "Not authenticated" });
+      return res.status(401).json({ success: false, error: 'Not authenticated' });
     }
 
     const notificationIds = req.body.notificationIds;
     if (!notificationIds || !Array.isArray(notificationIds)) {
-      return res.status(400).json({ success: false, error: "notificationIds array is required" });
+      return res.status(400).json({ success: false, error: 'notificationIds array is required' });
     }
 
     const result = await useCase.execute({

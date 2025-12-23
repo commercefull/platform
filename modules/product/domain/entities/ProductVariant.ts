@@ -76,19 +76,14 @@ export class ProductVariant {
       productId: props.productId,
       sku: props.sku,
       name: variantName,
-      price: Price.create(
-        props.basePrice,
-        props.currencyCode || 'USD',
-        props.salePrice,
-        props.cost
-      ),
+      price: Price.create(props.basePrice, props.currencyCode || 'USD', props.salePrice, props.cost),
       dimensions: Dimensions.create({
         weight: props.weight,
         weightUnit: props.weightUnit,
         length: props.length,
         width: props.width,
         height: props.height,
-        dimensionUnit: props.dimensionUnit
+        dimensionUnit: props.dimensionUnit,
       }),
       attributes: props.attributes,
       imageId: props.imageId,
@@ -102,7 +97,7 @@ export class ProductVariant {
       externalId: props.externalId,
       metadata: props.metadata,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     });
   }
 
@@ -111,25 +106,63 @@ export class ProductVariant {
   }
 
   // Getters
-  get variantId(): string { return this.props.variantId; }
-  get productId(): string { return this.props.productId; }
-  get sku(): string { return this.props.sku; }
-  get name(): string { return this.props.name; }
-  get price(): Price { return this.props.price; }
-  get dimensions(): Dimensions { return this.props.dimensions; }
-  get attributes(): VariantAttribute[] { return [...this.props.attributes]; }
-  get imageId(): string | undefined { return this.props.imageId; }
-  get imageUrl(): string | undefined { return this.props.imageUrl; }
-  get stockQuantity(): number { return this.props.stockQuantity; }
-  get lowStockThreshold(): number { return this.props.lowStockThreshold; }
-  get isDefault(): boolean { return this.props.isDefault; }
-  get isActive(): boolean { return this.props.isActive; }
-  get position(): number { return this.props.position; }
-  get barcode(): string | undefined { return this.props.barcode; }
-  get externalId(): string | undefined { return this.props.externalId; }
-  get metadata(): Record<string, any> | undefined { return this.props.metadata; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get variantId(): string {
+    return this.props.variantId;
+  }
+  get productId(): string {
+    return this.props.productId;
+  }
+  get sku(): string {
+    return this.props.sku;
+  }
+  get name(): string {
+    return this.props.name;
+  }
+  get price(): Price {
+    return this.props.price;
+  }
+  get dimensions(): Dimensions {
+    return this.props.dimensions;
+  }
+  get attributes(): VariantAttribute[] {
+    return [...this.props.attributes];
+  }
+  get imageId(): string | undefined {
+    return this.props.imageId;
+  }
+  get imageUrl(): string | undefined {
+    return this.props.imageUrl;
+  }
+  get stockQuantity(): number {
+    return this.props.stockQuantity;
+  }
+  get lowStockThreshold(): number {
+    return this.props.lowStockThreshold;
+  }
+  get isDefault(): boolean {
+    return this.props.isDefault;
+  }
+  get isActive(): boolean {
+    return this.props.isActive;
+  }
+  get position(): number {
+    return this.props.position;
+  }
+  get barcode(): string | undefined {
+    return this.props.barcode;
+  }
+  get externalId(): string | undefined {
+    return this.props.externalId;
+  }
+  get metadata(): Record<string, any> | undefined {
+    return this.props.metadata;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   // Computed properties
   get isInStock(): boolean {
@@ -149,9 +182,7 @@ export class ProductVariant {
   }
 
   get attributeString(): string {
-    return this.props.attributes
-      .map(attr => `${attr.attributeName}: ${attr.displayValue || attr.value}`)
-      .join(', ');
+    return this.props.attributes.map(attr => `${attr.attributeName}: ${attr.displayValue || attr.value}`).join(', ');
   }
 
   // Domain methods
@@ -290,7 +321,7 @@ export class ProductVariant {
       externalId: this.props.externalId,
       metadata: this.props.metadata,
       createdAt: this.props.createdAt.toISOString(),
-      updatedAt: this.props.updatedAt.toISOString()
+      updatedAt: this.props.updatedAt.toISOString(),
     };
   }
 }

@@ -12,7 +12,7 @@ export enum PaymentStatus {
   REFUNDED = 'refunded',
   FAILED = 'failed',
   VOIDED = 'voided',
-  REQUIRES_ACTION = 'requires_action'
+  REQUIRES_ACTION = 'requires_action',
 }
 
 /**
@@ -27,7 +27,7 @@ export const PaymentStatusTransitions: Record<PaymentStatus, PaymentStatus[]> = 
   [PaymentStatus.PARTIALLY_REFUNDED]: [PaymentStatus.REFUNDED],
   [PaymentStatus.REFUNDED]: [],
   [PaymentStatus.FAILED]: [PaymentStatus.PENDING],
-  [PaymentStatus.VOIDED]: []
+  [PaymentStatus.VOIDED]: [],
 };
 
 /**
@@ -51,7 +51,7 @@ export function getPaymentStatusLabel(status: PaymentStatus): string {
     [PaymentStatus.REFUNDED]: 'Refunded',
     [PaymentStatus.FAILED]: 'Failed',
     [PaymentStatus.VOIDED]: 'Voided',
-    [PaymentStatus.REQUIRES_ACTION]: 'Requires Action'
+    [PaymentStatus.REQUIRES_ACTION]: 'Requires Action',
   };
   return labels[status] || status;
 }

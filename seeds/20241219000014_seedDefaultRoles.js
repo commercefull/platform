@@ -6,7 +6,6 @@ exports.seed = async function (knex) {
   // Check if roles already exist
   const existingRoles = await knex('role').where('isSystem', true).count('roleId as count').first();
   if (existingRoles && parseInt(existingRoles.count) > 0) {
-    
     return;
   }
 
@@ -18,7 +17,7 @@ exports.seed = async function (knex) {
       permissions: JSON.stringify(['*']),
       isSystem: true,
       createdAt: knex.fn.now(),
-      updatedAt: knex.fn.now()
+      updatedAt: knex.fn.now(),
     },
     {
       roleId: knex.raw('gen_random_uuid()'),
@@ -33,42 +32,29 @@ exports.seed = async function (knex) {
         'orders.edit',
         'customers.view',
         'analytics.view',
-        'settings.view'
+        'settings.view',
       ]),
       isSystem: true,
       createdAt: knex.fn.now(),
-      updatedAt: knex.fn.now()
+      updatedAt: knex.fn.now(),
     },
     {
       roleId: knex.raw('gen_random_uuid()'),
       name: 'Editor',
       description: 'Content and product management',
-      permissions: JSON.stringify([
-        'dashboard.view',
-        'products.view',
-        'products.create',
-        'products.edit'
-      ]),
+      permissions: JSON.stringify(['dashboard.view', 'products.view', 'products.create', 'products.edit']),
       isSystem: true,
       createdAt: knex.fn.now(),
-      updatedAt: knex.fn.now()
+      updatedAt: knex.fn.now(),
     },
     {
       roleId: knex.raw('gen_random_uuid()'),
       name: 'Viewer',
       description: 'Read-only access',
-      permissions: JSON.stringify([
-        'dashboard.view',
-        'products.view',
-        'orders.view',
-        'customers.view',
-        'analytics.view'
-      ]),
+      permissions: JSON.stringify(['dashboard.view', 'products.view', 'orders.view', 'customers.view', 'analytics.view']),
       isSystem: true,
       createdAt: knex.fn.now(),
-      updatedAt: knex.fn.now()
-    }
+      updatedAt: knex.fn.now(),
+    },
   ]);
-
-  
 };

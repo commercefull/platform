@@ -15,10 +15,7 @@ export class BusinessController {
   constructor() {
     const businessRepository = new BusinessRepo();
     const systemConfigRepository = new SystemConfigurationRepo();
-    this.createBusinessUseCase = new CreateBusinessUseCase(
-      businessRepository,
-      systemConfigRepository
-    );
+    this.createBusinessUseCase = new CreateBusinessUseCase(businessRepository, systemConfigRepository);
   }
 
   /**
@@ -40,23 +37,23 @@ export class BusinessController {
         theme: req.body.theme,
         isActive: req.body.isActive,
         settings: req.body.settings,
-        metadata: req.body.metadata
+        metadata: req.body.metadata,
       });
 
       const result = await this.createBusinessUseCase.execute(command);
 
       res.status(201).json({
         success: true,
-        data: result
+        data: result,
       });
     } catch (error) {
       logger.error('Error:', error);
-      
+
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       res.status(400).json({
         success: false,
         message: 'Failed to create business',
-        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
       });
     }
   }
@@ -73,22 +70,22 @@ export class BusinessController {
       if (!business) {
         return res.status(404).json({
           success: false,
-          message: 'Business not found'
+          message: 'Business not found',
         });
       }
 
       res.json({
         success: true,
-        data: business.toJSON()
+        data: business.toJSON(),
       });
     } catch (error) {
       logger.error('Error:', error);
-      
+
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       res.status(500).json({
         success: false,
         message: 'Failed to get business',
-        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
       });
     }
   }
@@ -105,22 +102,22 @@ export class BusinessController {
       if (!business) {
         return res.status(404).json({
           success: false,
-          message: 'Business not found'
+          message: 'Business not found',
         });
       }
 
       res.json({
         success: true,
-        data: business.toJSON()
+        data: business.toJSON(),
       });
     } catch (error) {
       logger.error('Error:', error);
-      
+
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       res.status(500).json({
         success: false,
         message: 'Failed to get business',
-        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
       });
     }
   }
@@ -137,16 +134,16 @@ export class BusinessController {
       res.json({
         success: true,
         data: businesses.map(business => business.toJSON()),
-        count: businesses.length
+        count: businesses.length,
       });
     } catch (error) {
       logger.error('Error:', error);
-      
+
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       res.status(500).json({
         success: false,
         message: 'Failed to list businesses',
-        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
       });
     }
   }

@@ -14,12 +14,7 @@ const purchaseOrderRepo = PurchaseOrderRepo;
 
 export const getReceivingRecords = async (req: Request, res: Response): Promise<void> => {
   try {
-    const {
-      status,
-      warehouseId,
-      supplierId,
-      limit = '50'
-    } = req.query;
+    const { status, warehouseId, supplierId, limit = '50' } = req.query;
 
     let receivingRecords;
 
@@ -37,7 +32,7 @@ export const getReceivingRecords = async (req: Request, res: Response): Promise<
     successResponse(res, receivingRecords);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to fetch receiving records');
   }
 };
@@ -55,7 +50,7 @@ export const getReceivingRecordById = async (req: Request, res: Response): Promi
     successResponse(res, receivingRecord);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to fetch receiving record');
   }
 };
@@ -67,7 +62,7 @@ export const getReceivingByPurchaseOrder = async (req: Request, res: Response): 
     successResponse(res, receivingRecords);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to fetch receiving records');
   }
 };
@@ -86,7 +81,7 @@ export const createReceivingRecord = async (req: Request, res: Response): Promis
       notes,
       discrepancies,
       attachments,
-      items // Array of receiving items
+      items, // Array of receiving items
     } = req.body;
 
     // Validate required fields
@@ -112,7 +107,7 @@ export const createReceivingRecord = async (req: Request, res: Response): Promis
       packageCount,
       notes,
       discrepancies,
-      attachments
+      attachments,
     };
 
     const receivingRecord = await receivingRecordRepo.create(recordParams);
@@ -122,19 +117,23 @@ export const createReceivingRecord = async (req: Request, res: Response): Promis
     for (const item of items) {
       const itemParams = {
         supplierReceivingRecordId: receivingRecord.supplierReceivingRecordId,
-        ...item
+        ...item,
       };
       const createdItem = await receivingItemRepo.create(itemParams);
       createdItems.push(createdItem);
     }
 
-    successResponse(res, {
-      receivingRecord,
-      items: createdItems
-    }, 201);
+    successResponse(
+      res,
+      {
+        receivingRecord,
+        items: createdItems,
+      },
+      201,
+    );
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to create receiving record');
   }
 };
@@ -154,7 +153,7 @@ export const updateReceivingRecord = async (req: Request, res: Response): Promis
     successResponse(res, receivingRecord);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to update receiving record');
   }
 };
@@ -172,7 +171,7 @@ export const completeReceiving = async (req: Request, res: Response): Promise<vo
     successResponse(res, receivingRecord);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to complete receiving record');
   }
 };
@@ -186,7 +185,7 @@ export const getReceivingItems = async (req: Request, res: Response): Promise<vo
     successResponse(res, items);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to fetch receiving items');
   }
 };
@@ -196,7 +195,7 @@ export const createReceivingItem = async (req: Request, res: Response): Promise<
     const { id } = req.params;
     const itemParams = {
       receivingRecordId: id,
-      ...req.body
+      ...req.body,
     };
 
     // Validate required fields
@@ -215,7 +214,7 @@ export const createReceivingItem = async (req: Request, res: Response): Promise<
     successResponse(res, item, 201);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to create receiving item');
   }
 };
@@ -235,7 +234,7 @@ export const updateReceivingItem = async (req: Request, res: Response): Promise<
     successResponse(res, item);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to update receiving item');
   }
 };
@@ -255,7 +254,7 @@ export const acceptReceivingItem = async (req: Request, res: Response): Promise<
     successResponse(res, item);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to accept receiving item');
   }
 };
@@ -280,7 +279,7 @@ export const rejectReceivingItem = async (req: Request, res: Response): Promise<
     successResponse(res, item);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to reject receiving item');
   }
 };

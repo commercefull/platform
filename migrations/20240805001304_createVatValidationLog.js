@@ -1,7 +1,7 @@
 /**
  * VAT Validation Log Table
  * Tracks all VAT number validations (VIES, HMRC, etc.) for audit trail
- * 
+ *
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
@@ -22,18 +22,18 @@ exports.up = function (knex) {
     t.enum('validationStatus', [
       'valid',
       'invalid',
-      'unavailable',    // Service unavailable
-      'timeout',        // Service timeout
-      'error',          // Other error
-      'format_invalid'  // Failed format check before API call
+      'unavailable', // Service unavailable
+      'timeout', // Service timeout
+      'error', // Other error
+      'format_invalid', // Failed format check before API call
     ]).notNullable();
     // Validation source
     t.enum('validationSource', [
-      'vies',     // EU VIES service
-      'hmrc',     // UK HMRC
-      'manual',   // Manual verification
-      'cache',    // From cached result
-      'format'    // Format-only check
+      'vies', // EU VIES service
+      'hmrc', // UK HMRC
+      'manual', // Manual verification
+      'cache', // From cached result
+      'format', // Format-only check
     ]).notNullable();
     t.string('requestId', 100); // External API request ID
     t.jsonb('response'); // Full API response
@@ -51,7 +51,7 @@ exports.up = function (knex) {
     // Audit
     t.string('ipAddress', 50);
     t.string('context', 50); // checkout, registration, admin, api
-    
+
     t.index('vatNumber');
     t.index('customerId');
     t.index('merchantId');

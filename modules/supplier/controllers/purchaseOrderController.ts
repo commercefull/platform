@@ -9,22 +9,24 @@ const purchaseOrderRepo = PurchaseOrderRepo;
 // ---------- Purchase Order CRUD Methods ----------
 export const getPurchaseOrders = async (req: Request, res: Response): Promise<void> => {
   try {
-    const {
-      status,
-      supplierId,
-      warehouseId,
-      limit = '50',
-      offset = '0'
-    } = req.query;
+    const { status, supplierId, warehouseId, limit = '50', offset = '0' } = req.query;
 
     let purchaseOrders;
 
     if (status) {
       purchaseOrders = await purchaseOrderRepo.findByStatus(status as any, parseInt(limit as string), parseInt(offset as string));
     } else if (supplierId) {
-      purchaseOrders = await purchaseOrderRepo.findBySupplierId(supplierId as string, parseInt(limit as string), parseInt(offset as string));
+      purchaseOrders = await purchaseOrderRepo.findBySupplierId(
+        supplierId as string,
+        parseInt(limit as string),
+        parseInt(offset as string),
+      );
     } else if (warehouseId) {
-      purchaseOrders = await purchaseOrderRepo.findByWarehouseId(warehouseId as string, parseInt(limit as string), parseInt(offset as string));
+      purchaseOrders = await purchaseOrderRepo.findByWarehouseId(
+        warehouseId as string,
+        parseInt(limit as string),
+        parseInt(offset as string),
+      );
     } else {
       // TODO: Implement findAll method if needed
       successResponse(res, []);
@@ -34,7 +36,7 @@ export const getPurchaseOrders = async (req: Request, res: Response): Promise<vo
     successResponse(res, purchaseOrders);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to fetch purchase orders');
   }
 };
@@ -52,7 +54,7 @@ export const getPurchaseOrderById = async (req: Request, res: Response): Promise
     successResponse(res, purchaseOrder);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to fetch purchase order');
   }
 };
@@ -62,16 +64,12 @@ export const getPurchaseOrdersBySupplierId = async (req: Request, res: Response)
     const { id } = req.params;
     const { limit = '50', offset = '0' } = req.query;
 
-    const purchaseOrders = await purchaseOrderRepo.findBySupplierId(
-      id,
-      parseInt(limit as string),
-      parseInt(offset as string)
-    );
+    const purchaseOrders = await purchaseOrderRepo.findBySupplierId(id, parseInt(limit as string), parseInt(offset as string));
 
     successResponse(res, purchaseOrders);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to fetch purchase orders');
   }
 };
@@ -100,7 +98,7 @@ export const createPurchaseOrder = async (req: Request, res: Response): Promise<
       notes,
       supplierNotes,
       attachments,
-      items // Array of purchase order items
+      items, // Array of purchase order items
     } = req.body;
 
     // Validate required fields
@@ -136,7 +134,7 @@ export const createPurchaseOrder = async (req: Request, res: Response): Promise<
       total,
       notes,
       supplierNotes,
-      attachments
+      attachments,
     };
 
     const purchaseOrder = await purchaseOrderRepo.create(poParams);
@@ -146,19 +144,23 @@ export const createPurchaseOrder = async (req: Request, res: Response): Promise<
     for (const item of items) {
       const itemParams = {
         supplierPurchaseOrderId: purchaseOrder.supplierPurchaseOrderId,
-        ...item
+        ...item,
       };
       const createdItem = await purchaseOrderRepo.createItem(itemParams);
       createdItems.push(createdItem);
     }
 
-    successResponse(res, {
-      purchaseOrder,
-      items: createdItems
-    }, 201);
+    successResponse(
+      res,
+      {
+        purchaseOrder,
+        items: createdItems,
+      },
+      201,
+    );
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to create purchase order');
   }
 };
@@ -178,7 +180,7 @@ export const updatePurchaseOrder = async (req: Request, res: Response): Promise<
     successResponse(res, purchaseOrder);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to update purchase order');
   }
 };
@@ -196,7 +198,7 @@ export const deletePurchaseOrder = async (req: Request, res: Response): Promise<
     successResponse(res, { message: 'Purchase order deleted successfully' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to delete purchase order');
   }
 };
@@ -214,7 +216,7 @@ export const approvePurchaseOrder = async (req: Request, res: Response): Promise
     successResponse(res, purchaseOrder);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to approve purchase order');
   }
 };
@@ -232,7 +234,7 @@ export const cancelPurchaseOrder = async (req: Request, res: Response): Promise<
     successResponse(res, purchaseOrder);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to cancel purchase order');
   }
 };
@@ -250,7 +252,7 @@ export const sendPurchaseOrder = async (req: Request, res: Response): Promise<vo
     successResponse(res, purchaseOrder);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to send purchase order');
   }
 };
@@ -264,7 +266,7 @@ export const getPurchaseOrderItems = async (req: Request, res: Response): Promis
     successResponse(res, items);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to fetch purchase order items');
   }
 };
@@ -274,7 +276,7 @@ export const addPurchaseOrderItem = async (req: Request, res: Response): Promise
     const { id } = req.params;
     const itemParams = {
       purchaseOrderId: id,
-      ...req.body
+      ...req.body,
     };
 
     // Validate required fields
@@ -294,7 +296,7 @@ export const addPurchaseOrderItem = async (req: Request, res: Response): Promise
     successResponse(res, item, 201);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to add purchase order item');
   }
 };
@@ -314,7 +316,7 @@ export const updatePurchaseOrderItem = async (req: Request, res: Response): Prom
     successResponse(res, item);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to update purchase order item');
   }
 };
@@ -332,7 +334,7 @@ export const deletePurchaseOrderItem = async (req: Request, res: Response): Prom
     successResponse(res, { message: 'Purchase order item deleted successfully' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to delete purchase order item');
   }
 };

@@ -7,14 +7,15 @@ import axios, { AxiosInstance } from 'axios';
 import { API_BASE, TEST_DATA } from '../testConstants';
 import { ADMIN_CREDENTIALS } from '../../testConstants';
 
-const createClient = (): AxiosInstance => axios.create({
-  baseURL: process.env.API_URL || 'http://localhost:3000',
-  validateStatus: () => true,
-  headers: {
-    'Accept': 'application/json',
-    'Content-Type': 'application/json'
-  }
-});
+const createClient = (): AxiosInstance =>
+  axios.create({
+    baseURL: process.env.API_URL || 'http://localhost:3000',
+    validateStatus: () => true,
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+  });
 
 describe('Content Categories API', () => {
   let client: AxiosInstance;
@@ -23,7 +24,7 @@ describe('Content Categories API', () => {
 
   beforeAll(async () => {
     client = createClient();
-    
+
     // Get auth token
     const loginResponse = await client.post('/business/auth/login', ADMIN_CREDENTIALS, { headers: { 'X-Test-Request': 'true' } });
     if (loginResponse.data.accessToken) {
@@ -63,7 +64,7 @@ describe('Content Categories API', () => {
       const categoryData = {
         ...TEST_DATA.category,
         name: `Test Category ${Date.now()}`,
-        slug: `test-category-${Date.now()}`
+        slug: `test-category-${Date.now()}`,
       };
 
       const response = await client.post(`${API_BASE}/categories`, categoryData);
@@ -84,7 +85,7 @@ describe('Content Categories API', () => {
         name: `Child Category ${Date.now()}`,
         slug: `child-category-${Date.now()}`,
         parentId: createdCategoryId,
-        isActive: true
+        isActive: true,
       };
 
       const response = await client.post(`${API_BASE}/categories`, childCategoryData);
@@ -139,7 +140,7 @@ describe('Content Categories API', () => {
 
       const updateData = {
         name: 'Updated Category Name',
-        description: 'Updated description'
+        description: 'Updated description',
       };
 
       const response = await client.put(`${API_BASE}/categories/${createdCategoryId}`, updateData);
@@ -156,7 +157,7 @@ describe('Content Categories API', () => {
 
       // Move child to root (no parent)
       const response = await client.post(`${API_BASE}/categories/${createdChildCategoryId}/move`, {
-        newParentId: null
+        newParentId: null,
       });
 
       expect(response.status).toBe(200);
@@ -167,7 +168,7 @@ describe('Content Categories API', () => {
       if (!createdChildCategoryId || !createdCategoryId) return;
 
       const response = await client.post(`${API_BASE}/categories/${createdChildCategoryId}/move`, {
-        newParentId: createdCategoryId
+        newParentId: createdCategoryId,
       });
 
       expect(response.status).toBe(200);

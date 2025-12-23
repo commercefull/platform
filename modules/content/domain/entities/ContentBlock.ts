@@ -25,17 +25,39 @@ export class ContentBlock {
   }
 
   // Getters
-  get contentBlockId(): string { return this.props.contentBlockId; }
-  get pageId(): string { return this.props.pageId; }
-  get contentTypeId(): string { return this.props.contentTypeId; }
-  get name(): string { return this.props.name; }
-  get order(): number { return this.props.order; }
-  get content(): Record<string, any> { return this.props.content; }
-  get status(): 'active' | 'inactive' { return this.props.status; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
-  get createdBy(): string | undefined { return this.props.createdBy; }
-  get updatedBy(): string | undefined { return this.props.updatedBy; }
+  get contentBlockId(): string {
+    return this.props.contentBlockId;
+  }
+  get pageId(): string {
+    return this.props.pageId;
+  }
+  get contentTypeId(): string {
+    return this.props.contentTypeId;
+  }
+  get name(): string {
+    return this.props.name;
+  }
+  get order(): number {
+    return this.props.order;
+  }
+  get content(): Record<string, any> {
+    return this.props.content;
+  }
+  get status(): 'active' | 'inactive' {
+    return this.props.status;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
+  get createdBy(): string | undefined {
+    return this.props.createdBy;
+  }
+  get updatedBy(): string | undefined {
+    return this.props.updatedBy;
+  }
 
   // Factory method
   static create(props: Omit<ContentBlockProps, 'createdAt' | 'updatedAt'> & { createdAt?: Date; updatedAt?: Date }): ContentBlock {
@@ -44,7 +66,7 @@ export class ContentBlock {
       ...props,
       status: props.status || 'active',
       createdAt: props.createdAt || now,
-      updatedAt: props.updatedAt || now
+      updatedAt: props.updatedAt || now,
     });
   }
 

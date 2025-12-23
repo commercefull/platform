@@ -48,7 +48,7 @@ export const listProducts = async (req: Request, res: Response): Promise<void> =
 
     const filters: any = {
       status: ProductStatus.ACTIVE,
-      visibility: [ProductVisibility.VISIBLE, ProductVisibility.FEATURED]
+      visibility: [ProductVisibility.VISIBLE, ProductVisibility.FEATURED],
     };
     if (categoryId) filters.categoryId = categoryId as string;
     if (brandId) filters.brandId = brandId as string;
@@ -62,7 +62,7 @@ export const listProducts = async (req: Request, res: Response): Promise<void> =
       parseInt(limit as string) || 20,
       parseInt(offset as string) || 0,
       (orderBy as string) || 'createdAt',
-      (orderDirection as 'asc' | 'desc') || 'desc'
+      (orderDirection as 'asc' | 'desc') || 'desc',
     );
 
     const useCase = new ListProductsUseCase(ProductRepo);
@@ -71,7 +71,7 @@ export const listProducts = async (req: Request, res: Response): Promise<void> =
     respond(req, res, result, 200, 'product/list');
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     respondError(req, res, error.message || 'Failed to list products', 500, 'product/error');
   }
 };
@@ -83,17 +83,11 @@ export const listProducts = async (req: Request, res: Response): Promise<void> =
 export const getProduct = async (req: Request, res: Response): Promise<void> => {
   try {
     const { identifier } = req.params;
-    
+
     // Determine if identifier is UUID or slug
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(identifier);
-    
-    const command = new GetProductCommand(
-      isUuid ? identifier : undefined,
-      isUuid ? undefined : identifier,
-      undefined,
-      true,
-      true
-    );
+
+    const command = new GetProductCommand(isUuid ? identifier : undefined, isUuid ? undefined : identifier, undefined, true, true);
 
     const useCase = new GetProductUseCase(ProductRepo);
     const product = await useCase.execute(command);
@@ -104,8 +98,7 @@ export const getProduct = async (req: Request, res: Response): Promise<void> => 
     }
 
     // Only show active and visible products to customers
-    if (product.status !== 'active' || 
-        !['visible', 'featured'].includes(product.visibility)) {
+    if (product.status !== 'active' || !['visible', 'featured'].includes(product.visibility)) {
       respondError(req, res, 'Product not found', 404, 'product/error');
       return;
     }
@@ -113,7 +106,7 @@ export const getProduct = async (req: Request, res: Response): Promise<void> => 
     respond(req, res, product, 200, 'product/detail');
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     respondError(req, res, error.message || 'Failed to get product', 500, 'product/error');
   }
 };
@@ -142,7 +135,7 @@ export const searchProducts = async (req: Request, res: Response): Promise<void>
       filters,
       parseInt(limit as string) || 20,
       parseInt(offset as string) || 0,
-      (orderBy as any) || 'relevance'
+      (orderBy as any) || 'relevance',
     );
 
     const useCase = new SearchProductsUseCase(ProductRepo);
@@ -151,7 +144,7 @@ export const searchProducts = async (req: Request, res: Response): Promise<void>
     respond(req, res, result, 200, 'product/search');
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     respondError(req, res, error.message || 'Failed to search products', 500, 'product/error');
   }
 };
@@ -168,12 +161,12 @@ export const getFeaturedProducts = async (req: Request, res: Response): Promise<
       {
         status: ProductStatus.ACTIVE,
         visibility: [ProductVisibility.VISIBLE, ProductVisibility.FEATURED],
-        isFeatured: true
+        isFeatured: true,
       },
       parseInt(limit as string) || 10,
       parseInt(offset as string) || 0,
       'createdAt',
-      'desc'
+      'desc',
     );
 
     const useCase = new ListProductsUseCase(ProductRepo);
@@ -182,7 +175,7 @@ export const getFeaturedProducts = async (req: Request, res: Response): Promise<
     respond(req, res, result, 200, 'product/featured');
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     respondError(req, res, error.message || 'Failed to get featured products', 500, 'product/error');
   }
 };
@@ -200,12 +193,12 @@ export const getProductsByCategory = async (req: Request, res: Response): Promis
       {
         categoryId,
         status: ProductStatus.ACTIVE,
-        visibility: [ProductVisibility.VISIBLE, ProductVisibility.FEATURED]
+        visibility: [ProductVisibility.VISIBLE, ProductVisibility.FEATURED],
       },
       parseInt(limit as string) || 20,
       parseInt(offset as string) || 0,
       (orderBy as string) || 'createdAt',
-      (orderDirection as 'asc' | 'desc') || 'desc'
+      (orderDirection as 'asc' | 'desc') || 'desc',
     );
 
     const useCase = new ListProductsUseCase(ProductRepo);
@@ -214,7 +207,7 @@ export const getProductsByCategory = async (req: Request, res: Response): Promis
     respond(req, res, result, 200, 'product/category');
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     respondError(req, res, error.message || 'Failed to get products', 500, 'product/error');
   }
 };
@@ -233,7 +226,7 @@ export const getRelatedProducts = async (req: Request, res: Response): Promise<v
     respond(req, res, { products }, 200, 'product/related');
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     respondError(req, res, error.message || 'Failed to get related products', 500, 'product/error');
   }
 };

@@ -11,7 +11,7 @@ import {
   renewAccessToken,
   checkTokenValidity,
   requestPasswordReset,
-  resetPassword
+  resetPassword,
 } from '../../controllers/identityBusinessController';
 
 const router = Router();

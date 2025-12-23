@@ -18,15 +18,7 @@ export class AuthRefreshTokenRepo {
         "token", "userType", "userId", "isRevoked", "expiresAt", "createdAt", "updatedAt", "userAgent", "ipAddress"
       ) VALUES ($1, $2, $3, false, $4, $5, $5, $6, $7)
       RETURNING *`,
-      [
-        params.token,
-        params.userType,
-        params.userId,
-        params.expiresAt,
-        now,
-        params.userAgent ?? null,
-        params.ipAddress ?? null
-      ]
+      [params.token, params.userType, params.userId, params.expiresAt, now, params.userAgent ?? null, params.ipAddress ?? null],
     );
 
     if (!record) {
@@ -40,17 +32,19 @@ export class AuthRefreshTokenRepo {
     return queryOne<IdentityRefreshTokens>(
       `SELECT * FROM "public"."identityRefreshTokens"
        WHERE "token" = $1 AND "isRevoked" = false AND "expiresAt" > $2`,
-      [token, new Date()]
+      [token, new Date()],
     );
   }
 
   async findForUser(userId: string, userType: string): Promise<IdentityRefreshTokens[]> {
-    return (await query<IdentityRefreshTokens[]>(
-      `SELECT * FROM "public"."identityRefreshTokens"
+    return (
+      (await query<IdentityRefreshTokens[]>(
+        `SELECT * FROM "public"."identityRefreshTokens"
        WHERE "userId" = $1 AND "userType" = $2
        ORDER BY "createdAt" DESC`,
-      [userId, userType]
-    )) || [];
+        [userId, userType],
+      )) || []
+    );
   }
 
   async markUsed(token: string, usedAt: Date = new Date()): Promise<boolean> {
@@ -59,7 +53,7 @@ export class AuthRefreshTokenRepo {
        SET "lastUsedAt" = $1, "updatedAt" = $1
        WHERE "token" = $2 AND "isRevoked" = false
        RETURNING "authRefreshTokenId"`,
-      [usedAt, token]
+      [usedAt, token],
     );
 
     return !!result;
@@ -71,7 +65,7 @@ export class AuthRefreshTokenRepo {
        SET "isRevoked" = true, "updatedAt" = $1
        WHERE "token" = $2 AND "isRevoked" = false
        RETURNING "authRefreshTokenId"`,
-      [new Date(), token]
+      [new Date(), token],
     );
 
     return !!result;
@@ -83,13 +77,13 @@ export class AuthRefreshTokenRepo {
        SET "isRevoked" = true, "updatedAt" = $1
        WHERE "userId" = $2 AND "userType" = $3 AND "isRevoked" = false
        RETURNING "authRefreshTokenId"`,
-      [new Date(), userId, userType]
+      [new Date(), userId, userType],
     );
 
     const tokens = await query<IdentityRefreshTokens[]>(
       `SELECT "authRefreshTokenId" FROM "public"."identityRefreshTokens"
        WHERE "userId" = $1 AND "userType" = $2 AND "isRevoked" = true`,
-      [userId, userType]
+      [userId, userType],
     );
 
     return tokens ? tokens.length : 0;
@@ -100,7 +94,7 @@ export class AuthRefreshTokenRepo {
       `DELETE FROM "public"."identityRefreshTokens"
        WHERE "expiresAt" < $1
        RETURNING "authRefreshTokenId"`,
-      [now]
+      [now],
     );
 
     return result ? result.length : 0;

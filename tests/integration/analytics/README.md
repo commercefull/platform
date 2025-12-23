@@ -17,11 +17,13 @@ tests/integration/analytics/
 ## Running Tests
 
 ### Run all Analytics tests
+
 ```bash
 npm test -- --testPathPatterns="tests/integration/analytics"
 ```
 
 ### Run specific domain tests
+
 ```bash
 # Reports
 npm test -- --testPathPatterns="tests/integration/analytics/reports"
@@ -32,21 +34,26 @@ npm test -- --testPathPatterns="tests/integration/analytics/reports"
 ### Reports (`reports.test.ts`)
 
 **Sales Analytics:**
+
 - GET /analytics/sales/dashboard - Sales dashboard with summary
 - GET /analytics/sales/daily - Daily sales data with filtering
 
 **Product Analytics:**
+
 - GET /analytics/products - Product performance data
 - GET /analytics/products/top - Top performing products
 
 **Search Analytics:**
+
 - GET /analytics/search - Search analytics data
 - GET /analytics/search/zero-results - Zero result searches
 
 **Customer Analytics:**
+
 - GET /analytics/customers/cohorts - Customer cohort analysis
 
 **Event Tracking:**
+
 - GET /analytics/events - Tracked events
 - GET /analytics/events/counts - Event counts by period
 

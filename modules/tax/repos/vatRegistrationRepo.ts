@@ -77,28 +77,21 @@ export interface VatValidationLog {
 // ============================================================================
 
 export async function getVatRegistration(vatRegistrationId: string): Promise<VatRegistration | null> {
-  const row = await queryOne<Record<string, any>>(
-    'SELECT * FROM "vatRegistration" WHERE "vatRegistrationId" = $1',
-    [vatRegistrationId]
-  );
+  const row = await queryOne<Record<string, any>>('SELECT * FROM "vatRegistration" WHERE "vatRegistrationId" = $1', [vatRegistrationId]);
   return row ? mapToVatRegistration(row) : null;
 }
 
 export async function getVatRegistrationsByMerchant(merchantId: string): Promise<VatRegistration[]> {
-  const rows = await query<Record<string, any>[]>(
-    'SELECT * FROM "vatRegistration" WHERE "merchantId" = $1 ORDER BY "countryCode" ASC',
-    [merchantId]
-  );
+  const rows = await query<Record<string, any>[]>('SELECT * FROM "vatRegistration" WHERE "merchantId" = $1 ORDER BY "countryCode" ASC', [
+    merchantId,
+  ]);
   return (rows || []).map(mapToVatRegistration);
 }
 
-export async function getVatRegistrationByCountry(
-  merchantId: string, 
-  countryCode: string
-): Promise<VatRegistration | null> {
+export async function getVatRegistrationByCountry(merchantId: string, countryCode: string): Promise<VatRegistration | null> {
   const row = await queryOne<Record<string, any>>(
     'SELECT * FROM "vatRegistration" WHERE "merchantId" = $1 AND "countryCode" = $2 AND "isActive" = true',
-    [merchantId, countryCode]
+    [merchantId, countryCode],
   );
   return row ? mapToVatRegistration(row) : null;
 }
@@ -107,18 +100,20 @@ export async function getActiveOssRegistration(merchantId: string): Promise<VatR
   const row = await queryOne<Record<string, any>>(
     `SELECT * FROM "vatRegistration" 
      WHERE "merchantId" = $1 AND "registrationType" = 'oss' AND "isActive" = true`,
-    [merchantId]
+    [merchantId],
   );
   return row ? mapToVatRegistration(row) : null;
 }
 
-export async function saveVatRegistration(data: Partial<VatRegistration> & { 
-  merchantId: string; 
-  countryCode: string; 
-  vatNumber: string;
-}): Promise<VatRegistration> {
+export async function saveVatRegistration(
+  data: Partial<VatRegistration> & {
+    merchantId: string;
+    countryCode: string;
+    vatNumber: string;
+  },
+): Promise<VatRegistration> {
   const now = new Date().toISOString();
-  
+
   if (data.vatRegistrationId) {
     // Update existing
     await query(
@@ -130,13 +125,27 @@ export async function saveVatRegistration(data: Partial<VatRegistration> & {
         "isActive" = $16, "notes" = $17, "certificateUrl" = $18, "updatedAt" = $19
       WHERE "vatRegistrationId" = $20`,
       [
-        data.vatNumber, data.tradingName, data.legalName, data.registrationType || 'standard',
-        data.isVerified || false, data.verifiedAt?.toISOString(), data.verificationSource,
-        data.registrationDate?.toISOString(), data.deregistrationDate?.toISOString(),
-        data.effectiveFrom?.toISOString(), data.effectiveUntil?.toISOString(),
-        data.annualThreshold, data.thresholdCurrency || 'EUR', data.currentYearSales, data.thresholdExceeded || false,
-        data.isActive !== false, data.notes, data.certificateUrl, now, data.vatRegistrationId
-      ]
+        data.vatNumber,
+        data.tradingName,
+        data.legalName,
+        data.registrationType || 'standard',
+        data.isVerified || false,
+        data.verifiedAt?.toISOString(),
+        data.verificationSource,
+        data.registrationDate?.toISOString(),
+        data.deregistrationDate?.toISOString(),
+        data.effectiveFrom?.toISOString(),
+        data.effectiveUntil?.toISOString(),
+        data.annualThreshold,
+        data.thresholdCurrency || 'EUR',
+        data.currentYearSales,
+        data.thresholdExceeded || false,
+        data.isActive !== false,
+        data.notes,
+        data.certificateUrl,
+        now,
+        data.vatRegistrationId,
+      ],
     );
     return (await getVatRegistration(data.vatRegistrationId))!;
   } else {
@@ -150,12 +159,25 @@ export async function saveVatRegistration(data: Partial<VatRegistration> & {
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
       RETURNING *`,
       [
-        data.merchantId, data.countryCode, data.vatNumber, data.tradingName, data.legalName,
-        data.registrationType || 'standard', false,
-        data.registrationDate?.toISOString(), data.effectiveFrom?.toISOString(),
-        data.annualThreshold, data.thresholdCurrency || 'EUR', data.currentYearSales || 0, false,
-        true, data.notes, data.certificateUrl, now, now
-      ]
+        data.merchantId,
+        data.countryCode,
+        data.vatNumber,
+        data.tradingName,
+        data.legalName,
+        data.registrationType || 'standard',
+        false,
+        data.registrationDate?.toISOString(),
+        data.effectiveFrom?.toISOString(),
+        data.annualThreshold,
+        data.thresholdCurrency || 'EUR',
+        data.currentYearSales || 0,
+        false,
+        true,
+        data.notes,
+        data.certificateUrl,
+        now,
+        now,
+      ],
     );
     return mapToVatRegistration(result!);
   }
@@ -169,7 +191,7 @@ export async function deactivateVatRegistration(vatRegistrationId: string): Prom
   await query(
     `UPDATE "vatRegistration" SET "isActive" = false, "deregistrationDate" = $1, "updatedAt" = $1
      WHERE "vatRegistrationId" = $2`,
-    [new Date().toISOString(), vatRegistrationId]
+    [new Date().toISOString(), vatRegistrationId],
   );
 }
 
@@ -179,7 +201,7 @@ export async function deactivateVatRegistration(vatRegistrationId: string): Prom
 
 export async function logVatValidation(data: Omit<VatValidationLog, 'vatValidationLogId' | 'createdAt'>): Promise<VatValidationLog> {
   const now = new Date().toISOString();
-  
+
   const result = await queryOne<Record<string, any>>(
     `INSERT INTO "vatValidationLog" (
       "customerId", "merchantId", "orderId", "vatNumber", "countryCode", "vatNumberFormatted",
@@ -190,22 +212,38 @@ export async function logVatValidation(data: Omit<VatValidationLog, 'vatValidati
     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)
     RETURNING *`,
     [
-      data.customerId, data.merchantId, data.orderId, data.vatNumber, data.countryCode,
-      data.vatNumberFormatted, data.isValid, data.validationStatus, data.validationSource,
-      data.requestId, data.response ? JSON.stringify(data.response) : null,
-      data.companyName, data.companyAddress, data.companyCity, data.companyPostalCode,
-      data.validatedAt.toISOString(), data.responseTimeMs, data.expiresAt?.toISOString(),
-      data.reverseChargeApplicable || false, data.ipAddress, data.context, now
-    ]
+      data.customerId,
+      data.merchantId,
+      data.orderId,
+      data.vatNumber,
+      data.countryCode,
+      data.vatNumberFormatted,
+      data.isValid,
+      data.validationStatus,
+      data.validationSource,
+      data.requestId,
+      data.response ? JSON.stringify(data.response) : null,
+      data.companyName,
+      data.companyAddress,
+      data.companyCity,
+      data.companyPostalCode,
+      data.validatedAt.toISOString(),
+      data.responseTimeMs,
+      data.expiresAt?.toISOString(),
+      data.reverseChargeApplicable || false,
+      data.ipAddress,
+      data.context,
+      now,
+    ],
   );
-  
+
   return mapToVatValidationLog(result!);
 }
 
 export async function getRecentValidation(
-  vatNumber: string, 
-  countryCode: string, 
-  maxAgeHours: number = 24
+  vatNumber: string,
+  countryCode: string,
+  maxAgeHours: number = 24,
 ): Promise<VatValidationLog | null> {
   const row = await queryOne<Record<string, any>>(
     `SELECT * FROM "vatValidationLog" 
@@ -213,20 +251,17 @@ export async function getRecentValidation(
      AND "validatedAt" > NOW() - INTERVAL '${maxAgeHours} hours'
      AND "isValid" IS NOT NULL
      ORDER BY "validatedAt" DESC LIMIT 1`,
-    [vatNumber, countryCode]
+    [vatNumber, countryCode],
   );
   return row ? mapToVatValidationLog(row) : null;
 }
 
-export async function getValidationHistory(
-  vatNumber: string, 
-  limit: number = 10
-): Promise<VatValidationLog[]> {
+export async function getValidationHistory(vatNumber: string, limit: number = 10): Promise<VatValidationLog[]> {
   const rows = await query<Record<string, any>[]>(
     `SELECT * FROM "vatValidationLog" 
      WHERE "vatNumber" = $1
      ORDER BY "validatedAt" DESC LIMIT $2`,
-    [vatNumber, limit]
+    [vatNumber, limit],
   );
   return (rows || []).map(mapToVatValidationLog);
 }
@@ -270,35 +305,35 @@ const VAT_PATTERNS: Record<string, RegExp> = {
 export function formatVatNumber(vatNumber: string, countryCode?: string): string {
   // Remove spaces and convert to uppercase
   let formatted = vatNumber.replace(/\s/g, '').toUpperCase();
-  
+
   // Add country code prefix if not present and country code provided
   if (countryCode && !formatted.startsWith(countryCode)) {
     formatted = countryCode + formatted;
   }
-  
+
   return formatted;
 }
 
 export function validateVatNumberFormat(vatNumber: string, countryCode: string): boolean {
   const formatted = formatVatNumber(vatNumber, countryCode);
   const pattern = VAT_PATTERNS[countryCode];
-  
+
   if (!pattern) {
     // Unknown country, allow any format
     return formatted.length >= 8;
   }
-  
+
   return pattern.test(formatted);
 }
 
 export function extractCountryFromVat(vatNumber: string): string | null {
   const formatted = vatNumber.replace(/\s/g, '').toUpperCase();
   const countryCode = formatted.substring(0, 2);
-  
+
   if (VAT_PATTERNS[countryCode]) {
     return countryCode;
   }
-  
+
   return null;
 }
 
@@ -332,7 +367,7 @@ function mapToVatRegistration(row: Record<string, any>): VatRegistration {
     notes: row.notes,
     certificateUrl: row.certificateUrl,
     createdAt: new Date(row.createdAt),
-    updatedAt: new Date(row.updatedAt)
+    updatedAt: new Date(row.updatedAt),
   };
 }
 
@@ -360,6 +395,6 @@ function mapToVatValidationLog(row: Record<string, any>): VatValidationLog {
     reverseChargeApplicable: Boolean(row.reverseChargeApplicable),
     ipAddress: row.ipAddress,
     context: row.context,
-    createdAt: new Date(row.createdAt)
+    createdAt: new Date(row.createdAt),
   };
 }

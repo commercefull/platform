@@ -1,5 +1,10 @@
-import { query, queryOne } from "../../../libs/db";
-import { Table, PromotionProductDiscount, PromotionProductDiscountItem, PromotionProductDiscountCustomerGroup } from "../../../libs/db/types";
+import { query, queryOne } from '../../../libs/db';
+import {
+  Table,
+  PromotionProductDiscount,
+  PromotionProductDiscountItem,
+  PromotionProductDiscountCustomerGroup,
+} from '../../../libs/db/types';
 
 // Table name constants
 const DISCOUNT_TABLE = Table.PromotionProductDiscount;
@@ -69,7 +74,7 @@ export class DiscountRepo {
    */
   async create(input: CreateProductDiscountInput): Promise<PromotionProductDiscount> {
     const now = new Date();
-    
+
     const discount = await queryOne<PromotionProductDiscount>(
       `INSERT INTO "${DISCOUNT_TABLE}" (
         "promotionId", "name", "description", "discountType", "discountValue",
@@ -103,17 +108,17 @@ export class DiscountRepo {
         input.badgeStyle ? JSON.stringify(input.badgeStyle) : null,
         input.merchantId || null,
         now,
-        now
-      ]
+        now,
+      ],
     );
-    
+
     if (!discount) {
       throw new Error('Failed to create product discount');
     }
-    
+
     return discount;
   }
-  
+
   /**
    * Update an existing product discount
    */
@@ -121,15 +126,31 @@ export class DiscountRepo {
     const updateFields: string[] = [];
     const params: any[] = [id];
     let paramIndex = 2;
-    
+
     const allowedFields = [
-      'promotionId', 'name', 'description', 'discountType', 'discountValue',
-      'currencyCode', 'startDate', 'endDate', 'isActive', 'priority',
-      'appliesTo', 'minimumQuantity', 'maximumQuantity', 'minimumAmount',
-      'maximumDiscountAmount', 'stackable', 'displayOnProductPage', 'displayInListing',
-      'badgeText', 'badgeStyle', 'merchantId'
+      'promotionId',
+      'name',
+      'description',
+      'discountType',
+      'discountValue',
+      'currencyCode',
+      'startDate',
+      'endDate',
+      'isActive',
+      'priority',
+      'appliesTo',
+      'minimumQuantity',
+      'maximumQuantity',
+      'minimumAmount',
+      'maximumDiscountAmount',
+      'stackable',
+      'displayOnProductPage',
+      'displayInListing',
+      'badgeText',
+      'badgeStyle',
+      'merchantId',
     ];
-    
+
     for (const [key, value] of Object.entries(input)) {
       if (allowedFields.includes(key) && value !== undefined) {
         updateFields.push(`"${key}" = $${paramIndex}`);
@@ -141,10 +162,10 @@ export class DiscountRepo {
         paramIndex++;
       }
     }
-    
+
     updateFields.push(`"updatedAt" = $${paramIndex}`);
     params.push(new Date());
-    
+
     if (updateFields.length === 1) {
       const discount = await this.findById(id);
       if (!discount) {
@@ -152,30 +173,27 @@ export class DiscountRepo {
       }
       return discount;
     }
-    
+
     const discount = await queryOne<PromotionProductDiscount>(
       `UPDATE "${DISCOUNT_TABLE}" SET ${updateFields.join(', ')} 
        WHERE "promotionProductDiscountId" = $1 RETURNING *`,
-      params
+      params,
     );
-    
+
     if (!discount) {
       throw new Error(`Product discount with id ${id} not found`);
     }
-    
+
     return discount;
   }
-  
+
   /**
    * Find a product discount by ID
    */
   async findById(id: string): Promise<PromotionProductDiscount | null> {
-    return await queryOne<PromotionProductDiscount>(
-      `SELECT * FROM "${DISCOUNT_TABLE}" WHERE "promotionProductDiscountId" = $1`,
-      [id]
-    );
+    return await queryOne<PromotionProductDiscount>(`SELECT * FROM "${DISCOUNT_TABLE}" WHERE "promotionProductDiscountId" = $1`, [id]);
   }
-  
+
   /**
    * Find all product discounts with filters
    */
@@ -193,93 +211,93 @@ export class DiscountRepo {
       offset?: number;
       orderBy?: string;
       direction?: 'ASC' | 'DESC';
-    } = {}
+    } = {},
   ): Promise<PromotionProductDiscount[]> {
     const { promotionId, merchantId, isActive, discountType, startBefore, endAfter } = filters;
     const { limit = 50, offset = 0, orderBy = 'priority', direction = 'DESC' } = options;
-    
+
     let sql = `SELECT * FROM "${DISCOUNT_TABLE}" WHERE 1=1`;
     const params: any[] = [];
     let paramIndex = 1;
-    
+
     if (promotionId) {
       sql += ` AND "promotionId" = $${paramIndex}`;
       params.push(promotionId);
       paramIndex++;
     }
-    
+
     if (merchantId) {
       sql += ` AND "merchantId" = $${paramIndex}`;
       params.push(merchantId);
       paramIndex++;
     }
-    
+
     if (isActive !== undefined) {
       sql += ` AND "isActive" = $${paramIndex}`;
       params.push(isActive);
       paramIndex++;
     }
-    
+
     if (discountType) {
       sql += ` AND "discountType" = $${paramIndex}`;
       params.push(discountType);
       paramIndex++;
     }
-    
+
     if (startBefore) {
       sql += ` AND "startDate" <= $${paramIndex}`;
       params.push(startBefore);
       paramIndex++;
     }
-    
+
     if (endAfter) {
       sql += ` AND ("endDate" IS NULL OR "endDate" >= $${paramIndex})`;
       params.push(endAfter);
       paramIndex++;
     }
-    
+
     sql += ` ORDER BY "${orderBy}" ${direction} LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
     params.push(limit, offset);
-    
-    return await query<PromotionProductDiscount[]>(sql, params) || [];
+
+    return (await query<PromotionProductDiscount[]>(sql, params)) || [];
   }
-  
+
   /**
    * Find active product discounts
    */
   async findActive(merchantId?: string): Promise<PromotionProductDiscount[]> {
     const now = new Date();
-    
+
     return this.findAll(
       {
         merchantId,
         isActive: true,
         startBefore: now,
-        endAfter: now
+        endAfter: now,
       },
       {
         orderBy: 'priority',
-        direction: 'DESC'
-      }
+        direction: 'DESC',
+      },
     );
   }
-  
+
   /**
    * Delete a product discount
    */
   async delete(id: string): Promise<boolean> {
     await query('BEGIN');
-    
+
     try {
       // Delete related items first
       await query(`DELETE FROM "${DISCOUNT_ITEM_TABLE}" WHERE "promotionProductDiscountId" = $1`, [id]);
       await query(`DELETE FROM "${DISCOUNT_CUSTOMER_GROUP_TABLE}" WHERE "promotionProductDiscountId" = $1`, [id]);
-      
+
       const result = await queryOne<{ promotionProductDiscountId: string }>(
         `DELETE FROM "${DISCOUNT_TABLE}" WHERE "promotionProductDiscountId" = $1 RETURNING "promotionProductDiscountId"`,
-        [id]
+        [id],
       );
-      
+
       await query('COMMIT');
       return !!result;
     } catch (error) {
@@ -287,15 +305,15 @@ export class DiscountRepo {
       throw error;
     }
   }
-  
+
   // DISCOUNT ITEM METHODS
-  
+
   /**
    * Add an item to a discount
    */
   async addItem(input: CreateDiscountItemInput): Promise<PromotionProductDiscountItem> {
     const now = new Date();
-    
+
     const item = await queryOne<PromotionProductDiscountItem>(
       `INSERT INTO "${DISCOUNT_ITEM_TABLE}" (
         "promotionProductDiscountId", "productId", "productVariantId",
@@ -309,89 +327,92 @@ export class DiscountRepo {
         input.productBrandId || null,
         input.itemType,
         now,
-        now
-      ]
+        now,
+      ],
     );
-    
+
     if (!item) {
       throw new Error('Failed to add discount item');
     }
-    
+
     return item;
   }
-  
+
   /**
    * Find items by discount ID
    */
   async findItemsByDiscountId(discountId: string): Promise<PromotionProductDiscountItem[]> {
-    return await query<PromotionProductDiscountItem[]>(
-      `SELECT * FROM "${DISCOUNT_ITEM_TABLE}" WHERE "promotionProductDiscountId" = $1`,
-      [discountId]
-    ) || [];
+    return (
+      (await query<PromotionProductDiscountItem[]>(`SELECT * FROM "${DISCOUNT_ITEM_TABLE}" WHERE "promotionProductDiscountId" = $1`, [
+        discountId,
+      ])) || []
+    );
   }
-  
+
   /**
    * Remove an item from a discount
    */
   async removeItem(itemId: string): Promise<boolean> {
     const result = await queryOne<{ promotionProductDiscountItemId: string }>(
       `DELETE FROM "${DISCOUNT_ITEM_TABLE}" WHERE "promotionProductDiscountItemId" = $1 RETURNING "promotionProductDiscountItemId"`,
-      [itemId]
+      [itemId],
     );
     return !!result;
   }
-  
+
   // CUSTOMER GROUP METHODS
-  
+
   /**
    * Add a customer group to a discount
    */
   async addCustomerGroup(discountId: string, customerGroupId: string): Promise<PromotionProductDiscountCustomerGroup> {
     const now = new Date();
-    
+
     const group = await queryOne<PromotionProductDiscountCustomerGroup>(
       `INSERT INTO "${DISCOUNT_CUSTOMER_GROUP_TABLE}" (
         "promotionProductDiscountId", "customerGroupId", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4) RETURNING *`,
-      [discountId, customerGroupId, now, now]
+      [discountId, customerGroupId, now, now],
     );
-    
+
     if (!group) {
       throw new Error('Failed to add customer group to discount');
     }
-    
+
     return group;
   }
-  
+
   /**
    * Find customer groups by discount ID
    */
   async findCustomerGroupsByDiscountId(discountId: string): Promise<PromotionProductDiscountCustomerGroup[]> {
-    return await query<PromotionProductDiscountCustomerGroup[]>(
-      `SELECT * FROM "${DISCOUNT_CUSTOMER_GROUP_TABLE}" WHERE "promotionProductDiscountId" = $1`,
-      [discountId]
-    ) || [];
+    return (
+      (await query<PromotionProductDiscountCustomerGroup[]>(
+        `SELECT * FROM "${DISCOUNT_CUSTOMER_GROUP_TABLE}" WHERE "promotionProductDiscountId" = $1`,
+        [discountId],
+      )) || []
+    );
   }
-  
+
   /**
    * Remove a customer group from a discount
    */
   async removeCustomerGroup(groupId: string): Promise<boolean> {
     const result = await queryOne<{ promotionProductDiscountCustomerGroupId: string }>(
       `DELETE FROM "${DISCOUNT_CUSTOMER_GROUP_TABLE}" WHERE "promotionProductDiscountCustomerGroupId" = $1 RETURNING "promotionProductDiscountCustomerGroupId"`,
-      [groupId]
+      [groupId],
     );
     return !!result;
   }
-  
+
   // BUSINESS LOGIC METHODS
-  
+
   /**
    * Find discounts applicable to a product
    */
   async findDiscountsForProduct(productId: string, merchantId?: string): Promise<PromotionProductDiscount[]> {
     const now = new Date();
-    
+
     let sql = `
       SELECT DISTINCT d.* FROM "${DISCOUNT_TABLE}" d
       LEFT JOIN "${DISCOUNT_ITEM_TABLE}" i ON d."promotionProductDiscountId" = i."promotionProductDiscountId"
@@ -403,26 +424,26 @@ export class DiscountRepo {
           OR (d."appliesTo" = 'specific_products' AND i."productId" = $2)
         )
     `;
-    
+
     const params: any[] = [now, productId];
     let paramIndex = 3;
-    
+
     if (merchantId) {
       sql += ` AND d."merchantId" = $${paramIndex}`;
       params.push(merchantId);
     }
-    
+
     sql += ` ORDER BY d."priority" DESC`;
-    
-    return await query<PromotionProductDiscount[]>(sql, params) || [];
+
+    return (await query<PromotionProductDiscount[]>(sql, params)) || [];
   }
-  
+
   /**
    * Find discounts applicable to a category
    */
   async findDiscountsForCategory(categoryId: string, merchantId?: string): Promise<PromotionProductDiscount[]> {
     const now = new Date();
-    
+
     let sql = `
       SELECT DISTINCT d.* FROM "${DISCOUNT_TABLE}" d
       LEFT JOIN "${DISCOUNT_ITEM_TABLE}" i ON d."promotionProductDiscountId" = i."promotionProductDiscountId"
@@ -434,20 +455,20 @@ export class DiscountRepo {
           OR (d."appliesTo" = 'specific_products' AND i."productCategoryId" = $2)
         )
     `;
-    
+
     const params: any[] = [now, categoryId];
     let paramIndex = 3;
-    
+
     if (merchantId) {
       sql += ` AND d."merchantId" = $${paramIndex}`;
       params.push(merchantId);
     }
-    
+
     sql += ` ORDER BY d."priority" DESC`;
-    
-    return await query<PromotionProductDiscount[]>(sql, params) || [];
+
+    return (await query<PromotionProductDiscount[]>(sql, params)) || [];
   }
-  
+
   /**
    * Calculate discount amount for a given price
    */
@@ -456,31 +477,29 @@ export class DiscountRepo {
     if (discount.minimumQuantity && quantity < discount.minimumQuantity) {
       return 0;
     }
-    
+
     // Check maximum quantity
-    const applicableQuantity = discount.maximumQuantity 
-      ? Math.min(quantity, discount.maximumQuantity) 
-      : quantity;
-    
+    const applicableQuantity = discount.maximumQuantity ? Math.min(quantity, discount.maximumQuantity) : quantity;
+
     // Check minimum amount
     const totalPrice = price * applicableQuantity;
     if (discount.minimumAmount && totalPrice < Number(discount.minimumAmount)) {
       return 0;
     }
-    
+
     let discountAmount = 0;
-    
+
     if (discount.discountType === 'percentage') {
       discountAmount = (totalPrice * Number(discount.discountValue)) / 100;
     } else {
       discountAmount = Number(discount.discountValue) * applicableQuantity;
     }
-    
+
     // Apply maximum discount cap
     if (discount.maximumDiscountAmount && discountAmount > Number(discount.maximumDiscountAmount)) {
       discountAmount = Number(discount.maximumDiscountAmount);
     }
-    
+
     return Math.min(discountAmount, totalPrice);
   }
 }

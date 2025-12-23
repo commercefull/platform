@@ -112,21 +112,25 @@ export class SubmitForApprovalUseCase {
   private compareValue(actual: number, operator: string, expected: unknown): boolean {
     const expectedNum = Number(expected);
     switch (operator) {
-      case 'gt': return actual > expectedNum;
-      case 'lt': return actual < expectedNum;
-      case 'eq': return actual === expectedNum;
-      default: return true;
+      case 'gt':
+        return actual > expectedNum;
+      case 'lt':
+        return actual < expectedNum;
+      case 'eq':
+        return actual === expectedNum;
+      default:
+        return true;
     }
   }
 
   private async getApproversForStep(step: any, companyId: string): Promise<string[]> {
     if (!step) return [];
-    
+
     // In a real implementation, this would look up users by role/department
     if (step.approverId) {
       return [step.approverId];
     }
-    
+
     return [];
   }
 }

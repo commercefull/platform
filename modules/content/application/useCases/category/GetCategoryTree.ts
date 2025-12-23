@@ -7,9 +7,7 @@ import { ContentCategoryRepo } from '../../../repos/contentCategoryRepo';
 import { ContentCategory } from '../../../../../libs/db/types';
 
 export class GetCategoryTreeQuery {
-  constructor(
-    public readonly includeInactive: boolean = false
-  ) {}
+  constructor(public readonly includeInactive: boolean = false) {}
 }
 
 export interface CategoryTreeNode {
@@ -31,7 +29,7 @@ export class GetCategoryTreeUseCase {
   async execute(query: GetCategoryTreeQuery): Promise<CategoryTreeNode[]> {
     const isActive = query.includeInactive ? undefined : true;
     const categories = await this.categoryRepo.getCategoryTree(isActive);
-    
+
     return this.buildTree(categories);
   }
 
@@ -51,14 +49,14 @@ export class GetCategoryTreeUseCase {
         depth: category.depth,
         sortOrder: category.sortOrder,
         isActive: category.isActive,
-        children: []
+        children: [],
       });
     }
 
     // Second pass: build hierarchy
     for (const category of categories) {
       const node = categoryMap.get(category.contentCategoryId)!;
-      
+
       if (category.parentId && categoryMap.has(category.parentId)) {
         const parent = categoryMap.get(category.parentId)!;
         parent.children.push(node);

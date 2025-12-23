@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function (knex) {
   return knex.schema.createTable('notificationWebhook', t => {
     t.uuid('notificationWebhookId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
@@ -14,7 +14,6 @@ exports.up = function(knex) {
     t.timestamp('lastSuccess');
     t.timestamp('lastFailure');
     t.text('lastFailureReason');
-    
 
     t.index('isActive');
     t.index('lastSuccess');
@@ -23,6 +22,6 @@ exports.up = function(knex) {
   });
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTable('notificationWebhook');
 };

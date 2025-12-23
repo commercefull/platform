@@ -30,13 +30,7 @@ export class Basket {
     this.props = props;
   }
 
-  static create(props: {
-    basketId: string;
-    customerId?: string;
-    sessionId?: string;
-    currency?: string;
-    expiresAt?: Date;
-  }): Basket {
+  static create(props: { basketId: string; customerId?: string; sessionId?: string; currency?: string; expiresAt?: Date }): Basket {
     const now = new Date();
     return new Basket({
       basketId: props.basketId,
@@ -48,7 +42,7 @@ export class Basket {
       expiresAt: props.expiresAt || new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000), // 7 days
       createdAt: now,
       updatedAt: now,
-      lastActivityAt: now
+      lastActivityAt: now,
     });
   }
 
@@ -115,10 +109,7 @@ export class Basket {
   }
 
   get subtotal(): Money {
-    return this.props.items.reduce(
-      (sum, item) => sum.add(item.lineTotal),
-      Money.zero(this.props.currency)
-    );
+    return this.props.items.reduce((sum, item) => sum.add(item.lineTotal), Money.zero(this.props.currency));
   }
 
   get isEmpty(): boolean {
@@ -139,9 +130,7 @@ export class Basket {
     this.ensureActive();
 
     // Check if same product already exists
-    const existingItem = this.props.items.find(i => 
-      i.isSameProduct(item.productId, item.productVariantId)
-    );
+    const existingItem = this.props.items.find(i => i.isSameProduct(item.productId, item.productVariantId));
 
     if (existingItem) {
       existingItem.incrementQuantity(item.quantity);
@@ -211,11 +200,11 @@ export class Basket {
 
   mergeFrom(otherBasket: Basket): void {
     this.ensureActive();
-    
+
     for (const item of otherBasket.items) {
       this.addItem(item);
     }
-    
+
     this.touch();
   }
 
@@ -275,7 +264,7 @@ export class Basket {
       convertedToOrderId: this.props.convertedToOrderId,
       createdAt: this.props.createdAt.toISOString(),
       updatedAt: this.props.updatedAt.toISOString(),
-      lastActivityAt: this.props.lastActivityAt.toISOString()
+      lastActivityAt: this.props.lastActivityAt.toISOString(),
     };
   }
 }

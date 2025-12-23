@@ -8,14 +8,14 @@ export const TEST_CUSTOMER = {
   email: 'customer@example.com',
   password: 'password123',
   firstName: 'Test',
-  lastName: 'Customer'
+  lastName: 'Customer',
 };
 
 export const TEST_MERCHANT = {
   email: 'merchant@example.com',
   password: 'password123',
   name: 'Test Merchant',
-  businessName: 'Test Store'
+  businessName: 'Test Store',
 };
 
 // Legacy exports for backward compatibility
@@ -38,28 +38,25 @@ export async function setupIdentityTests() {
     baseURL: process.env.API_URL || 'http://localhost:3000',
     validateStatus: () => true,
     headers: {
-      'Accept': 'application/json',
+      Accept: 'application/json',
       'Content-Type': 'application/json',
-      'X-Test-Request': 'true'
-    }
+      'X-Test-Request': 'true',
+    },
   });
 
   let adminToken = '';
-  
+
   try {
     // Get admin/merchant token
     const adminLoginResponse = await client.post('/business/auth/login', {
       email: TEST_MERCHANT.email,
-      password: TEST_MERCHANT.password
+      password: TEST_MERCHANT.password,
     });
-    
+
     adminToken = adminLoginResponse.data?.accessToken || '';
     if (!adminToken) {
-      
     }
-  } catch (error) {
-    
-  }
+  } catch (error) {}
 
   _client = client;
   _adminToken = adminToken;
@@ -72,7 +69,7 @@ export async function setupIdentityTests() {
  */
 export async function setupAuthTests() {
   const { client, adminToken } = await setupIdentityTests();
-  
+
   return {
     client,
     adminToken,
@@ -81,7 +78,7 @@ export async function setupAuthTests() {
     testAdminId: '',
     customerResetToken: '',
     merchantResetToken: '',
-    customerRefreshToken: ''
+    customerRefreshToken: '',
   };
 }
 
@@ -96,14 +93,14 @@ export async function cleanupIdentityTests() {
  * Legacy cleanup function for backward compatibility
  */
 export async function cleanupAuthTests(
-  _client: AxiosInstance, 
-  _adminToken: string, 
+  _client: AxiosInstance,
+  _adminToken: string,
   _params: {
-    testCustomerId?: string,
-    testMerchantId?: string,
-    testAdminId?: string,
-    customerRefreshToken?: string
-  }
+    testCustomerId?: string;
+    testMerchantId?: string;
+    testAdminId?: string;
+    customerRefreshToken?: string;
+  },
 ) {
   // No cleanup needed - we use seeded data
 }

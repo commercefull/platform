@@ -2,8 +2,8 @@
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.up = function(knex) {
-  return knex.schema.createTable('referralReward', function(table) {
+exports.up = function (knex) {
+  return knex.schema.createTable('referralReward', function (table) {
     table.uuid('referralRewardId').primary().defaultTo(knex.raw('uuidv7()'));
     table.uuid('referralId').notNullable().references('referralId').inTable('referral').onDelete('CASCADE');
     table.uuid('customerId').notNullable().references('customerId').inTable('customer').onDelete('CASCADE');
@@ -34,6 +34,6 @@ exports.up = function(knex) {
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTableIfExists('referralReward');
 };

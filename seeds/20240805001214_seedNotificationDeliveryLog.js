@@ -6,7 +6,6 @@ exports.up = async function (knex) {
   const notification = await knex('notification').first('notificationId');
 
   if (!notification) {
-    
     return;
   }
 
@@ -30,9 +29,7 @@ exports.up = async function (knex) {
  * @returns { Promise<void> }
  */
 exports.down = function (knex) {
-  return knex('notificationDeliveryLog')
-    .where({ recipient: 'system' })
-    .del();
+  return knex('notificationDeliveryLog').where({ recipient: 'system' }).del();
 };
 
 exports.seed = async function (knex) {

@@ -57,7 +57,7 @@ export class TaxNexusRepo {
   async findDefault(merchantId: string): Promise<TaxNexus | null> {
     return await queryOne<TaxNexus>(
       `SELECT * FROM "taxNexus" WHERE "merchantId" = $1 AND "isDefault" = true AND "isActive" = true LIMIT 1`,
-      [merchantId]
+      [merchantId],
     );
   }
 
@@ -65,10 +65,10 @@ export class TaxNexusRepo {
     const now = unixTimestamp();
 
     if (params.isDefault) {
-      await query(
-        `UPDATE "taxNexus" SET "isDefault" = false, "updatedAt" = $1 WHERE "merchantId" = $2 AND "isDefault" = true`,
-        [now, params.merchantId]
-      );
+      await query(`UPDATE "taxNexus" SET "isDefault" = false, "updatedAt" = $1 WHERE "merchantId" = $2 AND "isDefault" = true`, [
+        now,
+        params.merchantId,
+      ]);
     }
 
     const result = await queryOne<TaxNexus>(
@@ -78,12 +78,24 @@ export class TaxNexusRepo {
         "endDate", "isActive", "notes", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17) RETURNING *`,
       [
-        params.merchantId, params.name, params.country, params.region || null,
-        params.regionCode || null, params.city || null, params.postalCode || null,
-        params.streetAddress || null, params.taxId || null, params.registrationNumber || null,
-        params.isDefault || false, params.startDate || now, params.endDate || null,
-        params.isActive ?? true, params.notes || null, now, now
-      ]
+        params.merchantId,
+        params.name,
+        params.country,
+        params.region || null,
+        params.regionCode || null,
+        params.city || null,
+        params.postalCode || null,
+        params.streetAddress || null,
+        params.taxId || null,
+        params.registrationNumber || null,
+        params.isDefault || false,
+        params.startDate || now,
+        params.endDate || null,
+        params.isActive ?? true,
+        params.notes || null,
+        now,
+        now,
+      ],
     );
     if (!result) throw new Error('Failed to create tax nexus');
     return result;
@@ -96,7 +108,7 @@ export class TaxNexusRepo {
     if (params.isDefault === true) {
       await query(
         `UPDATE "taxNexus" SET "isDefault" = false, "updatedAt" = $1 WHERE "merchantId" = $2 AND "isDefault" = true AND "taxNexusId" != $3`,
-        [unixTimestamp(), nexus.merchantId, id]
+        [unixTimestamp(), nexus.merchantId, id],
       );
     }
 
@@ -118,7 +130,7 @@ export class TaxNexusRepo {
 
     return await queryOne<TaxNexus>(
       `UPDATE "taxNexus" SET ${updateFields.join(', ')} WHERE "taxNexusId" = $${paramIndex} RETURNING *`,
-      values
+      values,
     );
   }
 
@@ -131,10 +143,7 @@ export class TaxNexusRepo {
   }
 
   async delete(id: string): Promise<boolean> {
-    const result = await queryOne<{ taxNexusId: string }>(
-      `DELETE FROM "taxNexus" WHERE "taxNexusId" = $1 RETURNING "taxNexusId"`,
-      [id]
-    );
+    const result = await queryOne<{ taxNexusId: string }>(`DELETE FROM "taxNexus" WHERE "taxNexusId" = $1 RETURNING "taxNexusId"`, [id]);
     return !!result;
   }
 

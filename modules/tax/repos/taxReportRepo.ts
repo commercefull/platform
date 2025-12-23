@@ -53,17 +53,21 @@ export class TaxReportRepo {
   }
 
   async findByStatus(merchantId: string, status: TaxReportStatus): Promise<TaxReport[]> {
-    return (await query<TaxReport[]>(
-      `SELECT * FROM "taxReport" WHERE "merchantId" = $1 AND "status" = $2 ORDER BY "createdAt" DESC`,
-      [merchantId, status]
-    )) || [];
+    return (
+      (await query<TaxReport[]>(`SELECT * FROM "taxReport" WHERE "merchantId" = $1 AND "status" = $2 ORDER BY "createdAt" DESC`, [
+        merchantId,
+        status,
+      ])) || []
+    );
   }
 
   async findByDateRange(merchantId: string, dateFrom: string, dateTo: string): Promise<TaxReport[]> {
-    return (await query<TaxReport[]>(
-      `SELECT * FROM "taxReport" WHERE "merchantId" = $1 AND "dateFrom" >= $2 AND "dateTo" <= $3 ORDER BY "createdAt" DESC`,
-      [merchantId, dateFrom, dateTo]
-    )) || [];
+    return (
+      (await query<TaxReport[]>(
+        `SELECT * FROM "taxReport" WHERE "merchantId" = $1 AND "dateFrom" >= $2 AND "dateTo" <= $3 ORDER BY "createdAt" DESC`,
+        [merchantId, dateFrom, dateTo],
+      )) || []
+    );
   }
 
   async create(params: TaxReportCreateParams): Promise<TaxReport> {
@@ -75,12 +79,22 @@ export class TaxReportRepo {
         "errorMessage", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING *`,
       [
-        params.merchantId, params.name, params.reportType, params.dateFrom, params.dateTo,
-        JSON.stringify(params.taxJurisdictions || []), params.fileUrl || null,
-        params.fileFormat || null, params.status || 'pending', params.generatedBy || null,
-        JSON.stringify(params.parameters || {}), JSON.stringify(params.results || {}),
-        params.errorMessage || null, now, now
-      ]
+        params.merchantId,
+        params.name,
+        params.reportType,
+        params.dateFrom,
+        params.dateTo,
+        JSON.stringify(params.taxJurisdictions || []),
+        params.fileUrl || null,
+        params.fileFormat || null,
+        params.status || 'pending',
+        params.generatedBy || null,
+        JSON.stringify(params.parameters || {}),
+        JSON.stringify(params.results || {}),
+        params.errorMessage || null,
+        now,
+        now,
+      ],
     );
     if (!result) throw new Error('Failed to create tax report');
     return result;
@@ -109,7 +123,7 @@ export class TaxReportRepo {
 
     return await queryOne<TaxReport>(
       `UPDATE "taxReport" SET ${updateFields.join(', ')} WHERE "taxReportId" = $${paramIndex} RETURNING *`,
-      values
+      values,
     );
   }
 
@@ -122,10 +136,9 @@ export class TaxReportRepo {
   }
 
   async delete(id: string): Promise<boolean> {
-    const result = await queryOne<{ taxReportId: string }>(
-      `DELETE FROM "taxReport" WHERE "taxReportId" = $1 RETURNING "taxReportId"`,
-      [id]
-    );
+    const result = await queryOne<{ taxReportId: string }>(`DELETE FROM "taxReport" WHERE "taxReportId" = $1 RETURNING "taxReportId"`, [
+      id,
+    ]);
     return !!result;
   }
 

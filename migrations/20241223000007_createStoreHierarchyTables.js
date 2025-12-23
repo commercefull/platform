@@ -2,9 +2,9 @@
  * Migration: Create Store Hierarchy and Multi-Store Tables
  */
 
-exports.up = async function(knex) {
+exports.up = async function (knex) {
   // Create store_hierarchy table
-  await knex.schema.createTable('storeHierarchy', (table) => {
+  await knex.schema.createTable('storeHierarchy', table => {
     table.string('hierarchyId').primary();
     table.string('businessId').notNullable();
     table.string('defaultStoreId');
@@ -13,12 +13,12 @@ exports.up = async function(knex) {
     table.boolean('isActive').defaultTo(true);
     table.timestamp('createdAt').defaultTo(knex.fn.now());
     table.timestamp('updatedAt').defaultTo(knex.fn.now());
-    
+
     table.index(['businessId']);
   });
 
   // Create store_settings table
-  await knex.schema.createTable('storeSettings', (table) => {
+  await knex.schema.createTable('storeSettings', table => {
     table.string('storeSettingsId').primary();
     table.string('storeId').notNullable().unique();
     table.string('inventoryMode').defaultTo('shared'); // shared, dedicated, hybrid
@@ -37,12 +37,12 @@ exports.up = async function(knex) {
     table.jsonb('customSettings');
     table.timestamp('createdAt').defaultTo(knex.fn.now());
     table.timestamp('updatedAt').defaultTo(knex.fn.now());
-    
+
     table.index(['storeId']);
   });
 
   // Create store_pickup_location table
-  await knex.schema.createTable('storePickupLocation', (table) => {
+  await knex.schema.createTable('storePickupLocation', table => {
     table.string('pickupLocationId').primary();
     table.string('storeId').notNullable();
     table.string('name').notNullable();
@@ -58,13 +58,13 @@ exports.up = async function(knex) {
     table.integer('sortOrder').defaultTo(0);
     table.timestamp('createdAt').defaultTo(knex.fn.now());
     table.timestamp('updatedAt').defaultTo(knex.fn.now());
-    
+
     table.index(['storeId']);
     table.index(['isActive']);
   });
 
   // Create store_delivery_zone table
-  await knex.schema.createTable('storeDeliveryZone', (table) => {
+  await knex.schema.createTable('storeDeliveryZone', table => {
     table.string('deliveryZoneId').primary();
     table.string('storeId').notNullable();
     table.string('name').notNullable();
@@ -80,13 +80,13 @@ exports.up = async function(knex) {
     table.integer('priority').defaultTo(0);
     table.timestamp('createdAt').defaultTo(knex.fn.now());
     table.timestamp('updatedAt').defaultTo(knex.fn.now());
-    
+
     table.index(['storeId']);
     table.index(['isActive']);
   });
 };
 
-exports.down = async function(knex) {
+exports.down = async function (knex) {
   await knex.schema.dropTableIfExists('storeDeliveryZone');
   await knex.schema.dropTableIfExists('storePickupLocation');
   await knex.schema.dropTableIfExists('storeSettings');

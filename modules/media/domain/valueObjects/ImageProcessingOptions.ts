@@ -44,19 +44,19 @@ export class ImageProcessingOptionsBuilder {
       format: 'webp',
       compression: {
         quality: 80,
-        progressive: true
+        progressive: true,
       },
       generateThumbnail: true,
       thumbnailSize: {
         width: 300,
-        height: 300
+        height: 300,
       },
       responsiveSizes: [
         { width: 320, suffix: '_sm' },
         { width: 640, suffix: '_md' },
         { width: 1024, suffix: '_lg' },
-        { width: 1920, suffix: '_xl' }
-      ]
+        { width: 1920, suffix: '_xl' },
+      ],
     };
 
     return new ImageProcessingOptionsBuilder({
@@ -65,7 +65,7 @@ export class ImageProcessingOptionsBuilder {
       resize: options.resize ? { ...defaults.resize, ...options.resize } : defaults.resize,
       compression: options.compression ? { ...defaults.compression, ...options.compression } : defaults.compression,
       thumbnailSize: options.thumbnailSize || defaults.thumbnailSize,
-      responsiveSizes: options.responsiveSizes || defaults.responsiveSizes
+      responsiveSizes: options.responsiveSizes || defaults.responsiveSizes,
     });
   }
 
@@ -80,7 +80,7 @@ export class ImageProcessingOptionsBuilder {
       compression: {
         quality: 85,
         progressive: true,
-        effort: 4
+        effort: 4,
       },
       generateThumbnail: true,
       thumbnailSize: { width: 300, height: 300 },
@@ -88,8 +88,8 @@ export class ImageProcessingOptionsBuilder {
         { width: 320, suffix: '_sm' },
         { width: 640, suffix: '_md' },
         { width: 1024, suffix: '_lg' },
-        { width: 1600, suffix: '_xl' }
-      ]
+        { width: 1600, suffix: '_xl' },
+      ],
     }).build();
   }
 
@@ -98,15 +98,15 @@ export class ImageProcessingOptionsBuilder {
       format: 'webp',
       compression: {
         quality: 90,
-        progressive: true
+        progressive: true,
       },
       generateThumbnail: true,
       thumbnailSize: { width: 150, height: 150 },
       responsiveSizes: [
         { width: 150, suffix: '_sm' },
         { width: 300, suffix: '_md' },
-        { width: 600, suffix: '_lg' }
-      ]
+        { width: 600, suffix: '_lg' },
+      ],
     }).build();
   }
 
@@ -115,19 +115,19 @@ export class ImageProcessingOptionsBuilder {
       format: 'webp',
       compression: {
         quality: 85,
-        progressive: true
+        progressive: true,
       },
       resize: {
         width: 1920,
         height: 600,
-        fit: 'cover'
+        fit: 'cover',
       },
       generateThumbnail: false,
       responsiveSizes: [
         { width: 800, height: 250, suffix: '_sm' },
         { width: 1200, height: 375, suffix: '_md' },
-        { width: 1920, height: 600, suffix: '_lg' }
-      ]
+        { width: 1920, height: 600, suffix: '_lg' },
+      ],
     }).build();
   }
 }

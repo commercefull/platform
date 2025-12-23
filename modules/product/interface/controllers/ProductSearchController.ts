@@ -4,7 +4,7 @@ import {
   searchProductsUseCase,
   getSearchSuggestionsUseCase,
   findSimilarProductsUseCase,
-  findByAttributeUseCase
+  findByAttributeUseCase,
 } from '../../application/useCases/attribute/SearchProducts';
 
 export class ProductSearchController {
@@ -35,7 +35,7 @@ export class ProductSearchController {
         sortBy,
         sortOrder,
         page,
-        limit
+        limit,
       } = req.query;
 
       // Parse attribute filters from query string
@@ -43,9 +43,7 @@ export class ProductSearchController {
       let parsedAttributes: any[] | undefined;
       if (attributes) {
         try {
-          parsedAttributes = typeof attributes === 'string' 
-            ? JSON.parse(attributes) 
-            : attributes as any[];
+          parsedAttributes = typeof attributes === 'string' ? JSON.parse(attributes) : (attributes as any[]);
         } catch {
           // If not JSON, try to parse from query params
           parsedAttributes = [];
@@ -72,7 +70,7 @@ export class ProductSearchController {
         sortBy: sortBy as any,
         sortOrder: sortOrder as any,
         page: page ? parseInt(page as string, 10) : 1,
-        limit: limit ? parseInt(limit as string, 10) : 20
+        limit: limit ? parseInt(limit as string, 10) : 20,
       });
 
       if (!result.success) {
@@ -85,7 +83,7 @@ export class ProductSearchController {
       logger.error('Error:', error);
       res.status(500).json({
         success: false,
-        error: `Search failed: ${(error as Error).message}`
+        error: `Search failed: ${(error as Error).message}`,
       });
     }
   }
@@ -108,7 +106,7 @@ export class ProductSearchController {
       logger.error('Error:', error);
       res.status(500).json({
         success: false,
-        error: `Search failed: ${(error as Error).message}`
+        error: `Search failed: ${(error as Error).message}`,
       });
     }
   }
@@ -123,7 +121,7 @@ export class ProductSearchController {
 
       const result = await getSearchSuggestionsUseCase.execute({
         query: (q || query) as string,
-        limit: limit ? parseInt(limit as string, 10) : 10
+        limit: limit ? parseInt(limit as string, 10) : 10,
       });
 
       if (!result.success) {
@@ -136,7 +134,7 @@ export class ProductSearchController {
       logger.error('Error:', error);
       res.status(500).json({
         success: false,
-        error: `Failed to get suggestions: ${(error as Error).message}`
+        error: `Failed to get suggestions: ${(error as Error).message}`,
       });
     }
   }
@@ -152,7 +150,7 @@ export class ProductSearchController {
 
       const result = await findSimilarProductsUseCase.execute({
         productId,
-        limit: limit ? parseInt(limit as string, 10) : 10
+        limit: limit ? parseInt(limit as string, 10) : 10,
       });
 
       if (!result.success) {
@@ -165,7 +163,7 @@ export class ProductSearchController {
       logger.error('Error:', error);
       res.status(500).json({
         success: false,
-        error: `Failed to find similar products: ${(error as Error).message}`
+        error: `Failed to find similar products: ${(error as Error).message}`,
       });
     }
   }
@@ -180,7 +178,7 @@ export class ProductSearchController {
 
       const result = await findByAttributeUseCase.execute({
         attributeCode: code,
-        value
+        value,
       });
 
       if (!result.success) {
@@ -193,7 +191,7 @@ export class ProductSearchController {
       logger.error('Error:', error);
       res.status(500).json({
         success: false,
-        error: `Failed to find products: ${(error as Error).message}`
+        error: `Failed to find products: ${(error as Error).message}`,
       });
     }
   }

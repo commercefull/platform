@@ -3,11 +3,11 @@
  * Adds tables for platform administrators and session management
  */
 
-exports.up = async function(knex) {
+exports.up = async function (knex) {
   // Create adminUser table
   const hasAdminUser = await knex.schema.hasTable('adminUser');
   if (!hasAdminUser) {
-    await knex.schema.createTable('adminUser', (table) => {
+    await knex.schema.createTable('adminUser', table => {
       table.string('adminId', 50).primary();
       table.string('email', 255).unique().notNullable();
       table.string('name', 255).notNullable();
@@ -29,7 +29,7 @@ exports.up = async function(knex) {
   // Create userSession table for web app sessions
   const hasUserSession = await knex.schema.hasTable('userSession');
   if (!hasUserSession) {
-    await knex.schema.createTable('userSession', (table) => {
+    await knex.schema.createTable('userSession', table => {
       table.string('sessionId', 50).primary();
       table.string('userId', 50).notNullable();
       table.string('userType', 20).notNullable(); // 'admin', 'merchant', 'b2b', 'customer'
@@ -55,7 +55,7 @@ exports.up = async function(knex) {
   // Create b2bUser table for B2B company users
   const hasB2bUser = await knex.schema.hasTable('b2bUser');
   if (!hasB2bUser) {
-    await knex.schema.createTable('b2bUser', (table) => {
+    await knex.schema.createTable('b2bUser', table => {
       table.string('b2bUserId', 50).primary();
       table.string('b2bCompanyId', 50).notNullable();
       table.string('email', 255).notNullable();
@@ -82,7 +82,7 @@ exports.up = async function(knex) {
   }
 };
 
-exports.down = async function(knex) {
+exports.down = async function (knex) {
   await knex.schema.dropTableIfExists('b2bUser');
   await knex.schema.dropTableIfExists('userSession');
   await knex.schema.dropTableIfExists('adminUser');

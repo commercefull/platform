@@ -1,6 +1,6 @@
 /**
  * CreateWarehouse Use Case
- * 
+ *
  * Creates a new warehouse for inventory storage and fulfillment.
  */
 
@@ -12,11 +12,11 @@ export interface CreateWarehouseInput {
   name: string;
   code: string;
   type: WarehouseType;
-  
+
   // Ownership
   businessId?: string;
   merchantId?: string;
-  
+
   // Address
   address: {
     addressLine1: string;
@@ -28,18 +28,18 @@ export interface CreateWarehouseInput {
     latitude?: number;
     longitude?: number;
   };
-  
+
   // Settings
   timezone?: string;
   cutoffTime?: string; // e.g., "14:00" - orders after this time ship next day
   processingTime?: number; // Hours to process an order
   isActive?: boolean;
   isDefault?: boolean;
-  
+
   // Capabilities
   capabilities?: string[];
   supportedCarriers?: string[];
-  
+
   // Capacity
   maxCapacity?: number;
   currentCapacity?: number;
@@ -57,7 +57,7 @@ export interface CreateWarehouseOutput {
 
 export class CreateWarehouseUseCase {
   constructor(
-    private readonly warehouseRepository: any // WarehouseRepository
+    private readonly warehouseRepository: any, // WarehouseRepository
   ) {}
 
   async execute(input: CreateWarehouseInput): Promise<CreateWarehouseOutput> {

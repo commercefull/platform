@@ -9,7 +9,7 @@ export enum ProductStatus {
   ACTIVE = 'active',
   INACTIVE = 'inactive',
   DISCONTINUED = 'discontinued',
-  ARCHIVED = 'archived'
+  ARCHIVED = 'archived',
 }
 
 /**
@@ -21,7 +21,7 @@ export const ProductStatusTransitions: Record<ProductStatus, ProductStatus[]> = 
   [ProductStatus.ACTIVE]: [ProductStatus.INACTIVE, ProductStatus.DISCONTINUED, ProductStatus.ARCHIVED],
   [ProductStatus.INACTIVE]: [ProductStatus.ACTIVE, ProductStatus.DISCONTINUED, ProductStatus.ARCHIVED],
   [ProductStatus.DISCONTINUED]: [ProductStatus.ARCHIVED],
-  [ProductStatus.ARCHIVED]: []
+  [ProductStatus.ARCHIVED]: [],
 };
 
 /**
@@ -42,7 +42,7 @@ export function getProductStatusLabel(status: ProductStatus): string {
     [ProductStatus.ACTIVE]: 'Active',
     [ProductStatus.INACTIVE]: 'Inactive',
     [ProductStatus.DISCONTINUED]: 'Discontinued',
-    [ProductStatus.ARCHIVED]: 'Archived'
+    [ProductStatus.ARCHIVED]: 'Archived',
   };
   return labels[status] || status;
 }

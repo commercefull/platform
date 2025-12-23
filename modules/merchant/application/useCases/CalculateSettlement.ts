@@ -1,6 +1,6 @@
 /**
  * CalculateSettlement Use Case
- * 
+ *
  * Calculates merchant settlement for a period.
  */
 
@@ -40,7 +40,7 @@ export class CalculateSettlementUseCase {
   constructor(
     private readonly merchantRepository: any,
     private readonly orderRepository: any,
-    private readonly settlementRepository: any
+    private readonly settlementRepository: any,
   ) {}
 
   async execute(input: CalculateSettlementInput): Promise<CalculateSettlementOutput> {
@@ -50,11 +50,7 @@ export class CalculateSettlementUseCase {
     }
 
     // Get completed orders for the period
-    const orders = await this.orderRepository.findByMerchantAndPeriod(
-      input.merchantId,
-      input.periodStart,
-      input.periodEnd
-    );
+    const orders = await this.orderRepository.findByMerchantAndPeriod(input.merchantId, input.periodStart, input.periodEnd);
 
     const lineItems: SettlementLineItem[] = [];
     let grossSales = 0;
@@ -63,7 +59,7 @@ export class CalculateSettlementUseCase {
     let refunds = 0;
 
     for (const order of orders) {
-      const commissionRate = merchant.commissionRate || 0.10;
+      const commissionRate = merchant.commissionRate || 0.1;
       const commissionAmount = order.total * commissionRate;
       const fees = order.paymentFee || 0;
       const netAmount = order.total - commissionAmount - fees;

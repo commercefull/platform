@@ -1,10 +1,6 @@
 import { AxiosInstance } from 'axios';
 import { createTestClient, loginTestAdmin } from '../testUtils';
-import {
-  SEEDED_PRODUCT_TYPE_SIMPLE_ID,
-  SEEDED_PRODUCT_TYPE_CONFIGURABLE_ID,
-  SEEDED_ATTRIBUTE_SET_APPAREL_ID
-} from './testUtils';
+import { SEEDED_PRODUCT_TYPE_SIMPLE_ID, SEEDED_PRODUCT_TYPE_CONFIGURABLE_ID, SEEDED_ATTRIBUTE_SET_APPAREL_ID } from './testUtils';
 
 describe('Product Type Tests', () => {
   let client: AxiosInstance;
@@ -19,7 +15,7 @@ describe('Product Type Tests', () => {
   describe('Product Type CRUD Operations', () => {
     it('should list all product types', async () => {
       const response = await client.get('/business/product-types', {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
 
       expect(response.status).toBe(200);
@@ -30,7 +26,7 @@ describe('Product Type Tests', () => {
 
     it('should list product types with active filter (returns all since no isActive column)', async () => {
       const response = await client.get('/business/product-types?active=true', {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
 
       expect(response.status).toBe(200);
@@ -40,7 +36,7 @@ describe('Product Type Tests', () => {
 
     it('should get a seeded product type by ID', async () => {
       const response = await client.get(`/business/product-types/${SEEDED_PRODUCT_TYPE_SIMPLE_ID}`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
 
       expect(response.status).toBe(200);
@@ -50,7 +46,7 @@ describe('Product Type Tests', () => {
 
     it('should get a product type by slug', async () => {
       const response = await client.get('/business/product-types/slug/configurable-test', {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
 
       expect(response.status).toBe(200);
@@ -61,17 +57,17 @@ describe('Product Type Tests', () => {
     it('should create a new product type', async () => {
       const productTypeData = {
         name: 'Test Product Type',
-        slug: `test-type-${Date.now()}`
+        slug: `test-type-${Date.now()}`,
       };
 
       const response = await client.post('/business/product-types', productTypeData, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
 
       expect(response.status).toBe(201);
       expect(response.data.success).toBe(true);
       expect(response.data.data.name).toBe('Test Product Type');
-      
+
       createdProductTypeId = response.data.data.productTypeId;
     });
 
@@ -83,11 +79,11 @@ describe('Product Type Tests', () => {
 
       const updateData = {
         name: 'Updated Product Type',
-        description: 'Updated by integration test'
+        description: 'Updated by integration test',
       };
 
       const response = await client.put(`/business/product-types/${createdProductTypeId}`, updateData, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
 
       expect(response.status).toBe(200);
@@ -97,7 +93,7 @@ describe('Product Type Tests', () => {
 
     it('should get attributes for a product type', async () => {
       const response = await client.get(`/business/product-types/${SEEDED_PRODUCT_TYPE_CONFIGURABLE_ID}/attributes`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
 
       expect(response.status).toBe(200);
@@ -107,7 +103,7 @@ describe('Product Type Tests', () => {
 
     it('should return 404 for non-existent product type', async () => {
       const response = await client.get('/business/product-types/00000000-0000-0000-0000-000000000000', {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
 
       expect(response.status).toBe(404);
@@ -118,13 +114,13 @@ describe('Product Type Tests', () => {
       const productTypeData = {
         name: 'Duplicate Test',
         slug: 'simple-test', // Already exists
-        description: 'Should fail'
+        description: 'Should fail',
       };
 
       const response = await client.post('/business/product-types', productTypeData, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       // Should return 400 for duplicate slug
       expect(response.status).toBe(400);
       expect(response.data.success).toBe(false);
@@ -139,7 +135,7 @@ describe('Product Type Tests', () => {
       }
 
       const response = await client.delete(`/business/product-types/${createdProductTypeId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
 
       expect(response.status).toBe(200);

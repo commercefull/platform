@@ -2,8 +2,8 @@
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.up = function(knex) {
-  return knex.schema.createTable('promotionGiftCardTransaction', function(table) {
+exports.up = function (knex) {
+  return knex.schema.createTable('promotionGiftCardTransaction', function (table) {
     table.uuid('promotionGiftCardTransactionId').primary().defaultTo(knex.raw('uuidv7()'));
     table.uuid('promotionGiftCardId').notNullable().references('promotionGiftCardId').inTable('promotionGiftCard').onDelete('CASCADE');
     table.string('type').notNullable(); // purchase, reload, redemption, refund, adjustment, expiration
@@ -19,7 +19,7 @@ exports.up = function(knex) {
     table.string('referenceNumber');
     table.jsonb('metadata');
     table.timestamp('createdAt').defaultTo(knex.fn.now());
-    
+
     table.index('promotionGiftCardId');
     table.index('orderId');
     table.index('type');
@@ -31,6 +31,6 @@ exports.up = function(knex) {
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTableIfExists('promotionGiftCardTransaction');
 };

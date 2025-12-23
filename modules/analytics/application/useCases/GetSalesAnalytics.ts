@@ -1,6 +1,6 @@
 /**
  * GetSalesAnalytics Use Case
- * 
+ *
  * Provides detailed sales analytics with breakdowns by time, category, channel.
  */
 
@@ -50,12 +50,7 @@ export class GetSalesAnalyticsUseCase {
     const { storeId, startDate, endDate, groupBy, breakdown } = input;
 
     // Get time series data
-    const timeSeries = await this.analyticsRepository.getSalesTimeSeries(
-      storeId,
-      startDate,
-      endDate,
-      groupBy
-    );
+    const timeSeries = await this.analyticsRepository.getSalesTimeSeries(storeId, startDate, endDate, groupBy);
 
     // Calculate totals
     const totals = timeSeries.reduce(
@@ -65,19 +60,14 @@ export class GetSalesAnalyticsUseCase {
         units: acc.units + point.units,
         averageOrderValue: 0,
       }),
-      { orders: 0, revenue: 0, units: 0, averageOrderValue: 0 }
+      { orders: 0, revenue: 0, units: 0, averageOrderValue: 0 },
     );
     totals.averageOrderValue = totals.orders > 0 ? totals.revenue / totals.orders : 0;
 
     // Get breakdown if requested
     let breakdownData: SalesBreakdown[] | undefined;
     if (breakdown) {
-      const rawBreakdown = await this.analyticsRepository.getSalesBreakdown(
-        storeId,
-        startDate,
-        endDate,
-        breakdown
-      );
+      const rawBreakdown = await this.analyticsRepository.getSalesBreakdown(storeId, startDate, endDate, breakdown);
 
       // Calculate percentages
       breakdownData = rawBreakdown.map((item: SalesBreakdown) => ({
@@ -94,12 +84,8 @@ export class GetSalesAnalyticsUseCase {
     const prevTotals = await this.analyticsRepository.getSalesTotals(storeId, prevStart, prevEnd);
 
     const growth = {
-      ordersGrowth: prevTotals.orders > 0
-        ? ((totals.orders - prevTotals.orders) / prevTotals.orders) * 100
-        : 0,
-      revenueGrowth: prevTotals.revenue > 0
-        ? ((totals.revenue - prevTotals.revenue) / prevTotals.revenue) * 100
-        : 0,
+      ordersGrowth: prevTotals.orders > 0 ? ((totals.orders - prevTotals.orders) / prevTotals.orders) * 100 : 0,
+      revenueGrowth: prevTotals.revenue > 0 ? ((totals.revenue - prevTotals.revenue) / prevTotals.revenue) * 100 : 0,
     };
 
     return {

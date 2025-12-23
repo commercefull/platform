@@ -1,30 +1,30 @@
-import { queryOne, query } from "../../../libs/db";
-import { Table } from "../../../libs/db/types";
+import { queryOne, query } from '../../../libs/db';
+import { Table } from '../../../libs/db/types';
 
 // Product status and visibility enums to match database schema
 export enum ProductStatus {
-  DRAFT = "draft",
-  ACTIVE = "active",
-  INACTIVE = "inactive",
-  DISCONTINUED = "discontinued",
-  ARCHIVED = "archived"
+  DRAFT = 'draft',
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
+  DISCONTINUED = 'discontinued',
+  ARCHIVED = 'archived',
 }
 
 export enum ProductVisibility {
-  VISIBLE = "visible",
-  NOT_VISIBLE = "not_visible",
-  CATALOG = "catalog",
-  SEARCH = "search"
+  VISIBLE = 'visible',
+  NOT_VISIBLE = 'not_visible',
+  CATALOG = 'catalog',
+  SEARCH = 'search',
 }
 
 export enum ProductType {
-  SIMPLE = "simple",
-  CONFIGURABLE = "configurable",
-  GROUPED = "grouped",
-  VIRTUAL = "virtual",
-  DOWNLOADABLE = "downloadable",
-  BUNDLE = "bundle",
-  SUBSCRIPTION = "subscription"
+  SIMPLE = 'simple',
+  CONFIGURABLE = 'configurable',
+  GROUPED = 'grouped',
+  VIRTUAL = 'virtual',
+  DOWNLOADABLE = 'downloadable',
+  BUNDLE = 'bundle',
+  SUBSCRIPTION = 'subscription',
 }
 
 // Product interface matching database schema (camelCase)
@@ -99,9 +99,20 @@ export interface Product {
 }
 
 // Alias for backward compatibility
-export type ProductListItem = Pick<Product, 
-  'productId' | 'name' | 'sku' | 'status' | 'visibility' | 'price' | 'basePrice' | 
-  'salePrice' | 'isFeatured' | 'hasVariants' | 'createdAt' | 'updatedAt'
+export type ProductListItem = Pick<
+  Product,
+  | 'productId'
+  | 'name'
+  | 'sku'
+  | 'status'
+  | 'visibility'
+  | 'price'
+  | 'basePrice'
+  | 'salePrice'
+  | 'isFeatured'
+  | 'hasVariants'
+  | 'createdAt'
+  | 'updatedAt'
 > & { id?: string }; // Include id alias for compatibility
 
 export type ProductCreateProps = Omit<Product, 'productId' | 'createdAt' | 'updatedAt'>;
@@ -181,7 +192,7 @@ export class ProductRepo {
       limit = 50,
       offset = 0,
       orderBy = 'createdAt',
-      orderDirection = 'DESC'
+      orderDirection = 'DESC',
     } = options;
 
     let sql = `SELECT * FROM "${this.tableName}" WHERE "deletedAt" IS NULL`;
@@ -271,26 +282,14 @@ export class ProductRepo {
     sql += ` LIMIT $${paramIndex++} OFFSET $${paramIndex++}`;
     params.push(limit, offset);
 
-    return await query<Product[]>(sql, params) || [];
+    return (await query<Product[]>(sql, params)) || [];
   }
 
   /**
    * Count products based on filter options
    */
   async count(options: Omit<ProductFilterOptions, 'limit' | 'offset' | 'orderBy' | 'orderDirection'> = {}): Promise<number> {
-    const {
-      status,
-      visibility,
-      type,
-      brandId,
-      isFeatured,
-      isVirtual,
-      hasVariants,
-      priceMin,
-      priceMax,
-      merchantId,
-      searchTerm
-    } = options;
+    const { status, visibility, type, brandId, isFeatured, isVirtual, hasVariants, priceMin, priceMax, merchantId, searchTerm } = options;
 
     let sql = `SELECT COUNT(*) as count FROM "${this.tableName}" WHERE "deletedAt" IS NULL`;
     const params: any[] = [];
@@ -481,7 +480,7 @@ export class ProductRepo {
       data.hasVariants || false,
       data.variantAttributes ? JSON.stringify(data.variantAttributes) : null,
       data.createdBy || null,
-      data.updatedBy || null
+      data.updatedBy || null,
     ];
 
     const result = await queryOne<Product>(sql, values);
@@ -503,24 +502,65 @@ export class ProductRepo {
 
     // Build dynamic SET clause
     const updateableFields: (keyof ProductUpdateProps)[] = [
-      'sku', 'name', 'slug', 'description', 'shortDescription',
-      'brandId', 'type', 'status', 'visibility',
-      'price', 'basePrice', 'salePrice', 'costPrice', 'compareAtPrice',
-      'taxClass', 'taxRate', 'isTaxable', 'currency', 'currencyCode',
-      'isInventoryManaged', 'minOrderQuantity', 'maxOrderQuantity', 'orderIncrementQuantity',
-      'weight', 'weightUnit', 'length', 'width', 'height', 'dimensionUnit',
-      'metaTitle', 'metaDescription', 'metaKeywords',
-      'hsCode', 'countryOfOrigin',
-      'isFeatured', 'isNew', 'isBestseller',
-      'warningThreshold', 'preorderEnabled', 'preorderReleaseDate', 'preorderAllowance',
-      'customFields', 'seoData',
-      'relatedProducts', 'crossSellProducts', 'upSellProducts',
-      'isVirtual', 'isDownloadable', 'isSubscription',
-      'primaryImageId', 'publishedAt',
-      'userId', 'merchantId',
-      'returnPolicy', 'warranty', 'externalId',
-      'hasVariants', 'variantAttributes',
-      'updatedBy'
+      'sku',
+      'name',
+      'slug',
+      'description',
+      'shortDescription',
+      'brandId',
+      'type',
+      'status',
+      'visibility',
+      'price',
+      'basePrice',
+      'salePrice',
+      'costPrice',
+      'compareAtPrice',
+      'taxClass',
+      'taxRate',
+      'isTaxable',
+      'currency',
+      'currencyCode',
+      'isInventoryManaged',
+      'minOrderQuantity',
+      'maxOrderQuantity',
+      'orderIncrementQuantity',
+      'weight',
+      'weightUnit',
+      'length',
+      'width',
+      'height',
+      'dimensionUnit',
+      'metaTitle',
+      'metaDescription',
+      'metaKeywords',
+      'hsCode',
+      'countryOfOrigin',
+      'isFeatured',
+      'isNew',
+      'isBestseller',
+      'warningThreshold',
+      'preorderEnabled',
+      'preorderReleaseDate',
+      'preorderAllowance',
+      'customFields',
+      'seoData',
+      'relatedProducts',
+      'crossSellProducts',
+      'upSellProducts',
+      'isVirtual',
+      'isDownloadable',
+      'isSubscription',
+      'primaryImageId',
+      'publishedAt',
+      'userId',
+      'merchantId',
+      'returnPolicy',
+      'warranty',
+      'externalId',
+      'hasVariants',
+      'variantAttributes',
+      'updatedBy',
     ];
 
     for (const field of updateableFields) {
@@ -601,11 +641,11 @@ export class ProductRepo {
    * Find featured products
    */
   async findFeatured(limit: number = 10): Promise<Product[]> {
-    return this.findAll({ 
-      isFeatured: true, 
+    return this.findAll({
+      isFeatured: true,
       status: ProductStatus.ACTIVE,
       visibility: ProductVisibility.VISIBLE,
-      limit 
+      limit,
     });
   }
 
@@ -622,7 +662,7 @@ export class ProductRepo {
       ORDER BY "createdAt" DESC
       LIMIT $3
     `;
-    return await query<Product[]>(sql, [ProductStatus.ACTIVE, ProductVisibility.VISIBLE, limit]) || [];
+    return (await query<Product[]>(sql, [ProductStatus.ACTIVE, ProductVisibility.VISIBLE, limit])) || [];
   }
 
   /**
@@ -638,7 +678,7 @@ export class ProductRepo {
       ORDER BY "reviewCount" DESC, "averageRating" DESC
       LIMIT $3
     `;
-    return await query<Product[]>(sql, [ProductStatus.ACTIVE, ProductVisibility.VISIBLE, limit]) || [];
+    return (await query<Product[]>(sql, [ProductStatus.ACTIVE, ProductVisibility.VISIBLE, limit])) || [];
   }
 
   /**
@@ -661,12 +701,7 @@ export class ProductRepo {
           AND "deletedAt" IS NULL
         LIMIT $${product.relatedProducts.length + 3}
       `;
-      return await query<Product[]>(sql, [
-        ...product.relatedProducts,
-        ProductStatus.ACTIVE,
-        ProductVisibility.VISIBLE,
-        limit
-      ]) || [];
+      return (await query<Product[]>(sql, [...product.relatedProducts, ProductStatus.ACTIVE, ProductVisibility.VISIBLE, limit])) || [];
     }
 
     // Otherwise, find products with same brand
@@ -681,13 +716,7 @@ export class ProductRepo {
         ORDER BY RANDOM()
         LIMIT $5
       `;
-      return await query<Product[]>(sql, [
-        product.brandId,
-        productId,
-        ProductStatus.ACTIVE,
-        ProductVisibility.VISIBLE,
-        limit
-      ]) || [];
+      return (await query<Product[]>(sql, [product.brandId, productId, ProductStatus.ACTIVE, ProductVisibility.VISIBLE, limit])) || [];
     }
 
     return [];

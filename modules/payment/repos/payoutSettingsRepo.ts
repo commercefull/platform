@@ -43,11 +43,20 @@ export class PayoutSettingsRepo {
         "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *`,
       [
-        params.merchantId, params.frequency || 'weekly', params.minimumAmount || 1.00,
-        params.bankAccountId || null, params.payoutDay || null, params.holdPeriod || 0,
-        params.automaticPayouts ?? true, params.currencyCode || 'USD', params.payoutProvider || 'stripe',
-        params.payoutMethod || 'bank_transfer', JSON.stringify(params.providerSettings || {}), now, now
-      ]
+        params.merchantId,
+        params.frequency || 'weekly',
+        params.minimumAmount || 1.0,
+        params.bankAccountId || null,
+        params.payoutDay || null,
+        params.holdPeriod || 0,
+        params.automaticPayouts ?? true,
+        params.currencyCode || 'USD',
+        params.payoutProvider || 'stripe',
+        params.payoutMethod || 'bank_transfer',
+        JSON.stringify(params.providerSettings || {}),
+        now,
+        now,
+      ],
     );
     if (!result) throw new Error('Failed to create payout settings');
     return result;
@@ -72,7 +81,7 @@ export class PayoutSettingsRepo {
 
     return await queryOne<PayoutSettings>(
       `UPDATE "payoutSettings" SET ${updateFields.join(', ')} WHERE "payoutSettingsId" = $${paramIndex} RETURNING *`,
-      values
+      values,
     );
   }
 
@@ -85,7 +94,7 @@ export class PayoutSettingsRepo {
   async delete(id: string): Promise<boolean> {
     const result = await queryOne<{ payoutSettingsId: string }>(
       `DELETE FROM "payoutSettings" WHERE "payoutSettingsId" = $1 RETURNING "payoutSettingsId"`,
-      [id]
+      [id],
     );
     return !!result;
   }

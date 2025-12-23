@@ -1,19 +1,19 @@
 /**
  * Inventory Repository
- * 
+ *
  * Handles persistence for inventory-related entities using the actual database schema.
  */
 
 import { query, queryOne } from '../../../libs/db';
 import { generateUUID } from '../../../libs/uuid';
-import { 
+import {
   InventoryLocation as DbInventoryLocation,
   InventoryTransaction as DbInventoryTransaction,
   InventoryLevel as DbInventoryLevel,
   InventoryLot as DbInventoryLot,
   InventoryTransactionType as DbInventoryTransactionType,
   InventoryTransfer as DbInventoryTransfer,
-  InventoryCount as DbInventoryCount
+  InventoryCount as DbInventoryCount,
 } from '../../../libs/db/types';
 
 // ============================================================================
@@ -121,11 +121,7 @@ export class InventoryRepo {
     return results || [];
   }
 
-  async findLocations(
-    filter?: InventoryLocationFilter,
-    limit: number = 50,
-    offset: number = 0
-  ): Promise<InventoryLocation[]> {
+  async findLocations(filter?: InventoryLocationFilter, limit: number = 50, offset: number = 0): Promise<InventoryLocation[]> {
     let sql = `SELECT * FROM "inventoryLocation" WHERE 1=1`;
     const params: unknown[] = [];
     let paramIndex = 1;
@@ -214,7 +210,7 @@ export class InventoryRepo {
       input.expiryDate || null,
       input.status || 'available',
       now,
-      now
+      now,
     ]);
 
     if (!result) {
@@ -224,10 +220,7 @@ export class InventoryRepo {
     return result;
   }
 
-  async updateLocation(
-    inventoryLocationId: string, 
-    input: UpdateInventoryLocationInput
-  ): Promise<InventoryLocation> {
+  async updateLocation(inventoryLocationId: string, input: UpdateInventoryLocationInput): Promise<InventoryLocation> {
     const now = new Date();
     const updates: string[] = [];
     const params: unknown[] = [];
@@ -291,11 +284,7 @@ export class InventoryRepo {
     return result;
   }
 
-  async adjustQuantity(
-    inventoryLocationId: string,
-    quantityChange: number,
-    reason?: string
-  ): Promise<InventoryLocation> {
+  async adjustQuantity(inventoryLocationId: string, quantityChange: number, reason?: string): Promise<InventoryLocation> {
     const sql = `
       UPDATE "inventoryLocation" 
       SET 
@@ -306,11 +295,7 @@ export class InventoryRepo {
       RETURNING *
     `;
 
-    const result = await queryOne<InventoryLocation>(sql, [
-      inventoryLocationId,
-      quantityChange,
-      new Date()
-    ]);
+    const result = await queryOne<InventoryLocation>(sql, [inventoryLocationId, quantityChange, new Date()]);
 
     if (!result) {
       throw new Error(`Inventory location ${inventoryLocationId} not found`);
@@ -330,11 +315,7 @@ export class InventoryRepo {
       RETURNING *
     `;
 
-    const result = await queryOne<InventoryLocation>(sql, [
-      inventoryLocationId,
-      quantity,
-      new Date()
-    ]);
+    const result = await queryOne<InventoryLocation>(sql, [inventoryLocationId, quantity, new Date()]);
 
     if (!result) {
       throw new Error('Insufficient available quantity or location not found');
@@ -354,11 +335,7 @@ export class InventoryRepo {
       RETURNING *
     `;
 
-    const result = await queryOne<InventoryLocation>(sql, [
-      inventoryLocationId,
-      quantity,
-      new Date()
-    ]);
+    const result = await queryOne<InventoryLocation>(sql, [inventoryLocationId, quantity, new Date()]);
 
     if (!result) {
       throw new Error(`Inventory location ${inventoryLocationId} not found`);
@@ -393,10 +370,7 @@ export class InventoryRepo {
     return results || [];
   }
 
-  async findTransactionsByWarehouseId(
-    distributionWarehouseId: string, 
-    limit: number = 50
-  ): Promise<InventoryTransaction[]> {
+  async findTransactionsByWarehouseId(distributionWarehouseId: string, limit: number = 50): Promise<InventoryTransaction[]> {
     const sql = `
       SELECT * FROM "inventoryTransaction" 
       WHERE "distributionWarehouseId" = $1 
@@ -439,7 +413,7 @@ export class InventoryRepo {
       'completed',
       input.reason || null,
       now,
-      now
+      now,
     ]);
 
     if (!result) {
@@ -469,9 +443,9 @@ export class InventoryRepo {
   // ==========================================================================
 
   async checkProductAvailability(
-    productId: string, 
-    variantId?: string, 
-    requiredQuantity: number = 1
+    productId: string,
+    variantId?: string,
+    requiredQuantity: number = 1,
   ): Promise<{ available: boolean; totalAvailable: number; locations: InventoryLocation[] }> {
     let sql = `SELECT * FROM "inventoryLocation" WHERE "productId" = $1 AND "status" = 'available'`;
     const params: unknown[] = [productId];
@@ -489,7 +463,7 @@ export class InventoryRepo {
     return {
       available: totalAvailable >= requiredQuantity,
       totalAvailable,
-      locations: locationList
+      locations: locationList,
     };
   }
 
@@ -512,10 +486,7 @@ export class InventoryRepo {
     return await queryOne<InventoryLevel>(sql, [inventoryLevelId]);
   }
 
-  async findLevelByProductAndWarehouse(
-    productId: string, 
-    distributionWarehouseId: string
-  ): Promise<InventoryLevel | null> {
+  async findLevelByProductAndWarehouse(productId: string, distributionWarehouseId: string): Promise<InventoryLevel | null> {
     const sql = `
       SELECT * FROM "inventoryLevel" 
       WHERE "productId" = $1 AND "distributionWarehouseId" = $2

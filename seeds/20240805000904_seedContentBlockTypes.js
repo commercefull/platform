@@ -13,14 +13,24 @@ const BLOCK_TYPES = [
   { name: 'Columns', slug: 'columns', description: 'Multi-column layout', category: 'Layout', isSystem: true, sortOrder: 80 },
   { name: 'Spacer', slug: 'spacer', description: 'Vertical spacing control', category: 'Layout', isSystem: true, sortOrder: 90 },
   { name: 'Product', slug: 'product', description: 'Single product display', category: 'Commerce', isSystem: true, sortOrder: 100 },
-  { name: 'Product Grid', slug: 'product-grid', description: 'Display multiple products', category: 'Commerce', isSystem: true, sortOrder: 110 },
+  {
+    name: 'Product Grid',
+    slug: 'product-grid',
+    description: 'Display multiple products',
+    category: 'Commerce',
+    isSystem: true,
+    sortOrder: 110,
+  },
   { name: 'Form', slug: 'form', description: 'Contact or subscription form', category: 'Interactive', isSystem: true, sortOrder: 120 },
-  { name: 'HTML', slug: 'html', description: 'Custom HTML code', category: 'Advanced', isSystem: true, sortOrder: 130 }
+  { name: 'HTML', slug: 'html', description: 'Custom HTML code', category: 'Advanced', isSystem: true, sortOrder: 130 },
 ];
 
 exports.seed = async function (knex) {
   await knex('contentBlockType')
-    .whereIn('slug', BLOCK_TYPES.map(type => type.slug))
+    .whereIn(
+      'slug',
+      BLOCK_TYPES.map(type => type.slug),
+    )
     .del();
 
   await knex('contentBlockType').insert(BLOCK_TYPES);

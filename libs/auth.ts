@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { SessionService } from './session';
 
@@ -18,19 +18,18 @@ const authenticateToken = (req: Request, res: Response, next: NextFunction, secr
   // Get token from header
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN format
-  
+
   if (!token) {
     res.status(401).json({ success: false, message: 'Access token is required' });
     return;
   }
-  
+
   try {
     // Verify token
     const decoded = jwt.verify(token, String(secret));
     req.user = decoded;
     return next();
   } catch (error) {
-    
     // Return 401 for invalid/expired tokens (not 403 which is for authorization failures)
     res.status(401).json({ success: false, message: 'Invalid or expired token' });
   }
@@ -40,22 +39,22 @@ const authenticateToken = (req: Request, res: Response, next: NextFunction, secr
  * Authenticate web requests via session
  */
 const authenticateSession = async (
-  req: Request, 
-  res: Response, 
-  next: NextFunction, 
+  req: Request,
+  res: Response,
+  next: NextFunction,
   userType: 'admin' | 'merchant' | 'b2b' | 'customer',
-  loginPath: string
+  loginPath: string,
 ): Promise<void> => {
   // Get session ID from cookie
   const sessionId = req.cookies?.[SESSION_COOKIE_NAME];
-  
+
   if (!sessionId) {
     return res.redirect(loginPath);
   }
 
   try {
     const session = await SessionService.getSession(sessionId);
-    
+
     if (!session) {
       res.clearCookie(SESSION_COOKIE_NAME);
       return res.redirect(loginPath);
@@ -84,7 +83,6 @@ const authenticateSession = async (
 
     return next();
   } catch (error) {
-    
     res.clearCookie(SESSION_COOKIE_NAME);
     return res.redirect(loginPath);
   }
@@ -133,15 +131,15 @@ export const isB2BLoggedIn = async (req: Request, res: Response, next: NextFunct
 };
 
 export const isCustomerLoggedIn = (req: Request, res: Response, next: NextFunction) => {
-    if (req.xhr || req.headers.accept?.indexOf('json') !== -1) {
-        return authenticateToken(req, res, next, CUSTOMER_JWT_SECRET);
-    }
-    
-    if (req.isAuthenticated()) {
-        return next();
-    }
-    
-    res.redirect("/login");
+  if (req.xhr || req.headers.accept?.indexOf('json') !== -1) {
+    return authenticateToken(req, res, next, CUSTOMER_JWT_SECRET);
+  }
+
+  if (req.isAuthenticated()) {
+    return next();
+  }
+
+  res.redirect('/login');
 };
 
 /**
@@ -149,8 +147,8 @@ export const isCustomerLoggedIn = (req: Request, res: Response, next: NextFuncti
  * Useful for pages that should only be accessible to non-authenticated users (signup, login)
  */
 export const isCustomerNotLoggedIn = (req: Request, res: Response, next: NextFunction) => {
-    if (req.isAuthenticated()) {
-        return res.redirect('/user/profile'); // Redirect to profile if already authenticated
-    }
-    next(); // Continue if not authenticated
+  if (req.isAuthenticated()) {
+    return res.redirect('/user/profile'); // Redirect to profile if already authenticated
+  }
+  next(); // Continue if not authenticated
 };

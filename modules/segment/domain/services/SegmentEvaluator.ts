@@ -1,6 +1,6 @@
 /**
  * Segment Evaluator Service
- * 
+ *
  * Evaluates customer membership in dynamic segments.
  */
 

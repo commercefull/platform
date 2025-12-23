@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function (knex) {
   return knex.schema.createTable('paymentPlan', t => {
     t.uuid('paymentPlanId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
@@ -10,7 +10,10 @@ exports.up = function(knex) {
     t.boolean('isPublic').notNullable().defaultTo(true);
     t.decimal('amount', 15, 2).notNullable();
     t.string('currencyCode', 3).notNullable().defaultTo('USD');
-    t.string('billingInterval', 20).notNullable().checkIn(['daily', 'weekly', 'monthly', 'quarterly', 'biannually', 'annually']).defaultTo('monthly');
+    t.string('billingInterval', 20)
+      .notNullable()
+      .checkIn(['daily', 'weekly', 'monthly', 'quarterly', 'biannually', 'annually'])
+      .defaultTo('monthly');
     t.integer('billingFrequency').notNullable().defaultTo(1);
     t.integer('trialPeriodDays').defaultTo(0);
     t.decimal('setupFee', 15, 2).defaultTo(0);
@@ -19,7 +22,7 @@ exports.up = function(knex) {
     t.integer('gracePeriodDays').notNullable().defaultTo(3);
     t.jsonb('cancelationPolicy');
     t.enum('allowedPaymentMethods', ['creditCard', 'debitCard', 'giftCard', 'storeCredit', 'other']).notNullable();
-    
+
     t.index('merchantId');
     t.index('isActive');
     t.index('isPublic');
@@ -28,6 +31,6 @@ exports.up = function(knex) {
   });
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTable('paymentPlan');
 };

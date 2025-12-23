@@ -14,32 +14,20 @@ import { unixTimestamp } from '../../../libs/date';
 export type ContentCategoryCreateParams = Omit<ContentCategory, 'contentCategoryId' | 'createdAt' | 'updatedAt'>;
 export type ContentCategoryUpdateParams = Partial<Omit<ContentCategory, 'contentCategoryId' | 'createdAt' | 'updatedAt'>>;
 
-
 // ============================================================================
 // Repository
 // ============================================================================
 
 export class ContentCategoryRepo {
   async findCategoryById(id: string): Promise<ContentCategory | null> {
-    return queryOne<ContentCategory>(
-      'SELECT * FROM "contentCategory" WHERE "contentCategoryId" = $1',
-      [id]
-    );
+    return queryOne<ContentCategory>('SELECT * FROM "contentCategory" WHERE "contentCategoryId" = $1', [id]);
   }
 
   async findCategoryBySlug(slug: string): Promise<ContentCategory | null> {
-    return queryOne<ContentCategory>(
-      'SELECT * FROM "contentCategory" WHERE "slug" = $1',
-      [slug]
-    );
+    return queryOne<ContentCategory>('SELECT * FROM "contentCategory" WHERE "slug" = $1', [slug]);
   }
 
-  async findAllCategories(
-    parentId?: string,
-    isActive?: boolean,
-    limit: number = 100,
-    offset: number = 0
-  ): Promise<ContentCategory[]> {
+  async findAllCategories(parentId?: string, isActive?: boolean, limit: number = 100, offset: number = 0): Promise<ContentCategory[]> {
     let sql = 'SELECT * FROM "contentCategory"';
     const conditions: string[] = [];
     const params: any[] = [];
@@ -95,11 +83,11 @@ export class ContentCategoryRepo {
 
   async createCategory(params: ContentCategoryCreateParams): Promise<ContentCategory> {
     const now = unixTimestamp();
-    
+
     // Check slug uniqueness within parent
     const existing = await queryOne<ContentCategory>(
       'SELECT * FROM "contentCategory" WHERE "slug" = $1 AND ("parentId" = $2 OR ($2 IS NULL AND "parentId" IS NULL))',
-      [params.slug, params.parentId || null]
+      [params.slug, params.parentId || null],
     );
     if (existing) {
       throw new Error(`Category with slug "${params.slug}" already exists in this parent`);
@@ -108,7 +96,7 @@ export class ContentCategoryRepo {
     // Calculate depth and path
     let depth = 0;
     let path = params.slug;
-    
+
     if (params.parentId) {
       const parent = await this.findCategoryById(params.parentId);
       if (parent) {
@@ -136,8 +124,8 @@ export class ContentCategoryRepo {
         path,
         depth,
         now,
-        now
-      ]
+        now,
+      ],
     );
 
     if (!result) {
@@ -192,7 +180,7 @@ export class ContentCategoryRepo {
 
     const result = await queryOne<ContentCategory>(
       `UPDATE "contentCategory" SET ${updateFields.join(', ')} WHERE "contentCategoryId" = $${paramIndex} RETURNING *`,
-      values
+      values,
     );
 
     if (!result) {
@@ -204,10 +192,7 @@ export class ContentCategoryRepo {
 
   async deleteCategory(id: string): Promise<boolean> {
     // Check if category has children
-    const childCount = await query<Array<{ count: string }>>(
-      'SELECT COUNT(*) as count FROM "contentCategory" WHERE "parentId" = $1',
-      [id]
-    );
+    const childCount = await query<Array<{ count: string }>>('SELECT COUNT(*) as count FROM "contentCategory" WHERE "parentId" = $1', [id]);
 
     if (childCount && childCount.length > 0 && parseInt(childCount[0].count) > 0) {
       throw new Error(`Cannot delete category as it has ${childCount[0].count} child categories`);
@@ -215,7 +200,7 @@ export class ContentCategoryRepo {
 
     const result = await queryOne<{ id: string }>(
       'DELETE FROM "contentCategory" WHERE "contentCategoryId" = $1 RETURNING "contentCategoryId"',
-      [id]
+      [id],
     );
     return !!result;
   }
@@ -229,7 +214,7 @@ export class ContentCategoryRepo {
     // Calculate new depth and path
     let depth = 0;
     let path = category.slug;
-    
+
     if (newParentId) {
       const parent = await this.findCategoryById(newParentId);
       if (parent) {
@@ -241,7 +226,7 @@ export class ContentCategoryRepo {
     return this.updateCategory(id, {
       parentId: newParentId || undefined,
       path,
-      depth
+      depth,
     });
   }
 }

@@ -11,7 +11,7 @@ export class DuplicateTemplateCommand {
     public readonly templateId: string,
     public readonly newName: string,
     public readonly newSlug: string,
-    public readonly createdBy?: string
+    public readonly createdBy?: string,
   ) {}
 }
 
@@ -51,13 +51,13 @@ export class DuplicateTemplateUseCase {
       compatibleContentTypes: original.compatibleContentTypes,
       isSystem: false, // Duplicates are never system templates
       isActive: true,
-      createdBy: command.createdBy
+      createdBy: command.createdBy,
     });
 
     eventBus.emit('content.template.created', {
       templateId: duplicate.id,
       name: duplicate.name,
-      slug: duplicate.slug
+      slug: duplicate.slug,
     });
 
     return {
@@ -65,7 +65,7 @@ export class DuplicateTemplateUseCase {
       name: duplicate.name,
       slug: duplicate.slug,
       originalTemplateId: command.templateId,
-      createdAt: duplicate.createdAt
+      createdAt: duplicate.createdAt,
     };
   }
 }

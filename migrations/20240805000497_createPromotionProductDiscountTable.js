@@ -1,10 +1,10 @@
-exports.up = function(knex) {
+exports.up = function (knex) {
   return knex.schema.createTable('promotionProductDiscount', t => {
     t.uuid('promotionProductDiscountId').primary().defaultTo(knex.raw('uuidv7()'));
     t.uuid('promotionId').references('promotionId').inTable('promotion').onDelete('CASCADE');
     t.string('name', 255).notNullable();
     t.text('description');
-    t.enum('discountType', ['percentage', 'fixed_amount']).notNullable(); 
+    t.enum('discountType', ['percentage', 'fixed_amount']).notNullable();
     t.decimal('discountValue', 15, 2).notNullable();
     t.string('currencyCode', 3).defaultTo('USD');
     t.timestamp('startDate').notNullable().defaultTo(knex.fn.now());
@@ -22,7 +22,7 @@ exports.up = function(knex) {
     t.string('badgeText', 100);
     t.jsonb('badgeStyle');
     t.uuid('merchantId').references('merchantId').inTable('merchant');
-    
+
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
 
@@ -40,6 +40,6 @@ exports.up = function(knex) {
   });
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTable('promotionProductDiscount');
 };

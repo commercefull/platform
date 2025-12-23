@@ -14,7 +14,7 @@ export class CreateRedirectCommand {
     public readonly isRegex?: boolean,
     public readonly isActive?: boolean,
     public readonly notes?: string,
-    public readonly createdBy?: string
+    public readonly createdBy?: string,
   ) {}
 }
 
@@ -59,14 +59,14 @@ export class CreateRedirectUseCase {
       isActive: command.isActive !== undefined ? command.isActive : true,
       notes: command.notes ?? null,
       createdBy: command.createdBy ?? null,
-      updatedBy: null
+      updatedBy: null,
     });
 
     eventBus.emit('content.redirect.created', {
       redirectId: redirect.contentRedirectId,
       sourceUrl: redirect.sourceUrl,
       targetUrl: redirect.targetUrl,
-      statusCode: redirect.statusCode
+      statusCode: redirect.statusCode,
     });
 
     return {
@@ -77,7 +77,7 @@ export class CreateRedirectUseCase {
       isRegex: redirect.isRegex,
       isActive: redirect.isActive,
       hits: redirect.hits,
-      createdAt: redirect.createdAt instanceof Date ? redirect.createdAt.toISOString() : String(redirect.createdAt)
+      createdAt: redirect.createdAt instanceof Date ? redirect.createdAt.toISOString() : String(redirect.createdAt),
     };
   }
 }

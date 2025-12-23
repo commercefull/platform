@@ -90,7 +90,7 @@ export const postLogin = async (req: Request, res: Response) => {
     return res.redirect('/merchant');
   } catch (error) {
     logger.error('Error:', error);
-    
+
     merchantRespond(req, res, 'login', {
       pageName: 'Merchant Login',
       error: 'An error occurred during login',
@@ -111,7 +111,7 @@ export const postLogout = async (req: Request, res: Response) => {
     res.redirect('/merchant/login');
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.clearCookie(SESSION_COOKIE_NAME);
     res.redirect('/merchant/login');
   }

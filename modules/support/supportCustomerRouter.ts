@@ -26,7 +26,7 @@ import {
   // Price Alerts
   createPriceAlert,
   getMyPriceAlerts,
-  cancelMyPriceAlert
+  cancelMyPriceAlert,
 } from './controllers/supportCustomerController';
 
 const router = Router();

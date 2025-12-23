@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function (knex) {
   return knex.schema.createTable('analyticsCustomer', t => {
     t.uuid('analyticsCustomerId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('lastUpdatedAt').notNullable().defaultTo(knex.fn.now());
@@ -39,6 +39,6 @@ exports.up = function(knex) {
   });
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTable('analyticsCustomer');
 };

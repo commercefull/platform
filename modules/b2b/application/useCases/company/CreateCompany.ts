@@ -83,7 +83,7 @@ export class CreateCompanyUseCase {
         status: 'pending',
         companyType: 'corporation',
         currency: 'USD',
-        notes: command.notes
+        notes: command.notes,
       });
 
       // Create addresses if provided
@@ -97,7 +97,7 @@ export class CreateCompanyUseCase {
           state: command.billingAddress.state,
           postalCode: command.billingAddress.postalCode,
           countryCode: command.billingAddress.country,
-          isDefault: true
+          isDefault: true,
         });
       }
 
@@ -111,7 +111,7 @@ export class CreateCompanyUseCase {
           state: command.shippingAddress.state,
           postalCode: command.shippingAddress.postalCode,
           countryCode: command.shippingAddress.country,
-          isDefault: true
+          isDefault: true,
         });
       }
 
@@ -123,7 +123,7 @@ export class CreateCompanyUseCase {
         industry: company.industry,
         status: company.status,
         createdBy: command.createdBy,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
 
       return {
@@ -135,8 +135,8 @@ export class CreateCompanyUseCase {
           status: company.status,
           creditLimit: company.creditLimit,
           paymentTermsDays: company.paymentTermsDays,
-          createdAt: company.createdAt
-        }
+          createdAt: company.createdAt,
+        },
       };
     } catch (error: any) {
       return { success: false, error: error.message };

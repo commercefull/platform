@@ -6,13 +6,13 @@ import updateAttributeUseCase from '../../application/useCases/attribute/UpdateA
 import {
   addAttributeValueUseCase,
   removeAttributeValueUseCase,
-  getAttributeValuesUseCase
+  getAttributeValuesUseCase,
 } from '../../application/useCases/attribute/ManageAttributeValues';
 import {
   setProductAttributeUseCase,
   setProductAttributesUseCase,
   getProductAttributesUseCase,
-  removeProductAttributeUseCase
+  removeProductAttributeUseCase,
 } from '../../application/useCases/attribute/AssignProductAttributes';
 
 export class AttributeController {
@@ -42,13 +42,13 @@ export class AttributeController {
 
       res.json({
         success: true,
-        data: attributes
+        data: attributes,
       });
     } catch (error) {
       logger.error('Error:', error);
       res.status(500).json({
         success: false,
-        error: `Failed to list attributes: ${(error as Error).message}`
+        error: `Failed to list attributes: ${(error as Error).message}`,
       });
     }
   }
@@ -65,7 +65,7 @@ export class AttributeController {
       if (!attribute) {
         res.status(404).json({
           success: false,
-          error: 'Attribute not found'
+          error: 'Attribute not found',
         });
         return;
       }
@@ -81,14 +81,14 @@ export class AttributeController {
         success: true,
         data: {
           ...attribute,
-          values
-        }
+          values,
+        },
       });
     } catch (error) {
       logger.error('Error:', error);
       res.status(500).json({
         success: false,
-        error: `Failed to get attribute: ${(error as Error).message}`
+        error: `Failed to get attribute: ${(error as Error).message}`,
       });
     }
   }
@@ -105,20 +105,20 @@ export class AttributeController {
       if (!attribute) {
         res.status(404).json({
           success: false,
-          error: 'Attribute not found'
+          error: 'Attribute not found',
         });
         return;
       }
 
       res.json({
         success: true,
-        data: attribute
+        data: attribute,
       });
     } catch (error) {
       logger.error('Error:', error);
       res.status(500).json({
         success: false,
-        error: `Failed to get attribute: ${(error as Error).message}`
+        error: `Failed to get attribute: ${(error as Error).message}`,
       });
     }
   }
@@ -141,7 +141,7 @@ export class AttributeController {
       logger.error('Error:', error);
       res.status(500).json({
         success: false,
-        error: `Failed to create attribute: ${(error as Error).message}`
+        error: `Failed to create attribute: ${(error as Error).message}`,
       });
     }
   }
@@ -155,7 +155,7 @@ export class AttributeController {
       const { id } = req.params;
       const result = await updateAttributeUseCase.execute({
         attributeId: id,
-        ...req.body
+        ...req.body,
       });
 
       if (!result.success) {
@@ -168,7 +168,7 @@ export class AttributeController {
       logger.error('Error:', error);
       res.status(500).json({
         success: false,
-        error: `Failed to update attribute: ${(error as Error).message}`
+        error: `Failed to update attribute: ${(error as Error).message}`,
       });
     }
   }
@@ -180,13 +180,13 @@ export class AttributeController {
   async deleteAttribute(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      
+
       // Check if attribute exists
       const attribute = await dynamicAttributeRepository.findAttributeById(id);
       if (!attribute) {
         res.status(404).json({
           success: false,
-          error: 'Attribute not found'
+          error: 'Attribute not found',
         });
         return;
       }
@@ -195,7 +195,7 @@ export class AttributeController {
       if (attribute.isSystem) {
         res.status(400).json({
           success: false,
-          error: 'Cannot delete system attributes'
+          error: 'Cannot delete system attributes',
         });
         return;
       }
@@ -204,13 +204,13 @@ export class AttributeController {
 
       res.json({
         success: true,
-        message: 'Attribute deleted successfully'
+        message: 'Attribute deleted successfully',
       });
     } catch (error) {
       logger.error('Error:', error);
       res.status(500).json({
         success: false,
-        error: `Failed to delete attribute: ${(error as Error).message}`
+        error: `Failed to delete attribute: ${(error as Error).message}`,
       });
     }
   }
@@ -236,7 +236,7 @@ export class AttributeController {
       logger.error('Error:', error);
       res.status(500).json({
         success: false,
-        error: `Failed to get attribute values: ${(error as Error).message}`
+        error: `Failed to get attribute values: ${(error as Error).message}`,
       });
     }
   }
@@ -250,7 +250,7 @@ export class AttributeController {
       const { id } = req.params;
       const result = await addAttributeValueUseCase.execute({
         attributeId: id,
-        ...req.body
+        ...req.body,
       });
 
       if (!result.success) {
@@ -263,7 +263,7 @@ export class AttributeController {
       logger.error('Error:', error);
       res.status(500).json({
         success: false,
-        error: `Failed to add attribute value: ${(error as Error).message}`
+        error: `Failed to add attribute value: ${(error as Error).message}`,
       });
     }
   }
@@ -276,7 +276,7 @@ export class AttributeController {
     try {
       const { valueId } = req.params;
       const result = await removeAttributeValueUseCase.execute({
-        attributeValueId: valueId
+        attributeValueId: valueId,
       });
 
       if (!result.success) {
@@ -286,13 +286,13 @@ export class AttributeController {
 
       res.json({
         success: true,
-        message: 'Attribute value removed successfully'
+        message: 'Attribute value removed successfully',
       });
     } catch (error) {
       logger.error('Error:', error);
       res.status(500).json({
         success: false,
-        error: `Failed to remove attribute value: ${(error as Error).message}`
+        error: `Failed to remove attribute value: ${(error as Error).message}`,
       });
     }
   }
@@ -318,7 +318,7 @@ export class AttributeController {
       logger.error('Error:', error);
       res.status(500).json({
         success: false,
-        error: `Failed to get product attributes: ${(error as Error).message}`
+        error: `Failed to get product attributes: ${(error as Error).message}`,
       });
     }
   }
@@ -332,7 +332,7 @@ export class AttributeController {
       const { productId } = req.params;
       const result = await setProductAttributeUseCase.execute({
         productId,
-        ...req.body
+        ...req.body,
       });
 
       if (!result.success) {
@@ -345,7 +345,7 @@ export class AttributeController {
       logger.error('Error:', error);
       res.status(500).json({
         success: false,
-        error: `Failed to set product attribute: ${(error as Error).message}`
+        error: `Failed to set product attribute: ${(error as Error).message}`,
       });
     }
   }
@@ -362,7 +362,7 @@ export class AttributeController {
       const result = await setProductAttributesUseCase.execute({
         productId,
         attributes,
-        clearExisting
+        clearExisting,
       });
 
       if (!result.success) {
@@ -375,7 +375,7 @@ export class AttributeController {
       logger.error('Error:', error);
       res.status(500).json({
         success: false,
-        error: `Failed to set product attributes: ${(error as Error).message}`
+        error: `Failed to set product attributes: ${(error as Error).message}`,
       });
     }
   }
@@ -389,7 +389,7 @@ export class AttributeController {
       const { productId, attributeId } = req.params;
       const result = await removeProductAttributeUseCase.execute({
         productId,
-        attributeId
+        attributeId,
       });
 
       if (!result.success) {
@@ -399,13 +399,13 @@ export class AttributeController {
 
       res.json({
         success: true,
-        message: 'Product attribute removed successfully'
+        message: 'Product attribute removed successfully',
       });
     } catch (error) {
       logger.error('Error:', error);
       res.status(500).json({
         success: false,
-        error: `Failed to remove product attribute: ${(error as Error).message}`
+        error: `Failed to remove product attribute: ${(error as Error).message}`,
       });
     }
   }

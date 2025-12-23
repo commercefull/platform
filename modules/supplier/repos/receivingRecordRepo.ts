@@ -38,8 +38,16 @@ export interface SupplierReceivingRecord {
   completedAt?: string;
 }
 
-export type SupplierReceivingRecordCreateParams = Omit<SupplierReceivingRecord, 'supplierReceivingRecordId' | 'createdAt' | 'updatedAt' | 'receiptNumber'>;
-export type SupplierReceivingRecordUpdateParams = Partial<Pick<SupplierReceivingRecord, 'status' | 'carrierName' | 'trackingNumber' | 'packageCount' | 'notes' | 'discrepancies' | 'attachments' | 'completedAt'>>;
+export type SupplierReceivingRecordCreateParams = Omit<
+  SupplierReceivingRecord,
+  'supplierReceivingRecordId' | 'createdAt' | 'updatedAt' | 'receiptNumber'
+>;
+export type SupplierReceivingRecordUpdateParams = Partial<
+  Pick<
+    SupplierReceivingRecord,
+    'status' | 'carrierName' | 'trackingNumber' | 'packageCount' | 'notes' | 'discrepancies' | 'attachments' | 'completedAt'
+  >
+>;
 
 export class SupplierReceivingRecordRepo {
   private async generateReceiptNumber(): Promise<string> {
@@ -57,37 +65,47 @@ export class SupplierReceivingRecordRepo {
   }
 
   async findByPurchaseOrderId(supplierPurchaseOrderId: string): Promise<SupplierReceivingRecord[]> {
-    return (await query<SupplierReceivingRecord[]>(
-      `SELECT * FROM "supplierReceivingRecord" WHERE "supplierPurchaseOrderId" = $1 ORDER BY "createdAt" DESC`,
-      [supplierPurchaseOrderId]
-    )) || [];
+    return (
+      (await query<SupplierReceivingRecord[]>(
+        `SELECT * FROM "supplierReceivingRecord" WHERE "supplierPurchaseOrderId" = $1 ORDER BY "createdAt" DESC`,
+        [supplierPurchaseOrderId],
+      )) || []
+    );
   }
 
   async findByWarehouseId(warehouseId: string, limit = 50): Promise<SupplierReceivingRecord[]> {
-    return (await query<SupplierReceivingRecord[]>(
-      `SELECT * FROM "supplierReceivingRecord" WHERE "warehouseId" = $1 ORDER BY "receivedDate" DESC LIMIT $2`,
-      [warehouseId, limit]
-    )) || [];
+    return (
+      (await query<SupplierReceivingRecord[]>(
+        `SELECT * FROM "supplierReceivingRecord" WHERE "warehouseId" = $1 ORDER BY "receivedDate" DESC LIMIT $2`,
+        [warehouseId, limit],
+      )) || []
+    );
   }
 
   async findBySupplierId(supplierId: string, limit = 50): Promise<SupplierReceivingRecord[]> {
-    return (await query<SupplierReceivingRecord[]>(
-      `SELECT * FROM "supplierReceivingRecord" WHERE "supplierId" = $1 ORDER BY "receivedDate" DESC LIMIT $2`,
-      [supplierId, limit]
-    )) || [];
+    return (
+      (await query<SupplierReceivingRecord[]>(
+        `SELECT * FROM "supplierReceivingRecord" WHERE "supplierId" = $1 ORDER BY "receivedDate" DESC LIMIT $2`,
+        [supplierId, limit],
+      )) || []
+    );
   }
 
   async findByStatus(status: SupplierReceivingStatus, limit = 100): Promise<SupplierReceivingRecord[]> {
-    return (await query<SupplierReceivingRecord[]>(
-      `SELECT * FROM "supplierReceivingRecord" WHERE "status" = $1 ORDER BY "receivedDate" DESC LIMIT $2`,
-      [status, limit]
-    )) || [];
+    return (
+      (await query<SupplierReceivingRecord[]>(
+        `SELECT * FROM "supplierReceivingRecord" WHERE "status" = $1 ORDER BY "receivedDate" DESC LIMIT $2`,
+        [status, limit],
+      )) || []
+    );
   }
 
   async findWithDiscrepancies(): Promise<SupplierReceivingRecord[]> {
-    return (await query<SupplierReceivingRecord[]>(
-      `SELECT * FROM "supplierReceivingRecord" WHERE "discrepancies" = true ORDER BY "receivedDate" DESC`
-    )) || [];
+    return (
+      (await query<SupplierReceivingRecord[]>(
+        `SELECT * FROM "supplierReceivingRecord" WHERE "discrepancies" = true ORDER BY "receivedDate" DESC`,
+      )) || []
+    );
   }
 
   async create(params: SupplierReceivingRecordCreateParams): Promise<SupplierReceivingRecord> {
@@ -101,12 +119,21 @@ export class SupplierReceivingRecordRepo {
         "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING *`,
       [
-        receiptNumber, params.supplierPurchaseOrderId || null, params.warehouseId, params.supplierId,
-        params.status || 'pending', params.receivedDate || now, params.carrierName || null,
-        params.trackingNumber || null, params.packageCount || null, params.notes || null,
-        params.discrepancies || false, params.attachments ? JSON.stringify(params.attachments) : null,
-        now, now
-      ]
+        receiptNumber,
+        params.supplierPurchaseOrderId || null,
+        params.warehouseId,
+        params.supplierId,
+        params.status || 'pending',
+        params.receivedDate || now,
+        params.carrierName || null,
+        params.trackingNumber || null,
+        params.packageCount || null,
+        params.notes || null,
+        params.discrepancies || false,
+        params.attachments ? JSON.stringify(params.attachments) : null,
+        now,
+        now,
+      ],
     );
 
     if (!result) throw new Error('Failed to create receiving record');
@@ -132,7 +159,7 @@ export class SupplierReceivingRecordRepo {
 
     return await queryOne<SupplierReceivingRecord>(
       `UPDATE "supplierReceivingRecord" SET ${updateFields.join(', ')} WHERE "supplierReceivingRecordId" = $${paramIndex} RETURNING *`,
-      values
+      values,
     );
   }
 
@@ -151,20 +178,22 @@ export class SupplierReceivingRecordRepo {
   async delete(id: string): Promise<boolean> {
     const result = await queryOne<{ supplierReceivingRecordId: string }>(
       `DELETE FROM "supplierReceivingRecord" WHERE "supplierReceivingRecordId" = $1 RETURNING "supplierReceivingRecordId"`,
-      [id]
+      [id],
     );
     return !!result;
   }
 
   async getStatistics(): Promise<Record<SupplierReceivingStatus, number> & { withDiscrepancies: number }> {
     const results = await query<{ status: SupplierReceivingStatus; count: string }[]>(
-      `SELECT "status", COUNT(*) as count FROM "supplierReceivingRecord" GROUP BY "status"`
+      `SELECT "status", COUNT(*) as count FROM "supplierReceivingRecord" GROUP BY "status"`,
     );
     const stats: Record<string, number> = {};
-    results?.forEach(row => { stats[row.status] = parseInt(row.count, 10); });
+    results?.forEach(row => {
+      stats[row.status] = parseInt(row.count, 10);
+    });
 
     const discrepancyResult = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM "supplierReceivingRecord" WHERE "discrepancies" = true`
+      `SELECT COUNT(*) as count FROM "supplierReceivingRecord" WHERE "discrepancies" = true`,
     );
     stats.withDiscrepancies = discrepancyResult ? parseInt(discrepancyResult.count, 10) : 0;
 

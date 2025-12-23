@@ -45,9 +45,7 @@ export class GetLowStockItemsUseCase {
       limit,
     });
 
-    const criticalItems = items.filter(
-      (item: any) => item.quantity - (item.reservedQuantity || 0) <= 0
-    );
+    const criticalItems = items.filter((item: any) => item.quantity - (item.reservedQuantity || 0) <= 0);
 
     // Emit event for monitoring
     if (items.length > 0) {
@@ -70,10 +68,7 @@ export class GetLowStockItemsUseCase {
         currentQuantity: item.quantity - (item.reservedQuantity || 0),
         reorderPoint: item.reorderPoint,
         reorderQuantity: item.reorderQuantity,
-        suggestedReorder: Math.max(
-          item.reorderQuantity || 0,
-          (item.reorderPoint || 0) - (item.quantity - (item.reservedQuantity || 0))
-        ),
+        suggestedReorder: Math.max(item.reorderQuantity || 0, (item.reorderPoint || 0) - (item.quantity - (item.reservedQuantity || 0))),
       })),
       total: items.length,
       criticalCount: criticalItems.length,

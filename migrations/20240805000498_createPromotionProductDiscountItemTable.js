@@ -1,9 +1,13 @@
-exports.up = function(knex) {
+exports.up = function (knex) {
   return knex.schema.createTable('promotionProductDiscountItem', t => {
     t.uuid('promotionProductDiscountItemId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
-    t.uuid('promotionProductDiscountId').notNullable().references('promotionProductDiscountId').inTable('promotionProductDiscount').onDelete('CASCADE');
+    t.uuid('promotionProductDiscountId')
+      .notNullable()
+      .references('promotionProductDiscountId')
+      .inTable('promotionProductDiscount')
+      .onDelete('CASCADE');
     t.uuid('productId').references('productId').inTable('product').onDelete('CASCADE');
     t.uuid('productVariantId').references('productVariantId').inTable('productVariant').onDelete('CASCADE');
     t.uuid('productCategoryId').notNullable().references('productCategoryId').inTable('productCategory').onDelete('CASCADE');
@@ -24,6 +28,6 @@ exports.up = function(knex) {
   });
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTable('promotionProductDiscountItem');
 };

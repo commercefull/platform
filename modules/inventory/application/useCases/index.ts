@@ -1,6 +1,6 @@
 /**
  * Inventory Use Cases
- * 
+ *
  * Barrel export for all inventory-related use cases.
  */
 
@@ -11,7 +11,11 @@ export * from './ManageStock';
 export { ReserveStockUseCase, type ReserveStockInput, type ReserveStockOutput } from './ReserveStock';
 export { ReleaseReservationUseCase, type ReleaseReservationInput, type ReleaseReservationOutput } from './ReleaseReservation';
 export { TransferStockUseCase, type TransferStockInput, type TransferStockOutput } from './TransferStock';
-export { AdjustStockUseCase as AdjustStockUseCaseV2, type AdjustStockInput as AdjustStockInputV2, type AdjustStockOutput } from './AdjustStock';
+export {
+  AdjustStockUseCase as AdjustStockUseCaseV2,
+  type AdjustStockInput as AdjustStockInputV2,
+  type AdjustStockOutput,
+} from './AdjustStock';
 
 // Multi-store inventory pool use cases
 export * from './CreateInventoryPool';

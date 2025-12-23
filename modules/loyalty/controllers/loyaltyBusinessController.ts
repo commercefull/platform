@@ -1,6 +1,6 @@
 /**
  * Loyalty Business Controller
- * 
+ *
  * Handles business/admin endpoints for loyalty management.
  */
 
@@ -35,7 +35,7 @@ export const getTiers = async (req: Request, res: Response): Promise<void> => {
     respond(res, tiers);
   } catch (error) {
     logger.error('Error:', error);
-    
+
     respondError(res, 'Failed to fetch loyalty tiers');
   }
 };
@@ -53,7 +53,7 @@ export const getTierById = async (req: Request, res: Response): Promise<void> =>
     respond(res, tier);
   } catch (error) {
     logger.error('Error:', error);
-    
+
     respondError(res, 'Failed to fetch loyalty tier');
   }
 };
@@ -74,13 +74,13 @@ export const createTier = async (req: Request, res: Response): Promise<void> => 
       pointsThreshold,
       multiplier,
       benefits,
-      isActive
+      isActive,
     });
 
     respondWithMessage(res, tier, 'Loyalty tier created successfully', 201);
   } catch (error) {
     logger.error('Error:', error);
-    
+
     respondError(res, 'Failed to create loyalty tier');
   }
 };
@@ -97,13 +97,13 @@ export const updateTier = async (req: Request, res: Response): Promise<void> => 
       pointsThreshold,
       multiplier,
       benefits,
-      isActive
+      isActive,
     });
 
     respondWithMessage(res, tier, 'Loyalty tier updated successfully');
   } catch (error) {
     logger.error('Error:', error);
-    
+
     respondError(res, 'Failed to update loyalty tier');
   }
 };
@@ -119,7 +119,7 @@ export const getRewards = async (req: Request, res: Response): Promise<void> => 
     respond(res, rewards);
   } catch (error) {
     logger.error('Error:', error);
-    
+
     respondError(res, 'Failed to fetch loyalty rewards');
   }
 };
@@ -137,17 +137,15 @@ export const getRewardById = async (req: Request, res: Response): Promise<void> 
     respond(res, reward);
   } catch (error) {
     logger.error('Error:', error);
-    
+
     respondError(res, 'Failed to fetch loyalty reward');
   }
 };
 
 export const createReward = async (req: Request, res: Response): Promise<void> => {
   try {
-    const {
-      name, description, pointsCost, discountAmount, discountPercent,
-      discountCode, freeShipping, productIds, expiresAt, isActive
-    } = req.body;
+    const { name, description, pointsCost, discountAmount, discountPercent, discountCode, freeShipping, productIds, expiresAt, isActive } =
+      req.body;
 
     if (!name || pointsCost === undefined) {
       respondError(res, 'Name and pointsCost are required', 400);
@@ -164,13 +162,13 @@ export const createReward = async (req: Request, res: Response): Promise<void> =
       freeShipping,
       productIds,
       expiresAt: expiresAt ? new Date(expiresAt) : undefined,
-      isActive
+      isActive,
     });
 
     respondWithMessage(res, reward, 'Loyalty reward created successfully', 201);
   } catch (error) {
     logger.error('Error:', error);
-    
+
     respondError(res, 'Failed to create loyalty reward');
   }
 };
@@ -178,10 +176,8 @@ export const createReward = async (req: Request, res: Response): Promise<void> =
 export const updateReward = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const {
-      name, description, pointsCost, discountAmount, discountPercent,
-      discountCode, freeShipping, productIds, expiresAt, isActive
-    } = req.body;
+    const { name, description, pointsCost, discountAmount, discountPercent, discountCode, freeShipping, productIds, expiresAt, isActive } =
+      req.body;
 
     const reward = await loyaltyRepo.updateReward(id, {
       name,
@@ -193,13 +189,13 @@ export const updateReward = async (req: Request, res: Response): Promise<void> =
       freeShipping,
       productIds,
       expiresAt: expiresAt ? new Date(expiresAt) : undefined,
-      isActive
+      isActive,
     });
 
     respondWithMessage(res, reward, 'Loyalty reward updated successfully');
   } catch (error) {
     logger.error('Error:', error);
-    
+
     respondError(res, 'Failed to update loyalty reward');
   }
 };
@@ -220,11 +216,11 @@ export const getCustomerPoints = async (req: Request, res: Response): Promise<vo
 
     respond(res, {
       ...pointsData.points,
-      tier: pointsData.tier
+      tier: pointsData.tier,
     });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     respondError(res, 'Failed to fetch customer loyalty points');
   }
 };
@@ -239,11 +235,11 @@ export const getCustomerPointsTransactions = async (req: Request, res: Response)
     res.json({
       success: true,
       data: transactions,
-      pagination: { limit }
+      pagination: { limit },
     });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     respondError(res, 'Failed to fetch customer loyalty transactions');
   }
 };
@@ -270,17 +266,13 @@ export const adjustCustomerPoints = async (req: Request, res: Response): Promise
       customerId,
       parseInt(points),
       LoyaltyPointsAction.MANUAL_ADJUSTMENT,
-      reason || 'Manual adjustment by admin'
+      reason || 'Manual adjustment by admin',
     );
 
-    respondWithMessage(
-      res, 
-      updatedPoints, 
-      `Customer points ${points >= 0 ? 'increased' : 'decreased'} successfully`
-    );
+    respondWithMessage(res, updatedPoints, `Customer points ${points >= 0 ? 'increased' : 'decreased'} successfully`);
   } catch (error) {
     logger.error('Error:', error);
-    
+
     respondError(res, 'Failed to adjust customer loyalty points');
   }
 };
@@ -298,7 +290,7 @@ export const getCustomerRedemptions = async (req: Request, res: Response): Promi
     respond(res, redemptions);
   } catch (error) {
     logger.error('Error:', error);
-    
+
     respondError(res, 'Failed to fetch customer redemptions');
   }
 };
@@ -313,15 +305,12 @@ export const updateRedemptionStatus = async (req: Request, res: Response): Promi
       return;
     }
 
-    const redemption = await loyaltyRepo.updateRedemptionStatus(
-      id,
-      status as 'pending' | 'used' | 'expired' | 'cancelled'
-    );
+    const redemption = await loyaltyRepo.updateRedemptionStatus(id, status as 'pending' | 'used' | 'expired' | 'cancelled');
 
     respondWithMessage(res, redemption, `Redemption status updated to ${status}`);
   } catch (error) {
     logger.error('Error:', error);
-    
+
     respondError(res, 'Failed to update redemption status');
   }
 };
@@ -340,16 +329,12 @@ export const processOrderPoints = async (req: Request, res: Response): Promise<v
       return;
     }
 
-    const updatedPoints = await loyaltyRepo.processOrderPoints(
-      customerId,
-      orderId,
-      parseFloat(orderAmount)
-    );
+    const updatedPoints = await loyaltyRepo.processOrderPoints(customerId, orderId, parseFloat(orderAmount));
 
     respondWithMessage(res, updatedPoints, 'Order points processed successfully');
   } catch (error) {
     logger.error('Error:', error);
-    
+
     respondError(res, 'Failed to process order points');
   }
 };

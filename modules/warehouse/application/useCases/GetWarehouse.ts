@@ -1,6 +1,6 @@
 /**
  * GetWarehouse Use Case
- * 
+ *
  * Retrieves a warehouse by ID or code.
  */
 
@@ -45,7 +45,7 @@ export interface GetWarehouseOutput {
 
 export class GetWarehouseUseCase {
   constructor(
-    private readonly warehouseRepository: any // WarehouseRepository
+    private readonly warehouseRepository: any, // WarehouseRepository
   ) {}
 
   async execute(input: GetWarehouseInput): Promise<GetWarehouseOutput> {

@@ -7,14 +7,15 @@ import axios, { AxiosInstance } from 'axios';
 import { API_BASE, TEST_DATA } from '../testConstants';
 import { ADMIN_CREDENTIALS } from '../../testConstants';
 
-const createClient = (): AxiosInstance => axios.create({
-  baseURL: process.env.API_URL || 'http://localhost:3000',
-  validateStatus: () => true,
-  headers: {
-    'Accept': 'application/json',
-    'Content-Type': 'application/json'
-  }
-});
+const createClient = (): AxiosInstance =>
+  axios.create({
+    baseURL: process.env.API_URL || 'http://localhost:3000',
+    validateStatus: () => true,
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+  });
 
 describe('Content Templates API', () => {
   let client: AxiosInstance;
@@ -23,7 +24,7 @@ describe('Content Templates API', () => {
 
   beforeAll(async () => {
     client = createClient();
-    
+
     // Get auth token
     const loginResponse = await client.post('/business/auth/login', ADMIN_CREDENTIALS, { headers: { 'X-Test-Request': 'true' } });
     if (loginResponse.data.accessToken) {
@@ -69,8 +70,8 @@ describe('Content Templates API', () => {
         areas: {
           header: { name: 'Header', allowedBlocks: ['navigation', 'logo'] },
           content: { name: 'Main Content', allowedBlocks: ['hero', 'text', 'image'] },
-          footer: { name: 'Footer', allowedBlocks: ['navigation', 'social'] }
-        }
+          footer: { name: 'Footer', allowedBlocks: ['navigation', 'social'] },
+        },
       };
 
       const response = await client.post(`${API_BASE}/templates`, templateData);
@@ -86,7 +87,7 @@ describe('Content Templates API', () => {
 
     it('should return 400 if name is missing', async () => {
       const response = await client.post(`${API_BASE}/templates`, {
-        slug: 'missing-name'
+        slug: 'missing-name',
       });
 
       expect(response.status).toBe(400);
@@ -95,7 +96,7 @@ describe('Content Templates API', () => {
 
     it('should return 400 if slug is missing', async () => {
       const response = await client.post(`${API_BASE}/templates`, {
-        name: 'Missing Slug'
+        name: 'Missing Slug',
       });
 
       expect(response.status).toBe(400);
@@ -129,7 +130,7 @@ describe('Content Templates API', () => {
       const updateData = {
         name: 'Updated Template Name',
         description: 'Updated template description',
-        cssStyles: '.container { max-width: 1400px; }'
+        cssStyles: '.container { max-width: 1400px; }',
       };
 
       const response = await client.put(`${API_BASE}/templates/${createdTemplateId}`, updateData);
@@ -143,7 +144,7 @@ describe('Content Templates API', () => {
       if (!createdTemplateId) return;
 
       const response = await client.put(`${API_BASE}/templates/${createdTemplateId}`, {
-        isActive: false
+        isActive: false,
       });
 
       expect(response.status).toBe(200);
@@ -155,7 +156,7 @@ describe('Content Templates API', () => {
       if (!createdTemplateId) return;
 
       const response = await client.put(`${API_BASE}/templates/${createdTemplateId}`, {
-        isActive: true
+        isActive: true,
       });
 
       expect(response.status).toBe(200);
@@ -170,7 +171,7 @@ describe('Content Templates API', () => {
 
       const duplicateData = {
         name: `Duplicated Template ${Date.now()}`,
-        slug: `duplicated-template-${Date.now()}`
+        slug: `duplicated-template-${Date.now()}`,
       };
 
       const response = await client.post(`${API_BASE}/templates/${createdTemplateId}/duplicate`, duplicateData);
@@ -189,7 +190,7 @@ describe('Content Templates API', () => {
       if (!createdTemplateId) return;
 
       const response = await client.post(`${API_BASE}/templates/${createdTemplateId}/duplicate`, {
-        slug: 'missing-name'
+        slug: 'missing-name',
       });
 
       expect(response.status).toBe(400);
@@ -199,7 +200,7 @@ describe('Content Templates API', () => {
     it('should return 404 when duplicating non-existent template', async () => {
       const response = await client.post(`${API_BASE}/templates/00000000-0000-0000-0000-000000000000/duplicate`, {
         name: 'Test',
-        slug: 'test'
+        slug: 'test',
       });
 
       expect(response.status).toBe(404);

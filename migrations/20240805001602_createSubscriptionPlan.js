@@ -2,10 +2,15 @@
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.up = function(knex) {
-  return knex.schema.createTable('subscriptionPlan', function(table) {
+exports.up = function (knex) {
+  return knex.schema.createTable('subscriptionPlan', function (table) {
     table.uuid('subscriptionPlanId').primary().defaultTo(knex.raw('uuidv7()'));
-    table.uuid('subscriptionProductId').notNullable().references('subscriptionProductId').inTable('subscriptionProduct').onDelete('CASCADE');
+    table
+      .uuid('subscriptionProductId')
+      .notNullable()
+      .references('subscriptionProductId')
+      .inTable('subscriptionProduct')
+      .onDelete('CASCADE');
     table.string('name').notNullable();
     table.string('slug');
     table.text('description');
@@ -30,7 +35,7 @@ exports.up = function(knex) {
     table.boolean('isActive').defaultTo(true);
     table.timestamp('createdAt').defaultTo(knex.fn.now());
     table.timestamp('updatedAt').defaultTo(knex.fn.now());
-    
+
     table.index('subscriptionProductId');
     table.index('isActive');
   });
@@ -40,6 +45,6 @@ exports.up = function(knex) {
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTableIfExists('subscriptionPlan');
 };

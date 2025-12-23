@@ -8,14 +8,15 @@ import { ADMIN_CREDENTIALS } from '../../testConstants';
 
 const API_BASE = '/business/b2b';
 
-const createClient = (): AxiosInstance => axios.create({
-  baseURL: process.env.API_URL || 'http://localhost:3000',
-  validateStatus: () => true,
-  headers: {
-    'Accept': 'application/json',
-    'Content-Type': 'application/json'
-  }
-});
+const createClient = (): AxiosInstance =>
+  axios.create({
+    baseURL: process.env.API_URL || 'http://localhost:3000',
+    validateStatus: () => true,
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+  });
 
 describe('B2B Quotes API', () => {
   let client: AxiosInstance;
@@ -25,7 +26,7 @@ describe('B2B Quotes API', () => {
 
   beforeAll(async () => {
     client = createClient();
-    
+
     // Get auth token
     const loginResponse = await client.post('/business/auth/login', ADMIN_CREDENTIALS, { headers: { 'X-Test-Request': 'true' } });
     if (loginResponse.data.accessToken) {
@@ -35,14 +36,14 @@ describe('B2B Quotes API', () => {
     // Create a test company for quotes
     const companyResponse = await client.post(`${API_BASE}/companies`, {
       name: `Quote Test Company ${Date.now()}`,
-      email: `quote-test-${Date.now()}@example.com`
+      email: `quote-test-${Date.now()}@example.com`,
     });
     if (companyResponse.status === 201) {
       createdCompanyId = companyResponse.data.data.id || companyResponse.data.data.b2bCompanyId;
-      
+
       // Approve the company so we can create quotes
       await client.post(`${API_BASE}/companies/${createdCompanyId}/approve`, {
-        creditLimit: 50000
+        creditLimit: 50000,
       });
     }
   });
@@ -91,7 +92,7 @@ describe('B2B Quotes API', () => {
         companyId: createdCompanyId,
         currency: 'USD',
         validityDays: 30,
-        customerNotes: 'Test quote for integration testing'
+        customerNotes: 'Test quote for integration testing',
       };
 
       const response = await client.post(`${API_BASE}/quotes`, quoteData);
@@ -106,7 +107,7 @@ describe('B2B Quotes API', () => {
 
     it('should return 400 if companyId is missing', async () => {
       const response = await client.post(`${API_BASE}/quotes`, {
-        currency: 'USD'
+        currency: 'USD',
       });
 
       expect(response.status).toBe(400);
@@ -139,7 +140,7 @@ describe('B2B Quotes API', () => {
 
       const updateData = {
         customerNotes: 'Updated test notes',
-        internalNotes: 'Internal note for testing'
+        internalNotes: 'Internal note for testing',
       };
 
       const response = await client.put(`${API_BASE}/quotes/${createdQuoteId}`, updateData);
@@ -159,7 +160,7 @@ describe('B2B Quotes API', () => {
           sku: 'TEST-SKU-001',
           quantity: 10,
           unitPrice: 99.99,
-          unit: 'each'
+          unit: 'each',
         };
 
         const response = await client.post(`${API_BASE}/quotes/${createdQuoteId}/items`, itemData);
@@ -176,7 +177,7 @@ describe('B2B Quotes API', () => {
 
         const response = await client.post(`${API_BASE}/quotes/${createdQuoteId}/items`, {
           quantity: 5,
-          unitPrice: 50
+          unitPrice: 50,
         });
 
         expect(response.status).toBe(400);
@@ -190,13 +191,10 @@ describe('B2B Quotes API', () => {
 
         const updateData = {
           quantity: 20,
-          unitPrice: 89.99
+          unitPrice: 89.99,
         };
 
-        const response = await client.put(
-          `${API_BASE}/quotes/${createdQuoteId}/items/${createdQuoteItemId}`,
-          updateData
-        );
+        const response = await client.put(`${API_BASE}/quotes/${createdQuoteId}/items/${createdQuoteItemId}`, updateData);
 
         expect(response.status).toBe(200);
         expect(response.data.success).toBe(true);
@@ -207,9 +205,7 @@ describe('B2B Quotes API', () => {
       it('should remove an item from a quote', async () => {
         if (!createdQuoteId || !createdQuoteItemId) return;
 
-        const response = await client.delete(
-          `${API_BASE}/quotes/${createdQuoteId}/items/${createdQuoteItemId}`
-        );
+        const response = await client.delete(`${API_BASE}/quotes/${createdQuoteId}/items/${createdQuoteItemId}`);
 
         expect(response.status).toBe(200);
         expect(response.data.success).toBe(true);
@@ -227,7 +223,7 @@ describe('B2B Quotes API', () => {
         name: 'Test Product for Send',
         quantity: 5,
         unitPrice: 100,
-        unit: 'each'
+        unit: 'each',
       });
 
       const response = await client.post(`${API_BASE}/quotes/${createdQuoteId}/send`);

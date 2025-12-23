@@ -22,11 +22,11 @@ export const listLoyaltyTiers = async (req: Request, res: Response): Promise<voi
       pageName: 'Loyalty Tiers',
       tiers,
       filters: { includeInactive },
-      success: req.query.success || null
+      success: req.query.success || null,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load loyalty tiers',
@@ -41,7 +41,7 @@ export const createLoyaltyTierForm = async (req: Request, res: Response): Promis
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -51,14 +51,7 @@ export const createLoyaltyTierForm = async (req: Request, res: Response): Promis
 
 export const createLoyaltyTier = async (req: Request, res: Response): Promise<void> => {
   try {
-    const {
-      name,
-      description,
-      type,
-      pointsThreshold,
-      multiplier,
-      benefits
-    } = req.body;
+    const { name, description, type, pointsThreshold, multiplier, benefits } = req.body;
 
     const tier = await loyaltyRepo.createTier({
       name,
@@ -66,13 +59,12 @@ export const createLoyaltyTier = async (req: Request, res: Response): Promise<vo
       type: type || 'custom',
       pointsThreshold: parseInt(pointsThreshold),
       multiplier: parseFloat(multiplier),
-      benefits: benefits ? JSON.parse(benefits) : undefined
+      benefits: benefits ? JSON.parse(benefits) : undefined,
     });
 
     res.redirect(`/hub/loyalty/tiers/${tier.loyaltyTierId}?success=Loyalty tier created successfully`);
   } catch (error: any) {
     logger.error('Error:', error);
-    
 
     adminRespond(req, res, 'programs/loyalty/tiers/create', {
       pageName: 'Create Loyalty Tier',
@@ -99,11 +91,11 @@ export const viewLoyaltyTier = async (req: Request, res: Response): Promise<void
     adminRespond(req, res, 'programs/loyalty/tiers/view', {
       pageName: `Tier: ${tier.name}`,
       tier,
-      success: req.query.success || null
+      success: req.query.success || null,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load loyalty tier',
@@ -131,7 +123,7 @@ export const editLoyaltyTierForm = async (req: Request, res: Response): Promise<
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -144,15 +136,7 @@ export const updateLoyaltyTier = async (req: Request, res: Response): Promise<vo
     const { tierId } = req.params;
     const updates: any = {};
 
-    const {
-      name,
-      description,
-      type,
-      pointsThreshold,
-      multiplier,
-      benefits,
-      isActive
-    } = req.body;
+    const { name, description, type, pointsThreshold, multiplier, benefits, isActive } = req.body;
 
     if (name !== undefined) updates.name = name;
     if (description !== undefined) updates.description = description || undefined;
@@ -167,7 +151,6 @@ export const updateLoyaltyTier = async (req: Request, res: Response): Promise<vo
     res.redirect(`/hub/loyalty/tiers/${tierId}?success=Loyalty tier updated successfully`);
   } catch (error: any) {
     logger.error('Error:', error);
-    
 
     try {
       const tier = await loyaltyRepo.findTierById(req.params.tierId);
@@ -196,7 +179,7 @@ export const deleteLoyaltyTier = async (req: Request, res: Response): Promise<vo
     res.json({ success: true, message: 'Loyalty tier deleted successfully' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to delete loyalty tier' });
   }
 };
@@ -215,12 +198,12 @@ export const listLoyaltyRewards = async (req: Request, res: Response): Promise<v
       pageName: 'Loyalty Rewards',
       rewards,
       filters: { includeInactive },
-      
-      success: req.query.success || null
+
+      success: req.query.success || null,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load loyalty rewards',
@@ -235,7 +218,7 @@ export const createLoyaltyRewardForm = async (req: Request, res: Response): Prom
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -245,17 +228,7 @@ export const createLoyaltyRewardForm = async (req: Request, res: Response): Prom
 
 export const createLoyaltyReward = async (req: Request, res: Response): Promise<void> => {
   try {
-    const {
-      name,
-      description,
-      pointsCost,
-      discountAmount,
-      discountPercent,
-      discountCode,
-      freeShipping,
-      productIds,
-      expiresAt
-    } = req.body;
+    const { name, description, pointsCost, discountAmount, discountPercent, discountCode, freeShipping, productIds, expiresAt } = req.body;
 
     const reward = await loyaltyRepo.createReward({
       name,
@@ -266,13 +239,12 @@ export const createLoyaltyReward = async (req: Request, res: Response): Promise<
       discountCode: discountCode || undefined,
       freeShipping: freeShipping === 'true',
       productIds: productIds ? JSON.parse(productIds) : undefined,
-      expiresAt: expiresAt ? new Date(expiresAt) : undefined
+      expiresAt: expiresAt ? new Date(expiresAt) : undefined,
     });
 
     res.redirect(`/hub/loyalty/rewards/${reward.loyaltyRewardId}?success=Loyalty reward created successfully`);
   } catch (error: any) {
     logger.error('Error:', error);
-    
 
     adminRespond(req, res, 'programs/loyalty/rewards/create', {
       pageName: 'Create Loyalty Reward',
@@ -299,12 +271,12 @@ export const viewLoyaltyReward = async (req: Request, res: Response): Promise<vo
     adminRespond(req, res, 'programs/loyalty/rewards/view', {
       pageName: `Reward: ${reward.name}`,
       reward,
-      
-      success: req.query.success || null
+
+      success: req.query.success || null,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load loyalty reward',
@@ -332,7 +304,7 @@ export const editLoyaltyRewardForm = async (req: Request, res: Response): Promis
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -345,18 +317,8 @@ export const updateLoyaltyReward = async (req: Request, res: Response): Promise<
     const { rewardId } = req.params;
     const updates: any = {};
 
-    const {
-      name,
-      description,
-      pointsCost,
-      discountAmount,
-      discountPercent,
-      discountCode,
-      freeShipping,
-      productIds,
-      expiresAt,
-      isActive
-    } = req.body;
+    const { name, description, pointsCost, discountAmount, discountPercent, discountCode, freeShipping, productIds, expiresAt, isActive } =
+      req.body;
 
     if (name !== undefined) updates.name = name;
     if (description !== undefined) updates.description = description || undefined;
@@ -374,7 +336,6 @@ export const updateLoyaltyReward = async (req: Request, res: Response): Promise<
     res.redirect(`/hub/loyalty/rewards/${rewardId}?success=Loyalty reward updated successfully`);
   } catch (error: any) {
     logger.error('Error:', error);
-    
 
     try {
       const reward = await loyaltyRepo.findRewardById(req.params.rewardId);
@@ -403,7 +364,7 @@ export const deleteLoyaltyReward = async (req: Request, res: Response): Promise<
     res.json({ success: true, message: 'Loyalty reward deleted successfully' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to delete loyalty reward' });
   }
 };
@@ -426,12 +387,12 @@ export const listCustomerLoyalty = async (req: Request, res: Response): Promise<
       customers: [], // Would need implementation
       filters: { customerId },
       pagination: { limit, offset },
-      
-      success: req.query.success || null
+
+      success: req.query.success || null,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load customer loyalty',
@@ -460,12 +421,12 @@ export const viewCustomerLoyalty = async (req: Request, res: Response): Promise<
       pointsData,
       transactions,
       redemptions,
-      
-      success: req.query.success || null
+
+      success: req.query.success || null,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load customer loyalty',
@@ -487,7 +448,7 @@ export const loyaltyAnalytics = async (req: Request, res: Response): Promise<voi
       totalRedemptions: 0,
       avgPointsPerMember: 0,
       topRewards: [],
-      recentTransactions: []
+      recentTransactions: [],
     };
 
     adminRespond(req, res, 'programs/loyalty/analytics/index', {
@@ -496,7 +457,7 @@ export const loyaltyAnalytics = async (req: Request, res: Response): Promise<voi
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load loyalty analytics',

@@ -1,6 +1,6 @@
 /**
  * TransferStock Use Case
- * 
+ *
  * Transfers inventory between locations (warehouses, stores).
  */
 
@@ -45,7 +45,7 @@ export interface TransferStockOutput {
 
 export class TransferStockUseCase {
   constructor(
-    private readonly inventoryRepository: any // InventoryRepository
+    private readonly inventoryRepository: any, // InventoryRepository
   ) {}
 
   async execute(input: TransferStockInput): Promise<TransferStockOutput> {
@@ -67,11 +67,7 @@ export class TransferStockUseCase {
     for (const item of input.items) {
       try {
         // Get source inventory
-        const sourceInventory = await this.inventoryRepository.findByProduct(
-          item.productId,
-          item.variantId,
-          input.sourceLocationId
-        );
+        const sourceInventory = await this.inventoryRepository.findByProduct(item.productId, item.variantId, input.sourceLocationId);
 
         if (!sourceInventory) {
           results.push({
@@ -111,25 +107,15 @@ export class TransferStockUseCase {
 
         // Decrease source quantity
         const newSourceQuantity = sourceInventory.quantity - transferQuantity;
-        await this.inventoryRepository.updateQuantity(
-          sourceInventory.inventoryItemId,
-          newSourceQuantity
-        );
+        await this.inventoryRepository.updateQuantity(sourceInventory.inventoryItemId, newSourceQuantity);
 
         // Get or create destination inventory
-        let destInventory = await this.inventoryRepository.findByProduct(
-          item.productId,
-          item.variantId,
-          input.destinationLocationId
-        );
+        let destInventory = await this.inventoryRepository.findByProduct(item.productId, item.variantId, input.destinationLocationId);
 
         let newDestQuantity: number;
         if (destInventory) {
           newDestQuantity = destInventory.quantity + transferQuantity;
-          await this.inventoryRepository.updateQuantity(
-            destInventory.inventoryItemId,
-            newDestQuantity
-          );
+          await this.inventoryRepository.updateQuantity(destInventory.inventoryItemId, newDestQuantity);
         } else {
           // Create inventory item at destination
           newDestQuantity = transferQuantity;

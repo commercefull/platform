@@ -44,7 +44,7 @@ export class CancelSubscriptionUseCase {
       return {
         success: false,
         message: 'Subscription ID is required',
-        errors: ['subscription_id_required']
+        errors: ['subscription_id_required'],
       };
     }
 
@@ -55,7 +55,7 @@ export class CancelSubscriptionUseCase {
         return {
           success: false,
           message: 'Subscription not found',
-          errors: ['subscription_not_found']
+          errors: ['subscription_not_found'],
         };
       }
 
@@ -64,12 +64,12 @@ export class CancelSubscriptionUseCase {
         return {
           success: false,
           message: 'Subscription is already cancelled',
-          errors: ['already_cancelled']
+          errors: ['already_cancelled'],
         };
       }
 
       // 3. Get the product to check cancellation rules
-      const product = subscription.subscriptionProductId 
+      const product = subscription.subscriptionProductId
         ? await subscriptionRepo.getSubscriptionProduct(subscription.subscriptionProductId)
         : null;
 
@@ -78,7 +78,7 @@ export class CancelSubscriptionUseCase {
         return {
           success: false,
           message: 'Early cancellation is not allowed for this subscription',
-          errors: ['early_cancel_not_allowed']
+          errors: ['early_cancel_not_allowed'],
         };
       }
 
@@ -87,7 +87,7 @@ export class CancelSubscriptionUseCase {
         input.customerSubscriptionId,
         input.reason,
         input.cancelledBy,
-        !input.cancelImmediately // cancelAtPeriodEnd = true if not immediate
+        !input.cancelImmediately, // cancelAtPeriodEnd = true if not immediate
       );
 
       // 6. Get updated subscription
@@ -98,15 +98,15 @@ export class CancelSubscriptionUseCase {
       return {
         success: true,
         subscription: updatedSubscription || undefined,
-        message: input.cancelImmediately 
-          ? 'Subscription cancelled immediately' 
-          : 'Subscription will be cancelled at the end of the current billing period'
+        message: input.cancelImmediately
+          ? 'Subscription cancelled immediately'
+          : 'Subscription will be cancelled at the end of the current billing period',
       };
     } catch (error: any) {
       return {
         success: false,
         message: error.message || 'Failed to cancel subscription',
-        errors: ['cancellation_failed']
+        errors: ['cancellation_failed'],
       };
     }
   }

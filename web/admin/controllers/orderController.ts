@@ -22,7 +22,8 @@ import { adminRespond } from 'web/respond';
 
 export const listOrders = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { status, paymentStatus, fulfillmentStatus, customerId, search, startDate, endDate, limit, offset, orderBy, orderDirection } = req.query;
+    const { status, paymentStatus, fulfillmentStatus, customerId, search, startDate, endDate, limit, offset, orderBy, orderDirection } =
+      req.query;
 
     const filters: any = {};
     if (status) filters.status = status as OrderStatus;
@@ -38,7 +39,7 @@ export const listOrders = async (req: Request, res: Response): Promise<void> => 
       parseInt(limit as string) || 50,
       parseInt(offset as string) || 0,
       (orderBy as string) || 'createdAt',
-      (orderDirection as 'asc' | 'desc') || 'desc'
+      (orderDirection as 'asc' | 'desc') || 'desc',
     );
 
     const useCase = new ListOrdersUseCase(OrderRepo);
@@ -57,7 +58,7 @@ export const listOrders = async (req: Request, res: Response): Promise<void> => 
         offset: result.offset,
         page,
         pages,
-        hasMore: result.hasMore
+        hasMore: result.hasMore,
       },
       filters: {
         status: status || '',
@@ -68,18 +69,18 @@ export const listOrders = async (req: Request, res: Response): Promise<void> => 
         startDate: startDate || '',
         endDate: endDate || '',
         orderBy: orderBy || 'createdAt',
-        orderDirection: orderDirection || 'desc'
+        orderDirection: orderDirection || 'desc',
       },
       // Status options for filters
       orderStatuses: Object.values(OrderStatus),
       paymentStatuses: Object.values(PaymentStatus),
       fulfillmentStatuses: Object.values(FulfillmentStatus),
-      
-      success: req.query.success || null
+
+      success: req.query.success || null,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load orders',
@@ -113,12 +114,12 @@ export const viewOrder = async (req: Request, res: Response): Promise<void> => {
       orderStatuses: Object.values(OrderStatus),
       paymentStatuses: Object.values(PaymentStatus),
       fulfillmentStatuses: Object.values(FulfillmentStatus),
-      
-      success: req.query.success || null
+
+      success: req.query.success || null,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load order',
@@ -154,7 +155,7 @@ export const updateOrderStatus = async (req: Request, res: Response): Promise<vo
     }
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     if (req.xhr || req.headers.accept?.includes('application/json')) {
       res.status(500).json({ success: false, message: error.message || 'Failed to update status' });
     } else {
@@ -184,7 +185,7 @@ export const cancelOrder = async (req: Request, res: Response): Promise<void> =>
     }
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     if (req.xhr || req.headers.accept?.includes('application/json')) {
       res.status(500).json({ success: false, message: error.message || 'Failed to cancel order' });
     } else {
@@ -219,7 +220,7 @@ export const refundForm = async (req: Request, res: Response): Promise<void> => 
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load refund form',
@@ -237,11 +238,7 @@ export const processRefund = async (req: Request, res: Response): Promise<void> 
     const { amount, reason, refundItems } = req.body;
     const processedBy = (req as any).user?.id || 'admin';
 
-    const command = new ProcessRefundCommand(
-      orderId,
-      parseFloat(amount),
-      reason || 'Refund processed by admin'
-    );
+    const command = new ProcessRefundCommand(orderId, parseFloat(amount), reason || 'Refund processed by admin');
 
     const useCase = new ProcessRefundUseCase(OrderRepo);
     await useCase.execute(command);
@@ -253,7 +250,7 @@ export const processRefund = async (req: Request, res: Response): Promise<void> 
     }
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     if (req.xhr || req.headers.accept?.includes('application/json')) {
       res.status(500).json({ success: false, message: error.message || 'Failed to process refund' });
     } else {

@@ -47,9 +47,7 @@ class SessionServiceClass {
   async createSession(input: CreateSessionInput): Promise<string> {
     const sessionId = uuidv4();
     const now = new Date();
-    const expiresAt = new Date(
-      now.getTime() + (input.expiresInHours || this.defaultExpiryHours) * 60 * 60 * 1000
-    );
+    const expiresAt = new Date(now.getTime() + (input.expiresInHours || this.defaultExpiryHours) * 60 * 60 * 1000);
 
     const sql = `
       INSERT INTO "${this.tableName}" 
@@ -141,7 +139,7 @@ class SessionServiceClass {
       DELETE FROM "${this.tableName}"
       WHERE "expiresAt" < NOW()
     `;
-    const result = await query(sql) as any;
+    const result = (await query(sql)) as any;
     return result?.rowCount || 0;
   }
 

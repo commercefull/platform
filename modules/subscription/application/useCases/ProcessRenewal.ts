@@ -21,7 +21,7 @@ export class ProcessRenewalUseCase {
   constructor(
     private readonly subscriptionRepo: any,
     private readonly paymentService: any,
-    private readonly invoiceService: any
+    private readonly invoiceService: any,
   ) {}
 
   async execute(input: ProcessRenewalInput): Promise<ProcessRenewalOutput> {

@@ -11,6 +11,7 @@ The Merchant feature manages merchant/seller accounts in a multi-vendor marketpl
 ### Merchant Management (Business)
 
 ### UC-MER-001: List Merchants (Business)
+
 **Actor:** Admin  
 **Priority:** High
 
@@ -21,6 +22,7 @@ The Merchant feature manages merchant/seller accounts in a multi-vendor marketpl
 **Then** the system returns all merchant accounts
 
 #### API Endpoint
+
 ```
 GET /business/merchants
 Query: status?, search?, limit, offset
@@ -29,6 +31,7 @@ Query: status?, search?, limit, offset
 ---
 
 ### UC-MER-002: Create Merchant (Business)
+
 **Actor:** Admin  
 **Priority:** High
 
@@ -40,6 +43,7 @@ Query: status?, search?, limit, offset
 **Then** the merchant account is created
 
 #### API Endpoint
+
 ```
 POST /business/merchants
 Body: {
@@ -51,6 +55,7 @@ Body: {
 ```
 
 #### Business Rules
+
 - Email must be unique
 - Commission rate determines platform fee
 - Pending merchants need approval
@@ -58,10 +63,12 @@ Body: {
 ---
 
 ### UC-MER-003: Get Merchant (Business)
+
 **Actor:** Admin  
 **Priority:** High
 
 #### API Endpoint
+
 ```
 GET /business/merchants/:id
 ```
@@ -69,10 +76,12 @@ GET /business/merchants/:id
 ---
 
 ### UC-MER-004: Update Merchant (Business)
+
 **Actor:** Admin  
 **Priority:** Medium
 
 #### API Endpoint
+
 ```
 PUT /business/merchants/:id
 Body: { name?, commissionRate?, status?, ... }
@@ -81,10 +90,12 @@ Body: { name?, commissionRate?, status?, ... }
 ---
 
 ### UC-MER-005: Delete Merchant (Business)
+
 **Actor:** Admin  
 **Priority:** Low
 
 #### API Endpoint
+
 ```
 DELETE /business/merchants/:id
 ```
@@ -94,10 +105,12 @@ DELETE /business/merchants/:id
 ### Merchant Addresses (Business)
 
 ### UC-MER-006: Get Merchant Addresses (Business)
+
 **Actor:** Admin  
 **Priority:** Medium
 
 #### API Endpoint
+
 ```
 GET /business/merchants/:merchantId/addresses
 ```
@@ -105,6 +118,7 @@ GET /business/merchants/:merchantId/addresses
 ---
 
 ### UC-MER-007: Add Merchant Address (Business)
+
 **Actor:** Admin  
 **Priority:** Medium
 
@@ -116,6 +130,7 @@ GET /business/merchants/:merchantId/addresses
 **Then** the address is associated with the merchant
 
 #### API Endpoint
+
 ```
 POST /business/merchants/:merchantId/addresses
 Body: {
@@ -131,10 +146,12 @@ Body: {
 ### Merchant Payment Info (Business)
 
 ### UC-MER-008: Get Merchant Payment Info (Business)
+
 **Actor:** Admin  
 **Priority:** Medium
 
 #### API Endpoint
+
 ```
 GET /business/merchants/:merchantId/payment-info
 ```
@@ -142,6 +159,7 @@ GET /business/merchants/:merchantId/payment-info
 ---
 
 ### UC-MER-009: Add Merchant Payment Info (Business)
+
 **Actor:** Admin  
 **Priority:** Medium
 
@@ -153,6 +171,7 @@ GET /business/merchants/:merchantId/payment-info
 **Then** payouts can be processed
 
 #### API Endpoint
+
 ```
 POST /business/merchants/:merchantId/payment-info
 Body: {
@@ -163,6 +182,7 @@ Body: {
 ```
 
 #### Business Rules
+
 - Bank details are encrypted
 - At least one payment method required for payouts
 - Can have multiple payment methods
@@ -171,19 +191,19 @@ Body: {
 
 ## Events Emitted
 
-| Event | Trigger | Payload |
-|-------|---------|---------|
-| `merchant.created` | Merchant created | merchantId |
-| `merchant.approved` | Merchant approved | merchantId |
-| `merchant.suspended` | Merchant suspended | merchantId, reason |
-| `merchant.payout.processed` | Payout sent | merchantId, amount |
+| Event                       | Trigger            | Payload            |
+| --------------------------- | ------------------ | ------------------ |
+| `merchant.created`          | Merchant created   | merchantId         |
+| `merchant.approved`         | Merchant approved  | merchantId         |
+| `merchant.suspended`        | Merchant suspended | merchantId, reason |
+| `merchant.payout.processed` | Payout sent        | merchantId, amount |
 
 ---
 
 ## Integration Test Coverage
 
-| Use Case | Test File | Status |
-|----------|-----------|--------|
-| UC-MER-001 to UC-MER-005 | `merchant/merchant.test.ts` | 🟡 |
-| UC-MER-006 to UC-MER-007 | `merchant/addresses.test.ts` | ❌ |
-| UC-MER-008 to UC-MER-009 | `merchant/payment.test.ts` | ❌ |
+| Use Case                 | Test File                    | Status |
+| ------------------------ | ---------------------------- | ------ |
+| UC-MER-001 to UC-MER-005 | `merchant/merchant.test.ts`  | 🟡     |
+| UC-MER-006 to UC-MER-007 | `merchant/addresses.test.ts` | ❌     |
+| UC-MER-008 to UC-MER-009 | `merchant/payment.test.ts`   | ❌     |

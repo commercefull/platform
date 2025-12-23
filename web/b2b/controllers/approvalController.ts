@@ -42,7 +42,7 @@ export const listPendingApprovals = async (req: Request, res: Response) => {
     const countResult = await queryOne<{ count: string }>(
       `SELECT COUNT(*) as count FROM "b2bApprovalRequest" 
        WHERE "b2bCompanyId" = $1 AND "status" = 'pending'`,
-      [user.companyId]
+      [user.companyId],
     );
     const total = parseInt(countResult?.count || '0');
 
@@ -53,7 +53,7 @@ export const listPendingApprovals = async (req: Request, res: Response) => {
        WHERE ar."b2bCompanyId" = $1 AND ar."status" = 'pending'
        ORDER BY ar."createdAt" DESC
        LIMIT $2 OFFSET $3`,
-      [user.companyId, limit, offset]
+      [user.companyId, limit, offset],
     );
 
     const pages = Math.ceil(total / limit);
@@ -73,7 +73,7 @@ export const listPendingApprovals = async (req: Request, res: Response) => {
     });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     b2bRespond(req, res, 'error', {
       pageName: 'Error',
       error: 'Failed to load approvals',
@@ -99,7 +99,7 @@ export const listApprovalHistory = async (req: Request, res: Response) => {
     const countResult = await queryOne<{ count: string }>(
       `SELECT COUNT(*) as count FROM "b2bApprovalRequest" 
        WHERE "b2bCompanyId" = $1 AND "status" != 'pending'`,
-      [user.companyId]
+      [user.companyId],
     );
     const total = parseInt(countResult?.count || '0');
 
@@ -113,7 +113,7 @@ export const listApprovalHistory = async (req: Request, res: Response) => {
        WHERE ar."b2bCompanyId" = $1 AND ar."status" != 'pending'
        ORDER BY ar."processedAt" DESC
        LIMIT $2 OFFSET $3`,
-      [user.companyId, limit, offset]
+      [user.companyId, limit, offset],
     );
 
     const pages = Math.ceil(total / limit);
@@ -133,7 +133,7 @@ export const listApprovalHistory = async (req: Request, res: Response) => {
     });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     b2bRespond(req, res, 'error', {
       pageName: 'Error',
       error: 'Failed to load approval history',
@@ -159,7 +159,7 @@ export const viewApproval = async (req: Request, res: Response) => {
        FROM "b2bApprovalRequest" ar
        JOIN "b2bUser" u ON ar."requestedBy" = u."b2bUserId"
        WHERE ar."approvalRequestId" = $1 AND ar."b2bCompanyId" = $2`,
-      [approvalId, user.companyId]
+      [approvalId, user.companyId],
     );
 
     if (!approval) {
@@ -178,7 +178,7 @@ export const viewApproval = async (req: Request, res: Response) => {
     });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     b2bRespond(req, res, 'error', {
       pageName: 'Error',
       error: 'Failed to load approval',

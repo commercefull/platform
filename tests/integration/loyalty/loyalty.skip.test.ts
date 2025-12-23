@@ -1,6 +1,6 @@
 /**
  * Loyalty Integration Tests
- * 
+ *
  * Tests for loyalty management endpoints.
  */
 
@@ -14,12 +14,12 @@ const API_URL = process.env.API_URL || 'http://localhost:3000';
 
 const TEST_MERCHANT = {
   email: 'merchant@example.com',
-  password: 'password123'
+  password: 'password123',
 };
 
 const TEST_CUSTOMER = {
   email: 'customer@example.com',
-  password: 'password123'
+  password: 'password123',
 };
 
 let client: AxiosInstance;
@@ -36,9 +36,9 @@ beforeAll(async () => {
     baseURL: API_URL,
     validateStatus: () => true,
     headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    }
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
   });
 
   try {
@@ -46,7 +46,6 @@ beforeAll(async () => {
     const merchantLogin = await client.post('/business/auth/login', TEST_MERCHANT, { headers: { 'X-Test-Request': 'true' } });
     merchantToken = merchantLogin.data?.accessToken || '';
     if (!merchantToken) {
-      
     }
 
     // Login as customer
@@ -54,10 +53,8 @@ beforeAll(async () => {
     customerToken = customerLogin.data?.accessToken || '';
     customerId = customerLogin.data?.customer?.customerId || customerLogin.data?.customer?.id || customerLogin.data?.customerId || '';
     if (!customerToken) {
-      
     }
   } catch (error) {
-    
     merchantToken = '';
     customerToken = '';
     customerId = '';
@@ -79,7 +76,7 @@ describe('Loyalty Feature Tests', () => {
     describe('GET /business/loyalty/tiers', () => {
       it('should list all loyalty tiers', async () => {
         const response = await client.get('/business/loyalty/tiers', {
-          headers: { Authorization: `Bearer ${merchantToken}` }
+          headers: { Authorization: `Bearer ${merchantToken}` },
         });
 
         expect(response.status).toBe(200);
@@ -102,11 +99,11 @@ describe('Loyalty Feature Tests', () => {
           pointsThreshold: 100,
           multiplier: 1.2,
           benefits: ['Free shipping', '10% discount'],
-          isActive: true
+          isActive: true,
         };
 
         const response = await client.post('/business/loyalty/tiers', tierData, {
-          headers: { Authorization: `Bearer ${merchantToken}` }
+          headers: { Authorization: `Bearer ${merchantToken}` },
         });
 
         expect(response.status).toBe(201);
@@ -116,11 +113,15 @@ describe('Loyalty Feature Tests', () => {
       });
 
       it('should require name and pointsThreshold', async () => {
-        const response = await client.post('/business/loyalty/tiers', {
-          multiplier: 1.0
-        }, {
-          headers: { Authorization: `Bearer ${merchantToken}` }
-        });
+        const response = await client.post(
+          '/business/loyalty/tiers',
+          {
+            multiplier: 1.0,
+          },
+          {
+            headers: { Authorization: `Bearer ${merchantToken}` },
+          },
+        );
 
         expect(response.status).toBe(400);
         expect(response.data.success).toBe(false);
@@ -132,7 +133,7 @@ describe('Loyalty Feature Tests', () => {
         if (!testTierId) return;
 
         const response = await client.get(`/business/loyalty/tiers/${testTierId}`, {
-          headers: { Authorization: `Bearer ${merchantToken}` }
+          headers: { Authorization: `Bearer ${merchantToken}` },
         });
 
         expect(response.status).toBe(200);
@@ -142,7 +143,7 @@ describe('Loyalty Feature Tests', () => {
 
       it('should return 404 for non-existent tier', async () => {
         const response = await client.get('/business/loyalty/tiers/00000000-0000-0000-0000-000000000000', {
-          headers: { Authorization: `Bearer ${merchantToken}` }
+          headers: { Authorization: `Bearer ${merchantToken}` },
         });
 
         expect(response.status).toBe(404);
@@ -153,12 +154,16 @@ describe('Loyalty Feature Tests', () => {
       it('should update a tier', async () => {
         if (!testTierId) return;
 
-        const response = await client.put(`/business/loyalty/tiers/${testTierId}`, {
-          name: 'Updated Test Tier',
-          multiplier: 1.5
-        }, {
-          headers: { Authorization: `Bearer ${merchantToken}` }
-        });
+        const response = await client.put(
+          `/business/loyalty/tiers/${testTierId}`,
+          {
+            name: 'Updated Test Tier',
+            multiplier: 1.5,
+          },
+          {
+            headers: { Authorization: `Bearer ${merchantToken}` },
+          },
+        );
 
         expect(response.status).toBe(200);
         expect(response.data.success).toBe(true);
@@ -177,7 +182,7 @@ describe('Loyalty Feature Tests', () => {
     describe('GET /business/loyalty/rewards', () => {
       it('should list all loyalty rewards', async () => {
         const response = await client.get('/business/loyalty/rewards', {
-          headers: { Authorization: `Bearer ${merchantToken}` }
+          headers: { Authorization: `Bearer ${merchantToken}` },
         });
 
         expect(response.status).toBe(200);
@@ -192,13 +197,13 @@ describe('Loyalty Feature Tests', () => {
           name: `Test Reward ${Date.now()}`,
           description: 'Test reward for integration tests',
           pointsCost: 500,
-          discountAmount: 10.00,
+          discountAmount: 10.0,
           freeShipping: true,
-          isActive: true
+          isActive: true,
         };
 
         const response = await client.post('/business/loyalty/rewards', rewardData, {
-          headers: { Authorization: `Bearer ${merchantToken}` }
+          headers: { Authorization: `Bearer ${merchantToken}` },
         });
 
         expect(response.status).toBe(201);
@@ -208,11 +213,15 @@ describe('Loyalty Feature Tests', () => {
       });
 
       it('should require name and pointsCost', async () => {
-        const response = await client.post('/business/loyalty/rewards', {
-          description: 'Missing required fields'
-        }, {
-          headers: { Authorization: `Bearer ${merchantToken}` }
-        });
+        const response = await client.post(
+          '/business/loyalty/rewards',
+          {
+            description: 'Missing required fields',
+          },
+          {
+            headers: { Authorization: `Bearer ${merchantToken}` },
+          },
+        );
 
         expect(response.status).toBe(400);
         expect(response.data.success).toBe(false);
@@ -224,7 +233,7 @@ describe('Loyalty Feature Tests', () => {
         if (!testRewardId) return;
 
         const response = await client.get(`/business/loyalty/rewards/${testRewardId}`, {
-          headers: { Authorization: `Bearer ${merchantToken}` }
+          headers: { Authorization: `Bearer ${merchantToken}` },
         });
 
         expect(response.status).toBe(200);
@@ -237,12 +246,16 @@ describe('Loyalty Feature Tests', () => {
       it('should update a reward', async () => {
         if (!testRewardId) return;
 
-        const response = await client.put(`/business/loyalty/rewards/${testRewardId}`, {
-          name: 'Updated Test Reward',
-          pointsCost: 600
-        }, {
-          headers: { Authorization: `Bearer ${merchantToken}` }
-        });
+        const response = await client.put(
+          `/business/loyalty/rewards/${testRewardId}`,
+          {
+            name: 'Updated Test Reward',
+            pointsCost: 600,
+          },
+          {
+            headers: { Authorization: `Bearer ${merchantToken}` },
+          },
+        );
 
         expect(response.status).toBe(200);
         expect(response.data.success).toBe(true);
@@ -303,7 +316,7 @@ describe('Loyalty Feature Tests', () => {
     describe('GET /loyalty/my-status', () => {
       it('should get customer loyalty status when authenticated', async () => {
         const response = await client.get('/customer/loyalty/my-status', {
-          headers: { Authorization: `Bearer ${customerToken}` }
+          headers: { Authorization: `Bearer ${customerToken}` },
         });
 
         expect(response.status).toBe(200);
@@ -321,7 +334,7 @@ describe('Loyalty Feature Tests', () => {
     describe('GET /loyalty/my-transactions', () => {
       it('should get customer transactions when authenticated', async () => {
         const response = await client.get('/customer/loyalty/my-transactions', {
-          headers: { Authorization: `Bearer ${customerToken}` }
+          headers: { Authorization: `Bearer ${customerToken}` },
         });
 
         expect(response.status).toBe(200);
@@ -333,7 +346,7 @@ describe('Loyalty Feature Tests', () => {
     describe('GET /loyalty/my-redemptions', () => {
       it('should get customer redemptions when authenticated', async () => {
         const response = await client.get('/customer/loyalty/my-redemptions', {
-          headers: { Authorization: `Bearer ${customerToken}` }
+          headers: { Authorization: `Bearer ${customerToken}` },
         });
 
         expect(response.status).toBe(200);
@@ -345,16 +358,20 @@ describe('Loyalty Feature Tests', () => {
     describe('POST /loyalty/redeem', () => {
       it('should require authentication', async () => {
         const response = await client.post('/customer/loyalty/redeem', {
-          rewardId: '00000000-0000-0000-0000-000000000000'
+          rewardId: '00000000-0000-0000-0000-000000000000',
         });
 
         expect(response.status).toBe(401);
       });
 
       it('should require rewardId', async () => {
-        const response = await client.post('/customer/loyalty/redeem', {}, {
-          headers: { Authorization: `Bearer ${customerToken}` }
-        });
+        const response = await client.post(
+          '/customer/loyalty/redeem',
+          {},
+          {
+            headers: { Authorization: `Bearer ${customerToken}` },
+          },
+        );
 
         expect(response.status).toBe(400);
       });
@@ -371,7 +388,7 @@ describe('Loyalty Feature Tests', () => {
         if (!customerId) return;
 
         const response = await client.get(`/business/loyalty/customers/${customerId}/points`, {
-          headers: { Authorization: `Bearer ${merchantToken}` }
+          headers: { Authorization: `Bearer ${merchantToken}` },
         });
 
         expect(response.status).toBe(200);
@@ -387,7 +404,7 @@ describe('Loyalty Feature Tests', () => {
         const response = await client.post(
           `/business/loyalty/customers/${customerId}/points/adjust`,
           { points: 100, reason: 'Test adjustment' },
-          { headers: { Authorization: `Bearer ${merchantToken}` } }
+          { headers: { Authorization: `Bearer ${merchantToken}` } },
         );
 
         // May return 200 (success) or 500 (if customer doesn't exist in loyalty system)
@@ -402,7 +419,7 @@ describe('Loyalty Feature Tests', () => {
         const response = await client.post(
           `/business/loyalty/customers/${customerId}/points/adjust`,
           { reason: 'Missing points' },
-          { headers: { Authorization: `Bearer ${merchantToken}` } }
+          { headers: { Authorization: `Bearer ${merchantToken}` } },
         );
 
         expect(response.status).toBe(400);
@@ -413,10 +430,9 @@ describe('Loyalty Feature Tests', () => {
       it('should get customer transactions', async () => {
         if (!customerId) return;
 
-        const response = await client.get(
-          `/business/loyalty/customers/${customerId}/transactions`,
-          { headers: { Authorization: `Bearer ${merchantToken}` } }
-        );
+        const response = await client.get(`/business/loyalty/customers/${customerId}/transactions`, {
+          headers: { Authorization: `Bearer ${merchantToken}` },
+        });
 
         expect(response.status).toBe(200);
         expect(response.data.success).toBe(true);
@@ -428,10 +444,9 @@ describe('Loyalty Feature Tests', () => {
       it('should get customer redemptions', async () => {
         if (!customerId) return;
 
-        const response = await client.get(
-          `/business/loyalty/customers/${customerId}/redemptions`,
-          { headers: { Authorization: `Bearer ${merchantToken}` } }
-        );
+        const response = await client.get(`/business/loyalty/customers/${customerId}/redemptions`, {
+          headers: { Authorization: `Bearer ${merchantToken}` },
+        });
 
         expect(response.status).toBe(200);
         expect(response.data.success).toBe(true);

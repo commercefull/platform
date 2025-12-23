@@ -30,7 +30,7 @@ export class UpdateTicketUseCase {
     }
 
     const updates: Record<string, unknown> = {};
-    
+
     if (input.status) updates.status = input.status;
     if (input.priority) updates.priority = input.priority;
     if (input.assignedTo !== undefined) updates.assignedTo = input.assignedTo;

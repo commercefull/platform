@@ -22,12 +22,12 @@ export const listShippingZones = async (req: Request, res: Response): Promise<vo
       pageName: 'Shipping Zones',
       zones,
       stats: { total: zones.length, active: activeCount },
-      
-      success: req.query.success || null
+
+      success: req.query.success || null,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load shipping zones',
@@ -42,7 +42,7 @@ export const createShippingZoneForm = async (req: Request, res: Response): Promi
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -52,15 +52,7 @@ export const createShippingZoneForm = async (req: Request, res: Response): Promi
 
 export const createShippingZone = async (req: Request, res: Response): Promise<void> => {
   try {
-    const {
-      name,
-      description,
-      locationType,
-      locations,
-      excludedLocations,
-      priority,
-      isActive
-    } = req.body;
+    const { name, description, locationType, locations, excludedLocations, priority, isActive } = req.body;
 
     const zone = await shippingZoneRepo.create({
       name,
@@ -70,13 +62,12 @@ export const createShippingZone = async (req: Request, res: Response): Promise<v
       excludedLocations: excludedLocations ? JSON.parse(excludedLocations) : undefined,
       priority: priority ? parseInt(priority) : 0,
       isActive: isActive === 'true',
-      createdBy: 'admin' // Add required createdBy field
+      createdBy: 'admin', // Add required createdBy field
     });
 
     res.redirect(`/hub/shipping/zones/${zone.shippingZoneId}?success=Shipping zone created successfully`);
   } catch (error: any) {
     logger.error('Error:', error);
-    
 
     adminRespond(req, res, 'shipping/zones/create', {
       pageName: 'Create Shipping Zone',
@@ -101,18 +92,18 @@ export const viewShippingZone = async (req: Request, res: Response): Promise<voi
     }
 
     // Get associated rates
-    const rates = await shippingZoneRepo.findById(zoneId) ? [] : []; // Placeholder - would need to get rates for this zone
+    const rates = (await shippingZoneRepo.findById(zoneId)) ? [] : []; // Placeholder - would need to get rates for this zone
 
     adminRespond(req, res, 'shipping/zones/view', {
       pageName: `Zone: ${zone.name}`,
       zone,
       rates,
-      
-      success: req.query.success || null
+
+      success: req.query.success || null,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load shipping zone',
@@ -140,7 +131,7 @@ export const editShippingZoneForm = async (req: Request, res: Response): Promise
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -153,15 +144,7 @@ export const updateShippingZone = async (req: Request, res: Response): Promise<v
     const { zoneId } = req.params;
     const updates: any = {};
 
-    const {
-      name,
-      description,
-      locationType,
-      locations,
-      excludedLocations,
-      priority,
-      isActive
-    } = req.body;
+    const { name, description, locationType, locations, excludedLocations, priority, isActive } = req.body;
 
     if (name !== undefined) updates.name = name;
     if (description !== undefined) updates.description = description || undefined;
@@ -180,7 +163,6 @@ export const updateShippingZone = async (req: Request, res: Response): Promise<v
     res.redirect(`/hub/shipping/zones/${zoneId}?success=Shipping zone updated successfully`);
   } catch (error: any) {
     logger.error('Error:', error);
-    
 
     try {
       const zone = await shippingZoneRepo.findById(req.params.zoneId);
@@ -213,7 +195,7 @@ export const activateShippingZone = async (req: Request, res: Response): Promise
     res.json({ success: true, message: 'Shipping zone activated successfully' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to activate shipping zone' });
   }
 };
@@ -231,7 +213,7 @@ export const deactivateShippingZone = async (req: Request, res: Response): Promi
     res.json({ success: true, message: 'Shipping zone deactivated successfully' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to deactivate shipping zone' });
   }
 };
@@ -249,7 +231,7 @@ export const deleteShippingZone = async (req: Request, res: Response): Promise<v
     res.json({ success: true, message: 'Shipping zone deleted successfully' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to delete shipping zone' });
   }
 };

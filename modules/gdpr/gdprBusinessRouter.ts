@@ -13,7 +13,7 @@ import {
   processExportRequest,
   processDeletionRequest,
   rejectRequest,
-  getCookieConsentStatistics
+  getCookieConsentStatistics,
 } from './interface/controllers/GdprController';
 import { isMerchantLoggedIn } from '../../libs/auth';
 

@@ -1,6 +1,6 @@
 /**
  * Social Login Integration Tests
- * 
+ *
  * Tests for OAuth/social login authentication endpoints.
  */
 
@@ -21,7 +21,7 @@ const mockGoogleProfile = {
   name: 'Social User',
   given_name: 'Social',
   family_name: 'User',
-  picture: 'https://example.com/avatar.jpg'
+  picture: 'https://example.com/avatar.jpg',
 };
 
 const mockFacebookProfile = {
@@ -30,7 +30,7 @@ const mockFacebookProfile = {
   name: 'Facebook User',
   firstName: 'Facebook',
   lastName: 'User',
-  picture: 'https://example.com/fb-avatar.jpg'
+  picture: 'https://example.com/fb-avatar.jpg',
 };
 
 // ============================================================================
@@ -42,9 +42,9 @@ beforeAll(() => {
     baseURL: API_URL,
     validateStatus: () => true,
     headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    }
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
   });
 });
 
@@ -108,7 +108,7 @@ describe('Social Login Feature Tests', () => {
   describe('POST /identity/social/:provider/customer', () => {
     it('should require access token or id token', async () => {
       const response = await client.post('/customer/identity/google/customer', {
-        profile: mockGoogleProfile
+        profile: mockGoogleProfile,
       });
 
       expect(response.status).toBe(400);
@@ -119,7 +119,7 @@ describe('Social Login Feature Tests', () => {
     it('should require profile with id and email', async () => {
       const response = await client.post('/customer/identity/google/customer', {
         accessToken: 'mock-access-token',
-        profile: { name: 'No ID User' }
+        profile: { name: 'No ID User' },
       });
 
       expect(response.status).toBe(400);
@@ -130,7 +130,7 @@ describe('Social Login Feature Tests', () => {
     it('should authenticate customer with valid Google profile', async () => {
       const response = await client.post('/customer/identity/google/customer', {
         accessToken: 'mock-google-access-token',
-        profile: mockGoogleProfile
+        profile: mockGoogleProfile,
       });
 
       expect(response.status).toBe(200);
@@ -145,12 +145,12 @@ describe('Social Login Feature Tests', () => {
       const uniqueProfile = {
         ...mockGoogleProfile,
         id: `google-new-${Date.now()}`,
-        email: `newuser-${Date.now()}@gmail.com`
+        email: `newuser-${Date.now()}@gmail.com`,
       };
 
       const response = await client.post('/customer/identity/google/customer', {
         accessToken: 'mock-google-access-token',
-        profile: uniqueProfile
+        profile: uniqueProfile,
       });
 
       expect(response.status).toBe(200);
@@ -161,7 +161,7 @@ describe('Social Login Feature Tests', () => {
     it('should reject unsupported provider', async () => {
       const response = await client.post('/customer/identity/unsupported/customer', {
         accessToken: 'mock-access-token',
-        profile: mockGoogleProfile
+        profile: mockGoogleProfile,
       });
 
       expect(response.status).toBe(400);
@@ -176,7 +176,7 @@ describe('Social Login Feature Tests', () => {
   describe('POST /identity/social/:provider/merchant', () => {
     it('should require access token or id token', async () => {
       const response = await client.post('/customer/identity/google/merchant', {
-        profile: mockGoogleProfile
+        profile: mockGoogleProfile,
       });
 
       expect(response.status).toBe(400);
@@ -188,12 +188,12 @@ describe('Social Login Feature Tests', () => {
       const merchantProfile = {
         id: `google-merchant-${Date.now()}`,
         email: `merchant-${Date.now()}@business.com`,
-        name: 'Business Owner'
+        name: 'Business Owner',
       };
 
       const response = await client.post('/customer/identity/google/merchant', {
         accessToken: 'mock-google-access-token',
-        profile: merchantProfile
+        profile: merchantProfile,
       });
 
       expect(response.status).toBe(200);
@@ -221,18 +221,17 @@ describe('Social Login Feature Tests', () => {
       // First, login via social to get a token
       const loginResponse = await client.post('/customer/identity/google/customer', {
         accessToken: 'mock-google-access-token',
-        profile: mockGoogleProfile
+        profile: mockGoogleProfile,
       });
 
       if (loginResponse.status !== 200) {
-        
         return;
       }
 
       const token = loginResponse.data.accessToken;
 
       const response = await client.get('/customer/identity/customer/accounts', {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       expect(response.status).toBe(200);
@@ -259,7 +258,7 @@ describe('Social Login Feature Tests', () => {
     it('should require authentication', async () => {
       const response = await client.post('/customer/identity/facebook/customer/link', {
         accessToken: 'mock-fb-token',
-        profile: mockFacebookProfile
+        profile: mockFacebookProfile,
       });
 
       expect(response.status).toBe(401);

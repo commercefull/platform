@@ -1,6 +1,6 @@
 /**
  * VoidPayment Use Case
- * 
+ *
  * Voids a previously authorized (but not captured) payment.
  */
 
@@ -21,7 +21,7 @@ export interface VoidPaymentOutput {
 export class VoidPaymentUseCase {
   constructor(
     private readonly paymentRepository: any, // PaymentRepository
-    private readonly paymentGateway: any // PaymentGatewayService
+    private readonly paymentGateway: any, // PaymentGatewayService
   ) {}
 
   async execute(input: VoidPaymentInput): Promise<VoidPaymentOutput> {
@@ -56,7 +56,7 @@ export class VoidPaymentUseCase {
     transaction.voidedAt = new Date();
     transaction.voidReason = input.reason;
     transaction.gatewayResponse = gatewayResult.response;
-    
+
     await this.paymentRepository.updateTransaction(transaction);
 
     // Emit event (void is similar to failed payment from order perspective)

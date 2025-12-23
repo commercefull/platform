@@ -144,7 +144,7 @@ class AdminRepositoryClass {
       SET "deletedAt" = $1, "updatedAt" = $1
       WHERE "adminId" = $2 AND "deletedAt" IS NULL
     `;
-    const result = await query(sql, [new Date(), adminId]) as any;
+    const result = (await query(sql, [new Date(), adminId])) as any;
     return (result?.rowCount || 0) > 0;
   }
 

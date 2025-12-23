@@ -88,12 +88,7 @@ export class ShippingService {
   /**
    * Calculate shipping rates for an order
    */
-  async calculateRates(
-    fromAddress: Address,
-    toAddress: Address,
-    packages: Package[],
-    currency: string = 'USD'
-  ): Promise<ShippingQuote[]> {
+  async calculateRates(fromAddress: Address, toAddress: Address, packages: Package[], currency: string = 'USD'): Promise<ShippingQuote[]> {
     try {
       // 1. Find applicable shipping zone (simplified - find all active zones)
       const zones = await this.zoneRepo.findAll(true); // activeOnly = true
@@ -125,12 +120,11 @@ export class ShippingService {
               currency,
               estimatedDays: (method.estimatedDeliveryDays as any)?.min || method.handlingDays || 3,
               guaranteedDelivery: false, // Default value - not stored in interface
-              trackingAvailable: true,   // Default value - not stored in interface
-              insuranceIncluded: rate.insurance > 0
+              trackingAvailable: true, // Default value - not stored in interface
+              insuranceIncluded: rate.insurance > 0,
             });
           }
         } catch (error) {
-          
           // Continue with other methods
         }
       }
@@ -138,7 +132,6 @@ export class ShippingService {
       // 4. Sort by rate
       return quotes.sort((a, b) => a.rate - b.rate);
     } catch (error) {
-      
       throw error;
     }
   }
@@ -162,13 +155,12 @@ export class ShippingService {
       return {
         valid: messages.length === 0,
         normalizedAddress: messages.length === 0 ? address : undefined,
-        messages
+        messages,
       };
     } catch (error) {
-      
       return {
         valid: false,
-        messages: ['Address validation failed']
+        messages: ['Address validation failed'],
       };
     }
   }
@@ -182,7 +174,7 @@ export class ShippingService {
     toAddress: Address,
     packages: Package[],
     carrierCode: string,
-    serviceCode: string
+    serviceCode: string,
   ): Promise<Shipment> {
     try {
       // Get carrier and method details
@@ -213,7 +205,7 @@ export class ShippingService {
         estimatedDeliveryDate: this.calculateEstimatedDelivery((method.estimatedDeliveryDays as any)?.min || method.handlingDays || 3),
         cost: cost.baseRate,
         insurance: cost.insurance,
-        labels: []
+        labels: [],
       };
 
       // Generate shipping labels
@@ -221,7 +213,6 @@ export class ShippingService {
 
       return shipment;
     } catch (error) {
-      
       throw error;
     }
   }
@@ -252,19 +243,18 @@ export class ShippingService {
             time: '09:00',
             location: 'Shipping Facility',
             description: 'Package has been picked up',
-            status: 'picked_up'
+            status: 'picked_up',
           },
           {
             date: new Date().toISOString().split('T')[0],
             time: '14:30',
             location: 'Sorting Facility',
             description: 'Package is being sorted',
-            status: 'in_transit'
-          }
-        ]
+            status: 'in_transit',
+          },
+        ],
       };
     } catch (error) {
-      
       throw error;
     }
   }
@@ -272,10 +262,7 @@ export class ShippingService {
   /**
    * Generate shipping label
    */
-  async generateLabel(
-    shipmentId: string,
-    format: 'pdf' | 'png' | 'zpl' = 'pdf'
-  ): Promise<ShippingLabel> {
+  async generateLabel(shipmentId: string, format: 'pdf' | 'png' | 'zpl' = 'pdf'): Promise<ShippingLabel> {
     try {
       // TODO: Generate actual shipping label
       // For now, return mock label
@@ -283,10 +270,9 @@ export class ShippingService {
         type: 'shipping',
         format,
         data: 'base64-encoded-label-data-would-go-here',
-        trackingNumber: `TRK${Date.now()}`
+        trackingNumber: `TRK${Date.now()}`,
       };
     } catch (error) {
-      
       throw error;
     }
   }
@@ -299,7 +285,6 @@ export class ShippingService {
       // Return all active shipping methods (simplified implementation)
       return await this.methodRepo.findAll(true);
     } catch (error) {
-      
       return [];
     }
   }
@@ -312,7 +297,7 @@ export class ShippingService {
     packages: Package[],
     zone: any,
     fromAddress: Address,
-    toAddress: Address
+    toAddress: Address,
   ): Promise<{ total: number; baseRate: number; insurance: number } | null> {
     try {
       // Calculate package dimensions and weight
@@ -343,7 +328,6 @@ export class ShippingService {
 
       return { total, baseRate, insurance };
     } catch (error) {
-      
       return null;
     }
   }
@@ -355,7 +339,7 @@ export class ShippingService {
     method: any,
     packages: Package[],
     fromAddress: Address,
-    toAddress: Address
+    toAddress: Address,
   ): Promise<{ baseRate: number; insurance: number }> {
     const rate = await this.calculateMethodRate(method, packages, null, fromAddress, toAddress);
     return rate ? { baseRate: rate.baseRate, insurance: rate.insurance } : { baseRate: 0, insurance: 0 };
@@ -414,7 +398,7 @@ export class ShippingService {
     shipment: Shipment,
     fromAddress: Address,
     toAddress: Address,
-    packages: Package[]
+    packages: Package[],
   ): Promise<ShippingLabel[]> {
     const labels: ShippingLabel[] = [];
 
@@ -433,14 +417,15 @@ export class ShippingService {
   async getCarrierCapabilities(carrierCode: string): Promise<any> {
     try {
       const carrier = await this.carrierRepo.findByCode(carrierCode);
-      return carrier ? {
-        supportedServices: carrier.supportedServices,
-        supportedRegions: carrier.supportedRegions,
-        hasApiIntegration: carrier.hasApiIntegration,
-        requiresContract: carrier.requiresContract
-      } : {};
+      return carrier
+        ? {
+            supportedServices: carrier.supportedServices,
+            supportedRegions: carrier.supportedRegions,
+            hasApiIntegration: carrier.hasApiIntegration,
+            requiresContract: carrier.requiresContract,
+          }
+        : {};
     } catch (error) {
-      
       return {};
     }
   }
@@ -451,9 +436,7 @@ export class ShippingService {
   async updateShipmentStatus(shipmentId: string, status: string, trackingInfo?: TrackingInfo): Promise<void> {
     try {
       // TODO: Update shipment status in database
-      
     } catch (error) {
-      
       throw error;
     }
   }

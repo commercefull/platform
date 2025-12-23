@@ -30,11 +30,11 @@ export interface SessionStoreResult {
 
 /**
  * Creates a session store based on configuration.
- * 
+ *
  * Priority (when type is 'auto'):
  * 1. Redis if REDIS_URL or REDIS_HOST is set
  * 2. PostgreSQL as fallback
- * 
+ *
  * @param config - Session store configuration
  * @returns Session store instance and metadata
  */
@@ -94,17 +94,11 @@ function createRedisStore(config?: SessionStoreConfig['redis']): SessionStoreRes
   }
 
   // Handle Redis connection events
-  client.on('connect', () => {
-    
-  });
+  client.on('connect', () => {});
 
-  client.on('error', (err) => {
-    
-  });
+  client.on('error', err => {});
 
-  client.on('ready', () => {
-    
-  });
+  client.on('ready', () => {});
 
   const store = new RedisStore({
     client,
@@ -134,8 +128,6 @@ function createPostgresStore(config?: SessionStoreConfig['postgres']): SessionSt
     createTableIfMissing: true,
   });
 
-  
-
   return {
     store,
     type: 'postgres',
@@ -148,7 +140,6 @@ function createPostgresStore(config?: SessionStoreConfig['postgres']): SessionSt
 export async function closeSessionStore(result: SessionStoreResult): Promise<void> {
   if (result.type === 'redis' && result.client) {
     await result.client.quit();
-    
   }
   // PostgreSQL pool is managed externally
 }

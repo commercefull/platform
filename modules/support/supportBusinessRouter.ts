@@ -38,7 +38,7 @@ import {
   getStockAlerts,
   getPriceAlerts,
   notifyStockAlerts,
-  notifyPriceAlerts
+  notifyPriceAlerts,
 } from './controllers/supportBusinessController';
 
 const router = Router();

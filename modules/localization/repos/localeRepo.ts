@@ -17,29 +17,21 @@ export class LocaleRepo {
    * Find locale by ID
    */
   async findById(localeId: string): Promise<Locale | null> {
-    return await queryOne<Locale>(
-      `SELECT * FROM "${Table.Locale}" WHERE "localeId" = $1`,
-      [localeId]
-    );
+    return await queryOne<Locale>(`SELECT * FROM "${Table.Locale}" WHERE "localeId" = $1`, [localeId]);
   }
 
   /**
    * Find locale by code
    */
   async findByCode(code: string): Promise<Locale | null> {
-    return await queryOne<Locale>(
-      `SELECT * FROM "${Table.Locale}" WHERE "code" = $1`,
-      [code]
-    );
+    return await queryOne<Locale>(`SELECT * FROM "${Table.Locale}" WHERE "code" = $1`, [code]);
   }
 
   /**
    * Find default locale
    */
   async findDefault(): Promise<Locale | null> {
-    return await queryOne<Locale>(
-      `SELECT * FROM "${Table.Locale}" WHERE "isDefault" = true AND "isActive" = true LIMIT 1`
-    );
+    return await queryOne<Locale>(`SELECT * FROM "${Table.Locale}" WHERE "isDefault" = true AND "isActive" = true LIMIT 1`);
   }
 
   /**
@@ -47,13 +39,13 @@ export class LocaleRepo {
    */
   async findAll(activeOnly: boolean = false): Promise<Locale[]> {
     let sql = `SELECT * FROM "${Table.Locale}"`;
-    
+
     if (activeOnly) {
       sql += ` WHERE "isActive" = true`;
     }
-    
+
     sql += ` ORDER BY "name" ASC`;
-    
+
     const results = await query<Locale[]>(sql);
     return results || [];
   }
@@ -64,13 +56,13 @@ export class LocaleRepo {
   async findByLanguage(language: string, activeOnly: boolean = true): Promise<Locale[]> {
     let sql = `SELECT * FROM "${Table.Locale}" WHERE "language" = $1`;
     const params: any[] = [language.toLowerCase()];
-    
+
     if (activeOnly) {
       sql += ` AND "isActive" = true`;
     }
-    
+
     sql += ` ORDER BY "name" ASC`;
-    
+
     const results = await query<Locale[]>(sql, params);
     return results || [];
   }
@@ -81,13 +73,13 @@ export class LocaleRepo {
   async findByCountryCode(countryCode: string, activeOnly: boolean = true): Promise<Locale[]> {
     let sql = `SELECT * FROM "${Table.Locale}" WHERE "countryCode" = $1`;
     const params: any[] = [countryCode.toUpperCase()];
-    
+
     if (activeOnly) {
       sql += ` AND "isActive" = true`;
     }
-    
+
     sql += ` ORDER BY "name" ASC`;
-    
+
     const results = await query<Locale[]>(sql, params);
     return results || [];
   }
@@ -98,13 +90,13 @@ export class LocaleRepo {
   async findByCurrency(currencyId: string, activeOnly: boolean = true): Promise<Locale[]> {
     let sql = `SELECT * FROM "${Table.Locale}" WHERE "defaultCurrencyId" = $1`;
     const params: any[] = [currencyId];
-    
+
     if (activeOnly) {
       sql += ` AND "isActive" = true`;
     }
-    
+
     sql += ` ORDER BY "name" ASC`;
-    
+
     const results = await query<Locale[]>(sql, params);
     return results || [];
   }
@@ -115,13 +107,13 @@ export class LocaleRepo {
   async findByTextDirection(textDirection: TextDirection, activeOnly: boolean = true): Promise<Locale[]> {
     let sql = `SELECT * FROM "${Table.Locale}" WHERE "textDirection" = $1`;
     const params: any[] = [textDirection];
-    
+
     if (activeOnly) {
       sql += ` AND "isActive" = true`;
     }
-    
+
     sql += ` ORDER BY "name" ASC`;
-    
+
     const results = await query<Locale[]>(sql, params);
     return results || [];
   }
@@ -132,13 +124,13 @@ export class LocaleRepo {
   async search(searchTerm: string, activeOnly: boolean = true): Promise<Locale[]> {
     let sql = `SELECT * FROM "${Table.Locale}" WHERE ("name" ILIKE $1 OR "code" ILIKE $1)`;
     const params: any[] = [`%${searchTerm}%`];
-    
+
     if (activeOnly) {
       sql += ` AND "isActive" = true`;
     }
-    
+
     sql += ` ORDER BY "name" ASC`;
-    
+
     const results = await query<Locale[]>(sql, params);
     return results || [];
   }
@@ -180,8 +172,8 @@ export class LocaleRepo {
         params.timeZone || 'UTC',
         params.defaultCurrencyId || null,
         now,
-        now
-      ]
+        now,
+      ],
     );
 
     if (!result) {
@@ -231,7 +223,7 @@ export class LocaleRepo {
        SET ${updateFields.join(', ')}
        WHERE "localeId" = $${paramIndex}
        RETURNING *`,
-      values
+      values,
     );
 
     return result;
@@ -250,12 +242,12 @@ export class LocaleRepo {
   private async unsetAllDefaults(exceptId?: string): Promise<void> {
     let sql = `UPDATE "${Table.Locale}" SET "isDefault" = false, "updatedAt" = $1 WHERE "isDefault" = true`;
     const params: any[] = [unixTimestamp()];
-    
+
     if (exceptId) {
       sql += ` AND "localeId" != $2`;
       params.push(exceptId);
     }
-    
+
     await query(sql, params);
   }
 
@@ -277,10 +269,9 @@ export class LocaleRepo {
    * Delete locale
    */
   async delete(localeId: string): Promise<boolean> {
-    const result = await queryOne<{ localeId: string }>(
-      `DELETE FROM "${Table.Locale}" WHERE "localeId" = $1 RETURNING "localeId"`,
-      [localeId]
-    );
+    const result = await queryOne<{ localeId: string }>(`DELETE FROM "${Table.Locale}" WHERE "localeId" = $1 RETURNING "localeId"`, [
+      localeId,
+    ]);
 
     return !!result;
   }
@@ -290,11 +281,11 @@ export class LocaleRepo {
    */
   async count(activeOnly: boolean = false): Promise<number> {
     let sql = `SELECT COUNT(*) as count FROM "${Table.Locale}"`;
-    
+
     if (activeOnly) {
       sql += ` WHERE "isActive" = true`;
     }
-    
+
     const result = await queryOne<{ count: string }>(sql);
 
     return result ? parseInt(result.count, 10) : 0;
@@ -308,7 +299,7 @@ export class LocaleRepo {
       `SELECT DISTINCT "language" FROM "${Table.Locale}" 
        WHERE "isActive" = true 
        ORDER BY "language" ASC`,
-      []
+      [],
     );
 
     return results ? results.map(l => l.language) : [];
@@ -330,7 +321,7 @@ export class LocaleRepo {
       `SELECT "language", COUNT(*) as count 
        FROM "${Table.Locale}" 
        GROUP BY "language"`,
-      []
+      [],
     );
 
     const byLanguage: Record<string, number> = {};
@@ -344,7 +335,7 @@ export class LocaleRepo {
       `SELECT "textDirection", COUNT(*) as count 
        FROM "${Table.Locale}" 
        GROUP BY "textDirection"`,
-      []
+      [],
     );
 
     const byTextDirection: Record<string, number> = { ltr: 0, rtl: 0 };
@@ -358,7 +349,7 @@ export class LocaleRepo {
       total,
       active,
       byLanguage,
-      byTextDirection: byTextDirection as Record<TextDirection, number>
+      byTextDirection: byTextDirection as Record<TextDirection, number>,
     };
   }
 }

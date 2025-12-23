@@ -1,6 +1,6 @@
 /**
  * GetDashboardMetrics Use Case
- * 
+ *
  * Retrieves key metrics for the dashboard including orders, revenue, customers.
  */
 

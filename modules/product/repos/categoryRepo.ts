@@ -1,5 +1,5 @@
-import { queryOne, query } from "../../../libs/db";
-import { Table } from "../../../libs/db/types";
+import { queryOne, query } from '../../../libs/db';
+import { Table } from '../../../libs/db/types';
 
 export interface Category {
   productCategoryId: string;
@@ -69,42 +69,42 @@ export class CategoryRepo {
 
   async findAll(): Promise<Category[]> {
     const sql = `SELECT * FROM "${this.tableName}" ORDER BY "position" ASC`;
-    return await query<Category[]>(sql) || [];
+    return (await query<Category[]>(sql)) || [];
   }
 
   async findActive(): Promise<Category[]> {
     const sql = `SELECT * FROM "${this.tableName}" WHERE "isActive" = true ORDER BY "position" ASC`;
-    return await query<Category[]>(sql) || [];
+    return (await query<Category[]>(sql)) || [];
   }
 
   async findChildren(parentId: string): Promise<Category[]> {
     const sql = `SELECT * FROM "${this.tableName}" WHERE "parentId" = $1 ORDER BY "position" ASC`;
-    return await query<Category[]>(sql, [parentId]) || [];
+    return (await query<Category[]>(sql, [parentId])) || [];
   }
 
   async findRootCategories(): Promise<Category[]> {
     const sql = `SELECT * FROM "${this.tableName}" WHERE "parentId" IS NULL ORDER BY "position" ASC`;
-    return await query<Category[]>(sql) || [];
+    return (await query<Category[]>(sql)) || [];
   }
 
   async findFeatured(): Promise<Category[]> {
     const sql = `SELECT * FROM "${this.tableName}" WHERE "isFeatured" = true AND "isActive" = true ORDER BY "position" ASC`;
-    return await query<Category[]>(sql) || [];
+    return (await query<Category[]>(sql)) || [];
   }
 
   async findForMenu(): Promise<Category[]> {
     const sql = `SELECT * FROM "${this.tableName}" WHERE "includeInMenu" = true AND "isActive" = true ORDER BY "position" ASC`;
-    return await query<Category[]>(sql) || [];
+    return (await query<Category[]>(sql)) || [];
   }
 
   async create(props: CategoryCreateProps): Promise<Category> {
     // Generate slug from name if not provided
     const slug = props.slug || this.generateSlug(props.name);
-    
+
     // Calculate depth and path based on parent
     let depth = 0;
     let path = '';
-    
+
     if (props.parentId) {
       const parent = await this.findOne(props.parentId);
       if (parent) {
@@ -145,7 +145,7 @@ export class CategoryRepo {
       props.merchantId || null,
       props.isGlobal !== false,
       props.customLayout || null,
-      props.displaySettings ? JSON.stringify(props.displaySettings) : null
+      props.displaySettings ? JSON.stringify(props.displaySettings) : null,
     ];
 
     const result = await queryOne<Category>(sql, values);
@@ -163,10 +163,24 @@ export class CategoryRepo {
     let paramIndex = 2;
 
     const updateableFields: (keyof CategoryUpdateProps)[] = [
-      'name', 'slug', 'description', 'parentId', 'position',
-      'isActive', 'isFeatured', 'imageUrl', 'bannerUrl', 'iconUrl',
-      'metaTitle', 'metaDescription', 'metaKeywords',
-      'includeInMenu', 'merchantId', 'isGlobal', 'customLayout', 'displaySettings'
+      'name',
+      'slug',
+      'description',
+      'parentId',
+      'position',
+      'isActive',
+      'isFeatured',
+      'imageUrl',
+      'bannerUrl',
+      'iconUrl',
+      'metaTitle',
+      'metaDescription',
+      'metaKeywords',
+      'includeInMenu',
+      'merchantId',
+      'isGlobal',
+      'customLayout',
+      'displaySettings',
     ];
 
     for (const field of updateableFields) {

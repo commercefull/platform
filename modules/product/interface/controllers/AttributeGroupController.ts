@@ -15,13 +15,13 @@ export class AttributeGroupController {
 
       res.json({
         success: true,
-        data: groups || []
+        data: groups || [],
       });
     } catch (error) {
       logger.error('Error:', error);
       res.status(500).json({
         success: false,
-        error: `Failed to list attribute groups: ${(error as Error).message}`
+        error: `Failed to list attribute groups: ${(error as Error).message}`,
       });
     }
   }
@@ -38,20 +38,20 @@ export class AttributeGroupController {
       if (!group) {
         res.status(404).json({
           success: false,
-          error: 'Attribute group not found'
+          error: 'Attribute group not found',
         });
         return;
       }
 
       res.json({
         success: true,
-        data: group
+        data: group,
       });
     } catch (error) {
       logger.error('Error:', error);
       res.status(500).json({
         success: false,
-        error: `Failed to get attribute group: ${(error as Error).message}`
+        error: `Failed to get attribute group: ${(error as Error).message}`,
       });
     }
   }
@@ -68,20 +68,20 @@ export class AttributeGroupController {
       if (!group) {
         res.status(404).json({
           success: false,
-          error: 'Attribute group not found'
+          error: 'Attribute group not found',
         });
         return;
       }
 
       res.json({
         success: true,
-        data: group
+        data: group,
       });
     } catch (error) {
       logger.error('Error:', error);
       res.status(500).json({
         success: false,
-        error: `Failed to get attribute group: ${(error as Error).message}`
+        error: `Failed to get attribute group: ${(error as Error).message}`,
       });
     }
   }
@@ -98,7 +98,7 @@ export class AttributeGroupController {
       if (!name || !code) {
         res.status(400).json({
           success: false,
-          error: 'Name and code are required'
+          error: 'Name and code are required',
         });
         return;
       }
@@ -108,7 +108,7 @@ export class AttributeGroupController {
       if (existing) {
         res.status(400).json({
           success: false,
-          error: 'Attribute group with this code already exists'
+          error: 'Attribute group with this code already exists',
         });
         return;
       }
@@ -117,18 +117,18 @@ export class AttributeGroupController {
         name,
         code,
         description: description || '',
-        position: sortOrder || 0
+        position: sortOrder || 0,
       });
 
       res.status(201).json({
         success: true,
-        data: group
+        data: group,
       });
     } catch (error) {
       logger.error('Error:', error);
       res.status(500).json({
         success: false,
-        error: `Failed to create attribute group: ${(error as Error).message}`
+        error: `Failed to create attribute group: ${(error as Error).message}`,
       });
     }
   }
@@ -147,7 +147,7 @@ export class AttributeGroupController {
       if (!existing) {
         res.status(404).json({
           success: false,
-          error: 'Attribute group not found'
+          error: 'Attribute group not found',
         });
         return;
       }
@@ -155,18 +155,18 @@ export class AttributeGroupController {
       const group = await attributeGroupRepo.update(id, {
         name,
         description,
-        position: sortOrder
+        position: sortOrder,
       });
 
       res.json({
         success: true,
-        data: group
+        data: group,
       });
     } catch (error) {
       logger.error('Error:', error);
       res.status(500).json({
         success: false,
-        error: `Failed to update attribute group: ${(error as Error).message}`
+        error: `Failed to update attribute group: ${(error as Error).message}`,
       });
     }
   }
@@ -184,7 +184,7 @@ export class AttributeGroupController {
       if (!existing) {
         res.status(404).json({
           success: false,
-          error: 'Attribute group not found'
+          error: 'Attribute group not found',
         });
         return;
       }
@@ -193,13 +193,13 @@ export class AttributeGroupController {
 
       res.json({
         success: true,
-        message: 'Attribute group deleted successfully'
+        message: 'Attribute group deleted successfully',
       });
     } catch (error) {
       logger.error('Error:', error);
       res.status(500).json({
         success: false,
-        error: `Failed to delete attribute group: ${(error as Error).message}`
+        error: `Failed to delete attribute group: ${(error as Error).message}`,
       });
     }
   }

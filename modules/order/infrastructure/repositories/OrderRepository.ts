@@ -5,11 +5,11 @@
 
 import { query, queryOne } from '../../../../libs/db';
 import { generateUUID } from '../../../../libs/uuid';
-import { 
-  OrderRepository as IOrderRepository, 
-  OrderFilters, 
+import {
+  OrderRepository as IOrderRepository,
+  OrderFilters,
   PaginationOptions,
-  PaginatedResult 
+  PaginatedResult,
 } from '../../domain/repositories/OrderRepository';
 import { Order } from '../../domain/entities/Order';
 import { OrderItem } from '../../domain/entities/OrderItem';
@@ -20,12 +20,8 @@ import { PaymentStatus } from '../../domain/valueObjects/PaymentStatus';
 import { FulfillmentStatus } from '../../domain/valueObjects/FulfillmentStatus';
 
 export class OrderRepo implements IOrderRepository {
-
   async findById(orderId: string): Promise<Order | null> {
-    const row = await queryOne<Record<string, any>>(
-      'SELECT * FROM "order" WHERE "orderId" = $1 AND "deletedAt" IS NULL',
-      [orderId]
-    );
+    const row = await queryOne<Record<string, any>>('SELECT * FROM "order" WHERE "orderId" = $1 AND "deletedAt" IS NULL', [orderId]);
     if (!row) return null;
 
     const items = await this.getOrderItems(orderId);
@@ -36,10 +32,9 @@ export class OrderRepo implements IOrderRepository {
   }
 
   async findByOrderNumber(orderNumber: string): Promise<Order | null> {
-    const row = await queryOne<Record<string, any>>(
-      'SELECT * FROM "order" WHERE "orderNumber" = $1 AND "deletedAt" IS NULL',
-      [orderNumber]
-    );
+    const row = await queryOne<Record<string, any>>('SELECT * FROM "order" WHERE "orderNumber" = $1 AND "deletedAt" IS NULL', [
+      orderNumber,
+    ]);
     if (!row) return null;
 
     const items = await this.getOrderItems(row.orderId);
@@ -49,10 +44,7 @@ export class OrderRepo implements IOrderRepository {
     return this.mapToOrder(row, items, shippingAddress, billingAddress);
   }
 
-  async findByCustomerId(
-    customerId: string, 
-    pagination?: PaginationOptions
-  ): Promise<PaginatedResult<Order>> {
+  async findByCustomerId(customerId: string, pagination?: PaginationOptions): Promise<PaginatedResult<Order>> {
     const limit = pagination?.limit || 20;
     const offset = pagination?.offset || 0;
     const orderBy = pagination?.orderBy || 'createdAt';
@@ -60,14 +52,14 @@ export class OrderRepo implements IOrderRepository {
 
     const countResult = await queryOne<{ count: string }>(
       'SELECT COUNT(*) as count FROM "order" WHERE "customerId" = $1 AND "deletedAt" IS NULL',
-      [customerId]
+      [customerId],
     );
     const total = parseInt(countResult?.count || '0');
 
     const rows = await query<Record<string, any>[]>(
       `SELECT * FROM "order" WHERE "customerId" = $1 AND "deletedAt" IS NULL 
        ORDER BY "${orderBy}" ${orderDir.toUpperCase()} LIMIT $2 OFFSET $3`,
-      [customerId, limit, offset]
+      [customerId, limit, offset],
     );
 
     const orders: Order[] = [];
@@ -81,10 +73,7 @@ export class OrderRepo implements IOrderRepository {
     return { data: orders, total, limit, offset, hasMore: offset + orders.length < total };
   }
 
-  async findAll(
-    filters?: OrderFilters, 
-    pagination?: PaginationOptions
-  ): Promise<PaginatedResult<Order>> {
+  async findAll(filters?: OrderFilters, pagination?: PaginationOptions): Promise<PaginatedResult<Order>> {
     const limit = pagination?.limit || 50;
     const offset = pagination?.offset || 0;
     const orderBy = pagination?.orderBy || 'createdAt';
@@ -92,17 +81,14 @@ export class OrderRepo implements IOrderRepository {
 
     const { whereClause, params } = this.buildWhereClause(filters);
 
-    const countResult = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM "order" ${whereClause}`,
-      params
-    );
+    const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "order" ${whereClause}`, params);
     const total = parseInt(countResult?.count || '0');
 
     const rows = await query<Record<string, any>[]>(
       `SELECT * FROM "order" ${whereClause}
        ORDER BY "${orderBy}" ${orderDir.toUpperCase()}
        LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
-      [...params, limit, offset]
+      [...params, limit, offset],
     );
 
     const orders: Order[] = [];
@@ -134,11 +120,8 @@ export class OrderRepo implements IOrderRepository {
 
   async save(order: Order): Promise<Order> {
     const now = new Date().toISOString();
-    
-    const existing = await queryOne<Record<string, any>>(
-      'SELECT "orderId" FROM "order" WHERE "orderId" = $1',
-      [order.orderId]
-    );
+
+    const existing = await queryOne<Record<string, any>>('SELECT "orderId" FROM "order" WHERE "orderId" = $1', [order.orderId]);
 
     if (existing) {
       await query(
@@ -155,20 +138,41 @@ export class OrderRepo implements IOrderRepository {
           "metadata" = $32, "updatedAt" = $33
         WHERE "orderId" = $34`,
         [
-          order.orderNumber, order.customerId || null, order.basketId || null,
-          order.status, order.paymentStatus, order.fulfillmentStatus, order.currencyCode,
-          order.subtotal.amount, order.discountTotal.amount, order.taxTotal.amount,
-          order.shippingTotal.amount, order.handlingFee.amount, order.totalAmount.amount,
-          order.totalItems, order.totalQuantity, order.taxExempt,
-          order.completedAt?.toISOString() || null, order.cancelledAt?.toISOString() || null,
-          order.returnedAt?.toISOString() || null, order.customerEmail,
-          order.customerPhone || null, order.customerName || null,
-          order.customerNotes || null, order.adminNotes || null,
-          order.estimatedDeliveryDate?.toISOString() || null, order.hasGiftWrapping,
-          order.giftMessage || null, order.isGift, order.isSubscriptionOrder,
-          order.parentOrderId || null, order.tags.length > 0 ? JSON.stringify(order.tags) : null,
-          order.metadata ? JSON.stringify(order.metadata) : null, now, order.orderId
-        ]
+          order.orderNumber,
+          order.customerId || null,
+          order.basketId || null,
+          order.status,
+          order.paymentStatus,
+          order.fulfillmentStatus,
+          order.currencyCode,
+          order.subtotal.amount,
+          order.discountTotal.amount,
+          order.taxTotal.amount,
+          order.shippingTotal.amount,
+          order.handlingFee.amount,
+          order.totalAmount.amount,
+          order.totalItems,
+          order.totalQuantity,
+          order.taxExempt,
+          order.completedAt?.toISOString() || null,
+          order.cancelledAt?.toISOString() || null,
+          order.returnedAt?.toISOString() || null,
+          order.customerEmail,
+          order.customerPhone || null,
+          order.customerName || null,
+          order.customerNotes || null,
+          order.adminNotes || null,
+          order.estimatedDeliveryDate?.toISOString() || null,
+          order.hasGiftWrapping,
+          order.giftMessage || null,
+          order.isGift,
+          order.isSubscriptionOrder,
+          order.parentOrderId || null,
+          order.tags.length > 0 ? JSON.stringify(order.tags) : null,
+          order.metadata ? JSON.stringify(order.metadata) : null,
+          now,
+          order.orderId,
+        ],
       );
     } else {
       await query(
@@ -186,18 +190,41 @@ export class OrderRepo implements IOrderRepository {
           $31, $32, $33, $34
         )`,
         [
-          order.orderId, order.orderNumber, order.customerId || null, order.basketId || null,
-          order.status, order.paymentStatus, order.fulfillmentStatus, order.currencyCode,
-          order.subtotal.amount, order.discountTotal.amount, order.taxTotal.amount,
-          order.shippingTotal.amount, order.handlingFee.amount, order.totalAmount.amount,
-          order.totalItems, order.totalQuantity, order.taxExempt, order.orderDate.toISOString(),
-          order.customerEmail, order.customerPhone || null, order.customerName || null,
-          order.customerNotes || null, order.ipAddress || null, order.userAgent || null,
-          order.referralSource || null, order.hasGiftWrapping, order.giftMessage || null,
-          order.isGift, order.isSubscriptionOrder, order.parentOrderId || null,
+          order.orderId,
+          order.orderNumber,
+          order.customerId || null,
+          order.basketId || null,
+          order.status,
+          order.paymentStatus,
+          order.fulfillmentStatus,
+          order.currencyCode,
+          order.subtotal.amount,
+          order.discountTotal.amount,
+          order.taxTotal.amount,
+          order.shippingTotal.amount,
+          order.handlingFee.amount,
+          order.totalAmount.amount,
+          order.totalItems,
+          order.totalQuantity,
+          order.taxExempt,
+          order.orderDate.toISOString(),
+          order.customerEmail,
+          order.customerPhone || null,
+          order.customerName || null,
+          order.customerNotes || null,
+          order.ipAddress || null,
+          order.userAgent || null,
+          order.referralSource || null,
+          order.hasGiftWrapping,
+          order.giftMessage || null,
+          order.isGift,
+          order.isSubscriptionOrder,
+          order.parentOrderId || null,
           order.tags.length > 0 ? JSON.stringify(order.tags) : null,
-          order.metadata ? JSON.stringify(order.metadata) : null, now, now
-        ]
+          order.metadata ? JSON.stringify(order.metadata) : null,
+          now,
+          now,
+        ],
       );
     }
 
@@ -210,47 +237,34 @@ export class OrderRepo implements IOrderRepository {
 
   async delete(orderId: string): Promise<void> {
     const now = new Date().toISOString();
-    await query(
-      'UPDATE "order" SET "deletedAt" = $1, "updatedAt" = $1 WHERE "orderId" = $2',
-      [now, orderId]
-    );
+    await query('UPDATE "order" SET "deletedAt" = $1, "updatedAt" = $1 WHERE "orderId" = $2', [now, orderId]);
   }
 
   async count(filters?: OrderFilters): Promise<number> {
     const { whereClause, params } = this.buildWhereClause(filters);
-    const result = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM "order" ${whereClause}`,
-      params
-    );
+    const result = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "order" ${whereClause}`, params);
     return parseInt(result?.count || '0');
   }
 
   async countByCustomer(customerId: string): Promise<number> {
     const result = await queryOne<{ count: string }>(
       'SELECT COUNT(*) as count FROM "order" WHERE "customerId" = $1 AND "deletedAt" IS NULL',
-      [customerId]
+      [customerId],
     );
     return parseInt(result?.count || '0');
   }
 
   async countByStatus(status: OrderStatus): Promise<number> {
-    const result = await queryOne<{ count: string }>(
-      'SELECT COUNT(*) as count FROM "order" WHERE "status" = $1 AND "deletedAt" IS NULL',
-      [status]
-    );
+    const result = await queryOne<{ count: string }>('SELECT COUNT(*) as count FROM "order" WHERE "status" = $1 AND "deletedAt" IS NULL', [
+      status,
+    ]);
     return parseInt(result?.count || '0');
   }
 
   // Order Items
   async getOrderItems(orderId: string): Promise<OrderItem[]> {
-    const rows = await query<Record<string, any>[]>(
-      'SELECT * FROM "orderItem" WHERE "orderId" = $1 ORDER BY "createdAt" ASC',
-      [orderId]
-    );
-    const order = await queryOne<Record<string, any>>(
-      'SELECT "currencyCode" FROM "order" WHERE "orderId" = $1',
-      [orderId]
-    );
+    const rows = await query<Record<string, any>[]>('SELECT * FROM "orderItem" WHERE "orderId" = $1 ORDER BY "createdAt" ASC', [orderId]);
+    const order = await queryOne<Record<string, any>>('SELECT "currencyCode" FROM "order" WHERE "orderId" = $1', [orderId]);
     const currency = order?.currencyCode || 'USD';
     return (rows || []).map(row => this.mapToOrderItem(row, currency));
   }
@@ -267,19 +281,35 @@ export class OrderRepo implements IOrderRepository {
         "createdAt", "updatedAt"
       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28)`,
       [
-        item.orderItemId, orderId, item.productId, item.productVariantId || null,
-        item.sku, item.name, item.description || null, item.quantity,
-        item.unitPrice.amount, item.unitCost?.amount || null,
-        item.discountedUnitPrice?.amount || null, item.lineTotal.amount,
-        item.discountTotal.amount, item.taxTotal.amount, item.taxRate || null,
-        item.taxExempt, item.fulfillmentStatus,
+        item.orderItemId,
+        orderId,
+        item.productId,
+        item.productVariantId || null,
+        item.sku,
+        item.name,
+        item.description || null,
+        item.quantity,
+        item.unitPrice.amount,
+        item.unitCost?.amount || null,
+        item.discountedUnitPrice?.amount || null,
+        item.lineTotal.amount,
+        item.discountTotal.amount,
+        item.taxTotal.amount,
+        item.taxRate || null,
+        item.taxExempt,
+        item.fulfillmentStatus,
         item.options ? JSON.stringify(item.options) : null,
         item.attributes ? JSON.stringify(item.attributes) : null,
-        item.giftWrapped, item.giftMessage || null, item.weight || null,
-        item.dimensions ? JSON.stringify(item.dimensions) : null, item.isDigital,
+        item.giftWrapped,
+        item.giftMessage || null,
+        item.weight || null,
+        item.dimensions ? JSON.stringify(item.dimensions) : null,
+        item.isDigital,
         item.subscriptionInfo ? JSON.stringify(item.subscriptionInfo) : null,
-        item.metadata ? JSON.stringify(item.metadata) : null, now, now
-      ]
+        item.metadata ? JSON.stringify(item.metadata) : null,
+        now,
+        now,
+      ],
     );
     return item;
   }
@@ -294,11 +324,18 @@ export class OrderRepo implements IOrderRepository {
         "updatedAt" = $10
       WHERE "orderItemId" = $11`,
       [
-        item.quantity, item.unitPrice.amount, item.discountedUnitPrice?.amount || null,
-        item.lineTotal.amount, item.discountTotal.amount, item.taxTotal.amount,
-        item.fulfillmentStatus, item.giftWrapped, item.giftMessage || null,
-        now, item.orderItemId
-      ]
+        item.quantity,
+        item.unitPrice.amount,
+        item.discountedUnitPrice?.amount || null,
+        item.lineTotal.amount,
+        item.discountTotal.amount,
+        item.taxTotal.amount,
+        item.fulfillmentStatus,
+        item.giftWrapped,
+        item.giftMessage || null,
+        now,
+        item.orderItemId,
+      ],
     );
     return item;
   }
@@ -309,19 +346,15 @@ export class OrderRepo implements IOrderRepository {
 
   // Order Addresses
   async getOrderAddresses(orderId: string): Promise<OrderAddress[]> {
-    const rows = await query<Record<string, any>[]>(
-      'SELECT * FROM "orderAddress" WHERE "orderId" = $1',
-      [orderId]
-    );
+    const rows = await query<Record<string, any>[]>('SELECT * FROM "orderAddress" WHERE "orderId" = $1', [orderId]);
     return (rows || []).map(row => this.mapToOrderAddress(row));
   }
 
   async saveOrderAddress(address: OrderAddress): Promise<OrderAddress> {
     const now = new Date().toISOString();
-    const existing = await queryOne<Record<string, any>>(
-      'SELECT "orderAddressId" FROM "orderAddress" WHERE "orderAddressId" = $1',
-      [address.orderAddressId]
-    );
+    const existing = await queryOne<Record<string, any>>('SELECT "orderAddressId" FROM "orderAddress" WHERE "orderAddressId" = $1', [
+      address.orderAddressId,
+    ]);
 
     if (existing) {
       await query(
@@ -332,13 +365,22 @@ export class OrderRepo implements IOrderRepository {
           "isDefault" = $12, "additionalInfo" = $13, "updatedAt" = $14
         WHERE "orderAddressId" = $15`,
         [
-          address.firstName, address.lastName, address.company || null,
-          address.address1, address.address2 || null, address.city, address.state,
-          address.postalCode, address.country,
-          address.phone || null, address.email || null, address.isDefault,
-          address.metadata ? JSON.stringify(address.metadata) : null, now,
-          address.orderAddressId
-        ]
+          address.firstName,
+          address.lastName,
+          address.company || null,
+          address.address1,
+          address.address2 || null,
+          address.city,
+          address.state,
+          address.postalCode,
+          address.country,
+          address.phone || null,
+          address.email || null,
+          address.isDefault,
+          address.metadata ? JSON.stringify(address.metadata) : null,
+          now,
+          address.orderAddressId,
+        ],
       );
     } else {
       await query(
@@ -349,31 +391,41 @@ export class OrderRepo implements IOrderRepository {
           "createdAt", "updatedAt"
         ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)`,
         [
-          address.orderAddressId, address.orderId, address.addressType,
-          address.firstName, address.lastName, address.company || null,
-          address.address1, address.address2 || null, address.city, address.state,
-          address.postalCode, address.country,
-          address.phone || null, address.email || null, address.isDefault,
-          address.metadata ? JSON.stringify(address.metadata) : null, now, now
-        ]
+          address.orderAddressId,
+          address.orderId,
+          address.addressType,
+          address.firstName,
+          address.lastName,
+          address.company || null,
+          address.address1,
+          address.address2 || null,
+          address.city,
+          address.state,
+          address.postalCode,
+          address.country,
+          address.phone || null,
+          address.email || null,
+          address.isDefault,
+          address.metadata ? JSON.stringify(address.metadata) : null,
+          now,
+          now,
+        ],
       );
     }
     return address;
   }
 
   async getShippingAddress(orderId: string): Promise<OrderAddress | null> {
-    const row = await queryOne<Record<string, any>>(
-      `SELECT * FROM "orderAddress" WHERE "orderId" = $1 AND "addressType" = 'shipping'`,
-      [orderId]
-    );
+    const row = await queryOne<Record<string, any>>(`SELECT * FROM "orderAddress" WHERE "orderId" = $1 AND "addressType" = 'shipping'`, [
+      orderId,
+    ]);
     return row ? this.mapToOrderAddress(row) : null;
   }
 
   async getBillingAddress(orderId: string): Promise<OrderAddress | null> {
-    const row = await queryOne<Record<string, any>>(
-      `SELECT * FROM "orderAddress" WHERE "orderId" = $1 AND "addressType" = 'billing'`,
-      [orderId]
-    );
+    const row = await queryOne<Record<string, any>>(`SELECT * FROM "orderAddress" WHERE "orderId" = $1 AND "addressType" = 'billing'`, [
+      orderId,
+    ]);
     return row ? this.mapToOrderAddress(row) : null;
   }
 
@@ -383,7 +435,7 @@ export class OrderRepo implements IOrderRepository {
     await query(
       `INSERT INTO "orderStatusHistory" ("orderStatusHistoryId", "orderId", "status", "reason", "createdAt")
        VALUES ($1, $2, $3, $4, $5)`,
-      [generateUUID(), orderId, status, reason || null, now]
+      [generateUUID(), orderId, status, reason || null, now],
     );
   }
 
@@ -392,7 +444,7 @@ export class OrderRepo implements IOrderRepository {
     await query(
       `INSERT INTO "orderPaymentHistory" ("orderPaymentHistoryId", "orderId", "paymentStatus", "transactionId", "createdAt")
        VALUES ($1, $2, $3, $4, $5)`,
-      [generateUUID(), orderId, status, transactionId || null, now]
+      [generateUUID(), orderId, status, transactionId || null, now],
     );
   }
 
@@ -401,7 +453,7 @@ export class OrderRepo implements IOrderRepository {
     await query(
       `INSERT INTO "orderFulfillmentHistory" ("orderFulfillmentHistoryId", "orderId", "fulfillmentStatus", "createdAt")
        VALUES ($1, $2, $3, $4)`,
-      [generateUUID(), orderId, status, now]
+      [generateUUID(), orderId, status, now],
     );
   }
 
@@ -409,12 +461,12 @@ export class OrderRepo implements IOrderRepository {
     const rows = await query<Record<string, any>[]>(
       `SELECT "status", "reason", "createdAt" FROM "orderStatusHistory" 
        WHERE "orderId" = $1 ORDER BY "createdAt" DESC`,
-      [orderId]
+      [orderId],
     );
     return (rows || []).map(row => ({
       status: row.status as OrderStatus,
       reason: row.reason,
-      createdAt: new Date(row.createdAt)
+      createdAt: new Date(row.createdAt),
     }));
   }
 
@@ -429,12 +481,12 @@ export class OrderRepo implements IOrderRepository {
     const statsResult = await queryOne<Record<string, any>>(
       `SELECT COUNT(*) as "totalOrders", COALESCE(SUM("totalAmount"), 0) as "totalRevenue",
        COALESCE(AVG("totalAmount"), 0) as "averageOrderValue" FROM "order" ${whereClause}`,
-      params
+      params,
     );
 
     const statusRows = await query<Record<string, any>[]>(
       `SELECT "status", COUNT(*) as count FROM "order" ${whereClause} GROUP BY "status"`,
-      params
+      params,
     );
 
     const ordersByStatus: Record<OrderStatus, number> = {} as Record<OrderStatus, number>;
@@ -449,15 +501,12 @@ export class OrderRepo implements IOrderRepository {
       totalOrders: parseInt(statsResult?.totalOrders || '0'),
       totalRevenue: parseFloat(statsResult?.totalRevenue || '0'),
       averageOrderValue: parseFloat(statsResult?.averageOrderValue || '0'),
-      ordersByStatus
+      ordersByStatus,
     };
   }
 
   private async syncItems(order: Order): Promise<void> {
-    const existingItems = await query<Record<string, any>[]>(
-      'SELECT "orderItemId" FROM "orderItem" WHERE "orderId" = $1',
-      [order.orderId]
-    );
+    const existingItems = await query<Record<string, any>[]>('SELECT "orderItemId" FROM "orderItem" WHERE "orderId" = $1', [order.orderId]);
     const existingIds = new Set((existingItems || []).map(i => i.orderItemId));
     const itemsToKeep = new Set<string>();
 
@@ -515,14 +564,16 @@ export class OrderRepo implements IOrderRepository {
       params.push(filters.maxAmount);
     }
     if (filters?.search) {
-      conditions.push(`("orderNumber" ILIKE \$${paramIndex} OR "customerEmail" ILIKE \$${paramIndex} OR "customerName" ILIKE \$${paramIndex})`);
+      conditions.push(
+        `("orderNumber" ILIKE \$${paramIndex} OR "customerEmail" ILIKE \$${paramIndex} OR "customerName" ILIKE \$${paramIndex})`,
+      );
       params.push(`%${filters.search}%`);
       paramIndex++;
     }
 
     return {
       whereClause: conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '',
-      params
+      params,
     };
   }
 
@@ -530,10 +581,10 @@ export class OrderRepo implements IOrderRepository {
     row: Record<string, any>,
     items: OrderItem[],
     shippingAddress: OrderAddress | null,
-    billingAddress: OrderAddress | null
+    billingAddress: OrderAddress | null,
   ): Order {
     const currency = row.currencyCode || 'USD';
-    
+
     return Order.reconstitute({
       orderId: row.orderId,
       orderNumber: row.orderNumber,
@@ -577,7 +628,7 @@ export class OrderRepo implements IOrderRepository {
       metadata: row.metadata ? (typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata) : undefined,
       createdAt: new Date(row.createdAt),
       updatedAt: new Date(row.updatedAt),
-      deletedAt: row.deletedAt ? new Date(row.deletedAt) : undefined
+      deletedAt: row.deletedAt ? new Date(row.deletedAt) : undefined,
     });
   }
 
@@ -607,10 +658,14 @@ export class OrderRepo implements IOrderRepository {
       weight: row.weight ? parseFloat(row.weight) : undefined,
       dimensions: row.dimensions ? (typeof row.dimensions === 'string' ? JSON.parse(row.dimensions) : row.dimensions) : undefined,
       isDigital: Boolean(row.isDigital),
-      subscriptionInfo: row.subscriptionInfo ? (typeof row.subscriptionInfo === 'string' ? JSON.parse(row.subscriptionInfo) : row.subscriptionInfo) : undefined,
+      subscriptionInfo: row.subscriptionInfo
+        ? typeof row.subscriptionInfo === 'string'
+          ? JSON.parse(row.subscriptionInfo)
+          : row.subscriptionInfo
+        : undefined,
       metadata: row.metadata ? (typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata) : undefined,
       createdAt: new Date(row.createdAt),
-      updatedAt: new Date(row.updatedAt)
+      updatedAt: new Date(row.updatedAt),
     });
   }
 
@@ -634,7 +689,7 @@ export class OrderRepo implements IOrderRepository {
       isDefault: Boolean(row.isDefault),
       metadata: row.metadata ? (typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata) : undefined,
       createdAt: new Date(row.createdAt),
-      updatedAt: new Date(row.updatedAt)
+      updatedAt: new Date(row.updatedAt),
     });
   }
 }

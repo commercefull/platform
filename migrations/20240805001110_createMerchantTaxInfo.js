@@ -22,7 +22,7 @@ exports.up = function (knex) {
     t.timestamp('taxFormFiledAt');
     t.boolean('taxExempt').notNullable().defaultTo(false);
     t.text('taxExemptionReason');
-    
+
     t.index('merchantId');
     t.index('taxIdentificationType');
     t.index('taxIdentificationNumber');

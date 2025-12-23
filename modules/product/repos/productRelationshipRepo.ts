@@ -22,10 +22,7 @@ export class ProductRelationshipRepo {
    * Find relationship by ID
    */
   async findById(productRelatedId: string): Promise<ProductRelationship | null> {
-    return await queryOne<ProductRelationship>(
-      `SELECT * FROM "public"."productRelated" WHERE "productRelatedId" = $1`,
-      [productRelatedId]
-    );
+    return await queryOne<ProductRelationship>(`SELECT * FROM "public"."productRelated" WHERE "productRelatedId" = $1`, [productRelatedId]);
   }
 
   /**
@@ -34,14 +31,14 @@ export class ProductRelationshipRepo {
   async findByProductId(productId: string, type?: RelationType): Promise<ProductRelationship[]> {
     let sql = `SELECT * FROM "public"."productRelated" WHERE "productId" = $1`;
     const params: any[] = [productId];
-    
+
     if (type) {
       sql += ` AND "type" = $2`;
       params.push(type);
     }
-    
+
     sql += ` ORDER BY "position" ASC, "createdAt" ASC`;
-    
+
     const results = await query<ProductRelationship[]>(sql, params);
     return results || [];
   }
@@ -59,14 +56,14 @@ export class ProductRelationshipRepo {
   async findReverseRelationships(productId: string, type?: RelationType): Promise<ProductRelationship[]> {
     let sql = `SELECT * FROM "public"."productRelated" WHERE "relatedProductId" = $1`;
     const params: any[] = [productId];
-    
+
     if (type) {
       sql += ` AND "type" = $2`;
       params.push(type);
     }
-    
+
     sql += ` ORDER BY "position" ASC, "createdAt" ASC`;
-    
+
     const results = await query<ProductRelationship[]>(sql, params);
     return results || [];
   }
@@ -79,7 +76,7 @@ export class ProductRelationshipRepo {
       `SELECT * FROM "public"."productRelated" 
        WHERE "productId" = $1 AND "isAutomated" = true 
        ORDER BY "position" ASC`,
-      [productId]
+      [productId],
     );
     return results || [];
   }
@@ -92,7 +89,7 @@ export class ProductRelationshipRepo {
       `SELECT * FROM "public"."productRelated" 
        WHERE "productId" = $1 AND "isAutomated" = false 
        ORDER BY "position" ASC`,
-      [productId]
+      [productId],
     );
     return results || [];
   }
@@ -104,7 +101,7 @@ export class ProductRelationshipRepo {
     const result = await queryOne<{ productRelatedId: string }>(
       `SELECT "productRelatedId" FROM "public"."productRelated" 
        WHERE "productId" = $1 AND "relatedProductId" = $2 AND "type" = $3`,
-      [productId, relatedProductId, type]
+      [productId, relatedProductId, type],
     );
 
     return !!result;
@@ -133,15 +130,7 @@ export class ProductRelationshipRepo {
         "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING *`,
-      [
-        params.productId,
-        params.relatedProductId,
-        params.type || 'related',
-        params.position || 0,
-        params.isAutomated || false,
-        now,
-        now
-      ]
+      [params.productId, params.relatedProductId, params.type || 'related', params.position || 0, params.isAutomated || false, now, now],
     );
 
     if (!result) {
@@ -156,17 +145,16 @@ export class ProductRelationshipRepo {
    */
   async createMany(relationships: ProductRelationshipCreateParams[]): Promise<ProductRelationship[]> {
     const created: ProductRelationship[] = [];
-    
+
     for (const relationship of relationships) {
       try {
         const result = await this.create(relationship);
         created.push(result);
       } catch (error) {
         // Skip if already exists or other error, continue with next
-        
       }
     }
-    
+
     return created;
   }
 
@@ -198,7 +186,7 @@ export class ProductRelationshipRepo {
        SET ${updateFields.join(', ')}
        WHERE "productRelatedId" = $${paramIndex}
        RETURNING *`,
-      values
+      values,
     );
 
     return result;
@@ -216,16 +204,16 @@ export class ProductRelationshipRepo {
    */
   async bulkReorder(updates: Array<{ productRelatedId: string; position: number }>): Promise<boolean> {
     const now = unixTimestamp();
-    
+
     for (const update of updates) {
       await query(
         `UPDATE "public"."productRelated" 
          SET "position" = $1, "updatedAt" = $2 
          WHERE "productRelatedId" = $3`,
-        [update.position, now, update.productRelatedId]
+        [update.position, now, update.productRelatedId],
       );
     }
-    
+
     return true;
   }
 
@@ -235,7 +223,7 @@ export class ProductRelationshipRepo {
   async delete(productRelatedId: string): Promise<boolean> {
     const result = await queryOne<{ productRelatedId: string }>(
       `DELETE FROM "public"."productRelated" WHERE "productRelatedId" = $1 RETURNING "productRelatedId"`,
-      [productRelatedId]
+      [productRelatedId],
     );
 
     return !!result;
@@ -249,7 +237,7 @@ export class ProductRelationshipRepo {
       `DELETE FROM "public"."productRelated" 
        WHERE "productId" = $1 AND "relatedProductId" = $2 AND "type" = $3 
        RETURNING "productRelatedId"`,
-      [productId, relatedProductId, type]
+      [productId, relatedProductId, type],
     );
 
     return !!result;
@@ -261,7 +249,7 @@ export class ProductRelationshipRepo {
   async deleteAllByProductId(productId: string): Promise<number> {
     const result = await queryOne<{ count: string }>(
       `DELETE FROM "public"."productRelated" WHERE "productId" = $1 RETURNING COUNT(*) as count`,
-      [productId]
+      [productId],
     );
 
     return result ? parseInt(result.count, 10) : 0;
@@ -275,7 +263,7 @@ export class ProductRelationshipRepo {
       `DELETE FROM "public"."productRelated" 
        WHERE "productId" = $1 AND "isAutomated" = true 
        RETURNING COUNT(*) as count`,
-      [productId]
+      [productId],
     );
 
     return result ? parseInt(result.count, 10) : 0;
@@ -287,14 +275,14 @@ export class ProductRelationshipRepo {
   async createBidirectional(
     productId1: string,
     productId2: string,
-    type: RelationType = 'related'
+    type: RelationType = 'related',
   ): Promise<{ forward: ProductRelationship; reverse: ProductRelationship }> {
     const forward = await this.create({
       productId: productId1,
       relatedProductId: productId2,
       type,
       position: 0,
-      isAutomated: false
+      isAutomated: false,
     });
 
     const reverse = await this.create({
@@ -302,7 +290,7 @@ export class ProductRelationshipRepo {
       relatedProductId: productId1,
       type,
       position: 0,
-      isAutomated: false
+      isAutomated: false,
     });
 
     return { forward, reverse };
@@ -314,12 +302,12 @@ export class ProductRelationshipRepo {
   async countByProductId(productId: string, type?: RelationType): Promise<number> {
     let sql = `SELECT COUNT(*) as count FROM "public"."productRelated" WHERE "productId" = $1`;
     const params: any[] = [productId];
-    
+
     if (type) {
       sql += ` AND "type" = $2`;
       params.push(type);
     }
-    
+
     const result = await queryOne<{ count: string }>(sql, params);
 
     return result ? parseInt(result.count, 10) : 0;
@@ -331,13 +319,13 @@ export class ProductRelationshipRepo {
   async getStatistics(): Promise<Record<RelationType, number>> {
     const results = await query<{ type: RelationType; count: string }[]>(
       `SELECT "type", COUNT(*) as count FROM "public"."productRelated" GROUP BY "type"`,
-      []
+      [],
     );
 
     const stats: Record<string, number> = {
       related: 0,
       accessory: 0,
-      bundle: 0
+      bundle: 0,
     };
 
     if (results) {

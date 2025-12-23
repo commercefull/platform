@@ -4,23 +4,19 @@
  */
 
 import sharp from 'sharp';
-import {
-  ImageProcessingService,
-  ProcessedImage,
-  ImageProcessingResult
-} from '../../domain/services/ImageProcessingService';
+import { ImageProcessingService, ProcessedImage, ImageProcessingResult } from '../../domain/services/ImageProcessingService';
 import { ImageProcessingOptions, ImageProcessingOptionsBuilder } from '../../domain/valueObjects/ImageProcessingOptions';
 
 export class SharpImageProcessingService implements ImageProcessingService {
   async processImage(
     imageBuffer: Buffer,
-    options: ImageProcessingOptions = ImageProcessingOptionsBuilder.productImage()
+    options: ImageProcessingOptions = ImageProcessingOptionsBuilder.productImage(),
   ): Promise<ImageProcessingResult> {
     const result: ImageProcessingResult = {
       original: await this.resizeImage(imageBuffer, undefined, undefined, {
         quality: 90,
-        format: 'jpeg'
-      })
+        format: 'jpeg',
+      }),
     };
 
     // Generate WebP version
@@ -30,21 +26,17 @@ export class SharpImageProcessingService implements ImageProcessingService {
 
     // Generate thumbnail
     if (options.generateThumbnail && options.thumbnailSize) {
-      result.thumbnail = await this.generateThumbnail(
-        imageBuffer,
-        options.thumbnailSize.width,
-        options.thumbnailSize.height
-      );
+      result.thumbnail = await this.generateThumbnail(imageBuffer, options.thumbnailSize.width, options.thumbnailSize.height);
     }
 
     // Generate responsive sizes
     if (options.responsiveSizes && options.responsiveSizes.length > 0) {
       result.responsiveSizes = await Promise.all(
-        options.responsiveSizes.map(async (size) => {
+        options.responsiveSizes.map(async size => {
           const resized = await this.resizeImage(imageBuffer, size.width, size.height, {
             fit: options.resize?.fit || 'cover',
             quality: options.compression?.quality,
-            format: options.format || 'webp'
+            format: options.format || 'webp',
           });
 
           return {
@@ -52,9 +44,9 @@ export class SharpImageProcessingService implements ImageProcessingService {
             width: size.width,
             height: size.height,
             suffix: size.suffix,
-            size: resized.size
+            size: resized.size,
           };
-        })
+        }),
       );
     }
 
@@ -69,20 +61,16 @@ export class SharpImageProcessingService implements ImageProcessingService {
       fit?: 'cover' | 'contain' | 'fill' | 'inside' | 'outside';
       quality?: number;
       format?: 'webp' | 'jpeg' | 'png' | 'avif';
-    } = {}
+    } = {},
   ): Promise<ProcessedImage> {
-    const {
-      fit = 'cover',
-      quality = 80,
-      format = 'webp'
-    } = options;
+    const { fit = 'cover', quality = 80, format = 'webp' } = options;
 
     let sharpInstance = sharp(imageBuffer);
 
     if (width || height) {
       sharpInstance = sharpInstance.resize(width, height, {
         fit,
-        withoutEnlargement: true
+        withoutEnlargement: true,
       });
     }
 
@@ -91,25 +79,25 @@ export class SharpImageProcessingService implements ImageProcessingService {
       case 'webp':
         sharpInstance = sharpInstance.webp({
           quality,
-          effort: 4
+          effort: 4,
         });
         break;
       case 'jpeg':
         sharpInstance = sharpInstance.jpeg({
           quality,
-          progressive: true
+          progressive: true,
         });
         break;
       case 'png':
         sharpInstance = sharpInstance.png({
           quality,
-          compressionLevel: 6
+          compressionLevel: 6,
         });
         break;
       case 'avif':
         sharpInstance = sharpInstance.avif({
           quality,
-          effort: 4
+          effort: 4,
         });
         break;
     }
@@ -122,18 +110,15 @@ export class SharpImageProcessingService implements ImageProcessingService {
       format,
       width: metadata.width,
       height: metadata.height,
-      size: buffer.length
+      size: buffer.length,
     };
   }
 
-  async convertToWebP(
-    imageBuffer: Buffer,
-    quality: number = 80
-  ): Promise<ProcessedImage> {
+  async convertToWebP(imageBuffer: Buffer, quality: number = 80): Promise<ProcessedImage> {
     const buffer = await sharp(imageBuffer)
       .webp({
         quality,
-        effort: 4
+        effort: 4,
       })
       .toBuffer();
 
@@ -144,23 +129,19 @@ export class SharpImageProcessingService implements ImageProcessingService {
       format: 'webp',
       width: metadata.width,
       height: metadata.height,
-      size: buffer.length
+      size: buffer.length,
     };
   }
 
-  async generateThumbnail(
-    imageBuffer: Buffer,
-    width: number,
-    height: number
-  ): Promise<ProcessedImage> {
+  async generateThumbnail(imageBuffer: Buffer, width: number, height: number): Promise<ProcessedImage> {
     const buffer = await sharp(imageBuffer)
       .resize(width, height, {
         fit: 'cover',
-        withoutEnlargement: true
+        withoutEnlargement: true,
       })
       .webp({
         quality: 80,
-        effort: 4
+        effort: 4,
       })
       .toBuffer();
 
@@ -169,7 +150,7 @@ export class SharpImageProcessingService implements ImageProcessingService {
       format: 'webp',
       width,
       height,
-      size: buffer.length
+      size: buffer.length,
     };
   }
 }

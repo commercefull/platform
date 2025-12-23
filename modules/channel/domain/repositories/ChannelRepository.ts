@@ -1,6 +1,6 @@
 /**
  * Channel Repository Interface
- * 
+ *
  * Defines the contract for Channel persistence operations.
  */
 
@@ -44,11 +44,15 @@ export interface IChannelRepository {
   findByOwner(ownerType: string, ownerId: string): Promise<Channel[]>;
   findDefault(): Promise<Channel | null>;
   delete(channelId: string): Promise<boolean>;
-  
+
   // Channel Product operations
   saveChannelProduct(channelProduct: ChannelProduct): Promise<ChannelProduct>;
   findChannelProduct(channelId: string, productId: string): Promise<ChannelProduct | null>;
-  findChannelProducts(channelId: string, filters?: ChannelProductFilters, pagination?: PaginationOptions): Promise<PaginatedResult<ChannelProduct>>;
+  findChannelProducts(
+    channelId: string,
+    filters?: ChannelProductFilters,
+    pagination?: PaginationOptions,
+  ): Promise<PaginatedResult<ChannelProduct>>;
   findProductChannels(productId: string): Promise<ChannelProduct[]>;
   removeChannelProduct(channelId: string, productId: string): Promise<boolean>;
   bulkAssignProducts(channelId: string, productIds: string[]): Promise<ChannelProduct[]>;

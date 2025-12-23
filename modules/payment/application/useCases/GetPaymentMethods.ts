@@ -1,6 +1,6 @@
 /**
  * GetPaymentMethods Use Case
- * 
+ *
  * Retrieves available payment methods for a customer or checkout.
  */
 
@@ -19,14 +19,14 @@ export interface PaymentMethodInfo {
   provider: string;
   name: string;
   isDefault: boolean;
-  
+
   // For saved methods
   isSaved?: boolean;
   last4?: string;
   brand?: string; // visa, mastercard, etc.
   expiryMonth?: number;
   expiryYear?: number;
-  
+
   // For new methods
   isAvailable: boolean;
   minAmount?: number;
@@ -42,7 +42,7 @@ export interface GetPaymentMethodsOutput {
 export class GetPaymentMethodsUseCase {
   constructor(
     private readonly paymentRepository: any, // PaymentRepository
-    private readonly paymentConfigRepository: any // PaymentConfigRepository
+    private readonly paymentConfigRepository: any, // PaymentConfigRepository
   ) {}
 
   async execute(input: GetPaymentMethodsInput): Promise<GetPaymentMethodsOutput> {
@@ -52,7 +52,7 @@ export class GetPaymentMethodsUseCase {
     // Get saved payment methods for customer
     if (input.customerId) {
       const customerMethods = await this.paymentRepository.findSavedPaymentMethods(input.customerId);
-      
+
       for (const method of customerMethods) {
         savedMethods.push({
           paymentMethodId: method.paymentMethodId,
@@ -79,7 +79,7 @@ export class GetPaymentMethodsUseCase {
     for (const config of paymentConfigs) {
       // Check if method is available for this request
       const isAvailable = this.checkMethodAvailability(config, input);
-      
+
       if (isAvailable) {
         availableMethods.push({
           paymentMethodId: config.paymentMethodConfigId,

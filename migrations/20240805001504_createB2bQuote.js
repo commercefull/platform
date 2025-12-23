@@ -2,15 +2,30 @@
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.up = function(knex) {
-  return knex.schema.createTable('b2bQuote', function(table) {
+exports.up = function (knex) {
+  return knex.schema.createTable('b2bQuote', function (table) {
     table.uuid('b2bQuoteId').primary().defaultTo(knex.raw('uuidv7()'));
     table.string('quoteNumber').unique();
     table.uuid('b2bCompanyId').references('b2bCompanyId').inTable('b2bCompany').onDelete('SET NULL');
     table.uuid('customerId').references('customerId').inTable('customer').onDelete('SET NULL');
     table.uuid('b2bCompanyUserId').references('b2bCompanyUserId').inTable('b2bCompanyUser').onDelete('SET NULL');
     table.uuid('salesRepId');
-    table.string('status').defaultTo('draft').checkIn(['draft', 'pending_review', 'pending_approval', 'sent', 'viewed', 'negotiating', 'accepted', 'rejected', 'expired', 'converted', 'cancelled']);
+    table
+      .string('status')
+      .defaultTo('draft')
+      .checkIn([
+        'draft',
+        'pending_review',
+        'pending_approval',
+        'sent',
+        'viewed',
+        'negotiating',
+        'accepted',
+        'rejected',
+        'expired',
+        'converted',
+        'cancelled',
+      ]);
     table.string('currency', 3).defaultTo('USD');
     table.decimal('subtotal', 15, 2).defaultTo(0);
     table.decimal('discountTotal', 15, 2).defaultTo(0);
@@ -63,6 +78,6 @@ exports.up = function(knex) {
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTableIfExists('b2bQuote');
 };

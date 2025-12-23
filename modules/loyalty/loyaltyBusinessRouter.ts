@@ -1,6 +1,6 @@
 /**
  * Loyalty Business Router
- * 
+ *
  * Routes for loyalty management (merchant/admin access).
  * Mounted at /business/loyalty
  */
@@ -20,7 +20,7 @@ import {
   processOrderPoints,
   updateRedemptionStatus,
   updateReward,
-  updateTier
+  updateTier,
 } from './controllers/loyaltyBusinessController';
 import { isMerchantLoggedIn } from '../../libs/auth';
 

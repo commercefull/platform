@@ -25,14 +25,7 @@ export interface RegisterAdminOutput {
 export interface AdminRepository {
   findByEmail(email: string): Promise<any | null>;
   findById(adminId: string): Promise<any | null>;
-  create(admin: {
-    email: string;
-    name: string;
-    passwordHash: string;
-    role: string;
-    permissions: string[];
-    status: string;
-  }): Promise<any>;
+  create(admin: { email: string; name: string; passwordHash: string; role: string; permissions: string[]; status: string }): Promise<any>;
 }
 
 export interface AuthService {
@@ -42,7 +35,7 @@ export interface AuthService {
 export class RegisterAdminUseCase {
   constructor(
     private readonly adminRepo: AdminRepository,
-    private readonly authService: AuthService
+    private readonly authService: AuthService,
   ) {}
 
   async execute(input: RegisterAdminInput): Promise<RegisterAdminOutput> {

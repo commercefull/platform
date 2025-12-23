@@ -1,7 +1,7 @@
 /**
  * Brand Translation Table
  * Stores multi-language translations for product brands
- * 
+ *
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
@@ -24,7 +24,7 @@ exports.up = function (knex) {
     t.boolean('isAutoTranslated').notNullable().defaultTo(false);
     t.string('translationSource', 50);
     t.boolean('isApproved').notNullable().defaultTo(false);
-    
+
     t.index('productBrandId');
     t.index('localeId');
     t.index('slug');

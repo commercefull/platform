@@ -129,7 +129,7 @@ export class Coupon {
       createdBy: props.createdBy,
       metadata: props.metadata,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     });
   }
 
@@ -138,32 +138,84 @@ export class Coupon {
   }
 
   // Getters
-  get couponId(): string { return this.props.couponId; }
-  get code(): string { return this.props.code; }
-  get name(): string { return this.props.name; }
-  get description(): string | undefined { return this.props.description; }
-  get type(): DiscountType { return this.props.type; }
-  get value(): number { return this.props.value; }
-  get currency(): string | undefined { return this.props.currency; }
-  get minOrderValue(): number | undefined { return this.props.minOrderValue; }
-  get maxDiscountAmount(): number | undefined { return this.props.maxDiscountAmount; }
-  get usageType(): CouponType { return this.props.usageType; }
-  get usageLimit(): number | undefined { return this.props.usageLimit; }
-  get usageCount(): number { return this.props.usageCount; }
-  get customerUsageLimit(): number | undefined { return this.props.customerUsageLimit; }
-  get conditions(): CouponCondition[] { return [...this.props.conditions]; }
-  get isActive(): boolean { return this.props.isActive; }
-  get startsAt(): Date | undefined { return this.props.startsAt; }
-  get expiresAt(): Date | undefined { return this.props.expiresAt; }
-  get applicableProducts(): string[] | undefined { return this.props.applicableProducts ? [...this.props.applicableProducts] : undefined; }
-  get applicableCategories(): string[] | undefined { return this.props.applicableCategories ? [...this.props.applicableCategories] : undefined; }
-  get applicableCustomerGroups(): string[] | undefined { return this.props.applicableCustomerGroups ? [...this.props.applicableCustomerGroups] : undefined; }
-  get excludedProducts(): string[] | undefined { return this.props.excludedProducts ? [...this.props.excludedProducts] : undefined; }
-  get excludedCategories(): string[] | undefined { return this.props.excludedCategories ? [...this.props.excludedCategories] : undefined; }
-  get createdBy(): string { return this.props.createdBy; }
-  get metadata(): Record<string, any> | undefined { return this.props.metadata; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get couponId(): string {
+    return this.props.couponId;
+  }
+  get code(): string {
+    return this.props.code;
+  }
+  get name(): string {
+    return this.props.name;
+  }
+  get description(): string | undefined {
+    return this.props.description;
+  }
+  get type(): DiscountType {
+    return this.props.type;
+  }
+  get value(): number {
+    return this.props.value;
+  }
+  get currency(): string | undefined {
+    return this.props.currency;
+  }
+  get minOrderValue(): number | undefined {
+    return this.props.minOrderValue;
+  }
+  get maxDiscountAmount(): number | undefined {
+    return this.props.maxDiscountAmount;
+  }
+  get usageType(): CouponType {
+    return this.props.usageType;
+  }
+  get usageLimit(): number | undefined {
+    return this.props.usageLimit;
+  }
+  get usageCount(): number {
+    return this.props.usageCount;
+  }
+  get customerUsageLimit(): number | undefined {
+    return this.props.customerUsageLimit;
+  }
+  get conditions(): CouponCondition[] {
+    return [...this.props.conditions];
+  }
+  get isActive(): boolean {
+    return this.props.isActive;
+  }
+  get startsAt(): Date | undefined {
+    return this.props.startsAt;
+  }
+  get expiresAt(): Date | undefined {
+    return this.props.expiresAt;
+  }
+  get applicableProducts(): string[] | undefined {
+    return this.props.applicableProducts ? [...this.props.applicableProducts] : undefined;
+  }
+  get applicableCategories(): string[] | undefined {
+    return this.props.applicableCategories ? [...this.props.applicableCategories] : undefined;
+  }
+  get applicableCustomerGroups(): string[] | undefined {
+    return this.props.applicableCustomerGroups ? [...this.props.applicableCustomerGroups] : undefined;
+  }
+  get excludedProducts(): string[] | undefined {
+    return this.props.excludedProducts ? [...this.props.excludedProducts] : undefined;
+  }
+  get excludedCategories(): string[] | undefined {
+    return this.props.excludedCategories ? [...this.props.excludedCategories] : undefined;
+  }
+  get createdBy(): string {
+    return this.props.createdBy;
+  }
+  get metadata(): Record<string, any> | undefined {
+    return this.props.metadata;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   // Computed properties
   get status(): CouponStatus {
@@ -195,11 +247,7 @@ export class Coupon {
   }
 
   // Domain methods
-  updateBasicInfo(updates: {
-    name?: string;
-    description?: string;
-    isActive?: boolean;
-  }): void {
+  updateBasicInfo(updates: { name?: string; description?: string; isActive?: boolean }): void {
     if (updates.name !== undefined) this.props.name = updates.name;
     if (updates.description !== undefined) this.props.description = updates.description;
     if (updates.isActive !== undefined) this.props.isActive = updates.isActive;
@@ -221,21 +269,14 @@ export class Coupon {
     this.touch();
   }
 
-  updateUsageRules(updates: {
-    usageType?: CouponType;
-    usageLimit?: number;
-    customerUsageLimit?: number;
-  }): void {
+  updateUsageRules(updates: { usageType?: CouponType; usageLimit?: number; customerUsageLimit?: number }): void {
     if (updates.usageType !== undefined) this.props.usageType = updates.usageType;
     if (updates.usageLimit !== undefined) this.props.usageLimit = updates.usageLimit;
     if (updates.customerUsageLimit !== undefined) this.props.customerUsageLimit = updates.customerUsageLimit;
     this.touch();
   }
 
-  updateValidity(updates: {
-    startsAt?: Date;
-    expiresAt?: Date;
-  }): void {
+  updateValidity(updates: { startsAt?: Date; expiresAt?: Date }): void {
     if (updates.startsAt !== undefined) this.props.startsAt = updates.startsAt;
     if (updates.expiresAt !== undefined) this.props.expiresAt = updates.expiresAt;
     this.touch();
@@ -316,7 +357,7 @@ export class Coupon {
       orderId,
       customerId,
       discountAmount,
-      usedAt: new Date()
+      usedAt: new Date(),
     };
   }
 
@@ -358,16 +399,16 @@ export class Coupon {
       metadata: this.props.metadata,
       remainingUses: this.remainingUses,
       createdAt: this.props.createdAt.toISOString(),
-      updatedAt: this.props.updatedAt.toISOString()
+      updatedAt: this.props.updatedAt.toISOString(),
     };
   }
 }
 
 // Helper function (should be imported from uuid lib)
 function generateUUID(): string {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    const r = Math.random() * 16 | 0;
-    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
 }

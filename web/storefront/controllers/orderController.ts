@@ -28,11 +28,7 @@ export const orderHistory = async (req: Request, res: Response): Promise<void> =
       filters.status = status;
     }
 
-    const command = new ListOrdersCommand(
-      filters,
-      parseInt(limit as string),
-      (parseInt(page as string) - 1) * parseInt(limit as string)
-    );
+    const command = new ListOrdersCommand(filters, parseInt(limit as string), (parseInt(page as string) - 1) * parseInt(limit as string));
 
     const useCase = new ListOrdersUseCase(OrderRepo);
     const result = await useCase.execute(command);
@@ -44,19 +40,19 @@ export const orderHistory = async (req: Request, res: Response): Promise<void> =
         currentPage: parseInt(page as string),
         totalPages: Math.ceil(result.total / parseInt(limit as string)),
         totalOrders: result.total,
-        hasNext: (parseInt(page as string) * parseInt(limit as string)) < result.total,
-        hasPrev: parseInt(page as string) > 1
+        hasNext: parseInt(page as string) * parseInt(limit as string) < result.total,
+        hasPrev: parseInt(page as string) > 1,
       },
       filters: { status },
-      user: req.user
+      user: req.user,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     storefrontRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load order history',
-      user: req.user
+      user: req.user,
     });
   }
 };
@@ -81,7 +77,7 @@ export const orderDetails = async (req: Request, res: Response): Promise<void> =
     if (!order) {
       storefrontRespond(req, res, '404', {
         pageName: 'Order Not Found',
-        user: req.user
+        user: req.user,
       });
       return;
     }
@@ -97,15 +93,15 @@ export const orderDetails = async (req: Request, res: Response): Promise<void> =
     storefrontRespond(req, res, 'user/order-details', {
       pageName: `Order ${order.orderNumber}`,
       order: { ...order, totals },
-      user: req.user
+      user: req.user,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     storefrontRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load order details',
-      user: req.user
+      user: req.user,
     });
   }
 };
@@ -128,7 +124,7 @@ export const orderTracking = async (req: Request, res: Response): Promise<void> 
     if (!order) {
       storefrontRespond(req, res, '404', {
         pageName: 'Order Not Found',
-        user: req.user
+        user: req.user,
       });
       return;
     }
@@ -142,15 +138,15 @@ export const orderTracking = async (req: Request, res: Response): Promise<void> 
     storefrontRespond(req, res, 'shop/order-tracking', {
       pageName: `Track Order ${order.orderNumber}`,
       order: { ...order, totals, timeline },
-      user: req.user
+      user: req.user,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     storefrontRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load order tracking',
-      user: req.user
+      user: req.user,
     });
   }
 };
@@ -162,19 +158,22 @@ export const orderTracking = async (req: Request, res: Response): Promise<void> 
 function calculateOrderTotals(order: any) {
   // Orders should have tax already calculated and stored
   // Use the order's stored values directly
-  const subtotal = order.subtotal || order.items?.reduce((sum: number, item: any) => {
-    return sum + ((item.unitPrice || item.price) * item.quantity);
-  }, 0) || 0;
+  const subtotal =
+    order.subtotal ||
+    order.items?.reduce((sum: number, item: any) => {
+      return sum + (item.unitPrice || item.price) * item.quantity;
+    }, 0) ||
+    0;
 
   const tax = order.taxTotal || order.tax || 0;
   const shipping = order.shippingTotal || order.shipping || 0;
-  const total = order.totalAmount || order.total || (subtotal + tax + shipping);
+  const total = order.totalAmount || order.total || subtotal + tax + shipping;
 
   return {
     subtotal: typeof subtotal === 'number' ? subtotal.toFixed(2) : subtotal,
     tax: typeof tax === 'number' ? tax.toFixed(2) : tax,
     shipping: typeof shipping === 'number' ? shipping.toFixed(2) : shipping,
-    total: typeof total === 'number' ? total.toFixed(2) : total
+    total: typeof total === 'number' ? total.toFixed(2) : total,
   };
 }
 
@@ -185,8 +184,8 @@ function generateOrderTimeline(order: any) {
       title: 'Order Placed',
       description: 'Your order has been received',
       date: order.createdAt,
-      completed: true
-    }
+      completed: true,
+    },
   ];
 
   // Add more timeline events based on order status
@@ -196,7 +195,7 @@ function generateOrderTimeline(order: any) {
       title: 'Processing',
       description: 'Your order is being prepared',
       date: order.updatedAt,
-      completed: ['processing', 'shipped', 'delivered'].includes(order.status)
+      completed: ['processing', 'shipped', 'delivered'].includes(order.status),
     });
   }
 
@@ -206,7 +205,7 @@ function generateOrderTimeline(order: any) {
       title: 'Shipped',
       description: 'Your order has been shipped',
       date: order.shippedAt,
-      completed: ['shipped', 'delivered'].includes(order.status)
+      completed: ['shipped', 'delivered'].includes(order.status),
     });
   }
 
@@ -216,7 +215,7 @@ function generateOrderTimeline(order: any) {
       title: 'Delivered',
       description: 'Your order has been delivered',
       date: order.deliveredAt,
-      completed: true
+      completed: true,
     });
   }
 

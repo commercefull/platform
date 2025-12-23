@@ -25,17 +25,16 @@ export class MerchantSessionRepo {
   }
 
   async findByToken(token: string): Promise<MerchantSession | null> {
-    return await queryOne<MerchantSession>(
-      `SELECT * FROM "identityMerchantSession" WHERE "sessionToken" = $1 AND "isActive" = true`,
-      [token]
-    );
+    return await queryOne<MerchantSession>(`SELECT * FROM "identityMerchantSession" WHERE "sessionToken" = $1 AND "isActive" = true`, [
+      token,
+    ]);
   }
 
   async findByMerchantId(merchantId: string): Promise<MerchantSession[]> {
     return (
       (await query<MerchantSession[]>(
         `SELECT * FROM "identityMerchantSession" WHERE "merchantId" = $1 AND "isActive" = true ORDER BY "lastActivityAt" DESC`,
-        [merchantId]
+        [merchantId],
       )) || []
     );
   }
@@ -63,8 +62,8 @@ export class MerchantSessionRepo {
         lastActivityAt,
         isActive,
         now,
-        now
-      ]
+        now,
+      ],
     );
 
     if (!result) throw new Error('Failed to create merchant session');
@@ -75,21 +74,21 @@ export class MerchantSessionRepo {
     const now = new Date();
     return await queryOne<MerchantSession>(
       `UPDATE "identityMerchantSession" SET "lastActivityAt" = $1, "updatedAt" = $1 WHERE "sessionToken" = $2 RETURNING *`,
-      [now, token]
+      [now, token],
     );
   }
 
   async updateExpiry(token: string, expiresAt: Date): Promise<MerchantSession | null> {
     return await queryOne<MerchantSession>(
       `UPDATE "identityMerchantSession" SET "expiresAt" = $1, "updatedAt" = $2 WHERE "sessionToken" = $3 RETURNING *`,
-      [expiresAt, new Date(), token]
+      [expiresAt, new Date(), token],
     );
   }
 
   async invalidate(token: string): Promise<boolean> {
     const result = await queryOne<{ merchantSessionId: string }>(
       `UPDATE "identityMerchantSession" SET "isActive" = false, "updatedAt" = $1 WHERE "sessionToken" = $2 RETURNING "merchantSessionId"`,
-      [new Date(), token]
+      [new Date(), token],
     );
     return !!result;
   }
@@ -97,7 +96,7 @@ export class MerchantSessionRepo {
   async invalidateAllForMerchant(merchantId: string): Promise<number> {
     const results = await query<{ merchantSessionId: string }[]>(
       `UPDATE "identityMerchantSession" SET "isActive" = false, "updatedAt" = $1 WHERE "merchantId" = $2 RETURNING "merchantSessionId"`,
-      [new Date(), merchantId]
+      [new Date(), merchantId],
     );
     return results ? results.length : 0;
   }
@@ -106,7 +105,7 @@ export class MerchantSessionRepo {
     const now = new Date();
     const results = await query<{ merchantSessionId: string }[]>(
       `DELETE FROM "identityMerchantSession" WHERE "expiresAt" < $1 RETURNING "merchantSessionId"`,
-      [now]
+      [now],
     );
     return results ? results.length : 0;
   }
@@ -114,7 +113,7 @@ export class MerchantSessionRepo {
   async delete(id: string): Promise<boolean> {
     const result = await queryOne<{ merchantSessionId: string }>(
       `DELETE FROM "identityMerchantSession" WHERE "merchantSessionId" = $1 RETURNING "merchantSessionId"`,
-      [id]
+      [id],
     );
     return !!result;
   }

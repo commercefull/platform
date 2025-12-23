@@ -2,22 +2,25 @@
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.up = function(knex) {
-  return knex.schema.createTable('marketingProductRecommendation', function(table) {
+exports.up = function (knex) {
+  return knex.schema.createTable('marketingProductRecommendation', function (table) {
     table.uuid('marketingProductRecommendationId').primary().defaultTo(knex.raw('uuidv7()'));
     table.uuid('productId').notNullable().references('productId').inTable('product').onDelete('CASCADE');
     table.uuid('recommendedProductId').notNullable().references('productId').inTable('product').onDelete('CASCADE');
-    table.string('recommendationType').notNullable().checkIn([
-      'frequently_bought_together', 
-      'similar_products', 
-      'customers_also_viewed', 
-      'customers_also_bought',
-      'trending', 
-      'personalized', 
-      'manual',
-      'cross_sell',
-      'upsell'
-    ]);
+    table
+      .string('recommendationType')
+      .notNullable()
+      .checkIn([
+        'frequently_bought_together',
+        'similar_products',
+        'customers_also_viewed',
+        'customers_also_bought',
+        'trending',
+        'personalized',
+        'manual',
+        'cross_sell',
+        'upsell',
+      ]);
     table.decimal('score', 10, 6).defaultTo(0);
     table.integer('rank');
     table.integer('purchaseCount').defaultTo(0);
@@ -45,6 +48,6 @@ exports.up = function(knex) {
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTableIfExists('marketingProductRecommendation');
 };

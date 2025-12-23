@@ -2,7 +2,7 @@
  * Seed countries
  * @param { import('knex').Knex } knex
  */
-exports.seed = async function(knex) {
+exports.seed = async function (knex) {
   await knex('country').del();
   await knex('country').insert([
     { code: 'US', name: 'United States', alpha3Code: 'USA', numericCode: 840, region: 'North America', isActive: true },
@@ -17,6 +17,6 @@ exports.seed = async function(knex) {
     { code: 'IN', name: 'India', alpha3Code: 'IND', numericCode: 356, region: 'Asia', isActive: true },
     { code: 'AU', name: 'Australia', alpha3Code: 'AUS', numericCode: 36, region: 'Oceania', isActive: true },
     { code: 'BR', name: 'Brazil', alpha3Code: 'BRA', numericCode: 76, region: 'South America', isActive: true },
-    { code: 'MX', name: 'Mexico', alpha3Code: 'MEX', numericCode: 484, region: 'North America', isActive: true }
+    { code: 'MX', name: 'Mexico', alpha3Code: 'MEX', numericCode: 484, region: 'North America', isActive: true },
   ]);
 };

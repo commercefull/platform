@@ -40,12 +40,12 @@ export const listNotificationTemplates = async (req: Request, res: Response): Pr
       categories,
       filters: { activeOnly, category },
       stats: { total: totalCount, active: activeCount },
-      
-      success: req.query.success || null
+
+      success: req.query.success || null,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load notification templates',
@@ -60,7 +60,7 @@ export const createNotificationTemplateForm = async (req: Request, res: Response
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -83,7 +83,7 @@ export const createNotificationTemplate = async (req: Request, res: Response): P
       pushTemplate,
       smsTemplate,
       parameters,
-      categoryCode
+      categoryCode,
     } = req.body;
 
     const template = await notificationTemplateRepo.create({
@@ -101,13 +101,12 @@ export const createNotificationTemplate = async (req: Request, res: Response): P
       parameters: parameters ? JSON.parse(parameters) : undefined,
       isActive: true,
       categoryCode: categoryCode || undefined,
-      createdBy: 'admin'
+      createdBy: 'admin',
     });
 
     res.redirect(`/hub/notifications/templates/${template.notificationTemplateId}?success=Notification template created successfully`);
   } catch (error: any) {
     logger.error('Error:', error);
-    
 
     adminRespond(req, res, 'notifications/templates/create', {
       pageName: 'Create Notification Template',
@@ -138,12 +137,12 @@ export const viewNotificationTemplate = async (req: Request, res: Response): Pro
       pageName: `Template: ${template.name}`,
       template,
       preview,
-      
-      success: req.query.success || null
+
+      success: req.query.success || null,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load notification template',
@@ -171,7 +170,7 @@ export const editNotificationTemplateForm = async (req: Request, res: Response):
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -196,7 +195,7 @@ export const updateNotificationTemplate = async (req: Request, res: Response): P
       smsTemplate,
       parameters,
       categoryCode,
-      isActive
+      isActive,
     } = req.body;
 
     if (name !== undefined) updates.name = name;
@@ -221,7 +220,6 @@ export const updateNotificationTemplate = async (req: Request, res: Response): P
     res.redirect(`/hub/notifications/templates/${templateId}?success=Notification template updated successfully`);
   } catch (error: any) {
     logger.error('Error:', error);
-    
 
     try {
       const template = await notificationTemplateRepo.findById(req.params.templateId);
@@ -254,7 +252,7 @@ export const activateNotificationTemplate = async (req: Request, res: Response):
     res.json({ success: true, message: 'Notification template activated successfully' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to activate notification template' });
   }
 };
@@ -272,7 +270,7 @@ export const deactivateNotificationTemplate = async (req: Request, res: Response
     res.json({ success: true, message: 'Notification template deactivated successfully' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to deactivate notification template' });
   }
 };
@@ -290,7 +288,7 @@ export const deleteNotificationTemplate = async (req: Request, res: Response): P
     res.json({ success: true, message: 'Notification template deleted successfully' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to delete notification template' });
   }
 };
@@ -305,11 +303,11 @@ export const cloneNotificationTemplate = async (req: Request, res: Response): Pr
     res.json({
       success: true,
       message: 'Notification template cloned successfully',
-      template: clonedTemplate
+      template: clonedTemplate,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to clone notification template' });
   }
 };
@@ -323,11 +321,11 @@ export const previewNotificationTemplate = async (req: Request, res: Response): 
 
     res.json({
       success: true,
-      preview
+      preview,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to preview notification template' });
   }
 };

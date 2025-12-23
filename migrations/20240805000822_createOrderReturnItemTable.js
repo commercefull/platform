@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function (knex) {
   return knex.schema.createTable('orderReturnItem', t => {
     t.uuid('orderReturnItemId').primary().defaultTo(knex.raw('uuidv7()'));
     t.uuid('orderReturnId').notNullable().references('orderReturnId').inTable('orderReturn').onDelete('CASCADE');
@@ -11,7 +11,7 @@ exports.up = function(knex) {
     t.decimal('refundAmount', 15, 2);
     t.uuid('exchangeProductId').references('productId').inTable('product');
     t.uuid('exchangeVariantId').references('productVariantId').inTable('productVariant');
-    
+
     t.text('notes');
     t.text('inspectionNotes');
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
@@ -26,6 +26,6 @@ exports.up = function(knex) {
   });
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTable('orderReturnItem');
 };

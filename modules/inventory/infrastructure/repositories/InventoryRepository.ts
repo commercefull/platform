@@ -36,10 +36,7 @@ export interface PaginatedResult<T> {
 export class InventoryRepository {
   // Inventory CRUD
   async findById(inventoryId: string): Promise<Inventory | null> {
-    const row = await queryOne<Record<string, any>>(
-      'SELECT * FROM inventory WHERE "inventoryId" = $1',
-      [inventoryId]
-    );
+    const row = await queryOne<Record<string, any>>('SELECT * FROM inventory WHERE "inventoryId" = $1', [inventoryId]);
 
     if (!row) return null;
     return this.mapToInventory(row);
@@ -48,7 +45,7 @@ export class InventoryRepository {
   async findByProductAndLocation(productId: string, locationId: string, variantId?: string): Promise<Inventory | null> {
     const row = await queryOne<Record<string, any>>(
       'SELECT * FROM inventory WHERE "productId" = $1 AND "locationId" = $2 AND "variantId" IS NOT DISTINCT FROM $3',
-      [productId, locationId, variantId]
+      [productId, locationId, variantId],
     );
 
     if (!row) return null;
@@ -76,17 +73,14 @@ export class InventoryRepository {
 
     const { whereClause, params } = this.buildWhereClause(filters);
 
-    const countResult = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM inventory ${whereClause}`,
-      params
-    );
+    const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM inventory ${whereClause}`, params);
     const total = parseInt(countResult?.count || '0');
 
     const rows = await query<Record<string, any>[]>(
       `SELECT * FROM inventory ${whereClause}
        ORDER BY "${orderBy}" ${orderDir.toUpperCase()}
        LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
-      [...params, limit, offset]
+      [...params, limit, offset],
     );
 
     const inventory = (rows || []).map(row => this.mapToInventory(row));
@@ -97,17 +91,16 @@ export class InventoryRepository {
       limit,
       offset,
       hasMore: offset + inventory.length < total,
-      length: total
+      length: total,
     };
   }
 
   async save(inventory: Inventory): Promise<Inventory> {
     const now = new Date().toISOString();
 
-    const existing = await queryOne<Record<string, any>>(
-      'SELECT "inventoryId" FROM inventory WHERE "inventoryId" = $1',
-      [inventory.inventoryId]
-    );
+    const existing = await queryOne<Record<string, any>>('SELECT "inventoryId" FROM inventory WHERE "inventoryId" = $1', [
+      inventory.inventoryId,
+    ]);
 
     if (existing) {
       // Update existing inventory
@@ -133,8 +126,8 @@ export class InventoryRepository {
           inventory.isActive,
           inventory.metadata ? JSON.stringify(inventory.metadata) : null,
           now,
-          inventory.inventoryId
-        ]
+          inventory.inventoryId,
+        ],
       );
     } else {
       // Create new inventory
@@ -165,8 +158,8 @@ export class InventoryRepository {
           inventory.isActive,
           inventory.metadata ? JSON.stringify(inventory.metadata) : null,
           now,
-          now
-        ]
+          now,
+        ],
       );
     }
 
@@ -199,21 +192,21 @@ export class InventoryRepository {
         movement.referenceType,
         movement.performedBy,
         movement.notes,
-        now
-      ]
+        now,
+      ],
     );
 
     return {
       ...movement,
       movementId,
-      createdAt: new Date(now)
+      createdAt: new Date(now),
     };
   }
 
   async getMovements(inventoryId: string, limit: number = 50): Promise<InventoryMovement[]> {
     const rows = await query<Record<string, any>[]>(
       `SELECT * FROM "inventoryMovement" WHERE "inventoryId" = $1 ORDER BY "createdAt" DESC LIMIT $2`,
-      [inventoryId, limit]
+      [inventoryId, limit],
     );
 
     return (rows || []).map(row => ({
@@ -231,15 +224,13 @@ export class InventoryRepository {
       referenceType: row.referenceType,
       performedBy: row.performedBy,
       notes: row.notes,
-      createdAt: new Date(row.createdAt)
+      createdAt: new Date(row.createdAt),
     }));
   }
 
   // Inventory Locations
   async getLocations(): Promise<InventoryLocation[]> {
-    const rows = await query<Record<string, any>[]>(
-      'SELECT * FROM "inventoryLocation" WHERE "isActive" = true ORDER BY priority ASC'
-    );
+    const rows = await query<Record<string, any>[]>('SELECT * FROM "inventoryLocation" WHERE "isActive" = true ORDER BY priority ASC');
 
     return (rows || []).map(row => ({
       locationId: row.locationId,
@@ -248,15 +239,12 @@ export class InventoryRepository {
       address: row.address ? JSON.parse(row.address) : undefined,
       isActive: Boolean(row.isActive),
       priority: parseInt(row.priority || '0'),
-      metadata: row.metadata ? JSON.parse(row.metadata) : undefined
+      metadata: row.metadata ? JSON.parse(row.metadata) : undefined,
     }));
   }
 
   async getLocationById(locationId: string): Promise<InventoryLocation | null> {
-    const row = await queryOne<Record<string, any>>(
-      'SELECT * FROM "inventoryLocation" WHERE "locationId" = $1',
-      [locationId]
-    );
+    const row = await queryOne<Record<string, any>>('SELECT * FROM "inventoryLocation" WHERE "locationId" = $1', [locationId]);
 
     if (!row) return null;
 
@@ -267,12 +255,15 @@ export class InventoryRepository {
       address: row.address ? JSON.parse(row.address) : undefined,
       isActive: Boolean(row.isActive),
       priority: parseInt(row.priority || '0'),
-      metadata: row.metadata ? JSON.parse(row.metadata) : undefined
+      metadata: row.metadata ? JSON.parse(row.metadata) : undefined,
     };
   }
 
   // Stock calculations
-  async getTotalStock(productId: string, variantId?: string): Promise<{
+  async getTotalStock(
+    productId: string,
+    variantId?: string,
+  ): Promise<{
     totalQuantity: number;
     reservedQuantity: number;
     availableQuantity: number;
@@ -286,7 +277,7 @@ export class InventoryRepository {
         COUNT(*) as locations
       FROM inventory
       WHERE "productId" = $1 AND "variantId" IS NOT DISTINCT FROM $2 AND "isActive" = true`,
-      [productId, variantId]
+      [productId, variantId],
     );
 
     const row = rows?.[0];
@@ -294,24 +285,26 @@ export class InventoryRepository {
       totalQuantity: parseInt(row?.totalQuantity || '0'),
       reservedQuantity: parseInt(row?.reservedQuantity || '0'),
       availableQuantity: parseInt(row?.availableQuantity || '0'),
-      locations: parseInt(row?.locations || '0')
+      locations: parseInt(row?.locations || '0'),
     };
   }
 
-  async getLowStockAlerts(): Promise<Array<{
-    inventoryId: string;
-    productId: string;
-    variantId?: string;
-    sku: string;
-    locationId: string;
-    quantity: number;
-    threshold: number;
-  }>> {
+  async getLowStockAlerts(): Promise<
+    Array<{
+      inventoryId: string;
+      productId: string;
+      variantId?: string;
+      sku: string;
+      locationId: string;
+      quantity: number;
+      threshold: number;
+    }>
+  > {
     const rows = await query<Record<string, any>[]>(
       `SELECT "inventoryId", "productId", "variantId", sku, "locationId", "availableQuantity", "lowStockThreshold"
       FROM inventory
       WHERE "isActive" = true AND "availableQuantity" <= "lowStockThreshold" AND "availableQuantity" > 0
-      ORDER BY ("lowStockThreshold" - "availableQuantity") DESC`
+      ORDER BY ("lowStockThreshold" - "availableQuantity") DESC`,
     );
 
     return (rows || []).map(row => ({
@@ -321,22 +314,24 @@ export class InventoryRepository {
       sku: row.sku,
       locationId: row.locationId,
       quantity: parseInt(row.availableQuantity),
-      threshold: parseInt(row.lowStockThreshold)
+      threshold: parseInt(row.lowStockThreshold),
     }));
   }
 
-  async getOutOfStockItems(): Promise<Array<{
-    inventoryId: string;
-    productId: string;
-    variantId?: string;
-    sku: string;
-    locationId: string;
-  }>> {
+  async getOutOfStockItems(): Promise<
+    Array<{
+      inventoryId: string;
+      productId: string;
+      variantId?: string;
+      sku: string;
+      locationId: string;
+    }>
+  > {
     const rows = await query<Record<string, any>[]>(
       `SELECT "inventoryId", "productId", "variantId", sku, "locationId"
       FROM inventory
       WHERE "isActive" = true AND "availableQuantity" <= 0
-      ORDER BY "updatedAt" DESC`
+      ORDER BY "updatedAt" DESC`,
     );
 
     return (rows || []).map(row => ({
@@ -344,24 +339,26 @@ export class InventoryRepository {
       productId: row.productId,
       variantId: row.variantId,
       sku: row.sku,
-      locationId: row.locationId
+      locationId: row.locationId,
     }));
   }
 
-  async getItemsNeedingReorder(): Promise<Array<{
-    inventoryId: string;
-    productId: string;
-    variantId?: string;
-    sku: string;
-    locationId: string;
-    quantity: number;
-    reorderPoint: number;
-  }>> {
+  async getItemsNeedingReorder(): Promise<
+    Array<{
+      inventoryId: string;
+      productId: string;
+      variantId?: string;
+      sku: string;
+      locationId: string;
+      quantity: number;
+      reorderPoint: number;
+    }>
+  > {
     const rows = await query<Record<string, any>[]>(
       `SELECT "inventoryId", "productId", "variantId", sku, "locationId", quantity, "reorderPoint"
       FROM inventory
       WHERE "isActive" = true AND quantity <= "reorderPoint"
-      ORDER BY (quantity - "reorderPoint") ASC`
+      ORDER BY (quantity - "reorderPoint") ASC`,
     );
 
     return (rows || []).map(row => ({
@@ -371,7 +368,7 @@ export class InventoryRepository {
       sku: row.sku,
       locationId: row.locationId,
       quantity: parseInt(row.quantity),
-      reorderPoint: parseInt(row.reorderPoint)
+      reorderPoint: parseInt(row.reorderPoint),
     }));
   }
 
@@ -431,7 +428,7 @@ export class InventoryRepository {
 
     return {
       whereClause: conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '',
-      params
+      params,
     };
   }
 
@@ -458,7 +455,7 @@ export class InventoryRepository {
       isActive: Boolean(row.isActive),
       metadata: row.metadata ? (typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata) : undefined,
       createdAt: new Date(row.createdAt),
-      updatedAt: new Date(row.updatedAt)
+      updatedAt: new Date(row.updatedAt),
     });
   }
 }
@@ -467,9 +464,9 @@ export default new InventoryRepository();
 
 // Helper function (should be imported from uuid lib)
 function generateUUID(): string {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    const r = Math.random() * 16 | 0;
-    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
 }

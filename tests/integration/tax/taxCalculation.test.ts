@@ -20,31 +20,31 @@ describe('Tax Calculation API Integration Tests', () => {
           country: 'US',
           region: 'CA',
           postalCode: '94105',
-          city: 'San Francisco'
-        }
+          city: 'San Francisco',
+        },
       };
-      
+
       // Route is at /customer/tax/calculate not /api/tax/calculate
       const response = await client.post('/customer/tax/calculate', calculationRequest, {
-        headers: { Authorization: `Bearer ${userToken}` }
+        headers: { Authorization: `Bearer ${userToken}` },
       });
-      
+
       expect(response.status).toBe(200);
-      
+
       expect(response.data).toHaveProperty('subtotal');
       expect(response.data).toHaveProperty('taxAmount');
       expect(response.data).toHaveProperty('total');
       expect(response.data).toHaveProperty('taxBreakdown');
-      
+
       // Basic validation of the tax calculation
       expect(response.data.subtotal).toBe(calculationRequest.quantity * calculationRequest.price);
       expect(response.data.total).toBe(response.data.subtotal + response.data.taxAmount);
-      
+
       // Check if tax breakdown is present
       if (response.data.taxAmount > 0) {
         expect(Array.isArray(response.data.taxBreakdown)).toBeTruthy();
         expect(response.data.taxBreakdown.length).toBeGreaterThan(0);
-        
+
         // Verify the structure of the tax breakdown
         const firstBreakdown = response.data.taxBreakdown[0];
         expect(firstBreakdown).toHaveProperty('rateId');
@@ -61,39 +61,39 @@ describe('Tax Calculation API Integration Tests', () => {
         quantity: 2,
         price: 19.99,
         shippingAddress: {
-          country: 'US'
-        }
+          country: 'US',
+        },
       };
-      
+
       const response = await client.post('/customer/tax/calculate', invalidRequest, {
-        headers: { Authorization: `Bearer ${userToken}` }
+        headers: { Authorization: `Bearer ${userToken}` },
       });
-      
+
       expect(response.status).toBe(400);
     });
-    
+
     it('should calculate zero tax for countries without tax rates', async () => {
       const calculationRequest = {
         productId: 'test-product-123',
         quantity: 1,
-        price: 10.00,
+        price: 10.0,
         shippingAddress: {
           // Using a country code that likely doesn't have tax rates configured in test data
           country: 'ZZ', // Non-existent country code for testing
           region: 'TestRegion',
-          postalCode: '00000'
-        }
+          postalCode: '00000',
+        },
       };
-      
+
       const response = await client.post('/customer/tax/calculate', calculationRequest, {
-        headers: { Authorization: `Bearer ${userToken}` }
+        headers: { Authorization: `Bearer ${userToken}` },
       });
-      
+
       expect(response.status).toBe(200);
-      
+
       expect(response.data.taxAmount).toBe(0);
-      expect(response.data.subtotal).toBe(10.00);
-      expect(response.data.total).toBe(10.00);
+      expect(response.data.subtotal).toBe(10.0);
+      expect(response.data.total).toBe(10.0);
     });
   });
 
@@ -102,26 +102,26 @@ describe('Tax Calculation API Integration Tests', () => {
       // This test requires an existing basket
       // We'll need to either create a basket first or use a known test basket ID
       const testBasketId = 'test-basket-id'; // Replace with actual test basket ID or create one
-      
+
       const calculationRequest = {
         shippingAddress: {
           country: 'US',
           region: 'NY',
           postalCode: '10001',
-          city: 'New York'
+          city: 'New York',
         },
-        customerId: 'test-customer-id' // Optional
+        customerId: 'test-customer-id', // Optional
       };
-      
+
       const response = await client.post(`/customer/tax/calculate/basket/${testBasketId}`, calculationRequest, {
-        headers: { Authorization: `Bearer ${userToken}` }
+        headers: { Authorization: `Bearer ${userToken}` },
       });
-      
+
       expect(response.status).toBe(200);
       expect(response.data).toHaveProperty('subtotal');
       expect(response.data).toHaveProperty('taxAmount');
       expect(response.data).toHaveProperty('total');
-      
+
       // Additional checks if we have line items in the response
       if (response.data.lineItemTaxes && response.data.lineItemTaxes.length > 0) {
         const firstLineItem = response.data.lineItemTaxes[0];
@@ -130,12 +130,12 @@ describe('Tax Calculation API Integration Tests', () => {
         expect(firstLineItem).toHaveProperty('taxAmount');
       }
     });
-    
+
     it('should require authentication for basket tax calculation', async () => {
       const response = await client.post('/customer/tax/calculate/basket/any-basket-id', {
-        shippingAddress: { country: 'US' }
+        shippingAddress: { country: 'US' },
       });
-      
+
       expect(response.status).toBe(401);
     });
   });
@@ -146,16 +146,16 @@ describe('Tax Calculation API Integration Tests', () => {
         country: 'US',
         region: 'CA',
         postalCode: '94105',
-        city: 'San Francisco'
+        city: 'San Francisco',
       };
-      
+
       // Route is at /customer/tax/zones/find not /api/tax/zones/find
       const response = await client.post('/customer/tax/zones/find', addressRequest, {
-        headers: { Authorization: `Bearer ${userToken}` }
+        headers: { Authorization: `Bearer ${userToken}` },
       });
-      
+
       expect(response.status).toBe(200);
-      
+
       // If tax zones are found
       if (response.status === 200) {
         expect(response.data).toHaveProperty('taxZoneId');
@@ -164,31 +164,31 @@ describe('Tax Calculation API Integration Tests', () => {
         expect(response.data.countries).toContain('US');
       }
     });
-    
+
     it('should return 404 for addresses without matching tax zones', async () => {
       const addressRequest = {
         country: 'ZZ', // Non-existent country code
-        region: 'Unknown'
+        region: 'Unknown',
       };
-      
+
       const response = await client.post('/customer/tax/zones/find', addressRequest, {
-        headers: { Authorization: `Bearer ${userToken}` }
+        headers: { Authorization: `Bearer ${userToken}` },
       });
-      
+
       expect(response.status).toBe(404);
     });
-    
+
     it('should require country in the request', async () => {
       const invalidRequest = {
         // Missing country
         region: 'CA',
-        postalCode: '94105'
+        postalCode: '94105',
       };
-      
+
       const response = await client.post('/customer/tax/zones/find', invalidRequest, {
-        headers: { Authorization: `Bearer ${userToken}` }
+        headers: { Authorization: `Bearer ${userToken}` },
       });
-      
+
       expect(response.status).toBe(400);
     });
   });
@@ -196,23 +196,23 @@ describe('Tax Calculation API Integration Tests', () => {
   describe('GET /api/tax/exemption/:customerId', () => {
     it('should check tax exemption status for a customer', async () => {
       const testCustomerId = 'test-customer-id'; // Replace with actual test customer ID
-      
+
       const response = await client.get(`/customer/tax/exemption/${testCustomerId}`, {
-        headers: { Authorization: `Bearer ${userToken}` }
+        headers: { Authorization: `Bearer ${userToken}` },
       });
-      
+
       expect(response.status).toBe(200);
-      
+
       // Only check response data if we got a successful response
       if (response.status === 200) {
         expect(response.data).toHaveProperty('hasExemption');
       }
-      
+
       // If the customer has exemptions
       if (response.status === 200 && response.data.hasExemption) {
         expect(response.data).toHaveProperty('exemptions');
         expect(Array.isArray(response.data.exemptions)).toBeTruthy();
-        
+
         if (response.data.exemptions.length > 0) {
           const exemption = response.data.exemptions[0];
           expect(exemption).toHaveProperty('id');
@@ -222,10 +222,10 @@ describe('Tax Calculation API Integration Tests', () => {
         }
       }
     });
-    
+
     it('should require authentication for checking exemptions', async () => {
       const response = await client.get('/customer/tax/exemption/any-customer-id');
-      
+
       expect(response.status).toBe(401);
     });
   });
@@ -233,14 +233,14 @@ describe('Tax Calculation API Integration Tests', () => {
   describe('GET /api/tax/settings/:merchantId', () => {
     it('should retrieve tax display settings for a merchant', async () => {
       const testMerchantId = 'test-merchant-id'; // Replace with actual test merchant ID
-      
+
       const response = await client.get(`/customer/tax/settings/${testMerchantId}`);
-      
+
       expect(response.status).toBe(200);
-      
+
       expect(response.data).toHaveProperty('displayPricesWithTax');
       expect(response.data).toHaveProperty('priceDisplaySettings');
-      
+
       // Check price display settings structure
       expect(response.data.priceDisplaySettings).toHaveProperty('includesTax');
       expect(response.data.priceDisplaySettings).toHaveProperty('showTaxSeparately');

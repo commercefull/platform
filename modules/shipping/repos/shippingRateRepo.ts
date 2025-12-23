@@ -9,15 +9,14 @@ import { Table, ShippingRate } from '../../../libs/db/types';
 export { ShippingRate };
 
 export type CreateShippingRateInput = Omit<ShippingRate, 'shippingRateId' | 'createdAt' | 'updatedAt'>;
-export type UpdateShippingRateInput = Partial<Omit<ShippingRate, 'shippingRateId' | 'shippingZoneId' | 'shippingMethodId' | 'createdAt' | 'updatedAt'>>;
+export type UpdateShippingRateInput = Partial<
+  Omit<ShippingRate, 'shippingRateId' | 'shippingZoneId' | 'shippingMethodId' | 'createdAt' | 'updatedAt'>
+>;
 
 const TABLE = Table.ShippingRate;
 
 export async function findById(id: string): Promise<ShippingRate | null> {
-  return queryOne<ShippingRate>(
-    `SELECT * FROM "${TABLE}" WHERE "shippingRateId" = $1`,
-    [id]
-  );
+  return queryOne<ShippingRate>(`SELECT * FROM "${TABLE}" WHERE "shippingRateId" = $1`, [id]);
 }
 
 export async function findByZone(zoneId: string, activeOnly = false): Promise<ShippingRate[]> {
@@ -41,7 +40,7 @@ export async function findByMethod(methodId: string, activeOnly = false): Promis
 export async function findByZoneAndMethod(zoneId: string, methodId: string): Promise<ShippingRate | null> {
   return queryOne<ShippingRate>(
     `SELECT * FROM "${TABLE}" WHERE "shippingZoneId" = $1 AND "shippingMethodId" = $2 AND "isActive" = true ORDER BY "priority" ASC LIMIT 1`,
-    [zoneId, methodId]
+    [zoneId, methodId],
   );
 }
 
@@ -90,8 +89,8 @@ export async function create(input: CreateShippingRateInput): Promise<ShippingRa
       input.validFrom || null,
       input.validTo || null,
       input.conditions ? JSON.stringify(input.conditions) : null,
-      input.createdBy || null
-    ]
+      input.createdBy || null,
+    ],
   );
 
   if (!result) throw new Error('Failed to create shipping rate');
@@ -118,7 +117,7 @@ export async function update(id: string, input: UpdateShippingRateInput): Promis
 
   return queryOne<ShippingRate>(
     `UPDATE "${TABLE}" SET ${updateFields.join(', ')} WHERE "shippingRateId" = $${paramIndex} RETURNING *`,
-    values
+    values,
   );
 }
 
@@ -133,7 +132,7 @@ export async function deactivate(id: string): Promise<ShippingRate | null> {
 export async function deleteRate(id: string): Promise<boolean> {
   const result = await queryOne<{ shippingRateId: string }>(
     `DELETE FROM "${TABLE}" WHERE "shippingRateId" = $1 RETURNING "shippingRateId"`,
-    [id]
+    [id],
   );
   return !!result;
 }
@@ -158,14 +157,9 @@ export async function count(zoneId?: string, methodId?: string): Promise<number>
 /**
  * Calculate shipping rate for an order
  */
-export function calculateRate(
-  rate: ShippingRate,
-  orderTotal: number,
-  itemCount: number,
-  weight?: number
-): number {
+export function calculateRate(rate: ShippingRate, orderTotal: number, itemCount: number, weight?: number): number {
   if (rate.rateType === 'free') return 0;
-  
+
   // Check free threshold
   if (rate.freeThreshold && orderTotal >= parseFloat(rate.freeThreshold)) {
     return 0;
@@ -177,7 +171,7 @@ export function calculateRate(
     case 'flat':
       break;
     case 'itemBased':
-      calculatedRate += (parseFloat(rate.perItemRate || '0') * itemCount);
+      calculatedRate += parseFloat(rate.perItemRate || '0') * itemCount;
       break;
     case 'priceBased':
       if (rate.rateMatrix) {
@@ -223,5 +217,5 @@ export default {
   deactivate,
   delete: deleteRate,
   count,
-  calculateRate
+  calculateRate,
 };

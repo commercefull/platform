@@ -2,7 +2,7 @@
  * GDPR Cookie Consent Table
  * Tracks cookie consent for both authenticated and anonymous users
  * Separate from customerConsent to handle pre-login cookie consent
- * 
+ *
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
@@ -34,7 +34,7 @@ exports.up = function (knex) {
     t.timestamp('expiresAt'); // Consent should be renewed periodically
     // For linking anonymous to authenticated
     t.timestamp('linkedAt'); // When anonymous consent was linked to customer
-    
+
     t.index('customerId');
     t.index('sessionId');
     t.index('browserFingerprint');

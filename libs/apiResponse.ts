@@ -9,7 +9,7 @@ import { Response } from 'express';
 export function successResponse(res: Response, data: any, statusCode: number = 200): Response {
   return res.status(statusCode).json({
     success: true,
-    data
+    data,
   });
 }
 
@@ -24,8 +24,8 @@ export function errorResponse(res: Response, message: string, statusCode: number
     success: false,
     error: {
       message,
-      statusCode
-    }
+      statusCode,
+    },
   });
 }
 
@@ -40,13 +40,13 @@ export function validationErrorResponse(res: Response, errors: string[]): Respon
     error: {
       message: 'Validation failed',
       statusCode: 400,
-      errors
-    }
+      errors,
+    },
   });
 }
 
 export default {
   successResponse,
   errorResponse,
-  validationErrorResponse
+  validationErrorResponse,
 };

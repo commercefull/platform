@@ -2,8 +2,8 @@
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.up = function(knex) {
-  return knex.schema.createTable('marketingAffiliate', function(table) {
+exports.up = function (knex) {
+  return knex.schema.createTable('marketingAffiliate', function (table) {
     table.uuid('marketingAffiliateId').primary().defaultTo(knex.raw('uuidv7()'));
     table.uuid('customerId').references('customerId').inTable('customer').onDelete('SET NULL');
     table.string('email').notNullable();
@@ -52,6 +52,6 @@ exports.up = function(knex) {
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTableIfExists('marketingAffiliate');
 };

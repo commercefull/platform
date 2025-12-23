@@ -18,20 +18,15 @@ describe('Payment Transaction Tests', () => {
   });
 
   afterAll(async () => {
-    await cleanupPaymentTests(
-      client,
-      adminToken,
-      testGatewayId,
-      testMethodConfigId
-    );
+    await cleanupPaymentTests(client, adminToken, testGatewayId, testMethodConfigId);
   });
 
   describe('Transaction Operations', () => {
     it('should list transactions (admin)', async () => {
       const response = await client.get('/business/transactions', {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       expect(response.data.data).toHaveProperty('data');
@@ -40,29 +35,28 @@ describe('Payment Transaction Tests', () => {
 
     it('should create a new transaction', async () => {
       if (!testMethodConfigId) {
-        
         return;
       }
-      
+
       const newTransaction = {
         orderId: '00000000-0000-0000-0000-000000000001',
         amount: 49.99,
         currency: 'USD',
-        paymentMethodConfigId: testMethodConfigId
+        paymentMethodConfigId: testMethodConfigId,
       };
-      
+
       const response = await client.post('/business/transactions', newTransaction, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       expect(response.status).toBe(201);
       expect(response.data.success).toBe(true);
       expect(response.data.data).toHaveProperty('transactionId');
-      
+
       // Clean up
       const newTransactionId = response.data.data.transactionId;
       await client.delete(`/business/transactions/${newTransactionId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
     });
 
@@ -76,11 +70,11 @@ describe('Payment Transaction Tests', () => {
     it('should get refunds for a transaction', async () => {
       // Use a dummy transaction ID since we may not have one
       const dummyTransactionId = '00000000-0000-0000-0000-000000000001';
-      
+
       const response = await client.get(`/business/transactions/${dummyTransactionId}/refunds`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       // Transaction may not exist - expect 404
       expect(response.status).toBe(404);
     });
@@ -88,16 +82,16 @@ describe('Payment Transaction Tests', () => {
     it('should process a refund for a transaction', async () => {
       // Use a dummy transaction ID since we may not have one
       const dummyTransactionId = '00000000-0000-0000-0000-000000000001';
-      
+
       const refundRequest = {
-        amount: 25.00,
-        reason: 'Test refund'
+        amount: 25.0,
+        reason: 'Test refund',
       };
-      
+
       const response = await client.post(`/business/transactions/${dummyTransactionId}/refund`, refundRequest, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       // Transaction doesn't exist - expect 404
       expect(response.status).toBe(404);
     });

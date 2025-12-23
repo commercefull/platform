@@ -13,7 +13,7 @@ exports.up = function (knex) {
     t.string('category', 50);
     t.text('reason');
     t.boolean('isGlobal').notNullable().defaultTo(false);
-    
+
     t.index('userId');
     t.index('email');
     t.index('phone');

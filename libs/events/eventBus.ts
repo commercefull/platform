@@ -388,13 +388,13 @@ class EventBus {
       data,
       timestamp: new Date(),
       correlationId,
-      source
+      source,
     };
 
     console.log(`[EVENT] ${type}`, {
       correlationId,
       source,
-      dataKeys: Object.keys(data || {})
+      dataKeys: Object.keys(data || {}),
     });
 
     // Emit to specific event handlers
@@ -408,9 +408,7 @@ class EventBus {
     for (const handler of handlers) {
       try {
         await handler(payload);
-      } catch (error) {
-        
-      }
+      } catch (error) {}
     }
   }
 

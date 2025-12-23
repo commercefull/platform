@@ -1,55 +1,55 @@
 // Create a Stripe client.
-const stripe = Stripe("pk_test_Nw7zXh6zu9SXKrzk7KDxKUiV004Ly59ywq");
+const stripe = Stripe('pk_test_Nw7zXh6zu9SXKrzk7KDxKUiV004Ly59ywq');
 
 // Create an instance of Elements.
 const elements = stripe.elements();
 
 const style = {
   base: {
-    color: "#32325d",
+    color: '#32325d',
     fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
-    fontSmoothing: "antialiased",
-    fontSize: "16px",
+    fontSmoothing: 'antialiased',
+    fontSize: '16px',
   },
   invalid: {
-    color: "#fa755a",
-    iconColor: "#fa755a",
+    color: '#fa755a',
+    iconColor: '#fa755a',
   },
 };
 
 // Create an instance of the card Element.
-const card = elements.create("card", { style: style });
+const card = elements.create('card', { style: style });
 
 // Add an instance of the card Element into the `card-element` <div>.
-card.mount("#card-element");
+card.mount('#card-element');
 
 // Handle real-time validation errors from the card Element.
-card.addEventListener("change", function (event) {
-  const displayError = document.getElementById("card-errors");
+card.addEventListener('change', function (event) {
+  const displayError = document.getElementById('card-errors');
   if (event.error) {
     displayError.textContent = event.error.message;
   } else {
-    displayError.textContent = "";
+    displayError.textContent = '';
   }
 });
 
 // Handle form submission.
-const form = document.getElementById("checkout-form");
+const form = document.getElementById('checkout-form');
 
 if (form) {
-  form.addEventListener("submit", function (event) {
+  form.addEventListener('submit', function (event) {
     event.preventDefault();
 
     // Disable submit button
-    const submitButton = form.querySelector("button");
+    const submitButton = form.querySelector('button');
     if (submitButton) {
       submitButton.disabled = true;
     }
 
     // Get card name value
-    const cardNameInput = document.getElementById("card-name");
+    const cardNameInput = document.getElementById('card-name');
     const extraDetails = {
-      name: cardNameInput ? cardNameInput.value : "",
+      name: cardNameInput ? cardNameInput.value : '',
     };
 
     stripe.createToken(card, extraDetails).then(function (result) {
@@ -69,9 +69,9 @@ if (form) {
 // Submit the form with the token ID.
 function stripeTokenHandler(token) {
   // Insert the token ID into the form so it gets submitted to the server
-  const tokenInput = document.createElement("input");
-  tokenInput.type = "hidden";
-  tokenInput.name = "stripeToken";
+  const tokenInput = document.createElement('input');
+  tokenInput.type = 'hidden';
+  tokenInput.name = 'stripeToken';
   tokenInput.value = token.id;
 
   if (form) {
@@ -82,11 +82,11 @@ function stripeTokenHandler(token) {
 }
 
 // Checkout form interactions
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   // Toggle shipping address visibility
   const sameAddressCheckbox = document.getElementById('sameAddress');
   if (sameAddressCheckbox) {
-    sameAddressCheckbox.addEventListener('change', function() {
+    sameAddressCheckbox.addEventListener('change', function () {
       const shippingSection = document.getElementById('shippingAddress');
       if (shippingSection) {
         shippingSection.classList.toggle('hidden');
@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Toggle payment forms
   const paymentMethodRadios = document.querySelectorAll('input[name="paymentMethod"]');
   paymentMethodRadios.forEach(radio => {
-    radio.addEventListener('change', function() {
+    radio.addEventListener('change', function () {
       const creditForm = document.getElementById('credit-card-form');
       const paypalForm = document.getElementById('paypal-form');
 

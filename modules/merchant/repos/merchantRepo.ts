@@ -1,5 +1,5 @@
-import { queryOne, query } from "../../../libs/db";
-import { unixTimestamp } from "../../../libs/date";
+import { queryOne, query } from '../../../libs/db';
+import { unixTimestamp } from '../../../libs/date';
 import bcryptjs from 'bcryptjs';
 import crypto from 'crypto';
 
@@ -7,7 +7,7 @@ import crypto from 'crypto';
 import {
   Merchant as DbMerchant,
   MerchantAddress as DbMerchantAddress,
-  MerchantPaymentInfo as DbMerchantPaymentInfo
+  MerchantPaymentInfo as DbMerchantPaymentInfo,
 } from '../../../libs/db/types';
 
 // Re-export DB types
@@ -51,39 +51,24 @@ export class MerchantRepo {
   // ============================================================================
 
   async findById(merchantId: string): Promise<Merchant | null> {
-    return await queryOne<Merchant>(
-      'SELECT * FROM merchant WHERE "merchantId" = $1',
-      [merchantId]
-    );
+    return await queryOne<Merchant>('SELECT * FROM merchant WHERE "merchantId" = $1', [merchantId]);
   }
 
   async findByEmail(email: string): Promise<Merchant | null> {
-    return await queryOne<Merchant>(
-      'SELECT * FROM merchant WHERE email = $1',
-      [email]
-    );
+    return await queryOne<Merchant>('SELECT * FROM merchant WHERE email = $1', [email]);
   }
 
   async findBySlug(slug: string): Promise<Merchant | null> {
-    return await queryOne<Merchant>(
-      'SELECT * FROM merchant WHERE slug = $1',
-      [slug]
-    );
+    return await queryOne<Merchant>('SELECT * FROM merchant WHERE slug = $1', [slug]);
   }
 
   async findAll(limit: number = 50, offset: number = 0): Promise<Merchant[]> {
-    const results = await query<Merchant[]>(
-      'SELECT * FROM merchant ORDER BY name ASC LIMIT $1 OFFSET $2',
-      [limit, offset]
-    );
+    const results = await query<Merchant[]>('SELECT * FROM merchant ORDER BY name ASC LIMIT $1 OFFSET $2', [limit, offset]);
     return results || [];
   }
 
   async findByStatus(status: string, limit: number = 50): Promise<Merchant[]> {
-    const results = await query<Merchant[]>(
-      'SELECT * FROM merchant WHERE status = $1 ORDER BY "createdAt" DESC LIMIT $2',
-      [status, limit]
-    );
+    const results = await query<Merchant[]>('SELECT * FROM merchant WHERE status = $1 ORDER BY "createdAt" DESC LIMIT $2', [status, limit]);
     return results || [];
   }
 
@@ -115,8 +100,8 @@ export class MerchantRepo {
         false, // featuredMerchant
         false, // emailVerified
         now,
-        now
-      ]
+        now,
+      ],
     );
 
     if (!result) {
@@ -154,8 +139,8 @@ export class MerchantRepo {
         false,
         false,
         now,
-        now
-      ]
+        now,
+      ],
     );
 
     if (!result) {
@@ -193,7 +178,7 @@ export class MerchantRepo {
 
     const result = await queryOne<Merchant>(
       `UPDATE merchant SET ${updateFields.join(', ')} WHERE "merchantId" = $${paramIndex} RETURNING *`,
-      values
+      values,
     );
 
     if (!result) {
@@ -204,10 +189,9 @@ export class MerchantRepo {
   }
 
   async delete(merchantId: string): Promise<boolean> {
-    const result = await queryOne<{ merchantId: string }>(
-      'DELETE FROM merchant WHERE "merchantId" = $1 RETURNING "merchantId"',
-      [merchantId]
-    );
+    const result = await queryOne<{ merchantId: string }>('DELETE FROM merchant WHERE "merchantId" = $1 RETURNING "merchantId"', [
+      merchantId,
+    ]);
     return !!result;
   }
 
@@ -216,18 +200,14 @@ export class MerchantRepo {
   // ============================================================================
 
   async findAddressesByMerchantId(merchantId: string): Promise<MerchantAddress[]> {
-    const results = await query<MerchantAddress[]>(
-      'SELECT * FROM "merchantAddress" WHERE "merchantId" = $1 ORDER BY "isDefault" DESC',
-      [merchantId]
-    );
+    const results = await query<MerchantAddress[]>('SELECT * FROM "merchantAddress" WHERE "merchantId" = $1 ORDER BY "isDefault" DESC', [
+      merchantId,
+    ]);
     return results || [];
   }
 
   async findAddressById(merchantAddressId: string): Promise<MerchantAddress | null> {
-    return await queryOne<MerchantAddress>(
-      'SELECT * FROM "merchantAddress" WHERE "merchantAddressId" = $1',
-      [merchantAddressId]
-    );
+    return await queryOne<MerchantAddress>('SELECT * FROM "merchantAddress" WHERE "merchantAddressId" = $1', [merchantAddressId]);
   }
 
   async createAddress(params: MerchantAddressCreateParams): Promise<MerchantAddress> {
@@ -235,10 +215,10 @@ export class MerchantRepo {
 
     // If this is a default address, unset other defaults
     if (params.isDefault) {
-      await query(
-        'UPDATE "merchantAddress" SET "isDefault" = false, "updatedAt" = $1 WHERE "merchantId" = $2 AND "isDefault" = true',
-        [now, params.merchantId]
-      );
+      await query('UPDATE "merchantAddress" SET "isDefault" = false, "updatedAt" = $1 WHERE "merchantId" = $2 AND "isDefault" = true', [
+        now,
+        params.merchantId,
+      ]);
     }
 
     const result = await queryOne<MerchantAddress>(
@@ -265,8 +245,8 @@ export class MerchantRepo {
         params.email || null,
         false,
         now,
-        now
-      ]
+        now,
+      ],
     );
 
     if (!result) {
@@ -279,7 +259,7 @@ export class MerchantRepo {
   async deleteAddress(merchantAddressId: string): Promise<boolean> {
     const result = await queryOne<{ merchantAddressId: string }>(
       'DELETE FROM "merchantAddress" WHERE "merchantAddressId" = $1 RETURNING "merchantAddressId"',
-      [merchantAddressId]
+      [merchantAddressId],
     );
     return !!result;
   }
@@ -291,16 +271,15 @@ export class MerchantRepo {
   async findPaymentInfoByMerchantId(merchantId: string): Promise<MerchantPaymentInfo[]> {
     const results = await query<MerchantPaymentInfo[]>(
       'SELECT * FROM "merchantPaymentInfo" WHERE "merchantId" = $1 ORDER BY "isDefault" DESC',
-      [merchantId]
+      [merchantId],
     );
     return results || [];
   }
 
   async findPaymentInfoById(merchantPaymentInfoId: string): Promise<MerchantPaymentInfo | null> {
-    return await queryOne<MerchantPaymentInfo>(
-      'SELECT * FROM "merchantPaymentInfo" WHERE "merchantPaymentInfoId" = $1',
-      [merchantPaymentInfoId]
-    );
+    return await queryOne<MerchantPaymentInfo>('SELECT * FROM "merchantPaymentInfo" WHERE "merchantPaymentInfoId" = $1', [
+      merchantPaymentInfoId,
+    ]);
   }
 
   async createPaymentInfo(params: MerchantPaymentInfoCreateParams): Promise<MerchantPaymentInfo> {
@@ -326,8 +305,8 @@ export class MerchantRepo {
         params.currency,
         false,
         now,
-        now
-      ]
+        now,
+      ],
     );
 
     if (!result) {
@@ -341,12 +320,12 @@ export class MerchantRepo {
   // Authentication
   // ============================================================================
 
-  async authenticateMerchant(credentials: { email: string; password: string }): Promise<{ merchantId: string; email: string; name: string; status: string } | null> {
-    const merchant = await queryOne<Merchant>(
-      'SELECT * FROM merchant WHERE email = $1',
-      [credentials.email]
-    );
-    
+  async authenticateMerchant(credentials: {
+    email: string;
+    password: string;
+  }): Promise<{ merchantId: string; email: string; name: string; status: string } | null> {
+    const merchant = await queryOne<Merchant>('SELECT * FROM merchant WHERE email = $1', [credentials.email]);
+
     if (!merchant) return null;
 
     const passwordMatch = await bcryptjs.compare(credentials.password, merchant.password);
@@ -356,7 +335,7 @@ export class MerchantRepo {
       merchantId: merchant.merchantId,
       email: merchant.email,
       name: merchant.name,
-      status: merchant.status
+      status: merchant.status,
     };
   }
 
@@ -369,7 +348,7 @@ export class MerchantRepo {
     const hashedPassword = await this.hashPassword(newPassword);
     const result = await queryOne<{ merchantId: string }>(
       `UPDATE merchant SET password = $1, "updatedAt" = $2 WHERE "merchantId" = $3 RETURNING "merchantId"`,
-      [hashedPassword, new Date(), merchantId]
+      [hashedPassword, new Date(), merchantId],
     );
     return !!result;
   }
@@ -384,7 +363,7 @@ export class MerchantRepo {
       `INSERT INTO "merchantPasswordReset" ("merchantId", token, "expiresAt", "isUsed", "createdAt", "updatedAt")
        VALUES ($1, $2, $3, false, $4, $5)
        RETURNING "merchantPasswordResetId"`,
-      [merchantId, hashedToken, expiresAt, now, now]
+      [merchantId, hashedToken, expiresAt, now, now],
     );
 
     return token;
@@ -401,7 +380,7 @@ export class MerchantRepo {
        WHERE "isUsed" = false AND "expiresAt" > $1
        ORDER BY "createdAt" DESC
        LIMIT 1`,
-      [new Date()]
+      [new Date()],
     );
 
     if (!record) return null;
@@ -409,19 +388,16 @@ export class MerchantRepo {
     const isValid = await bcryptjs.compare(token, record.token);
     if (!isValid) return null;
 
-    await queryOne(
-      `UPDATE "merchantPasswordReset" SET "isUsed" = true, "updatedAt" = $1 WHERE "merchantPasswordResetId" = $2`,
-      [new Date(), record.merchantPasswordResetId]
-    );
+    await queryOne(`UPDATE "merchantPasswordReset" SET "isUsed" = true, "updatedAt" = $1 WHERE "merchantPasswordResetId" = $2`, [
+      new Date(),
+      record.merchantPasswordResetId,
+    ]);
 
     return record.merchantId;
   }
 
   async updateLastLogin(merchantId: string): Promise<void> {
-    await query(
-      'UPDATE merchant SET "lastLoginAt" = $1, "updatedAt" = $2 WHERE "merchantId" = $3',
-      [new Date(), new Date(), merchantId]
-    );
+    await query('UPDATE merchant SET "lastLoginAt" = $1, "updatedAt" = $2 WHERE "merchantId" = $3', [new Date(), new Date(), merchantId]);
   }
 
   // ============================================================================

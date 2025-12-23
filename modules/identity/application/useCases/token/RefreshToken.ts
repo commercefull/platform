@@ -17,7 +17,7 @@ export class RefreshTokenUseCase {
     private readonly refreshTokenRepo: any,
     private readonly tokenService: any,
     private readonly customerRepo: any,
-    private readonly merchantRepo: any
+    private readonly merchantRepo: any,
   ) {}
 
   async execute(input: RefreshTokenInput): Promise<RefreshTokenOutput> {
@@ -74,7 +74,7 @@ export class RefreshTokenUseCase {
     // Generate new tokens
     const accessToken = await this.tokenService.generateAccessToken(payload);
     const newRefreshToken = await this.tokenService.generateRefreshToken(
-      tokenRecord.customerId ? { customerId: tokenRecord.customerId } : { merchantId: tokenRecord.merchantId }
+      tokenRecord.customerId ? { customerId: tokenRecord.customerId } : { merchantId: tokenRecord.merchantId },
     );
 
     // Revoke old refresh token

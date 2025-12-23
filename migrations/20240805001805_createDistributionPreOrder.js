@@ -2,8 +2,8 @@
  * Distribution Pre-Order Migration
  * Creates the distributionPreOrder table for pre-order management
  */
-exports.up = function(knex) {
-  return knex.schema.createTable('distributionPreOrder', function(table) {
+exports.up = function (knex) {
+  return knex.schema.createTable('distributionPreOrder', function (table) {
     table.uuid('distributionPreOrderId').primary().defaultTo(knex.raw('uuidv7()'));
     table.uuid('productId').notNullable().references('productId').inTable('product').onDelete('CASCADE');
     table.uuid('productVariantId').references('productVariantId').inTable('productVariant').onDelete('SET NULL');
@@ -32,7 +32,7 @@ exports.up = function(knex) {
     table.jsonb('metadata');
     table.timestamp('createdAt').defaultTo(knex.fn.now());
     table.timestamp('updatedAt').defaultTo(knex.fn.now());
-    
+
     table.index('productId');
     table.index('productVariantId');
     table.index('status');
@@ -40,6 +40,6 @@ exports.up = function(knex) {
   });
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTableIfExists('distributionPreOrder');
 };

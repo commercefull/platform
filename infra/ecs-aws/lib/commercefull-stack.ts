@@ -64,17 +64,9 @@ export class CommerceFullStack extends cdk.Stack {
       allowAllOutbound: true,
     });
 
-    albSecurityGroup.addIngressRule(
-      ec2.Peer.anyIpv4(),
-      ec2.Port.tcp(80),
-      'Allow HTTP traffic from anywhere'
-    );
+    albSecurityGroup.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80), 'Allow HTTP traffic from anywhere');
 
-    albSecurityGroup.addIngressRule(
-      ec2.Peer.anyIpv4(),
-      ec2.Port.tcp(443),
-      'Allow HTTPS traffic from anywhere'
-    );
+    albSecurityGroup.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(443), 'Allow HTTPS traffic from anywhere');
 
     const ecsSecurityGroup = new ec2.SecurityGroup(this, 'ECSSecurityGroup', {
       vpc,
@@ -88,11 +80,7 @@ export class CommerceFullStack extends cdk.Stack {
       allowAllOutbound: true,
     });
 
-    dbSecurityGroup.addIngressRule(
-      ecsSecurityGroup,
-      ec2.Port.tcp(5432),
-      'Allow PostgreSQL traffic from ECS tasks'
-    );
+    dbSecurityGroup.addIngressRule(ecsSecurityGroup, ec2.Port.tcp(5432), 'Allow PostgreSQL traffic from ECS tasks');
 
     // ============================================================================
     // Database - PostgreSQL 18
@@ -111,15 +99,12 @@ export class CommerceFullStack extends cdk.Stack {
 
     const database = new rds.DatabaseInstance(this, 'CommerceFullDB', {
       engine: rds.DatabaseInstanceEngine.postgres({
-        version: rds.PostgresEngineVersion.VER_18
+        version: rds.PostgresEngineVersion.VER_18,
       }),
-      instanceType: ec2.InstanceType.of(
-        ec2.InstanceClass.BURSTABLE3,
-        ec2.InstanceSize.MICRO
-      ),
+      instanceType: ec2.InstanceType.of(ec2.InstanceClass.BURSTABLE3, ec2.InstanceSize.MICRO),
       vpc,
       vpcSubnets: {
-        subnetType: ec2.SubnetType.PRIVATE_ISOLATED
+        subnetType: ec2.SubnetType.PRIVATE_ISOLATED,
       },
       securityGroups: [dbSecurityGroup],
       credentials: rds.Credentials.fromSecret(dbCredentials),
@@ -147,9 +132,7 @@ export class CommerceFullStack extends cdk.Stack {
       assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com'),
     });
 
-    taskRole.addManagedPolicy(
-      iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AmazonECSTaskExecutionRolePolicy')
-    );
+    taskRole.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AmazonECSTaskExecutionRolePolicy'));
 
     // Grant access to secrets
     dbCredentials.grantRead(taskRole);
@@ -158,9 +141,7 @@ export class CommerceFullStack extends cdk.Stack {
       assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com'),
     });
 
-    executionRole.addManagedPolicy(
-      iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AmazonECSTaskExecutionRolePolicy')
-    );
+    executionRole.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AmazonECSTaskExecutionRolePolicy'));
 
     const logGroup = new logs.LogGroup(this, 'CommerceFullLogGroup', {
       logGroupName: `/ecs/commercefull-${environment}`,
@@ -176,8 +157,8 @@ export class CommerceFullStack extends cdk.Stack {
       family: `commercefull-${environment}`,
     });
 
-    const containerImage = process.env.CONTAINER_IMAGE ||
-      `${cdk.Stack.of(this).account}.dkr.ecr.${cdk.Stack.of(this).region}.amazonaws.com/commercefull:latest`;
+    const containerImage =
+      process.env.CONTAINER_IMAGE || `${cdk.Stack.of(this).account}.dkr.ecr.${cdk.Stack.of(this).region}.amazonaws.com/commercefull:latest`;
 
     const container = taskDefinition.addContainer('CommerceFullContainer', {
       image: ecs.ContainerImage.fromRegistry(containerImage),
@@ -194,16 +175,13 @@ export class CommerceFullStack extends cdk.Stack {
       },
       secrets: {
         DATABASE_URL: ecs.Secret.fromSsmParameter(
-          ssm.StringParameter.fromStringParameterName(this, 'DatabaseUrl',
-            `/commercefull/${environment}/database-url`)
+          ssm.StringParameter.fromStringParameterName(this, 'DatabaseUrl', `/commercefull/${environment}/database-url`),
         ),
         SESSION_SECRET: ecs.Secret.fromSsmParameter(
-          ssm.StringParameter.fromStringParameterName(this, 'SessionSecret',
-            `/commercefull/${environment}/session-secret`)
+          ssm.StringParameter.fromStringParameterName(this, 'SessionSecret', `/commercefull/${environment}/session-secret`),
         ),
         JWT_SECRET: ecs.Secret.fromSsmParameter(
-          ssm.StringParameter.fromStringParameterName(this, 'JwtSecret',
-            `/commercefull/${environment}/jwt-secret`)
+          ssm.StringParameter.fromStringParameterName(this, 'JwtSecret', `/commercefull/${environment}/jwt-secret`),
         ),
       },
       healthCheck: {
@@ -326,11 +304,7 @@ export class CommerceFullStack extends cdk.Stack {
       cors: [
         {
           allowedHeaders: ['*'],
-          allowedMethods: [
-            s3.HttpMethods.GET,
-            s3.HttpMethods.POST,
-            s3.HttpMethods.PUT,
-          ],
+          allowedMethods: [s3.HttpMethods.GET, s3.HttpMethods.POST, s3.HttpMethods.PUT],
           allowedOrigins: [`https://${domainName}`],
           maxAge: 3000,
         },
@@ -382,9 +356,7 @@ export class CommerceFullStack extends cdk.Stack {
 
       new route53.ARecord(this, 'CloudFrontAlias', {
         zone: hostedZone,
-        target: route53.RecordTarget.fromAlias(
-          new route53targets.CloudFrontTarget(distribution)
-        ),
+        target: route53.RecordTarget.fromAlias(new route53targets.CloudFrontTarget(distribution)),
       });
     }
 

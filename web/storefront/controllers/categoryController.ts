@@ -33,14 +33,14 @@ export const getCategoriesForNavigation = async (req: Request, res: Response): P
     const categories = await CategoryRepo.findForMenu();
     res.json({
       success: true,
-      categories
+      categories,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({
       success: false,
-      message: error.message || 'Failed to load categories'
+      message: error.message || 'Failed to load categories',
     });
   }
 };
@@ -54,14 +54,14 @@ export const getAllCategories = async (req: Request, res: Response): Promise<voi
     const categories = await CategoryRepo.findActive();
     res.json({
       success: true,
-      categories
+      categories,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({
       success: false,
-      message: error.message || 'Failed to load categories'
+      message: error.message || 'Failed to load categories',
     });
   }
 };
@@ -78,7 +78,7 @@ export const getCategoryDetails = async (req: Request, res: Response): Promise<v
     if (!category) {
       res.status(404).json({
         success: false,
-        message: 'Category not found'
+        message: 'Category not found',
       });
       return;
     }
@@ -89,14 +89,14 @@ export const getCategoryDetails = async (req: Request, res: Response): Promise<v
     res.json({
       success: true,
       category,
-      subcategories
+      subcategories,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({
       success: false,
-      message: error.message || 'Failed to load category details'
+      message: error.message || 'Failed to load category details',
     });
   }
 };
@@ -112,7 +112,7 @@ export const getCategoryPage = async (req: Request, res: Response): Promise<void
     const category = await CategoryRepo.findBySlug(categorySlug);
     if (!category) {
       return storefrontRespond(req, res, '404', {
-        pageName: 'Category Not Found'
+        pageName: 'Category Not Found',
       });
     }
 
@@ -120,20 +120,20 @@ export const getCategoryPage = async (req: Request, res: Response): Promise<void
     const subcategories = await CategoryRepo.findChildren(category.productCategoryId);
 
     // Get featured products in this category (placeholder - would need product filtering)
-    const featuredProducts:any[] = [];
+    const featuredProducts: any[] = [];
 
     storefrontRespond(req, res, 'category/category', {
       pageName: category.name,
       category,
       subcategories,
-      featuredProducts
+      featuredProducts,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     storefrontRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load category'
+      error: error.message || 'Failed to load category',
     });
   }
 };

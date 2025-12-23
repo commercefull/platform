@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function (knex) {
   return knex.schema.createTable('promotionCouponUsage', t => {
     t.uuid('promotionCouponUsageId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
@@ -9,7 +9,6 @@ exports.up = function(knex) {
     t.decimal('discountAmount', 15, 2).notNullable();
     t.string('currencyCode', 3).notNullable().defaultTo('USD');
     t.timestamp('usedAt').notNullable().defaultTo(knex.fn.now());
-    
 
     t.index('promotionCouponId');
     t.index('orderId');
@@ -18,6 +17,6 @@ exports.up = function(knex) {
   });
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTable('promotionCouponUsage');
 };

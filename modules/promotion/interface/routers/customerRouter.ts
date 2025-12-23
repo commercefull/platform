@@ -8,8 +8,12 @@ import * as giftCardController from '../../controllers/giftCardCustomerControlle
 const router = express.Router();
 
 // Placeholder routes - implement with DDD controllers
-router.post('/validate', (_req, res) => { res.json({ success: true, message: 'Validate code' }); });
-router.get('/active', (_req, res) => { res.json({ success: true, message: 'Get active promotions' }); });
+router.post('/validate', (_req, res) => {
+  res.json({ success: true, message: 'Validate code' });
+});
+router.get('/active', (_req, res) => {
+  res.json({ success: true, message: 'Get active promotions' });
+});
 
 // Gift Card routes
 router.get('/gift-cards/balance/:code', giftCardController.checkGiftCardBalance);

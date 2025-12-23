@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function (knex) {
   return knex.schema.createTable('cartPromotionItem', t => {
     t.uuid('cartPromotionItemId').primary().defaultTo(knex.raw('uuidv7()'));
     t.uuid('cartPromotionId').notNullable().references('cartPromotionId').inTable('cartPromotion').onDelete('CASCADE');
@@ -8,7 +8,6 @@ exports.up = function(knex) {
     t.decimal('discountPercentage', 5, 2);
     t.decimal('originalPrice', 15, 2).notNullable();
     t.decimal('finalPrice', 15, 2).notNullable();
-    
 
     t.index('cartPromotionId');
     t.index('basketItemId');
@@ -16,6 +15,6 @@ exports.up = function(knex) {
   });
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTable('cartPromotionItem');
 };

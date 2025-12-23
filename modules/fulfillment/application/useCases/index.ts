@@ -1,6 +1,6 @@
 /**
  * Fulfillment Use Cases
- * 
+ *
  * Barrel export for all fulfillment-related use cases.
  */
 

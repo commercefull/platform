@@ -10,7 +10,7 @@ import { StorageService, UploadResult } from '../../domain/services/StorageServi
 export class LocalStorageService implements StorageService {
   constructor(
     private readonly baseDir: string = './uploads',
-    private readonly baseUrl: string = 'http://localhost:3000/uploads'
+    private readonly baseUrl: string = 'http://localhost:3000/uploads',
   ) {}
 
   async upload(
@@ -20,7 +20,7 @@ export class LocalStorageService implements StorageService {
     options: {
       public?: boolean;
       metadata?: Record<string, string>;
-    } = {}
+    } = {},
   ): Promise<UploadResult> {
     const filePath = path.join(this.baseDir, key);
     const dir = path.dirname(filePath);
@@ -37,7 +37,7 @@ export class LocalStorageService implements StorageService {
       url,
       key,
       size: buffer.length,
-      mimeType
+      mimeType,
     };
   }
 
@@ -47,7 +47,7 @@ export class LocalStorageService implements StorageService {
     options: {
       public?: boolean;
       metadata?: Record<string, string>;
-    } = {}
+    } = {},
   ): Promise<UploadResult> {
     const buffer = await fs.readFile(filePath);
     return this.upload(buffer, key, this.getMimeType(filePath), options);
@@ -91,7 +91,7 @@ export class LocalStorageService implements StorageService {
       createdAt: stats.birthtime,
       modifiedAt: stats.mtime,
       isFile: stats.isFile(),
-      mimeType: this.getMimeType(key)
+      mimeType: this.getMimeType(key),
     };
   }
 
@@ -104,7 +104,7 @@ export class LocalStorageService implements StorageService {
       '.webp': 'image/webp',
       '.gif': 'image/gif',
       '.avif': 'image/avif',
-      '.svg': 'image/svg+xml'
+      '.svg': 'image/svg+xml',
     };
     return mimeTypes[ext] || 'application/octet-stream';
   }

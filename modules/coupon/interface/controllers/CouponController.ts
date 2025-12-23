@@ -1,6 +1,6 @@
 /**
  * Coupon Controller
- * 
+ *
  * HTTP interface for coupon management.
  */
 
@@ -39,7 +39,7 @@ export const createCoupon = async (req: Request, res: Response): Promise<void> =
       req.body.applicableCustomerGroups,
       req.body.excludedProducts,
       req.body.excludedCategories,
-      req.body.metadata
+      req.body.metadata,
     );
     const coupon = await useCase.execute(command);
     res.status(201).json({ success: true, data: coupon });
@@ -52,12 +52,7 @@ export const createCoupon = async (req: Request, res: Response): Promise<void> =
 export const validateCoupon = async (req: Request, res: Response): Promise<void> => {
   try {
     const useCase = new ValidateCouponUseCase(couponRepository);
-    const command = new ValidateCouponCommand(
-      req.body.code || req.params.code,
-      req.body.orderValue,
-      req.body.customerId,
-      req.body.items
-    );
+    const command = new ValidateCouponCommand(req.body.code || req.params.code, req.body.orderValue, req.body.customerId, req.body.items);
     const result = await useCase.execute(command);
     res.json({ success: true, data: result });
   } catch (error: any) {
@@ -124,7 +119,7 @@ export const listCoupons = async (req: Request, res: Response): Promise<void> =>
       {
         limit: req.query.limit ? parseInt(req.query.limit as string, 10) : 20,
         offset: req.query.offset ? parseInt(req.query.offset as string, 10) : 0,
-      }
+      },
     );
     res.json({ success: true, data: result });
   } catch (error: any) {

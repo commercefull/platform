@@ -7,18 +7,7 @@ const supplierRepo = SupplierRepo;
 
 export const getSuppliers = async (req: Request, res: Response): Promise<void> => {
   try {
-    const {
-      status,
-      isActive,
-      isApproved,
-      minRating,
-      category,
-      tag,
-      currency,
-      search,
-      limit = '50',
-      offset = '0'
-    } = req.query;
+    const { status, isActive, isApproved, minRating, category, tag, currency, search, limit = '50', offset = '0' } = req.query;
 
     let suppliers;
 
@@ -36,17 +25,13 @@ export const getSuppliers = async (req: Request, res: Response): Promise<void> =
       if (tag) filters.tag = tag as string;
       if (currency) filters.currency = currency as string;
 
-      suppliers = await supplierRepo.findWithFilters(
-        filters,
-        parseInt(limit as string),
-        parseInt(offset as string)
-      );
+      suppliers = await supplierRepo.findWithFilters(filters, parseInt(limit as string), parseInt(offset as string));
     }
 
     successResponse(res, suppliers);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to fetch suppliers');
   }
 };
@@ -64,7 +49,7 @@ export const getSupplierById = async (req: Request, res: Response): Promise<void
     successResponse(res, supplier);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to fetch supplier');
   }
 };
@@ -82,7 +67,7 @@ export const getSupplierByCode = async (req: Request, res: Response): Promise<vo
     successResponse(res, supplier);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to fetch supplier');
   }
 };
@@ -109,7 +94,7 @@ export const createSupplier = async (req: Request, res: Response): Promise<void>
       notes,
       categories,
       tags,
-      customFields
+      customFields,
     } = req.body;
 
     // Validate required fields
@@ -142,14 +127,14 @@ export const createSupplier = async (req: Request, res: Response): Promise<void>
       notes,
       categories,
       tags,
-      customFields
+      customFields,
     };
 
     const supplier = await supplierRepo.create(supplierParams);
     successResponse(res, supplier, 201);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     if (error.message.includes('already exists')) {
       errorResponse(res, error.message, 409);
     } else {
@@ -173,7 +158,7 @@ export const updateSupplier = async (req: Request, res: Response): Promise<void>
     successResponse(res, supplier);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to update supplier');
   }
 };
@@ -191,7 +176,7 @@ export const deleteSupplier = async (req: Request, res: Response): Promise<void>
     successResponse(res, { message: 'Supplier deleted successfully' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to delete supplier');
   }
 };
@@ -216,7 +201,7 @@ export const updateSupplierStatus = async (req: Request, res: Response): Promise
     successResponse(res, supplier);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to update supplier status');
   }
 };
@@ -241,7 +226,7 @@ export const updateSupplierVisibility = async (req: Request, res: Response): Pro
     successResponse(res, supplier);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to update supplier visibility');
   }
 };
@@ -259,7 +244,7 @@ export const approveSupplier = async (req: Request, res: Response): Promise<void
     successResponse(res, supplier);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to approve supplier');
   }
 };
@@ -277,7 +262,7 @@ export const suspendSupplier = async (req: Request, res: Response): Promise<void
     successResponse(res, supplier);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to suspend supplier');
   }
 };
@@ -288,7 +273,7 @@ export const getSupplierStatistics = async (req: Request, res: Response): Promis
     successResponse(res, statistics);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to fetch supplier statistics');
   }
 };
@@ -302,7 +287,7 @@ export const getSupplierAddresses = async (req: Request, res: Response): Promise
     successResponse(res, []);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to fetch supplier addresses');
   }
 };
@@ -314,7 +299,7 @@ export const createSupplierAddress = async (req: Request, res: Response): Promis
     successResponse(res, {}, 201);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to create supplier address');
   }
 };
@@ -326,7 +311,7 @@ export const updateSupplierAddress = async (req: Request, res: Response): Promis
     successResponse(res, {});
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to update supplier address');
   }
 };
@@ -338,7 +323,7 @@ export const deleteSupplierAddress = async (req: Request, res: Response): Promis
     successResponse(res, { message: 'Supplier address deleted successfully' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to delete supplier address');
   }
 };
@@ -352,7 +337,7 @@ export const getSupplierProducts = async (req: Request, res: Response): Promise<
     successResponse(res, []);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to fetch supplier products');
   }
 };
@@ -364,7 +349,7 @@ export const addProductToSupplier = async (req: Request, res: Response): Promise
     successResponse(res, {}, 201);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to add product to supplier');
   }
 };
@@ -376,7 +361,7 @@ export const updateSupplierProduct = async (req: Request, res: Response): Promis
     successResponse(res, {});
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to update supplier product');
   }
 };
@@ -388,7 +373,7 @@ export const removeProductFromSupplier = async (req: Request, res: Response): Pr
     successResponse(res, { message: 'Product removed from supplier successfully' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to remove product from supplier');
   }
 };

@@ -37,7 +37,7 @@ export class ListProductsForContextCommand {
     public readonly limit: number = 20,
     public readonly offset: number = 0,
     public readonly orderBy: string = 'createdAt',
-    public readonly orderDirection: 'asc' | 'desc' = 'desc'
+    public readonly orderDirection: 'asc' | 'desc' = 'desc',
   ) {}
 }
 
@@ -50,7 +50,7 @@ export class ListProductsForContextUseCase {
     private readonly productRepository: ProductRepository,
     private readonly businessRepository: BusinessRepository,
     private readonly storeRepository: StoreRepository,
-    private readonly systemConfigRepository: SystemConfigurationRepository
+    private readonly systemConfigRepository: SystemConfigurationRepository,
   ) {}
 
   async execute(command: ListProductsForContextCommand): Promise<ListProductsResponse> {
@@ -64,7 +64,7 @@ export class ListProductsForContextUseCase {
       limit: command.limit,
       offset: command.offset,
       orderBy: command.orderBy,
-      orderDirection: command.orderDirection
+      orderDirection: command.orderDirection,
     };
 
     const result = await this.productRepository.findAll(filters, pagination);
@@ -74,14 +74,14 @@ export class ListProductsForContextUseCase {
       total: result.total,
       limit: result.limit,
       offset: result.offset,
-      hasMore: result.hasMore
+      hasMore: result.hasMore,
     };
   }
 
   private async buildContextFilters(command: ListProductsForContextCommand, systemConfig: any) {
     const filters: any = {
       status: command.includeInactive ? undefined : ProductStatus.ACTIVE,
-      visibility: [ProductVisibility.VISIBLE, ProductVisibility.FEATURED]
+      visibility: [ProductVisibility.VISIBLE, ProductVisibility.FEATURED],
     };
 
     // Apply context-based ownership filtering
@@ -137,7 +137,7 @@ export class ListProductsForContextUseCase {
       hasVariants: product.hasVariants,
       primaryImageUrl: product.primaryImage?.url,
       categoryId: product.categoryId,
-      createdAt: product.createdAt.toISOString()
+      createdAt: product.createdAt.toISOString(),
     };
   }
 }

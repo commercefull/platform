@@ -10,7 +10,7 @@ export class SchedulePageCommand {
   constructor(
     public readonly pageId: string,
     public readonly scheduledAt: Date,
-    public readonly scheduledBy?: string
+    public readonly scheduledBy?: string,
   ) {}
 }
 
@@ -51,7 +51,7 @@ export class SchedulePageUseCase {
     const scheduledAtStr = command.scheduledAt.toISOString();
     const updatedPage = await this.contentRepo.updatePage(command.pageId, {
       status: 'scheduled',
-      scheduledAt: scheduledAtStr
+      scheduledAt: scheduledAtStr,
     });
 
     eventBus.emit('content.page.updated', {
@@ -59,7 +59,7 @@ export class SchedulePageUseCase {
       title: updatedPage.title,
       slug: updatedPage.slug,
       updatedBy: command.scheduledBy,
-      changes: ['status', 'scheduledAt']
+      changes: ['status', 'scheduledAt'],
     });
 
     return {
@@ -67,7 +67,7 @@ export class SchedulePageUseCase {
       title: updatedPage.title,
       slug: updatedPage.slug,
       status: updatedPage.status,
-      scheduledAt: scheduledAtStr
+      scheduledAt: scheduledAtStr,
     };
   }
 }

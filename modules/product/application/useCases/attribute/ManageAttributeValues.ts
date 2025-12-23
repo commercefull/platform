@@ -1,6 +1,6 @@
-import dynamicAttributeRepository, { 
+import dynamicAttributeRepository, {
   ProductAttributeValue,
-  AttributeValueCreateInput 
+  AttributeValueCreateInput,
 } from '../../../infrastructure/repositories/DynamicAttributeRepository';
 
 // ==================== Add Attribute Value ====================
@@ -27,7 +27,7 @@ export class AddAttributeValueUseCase {
       if (!attribute) {
         return {
           success: false,
-          error: 'Attribute not found'
+          error: 'Attribute not found',
         };
       }
 
@@ -36,7 +36,7 @@ export class AddAttributeValueUseCase {
       if (!optionTypes.includes(attribute.type)) {
         return {
           success: false,
-          error: `Attribute type "${attribute.type}" does not support predefined values`
+          error: `Attribute type "${attribute.type}" does not support predefined values`,
         };
       }
 
@@ -46,7 +46,7 @@ export class AddAttributeValueUseCase {
       if (duplicate) {
         return {
           success: false,
-          error: `Value "${command.value}" already exists for this attribute`
+          error: `Value "${command.value}" already exists for this attribute`,
         };
       }
 
@@ -56,19 +56,19 @@ export class AddAttributeValueUseCase {
         value: command.value,
         displayValue: command.displayValue,
         position: command.position ?? existingValues.length,
-        isDefault: command.isDefault
+        isDefault: command.isDefault,
       };
 
       const value = await dynamicAttributeRepository.createAttributeValue(input);
 
       return {
         success: true,
-        data: value
+        data: value,
       };
     } catch (error) {
       return {
         success: false,
-        error: `Failed to add attribute value: ${(error as Error).message}`
+        error: `Failed to add attribute value: ${(error as Error).message}`,
       };
     }
   }
@@ -93,7 +93,7 @@ export class RemoveAttributeValueUseCase {
       if (!deleted) {
         return {
           success: false,
-          error: 'Failed to delete attribute value'
+          error: 'Failed to delete attribute value',
         };
       }
 
@@ -101,7 +101,7 @@ export class RemoveAttributeValueUseCase {
     } catch (error) {
       return {
         success: false,
-        error: `Failed to remove attribute value: ${(error as Error).message}`
+        error: `Failed to remove attribute value: ${(error as Error).message}`,
       };
     }
   }
@@ -126,12 +126,12 @@ export class GetAttributeValuesUseCase {
 
       return {
         success: true,
-        data: values
+        data: values,
       };
     } catch (error) {
       return {
         success: false,
-        error: `Failed to get attribute values: ${(error as Error).message}`
+        error: `Failed to get attribute values: ${(error as Error).message}`,
       };
     }
   }

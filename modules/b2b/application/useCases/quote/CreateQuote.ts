@@ -93,13 +93,13 @@ export class CreateQuoteUseCase {
         customerNotes: command.notes,
         internalNotes: command.internalNotes,
         revisionNumber: 1,
-        attachments: []
+        attachments: [],
       });
 
       // Add items to the quote
       for (let i = 0; i < command.items.length; i++) {
         const item = command.items[i];
-        const lineTotal = (item.quantity * item.unitPrice) - (item.discount || 0);
+        const lineTotal = item.quantity * item.unitPrice - (item.discount || 0);
         await quoteRepo.saveQuoteItem({
           b2bQuoteId: quote.b2bQuoteId,
           productId: item.productId,
@@ -116,7 +116,7 @@ export class CreateQuoteUseCase {
           taxAmount: 0,
           isCustomItem: false,
           isPriceOverride: false,
-          position: i
+          position: i,
         });
       }
 
@@ -130,7 +130,7 @@ export class CreateQuoteUseCase {
         currency: quote.currency,
         itemCount: command.items.length,
         createdBy: command.createdBy,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
 
       return {
@@ -144,8 +144,8 @@ export class CreateQuoteUseCase {
           total: quote.grandTotal,
           itemCount: command.items.length,
           validUntil: quote.validUntil || validUntil,
-          createdAt: quote.createdAt
-        }
+          createdAt: quote.createdAt,
+        },
       };
     } catch (error: any) {
       return { success: false, error: error.message };

@@ -8,19 +8,27 @@ exports.up = function (knex) {
     t.uuid('orderId').notNullable().references('orderId').inTable('order').onDelete('CASCADE');
     t.uuid('paymentMethodId').references('paymentMethodId').inTable('paymentMethod');
     t.enum('type', [
-      'creditCard', 'debitCard', 'paypal', 'applePay', 'googlePay', 'bankTransfer', 'crypto', 'giftCard', 'storeCredit'
+      'creditCard',
+      'debitCard',
+      'paypal',
+      'applePay',
+      'googlePay',
+      'bankTransfer',
+      'crypto',
+      'giftCard',
+      'storeCredit',
     ]).notNullable();
     t.string('provider', 100).notNullable();
     t.decimal('amount', 15, 2).notNullable();
     t.string('currency', 3).notNullable();
-    t.enum('status', [
-      'pending', 'authorized', 'captured', 'refunded', 'partiallyRefunded', 'voided', 'failed'
-    ]).notNullable().defaultTo('pending');
+    t.enum('status', ['pending', 'authorized', 'captured', 'refunded', 'partiallyRefunded', 'voided', 'failed'])
+      .notNullable()
+      .defaultTo('pending');
     t.string('transactionId', 255);
     t.string('authorizationCode', 255);
     t.string('errorCode', 100);
     t.text('errorMessage');
-    
+
     t.string('maskedNumber', 30);
     t.string('cardType', 50);
     t.jsonb('gatewayResponse');

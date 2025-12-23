@@ -15,13 +15,13 @@ describe('Tax Categories API Integration Tests', () => {
   describe('GET /business/tax/categories', () => {
     it('should return tax categories when authenticated as admin', async () => {
       const response = await client.get('/business/tax/categories', {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       expect(Array.isArray(response.data.data)).toBeTruthy();
-      
+
       if (response.data.data.length > 0) {
         // Verify structure of a tax category - uses taxCategoryId not id
         const taxCategory = response.data.data[0];
@@ -39,7 +39,7 @@ describe('Tax Categories API Integration Tests', () => {
 
     it('should reject access when authenticated as non-admin user', async () => {
       const response = await client.get('/business/tax/categories', {
-        headers: { Authorization: `Bearer ${userToken}` }
+        headers: { Authorization: `Bearer ${userToken}` },
       });
       expect(response.status).toBe(401);
     });
@@ -49,21 +49,21 @@ describe('Tax Categories API Integration Tests', () => {
     it('should return a tax category by code for public API', async () => {
       // First get all categories to find a valid code
       const allCategoriesResponse = await client.get('/business/tax/categories', {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       const categoryCode = allCategoriesResponse.data.data[0].code;
-      
+
       // Test the public endpoint
       const response = await client.get(`/api/tax/categories/${categoryCode}`);
-      
+
       expect(response.status).toBe(200);
       // DB returns taxCategoryId, not id
       expect(response.data.taxCategoryId || response.data.id).toBeTruthy();
       expect(response.data).toHaveProperty('name');
       expect(response.data.code).toBe(categoryCode);
     });
-    
+
     it('should return 404 for non-existent tax category code', async () => {
       const response = await client.get('/api/tax/categories/non-existent-code');
       expect(response.status).toBe(404);
@@ -78,40 +78,40 @@ describe('Tax Categories API Integration Tests', () => {
         description: 'Tax category created during integration test',
         isDefault: false,
         sortOrder: 100,
-        isActive: true
+        isActive: true,
       };
-      
+
       const response = await client.post('/business/tax/categories', newTaxCategory, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       expect(response.status).toBe(201);
       // DB returns taxCategoryId, not id
       const createdTaxCategoryId = response.data.taxCategoryId || response.data.id;
       expect(createdTaxCategoryId).toBeTruthy();
       expect(response.data.name).toBe(newTaxCategory.name);
       expect(response.data.code).toBe(newTaxCategory.code);
-      
+
       // Clean up - delete the tax category we just created
       await client.delete(`/business/tax/categories/${createdTaxCategoryId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
     });
 
     it('should validate required fields', async () => {
       const invalidTaxCategory = {
         // Missing required fields
-        name: 'Invalid Tax Category'
+        name: 'Invalid Tax Category',
         // No code provided
       };
-      
+
       const response = await client.post('/business/tax/categories', invalidTaxCategory, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       expect(response.status).toBe(400);
     });
-    
+
     it('should reject duplicate category codes', async () => {
       // First, create a category
       const newTaxCategory = {
@@ -120,15 +120,15 @@ describe('Tax Categories API Integration Tests', () => {
         description: 'Tax category created during integration test',
         isDefault: false,
         sortOrder: 100,
-        isActive: true
+        isActive: true,
       };
-      
+
       const firstResponse = await client.post('/business/tax/categories', newTaxCategory, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       const createdTaxCategoryId = firstResponse.data.id;
-      
+
       // Try to create another category with the same code
       const duplicateTaxCategory = {
         name: 'Another Test Tax Category',
@@ -136,25 +136,25 @@ describe('Tax Categories API Integration Tests', () => {
         description: 'This should fail',
         isDefault: false,
         sortOrder: 101,
-        isActive: true
+        isActive: true,
       };
-      
+
       const duplicateResponse = await client.post('/business/tax/categories', duplicateTaxCategory, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       expect(duplicateResponse.status).toBe(400);
-      
+
       // Clean up - delete the tax category we created
       await client.delete(`/business/tax/categories/${createdTaxCategoryId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
     });
   });
 
   describe('PUT /business/tax/categories/:id', () => {
     let testCategoryId: string;
-    
+
     beforeEach(async () => {
       // Create a tax category for testing updates
       const newTaxCategory = {
@@ -163,57 +163,60 @@ describe('Tax Categories API Integration Tests', () => {
         description: 'Tax category for update testing',
         isDefault: false,
         sortOrder: 200,
-        isActive: true
+        isActive: true,
       };
-      
+
       const createResponse = await client.post('/business/tax/categories', newTaxCategory, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       if (createResponse.status === 201) {
         testCategoryId = createResponse.data.id;
       }
     });
-    
+
     afterEach(async () => {
       // Clean up - delete the test category if it exists
       if (testCategoryId) {
         await client.delete(`/business/tax/categories/${testCategoryId}`, {
-          headers: { Authorization: `Bearer ${adminToken}` }
+          headers: { Authorization: `Bearer ${adminToken}` },
         });
       }
     });
-    
-    it('should update an existing tax category when authenticated as admin', async () => {
 
+    it('should update an existing tax category when authenticated as admin', async () => {
       const updateData = {
         name: 'Updated Category Name',
         description: 'Updated description',
-        sortOrder: 201
+        sortOrder: 201,
       };
-      
+
       const response = await client.put(`/business/tax/categories/${testCategoryId}`, updateData, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       expect(response.status).toBe(200);
       expect(response.data.name).toBe(updateData.name);
       expect(response.data.description).toBe(updateData.description);
       expect(response.data.sortOrder).toBe(updateData.sortOrder);
     });
-    
+
     it('should return 404 for non-existent tax category', async () => {
-      const response = await client.put('/business/tax/categories/non-existent-id', { name: 'Test' }, {
-        headers: { Authorization: `Bearer ${adminToken}` }
-      });
-      
+      const response = await client.put(
+        '/business/tax/categories/non-existent-id',
+        { name: 'Test' },
+        {
+          headers: { Authorization: `Bearer ${adminToken}` },
+        },
+      );
+
       expect(response.status).toBe(404);
     });
   });
 
   describe('DELETE /business/tax/categories/:id', () => {
     let testCategoryId: string;
-    
+
     beforeEach(async () => {
       // Create a tax category for testing deletion
       const newTaxCategory = {
@@ -222,42 +225,41 @@ describe('Tax Categories API Integration Tests', () => {
         description: 'Tax category for deletion testing',
         isDefault: false,
         sortOrder: 300,
-        isActive: true
+        isActive: true,
       };
-      
+
       const createResponse = await client.post('/business/tax/categories', newTaxCategory, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       if (createResponse.status === 201) {
         testCategoryId = createResponse.data.id;
       }
     });
-    
+
     it('should delete a tax category when authenticated as admin', async () => {
-      
       const response = await client.delete(`/business/tax/categories/${testCategoryId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       expect(response.status).toBe(200);
-      
+
       // Verify it's really gone
       const getResponse = await client.get(`/business/tax/categories/${testCategoryId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       expect(getResponse.status).toBe(404);
-      
+
       // Clear the ID so afterEach doesn't try to delete again
       testCategoryId = '';
     });
-    
+
     afterEach(async () => {
       // Clean up - delete the test category if it exists
       if (testCategoryId) {
         await client.delete(`/business/tax/categories/${testCategoryId}`, {
-          headers: { Authorization: `Bearer ${adminToken}` }
+          headers: { Authorization: `Bearer ${adminToken}` },
         });
       }
     });

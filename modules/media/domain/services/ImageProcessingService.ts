@@ -27,10 +27,7 @@ export interface ImageProcessingResult {
 }
 
 export interface ImageProcessingService {
-  processImage(
-    imageBuffer: Buffer,
-    options?: ImageProcessingOptions
-  ): Promise<ImageProcessingResult>;
+  processImage(imageBuffer: Buffer, options?: ImageProcessingOptions): Promise<ImageProcessingResult>;
 
   resizeImage(
     imageBuffer: Buffer,
@@ -40,17 +37,10 @@ export interface ImageProcessingService {
       fit?: 'cover' | 'contain' | 'fill' | 'inside' | 'outside';
       quality?: number;
       format?: 'webp' | 'jpeg' | 'png';
-    }
+    },
   ): Promise<ProcessedImage>;
 
-  convertToWebP(
-    imageBuffer: Buffer,
-    quality?: number
-  ): Promise<ProcessedImage>;
+  convertToWebP(imageBuffer: Buffer, quality?: number): Promise<ProcessedImage>;
 
-  generateThumbnail(
-    imageBuffer: Buffer,
-    width: number,
-    height: number
-  ): Promise<ProcessedImage>;
+  generateThumbnail(imageBuffer: Buffer, width: number, height: number): Promise<ProcessedImage>;
 }

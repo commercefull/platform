@@ -35,17 +35,11 @@ export class OrderAddressRepo {
   }
 
   async findByOrderId(orderId: string): Promise<OrderAddress[]> {
-    return (await query<OrderAddress[]>(
-      `SELECT * FROM "orderAddress" WHERE "orderId" = $1 ORDER BY "addressType" ASC`,
-      [orderId]
-    )) || [];
+    return (await query<OrderAddress[]>(`SELECT * FROM "orderAddress" WHERE "orderId" = $1 ORDER BY "addressType" ASC`, [orderId])) || [];
   }
 
   async findByOrderIdAndType(orderId: string, addressType: OrderAddressType): Promise<OrderAddress | null> {
-    return await queryOne<OrderAddress>(
-      `SELECT * FROM "orderAddress" WHERE "orderId" = $1 AND "addressType" = $2`,
-      [orderId, addressType]
-    );
+    return await queryOne<OrderAddress>(`SELECT * FROM "orderAddress" WHERE "orderId" = $1 AND "addressType" = $2`, [orderId, addressType]);
   }
 
   async findShippingAddress(orderId: string): Promise<OrderAddress | null> {
@@ -66,12 +60,26 @@ export class OrderAddressRepo {
         "phoneNumber", "email", "isDefault", "validatedAt", "additionalInfo", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19) RETURNING *`,
       [
-        params.orderId, params.customerAddressId || null, params.addressType, params.firstName,
-        params.lastName, params.company || null, params.addressLine1, params.addressLine2 || null,
-        params.city, params.state, params.postalCode, params.country, params.phoneNumber || null,
-        params.email || null, params.isDefault || false, params.validatedAt || null,
-        params.additionalInfo || null, now, now
-      ]
+        params.orderId,
+        params.customerAddressId || null,
+        params.addressType,
+        params.firstName,
+        params.lastName,
+        params.company || null,
+        params.addressLine1,
+        params.addressLine2 || null,
+        params.city,
+        params.state,
+        params.postalCode,
+        params.country,
+        params.phoneNumber || null,
+        params.email || null,
+        params.isDefault || false,
+        params.validatedAt || null,
+        params.additionalInfo || null,
+        now,
+        now,
+      ],
     );
 
     if (!result) throw new Error('Failed to create order address');
@@ -97,7 +105,7 @@ export class OrderAddressRepo {
 
     return await queryOne<OrderAddress>(
       `UPDATE "orderAddress" SET ${updateFields.join(', ')} WHERE "orderAddressId" = $${paramIndex} RETURNING *`,
-      values
+      values,
     );
   }
 
@@ -108,7 +116,7 @@ export class OrderAddressRepo {
   async delete(id: string): Promise<boolean> {
     const result = await queryOne<{ orderAddressId: string }>(
       `DELETE FROM "orderAddress" WHERE "orderAddressId" = $1 RETURNING "orderAddressId"`,
-      [id]
+      [id],
     );
     return !!result;
   }
@@ -116,7 +124,7 @@ export class OrderAddressRepo {
   async deleteByOrderId(orderId: string): Promise<number> {
     const results = await query<{ orderAddressId: string }[]>(
       `DELETE FROM "orderAddress" WHERE "orderId" = $1 RETURNING "orderAddressId"`,
-      [orderId]
+      [orderId],
     );
     return results ? results.length : 0;
   }

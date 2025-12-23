@@ -21,13 +21,7 @@ import { FulfillmentStatus } from '../../domain/valueObjects/FulfillmentStatus';
 
 type ResponseData = Record<string, any>;
 
-function respond(
-  req: Request,
-  res: Response,
-  data: ResponseData,
-  statusCode: number = 200,
-  htmlTemplate?: string
-): void {
+function respond(req: Request, res: Response, data: ResponseData, statusCode: number = 200, htmlTemplate?: string): void {
   const acceptHeader = req.get('Accept') || 'application/json';
 
   if (acceptHeader.includes('text/html') && htmlTemplate) {
@@ -37,13 +31,7 @@ function respond(
   }
 }
 
-function respondError(
-  req: Request,
-  res: Response,
-  message: string,
-  statusCode: number = 500,
-  htmlTemplate?: string
-): void {
+function respondError(req: Request, res: Response, message: string, statusCode: number = 500, htmlTemplate?: string): void {
   const acceptHeader = req.get('Accept') || 'application/json';
 
   if (acceptHeader.includes('text/html') && htmlTemplate) {
@@ -76,7 +64,7 @@ export const listOrders = async (req: Request, res: Response): Promise<void> => 
       limit,
       offset,
       orderBy,
-      orderDirection
+      orderDirection,
     } = req.query;
 
     const filters: any = {};
@@ -95,7 +83,7 @@ export const listOrders = async (req: Request, res: Response): Promise<void> => 
       parseInt(limit as string) || 50,
       parseInt(offset as string) || 0,
       (orderBy as string) || 'createdAt',
-      (orderDirection as 'asc' | 'desc') || 'desc'
+      (orderDirection as 'asc' | 'desc') || 'desc',
     );
 
     const useCase = new ListOrdersUseCase(OrderRepo);
@@ -104,7 +92,7 @@ export const listOrders = async (req: Request, res: Response): Promise<void> => 
     respond(req, res, result, 200, 'admin/order/list');
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     respondError(req, res, error.message || 'Failed to list orders', 500, 'admin/order/error');
   }
 };
@@ -129,7 +117,7 @@ export const getOrder = async (req: Request, res: Response): Promise<void> => {
     respond(req, res, order, 200, 'admin/order/detail');
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     respondError(req, res, error.message || 'Failed to get order', 500, 'admin/order/error');
   }
 };
@@ -157,18 +145,17 @@ export const updateOrderStatus = async (req: Request, res: Response): Promise<vo
     respond(req, res, result, 200, 'admin/order/detail');
   } catch (error: any) {
     logger.error('Error:', error);
-    
-    
+
     if (error.message.includes('Cannot transition')) {
       respondError(req, res, error.message, 400, 'admin/order/error');
       return;
     }
-    
+
     if (error.message.includes('not found')) {
       respondError(req, res, error.message, 404, 'admin/order/error');
       return;
     }
-    
+
     respondError(req, res, error.message || 'Failed to update order status', 500, 'admin/order/error');
   }
 };
@@ -194,18 +181,17 @@ export const cancelOrder = async (req: Request, res: Response): Promise<void> =>
     respond(req, res, result, 200, 'admin/order/cancelled');
   } catch (error: any) {
     logger.error('Error:', error);
-    
-    
+
     if (error.message.includes('cannot be cancelled')) {
       respondError(req, res, error.message, 400, 'admin/order/error');
       return;
     }
-    
+
     if (error.message.includes('not found')) {
       respondError(req, res, error.message, 404, 'admin/order/error');
       return;
     }
-    
+
     respondError(req, res, error.message || 'Failed to cancel order', 500, 'admin/order/error');
   }
 };
@@ -236,18 +222,17 @@ export const processRefund = async (req: Request, res: Response): Promise<void> 
     respond(req, res, result, 200, 'admin/order/refund');
   } catch (error: any) {
     logger.error('Error:', error);
-    
-    
+
     if (error.message.includes('cannot be refunded') || error.message.includes('cannot exceed')) {
       respondError(req, res, error.message, 400, 'admin/order/error');
       return;
     }
-    
+
     if (error.message.includes('not found')) {
       respondError(req, res, error.message, 404, 'admin/order/error');
       return;
     }
-    
+
     respondError(req, res, error.message || 'Failed to process refund', 500, 'admin/order/error');
   }
 };
@@ -270,7 +255,7 @@ export const getOrderStats = async (req: Request, res: Response): Promise<void> 
     respond(req, res, stats, 200, 'admin/order/stats');
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     respondError(req, res, error.message || 'Failed to get order statistics', 500, 'admin/order/error');
   }
 };
@@ -288,7 +273,7 @@ export const getOrderHistory = async (req: Request, res: Response): Promise<void
     respond(req, res, { orderId, history }, 200, 'admin/order/history');
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     respondError(req, res, error.message || 'Failed to get order history', 500, 'admin/order/error');
   }
 };

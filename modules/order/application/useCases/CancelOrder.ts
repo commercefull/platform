@@ -15,7 +15,7 @@ export class CancelOrderCommand {
   constructor(
     public readonly orderId: string,
     public readonly reason: string,
-    public readonly customerId?: string // For authorization check
+    public readonly customerId?: string, // For authorization check
   ) {}
 }
 
@@ -40,7 +40,7 @@ export class CancelOrderUseCase {
 
   async execute(command: CancelOrderCommand): Promise<CancelOrderResponse> {
     const order = await this.orderRepository.findById(command.orderId);
-    
+
     if (!order) {
       throw new Error('Order not found');
     }
@@ -62,11 +62,7 @@ export class CancelOrderUseCase {
     await this.orderRepository.save(order);
 
     // Record status change in history
-    await this.orderRepository.recordStatusChange(
-      command.orderId,
-      OrderStatus.CANCELLED,
-      command.reason
-    );
+    await this.orderRepository.recordStatusChange(command.orderId, OrderStatus.CANCELLED, command.reason);
 
     // Emit event
     eventBus.emit('order.cancelled', {
@@ -74,7 +70,7 @@ export class CancelOrderUseCase {
       orderNumber: order.orderNumber,
       customerId: order.customerId,
       reason: command.reason,
-      totalAmount: order.totalAmount.amount
+      totalAmount: order.totalAmount.amount,
     });
 
     return {
@@ -82,7 +78,7 @@ export class CancelOrderUseCase {
       orderNumber: order.orderNumber,
       status: order.status,
       cancelledAt: order.cancelledAt!.toISOString(),
-      reason: command.reason
+      reason: command.reason,
     };
   }
 }

@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function (knex) {
   return knex.schema.createTable('customerLoyaltyTransaction', t => {
     t.uuid('customerLoyaltyTransactionId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
@@ -12,7 +12,6 @@ exports.up = function(knex) {
     t.string('source', 50).notNullable();
     t.string('status', 20).notNullable().defaultTo('completed').checkIn(['pending', 'completed', 'cancelled', 'expired']);
     t.timestamp('expiresAt');
-    
 
     t.index('accountId');
     t.index('orderId');
@@ -23,6 +22,6 @@ exports.up = function(knex) {
   });
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTable('customerLoyaltyTransaction');
 };

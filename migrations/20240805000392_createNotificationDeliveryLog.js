@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function (knex) {
   return knex.schema.createTable('notificationDeliveryLog', t => {
     t.uuid('notificationDeliveryLogId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
@@ -18,7 +18,6 @@ exports.up = function(knex) {
     t.string('providerMessageId', 255);
     t.jsonb('providerResponse');
     t.integer('retryCount').defaultTo(0);
-    
 
     t.index('notificationId');
     t.index('userId');
@@ -36,6 +35,6 @@ exports.up = function(knex) {
   });
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTable('notificationDeliveryLog');
 };

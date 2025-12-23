@@ -1,6 +1,6 @@
-import dynamicAttributeRepository, { 
+import dynamicAttributeRepository, {
   ProductAttributeData,
-  ProductAttribute 
+  ProductAttribute,
 } from '../../../infrastructure/repositories/DynamicAttributeRepository';
 
 // ==================== Set Product Attribute ====================
@@ -23,7 +23,7 @@ export class SetProductAttributeUseCase {
     try {
       // Get attribute by ID or code
       let attribute: ProductAttribute | null = null;
-      
+
       if (command.attributeId) {
         attribute = await dynamicAttributeRepository.findAttributeById(command.attributeId);
       } else if (command.attributeCode) {
@@ -33,7 +33,7 @@ export class SetProductAttributeUseCase {
       if (!attribute) {
         return {
           success: false,
-          error: 'Attribute not found'
+          error: 'Attribute not found',
         };
       }
 
@@ -45,7 +45,7 @@ export class SetProductAttributeUseCase {
         if (!validValue && values.length > 0) {
           return {
             success: false,
-            error: `Invalid value "${command.value}" for attribute "${attribute.name}"`
+            error: `Invalid value "${command.value}" for attribute "${attribute.name}"`,
           };
         }
       }
@@ -54,17 +54,17 @@ export class SetProductAttributeUseCase {
       const result = await dynamicAttributeRepository.setProductAttribute({
         productId: command.productId,
         attributeId: attribute.productAttributeId,
-        value: command.value
+        value: command.value,
       });
 
       return {
         success: true,
-        data: result
+        data: result,
       };
     } catch (error) {
       return {
         success: false,
-        error: `Failed to set product attribute: ${(error as Error).message}`
+        error: `Failed to set product attribute: ${(error as Error).message}`,
       };
     }
   }
@@ -101,13 +101,13 @@ export class SetProductAttributesUseCase {
 
       const results = {
         set: 0,
-        failed: [] as Array<{ attribute: string; error: string }>
+        failed: [] as Array<{ attribute: string; error: string }>,
       };
 
       // Set each attribute
       for (const attr of command.attributes) {
         let attribute: ProductAttribute | null = null;
-        
+
         if (attr.attributeId) {
           attribute = await dynamicAttributeRepository.findAttributeById(attr.attributeId);
         } else if (attr.attributeCode) {
@@ -117,7 +117,7 @@ export class SetProductAttributesUseCase {
         if (!attribute) {
           results.failed.push({
             attribute: attr.attributeId || attr.attributeCode || 'unknown',
-            error: 'Attribute not found'
+            error: 'Attribute not found',
           });
           continue;
         }
@@ -126,25 +126,25 @@ export class SetProductAttributesUseCase {
           await dynamicAttributeRepository.setProductAttribute({
             productId: command.productId,
             attributeId: attribute.productAttributeId,
-            value: attr.value
+            value: attr.value,
           });
           results.set++;
         } catch (error) {
           results.failed.push({
             attribute: attribute.code,
-            error: (error as Error).message
+            error: (error as Error).message,
           });
         }
       }
 
       return {
         success: true,
-        data: results
+        data: results,
       };
     } catch (error) {
       return {
         success: false,
-        error: `Failed to set product attributes: ${(error as Error).message}`
+        error: `Failed to set product attributes: ${(error as Error).message}`,
       };
     }
   }
@@ -185,17 +185,17 @@ export class GetProductAttributesUseCase {
         attributeType: attr.attribute.type,
         value: attr.value,
         isFilterable: attr.attribute.isFilterable,
-        isSearchable: attr.attribute.isSearchable
+        isSearchable: attr.attribute.isSearchable,
       }));
 
       return {
         success: true,
-        data: result
+        data: result,
       };
     } catch (error) {
       return {
         success: false,
-        error: `Failed to get product attributes: ${(error as Error).message}`
+        error: `Failed to get product attributes: ${(error as Error).message}`,
       };
     }
   }
@@ -224,7 +224,7 @@ export class RemoveProductAttributeUseCase {
         if (!attribute) {
           return {
             success: false,
-            error: 'Attribute not found'
+            error: 'Attribute not found',
           };
         }
         attributeId = attribute.productAttributeId;
@@ -233,7 +233,7 @@ export class RemoveProductAttributeUseCase {
       if (!attributeId) {
         return {
           success: false,
-          error: 'Attribute ID or code is required'
+          error: 'Attribute ID or code is required',
         };
       }
 
@@ -243,7 +243,7 @@ export class RemoveProductAttributeUseCase {
     } catch (error) {
       return {
         success: false,
-        error: `Failed to remove product attribute: ${(error as Error).message}`
+        error: `Failed to remove product attribute: ${(error as Error).message}`,
       };
     }
   }

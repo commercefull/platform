@@ -41,7 +41,7 @@ export class UpdateStoreCommand {
       customPages?: Record<string, unknown>;
       customFields?: Record<string, unknown>;
       metadata?: Record<string, unknown>;
-    }
+    },
   ) {}
 }
 
@@ -130,10 +130,7 @@ export class UpdateStoreUseCase {
 
     // Currency updates
     if (updates.supportedCurrencies || updates.defaultCurrency) {
-      store.updateCurrencies(
-        updates.supportedCurrencies || store.supportedCurrencies || [],
-        updates.defaultCurrency
-      );
+      store.updateCurrencies(updates.supportedCurrencies || store.supportedCurrencies || [], updates.defaultCurrency);
     }
 
     // Settings updates

@@ -14,7 +14,7 @@ exports.up = function (knex) {
     t.enum('direction', ['in', 'out', 'transfer', 'adjust']).notNullable();
     t.boolean('requiresApproval').notNullable().defaultTo(false);
     t.boolean('requiresDocumentation').notNullable().defaultTo(false);
-    
+
     t.index('code');
     t.index('direction');
     t.index('affectsAvailable');

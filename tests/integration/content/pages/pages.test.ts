@@ -7,14 +7,15 @@ import axios, { AxiosInstance } from 'axios';
 import { API_BASE, TEST_DATA } from '../testConstants';
 import { ADMIN_CREDENTIALS, TEST_CONTENT_TYPE_ID } from '../../testConstants';
 
-const createClient = (): AxiosInstance => axios.create({
-  baseURL: process.env.API_URL || 'http://localhost:3000',
-  validateStatus: () => true,
-  headers: {
-    'Accept': 'application/json',
-    'Content-Type': 'application/json'
-  }
-});
+const createClient = (): AxiosInstance =>
+  axios.create({
+    baseURL: process.env.API_URL || 'http://localhost:3000',
+    validateStatus: () => true,
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+  });
 
 describe('Content Pages API', () => {
   let client: AxiosInstance;
@@ -24,22 +25,22 @@ describe('Content Pages API', () => {
 
   beforeAll(async () => {
     client = createClient();
-    
+
     // Get auth token
     const loginResponse = await client.post('/business/auth/login', ADMIN_CREDENTIALS, { headers: { 'X-Test-Request': 'true' } });
     if (loginResponse.data.accessToken) {
       authToken = loginResponse.data.accessToken;
       client.defaults.headers.common['Authorization'] = `Bearer ${authToken}`;
     }
-    
+
     // Create a content type for pages
     const typeResponse = await client.post(`${API_BASE}/types`, {
       name: 'Page Type',
       slug: `page-type-${Date.now()}`,
       description: 'Test page type',
-      isActive: true
+      isActive: true,
     });
-    
+
     if (typeResponse.status === 201) {
       createdContentTypeId = typeResponse.data.data.id;
     }
@@ -79,7 +80,7 @@ describe('Content Pages API', () => {
         ...TEST_DATA.page,
         title: `Test Page ${Date.now()}`,
         slug: `test-page-${Date.now()}`,
-        contentTypeId: TEST_CONTENT_TYPE_ID
+        contentTypeId: TEST_CONTENT_TYPE_ID,
       };
 
       const response = await client.post(`${API_BASE}/pages`, pageData);
@@ -127,7 +128,7 @@ describe('Content Pages API', () => {
 
       const updateData = {
         title: 'Updated Page Title',
-        summary: 'Updated summary'
+        summary: 'Updated summary',
       };
 
       const response = await client.put(`${API_BASE}/pages/${createdPageId}`, updateData);
@@ -171,7 +172,7 @@ describe('Content Pages API', () => {
       futureDate.setDate(futureDate.getDate() + 7);
 
       const response = await client.post(`${API_BASE}/pages/${createdPageId}/schedule`, {
-        scheduledAt: futureDate.toISOString()
+        scheduledAt: futureDate.toISOString(),
       });
 
       expect(response.status).toBe(200);
@@ -188,5 +189,4 @@ describe('Content Pages API', () => {
       expect(response.data.success).toBe(false);
     });
   });
-
 });

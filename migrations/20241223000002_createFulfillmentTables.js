@@ -2,9 +2,9 @@
  * Migration: Create Fulfillment Module Tables
  */
 
-exports.up = async function(knex) {
+exports.up = async function (knex) {
   // Create fulfillment table
-  await knex.schema.createTable('fulfillment', (table) => {
+  await knex.schema.createTable('fulfillment', table => {
     table.string('fulfillmentId').primary();
     table.string('orderId').notNullable();
     table.string('orderNumber');
@@ -44,7 +44,7 @@ exports.up = async function(knex) {
     table.text('failureReason');
     table.timestamp('createdAt').defaultTo(knex.fn.now());
     table.timestamp('updatedAt').defaultTo(knex.fn.now());
-    
+
     table.index(['orderId']);
     table.index(['status']);
     table.index(['merchantId']);
@@ -53,7 +53,7 @@ exports.up = async function(knex) {
   });
 
   // Create fulfillment_item table
-  await knex.schema.createTable('fulfillmentItem', (table) => {
+  await knex.schema.createTable('fulfillmentItem', table => {
     table.string('fulfillmentItemId').primary();
     table.string('fulfillmentId').notNullable().references('fulfillmentId').inTable('fulfillment').onDelete('CASCADE');
     table.string('orderItemId').notNullable();
@@ -75,13 +75,13 @@ exports.up = async function(knex) {
     table.timestamp('packedAt');
     table.timestamp('createdAt').defaultTo(knex.fn.now());
     table.timestamp('updatedAt').defaultTo(knex.fn.now());
-    
+
     table.index(['fulfillmentId']);
     table.index(['productId']);
   });
 
   // Create fulfillment_partner table (3PL partners)
-  await knex.schema.createTable('fulfillmentPartner', (table) => {
+  await knex.schema.createTable('fulfillmentPartner', table => {
     table.string('fulfillmentPartnerId').primary();
     table.string('name').notNullable();
     table.string('code').notNullable().unique();
@@ -96,7 +96,7 @@ exports.up = async function(knex) {
   });
 
   // Create fulfillment_rule table
-  await knex.schema.createTable('fulfillmentRule', (table) => {
+  await knex.schema.createTable('fulfillmentRule', table => {
     table.string('fulfillmentRuleId').primary();
     table.string('name').notNullable();
     table.string('type').notNullable(); // routing, splitting, assignment
@@ -106,12 +106,12 @@ exports.up = async function(knex) {
     table.boolean('isActive').defaultTo(true);
     table.timestamp('createdAt').defaultTo(knex.fn.now());
     table.timestamp('updatedAt').defaultTo(knex.fn.now());
-    
+
     table.index(['type', 'isActive']);
   });
 };
 
-exports.down = async function(knex) {
+exports.down = async function (knex) {
   await knex.schema.dropTableIfExists('fulfillmentRule');
   await knex.schema.dropTableIfExists('fulfillmentPartner');
   await knex.schema.dropTableIfExists('fulfillmentItem');

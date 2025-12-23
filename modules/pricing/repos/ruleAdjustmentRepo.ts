@@ -21,17 +21,15 @@ export class RuleAdjustmentRepo {
   }
 
   async findByPricingRule(pricingRuleId: string): Promise<RuleAdjustment[]> {
-    return (await query<RuleAdjustment[]>(
-      `SELECT * FROM "ruleAdjustment" WHERE "pricingRuleId" = $1 ORDER BY "createdAt" ASC`,
-      [pricingRuleId]
-    )) || [];
+    return (
+      (await query<RuleAdjustment[]>(`SELECT * FROM "ruleAdjustment" WHERE "pricingRuleId" = $1 ORDER BY "createdAt" ASC`, [
+        pricingRuleId,
+      ])) || []
+    );
   }
 
   async findByType(type: RuleAdjustmentType): Promise<RuleAdjustment[]> {
-    return (await query<RuleAdjustment[]>(
-      `SELECT * FROM "ruleAdjustment" WHERE "type" = $1 ORDER BY "value" DESC`,
-      [type]
-    )) || [];
+    return (await query<RuleAdjustment[]>(`SELECT * FROM "ruleAdjustment" WHERE "type" = $1 ORDER BY "value" DESC`, [type])) || [];
   }
 
   async create(params: RuleAdjustmentCreateParams): Promise<RuleAdjustment> {
@@ -39,7 +37,7 @@ export class RuleAdjustmentRepo {
     const result = await queryOne<RuleAdjustment>(
       `INSERT INTO "ruleAdjustment" ("pricingRuleId", "type", "value", "createdAt", "updatedAt") 
        VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-      [params.pricingRuleId, params.type, params.value, now, now]
+      [params.pricingRuleId, params.type, params.value, now, now],
     );
     if (!result) throw new Error('Failed to create rule adjustment');
     return result;
@@ -64,14 +62,14 @@ export class RuleAdjustmentRepo {
 
     return await queryOne<RuleAdjustment>(
       `UPDATE "ruleAdjustment" SET ${updateFields.join(', ')} WHERE "ruleAdjustmentId" = $${paramIndex} RETURNING *`,
-      values
+      values,
     );
   }
 
   async delete(id: string): Promise<boolean> {
     const result = await queryOne<{ ruleAdjustmentId: string }>(
       `DELETE FROM "ruleAdjustment" WHERE "ruleAdjustmentId" = $1 RETURNING "ruleAdjustmentId"`,
-      [id]
+      [id],
     );
     return !!result;
   }
@@ -79,7 +77,7 @@ export class RuleAdjustmentRepo {
   async deleteByPricingRule(pricingRuleId: string): Promise<number> {
     const results = await query<{ ruleAdjustmentId: string }[]>(
       `DELETE FROM "ruleAdjustment" WHERE "pricingRuleId" = $1 RETURNING "ruleAdjustmentId"`,
-      [pricingRuleId]
+      [pricingRuleId],
     );
     return results ? results.length : 0;
   }

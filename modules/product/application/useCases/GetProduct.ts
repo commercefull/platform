@@ -17,7 +17,7 @@ export class GetProductCommand {
     public readonly slug?: string,
     public readonly sku?: string,
     public readonly includeVariants: boolean = true,
-    public readonly includeImages: boolean = true
+    public readonly includeImages: boolean = true,
   ) {
     if (!productId && !slug && !sku) {
       throw new Error('Either productId, slug, or sku must be provided');
@@ -129,18 +129,14 @@ export class GetProductUseCase {
         url: img.url,
         altText: img.altText,
         position: img.position,
-        isPrimary: img.isPrimary
+        isPrimary: img.isPrimary,
       }));
     }
 
     return this.mapToResponse(product, variants, images);
   }
 
-  private mapToResponse(
-    product: Product, 
-    variants: ProductVariant[],
-    images: ProductImageResponse[]
-  ): ProductDetailResponse {
+  private mapToResponse(product: Product, variants: ProductVariant[], images: ProductImageResponse[]): ProductDetailResponse {
     const primaryImage = images.find(img => img.isPrimary) || images[0];
 
     return {
@@ -184,12 +180,12 @@ export class GetProductUseCase {
         stockQuantity: v.stockQuantity,
         isInStock: v.isInStock,
         isDefault: v.isDefault,
-        imageUrl: v.imageUrl
+        imageUrl: v.imageUrl,
       })),
       images,
       primaryImage,
       createdAt: product.createdAt.toISOString(),
-      updatedAt: product.updatedAt.toISOString()
+      updatedAt: product.updatedAt.toISOString(),
     };
   }
 }

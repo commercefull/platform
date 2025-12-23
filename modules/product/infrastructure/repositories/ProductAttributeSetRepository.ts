@@ -1,5 +1,5 @@
-import { query, queryOne } from "../../../../libs/db";
-import { Table } from "../../../../libs/db/types";
+import { query, queryOne } from '../../../../libs/db';
+import { Table } from '../../../../libs/db/types';
 
 export interface ProductAttributeSet {
   productAttributeSetId: string;
@@ -74,17 +74,17 @@ export class ProductAttributeSetRepository {
       WHERE "productTypeId" = $1 AND "isActive" = true
       ORDER BY "name" ASC
     `;
-    return await query<ProductAttributeSet[]>(sql, [productTypeId]) || [];
+    return (await query<ProductAttributeSet[]>(sql, [productTypeId])) || [];
   }
 
   async findAll(): Promise<ProductAttributeSet[]> {
     const sql = `SELECT * FROM "${this.tableName}" ORDER BY "name" ASC`;
-    return await query<ProductAttributeSet[]>(sql) || [];
+    return (await query<ProductAttributeSet[]>(sql)) || [];
   }
 
   async findActive(): Promise<ProductAttributeSet[]> {
     const sql = `SELECT * FROM "${this.tableName}" WHERE "isActive" = true ORDER BY "name" ASC`;
-    return await query<ProductAttributeSet[]>(sql) || [];
+    return (await query<ProductAttributeSet[]>(sql)) || [];
   }
 
   /**
@@ -109,11 +109,11 @@ export class ProductAttributeSetRepository {
       ORDER BY pasm."position" ASC
     `;
 
-    const attributes = await query<ProductAttributeSetAttribute[]>(sql, [id]) || [];
+    const attributes = (await query<ProductAttributeSetAttribute[]>(sql, [id])) || [];
 
     return {
       ...attributeSet,
-      attributes
+      attributes,
     };
   }
 
@@ -137,7 +137,7 @@ export class ProductAttributeSetRepository {
       ORDER BY pasm."position" ASC
     `;
 
-    return await query<ProductAttributeSetAttribute[]>(sql, [productTypeId]) || [];
+    return (await query<ProductAttributeSetAttribute[]>(sql, [productTypeId])) || [];
   }
 
   async create(input: ProductAttributeSetCreateInput): Promise<ProductAttributeSet> {
@@ -156,7 +156,7 @@ export class ProductAttributeSetRepository {
       input.productTypeId || null,
       input.isActive !== false,
       input.merchantId || null,
-      input.isGlobal !== false
+      input.isGlobal !== false,
     ]);
 
     if (!result) {
@@ -205,7 +205,7 @@ export class ProductAttributeSetRepository {
   async delete(id: string): Promise<boolean> {
     // First delete mappings
     await query(`DELETE FROM "${this.mappingTableName}" WHERE "attributeSetId" = $1`, [id]);
-    
+
     const sql = `DELETE FROM "${this.tableName}" WHERE "productAttributeSetId" = $1`;
     const result = await query(sql, [id]);
     return result !== null;
@@ -227,13 +227,7 @@ export class ProductAttributeSetRepository {
         "updatedAt" = now()
     `;
 
-    await query(sql, [
-      input.attributeSetId,
-      input.attributeId,
-      input.position || 0,
-      input.isRequired || false,
-      input.defaultValue || null
-    ]);
+    await query(sql, [input.attributeSetId, input.attributeId, input.position || 0, input.isRequired || false, input.defaultValue || null]);
   }
 
   /**
@@ -256,7 +250,7 @@ export class ProductAttributeSetRepository {
       await query(
         `UPDATE "${this.mappingTableName}" SET "position" = $1, "updatedAt" = now() 
          WHERE "attributeSetId" = $2 AND "attributeId" = $3`,
-        [i, attributeSetId, attributeIds[i]]
+        [i, attributeSetId, attributeIds[i]],
       );
     }
   }

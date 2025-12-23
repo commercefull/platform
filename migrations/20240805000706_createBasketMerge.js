@@ -13,7 +13,7 @@ exports.up = function (knex) {
     t.integer('itemsMerged').notNullable().defaultTo(0);
     t.enum('conflictStrategy', ['keepBoth', 'useSource', 'useTarget', 'highestQuantity']).notNullable();
     t.uuid('mergedBy');
-    
+
     t.index('targetBasketId');
     t.index('sourceBasketId');
     t.index('createdAt');

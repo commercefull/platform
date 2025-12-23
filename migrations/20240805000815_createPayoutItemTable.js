@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function (knex) {
   return knex.schema.createTable('payoutItem', t => {
     t.uuid('payoutItemId').primary().defaultTo(knex.raw('uuidv7()'));
     t.uuid('payoutId').notNullable().references('payoutId').inTable('payout').onDelete('CASCADE');
@@ -12,7 +12,7 @@ exports.up = function(knex) {
     t.uuid('orderPaymentId').references('orderPaymentId').inTable('orderPayment');
     t.uuid('paymentRefundId').references('paymentRefundId').inTable('paymentRefund');
     t.uuid('disputeId').references('paymentDisputeId').inTable('paymentDispute');
-    
+
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('deletedAt');
 
@@ -26,6 +26,6 @@ exports.up = function(knex) {
   });
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTable('payoutItem');
 };

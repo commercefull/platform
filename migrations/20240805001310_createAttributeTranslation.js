@@ -1,7 +1,7 @@
 /**
  * Attribute Translation Table
  * Stores multi-language translations for product attributes and their options
- * 
+ *
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
@@ -22,7 +22,7 @@ exports.up = function (knex) {
     t.boolean('isAutoTranslated').notNullable().defaultTo(false);
     t.string('translationSource', 50);
     t.boolean('isApproved').notNullable().defaultTo(false);
-    
+
     t.index('productAttributeId');
     t.index('localeId');
     t.unique(['productAttributeId', 'localeId']);

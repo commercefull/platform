@@ -1,6 +1,6 @@
 /**
  * Payout Repository
- * 
+ *
  * Manages marketplace seller payouts.
  */
 
@@ -56,16 +56,10 @@ export async function create(params: CreatePayoutParams): Promise<Payout> {
 }
 
 export async function findById(payoutId: string): Promise<Payout | null> {
-  return queryOne<Payout>(
-    'SELECT * FROM "payout" WHERE "payoutId" = $1',
-    [payoutId]
-  );
+  return queryOne<Payout>('SELECT * FROM "payout" WHERE "payoutId" = $1', [payoutId]);
 }
 
-export async function findBySeller(
-  sellerId: string,
-  options?: { status?: string; limit?: number; offset?: number }
-): Promise<Payout[]> {
+export async function findBySeller(sellerId: string, options?: { status?: string; limit?: number; offset?: number }): Promise<Payout[]> {
   let sql = 'SELECT * FROM "payout" WHERE "sellerId" = $1';
   const params: unknown[] = [sellerId];
   let paramIndex = 2;
@@ -91,16 +85,14 @@ export async function findBySeller(
 }
 
 export async function findPending(): Promise<Payout[]> {
-  const result = await query<{ rows: Payout[] }>(
-    'SELECT * FROM "payout" WHERE "status" = \'pending\' ORDER BY "createdAt" ASC'
-  );
+  const result = await query<{ rows: Payout[] }>('SELECT * FROM "payout" WHERE "status" = \'pending\' ORDER BY "createdAt" ASC');
   return result?.rows ?? [];
 }
 
 export async function findScheduled(beforeDate: Date): Promise<Payout[]> {
   const result = await query<{ rows: Payout[] }>(
     'SELECT * FROM "payout" WHERE "status" = \'scheduled\' AND "scheduledDate" <= $1 ORDER BY "scheduledDate" ASC',
-    [beforeDate]
+    [beforeDate],
   );
   return result?.rows ?? [];
 }
@@ -108,7 +100,7 @@ export async function findScheduled(beforeDate: Date): Promise<Payout[]> {
 export async function schedule(payoutId: string, scheduledDate: Date): Promise<boolean> {
   const result = await query<{ rowCount: number }>(
     'UPDATE "payout" SET "status" = \'scheduled\', "scheduledDate" = $1, "updatedAt" = $2 WHERE "payoutId" = $3 AND "status" = \'pending\'',
-    [scheduledDate, new Date(), payoutId]
+    [scheduledDate, new Date(), payoutId],
   );
   return (result?.rowCount ?? 0) > 0;
 }
@@ -116,7 +108,7 @@ export async function schedule(payoutId: string, scheduledDate: Date): Promise<b
 export async function process(payoutId: string): Promise<boolean> {
   const result = await query<{ rowCount: number }>(
     'UPDATE "payout" SET "status" = \'processing\', "updatedAt" = $1 WHERE "payoutId" = $2 AND "status" IN (\'pending\', \'scheduled\')',
-    [new Date(), payoutId]
+    [new Date(), payoutId],
   );
   return (result?.rowCount ?? 0) > 0;
 }
@@ -125,7 +117,7 @@ export async function complete(payoutId: string, paymentReference: string): Prom
   const now = new Date();
   const result = await query<{ rowCount: number }>(
     'UPDATE "payout" SET "status" = \'completed\', "processedAt" = $1, "paymentReference" = $2, "updatedAt" = $3 WHERE "payoutId" = $4 AND "status" = \'processing\'',
-    [now, paymentReference, now, payoutId]
+    [now, paymentReference, now, payoutId],
   );
   return (result?.rowCount ?? 0) > 0;
 }
@@ -133,7 +125,7 @@ export async function complete(payoutId: string, paymentReference: string): Prom
 export async function fail(payoutId: string): Promise<boolean> {
   const result = await query<{ rowCount: number }>(
     'UPDATE "payout" SET "status" = \'failed\', "updatedAt" = $1 WHERE "payoutId" = $2 AND "status" = \'processing\'',
-    [new Date(), payoutId]
+    [new Date(), payoutId],
   );
   return (result?.rowCount ?? 0) > 0;
 }

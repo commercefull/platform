@@ -27,7 +27,9 @@ export interface SupplierProduct {
 }
 
 export type SupplierProductCreateParams = Omit<SupplierProduct, 'supplierProductId' | 'createdAt' | 'updatedAt'>;
-export type SupplierProductUpdateParams = Partial<Omit<SupplierProduct, 'supplierProductId' | 'supplierId' | 'productId' | 'createdAt' | 'updatedAt'>>;
+export type SupplierProductUpdateParams = Partial<
+  Omit<SupplierProduct, 'supplierProductId' | 'supplierId' | 'productId' | 'createdAt' | 'updatedAt'>
+>;
 
 export class SupplierProductRepo {
   async findById(id: string): Promise<SupplierProduct | null> {
@@ -55,17 +57,11 @@ export class SupplierProductRepo {
   }
 
   async findBySku(sku: string): Promise<SupplierProduct[]> {
-    return (await query<SupplierProduct[]>(
-      `SELECT * FROM "supplierProduct" WHERE "sku" = $1 ORDER BY "unitCost" ASC`,
-      [sku]
-    )) || [];
+    return (await query<SupplierProduct[]>(`SELECT * FROM "supplierProduct" WHERE "sku" = $1 ORDER BY "unitCost" ASC`, [sku])) || [];
   }
 
   async findBySupplierSku(supplierSku: string): Promise<SupplierProduct[]> {
-    return (await query<SupplierProduct[]>(
-      `SELECT * FROM "supplierProduct" WHERE "supplierSku" = $1`,
-      [supplierSku]
-    )) || [];
+    return (await query<SupplierProduct[]>(`SELECT * FROM "supplierProduct" WHERE "supplierSku" = $1`, [supplierSku])) || [];
   }
 
   async findPreferred(productId: string, productVariantId?: string): Promise<SupplierProduct | null> {
@@ -82,10 +78,12 @@ export class SupplierProductRepo {
   }
 
   async findByStatus(status: SupplierProductStatus, limit = 100): Promise<SupplierProduct[]> {
-    return (await query<SupplierProduct[]>(
-      `SELECT * FROM "supplierProduct" WHERE "status" = $1 ORDER BY "supplierId" LIMIT $2`,
-      [status, limit]
-    )) || [];
+    return (
+      (await query<SupplierProduct[]>(`SELECT * FROM "supplierProduct" WHERE "status" = $1 ORDER BY "supplierId" LIMIT $2`, [
+        status,
+        limit,
+      ])) || []
+    );
   }
 
   async create(params: SupplierProductCreateParams): Promise<SupplierProduct> {
@@ -98,14 +96,25 @@ export class SupplierProductRepo {
         "packagingInfo", "dimensions", "weight", "notes", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18) RETURNING *`,
       [
-        params.supplierId, params.productId, params.productVariantId || null, params.sku,
-        params.supplierSku || null, params.supplierProductName || null, params.status || 'active',
-        params.isPreferred || false, params.unitCost, params.currency || 'USD',
-        params.minimumOrderQuantity || 1, params.leadTime || null,
+        params.supplierId,
+        params.productId,
+        params.productVariantId || null,
+        params.sku,
+        params.supplierSku || null,
+        params.supplierProductName || null,
+        params.status || 'active',
+        params.isPreferred || false,
+        params.unitCost,
+        params.currency || 'USD',
+        params.minimumOrderQuantity || 1,
+        params.leadTime || null,
         params.packagingInfo ? JSON.stringify(params.packagingInfo) : null,
-        params.dimensions ? JSON.stringify(params.dimensions) : null, params.weight || null,
-        params.notes || null, now, now
-      ]
+        params.dimensions ? JSON.stringify(params.dimensions) : null,
+        params.weight || null,
+        params.notes || null,
+        now,
+        now,
+      ],
     );
 
     if (!result) throw new Error('Failed to create supplier product');
@@ -132,7 +141,7 @@ export class SupplierProductRepo {
 
     return await queryOne<SupplierProduct>(
       `UPDATE "supplierProduct" SET ${updateFields.join(', ')} WHERE "supplierProductId" = $${paramIndex} RETURNING *`,
-      values
+      values,
     );
   }
 
@@ -144,17 +153,17 @@ export class SupplierProductRepo {
     await query(
       `UPDATE "supplierProduct" SET "isPreferred" = false, "updatedAt" = $1 
        WHERE "productId" = $2 AND "productVariantId" ${product.productVariantId ? '= $3' : 'IS NULL'} AND "isPreferred" = true`,
-      product.productVariantId ? [unixTimestamp(), product.productId, product.productVariantId] : [unixTimestamp(), product.productId]
+      product.productVariantId ? [unixTimestamp(), product.productId, product.productVariantId] : [unixTimestamp(), product.productId],
     );
 
     return this.update(id, { isPreferred: true });
   }
 
   async updateLastOrdered(id: string): Promise<void> {
-    await query(
-      `UPDATE "supplierProduct" SET "lastOrderedAt" = $1, "updatedAt" = $1 WHERE "supplierProductId" = $2`,
-      [unixTimestamp(), id]
-    );
+    await query(`UPDATE "supplierProduct" SET "lastOrderedAt" = $1, "updatedAt" = $1 WHERE "supplierProductId" = $2`, [
+      unixTimestamp(),
+      id,
+    ]);
   }
 
   async activate(id: string): Promise<SupplierProduct | null> {
@@ -172,26 +181,24 @@ export class SupplierProductRepo {
   async delete(id: string): Promise<boolean> {
     const result = await queryOne<{ supplierProductId: string }>(
       `DELETE FROM "supplierProduct" WHERE "supplierProductId" = $1 RETURNING "supplierProductId"`,
-      [id]
+      [id],
     );
     return !!result;
   }
 
   async getStatistics(): Promise<{ total: number; byStatus: Record<SupplierProductStatus, number>; preferred: number }> {
-    const totalResult = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM "supplierProduct"`
-    );
+    const totalResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "supplierProduct"`);
     const total = totalResult ? parseInt(totalResult.count, 10) : 0;
 
     const statusResults = await query<{ status: SupplierProductStatus; count: string }[]>(
-      `SELECT "status", COUNT(*) as count FROM "supplierProduct" GROUP BY "status"`
+      `SELECT "status", COUNT(*) as count FROM "supplierProduct" GROUP BY "status"`,
     );
     const byStatus: Record<string, number> = {};
-    statusResults?.forEach(row => { byStatus[row.status] = parseInt(row.count, 10); });
+    statusResults?.forEach(row => {
+      byStatus[row.status] = parseInt(row.count, 10);
+    });
 
-    const preferredResult = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM "supplierProduct" WHERE "isPreferred" = true`
-    );
+    const preferredResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "supplierProduct" WHERE "isPreferred" = true`);
     const preferred = preferredResult ? parseInt(preferredResult.count, 10) : 0;
 
     return { total, byStatus: byStatus as Record<SupplierProductStatus, number>, preferred };

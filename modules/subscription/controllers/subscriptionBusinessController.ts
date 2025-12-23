@@ -20,7 +20,7 @@ export const getSubscriptionProducts: AsyncHandler = async (req, res, next) => {
     res.json({ success: true, data: products });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -32,12 +32,12 @@ export const getSubscriptionProduct: AsyncHandler = async (req, res, next) => {
       res.status(404).json({ success: false, message: 'Subscription product not found' });
       return;
     }
-    
+
     const plans = await subscriptionRepo.getSubscriptionPlans(req.params.id);
     res.json({ success: true, data: { ...product, plans } });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -48,7 +48,7 @@ export const createSubscriptionProduct: AsyncHandler = async (req, res, next) =>
     res.status(201).json({ success: true, data: product });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -57,12 +57,12 @@ export const updateSubscriptionProduct: AsyncHandler = async (req, res, next) =>
   try {
     const product = await subscriptionRepo.saveSubscriptionProduct({
       subscriptionProductId: req.params.id,
-      ...req.body
+      ...req.body,
     });
     res.json({ success: true, data: product });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -73,7 +73,7 @@ export const deleteSubscriptionProduct: AsyncHandler = async (req, res, next) =>
     res.json({ success: true, message: 'Subscription product deactivated' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -85,14 +85,11 @@ export const deleteSubscriptionProduct: AsyncHandler = async (req, res, next) =>
 export const getSubscriptionPlans: AsyncHandler = async (req, res, next) => {
   try {
     const { activeOnly } = req.query;
-    const plans = await subscriptionRepo.getSubscriptionPlans(
-      req.params.productId,
-      activeOnly !== 'false'
-    );
+    const plans = await subscriptionRepo.getSubscriptionPlans(req.params.productId, activeOnly !== 'false');
     res.json({ success: true, data: plans });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -107,7 +104,7 @@ export const getSubscriptionPlan: AsyncHandler = async (req, res, next) => {
     res.json({ success: true, data: plan });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -116,12 +113,12 @@ export const createSubscriptionPlan: AsyncHandler = async (req, res, next) => {
   try {
     const plan = await subscriptionRepo.saveSubscriptionPlan({
       subscriptionProductId: req.params.productId,
-      ...req.body
+      ...req.body,
     });
     res.status(201).json({ success: true, data: plan });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -131,12 +128,12 @@ export const updateSubscriptionPlan: AsyncHandler = async (req, res, next) => {
     const plan = await subscriptionRepo.saveSubscriptionPlan({
       subscriptionPlanId: req.params.planId,
       subscriptionProductId: req.params.productId,
-      ...req.body
+      ...req.body,
     });
     res.json({ success: true, data: plan });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -147,7 +144,7 @@ export const deleteSubscriptionPlan: AsyncHandler = async (req, res, next) => {
     res.json({ success: true, message: 'Subscription plan deactivated' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -161,12 +158,12 @@ export const getCustomerSubscriptions: AsyncHandler = async (req, res, next) => 
     const { customerId, status, limit, offset } = req.query;
     const result = await subscriptionRepo.getCustomerSubscriptions(
       { customerId: customerId as string, status: status as any },
-      { limit: parseInt(limit as string) || 20, offset: parseInt(offset as string) || 0 }
+      { limit: parseInt(limit as string) || 20, offset: parseInt(offset as string) || 0 },
     );
     res.json({ success: true, ...result });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -178,14 +175,14 @@ export const getCustomerSubscription: AsyncHandler = async (req, res, next) => {
       res.status(404).json({ success: false, message: 'Subscription not found' });
       return;
     }
-    
+
     const orders = await subscriptionRepo.getSubscriptionOrders(req.params.id);
     const dunningAttempts = await subscriptionRepo.getDunningAttempts(req.params.id);
-    
+
     res.json({ success: true, data: { ...subscription, orders, dunningAttempts } });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -194,18 +191,13 @@ export const cancelSubscriptionAdmin: AsyncHandler = async (req, res, next) => {
   try {
     const { reason, cancelAtPeriodEnd } = req.body;
     const adminId = (req as any).userId || (req as any).merchantId;
-    
-    await subscriptionRepo.cancelSubscription(
-      req.params.id,
-      reason,
-      `admin:${adminId}`,
-      cancelAtPeriodEnd !== false
-    );
-    
+
+    await subscriptionRepo.cancelSubscription(req.params.id, reason, `admin:${adminId}`, cancelAtPeriodEnd !== false);
+
     res.json({ success: true, message: 'Subscription cancelled' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -214,18 +206,18 @@ export const pauseSubscriptionAdmin: AsyncHandler = async (req, res, next) => {
   try {
     const { resumeAt, reason } = req.body;
     const adminId = (req as any).userId || (req as any).merchantId;
-    
+
     const pause = await subscriptionRepo.pauseSubscription(
       req.params.id,
       resumeAt ? new Date(resumeAt) : undefined,
       reason,
-      `admin:${adminId}`
+      `admin:${adminId}`,
     );
-    
+
     res.json({ success: true, data: pause });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -237,7 +229,7 @@ export const resumeSubscriptionAdmin: AsyncHandler = async (req, res, next) => {
     res.json({ success: true, message: 'Subscription resumed' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -249,7 +241,7 @@ export const updateSubscriptionStatus: AsyncHandler = async (req, res, next) => 
     res.json({ success: true, message: 'Subscription status updated' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -264,7 +256,7 @@ export const getSubscriptionOrders: AsyncHandler = async (req, res, next) => {
     res.json({ success: true, data: orders });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -276,7 +268,7 @@ export const retrySubscriptionOrder: AsyncHandler = async (req, res, next) => {
     res.json({ success: true, message: 'Order marked for retry' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -287,7 +279,7 @@ export const skipSubscriptionOrder: AsyncHandler = async (req, res, next) => {
     res.json({ success: true, message: 'Order skipped' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -302,7 +294,7 @@ export const getDunningAttempts: AsyncHandler = async (req, res, next) => {
     res.json({ success: true, data: attempts });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -313,7 +305,7 @@ export const getPendingDunning: AsyncHandler = async (req, res, next) => {
     res.json({ success: true, data: attempts });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -330,7 +322,7 @@ export const getSubscriptionsDueBilling: AsyncHandler = async (req, res, next) =
     res.json({ success: true, data: subscriptions });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -351,7 +343,7 @@ export const processBillingCycle: AsyncHandler = async (req, res, next) => {
       periodEnd: new Date(), // Will be calculated properly
       subtotal: subscription.totalPrice,
       discountAmount: subscription.discountAmount,
-      taxAmount: subscription.taxAmount
+      taxAmount: subscription.taxAmount,
     });
 
     // Advance billing cycle
@@ -360,7 +352,7 @@ export const processBillingCycle: AsyncHandler = async (req, res, next) => {
     res.json({ success: true, data: order });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(400).json({ success: false, message: error.message });
   }
 };

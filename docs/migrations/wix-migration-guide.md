@@ -15,6 +15,7 @@ This guide provides detailed instructions for migrating from Wix E-commerce to C
 ## Wix Data Architecture
 
 ### API Structure
+
 - REST API with GraphQL elements
 - Limited bulk operations
 - Rate limits: 100 requests per minute
@@ -22,6 +23,7 @@ This guide provides detailed instructions for migrating from Wix E-commerce to C
 - Complex permission model
 
 ### Key Challenges
+
 - Limited API access compared to other platforms
 - Product options and variations handling
 - Media asset migration complexity
@@ -45,7 +47,7 @@ class WixAPIClient {
     this.client = new WixAPI({
       accountId: this.accountId,
       apiKey: this.apiKey,
-      siteId: this.siteId
+      siteId: this.siteId,
     });
   }
 
@@ -74,7 +76,7 @@ class WixAPIClient {
 ### 2. Data Assessment
 
 ```javascript
-const assessWixData = async (wixApi) => {
+const assessWixData = async wixApi => {
   try {
     // Get basic counts (limited by Wix API)
     const productsQuery = await wixApi.getProducts({ limit: 1 });
@@ -86,26 +88,24 @@ const assessWixData = async (wixApi) => {
     const assessment = {
       products: {
         estimatedTotal: await estimateTotal(wixApi, 'products'),
-        sampleData: productsQuery.items?.[0]
+        sampleData: productsQuery.items?.[0],
       },
       orders: {
         estimatedTotal: await estimateTotal(wixApi, 'orders'),
-        sampleData: ordersQuery.items?.[0]
+        sampleData: ordersQuery.items?.[0],
       },
       customers: {
         estimatedTotal: await estimateTotal(wixApi, 'customers'),
-        sampleData: customersQuery.items?.[0]
+        sampleData: customersQuery.items?.[0],
       },
       collections: {
         estimatedTotal: await estimateTotal(wixApi, 'collections'),
-        sampleData: collectionsQuery.items?.[0]
-      }
+        sampleData: collectionsQuery.items?.[0],
+      },
     };
 
     return assessment;
-
   } catch (error) {
-    
     throw error;
   }
 };
@@ -120,7 +120,7 @@ async function estimateTotal(api, endpoint) {
   while (hasMore) {
     const response = await api[`get${endpoint.charAt(0).toUpperCase() + endpoint.slice(1)}`]({
       limit,
-      offset
+      offset,
     });
 
     const items = response.items || [];
@@ -159,7 +159,7 @@ class WixCollectionsMigrator {
     while (hasMore) {
       const response = await wixApi.getCollections({
         limit: 100,
-        offset
+        offset,
       });
 
       collections.push(...(response.items || []));
@@ -182,7 +182,7 @@ class WixCollectionsMigrator {
         parentId: collection.parentId ? collectionMap.get(collection.parentId) : null,
         isActive: collection.visible,
         metaTitle: collection.seoData?.title,
-        metaDescription: collection.seoData?.description
+        metaDescription: collection.seoData?.description,
       });
 
       collectionMap.set(collection._id, category.id);
@@ -218,7 +218,7 @@ class WixProductOptionsMigrator {
             optionTypes.set(option.name, {
               name: option.name,
               type: option.optionType,
-              choices: new Set()
+              choices: new Set(),
             });
           }
 
@@ -241,7 +241,7 @@ class WixProductOptionsMigrator {
         description: `Product ${optionName.toLowerCase()} options from Wix`,
         position: 1,
         isComparable: true,
-        isGlobal: true
+        isGlobal: true,
       });
 
       // Create attribute
@@ -265,19 +265,19 @@ class WixProductOptionsMigrator {
         position: 1,
         options: Array.from(optionData.choices).map(choice => ({
           label: choice,
-          value: choice.toLowerCase().replace(/\s+/g, '_')
-        }))
+          value: choice.toLowerCase().replace(/\s+/g, '_'),
+        })),
       });
     }
   }
 
   mapOptionType(wixType) {
     const typeMapping = {
-      'drop_down': 'select',
-      'radio': 'select',
-      'checkbox': 'select',
-      'color': 'select',
-      'text': 'text'
+      drop_down: 'select',
+      radio: 'select',
+      checkbox: 'select',
+      color: 'select',
+      text: 'text',
     };
     return typeMapping[wixType] || 'select';
   }
@@ -298,7 +298,7 @@ class WixProductExtractor {
     while (hasMore) {
       const response = await wixApi.getProducts({
         limit: 100,
-        offset
+        offset,
       });
 
       const items = response.items || [];
@@ -350,8 +350,7 @@ class WixProductTransformer {
       visibility: 'public',
       price: parseFloat(wixProduct.price?.formatted?.amount || wixProduct.price || 0),
       regularPrice: parseFloat(wixProduct.price?.formatted?.amount || wixProduct.price || 0),
-      salePrice: wixProduct.discountedPrice ?
-        parseFloat(wixProduct.discountedPrice.formatted?.amount || wixProduct.discountedPrice) : null,
+      salePrice: wixProduct.discountedPrice ? parseFloat(wixProduct.discountedPrice.formatted?.amount || wixProduct.discountedPrice) : null,
       cost: wixProduct.cost ? parseFloat(wixProduct.cost.formatted?.amount || wixProduct.cost) : null,
       weight: parseFloat(wixProduct.weight || 0),
       stockQuantity: wixProduct.stock?.quantity || 0,
@@ -365,11 +364,11 @@ class WixProductTransformer {
       seo: {
         title: wixProduct.seoData?.title,
         description: wixProduct.seoData?.description,
-        keywords: wixProduct.seoData?.tags?.join(', ')
+        keywords: wixProduct.seoData?.tags?.join(', '),
       },
       customFields: this.transformCustomFields(wixProduct),
       createdAt: wixProduct.createdDate,
-      updatedAt: wixProduct.lastUpdated
+      updatedAt: wixProduct.lastUpdated,
     };
   }
 
@@ -393,10 +392,11 @@ class WixProductTransformer {
       code: option.name.toLowerCase().replace(/\s+/g, '_'),
       type: 'select',
       required: option.required || false,
-      values: option.choices?.map(choice => ({
-        label: choice.description,
-        value: choice.value
-      })) || []
+      values:
+        option.choices?.map(choice => ({
+          label: choice.description,
+          value: choice.value,
+        })) || [],
     }));
   }
 
@@ -409,7 +409,7 @@ class WixProductTransformer {
       position: index,
       width: media.width,
       height: media.height,
-      isMain: index === 0
+      isMain: index === 0,
     }));
   }
 
@@ -422,7 +422,7 @@ class WixProductTransformer {
       price: parseFloat(variant.price?.formatted?.amount || variant.price || 0),
       stockQuantity: variant.stock?.quantity || 0,
       attributes: this.parseVariantOptions(variant.choices),
-      isActive: variant.visible !== false
+      isActive: variant.visible !== false,
     }));
   }
 
@@ -431,7 +431,7 @@ class WixProductTransformer {
 
     return Object.entries(choices).map(([optionName, choice]) => ({
       name: optionName,
-      value: choice.description || choice
+      value: choice.description || choice,
     }));
   }
 
@@ -451,8 +451,7 @@ class WixProductTransformer {
     // Extract first sentence or limit to 200 characters
     const sentences = description.split(/[.!?]+/);
     const firstSentence = sentences[0]?.trim();
-    return firstSentence && firstSentence.length <= 200 ? firstSentence :
-           description.substring(0, 200) + '...';
+    return firstSentence && firstSentence.length <= 200 ? firstSentence : description.substring(0, 200) + '...';
   }
 
   generateSlug(name) {
@@ -478,7 +477,7 @@ class WixCustomerExtractor {
     while (hasMore) {
       const response = await wixApi.getCustomers({
         limit: 100,
-        offset
+        offset,
       });
 
       const items = response.items || [];
@@ -500,7 +499,7 @@ class WixCustomerExtractor {
     // Get detailed customer information
     try {
       const contact = await wixApi.client.contacts.get(contactId, {
-        include: 'addresses,emails,phones'
+        include: 'addresses,emails,phones',
       });
       return contact;
     } catch (error) {
@@ -539,15 +538,15 @@ class WixCustomerTransformer {
       notes: primaryInfo.notes || '',
       tags: wixCustomer.labels || [],
       createdAt: wixCustomer.createdDate,
-      updatedAt: wixCustomer.lastUpdated
+      updatedAt: wixCustomer.lastUpdated,
     };
   }
 
   mapGender(wixGender) {
     const genderMap = {
-      'M': 'Male',
-      'F': 'Female',
-      'O': 'Other'
+      M: 'Male',
+      F: 'Female',
+      O: 'Other',
     };
     return genderMap[wixGender] || null;
   }
@@ -564,7 +563,7 @@ class WixCustomerTransformer {
       city: wixAddress.city,
       state: wixAddress.subdivision,
       postcode: wixAddress.postalCode,
-      country: wixAddress.country
+      country: wixAddress.country,
     };
   }
 }
@@ -583,14 +582,14 @@ class WixOrderExtractor {
 
     const query = {
       limit: 100,
-      offset
+      offset,
     };
 
     // Add date filter if provided (Wix API limitations)
     if (dateFilter) {
       query.createdDate = {
         $gte: dateFilter.start,
-        $lte: dateFilter.end
+        $lte: dateFilter.end,
       };
     }
 
@@ -654,17 +653,17 @@ class WixOrderTransformer {
       customerNote: wixOrder.customerNote || '',
       orderNotes: this.extractOrderNotes(wixOrder),
       createdAt: wixOrder.createdDate,
-      updatedAt: wixOrder.updatedDate
+      updatedAt: wixOrder.updatedDate,
     };
   }
 
   mapOrderStatus(wixStatus) {
     const statusMapping = {
-      'new': 'pending',
-      'in_progress': 'processing',
-      'fulfilled': 'completed',
-      'cancelled': 'cancelled',
-      'refunded': 'refunded'
+      new: 'pending',
+      in_progress: 'processing',
+      fulfilled: 'completed',
+      cancelled: 'cancelled',
+      refunded: 'refunded',
     };
     return statusMapping[wixStatus] || 'pending';
   }
@@ -683,25 +682,27 @@ class WixOrderTransformer {
       city: address.city,
       state: address.subdivision || address.state,
       postcode: address.postalCode || address.zipCode,
-      country: address.country
+      country: address.country,
     };
   }
 
   transformLineItems(lineItems, productMap) {
-    return lineItems?.map(item => {
-      const productId = productMap.get(item.productId);
+    return (
+      lineItems?.map(item => {
+        const productId = productMap.get(item.productId);
 
-      return {
-        productId: productId || null,
-        sku: item.sku,
-        name: item.name,
-        quantity: item.quantity,
-        price: parseFloat(item.price?.amount || item.price || 0),
-        total: parseFloat(item.total?.amount || item.total || 0),
-        taxTotal: parseFloat(item.tax?.amount || 0),
-        variantId: item.variantId ? this.findVariantId(item.variantId, productId) : null
-      };
-    }) || [];
+        return {
+          productId: productId || null,
+          sku: item.sku,
+          name: item.name,
+          quantity: item.quantity,
+          price: parseFloat(item.price?.amount || item.price || 0),
+          total: parseFloat(item.total?.amount || item.total || 0),
+          taxTotal: parseFloat(item.tax?.amount || 0),
+          variantId: item.variantId ? this.findVariantId(item.variantId, productId) : null,
+        };
+      }) || []
+    );
   }
 
   extractOrderNotes(order) {
@@ -736,11 +737,11 @@ async function runWixMigration() {
     wix: {
       accountId: process.env.WIX_ACCOUNT_ID,
       apiKey: process.env.WIX_API_KEY,
-      siteId: process.env.WIX_SITE_ID
+      siteId: process.env.WIX_SITE_ID,
     },
     commercefull: {
       baseURL: process.env.COMMERCEFULL_URL,
-      apiKey: process.env.COMMERCEFULL_API_KEY
+      apiKey: process.env.COMMERCEFULL_API_KEY,
     },
     options: {
       batchSize: 50,
@@ -748,14 +749,12 @@ async function runWixMigration() {
       continueOnError: true,
       dateRange: {
         start: '2023-01-01', // Limit historical data
-        end: new Date().toISOString().split('T')[0]
-      }
-    }
+        end: new Date().toISOString().split('T')[0],
+      },
+    },
   });
 
   try {
-    
-
     // Phase 1: Foundation data
     await runner.migrateCollections();
     await runner.migrateProductOptions();
@@ -772,11 +771,8 @@ async function runWixMigration() {
     // Phase 5: Content
     await runner.migrateContent();
 
-    
     console.log(runner.monitor.generateReport());
-
   } catch (error) {
-    
     console.log('Partial results:', runner.monitor.generateReport());
   }
 }
@@ -820,7 +816,6 @@ class WixRateLimiter {
       const waitTime = 60000 - (now - oldestRequest);
 
       if (waitTime > 0) {
-        
         await this.sleep(waitTime);
       }
     }
@@ -846,7 +841,7 @@ const WixValidation = {
     return {
       wix: 'API limited - manual verification needed',
       commercefull: cfCount,
-      note: 'Wix API has limitations on total counts'
+      note: 'Wix API has limitations on total counts',
     };
   },
 
@@ -857,7 +852,7 @@ const WixValidation = {
     return {
       wix: wixCollections.items?.length || 0,
       commercefull: cfCategories.length,
-      difference: Math.abs((wixCollections.items?.length || 0) - cfCategories.length)
+      difference: Math.abs((wixCollections.items?.length || 0) - cfCategories.length),
     };
   },
 
@@ -872,9 +867,9 @@ const WixValidation = {
     return {
       wixHasOptions,
       cfHasVariants,
-      optionsMigrated: wixHasOptions === cfHasVariants
+      optionsMigrated: wixHasOptions === cfHasVariants,
     };
-  }
+  },
 };
 ```
 
@@ -884,6 +879,7 @@ const WixValidation = {
 
 **Problem**: Limited API access compared to other platforms
 **Solutions**:
+
 - Use webhooks for real-time data sync during transition
 - Export data manually for historical records
 - Implement incremental sync after initial migration
@@ -892,6 +888,7 @@ const WixValidation = {
 
 **Problem**: Complex product option structures
 **Solutions**:
+
 - Pre-analyze option structures before migration
 - Create mapping tables for option relationships
 - Handle edge cases with custom logic
@@ -900,6 +897,7 @@ const WixValidation = {
 
 **Problem**: Limited historical order data via API
 **Solutions**:
+
 - Export historical data manually from Wix admin
 - Use CSV imports for old orders
 - Implement phased migration approach

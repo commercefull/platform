@@ -20,7 +20,7 @@ export interface ProductItem {
 export class ApplyProductDiscountCommand {
   constructor(
     public readonly items: ProductItem[],
-    public readonly merchantId?: string
+    public readonly merchantId?: string,
   ) {}
 }
 
@@ -68,7 +68,7 @@ export class ApplyProductDiscountUseCase {
         totalDiscount: 0,
         totalFinal: 0,
         appliedDiscounts: [],
-        message: 'No items to process'
+        message: 'No items to process',
       };
     }
 
@@ -82,10 +82,7 @@ export class ApplyProductDiscountUseCase {
       totalOriginal += itemTotal;
 
       // Find applicable discounts for this product
-      const discounts = await discountRepo.findDiscountsForProduct(
-        item.productId,
-        command.merchantId
-      );
+      const discounts = await discountRepo.findDiscountsForProduct(item.productId, command.merchantId);
 
       const itemDiscounts: DiscountedItem['discounts'] = [];
       let itemTotalDiscount = 0;
@@ -98,14 +95,14 @@ export class ApplyProductDiscountUseCase {
       if (nonStackable.length > 0) {
         const bestDiscount = nonStackable[0]; // Already sorted by priority
         const discountAmount = discountRepo.calculateDiscount(bestDiscount, item.price, item.quantity);
-        
+
         if (discountAmount > 0) {
           itemDiscounts.push({
             discountId: bestDiscount.promotionProductDiscountId,
             discountName: bestDiscount.name,
             discountType: bestDiscount.discountType,
             discountValue: Number(bestDiscount.discountValue),
-            discountAmount
+            discountAmount,
           });
           itemTotalDiscount += discountAmount;
           appliedDiscountIds.add(bestDiscount.promotionProductDiscountId);
@@ -115,14 +112,14 @@ export class ApplyProductDiscountUseCase {
       // Apply stackable discounts
       for (const discount of stackable) {
         const discountAmount = discountRepo.calculateDiscount(discount, item.price, item.quantity);
-        
+
         if (discountAmount > 0) {
           itemDiscounts.push({
             discountId: discount.promotionProductDiscountId,
             discountName: discount.name,
             discountType: discount.discountType,
             discountValue: Number(discount.discountValue),
-            discountAmount
+            discountAmount,
           });
           itemTotalDiscount += discountAmount;
           appliedDiscountIds.add(discount.promotionProductDiscountId);
@@ -140,7 +137,7 @@ export class ApplyProductDiscountUseCase {
         quantity: item.quantity,
         discounts: itemDiscounts,
         totalDiscount: itemTotalDiscount,
-        finalPrice: item.price - (itemTotalDiscount / item.quantity)
+        finalPrice: item.price - itemTotalDiscount / item.quantity,
       });
     }
 
@@ -151,9 +148,7 @@ export class ApplyProductDiscountUseCase {
       totalDiscount,
       totalFinal: totalOriginal - totalDiscount,
       appliedDiscounts: Array.from(appliedDiscountIds),
-      message: totalDiscount > 0 
-        ? `Applied ${appliedDiscountIds.size} discount(s)` 
-        : 'No discounts applicable'
+      message: totalDiscount > 0 ? `Applied ${appliedDiscountIds.size} discount(s)` : 'No discounts applicable',
     };
   }
 }

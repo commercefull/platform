@@ -1,6 +1,6 @@
 /**
  * Identity Domain Events
- * 
+ *
  * Events emitted by the identity subdomain for authentication and authorization operations.
  */
 

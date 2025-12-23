@@ -1,7 +1,17 @@
 import { query, queryOne } from '../../../libs/db';
 import { unixTimestamp } from '../../../libs/date';
 
-export type FulfillmentStatus = 'pending' | 'shipped' | 'delivered' | 'cancelled' | 'failed' | 'returned' | 'partiallyDelivered' | 'partiallyReturned' | 'partiallyFailed' | 'partiallyCancelled';
+export type FulfillmentStatus =
+  | 'pending'
+  | 'shipped'
+  | 'delivered'
+  | 'cancelled'
+  | 'failed'
+  | 'returned'
+  | 'partiallyDelivered'
+  | 'partiallyReturned'
+  | 'partiallyFailed'
+  | 'partiallyCancelled';
 
 export interface FulfillmentStatusHistory {
   fulfillmentStatusHistoryId: string;
@@ -18,24 +28,27 @@ export type FulfillmentStatusHistoryCreateParams = Omit<FulfillmentStatusHistory
 
 export class FulfillmentStatusHistoryRepo {
   async findById(id: string): Promise<FulfillmentStatusHistory | null> {
-    return await queryOne<FulfillmentStatusHistory>(
-      `SELECT * FROM "fulfillmentStatusHistory" WHERE "fulfillmentStatusHistoryId" = $1`,
-      [id]
-    );
+    return await queryOne<FulfillmentStatusHistory>(`SELECT * FROM "fulfillmentStatusHistory" WHERE "fulfillmentStatusHistoryId" = $1`, [
+      id,
+    ]);
   }
 
   async findByFulfillment(orderFulfillmentId: string): Promise<FulfillmentStatusHistory[]> {
-    return (await query<FulfillmentStatusHistory[]>(
-      `SELECT * FROM "fulfillmentStatusHistory" WHERE "orderFulfillmentId" = $1 ORDER BY "createdAt" DESC`,
-      [orderFulfillmentId]
-    )) || [];
+    return (
+      (await query<FulfillmentStatusHistory[]>(
+        `SELECT * FROM "fulfillmentStatusHistory" WHERE "orderFulfillmentId" = $1 ORDER BY "createdAt" DESC`,
+        [orderFulfillmentId],
+      )) || []
+    );
   }
 
   async findByStatus(status: FulfillmentStatus, limit = 100): Promise<FulfillmentStatusHistory[]> {
-    return (await query<FulfillmentStatusHistory[]>(
-      `SELECT * FROM "fulfillmentStatusHistory" WHERE "status" = $1 ORDER BY "createdAt" DESC LIMIT $2`,
-      [status, limit]
-    )) || [];
+    return (
+      (await query<FulfillmentStatusHistory[]>(
+        `SELECT * FROM "fulfillmentStatusHistory" WHERE "status" = $1 ORDER BY "createdAt" DESC LIMIT $2`,
+        [status, limit],
+      )) || []
+    );
   }
 
   async create(params: FulfillmentStatusHistoryCreateParams): Promise<FulfillmentStatusHistory> {
@@ -44,10 +57,7 @@ export class FulfillmentStatusHistoryRepo {
       `INSERT INTO "fulfillmentStatusHistory" (
         "orderFulfillmentId", "status", "previousStatus", "notes", "location", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
-      [
-        params.orderFulfillmentId, params.status, params.previousStatus || null,
-        params.notes || null, params.location || null, now, now
-      ]
+      [params.orderFulfillmentId, params.status, params.previousStatus || null, params.notes || null, params.location || null, now, now],
     );
     if (!result) throw new Error('Failed to create fulfillment status history');
     return result;
@@ -56,7 +66,7 @@ export class FulfillmentStatusHistoryRepo {
   async getLatestStatus(orderFulfillmentId: string): Promise<FulfillmentStatusHistory | null> {
     return await queryOne<FulfillmentStatusHistory>(
       `SELECT * FROM "fulfillmentStatusHistory" WHERE "orderFulfillmentId" = $1 ORDER BY "createdAt" DESC LIMIT 1`,
-      [orderFulfillmentId]
+      [orderFulfillmentId],
     );
   }
 

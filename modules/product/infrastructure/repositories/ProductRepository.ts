@@ -5,11 +5,11 @@
 
 import { query, queryOne } from '../../../../libs/db';
 import { generateUUID } from '../../../../libs/uuid';
-import { 
-  ProductRepository as IProductRepository, 
-  ProductFilters, 
+import {
+  ProductRepository as IProductRepository,
+  ProductFilters,
   PaginationOptions,
-  PaginatedResult 
+  PaginatedResult,
 } from '../../domain/repositories/ProductRepository';
 import { Product, ProductImage } from '../../domain/entities/Product';
 import { ProductVariant, VariantAttribute } from '../../domain/entities/ProductVariant';
@@ -19,32 +19,22 @@ import { Price } from '../../domain/valueObjects/Price';
 import { Dimensions } from '../../domain/valueObjects/Dimensions';
 
 export class ProductRepo implements IProductRepository {
-
   async findById(productId: string): Promise<Product | null> {
-    const row = await queryOne<Record<string, any>>(
-      'SELECT * FROM product WHERE "productId" = $1 AND "deletedAt" IS NULL',
-      [productId]
-    );
+    const row = await queryOne<Record<string, any>>('SELECT * FROM product WHERE "productId" = $1 AND "deletedAt" IS NULL', [productId]);
     if (!row) return null;
     const images = await this.getProductImages(productId);
     return this.mapToProduct(row, images);
   }
 
   async findBySlug(slug: string): Promise<Product | null> {
-    const row = await queryOne<Record<string, any>>(
-      'SELECT * FROM product WHERE slug = $1 AND "deletedAt" IS NULL',
-      [slug]
-    );
+    const row = await queryOne<Record<string, any>>('SELECT * FROM product WHERE slug = $1 AND "deletedAt" IS NULL', [slug]);
     if (!row) return null;
     const images = await this.getProductImages(row.productId);
     return this.mapToProduct(row, images);
   }
 
   async findBySku(sku: string): Promise<Product | null> {
-    const row = await queryOne<Record<string, any>>(
-      'SELECT * FROM product WHERE sku = $1 AND "deletedAt" IS NULL',
-      [sku]
-    );
+    const row = await queryOne<Record<string, any>>('SELECT * FROM product WHERE sku = $1 AND "deletedAt" IS NULL', [sku]);
     if (!row) return null;
     const images = await this.getProductImages(row.productId);
     return this.mapToProduct(row, images);
@@ -58,17 +48,14 @@ export class ProductRepo implements IProductRepository {
 
     const { whereClause, params } = this.buildWhereClause(filters);
 
-    const countResult = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM product ${whereClause}`,
-      params
-    );
+    const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM product ${whereClause}`, params);
     const total = parseInt(countResult?.count || '0');
 
     const rows = await query<Record<string, any>[]>(
       `SELECT * FROM product ${whereClause}
        ORDER BY "${orderBy}" ${orderDir.toUpperCase()}
        LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
-      [...params, limit, offset]
+      [...params, limit, offset],
     );
 
     const products: Product[] = [];
@@ -82,11 +69,8 @@ export class ProductRepo implements IProductRepository {
 
   async save(product: Product): Promise<Product> {
     const now = new Date().toISOString();
-    
-    const existing = await queryOne<Record<string, any>>(
-      'SELECT "productId" FROM product WHERE "productId" = $1',
-      [product.productId]
-    );
+
+    const existing = await queryOne<Record<string, any>>('SELECT "productId" FROM product WHERE "productId" = $1', [product.productId]);
 
     if (existing) {
       await query(
@@ -101,19 +85,43 @@ export class ProductRepo implements IProductRepository {
           "merchantId" = $31, "businessId" = $32, "storeId" = $33, "publishedAt" = $34, "updatedAt" = $35
         WHERE "productId" = $36`,
         [
-          product.name, product.description, product.shortDescription, product.sku, product.slug,
-          product.brandId || null, 'simple', product.status, product.visibility,
-          product.price.basePrice, product.price.basePrice, product.price.salePrice,
-          product.price.cost, product.taxClass || 'standard', product.isTaxable,
-          product.price.currency, true, product.dimensions.weight,
-          product.dimensions.weightUnit, product.dimensions.length, product.dimensions.width,
-          product.dimensions.height, product.dimensions.dimensionUnit,
-          product.metaTitle || null, product.metaDescription || null, product.metaKeywords || null,
-          product.isFeatured, false, false, product.hasVariants,
-          product.merchantId || null, product.businessId || null, product.storeId || null,
-          product.publishedAt?.toISOString() || null, now,
-          product.productId
-        ]
+          product.name,
+          product.description,
+          product.shortDescription,
+          product.sku,
+          product.slug,
+          product.brandId || null,
+          'simple',
+          product.status,
+          product.visibility,
+          product.price.basePrice,
+          product.price.basePrice,
+          product.price.salePrice,
+          product.price.cost,
+          product.taxClass || 'standard',
+          product.isTaxable,
+          product.price.currency,
+          true,
+          product.dimensions.weight,
+          product.dimensions.weightUnit,
+          product.dimensions.length,
+          product.dimensions.width,
+          product.dimensions.height,
+          product.dimensions.dimensionUnit,
+          product.metaTitle || null,
+          product.metaDescription || null,
+          product.metaKeywords || null,
+          product.isFeatured,
+          false,
+          false,
+          product.hasVariants,
+          product.merchantId || null,
+          product.businessId || null,
+          product.storeId || null,
+          product.publishedAt?.toISOString() || null,
+          now,
+          product.productId,
+        ],
       );
     } else {
       await query(
@@ -130,19 +138,44 @@ export class ProductRepo implements IProductRepository {
           $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36
         )`,
         [
-          product.productId, product.name, product.description, product.shortDescription,
-          product.sku, product.slug, product.brandId || null, 'simple',
-          product.status, product.visibility, product.price.basePrice,
-          product.price.basePrice, product.price.salePrice, product.price.cost,
-          product.taxClass || 'standard', product.isTaxable, product.price.currency, true,
-          product.dimensions.weight, product.dimensions.weightUnit,
-          product.dimensions.length, product.dimensions.width, product.dimensions.height,
-          product.dimensions.dimensionUnit, product.metaTitle || null,
-          product.metaDescription || null, product.metaKeywords || null,
-          product.isFeatured, false, false, product.hasVariants,
-          product.merchantId || null, product.businessId || null, product.storeId || null,
-          product.publishedAt?.toISOString() || null, now, now
-        ]
+          product.productId,
+          product.name,
+          product.description,
+          product.shortDescription,
+          product.sku,
+          product.slug,
+          product.brandId || null,
+          'simple',
+          product.status,
+          product.visibility,
+          product.price.basePrice,
+          product.price.basePrice,
+          product.price.salePrice,
+          product.price.cost,
+          product.taxClass || 'standard',
+          product.isTaxable,
+          product.price.currency,
+          true,
+          product.dimensions.weight,
+          product.dimensions.weightUnit,
+          product.dimensions.length,
+          product.dimensions.width,
+          product.dimensions.height,
+          product.dimensions.dimensionUnit,
+          product.metaTitle || null,
+          product.metaDescription || null,
+          product.metaKeywords || null,
+          product.isFeatured,
+          false,
+          false,
+          product.hasVariants,
+          product.merchantId || null,
+          product.businessId || null,
+          product.storeId || null,
+          product.publishedAt?.toISOString() || null,
+          now,
+          now,
+        ],
       );
     }
 
@@ -151,10 +184,11 @@ export class ProductRepo implements IProductRepository {
 
   async delete(productId: string): Promise<void> {
     const now = new Date().toISOString();
-    await query(
-      'UPDATE product SET "deletedAt" = $1, status = $2, "updatedAt" = $1 WHERE "productId" = $3',
-      [now, ProductStatus.ARCHIVED, productId]
-    );
+    await query('UPDATE product SET "deletedAt" = $1, status = $2, "updatedAt" = $1 WHERE "productId" = $3', [
+      now,
+      ProductStatus.ARCHIVED,
+      productId,
+    ]);
   }
 
   async hardDelete(productId: string): Promise<void> {
@@ -163,10 +197,7 @@ export class ProductRepo implements IProductRepository {
 
   async count(filters?: ProductFilters): Promise<number> {
     const { whereClause, params } = this.buildWhereClause(filters);
-    const result = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM product ${whereClause}`,
-      params
-    );
+    const result = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM product ${whereClause}`, params);
     return parseInt(result?.count || '0');
   }
 
@@ -207,7 +238,7 @@ export class ProductRepo implements IProductRepository {
        WHERE "brandId" = $1 AND "productId" != $2 AND "deletedAt" IS NULL 
        AND status = $3 AND visibility IN ($4, $5)
        ORDER BY "isFeatured" DESC, RANDOM() LIMIT $6`,
-      [product.brandId, productId, ProductStatus.ACTIVE, ProductVisibility.VISIBLE, ProductVisibility.FEATURED, limit]
+      [product.brandId, productId, ProductStatus.ACTIVE, ProductVisibility.VISIBLE, ProductVisibility.FEATURED, limit],
     );
 
     const products: Product[] = [];
@@ -224,36 +255,28 @@ export class ProductRepo implements IProductRepository {
 
   // Variant methods
   async findVariantsByProductId(productId: string): Promise<ProductVariant[]> {
-    const rows = await query<Record<string, any>[]>(
-      'SELECT * FROM "productVariant" WHERE "productId" = $1 ORDER BY "sortOrder" ASC',
-      [productId]
-    );
+    const rows = await query<Record<string, any>[]>('SELECT * FROM "productVariant" WHERE "productId" = $1 ORDER BY "sortOrder" ASC', [
+      productId,
+    ]);
     return (rows || []).map(row => this.mapToVariant(row));
   }
 
   async findVariantById(variantId: string): Promise<ProductVariant | null> {
-    const row = await queryOne<Record<string, any>>(
-      'SELECT * FROM "productVariant" WHERE "productVariantId" = $1',
-      [variantId]
-    );
+    const row = await queryOne<Record<string, any>>('SELECT * FROM "productVariant" WHERE "productVariantId" = $1', [variantId]);
     return row ? this.mapToVariant(row) : null;
   }
 
   async findVariantBySku(sku: string): Promise<ProductVariant | null> {
-    const row = await queryOne<Record<string, any>>(
-      'SELECT * FROM "productVariant" WHERE sku = $1',
-      [sku]
-    );
+    const row = await queryOne<Record<string, any>>('SELECT * FROM "productVariant" WHERE sku = $1', [sku]);
     return row ? this.mapToVariant(row) : null;
   }
 
   async saveVariant(variant: ProductVariant): Promise<ProductVariant> {
     const now = new Date().toISOString();
-    
-    const existing = await queryOne<Record<string, any>>(
-      'SELECT "productVariantId" FROM "productVariant" WHERE "productVariantId" = $1',
-      [variant.variantId]
-    );
+
+    const existing = await queryOne<Record<string, any>>('SELECT "productVariantId" FROM "productVariant" WHERE "productVariantId" = $1', [
+      variant.variantId,
+    ]);
 
     if (existing) {
       await query(
@@ -263,11 +286,19 @@ export class ProductRepo implements IProductRepository {
           "sortOrder" = $9, barcode = $10, "updatedAt" = $11
         WHERE "productVariantId" = $12`,
         [
-          variant.sku, variant.name, variant.price.basePrice, variant.price.salePrice,
-          variant.dimensions.weight, variant.dimensions.weightUnit,
-          variant.isDefault, variant.isActive, variant.position,
-          variant.barcode, now, variant.variantId
-        ]
+          variant.sku,
+          variant.name,
+          variant.price.basePrice,
+          variant.price.salePrice,
+          variant.dimensions.weight,
+          variant.dimensions.weightUnit,
+          variant.isDefault,
+          variant.isActive,
+          variant.position,
+          variant.barcode,
+          now,
+          variant.variantId,
+        ],
       );
     } else {
       await query(
@@ -277,11 +308,21 @@ export class ProductRepo implements IProductRepository {
           "createdAt", "updatedAt"
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
         [
-          variant.variantId, variant.productId, variant.sku, variant.name,
-          variant.price.basePrice, variant.price.salePrice,
-          variant.dimensions.weight, variant.dimensions.weightUnit,
-          variant.isDefault, variant.isActive, variant.position, variant.barcode, now, now
-        ]
+          variant.variantId,
+          variant.productId,
+          variant.sku,
+          variant.name,
+          variant.price.basePrice,
+          variant.price.salePrice,
+          variant.dimensions.weight,
+          variant.dimensions.weightUnit,
+          variant.isDefault,
+          variant.isActive,
+          variant.position,
+          variant.barcode,
+          now,
+          now,
+        ],
       );
     }
 
@@ -293,25 +334,23 @@ export class ProductRepo implements IProductRepository {
   }
 
   async getDefaultVariant(productId: string): Promise<ProductVariant | null> {
-    const row = await queryOne<Record<string, any>>(
-      'SELECT * FROM "productVariant" WHERE "productId" = $1 AND "isDefault" = true',
-      [productId]
-    );
+    const row = await queryOne<Record<string, any>>('SELECT * FROM "productVariant" WHERE "productId" = $1 AND "isDefault" = true', [
+      productId,
+    ]);
     return row ? this.mapToVariant(row) : null;
   }
 
   // Image methods
   async getProductImages(productId: string): Promise<ProductImage[]> {
-    const rows = await query<Record<string, any>[]>(
-      'SELECT * FROM "productImage" WHERE "productId" = $1 ORDER BY position ASC',
-      [productId]
-    );
+    const rows = await query<Record<string, any>[]>('SELECT * FROM "productImage" WHERE "productId" = $1 ORDER BY position ASC', [
+      productId,
+    ]);
     return (rows || []).map(row => ({
       imageId: row.productImageId,
       url: row.url,
       altText: row.altText,
       position: row.position,
-      isPrimary: Boolean(row.isPrimary)
+      isPrimary: Boolean(row.isPrimary),
     }));
   }
 
@@ -320,7 +359,7 @@ export class ProductRepo implements IProductRepository {
     await query(
       `INSERT INTO "productImage" ("productImageId", "productId", url, "altText", position, "isPrimary", "createdAt", "updatedAt")
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-      [image.imageId, productId, image.url, image.altText, image.position, image.isPrimary, now, now]
+      [image.imageId, productId, image.url, image.altText, image.position, image.isPrimary, now, now],
     );
   }
 
@@ -343,10 +382,7 @@ export class ProductRepo implements IProductRepository {
     }
 
     params.push(imageId);
-    await query(
-      `UPDATE "productImage" SET ${setClauses.join(', ')} WHERE "productImageId" = $${paramIndex}`,
-      params
-    );
+    await query(`UPDATE "productImage" SET ${setClauses.join(', ')} WHERE "productImageId" = $${paramIndex}`, params);
   }
 
   async deleteProductImage(imageId: string): Promise<void> {
@@ -355,10 +391,12 @@ export class ProductRepo implements IProductRepository {
 
   async reorderProductImages(productId: string, imageIds: string[]): Promise<void> {
     for (let i = 0; i < imageIds.length; i++) {
-      await query(
-        'UPDATE "productImage" SET position = $1, "updatedAt" = $2 WHERE "productImageId" = $3 AND "productId" = $4',
-        [i, new Date().toISOString(), imageIds[i], productId]
-      );
+      await query('UPDATE "productImage" SET position = $1, "updatedAt" = $2 WHERE "productImageId" = $3 AND "productId" = $4', [
+        i,
+        new Date().toISOString(),
+        imageIds[i],
+        productId,
+      ]);
     }
   }
 
@@ -427,13 +465,13 @@ export class ProductRepo implements IProductRepository {
 
     return {
       whereClause: conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '',
-      params
+      params,
     };
   }
 
   private mapToProduct(row: Record<string, any>, images: ProductImage[]): Product {
     const currency = row.currency || 'USD';
-    
+
     return Product.reconstitute({
       productId: row.productId,
       name: row.name,
@@ -453,7 +491,7 @@ export class ProductRepo implements IProductRepository {
         parseFloat(row.price || row.basePrice || 0),
         currency,
         row.salePrice ? parseFloat(row.salePrice) : undefined,
-        row.costPrice ? parseFloat(row.costPrice) : undefined
+        row.costPrice ? parseFloat(row.costPrice) : undefined,
       ),
       dimensions: Dimensions.create({
         weight: row.weight ? parseFloat(row.weight) : undefined,
@@ -461,7 +499,7 @@ export class ProductRepo implements IProductRepository {
         length: row.length ? parseFloat(row.length) : undefined,
         width: row.width ? parseFloat(row.width) : undefined,
         height: row.height ? parseFloat(row.height) : undefined,
-        dimensionUnit: row.dimensionUnit || 'cm'
+        dimensionUnit: row.dimensionUnit || 'cm',
       }),
       isFeatured: Boolean(row.isFeatured),
       isVirtual: Boolean(row.isVirtual),
@@ -470,8 +508,11 @@ export class ProductRepo implements IProductRepository {
       isTaxable: Boolean(row.isTaxable),
       taxClass: row.taxClass,
       hasVariants: Boolean(row.hasVariants),
-      variantAttributes: row.variantAttributes ? 
-        (typeof row.variantAttributes === 'string' ? JSON.parse(row.variantAttributes) : row.variantAttributes) : undefined,
+      variantAttributes: row.variantAttributes
+        ? typeof row.variantAttributes === 'string'
+          ? JSON.parse(row.variantAttributes)
+          : row.variantAttributes
+        : undefined,
       images,
       primaryImageId: row.primaryImageId,
       metaTitle: row.metaTitle,
@@ -487,31 +528,26 @@ export class ProductRepo implements IProductRepository {
       publishedAt: row.publishedAt ? new Date(row.publishedAt) : undefined,
       createdAt: new Date(row.createdAt),
       updatedAt: new Date(row.updatedAt),
-      deletedAt: row.deletedAt ? new Date(row.deletedAt) : undefined
+      deletedAt: row.deletedAt ? new Date(row.deletedAt) : undefined,
     });
   }
 
   private mapToVariant(row: Record<string, any>): ProductVariant {
     const currency = 'USD';
-    
+
     return ProductVariant.reconstitute({
       variantId: row.productVariantId,
       productId: row.productId,
       sku: row.sku,
       name: row.name,
-      price: Price.create(
-        parseFloat(row.price || 0),
-        currency,
-        row.compareAtPrice ? parseFloat(row.compareAtPrice) : undefined,
-        undefined
-      ),
+      price: Price.create(parseFloat(row.price || 0), currency, row.compareAtPrice ? parseFloat(row.compareAtPrice) : undefined, undefined),
       dimensions: Dimensions.create({
         weight: row.weight ? parseFloat(row.weight) : undefined,
         weightUnit: row.weightUnit || 'g',
         length: undefined,
         width: undefined,
         height: undefined,
-        dimensionUnit: 'cm'
+        dimensionUnit: 'cm',
       }),
       attributes: row.attributes ? (typeof row.attributes === 'string' ? JSON.parse(row.attributes) : row.attributes) : [],
       imageId: row.imageId,
@@ -525,7 +561,7 @@ export class ProductRepo implements IProductRepository {
       externalId: row.externalId,
       metadata: row.metadata ? (typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata) : undefined,
       createdAt: new Date(row.createdAt),
-      updatedAt: new Date(row.updatedAt)
+      updatedAt: new Date(row.updatedAt),
     });
   }
 }

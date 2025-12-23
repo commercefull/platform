@@ -9,6 +9,7 @@ The Order feature manages the complete order lifecycle from creation through ful
 ## Use Cases
 
 ### UC-ORD-001: List Orders (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** High
 
@@ -19,12 +20,14 @@ The Order feature manages the complete order lifecycle from creation through ful
 **Then** the system returns a paginated list of orders matching the criteria
 
 #### API Endpoint
+
 ```
 GET /business/orders
 Query: status, customerId, dateFrom, dateTo, limit, offset
 ```
 
 #### Business Rules
+
 - Orders are sorted by creation date (newest first) by default
 - Supports filtering by status, customer, date range
 - Returns order summary (not full details) for performance
@@ -32,6 +35,7 @@ Query: status, customerId, dateFrom, dateTo, limit, offset
 ---
 
 ### UC-ORD-002: Get Order Details (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** High
 
@@ -43,11 +47,13 @@ Query: status, customerId, dateFrom, dateTo, limit, offset
 **Then** the system returns the complete order with items, addresses, and payment info
 
 #### API Endpoint
+
 ```
 GET /business/orders/:orderId
 ```
 
 #### Business Rules
+
 - Returns full order details including all line items
 - Includes customer information
 - Includes shipping and billing addresses
@@ -56,6 +62,7 @@ GET /business/orders/:orderId
 ---
 
 ### UC-ORD-003: Get Order Statistics (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
@@ -66,12 +73,14 @@ GET /business/orders/:orderId
 **Then** the system returns aggregated order metrics
 
 #### API Endpoint
+
 ```
 GET /business/orders/stats
 Query: dateFrom, dateTo
 ```
 
 #### Business Rules
+
 - Returns total order count, revenue, average order value
 - Can be filtered by date range
 - Includes breakdown by status
@@ -79,6 +88,7 @@ Query: dateFrom, dateTo
 ---
 
 ### UC-ORD-004: Update Order Status (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** High
 
@@ -93,18 +103,21 @@ Query: dateFrom, dateTo
 **And** emits an order.status_changed event
 
 #### API Endpoint
+
 ```
 PUT /business/orders/:orderId/status
 Body: { status: string, notes?: string }
 ```
 
 #### Business Rules
+
 - Status transitions must follow valid state machine
 - Cannot transition from completed/cancelled states
 - Records who made the change and when
 - Triggers appropriate notifications
 
 #### Valid Status Transitions
+
 ```
 pending → confirmed → processing → shipped → delivered
 pending → cancelled
@@ -116,6 +129,7 @@ delivered → returned
 ---
 
 ### UC-ORD-005: Cancel Order (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** High
 
@@ -130,12 +144,14 @@ delivered → returned
 **And** emits order.cancelled event
 
 #### API Endpoint
+
 ```
 POST /business/orders/:orderId/cancel
 Body: { reason: string, refundAmount?: number }
 ```
 
 #### Business Rules
+
 - Order must be in pending, confirmed, or processing status
 - Shipped orders cannot be cancelled (must use returns)
 - Full or partial refund can be specified
@@ -144,6 +160,7 @@ Body: { reason: string, refundAmount?: number }
 ---
 
 ### UC-ORD-006: Process Refund (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** High
 
@@ -157,12 +174,14 @@ Body: { reason: string, refundAmount?: number }
 **And** emits order.refunded event
 
 #### API Endpoint
+
 ```
 POST /business/orders/:orderId/refund
 Body: { amount: number, reason: string, lineItems?: array }
 ```
 
 #### Business Rules
+
 - Refund amount cannot exceed captured amount
 - Can refund full or partial amount
 - Multiple partial refunds allowed up to total captured
@@ -171,6 +190,7 @@ Body: { amount: number, reason: string, lineItems?: array }
 ---
 
 ### UC-ORD-007: Get Order History (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
@@ -182,11 +202,13 @@ Body: { amount: number, reason: string, lineItems?: array }
 **Then** the system returns all status changes and events for the order
 
 #### API Endpoint
+
 ```
 GET /business/orders/:orderId/history
 ```
 
 #### Business Rules
+
 - Returns chronological list of all order events
 - Includes status changes, notes, and who made changes
 - Read-only historical record
@@ -194,6 +216,7 @@ GET /business/orders/:orderId/history
 ---
 
 ### UC-ORD-008: Get My Orders (Customer)
+
 **Actor:** Customer  
 **Priority:** High
 
@@ -204,12 +227,14 @@ GET /business/orders/:orderId/history
 **Then** the system returns a list of their orders
 
 #### API Endpoint
+
 ```
 GET /orders
 Query: status, limit, offset
 ```
 
 #### Business Rules
+
 - Only returns orders belonging to the customer
 - Sorted by date (newest first)
 - Supports pagination
@@ -217,6 +242,7 @@ Query: status, limit, offset
 ---
 
 ### UC-ORD-009: Get Order Details (Customer)
+
 **Actor:** Customer  
 **Priority:** High
 
@@ -228,12 +254,14 @@ Query: status, limit, offset
 **Then** the system returns the order information
 
 #### API Endpoint
+
 ```
 GET /orders/:orderId
 GET /orders/number/:orderNumber
 ```
 
 #### Business Rules
+
 - Customer can only view their own orders
 - Returns 404 if order doesn't exist or doesn't belong to customer
 - Can retrieve by order ID or order number
@@ -241,6 +269,7 @@ GET /orders/number/:orderNumber
 ---
 
 ### UC-ORD-010: Create Order (Customer)
+
 **Actor:** Customer  
 **Priority:** High
 
@@ -256,12 +285,14 @@ GET /orders/number/:orderNumber
 **And** emits order.created event
 
 #### API Endpoint
+
 ```
 POST /orders
 Body: { basketId, shippingAddressId, billingAddressId, paymentMethodId, ... }
 ```
 
 #### Business Rules
+
 - Basket must have items and not be empty
 - All items must be in stock
 - Payment must be authorized
@@ -270,6 +301,7 @@ Body: { basketId, shippingAddressId, billingAddressId, paymentMethodId, ... }
 ---
 
 ### UC-ORD-011: Cancel Order (Customer)
+
 **Actor:** Customer  
 **Priority:** Medium
 
@@ -283,12 +315,14 @@ Body: { basketId, shippingAddressId, billingAddressId, paymentMethodId, ... }
 **And** initiates refund process
 
 #### API Endpoint
+
 ```
 POST /orders/:orderId/cancel
 Body: { reason?: string }
 ```
 
 #### Business Rules
+
 - Customer can only cancel their own orders
 - Order must be in pending or confirmed status
 - Processing/shipped orders cannot be cancelled by customer
@@ -298,28 +332,28 @@ Body: { reason?: string }
 
 ## Events Emitted
 
-| Event | Trigger | Payload |
-|-------|---------|---------|
-| `order.created` | Order created | orderId, customerId, total |
-| `order.status_changed` | Status updated | orderId, oldStatus, newStatus |
-| `order.cancelled` | Order cancelled | orderId, reason |
-| `order.refunded` | Refund processed | orderId, refundAmount |
-| `order.completed` | Order delivered | orderId, customerId |
+| Event                  | Trigger          | Payload                       |
+| ---------------------- | ---------------- | ----------------------------- |
+| `order.created`        | Order created    | orderId, customerId, total    |
+| `order.status_changed` | Status updated   | orderId, oldStatus, newStatus |
+| `order.cancelled`      | Order cancelled  | orderId, reason               |
+| `order.refunded`       | Refund processed | orderId, refundAmount         |
+| `order.completed`      | Order delivered  | orderId, customerId           |
 
 ---
 
 ## Integration Test Coverage
 
-| Use Case | Test File | Status |
-|----------|-----------|--------|
-| UC-ORD-001 | `order/order.test.ts` | ✅ |
-| UC-ORD-002 | `order/order.test.ts` | ✅ |
-| UC-ORD-003 | `order/order.test.ts` | 🟡 |
-| UC-ORD-004 | `order/order.test.ts` | ✅ |
-| UC-ORD-005 | `order/order.test.ts` | ✅ |
-| UC-ORD-006 | `order/order.test.ts` | 🟡 |
-| UC-ORD-007 | `order/order.test.ts` | ❌ |
-| UC-ORD-008 | `order/order.test.ts` | ✅ |
-| UC-ORD-009 | `order/order.test.ts` | ✅ |
-| UC-ORD-010 | `order/order.test.ts` | ✅ |
-| UC-ORD-011 | `order/order.test.ts` | 🟡 |
+| Use Case   | Test File             | Status |
+| ---------- | --------------------- | ------ |
+| UC-ORD-001 | `order/order.test.ts` | ✅     |
+| UC-ORD-002 | `order/order.test.ts` | ✅     |
+| UC-ORD-003 | `order/order.test.ts` | 🟡     |
+| UC-ORD-004 | `order/order.test.ts` | ✅     |
+| UC-ORD-005 | `order/order.test.ts` | ✅     |
+| UC-ORD-006 | `order/order.test.ts` | 🟡     |
+| UC-ORD-007 | `order/order.test.ts` | ❌     |
+| UC-ORD-008 | `order/order.test.ts` | ✅     |
+| UC-ORD-009 | `order/order.test.ts` | ✅     |
+| UC-ORD-010 | `order/order.test.ts` | ✅     |
+| UC-ORD-011 | `order/order.test.ts` | 🟡     |

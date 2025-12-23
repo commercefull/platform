@@ -14,9 +14,7 @@ export class SystemConfigurationController {
 
   constructor() {
     const systemConfigRepository = new SystemConfigurationRepo();
-    this.updateSystemConfigurationUseCase = new UpdateSystemConfigurationUseCase(
-      systemConfigRepository
-    );
+    this.updateSystemConfigurationUseCase = new UpdateSystemConfigurationUseCase(systemConfigRepository);
   }
 
   /**
@@ -32,7 +30,7 @@ export class SystemConfigurationController {
         supportEmail: req.body.supportEmail,
         defaultCurrency: req.body.defaultCurrency,
         defaultLanguage: req.body.defaultLanguage,
-        timezone: req.body.timezone
+        timezone: req.body.timezone,
       });
 
       const systemConfigRepository = new SystemConfigurationRepo();
@@ -40,16 +38,16 @@ export class SystemConfigurationController {
 
       res.status(201).json({
         success: true,
-        data: config.toJSON()
+        data: config.toJSON(),
       });
     } catch (error) {
       logger.error('Error:', error);
-      
+
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       res.status(400).json({
         success: false,
         message: 'Failed to create system configuration',
-        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
       });
     }
   }
@@ -60,40 +58,37 @@ export class SystemConfigurationController {
    */
   async updateSystemConfiguration(req: Request, res: Response) {
     try {
-      const command = new UpdateSystemConfigurationCommand(
-        req.params.configId,
-        {
-          platformName: req.body.platformName,
-          platformDomain: req.body.platformDomain,
-          supportEmail: req.body.supportEmail,
-          defaultCurrency: req.body.defaultCurrency,
-          defaultLanguage: req.body.defaultLanguage,
-          timezone: req.body.timezone,
-          systemMode: req.body.systemMode,
-          features: req.body.features,
-          businessSettings: req.body.businessSettings,
-          platformSettings: req.body.platformSettings,
-          securitySettings: req.body.securitySettings,
-          notificationSettings: req.body.notificationSettings,
-          integrationSettings: req.body.integrationSettings,
-          metadata: req.body.metadata
-        }
-      );
+      const command = new UpdateSystemConfigurationCommand(req.params.configId, {
+        platformName: req.body.platformName,
+        platformDomain: req.body.platformDomain,
+        supportEmail: req.body.supportEmail,
+        defaultCurrency: req.body.defaultCurrency,
+        defaultLanguage: req.body.defaultLanguage,
+        timezone: req.body.timezone,
+        systemMode: req.body.systemMode,
+        features: req.body.features,
+        businessSettings: req.body.businessSettings,
+        platformSettings: req.body.platformSettings,
+        securitySettings: req.body.securitySettings,
+        notificationSettings: req.body.notificationSettings,
+        integrationSettings: req.body.integrationSettings,
+        metadata: req.body.metadata,
+      });
 
       const result = await this.updateSystemConfigurationUseCase.execute(command);
 
       res.json({
         success: true,
-        data: result
+        data: result,
       });
     } catch (error) {
       logger.error('Error:', error);
-      
+
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       res.status(400).json({
         success: false,
         message: 'Failed to update system configuration',
-        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
       });
     }
   }
@@ -110,22 +105,22 @@ export class SystemConfigurationController {
       if (!config) {
         return res.status(404).json({
           success: false,
-          message: 'System configuration not found'
+          message: 'System configuration not found',
         });
       }
 
       res.json({
         success: true,
-        data: config.toJSON()
+        data: config.toJSON(),
       });
     } catch (error) {
       logger.error('Error:', error);
-      
+
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       res.status(500).json({
         success: false,
         message: 'Failed to get system configuration',
-        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
       });
     }
   }
@@ -142,22 +137,22 @@ export class SystemConfigurationController {
       if (!config) {
         return res.status(404).json({
           success: false,
-          message: 'No active system configuration found'
+          message: 'No active system configuration found',
         });
       }
 
       res.json({
         success: true,
-        data: config.toJSON()
+        data: config.toJSON(),
       });
     } catch (error) {
       logger.error('Error:', error);
-      
+
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       res.status(500).json({
         success: false,
         message: 'Failed to get active system configuration',
-        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
       });
     }
   }
@@ -174,16 +169,16 @@ export class SystemConfigurationController {
       res.json({
         success: true,
         data: configs.map(config => config.toJSON()),
-        count: configs.length
+        count: configs.length,
       });
     } catch (error) {
       logger.error('Error:', error);
-      
+
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       res.status(500).json({
         success: false,
         message: 'Failed to list system configurations',
-        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
       });
     }
   }

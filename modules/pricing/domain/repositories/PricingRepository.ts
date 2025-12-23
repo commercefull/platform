@@ -14,7 +14,12 @@ export interface PricingRepository {
   delete(ruleId: string): Promise<void>;
 
   // Price calculation
-  calculatePrice(productId: string, basePrice: number, quantity: number, customerId?: string): Promise<{
+  calculatePrice(
+    productId: string,
+    basePrice: number,
+    quantity: number,
+    customerId?: string,
+  ): Promise<{
     finalPrice: number;
     appliedRules: string[];
     discount: number;

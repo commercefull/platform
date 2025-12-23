@@ -14,7 +14,7 @@ exports.up = function (knex) {
     t.decimal('merchantPrice', 15, 2);
     t.decimal('merchantCost', 15, 2);
     t.integer('merchantStock');
-    
+
     t.index('merchantProductId');
     t.index('productVariantId');
     t.index('isActive');

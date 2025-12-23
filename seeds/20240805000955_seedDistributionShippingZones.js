@@ -10,7 +10,7 @@ exports.up = function (knex) {
       isActive: true,
       priority: 0,
       locationType: 'country',
-      locations: JSON.stringify(['*'])
+      locations: JSON.stringify(['*']),
     },
     {
       name: 'United States',
@@ -18,8 +18,8 @@ exports.up = function (knex) {
       isActive: true,
       priority: 10,
       locationType: 'country',
-      locations: JSON.stringify(['US'])
-    }
+      locations: JSON.stringify(['US']),
+    },
   ]);
 };
 

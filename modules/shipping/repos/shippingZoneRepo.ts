@@ -14,17 +14,11 @@ export type UpdateShippingZoneInput = Partial<Omit<ShippingZone, 'shippingZoneId
 const TABLE = Table.ShippingZone;
 
 export async function findById(id: string): Promise<ShippingZone | null> {
-  return queryOne<ShippingZone>(
-    `SELECT * FROM "${TABLE}" WHERE "shippingZoneId" = $1`,
-    [id]
-  );
+  return queryOne<ShippingZone>(`SELECT * FROM "${TABLE}" WHERE "shippingZoneId" = $1`, [id]);
 }
 
 export async function findByName(name: string): Promise<ShippingZone | null> {
-  return queryOne<ShippingZone>(
-    `SELECT * FROM "${TABLE}" WHERE "name" = $1`,
-    [name]
-  );
+  return queryOne<ShippingZone>(`SELECT * FROM "${TABLE}" WHERE "name" = $1`, [name]);
 }
 
 export async function findAll(activeOnly = false): Promise<ShippingZone[]> {
@@ -34,10 +28,7 @@ export async function findAll(activeOnly = false): Promise<ShippingZone[]> {
   return (await query<ShippingZone[]>(sql)) || [];
 }
 
-export async function findByLocationType(
-  locationType: ShippingZone['locationType'],
-  activeOnly = false
-): Promise<ShippingZone[]> {
+export async function findByLocationType(locationType: ShippingZone['locationType'], activeOnly = false): Promise<ShippingZone[]> {
   let sql = `SELECT * FROM "${TABLE}" WHERE "locationType" = $1`;
   if (activeOnly) sql += ` AND "isActive" = true`;
   sql += ` ORDER BY "priority" ASC`;
@@ -52,10 +43,7 @@ export async function findByLocation(country: string, state?: string): Promise<S
     AND NOT ("excludedLocations" @> $1::jsonb OR "excludedLocations" @> $2::jsonb)
     ORDER BY "priority" ASC
   `;
-  return (await query<ShippingZone[]>(sql, [
-    JSON.stringify([country]),
-    state ? JSON.stringify([state]) : JSON.stringify([])
-  ])) || [];
+  return (await query<ShippingZone[]>(sql, [JSON.stringify([country]), state ? JSON.stringify([state]) : JSON.stringify([])])) || [];
 }
 
 export async function create(input: CreateShippingZoneInput): Promise<ShippingZone> {
@@ -72,8 +60,8 @@ export async function create(input: CreateShippingZoneInput): Promise<ShippingZo
       input.locationType || 'country',
       JSON.stringify(input.locations),
       input.excludedLocations ? JSON.stringify(input.excludedLocations) : null,
-      input.createdBy || null
-    ]
+      input.createdBy || null,
+    ],
   );
 
   if (!result) throw new Error('Failed to create shipping zone');
@@ -100,7 +88,7 @@ export async function update(id: string, input: UpdateShippingZoneInput): Promis
 
   return queryOne<ShippingZone>(
     `UPDATE "${TABLE}" SET ${updateFields.join(', ')} WHERE "shippingZoneId" = $${paramIndex} RETURNING *`,
-    values
+    values,
   );
 }
 
@@ -115,7 +103,7 @@ export async function deactivate(id: string): Promise<ShippingZone | null> {
 export async function deleteZone(id: string): Promise<boolean> {
   const result = await queryOne<{ shippingZoneId: string }>(
     `DELETE FROM "${TABLE}" WHERE "shippingZoneId" = $1 RETURNING "shippingZoneId"`,
-    [id]
+    [id],
   );
   return !!result;
 }
@@ -138,5 +126,5 @@ export default {
   activate,
   deactivate,
   delete: deleteZone,
-  count
+  count,
 };

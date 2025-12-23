@@ -20,7 +20,7 @@ export const membershipDashboard = async (req: Request, res: Response): Promise<
         COUNT(*) as "totalMembers",
         SUM(CASE WHEN "status" = 'active' THEN 1 ELSE 0 END) as "activeMembers",
         SUM(CASE WHEN "endDate" IS NOT NULL AND "endDate" <= NOW() + INTERVAL '30 days' THEN 1 ELSE 0 END) as "expiringThisMonth"
-       FROM "userMembership"`
+       FROM "userMembership"`,
     );
 
     // Get tiers
@@ -30,7 +30,7 @@ export const membershipDashboard = async (req: Request, res: Response): Promise<
        LEFT JOIN "userMembership" um ON mt."membershipTierId" = um."membershipTierId"
        WHERE mt."deletedAt" IS NULL
        GROUP BY mt."membershipTierId"
-       ORDER BY mt."sortOrder", mt."price"`
+       ORDER BY mt."sortOrder", mt."price"`,
     );
 
     // Get recent members
@@ -41,7 +41,7 @@ export const membershipDashboard = async (req: Request, res: Response): Promise<
        LEFT JOIN "membershipTier" mt ON um."membershipTierId" = mt."membershipTierId"
        LEFT JOIN "customer" c ON um."customerId" = c."customerId"
        ORDER BY um."createdAt" DESC
-       LIMIT 20`
+       LIMIT 20`,
     );
 
     adminRespond(req, res, 'programs/membership/index', {
@@ -49,14 +49,14 @@ export const membershipDashboard = async (req: Request, res: Response): Promise<
       stats: {
         totalMembers: parseInt(statsResult?.totalMembers || '0'),
         activeMembers: parseInt(statsResult?.activeMembers || '0'),
-        expiringThisMonth: parseInt(statsResult?.expiringThisMonth || '0')
+        expiringThisMonth: parseInt(statsResult?.expiringThisMonth || '0'),
       },
       tiers: tiers || [],
       members: members || [],
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load membership dashboard',
@@ -75,7 +75,7 @@ export const subscriptionDashboard = async (req: Request, res: Response): Promis
       `SELECT 
         COUNT(*) as "totalSubscriptions",
         SUM(CASE WHEN "status" = 'active' THEN 1 ELSE 0 END) as "activeSubscriptions"
-       FROM "subscription"`
+       FROM "subscription"`,
     );
 
     // Calculate MRR
@@ -83,7 +83,7 @@ export const subscriptionDashboard = async (req: Request, res: Response): Promis
       `SELECT COALESCE(SUM(sp."price"), 0) as "mrr"
        FROM "subscription" s
        JOIN "subscriptionPlan" sp ON s."subscriptionPlanId" = sp."subscriptionPlanId"
-       WHERE s."status" = 'active' AND sp."billingCycle" = 'monthly'`
+       WHERE s."status" = 'active' AND sp."billingCycle" = 'monthly'`,
     );
 
     // Get plans
@@ -93,7 +93,7 @@ export const subscriptionDashboard = async (req: Request, res: Response): Promis
        LEFT JOIN "subscription" s ON sp."subscriptionPlanId" = s."subscriptionPlanId"
        WHERE sp."deletedAt" IS NULL
        GROUP BY sp."subscriptionPlanId"
-       ORDER BY sp."price"`
+       ORDER BY sp."price"`,
     );
 
     // Get recent subscriptions
@@ -104,7 +104,7 @@ export const subscriptionDashboard = async (req: Request, res: Response): Promis
        LEFT JOIN "subscriptionPlan" sp ON s."subscriptionPlanId" = sp."subscriptionPlanId"
        LEFT JOIN "customer" c ON s."customerId" = c."customerId"
        ORDER BY s."createdAt" DESC
-       LIMIT 20`
+       LIMIT 20`,
     );
 
     adminRespond(req, res, 'programs/subscription/index', {
@@ -113,14 +113,14 @@ export const subscriptionDashboard = async (req: Request, res: Response): Promis
         totalSubscriptions: parseInt(statsResult?.totalSubscriptions || '0'),
         activeSubscriptions: parseInt(statsResult?.activeSubscriptions || '0'),
         mrr: parseFloat(mrrResult?.mrr || '0'),
-        churnRate: 0 // TODO: Calculate actual churn rate
+        churnRate: 0, // TODO: Calculate actual churn rate
       },
       plans: plans || [],
       subscriptions: subscriptions || [],
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load subscription dashboard',
@@ -140,7 +140,7 @@ export const loyaltyDashboard = async (req: Request, res: Response): Promise<voi
         COUNT(DISTINCT "customerId") as "totalMembers",
         SUM(CASE WHEN "type" = 'earn' THEN "points" ELSE 0 END) as "totalPointsIssued",
         SUM(CASE WHEN "type" = 'redeem' THEN "points" ELSE 0 END) as "totalPointsRedeemed"
-       FROM "loyaltyTransaction"`
+       FROM "loyaltyTransaction"`,
     );
 
     // Get rewards
@@ -150,7 +150,7 @@ export const loyaltyDashboard = async (req: Request, res: Response): Promise<voi
        LEFT JOIN "loyaltyRedemption" lrd ON lr."loyaltyRewardId" = lrd."loyaltyRewardId"
        WHERE lr."deletedAt" IS NULL
        GROUP BY lr."loyaltyRewardId"
-       ORDER BY lr."pointsCost"`
+       ORDER BY lr."pointsCost"`,
     );
 
     // Get recent transactions
@@ -160,14 +160,14 @@ export const loyaltyDashboard = async (req: Request, res: Response): Promise<voi
        FROM "loyaltyTransaction" lt
        LEFT JOIN "customer" c ON lt."customerId" = c."customerId"
        ORDER BY lt."createdAt" DESC
-       LIMIT 20`
+       LIMIT 20`,
     );
 
     // Get settings
     const settings = {
       pointsPerDollar: 1,
       pointValue: 0.01,
-      minRedemption: 100
+      minRedemption: 100,
     };
 
     adminRespond(req, res, 'programs/loyalty/index', {
@@ -175,7 +175,7 @@ export const loyaltyDashboard = async (req: Request, res: Response): Promise<voi
       stats: {
         totalMembers: parseInt(statsResult?.totalMembers || '0'),
         totalPointsIssued: parseInt(statsResult?.totalPointsIssued || '0'),
-        totalPointsRedeemed: parseInt(statsResult?.totalPointsRedeemed || '0')
+        totalPointsRedeemed: parseInt(statsResult?.totalPointsRedeemed || '0'),
       },
       rewards: rewards || [],
       transactions: transactions || [],
@@ -183,7 +183,7 @@ export const loyaltyDashboard = async (req: Request, res: Response): Promise<voi
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load loyalty dashboard',
@@ -203,19 +203,19 @@ export const b2bDashboard = async (req: Request, res: Response): Promise<void> =
         COUNT(*) as "totalCompanies",
         SUM(CASE WHEN "status" = 'approved' THEN 1 ELSE 0 END) as "activeCompanies"
        FROM "b2bCompany"
-       WHERE "deletedAt" IS NULL`
+       WHERE "deletedAt" IS NULL`,
     );
 
     const quoteStats = await queryOne<any>(
       `SELECT COUNT(*) as "pendingQuotes"
        FROM "b2bQuote"
-       WHERE "status" = 'pending' AND "deletedAt" IS NULL`
+       WHERE "status" = 'pending' AND "deletedAt" IS NULL`,
     );
 
     const revenueResult = await queryOne<any>(
       `SELECT COALESCE(SUM(o."totalAmount"), 0) as "totalB2BRevenue"
        FROM "order" o
-       WHERE o."b2bCompanyId" IS NOT NULL AND o."deletedAt" IS NULL`
+       WHERE o."b2bCompanyId" IS NOT NULL AND o."deletedAt" IS NULL`,
     );
 
     // Get companies
@@ -226,7 +226,7 @@ export const b2bDashboard = async (req: Request, res: Response): Promise<void> =
        WHERE bc."deletedAt" IS NULL
        GROUP BY bc."b2bCompanyId"
        ORDER BY bc."createdAt" DESC
-       LIMIT 20`
+       LIMIT 20`,
     );
 
     // Get recent quotes
@@ -237,7 +237,7 @@ export const b2bDashboard = async (req: Request, res: Response): Promise<void> =
        LEFT JOIN "b2bCompany" bc ON q."b2bCompanyId" = bc."b2bCompanyId"
        WHERE q."deletedAt" IS NULL
        ORDER BY q."createdAt" DESC
-       LIMIT 20`
+       LIMIT 20`,
     );
 
     adminRespond(req, res, 'programs/b2b/index', {
@@ -246,14 +246,14 @@ export const b2bDashboard = async (req: Request, res: Response): Promise<void> =
         totalCompanies: parseInt(statsResult?.totalCompanies || '0'),
         activeCompanies: parseInt(statsResult?.activeCompanies || '0'),
         pendingQuotes: parseInt(quoteStats?.pendingQuotes || '0'),
-        totalB2BRevenue: parseFloat(revenueResult?.totalB2BRevenue || '0')
+        totalB2BRevenue: parseFloat(revenueResult?.totalB2BRevenue || '0'),
       },
       companies: companies || [],
       quotes: quotes || [],
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load B2B dashboard',

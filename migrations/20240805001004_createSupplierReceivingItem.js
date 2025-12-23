@@ -7,7 +7,11 @@ exports.up = function (knex) {
     t.uuid('supplierReceivingItemId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
-    t.uuid('supplierReceivingRecordId').notNullable().references('supplierReceivingRecordId').inTable('supplierReceivingRecord').onDelete('CASCADE');
+    t.uuid('supplierReceivingRecordId')
+      .notNullable()
+      .references('supplierReceivingRecordId')
+      .inTable('supplierReceivingRecord')
+      .onDelete('CASCADE');
     t.uuid('supplierPurchaseOrderItemId').references('supplierPurchaseOrderItemId').inTable('supplierPurchaseOrderItem');
     t.uuid('productId').notNullable();
     t.uuid('productVariantId');
@@ -24,7 +28,7 @@ exports.up = function (knex) {
     t.enum('acceptanceStatus', ['pending', 'accepted', 'rejected', 'partial']).defaultTo('pending');
     t.text('inspectionNotes');
     t.string('discrepancyReason', 255);
-    
+
     t.timestamp('processedAt');
     t.uuid('processedBy');
     t.index('supplierReceivingRecordId');

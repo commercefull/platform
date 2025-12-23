@@ -17,7 +17,7 @@ exports.up = function (knex) {
     t.string('osVersion', 20);
     t.boolean('isActive').notNullable().defaultTo(true);
     t.timestamp('lastUsedAt').notNullable().defaultTo(knex.fn.now());
-    
+
     t.index('userId');
     t.index('userType');
     t.index('deviceToken');

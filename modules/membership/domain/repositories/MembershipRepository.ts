@@ -30,11 +30,16 @@ export interface MembershipRepository {
   upgradeTier(customerId: string, newTierId: string): Promise<UserMembership>;
   addPoints(customerId: string, points: number, reason: string): Promise<number>;
   redeemPoints(customerId: string, points: number, orderId?: string): Promise<number>;
-  getPointsHistory(customerId: string, limit?: number): Promise<Array<{
-    transactionId: string;
-    type: 'earn' | 'redeem' | 'expire' | 'adjust';
-    points: number;
-    reason: string;
-    createdAt: Date;
-  }>>;
+  getPointsHistory(
+    customerId: string,
+    limit?: number,
+  ): Promise<
+    Array<{
+      transactionId: string;
+      type: 'earn' | 'redeem' | 'expire' | 'adjust';
+      points: number;
+      reason: string;
+      createdAt: Date;
+    }>
+  >;
 }

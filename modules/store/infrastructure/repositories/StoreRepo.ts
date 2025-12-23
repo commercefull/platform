@@ -8,38 +8,25 @@ import { StoreRepository as IStoreRepository, StoreFilters } from '../../domain/
 import { Store } from '../../domain/entities/Store';
 
 export class StoreRepo implements IStoreRepository {
-
   async findById(storeId: string): Promise<Store | null> {
-    const row = await queryOne<Record<string, any>>(
-      'SELECT * FROM store WHERE "storeId" = $1',
-      [storeId]
-    );
+    const row = await queryOne<Record<string, any>>('SELECT * FROM store WHERE "storeId" = $1', [storeId]);
     return row ? this.mapToStore(row) : null;
   }
 
   async findBySlug(slug: string): Promise<Store | null> {
-    const row = await queryOne<Record<string, any>>(
-      'SELECT * FROM store WHERE slug = $1',
-      [slug]
-    );
+    const row = await queryOne<Record<string, any>>('SELECT * FROM store WHERE slug = $1', [slug]);
     return row ? this.mapToStore(row) : null;
   }
 
   async findByUrl(storeUrl: string): Promise<Store | null> {
-    const row = await queryOne<Record<string, any>>(
-      'SELECT * FROM store WHERE "storeUrl" = $1',
-      [storeUrl]
-    );
+    const row = await queryOne<Record<string, any>>('SELECT * FROM store WHERE "storeUrl" = $1', [storeUrl]);
     return row ? this.mapToStore(row) : null;
   }
 
   async findAll(filters?: StoreFilters): Promise<Store[]> {
     const { whereClause, params } = this.buildWhereClause(filters);
 
-    const rows = await query<Record<string, any>[]>(
-      `SELECT * FROM store ${whereClause} ORDER BY "createdAt" DESC`,
-      params
-    );
+    const rows = await query<Record<string, any>[]>(`SELECT * FROM store ${whereClause} ORDER BY "createdAt" DESC`, params);
 
     return (rows || []).map(row => this.mapToStore(row));
   }
@@ -47,10 +34,7 @@ export class StoreRepo implements IStoreRepository {
   async save(store: Store): Promise<Store> {
     const now = new Date().toISOString();
 
-    const existing = await queryOne<Record<string, any>>(
-      'SELECT "storeId" FROM store WHERE "storeId" = $1',
-      [store.storeId]
-    );
+    const existing = await queryOne<Record<string, any>>('SELECT "storeId" FROM store WHERE "storeId" = $1', [store.storeId]);
 
     if (existing) {
       await query(
@@ -68,29 +52,48 @@ export class StoreRepo implements IStoreRepository {
           "customPages" = $37, "customFields" = $38, metadata = $39, "updatedAt" = $40
         WHERE "storeId" = $41`,
         [
-          store.name, store.slug, store.description, store.storeType,
-          store.merchantId, store.businessId, store.storeUrl, store.storeEmail,
-          store.storePhone, store.logo, store.banner, store.favicon,
-          store.primaryColor, store.secondaryColor, store.theme,
+          store.name,
+          store.slug,
+          store.description,
+          store.storeType,
+          store.merchantId,
+          store.businessId,
+          store.storeUrl,
+          store.storeEmail,
+          store.storePhone,
+          store.logo,
+          store.banner,
+          store.favicon,
+          store.primaryColor,
+          store.secondaryColor,
+          store.theme,
           JSON.stringify(store.colorScheme || {}),
-          JSON.stringify(store.address), store.isActive, store.isVerified, store.isFeatured,
-          store.storeRating, store.reviewCount, store.followerCount,
-          store.productCount, store.orderCount,
+          JSON.stringify(store.address),
+          store.isActive,
+          store.isVerified,
+          store.isFeatured,
+          store.storeRating,
+          store.reviewCount,
+          store.followerCount,
+          store.productCount,
+          store.orderCount,
           JSON.stringify(store.storePolicies || {}),
           JSON.stringify(store.shippingMethods || []),
           JSON.stringify(store.paymentMethods || []),
           JSON.stringify(store.supportedCurrencies || []),
           store.defaultCurrency,
           JSON.stringify(store.settings || {}),
-          store.metaTitle, store.metaDescription,
+          store.metaTitle,
+          store.metaDescription,
           JSON.stringify(store.metaKeywords || []),
           JSON.stringify(store.socialLinks || {}),
           JSON.stringify(store.openingHours || {}),
           JSON.stringify(store.customPages || {}),
           JSON.stringify(store.customFields || {}),
           JSON.stringify(store.metadata || {}),
-          now, store.storeId
-        ]
+          now,
+          store.storeId,
+        ],
       );
     } else {
       await query(
@@ -109,22 +112,49 @@ export class StoreRepo implements IStoreRepository {
           $35, $36, $37, $38, $39, $40, $41
         )`,
         [
-          store.storeId, store.name, store.slug, store.description, store.storeType,
-          store.merchantId, store.businessId, store.storeUrl, store.storeEmail, store.storePhone,
-          store.logo, store.banner, store.favicon, store.primaryColor, store.secondaryColor,
-          store.theme, JSON.stringify(store.colorScheme || {}),
-          JSON.stringify(store.address), store.isActive, store.isVerified, store.isFeatured,
-          store.storeRating, store.reviewCount, store.followerCount, store.productCount,
-          store.orderCount, JSON.stringify(store.storePolicies || {}),
+          store.storeId,
+          store.name,
+          store.slug,
+          store.description,
+          store.storeType,
+          store.merchantId,
+          store.businessId,
+          store.storeUrl,
+          store.storeEmail,
+          store.storePhone,
+          store.logo,
+          store.banner,
+          store.favicon,
+          store.primaryColor,
+          store.secondaryColor,
+          store.theme,
+          JSON.stringify(store.colorScheme || {}),
+          JSON.stringify(store.address),
+          store.isActive,
+          store.isVerified,
+          store.isFeatured,
+          store.storeRating,
+          store.reviewCount,
+          store.followerCount,
+          store.productCount,
+          store.orderCount,
+          JSON.stringify(store.storePolicies || {}),
           JSON.stringify(store.shippingMethods || []),
           JSON.stringify(store.paymentMethods || []),
           JSON.stringify(store.supportedCurrencies || []),
-          store.defaultCurrency, JSON.stringify(store.settings || {}),
-          store.metaTitle, store.metaDescription, JSON.stringify(store.metaKeywords || []),
-          JSON.stringify(store.socialLinks || {}), JSON.stringify(store.openingHours || {}),
-          JSON.stringify(store.customPages || {}), JSON.stringify(store.customFields || {}),
-          JSON.stringify(store.metadata || {}), now, now
-        ]
+          store.defaultCurrency,
+          JSON.stringify(store.settings || {}),
+          store.metaTitle,
+          store.metaDescription,
+          JSON.stringify(store.metaKeywords || []),
+          JSON.stringify(store.socialLinks || {}),
+          JSON.stringify(store.openingHours || {}),
+          JSON.stringify(store.customPages || {}),
+          JSON.stringify(store.customFields || {}),
+          JSON.stringify(store.metadata || {}),
+          now,
+          now,
+        ],
       );
     }
 
@@ -137,10 +167,7 @@ export class StoreRepo implements IStoreRepository {
 
   async count(filters?: StoreFilters): Promise<number> {
     const { whereClause, params } = this.buildWhereClause(filters);
-    const result = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM store ${whereClause}`,
-      params
-    );
+    const result = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM store ${whereClause}`, params);
     return parseInt(result?.count || '0');
   }
 
@@ -164,12 +191,15 @@ export class StoreRepo implements IStoreRepository {
     return this.findAll({ storeType });
   }
 
-  async updateStats(storeId: string, stats: {
-    productCount?: number;
-    orderCount?: number;
-    reviewCount?: number;
-    followerCount?: number;
-  }): Promise<void> {
+  async updateStats(
+    storeId: string,
+    stats: {
+      productCount?: number;
+      orderCount?: number;
+      reviewCount?: number;
+      followerCount?: number;
+    },
+  ): Promise<void> {
     const setClauses: string[] = ['"updatedAt" = $1'];
     const params: any[] = [new Date().toISOString()];
     let paramIndex = 2;
@@ -192,10 +222,7 @@ export class StoreRepo implements IStoreRepository {
     }
 
     params.push(storeId);
-    await query(
-      `UPDATE store SET ${setClauses.join(', ')} WHERE "storeId" = $${paramIndex}`,
-      params
-    );
+    await query(`UPDATE store SET ${setClauses.join(', ')} WHERE "storeId" = $${paramIndex}`, params);
   }
 
   private buildWhereClause(filters?: StoreFilters): { whereClause: string; params: any[] } {
@@ -230,7 +257,7 @@ export class StoreRepo implements IStoreRepository {
 
     return {
       whereClause: conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '',
-      params
+      params,
     };
   }
 
@@ -277,7 +304,7 @@ export class StoreRepo implements IStoreRepository {
       customFields: typeof row.customFields === 'string' ? JSON.parse(row.customFields) : row.customFields,
       metadata: typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata,
       createdAt: new Date(row.createdAt),
-      updatedAt: new Date(row.updatedAt)
+      updatedAt: new Date(row.updatedAt),
     });
   }
 }

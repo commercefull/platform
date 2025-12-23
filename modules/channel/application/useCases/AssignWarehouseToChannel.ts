@@ -1,6 +1,6 @@
 /**
  * AssignWarehouseToChannel Use Case
- * 
+ *
  * Assigns warehouses to a distribution channel for fulfillment.
  */
 

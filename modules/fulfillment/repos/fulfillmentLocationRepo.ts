@@ -1,6 +1,6 @@
 /**
  * Fulfillment Location Repository
- * 
+ *
  * Manages unified fulfillment locations (warehouses, stores, dropship vendors, 3PLs).
  */
 
@@ -76,22 +76,16 @@ export async function create(params: CreateFulfillmentLocationParams): Promise<F
 }
 
 export async function findById(locationId: string): Promise<FulfillmentLocation | null> {
-  return queryOne<FulfillmentLocation>(
-    'SELECT * FROM "fulfillmentLocation" WHERE "locationId" = $1',
-    [locationId]
-  );
+  return queryOne<FulfillmentLocation>('SELECT * FROM "fulfillmentLocation" WHERE "locationId" = $1', [locationId]);
 }
 
 export async function findByCode(code: string): Promise<FulfillmentLocation | null> {
-  return queryOne<FulfillmentLocation>(
-    'SELECT * FROM "fulfillmentLocation" WHERE "code" = $1',
-    [code]
-  );
+  return queryOne<FulfillmentLocation>('SELECT * FROM "fulfillmentLocation" WHERE "code" = $1', [code]);
 }
 
 export async function findByOrganization(
   organizationId: string,
-  options?: { type?: string; isActive?: boolean }
+  options?: { type?: string; isActive?: boolean },
 ): Promise<FulfillmentLocation[]> {
   let sql = 'SELECT * FROM "fulfillmentLocation" WHERE "organizationId" = $1';
   const params: unknown[] = [organizationId];
@@ -115,15 +109,12 @@ export async function findByOrganization(
 export async function findBySeller(sellerId: string): Promise<FulfillmentLocation[]> {
   const result = await query<{ rows: FulfillmentLocation[] }>(
     'SELECT * FROM "fulfillmentLocation" WHERE "sellerId" = $1 AND "isActive" = true ORDER BY "name" ASC',
-    [sellerId]
+    [sellerId],
   );
   return result?.rows ?? [];
 }
 
-export async function update(
-  locationId: string,
-  params: UpdateFulfillmentLocationParams
-): Promise<FulfillmentLocation | null> {
+export async function update(locationId: string, params: UpdateFulfillmentLocationParams): Promise<FulfillmentLocation | null> {
   const updates: string[] = ['"updatedAt" = $1'];
   const values: unknown[] = [new Date()];
   let paramIndex = 2;
@@ -160,7 +151,7 @@ export async function update(
 export async function activate(locationId: string): Promise<boolean> {
   const result = await query<{ rowCount: number }>(
     'UPDATE "fulfillmentLocation" SET "isActive" = true, "updatedAt" = $1 WHERE "locationId" = $2',
-    [new Date(), locationId]
+    [new Date(), locationId],
   );
   return (result?.rowCount ?? 0) > 0;
 }
@@ -168,7 +159,7 @@ export async function activate(locationId: string): Promise<boolean> {
 export async function deactivate(locationId: string): Promise<boolean> {
   const result = await query<{ rowCount: number }>(
     'UPDATE "fulfillmentLocation" SET "isActive" = false, "updatedAt" = $1 WHERE "locationId" = $2',
-    [new Date(), locationId]
+    [new Date(), locationId],
   );
   return (result?.rowCount ?? 0) > 0;
 }
@@ -176,7 +167,7 @@ export async function deactivate(locationId: string): Promise<boolean> {
 export async function findNearestLocations(
   latitude: number,
   longitude: number,
-  options?: { limit?: number; type?: string; organizationId?: string }
+  options?: { limit?: number; type?: string; organizationId?: string },
 ): Promise<Array<FulfillmentLocation & { distance: number }>> {
   const limit = options?.limit || 10;
 

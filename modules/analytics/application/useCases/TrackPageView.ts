@@ -51,12 +51,12 @@ export class TrackPageViewUseCase {
         pageTitle: command.pageTitle,
         referrer: command.referrer,
         userAgent: command.userAgent,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
 
       return {
         success: true,
-        pageViewId
+        pageViewId,
       };
     } catch (error: any) {
       return { success: false, error: error.message };

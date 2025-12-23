@@ -26,7 +26,7 @@ export class UploadMediaCommand {
     public readonly isExternal?: boolean,
     public readonly externalService?: string,
     public readonly externalId?: string,
-    public readonly uploadedBy?: string
+    public readonly uploadedBy?: string,
   ) {}
 }
 
@@ -89,7 +89,7 @@ export class UploadMediaUseCase {
       externalService: command.externalService ?? null,
       externalId: command.externalId ?? null,
       createdBy: command.uploadedBy ?? null,
-      updatedBy: null
+      updatedBy: null,
     });
 
     eventBus.emit('content.media.uploaded', {
@@ -98,7 +98,7 @@ export class UploadMediaUseCase {
       fileName: media.fileName,
       fileType: media.fileType,
       fileSize: media.fileSize,
-      uploadedBy: command.uploadedBy
+      uploadedBy: command.uploadedBy,
     });
 
     return {
@@ -113,7 +113,7 @@ export class UploadMediaUseCase {
       height: media.height ?? undefined,
       altText: media.altText ?? undefined,
       folderId: media.contentMediaFolderId ?? undefined,
-      createdAt: media.createdAt instanceof Date ? media.createdAt.toISOString() : String(media.createdAt)
+      createdAt: media.createdAt instanceof Date ? media.createdAt.toISOString() : String(media.createdAt),
     };
   }
 }

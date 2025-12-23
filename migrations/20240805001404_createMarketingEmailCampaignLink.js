@@ -2,10 +2,15 @@
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.up = function(knex) {
-  return knex.schema.createTable('marketingEmailCampaignLink', function(table) {
+exports.up = function (knex) {
+  return knex.schema.createTable('marketingEmailCampaignLink', function (table) {
     table.uuid('marketingEmailCampaignLinkId').primary().defaultTo(knex.raw('uuidv7()'));
-    table.uuid('marketingEmailCampaignId').notNullable().references('marketingEmailCampaignId').inTable('marketingEmailCampaign').onDelete('CASCADE');
+    table
+      .uuid('marketingEmailCampaignId')
+      .notNullable()
+      .references('marketingEmailCampaignId')
+      .inTable('marketingEmailCampaign')
+      .onDelete('CASCADE');
     table.string('originalUrl').notNullable();
     table.string('trackingUrl');
     table.string('linkText');
@@ -24,6 +29,6 @@ exports.up = function(knex) {
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTableIfExists('marketingEmailCampaignLink');
 };

@@ -2,19 +2,25 @@
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.up = function(knex) {
-  return knex.schema.createTable('distributionShippingRate', (table) => {
+exports.up = function (knex) {
+  return knex.schema.createTable('distributionShippingRate', table => {
     table.uuid('distributionShippingRateId').primary().defaultTo(knex.raw('uuidv7()'));
     table.timestamp('createdAt').defaultTo(knex.fn.now()).notNullable();
     table.timestamp('updatedAt').defaultTo(knex.fn.now()).notNullable();
-    
-    table.uuid('distributionShippingZoneId').notNullable()
-      .references('distributionShippingZoneId').inTable('distributionShippingZone')
+
+    table
+      .uuid('distributionShippingZoneId')
+      .notNullable()
+      .references('distributionShippingZoneId')
+      .inTable('distributionShippingZone')
       .onDelete('CASCADE');
-    table.uuid('distributionShippingMethodId').notNullable()
-      .references('distributionShippingMethodId').inTable('distributionShippingMethod')
+    table
+      .uuid('distributionShippingMethodId')
+      .notNullable()
+      .references('distributionShippingMethodId')
+      .inTable('distributionShippingMethod')
       .onDelete('CASCADE');
-    
+
     table.string('name', 100).nullable();
     table.text('description').nullable();
     table.boolean('isActive').defaultTo(true).notNullable();
@@ -45,6 +51,6 @@ exports.up = function(knex) {
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTable('distributionShippingRate');
 };

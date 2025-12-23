@@ -7,9 +7,7 @@ import { PromotionRepo } from '../../repos/promotionRepo';
 
 // Command
 export class DeletePromotionCommand {
-  constructor(
-    public readonly promotionId: string
-  ) {}
+  constructor(public readonly promotionId: string) {}
 }
 
 // Response
@@ -34,7 +32,7 @@ export class DeletePromotionUseCase {
 
     return {
       promotionId: command.promotionId,
-      deleted
+      deleted,
     };
   }
 }

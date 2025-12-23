@@ -5,22 +5,21 @@
 
 import { query, queryOne } from '../../../../libs/db';
 import { generateUUID } from '../../../../libs/uuid';
-import { 
-  PaymentRepository as IPaymentRepository, 
-  PaymentFilters, 
+import {
+  PaymentRepository as IPaymentRepository,
+  PaymentFilters,
   PaginationOptions,
-  PaginatedResult 
+  PaginatedResult,
 } from '../../domain/repositories/PaymentRepository';
 import { PaymentTransaction, PaymentTransactionProps } from '../../domain/entities/PaymentTransaction';
 import { PaymentRefund, PaymentRefundProps } from '../../domain/entities/PaymentRefund';
 import { TransactionStatus, RefundStatus } from '../../domain/valueObjects/PaymentStatus';
 
 export class PaymentRepo implements IPaymentRepository {
-
   async findTransactionById(transactionId: string): Promise<PaymentTransaction | null> {
     const row = await queryOne<Record<string, any>>(
       'SELECT * FROM "paymentTransaction" WHERE "paymentTransactionId" = $1 AND "deletedAt" IS NULL',
-      [transactionId]
+      [transactionId],
     );
     return row ? this.mapToTransaction(row) : null;
   }
@@ -28,7 +27,7 @@ export class PaymentRepo implements IPaymentRepository {
   async findTransactionByExternalId(externalId: string): Promise<PaymentTransaction | null> {
     const row = await queryOne<Record<string, any>>(
       'SELECT * FROM "paymentTransaction" WHERE "externalTransactionId" = $1 AND "deletedAt" IS NULL',
-      [externalId]
+      [externalId],
     );
     return row ? this.mapToTransaction(row) : null;
   }
@@ -36,7 +35,7 @@ export class PaymentRepo implements IPaymentRepository {
   async findTransactionsByOrderId(orderId: string): Promise<PaymentTransaction[]> {
     const rows = await query<Record<string, any>[]>(
       'SELECT * FROM "paymentTransaction" WHERE "orderId" = $1 AND "deletedAt" IS NULL ORDER BY "createdAt" DESC',
-      [orderId]
+      [orderId],
     );
     return (rows || []).map(row => this.mapToTransaction(row));
   }
@@ -47,20 +46,22 @@ export class PaymentRepo implements IPaymentRepository {
 
     const countResult = await queryOne<{ count: string }>(
       'SELECT COUNT(*) as count FROM "paymentTransaction" WHERE "customerId" = $1 AND "deletedAt" IS NULL',
-      [customerId]
+      [customerId],
     );
     const total = parseInt(countResult?.count || '0');
 
     const rows = await query<Record<string, any>[]>(
       `SELECT * FROM "paymentTransaction" WHERE "customerId" = $1 AND "deletedAt" IS NULL
        ORDER BY "createdAt" DESC LIMIT $2 OFFSET $3`,
-      [customerId, limit, offset]
+      [customerId, limit, offset],
     );
 
     return {
       data: (rows || []).map(row => this.mapToTransaction(row)),
-      total, limit, offset,
-      hasMore: offset + (rows?.length || 0) < total
+      total,
+      limit,
+      offset,
+      hasMore: offset + (rows?.length || 0) < total,
     };
   }
 
@@ -72,32 +73,31 @@ export class PaymentRepo implements IPaymentRepository {
 
     const { whereClause, params } = this.buildWhereClause(filters);
 
-    const countResult = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM "paymentTransaction" ${whereClause}`,
-      params
-    );
+    const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "paymentTransaction" ${whereClause}`, params);
     const total = parseInt(countResult?.count || '0');
 
     const rows = await query<Record<string, any>[]>(
       `SELECT * FROM "paymentTransaction" ${whereClause}
        ORDER BY "${orderBy}" ${orderDir.toUpperCase()}
        LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
-      [...params, limit, offset]
+      [...params, limit, offset],
     );
 
     return {
       data: (rows || []).map(row => this.mapToTransaction(row)),
-      total, limit, offset,
-      hasMore: offset + (rows?.length || 0) < total
+      total,
+      limit,
+      offset,
+      hasMore: offset + (rows?.length || 0) < total,
     };
   }
 
   async saveTransaction(transaction: PaymentTransaction): Promise<PaymentTransaction> {
     const now = new Date().toISOString();
-    
+
     const existing = await queryOne<Record<string, any>>(
       'SELECT "paymentTransactionId" FROM "paymentTransaction" WHERE "paymentTransactionId" = $1',
-      [transaction.transactionId]
+      [transaction.transactionId],
     );
 
     if (existing) {
@@ -120,8 +120,8 @@ export class PaymentRepo implements IPaymentRepository {
           transaction.capturedAt?.toISOString(),
           transaction.metadata ? JSON.stringify(transaction.metadata) : null,
           now,
-          transaction.transactionId
-        ]
+          transaction.transactionId,
+        ],
       );
     } else {
       await query(
@@ -143,8 +143,8 @@ export class PaymentRepo implements IPaymentRepository {
           transaction.customerIp,
           transaction.metadata ? JSON.stringify(transaction.metadata) : null,
           now,
-          now
-        ]
+          now,
+        ],
       );
     }
 
@@ -153,37 +153,30 @@ export class PaymentRepo implements IPaymentRepository {
 
   async countTransactions(filters?: PaymentFilters): Promise<number> {
     const { whereClause, params } = this.buildWhereClause(filters);
-    const result = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM "paymentTransaction" ${whereClause}`,
-      params
-    );
+    const result = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "paymentTransaction" ${whereClause}`, params);
     return parseInt(result?.count || '0');
   }
 
   // Refunds
   async findRefundById(refundId: string): Promise<PaymentRefund | null> {
-    const row = await queryOne<Record<string, any>>(
-      'SELECT * FROM "paymentRefund" WHERE "paymentRefundId" = $1',
-      [refundId]
-    );
+    const row = await queryOne<Record<string, any>>('SELECT * FROM "paymentRefund" WHERE "paymentRefundId" = $1', [refundId]);
     return row ? this.mapToRefund(row) : null;
   }
 
   async findRefundsByTransactionId(transactionId: string): Promise<PaymentRefund[]> {
     const rows = await query<Record<string, any>[]>(
       'SELECT * FROM "paymentRefund" WHERE "paymentTransactionId" = $1 ORDER BY "createdAt" DESC',
-      [transactionId]
+      [transactionId],
     );
     return (rows || []).map(row => this.mapToRefund(row));
   }
 
   async saveRefund(refund: PaymentRefund): Promise<PaymentRefund> {
     const now = new Date().toISOString();
-    
-    const existing = await queryOne<Record<string, any>>(
-      'SELECT "paymentRefundId" FROM "paymentRefund" WHERE "paymentRefundId" = $1',
-      [refund.refundId]
-    );
+
+    const existing = await queryOne<Record<string, any>>('SELECT "paymentRefundId" FROM "paymentRefund" WHERE "paymentRefundId" = $1', [
+      refund.refundId,
+    ]);
 
     if (existing) {
       await query(
@@ -201,8 +194,8 @@ export class PaymentRepo implements IPaymentRepository {
           refund.processedAt?.toISOString(),
           refund.metadata ? JSON.stringify(refund.metadata) : null,
           now,
-          refund.refundId
-        ]
+          refund.refundId,
+        ],
       );
     } else {
       await query(
@@ -218,8 +211,8 @@ export class PaymentRepo implements IPaymentRepository {
           refund.status,
           refund.metadata ? JSON.stringify(refund.metadata) : null,
           now,
-          now
-        ]
+          now,
+        ],
       );
     }
 
@@ -227,14 +220,19 @@ export class PaymentRepo implements IPaymentRepository {
   }
 
   // Payment Methods
-  async getEnabledPaymentMethods(merchantId: string, currency?: string): Promise<Array<{
-    paymentMethodConfigId: string;
-    paymentMethod: string;
-    displayName: string;
-    description?: string;
-    icon?: string;
-    processingFee?: number;
-  }>> {
+  async getEnabledPaymentMethods(
+    merchantId: string,
+    currency?: string,
+  ): Promise<
+    Array<{
+      paymentMethodConfigId: string;
+      paymentMethod: string;
+      displayName: string;
+      description?: string;
+      icon?: string;
+      processingFee?: number;
+    }>
+  > {
     let sql = 'SELECT * FROM "paymentMethod" WHERE "merchantId" = $1 AND "isEnabled" = true AND "deletedAt" IS NULL';
     const params: any[] = [merchantId];
 
@@ -252,7 +250,7 @@ export class PaymentRepo implements IPaymentRepository {
       displayName: row.displayName || row.type,
       description: row.description,
       icon: row.icon,
-      processingFee: row.processingFee ? parseFloat(row.processingFee) : undefined
+      processingFee: row.processingFee ? parseFloat(row.processingFee) : undefined,
     }));
   }
 
@@ -264,25 +262,25 @@ export class PaymentRepo implements IPaymentRepository {
   } | null> {
     const row = await queryOne<Record<string, any>>(
       'SELECT * FROM "paymentGateway" WHERE "merchantId" = $1 AND "isDefault" = true AND "isActive" = true AND "deletedAt" IS NULL',
-      [merchantId]
+      [merchantId],
     );
-    
+
     if (!row) {
       const fallback = await queryOne<Record<string, any>>(
-        'SELECT * FROM "paymentGateway" WHERE "isActive" = true AND "deletedAt" IS NULL ORDER BY "createdAt" ASC LIMIT 1'
+        'SELECT * FROM "paymentGateway" WHERE "isActive" = true AND "deletedAt" IS NULL ORDER BY "createdAt" ASC LIMIT 1',
       );
       if (!fallback) return null;
       return {
         gatewayId: fallback.paymentGatewayId,
         provider: fallback.provider,
-        isTestMode: Boolean(fallback.isTestMode)
+        isTestMode: Boolean(fallback.isTestMode),
       };
     }
 
     return {
       gatewayId: row.paymentGatewayId,
       provider: row.provider,
-      isTestMode: Boolean(row.isTestMode)
+      isTestMode: Boolean(row.isTestMode),
     };
   }
 
@@ -324,7 +322,7 @@ export class PaymentRepo implements IPaymentRepository {
 
     return {
       whereClause: conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '',
-      params
+      params,
     };
   }
 
@@ -339,20 +337,25 @@ export class PaymentRepo implements IPaymentRepository {
       amount: parseFloat(row.amount),
       currency: row.currency,
       status: row.status as TransactionStatus,
-      paymentMethodDetails: row.paymentMethodDetails ? 
-        (typeof row.paymentMethodDetails === 'string' ? JSON.parse(row.paymentMethodDetails) : row.paymentMethodDetails) : undefined,
-      gatewayResponse: row.gatewayResponse ?
-        (typeof row.gatewayResponse === 'string' ? JSON.parse(row.gatewayResponse) : row.gatewayResponse) : undefined,
+      paymentMethodDetails: row.paymentMethodDetails
+        ? typeof row.paymentMethodDetails === 'string'
+          ? JSON.parse(row.paymentMethodDetails)
+          : row.paymentMethodDetails
+        : undefined,
+      gatewayResponse: row.gatewayResponse
+        ? typeof row.gatewayResponse === 'string'
+          ? JSON.parse(row.gatewayResponse)
+          : row.gatewayResponse
+        : undefined,
       errorCode: row.errorCode,
       errorMessage: row.errorMessage,
       refundedAmount: parseFloat(row.refundedAmount || 0),
       customerIp: row.customerIp,
       authorizedAt: row.authorizedAt ? new Date(row.authorizedAt) : undefined,
       capturedAt: row.capturedAt ? new Date(row.capturedAt) : undefined,
-      metadata: row.metadata ?
-        (typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata) : undefined,
+      metadata: row.metadata ? (typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata) : undefined,
       createdAt: new Date(row.createdAt),
-      updatedAt: new Date(row.updatedAt)
+      updatedAt: new Date(row.updatedAt),
     });
   }
 
@@ -365,15 +368,17 @@ export class PaymentRepo implements IPaymentRepository {
       currency: row.currency,
       reason: row.reason,
       status: row.status as RefundStatus,
-      gatewayResponse: row.gatewayResponse ?
-        (typeof row.gatewayResponse === 'string' ? JSON.parse(row.gatewayResponse) : row.gatewayResponse) : undefined,
+      gatewayResponse: row.gatewayResponse
+        ? typeof row.gatewayResponse === 'string'
+          ? JSON.parse(row.gatewayResponse)
+          : row.gatewayResponse
+        : undefined,
       errorCode: row.errorCode,
       errorMessage: row.errorMessage,
       processedAt: row.processedAt ? new Date(row.processedAt) : undefined,
-      metadata: row.metadata ?
-        (typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata) : undefined,
+      metadata: row.metadata ? (typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata) : undefined,
       createdAt: new Date(row.createdAt),
-      updatedAt: new Date(row.updatedAt)
+      updatedAt: new Date(row.updatedAt),
     });
   }
 }

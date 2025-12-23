@@ -17,7 +17,7 @@ export class RedeemCouponCommand {
     public readonly orderTotal: number,
     public readonly discountAmount: number,
     public readonly customerId?: string,
-    public readonly merchantId?: string
+    public readonly merchantId?: string,
   ) {}
 }
 
@@ -51,40 +51,31 @@ export class RedeemCouponUseCase {
 
     // First validate the coupon
     const validationResult = await this.validateCouponUseCase.execute(
-      new ValidateCouponCommand(
-        command.code,
-        command.orderTotal,
-        command.customerId,
-        command.merchantId
-      )
+      new ValidateCouponCommand(command.code, command.orderTotal, command.customerId, command.merchantId),
     );
 
     if (!validationResult.valid || !validationResult.coupon) {
       return {
         success: false,
         message: validationResult.message,
-        errors: validationResult.errors
+        errors: validationResult.errors,
       };
     }
 
     try {
       // Record the usage
-      const usage = await couponRepo.recordUsage(
-        validationResult.coupon.promotionCouponId,
-        command.orderId,
-        command.customerId
-      );
+      const usage = await couponRepo.recordUsage(validationResult.coupon.promotionCouponId, command.orderId, command.customerId);
 
       return {
         success: true,
         usage,
-        message: 'Coupon redeemed successfully'
+        message: 'Coupon redeemed successfully',
       };
     } catch (error: any) {
       return {
         success: false,
         message: error.message || 'Failed to redeem coupon',
-        errors: ['redemption_failed']
+        errors: ['redemption_failed'],
       };
     }
   }

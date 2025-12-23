@@ -17,30 +17,31 @@ export class CustomerAddressRepo {
   }
 
   async findByCustomerId(customerId: string): Promise<CustomerAddress[]> {
-    return (await query<CustomerAddress[]>(
-      `SELECT * FROM "customerAddress" WHERE "customerId" = $1 ORDER BY "isDefault" DESC, "createdAt" DESC`,
-      [customerId]
-    )) || [];
+    return (
+      (await query<CustomerAddress[]>(
+        `SELECT * FROM "customerAddress" WHERE "customerId" = $1 ORDER BY "isDefault" DESC, "createdAt" DESC`,
+        [customerId],
+      )) || []
+    );
   }
 
   async findDefaultByCustomerId(customerId: string): Promise<CustomerAddress | null> {
-    return await queryOne<CustomerAddress>(
-      `SELECT * FROM "customerAddress" WHERE "customerId" = $1 AND "isDefault" = true LIMIT 1`,
-      [customerId]
-    );
+    return await queryOne<CustomerAddress>(`SELECT * FROM "customerAddress" WHERE "customerId" = $1 AND "isDefault" = true LIMIT 1`, [
+      customerId,
+    ]);
   }
 
   async findDefaultBillingByCustomerId(customerId: string): Promise<CustomerAddress | null> {
     return await queryOne<CustomerAddress>(
       `SELECT * FROM "customerAddress" WHERE "customerId" = $1 AND "isDefaultBilling" = true LIMIT 1`,
-      [customerId]
+      [customerId],
     );
   }
 
   async findDefaultShippingByCustomerId(customerId: string): Promise<CustomerAddress | null> {
     return await queryOne<CustomerAddress>(
       `SELECT * FROM "customerAddress" WHERE "customerId" = $1 AND "isDefaultShipping" = true LIMIT 1`,
-      [customerId]
+      [customerId],
     );
   }
 
@@ -67,15 +68,32 @@ export class CustomerAddressRepo {
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25)
       RETURNING *`,
       [
-        params.customerId, params.firstName || null, params.lastName || null, params.company || null,
-        params.addressLine1, params.addressLine2 || null, params.city, params.state || null,
-        params.postalCode, params.country, params.phone || null, params.email || null,
-        params.isDefault || false, params.isDefaultBilling || false, params.isDefaultShipping || false,
-        params.addressType || 'both', params.isVerified || false, params.verifiedAt || null,
+        params.customerId,
+        params.firstName || null,
+        params.lastName || null,
+        params.company || null,
+        params.addressLine1,
+        params.addressLine2 || null,
+        params.city,
+        params.state || null,
+        params.postalCode,
+        params.country,
+        params.phone || null,
+        params.email || null,
+        params.isDefault || false,
+        params.isDefaultBilling || false,
+        params.isDefaultShipping || false,
+        params.addressType || 'both',
+        params.isVerified || false,
+        params.verifiedAt || null,
         params.verificationData ? JSON.stringify(params.verificationData) : null,
-        params.additionalInfo || null, params.latitude || null, params.longitude || null,
-        params.name || null, now, now
-      ]
+        params.additionalInfo || null,
+        params.latitude || null,
+        params.longitude || null,
+        params.name || null,
+        now,
+        now,
+      ],
     );
 
     if (!result) throw new Error('Failed to create customer address');
@@ -114,7 +132,7 @@ export class CustomerAddressRepo {
 
     return await queryOne<CustomerAddress>(
       `UPDATE "customerAddress" SET ${updateFields.join(', ')} WHERE "customerAddressId" = $${paramIndex} RETURNING *`,
-      values
+      values,
     );
   }
 
@@ -151,7 +169,7 @@ export class CustomerAddressRepo {
   async delete(id: string): Promise<boolean> {
     const result = await queryOne<{ customerAddressId: string }>(
       `DELETE FROM "customerAddress" WHERE "customerAddressId" = $1 RETURNING "customerAddressId"`,
-      [id]
+      [id],
     );
     return !!result;
   }

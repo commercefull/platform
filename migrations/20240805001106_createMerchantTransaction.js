@@ -20,7 +20,7 @@ exports.up = function (knex) {
     t.decimal('pendingBalanceAfter', 15, 2);
     t.decimal('reserveBalanceBefore', 15, 2);
     t.decimal('reserveBalanceAfter', 15, 2);
-    
+
     t.text('notes');
     t.uuid('createdBy');
     t.index('merchantId');

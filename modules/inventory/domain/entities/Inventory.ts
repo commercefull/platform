@@ -126,7 +126,7 @@ export class Inventory {
       isActive: true,
       metadata: props.metadata,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     });
   }
 
@@ -135,26 +135,66 @@ export class Inventory {
   }
 
   // Getters
-  get inventoryId(): string { return this.props.inventoryId; }
-  get productId(): string { return this.props.productId; }
-  get variantId(): string | undefined { return this.props.variantId; }
-  get locationId(): string { return this.props.locationId; }
-  get sku(): string { return this.props.sku; }
-  get quantity(): number { return this.props.quantity; }
-  get reservedQuantity(): number { return this.props.reservedQuantity; }
-  get availableQuantity(): number { return this.props.availableQuantity; }
-  get lowStockThreshold(): number { return this.props.lowStockThreshold; }
-  get reorderPoint(): number { return this.props.reorderPoint; }
-  get reorderQuantity(): number { return this.props.reorderQuantity; }
-  get cost(): number | undefined { return this.props.cost; }
-  get supplierId(): string | undefined { return this.props.supplierId; }
-  get binLocation(): string | undefined { return this.props.binLocation; }
-  get expiryDate(): Date | undefined { return this.props.expiryDate; }
-  get batchNumber(): string | undefined { return this.props.batchNumber; }
-  get isActive(): boolean { return this.props.isActive; }
-  get metadata(): Record<string, any> | undefined { return this.props.metadata; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get inventoryId(): string {
+    return this.props.inventoryId;
+  }
+  get productId(): string {
+    return this.props.productId;
+  }
+  get variantId(): string | undefined {
+    return this.props.variantId;
+  }
+  get locationId(): string {
+    return this.props.locationId;
+  }
+  get sku(): string {
+    return this.props.sku;
+  }
+  get quantity(): number {
+    return this.props.quantity;
+  }
+  get reservedQuantity(): number {
+    return this.props.reservedQuantity;
+  }
+  get availableQuantity(): number {
+    return this.props.availableQuantity;
+  }
+  get lowStockThreshold(): number {
+    return this.props.lowStockThreshold;
+  }
+  get reorderPoint(): number {
+    return this.props.reorderPoint;
+  }
+  get reorderQuantity(): number {
+    return this.props.reorderQuantity;
+  }
+  get cost(): number | undefined {
+    return this.props.cost;
+  }
+  get supplierId(): string | undefined {
+    return this.props.supplierId;
+  }
+  get binLocation(): string | undefined {
+    return this.props.binLocation;
+  }
+  get expiryDate(): Date | undefined {
+    return this.props.expiryDate;
+  }
+  get batchNumber(): string | undefined {
+    return this.props.batchNumber;
+  }
+  get isActive(): boolean {
+    return this.props.isActive;
+  }
+  get metadata(): Record<string, any> | undefined {
+    return this.props.metadata;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   // Computed properties
   get isInStock(): boolean {
@@ -191,7 +231,7 @@ export class Inventory {
       newQuantity: quantity,
       reason,
       performedBy: performedBy || 'system',
-      createdAt: new Date()
+      createdAt: new Date(),
     };
 
     this.props.quantity = quantity;
@@ -302,7 +342,7 @@ export class Inventory {
       needsReorder: this.needsReorder,
       isExpired: this.isExpired,
       createdAt: this.props.createdAt.toISOString(),
-      updatedAt: this.props.updatedAt.toISOString()
+      updatedAt: this.props.updatedAt.toISOString(),
     };
   }
 }

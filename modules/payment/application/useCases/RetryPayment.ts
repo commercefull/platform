@@ -1,6 +1,6 @@
 /**
  * RetryPayment Use Case
- * 
+ *
  * Retries a failed payment with same or different payment method.
  */
 
@@ -97,7 +97,7 @@ export class RetryPaymentUseCase {
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Payment processing failed';
-      
+
       await this.paymentRepository.updateStatus(newTransactionId, 'failed', {
         failureReason: errorMessage,
       });

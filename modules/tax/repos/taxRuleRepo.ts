@@ -54,9 +54,16 @@ export class TaxRuleRepo {
         "sortOrder", "isActive", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
       [
-        params.taxRateId, params.name || null, params.description || null, params.conditionType,
-        JSON.stringify(params.conditionValue), params.sortOrder || 0, params.isActive ?? true, now, now
-      ]
+        params.taxRateId,
+        params.name || null,
+        params.description || null,
+        params.conditionType,
+        JSON.stringify(params.conditionValue),
+        params.sortOrder || 0,
+        params.isActive ?? true,
+        now,
+        now,
+      ],
     );
     if (!result) throw new Error('Failed to create tax rule');
     return result;
@@ -81,7 +88,7 @@ export class TaxRuleRepo {
 
     return await queryOne<TaxRule>(
       `UPDATE "taxRule" SET ${updateFields.join(', ')} WHERE "taxRuleId" = $${paramIndex} RETURNING *`,
-      values
+      values,
     );
   }
 
@@ -94,10 +101,7 @@ export class TaxRuleRepo {
   }
 
   async delete(id: string): Promise<boolean> {
-    const result = await queryOne<{ taxRuleId: string }>(
-      `DELETE FROM "taxRule" WHERE "taxRuleId" = $1 RETURNING "taxRuleId"`,
-      [id]
-    );
+    const result = await queryOne<{ taxRuleId: string }>(`DELETE FROM "taxRule" WHERE "taxRuleId" = $1 RETURNING "taxRuleId"`, [id]);
     return !!result;
   }
 

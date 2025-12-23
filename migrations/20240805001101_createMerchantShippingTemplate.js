@@ -20,7 +20,7 @@ exports.up = function (knex) {
     t.jsonb('shippingDestinations');
     t.jsonb('restrictedDestinations');
     t.jsonb('supportedCarriers');
-    
+
     t.index('merchantId');
     t.index('isDefault');
     t.index('isActive');

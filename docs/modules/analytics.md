@@ -9,6 +9,7 @@ The Analytics feature provides business intelligence and reporting capabilities,
 ## Use Cases
 
 ### UC-ANA-001: Get Sales Dashboard
+
 **Actor:** Merchant/Admin  
 **Priority:** High
 
@@ -19,12 +20,14 @@ The Analytics feature provides business intelligence and reporting capabilities,
 **Then** the system returns sales summary, daily data, and real-time metrics
 
 #### API Endpoint
+
 ```
 GET /business/analytics/sales/dashboard
 Query: startDate, endDate, merchantId
 ```
 
 #### Business Rules
+
 - Returns aggregated sales metrics for the period
 - Includes summary (total revenue, orders, AOV)
 - Includes daily breakdown
@@ -33,6 +36,7 @@ Query: startDate, endDate, merchantId
 ---
 
 ### UC-ANA-002: Get Daily Sales Data
+
 **Actor:** Merchant/Admin  
 **Priority:** High
 
@@ -44,12 +48,14 @@ Query: startDate, endDate, merchantId
 **Then** the system returns paginated daily sales metrics
 
 #### API Endpoint
+
 ```
 GET /business/analytics/sales/daily
 Query: startDate, endDate, channel, merchantId, limit, offset
 ```
 
 #### Business Rules
+
 - Data is aggregated by day
 - Can filter by channel (web, mobile, etc.)
 - Includes order count, revenue, conversion rates
@@ -58,6 +64,7 @@ Query: startDate, endDate, channel, merchantId, limit, offset
 ---
 
 ### UC-ANA-003: Get Product Performance
+
 **Actor:** Merchant/Admin  
 **Priority:** High
 
@@ -69,12 +76,14 @@ Query: startDate, endDate, channel, merchantId, limit, offset
 **Then** the system returns product-level analytics
 
 #### API Endpoint
+
 ```
 GET /business/analytics/products
 Query: productId, startDate, endDate, limit, offset
 ```
 
 #### Business Rules
+
 - Tracks views, add-to-carts, purchases
 - Calculates conversion rates
 - Includes revenue and quantity sold
@@ -83,6 +92,7 @@ Query: productId, startDate, endDate, limit, offset
 ---
 
 ### UC-ANA-004: Get Top Products
+
 **Actor:** Merchant/Admin  
 **Priority:** High
 
@@ -93,12 +103,14 @@ Query: productId, startDate, endDate, limit, offset
 **Then** the system returns best performing products by chosen metric
 
 #### API Endpoint
+
 ```
 GET /business/analytics/products/top
 Query: startDate, endDate, metric (revenue|purchases|views), limit
 ```
 
 #### Business Rules
+
 - Can sort by revenue, purchase count, or views
 - Returns aggregated data for period
 - Default metric is revenue
@@ -107,6 +119,7 @@ Query: startDate, endDate, metric (revenue|purchases|views), limit
 ---
 
 ### UC-ANA-005: Get Search Analytics
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
@@ -117,12 +130,14 @@ Query: startDate, endDate, metric (revenue|purchases|views), limit
 **Then** the system returns search query performance data
 
 #### API Endpoint
+
 ```
 GET /business/analytics/search
 Query: startDate, endDate, isZeroResult, query, limit, offset
 ```
 
 #### Business Rules
+
 - Shows what customers are searching for
 - Includes search count, click-through rate
 - Includes conversion rate from search
@@ -131,6 +146,7 @@ Query: startDate, endDate, isZeroResult, query, limit, offset
 ---
 
 ### UC-ANA-006: Get Zero Result Searches
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
@@ -141,12 +157,14 @@ Query: startDate, endDate, isZeroResult, query, limit, offset
 **Then** the system returns searches that returned no products
 
 #### API Endpoint
+
 ```
 GET /business/analytics/search/zero-results
 Query: startDate, endDate, limit
 ```
 
 #### Business Rules
+
 - Identifies product gaps
 - Helps improve search and catalog
 - Sorted by frequency
@@ -154,6 +172,7 @@ Query: startDate, endDate, limit
 ---
 
 ### UC-ANA-007: Get Customer Cohorts
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
@@ -164,12 +183,14 @@ Query: startDate, endDate, limit
 **Then** the system returns retention analysis by acquisition month
 
 #### API Endpoint
+
 ```
 GET /business/analytics/customers/cohorts
 Query: startMonth, endMonth
 ```
 
 #### Business Rules
+
 - Groups customers by acquisition month
 - Tracks retention over time
 - Includes revenue per cohort
@@ -178,6 +199,7 @@ Query: startMonth, endMonth
 ---
 
 ### UC-ANA-008: Get Events
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
@@ -189,12 +211,14 @@ Query: startMonth, endMonth
 **Then** the system returns raw event data
 
 #### API Endpoint
+
 ```
 GET /business/analytics/events
 Query: eventType, eventCategory, customerId, orderId, productId, startDate, endDate, limit, offset
 ```
 
 #### Business Rules
+
 - Returns raw event tracking data
 - Can filter by event type, category
 - Can filter by entity (customer, order, product)
@@ -203,6 +227,7 @@ Query: eventType, eventCategory, customerId, orderId, productId, startDate, endD
 ---
 
 ### UC-ANA-009: Get Event Counts
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
@@ -214,12 +239,14 @@ Query: eventType, eventCategory, customerId, orderId, productId, startDate, endD
 **Then** the system returns event counts grouped by period
 
 #### API Endpoint
+
 ```
 GET /business/analytics/events/counts
 Query: startDate, endDate, groupBy (hour|day)
 ```
 
 #### Business Rules
+
 - Aggregates event counts by period
 - Groups by hour or day
 - Shows event distribution over time
@@ -227,6 +254,7 @@ Query: startDate, endDate, groupBy (hour|day)
 ---
 
 ### UC-ANA-010: Get Snapshots
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
@@ -238,12 +266,14 @@ Query: startDate, endDate, groupBy (hour|day)
 **Then** the system returns historical business state snapshots
 
 #### API Endpoint
+
 ```
 GET /business/analytics/snapshots
 Query: snapshotType (hourly|daily|weekly|monthly), startDate, endDate, merchantId
 ```
 
 #### Business Rules
+
 - Shows point-in-time business metrics
 - Includes order counts, revenue, customer counts
 - Includes inventory and support metrics
@@ -252,6 +282,7 @@ Query: snapshotType (hourly|daily|weekly|monthly), startDate, endDate, merchantI
 ---
 
 ### UC-ANA-011: Get Latest Snapshot
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
@@ -262,12 +293,14 @@ Query: snapshotType (hourly|daily|weekly|monthly), startDate, endDate, merchantI
 **Then** the system returns the most recent snapshot
 
 #### API Endpoint
+
 ```
 GET /business/analytics/snapshots/latest
 Query: snapshotType (hourly|daily|weekly|monthly), merchantId
 ```
 
 #### Business Rules
+
 - Returns single most recent snapshot
 - Quick overview of current state
 - Includes all tracked metrics
@@ -275,6 +308,7 @@ Query: snapshotType (hourly|daily|weekly|monthly), merchantId
 ---
 
 ### UC-ANA-012: Get Real-time Metrics
+
 **Actor:** Merchant/Admin  
 **Priority:** High
 
@@ -285,12 +319,14 @@ Query: snapshotType (hourly|daily|weekly|monthly), merchantId
 **Then** the system returns current activity metrics
 
 #### API Endpoint
+
 ```
 GET /business/analytics/realtime
 Query: merchantId, minutes (default: 60)
 ```
 
 #### Business Rules
+
 - Returns metrics for last N minutes
 - Includes active visitors
 - Includes orders and revenue
@@ -299,6 +335,7 @@ Query: merchantId, minutes (default: 60)
 ---
 
 ### UC-ANA-013: List Dashboards
+
 **Actor:** Merchant/Admin  
 **Priority:** Low
 
@@ -309,11 +346,13 @@ Query: merchantId, minutes (default: 60)
 **Then** the system returns all available dashboards
 
 #### API Endpoint
+
 ```
 GET /business/analytics/dashboards
 ```
 
 #### Business Rules
+
 - Returns custom and default dashboards
 - Includes shared dashboards
 - Sorted by default flag, then name
@@ -321,6 +360,7 @@ GET /business/analytics/dashboards
 ---
 
 ### UC-ANA-014: Get Dashboard
+
 **Actor:** Merchant/Admin  
 **Priority:** Low
 
@@ -332,11 +372,13 @@ GET /business/analytics/dashboards
 **Then** the system returns the dashboard configuration
 
 #### API Endpoint
+
 ```
 GET /business/analytics/dashboards/:id
 ```
 
 #### Business Rules
+
 - Returns dashboard layout and widgets
 - Includes filter configuration
 - Returns 404 if not found
@@ -344,6 +386,7 @@ GET /business/analytics/dashboards/:id
 ---
 
 ### UC-ANA-015: Create Dashboard
+
 **Actor:** Merchant/Admin  
 **Priority:** Low
 
@@ -354,12 +397,14 @@ GET /business/analytics/dashboards/:id
 **Then** the system creates and returns the dashboard
 
 #### API Endpoint
+
 ```
 POST /business/analytics/dashboards
 Body: { name, description?, layout?, widgets?, filters?, dateRange?, isDefault?, isShared? }
 ```
 
 #### Business Rules
+
 - Dashboard name is required
 - Can configure widgets and layout
 - Can set default date range
@@ -368,6 +413,7 @@ Body: { name, description?, layout?, widgets?, filters?, dateRange?, isDefault?,
 ---
 
 ### UC-ANA-016: Update Dashboard
+
 **Actor:** Merchant/Admin  
 **Priority:** Low
 
@@ -379,12 +425,14 @@ Body: { name, description?, layout?, widgets?, filters?, dateRange?, isDefault?,
 **Then** the system saves the changes
 
 #### API Endpoint
+
 ```
 PUT /business/analytics/dashboards/:id
 Body: { name?, description?, layout?, widgets?, filters?, dateRange?, isDefault?, isShared? }
 ```
 
 #### Business Rules
+
 - Can update any dashboard field
 - Validates widget configurations
 - Returns updated dashboard
@@ -392,6 +440,7 @@ Body: { name?, description?, layout?, widgets?, filters?, dateRange?, isDefault?
 ---
 
 ### UC-ANA-017: Delete Dashboard
+
 **Actor:** Merchant/Admin  
 **Priority:** Low
 
@@ -403,11 +452,13 @@ Body: { name?, description?, layout?, widgets?, filters?, dateRange?, isDefault?
 **Then** the system removes the dashboard
 
 #### API Endpoint
+
 ```
 DELETE /business/analytics/dashboards/:id
 ```
 
 #### Business Rules
+
 - Permanently deletes dashboard
 - Cannot delete default system dashboards
 - Returns success message
@@ -418,39 +469,39 @@ DELETE /business/analytics/dashboards/:id
 
 The analytics system listens to and tracks these events:
 
-| Event Category | Events |
-|----------------|--------|
-| **Order** | created, completed, cancelled, refunded |
-| **Cart/Basket** | created, item_added, item_removed, abandoned |
-| **Checkout** | started, completed |
-| **Payment** | success, failed |
-| **Product** | viewed, created |
-| **Customer** | created, updated |
-| **Subscription** | created, cancelled |
-| **Support** | ticket_created, ticket_resolved |
-| **Review** | created |
-| **Alert** | stock_alert_created |
+| Event Category   | Events                                       |
+| ---------------- | -------------------------------------------- |
+| **Order**        | created, completed, cancelled, refunded      |
+| **Cart/Basket**  | created, item_added, item_removed, abandoned |
+| **Checkout**     | started, completed                           |
+| **Payment**      | success, failed                              |
+| **Product**      | viewed, created                              |
+| **Customer**     | created, updated                             |
+| **Subscription** | created, cancelled                           |
+| **Support**      | ticket_created, ticket_resolved              |
+| **Review**       | created                                      |
+| **Alert**        | stock_alert_created                          |
 
 ---
 
 ## Integration Test Coverage
 
-| Use Case | Test File | Status |
-|----------|-----------|--------|
-| UC-ANA-001 | `analytics/analytics.test.ts` | ❌ |
-| UC-ANA-002 | `analytics/analytics.test.ts` | ❌ |
-| UC-ANA-003 | `analytics/analytics.test.ts` | ❌ |
-| UC-ANA-004 | `analytics/analytics.test.ts` | ❌ |
-| UC-ANA-005 | `analytics/analytics.test.ts` | ❌ |
-| UC-ANA-006 | `analytics/analytics.test.ts` | ❌ |
-| UC-ANA-007 | `analytics/analytics.test.ts` | ❌ |
-| UC-ANA-008 | `analytics/analytics.test.ts` | ❌ |
-| UC-ANA-009 | `analytics/analytics.test.ts` | ❌ |
-| UC-ANA-010 | `analytics/analytics.test.ts` | ❌ |
-| UC-ANA-011 | `analytics/analytics.test.ts` | ❌ |
-| UC-ANA-012 | `analytics/analytics.test.ts` | ❌ |
-| UC-ANA-013 | `analytics/analytics.test.ts` | ❌ |
-| UC-ANA-014 | `analytics/analytics.test.ts` | ❌ |
-| UC-ANA-015 | `analytics/analytics.test.ts` | ❌ |
-| UC-ANA-016 | `analytics/analytics.test.ts` | ❌ |
-| UC-ANA-017 | `analytics/analytics.test.ts` | ❌ |
+| Use Case   | Test File                     | Status |
+| ---------- | ----------------------------- | ------ |
+| UC-ANA-001 | `analytics/analytics.test.ts` | ❌     |
+| UC-ANA-002 | `analytics/analytics.test.ts` | ❌     |
+| UC-ANA-003 | `analytics/analytics.test.ts` | ❌     |
+| UC-ANA-004 | `analytics/analytics.test.ts` | ❌     |
+| UC-ANA-005 | `analytics/analytics.test.ts` | ❌     |
+| UC-ANA-006 | `analytics/analytics.test.ts` | ❌     |
+| UC-ANA-007 | `analytics/analytics.test.ts` | ❌     |
+| UC-ANA-008 | `analytics/analytics.test.ts` | ❌     |
+| UC-ANA-009 | `analytics/analytics.test.ts` | ❌     |
+| UC-ANA-010 | `analytics/analytics.test.ts` | ❌     |
+| UC-ANA-011 | `analytics/analytics.test.ts` | ❌     |
+| UC-ANA-012 | `analytics/analytics.test.ts` | ❌     |
+| UC-ANA-013 | `analytics/analytics.test.ts` | ❌     |
+| UC-ANA-014 | `analytics/analytics.test.ts` | ❌     |
+| UC-ANA-015 | `analytics/analytics.test.ts` | ❌     |
+| UC-ANA-016 | `analytics/analytics.test.ts` | ❌     |
+| UC-ANA-017 | `analytics/analytics.test.ts` | ❌     |

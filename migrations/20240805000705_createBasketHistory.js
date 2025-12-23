@@ -9,9 +9,18 @@ exports.up = function (knex) {
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     t.uuid('basketId').notNullable().references('basketId').inTable('basket').onDelete('CASCADE');
     t.enum('eventType', [
-      'created', 'itemAdded', 'itemRemoved', 'itemUpdated', 'merged', 
-      'discountApplied', 'discountRemoved', 'cleared', 'abandoned', 
-      'converted', 'expired', 'restored'
+      'created',
+      'itemAdded',
+      'itemRemoved',
+      'itemUpdated',
+      'merged',
+      'discountApplied',
+      'discountRemoved',
+      'cleared',
+      'abandoned',
+      'converted',
+      'expired',
+      'restored',
     ]).notNullable();
     t.uuid('entityId');
     t.jsonb('data').notNullable();

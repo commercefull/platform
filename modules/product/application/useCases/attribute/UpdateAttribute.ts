@@ -1,6 +1,6 @@
-import dynamicAttributeRepository, { 
-  ProductAttributeUpdateInput, 
-  ProductAttribute 
+import dynamicAttributeRepository, {
+  ProductAttributeUpdateInput,
+  ProductAttribute,
 } from '../../../infrastructure/repositories/DynamicAttributeRepository';
 
 export interface UpdateAttributeCommand {
@@ -39,7 +39,7 @@ export class UpdateAttributeUseCase {
       if (!existing) {
         return {
           success: false,
-          error: 'Attribute not found'
+          error: 'Attribute not found',
         };
       }
 
@@ -49,7 +49,7 @@ export class UpdateAttributeUseCase {
         if (codeExists) {
           return {
             success: false,
-            error: `Attribute with code "${command.code}" already exists`
+            error: `Attribute with code "${command.code}" already exists`,
           };
         }
       }
@@ -58,13 +58,13 @@ export class UpdateAttributeUseCase {
       if (existing.isSystem) {
         return {
           success: false,
-          error: 'Cannot update system attributes'
+          error: 'Cannot update system attributes',
         };
       }
 
       // Build update input
       const input: ProductAttributeUpdateInput = {};
-      
+
       if (command.name !== undefined) input.name = command.name;
       if (command.code !== undefined) input.code = command.code;
       if (command.description !== undefined) input.description = command.description;
@@ -89,18 +89,18 @@ export class UpdateAttributeUseCase {
       if (!updated) {
         return {
           success: false,
-          error: 'Failed to update attribute'
+          error: 'Failed to update attribute',
         };
       }
 
       return {
         success: true,
-        data: updated
+        data: updated,
       };
     } catch (error) {
       return {
         success: false,
-        error: `Failed to update attribute: ${(error as Error).message}`
+        error: `Failed to update attribute: ${(error as Error).message}`,
       };
     }
   }

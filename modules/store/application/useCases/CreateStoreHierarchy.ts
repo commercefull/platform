@@ -1,6 +1,6 @@
 /**
  * CreateStoreHierarchy Use Case
- * 
+ *
  * Creates a store hierarchy for multi-store businesses.
  */
 

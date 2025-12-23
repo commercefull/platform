@@ -24,7 +24,7 @@ export const getLocales = async (req: Request, res: Response): Promise<void> => 
     successResponse(res, locales);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to fetch locales');
   }
 };
@@ -42,7 +42,7 @@ export const getLocaleById = async (req: Request, res: Response): Promise<void> 
     successResponse(res, locale);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to fetch locale');
   }
 };
@@ -60,7 +60,7 @@ export const getLocaleByCode = async (req: Request, res: Response): Promise<void
     successResponse(res, locale);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to fetch locale');
   }
 };
@@ -77,7 +77,7 @@ export const getDefaultLocale = async (req: Request, res: Response): Promise<voi
     successResponse(res, locale);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to fetch default locale');
   }
 };
@@ -89,7 +89,7 @@ export const getLocalesByLanguage = async (req: Request, res: Response): Promise
     successResponse(res, locales);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to fetch locales');
   }
 };
@@ -101,7 +101,7 @@ export const getLocalesByCountry = async (req: Request, res: Response): Promise<
     successResponse(res, locales);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to fetch locales');
   }
 };
@@ -112,26 +112,15 @@ export const getLocaleStatistics = async (req: Request, res: Response): Promise<
     successResponse(res, statistics);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to fetch locale statistics');
   }
 };
 
 export const createLocale = async (req: Request, res: Response): Promise<void> => {
   try {
-    const {
-      code,
-      name,
-      language,
-      countryCode,
-      isActive,
-      isDefault,
-      textDirection,
-      dateFormat,
-      timeFormat,
-      timeZone,
-      defaultCurrencyId
-    } = req.body;
+    const { code, name, language, countryCode, isActive, isDefault, textDirection, dateFormat, timeFormat, timeZone, defaultCurrencyId } =
+      req.body;
 
     // Validate required fields
     const errors: string[] = [];
@@ -159,14 +148,14 @@ export const createLocale = async (req: Request, res: Response): Promise<void> =
       defaultCurrencyId: defaultCurrencyId || null,
       numberFormat: req.body.numberFormat || null,
       fallbackLocaleId: req.body.fallbackLocaleId || null,
-      flagIcon: req.body.flagIcon || null
+      flagIcon: req.body.flagIcon || null,
     };
 
     const locale = await localeRepo.create(localeParams);
     successResponse(res, locale, 201);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     if (error.message.includes('already exists')) {
       errorResponse(res, error.message, 409);
     } else {
@@ -190,7 +179,7 @@ export const updateLocale = async (req: Request, res: Response): Promise<void> =
     successResponse(res, locale);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to update locale');
   }
 };
@@ -208,7 +197,7 @@ export const deleteLocale = async (req: Request, res: Response): Promise<void> =
     successResponse(res, { message: 'Locale deleted successfully' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to delete locale');
   }
 };
@@ -226,7 +215,7 @@ export const setDefaultLocale = async (req: Request, res: Response): Promise<voi
     successResponse(res, locale);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to set default locale');
   }
 };
@@ -244,7 +233,7 @@ export const activateLocale = async (req: Request, res: Response): Promise<void>
     successResponse(res, locale);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to activate locale');
   }
 };
@@ -262,7 +251,7 @@ export const deactivateLocale = async (req: Request, res: Response): Promise<voi
     successResponse(res, locale);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to deactivate locale');
   }
 };
@@ -275,7 +264,7 @@ export const getCountries = async (req: Request, res: Response): Promise<void> =
     successResponse(res, []);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to fetch countries');
   }
 };
@@ -287,7 +276,7 @@ export const getCountryById = async (req: Request, res: Response): Promise<void>
     successResponse(res, {});
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to fetch country');
   }
 };
@@ -299,7 +288,7 @@ export const getCountryByCode = async (req: Request, res: Response): Promise<voi
     successResponse(res, {});
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to fetch country');
   }
 };
@@ -311,7 +300,7 @@ export const getCountriesByRegion = async (req: Request, res: Response): Promise
     successResponse(res, []);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to fetch countries');
   }
 };
@@ -322,7 +311,7 @@ export const createCountry = async (req: Request, res: Response): Promise<void> 
     successResponse(res, {}, 201);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to create country');
   }
 };
@@ -334,7 +323,7 @@ export const updateCountry = async (req: Request, res: Response): Promise<void> 
     successResponse(res, {});
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to update country');
   }
 };
@@ -346,7 +335,7 @@ export const deleteCountry = async (req: Request, res: Response): Promise<void> 
     successResponse(res, { message: 'Country deleted successfully' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to delete country');
   }
 };
@@ -358,7 +347,7 @@ export const activateCountry = async (req: Request, res: Response): Promise<void
     successResponse(res, {});
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to activate country');
   }
 };
@@ -370,7 +359,7 @@ export const deactivateCountry = async (req: Request, res: Response): Promise<vo
     successResponse(res, {});
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to deactivate country');
   }
 };

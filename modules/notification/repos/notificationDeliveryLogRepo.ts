@@ -27,14 +27,25 @@ export interface NotificationDeliveryLog {
   retryCount: number;
 }
 
-export type NotificationDeliveryLogCreateParams = Omit<NotificationDeliveryLog, 
+export type NotificationDeliveryLogCreateParams = Omit<
+  NotificationDeliveryLog,
   'notificationDeliveryLogId' | 'createdAt' | 'retryCount' | 'sentAt' | 'deliveredAt' | 'failedAt'
 >;
 
-export type NotificationDeliveryLogUpdateParams = Partial<Pick<NotificationDeliveryLog,
-  'status' | 'statusDetails' | 'sentAt' | 'deliveredAt' | 'failedAt' | 'failureReason' | 
-  'providerMessageId' | 'providerResponse' | 'retryCount'
->>;
+export type NotificationDeliveryLogUpdateParams = Partial<
+  Pick<
+    NotificationDeliveryLog,
+    | 'status'
+    | 'statusDetails'
+    | 'sentAt'
+    | 'deliveredAt'
+    | 'failedAt'
+    | 'failureReason'
+    | 'providerMessageId'
+    | 'providerResponse'
+    | 'retryCount'
+  >
+>;
 
 export class NotificationDeliveryLogRepo {
   /**
@@ -43,7 +54,7 @@ export class NotificationDeliveryLogRepo {
   async findById(notificationDeliveryLogId: string): Promise<NotificationDeliveryLog | null> {
     return await queryOne<NotificationDeliveryLog>(
       `SELECT * FROM "public"."notificationDeliveryLog" WHERE "notificationDeliveryLogId" = $1`,
-      [notificationDeliveryLogId]
+      [notificationDeliveryLogId],
     );
   }
 
@@ -55,7 +66,7 @@ export class NotificationDeliveryLogRepo {
       `SELECT * FROM "public"."notificationDeliveryLog" 
        WHERE "notificationId" = $1 
        ORDER BY "createdAt" DESC`,
-      [notificationId]
+      [notificationId],
     );
     return results || [];
   }
@@ -69,7 +80,7 @@ export class NotificationDeliveryLogRepo {
        WHERE "userId" = $1 
        ORDER BY "createdAt" DESC 
        LIMIT $2 OFFSET $3`,
-      [userId, limit, offset]
+      [userId, limit, offset],
     );
     return results || [];
   }
@@ -83,7 +94,7 @@ export class NotificationDeliveryLogRepo {
        WHERE "status" = $1 
        ORDER BY "createdAt" DESC 
        LIMIT $2 OFFSET $3`,
-      [status, limit, offset]
+      [status, limit, offset],
     );
     return results || [];
   }
@@ -97,7 +108,7 @@ export class NotificationDeliveryLogRepo {
        WHERE "channel" = $1 
        ORDER BY "createdAt" DESC 
        LIMIT $2 OFFSET $3`,
-      [channel, limit, offset]
+      [channel, limit, offset],
     );
     return results || [];
   }
@@ -111,7 +122,7 @@ export class NotificationDeliveryLogRepo {
        WHERE "provider" = $1 
        ORDER BY "createdAt" DESC 
        LIMIT $2 OFFSET $3`,
-      [provider, limit, offset]
+      [provider, limit, offset],
     );
     return results || [];
   }
@@ -125,7 +136,7 @@ export class NotificationDeliveryLogRepo {
        WHERE "status" IN ('failed', 'bounced', 'blocked') 
        ORDER BY "createdAt" DESC 
        LIMIT $1 OFFSET $2`,
-      [limit, offset]
+      [limit, offset],
     );
     return results || [];
   }
@@ -139,7 +150,7 @@ export class NotificationDeliveryLogRepo {
        WHERE "status" = 'pending' 
        ORDER BY "createdAt" ASC 
        LIMIT $1`,
-      [limit]
+      [limit],
     );
     return results || [];
   }
@@ -170,8 +181,8 @@ export class NotificationDeliveryLogRepo {
         params.provider || null,
         params.providerMessageId || null,
         params.providerResponse ? JSON.stringify(params.providerResponse) : null,
-        now
-      ]
+        now,
+      ],
     );
 
     if (!result) {
@@ -207,7 +218,7 @@ export class NotificationDeliveryLogRepo {
        SET ${updateFields.join(', ')}
        WHERE "notificationDeliveryLogId" = $${paramIndex}
        RETURNING *`,
-      values
+      values,
     );
 
     return result;
@@ -220,7 +231,7 @@ export class NotificationDeliveryLogRepo {
     return this.update(notificationDeliveryLogId, {
       status: 'sent',
       sentAt: unixTimestamp(),
-      providerMessageId
+      providerMessageId,
     });
   }
 
@@ -230,7 +241,7 @@ export class NotificationDeliveryLogRepo {
   async markAsDelivered(notificationDeliveryLogId: string): Promise<NotificationDeliveryLog | null> {
     return this.update(notificationDeliveryLogId, {
       status: 'delivered',
-      deliveredAt: unixTimestamp()
+      deliveredAt: unixTimestamp(),
     });
   }
 
@@ -239,12 +250,12 @@ export class NotificationDeliveryLogRepo {
    */
   async markAsFailed(notificationDeliveryLogId: string, failureReason: string): Promise<NotificationDeliveryLog | null> {
     const log = await this.findById(notificationDeliveryLogId);
-    
+
     return this.update(notificationDeliveryLogId, {
       status: 'failed',
       failedAt: unixTimestamp(),
       failureReason,
-      retryCount: log ? log.retryCount + 1 : 1
+      retryCount: log ? log.retryCount + 1 : 1,
     });
   }
 
@@ -255,7 +266,7 @@ export class NotificationDeliveryLogRepo {
     return this.update(notificationDeliveryLogId, {
       status: 'bounced',
       failedAt: unixTimestamp(),
-      failureReason
+      failureReason,
     });
   }
 
@@ -266,7 +277,7 @@ export class NotificationDeliveryLogRepo {
     return this.update(notificationDeliveryLogId, {
       status: 'blocked',
       failedAt: unixTimestamp(),
-      failureReason
+      failureReason,
     });
   }
 
@@ -279,7 +290,7 @@ export class NotificationDeliveryLogRepo {
        SET "retryCount" = "retryCount" + 1
        WHERE "notificationDeliveryLogId" = $1
        RETURNING *`,
-      [notificationDeliveryLogId]
+      [notificationDeliveryLogId],
     );
 
     return result;
@@ -293,7 +304,7 @@ export class NotificationDeliveryLogRepo {
       `DELETE FROM "public"."notificationDeliveryLog" 
        WHERE "notificationDeliveryLogId" = $1 
        RETURNING "notificationDeliveryLogId"`,
-      [notificationDeliveryLogId]
+      [notificationDeliveryLogId],
     );
 
     return !!result;
@@ -307,7 +318,7 @@ export class NotificationDeliveryLogRepo {
       `SELECT COUNT(*) as count 
        FROM "public"."notificationDeliveryLog" 
        WHERE "status" = $1`,
-      [status]
+      [status],
     );
 
     return result ? parseInt(result.count, 10) : 0;
@@ -339,7 +350,7 @@ export class NotificationDeliveryLogRepo {
        FROM "public"."notificationDeliveryLog" 
        ${whereClause}
        GROUP BY "status"`,
-      params
+      params,
     );
 
     const stats: Record<string, number> = {
@@ -349,7 +360,7 @@ export class NotificationDeliveryLogRepo {
       delivered: 0,
       failed: 0,
       bounced: 0,
-      blocked: 0
+      blocked: 0,
     };
 
     if (results) {
@@ -359,13 +370,11 @@ export class NotificationDeliveryLogRepo {
       });
     }
 
-    const deliveryRate = stats.total > 0 
-      ? ((stats.delivered / stats.total) * 100) 
-      : 0;
+    const deliveryRate = stats.total > 0 ? (stats.delivered / stats.total) * 100 : 0;
 
     return {
       ...stats,
-      deliveryRate: Math.round(deliveryRate * 100) / 100
+      deliveryRate: Math.round(deliveryRate * 100) / 100,
     } as any;
   }
 
@@ -377,14 +386,14 @@ export class NotificationDeliveryLogRepo {
       `SELECT "channel", "status", COUNT(*) as count 
        FROM "public"."notificationDeliveryLog" 
        GROUP BY "channel", "status"`,
-      []
+      [],
     );
 
     const stats: any = {
       email: { sent: 0, delivered: 0, failed: 0 },
       sms: { sent: 0, delivered: 0, failed: 0 },
       in_app: { sent: 0, delivered: 0, failed: 0 },
-      push: { sent: 0, delivered: 0, failed: 0 }
+      push: { sent: 0, delivered: 0, failed: 0 },
     };
 
     if (results) {
@@ -405,13 +414,13 @@ export class NotificationDeliveryLogRepo {
    * Clean up old logs
    */
   async cleanupOldLogs(daysToKeep: number = 90): Promise<number> {
-    const cutoffDate = parseInt(unixTimestamp()) - (daysToKeep * 24 * 60 * 60);
-    
+    const cutoffDate = parseInt(unixTimestamp()) - daysToKeep * 24 * 60 * 60;
+
     const result = await queryOne<{ count: string }>(
       `DELETE FROM "public"."notificationDeliveryLog" 
        WHERE "createdAt" < $1 
        RETURNING COUNT(*) as count`,
-      [cutoffDate]
+      [cutoffDate],
     );
 
     return result ? parseInt(result.count, 10) : 0;

@@ -24,7 +24,7 @@ export interface RevokeTokenOutput {
 export class RevokeTokenUseCase {
   constructor(
     private readonly tokenBlacklistRepo: any,
-    private readonly refreshTokenRepo: any
+    private readonly refreshTokenRepo: any,
   ) {}
 
   async revokeOne(input: RevokeTokenInput): Promise<RevokeTokenOutput> {

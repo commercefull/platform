@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function (knex) {
   return knex.schema.createTable('taxSettings', t => {
     t.uuid('taxSettingsId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
@@ -18,7 +18,7 @@ exports.up = function(knex) {
     t.uuid('defaultTaxZone').references('taxZoneId').inTable('taxZone').onDelete('CASCADE');
     t.enum('taxProvider', ['internal', 'external']).defaultTo('internal');
     t.jsonb('taxProviderSettings');
-    
+
     t.index('merchantId');
     t.index('calculationMethod');
     t.index('taxBasedOn');
@@ -29,6 +29,6 @@ exports.up = function(knex) {
   });
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTable('taxSettings');
 };

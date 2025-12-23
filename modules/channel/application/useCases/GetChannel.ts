@@ -1,6 +1,6 @@
 /**
  * GetChannel Use Case
- * 
+ *
  * Retrieves a channel by ID or code.
  */
 

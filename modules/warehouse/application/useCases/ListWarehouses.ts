@@ -1,6 +1,6 @@
 /**
  * ListWarehouses Use Case
- * 
+ *
  * Lists warehouses with optional filtering and pagination.
  */
 
@@ -40,7 +40,7 @@ export interface ListWarehousesOutput {
 
 export class ListWarehousesUseCase {
   constructor(
-    private readonly warehouseRepository: any // WarehouseRepository
+    private readonly warehouseRepository: any, // WarehouseRepository
   ) {}
 
   async execute(input: ListWarehousesInput): Promise<ListWarehousesOutput> {

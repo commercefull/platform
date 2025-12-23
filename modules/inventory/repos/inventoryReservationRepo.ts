@@ -1,6 +1,6 @@
 /**
  * Inventory Reservation Repository
- * 
+ *
  * Manages inventory reservations for orders.
  */
 
@@ -47,24 +47,18 @@ export async function create(params: CreateReservationParams): Promise<Inventory
 }
 
 export async function findById(reservationId: string): Promise<InventoryReservation | null> {
-  return queryOne<InventoryReservation>(
-    'SELECT * FROM "inventoryReservation" WHERE "reservationId" = $1',
-    [reservationId]
-  );
+  return queryOne<InventoryReservation>('SELECT * FROM "inventoryReservation" WHERE "reservationId" = $1', [reservationId]);
 }
 
 export async function findByOrder(orderId: string): Promise<InventoryReservation[]> {
   const result = await query<{ rows: InventoryReservation[] }>(
     'SELECT * FROM "inventoryReservation" WHERE "orderId" = $1 ORDER BY "createdAt" ASC',
-    [orderId]
+    [orderId],
   );
   return result?.rows ?? [];
 }
 
-export async function findByLocation(
-  locationId: string,
-  productVariantId?: string
-): Promise<InventoryReservation[]> {
+export async function findByLocation(locationId: string, productVariantId?: string): Promise<InventoryReservation[]> {
   let sql = 'SELECT * FROM "inventoryReservation" WHERE "locationId" = $1 AND "status" = \'reserved\'';
   const params: unknown[] = [locationId];
 
@@ -77,13 +71,10 @@ export async function findByLocation(
   return result?.rows ?? [];
 }
 
-export async function getReservedQuantity(
-  locationId: string,
-  productVariantId: string
-): Promise<number> {
+export async function getReservedQuantity(locationId: string, productVariantId: string): Promise<number> {
   const result = await queryOne<{ total: string }>(
     'SELECT COALESCE(SUM("quantity"), 0) as total FROM "inventoryReservation" WHERE "locationId" = $1 AND "productVariantId" = $2 AND "status" = \'reserved\'',
-    [locationId, productVariantId]
+    [locationId, productVariantId],
   );
   return parseInt(result?.total || '0', 10);
 }
@@ -91,7 +82,7 @@ export async function getReservedQuantity(
 export async function release(reservationId: string): Promise<boolean> {
   const result = await query<{ rowCount: number }>(
     'UPDATE "inventoryReservation" SET "status" = \'released\', "updatedAt" = $1 WHERE "reservationId" = $2 AND "status" = \'reserved\'',
-    [new Date(), reservationId]
+    [new Date(), reservationId],
   );
   return (result?.rowCount ?? 0) > 0;
 }
@@ -99,7 +90,7 @@ export async function release(reservationId: string): Promise<boolean> {
 export async function consume(reservationId: string): Promise<boolean> {
   const result = await query<{ rowCount: number }>(
     'UPDATE "inventoryReservation" SET "status" = \'consumed\', "updatedAt" = $1 WHERE "reservationId" = $2 AND "status" = \'reserved\'',
-    [new Date(), reservationId]
+    [new Date(), reservationId],
   );
   return (result?.rowCount ?? 0) > 0;
 }
@@ -107,7 +98,7 @@ export async function consume(reservationId: string): Promise<boolean> {
 export async function releaseByOrder(orderId: string): Promise<number> {
   const result = await query<{ rowCount: number }>(
     'UPDATE "inventoryReservation" SET "status" = \'released\', "updatedAt" = $1 WHERE "orderId" = $2 AND "status" = \'reserved\'',
-    [new Date(), orderId]
+    [new Date(), orderId],
   );
   return result?.rowCount ?? 0;
 }
@@ -115,7 +106,7 @@ export async function releaseByOrder(orderId: string): Promise<number> {
 export async function consumeByOrder(orderId: string): Promise<number> {
   const result = await query<{ rowCount: number }>(
     'UPDATE "inventoryReservation" SET "status" = \'consumed\', "updatedAt" = $1 WHERE "orderId" = $2 AND "status" = \'reserved\'',
-    [new Date(), orderId]
+    [new Date(), orderId],
   );
   return result?.rowCount ?? 0;
 }
@@ -123,7 +114,7 @@ export async function consumeByOrder(orderId: string): Promise<number> {
 export async function releaseExpired(): Promise<number> {
   const result = await query<{ rowCount: number }>(
     'UPDATE "inventoryReservation" SET "status" = \'released\', "updatedAt" = $1 WHERE "status" = \'reserved\' AND "expiresAt" IS NOT NULL AND "expiresAt" < $1',
-    [new Date()]
+    [new Date()],
   );
   return result?.rowCount ?? 0;
 }

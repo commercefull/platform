@@ -1,6 +1,6 @@
 /**
  * CalculatePrice Use Case
- * 
+ *
  * Calculates the final price for a product considering all pricing rules.
  */
 
@@ -35,7 +35,7 @@ export interface CalculatePriceOutput {
 export class CalculatePriceUseCase {
   constructor(
     private readonly pricingRepository: any,
-    private readonly productRepository: any
+    private readonly productRepository: any,
   ) {}
 
   async execute(input: CalculatePriceInput): Promise<CalculatePriceOutput> {
@@ -60,11 +60,7 @@ export class CalculatePriceUseCase {
 
     // Check for price list override
     if (input.priceListId) {
-      const priceListItem = await this.pricingRepository.getPriceListItem(
-        input.priceListId,
-        input.productId,
-        input.variantId
-      );
+      const priceListItem = await this.pricingRepository.getPriceListItem(input.priceListId, input.productId, input.variantId);
       if (priceListItem) {
         finalPrice = priceListItem.price;
         appliedRules.push(`price_list:${input.priceListId}`);
@@ -73,11 +69,7 @@ export class CalculatePriceUseCase {
 
     // Check for B2B company pricing
     if (input.companyId) {
-      const companyPrice = await this.pricingRepository.getCompanyPrice(
-        input.companyId,
-        input.productId,
-        input.variantId
-      );
+      const companyPrice = await this.pricingRepository.getCompanyPrice(input.companyId, input.productId, input.variantId);
       if (companyPrice) {
         finalPrice = companyPrice.price;
         appliedRules.push(`b2b_company:${input.companyId}`);
@@ -86,10 +78,7 @@ export class CalculatePriceUseCase {
 
     // Check for volume discounts
     if (input.quantity > 1) {
-      const volumeDiscount = await this.pricingRepository.getVolumeDiscount(
-        input.productId,
-        input.quantity
-      );
+      const volumeDiscount = await this.pricingRepository.getVolumeDiscount(input.productId, input.quantity);
       if (volumeDiscount) {
         const discountAmount = finalPrice * (volumeDiscount.discountPercent / 100);
         finalPrice = finalPrice - discountAmount;
@@ -98,10 +87,7 @@ export class CalculatePriceUseCase {
     }
 
     // Calculate sale price if active
-    const salePrice = await this.pricingRepository.getActiveSalePrice(
-      input.productId,
-      input.variantId
-    );
+    const salePrice = await this.pricingRepository.getActiveSalePrice(input.productId, input.variantId);
     if (salePrice && salePrice < finalPrice) {
       finalPrice = salePrice;
       appliedRules.push('sale_price');

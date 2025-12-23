@@ -21,7 +21,7 @@ exports.up = function (knex) {
     t.string('trackingNumber', 100);
     t.timestamp('expectedDeliveryDate');
     t.timestamp('actualDeliveryDate');
-    
+
     t.index('referenceNumber');
     t.index('sourceDistributionWarehouseId');
     t.index('destinationDistributionWarehouseId');

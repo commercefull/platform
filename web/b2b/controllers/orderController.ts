@@ -39,10 +39,7 @@ export const listOrders = async (req: Request, res: Response) => {
       params.push(status);
     }
 
-    const countResult = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM "order" ${whereClause}`,
-      params
-    );
+    const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "order" ${whereClause}`, params);
     const total = parseInt(countResult?.count || '0');
 
     params.push(limit, offset);
@@ -53,7 +50,7 @@ export const listOrders = async (req: Request, res: Response) => {
        ${whereClause}
        ORDER BY "createdAt" DESC
        LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`,
-      params
+      params,
     );
 
     const pages = Math.ceil(total / limit);
@@ -74,7 +71,7 @@ export const listOrders = async (req: Request, res: Response) => {
     });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     b2bRespond(req, res, 'error', {
       pageName: 'Error',
       error: 'Failed to load orders',
@@ -98,7 +95,7 @@ export const viewOrder = async (req: Request, res: Response) => {
     const order = await queryOne<any>(
       `SELECT * FROM "order"
        WHERE "orderId" = $1 AND "b2bCompanyId" = $2 AND "deletedAt" IS NULL`,
-      [orderId, user.companyId]
+      [orderId, user.companyId],
     );
 
     if (!order) {
@@ -114,7 +111,7 @@ export const viewOrder = async (req: Request, res: Response) => {
        FROM "orderItem" oi
        JOIN "product" p ON oi."productId" = p."productId"
        WHERE oi."orderId" = $1`,
-      [orderId]
+      [orderId],
     );
 
     b2bRespond(req, res, 'orders/view', {
@@ -125,7 +122,7 @@ export const viewOrder = async (req: Request, res: Response) => {
     });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     b2bRespond(req, res, 'error', {
       pageName: 'Error',
       error: 'Failed to load order',
@@ -149,7 +146,7 @@ export const reorderForm = async (req: Request, res: Response) => {
     const order = await queryOne<any>(
       `SELECT * FROM "order"
        WHERE "orderId" = $1 AND "b2bCompanyId" = $2 AND "deletedAt" IS NULL`,
-      [orderId, user.companyId]
+      [orderId, user.companyId],
     );
 
     if (!order) {
@@ -165,7 +162,7 @@ export const reorderForm = async (req: Request, res: Response) => {
        FROM "orderItem" oi
        JOIN "product" p ON oi."productId" = p."productId"
        WHERE oi."orderId" = $1 AND p."status" = 'active'`,
-      [orderId]
+      [orderId],
     );
 
     b2bRespond(req, res, 'orders/reorder', {
@@ -176,7 +173,7 @@ export const reorderForm = async (req: Request, res: Response) => {
     });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     b2bRespond(req, res, 'error', {
       pageName: 'Error',
       error: 'Failed to load reorder form',

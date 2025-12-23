@@ -20,11 +20,11 @@ describe('Inventory Location Tests', () => {
   afterAll(async () => {
     // Clean up the original test data
     await cleanupInventoryTests(client, adminToken, testInventoryItemId, testLocationId);
-    
+
     // Delete additional location if it was created
     if (additionalLocationId) {
       await client.delete(`/business/inventory/locations/${additionalLocationId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
     }
   });
@@ -32,9 +32,9 @@ describe('Inventory Location Tests', () => {
   describe('Location CRUD Operations', () => {
     it('should get a location by ID', async () => {
       const response = await client.get(`/business/inventory/locations/${testLocationId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       // DB returns inventoryLocationId, not id
@@ -46,13 +46,13 @@ describe('Inventory Location Tests', () => {
 
     it('should list all active locations', async () => {
       const response = await client.get('/business/inventory/locations', {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       expect(Array.isArray(response.data.data)).toBe(true);
-      
+
       // Our test location should be in the list - uses inventoryLocationId
       const testLocation = response.data.data.find((loc: any) => (loc.inventoryLocationId || loc.id) === testLocationId);
       expect(testLocation).toBeDefined();
@@ -67,11 +67,11 @@ describe('Inventory Location Tests', () => {
         state: 'TS',
         country: 'Testland',
         postalCode: '54321',
-        isActive: true
+        isActive: true,
       };
 
       const response = await client.post('/business/inventory/locations', newLocation, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
 
       expect(response.status).toBe(201);
@@ -80,7 +80,7 @@ describe('Inventory Location Tests', () => {
       expect(response.data.data.inventoryLocationId || response.data.data.id).toBeTruthy();
       expect(response.data.data).toHaveProperty('name', newLocation.name);
       expect(response.data.data).toHaveProperty('type', newLocation.type);
-      
+
       // Save ID for cleanup - uses inventoryLocationId
       additionalLocationId = response.data.data.inventoryLocationId || response.data.data.id;
     });
@@ -88,11 +88,11 @@ describe('Inventory Location Tests', () => {
     it('should update a location', async () => {
       const updateData = {
         name: `Updated Location ${uuidv4().substring(0, 8)}`,
-        isActive: false
+        isActive: false,
       };
 
       const response = await client.put(`/business/inventory/locations/${additionalLocationId}`, updateData, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
 
       expect(response.status).toBe(200);
@@ -104,19 +104,19 @@ describe('Inventory Location Tests', () => {
     it('should only return active locations with the isActive filter', async () => {
       const response = await client.get('/business/inventory/locations', {
         headers: { Authorization: `Bearer ${adminToken}` },
-        params: { includeInactive: false }
+        params: { includeInactive: false },
       });
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
-      
+
       // All returned locations should be active (if isActive property exists)
       response.data.data.forEach((location: any) => {
         if (location.hasOwnProperty('isActive')) {
           expect(location.isActive).toBe(true);
         }
       });
-      
+
       // Our inactive location should not be in the results
       const inactiveLocation = response.data.data.find((loc: any) => (loc.inventoryLocationId || loc.id) === additionalLocationId);
       expect(inactiveLocation).toBeUndefined();

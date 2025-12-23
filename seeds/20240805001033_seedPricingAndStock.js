@@ -7,14 +7,14 @@ const PRICE_LISTS = [
     name: 'Retail',
     description: 'Standard retail prices',
     isActive: true,
-    priority: 100
+    priority: 100,
   },
   {
     name: 'Wholesale',
     description: 'Wholesale customer prices',
     isActive: true,
-    priority: 200
-  }
+    priority: 200,
+  },
 ];
 
 exports.up = async function (knex) {
@@ -49,7 +49,7 @@ exports.up = async function (knex) {
     availableQuantity: 100,
     onHandQuantity: 100,
     stockStatus: 'inStock',
-    minStockLevel: 10
+    minStockLevel: 10,
   });
 };
 
@@ -62,7 +62,12 @@ exports.down = async function (knex) {
   if (sampleProduct) {
     await knex('inventoryLevel').where({ productId: sampleProduct.productId }).delete();
   }
-  await knex('priceList').whereIn('name', PRICE_LISTS.map(pl => pl.name)).delete();
+  await knex('priceList')
+    .whereIn(
+      'name',
+      PRICE_LISTS.map(pl => pl.name),
+    )
+    .delete();
 };
 
 exports.seed = async function (knex) {

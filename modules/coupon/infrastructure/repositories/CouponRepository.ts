@@ -34,20 +34,14 @@ export interface PaginatedResult<T> {
 
 export class CouponRepository {
   async findById(couponId: string): Promise<Coupon | null> {
-    const row = await queryOne<Record<string, any>>(
-      'SELECT * FROM coupon WHERE "couponId" = $1',
-      [couponId]
-    );
+    const row = await queryOne<Record<string, any>>('SELECT * FROM coupon WHERE "couponId" = $1', [couponId]);
 
     if (!row) return null;
     return this.mapToCoupon(row);
   }
 
   async findByCode(code: string): Promise<Coupon | null> {
-    const row = await queryOne<Record<string, any>>(
-      'SELECT * FROM coupon WHERE code = $1',
-      [code.toUpperCase()]
-    );
+    const row = await queryOne<Record<string, any>>('SELECT * FROM coupon WHERE code = $1', [code.toUpperCase()]);
 
     if (!row) return null;
     return this.mapToCoupon(row);
@@ -61,17 +55,14 @@ export class CouponRepository {
 
     const { whereClause, params } = this.buildWhereClause(filters);
 
-    const countResult = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM coupon ${whereClause}`,
-      params
-    );
+    const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM coupon ${whereClause}`, params);
     const total = parseInt(countResult?.count || '0');
 
     const rows = await query<Record<string, any>[]>(
       `SELECT * FROM coupon ${whereClause}
        ORDER BY "${orderBy}" ${orderDir.toUpperCase()}
        LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
-      [...params, limit, offset]
+      [...params, limit, offset],
     );
 
     const coupons = (rows || []).map(row => this.mapToCoupon(row));
@@ -82,17 +73,14 @@ export class CouponRepository {
       limit,
       offset,
       hasMore: offset + coupons.length < total,
-      length: total
+      length: total,
     };
   }
 
   async save(coupon: Coupon): Promise<Coupon> {
     const now = new Date().toISOString();
 
-    const existing = await queryOne<Record<string, any>>(
-      'SELECT "couponId" FROM coupon WHERE "couponId" = $1',
-      [coupon.couponId]
-    );
+    const existing = await queryOne<Record<string, any>>('SELECT "couponId" FROM coupon WHERE "couponId" = $1', [coupon.couponId]);
 
     if (existing) {
       // Update existing coupon
@@ -131,8 +119,8 @@ export class CouponRepository {
           coupon.excludedCategories ? JSON.stringify(coupon.excludedCategories) : null,
           coupon.metadata ? JSON.stringify(coupon.metadata) : null,
           now,
-          coupon.couponId
-        ]
+          coupon.couponId,
+        ],
       );
     } else {
       // Create new coupon
@@ -171,8 +159,8 @@ export class CouponRepository {
           coupon.createdBy,
           coupon.metadata ? JSON.stringify(coupon.metadata) : null,
           now,
-          now
-        ]
+          now,
+        ],
       );
     }
 
@@ -191,30 +179,20 @@ export class CouponRepository {
       `INSERT INTO "couponUsage" (
         "usageId", "couponId", "orderId", "customerId", "discountAmount", "usedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6)`,
-      [
-        usage.usageId,
-        usage.couponId,
-        usage.orderId,
-        usage.customerId,
-        usage.discountAmount,
-        now
-      ]
+      [usage.usageId, usage.couponId, usage.orderId, usage.customerId, usage.discountAmount, now],
     );
 
     // Update coupon usage count
-    await query(
-      'UPDATE coupon SET "usageCount" = "usageCount" + 1, "updatedAt" = $1 WHERE "couponId" = $2',
-      [now, usage.couponId]
-    );
+    await query('UPDATE coupon SET "usageCount" = "usageCount" + 1, "updatedAt" = $1 WHERE "couponId" = $2', [now, usage.couponId]);
 
     return usage;
   }
 
   async getUsageHistory(couponId: string, limit: number = 50): Promise<CouponUsage[]> {
-    const rows = await query<Record<string, any>[]>(
-      `SELECT * FROM "couponUsage" WHERE "couponId" = $1 ORDER BY "usedAt" DESC LIMIT $2`,
-      [couponId, limit]
-    );
+    const rows = await query<Record<string, any>[]>(`SELECT * FROM "couponUsage" WHERE "couponId" = $1 ORDER BY "usedAt" DESC LIMIT $2`, [
+      couponId,
+      limit,
+    ]);
 
     return (rows || []).map(row => ({
       usageId: row.usageId,
@@ -222,14 +200,14 @@ export class CouponRepository {
       orderId: row.orderId,
       customerId: row.customerId,
       discountAmount: parseFloat(row.discountAmount),
-      usedAt: new Date(row.usedAt)
+      usedAt: new Date(row.usedAt),
     }));
   }
 
   async getCustomerUsageCount(couponId: string, customerId: string): Promise<number> {
     const row = await queryOne<{ count: string }>(
       'SELECT COUNT(*) as count FROM "couponUsage" WHERE "couponId" = $1 AND "customerId" = $2',
-      [couponId, customerId]
+      [couponId, customerId],
     );
 
     return parseInt(row?.count || '0');
@@ -243,13 +221,17 @@ export class CouponRepository {
       AND ("expiresAt" IS NULL OR "expiresAt" > NOW())
       ORDER BY "createdAt" DESC
       LIMIT $1`,
-      [limit]
+      [limit],
     );
 
     return (rows || []).map(row => this.mapToCoupon(row));
   }
 
-  async validateCouponCode(code: string, orderValue: number, customerId?: string): Promise<{
+  async validateCouponCode(
+    code: string,
+    orderValue: number,
+    customerId?: string,
+  ): Promise<{
     valid: boolean;
     coupon?: Coupon;
     discountAmount?: number;
@@ -282,7 +264,7 @@ export class CouponRepository {
     return {
       valid: true,
       coupon,
-      discountAmount
+      discountAmount,
     };
   }
 
@@ -323,7 +305,7 @@ export class CouponRepository {
 
     return {
       whereClause: conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '',
-      params
+      params,
     };
   }
 
@@ -346,15 +328,35 @@ export class CouponRepository {
       isActive: Boolean(row.isActive),
       startsAt: row.startsAt ? new Date(row.startsAt) : undefined,
       expiresAt: row.expiresAt ? new Date(row.expiresAt) : undefined,
-      applicableProducts: row.applicableProducts ? (typeof row.applicableProducts === 'string' ? JSON.parse(row.applicableProducts) : row.applicableProducts) : undefined,
-      applicableCategories: row.applicableCategories ? (typeof row.applicableCategories === 'string' ? JSON.parse(row.applicableCategories) : row.applicableCategories) : undefined,
-      applicableCustomerGroups: row.applicableCustomerGroups ? (typeof row.applicableCustomerGroups === 'string' ? JSON.parse(row.applicableCustomerGroups) : row.applicableCustomerGroups) : undefined,
-      excludedProducts: row.excludedProducts ? (typeof row.excludedProducts === 'string' ? JSON.parse(row.excludedProducts) : row.excludedProducts) : undefined,
-      excludedCategories: row.excludedCategories ? (typeof row.excludedCategories === 'string' ? JSON.parse(row.excludedCategories) : row.excludedCategories) : undefined,
+      applicableProducts: row.applicableProducts
+        ? typeof row.applicableProducts === 'string'
+          ? JSON.parse(row.applicableProducts)
+          : row.applicableProducts
+        : undefined,
+      applicableCategories: row.applicableCategories
+        ? typeof row.applicableCategories === 'string'
+          ? JSON.parse(row.applicableCategories)
+          : row.applicableCategories
+        : undefined,
+      applicableCustomerGroups: row.applicableCustomerGroups
+        ? typeof row.applicableCustomerGroups === 'string'
+          ? JSON.parse(row.applicableCustomerGroups)
+          : row.applicableCustomerGroups
+        : undefined,
+      excludedProducts: row.excludedProducts
+        ? typeof row.excludedProducts === 'string'
+          ? JSON.parse(row.excludedProducts)
+          : row.excludedProducts
+        : undefined,
+      excludedCategories: row.excludedCategories
+        ? typeof row.excludedCategories === 'string'
+          ? JSON.parse(row.excludedCategories)
+          : row.excludedCategories
+        : undefined,
       createdBy: row.createdBy,
       metadata: row.metadata ? (typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata) : undefined,
       createdAt: new Date(row.createdAt),
-      updatedAt: new Date(row.updatedAt)
+      updatedAt: new Date(row.updatedAt),
     });
   }
 }

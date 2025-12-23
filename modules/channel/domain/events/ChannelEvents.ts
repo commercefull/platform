@@ -1,6 +1,6 @@
 /**
  * Channel Domain Events
- * 
+ *
  * Events emitted by the Channel module.
  */
 

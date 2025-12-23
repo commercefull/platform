@@ -20,36 +20,34 @@ describe('Generic Promotion API Tests', () => {
 
   it('should create a new promotion', async () => {
     if (!adminToken) {
-      
       return;
     }
-    
+
     const response = await client.post('/business/promotions', testPromotion, {
-      headers: { Authorization: `Bearer ${adminToken}` }
+      headers: { Authorization: `Bearer ${adminToken}` },
     });
-    
+
     expect(response.status).toBe(201);
     expect(response.data.success).toBe(true);
     // API returns promotionId, not id
     expect(response.data.data).toHaveProperty('promotionId');
-    
+
     // Save the promotion ID for later tests
     promotionId = response.data.data.promotionId;
-    
+
     // Validate the promotion data
     expect(response.data.data.name).toBe(testPromotion.name);
   });
 
   it('should get a promotion by ID', async () => {
     if (!adminToken || !promotionId) {
-      
       return;
     }
-    
+
     const response = await client.get(`/business/promotions/${promotionId}`, {
-      headers: { Authorization: `Bearer ${adminToken}` }
+      headers: { Authorization: `Bearer ${adminToken}` },
     });
-    
+
     expect(response.status).toBe(200);
     expect(response.data.success).toBe(true);
     // Single get returns { promotion, rules, actions } structure
@@ -62,19 +60,18 @@ describe('Generic Promotion API Tests', () => {
 
   it('should update a promotion', async () => {
     if (!adminToken || !promotionId) {
-      
       return;
     }
-    
+
     const updateData = {
       name: 'Updated Test Promotion',
-      discountValue: 15
+      discountValue: 15,
     };
-    
+
     const response = await client.put(`/business/promotions/${promotionId}`, updateData, {
-      headers: { Authorization: `Bearer ${adminToken}` }
+      headers: { Authorization: `Bearer ${adminToken}` },
     });
-    
+
     expect(response.status).toBe(200);
     expect(response.data.success).toBe(true);
     expect(response.data.data.name).toBe(updateData.name);
@@ -82,62 +79,71 @@ describe('Generic Promotion API Tests', () => {
 
   it('should apply a promotion to a cart', async () => {
     if (!adminToken || !promotionId || !testCartId) {
-      
       return;
     }
-    
+
     // Add an item to the cart first
-    await client.post(`/api/cart/${testCartId}/items`, {
-      productId: testProductId,
-      quantity: 2,
-      price: 49.99
-    }, {
-      headers: { Authorization: `Bearer ${adminToken}` }
-    });
-    
+    await client.post(
+      `/api/cart/${testCartId}/items`,
+      {
+        productId: testProductId,
+        quantity: 2,
+        price: 49.99,
+      },
+      {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      },
+    );
+
     // Apply the promotion to the cart
-    const response = await client.post('/business/promotions/apply', {
-      cartId: testCartId,
-      promotionId: promotionId
-    }, {
-      headers: { Authorization: `Bearer ${adminToken}` }
-    });
-    
+    const response = await client.post(
+      '/business/promotions/apply',
+      {
+        cartId: testCartId,
+        promotionId: promotionId,
+      },
+      {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      },
+    );
+
     expect(response.status).toBe(200);
     expect(response.data.success).toBe(true);
   });
 
   it('should validate a promotion for a cart', async () => {
     if (!adminToken || !promotionId || !testCartId) {
-      
       return;
     }
-    
-    const response = await client.post('/business/promotions/validate', {
-      cartId: testCartId,
-      promotionId: promotionId
-    }, {
-      headers: { Authorization: `Bearer ${adminToken}` }
-    });
-    
+
+    const response = await client.post(
+      '/business/promotions/validate',
+      {
+        cartId: testCartId,
+        promotionId: promotionId,
+      },
+      {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      },
+    );
+
     expect(response.status).toBe(200);
     expect(response.data.success).toBe(true);
   });
-  
+
   it('should delete a promotion', async () => {
-    
     const response = await client.delete(`/business/promotions/${promotionId}`, {
-      headers: { Authorization: `Bearer ${adminToken}` }
+      headers: { Authorization: `Bearer ${adminToken}` },
     });
-    
+
     expect(response.status).toBe(200);
     expect(response.data.success).toBe(true);
-    
+
     // Verify the promotion is deleted
     const getResponse = await client.get(`/business/promotions/${promotionId}`, {
-      headers: { Authorization: `Bearer ${adminToken}` }
+      headers: { Authorization: `Bearer ${adminToken}` },
     });
-    
+
     expect(getResponse.status).toBe(404);
   });
 

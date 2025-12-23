@@ -21,10 +21,7 @@ export class ChannelRepository implements IChannelRepository {
     const props = channel.toPersistence();
     const now = new Date().toISOString();
 
-    const existing = await queryOne<Record<string, any>>(
-      'SELECT "channelId" FROM channel WHERE "channelId" = $1',
-      [props.channelId]
-    );
+    const existing = await queryOne<Record<string, any>>('SELECT "channelId" FROM channel WHERE "channelId" = $1', [props.channelId]);
 
     if (existing) {
       // Update
@@ -77,7 +74,7 @@ export class ChannelRepository implements IChannelRepository {
           props.settings ? JSON.stringify(props.settings) : null,
           now,
           props.channelId,
-        ]
+        ],
       );
     } else {
       // Insert
@@ -115,7 +112,7 @@ export class ChannelRepository implements IChannelRepository {
           props.settings ? JSON.stringify(props.settings) : null,
           now,
           now,
-        ]
+        ],
       );
     }
 
@@ -124,49 +121,37 @@ export class ChannelRepository implements IChannelRepository {
   }
 
   async findById(channelId: string): Promise<Channel | null> {
-    const row = await queryOne<Record<string, any>>(
-      'SELECT * FROM channel WHERE "channelId" = $1',
-      [channelId]
-    );
+    const row = await queryOne<Record<string, any>>('SELECT * FROM channel WHERE "channelId" = $1', [channelId]);
 
     if (!row) return null;
     return this.mapToChannel(row);
   }
 
   async findByCode(code: string): Promise<Channel | null> {
-    const row = await queryOne<Record<string, any>>(
-      'SELECT * FROM channel WHERE code = $1',
-      [code]
-    );
+    const row = await queryOne<Record<string, any>>('SELECT * FROM channel WHERE code = $1', [code]);
 
     if (!row) return null;
     return this.mapToChannel(row);
   }
 
-  async findAll(
-    filters?: ChannelFilters,
-    pagination?: PaginationOptions
-  ): Promise<PaginatedResult<Channel>> {
+  async findAll(filters?: ChannelFilters, pagination?: PaginationOptions): Promise<PaginatedResult<Channel>> {
     const page = pagination?.page || 1;
     const limit = pagination?.limit || 20;
     const offset = (page - 1) * limit;
 
     const { whereClause, params } = this.buildChannelWhereClause(filters);
 
-    const countResult = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM channel ${whereClause}`,
-      params
-    );
+    const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM channel ${whereClause}`, params);
     const total = parseInt(countResult?.count || '0', 10);
 
     const rows = await query<Record<string, any>[]>(
       `SELECT * FROM channel ${whereClause}
        ORDER BY name ASC
        LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
-      [...params, limit, offset]
+      [...params, limit, offset],
     );
 
-    const data = (rows || []).map((row) => this.mapToChannel(row));
+    const data = (rows || []).map(row => this.mapToChannel(row));
 
     return {
       data,
@@ -178,29 +163,23 @@ export class ChannelRepository implements IChannelRepository {
   }
 
   async findByOwner(ownerType: string, ownerId: string): Promise<Channel[]> {
-    const rows = await query<Record<string, any>[]>(
-      'SELECT * FROM channel WHERE "ownerType" = $1 AND "ownerId" = $2 ORDER BY name ASC',
-      [ownerType, ownerId]
-    );
+    const rows = await query<Record<string, any>[]>('SELECT * FROM channel WHERE "ownerType" = $1 AND "ownerId" = $2 ORDER BY name ASC', [
+      ownerType,
+      ownerId,
+    ]);
 
-    return (rows || []).map((row) => this.mapToChannel(row));
+    return (rows || []).map(row => this.mapToChannel(row));
   }
 
   async findDefault(): Promise<Channel | null> {
-    const row = await queryOne<Record<string, any>>(
-      'SELECT * FROM channel WHERE "isDefault" = true AND "isActive" = true LIMIT 1',
-      []
-    );
+    const row = await queryOne<Record<string, any>>('SELECT * FROM channel WHERE "isDefault" = true AND "isActive" = true LIMIT 1', []);
 
     if (!row) return null;
     return this.mapToChannel(row);
   }
 
   async delete(channelId: string): Promise<boolean> {
-    const result = await query<{ rowCount?: number }>(
-      'DELETE FROM channel WHERE "channelId" = $1',
-      [channelId]
-    );
+    const result = await query<{ rowCount?: number }>('DELETE FROM channel WHERE "channelId" = $1', [channelId]);
 
     return (result as any)?.rowCount > 0;
   }
@@ -211,10 +190,9 @@ export class ChannelRepository implements IChannelRepository {
     const props = channelProduct.toPersistence();
     const now = new Date().toISOString();
 
-    const existing = await queryOne<Record<string, any>>(
-      'SELECT "channelProductId" FROM "channelProduct" WHERE "channelProductId" = $1',
-      [props.channelProductId]
-    );
+    const existing = await queryOne<Record<string, any>>('SELECT "channelProductId" FROM "channelProduct" WHERE "channelProductId" = $1', [
+      props.channelProductId,
+    ]);
 
     if (existing) {
       await query(
@@ -240,7 +218,7 @@ export class ChannelRepository implements IChannelRepository {
           props.unpublishedAt?.toISOString() || null,
           now,
           props.channelProductId,
-        ]
+        ],
       );
     } else {
       await query(
@@ -263,7 +241,7 @@ export class ChannelRepository implements IChannelRepository {
           props.unpublishedAt?.toISOString() || null,
           now,
           now,
-        ]
+        ],
       );
     }
 
@@ -271,14 +249,11 @@ export class ChannelRepository implements IChannelRepository {
     return saved!;
   }
 
-  async findChannelProduct(
-    channelId: string,
-    productId: string
-  ): Promise<ChannelProduct | null> {
-    const row = await queryOne<Record<string, any>>(
-      'SELECT * FROM "channelProduct" WHERE "channelId" = $1 AND "productId" = $2',
-      [channelId, productId]
-    );
+  async findChannelProduct(channelId: string, productId: string): Promise<ChannelProduct | null> {
+    const row = await queryOne<Record<string, any>>('SELECT * FROM "channelProduct" WHERE "channelId" = $1 AND "productId" = $2', [
+      channelId,
+      productId,
+    ]);
 
     if (!row) return null;
     return this.mapToChannelProduct(row);
@@ -287,7 +262,7 @@ export class ChannelRepository implements IChannelRepository {
   async findChannelProducts(
     channelId: string,
     filters?: ChannelProductFilters,
-    pagination?: PaginationOptions
+    pagination?: PaginationOptions,
   ): Promise<PaginatedResult<ChannelProduct>> {
     const page = pagination?.page || 1;
     const limit = pagination?.limit || 20;
@@ -308,20 +283,17 @@ export class ChannelRepository implements IChannelRepository {
 
     const whereClause = `WHERE ${conditions.join(' AND ')}`;
 
-    const countResult = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM "channelProduct" ${whereClause}`,
-      params
-    );
+    const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "channelProduct" ${whereClause}`, params);
     const total = parseInt(countResult?.count || '0', 10);
 
     const rows = await query<Record<string, any>[]>(
       `SELECT * FROM "channelProduct" ${whereClause}
        ORDER BY "sortOrder" ASC
        LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
-      [...params, limit, offset]
+      [...params, limit, offset],
     );
 
-    const data = (rows || []).map((row) => this.mapToChannelProduct(row));
+    const data = (rows || []).map(row => this.mapToChannelProduct(row));
 
     return {
       data,
@@ -333,27 +305,21 @@ export class ChannelRepository implements IChannelRepository {
   }
 
   async findProductChannels(productId: string): Promise<ChannelProduct[]> {
-    const rows = await query<Record<string, any>[]>(
-      'SELECT * FROM "channelProduct" WHERE "productId" = $1',
-      [productId]
-    );
+    const rows = await query<Record<string, any>[]>('SELECT * FROM "channelProduct" WHERE "productId" = $1', [productId]);
 
-    return (rows || []).map((row) => this.mapToChannelProduct(row));
+    return (rows || []).map(row => this.mapToChannelProduct(row));
   }
 
   async removeChannelProduct(channelId: string, productId: string): Promise<boolean> {
-    const result = await query<{ rowCount?: number }>(
-      'DELETE FROM "channelProduct" WHERE "channelId" = $1 AND "productId" = $2',
-      [channelId, productId]
-    );
+    const result = await query<{ rowCount?: number }>('DELETE FROM "channelProduct" WHERE "channelId" = $1 AND "productId" = $2', [
+      channelId,
+      productId,
+    ]);
 
     return (result as any)?.rowCount > 0;
   }
 
-  async bulkAssignProducts(
-    channelId: string,
-    productIds: string[]
-  ): Promise<ChannelProduct[]> {
+  async bulkAssignProducts(channelId: string, productIds: string[]): Promise<ChannelProduct[]> {
     const results: ChannelProduct[] = [];
 
     for (const productId of productIds) {
@@ -380,10 +346,7 @@ export class ChannelRepository implements IChannelRepository {
     if (productIds.length === 0) return true;
 
     const placeholders = productIds.map((_, i) => `$${i + 2}`).join(', ');
-    await query(
-      `DELETE FROM "channelProduct" WHERE "channelId" = $1 AND "productId" IN (${placeholders})`,
-      [channelId, ...productIds]
-    );
+    await query(`DELETE FROM "channelProduct" WHERE "channelId" = $1 AND "productId" IN (${placeholders})`, [channelId, ...productIds]);
 
     return true;
   }
@@ -451,11 +414,7 @@ export class ChannelRepository implements IChannelRepository {
       merchantVisible: row.merchantVisible ?? true,
       isActive: Boolean(row.isActive),
       isDefault: Boolean(row.isDefault),
-      settings: row.settings
-        ? typeof row.settings === 'string'
-          ? JSON.parse(row.settings)
-          : row.settings
-        : undefined,
+      settings: row.settings ? (typeof row.settings === 'string' ? JSON.parse(row.settings) : row.settings) : undefined,
       createdAt: new Date(row.createdAt),
       updatedAt: new Date(row.updatedAt),
     });
@@ -469,12 +428,8 @@ export class ChannelRepository implements IChannelRepository {
       isVisible: Boolean(row.isVisible),
       isFeatured: Boolean(row.isFeatured),
       priceOverride: row.priceOverride ? parseFloat(row.priceOverride) : undefined,
-      salePriceOverride: row.salePriceOverride
-        ? parseFloat(row.salePriceOverride)
-        : undefined,
-      inventoryOverride: row.inventoryOverride
-        ? parseInt(row.inventoryOverride, 10)
-        : undefined,
+      salePriceOverride: row.salePriceOverride ? parseFloat(row.salePriceOverride) : undefined,
+      inventoryOverride: row.inventoryOverride ? parseInt(row.inventoryOverride, 10) : undefined,
       sortOrder: parseInt(row.sortOrder || '0', 10),
       publishedAt: row.publishedAt ? new Date(row.publishedAt) : undefined,
       unpublishedAt: row.unpublishedAt ? new Date(row.unpublishedAt) : undefined,

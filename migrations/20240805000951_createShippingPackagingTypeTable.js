@@ -24,7 +24,7 @@ exports.up = function (knex) {
     t.boolean('recyclable').notNullable().defaultTo(false);
     t.text('imageUrl');
     t.specificType('validCarriers', 'text[]');
-    
+
     t.uuid('createdBy');
     t.index('code');
     t.index('isActive');

@@ -1,6 +1,6 @@
 /**
  * CreateInventoryPool Use Case
- * 
+ *
  * Creates a shared inventory pool for multi-store businesses.
  */
 

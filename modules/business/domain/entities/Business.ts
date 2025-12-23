@@ -73,11 +73,11 @@ export class Business {
         enableMarketplace: props.businessType === 'marketplace',
         defaultCurrency: props.defaultCurrency || 'USD',
         defaultLanguage: props.defaultLanguage || 'en',
-        timezone: props.timezone || 'UTC'
+        timezone: props.timezone || 'UTC',
       },
       metadata: props.metadata,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     });
   }
 
@@ -86,33 +86,65 @@ export class Business {
   }
 
   // Getters
-  get businessId(): string { return this.props.businessId; }
-  get name(): string { return this.props.name; }
-  get slug(): string { return this.props.slug; }
-  get description(): string | undefined { return this.props.description; }
-  get businessType(): BusinessType { return this.props.businessType; }
-  get domain(): string | undefined { return this.props.domain; }
-  get logo(): string | undefined { return this.props.logo; }
-  get favicon(): string | undefined { return this.props.favicon; }
-  get primaryColor(): string | undefined { return this.props.primaryColor; }
-  get secondaryColor(): string | undefined { return this.props.secondaryColor; }
-  get isActive(): boolean { return this.props.isActive; }
-  get settings(): BusinessProps['settings'] { return this.props.settings; }
-  get metadata(): Record<string, any> | undefined { return this.props.metadata; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get businessId(): string {
+    return this.props.businessId;
+  }
+  get name(): string {
+    return this.props.name;
+  }
+  get slug(): string {
+    return this.props.slug;
+  }
+  get description(): string | undefined {
+    return this.props.description;
+  }
+  get businessType(): BusinessType {
+    return this.props.businessType;
+  }
+  get domain(): string | undefined {
+    return this.props.domain;
+  }
+  get logo(): string | undefined {
+    return this.props.logo;
+  }
+  get favicon(): string | undefined {
+    return this.props.favicon;
+  }
+  get primaryColor(): string | undefined {
+    return this.props.primaryColor;
+  }
+  get secondaryColor(): string | undefined {
+    return this.props.secondaryColor;
+  }
+  get isActive(): boolean {
+    return this.props.isActive;
+  }
+  get settings(): BusinessProps['settings'] {
+    return this.props.settings;
+  }
+  get metadata(): Record<string, any> | undefined {
+    return this.props.metadata;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   // Computed properties
-  get isMarketplace(): boolean { return this.props.businessType === 'marketplace'; }
-  get isMultiStore(): boolean { return this.props.businessType === 'multi_store'; }
-  get isSingleStore(): boolean { return this.props.businessType === 'single_store'; }
+  get isMarketplace(): boolean {
+    return this.props.businessType === 'marketplace';
+  }
+  get isMultiStore(): boolean {
+    return this.props.businessType === 'multi_store';
+  }
+  get isSingleStore(): boolean {
+    return this.props.businessType === 'single_store';
+  }
 
   // Domain methods
-  updateBasicInfo(updates: {
-    name?: string;
-    description?: string;
-    domain?: string;
-  }): void {
+  updateBasicInfo(updates: { name?: string; description?: string; domain?: string }): void {
     if (updates.name) {
       this.props.name = updates.name;
       this.props.slug = Business.generateSlug(updates.name);
@@ -122,12 +154,7 @@ export class Business {
     this.touch();
   }
 
-  updateBranding(branding: {
-    logo?: string;
-    favicon?: string;
-    primaryColor?: string;
-    secondaryColor?: string;
-  }): void {
+  updateBranding(branding: { logo?: string; favicon?: string; primaryColor?: string; secondaryColor?: string }): void {
     if (branding.logo !== undefined) this.props.logo = branding.logo;
     if (branding.favicon !== undefined) this.props.favicon = branding.favicon;
     if (branding.primaryColor !== undefined) this.props.primaryColor = branding.primaryColor;
@@ -142,7 +169,7 @@ export class Business {
       ...this.props.settings,
       allowMultipleStores: newType === 'multi_store',
       allowMultipleWarehouses: newType !== 'single_store',
-      enableMarketplace: newType === 'marketplace'
+      enableMarketplace: newType === 'marketplace',
     };
     this.touch();
   }
@@ -198,7 +225,7 @@ export class Business {
       isMultiStore: this.isMultiStore,
       isSingleStore: this.isSingleStore,
       createdAt: this.props.createdAt.toISOString(),
-      updatedAt: this.props.updatedAt.toISOString()
+      updatedAt: this.props.updatedAt.toISOString(),
     };
   }
 }

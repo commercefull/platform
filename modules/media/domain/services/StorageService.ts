@@ -19,7 +19,7 @@ export interface StorageService {
     options?: {
       public?: boolean;
       metadata?: Record<string, string>;
-    }
+    },
   ): Promise<UploadResult>;
 
   uploadFile(
@@ -28,7 +28,7 @@ export interface StorageService {
     options?: {
       public?: boolean;
       metadata?: Record<string, string>;
-    }
+    },
   ): Promise<UploadResult>;
 
   download(key: string): Promise<Buffer>;

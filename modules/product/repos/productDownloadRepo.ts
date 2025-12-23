@@ -60,11 +60,21 @@ export class ProductDownloadRepo {
         "maxDownloads", "daysValid", "isActive", "sampleUrl", "sortOrder", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING *`,
       [
-        params.productId, params.productVariantId || null, params.name, params.fileUrl,
-        params.filePath || null, params.fileSize || null, params.mimeType || null,
-        params.maxDownloads || null, params.daysValid || null, params.isActive ?? true,
-        params.sampleUrl || null, params.sortOrder || 0, now, now
-      ]
+        params.productId,
+        params.productVariantId || null,
+        params.name,
+        params.fileUrl,
+        params.filePath || null,
+        params.fileSize || null,
+        params.mimeType || null,
+        params.maxDownloads || null,
+        params.daysValid || null,
+        params.isActive ?? true,
+        params.sampleUrl || null,
+        params.sortOrder || 0,
+        now,
+        now,
+      ],
     );
 
     if (!result) throw new Error('Failed to create product download');
@@ -90,7 +100,7 @@ export class ProductDownloadRepo {
 
     return await queryOne<ProductDownload>(
       `UPDATE "productDownload" SET ${updateFields.join(', ')} WHERE "productDownloadId" = $${paramIndex} RETURNING *`,
-      values
+      values,
     );
   }
 
@@ -112,7 +122,7 @@ export class ProductDownloadRepo {
   async delete(id: string): Promise<boolean> {
     const result = await queryOne<{ productDownloadId: string }>(
       `DELETE FROM "productDownload" WHERE "productDownloadId" = $1 RETURNING "productDownloadId"`,
-      [id]
+      [id],
     );
     return !!result;
   }
@@ -147,16 +157,16 @@ export class ProductDownloadRepo {
   async getStatistics(): Promise<{ total: number; active: number; byProduct: Record<string, number> }> {
     const total = await this.count();
 
-    const activeResult = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM "productDownload" WHERE "isActive" = true`
-    );
+    const activeResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "productDownload" WHERE "isActive" = true`);
     const active = activeResult ? parseInt(activeResult.count, 10) : 0;
 
     const productResults = await query<{ productId: string; count: string }[]>(
-      `SELECT "productId", COUNT(*) as count FROM "productDownload" GROUP BY "productId"`
+      `SELECT "productId", COUNT(*) as count FROM "productDownload" GROUP BY "productId"`,
     );
     const byProduct: Record<string, number> = {};
-    productResults?.forEach(row => { byProduct[row.productId] = parseInt(row.count, 10); });
+    productResults?.forEach(row => {
+      byProduct[row.productId] = parseInt(row.count, 10);
+    });
 
     return { total, active, byProduct };
   }

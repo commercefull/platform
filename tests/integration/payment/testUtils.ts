@@ -9,7 +9,7 @@ export const testGatewayData = {
   isTestMode: true,
   apiKey: 'test_api_key_123',
   apiSecret: 'test_api_secret_456',
-  supportedPaymentMethods: 'creditCard'
+  supportedPaymentMethods: 'creditCard',
 };
 
 export const testMethodConfigData = {
@@ -18,7 +18,7 @@ export const testMethodConfigData = {
   displayName: 'Test Credit Card',
   description: 'Test payment method',
   displayOrder: 1,
-  supportedCurrencies: ['USD']
+  supportedCurrencies: ['USD'],
 };
 
 /**
@@ -27,63 +27,59 @@ export const testMethodConfigData = {
  */
 export const setupPaymentTests = async () => {
   const client = createTestClient();
-  
+
   let adminToken = '';
   let customerToken = '';
-  
+
   try {
     adminToken = await loginTestAdmin(client);
-  } catch (error: any) {
-    
-  }
-  
+  } catch (error: any) {}
+
   try {
     customerToken = await loginTestUser(client);
-  } catch (error: any) {
-    
-  }
-  
+  } catch (error: any) {}
+
   let testGatewayId = '';
   let testMethodConfigId = '';
-  
+
   // Try to create test gateway
   try {
     const gatewayResponse = await client.post('/business/gateways', testGatewayData, {
-      headers: { Authorization: `Bearer ${adminToken}` }
+      headers: { Authorization: `Bearer ${adminToken}` },
     });
-    
+
     if (gatewayResponse.data.success && gatewayResponse.data.data) {
       testGatewayId = gatewayResponse.data.data.paymentGatewayId || gatewayResponse.data.data.id || '';
     }
-  } catch (error: any) {
-    
-  }
-  
+  } catch (error: any) {}
+
   // Try to create test method config
   if (testGatewayId) {
     try {
-      const methodConfigResponse = await client.post('/business/method-configs', {
-        ...testMethodConfigData,
-        gatewayId: testGatewayId
-      }, {
-        headers: { Authorization: `Bearer ${adminToken}` }
-      });
-      
+      const methodConfigResponse = await client.post(
+        '/business/method-configs',
+        {
+          ...testMethodConfigData,
+          gatewayId: testGatewayId,
+        },
+        {
+          headers: { Authorization: `Bearer ${adminToken}` },
+        },
+      );
+
       if (methodConfigResponse.data.success && methodConfigResponse.data.data) {
         testMethodConfigId = methodConfigResponse.data.data.paymentMethodConfigId || methodConfigResponse.data.data.id || '';
       }
-    } catch (error: any) {
-      
-    }
+    } catch (error: any) {}
   }
-  
+
   return {
     client,
     adminToken,
     customerToken,
     testGatewayId,
     testMethodConfigId,
-    testTransactionId: '' // Will be created in tests if needed
+    testTransactionId: '', // Will be created in tests if needed
   };
 };
 
@@ -91,27 +87,26 @@ export const setupPaymentTests = async () => {
  * Cleanup function for payment integration tests
  * Removes test data created during setup
  */
-export const cleanupPaymentTests = async (
-  client: AxiosInstance, 
-  adminToken: string, 
-  testGatewayId: string, 
-  testMethodConfigId: string
-) => {
+export const cleanupPaymentTests = async (client: AxiosInstance, adminToken: string, testGatewayId: string, testMethodConfigId: string) => {
   // Delete test method config
   if (testMethodConfigId) {
     try {
       await client.delete(`/business/method-configs/${testMethodConfigId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-    } catch (e) { /* ignore */ }
+    } catch (e) {
+      /* ignore */
+    }
   }
-  
+
   // Delete test gateway
   if (testGatewayId) {
     try {
       await client.delete(`/business/gateways/${testGatewayId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-    } catch (e) { /* ignore */ }
+    } catch (e) {
+      /* ignore */
+    }
   }
 };

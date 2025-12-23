@@ -19,7 +19,7 @@ export class InitiatePaymentCommand {
     public readonly paymentMethodConfigId: string,
     public readonly customerId?: string,
     public readonly customerIp?: string,
-    public readonly metadata?: Record<string, any>
+    public readonly metadata?: Record<string, any>,
   ) {}
 }
 
@@ -65,7 +65,7 @@ export class InitiatePaymentUseCase {
       amount: command.amount,
       currency: command.currency,
       customerIp: command.customerIp,
-      metadata: command.metadata
+      metadata: command.metadata,
     });
 
     await this.paymentRepository.saveTransaction(transaction);
@@ -75,7 +75,7 @@ export class InitiatePaymentUseCase {
       transactionId: transaction.transactionId,
       orderId: transaction.orderId,
       amount: transaction.amount,
-      currency: transaction.currency
+      currency: transaction.currency,
     });
 
     return {
@@ -84,7 +84,7 @@ export class InitiatePaymentUseCase {
       amount: transaction.amount,
       currency: transaction.currency,
       status: transaction.status,
-      createdAt: transaction.createdAt.toISOString()
+      createdAt: transaction.createdAt.toISOString(),
     };
   }
 }

@@ -95,12 +95,16 @@ export class PaymentRepo {
   }
 
   async findPaymentMethodByCode(code: string): Promise<PaymentMethod | null> {
-    const method = await queryOne<PaymentMethod>('SELECT * FROM "public"."payment_method" WHERE "code" = $1 AND "deleted_at" IS NULL', [code]);
+    const method = await queryOne<PaymentMethod>('SELECT * FROM "public"."payment_method" WHERE "code" = $1 AND "deleted_at" IS NULL', [
+      code,
+    ]);
     return method || null;
   }
 
   async findActivePaymentMethods(): Promise<PaymentMethod[]> {
-    const methods = await query<PaymentMethod[]>('SELECT * FROM "public"."payment_method" WHERE "is_active" = true AND "deleted_at" IS NULL ORDER BY "name" ASC');
+    const methods = await query<PaymentMethod[]>(
+      'SELECT * FROM "public"."payment_method" WHERE "is_active" = true AND "deleted_at" IS NULL ORDER BY "name" ASC',
+    );
     return methods || [];
   }
 
@@ -111,18 +115,30 @@ export class PaymentRepo {
       ("name", "code", "provider", "is_active", "requires_customer_saved", "config", "test_mode", "created_at", "updated_at") 
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
       RETURNING *`,
-      [method.name, method.code, method.provider, method.is_active, 
-       method.requires_customer_saved, method.config, method.test_mode, now, now]
+      [
+        method.name,
+        method.code,
+        method.provider,
+        method.is_active,
+        method.requires_customer_saved,
+        method.config,
+        method.test_mode,
+        now,
+        now,
+      ],
     );
-    
+
     if (!result) {
       throw new Error('Failed to create payment method');
     }
-    
+
     return result;
   }
 
-  async updatePaymentMethod(id: string, method: Partial<Omit<PaymentMethod, 'id' | 'created_at' | 'updated_at' | 'deleted_at'>>): Promise<PaymentMethod> {
+  async updatePaymentMethod(
+    id: string,
+    method: Partial<Omit<PaymentMethod, 'id' | 'created_at' | 'updated_at' | 'deleted_at'>>,
+  ): Promise<PaymentMethod> {
     const updates: string[] = [];
     const values: any[] = [];
     let paramCount = 1;
@@ -154,49 +170,57 @@ export class PaymentRepo {
       SET ${updates.join(', ')} 
       WHERE "id" = $${paramCount - 1} AND "deleted_at" IS NULL
       RETURNING *`,
-      values
+      values,
     );
-    
+
     if (!result) {
       throw new Error(`Failed to update payment method with ID ${id}`);
     }
-    
+
     return result;
   }
 
   async deletePaymentMethod(id: string): Promise<boolean> {
     const now = new Date();
-    
+
     // Use soft deletion instead of hard deletion
-    const result = await queryOne<{count: string}>(
+    const result = await queryOne<{ count: string }>(
       `UPDATE "public"."payment_method"
       SET "deleted_at" = $1, "updated_at" = $1
       WHERE "id" = $2 AND "deleted_at" IS NULL
       RETURNING id`,
-      [now, id]
+      [now, id],
     );
-    
+
     return !!result;
   }
 
   // Payment Gateway methods
   async findAllPaymentGateways(): Promise<PaymentGateway[]> {
-    const gateways = await query<PaymentGateway[]>('SELECT * FROM "public"."payment_gateway" WHERE "deleted_at" IS NULL ORDER BY "name" ASC');
+    const gateways = await query<PaymentGateway[]>(
+      'SELECT * FROM "public"."payment_gateway" WHERE "deleted_at" IS NULL ORDER BY "name" ASC',
+    );
     return gateways || [];
   }
 
   async findPaymentGatewayById(id: string): Promise<PaymentGateway | null> {
-    const gateway = await queryOne<PaymentGateway>('SELECT * FROM "public"."payment_gateway" WHERE "id" = $1 AND "deleted_at" IS NULL', [id]);
+    const gateway = await queryOne<PaymentGateway>('SELECT * FROM "public"."payment_gateway" WHERE "id" = $1 AND "deleted_at" IS NULL', [
+      id,
+    ]);
     return gateway || null;
   }
 
   async findPaymentGatewayByCode(code: string): Promise<PaymentGateway | null> {
-    const gateway = await queryOne<PaymentGateway>('SELECT * FROM "public"."payment_gateway" WHERE "code" = $1 AND "deleted_at" IS NULL', [code]);
+    const gateway = await queryOne<PaymentGateway>('SELECT * FROM "public"."payment_gateway" WHERE "code" = $1 AND "deleted_at" IS NULL', [
+      code,
+    ]);
     return gateway || null;
   }
 
   async findActivePaymentGateways(): Promise<PaymentGateway[]> {
-    const gateways = await query<PaymentGateway[]>('SELECT * FROM "public"."payment_gateway" WHERE "is_active" = true AND "deleted_at" IS NULL ORDER BY "name" ASC');
+    const gateways = await query<PaymentGateway[]>(
+      'SELECT * FROM "public"."payment_gateway" WHERE "is_active" = true AND "deleted_at" IS NULL ORDER BY "name" ASC',
+    );
     return gateways || [];
   }
 
@@ -220,18 +244,21 @@ export class PaymentRepo {
         gateway.supported_payment_methods,
         gateway.test_mode,
         now,
-        now
-      ]
+        now,
+      ],
     );
-    
+
     if (!result) {
       throw new Error('Failed to create payment gateway');
     }
-    
+
     return result;
   }
 
-  async updatePaymentGateway(id: string, gateway: Partial<Omit<PaymentGateway, 'id' | 'created_at' | 'updated_at' | 'deleted_at'>>): Promise<PaymentGateway> {
+  async updatePaymentGateway(
+    id: string,
+    gateway: Partial<Omit<PaymentGateway, 'id' | 'created_at' | 'updated_at' | 'deleted_at'>>,
+  ): Promise<PaymentGateway> {
     const updates: string[] = [];
     const values: any[] = [];
     let paramCount = 1;
@@ -263,28 +290,28 @@ export class PaymentRepo {
       SET ${updates.join(', ')} 
       WHERE "id" = $${paramCount - 1} AND "deleted_at" IS NULL
       RETURNING *`,
-      values
+      values,
     );
-    
+
     if (!result) {
       throw new Error(`Failed to update payment gateway with ID ${id}`);
     }
-    
+
     return result;
   }
 
   async deletePaymentGateway(id: string): Promise<boolean> {
     const now = new Date();
-    
+
     // Use soft deletion instead of hard deletion
-    const result = await queryOne<{count: string}>(
+    const result = await queryOne<{ count: string }>(
       `UPDATE "public"."payment_gateway"
       SET "deleted_at" = $1, "updated_at" = $1
       WHERE "id" = $2 AND "deleted_at" IS NULL
       RETURNING id`,
-      [now, id]
+      [now, id],
     );
-    
+
     return !!result;
   }
 

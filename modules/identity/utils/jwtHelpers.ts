@@ -4,10 +4,10 @@ import jwt, { SignOptions, JwtPayload } from 'jsonwebtoken';
  * Time unit multipliers for converting human-readable durations to milliseconds
  */
 const TIME_MULTIPLIERS: Record<string, number> = {
-  's': 1000,                    // seconds
-  'm': 60 * 1000,              // minutes
-  'h': 60 * 60 * 1000,         // hours
-  'd': 24 * 60 * 60 * 1000,    // days
+  s: 1000, // seconds
+  m: 60 * 1000, // minutes
+  h: 60 * 60 * 1000, // hours
+  d: 24 * 60 * 60 * 1000, // days
 };
 
 /**
@@ -21,10 +21,10 @@ const TIME_MULTIPLIERS: Record<string, number> = {
 export function parseExpirationDate(durationString: string): Date {
   const unit = durationString.slice(-1);
   const value = parseInt(durationString.slice(0, -1), 10);
-  
+
   const millisecondsPerUnit = TIME_MULTIPLIERS[unit] || TIME_MULTIPLIERS['d']; // Default to days
-  const expirationTime = Date.now() + (value * millisecondsPerUnit);
-  
+  const expirationTime = Date.now() + value * millisecondsPerUnit;
+
   return new Date(expirationTime);
 }
 
@@ -42,14 +42,14 @@ export function generateAccessToken(
   userEmail: string,
   userRole: 'customer' | 'merchant' | 'admin',
   jwtSecret: string,
-  expiresIn: string
+  expiresIn: string,
 ): string {
   const payload: JwtPayload = {
     id: userId,
     email: userEmail,
-    role: userRole
+    role: userRole,
   };
-  
+
   return jwt.sign(payload, jwtSecret, { expiresIn } as SignOptions);
 }
 
@@ -81,10 +81,10 @@ export function extractUserInfoFromToken(payload: JwtPayload | null): {
   if (!payload || !payload.id || !payload.email || !payload.role) {
     return null;
   }
-  
+
   return {
     userId: payload.id,
     userEmail: payload.email,
-    userRole: payload.role
+    userRole: payload.role,
   };
 }

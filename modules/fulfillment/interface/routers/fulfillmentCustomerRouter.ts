@@ -14,12 +14,12 @@ router.get('/:fulfillmentId', getFulfillment);
 router.get('/:fulfillmentId/track', async (req, res) => {
   try {
     // For now, return basic tracking info from fulfillment
-    res.json({ 
-      success: true, 
-      data: { 
+    res.json({
+      success: true,
+      data: {
         fulfillmentId: req.params.fulfillmentId,
-        message: 'Tracking endpoint - use fulfillment get for details' 
-      }
+        message: 'Tracking endpoint - use fulfillment get for details',
+      },
     });
   } catch (error: any) {
     res.status(400).json({ success: false, error: error.message });

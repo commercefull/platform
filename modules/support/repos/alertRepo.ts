@@ -12,7 +12,7 @@ import { Table } from '../../../libs/db/types';
 
 const TABLES = {
   STOCK_ALERT: Table.StockAlert,
-  PRICE_ALERT: Table.PriceAlert
+  PRICE_ALERT: Table.PriceAlert,
 };
 
 // ============================================================================
@@ -84,16 +84,13 @@ export interface PriceAlert {
 // ============================================================================
 
 export async function getStockAlert(stockAlertId: string): Promise<StockAlert | null> {
-  const row = await queryOne<Record<string, any>>(
-    'SELECT * FROM "stockAlert" WHERE "stockAlertId" = $1',
-    [stockAlertId]
-  );
+  const row = await queryOne<Record<string, any>>('SELECT * FROM "stockAlert" WHERE "stockAlertId" = $1', [stockAlertId]);
   return row ? mapToStockAlert(row) : null;
 }
 
 export async function getStockAlerts(
   filters?: { customerId?: string; productId?: string; status?: AlertStatus },
-  pagination?: { limit?: number; offset?: number }
+  pagination?: { limit?: number; offset?: number },
 ): Promise<{ data: StockAlert[]; total: number }> {
   let whereClause = '1=1';
   const params: any[] = [];
@@ -112,10 +109,7 @@ export async function getStockAlerts(
     params.push(filters.status);
   }
 
-  const countResult = await queryOne<{ count: string }>(
-    `SELECT COUNT(*) as count FROM "stockAlert" WHERE ${whereClause}`,
-    params
-  );
+  const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "stockAlert" WHERE ${whereClause}`, params);
 
   const limit = pagination?.limit || 20;
   const offset = pagination?.offset || 0;
@@ -123,12 +117,12 @@ export async function getStockAlerts(
   const rows = await query<Record<string, any>[]>(
     `SELECT * FROM "stockAlert" WHERE ${whereClause} 
      ORDER BY "createdAt" DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
-    [...params, limit, offset]
+    [...params, limit, offset],
   );
 
   return {
     data: (rows || []).map(mapToStockAlert),
-    total: parseInt(countResult?.count || '0')
+    total: parseInt(countResult?.count || '0'),
   };
 }
 
@@ -141,10 +135,7 @@ export async function getActiveStockAlertsForProduct(productId: string, productV
     params.push(productVariantId);
   }
 
-  const rows = await query<Record<string, any>[]>(
-    `SELECT * FROM "stockAlert" WHERE ${whereClause}`,
-    params
-  );
+  const rows = await query<Record<string, any>[]>(`SELECT * FROM "stockAlert" WHERE ${whereClause}`, params);
   return (rows || []).map(mapToStockAlert);
 }
 
@@ -174,11 +165,22 @@ export async function createStockAlert(alert: {
     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'active', $9, $10, $11, $12, $13, $14, $15)
     RETURNING *`,
     [
-      alert.customerId, alert.email, alert.phone, alert.productId,
-      alert.productVariantId, alert.productName, alert.variantName, alert.sku,
-      alert.desiredQuantity || 1, alert.stockThreshold || 1, true,
-      alert.notificationChannel || 'email', expiresAt.toISOString(), now, now
-    ]
+      alert.customerId,
+      alert.email,
+      alert.phone,
+      alert.productId,
+      alert.productVariantId,
+      alert.productName,
+      alert.variantName,
+      alert.sku,
+      alert.desiredQuantity || 1,
+      alert.stockThreshold || 1,
+      true,
+      alert.notificationChannel || 'email',
+      expiresAt.toISOString(),
+      now,
+      now,
+    ],
   );
 
   return mapToStockAlert(result!);
@@ -191,7 +193,7 @@ export async function notifyStockAlert(stockAlertId: string): Promise<void> {
       "status" = 'notified', "notifiedAt" = $1, "lastNotifiedAt" = $1,
       "notificationCount" = "notificationCount" + 1, "updatedAt" = $1
      WHERE "stockAlertId" = $2`,
-    [now, stockAlertId]
+    [now, stockAlertId],
   );
 }
 
@@ -201,7 +203,7 @@ export async function markStockAlertPurchased(stockAlertId: string, orderId: str
     `UPDATE "stockAlert" SET 
       "status" = 'purchased', "purchasedAt" = $1, "purchaseOrderId" = $2, "updatedAt" = $1
      WHERE "stockAlertId" = $3`,
-    [now, orderId, stockAlertId]
+    [now, orderId, stockAlertId],
   );
 }
 
@@ -209,7 +211,7 @@ export async function cancelStockAlert(stockAlertId: string): Promise<void> {
   await query(
     `UPDATE "stockAlert" SET "status" = 'cancelled', "updatedAt" = $1
      WHERE "stockAlertId" = $2`,
-    [new Date().toISOString(), stockAlertId]
+    [new Date().toISOString(), stockAlertId],
   );
 }
 
@@ -217,7 +219,7 @@ export async function expireStockAlerts(): Promise<number> {
   const result = await query(
     `UPDATE "stockAlert" SET "status" = 'expired', "updatedAt" = $1
      WHERE "status" = 'active' AND "expiresAt" < NOW()`,
-    [new Date().toISOString()]
+    [new Date().toISOString()],
   );
   return (result as any)?.rowCount || 0;
 }
@@ -227,16 +229,13 @@ export async function expireStockAlerts(): Promise<number> {
 // ============================================================================
 
 export async function getPriceAlert(priceAlertId: string): Promise<PriceAlert | null> {
-  const row = await queryOne<Record<string, any>>(
-    'SELECT * FROM "priceAlert" WHERE "priceAlertId" = $1',
-    [priceAlertId]
-  );
+  const row = await queryOne<Record<string, any>>('SELECT * FROM "priceAlert" WHERE "priceAlertId" = $1', [priceAlertId]);
   return row ? mapToPriceAlert(row) : null;
 }
 
 export async function getPriceAlerts(
   filters?: { customerId?: string; productId?: string; status?: AlertStatus },
-  pagination?: { limit?: number; offset?: number }
+  pagination?: { limit?: number; offset?: number },
 ): Promise<{ data: PriceAlert[]; total: number }> {
   let whereClause = '1=1';
   const params: any[] = [];
@@ -255,10 +254,7 @@ export async function getPriceAlerts(
     params.push(filters.status);
   }
 
-  const countResult = await queryOne<{ count: string }>(
-    `SELECT COUNT(*) as count FROM "priceAlert" WHERE ${whereClause}`,
-    params
-  );
+  const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "priceAlert" WHERE ${whereClause}`, params);
 
   const limit = pagination?.limit || 20;
   const offset = pagination?.offset || 0;
@@ -266,12 +262,12 @@ export async function getPriceAlerts(
   const rows = await query<Record<string, any>[]>(
     `SELECT * FROM "priceAlert" WHERE ${whereClause} 
      ORDER BY "createdAt" DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
-    [...params, limit, offset]
+    [...params, limit, offset],
   );
 
   return {
     data: (rows || []).map(mapToPriceAlert),
-    total: parseInt(countResult?.count || '0')
+    total: parseInt(countResult?.count || '0'),
   };
 }
 
@@ -284,10 +280,7 @@ export async function getActivePriceAlertsForProduct(productId: string, productV
     params.push(productVariantId);
   }
 
-  const rows = await query<Record<string, any>[]>(
-    `SELECT * FROM "priceAlert" WHERE ${whereClause}`,
-    params
-  );
+  const rows = await query<Record<string, any>[]>(`SELECT * FROM "priceAlert" WHERE ${whereClause}`, params);
   return (rows || []).map(mapToPriceAlert);
 }
 
@@ -300,7 +293,7 @@ export async function getPriceAlertsToNotify(productId: string, newPrice: number
        OR ("alertType" = 'any_drop' AND "originalPrice" > $2)
        OR ("alertType" = 'percentage_drop' AND "originalPrice" * (1 - "percentageDrop" / 100) >= $2)
      )`,
-    [productId, newPrice]
+    [productId, newPrice],
   );
   return (rows || []).map(mapToPriceAlert);
 }
@@ -335,12 +328,25 @@ export async function createPriceAlert(alert: {
     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'active', $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
     RETURNING *`,
     [
-      alert.customerId, alert.email, alert.phone, alert.productId,
-      alert.productVariantId, alert.productName, alert.variantName, alert.sku,
-      alert.alertType || 'target', alert.targetPrice, alert.percentageDrop,
-      alert.originalPrice, alert.currentPrice, alert.currency || 'USD',
-      alert.notificationChannel || 'email', expiresAt.toISOString(), now, now
-    ]
+      alert.customerId,
+      alert.email,
+      alert.phone,
+      alert.productId,
+      alert.productVariantId,
+      alert.productName,
+      alert.variantName,
+      alert.sku,
+      alert.alertType || 'target',
+      alert.targetPrice,
+      alert.percentageDrop,
+      alert.originalPrice,
+      alert.currentPrice,
+      alert.currency || 'USD',
+      alert.notificationChannel || 'email',
+      expiresAt.toISOString(),
+      now,
+      now,
+    ],
   );
 
   return mapToPriceAlert(result!);
@@ -353,7 +359,7 @@ export async function notifyPriceAlert(priceAlertId: string, notifiedPrice: numb
       "status" = 'notified', "notifiedAt" = $1, "lastNotifiedAt" = $1,
       "notifiedPrice" = $2, "notificationCount" = "notificationCount" + 1, "updatedAt" = $1
      WHERE "priceAlertId" = $3`,
-    [now, notifiedPrice, priceAlertId]
+    [now, notifiedPrice, priceAlertId],
   );
 }
 
@@ -363,7 +369,7 @@ export async function markPriceAlertPurchased(priceAlertId: string, orderId: str
     `UPDATE "priceAlert" SET 
       "status" = 'purchased', "purchasedAt" = $1, "purchaseOrderId" = $2, "updatedAt" = $1
      WHERE "priceAlertId" = $3`,
-    [now, orderId, priceAlertId]
+    [now, orderId, priceAlertId],
   );
 }
 
@@ -371,7 +377,7 @@ export async function cancelPriceAlert(priceAlertId: string): Promise<void> {
   await query(
     `UPDATE "priceAlert" SET "status" = 'cancelled', "updatedAt" = $1
      WHERE "priceAlertId" = $2`,
-    [new Date().toISOString(), priceAlertId]
+    [new Date().toISOString(), priceAlertId],
   );
 }
 
@@ -379,7 +385,7 @@ export async function updatePriceAlertCurrentPrice(productId: string, newPrice: 
   await query(
     `UPDATE "priceAlert" SET "currentPrice" = $1, "updatedAt" = $2
      WHERE "productId" = $3 AND "status" = 'active'`,
-    [newPrice, new Date().toISOString(), productId]
+    [newPrice, new Date().toISOString(), productId],
   );
 }
 
@@ -387,7 +393,7 @@ export async function expirePriceAlerts(): Promise<number> {
   const result = await query(
     `UPDATE "priceAlert" SET "status" = 'expired', "updatedAt" = $1
      WHERE "status" = 'active' AND "expiresAt" < NOW()`,
-    [new Date().toISOString()]
+    [new Date().toISOString()],
   );
   return (result as any)?.rowCount || 0;
 }
@@ -420,7 +426,7 @@ function mapToStockAlert(row: Record<string, any>): StockAlert {
     expiresAt: row.expiresAt ? new Date(row.expiresAt) : undefined,
     metadata: row.metadata,
     createdAt: new Date(row.createdAt),
-    updatedAt: new Date(row.updatedAt)
+    updatedAt: new Date(row.updatedAt),
   };
 }
 
@@ -452,6 +458,6 @@ function mapToPriceAlert(row: Record<string, any>): PriceAlert {
     expiresAt: row.expiresAt ? new Date(row.expiresAt) : undefined,
     metadata: row.metadata,
     createdAt: new Date(row.createdAt),
-    updatedAt: new Date(row.updatedAt)
+    updatedAt: new Date(row.updatedAt),
   };
 }

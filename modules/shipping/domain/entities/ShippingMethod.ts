@@ -1,6 +1,6 @@
 /**
  * ShippingMethod Entity
- * 
+ *
  * Represents a shipping method available for orders.
  */
 
@@ -13,39 +13,39 @@ export interface ShippingMethodProps {
   code: string;
   description?: string;
   type: ShippingMethodType;
-  
+
   // Carrier info
   carrierId?: string;
   carrierType?: CarrierType;
   carrierServiceCode?: string;
-  
+
   // Pricing
   basePrice: number;
   pricePerKg?: number;
   pricePerItem?: number;
   minPrice?: number;
   maxPrice?: number;
-  
+
   // Conditions
   minOrderValue?: number;
   maxOrderValue?: number;
   minWeight?: number;
   maxWeight?: number;
-  
+
   // Delivery
   estimatedDaysMin?: number;
   estimatedDaysMax?: number;
-  
+
   // Availability
   zoneIds: string[];
   isActive: boolean;
   isDefault: boolean;
   sortOrder: number;
-  
+
   // Multi-tenant
   storeId?: string;
   merchantId?: string;
-  
+
   // Audit
   createdAt: Date;
   updatedAt: Date;
@@ -59,24 +59,60 @@ export class ShippingMethod {
   }
 
   // Getters
-  get shippingMethodId(): string { return this.props.shippingMethodId; }
-  get name(): string { return this.props.name; }
-  get code(): string { return this.props.code; }
-  get description(): string | undefined { return this.props.description; }
-  get type(): ShippingMethodType { return this.props.type; }
-  get carrierId(): string | undefined { return this.props.carrierId; }
-  get carrierType(): CarrierType | undefined { return this.props.carrierType; }
-  get basePrice(): number { return this.props.basePrice; }
-  get estimatedDaysMin(): number | undefined { return this.props.estimatedDaysMin; }
-  get estimatedDaysMax(): number | undefined { return this.props.estimatedDaysMax; }
-  get zoneIds(): string[] { return [...this.props.zoneIds]; }
-  get isActive(): boolean { return this.props.isActive; }
-  get isDefault(): boolean { return this.props.isDefault; }
-  get sortOrder(): number { return this.props.sortOrder; }
-  get storeId(): string | undefined { return this.props.storeId; }
-  get merchantId(): string | undefined { return this.props.merchantId; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get shippingMethodId(): string {
+    return this.props.shippingMethodId;
+  }
+  get name(): string {
+    return this.props.name;
+  }
+  get code(): string {
+    return this.props.code;
+  }
+  get description(): string | undefined {
+    return this.props.description;
+  }
+  get type(): ShippingMethodType {
+    return this.props.type;
+  }
+  get carrierId(): string | undefined {
+    return this.props.carrierId;
+  }
+  get carrierType(): CarrierType | undefined {
+    return this.props.carrierType;
+  }
+  get basePrice(): number {
+    return this.props.basePrice;
+  }
+  get estimatedDaysMin(): number | undefined {
+    return this.props.estimatedDaysMin;
+  }
+  get estimatedDaysMax(): number | undefined {
+    return this.props.estimatedDaysMax;
+  }
+  get zoneIds(): string[] {
+    return [...this.props.zoneIds];
+  }
+  get isActive(): boolean {
+    return this.props.isActive;
+  }
+  get isDefault(): boolean {
+    return this.props.isDefault;
+  }
+  get sortOrder(): number {
+    return this.props.sortOrder;
+  }
+  get storeId(): string | undefined {
+    return this.props.storeId;
+  }
+  get merchantId(): string | undefined {
+    return this.props.merchantId;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   static create(props: Omit<ShippingMethodProps, 'shippingMethodId' | 'createdAt' | 'updatedAt'>): ShippingMethod {
     const now = new Date();
@@ -123,31 +159,31 @@ export class ShippingMethod {
   calculateRate(weight: number, orderValue: number): number {
     if (this.props.type === 'free') return 0;
     if (this.props.type === 'flat_rate') return this.props.basePrice;
-    
+
     let rate = this.props.basePrice;
-    
+
     if (this.props.type === 'weight_based' && this.props.pricePerKg) {
       rate += weight * this.props.pricePerKg;
     }
-    
+
     if (this.props.minPrice && rate < this.props.minPrice) {
       rate = this.props.minPrice;
     }
     if (this.props.maxPrice && rate > this.props.maxPrice) {
       rate = this.props.maxPrice;
     }
-    
+
     return rate;
   }
 
   isAvailableFor(weight: number, orderValue: number): boolean {
     if (!this.props.isActive) return false;
-    
+
     if (this.props.minOrderValue && orderValue < this.props.minOrderValue) return false;
     if (this.props.maxOrderValue && orderValue > this.props.maxOrderValue) return false;
     if (this.props.minWeight && weight < this.props.minWeight) return false;
     if (this.props.maxWeight && weight > this.props.maxWeight) return false;
-    
+
     return true;
   }
 

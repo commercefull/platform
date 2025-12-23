@@ -1,12 +1,12 @@
 /**
  * Migration: Create Channel Module Tables
- * 
+ *
  * Creates tables for distribution channels.
  */
 
-exports.up = async function(knex) {
+exports.up = async function (knex) {
   // Create channel table
-  await knex.schema.createTable('channel', (table) => {
+  await knex.schema.createTable('channel', table => {
     table.string('channelId').primary();
     table.string('name').notNullable();
     table.string('code').notNullable().unique();
@@ -31,14 +31,14 @@ exports.up = async function(knex) {
     table.jsonb('settings');
     table.timestamp('createdAt').defaultTo(knex.fn.now());
     table.timestamp('updatedAt').defaultTo(knex.fn.now());
-    
+
     table.index(['ownerType', 'ownerId']);
     table.index(['isActive']);
     table.index(['type']);
   });
 
   // Create channel_product table
-  await knex.schema.createTable('channelProduct', (table) => {
+  await knex.schema.createTable('channelProduct', table => {
     table.string('channelProductId').primary();
     table.string('channelId').notNullable().references('channelId').inTable('channel').onDelete('CASCADE');
     table.string('productId').notNullable();
@@ -52,25 +52,25 @@ exports.up = async function(knex) {
     table.timestamp('unpublishedAt');
     table.timestamp('createdAt').defaultTo(knex.fn.now());
     table.timestamp('updatedAt').defaultTo(knex.fn.now());
-    
+
     table.unique(['channelId', 'productId']);
     table.index(['channelId', 'isVisible']);
   });
 
   // Create channel_warehouse table
-  await knex.schema.createTable('channelWarehouse', (table) => {
+  await knex.schema.createTable('channelWarehouse', table => {
     table.string('channelWarehouseId').primary();
     table.string('channelId').notNullable().references('channelId').inTable('channel').onDelete('CASCADE');
     table.string('warehouseId').notNullable();
     table.integer('priority').defaultTo(0);
     table.boolean('isActive').defaultTo(true);
     table.timestamp('createdAt').defaultTo(knex.fn.now());
-    
+
     table.unique(['channelId', 'warehouseId']);
   });
 };
 
-exports.down = async function(knex) {
+exports.down = async function (knex) {
   await knex.schema.dropTableIfExists('channelWarehouse');
   await knex.schema.dropTableIfExists('channelProduct');
   await knex.schema.dropTableIfExists('channel');

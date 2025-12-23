@@ -1,6 +1,6 @@
 /**
  * ChannelProduct Entity
- * 
+ *
  * Represents the association between a product and a channel,
  * including channel-specific settings for that product.
  */
@@ -9,25 +9,25 @@ export interface ChannelProductProps {
   channelProductId: string;
   channelId: string;
   productId: string;
-  
+
   // Visibility
   isVisible: boolean;
   isFeatured: boolean;
-  
+
   // Channel-specific pricing override
   priceOverride?: number;
   salePriceOverride?: number;
-  
+
   // Channel-specific inventory
   inventoryOverride?: number;
-  
+
   // Position/sorting
   sortOrder: number;
-  
+
   // Dates
   publishedAt?: Date;
   unpublishedAt?: Date;
-  
+
   // Audit
   createdAt: Date;
   updatedAt: Date;
@@ -41,19 +41,45 @@ export class ChannelProduct {
   }
 
   // Getters
-  get channelProductId(): string { return this.props.channelProductId; }
-  get channelId(): string { return this.props.channelId; }
-  get productId(): string { return this.props.productId; }
-  get isVisible(): boolean { return this.props.isVisible; }
-  get isFeatured(): boolean { return this.props.isFeatured; }
-  get priceOverride(): number | undefined { return this.props.priceOverride; }
-  get salePriceOverride(): number | undefined { return this.props.salePriceOverride; }
-  get inventoryOverride(): number | undefined { return this.props.inventoryOverride; }
-  get sortOrder(): number { return this.props.sortOrder; }
-  get publishedAt(): Date | undefined { return this.props.publishedAt; }
-  get unpublishedAt(): Date | undefined { return this.props.unpublishedAt; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get channelProductId(): string {
+    return this.props.channelProductId;
+  }
+  get channelId(): string {
+    return this.props.channelId;
+  }
+  get productId(): string {
+    return this.props.productId;
+  }
+  get isVisible(): boolean {
+    return this.props.isVisible;
+  }
+  get isFeatured(): boolean {
+    return this.props.isFeatured;
+  }
+  get priceOverride(): number | undefined {
+    return this.props.priceOverride;
+  }
+  get salePriceOverride(): number | undefined {
+    return this.props.salePriceOverride;
+  }
+  get inventoryOverride(): number | undefined {
+    return this.props.inventoryOverride;
+  }
+  get sortOrder(): number {
+    return this.props.sortOrder;
+  }
+  get publishedAt(): Date | undefined {
+    return this.props.publishedAt;
+  }
+  get unpublishedAt(): Date | undefined {
+    return this.props.unpublishedAt;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   /**
    * Create a new ChannelProduct association

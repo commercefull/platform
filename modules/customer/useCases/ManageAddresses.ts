@@ -25,7 +25,7 @@ export class AddAddressCommand {
     public readonly firstName?: string,
     public readonly lastName?: string,
     public readonly company?: string,
-    public readonly isDefault?: boolean
+    public readonly isDefault?: boolean,
   ) {}
 }
 
@@ -33,14 +33,14 @@ export class UpdateAddressCommand {
   constructor(
     public readonly customerId: string,
     public readonly addressId: string,
-    public readonly updates: Partial<Omit<CustomerAddress, 'addressId'>>
+    public readonly updates: Partial<Omit<CustomerAddress, 'addressId'>>,
   ) {}
 }
 
 export class DeleteAddressCommand {
   constructor(
     public readonly customerId: string,
-    public readonly addressId: string
+    public readonly addressId: string,
   ) {}
 }
 
@@ -48,7 +48,7 @@ export class SetDefaultAddressCommand {
   constructor(
     public readonly customerId: string,
     public readonly addressId: string,
-    public readonly addressType: 'billing' | 'shipping'
+    public readonly addressType: 'billing' | 'shipping',
   ) {}
 }
 
@@ -100,7 +100,7 @@ export class ManageAddressesUseCase {
       phone: command.phone,
       firstName: command.firstName,
       lastName: command.lastName,
-      company: command.company
+      company: command.company,
     };
 
     customer.addAddress(address);
@@ -123,7 +123,7 @@ export class ManageAddressesUseCase {
     const updatedAddress: CustomerAddress = {
       ...existing,
       ...command.updates,
-      addressId: command.addressId
+      addressId: command.addressId,
     };
 
     customer.addAddress(updatedAddress);
@@ -176,7 +176,7 @@ export class ManageAddressesUseCase {
       phone: address.phone,
       firstName: address.firstName,
       lastName: address.lastName,
-      company: address.company
+      company: address.company,
     };
   }
 }

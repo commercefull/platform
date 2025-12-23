@@ -43,20 +43,14 @@ export interface AuthService {
 }
 
 export interface SessionService {
-  createSession(data: {
-    userId: string;
-    userType: string;
-    email: string;
-    role: string;
-    permissions: string[];
-  }): Promise<string>;
+  createSession(data: { userId: string; userType: string; email: string; role: string; permissions: string[] }): Promise<string>;
 }
 
 export class LoginAdminUseCase {
   constructor(
     private readonly adminRepo: AdminRepository,
     private readonly authService: AuthService,
-    private readonly sessionService: SessionService
+    private readonly sessionService: SessionService,
   ) {}
 
   async execute(input: LoginAdminInput): Promise<LoginAdminOutput> {
@@ -75,10 +69,7 @@ export class LoginAdminUseCase {
     }
 
     // Verify password
-    const isValidPassword = await this.authService.verifyPassword(
-      input.password,
-      admin.passwordHash
-    );
+    const isValidPassword = await this.authService.verifyPassword(input.password, admin.passwordHash);
     if (!isValidPassword) {
       eventBus.emit('admin.login_failed', {
         email: input.email,

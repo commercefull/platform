@@ -2,11 +2,16 @@
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.up = function(knex) {
-  return knex.schema.createTable('b2bCompanyCreditTransaction', function(table) {
+exports.up = function (knex) {
+  return knex.schema.createTable('b2bCompanyCreditTransaction', function (table) {
     table.uuid('b2bCompanyCreditTransactionId').primary().defaultTo(knex.raw('uuidv7()'));
     table.uuid('b2bCompanyId').notNullable().references('b2bCompanyId').inTable('b2bCompany').onDelete('CASCADE');
-    table.uuid('b2bCompanyCreditLimitId').notNullable().references('b2bCompanyCreditLimitId').inTable('b2bCompanyCreditLimit').onDelete('CASCADE');
+    table
+      .uuid('b2bCompanyCreditLimitId')
+      .notNullable()
+      .references('b2bCompanyCreditLimitId')
+      .inTable('b2bCompanyCreditLimit')
+      .onDelete('CASCADE');
     table.string('transactionType').notNullable().checkIn(['charge', 'payment', 'refund', 'adjustment', 'write_off', 'fee', 'interest']);
     table.decimal('amount', 15, 2).notNullable();
     table.string('currency', 3).defaultTo('USD');
@@ -41,6 +46,6 @@ exports.up = function(knex) {
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTableIfExists('b2bCompanyCreditTransaction');
 };

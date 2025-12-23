@@ -19,7 +19,7 @@ export class CreatePromotionCommand {
     public readonly usageLimitPerCustomer?: number,
     public readonly startsAt?: Date,
     public readonly endsAt?: Date,
-    public readonly merchantId?: string
+    public readonly merchantId?: string,
   ) {}
 }
 
@@ -71,10 +71,12 @@ export class CreatePromotionUseCase {
       maxDiscountAmount: command.maxDiscountAmount,
       merchantId: command.merchantId,
       // Add actions based on type
-      actions: [{
-        type: this.mapTypeToAction(command.type),
-        value: command.value
-      }]
+      actions: [
+        {
+          type: this.mapTypeToAction(command.type),
+          value: command.value,
+        },
+      ],
     });
 
     return this.mapToResponse(promotion);
@@ -99,7 +101,7 @@ export class CreatePromotionUseCase {
       code: promotion.code,
       name: promotion.name,
       status: promotion.status,
-      createdAt: promotion.createdAt?.toISOString() || new Date().toISOString()
+      createdAt: promotion.createdAt?.toISOString() || new Date().toISOString(),
     };
   }
 }

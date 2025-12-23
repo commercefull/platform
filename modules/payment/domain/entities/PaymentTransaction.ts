@@ -59,7 +59,7 @@ export class PaymentTransaction {
       customerIp: props.customerIp,
       metadata: props.metadata,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     });
   }
 
@@ -68,37 +68,89 @@ export class PaymentTransaction {
   }
 
   // Getters
-  get transactionId(): string { return this.props.transactionId; }
-  get orderId(): string { return this.props.orderId; }
-  get customerId(): string | undefined { return this.props.customerId; }
-  get paymentMethodConfigId(): string { return this.props.paymentMethodConfigId; }
-  get gatewayId(): string { return this.props.gatewayId; }
-  get externalTransactionId(): string | undefined { return this.props.externalTransactionId; }
-  get amount(): number { return this.props.amount; }
-  get currency(): string { return this.props.currency; }
-  get status(): TransactionStatus { return this.props.status; }
-  get paymentMethodDetails(): Record<string, any> | undefined { return this.props.paymentMethodDetails; }
-  get gatewayResponse(): Record<string, any> | undefined { return this.props.gatewayResponse; }
-  get errorCode(): string | undefined { return this.props.errorCode; }
-  get errorMessage(): string | undefined { return this.props.errorMessage; }
-  get refundedAmount(): number { return this.props.refundedAmount; }
-  get customerIp(): string | undefined { return this.props.customerIp; }
-  get authorizedAt(): Date | undefined { return this.props.authorizedAt; }
-  get capturedAt(): Date | undefined { return this.props.capturedAt; }
-  get metadata(): Record<string, any> | undefined { return this.props.metadata; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get transactionId(): string {
+    return this.props.transactionId;
+  }
+  get orderId(): string {
+    return this.props.orderId;
+  }
+  get customerId(): string | undefined {
+    return this.props.customerId;
+  }
+  get paymentMethodConfigId(): string {
+    return this.props.paymentMethodConfigId;
+  }
+  get gatewayId(): string {
+    return this.props.gatewayId;
+  }
+  get externalTransactionId(): string | undefined {
+    return this.props.externalTransactionId;
+  }
+  get amount(): number {
+    return this.props.amount;
+  }
+  get currency(): string {
+    return this.props.currency;
+  }
+  get status(): TransactionStatus {
+    return this.props.status;
+  }
+  get paymentMethodDetails(): Record<string, any> | undefined {
+    return this.props.paymentMethodDetails;
+  }
+  get gatewayResponse(): Record<string, any> | undefined {
+    return this.props.gatewayResponse;
+  }
+  get errorCode(): string | undefined {
+    return this.props.errorCode;
+  }
+  get errorMessage(): string | undefined {
+    return this.props.errorMessage;
+  }
+  get refundedAmount(): number {
+    return this.props.refundedAmount;
+  }
+  get customerIp(): string | undefined {
+    return this.props.customerIp;
+  }
+  get authorizedAt(): Date | undefined {
+    return this.props.authorizedAt;
+  }
+  get capturedAt(): Date | undefined {
+    return this.props.capturedAt;
+  }
+  get metadata(): Record<string, any> | undefined {
+    return this.props.metadata;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   // Computed
-  get isPending(): boolean { return this.props.status === TransactionStatus.PENDING; }
-  get isAuthorized(): boolean { return this.props.status === TransactionStatus.AUTHORIZED; }
-  get isPaid(): boolean { return this.props.status === TransactionStatus.PAID; }
-  get isFailed(): boolean { return this.props.status === TransactionStatus.FAILED; }
-  get isRefunded(): boolean { return this.props.status === TransactionStatus.REFUNDED; }
-  get canBeRefunded(): boolean { 
-    return [TransactionStatus.PAID, TransactionStatus.PARTIALLY_REFUNDED].includes(this.props.status); 
+  get isPending(): boolean {
+    return this.props.status === TransactionStatus.PENDING;
   }
-  get refundableAmount(): number { return this.props.amount - this.props.refundedAmount; }
+  get isAuthorized(): boolean {
+    return this.props.status === TransactionStatus.AUTHORIZED;
+  }
+  get isPaid(): boolean {
+    return this.props.status === TransactionStatus.PAID;
+  }
+  get isFailed(): boolean {
+    return this.props.status === TransactionStatus.FAILED;
+  }
+  get isRefunded(): boolean {
+    return this.props.status === TransactionStatus.REFUNDED;
+  }
+  get canBeRefunded(): boolean {
+    return [TransactionStatus.PAID, TransactionStatus.PARTIALLY_REFUNDED].includes(this.props.status);
+  }
+  get refundableAmount(): number {
+    return this.props.amount - this.props.refundedAmount;
+  }
 
   // Domain methods
   authorize(externalTransactionId: string, gatewayResponse?: Record<string, any>): void {
@@ -153,7 +205,7 @@ export class PaymentTransaction {
       throw new Error('Refund amount exceeds refundable amount');
     }
     this.props.refundedAmount += amount;
-    
+
     if (this.props.refundedAmount >= this.props.amount) {
       this.props.status = TransactionStatus.REFUNDED;
     } else {
@@ -202,7 +254,7 @@ export class PaymentTransaction {
       capturedAt: this.props.capturedAt?.toISOString(),
       metadata: this.props.metadata,
       createdAt: this.props.createdAt.toISOString(),
-      updatedAt: this.props.updatedAt.toISOString()
+      updatedAt: this.props.updatedAt.toISOString(),
     };
   }
 }

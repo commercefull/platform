@@ -25,13 +25,7 @@ export class ProductCreatedEvent implements DomainEvent {
     merchantId?: string;
   };
 
-  constructor(
-    productId: string,
-    name: string,
-    sku?: string,
-    categoryId?: string,
-    merchantId?: string
-  ) {
+  constructor(productId: string, name: string, sku?: string, categoryId?: string, merchantId?: string) {
     this.occurredAt = new Date();
     this.aggregateId = productId;
     this.payload = { productId, name, sku, categoryId, merchantId };

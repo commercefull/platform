@@ -43,7 +43,7 @@ import {
   // Approval Requests
   getApprovalRequests,
   getApprovalRequest,
-  processApprovalAction
+  processApprovalAction,
 } from './controllers/b2bBusinessController';
 
 const router = Router();

@@ -6,7 +6,7 @@ import axios, { AxiosInstance } from 'axios';
 
 const adminCredentials = {
   email: 'merchant@example.com',
-  password: 'password123'
+  password: 'password123',
 };
 
 /**
@@ -17,10 +17,10 @@ export async function setupPricingTests() {
     baseURL: process.env.API_URL || 'http://localhost:3000',
     validateStatus: () => true,
     headers: {
-      'Accept': 'application/json',
+      Accept: 'application/json',
       'Content-Type': 'application/json',
-      'X-Test-Request': 'true'
-    }
+      'X-Test-Request': 'true',
+    },
   });
 
   // Get admin token
@@ -33,7 +33,7 @@ export async function setupPricingTests() {
 
   return {
     client,
-    adminToken
+    adminToken,
   };
 }
 
@@ -47,13 +47,9 @@ export function createTestPricingRule(overrides: Partial<any> = {}) {
     scope: 'global',
     status: 'active',
     priority: 1,
-    adjustments: [
-      { type: 'percentage', value: 10 }
-    ],
-    conditions: [
-      { type: 'min_quantity', parameters: { value: 1 } }
-    ],
-    ...overrides
+    adjustments: [{ type: 'percentage', value: 10 }],
+    conditions: [{ type: 'min_quantity', parameters: { value: 1 } }],
+    ...overrides,
   };
 }
 
@@ -68,7 +64,7 @@ export function createTestTierPrice(productId: string = TEST_PRODUCT_UUID, overr
     productId,
     quantityMin: 10,
     price: 9.99,
-    ...overrides
+    ...overrides,
   };
 }
 
@@ -81,7 +77,7 @@ export function createTestPriceList(overrides: Partial<any> = {}) {
     description: 'Integration test price list',
     priority: 1,
     isActive: true,
-    ...overrides
+    ...overrides,
   };
 }
 
@@ -99,7 +95,7 @@ export function createTestCurrency(overrides: Partial<any> = {}) {
     decimalSeparator: '.',
     isActive: true,
     isDefault: false,
-    ...overrides
+    ...overrides,
   };
 }
 
@@ -113,7 +109,7 @@ export function createTestCurrencyRegion(overrides: Partial<any> = {}) {
     countries: ['XX', 'YY'],
     currencyCode: 'USD',
     isActive: true,
-    ...overrides
+    ...overrides,
   };
 }
 
@@ -128,10 +124,8 @@ export function createTestCurrencyPriceRule(overrides: Partial<any> = {}) {
     type: 'currency_conversion',
     scope: 'global',
     status: 'active',
-    adjustments: [
-      { type: 'percentage', value: 5 }
-    ],
-    ...overrides
+    adjustments: [{ type: 'percentage', value: 5 }],
+    ...overrides,
   };
 }
 
@@ -148,7 +142,7 @@ export async function cleanupPricingTests(
     currencyCodes?: string[];
     regionIds?: string[];
     priceRuleIds?: string[];
-  } = {}
+  } = {},
 ) {
   const headers = { Authorization: `Bearer ${adminToken}` };
 

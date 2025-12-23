@@ -19,7 +19,7 @@ exports.up = function (knex) {
     t.integer('usesRemaining');
     t.integer('usesPerCustomer').defaultTo(1);
     t.boolean('firstTimeOnly').notNullable().defaultTo(false);
-    
+
     t.uuid('createdBy');
     t.index('membershipPlanId');
     t.index('code');

@@ -27,11 +27,21 @@ export class ProductType {
   }
 
   // Getters
-  get id(): string { return this.props.productTypeId; }
-  get name(): string { return this.props.name; }
-  get slug(): string { return this.props.slug; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get id(): string {
+    return this.props.productTypeId;
+  }
+  get name(): string {
+    return this.props.name;
+  }
+  get slug(): string {
+    return this.props.slug;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   /**
    * Set the attribute sets for this product type
@@ -68,7 +78,7 @@ export class ProductType {
   toObject(): ProductTypeProps & { attributeSets: AttributeSetSummary[] } {
     return {
       ...this.props,
-      attributeSets: this.attributeSets
+      attributeSets: this.attributeSets,
     };
   }
 
@@ -76,14 +86,19 @@ export class ProductType {
    * Create a new ProductType instance
    */
   static create(props: Omit<ProductTypeProps, 'productTypeId' | 'createdAt' | 'updatedAt'> & { productTypeId?: string }): ProductType {
-    const slug = props.slug || props.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-    
+    const slug =
+      props.slug ||
+      props.name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '');
+
     return new ProductType({
       ...props,
       slug,
       productTypeId: props.productTypeId || '',
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     });
   }
 
@@ -109,5 +124,5 @@ export const StandardProductTypes = [
   { name: 'Downloadable', slug: 'downloadable' },
   { name: 'Bundle', slug: 'bundle' },
   { name: 'Grouped', slug: 'grouped' },
-  { name: 'Subscription', slug: 'subscription' }
+  { name: 'Subscription', slug: 'subscription' },
 ];

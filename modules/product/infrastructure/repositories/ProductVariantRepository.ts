@@ -35,10 +35,9 @@ export interface PaginatedResult<T> {
 
 export class ProductVariantRepository {
   async findById(variantId: string): Promise<ProductVariant | null> {
-    const row = await queryOne<Record<string, any>>(
-      'SELECT * FROM "productVariant" WHERE "variantId" = $1 AND "deletedAt" IS NULL',
-      [variantId]
-    );
+    const row = await queryOne<Record<string, any>>('SELECT * FROM "productVariant" WHERE "variantId" = $1 AND "deletedAt" IS NULL', [
+      variantId,
+    ]);
 
     if (!row) return null;
 
@@ -50,7 +49,7 @@ export class ProductVariantRepository {
   async findByProductId(productId: string): Promise<ProductVariant[]> {
     const rows = await query<Record<string, any>[]>(
       'SELECT * FROM "productVariant" WHERE "productId" = $1 AND "deletedAt" IS NULL ORDER BY "sortOrder" ASC, "createdAt" ASC',
-      [productId]
+      [productId],
     );
 
     const variants: ProductVariant[] = [];
@@ -63,10 +62,7 @@ export class ProductVariantRepository {
   }
 
   async findBySku(sku: string): Promise<ProductVariant | null> {
-    const row = await queryOne<Record<string, any>>(
-      'SELECT * FROM "productVariant" WHERE sku = $1 AND "deletedAt" IS NULL',
-      [sku]
-    );
+    const row = await queryOne<Record<string, any>>('SELECT * FROM "productVariant" WHERE sku = $1 AND "deletedAt" IS NULL', [sku]);
 
     if (!row) return null;
 
@@ -78,7 +74,7 @@ export class ProductVariantRepository {
   async findDefaultVariant(productId: string): Promise<ProductVariant | null> {
     const row = await queryOne<Record<string, any>>(
       'SELECT * FROM "productVariant" WHERE "productId" = $1 AND "isDefault" = true AND "isActive" = true AND "deletedAt" IS NULL',
-      [productId]
+      [productId],
     );
 
     if (!row) return null;
@@ -96,17 +92,14 @@ export class ProductVariantRepository {
 
     const { whereClause, params } = this.buildWhereClause(filters);
 
-    const countResult = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM "productVariant" ${whereClause}`,
-      params
-    );
+    const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "productVariant" ${whereClause}`, params);
     const total = parseInt(countResult?.count || '0');
 
     const rows = await query<Record<string, any>[]>(
       `SELECT * FROM "productVariant" ${whereClause}
        ORDER BY "position" ASC, "createdAt" ASC
        LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
-      [...params, limit, offset]
+      [...params, limit, offset],
     );
 
     const variants: ProductVariant[] = [];
@@ -121,17 +114,16 @@ export class ProductVariantRepository {
       limit,
       offset,
       hasMore: offset + variants.length < total,
-      length: total
+      length: total,
     };
   }
 
   async save(variant: ProductVariant): Promise<ProductVariant> {
     const now = new Date().toISOString();
 
-    const existing = await queryOne<Record<string, any>>(
-      'SELECT "variantId" FROM "productVariant" WHERE "variantId" = $1',
-      [variant.variantId]
-    );
+    const existing = await queryOne<Record<string, any>>('SELECT "variantId" FROM "productVariant" WHERE "variantId" = $1', [
+      variant.variantId,
+    ]);
 
     if (existing) {
       // Update existing variant
@@ -163,8 +155,8 @@ export class ProductVariantRepository {
           variant.position,
           variant.metadata ? JSON.stringify(variant.metadata) : null,
           now,
-          variant.variantId
-        ]
+          variant.variantId,
+        ],
       );
     } else {
       // Create new variant
@@ -198,8 +190,8 @@ export class ProductVariantRepository {
           variant.position,
           variant.metadata ? JSON.stringify(variant.metadata) : null,
           now,
-          now
-        ]
+          now,
+        ],
       );
     }
 
@@ -211,26 +203,28 @@ export class ProductVariantRepository {
 
   async delete(variantId: string): Promise<void> {
     const now = new Date().toISOString();
-    await query(
-      'UPDATE "productVariant" SET "deletedAt" = $1, "isActive" = false, "updatedAt" = $1 WHERE "variantId" = $2',
-      [now, variantId]
-    );
+    await query('UPDATE "productVariant" SET "deletedAt" = $1, "isActive" = false, "updatedAt" = $1 WHERE "variantId" = $2', [
+      now,
+      variantId,
+    ]);
   }
 
   async updateInventory(variantId: string, quantity: number): Promise<void> {
     const now = new Date().toISOString();
-    await query(
-      'UPDATE "productVariant" SET "inventoryQuantity" = $1, "updatedAt" = $2 WHERE "variantId" = $3',
-      [quantity, now, variantId]
-    );
+    await query('UPDATE "productVariant" SET "inventoryQuantity" = $1, "updatedAt" = $2 WHERE "variantId" = $3', [
+      quantity,
+      now,
+      variantId,
+    ]);
   }
 
   async adjustInventory(variantId: string, adjustment: number): Promise<void> {
     const now = new Date().toISOString();
-    await query(
-      'UPDATE "productVariant" SET "inventoryQuantity" = "inventoryQuantity" + $1, "updatedAt" = $2 WHERE "variantId" = $3',
-      [adjustment, now, variantId]
-    );
+    await query('UPDATE "productVariant" SET "inventoryQuantity" = "inventoryQuantity" + $1, "updatedAt" = $2 WHERE "variantId" = $3', [
+      adjustment,
+      now,
+      variantId,
+    ]);
   }
 
   async reserveInventory(variantId: string, quantity: number): Promise<boolean> {
@@ -239,7 +233,7 @@ export class ProductVariantRepository {
     // Check if sufficient inventory
     const row = await queryOne<Record<string, any>>(
       'SELECT "inventoryQuantity", "allowBackorders", "trackInventory" FROM "productVariant" WHERE "variantId" = $1 AND "deletedAt" IS NULL',
-      [variantId]
+      [variantId],
     );
 
     if (!row) return false;
@@ -248,34 +242,36 @@ export class ProductVariantRepository {
     if (!canFulfill) return false;
 
     // Reserve inventory
-    await query(
-      'UPDATE "productVariant" SET "inventoryQuantity" = "inventoryQuantity" - $1, "updatedAt" = $2 WHERE "variantId" = $3',
-      [quantity, now, variantId]
-    );
+    await query('UPDATE "productVariant" SET "inventoryQuantity" = "inventoryQuantity" - $1, "updatedAt" = $2 WHERE "variantId" = $3', [
+      quantity,
+      now,
+      variantId,
+    ]);
 
     return true;
   }
 
   async releaseInventory(variantId: string, quantity: number): Promise<void> {
     const now = new Date().toISOString();
-    await query(
-      'UPDATE "productVariant" SET "inventoryQuantity" = "inventoryQuantity" + $1, "updatedAt" = $2 WHERE "variantId" = $3',
-      [quantity, now, variantId]
-    );
+    await query('UPDATE "productVariant" SET "inventoryQuantity" = "inventoryQuantity" + $1, "updatedAt" = $2 WHERE "variantId" = $3', [
+      quantity,
+      now,
+      variantId,
+    ]);
   }
 
   // Helper methods
   private async getVariantAttributes(variantId: string): Promise<VariantAttribute[]> {
     const rows = await query<Record<string, any>[]>(
       'SELECT * FROM "productVariantAttribute" WHERE "variantId" = $1 ORDER BY "displayOrder" ASC',
-      [variantId]
+      [variantId],
     );
 
     return (rows || []).map(row => ({
       attributeId: row.attributeId,
       attributeName: row.attributeName,
       value: row.value,
-      displayValue: row.displayValue
+      displayValue: row.displayValue,
     }));
   }
 
@@ -289,13 +285,7 @@ export class ProductVariantRepository {
         `INSERT INTO "productVariantAttribute" (
           "variantId", "attributeId", "attributeName", "value", "displayValue"
         ) VALUES ($1, $2, $3, $4, $5)`,
-        [
-          variant.variantId,
-          attr.attributeId,
-          attr.attributeName,
-          attr.value,
-          attr.displayValue || attr.value
-        ]
+        [variant.variantId, attr.attributeId, attr.attributeName, attr.value, attr.displayValue || attr.value],
       );
     }
   }
@@ -334,7 +324,7 @@ export class ProductVariantRepository {
 
     return {
       whereClause: conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '',
-      params
+      params,
     };
   }
 
@@ -348,7 +338,7 @@ export class ProductVariantRepository {
         parseFloat(row.basePrice),
         row.currency || 'USD',
         row.salePrice ? parseFloat(row.salePrice) : undefined,
-        row.cost ? parseFloat(row.cost) : undefined
+        row.cost ? parseFloat(row.cost) : undefined,
       ),
       dimensions: Dimensions.create({
         weight: row.weight ? parseFloat(row.weight) : undefined,
@@ -356,7 +346,7 @@ export class ProductVariantRepository {
         length: row.length ? parseFloat(row.length) : undefined,
         width: row.width ? parseFloat(row.width) : undefined,
         height: row.height ? parseFloat(row.height) : undefined,
-        dimensionUnit: row.dimensionUnit
+        dimensionUnit: row.dimensionUnit,
       }),
       attributes,
       imageId: row.imageId,
@@ -370,7 +360,7 @@ export class ProductVariantRepository {
       externalId: row.externalId,
       metadata: row.metadata ? (typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata) : undefined,
       createdAt: new Date(row.createdAt),
-      updatedAt: new Date(row.updatedAt)
+      updatedAt: new Date(row.updatedAt),
     });
   }
 }

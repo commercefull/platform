@@ -7,21 +7,33 @@ exports.up = function (knex) {
     t.uuid('notificationId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
-    
+
     // User information
     t.uuid('userId').notNullable();
     t.enum('userType', ['customer', 'merchant', 'admin']).notNullable().defaultTo('customer');
-    
+
     // Notification content
     t.enum('type', [
-      'account_registration', 'password_reset', 'email_verification',
-      'order_confirmation', 'order_shipped', 'order_delivered', 'order_cancelled',
-      'return_initiated', 'refund_processed', 'back_in_stock', 'price_drop',
-      'new_product', 'review_request', 'abandoned_cart', 'coupon_offer', 'promotion'
+      'account_registration',
+      'password_reset',
+      'email_verification',
+      'order_confirmation',
+      'order_shipped',
+      'order_delivered',
+      'order_cancelled',
+      'return_initiated',
+      'refund_processed',
+      'back_in_stock',
+      'price_drop',
+      'new_product',
+      'review_request',
+      'abandoned_cart',
+      'coupon_offer',
+      'promotion',
     ]).notNullable();
     t.string('title', 255).notNullable();
     t.text('content').notNullable();
-    
+
     // Channel and delivery
     t.enum('channel', ['email', 'sms', 'push', 'in_app']).notNullable(); // Array of channels: email, sms, push, in_app
     t.boolean('isRead').notNullable().defaultTo(false);
@@ -29,7 +41,7 @@ exports.up = function (knex) {
     t.timestamp('sentAt');
     t.timestamp('deliveredAt');
     t.timestamp('expiresAt');
-    
+
     // Actions and metadata
     t.string('actionUrl', 500);
     t.string('actionLabel', 100);
@@ -38,7 +50,7 @@ exports.up = function (knex) {
     t.string('category', 100);
     t.jsonb('data');
     t.jsonb('metadata');
-    
+
     // Soft delete
     t.timestamp('deletedAt');
 

@@ -12,33 +12,35 @@ exports.up = async function (knex) {
   }
 
   // Insert sample product
-  const [sampleProduct] = await knex('product').insert({
-    sku: 'SAMPLE-001',
-    name: 'Sample Product',
-    slug: 'sample-product',
-    description: 'This is a detailed description of the sample product.',
-    shortDescription: 'A short description of the sample product.',
-    brandId: genericBrand.productBrandId,
-    type: 'simple',
-    status: 'active',
-    visibility: 'visible',
-    price: 19.99,
-    weight: 500,
-    weightUnit: 'g',
-    isInventoryManaged: true,
-    isFeatured: true,
-    isNew: false,
-    isBestseller: false,
-    hasVariants: false,
-    isFeatured: true
-  }).returning(['productId']);
+  const [sampleProduct] = await knex('product')
+    .insert({
+      sku: 'SAMPLE-001',
+      name: 'Sample Product',
+      slug: 'sample-product',
+      description: 'This is a detailed description of the sample product.',
+      shortDescription: 'A short description of the sample product.',
+      brandId: genericBrand.productBrandId,
+      type: 'simple',
+      status: 'active',
+      visibility: 'visible',
+      price: 19.99,
+      weight: 500,
+      weightUnit: 'g',
+      isInventoryManaged: true,
+      isFeatured: true,
+      isNew: false,
+      isBestseller: false,
+      hasVariants: false,
+      isFeatured: true,
+    })
+    .returning(['productId']);
 
   // Link product to category
   const productId = sampleProduct.productId ?? sampleProduct;
   return knex('productCategoryMap').insert({
     productId,
     productCategoryId: electronicsCategory.productCategoryId,
-    isPrimary: true
+    isPrimary: true,
   });
 };
 

@@ -33,7 +33,7 @@ export class ListProductsCommand {
     public readonly limit: number = 20,
     public readonly offset: number = 0,
     public readonly orderBy: string = 'createdAt',
-    public readonly orderDirection: 'asc' | 'desc' = 'desc'
+    public readonly orderDirection: 'asc' | 'desc' = 'desc',
   ) {}
 }
 
@@ -76,12 +76,12 @@ export class ListProductsUseCase {
 
   async execute(command: ListProductsCommand): Promise<ListProductsResponse> {
     const filters: ProductFilters = command.filters || {};
-    
+
     const pagination: PaginationOptions = {
       limit: command.limit,
       offset: command.offset,
       orderBy: command.orderBy,
-      orderDirection: command.orderDirection
+      orderDirection: command.orderDirection,
     };
 
     const result = await this.productRepository.findAll(filters, pagination);
@@ -91,7 +91,7 @@ export class ListProductsUseCase {
       total: result.total,
       limit: result.limit,
       offset: result.offset,
-      hasMore: result.hasMore
+      hasMore: result.hasMore,
     };
   }
 
@@ -111,7 +111,7 @@ export class ListProductsUseCase {
       hasVariants: product.hasVariants,
       primaryImageUrl: product.primaryImage?.url,
       categoryId: product.categoryId,
-      createdAt: product.createdAt.toISOString()
+      createdAt: product.createdAt.toISOString(),
     };
   }
 }

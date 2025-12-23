@@ -1,7 +1,7 @@
 /**
  * Product Translation Table
  * Stores multi-language translations for products
- * 
+ *
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
@@ -36,7 +36,7 @@ exports.up = function (knex) {
     t.timestamp('reviewedAt');
     t.uuid('reviewedBy');
     t.boolean('isApproved').notNullable().defaultTo(false);
-    
+
     t.index('productId');
     t.index('localeId');
     t.index('slug');

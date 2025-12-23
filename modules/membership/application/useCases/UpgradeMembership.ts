@@ -1,6 +1,6 @@
 /**
  * UpgradeMembership Use Case
- * 
+ *
  * Upgrades a customer's membership to a higher tier.
  */
 
@@ -52,7 +52,7 @@ export class UpgradeMembershipUseCase {
 
     // Get current tier for comparison
     const currentTier = await this.membershipRepository.getTierById(membership.tierId);
-    
+
     // Validate upgrade (new tier should have higher price or level)
     if (newTier.price <= currentTier.price) {
       throw new Error('Cannot upgrade to a tier with equal or lower price. Use downgrade instead.');

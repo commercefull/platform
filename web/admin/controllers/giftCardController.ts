@@ -18,10 +18,7 @@ export const listGiftCards = async (req: Request, res: Response): Promise<void> 
     const limit = parseInt(req.query.limit as string) || 50;
     const offset = parseInt(req.query.offset as string) || 0;
 
-    const result = await giftCardRepo.getGiftCards(
-      { status: status as any },
-      { limit, offset }
-    );
+    const result = await giftCardRepo.getGiftCards({ status: status as any }, { limit, offset });
 
     // Get total stats
     const totalResult = await giftCardRepo.getGiftCards();
@@ -36,14 +33,14 @@ export const listGiftCards = async (req: Request, res: Response): Promise<void> 
       stats: {
         totalCards: totalResult.total,
         activeCards,
-        totalValue
+        totalValue,
       },
-      
-      success: req.query.success || null
+
+      success: req.query.success || null,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load gift cards',
@@ -58,7 +55,7 @@ export const createGiftCardForm = async (req: Request, res: Response): Promise<v
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -81,7 +78,7 @@ export const createGiftCard = async (req: Request, res: Response): Promise<void>
       isReloadable,
       minReloadAmount,
       maxReloadAmount,
-      maxBalance
+      maxBalance,
     } = req.body;
 
     const giftCard = await giftCardRepo.createGiftCard({
@@ -92,20 +89,22 @@ export const createGiftCard = async (req: Request, res: Response): Promise<void>
       recipientName: recipientName || undefined,
       personalMessage: personalMessage || undefined,
       deliveryDate: deliveryDate ? new Date(deliveryDate) : undefined,
-      deliveryMethod: deliveryMethod as any || 'email',
+      deliveryMethod: (deliveryMethod as any) || 'email',
       expiresAt: expiresAt ? new Date(expiresAt) : undefined,
       isReloadable: isReloadable === 'true',
-      restrictions: minReloadAmount || maxReloadAmount || maxBalance ? {
-        minReloadAmount: minReloadAmount ? parseFloat(minReloadAmount) : undefined,
-        maxReloadAmount: maxReloadAmount ? parseFloat(maxReloadAmount) : undefined,
-        maxBalance: maxBalance ? parseFloat(maxBalance) : undefined
-      } : undefined
+      restrictions:
+        minReloadAmount || maxReloadAmount || maxBalance
+          ? {
+              minReloadAmount: minReloadAmount ? parseFloat(minReloadAmount) : undefined,
+              maxReloadAmount: maxReloadAmount ? parseFloat(maxReloadAmount) : undefined,
+              maxBalance: maxBalance ? parseFloat(maxBalance) : undefined,
+            }
+          : undefined,
     });
 
     res.redirect(`/hub/promotions/gift-cards/${giftCard.promotionGiftCardId}?success=Gift card created successfully`);
   } catch (error: any) {
     logger.error('Error:', error);
-    
 
     adminRespond(req, res, 'promotions/gift-cards/create', {
       pageName: 'Create Gift Card',
@@ -136,12 +135,12 @@ export const viewGiftCard = async (req: Request, res: Response): Promise<void> =
       pageName: `Gift Card: ${giftCard.code}`,
       giftCard,
       transactions,
-      
-      success: req.query.success || null
+
+      success: req.query.success || null,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load gift card',
@@ -169,7 +168,7 @@ export const editGiftCardForm = async (req: Request, res: Response): Promise<voi
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -186,7 +185,7 @@ export const activateGiftCardAction = async (req: Request, res: Response): Promi
     res.json({ success: true, message: 'Gift card activated successfully' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to activate gift card' });
   }
 };
@@ -201,7 +200,7 @@ export const assignGiftCardAction = async (req: Request, res: Response): Promise
     res.json({ success: true, message: 'Gift card assigned successfully' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to assign gift card' });
   }
 };
@@ -216,11 +215,11 @@ export const reloadGiftCardAction = async (req: Request, res: Response): Promise
     res.json({
       success: true,
       message: 'Gift card reloaded successfully',
-      transaction
+      transaction,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to reload gift card' });
   }
 };
@@ -235,11 +234,11 @@ export const refundToGiftCardAction = async (req: Request, res: Response): Promi
     res.json({
       success: true,
       message: 'Refund applied to gift card successfully',
-      transaction
+      transaction,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to refund to gift card' });
   }
 };
@@ -253,7 +252,7 @@ export const cancelGiftCardAction = async (req: Request, res: Response): Promise
     res.json({ success: true, message: 'Gift card cancelled successfully' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to cancel gift card' });
   }
 };
@@ -274,11 +273,11 @@ export const checkGiftCardBalance = async (req: Request, res: Response): Promise
       balance: giftCard.currentBalance,
       currency: giftCard.currency,
       status: giftCard.status,
-      expiresAt: giftCard.expiresAt
+      expiresAt: giftCard.expiresAt,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ valid: false, message: 'Failed to check gift card balance' });
   }
 };

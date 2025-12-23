@@ -51,27 +51,27 @@ ORDER BY t.table_name, c.ordinal_position;
 ```javascript
 const dataAssessment = {
   async assessTableSizes(db) {
-    const tables = [
-      'products', 'customers', 'orders', 'categories',
-      'inventory', 'users', 'content', 'media'
-    ];
+    const tables = ['products', 'customers', 'orders', 'categories', 'inventory', 'users', 'content', 'media'];
 
     const results = {};
 
     for (const table of tables) {
       try {
         const count = await db.query(`SELECT COUNT(*) as count FROM ${table}`);
-        const size = await db.query(`
+        const size = await db.query(
+          `
           SELECT
             table_name,
             round(((data_length + index_length) / 1024 / 1024), 2) as size_mb
           FROM information_schema.tables
           WHERE table_name = ?
-        `, [table]);
+        `,
+          [table],
+        );
 
         results[table] = {
           count: count[0].count,
-          sizeMB: size[0]?.size_mb || 0
+          sizeMB: size[0]?.size_mb || 0,
         };
       } catch (error) {
         results[table] = { error: error.message };
@@ -112,7 +112,7 @@ const dataAssessment = {
     `);
 
     return relationships;
-  }
+  },
 };
 ```
 
@@ -129,19 +129,22 @@ class CustomFieldAnalyzer {
       { pattern: '%meta%', description: 'Meta fields' },
       { pattern: '%attribute%', description: 'Attribute fields' },
       { pattern: '%property%', description: 'Property fields' },
-      { pattern: '%option%', description: 'Option fields' }
+      { pattern: '%option%', description: 'Option fields' },
     ];
 
     const results = {};
 
     for (const { pattern, description } of patterns) {
-      const fields = await db.query(`
+      const fields = await db.query(
+        `
         SELECT table_name, column_name, data_type
         FROM information_schema.columns
         WHERE table_schema = DATABASE()
         AND column_name LIKE ?
         ORDER BY table_name, column_name
-      `, [pattern]);
+      `,
+        [pattern],
+      );
 
       if (fields.length > 0) {
         results[description] = fields;
@@ -165,13 +168,16 @@ class CustomFieldAnalyzer {
   }
 
   async sampleJSONContent(db, table, column, limit = 5) {
-    const samples = await db.query(`
+    const samples = await db.query(
+      `
       SELECT ${column} as content
       FROM ${table}
       WHERE ${column} IS NOT NULL
       AND ${column} != ''
       LIMIT ?
-    `, [limit]);
+    `,
+      [limit],
+    );
 
     return samples.map(row => {
       try {
@@ -196,12 +202,12 @@ class APIAnalyzer {
       products: await this.testEndpoint('/api/products'),
       customers: await this.testEndpoint('/api/customers'),
       orders: await this.testEndpoint('/api/orders'),
-      categories: await this.testEndpoint('/api/categories')
+      categories: await this.testEndpoint('/api/categories'),
     };
 
     return {
       available: Object.entries(endpoints).filter(([_, available]) => available),
-      unavailable: Object.entries(endpoints).filter(([_, available]) => !available)
+      unavailable: Object.entries(endpoints).filter(([_, available]) => !available),
     };
   }
 
@@ -229,7 +235,7 @@ class APIAnalyzer {
     return {
       concurrentRequests: concurrency,
       successfulRequests: successCount,
-      rateLimited: concurrency - successCount
+      rateLimited: concurrency - successCount,
     };
   }
 }
@@ -247,35 +253,35 @@ class EntityMapper {
         sourceTable: 'products',
         targetEntity: 'product',
         fieldMappings: {
-          'id': 'productId',
-          'name': 'name',
-          'description': 'description',
-          'price': 'price',
-          'sku': 'sku',
-          'created_at': 'createdAt',
-          'updated_at': 'updatedAt'
+          id: 'productId',
+          name: 'name',
+          description: 'description',
+          price: 'price',
+          sku: 'sku',
+          created_at: 'createdAt',
+          updated_at: 'updatedAt',
         },
         relationships: {
           categories: { table: 'product_categories', fk: 'product_id' },
           images: { table: 'product_images', fk: 'product_id' },
-          variants: { table: 'product_variants', fk: 'product_id' }
-        }
+          variants: { table: 'product_variants', fk: 'product_id' },
+        },
       },
       customers: {
         sourceTable: 'users',
         targetEntity: 'customer',
         fieldMappings: {
-          'id': 'customerId',
-          'email': 'email',
-          'first_name': 'firstName',
-          'last_name': 'lastName',
-          'created_at': 'createdAt'
+          id: 'customerId',
+          email: 'email',
+          first_name: 'firstName',
+          last_name: 'lastName',
+          created_at: 'createdAt',
         },
         relationships: {
           addresses: { table: 'user_addresses', fk: 'user_id' },
-          orders: { table: 'orders', fk: 'customer_id' }
-        }
-      }
+          orders: { table: 'orders', fk: 'customer_id' },
+        },
+      },
     };
   }
 
@@ -351,11 +357,7 @@ class EntityMapper {
         if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
           matrix[i][j] = matrix[i - 1][j - 1];
         } else {
-          matrix[i][j] = Math.min(
-            matrix[i - 1][j - 1] + 1,
-            matrix[i][j - 1] + 1,
-            matrix[i - 1][j] + 1
-          );
+          matrix[i][j] = Math.min(matrix[i - 1][j - 1] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j] + 1);
         }
       }
     }
@@ -372,17 +374,17 @@ class DynamicTransformer {
   constructor(mappingConfig) {
     this.config = mappingConfig;
     this.transformers = {
-      string: (value) => String(value || ''),
-      number: (value) => parseFloat(value) || 0,
-      boolean: (value) => Boolean(value),
-      date: (value) => new Date(value).toISOString(),
-      json: (value) => {
+      string: value => String(value || ''),
+      number: value => parseFloat(value) || 0,
+      boolean: value => Boolean(value),
+      date: value => new Date(value).toISOString(),
+      json: value => {
         try {
           return typeof value === 'string' ? JSON.parse(value) : value;
         } catch (e) {
           return null;
         }
-      }
+      },
     };
   }
 
@@ -469,14 +471,7 @@ class GenericMigrationFramework {
   }
 
   async migrate(entityType, options = {}) {
-    const {
-      batchSize = 1000,
-      concurrency = 3,
-      validate = true,
-      continueOnError = false
-    } = options;
-
-    
+    const { batchSize = 1000, concurrency = 3, validate = true, continueOnError = false } = options;
 
     // Analyze source data
     const sourceSchema = await this.source.analyzeSchema(entityType);
@@ -493,13 +488,7 @@ class GenericMigrationFramework {
       if (batch.length === 0) break;
 
       // Process batch with concurrency control
-      const results = await this.processBatchConcurrently(
-        batch,
-        entityType,
-        mappingConfig,
-        concurrency,
-        validate
-      );
+      const results = await this.processBatchConcurrently(batch, entityType, mappingConfig, concurrency, validate);
 
       migrated += results.successful;
       errors += results.errors;
@@ -520,7 +509,7 @@ class GenericMigrationFramework {
     const results = { successful: 0, errors: 0 };
 
     for (const chunk of chunks) {
-      const promises = chunk.map(async (item) => {
+      const promises = chunk.map(async item => {
         try {
           const transformed = this.transformer.transform(entityType, item);
 
@@ -534,7 +523,6 @@ class GenericMigrationFramework {
           await this.target.load(entityType, transformed);
           return { success: true };
         } catch (error) {
-          
           return { success: false, error };
         }
       });
@@ -599,7 +587,7 @@ class MigrationErrorHandler {
         count: 0,
         samples: [],
         firstSeen: new Date(),
-        lastSeen: new Date()
+        lastSeen: new Date(),
       });
     }
 
@@ -611,7 +599,7 @@ class MigrationErrorHandler {
       errorInfo.samples.push({
         data,
         error: error.message,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
     }
 
@@ -623,7 +611,6 @@ class MigrationErrorHandler {
         return recoveredData;
       } catch (recoveryError) {
         // Recovery failed, log and continue
-        
       }
     }
 
@@ -635,9 +622,9 @@ class MigrationErrorHandler {
       summary: {
         totalErrors: 0,
         uniqueErrorTypes: this.errors.size,
-        generatedAt: new Date()
+        generatedAt: new Date(),
       },
-      errors: []
+      errors: [],
     };
 
     for (const [errorKey, errorInfo] of this.errors) {
@@ -647,7 +634,7 @@ class MigrationErrorHandler {
         count: errorInfo.count,
         firstSeen: errorInfo.firstSeen,
         lastSeen: errorInfo.lastSeen,
-        samples: errorInfo.samples
+        samples: errorInfo.samples,
       });
     }
 
@@ -669,27 +656,27 @@ class DataValidator {
   setupDefaultRules() {
     // Product validation rules
     this.rules.set('product', {
-      name: (value) => value && value.length > 0 && value.length <= 255,
-      price: (value) => typeof value === 'number' && value >= 0,
-      sku: (value) => !value || (typeof value === 'string' && value.length <= 100),
-      description: (value) => !value || typeof value === 'string'
+      name: value => value && value.length > 0 && value.length <= 255,
+      price: value => typeof value === 'number' && value >= 0,
+      sku: value => !value || (typeof value === 'string' && value.length <= 100),
+      description: value => !value || typeof value === 'string',
     });
 
     // Customer validation rules
     this.rules.set('customer', {
-      email: (value) => {
+      email: value => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return value && emailRegex.test(value);
       },
-      firstName: (value) => value && value.length > 0 && value.length <= 100,
-      lastName: (value) => value && value.length > 0 && value.length <= 100
+      firstName: value => value && value.length > 0 && value.length <= 100,
+      lastName: value => value && value.length > 0 && value.length <= 100,
     });
 
     // Order validation rules
     this.rules.set('order', {
-      total: (value) => typeof value === 'number' && value >= 0,
-      customerId: (value) => value && typeof value === 'string',
-      status: (value) => ['pending', 'processing', 'completed', 'cancelled'].includes(value)
+      total: value => typeof value === 'number' && value >= 0,
+      customerId: value => value && typeof value === 'string',
+      status: value => ['pending', 'processing', 'completed', 'cancelled'].includes(value),
     });
   }
 
@@ -717,14 +704,14 @@ class DataValidator {
             errors.push({
               field,
               value: data[field],
-              message: `Validation failed for field ${field}`
+              message: `Validation failed for field ${field}`,
             });
           }
         } catch (error) {
           errors.push({
             field,
             value: data[field],
-            message: `Validation error for field ${field}: ${error.message}`
+            message: `Validation error for field ${field}: ${error.message}`,
           });
         }
       }
@@ -732,7 +719,7 @@ class DataValidator {
 
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 }
@@ -785,7 +772,7 @@ class ParallelProcessor {
     const delay = 1000 / requestsPerSecond;
     let lastRequestTime = 0;
 
-    const rateLimitedProcessor = async (item) => {
+    const rateLimitedProcessor = async item => {
       const now = Date.now();
       const timeSinceLastRequest = now - lastRequestTime;
 
@@ -815,7 +802,7 @@ class MemoryEfficientMigrator {
       batchSize: 1000,
       maxMemoryUsage: 500 * 1024 * 1024, // 500MB
       gcInterval: 10000, // 10 seconds
-      ...options
+      ...options,
     };
 
     this.lastGC = Date.now();
@@ -846,7 +833,6 @@ class MemoryEfficientMigrator {
           transformedData.push(transformed);
         } catch (error) {
           results.errors++;
-          
         }
       }
 
@@ -909,23 +895,21 @@ async function runCustomMigration() {
       host: process.env.SOURCE_DB_HOST,
       database: process.env.SOURCE_DB_NAME,
       username: process.env.SOURCE_DB_USER,
-      password: process.env.SOURCE_DB_PASSWORD
+      password: process.env.SOURCE_DB_PASSWORD,
     },
     target: {
       baseURL: process.env.COMMERCEFULL_URL,
-      apiKey: process.env.COMMERCEFULL_API_KEY
+      apiKey: process.env.COMMERCEFULL_API_KEY,
     },
     options: {
       batchSize: 500,
       concurrency: 3,
       validate: true,
-      continueOnError: true
-    }
+      continueOnError: true,
+    },
   });
 
   try {
-    
-
     // Analyze source system
     await runner.analyzeSource();
 
@@ -948,11 +932,8 @@ async function runCustomMigration() {
     // Phase 5: Content
     await runner.migrate('content');
 
-    
     console.log(runner.generateReport());
-
   } catch (error) {
-    
     console.log('Partial results:', runner.generateReport());
     console.log('Error details:', runner.errorHandler.generateErrorReport());
   }
@@ -972,13 +953,13 @@ const ValidationSuite = {
       products: await this.validateProducts(sourceDb, targetApi),
       customers: await this.validateCustomers(sourceDb, targetApi),
       orders: await this.validateOrders(sourceDb, targetApi),
-      categories: await this.validateCategories(sourceDb, targetApi)
+      categories: await this.validateCategories(sourceDb, targetApi),
     };
 
     return {
       overall: this.calculateOverallScore(results),
       details: results,
-      recommendations: this.generateRecommendations(results)
+      recommendations: this.generateRecommendations(results),
     };
   },
 
@@ -993,7 +974,7 @@ const ValidationSuite = {
       countMatch: sourceCount[0].count === targetCount,
       sourceCount: sourceCount[0].count,
       targetCount,
-      sampleValidation: this.validateSamples(sampleSource, sampleTarget, ['name', 'sku', 'price'])
+      sampleValidation: this.validateSamples(sampleSource, sampleTarget, ['name', 'sku', 'price']),
     };
   },
 
@@ -1012,7 +993,7 @@ const ValidationSuite = {
       results.push({
         index: i,
         allMatch: Object.values(fieldResults).every(match => match),
-        fieldResults
+        fieldResults,
       });
     }
 
@@ -1046,15 +1027,14 @@ const ValidationSuite = {
 
     const failedSamples = Object.entries(results)
       .filter(([_, result]) => result.sampleValidation)
-      .flatMap(([type, result]) => result.sampleValidation.filter(s => !s.allMatch))
-      .length;
+      .flatMap(([type, result]) => result.sampleValidation.filter(s => !s.allMatch)).length;
 
     if (failedSamples > 0) {
       recommendations.push(`${failedSamples} sample records have validation errors - review transformation logic`);
     }
 
     return recommendations;
-  }
+  },
 };
 ```
 

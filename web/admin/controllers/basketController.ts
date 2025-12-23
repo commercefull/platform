@@ -23,16 +23,19 @@ export const listAbandonedCarts = async (req: Request, res: Response): Promise<v
 
     // Calculate recovery potential
     const recoveryPotential = abandonedBaskets.reduce((total, basket) => {
-      return total + basket.items.reduce((itemTotal, item) => {
-        return itemTotal + (item.unitPrice.amount * item.quantity);
-      }, 0);
+      return (
+        total +
+        basket.items.reduce((itemTotal, item) => {
+          return itemTotal + item.unitPrice.amount * item.quantity;
+        }, 0)
+      );
     }, 0);
 
     const stats = {
       totalAbandoned: abandonedBaskets.length,
       totalExpired: expiredBaskets.length,
       recoveryPotential: recoveryPotential,
-      avgCartValue: abandonedBaskets.length > 0 ? recoveryPotential / abandonedBaskets.length : 0
+      avgCartValue: abandonedBaskets.length > 0 ? recoveryPotential / abandonedBaskets.length : 0,
     };
 
     adminRespond(req, res, 'operations/baskets/abandoned', {
@@ -42,12 +45,12 @@ export const listAbandonedCarts = async (req: Request, res: Response): Promise<v
       stats,
       filters: { olderThanDays },
       pagination: { limit, offset },
-      
-      success: req.query.success || null
+
+      success: req.query.success || null,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load abandoned carts',
@@ -71,25 +74,23 @@ export const viewAbandonedCart = async (req: Request, res: Response): Promise<vo
 
     // Calculate cart value
     const cartValue = basket.items.reduce((total, item) => {
-      return total + (item.unitPrice.amount * item.quantity);
+      return total + item.unitPrice.amount * item.quantity;
     }, 0);
 
     // Calculate days since last activity
-    const daysSinceActivity = Math.floor(
-      (Date.now() - basket.lastActivityAt.getTime()) / (1000 * 60 * 60 * 24)
-    );
+    const daysSinceActivity = Math.floor((Date.now() - basket.lastActivityAt.getTime()) / (1000 * 60 * 60 * 24));
 
     adminRespond(req, res, 'operations/baskets/view', {
       pageName: `Abandoned Cart: ${basket.basketId}`,
       basket,
       cartValue,
       daysSinceActivity,
-      
-      success: req.query.success || null
+
+      success: req.query.success || null,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load abandoned cart',
@@ -113,9 +114,9 @@ export const recoverAbandonedCart = async (req: Request, res: Response): Promise
       basketId,
       recoveryMethod,
       message,
-      cartValue: basket.items.reduce((total, item) => total + (item.unitPrice.amount * item.quantity), 0),
+      cartValue: basket.items.reduce((total, item) => total + item.unitPrice.amount * item.quantity, 0),
       customerId: basket.customerId,
-      sessionId: basket.sessionId
+      sessionId: basket.sessionId,
     });
 
     // In a real implementation, you might:
@@ -128,11 +129,11 @@ export const recoverAbandonedCart = async (req: Request, res: Response): Promise
       success: true,
       message: 'Recovery action initiated successfully',
       recoveryMethod,
-      basketId
+      basketId,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to recover abandoned cart' });
   }
 };
@@ -160,18 +161,18 @@ export const sendRecoveryEmail = async (req: Request, res: Response): Promise<vo
       subject,
       discountCode,
       cartItems: basket.items.length,
-      cartValue: basket.items.reduce((total, item) => total + (item.unitPrice.amount * item.quantity), 0)
+      cartValue: basket.items.reduce((total, item) => total + item.unitPrice.amount * item.quantity, 0),
     });
 
     res.json({
       success: true,
       message: 'Recovery email sent successfully',
       basketId,
-      customerId: basket.customerId
+      customerId: basket.customerId,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to send recovery email' });
   }
 };
@@ -181,12 +182,11 @@ export const markCartRecovered = async (req: Request, res: Response): Promise<vo
     const { basketId } = req.params;
 
     // In a real implementation, this would be called when a customer completes purchase from recovered cart
-    
 
     res.json({ success: true, message: 'Cart marked as recovered' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to mark cart as recovered' });
   }
 };
@@ -207,9 +207,12 @@ export const basketAnalytics = async (req: Request, res: Response): Promise<void
 
     // Calculate cart values
     const abandonedValue = abandonedBaskets.reduce((total, basket) => {
-      return total + basket.items.reduce((itemTotal, item) => {
-        return itemTotal + (item.unitPrice.amount * item.quantity);
-      }, 0);
+      return (
+        total +
+        basket.items.reduce((itemTotal, item) => {
+          return itemTotal + item.unitPrice.amount * item.quantity;
+        }, 0)
+      );
     }, 0);
 
     const avgCartValue = totalAbandoned > 0 ? abandonedValue / totalAbandoned : 0;
@@ -226,15 +229,21 @@ export const basketAnalytics = async (req: Request, res: Response): Promise<void
     });
 
     const recentValue = recentAbandoned.reduce((total, basket) => {
-      return total + basket.items.reduce((itemTotal, item) => {
-        return itemTotal + (item.unitPrice.amount * item.quantity);
-      }, 0);
+      return (
+        total +
+        basket.items.reduce((itemTotal, item) => {
+          return itemTotal + item.unitPrice.amount * item.quantity;
+        }, 0)
+      );
     }, 0);
 
     const olderValue = olderAbandoned.reduce((total, basket) => {
-      return total + basket.items.reduce((itemTotal, item) => {
-        return itemTotal + (item.unitPrice.amount * item.quantity);
-      }, 0);
+      return (
+        total +
+        basket.items.reduce((itemTotal, item) => {
+          return itemTotal + item.unitPrice.amount * item.quantity;
+        }, 0)
+      );
     }, 0);
 
     const stats = {
@@ -247,7 +256,7 @@ export const basketAnalytics = async (req: Request, res: Response): Promise<void
       olderAbandoned: olderAbandoned.length,
       recentValue,
       olderValue,
-      topAbandonedProducts: [] // Would need product analytics
+      topAbandonedProducts: [], // Would need product analytics
     };
 
     adminRespond(req, res, 'operations/baskets/analytics', {
@@ -256,7 +265,7 @@ export const basketAnalytics = async (req: Request, res: Response): Promise<void
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load basket analytics',
@@ -277,11 +286,11 @@ export const cleanupExpiredBaskets = async (req: Request, res: Response): Promis
     res.json({
       success: true,
       message: `Successfully cleaned up ${deletedCount} expired baskets`,
-      deletedCount
+      deletedCount,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to cleanup expired baskets' });
   }
 };

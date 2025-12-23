@@ -12,7 +12,7 @@ exports.up = function (knex) {
     t.enum('accessType', ['contentPage', 'category', 'product', 'media', 'download', 'feature']).notNullable();
     t.specificType('accessibleIds', 'uuid[]');
     t.jsonb('conditions');
-    
+
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     t.uuid('createdBy');

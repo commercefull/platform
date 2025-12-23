@@ -43,7 +43,7 @@ export class CreateProductCommand {
     public readonly metaDescription?: string,
     public readonly metaKeywords?: string,
     public readonly tags?: string[],
-    public readonly metadata?: Record<string, any>
+    public readonly metadata?: Record<string, any>,
   ) {}
 }
 
@@ -128,7 +128,7 @@ export class CreateProductUseCase {
       metaDescription: command.metaDescription,
       metaKeywords: command.metaKeywords,
       tags: command.tags,
-      metadata: command.metadata
+      metadata: command.metadata,
     });
 
     // Save product
@@ -140,7 +140,7 @@ export class CreateProductUseCase {
       name: savedProduct.name,
       sku: savedProduct.sku,
       categoryId: savedProduct.categoryId,
-      merchantId: savedProduct.merchantId
+      merchantId: savedProduct.merchantId,
     });
 
     return this.mapToResponse(savedProduct);
@@ -156,7 +156,7 @@ export class CreateProductUseCase {
       visibility: product.visibility,
       basePrice: product.price.basePrice,
       effectivePrice: product.price.effectivePrice,
-      createdAt: product.createdAt.toISOString()
+      createdAt: product.createdAt.toISOString(),
     };
   }
 }

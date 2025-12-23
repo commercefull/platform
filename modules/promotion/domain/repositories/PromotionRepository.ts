@@ -39,9 +39,13 @@ export interface PromotionRepository {
   // Usage tracking
   recordUsage(promotionId: string, customerId: string, orderId: string, discountAmount: number): Promise<void>;
   getCustomerUsageCount(promotionId: string, customerId: string): Promise<number>;
-  
+
   // Validation
-  validateCode(code: string, subtotal: number, customerId?: string): Promise<{
+  validateCode(
+    code: string,
+    subtotal: number,
+    customerId?: string,
+  ): Promise<{
     valid: boolean;
     promotion?: Promotion;
     discount?: number;

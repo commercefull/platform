@@ -9,7 +9,11 @@ exports.up = function (knex) {
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     t.uuid('productId').notNullable().references('productId').inTable('product').onDelete('CASCADE');
     t.uuid('productVariantId').references('productVariantId').inTable('productVariant').onDelete('CASCADE');
-    t.uuid('distributionWarehouseId').notNullable().references('distributionWarehouseId').inTable('distributionWarehouse').onDelete('CASCADE');
+    t.uuid('distributionWarehouseId')
+      .notNullable()
+      .references('distributionWarehouseId')
+      .inTable('distributionWarehouse')
+      .onDelete('CASCADE');
     t.uuid('distributionWarehouseBinId').references('distributionWarehouseBinId').inTable('distributionWarehouseBin');
     t.string('lotNumber', 100).notNullable();
     t.specificType('serialNumbers', 'text[]');
@@ -22,7 +26,7 @@ exports.up = function (knex) {
     t.uuid('supplierPurchaseOrderId').references('supplierPurchaseOrderId').inTable('supplierPurchaseOrder');
     t.enum('status', ['available', 'reserved', 'allocated', 'quarantine', 'expired', 'consumed']).notNullable().defaultTo('available');
     t.decimal('cost', 15, 2);
-    
+
     t.uuid('createdBy');
     t.index('productId');
     t.index('productVariantId');

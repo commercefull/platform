@@ -7,7 +7,7 @@
 const SUBSCRIPTION_PRODUCT_IDS = {
   MONTHLY_BOX: '01937000-0000-7000-8000-000000000001',
   WEEKLY_DELIVERY: '01937000-0000-7000-8000-000000000002',
-  ANNUAL_MEMBERSHIP: '01937000-0000-7000-8000-000000000003'
+  ANNUAL_MEMBERSHIP: '01937000-0000-7000-8000-000000000003',
 };
 
 const SUBSCRIPTION_PLAN_IDS = {
@@ -15,28 +15,28 @@ const SUBSCRIPTION_PLAN_IDS = {
   MONTHLY_BOX_PREMIUM: '01937001-0000-7000-8000-000000000002',
   WEEKLY_DELIVERY_STANDARD: '01937001-0000-7000-8000-000000000003',
   ANNUAL_MEMBERSHIP_BASIC: '01937001-0000-7000-8000-000000000004',
-  ANNUAL_MEMBERSHIP_VIP: '01937001-0000-7000-8000-000000000005'
+  ANNUAL_MEMBERSHIP_VIP: '01937001-0000-7000-8000-000000000005',
 };
 
 const CUSTOMER_SUBSCRIPTION_IDS = {
   ACTIVE_MONTHLY: '01937002-0000-7000-8000-000000000001',
   PAUSED_WEEKLY: '01937002-0000-7000-8000-000000000002',
-  CANCELLED_ANNUAL: '01937002-0000-7000-8000-000000000003'
+  CANCELLED_ANNUAL: '01937002-0000-7000-8000-000000000003',
 };
 
 // We need a product ID - use a fixed one that should exist from product seeds
 const TEST_PRODUCT_ID = '01912000-0000-7000-8000-000000000001';
 const TEST_CUSTOMER_ID = '01911000-0000-7000-8000-000000000001';
 
-exports.seed = async function(knex) {
+exports.seed = async function (knex) {
   // Check if test product exists, if not skip seeding
   const productExists = await knex('product').where('productId', TEST_PRODUCT_ID).first();
-  
+
   if (!productExists) {
     console.log('Skipping subscription seed - test product does not exist (productId:', TEST_PRODUCT_ID, ')');
     return;
   }
-  
+
   // Clean up existing test data
   await knex('subscriptionPause').whereIn('customerSubscriptionId', Object.values(CUSTOMER_SUBSCRIPTION_IDS)).del();
   await knex('subscriptionOrder').whereIn('customerSubscriptionId', Object.values(CUSTOMER_SUBSCRIPTION_IDS)).del();
@@ -46,9 +46,7 @@ exports.seed = async function(knex) {
 
   // Seed Subscription Products with existence checks
   for (const [key, subProductId] of Object.entries(SUBSCRIPTION_PRODUCT_IDS)) {
-    const existingSubProduct = await knex('subscriptionProduct')
-      .where('subscriptionProductId', subProductId)
-      .first();
+    const existingSubProduct = await knex('subscriptionProduct').where('subscriptionProductId', subProductId).first();
 
     if (!existingSubProduct) {
       let productData;
@@ -73,7 +71,7 @@ exports.seed = async function(knex) {
           cancelNoticeDays: 0,
           autoRenew: true,
           renewalReminderDays: 7,
-          isActive: true
+          isActive: true,
         };
       } else if (key === 'WEEKLY_DELIVERY') {
         productData = {
@@ -95,7 +93,7 @@ exports.seed = async function(knex) {
           cancelNoticeDays: 7,
           autoRenew: true,
           renewalReminderDays: 3,
-          isActive: true
+          isActive: true,
         };
       } else if (key === 'ANNUAL_MEMBERSHIP') {
         productData = {
@@ -112,10 +110,10 @@ exports.seed = async function(knex) {
           allowSkip: false,
           allowEarlyCancel: true,
           cancelNoticeDays: 30,
-          earlyTerminationFee: 50.00,
+          earlyTerminationFee: 50.0,
           autoRenew: true,
           renewalReminderDays: 30,
-          isActive: true
+          isActive: true,
         };
       }
 
@@ -126,9 +124,7 @@ exports.seed = async function(knex) {
   // Seed Subscription Plans with existence checks
   const plansToInsert = [];
   for (const [key, planId] of Object.entries(SUBSCRIPTION_PLAN_IDS)) {
-    const existingPlan = await knex('subscriptionPlan')
-      .where('subscriptionPlanId', planId)
-      .first();
+    const existingPlan = await knex('subscriptionPlan').where('subscriptionPlanId', planId).first();
 
     if (!existingPlan) {
       let planData;
@@ -153,7 +149,7 @@ exports.seed = async function(knex) {
           features: JSON.stringify(['5 items per box', 'Free returns', 'Cancel anytime']),
           sortOrder: 1,
           isPopular: false,
-          isActive: true
+          isActive: true,
         };
       } else if (key === 'MONTHLY_BOX_PREMIUM') {
         planData = {
@@ -176,7 +172,7 @@ exports.seed = async function(knex) {
           features: JSON.stringify(['10 items per box', 'Free shipping', 'Priority support', 'Exclusive items']),
           sortOrder: 2,
           isPopular: true,
-          isActive: true
+          isActive: true,
         };
       } else if (key === 'WEEKLY_DELIVERY_STANDARD') {
         planData = {
@@ -189,7 +185,7 @@ exports.seed = async function(knex) {
           billingIntervalCount: 1,
           price: 19.99,
           currency: 'USD',
-          setupFee: 5.00,
+          setupFee: 5.0,
           trialDays: 7,
           contractLength: 4,
           isContractRequired: true,
@@ -199,7 +195,7 @@ exports.seed = async function(knex) {
           features: JSON.stringify(['Weekly delivery', 'Fresh products', 'Flexible scheduling']),
           sortOrder: 1,
           isPopular: false,
-          isActive: true
+          isActive: true,
         };
       } else if (key === 'ANNUAL_MEMBERSHIP_BASIC') {
         planData = {
@@ -223,7 +219,7 @@ exports.seed = async function(knex) {
           features: JSON.stringify(['All basic features', '20% discount on orders', 'Free shipping']),
           sortOrder: 1,
           isPopular: false,
-          isActive: true
+          isActive: true,
         };
       } else if (key === 'ANNUAL_MEMBERSHIP_VIP') {
         planData = {
@@ -244,10 +240,16 @@ exports.seed = async function(knex) {
           discountPercent: 30,
           discountAmount: 0,
           includesFreeShipping: true,
-          features: JSON.stringify(['All VIP features', '30% discount on orders', 'Free express shipping', 'Early access', 'Exclusive events']),
+          features: JSON.stringify([
+            'All VIP features',
+            '30% discount on orders',
+            'Free express shipping',
+            'Early access',
+            'Exclusive events',
+          ]),
           sortOrder: 2,
           isPopular: true,
-          isActive: true
+          isActive: true,
         };
       }
 
@@ -263,7 +265,7 @@ exports.seed = async function(knex) {
 
   // Check if test customer exists before creating subscriptions
   const customerExists = await knex('customer').where('customerId', TEST_CUSTOMER_ID).first();
-  
+
   if (customerExists) {
     // Seed Customer Subscriptions with existence checks
     const subscriptionsToInsert = [];
@@ -274,9 +276,7 @@ exports.seed = async function(knex) {
     lastMonth.setMonth(lastMonth.getMonth() - 1);
 
     for (const [key, subId] of Object.entries(CUSTOMER_SUBSCRIPTION_IDS)) {
-      const existingSubscription = await knex('customerSubscription')
-        .where('customerSubscriptionId', subId)
-        .first();
+      const existingSubscription = await knex('customerSubscription').where('customerSubscriptionId', subId).first();
 
       if (!existingSubscription) {
         let subscriptionData;
@@ -291,7 +291,7 @@ exports.seed = async function(knex) {
             quantity: 1,
             unitPrice: 49.99,
             discountAmount: 0,
-            taxAmount: 4.00,
+            taxAmount: 4.0,
             totalPrice: 53.99,
             currency: 'USD',
             billingInterval: 'month',
@@ -304,7 +304,7 @@ exports.seed = async function(knex) {
             skipCount: 0,
             billingCycleCount: 3,
             lifetimeValue: 161.97,
-            failedPaymentCount: 0
+            failedPaymentCount: 0,
           };
         } else if (key === 'PAUSED_WEEKLY') {
           subscriptionData = {
@@ -317,7 +317,7 @@ exports.seed = async function(knex) {
             quantity: 1,
             unitPrice: 19.99,
             discountAmount: 0,
-            taxAmount: 1.60,
+            taxAmount: 1.6,
             totalPrice: 21.59,
             currency: 'USD',
             billingInterval: 'week',
@@ -331,7 +331,7 @@ exports.seed = async function(knex) {
             skipCount: 0,
             billingCycleCount: 8,
             lifetimeValue: 172.72,
-            failedPaymentCount: 0
+            failedPaymentCount: 0,
           };
         } else if (key === 'CANCELLED_ANNUAL') {
           subscriptionData = {
@@ -344,7 +344,7 @@ exports.seed = async function(knex) {
             quantity: 1,
             unitPrice: 99.99,
             discountAmount: 0,
-            taxAmount: 8.00,
+            taxAmount: 8.0,
             totalPrice: 107.99,
             currency: 'USD',
             billingInterval: 'year',
@@ -359,7 +359,7 @@ exports.seed = async function(knex) {
             skipCount: 0,
             billingCycleCount: 1,
             lifetimeValue: 107.99,
-            failedPaymentCount: 0
+            failedPaymentCount: 0,
           };
         }
 
@@ -372,8 +372,6 @@ exports.seed = async function(knex) {
     if (subscriptionsToInsert.length > 0) {
       await knex('customerSubscription').insert(subscriptionsToInsert);
     }
-
-    
   } else {
     console.log('Subscription products and plans seeded (no customer subscriptions - test customer not found)');
   }

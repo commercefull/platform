@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { 
+import {
   getAllTaxRates,
   getTaxRate,
   createTaxRate,
@@ -14,7 +14,7 @@ import {
   getTaxZoneById,
   createTaxZone,
   updateTaxZone,
-  deleteTaxZone
+  deleteTaxZone,
 } from './controllers/taxBusinessController';
 import { isMerchantLoggedIn } from '../../libs/auth';
 

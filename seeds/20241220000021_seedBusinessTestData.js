@@ -9,7 +9,7 @@ const tableName = 'business';
 const TEST_BUSINESS_IDS = {
   MULTI_STORE: '10000000-0000-0000-0000-000000000001',
   SINGLE_STORE: '10000000-0000-0000-0000-000000000002',
-  MARKETPLACE: '10000000-0000-0000-0000-000000000003'
+  MARKETPLACE: '10000000-0000-0000-0000-000000000003',
 };
 
 exports.seed = async function (knex) {
@@ -33,7 +33,7 @@ exports.seed = async function (knex) {
       timezone: 'America/New_York',
       isActive: true,
       createdAt: knex.fn.now(),
-      updatedAt: knex.fn.now()
+      updatedAt: knex.fn.now(),
     },
     {
       businessId: TEST_BUSINESS_IDS.SINGLE_STORE,
@@ -49,7 +49,7 @@ exports.seed = async function (knex) {
       timezone: 'America/Toronto',
       isActive: true,
       createdAt: knex.fn.now(),
-      updatedAt: knex.fn.now()
+      updatedAt: knex.fn.now(),
     },
     {
       businessId: TEST_BUSINESS_IDS.MARKETPLACE,
@@ -65,7 +65,7 @@ exports.seed = async function (knex) {
       timezone: 'Europe/Berlin',
       isActive: true,
       createdAt: knex.fn.now(),
-      updatedAt: knex.fn.now()
-    }
+      updatedAt: knex.fn.now(),
+    },
   ]);
 };

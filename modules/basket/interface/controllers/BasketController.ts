@@ -26,9 +26,15 @@ import {
   SetItemAsGiftCommand,
   SetItemAsGiftUseCase,
   ExtendExpirationCommand,
-  ExtendExpirationUseCase
+  ExtendExpirationUseCase,
 } from '../../application/useCases';
-import { BasketNotFoundError, BasketItemNotFoundError, InvalidExpirationDaysError, BasketNotActiveError, BasketExpiredError } from '../../domain/errors/BasketErrors';
+import {
+  BasketNotFoundError,
+  BasketItemNotFoundError,
+  InvalidExpirationDaysError,
+  BasketNotActiveError,
+  BasketExpiredError,
+} from '../../domain/errors/BasketErrors';
 
 // ============================================================================
 // Response Mappers
@@ -51,12 +57,12 @@ function mapBasketToResponse(basket: Basket): BasketResponse {
       unitPrice: item.unitPrice.amount,
       lineTotal: item.lineTotal.amount,
       imageUrl: item.imageUrl,
-      isGift: item.isGift
+      isGift: item.isGift,
     })),
     itemCount: basket.itemCount,
     subtotal: basket.subtotal.amount,
     createdAt: basket.createdAt.toISOString(),
-    updatedAt: basket.updatedAt.toISOString()
+    updatedAt: basket.updatedAt.toISOString(),
   };
 }
 
@@ -65,7 +71,7 @@ function mapBasketToSummary(basket: Basket): { basketId: string; itemCount: numb
     basketId: basket.basketId,
     itemCount: basket.itemCount,
     subtotal: basket.subtotal.amount,
-    currency: basket.currency
+    currency: basket.currency,
   };
 }
 
@@ -78,13 +84,7 @@ type ResponseData = Record<string, any>;
 /**
  * Respond with JSON or HTML based on Accept header
  */
-function respond(
-  req: Request,
-  res: Response,
-  data: ResponseData,
-  statusCode: number = 200,
-  htmlTemplate?: string
-): void {
+function respond(req: Request, res: Response, data: ResponseData, statusCode: number = 200, htmlTemplate?: string): void {
   const acceptHeader = req.get('Accept') || 'application/json';
 
   if (acceptHeader.includes('text/html') && htmlTemplate) {
@@ -99,13 +99,7 @@ function respond(
 /**
  * Respond with error in JSON or HTML based on Accept header
  */
-function respondError(
-  req: Request,
-  res: Response,
-  message: string,
-  statusCode: number = 500,
-  htmlTemplate?: string
-): void {
+function respondError(req: Request, res: Response, message: string, statusCode: number = 500, htmlTemplate?: string): void {
   const acceptHeader = req.get('Accept') || 'application/json';
 
   if (acceptHeader.includes('text/html') && htmlTemplate) {
@@ -141,7 +135,7 @@ export const getOrCreateBasket = async (req: Request, res: Response): Promise<vo
     respond(req, res, basket, 200, 'basket/view');
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     respondError(req, res, error.message || 'Failed to get or create basket', 500, 'basket/error');
   }
 };
@@ -164,7 +158,7 @@ export const getBasket = async (req: Request, res: Response): Promise<void> => {
     respond(req, res, mapBasketToResponse(basket), 200, 'basket/view');
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     respondError(req, res, error.message || 'Failed to get basket', 500, 'basket/error');
   }
 };
@@ -187,7 +181,7 @@ export const getBasketSummary = async (req: Request, res: Response): Promise<voi
     respond(req, res, mapBasketToSummary(basket), 200, 'basket/summary');
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     respondError(req, res, error.message || 'Failed to get basket summary', 500, 'basket/error');
   }
 };
@@ -222,7 +216,7 @@ export const addItem = async (req: Request, res: Response): Promise<void> => {
       productVariantId,
       imageUrl,
       attributes,
-      itemType || 'physical'
+      itemType || 'physical',
     );
 
     const useCase = new AddItemUseCase(BasketRepo);
@@ -231,7 +225,7 @@ export const addItem = async (req: Request, res: Response): Promise<void> => {
     respond(req, res, basket, 201, 'basket/view');
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     respondError(req, res, error.message || 'Failed to add item to basket', 500, 'basket/error');
   }
 };
@@ -257,7 +251,7 @@ export const updateItemQuantity = async (req: Request, res: Response): Promise<v
     respond(req, res, basket, 200, 'basket/view');
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     respondError(req, res, error.message || 'Failed to update item quantity', 500, 'basket/error');
   }
 };
@@ -277,7 +271,7 @@ export const removeItem = async (req: Request, res: Response): Promise<void> => 
     respond(req, res, basket, 200, 'basket/view');
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     if (error instanceof BasketNotFoundError || error instanceof BasketItemNotFoundError) {
       respondError(req, res, error.message, error.statusCode, 'basket/error');
       return;
@@ -301,7 +295,7 @@ export const clearBasket = async (req: Request, res: Response): Promise<void> =>
     respond(req, res, basket, 200, 'basket/view');
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     if (error.message === 'Basket not found') {
       respondError(req, res, 'Basket not found', 404, 'basket/error');
       return;
@@ -331,7 +325,7 @@ export const getMyBasket = async (req: Request, res: Response): Promise<void> =>
     respond(req, res, basket, 200, 'basket/view');
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     respondError(req, res, error.message || 'Failed to get basket', 500, 'basket/error');
   }
 };
@@ -356,7 +350,7 @@ export const mergeBaskets = async (req: Request, res: Response): Promise<void> =
     respond(req, res, basket, 200, 'basket/view');
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     if (error instanceof BasketNotFoundError || error instanceof BasketNotActiveError || error instanceof BasketExpiredError) {
       respondError(req, res, error.message, error.statusCode, 'basket/error');
       return;
@@ -386,7 +380,7 @@ export const assignToCustomer = async (req: Request, res: Response): Promise<voi
     respond(req, res, basket, 200, 'basket/view');
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     if (error.message === 'Basket not found') {
       respondError(req, res, 'Basket not found', 404, 'basket/error');
       return;
@@ -411,7 +405,7 @@ export const setItemAsGift = async (req: Request, res: Response): Promise<void> 
     respond(req, res, basket, 200, 'basket/view');
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     if (error.message === 'Basket not found' || error.message === 'Item not found in basket') {
       respondError(req, res, error.message, 404, 'basket/error');
       return;
@@ -436,7 +430,7 @@ export const extendExpiration = async (req: Request, res: Response): Promise<voi
     respond(req, res, basket, 200, 'basket/view');
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     if (error instanceof BasketNotFoundError || error instanceof InvalidExpirationDaysError) {
       respondError(req, res, error.message, error.statusCode, 'basket/error');
       return;
@@ -464,7 +458,7 @@ export const deleteBasket = async (req: Request, res: Response): Promise<void> =
     respond(req, res, { message: 'Basket deleted successfully' }, 200, 'basket/view');
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     respondError(req, res, error.message || 'Failed to delete basket', 500, 'basket/error');
   }
 };

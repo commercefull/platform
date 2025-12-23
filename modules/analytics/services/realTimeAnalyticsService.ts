@@ -26,7 +26,6 @@
  */
 export function initializeAnalyticsWebSocket(server: any) {
   // Placeholder - WebSocket implementation would go here
-  
 }
 
 /**
@@ -34,7 +33,6 @@ export function initializeAnalyticsWebSocket(server: any) {
  */
 export function stopAnalyticsWebSocket() {
   // Placeholder - WebSocket cleanup would go here
-  
 }
 
 /**
@@ -43,7 +41,6 @@ export function stopAnalyticsWebSocket() {
  */
 export function broadcastAnalyticsEvent(eventType: string, data: any) {
   // Placeholder - WebSocket broadcasting would go here
-  
 }
 
 /**
@@ -53,7 +50,7 @@ export function getWebSocketStatus() {
   return {
     isRunning: false, // TODO: Implement WebSocket status
     connectedClients: 0,
-    broadcastInterval: 30000
+    broadcastInterval: 30000,
   };
 }
 
@@ -63,5 +60,4 @@ export function getWebSocketStatus() {
  */
 export async function forceBroadcast() {
   // Placeholder - force broadcast would go here
-  
 }

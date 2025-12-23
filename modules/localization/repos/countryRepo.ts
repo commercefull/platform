@@ -14,40 +14,28 @@ export class CountryRepo {
    * Find country by ID
    */
   async findById(countryId: string): Promise<Country | null> {
-    return await queryOne<Country>(
-      `SELECT * FROM "${Table.Country}" WHERE "countryId" = $1`,
-      [countryId]
-    );
+    return await queryOne<Country>(`SELECT * FROM "${Table.Country}" WHERE "countryId" = $1`, [countryId]);
   }
 
   /**
    * Find country by code (ISO 2-letter)
    */
   async findByCode(code: string): Promise<Country | null> {
-    return await queryOne<Country>(
-      `SELECT * FROM "${Table.Country}" WHERE "code" = $1`,
-      [code.toUpperCase()]
-    );
+    return await queryOne<Country>(`SELECT * FROM "${Table.Country}" WHERE "code" = $1`, [code.toUpperCase()]);
   }
 
   /**
    * Find country by alpha3 code (ISO 3-letter)
    */
   async findByAlpha3Code(alpha3Code: string): Promise<Country | null> {
-    return await queryOne<Country>(
-      `SELECT * FROM "${Table.Country}" WHERE "alpha3Code" = $1`,
-      [alpha3Code.toUpperCase()]
-    );
+    return await queryOne<Country>(`SELECT * FROM "${Table.Country}" WHERE "alpha3Code" = $1`, [alpha3Code.toUpperCase()]);
   }
 
   /**
    * Find country by numeric code
    */
   async findByNumericCode(numericCode: number): Promise<Country | null> {
-    return await queryOne<Country>(
-      `SELECT * FROM "${Table.Country}" WHERE "numericCode" = $1`,
-      [numericCode]
-    );
+    return await queryOne<Country>(`SELECT * FROM "${Table.Country}" WHERE "numericCode" = $1`, [numericCode]);
   }
 
   /**
@@ -55,13 +43,13 @@ export class CountryRepo {
    */
   async findAll(activeOnly: boolean = false): Promise<Country[]> {
     let sql = `SELECT * FROM "${Table.Country}"`;
-    
+
     if (activeOnly) {
       sql += ` WHERE "isActive" = true`;
     }
-    
+
     sql += ` ORDER BY "name" ASC`;
-    
+
     const results = await query<Country[]>(sql);
     return results || [];
   }
@@ -72,13 +60,13 @@ export class CountryRepo {
   async findByRegion(region: string, activeOnly: boolean = true): Promise<Country[]> {
     let sql = `SELECT * FROM "${Table.Country}" WHERE "region" = $1`;
     const params: any[] = [region];
-    
+
     if (activeOnly) {
       sql += ` AND "isActive" = true`;
     }
-    
+
     sql += ` ORDER BY "name" ASC`;
-    
+
     const results = await query<Country[]>(sql, params);
     return results || [];
   }
@@ -89,13 +77,13 @@ export class CountryRepo {
   async findByCurrency(currencyId: string, activeOnly: boolean = true): Promise<Country[]> {
     let sql = `SELECT * FROM "${Table.Country}" WHERE "defaultCurrencyId" = $1`;
     const params: any[] = [currencyId];
-    
+
     if (activeOnly) {
       sql += ` AND "isActive" = true`;
     }
-    
+
     sql += ` ORDER BY "name" ASC`;
-    
+
     const results = await query<Country[]>(sql, params);
     return results || [];
   }
@@ -106,13 +94,13 @@ export class CountryRepo {
   async search(searchTerm: string, activeOnly: boolean = true): Promise<Country[]> {
     let sql = `SELECT * FROM "${Table.Country}" WHERE "name" ILIKE $1`;
     const params: any[] = [`%${searchTerm}%`];
-    
+
     if (activeOnly) {
       sql += ` AND "isActive" = true`;
     }
-    
+
     sql += ` ORDER BY "name" ASC`;
-    
+
     const results = await query<Country[]>(sql, params);
     return results || [];
   }
@@ -146,8 +134,8 @@ export class CountryRepo {
         params.flagIcon || null,
         params.region || null,
         now,
-        now
-      ]
+        now,
+      ],
     );
 
     if (!result) {
@@ -190,7 +178,7 @@ export class CountryRepo {
        SET ${updateFields.join(', ')}
        WHERE "countryId" = $${paramIndex}
        RETURNING *`,
-      values
+      values,
     );
 
     return result;
@@ -214,10 +202,9 @@ export class CountryRepo {
    * Delete country
    */
   async delete(countryId: string): Promise<boolean> {
-    const result = await queryOne<{ countryId: string }>(
-      `DELETE FROM "${Table.Country}" WHERE "countryId" = $1 RETURNING "countryId"`,
-      [countryId]
-    );
+    const result = await queryOne<{ countryId: string }>(`DELETE FROM "${Table.Country}" WHERE "countryId" = $1 RETURNING "countryId"`, [
+      countryId,
+    ]);
 
     return !!result;
   }
@@ -227,11 +214,11 @@ export class CountryRepo {
    */
   async count(activeOnly: boolean = false): Promise<number> {
     let sql = `SELECT COUNT(*) as count FROM "${Table.Country}"`;
-    
+
     if (activeOnly) {
       sql += ` WHERE "isActive" = true`;
     }
-    
+
     const result = await queryOne<{ count: string }>(sql);
 
     return result ? parseInt(result.count, 10) : 0;
@@ -245,7 +232,7 @@ export class CountryRepo {
       `SELECT DISTINCT "region" FROM "${Table.Country}" 
        WHERE "region" IS NOT NULL 
        ORDER BY "region" ASC`,
-      []
+      [],
     );
 
     return results ? results.map(r => r.region) : [];
@@ -267,7 +254,7 @@ export class CountryRepo {
        FROM "${Table.Country}" 
        WHERE "region" IS NOT NULL 
        GROUP BY "region"`,
-      []
+      [],
     );
 
     const byRegion: Record<string, number> = {};
@@ -280,7 +267,7 @@ export class CountryRepo {
     return {
       total,
       active,
-      byRegion
+      byRegion,
     };
   }
 }

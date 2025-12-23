@@ -36,10 +36,7 @@ export class CreateInventoryItemUseCase {
     }
 
     // Check for duplicate SKU in same warehouse
-    const existing = await this.inventoryRepository.findBySkuAndWarehouse(
-      input.sku,
-      input.warehouseId
-    );
+    const existing = await this.inventoryRepository.findBySkuAndWarehouse(input.sku, input.warehouseId);
     if (existing) {
       throw new Error(`Inventory item with SKU ${input.sku} already exists in this warehouse`);
     }

@@ -2,8 +2,8 @@
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.up = function(knex) {
-  return knex.schema.createTable('supportAgent', function(table) {
+exports.up = function (knex) {
+  return knex.schema.createTable('supportAgent', function (table) {
     table.uuid('supportAgentId').primary().defaultTo(knex.raw('uuidv7()'));
     table.string('email').unique().notNullable();
     table.string('firstName').notNullable();
@@ -30,7 +30,7 @@ exports.up = function(knex) {
     table.timestamp('lastActiveAt');
     table.timestamp('createdAt').defaultTo(knex.fn.now());
     table.timestamp('updatedAt').defaultTo(knex.fn.now());
-    
+
     table.index('email');
     table.index('isActive');
     table.index('department');
@@ -41,6 +41,6 @@ exports.up = function(knex) {
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTableIfExists('supportAgent');
 };

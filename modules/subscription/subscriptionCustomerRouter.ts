@@ -21,7 +21,7 @@ import {
   reactivateMySubscription,
   // Billing
   getMySubscriptionOrders,
-  skipNextDelivery
+  skipNextDelivery,
 } from './controllers/subscriptionCustomerController';
 
 const router = Router();

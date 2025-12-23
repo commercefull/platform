@@ -1,6 +1,6 @@
 /**
  * CancelMembership Use Case
- * 
+ *
  * Cancels a customer's membership.
  */
 
@@ -47,12 +47,12 @@ export class CancelMembershipUseCase {
     if (immediate) {
       // Immediate cancellation
       effectiveEndDate = now;
-      
+
       // Calculate potential refund for unused period
       if (membership.currentPeriodEnd) {
         const periodEnd = new Date(membership.currentPeriodEnd);
         const daysRemaining = Math.max(0, Math.ceil((periodEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
-        
+
         if (daysRemaining > 0) {
           const tier = await this.membershipRepository.getTierById(membership.tierId);
           const daysInPeriod = membership.billingPeriod === 'monthly' ? 30 : membership.billingPeriod === 'quarterly' ? 90 : 365;
@@ -72,7 +72,7 @@ export class CancelMembershipUseCase {
     } else {
       // Cancel at end of billing period
       effectiveEndDate = membership.currentPeriodEnd ? new Date(membership.currentPeriodEnd) : now;
-      
+
       await this.membershipRepository.updateMembership(membershipId, {
         status: 'pending_cancellation',
         scheduledCancellationDate: effectiveEndDate,

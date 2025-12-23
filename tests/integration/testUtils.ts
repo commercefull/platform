@@ -16,10 +16,10 @@ export const createTestClient = (baseURL: string = 'http://localhost:3000'): Axi
     validateStatus: () => true, // Don't throw HTTP errors so we can test them
     timeout: 10000, // 10 second timeout to prevent hanging
     headers: {
-      'Accept': 'application/json',
+      Accept: 'application/json',
       'Content-Type': 'application/json',
-      'X-Test-Request': 'true' // Skip rate limiting for test requests
-    }
+      'X-Test-Request': 'true', // Skip rate limiting for test requests
+    },
   });
 };
 
@@ -27,33 +27,36 @@ export const createTestClient = (baseURL: string = 'http://localhost:3000'): Axi
  * Test authentication helper - logs in a test user and returns auth token
  * Uses caching to avoid repeated login calls
  */
-export const loginTestUser = async (client: AxiosInstance, email: string = 'testcustomer@example.com', password: string = 'password123'): Promise<string> => {
+export const loginTestUser = async (
+  client: AxiosInstance,
+  email: string = 'testcustomer@example.com',
+  password: string = 'password123',
+): Promise<string> => {
   // Return cached token if valid
   if (cachedCustomerToken && Date.now() - customerTokenCacheTime < TOKEN_CACHE_TTL) {
     return cachedCustomerToken;
   }
 
-  
-
   try {
-    const response = await client.post('/customer/identity/login', {
-      email,
-      password,
-    }, {
-      headers: { 'X-Test-Request': 'true' }
-    });
-
-    
+    const response = await client.post(
+      '/customer/identity/login',
+      {
+        email,
+        password,
+      },
+      {
+        headers: { 'X-Test-Request': 'true' },
+      },
+    );
 
     if (response.status !== 200 || !response.data?.accessToken) {
-      
       // Return empty string instead of throwing to prevent cascade failures
       return '';
     }
 
     cachedCustomerToken = response.data.accessToken;
     customerTokenCacheTime = Date.now();
-    
+
     return response.data.accessToken;
   } catch (error: any) {
     console.error('❌ Customer login error (server may not be running):', error.message);
@@ -71,26 +74,25 @@ export const loginTestAdmin = async (client: AxiosInstance): Promise<string> => 
     return cachedAdminToken;
   }
 
-  
-
   try {
-    const response = await client.post('/business/auth/login', {
-      email: 'merchant@example.com',
-      password: 'password123',
-    }, {
-      headers: { 'X-Test-Request': 'true' }
-    });
-
-    
+    const response = await client.post(
+      '/business/auth/login',
+      {
+        email: 'merchant@example.com',
+        password: 'password123',
+      },
+      {
+        headers: { 'X-Test-Request': 'true' },
+      },
+    );
 
     if (response.status !== 200 || !response.data?.accessToken) {
-      
       return '';
     }
 
     cachedAdminToken = response.data.accessToken;
     adminTokenCacheTime = Date.now();
-    
+
     return response.data.accessToken;
   } catch (error: any) {
     console.error('❌ Merchant login error (server may not be running):', error.message);
@@ -112,7 +114,10 @@ export const clearTokenCache = (): void => {
  * Debug helper to check current token status
  */
 export const debugTokens = (): void => {
-  
-  console.log(`  Admin token: ${cachedAdminToken ? '✅ cached' : '❌ none'} (${cachedAdminToken ? new Date(adminTokenCacheTime).toISOString() : 'never'})`);
-  console.log(`  Customer token: ${cachedCustomerToken ? '✅ cached' : '❌ none'} (${cachedCustomerToken ? new Date(customerTokenCacheTime).toISOString() : 'never'})`);
+  console.log(
+    `  Admin token: ${cachedAdminToken ? '✅ cached' : '❌ none'} (${cachedAdminToken ? new Date(adminTokenCacheTime).toISOString() : 'never'})`,
+  );
+  console.log(
+    `  Customer token: ${cachedCustomerToken ? '✅ cached' : '❌ none'} (${cachedCustomerToken ? new Date(customerTokenCacheTime).toISOString() : 'never'})`,
+  );
 };

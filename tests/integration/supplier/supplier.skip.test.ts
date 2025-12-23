@@ -6,7 +6,7 @@ describe('Supplier Feature Tests', () => {
   let adminToken: string;
   const createdResources = {
     supplierIds: [] as string[],
-    poIds: [] as string[]
+    poIds: [] as string[],
   };
 
   beforeAll(async () => {
@@ -30,7 +30,7 @@ describe('Supplier Feature Tests', () => {
       const supplierData = createTestSupplier();
 
       const response = await client.post('/business/suppliers', supplierData, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
 
       expect(response.status).toBe(201);
@@ -43,7 +43,7 @@ describe('Supplier Feature Tests', () => {
 
     it('UC-SUP-001: should list suppliers', async () => {
       const response = await client.get('/business/suppliers', {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
 
       expect(response.status).toBe(200);
@@ -53,7 +53,7 @@ describe('Supplier Feature Tests', () => {
 
     it('UC-SUP-002: should get a specific supplier', async () => {
       const response = await client.get(`/business/suppliers/${testSupplierId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
 
       expect(response.status).toBe(200);
@@ -65,7 +65,7 @@ describe('Supplier Feature Tests', () => {
       const updateData = { leadTime: 10 };
 
       const response = await client.put(`/business/suppliers/${testSupplierId}`, updateData, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
 
       expect(response.status).toBe(200);
@@ -83,7 +83,7 @@ describe('Supplier Feature Tests', () => {
     beforeAll(async () => {
       const supplierData = createTestSupplier();
       const response = await client.post('/business/suppliers', supplierData, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
       testSupplierId = response.data.data.supplierId;
       createdResources.supplierIds.push(testSupplierId);
@@ -91,7 +91,7 @@ describe('Supplier Feature Tests', () => {
 
     it('UC-SUP-006: should list supplier products', async () => {
       const response = await client.get(`/business/suppliers/${testSupplierId}/products`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
 
       expect(response.status).toBe(200);
@@ -102,12 +102,12 @@ describe('Supplier Feature Tests', () => {
       const linkData = {
         productId: 'prod-001',
         supplierSku: 'SUP-SKU-001',
-        cost: 15.00,
-        minOrderQuantity: 10
+        cost: 15.0,
+        minOrderQuantity: 10,
       };
 
       const response = await client.post(`/business/suppliers/${testSupplierId}/products`, linkData, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
 
       expect(response.status).toBe(201);
@@ -126,7 +126,7 @@ describe('Supplier Feature Tests', () => {
     beforeAll(async () => {
       const supplierData = createTestSupplier();
       const response = await client.post('/business/suppliers', supplierData, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
       testSupplierId = response.data.data.supplierId;
       createdResources.supplierIds.push(testSupplierId);
@@ -136,7 +136,7 @@ describe('Supplier Feature Tests', () => {
       const poData = createTestPurchaseOrder(testSupplierId, SEEDED_WAREHOUSE_ID);
 
       const response = await client.post('/business/purchase-orders', poData, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
 
       expect(response.status).toBe(201);
@@ -149,7 +149,7 @@ describe('Supplier Feature Tests', () => {
 
     it('UC-SUP-010: should list purchase orders', async () => {
       const response = await client.get('/business/purchase-orders', {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
 
       expect(response.status).toBe(200);
@@ -159,7 +159,7 @@ describe('Supplier Feature Tests', () => {
 
     it('UC-SUP-011: should get a specific purchase order', async () => {
       const response = await client.get(`/business/purchase-orders/${testPOId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
 
       expect(response.status).toBe(200);
@@ -167,9 +167,13 @@ describe('Supplier Feature Tests', () => {
     });
 
     it('UC-SUP-014: should send purchase order', async () => {
-      const response = await client.post(`/business/purchase-orders/${testPOId}/send`, {}, {
-        headers: { Authorization: `Bearer ${adminToken}` }
-      });
+      const response = await client.post(
+        `/business/purchase-orders/${testPOId}/send`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${adminToken}` },
+        },
+      );
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
@@ -177,11 +181,11 @@ describe('Supplier Feature Tests', () => {
 
     it('UC-SUP-015: should receive purchase order', async () => {
       const receiveData = {
-        items: [{ productId: 'prod-001', quantityReceived: 100 }]
+        items: [{ productId: 'prod-001', quantityReceived: 100 }],
       };
 
       const response = await client.post(`/business/purchase-orders/${testPOId}/receive`, receiveData, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
 
       expect(response.status).toBe(200);
@@ -200,7 +204,7 @@ describe('Supplier Feature Tests', () => {
 
     it('should reject invalid tokens', async () => {
       const response = await client.get('/business/suppliers', {
-        headers: { Authorization: 'Bearer invalid-token' }
+        headers: { Authorization: 'Bearer invalid-token' },
       });
       expect(response.status).toBe(401);
     });

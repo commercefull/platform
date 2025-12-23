@@ -7,30 +7,30 @@
 const SUPPLIER_IDS = {
   ACME_CORP: '01938000-0000-7000-8000-000000000001',
   GLOBAL_PARTS: '01938000-0000-7000-8000-000000000002',
-  QUALITY_GOODS: '01938000-0000-7000-8000-000000000003'
+  QUALITY_GOODS: '01938000-0000-7000-8000-000000000003',
 };
 
 const SUPPLIER_ADDRESS_IDS = {
   ACME_HQ: '01938001-0000-7000-8000-000000000001',
   ACME_WAREHOUSE: '01938001-0000-7000-8000-000000000002',
-  GLOBAL_HQ: '01938001-0000-7000-8000-000000000003'
+  GLOBAL_HQ: '01938001-0000-7000-8000-000000000003',
 };
 
 const SUPPLIER_PRODUCT_IDS = {
   WIDGET_A: '01938002-0000-7000-8000-000000000001',
   WIDGET_B: '01938002-0000-7000-8000-000000000002',
-  GADGET_X: '01938002-0000-7000-8000-000000000003'
+  GADGET_X: '01938002-0000-7000-8000-000000000003',
 };
 
 const PURCHASE_ORDER_IDS = {
   PO_001: '01938003-0000-7000-8000-000000000001',
-  PO_002: '01938003-0000-7000-8000-000000000002'
+  PO_002: '01938003-0000-7000-8000-000000000002',
 };
 
 const PURCHASE_ORDER_ITEM_IDS = {
   PO_001_ITEM_1: '01938004-0000-7000-8000-000000000001',
   PO_001_ITEM_2: '01938004-0000-7000-8000-000000000002',
-  PO_002_ITEM_1: '01938004-0000-7000-8000-000000000003'
+  PO_002_ITEM_1: '01938004-0000-7000-8000-000000000003',
 };
 
 // Test product ID (should exist from product seeds)
@@ -38,17 +38,41 @@ const TEST_PRODUCT_ID = '01912000-0000-7000-8000-000000000001';
 // Test warehouse ID (should exist from warehouse seeds)
 const TEST_WAREHOUSE_ID = '01915000-0000-7000-8000-000000000001';
 
-exports.seed = async function(knex) {
+exports.seed = async function (knex) {
   // Clean up existing test data in reverse order of dependencies
-  await knex('supplierReceivingItem').whereIn('supplierReceivingRecordId', 
-    knex('supplierReceivingRecord').select('supplierReceivingRecordId').whereIn('supplierPurchaseOrderId', Object.values(PURCHASE_ORDER_IDS))
-  ).del().catch(() => {});
-  await knex('supplierReceivingRecord').whereIn('supplierPurchaseOrderId', Object.values(PURCHASE_ORDER_IDS)).del().catch(() => {});
-  await knex('supplierPurchaseOrderItem').whereIn('supplierPurchaseOrderItemId', Object.values(PURCHASE_ORDER_ITEM_IDS)).del().catch(() => {});
-  await knex('supplierPurchaseOrder').whereIn('supplierPurchaseOrderId', Object.values(PURCHASE_ORDER_IDS)).del().catch(() => {});
-  await knex('supplierProduct').whereIn('supplierProductId', Object.values(SUPPLIER_PRODUCT_IDS)).del().catch(() => {});
-  await knex('supplierAddress').whereIn('supplierAddressId', Object.values(SUPPLIER_ADDRESS_IDS)).del().catch(() => {});
-  await knex('supplier').whereIn('supplierId', Object.values(SUPPLIER_IDS)).del().catch(() => {});
+  await knex('supplierReceivingItem')
+    .whereIn(
+      'supplierReceivingRecordId',
+      knex('supplierReceivingRecord')
+        .select('supplierReceivingRecordId')
+        .whereIn('supplierPurchaseOrderId', Object.values(PURCHASE_ORDER_IDS)),
+    )
+    .del()
+    .catch(() => {});
+  await knex('supplierReceivingRecord')
+    .whereIn('supplierPurchaseOrderId', Object.values(PURCHASE_ORDER_IDS))
+    .del()
+    .catch(() => {});
+  await knex('supplierPurchaseOrderItem')
+    .whereIn('supplierPurchaseOrderItemId', Object.values(PURCHASE_ORDER_ITEM_IDS))
+    .del()
+    .catch(() => {});
+  await knex('supplierPurchaseOrder')
+    .whereIn('supplierPurchaseOrderId', Object.values(PURCHASE_ORDER_IDS))
+    .del()
+    .catch(() => {});
+  await knex('supplierProduct')
+    .whereIn('supplierProductId', Object.values(SUPPLIER_PRODUCT_IDS))
+    .del()
+    .catch(() => {});
+  await knex('supplierAddress')
+    .whereIn('supplierAddressId', Object.values(SUPPLIER_ADDRESS_IDS))
+    .del()
+    .catch(() => {});
+  await knex('supplier')
+    .whereIn('supplierId', Object.values(SUPPLIER_IDS))
+    .del()
+    .catch(() => {});
 
   // Seed Suppliers
   await knex('supplier').insert([
@@ -68,10 +92,10 @@ exports.seed = async function(knex) {
       paymentTerms: 'Net 30',
       paymentMethod: 'wire_transfer',
       currency: 'USD',
-      minOrderValue: 100.00,
+      minOrderValue: 100.0,
       leadTime: 7,
       categories: ['electronics', 'hardware'],
-      tags: ['preferred', 'reliable']
+      tags: ['preferred', 'reliable'],
     },
     {
       supplierId: SUPPLIER_IDS.GLOBAL_PARTS,
@@ -89,10 +113,10 @@ exports.seed = async function(knex) {
       paymentTerms: 'Net 45',
       paymentMethod: 'credit',
       currency: 'USD',
-      minOrderValue: 250.00,
+      minOrderValue: 250.0,
       leadTime: 14,
       categories: ['parts', 'components'],
-      tags: ['international']
+      tags: ['international'],
     },
     {
       supplierId: SUPPLIER_IDS.QUALITY_GOODS,
@@ -109,8 +133,8 @@ exports.seed = async function(knex) {
       currency: 'USD',
       leadTime: 5,
       categories: ['premium'],
-      tags: ['new']
-    }
+      tags: ['new'],
+    },
   ]);
 
   // Seed Supplier Addresses
@@ -130,7 +154,7 @@ exports.seed = async function(knex) {
       contactName: 'John Smith',
       contactEmail: 'jsmith@acme.example.com',
       contactPhone: '+1-555-0101',
-      isActive: true
+      isActive: true,
     },
     {
       supplierAddressId: SUPPLIER_ADDRESS_IDS.ACME_WAREHOUSE,
@@ -145,7 +169,7 @@ exports.seed = async function(knex) {
       isDefault: false,
       contactName: 'Jane Doe',
       contactEmail: 'jdoe@acme.example.com',
-      isActive: true
+      isActive: true,
     },
     {
       supplierAddressId: SUPPLIER_ADDRESS_IDS.GLOBAL_HQ,
@@ -158,13 +182,13 @@ exports.seed = async function(knex) {
       country: 'US',
       addressType: 'headquarters',
       isDefault: true,
-      isActive: true
-    }
+      isActive: true,
+    },
   ]);
 
   // Check if test product exists before seeding supplier products
   const productExists = await knex('product').where('productId', TEST_PRODUCT_ID).first();
-  
+
   if (productExists) {
     // Seed Supplier Products
     await knex('supplierProduct').insert([
@@ -180,7 +204,7 @@ exports.seed = async function(knex) {
         unitCost: 15.99,
         currency: 'USD',
         minimumOrderQuantity: 10,
-        leadTime: 5
+        leadTime: 5,
       },
       {
         supplierProductId: SUPPLIER_PRODUCT_IDS.WIDGET_B,
@@ -191,10 +215,10 @@ exports.seed = async function(knex) {
         supplierProductName: 'Standard Widget B',
         status: 'active',
         isPreferred: false,
-        unitCost: 12.50,
+        unitCost: 12.5,
         currency: 'USD',
         minimumOrderQuantity: 25,
-        leadTime: 7
+        leadTime: 7,
       },
       {
         supplierProductId: SUPPLIER_PRODUCT_IDS.GADGET_X,
@@ -205,16 +229,16 @@ exports.seed = async function(knex) {
         supplierProductName: 'Gadget X Component',
         status: 'active',
         isPreferred: true,
-        unitCost: 25.00,
+        unitCost: 25.0,
         currency: 'USD',
         minimumOrderQuantity: 5,
-        leadTime: 10
-      }
+        leadTime: 10,
+      },
     ]);
 
     // Check if test warehouse exists before seeding purchase orders
     const warehouseExists = await knex('distributionWarehouse').where('distributionWarehouseId', TEST_WAREHOUSE_ID).first();
-    
+
     if (warehouseExists) {
       // Seed Purchase Orders
       const now = new Date();
@@ -233,12 +257,12 @@ exports.seed = async function(knex) {
           orderDate: now,
           expectedDeliveryDate: nextWeek,
           currency: 'USD',
-          subtotal: 319.80,
+          subtotal: 319.8,
           tax: 25.58,
-          shipping: 15.00,
+          shipping: 15.0,
           discount: 0,
           total: 360.38,
-          notes: 'Test purchase order 1'
+          notes: 'Test purchase order 1',
         },
         {
           supplierPurchaseOrderId: PURCHASE_ORDER_IDS.PO_002,
@@ -250,13 +274,13 @@ exports.seed = async function(knex) {
           priority: 'high',
           orderDate: now,
           currency: 'USD',
-          subtotal: 250.00,
-          tax: 20.00,
+          subtotal: 250.0,
+          tax: 20.0,
           shipping: 0,
-          discount: 25.00,
-          total: 245.00,
-          notes: 'Test purchase order 2 - draft'
-        }
+          discount: 25.0,
+          total: 245.0,
+          notes: 'Test purchase order 2 - draft',
+        },
       ]);
 
       // Seed Purchase Order Items
@@ -274,8 +298,8 @@ exports.seed = async function(knex) {
           unitCost: 15.99,
           tax: 25.58,
           discount: 0,
-          total: 319.80,
-          status: 'pending'
+          total: 319.8,
+          status: 'pending',
         },
         {
           supplierPurchaseOrderItemId: PURCHASE_ORDER_ITEM_IDS.PO_001_ITEM_2,
@@ -287,11 +311,11 @@ exports.seed = async function(knex) {
           name: 'Standard Widget B',
           quantity: 10,
           receivedQuantity: 0,
-          unitCost: 12.50,
+          unitCost: 12.5,
           tax: 0,
           discount: 0,
-          total: 125.00,
-          status: 'pending'
+          total: 125.0,
+          status: 'pending',
         },
         {
           supplierPurchaseOrderItemId: PURCHASE_ORDER_ITEM_IDS.PO_002_ITEM_1,
@@ -303,12 +327,12 @@ exports.seed = async function(knex) {
           name: 'Gadget X Component',
           quantity: 10,
           receivedQuantity: 0,
-          unitCost: 25.00,
-          tax: 20.00,
+          unitCost: 25.0,
+          tax: 20.0,
           discount: 0,
-          total: 250.00,
-          status: 'pending'
-        }
+          total: 250.0,
+          status: 'pending',
+        },
       ]);
 
       console.log('Supplier test data seeded successfully (with purchase orders)');

@@ -43,7 +43,9 @@ export class ContentPage {
     this.props = props;
   }
 
-  static create(props: Omit<ContentPageProps, 'status' | 'blocks' | 'order' | 'isHomepage' | 'createdAt' | 'updatedAt'> & { blocks?: ContentBlock[] }): ContentPage {
+  static create(
+    props: Omit<ContentPageProps, 'status' | 'blocks' | 'order' | 'isHomepage' | 'createdAt' | 'updatedAt'> & { blocks?: ContentBlock[] },
+  ): ContentPage {
     const now = new Date();
     return new ContentPage({
       ...props,
@@ -52,7 +54,7 @@ export class ContentPage {
       order: 0,
       isHomepage: false,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     });
   }
 
@@ -60,13 +62,27 @@ export class ContentPage {
     return new ContentPage(props);
   }
 
-  get pageId(): string { return this.props.pageId; }
-  get title(): string { return this.props.title; }
-  get slug(): string { return this.props.slug; }
-  get content(): string | undefined { return this.props.content; }
-  get blocks(): ContentBlock[] { return this.props.blocks; }
-  get status(): ContentStatus { return this.props.status; }
-  get isPublished(): boolean { return this.props.status === 'published'; }
+  get pageId(): string {
+    return this.props.pageId;
+  }
+  get title(): string {
+    return this.props.title;
+  }
+  get slug(): string {
+    return this.props.slug;
+  }
+  get content(): string | undefined {
+    return this.props.content;
+  }
+  get blocks(): ContentBlock[] {
+    return this.props.blocks;
+  }
+  get status(): ContentStatus {
+    return this.props.status;
+  }
+  get isPublished(): boolean {
+    return this.props.status === 'published';
+  }
 
   publish(): void {
     this.props.status = 'published';

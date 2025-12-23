@@ -24,7 +24,7 @@ exports.up = function (knex) {
     t.decimal('commissionRate', 5, 2);
     t.string('shippingTemplate', 50);
     t.integer('handlingTime');
-    
+
     t.index('merchantId');
     t.index('productId');
     t.index('isActive');

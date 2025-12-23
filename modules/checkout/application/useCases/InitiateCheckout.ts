@@ -18,7 +18,7 @@ export class InitiateCheckoutCommand {
   constructor(
     public readonly basketId: string,
     public readonly customerId?: string,
-    public readonly guestEmail?: string
+    public readonly guestEmail?: string,
   ) {}
 }
 
@@ -73,22 +73,26 @@ export function mapCheckoutToResponse(session: CheckoutSession): CheckoutRespons
     guestEmail: session.guestEmail,
     status: session.status,
     paymentStatus: session.paymentStatus,
-    shippingAddress: session.shippingAddress ? {
-      firstName: session.shippingAddress.firstName,
-      lastName: session.shippingAddress.lastName,
-      addressLine1: session.shippingAddress.addressLine1,
-      city: session.shippingAddress.city,
-      postalCode: session.shippingAddress.postalCode,
-      country: session.shippingAddress.country
-    } : undefined,
-    billingAddress: session.billingAddress ? {
-      firstName: session.billingAddress.firstName,
-      lastName: session.billingAddress.lastName,
-      addressLine1: session.billingAddress.addressLine1,
-      city: session.billingAddress.city,
-      postalCode: session.billingAddress.postalCode,
-      country: session.billingAddress.country
-    } : undefined,
+    shippingAddress: session.shippingAddress
+      ? {
+          firstName: session.shippingAddress.firstName,
+          lastName: session.shippingAddress.lastName,
+          addressLine1: session.shippingAddress.addressLine1,
+          city: session.shippingAddress.city,
+          postalCode: session.shippingAddress.postalCode,
+          country: session.shippingAddress.country,
+        }
+      : undefined,
+    billingAddress: session.billingAddress
+      ? {
+          firstName: session.billingAddress.firstName,
+          lastName: session.billingAddress.lastName,
+          addressLine1: session.billingAddress.addressLine1,
+          city: session.billingAddress.city,
+          postalCode: session.billingAddress.postalCode,
+          country: session.billingAddress.country,
+        }
+      : undefined,
     shippingMethodId: session.shippingMethodId,
     shippingMethodName: session.shippingMethodName,
     paymentMethodId: session.paymentMethodId,
@@ -102,7 +106,7 @@ export function mapCheckoutToResponse(session: CheckoutSession): CheckoutRespons
     notes: session.notes,
     createdAt: session.createdAt.toISOString(),
     updatedAt: session.updatedAt.toISOString(),
-    expiresAt: session.expiresAt.toISOString()
+    expiresAt: session.expiresAt.toISOString(),
   };
 }
 
@@ -113,7 +117,7 @@ export function mapCheckoutToResponse(session: CheckoutSession): CheckoutRespons
 export class InitiateCheckoutUseCase {
   constructor(
     private readonly checkoutRepository: CheckoutRepository,
-    private readonly basketRepository: BasketRepository
+    private readonly basketRepository: BasketRepository,
   ) {}
 
   async execute(command: InitiateCheckoutCommand): Promise<CheckoutResponse> {
@@ -139,7 +143,7 @@ export class InitiateCheckoutUseCase {
       basketId: command.basketId,
       customerId: command.customerId,
       guestEmail: command.guestEmail,
-      currency: basket.currency
+      currency: basket.currency,
     });
 
     session.updateAmounts(basket.subtotal, Money.zero(basket.currency));
@@ -149,7 +153,7 @@ export class InitiateCheckoutUseCase {
     eventBus.emit('checkout.started', {
       checkoutId: session.id,
       basketId: command.basketId,
-      customerId: command.customerId
+      customerId: command.customerId,
     });
 
     return mapCheckoutToResponse(session);

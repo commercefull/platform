@@ -3,11 +3,11 @@
  * Phase 4: Marketplace & B2B - Multi-seller order support
  */
 
-exports.up = async function(knex) {
+exports.up = async function (knex) {
   // Add marketplace/B2B fields to basket table
   const hasBasketStoreId = await knex.schema.hasColumn('basket', 'storeId');
   if (!hasBasketStoreId) {
-    await knex.schema.alterTable('basket', (table) => {
+    await knex.schema.alterTable('basket', table => {
       table.string('storeId', 50).nullable();
       table.string('channelId', 50).nullable();
       table.string('accountId', 50).nullable(); // B2B company
@@ -17,7 +17,7 @@ exports.up = async function(knex) {
   // Add sellerId to basketItem table
   const hasBasketItemSellerId = await knex.schema.hasColumn('basketItem', 'sellerId');
   if (!hasBasketItemSellerId) {
-    await knex.schema.alterTable('basketItem', (table) => {
+    await knex.schema.alterTable('basketItem', table => {
       table.string('sellerId', 50).nullable();
     });
   }
@@ -25,7 +25,7 @@ exports.up = async function(knex) {
   // Add marketplace/B2B fields to order table
   const hasOrderStoreId = await knex.schema.hasColumn('order', 'storeId');
   if (!hasOrderStoreId) {
-    await knex.schema.alterTable('order', (table) => {
+    await knex.schema.alterTable('order', table => {
       table.string('storeId', 50).nullable();
       table.string('channelId', 50).nullable();
       table.string('accountId', 50).nullable(); // B2B company
@@ -38,17 +38,17 @@ exports.up = async function(knex) {
   // Add sellerId to orderLine table
   const hasOrderLineSellerId = await knex.schema.hasColumn('orderLine', 'sellerId');
   if (!hasOrderLineSellerId) {
-    await knex.schema.alterTable('orderLine', (table) => {
+    await knex.schema.alterTable('orderLine', table => {
       table.string('sellerId', 50).nullable();
     });
   }
 };
 
-exports.down = async function(knex) {
+exports.down = async function (knex) {
   // Remove sellerId from orderLine
   const hasOrderLineSellerId = await knex.schema.hasColumn('orderLine', 'sellerId');
   if (hasOrderLineSellerId) {
-    await knex.schema.alterTable('orderLine', (table) => {
+    await knex.schema.alterTable('orderLine', table => {
       table.dropColumn('sellerId');
     });
   }
@@ -56,7 +56,7 @@ exports.down = async function(knex) {
   // Remove marketplace/B2B fields from order
   const hasOrderStoreId = await knex.schema.hasColumn('order', 'storeId');
   if (hasOrderStoreId) {
-    await knex.schema.alterTable('order', (table) => {
+    await knex.schema.alterTable('order', table => {
       table.dropColumn('storeId');
       table.dropColumn('channelId');
       table.dropColumn('accountId');
@@ -69,7 +69,7 @@ exports.down = async function(knex) {
   // Remove sellerId from basketItem
   const hasBasketItemSellerId = await knex.schema.hasColumn('basketItem', 'sellerId');
   if (hasBasketItemSellerId) {
-    await knex.schema.alterTable('basketItem', (table) => {
+    await knex.schema.alterTable('basketItem', table => {
       table.dropColumn('sellerId');
     });
   }
@@ -77,7 +77,7 @@ exports.down = async function(knex) {
   // Remove marketplace/B2B fields from basket
   const hasBasketStoreId = await knex.schema.hasColumn('basket', 'storeId');
   if (hasBasketStoreId) {
-    await knex.schema.alterTable('basket', (table) => {
+    await knex.schema.alterTable('basket', table => {
       table.dropColumn('storeId');
       table.dropColumn('channelId');
       table.dropColumn('accountId');

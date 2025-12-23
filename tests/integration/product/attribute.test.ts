@@ -26,13 +26,13 @@ describe('Attribute Tests', () => {
         ...testAttribute,
         name: 'New Test Attribute',
         code: `new-attr-${Math.floor(Math.random() * 10000)}`,
-        attributeGroupId: testAttributeGroupId
+        attributeGroupId: testAttributeGroupId,
       };
-      
+
       const response = await client.post('/business/attributes', newAttribute, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       expect(response.status).toBe(201);
       expect(response.data.success).toBe(true);
       // DB returns productAttributeId, not id
@@ -47,16 +47,16 @@ describe('Attribute Tests', () => {
       expect(response.data.data).toHaveProperty('isSearchable');
       expect(response.data.data).toHaveProperty('position');
       expect(response.data.data).toHaveProperty('createdAt');
-      
+
       // Save the ID for later tests
       createdAttributeId = attrId;
     });
 
     it('should get an attribute by ID', async () => {
       const response = await client.get(`/business/attributes/${testAttributeId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       // DB returns productAttributeId, not id
@@ -64,19 +64,19 @@ describe('Attribute Tests', () => {
       expect(attrId).toBe(testAttributeId);
       expect(response.data.data).toHaveProperty('name', testAttribute.name);
     });
-    
+
     it('should get an attribute by code', async () => {
       // First get the attribute to find its code
       const getResponse = await client.get(`/business/attributes/${testAttributeId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       const attrCode = getResponse.data.data.code;
-      
+
       const response = await client.get(`/business/attributes/code/${attrCode}`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       // DB returns productAttributeId, not id
@@ -84,39 +84,39 @@ describe('Attribute Tests', () => {
       expect(attrId).toBe(testAttributeId);
       expect(response.data.data).toHaveProperty('code', attrCode);
     });
-    
+
     it('should list all attributes', async () => {
       const response = await client.get('/business/attributes', {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       expect(Array.isArray(response.data.data)).toBe(true);
       expect(response.data.data.length).toBeGreaterThan(0);
-      
+
       // Should find our test attributes - uses productAttributeId
       const foundOriginalAttr = response.data.data.find((a: any) => (a.productAttributeId || a.id) === testAttributeId);
       const foundNewAttr = response.data.data.find((a: any) => (a.productAttributeId || a.id) === createdAttributeId);
-      
+
       expect(foundOriginalAttr).toBeDefined();
       expect(foundNewAttr).toBeDefined();
     });
-    
+
     it('should get attributes by group', async () => {
       const response = await client.get(`/business/attributes/group/${testAttributeGroupId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       expect(Array.isArray(response.data.data)).toBe(true);
       expect(response.data.data.length).toBeGreaterThan(0);
-      
+
       // Should find our test attributes in the group - uses productAttributeId
       const foundOriginalAttr = response.data.data.find((a: any) => (a.productAttributeId || a.id) === testAttributeId);
       const foundNewAttr = response.data.data.find((a: any) => (a.productAttributeId || a.id) === createdAttributeId);
-      
+
       expect(foundOriginalAttr).toBeDefined();
       expect(foundNewAttr).toBeDefined();
     });
@@ -126,13 +126,13 @@ describe('Attribute Tests', () => {
         name: 'Updated Attribute Name',
         description: 'Updated attribute description',
         isFilterable: false,
-        sortOrder: 2
+        sortOrder: 2,
       };
-      
+
       const response = await client.put(`/business/attributes/${createdAttributeId}`, updatedData, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       expect(response.data.data).toHaveProperty('name', updatedData.name);
@@ -143,17 +143,17 @@ describe('Attribute Tests', () => {
 
     it('should delete an attribute', async () => {
       const response = await client.delete(`/business/attributes/${createdAttributeId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
-      
+
       // Verify the attribute is deleted
       const getResponse = await client.get(`/business/attributes/${createdAttributeId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       expect(getResponse.status).toBe(404);
     });
   });

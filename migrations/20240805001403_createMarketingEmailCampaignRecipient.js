@@ -2,15 +2,23 @@
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.up = function(knex) {
-  return knex.schema.createTable('marketingEmailCampaignRecipient', function(table) {
+exports.up = function (knex) {
+  return knex.schema.createTable('marketingEmailCampaignRecipient', function (table) {
     table.uuid('marketingEmailCampaignRecipientId').primary().defaultTo(knex.raw('uuidv7()'));
-    table.uuid('marketingEmailCampaignId').notNullable().references('marketingEmailCampaignId').inTable('marketingEmailCampaign').onDelete('CASCADE');
+    table
+      .uuid('marketingEmailCampaignId')
+      .notNullable()
+      .references('marketingEmailCampaignId')
+      .inTable('marketingEmailCampaign')
+      .onDelete('CASCADE');
     table.uuid('customerId').references('customerId').inTable('customer').onDelete('SET NULL');
     table.string('email').notNullable();
     table.string('firstName');
     table.string('lastName');
-    table.string('status').defaultTo('pending').checkIn(['pending', 'sent', 'delivered', 'opened', 'clicked', 'bounced', 'unsubscribed', 'complained', 'failed']);
+    table
+      .string('status')
+      .defaultTo('pending')
+      .checkIn(['pending', 'sent', 'delivered', 'opened', 'clicked', 'bounced', 'unsubscribed', 'complained', 'failed']);
     table.string('variant');
     table.timestamp('sentAt');
     table.timestamp('deliveredAt');
@@ -48,6 +56,6 @@ exports.up = function(knex) {
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTableIfExists('marketingEmailCampaignRecipient');
 };

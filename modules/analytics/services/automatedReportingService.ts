@@ -84,12 +84,14 @@ async function generateSalesReport(period: string, parameters: Record<string, an
   const generatedAt = new Date();
 
   // Get sales data
-  const salesData = await query<Array<{
-    date: string;
-    orders: string;
-    revenue: string;
-    customers: string;
-  }>>(
+  const salesData = await query<
+    Array<{
+      date: string;
+      orders: string;
+      revenue: string;
+      customers: string;
+    }>
+  >(
     `SELECT
       DATE(created_at) as date,
       COUNT(*) as orders,
@@ -99,7 +101,7 @@ async function generateSalesReport(period: string, parameters: Record<string, an
     WHERE created_at >= $1 AND created_at <= $2 AND status = 'completed'
     GROUP BY DATE(created_at)
     ORDER BY date`,
-    [startDate, endDate]
+    [startDate, endDate],
   );
 
   const salesDataSafe = salesData || [];
@@ -111,12 +113,14 @@ async function generateSalesReport(period: string, parameters: Record<string, an
   const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
 
   // Top products
-  const topProducts = await query<Array<{
-    product_id: string;
-    name: string;
-    sales: string;
-    revenue: string;
-  }>>(
+  const topProducts = await query<
+    Array<{
+      product_id: string;
+      name: string;
+      sales: string;
+      revenue: string;
+    }>
+  >(
     `SELECT
       p.product_id,
       p.name,
@@ -129,7 +133,7 @@ async function generateSalesReport(period: string, parameters: Record<string, an
     GROUP BY p.product_id, p.name
     ORDER BY revenue DESC
     LIMIT 10`,
-    [startDate, endDate]
+    [startDate, endDate],
   );
 
   return {
@@ -141,13 +145,13 @@ async function generateSalesReport(period: string, parameters: Record<string, an
       totalOrders,
       totalCustomers,
       averageOrderValue,
-      conversionRate: 0 // Would need more data
+      conversionRate: 0, // Would need more data
     },
     data: salesDataSafe.map(d => ({
       date: d.date,
       orders: parseInt(d.orders || '0'),
       revenue: parseFloat(d.revenue || '0'),
-      customers: parseInt(d.customers || '0')
+      customers: parseInt(d.customers || '0'),
     })),
     charts: [
       {
@@ -155,24 +159,28 @@ async function generateSalesReport(period: string, parameters: Record<string, an
         type: 'line',
         data: {
           labels: salesDataSafe.map(d => d.date),
-          datasets: [{
-            label: 'Revenue',
-            data: salesDataSafe.map(d => parseFloat(d.revenue || '0'))
-          }]
-        }
+          datasets: [
+            {
+              label: 'Revenue',
+              data: salesDataSafe.map(d => parseFloat(d.revenue || '0')),
+            },
+          ],
+        },
       },
       {
         title: 'Top Products by Revenue',
         type: 'bar',
         data: {
           labels: (topProducts || []).map((p: any) => p.name?.substring(0, 20) || ''),
-          datasets: [{
-            label: 'Revenue',
-            data: (topProducts || []).map((p: any) => parseFloat(p.revenue || '0'))
-          }]
-        }
-      }
-    ]
+          datasets: [
+            {
+              label: 'Revenue',
+              data: (topProducts || []).map((p: any) => parseFloat(p.revenue || '0')),
+            },
+          ],
+        },
+      },
+    ],
   };
 }
 
@@ -184,13 +192,15 @@ async function generateCustomerReport(period: string, parameters: Record<string,
   const [startDate, endDate] = parsePeriod(period);
 
   // Customer acquisition and retention
-  const customerData = await query<Array<{
-    date: string;
-    new_customers: string;
-    returning_customers: string;
-    orders: string;
-    revenue: string;
-  }>>(
+  const customerData = await query<
+    Array<{
+      date: string;
+      new_customers: string;
+      returning_customers: string;
+      orders: string;
+      revenue: string;
+    }>
+  >(
     `WITH customer_orders AS (
       SELECT
         DATE(o.created_at) as date,
@@ -222,15 +232,17 @@ async function generateCustomerReport(period: string, parameters: Record<string,
     FROM customer_classification
     GROUP BY date
     ORDER BY date`,
-    [startDate, endDate]
+    [startDate, endDate],
   );
 
   // Customer segments
-  const segmentData = await query<Array<{
-    segment: string;
-    customers: string;
-    revenue: string;
-  }>>(
+  const segmentData = await query<
+    Array<{
+      segment: string;
+      customers: string;
+      revenue: string;
+    }>
+  >(
     `SELECT
       CASE
         WHEN total_spent > 500 THEN 'High Value'
@@ -251,7 +263,7 @@ async function generateCustomerReport(period: string, parameters: Record<string,
         WHEN total_spent BETWEEN 100 AND 500 THEN 'Regular'
         ELSE 'Low Value'
       END`,
-    [startDate, endDate]
+    [startDate, endDate],
   );
 
   const customerDataSafe = customerData || [];
@@ -269,14 +281,14 @@ async function generateCustomerReport(period: string, parameters: Record<string,
       totalRevenue,
       newCustomers: totalNewCustomers,
       returningCustomers: totalReturningCustomers,
-      customerSegments: segmentDataSafe.length
+      customerSegments: segmentDataSafe.length,
     },
     data: customerDataSafe.map(d => ({
       date: d.date,
       newCustomers: parseInt(d.new_customers || '0'),
       returningCustomers: parseInt(d.returning_customers || '0'),
       orders: parseInt(d.orders || '0'),
-      revenue: parseFloat(d.revenue || '0')
+      revenue: parseFloat(d.revenue || '0'),
     })),
     charts: [
       {
@@ -286,21 +298,23 @@ async function generateCustomerReport(period: string, parameters: Record<string,
           labels: customerDataSafe.map(d => d.date),
           datasets: [
             { label: 'New Customers', data: customerDataSafe.map(d => parseInt(d.new_customers || '0')) },
-            { label: 'Returning Customers', data: customerDataSafe.map(d => parseInt(d.returning_customers || '0')) }
-          ]
-        }
+            { label: 'Returning Customers', data: customerDataSafe.map(d => parseInt(d.returning_customers || '0')) },
+          ],
+        },
       },
       {
         title: 'Customer Segments',
         type: 'pie',
         data: {
           labels: segmentDataSafe.map(s => s.segment),
-          datasets: [{
-            data: segmentDataSafe.map(s => parseInt(s.customers || '0'))
-          }]
-        }
-      }
-    ]
+          datasets: [
+            {
+              data: segmentDataSafe.map(s => parseInt(s.customers || '0')),
+            },
+          ],
+        },
+      },
+    ],
   };
 }
 
@@ -311,15 +325,17 @@ async function generateCustomerReport(period: string, parameters: Record<string,
 async function generateProductReport(period: string, parameters: Record<string, any>): Promise<ReportData> {
   const [startDate, endDate] = parsePeriod(period);
 
-  const productData = await query<Array<{
-    product_id: string;
-    name: string;
-    category: string;
-    sales: string;
-    revenue: string;
-    stock: string;
-    views: string;
-  }>>(
+  const productData = await query<
+    Array<{
+      product_id: string;
+      name: string;
+      category: string;
+      sales: string;
+      revenue: string;
+      stock: string;
+      views: string;
+    }>
+  >(
     `SELECT
       p.product_id,
       p.name,
@@ -334,7 +350,7 @@ async function generateProductReport(period: string, parameters: Record<string, 
     LEFT JOIN analyticsProductPerformance ap ON p.product_id = ap.productId AND ap.date >= $1 AND ap.date <= $2
     GROUP BY p.product_id, p.name, p.category, p.stock_quantity, ap.views
     ORDER BY revenue DESC`,
-    [startDate, endDate]
+    [startDate, endDate],
   );
 
   const productDataSafe = productData || [];
@@ -347,7 +363,7 @@ async function generateProductReport(period: string, parameters: Record<string, 
       totalProducts: productDataSafe.length,
       totalRevenue: productDataSafe.reduce((sum, p) => sum + parseFloat(p.revenue || '0'), 0),
       totalSales: productDataSafe.reduce((sum, p) => sum + parseInt(p.sales || '0'), 0),
-      lowStockProducts: productDataSafe.filter(p => parseInt(p.stock || '0') < 10).length
+      lowStockProducts: productDataSafe.filter(p => parseInt(p.stock || '0') < 10).length,
     },
     data: productDataSafe.map(p => ({
       productId: p.product_id,
@@ -356,8 +372,8 @@ async function generateProductReport(period: string, parameters: Record<string, 
       sales: parseInt(p.sales || '0'),
       revenue: parseFloat(p.revenue || '0'),
       stock: parseInt(p.stock || '0'),
-      views: parseInt(p.views || '0')
-    }))
+      views: parseInt(p.views || '0'),
+    })),
   };
 }
 
@@ -366,15 +382,17 @@ async function generateProductReport(period: string, parameters: Record<string, 
 // ============================================================================
 
 async function generateInventoryReport(period: string, parameters: Record<string, any>): Promise<ReportData> {
-  const inventoryData = await query<Array<{
-    product_id: string;
-    name: string;
-    category: string;
-    stock_quantity: string;
-    reorder_point: string;
-    cost_price: string;
-    sales_velocity: string;
-  }>>(
+  const inventoryData = await query<
+    Array<{
+      product_id: string;
+      name: string;
+      category: string;
+      stock_quantity: string;
+      reorder_point: string;
+      cost_price: string;
+      sales_velocity: string;
+    }>
+  >(
     `SELECT
       p.product_id,
       p.name,
@@ -387,15 +405,13 @@ async function generateInventoryReport(period: string, parameters: Record<string
     LEFT JOIN order_item oi ON p.product_id = oi.product_id
     LEFT JOIN "order" o ON oi.order_id = o.order_id AND o.created_at >= CURRENT_DATE - INTERVAL '30 days'
     GROUP BY p.product_id, p.name, p.category, p.stock_quantity, p.reorder_point, p.cost_price
-    ORDER BY p.stock_quantity ASC`
+    ORDER BY p.stock_quantity ASC`,
   );
 
   const inventoryDataSafe = inventoryData || [];
 
   const lowStock = inventoryDataSafe.filter(p => parseInt(p.stock_quantity || '0') <= parseInt(p.reorder_point || '10'));
-  const totalValue = inventoryDataSafe.reduce((sum, p) =>
-    sum + (parseInt(p.stock_quantity || '0') * parseFloat(p.cost_price || '0')), 0
-  );
+  const totalValue = inventoryDataSafe.reduce((sum, p) => sum + parseInt(p.stock_quantity || '0') * parseFloat(p.cost_price || '0'), 0);
 
   return {
     title: 'Inventory Status Report',
@@ -405,7 +421,7 @@ async function generateInventoryReport(period: string, parameters: Record<string
       totalProducts: inventoryDataSafe.length,
       lowStockProducts: lowStock.length,
       totalInventoryValue: totalValue,
-      stockoutRisk: lowStock.filter(p => parseInt(p.stock_quantity || '0') === 0).length
+      stockoutRisk: lowStock.filter(p => parseInt(p.stock_quantity || '0') === 0).length,
     },
     data: inventoryDataSafe.map(p => ({
       productId: p.product_id,
@@ -415,8 +431,8 @@ async function generateInventoryReport(period: string, parameters: Record<string
       reorderPoint: parseInt(p.reorder_point || '10'),
       costPrice: parseFloat(p.cost_price || '0'),
       salesVelocity: parseFloat(p.sales_velocity || '0'),
-      status: parseInt(p.stock_quantity || '0') <= parseInt(p.reorder_point || '10') ? 'Low Stock' : 'In Stock'
-    }))
+      status: parseInt(p.stock_quantity || '0') <= parseInt(p.reorder_point || '10') ? 'Low Stock' : 'In Stock',
+    })),
   };
 }
 
@@ -441,7 +457,7 @@ async function generateExecutiveReport(period: string, parameters: Record<string
       COALESCE(SUM(total_amount) * 0.25, 0) as profit
     FROM "order"
     WHERE created_at >= $1 AND created_at <= $2 AND status = 'completed'`,
-    [startDate, endDate]
+    [startDate, endDate],
   );
 
   return {
@@ -453,10 +469,12 @@ async function generateExecutiveReport(period: string, parameters: Record<string
       totalOrders: parseInt(executiveData?.orders || '0'),
       totalCustomers: parseInt(executiveData?.customers || '0'),
       totalProfit: parseFloat(executiveData?.profit || '0'),
-      profitMargin: parseFloat(executiveData?.revenue || '0') > 0 ?
-        (parseFloat(executiveData?.profit || '0') / parseFloat(executiveData?.revenue || '0')) * 100 : 0
+      profitMargin:
+        parseFloat(executiveData?.revenue || '0') > 0
+          ? (parseFloat(executiveData?.profit || '0') / parseFloat(executiveData?.revenue || '0')) * 100
+          : 0,
     },
-    data: [] // Executive summary focuses on high-level KPIs
+    data: [], // Executive summary focuses on high-level KPIs
   };
 }
 
@@ -502,14 +520,16 @@ export async function getReportExecutionHistory(): Promise<ReportExecution[]> {
   return [];
 }
 
-export async function scheduleReport(schedule: Omit<ReportSchedule, 'reportScheduleId' | 'createdAt' | 'updatedAt'>): Promise<ReportSchedule> {
+export async function scheduleReport(
+  schedule: Omit<ReportSchedule, 'reportScheduleId' | 'createdAt' | 'updatedAt'>,
+): Promise<ReportSchedule> {
   // Placeholder - would save report schedule to database
   const now = new Date();
   return {
     ...schedule,
     reportScheduleId: 'placeholder-id',
     createdAt: now,
-    updatedAt: now
+    updatedAt: now,
   };
 }
 
@@ -524,6 +544,6 @@ export async function executeScheduledReport(scheduleId: string): Promise<Report
     completedAt: now,
     recipientCount: 0,
     deliveryStatus: {},
-    createdAt: now
+    createdAt: now,
   };
 }

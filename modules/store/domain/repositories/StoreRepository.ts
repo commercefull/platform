@@ -32,10 +32,13 @@ export interface StoreRepository {
   findByType(storeType: string): Promise<Store[]>;
 
   // Store statistics
-  updateStats(storeId: string, stats: {
-    productCount?: number;
-    orderCount?: number;
-    reviewCount?: number;
-    followerCount?: number;
-  }): Promise<void>;
+  updateStats(
+    storeId: string,
+    stats: {
+      productCount?: number;
+      orderCount?: number;
+      reviewCount?: number;
+      followerCount?: number;
+    },
+  ): Promise<void>;
 }

@@ -82,7 +82,7 @@ export class GdprCookieConsent {
       consentedAt: now,
       expiresAt,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     });
   }
 
@@ -121,7 +121,7 @@ export class GdprCookieConsent {
       consentedAt: now,
       expiresAt,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     });
   }
 
@@ -133,26 +133,66 @@ export class GdprCookieConsent {
   }
 
   // Getters
-  get gdprCookieConsentId(): string { return this.props.gdprCookieConsentId; }
-  get customerId(): string | undefined { return this.props.customerId; }
-  get sessionId(): string | undefined { return this.props.sessionId; }
-  get browserFingerprint(): string | undefined { return this.props.browserFingerprint; }
-  get necessary(): boolean { return this.props.necessary; }
-  get functional(): boolean { return this.props.functional; }
-  get analytics(): boolean { return this.props.analytics; }
-  get marketing(): boolean { return this.props.marketing; }
-  get thirdParty(): boolean { return this.props.thirdParty; }
-  get ipAddress(): string | undefined { return this.props.ipAddress; }
-  get userAgent(): string | undefined { return this.props.userAgent; }
-  get country(): string | undefined { return this.props.country; }
-  get region(): string | undefined { return this.props.region; }
-  get consentBannerVersion(): string | undefined { return this.props.consentBannerVersion; }
-  get consentMethod(): string { return this.props.consentMethod; }
-  get consentedAt(): Date { return this.props.consentedAt; }
-  get expiresAt(): Date | undefined { return this.props.expiresAt; }
-  get linkedAt(): Date | undefined { return this.props.linkedAt; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get gdprCookieConsentId(): string {
+    return this.props.gdprCookieConsentId;
+  }
+  get customerId(): string | undefined {
+    return this.props.customerId;
+  }
+  get sessionId(): string | undefined {
+    return this.props.sessionId;
+  }
+  get browserFingerprint(): string | undefined {
+    return this.props.browserFingerprint;
+  }
+  get necessary(): boolean {
+    return this.props.necessary;
+  }
+  get functional(): boolean {
+    return this.props.functional;
+  }
+  get analytics(): boolean {
+    return this.props.analytics;
+  }
+  get marketing(): boolean {
+    return this.props.marketing;
+  }
+  get thirdParty(): boolean {
+    return this.props.thirdParty;
+  }
+  get ipAddress(): string | undefined {
+    return this.props.ipAddress;
+  }
+  get userAgent(): string | undefined {
+    return this.props.userAgent;
+  }
+  get country(): string | undefined {
+    return this.props.country;
+  }
+  get region(): string | undefined {
+    return this.props.region;
+  }
+  get consentBannerVersion(): string | undefined {
+    return this.props.consentBannerVersion;
+  }
+  get consentMethod(): string {
+    return this.props.consentMethod;
+  }
+  get consentedAt(): Date {
+    return this.props.consentedAt;
+  }
+  get expiresAt(): Date | undefined {
+    return this.props.expiresAt;
+  }
+  get linkedAt(): Date | undefined {
+    return this.props.linkedAt;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   /**
    * Get all preferences as object
@@ -163,7 +203,7 @@ export class GdprCookieConsent {
       functional: this.props.functional,
       analytics: this.props.analytics,
       marketing: this.props.marketing,
-      thirdParty: this.props.thirdParty
+      thirdParty: this.props.thirdParty,
     };
   }
 
@@ -200,7 +240,7 @@ export class GdprCookieConsent {
     }
     this.props.consentedAt = new Date();
     this.props.updatedAt = new Date();
-    
+
     // Reset expiry
     const expiresAt = new Date();
     expiresAt.setFullYear(expiresAt.getFullYear() + 1);
@@ -246,7 +286,7 @@ export class GdprCookieConsent {
   toJSON(): Record<string, any> {
     return {
       ...this.props,
-      isExpired: this.isExpired()
+      isExpired: this.isExpired(),
     };
   }
 }

@@ -1,41 +1,41 @@
 import { logger } from '../../../libs/logger';
-import { Request, Response } from "express";
+import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
-import { isAdminLoggedIn } from "../../../libs/auth";
-import { SessionService } from "../../../libs/session";
-import AdminRepository from "../../../modules/identity/infrastructure/repositories/AdminRepository";
-import DashboardQueryRepository from "../../../modules/analytics/infrastructure/repositories/DashboardQueryRepository";
-import { adminRespond } from "web/respond";
+import { isAdminLoggedIn } from '../../../libs/auth';
+import { SessionService } from '../../../libs/session';
+import AdminRepository from '../../../modules/identity/infrastructure/repositories/AdminRepository';
+import DashboardQueryRepository from '../../../modules/analytics/infrastructure/repositories/DashboardQueryRepository';
+import { adminRespond } from 'web/respond';
 
 // Session cookie name
 const SESSION_COOKIE_NAME = 'cf_session';
 
 // GET: admin dashboard
 export const getAdminDashboard = async (req: Request, res: Response) => {
-    try {
-      // Fetch real dashboard data using query repository
-      const [stats, recentOrders, topProducts, revenueByDay] = await Promise.all([
-        DashboardQueryRepository.getAdminDashboardStats(),
-        DashboardQueryRepository.getRecentOrders(5),
-        DashboardQueryRepository.getTopProducts(5),
-        DashboardQueryRepository.getRevenueByDay(7)
-      ]);
+  try {
+    // Fetch real dashboard data using query repository
+    const [stats, recentOrders, topProducts, revenueByDay] = await Promise.all([
+      DashboardQueryRepository.getAdminDashboardStats(),
+      DashboardQueryRepository.getRecentOrders(5),
+      DashboardQueryRepository.getTopProducts(5),
+      DashboardQueryRepository.getRevenueByDay(7),
+    ]);
 
-      const dashboardData = {
-        pageName: "Dashboard",
-        stats,
-        recentOrders,
-        topProducts,
-        revenueByDay
-      };
+    const dashboardData = {
+      pageName: 'Dashboard',
+      stats,
+      recentOrders,
+      topProducts,
+      revenueByDay,
+    };
 
-    adminRespond(req, res, "dashboard", dashboardData);
+    adminRespond(req, res, 'dashboard', dashboardData);
   } catch (error) {
     logger.error('Error:', error);
-    
-    adminRespond(req, res, "error", {
-      pageName: "Error",
-      error: "Failed to load dashboard",
+
+    adminRespond(req, res, 'error', {
+      pageName: 'Error',
+      error: 'Failed to load dashboard',
     });
   }
 };
@@ -47,12 +47,12 @@ export const getAdminLogin = async (req: Request, res: Response) => {
   if (sessionId) {
     const session = await SessionService.getSession(sessionId);
     if (session && session.userType === 'admin') {
-      return res.redirect("/admin");
+      return res.redirect('/admin');
     }
   }
 
-  adminRespond(req, res, "login", {
-    pageName: "Admin Login"
+  adminRespond(req, res, 'login', {
+    pageName: 'Admin Login',
   });
 };
 
@@ -67,9 +67,9 @@ export const postAdminLogin = async (req: Request, res: Response) => {
 
     // Basic validation
     if (!email || !password) {
-      return adminRespond(req, res, "login", {
-        pageName: "Admin Login",
-        error: "Email and password are required"
+      return adminRespond(req, res, 'login', {
+        pageName: 'Admin Login',
+        error: 'Email and password are required',
       });
     }
 
@@ -77,26 +77,26 @@ export const postAdminLogin = async (req: Request, res: Response) => {
     const admin = await AdminRepository.findByEmail(email);
 
     if (!admin) {
-      return adminRespond(req, res, "login", {
-        pageName: "Admin Login",
-        error: "Invalid email or password"
+      return adminRespond(req, res, 'login', {
+        pageName: 'Admin Login',
+        error: 'Invalid email or password',
       });
     }
 
     // Verify password
     const isValidPassword = await bcrypt.compare(password, admin.passwordHash);
     if (!isValidPassword) {
-      return adminRespond(req, res, "login", {
-        pageName: "Admin Login",
-        error: "Invalid email or password"
+      return adminRespond(req, res, 'login', {
+        pageName: 'Admin Login',
+        error: 'Invalid email or password',
       });
     }
 
     // Check admin status
     if (admin.status !== 'active') {
-      return adminRespond(req, res, "login", {
-        pageName: "Admin Login",
-        error: "Account is not active. Please contact super admin."
+      return adminRespond(req, res, 'login', {
+        pageName: 'Admin Login',
+        error: 'Account is not active. Please contact super admin.',
       });
     }
 
@@ -125,14 +125,13 @@ export const postAdminLogin = async (req: Request, res: Response) => {
     await AdminRepository.updateLastLogin(admin.adminId);
 
     // Redirect to dashboard
-    return res.redirect("/admin");
-
+    return res.redirect('/admin');
   } catch (error) {
     logger.error('Error:', error);
-    
-    adminRespond(req, res, "login", {
-      pageName: "Admin Login",
-      error: "An error occurred during login"
+
+    adminRespond(req, res, 'login', {
+      pageName: 'Admin Login',
+      error: 'An error occurred during login',
     });
   }
 };
@@ -142,7 +141,7 @@ export const postAdminLogout = async (req: Request, res: Response) => {
   try {
     // Get session ID from cookie
     const sessionId = req.cookies?.[SESSION_COOKIE_NAME];
-    
+
     // Invalidate session in database
     if (sessionId) {
       await SessionService.invalidateSession(sessionId);
@@ -152,27 +151,27 @@ export const postAdminLogout = async (req: Request, res: Response) => {
     res.clearCookie(SESSION_COOKIE_NAME);
 
     // Redirect to login page
-    res.redirect("/admin/login");
+    res.redirect('/admin/login');
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.clearCookie(SESSION_COOKIE_NAME);
-    res.redirect("/admin/login");
+    res.redirect('/admin/login');
   }
 };
 
 // GET: admin profile
 export const getAdminProfile = async (req: Request, res: Response) => {
   try {
-    adminRespond(req, res, "profile", {
-      pageName: "Admin Profile",
+    adminRespond(req, res, 'profile', {
+      pageName: 'Admin Profile',
     });
   } catch (error) {
     logger.error('Error:', error);
-    
-    adminRespond(req, res, "error", {
-      pageName: "Error",
-      error: "Failed to load profile"
+
+    adminRespond(req, res, 'error', {
+      pageName: 'Error',
+      error: 'Failed to load profile',
     });
   }
 };

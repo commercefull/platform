@@ -11,7 +11,7 @@ export {
   SearchFacets,
   FacetValue,
   PriceRangeFacet,
-  AttributeFacet
+  AttributeFacet,
 } from './ProductSearchService';
 
 export { default as productSearchService } from './ProductSearchService';

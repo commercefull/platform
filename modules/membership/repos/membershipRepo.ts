@@ -1,10 +1,10 @@
 /**
  * Membership Repository Facade
- * 
+ *
  * This provides a unified interface for membership operations, maintaining
  * backward compatibility with existing controllers while delegating to
  * specialized repositories.
- * 
+ *
  * For direct access to specific entities, use the specialized repos:
  * - membershipPlanRepo.ts - Membership plans
  * - membershipBenefitRepo.ts - Benefits
@@ -72,7 +72,7 @@ export interface UserMembershipWithTier extends UserMembership {
 
 /**
  * MembershipRepo class - Facade for membership operations
- * 
+ *
  * This class maintains backward compatibility with existing controllers
  * while delegating to the new specialized repositories.
  */
@@ -121,7 +121,7 @@ export class MembershipRepo {
       visibilityRules: null,
       availabilityRules: null,
       customFields: null,
-      createdBy: null
+      createdBy: null,
     });
     return this.planToTier(plan);
   }
@@ -156,14 +156,14 @@ export class MembershipRepo {
   async findBenefitsByTierId(tierId: string): Promise<LegacyMembershipBenefit[]> {
     const planBenefits = await membershipPlanBenefitRepo.findByPlanId(tierId, true);
     const benefits: LegacyMembershipBenefit[] = [];
-    
+
     for (const pb of planBenefits) {
       const benefit = await membershipBenefitRepo.findById(pb.benefitId);
       if (benefit) {
         benefits.push(this.benefitToLegacy(benefit, [tierId]));
       }
     }
-    
+
     return benefits;
   }
 
@@ -190,14 +190,14 @@ export class MembershipRepo {
       priority: 0,
       benefitType: params.benefitType as any,
       valueType: params.discountPercentage ? 'percentage' : 'fixed',
-      value: params.discountPercentage 
+      value: params.discountPercentage
         ? { percentage: params.discountPercentage }
-        : params.discountAmount 
+        : params.discountAmount
           ? { amount: params.discountAmount }
           : null,
       icon: null,
       rules: null,
-      createdBy: null
+      createdBy: null,
     });
 
     // Link benefit to plans
@@ -206,22 +206,25 @@ export class MembershipRepo {
         planId,
         benefitId: benefit.membershipBenefitId,
         isActive: true,
-        priority: 0
+        priority: 0,
       });
     }
 
     return this.benefitToLegacy(benefit, params.tierIds);
   }
 
-  async updateBenefit(id: string, params: Partial<{
-    name: string;
-    description: string;
-    tierIds: string[];
-    benefitType: string;
-    discountPercentage: number;
-    discountAmount: number;
-    isActive: boolean;
-  }>): Promise<LegacyMembershipBenefit> {
+  async updateBenefit(
+    id: string,
+    params: Partial<{
+      name: string;
+      description: string;
+      tierIds: string[];
+      benefitType: string;
+      discountPercentage: number;
+      discountAmount: number;
+      isActive: boolean;
+    }>,
+  ): Promise<LegacyMembershipBenefit> {
     const updateData: any = {};
     if (params.name !== undefined) updateData.name = params.name;
     if (params.description !== undefined) updateData.description = params.description;
@@ -258,7 +261,7 @@ export class MembershipRepo {
   async findUserMembershipWithTier(id: string): Promise<UserMembershipWithTier | null> {
     const sub = await membershipSubscriptionRepo.findById(id);
     if (!sub) return null;
-    
+
     const plan = await planRepo.findById(sub.membershipPlanId);
     if (!plan) return null;
 
@@ -275,7 +278,7 @@ export class MembershipRepo {
   async findMembershipByUserIdWithTier(userId: string): Promise<UserMembershipWithTier | null> {
     const subs = await membershipSubscriptionRepo.findActiveByCustomerId(userId);
     if (!subs.length) return null;
-    
+
     const sub = subs[0];
     const plan = await planRepo.findById(sub.membershipPlanId);
     if (!plan) return null;
@@ -284,13 +287,9 @@ export class MembershipRepo {
     return { ...membership, tier: this.planToTier(plan) };
   }
 
-  async findAllUserMemberships(
-    limit = 50,
-    offset = 0,
-    filter?: { isActive?: boolean; tierId?: string }
-  ): Promise<UserMembership[]> {
+  async findAllUserMemberships(limit = 50, offset = 0, filter?: { isActive?: boolean; tierId?: string }): Promise<UserMembership[]> {
     let subs: any[];
-    
+
     if (filter?.tierId) {
       subs = await membershipSubscriptionRepo.findByPlanId(filter.tierId, limit, offset);
     } else if (filter?.isActive !== undefined) {
@@ -298,7 +297,7 @@ export class MembershipRepo {
     } else {
       subs = await membershipSubscriptionRepo.findByStatus('active', limit);
     }
-    
+
     return subs.map(s => this.subscriptionToUserMembership(s));
   }
 
@@ -319,13 +318,16 @@ export class MembershipRepo {
       billingCycleOverride: null,
       paymentMethodId: params.paymentMethod || null,
       notes: null,
-      createdBy: null
+      createdBy: null,
     });
 
     return this.subscriptionToUserMembership(sub);
   }
 
-  async updateUserMembership(id: string, params: Partial<Omit<UserMembership, 'id' | 'userId' | 'createdAt' | 'updatedAt'>>): Promise<UserMembership> {
+  async updateUserMembership(
+    id: string,
+    params: Partial<Omit<UserMembership, 'id' | 'userId' | 'createdAt' | 'updatedAt'>>,
+  ): Promise<UserMembership> {
     const updateData: any = {};
     if (params.tierId !== undefined) updateData.membershipPlanId = params.tierId;
     if (params.isActive !== undefined) updateData.status = params.isActive ? 'active' : 'cancelled';
@@ -365,7 +367,7 @@ export class MembershipRepo {
       level: plan.level,
       isActive: plan.isActive,
       createdAt: plan.createdAt.toString(),
-      updatedAt: plan.updatedAt.toString()
+      updatedAt: plan.updatedAt.toString(),
     };
   }
 
@@ -381,7 +383,7 @@ export class MembershipRepo {
       discountAmount: value.amount,
       isActive: benefit.isActive,
       createdAt: benefit.createdAt.toString(),
-      updatedAt: benefit.updatedAt.toString()
+      updatedAt: benefit.updatedAt.toString(),
     };
   }
 
@@ -399,7 +401,7 @@ export class MembershipRepo {
       nextRenewalDate: sub.nextBillingDate?.toString(),
       paymentMethod: sub.paymentMethodId,
       createdAt: sub.createdAt.toString(),
-      updatedAt: sub.updatedAt.toString()
+      updatedAt: sub.updatedAt.toString(),
     };
   }
 }

@@ -10,7 +10,7 @@ type FormInputOpts = {
   class?: string;
   id?: string;
   style?: string;
-}
+};
 
 export const formInput = (options: FormInputOpts) => {
   return `
@@ -18,30 +18,30 @@ export const formInput = (options: FormInputOpts) => {
       <label class="form-label">${options.label} ${options.required ? '<span class="text-danger">*</span>' : ''}</label>
       <input class="${options.class ? `${options.class} form-control` : 'form-control'}" type="${options.type}" name="${options.name}" id="${options.id || options.name}" placeholder="${options.placeholder}" ${options.required ? 'required' : ''} ${options.value ? `value="${options.value}"` : ''} ${options.disabled ? 'disabled' : ''}>
     </div>
-  `
-}
+  `;
+};
 
 type FormHiddenOpts = Pick<FormInputOpts, 'name' | 'value'> & { id: string };
 
 export const formHidden = (options: FormHiddenOpts) => {
   return `
     <input type="hidden" name="${options.name}" id="${options.id}" ${options.value ? `value="${options.value}"` : ''}>
-  `
-}
+  `;
+};
 
 type FormSelectOpts = {
   name: string;
   label: string;
   wrapClass: string;
   firstOption?: string;
-  options: { value: string, text: string }[];
+  options: { value: string; text: string }[];
   required?: boolean;
   selected?: string;
   disabled?: boolean;
   class?: string;
   style?: string;
   id?: string;
-}
+};
 
 export const formSelect = (options: FormSelectOpts) => {
   return `
@@ -52,10 +52,13 @@ export const formSelect = (options: FormSelectOpts) => {
         ${options.options.map(option => `<option value="${option.value}" ${options.selected === option.value ? 'selected' : ''}>${option.text}</option>`).join('')}
       </select>
     </div>
-  `
-}
+  `;
+};
 
-type FormMultiSelectOpts = Pick<FormSelectOpts, 'name' | 'label' | 'wrapClass' | 'options' | 'required' | 'disabled' | 'class' | 'selected' | 'style'> & { id?: string };
+type FormMultiSelectOpts = Pick<
+  FormSelectOpts,
+  'name' | 'label' | 'wrapClass' | 'options' | 'required' | 'disabled' | 'class' | 'selected' | 'style'
+> & { id?: string };
 
 export const formMultiSelect = (options: FormMultiSelectOpts) => {
   return `
@@ -65,8 +68,8 @@ export const formMultiSelect = (options: FormMultiSelectOpts) => {
         ${options.options.map(option => `<option value="${option.value}" ${options.selected === option.value ? 'selected' : ''}>${option.text}</option>`).join('')}
       </select>
     </div>
-  `
-}
+  `;
+};
 
 type FormTextOpts = {
   name: string;
@@ -79,7 +82,7 @@ type FormTextOpts = {
   class?: string;
   id?: string;
   style?: string;
-}
+};
 
 export const formText = (options: FormTextOpts) => {
   return `
@@ -87,8 +90,8 @@ export const formText = (options: FormTextOpts) => {
       <label class="form-label">${options.label} ${options.required ? '<span class="text-danger">*</span>' : ''}</label>
       <textarea class="${options.class ? `${options.class} form-control` : 'form-control'}" name="${options.name}" id="${options.id || options.name}" placeholder="${options.placeholder}" ${options.required ? 'required' : ''} ${options.disabled ? 'disabled' : ''} ${options.style ? `style="${options.style}"` : ''}>${options.value ? options.value : ''}</textarea>
     </div>
-  `
-}
+  `;
+};
 
 type FormCheckboxOpts = {
   name: string;
@@ -100,7 +103,7 @@ type FormCheckboxOpts = {
   class?: string;
   id?: string;
   style?: string;
-}
+};
 
 export const formCheckbox = (options: FormCheckboxOpts) => {
   return `
@@ -111,15 +114,15 @@ export const formCheckbox = (options: FormCheckboxOpts) => {
         ${options.required ? 'required' : ''} ${options.checked ? 'checked' : ''} ${options.disabled ? 'disabled' : ''} ${options.style ? `style="${options.style}"` : ''}>
       </div>
     </div>
-  `
-}
+  `;
+};
 
 type FormSubmitOpts = {
   wrapClass: string;
   cancelUrl: string;
   id?: string;
   style?: string;
-}
+};
 
 export const formSubmit = (options: FormSubmitOpts) => {
   return `
@@ -129,13 +132,13 @@ export const formSubmit = (options: FormSubmitOpts) => {
         <button class="btn btn-secondary" name="submit" id="${options.id || 'submit'}" ${options.style ? `style="${options.style}"` : ''}>Save</button>
       </div>
     </div>
-  `
-}
+  `;
+};
 
 export const formLegend = (title: string) => {
   return `
     <div class="col-md-12 mt-4">
       <legend class="px-0 text-capitalize">${title}</legend>
     </div>
-  `
-}
+  `;
+};

@@ -10,12 +10,10 @@ exports.seed = async function (knex) {
     await trx('merchantContact').where('merchantId', TEST_MERCHANT_ID).del();
     await trx('merchantAddress').where('merchantId', TEST_MERCHANT_ID).del();
     await trx('merchant').where('merchantId', TEST_MERCHANT_ID).del();
-    
+
     // Also cleanup by slug just in case
-    const merchantIds = await trx('merchant')
-      .select('merchantId')
-      .where({ slug: 'sample-merchant' });
-      
+    const merchantIds = await trx('merchant').select('merchantId').where({ slug: 'sample-merchant' });
+
     if (merchantIds.length > 0) {
       const ids = merchantIds.map(m => m.merchantId);
       await trx('merchantContact').whereIn('merchantId', ids).del();
@@ -37,7 +35,7 @@ exports.seed = async function (knex) {
         verificationStatus: 'verified',
         businessType: 'llc',
         commissionRate: 10.0,
-        payoutSchedule: 'monthly'
+        payoutSchedule: 'monthly',
       })
       .returning(['merchantId']);
 
@@ -56,7 +54,7 @@ exports.seed = async function (knex) {
       postalCode: '12345',
       country: 'US',
       phone: '555-123-4567',
-      isVerified: true
+      isVerified: true,
     });
 
     await trx('merchantContact').insert({
@@ -67,7 +65,7 @@ exports.seed = async function (knex) {
       phone: '555-123-4567',
       jobTitle: 'Owner',
       isPrimary: true,
-      department: 'general'
+      department: 'general',
     });
   });
 };

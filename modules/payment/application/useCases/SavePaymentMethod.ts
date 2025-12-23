@@ -1,6 +1,6 @@
 /**
  * SavePaymentMethod Use Case
- * 
+ *
  * Saves a customer's payment method for future use.
  */
 
@@ -41,10 +41,7 @@ export class SavePaymentMethodUseCase {
     }
 
     // Check if payment method already exists
-    const existing = await this.paymentRepository.findPaymentMethodByProviderId(
-      input.customerId,
-      input.providerPaymentMethodId
-    );
+    const existing = await this.paymentRepository.findPaymentMethodByProviderId(input.customerId, input.providerPaymentMethodId);
     if (existing) {
       throw new Error('Payment method already saved');
     }

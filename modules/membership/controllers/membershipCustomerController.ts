@@ -1,8 +1,6 @@
 import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
-import { 
-  MembershipRepo 
-} from '../repos/membershipRepo';
+import { MembershipRepo } from '../repos/membershipRepo';
 
 // Create a single instance of the repository to be shared across handlers
 const membershipRepo = new MembershipRepo();
@@ -16,15 +14,15 @@ export const getMembershipTiers = async (req: Request, res: Response): Promise<v
 
     res.status(200).json({
       success: true,
-      data: tiers
+      data: tiers,
     });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({
       success: false,
       message: 'Failed to fetch membership tiers',
-      error: (error as Error).message
+      error: (error as Error).message,
     });
   }
 };
@@ -38,22 +36,22 @@ export const getMembershipTierById = async (req: Request, res: Response): Promis
     if (!tier || !tier.isActive) {
       res.status(404).json({
         success: false,
-        message: "Membership tier not found"
+        message: 'Membership tier not found',
       });
       return;
     }
 
     res.status(200).json({
       success: true,
-      data: tier
+      data: tier,
     });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({
       success: false,
       message: 'Failed to fetch membership tier details',
-      error: (error as Error).message
+      error: (error as Error).message,
     });
   }
 };
@@ -61,30 +59,30 @@ export const getMembershipTierById = async (req: Request, res: Response): Promis
 export const getTierBenefits = async (req: Request, res: Response): Promise<void> => {
   try {
     const { tierId } = req.params;
-    
+
     // Check if tier exists and is active
     const tier = await membershipRepo.findTierById(tierId);
     if (!tier || !tier.isActive) {
       res.status(404).json({
         success: false,
-        message: "Membership tier not found"
+        message: 'Membership tier not found',
       });
       return;
     }
-    
+
     const benefits = await membershipRepo.findBenefitsByTierId(tierId);
-    
+
     res.status(200).json({
       success: true,
-      data: benefits
+      data: benefits,
     });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({
       success: false,
       message: 'Failed to fetch membership tier benefits',
-      error: (error as Error).message
+      error: (error as Error).message,
     });
   }
 };
@@ -98,7 +96,7 @@ export const getUserMembershipByUserId = async (req: Request, res: Response): Pr
     if (!membership) {
       res.status(404).json({
         success: false,
-        message: `No active membership found for user with ID ${userId}`
+        message: `No active membership found for user with ID ${userId}`,
       });
       return;
     }
@@ -107,7 +105,7 @@ export const getUserMembershipByUserId = async (req: Request, res: Response): Pr
     if (!membership.isActive) {
       res.status(404).json({
         success: false,
-        message: `No active membership found for user with ID ${userId}`
+        message: `No active membership found for user with ID ${userId}`,
       });
       return;
     }
@@ -119,16 +117,16 @@ export const getUserMembershipByUserId = async (req: Request, res: Response): Pr
       success: true,
       data: {
         ...membership,
-        tier
-      }
+        tier,
+      },
     });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({
       success: false,
       message: 'Failed to fetch user membership',
-      error: (error as Error).message
+      error: (error as Error).message,
     });
   }
 };
@@ -136,30 +134,30 @@ export const getUserMembershipByUserId = async (req: Request, res: Response): Pr
 export const getUserMembershipBenefits = async (req: Request, res: Response): Promise<void> => {
   try {
     const { userId } = req.params;
-    
+
     // First check if user has an active membership
     const membership = await membershipRepo.findMembershipByUserId(userId);
     if (!membership || !membership.isActive) {
       res.status(404).json({
         success: false,
-        message: `No active membership found for user with ID ${userId}`
+        message: `No active membership found for user with ID ${userId}`,
       });
       return;
     }
-    
+
     const benefits = await membershipRepo.getUserMembershipBenefits(userId);
 
     res.status(200).json({
       success: true,
-      data: benefits
+      data: benefits,
     });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({
       success: false,
       message: 'Failed to fetch user membership benefits',
-      error: (error as Error).message
+      error: (error as Error).message,
     });
   }
 };

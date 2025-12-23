@@ -33,7 +33,7 @@ export interface GetTaxRateForAddressOutput {
 export class GetTaxRateForAddressUseCase {
   constructor(
     private readonly taxRepository: any,
-    private readonly customerRepository: any
+    private readonly customerRepository: any,
   ) {}
 
   async execute(input: GetTaxRateForAddressInput): Promise<GetTaxRateForAddressOutput> {

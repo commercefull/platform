@@ -1,12 +1,12 @@
 import { AxiosInstance } from 'axios';
-import { 
-  setupSubscriptionTests, 
-  cleanupSubscriptionTests, 
-  createTestSubscriptionProduct, 
+import {
+  setupSubscriptionTests,
+  cleanupSubscriptionTests,
+  createTestSubscriptionProduct,
   createTestSubscriptionPlan,
   SEEDED_SUBSCRIPTION_PRODUCT_IDS,
   SEEDED_SUBSCRIPTION_PLAN_IDS,
-  SEEDED_CUSTOMER_SUBSCRIPTION_IDS
+  SEEDED_CUSTOMER_SUBSCRIPTION_IDS,
 } from './testUtils';
 
 describe('Subscription Feature Tests', () => {
@@ -16,7 +16,7 @@ describe('Subscription Feature Tests', () => {
   const createdResources = {
     productIds: [] as string[],
     planIds: [] as string[],
-    subscriptionIds: [] as string[]
+    subscriptionIds: [] as string[],
   };
 
   beforeAll(async () => {
@@ -40,7 +40,7 @@ describe('Subscription Feature Tests', () => {
   describe('Subscription Products (Business)', () => {
     it('should list subscription products', async () => {
       const response = await client.get('/business/subscriptions/products', {
-        headers: authHeaders()
+        headers: authHeaders(),
       });
 
       expect(response.status).toBe(200);
@@ -50,7 +50,7 @@ describe('Subscription Feature Tests', () => {
 
     it('should get seeded Monthly Box product', async () => {
       const response = await client.get(`/business/subscriptions/products/${SEEDED_SUBSCRIPTION_PRODUCT_IDS.MONTHLY_BOX}`, {
-        headers: authHeaders()
+        headers: authHeaders(),
       });
 
       expect(response.status).toBe(200);
@@ -60,7 +60,7 @@ describe('Subscription Feature Tests', () => {
 
     it('should return 404 for non-existent product', async () => {
       const response = await client.get('/business/subscriptions/products/00000000-0000-0000-0000-000000000000', {
-        headers: authHeaders()
+        headers: authHeaders(),
       });
 
       expect(response.status).toBe(404);
@@ -74,7 +74,7 @@ describe('Subscription Feature Tests', () => {
   describe('Subscription Plans (Business)', () => {
     it('should list subscription plans for a product', async () => {
       const response = await client.get(`/business/subscriptions/products/${SEEDED_SUBSCRIPTION_PRODUCT_IDS.MONTHLY_BOX}/plans`, {
-        headers: authHeaders()
+        headers: authHeaders(),
       });
 
       expect(response.status).toBe(200);
@@ -84,9 +84,12 @@ describe('Subscription Feature Tests', () => {
     });
 
     it('should get seeded Basic Monthly Box plan', async () => {
-      const response = await client.get(`/business/subscriptions/products/${SEEDED_SUBSCRIPTION_PRODUCT_IDS.MONTHLY_BOX}/plans/${SEEDED_SUBSCRIPTION_PLAN_IDS.MONTHLY_BOX_BASIC}`, {
-        headers: authHeaders()
-      });
+      const response = await client.get(
+        `/business/subscriptions/products/${SEEDED_SUBSCRIPTION_PRODUCT_IDS.MONTHLY_BOX}/plans/${SEEDED_SUBSCRIPTION_PLAN_IDS.MONTHLY_BOX_BASIC}`,
+        {
+          headers: authHeaders(),
+        },
+      );
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
@@ -94,9 +97,12 @@ describe('Subscription Feature Tests', () => {
     });
 
     it('should get seeded Premium Monthly Box plan (popular)', async () => {
-      const response = await client.get(`/business/subscriptions/products/${SEEDED_SUBSCRIPTION_PRODUCT_IDS.MONTHLY_BOX}/plans/${SEEDED_SUBSCRIPTION_PLAN_IDS.MONTHLY_BOX_PREMIUM}`, {
-        headers: authHeaders()
-      });
+      const response = await client.get(
+        `/business/subscriptions/products/${SEEDED_SUBSCRIPTION_PRODUCT_IDS.MONTHLY_BOX}/plans/${SEEDED_SUBSCRIPTION_PLAN_IDS.MONTHLY_BOX_PREMIUM}`,
+        {
+          headers: authHeaders(),
+        },
+      );
 
       // May return 404 if seed data doesn't exist
       if (response.status === 200) {
@@ -112,7 +118,7 @@ describe('Subscription Feature Tests', () => {
   describe('Customer Subscription Management (Business)', () => {
     it('should list customer subscriptions', async () => {
       const response = await client.get('/business/subscriptions/subscriptions', {
-        headers: authHeaders()
+        headers: authHeaders(),
       });
 
       // May return 200 or 500 depending on DB state
@@ -124,7 +130,7 @@ describe('Subscription Feature Tests', () => {
 
     it('should filter subscriptions by status', async () => {
       const response = await client.get('/business/subscriptions/subscriptions?status=active', {
-        headers: authHeaders()
+        headers: authHeaders(),
       });
 
       // May return 200 or 500 depending on DB state
@@ -135,7 +141,7 @@ describe('Subscription Feature Tests', () => {
 
     it('should get seeded active subscription', async () => {
       const response = await client.get(`/business/subscriptions/subscriptions/${SEEDED_CUSTOMER_SUBSCRIPTION_IDS.ACTIVE_MONTHLY}`, {
-        headers: authHeaders()
+        headers: authHeaders(),
       });
 
       expect(response.status).toBe(200);
@@ -149,7 +155,7 @@ describe('Subscription Feature Tests', () => {
   describe('Billing Operations (Business)', () => {
     it('should get pending dunning attempts', async () => {
       const response = await client.get('/business/subscriptions/dunning/pending', {
-        headers: authHeaders()
+        headers: authHeaders(),
       });
 
       expect(response.status).toBe(200);
@@ -158,7 +164,7 @@ describe('Subscription Feature Tests', () => {
 
     it('should get subscriptions due for billing', async () => {
       const response = await client.get('/business/subscriptions/billing/due', {
-        headers: authHeaders()
+        headers: authHeaders(),
       });
 
       expect(response.status).toBe(200);
@@ -221,7 +227,7 @@ describe('Subscription Feature Tests', () => {
 
     it('should reject invalid tokens', async () => {
       const response = await client.get('/business/subscriptions/products', {
-        headers: { Authorization: 'Bearer invalid-token' }
+        headers: { Authorization: 'Bearer invalid-token' },
       });
       expect(response.status).toBe(401);
     });

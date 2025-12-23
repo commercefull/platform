@@ -27,7 +27,7 @@ export class ListStoresQuery {
     public readonly sort?: {
       field: string;
       direction: 'asc' | 'desc';
-    }
+    },
   ) {}
 }
 

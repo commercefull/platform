@@ -122,7 +122,7 @@ export class Order {
       tags: props.tags || [],
       metadata: props.metadata,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     });
   }
 
@@ -131,66 +131,168 @@ export class Order {
   }
 
   // Getters
-  get orderId(): string { return this.props.orderId; }
-  get orderNumber(): string { return this.props.orderNumber; }
-  get customerId(): string | undefined { return this.props.customerId; }
-  get basketId(): string | undefined { return this.props.basketId; }
-  get status(): OrderStatus { return this.props.status; }
-  get paymentStatus(): PaymentStatus { return this.props.paymentStatus; }
-  get fulfillmentStatus(): FulfillmentStatus { return this.props.fulfillmentStatus; }
-  get currencyCode(): string { return this.props.currencyCode; }
-  get subtotal(): Money { return this.props.subtotal; }
-  get discountTotal(): Money { return this.props.discountTotal; }
-  get taxTotal(): Money { return this.props.taxTotal; }
-  get shippingTotal(): Money { return this.props.shippingTotal; }
-  get handlingFee(): Money { return this.props.handlingFee; }
-  get totalAmount(): Money { return this.props.totalAmount; }
-  get totalItems(): number { return this.props.totalItems; }
-  get totalQuantity(): number { return this.props.totalQuantity; }
-  get taxExempt(): boolean { return this.props.taxExempt; }
-  get orderDate(): Date { return this.props.orderDate; }
-  get completedAt(): Date | undefined { return this.props.completedAt; }
-  get cancelledAt(): Date | undefined { return this.props.cancelledAt; }
-  get returnedAt(): Date | undefined { return this.props.returnedAt; }
-  get shippingAddress(): OrderAddress | undefined { return this.props.shippingAddress; }
-  get billingAddress(): OrderAddress | undefined { return this.props.billingAddress; }
-  get customerEmail(): string { return this.props.customerEmail; }
-  get customerPhone(): string | undefined { return this.props.customerPhone; }
-  get customerName(): string | undefined { return this.props.customerName; }
-  get customerNotes(): string | undefined { return this.props.customerNotes; }
-  get adminNotes(): string | undefined { return this.props.adminNotes; }
-  get ipAddress(): string | undefined { return this.props.ipAddress; }
-  get userAgent(): string | undefined { return this.props.userAgent; }
-  get referralSource(): string | undefined { return this.props.referralSource; }
-  get estimatedDeliveryDate(): Date | undefined { return this.props.estimatedDeliveryDate; }
-  get hasGiftWrapping(): boolean { return this.props.hasGiftWrapping; }
-  get giftMessage(): string | undefined { return this.props.giftMessage; }
-  get isGift(): boolean { return this.props.isGift; }
-  get isSubscriptionOrder(): boolean { return this.props.isSubscriptionOrder; }
-  get parentOrderId(): string | undefined { return this.props.parentOrderId; }
-  get items(): OrderItem[] { return [...this.props.items]; }
-  get tags(): string[] { return this.props.tags || []; }
-  get metadata(): Record<string, any> | undefined { return this.props.metadata; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
-  get deletedAt(): Date | undefined { return this.props.deletedAt; }
+  get orderId(): string {
+    return this.props.orderId;
+  }
+  get orderNumber(): string {
+    return this.props.orderNumber;
+  }
+  get customerId(): string | undefined {
+    return this.props.customerId;
+  }
+  get basketId(): string | undefined {
+    return this.props.basketId;
+  }
+  get status(): OrderStatus {
+    return this.props.status;
+  }
+  get paymentStatus(): PaymentStatus {
+    return this.props.paymentStatus;
+  }
+  get fulfillmentStatus(): FulfillmentStatus {
+    return this.props.fulfillmentStatus;
+  }
+  get currencyCode(): string {
+    return this.props.currencyCode;
+  }
+  get subtotal(): Money {
+    return this.props.subtotal;
+  }
+  get discountTotal(): Money {
+    return this.props.discountTotal;
+  }
+  get taxTotal(): Money {
+    return this.props.taxTotal;
+  }
+  get shippingTotal(): Money {
+    return this.props.shippingTotal;
+  }
+  get handlingFee(): Money {
+    return this.props.handlingFee;
+  }
+  get totalAmount(): Money {
+    return this.props.totalAmount;
+  }
+  get totalItems(): number {
+    return this.props.totalItems;
+  }
+  get totalQuantity(): number {
+    return this.props.totalQuantity;
+  }
+  get taxExempt(): boolean {
+    return this.props.taxExempt;
+  }
+  get orderDate(): Date {
+    return this.props.orderDate;
+  }
+  get completedAt(): Date | undefined {
+    return this.props.completedAt;
+  }
+  get cancelledAt(): Date | undefined {
+    return this.props.cancelledAt;
+  }
+  get returnedAt(): Date | undefined {
+    return this.props.returnedAt;
+  }
+  get shippingAddress(): OrderAddress | undefined {
+    return this.props.shippingAddress;
+  }
+  get billingAddress(): OrderAddress | undefined {
+    return this.props.billingAddress;
+  }
+  get customerEmail(): string {
+    return this.props.customerEmail;
+  }
+  get customerPhone(): string | undefined {
+    return this.props.customerPhone;
+  }
+  get customerName(): string | undefined {
+    return this.props.customerName;
+  }
+  get customerNotes(): string | undefined {
+    return this.props.customerNotes;
+  }
+  get adminNotes(): string | undefined {
+    return this.props.adminNotes;
+  }
+  get ipAddress(): string | undefined {
+    return this.props.ipAddress;
+  }
+  get userAgent(): string | undefined {
+    return this.props.userAgent;
+  }
+  get referralSource(): string | undefined {
+    return this.props.referralSource;
+  }
+  get estimatedDeliveryDate(): Date | undefined {
+    return this.props.estimatedDeliveryDate;
+  }
+  get hasGiftWrapping(): boolean {
+    return this.props.hasGiftWrapping;
+  }
+  get giftMessage(): string | undefined {
+    return this.props.giftMessage;
+  }
+  get isGift(): boolean {
+    return this.props.isGift;
+  }
+  get isSubscriptionOrder(): boolean {
+    return this.props.isSubscriptionOrder;
+  }
+  get parentOrderId(): string | undefined {
+    return this.props.parentOrderId;
+  }
+  get items(): OrderItem[] {
+    return [...this.props.items];
+  }
+  get tags(): string[] {
+    return this.props.tags || [];
+  }
+  get metadata(): Record<string, any> | undefined {
+    return this.props.metadata;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
+  get deletedAt(): Date | undefined {
+    return this.props.deletedAt;
+  }
 
   // Calculated properties
-  get isPending(): boolean { return this.props.status === OrderStatus.PENDING; }
-  get isProcessing(): boolean { return this.props.status === OrderStatus.PROCESSING; }
-  get isCompleted(): boolean { return this.props.status === OrderStatus.COMPLETED; }
-  get isCancelled(): boolean { return this.props.status === OrderStatus.CANCELLED; }
-  get isRefunded(): boolean { return this.props.status === OrderStatus.REFUNDED; }
-  get isPaid(): boolean { return this.props.paymentStatus === PaymentStatus.PAID; }
-  get isFulfilled(): boolean { return this.props.fulfillmentStatus === FulfillmentStatus.FULFILLED; }
+  get isPending(): boolean {
+    return this.props.status === OrderStatus.PENDING;
+  }
+  get isProcessing(): boolean {
+    return this.props.status === OrderStatus.PROCESSING;
+  }
+  get isCompleted(): boolean {
+    return this.props.status === OrderStatus.COMPLETED;
+  }
+  get isCancelled(): boolean {
+    return this.props.status === OrderStatus.CANCELLED;
+  }
+  get isRefunded(): boolean {
+    return this.props.status === OrderStatus.REFUNDED;
+  }
+  get isPaid(): boolean {
+    return this.props.paymentStatus === PaymentStatus.PAID;
+  }
+  get isFulfilled(): boolean {
+    return this.props.fulfillmentStatus === FulfillmentStatus.FULFILLED;
+  }
 
   get canBeCancelled(): boolean {
     return [OrderStatus.PENDING, OrderStatus.PROCESSING, OrderStatus.PAYMENT_PENDING].includes(this.props.status);
   }
 
   get canBeRefunded(): boolean {
-    return [OrderStatus.PROCESSING, OrderStatus.SHIPPED, OrderStatus.DELIVERED, OrderStatus.COMPLETED].includes(this.props.status) 
-      && this.props.paymentStatus === PaymentStatus.PAID;
+    return (
+      [OrderStatus.PROCESSING, OrderStatus.SHIPPED, OrderStatus.DELIVERED, OrderStatus.COMPLETED].includes(this.props.status) &&
+      this.props.paymentStatus === PaymentStatus.PAID
+    );
   }
 
   // Domain methods
@@ -220,15 +322,15 @@ export class Order {
     if (!canTransitionTo(this.props.status, newStatus)) {
       throw new Error(`Cannot transition order from ${this.props.status} to ${newStatus}`);
     }
-    
+
     this.props.status = newStatus;
-    
+
     if (newStatus === OrderStatus.COMPLETED) {
       this.props.completedAt = new Date();
     } else if (newStatus === OrderStatus.CANCELLED) {
       this.props.cancelledAt = new Date();
     }
-    
+
     this.touch();
   }
 
@@ -288,7 +390,7 @@ export class Order {
   }
 
   addAdminNote(note: string): void {
-    this.props.adminNotes = this.props.adminNotes 
+    this.props.adminNotes = this.props.adminNotes
       ? `${this.props.adminNotes}\n${new Date().toISOString()}: ${note}`
       : `${new Date().toISOString()}: ${note}`;
     this.touch();
@@ -364,11 +466,7 @@ export class Order {
     this.props.taxTotal = taxTotal;
     this.props.totalItems = this.props.items.length;
     this.props.totalQuantity = totalQuantity;
-    this.props.totalAmount = subtotal
-      .subtract(discountTotal)
-      .add(taxTotal)
-      .add(this.props.shippingTotal)
-      .add(this.props.handlingFee);
+    this.props.totalAmount = subtotal.subtract(discountTotal).add(taxTotal).add(this.props.shippingTotal).add(this.props.handlingFee);
   }
 
   private touch(): void {
@@ -422,7 +520,7 @@ export class Order {
       metadata: this.props.metadata,
       createdAt: this.props.createdAt.toISOString(),
       updatedAt: this.props.updatedAt.toISOString(),
-      deletedAt: this.props.deletedAt?.toISOString()
+      deletedAt: this.props.deletedAt?.toISOString(),
     };
   }
 }

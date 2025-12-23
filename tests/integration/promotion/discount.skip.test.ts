@@ -20,10 +20,9 @@ describe('Discount Tests', () => {
 
   it('should create a discount', async () => {
     if (!adminToken) {
-      
       return;
     }
-    
+
     const discountData = {
       name: 'Test Discount ' + Date.now(),
       description: 'Test discount for integration tests',
@@ -36,34 +35,33 @@ describe('Discount Tests', () => {
       // Don't include applicableProducts/Categories if they're placeholder IDs
       combinable: true,
       priority: 1,
-      status: 'active'
+      status: 'active',
     };
-    
+
     const response = await client.post('/business/discounts', discountData, {
-      headers: { Authorization: `Bearer ${adminToken}` }
+      headers: { Authorization: `Bearer ${adminToken}` },
     });
-    
+
     expect(response.status).toBe(201);
     expect(response.data.success).toBe(true);
     expect(response.data.data).toHaveProperty('discountId');
-    
+
     discountId = response.data.data.discountId;
   });
 
   it('should get active discounts', async () => {
     if (!adminToken) {
-      
       return;
     }
-    
+
     const response = await client.get('/business/discounts', {
-      headers: { Authorization: `Bearer ${adminToken}` }
+      headers: { Authorization: `Bearer ${adminToken}` },
     });
-    
+
     expect(response.status).toBe(200);
     expect(response.data.success).toBe(true);
     expect(Array.isArray(response.data.data)).toBe(true);
-    
+
     // Only check for specific discount if it was created
     if (discountId) {
       const foundDiscount = response.data.data.find((d: any) => d.discountId === discountId);
@@ -73,14 +71,13 @@ describe('Discount Tests', () => {
 
   it('should get discounts by product ID', async () => {
     if (!adminToken || !testProductId) {
-      
       return;
     }
-    
+
     const response = await client.get(`/business/discounts/product/${testProductId}`, {
-      headers: { Authorization: `Bearer ${adminToken}` }
+      headers: { Authorization: `Bearer ${adminToken}` },
     });
-    
+
     expect(response.status).toBe(200);
     expect(response.data.success).toBe(true);
     expect(Array.isArray(response.data.data)).toBe(true);
@@ -88,14 +85,13 @@ describe('Discount Tests', () => {
 
   it('should get discounts by category ID', async () => {
     if (!adminToken || !testCategoryId) {
-      
       return;
     }
-    
+
     const response = await client.get(`/business/discounts/category/${testCategoryId}`, {
-      headers: { Authorization: `Bearer ${adminToken}` }
+      headers: { Authorization: `Bearer ${adminToken}` },
     });
-    
+
     expect(response.status).toBe(200);
     expect(response.data.success).toBe(true);
     expect(Array.isArray(response.data.data)).toBe(true);
@@ -103,19 +99,18 @@ describe('Discount Tests', () => {
 
   it('should update a discount', async () => {
     if (!adminToken || !discountId) {
-      
       return;
     }
-    
+
     const updateData = {
       name: 'Updated Test Discount',
-      value: 20
+      value: 20,
     };
-    
+
     const response = await client.put(`/business/discounts/${discountId}`, updateData, {
-      headers: { Authorization: `Bearer ${adminToken}` }
+      headers: { Authorization: `Bearer ${adminToken}` },
     });
-    
+
     expect(response.status).toBe(200);
     expect(response.data.success).toBe(true);
     expect(response.data.data.name).toBe(updateData.name);
@@ -124,22 +119,21 @@ describe('Discount Tests', () => {
 
   it('should delete a discount', async () => {
     if (!adminToken || !discountId) {
-      
       return;
     }
-    
+
     const response = await client.delete(`/business/discounts/${discountId}`, {
-      headers: { Authorization: `Bearer ${adminToken}` }
+      headers: { Authorization: `Bearer ${adminToken}` },
     });
-    
+
     expect(response.status).toBe(200);
     expect(response.data.success).toBe(true);
-    
+
     // Verify the discount is deleted
     const getResponse = await client.get(`/business/discounts/${discountId}`, {
-      headers: { Authorization: `Bearer ${adminToken}` }
+      headers: { Authorization: `Bearer ${adminToken}` },
     });
-    
+
     expect(getResponse.status).toBe(404);
   });
 

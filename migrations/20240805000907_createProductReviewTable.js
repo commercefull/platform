@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function (knex) {
   return knex.schema.createTable('productReview', t => {
     t.uuid('productReviewId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
@@ -20,7 +20,6 @@ exports.up = function(knex) {
     t.string('reviewerEmail', 255);
     t.text('adminResponse');
     t.timestamp('adminResponseDate');
-    
 
     t.index('productId');
     t.index('productVariantId');
@@ -34,6 +33,6 @@ exports.up = function(knex) {
   });
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTable('productReview');
 };

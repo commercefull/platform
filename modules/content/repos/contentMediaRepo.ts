@@ -23,18 +23,10 @@ export type ContentMediaFolderUpdateParams = Partial<Omit<ContentMediaFolder, 'c
 export class ContentMediaRepo {
   // Media methods
   async findMediaById(id: string): Promise<ContentMedia | null> {
-    return queryOne<ContentMedia>(
-      'SELECT * FROM "contentMedia" WHERE "contentMediaId" = $1',
-      [id]
-    );
+    return queryOne<ContentMedia>('SELECT * FROM "contentMedia" WHERE "contentMediaId" = $1', [id]);
   }
 
-  async findAllMedia(
-    folderId?: string,
-    fileType?: string,
-    limit: number = 50,
-    offset: number = 0
-  ): Promise<ContentMedia[]> {
+  async findAllMedia(folderId?: string, fileType?: string, limit: number = 50, offset: number = 0): Promise<ContentMedia[]> {
     let sql = 'SELECT * FROM "contentMedia"';
     const conditions: string[] = [];
     const params: any[] = [];
@@ -74,7 +66,7 @@ export class ContentMediaRepo {
 
   async createMedia(params: ContentMediaCreateParams): Promise<ContentMedia> {
     const now = unixTimestamp();
-    
+
     const result = await queryOne<ContentMedia>(
       `INSERT INTO "contentMedia" 
       ("title", "fileName", "filePath", "fileType", "fileSize", "width", "height", 
@@ -106,8 +98,8 @@ export class ContentMediaRepo {
         now,
         now,
         params.createdBy || null,
-        params.updatedBy || null
-      ]
+        params.updatedBy || null,
+      ],
     );
 
     if (!result) {
@@ -158,7 +150,7 @@ export class ContentMediaRepo {
 
     const result = await queryOne<ContentMedia>(
       `UPDATE "contentMedia" SET ${updateFields.join(', ')} WHERE "contentMediaId" = $${paramIndex} RETURNING *`,
-      values
+      values,
     );
 
     if (!result) {
@@ -169,19 +161,15 @@ export class ContentMediaRepo {
   }
 
   async deleteMedia(id: string): Promise<boolean> {
-    const result = await queryOne<{ id: string }>(
-      'DELETE FROM "contentMedia" WHERE "contentMediaId" = $1 RETURNING "contentMediaId"',
-      [id]
-    );
+    const result = await queryOne<{ id: string }>('DELETE FROM "contentMedia" WHERE "contentMediaId" = $1 RETURNING "contentMediaId"', [
+      id,
+    ]);
     return !!result;
   }
 
   // Folder methods
   async findFolderById(id: string): Promise<ContentMediaFolder | null> {
-    return queryOne<ContentMediaFolder>(
-      'SELECT * FROM "contentMediaFolder" WHERE "contentMediaFolderId" = $1',
-      [id]
-    );
+    return queryOne<ContentMediaFolder>('SELECT * FROM "contentMediaFolder" WHERE "contentMediaFolderId" = $1', [id]);
   }
 
   async findAllFolders(parentId?: string): Promise<ContentMediaFolder[]> {
@@ -203,7 +191,7 @@ export class ContentMediaRepo {
 
   async createFolder(params: ContentMediaFolderCreateParams): Promise<ContentMediaFolder> {
     const now = unixTimestamp();
-    
+
     const result = await queryOne<ContentMediaFolder>(
       `INSERT INTO "contentMediaFolder" 
       ("name", "parentId", "path", "depth", "sortOrder", "createdAt", "updatedAt", "createdBy", "updatedBy") 
@@ -218,8 +206,8 @@ export class ContentMediaRepo {
         now,
         now,
         params.createdBy || null,
-        params.updatedBy || null
-      ]
+        params.updatedBy || null,
+      ],
     );
 
     if (!result) {
@@ -254,7 +242,7 @@ export class ContentMediaRepo {
 
     const result = await queryOne<ContentMediaFolder>(
       `UPDATE "contentMediaFolder" SET ${updateFields.join(', ')} WHERE "contentMediaFolderId" = $${paramIndex} RETURNING *`,
-      values
+      values,
     );
 
     if (!result) {
@@ -268,7 +256,7 @@ export class ContentMediaRepo {
     // Check if folder has media
     const mediaCount = await query<Array<{ count: string }>>(
       'SELECT COUNT(*) as count FROM "contentMedia" WHERE "contentMediaFolderId" = $1',
-      [id]
+      [id],
     );
 
     if (mediaCount && mediaCount.length > 0 && parseInt(mediaCount[0].count) > 0) {
@@ -278,7 +266,7 @@ export class ContentMediaRepo {
     // Check if folder has subfolders
     const subfolderCount = await query<Array<{ count: string }>>(
       'SELECT COUNT(*) as count FROM "contentMediaFolder" WHERE "parentId" = $1',
-      [id]
+      [id],
     );
 
     if (subfolderCount && subfolderCount.length > 0 && parseInt(subfolderCount[0].count) > 0) {
@@ -287,7 +275,7 @@ export class ContentMediaRepo {
 
     const result = await queryOne<{ id: string }>(
       'DELETE FROM "contentMediaFolder" WHERE "contentMediaFolderId" = $1 RETURNING "contentMediaFolderId"',
-      [id]
+      [id],
     );
     return !!result;
   }

@@ -13,7 +13,7 @@ exports.up = function (knex) {
     t.enum('status', ['pending', 'completed', 'failed']).notNullable().defaultTo('pending');
     t.jsonb('gatewayResponse');
     t.uuid('refundedBy');
-    
+
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     t.index('orderPaymentId');

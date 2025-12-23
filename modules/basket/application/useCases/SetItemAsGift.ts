@@ -15,7 +15,7 @@ export class SetItemAsGiftCommand {
   constructor(
     public readonly basketId: string,
     public readonly basketItemId: string,
-    public readonly giftMessage?: string
+    public readonly giftMessage?: string,
   ) {}
 }
 
@@ -43,7 +43,7 @@ export class SetItemAsGiftUseCase {
     eventBus.emit('basket.item_set_as_gift', {
       basketId: command.basketId,
       basketItemId: command.basketItemId,
-      giftMessage: command.giftMessage
+      giftMessage: command.giftMessage,
     });
 
     const updatedBasket = await this.basketRepository.findById(command.basketId);
@@ -67,12 +67,12 @@ export class SetItemAsGiftUseCase {
         unitPrice: item.unitPrice.amount,
         lineTotal: item.lineTotal.amount,
         imageUrl: item.imageUrl,
-        isGift: item.isGift
+        isGift: item.isGift,
       })),
       itemCount: basket.itemCount,
       subtotal: basket.subtotal.amount,
       createdAt: basket.createdAt.toISOString(),
-      updatedAt: basket.updatedAt.toISOString()
+      updatedAt: basket.updatedAt.toISOString(),
     };
   }
 }

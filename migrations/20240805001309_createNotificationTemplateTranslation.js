@@ -1,7 +1,7 @@
 /**
  * Notification Template Translation Table
  * Stores multi-language translations for email/SMS/push notification templates
- * 
+ *
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
@@ -32,7 +32,7 @@ exports.up = function (knex) {
     t.boolean('isActive').notNullable().defaultTo(true);
     // Preview data for testing
     t.jsonb('previewData');
-    
+
     t.index('notificationTemplateId');
     t.index('localeId');
     t.index('isActive');

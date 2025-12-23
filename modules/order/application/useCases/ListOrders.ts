@@ -30,7 +30,7 @@ export class ListOrdersCommand {
     public readonly limit: number = 50,
     public readonly offset: number = 0,
     public readonly orderBy: string = 'createdAt',
-    public readonly orderDirection: 'asc' | 'desc' = 'desc'
+    public readonly orderDirection: 'asc' | 'desc' = 'desc',
   ) {}
 }
 
@@ -72,12 +72,12 @@ export class ListOrdersUseCase {
 
   async execute(command: ListOrdersCommand): Promise<ListOrdersResponse> {
     const filters: OrderFilters = command.filters || {};
-    
+
     const pagination: PaginationOptions = {
       limit: command.limit,
       offset: command.offset,
       orderBy: command.orderBy,
-      orderDirection: command.orderDirection
+      orderDirection: command.orderDirection,
     };
 
     const result = await this.orderRepository.findAll(filters, pagination);
@@ -87,7 +87,7 @@ export class ListOrdersUseCase {
       total: result.total,
       limit: result.limit,
       offset: result.offset,
-      hasMore: result.hasMore
+      hasMore: result.hasMore,
     };
   }
 
@@ -106,7 +106,7 @@ export class ListOrdersUseCase {
       currencyCode: order.currencyCode,
       orderDate: order.orderDate.toISOString(),
       createdAt: order.createdAt.toISOString(),
-      tags: order.tags
+      tags: order.tags,
     };
   }
 }

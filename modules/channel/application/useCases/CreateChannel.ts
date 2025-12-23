@@ -1,6 +1,6 @@
 /**
  * CreateChannel Use Case
- * 
+ *
  * Creates a new distribution channel.
  */
 

@@ -12,7 +12,7 @@ import { eventBus } from '../../../libs/events/eventBus';
 export class VerifyCustomerCommand {
   constructor(
     public readonly customerId: string,
-    public readonly verificationType: 'email' | 'phone' = 'email'
+    public readonly verificationType: 'email' | 'phone' = 'email',
   ) {}
 }
 
@@ -59,14 +59,14 @@ export class VerifyCustomerUseCase {
     (eventBus as any).emit('customer.verified', {
       customerId: customer.customerId,
       email: customer.email,
-      verificationType: command.verificationType
+      verificationType: command.verificationType,
     });
 
     return {
       success: true,
       customerId: customer.customerId,
       email: customer.email,
-      verifiedAt: new Date().toISOString()
+      verifiedAt: new Date().toISOString(),
     };
   }
 }

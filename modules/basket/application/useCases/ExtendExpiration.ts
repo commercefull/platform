@@ -15,7 +15,7 @@ import { BasketNotFoundError, InvalidExpirationDaysError } from '../../domain/er
 export class ExtendExpirationCommand {
   constructor(
     public readonly basketId: string,
-    public readonly days: number = 7
+    public readonly days: number = 7,
   ) {}
 }
 
@@ -42,7 +42,7 @@ export class ExtendExpirationUseCase {
     eventBus.emit('basket.expiration_extended', {
       basketId: command.basketId,
       newExpiresAt: basket.expiresAt?.toISOString(),
-      days: command.days
+      days: command.days,
     });
 
     const updatedBasket = await this.basketRepository.findById(command.basketId);
@@ -66,12 +66,12 @@ export class ExtendExpirationUseCase {
         unitPrice: item.unitPrice.amount,
         lineTotal: item.lineTotal.amount,
         imageUrl: item.imageUrl,
-        isGift: item.isGift
+        isGift: item.isGift,
       })),
       itemCount: basket.itemCount,
       subtotal: basket.subtotal.amount,
       createdAt: basket.createdAt.toISOString(),
-      updatedAt: basket.updatedAt.toISOString()
+      updatedAt: basket.updatedAt.toISOString(),
     };
   }
 }

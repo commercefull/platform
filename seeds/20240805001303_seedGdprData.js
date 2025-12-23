@@ -1,18 +1,15 @@
 /**
  * GDPR Seed Data
  * Seeds test data for GDPR data requests and cookie consents
- * 
+ *
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
 exports.seed = async function (knex) {
   // Get test customer
-  const testCustomer = await knex('customer')
-    .where({ email: 'customer@example.com' })
-    .first('customerId');
+  const testCustomer = await knex('customer').where({ email: 'customer@example.com' }).first('customerId');
 
   if (!testCustomer) {
-    
     return;
   }
 
@@ -46,7 +43,7 @@ exports.seed = async function (knex) {
       ipAddress: '127.0.0.1',
       userAgent: 'Test Agent',
       createdAt: new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000),
-      updatedAt: now
+      updatedAt: now,
     },
     {
       customerId,
@@ -59,8 +56,8 @@ exports.seed = async function (knex) {
       ipAddress: '127.0.0.1',
       userAgent: 'Test Agent',
       createdAt: now,
-      updatedAt: now
-    }
+      updatedAt: now,
+    },
   ];
 
   await knex('gdprDataRequest').insert(gdprDataRequests);
@@ -87,7 +84,7 @@ exports.seed = async function (knex) {
       consentedAt: now,
       expiresAt,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     },
     {
       customerId: null,
@@ -106,11 +103,9 @@ exports.seed = async function (knex) {
       consentedAt: now,
       expiresAt,
       createdAt: now,
-      updatedAt: now
-    }
+      updatedAt: now,
+    },
   ];
 
   await knex('gdprCookieConsent').insert(cookieConsents);
-
-  
 };

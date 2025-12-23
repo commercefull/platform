@@ -1,6 +1,6 @@
 /**
  * SetLocalDeliveryZone Use Case
- * 
+ *
  * Configures local delivery zone for a store.
  */
 
@@ -54,10 +54,7 @@ export class SetLocalDeliveryZoneUseCase {
       availableSlots: input.availableSlots || [],
     };
 
-    const updatedStore = await this.storeRepository.updateLocalDeliverySettings(
-      input.storeId,
-      localDeliverySettings
-    );
+    const updatedStore = await this.storeRepository.updateLocalDeliverySettings(input.storeId, localDeliverySettings);
 
     return {
       storeId: updatedStore.storeId,

@@ -39,7 +39,7 @@ export class ApproveRequestUseCase {
     }
 
     const currentStep = workflow.steps.find((s: any) => s.stepOrder === request.currentStep);
-    
+
     // Verify approver has permission
     const canApprove = await this.verifyApprover(input.approverId, currentStep, request.companyId);
     if (!canApprove) {
@@ -60,10 +60,7 @@ export class ApproveRequestUseCase {
     });
 
     // Check if step is complete
-    const stepApprovals = await this.b2bRepository.countStepApprovals(
-      input.requestId,
-      request.currentStep
-    );
+    const stepApprovals = await this.b2bRepository.countStepApprovals(input.requestId, request.currentStep);
 
     let isComplete = false;
     let newStatus = 'pending';

@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function (knex) {
   return knex.schema.createTable('categoryPromotionProduct', t => {
     t.uuid('categoryPromotionProductId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
@@ -7,7 +7,6 @@ exports.up = function(knex) {
     t.uuid('productId').notNullable().references('productId').inTable('product').onDelete('CASCADE');
     t.boolean('isFeatured').notNullable().defaultTo(false);
     t.integer('displayOrder').notNullable().defaultTo(0);
-    
 
     t.index('categoryPromotionId');
     t.index('productId');
@@ -17,6 +16,6 @@ exports.up = function(knex) {
   });
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTable('categoryPromotionProduct');
 };

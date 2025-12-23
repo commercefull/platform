@@ -1,6 +1,6 @@
 /**
  * ShipOrder Use Case
- * 
+ *
  * Marks a fulfillment as shipped with tracking information.
  */
 

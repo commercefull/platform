@@ -7,6 +7,7 @@ This directory contains comprehensive migration guides for moving from popular e
 ### Open-Source Platforms
 
 #### [WooCommerce Migration Guide](./woocommerce-migration-guide.md)
+
 - **Platform**: WordPress plugin-based e-commerce
 - **Key Features**: Database direct access, meta fields, product variations
 - **Complexity**: High (complex meta field storage, custom fields)
@@ -14,6 +15,7 @@ This directory contains comprehensive migration guides for moving from popular e
 - **Estimated Time**: 1-3 weeks
 
 #### [Magento 2 Migration Guide](./magento2-migration-guide.md)
+
 - **Platform**: Enterprise PHP framework
 - **Key Features**: EAV data model, multi-store, complex product types
 - **Complexity**: Very High (EAV complexity, custom modules)
@@ -21,6 +23,7 @@ This directory contains comprehensive migration guides for moving from popular e
 - **Estimated Time**: 3-6 weeks
 
 #### [PrestaShop Migration Guide](./prestashop-migration-guide.md)
+
 - **Platform**: PHP-based e-commerce platform
 - **Key Features**: Multi-language support, product combinations, custom modules
 - **Complexity**: Medium-High (language handling, combinations)
@@ -30,6 +33,7 @@ This directory contains comprehensive migration guides for moving from popular e
 ### SaaS Platforms
 
 #### [Shopify Migration Guide](./shopify-migration-guide.md)
+
 - **Platform**: Shopify (SaaS with API access)
 - **Key Features**: API-based extraction, rate limiting, metafields handling
 - **Complexity**: Medium (API dependencies, webhooks)
@@ -37,6 +41,7 @@ This directory contains comprehensive migration guides for moving from popular e
 - **Estimated Time**: 2-4 weeks
 
 #### [Wix E-commerce Migration Guide](./wix-migration-guide.md)
+
 - **Platform**: Wix E-commerce (Website builder with commerce)
 - **Key Features**: API-based with rate limits, product options, multi-language
 - **Complexity**: Medium-High (API limitations, complex options)
@@ -44,6 +49,7 @@ This directory contains comprehensive migration guides for moving from popular e
 - **Estimated Time**: 2-4 weeks
 
 #### [Squarespace E-commerce Migration Guide](./squarespace-migration-guide.md)
+
 - **Platform**: Squarespace Commerce (Website builder with e-commerce)
 - **Key Features**: CSV export-based, manual processes, limited API access
 - **Complexity**: High (Manual processes, limited automation)
@@ -51,6 +57,7 @@ This directory contains comprehensive migration guides for moving from popular e
 - **Estimated Time**: 3-5 weeks
 
 #### [BigCommerce Migration Guide](./bigcommerce-migration-guide.md)
+
 - **Platform**: BigCommerce (Enterprise SaaS e-commerce)
 - **Key Features**: REST API, complex modifiers, multi-channel
 - **Complexity**: Medium (API complexity, modifiers)
@@ -60,6 +67,7 @@ This directory contains comprehensive migration guides for moving from popular e
 ### Custom Platforms
 
 #### [Custom Platform Migration Guide](./custom-platform-migration-guide.md)
+
 - **Platform**: Any proprietary or custom e-commerce system
 - **Key Features**: Dynamic mapping, schema analysis, flexible ETL
 - **Complexity**: Variable (depends on custom platform)
@@ -69,7 +77,9 @@ This directory contains comprehensive migration guides for moving from popular e
 ## Migration Overview
 
 ### Common Data Entities
+
 All guides cover migration of these core entities:
+
 - **Products**: Catalog items, variants, attributes, categories
 - **Customers**: User accounts, addresses, order history
 - **Orders**: Transactions, payments, shipping, fulfillment
@@ -79,16 +89,19 @@ All guides cover migration of these core entities:
 ### Technical Approaches
 
 #### Direct Database Access
+
 - **Platforms**: WooCommerce, Magento 2, PrestaShop, Custom
 - **Advantages**: Fast, complete data access, no API limits
 - **Challenges**: Schema complexity, direct database dependencies
 
 #### API-Based Migration
+
 - **Platforms**: Shopify, BigCommerce, some Custom platforms
 - **Advantages**: Clean data access, rate limiting built-in
 - **Challenges**: API limits, potential data transformation needs
 
 #### Hybrid Approach
+
 - **Platforms**: Complex custom systems
 - **Advantages**: Best of both worlds
 - **Challenges**: More complex implementation
@@ -97,29 +110,29 @@ All guides cover migration of these core entities:
 
 ### Choosing the Right Guide
 
-| If your current platform is... | Use this guide |
-|-------------------------------|----------------|
-| WooCommerce | [WooCommerce Guide](./woocommerce-migration-guide.md) |
-| Magento 1 or 2 | [Magento 2 Guide](./magento2-migration-guide.md) |
-| PrestaShop | [PrestaShop Guide](./prestashop-migration-guide.md) |
-| Shopify | [Shopify Guide](./shopify-migration-guide.md) |
-| Wix | [Wix Guide](./wix-migration-guide.md) |
-| Squarespace | [Squarespace Guide](./squarespace-migration-guide.md) |
-| BigCommerce | [BigCommerce Guide](./bigcommerce-migration-guide.md) |
-| Custom/proprietary platform | [Custom Platform Guide](./custom-platform-migration-guide.md) |
+| If your current platform is... | Use this guide                                                |
+| ------------------------------ | ------------------------------------------------------------- |
+| WooCommerce                    | [WooCommerce Guide](./woocommerce-migration-guide.md)         |
+| Magento 1 or 2                 | [Magento 2 Guide](./magento2-migration-guide.md)              |
+| PrestaShop                     | [PrestaShop Guide](./prestashop-migration-guide.md)           |
+| Shopify                        | [Shopify Guide](./shopify-migration-guide.md)                 |
+| Wix                            | [Wix Guide](./wix-migration-guide.md)                         |
+| Squarespace                    | [Squarespace Guide](./squarespace-migration-guide.md)         |
+| BigCommerce                    | [BigCommerce Guide](./bigcommerce-migration-guide.md)         |
+| Custom/proprietary platform    | [Custom Platform Guide](./custom-platform-migration-guide.md) |
 
 ### Migration Complexity Matrix
 
-| Platform | Database Access | API Available | Multi-language | Product Variants | Estimated Effort |
-|----------|----------------|---------------|----------------|------------------|------------------|
-| WooCommerce | Yes | Yes | Plugin-dependent | Yes | Medium-High |
-| Magento 2 | Yes | Yes | Yes | Yes | High |
-| PrestaShop | Yes | Limited | Yes | Yes | Medium-High |
-| Shopify | No | Yes | Limited | Yes | Medium |
-| Wix | No | Limited | Yes | Yes | Medium-High |
-| Squarespace | No | Very Limited | Limited | Limited | High |
-| BigCommerce | No | Yes | Yes | Yes | Medium |
-| Custom | Variable | Variable | Variable | Variable | Variable |
+| Platform    | Database Access | API Available | Multi-language   | Product Variants | Estimated Effort |
+| ----------- | --------------- | ------------- | ---------------- | ---------------- | ---------------- |
+| WooCommerce | Yes             | Yes           | Plugin-dependent | Yes              | Medium-High      |
+| Magento 2   | Yes             | Yes           | Yes              | Yes              | High             |
+| PrestaShop  | Yes             | Limited       | Yes              | Yes              | Medium-High      |
+| Shopify     | No              | Yes           | Limited          | Yes              | Medium           |
+| Wix         | No              | Limited       | Yes              | Yes              | Medium-High      |
+| Squarespace | No              | Very Limited  | Limited          | Limited          | High             |
+| BigCommerce | No              | Yes           | Yes              | Yes              | Medium           |
+| Custom      | Variable        | Variable      | Variable         | Variable         | Variable         |
 
 ### Prerequisites Checklist
 
@@ -143,12 +156,15 @@ All guides cover migration of these core entities:
 ## Support and Resources
 
 ### Additional Resources
+
 - [Main Migration Overview](../migrations/ecommerce-migration-guide.md) - General migration concepts
 - [CommerceFull API Documentation](https://docs.commercefull.com) - Target system API reference
 - [Migration Tools](./tools/) - Reusable migration utilities
 
 ### Need Help?
+
 If your platform isn't listed or you need custom migration assistance:
+
 1. Review the [Custom Platform Guide](./custom-platform-migration-guide.md)
 2. Contact CommerceFull support for custom migration services
 3. Consider engaging a migration specialist familiar with your source platform
@@ -163,4 +179,4 @@ If your platform isn't listed or you need custom migration assistance:
 
 ---
 
-*These guides are maintained by the CommerceFull team. For the latest updates and additional platform support, check the official CommerceFull documentation.*
+_These guides are maintained by the CommerceFull team. For the latest updates and additional platform support, check the official CommerceFull documentation._

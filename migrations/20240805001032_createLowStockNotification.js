@@ -9,7 +9,11 @@ exports.up = function (knex) {
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     t.uuid('productId').notNullable().references('productId').inTable('product').onDelete('CASCADE');
     t.uuid('productVariantId').references('productVariantId').inTable('productVariant').onDelete('CASCADE');
-    t.uuid('distributionWarehouseId').notNullable().references('distributionWarehouseId').inTable('distributionWarehouse').onDelete('CASCADE');
+    t.uuid('distributionWarehouseId')
+      .notNullable()
+      .references('distributionWarehouseId')
+      .inTable('distributionWarehouse')
+      .onDelete('CASCADE');
     t.integer('threshold').notNullable();
     t.integer('currentQuantity').notNullable();
     t.enum('status', ['new', 'acknowledged', 'resolved', 'ignored']).notNullable().defaultTo('new');

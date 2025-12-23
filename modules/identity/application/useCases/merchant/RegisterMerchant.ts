@@ -26,7 +26,7 @@ export class RegisterMerchantUseCase {
   constructor(
     private readonly merchantRepo: any,
     private readonly authService: any,
-    private readonly emailService: any
+    private readonly emailService: any,
   ) {}
 
   async execute(input: RegisterMerchantInput): Promise<RegisterMerchantOutput> {
@@ -56,7 +56,7 @@ export class RegisterMerchantUseCase {
 
     // Create merchant
     const merchantId = `merch_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 9)}`;
-    
+
     await this.merchantRepo.create({
       merchantId,
       email: input.email.toLowerCase(),
@@ -78,9 +78,7 @@ export class RegisterMerchantUseCase {
         businessName: input.businessName,
         firstName: input.firstName,
       });
-    } catch (error) {
-      
-    }
+    } catch (error) {}
 
     // Emit event
     eventBus.emit('merchant.registered', {

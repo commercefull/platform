@@ -1,8 +1,5 @@
-import express from "express";
-import {
-  getActiveMerchants,
-  getMerchantById
-} from "../../controllers/merchantCustomerController";
+import express from 'express';
+import { getActiveMerchants, getMerchantById } from '../../controllers/merchantCustomerController';
 
 const router = express.Router();
 
@@ -10,16 +7,16 @@ const router = express.Router();
 // These provide limited access compared to admin routes
 
 // Get active merchants (public storefront view)
-router.get("/", getActiveMerchants);
+router.get('/', getActiveMerchants);
 
 // Get specific merchant by ID (if active)
-router.get("/:id", getMerchantById);
+router.get('/:id', getMerchantById);
 
 // Get products from a specific merchant
-router.get("/:id/products", (req, res) => {
+router.get('/:id/products', (req, res) => {
   res.status(404).json({
     success: false,
-    message: 'This endpoint will be implemented in a future update'
+    message: 'This endpoint will be implemented in a future update',
   });
 });
 

@@ -1,6 +1,6 @@
 /**
  * Assortment Repository
- * 
+ *
  * Manages catalog visibility and product assortments scoped to stores, sellers, accounts, or channels.
  */
 
@@ -49,27 +49,21 @@ export async function createAssortment(params: CreateAssortmentParams): Promise<
 }
 
 export async function findAssortmentById(assortmentId: string): Promise<Assortment | null> {
-  return queryOne<Assortment>(
-    'SELECT * FROM "assortment" WHERE "assortmentId" = $1 AND "deletedAt" IS NULL',
-    [assortmentId]
-  );
+  return queryOne<Assortment>('SELECT * FROM "assortment" WHERE "assortmentId" = $1 AND "deletedAt" IS NULL', [assortmentId]);
 }
 
 export async function findAssortmentsByOrganization(organizationId: string): Promise<Assortment[]> {
   const result = await query<{ rows: Assortment[] }>(
     'SELECT * FROM "assortment" WHERE "organizationId" = $1 AND "deletedAt" IS NULL ORDER BY "name" ASC',
-    [organizationId]
+    [organizationId],
   );
   return result?.rows ?? [];
 }
 
-export async function findDefaultAssortment(
-  organizationId: string,
-  scopeType: string
-): Promise<Assortment | null> {
+export async function findDefaultAssortment(organizationId: string, scopeType: string): Promise<Assortment | null> {
   return queryOne<Assortment>(
     'SELECT * FROM "assortment" WHERE "organizationId" = $1 AND "scopeType" = $2 AND "isDefault" = true AND "deletedAt" IS NULL',
-    [organizationId, scopeType]
+    [organizationId, scopeType],
   );
 }
 
@@ -185,29 +179,23 @@ export async function addAssortmentItem(params: AddAssortmentItemParams): Promis
   return result!.rows[0];
 }
 
-export async function removeAssortmentItem(
-  assortmentId: string,
-  productVariantId: string
-): Promise<boolean> {
-  const result = await query<{ rowCount: number }>(
-    'DELETE FROM "assortmentItem" WHERE "assortmentId" = $1 AND "productVariantId" = $2',
-    [assortmentId, productVariantId]
-  );
+export async function removeAssortmentItem(assortmentId: string, productVariantId: string): Promise<boolean> {
+  const result = await query<{ rowCount: number }>('DELETE FROM "assortmentItem" WHERE "assortmentId" = $1 AND "productVariantId" = $2', [
+    assortmentId,
+    productVariantId,
+  ]);
   return (result?.rowCount ?? 0) > 0;
 }
 
 export async function getAssortmentItems(assortmentId: string): Promise<AssortmentItem[]> {
   const result = await query<{ rows: AssortmentItem[] }>(
     'SELECT * FROM "assortmentItem" WHERE "assortmentId" = $1 ORDER BY "sortOrder" ASC',
-    [assortmentId]
+    [assortmentId],
   );
   return result?.rows ?? [];
 }
 
-export async function getVisibleProducts(
-  storeId: string,
-  options?: { limit?: number; offset?: number }
-): Promise<any[]> {
+export async function getVisibleProducts(storeId: string, options?: { limit?: number; offset?: number }): Promise<any[]> {
   const limit = options?.limit || 50;
   const offset = options?.offset || 0;
 

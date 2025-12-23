@@ -1,6 +1,6 @@
 /**
  * ShippingZone Entity
- * 
+ *
  * Represents a geographic zone for shipping rate calculation.
  */
 
@@ -17,11 +17,11 @@ export interface ShippingZoneProps {
   locations: ZoneLocation[];
   isDefault: boolean;
   isActive: boolean;
-  
+
   // Multi-tenant
   storeId?: string;
   merchantId?: string;
-  
+
   // Audit
   createdAt: Date;
   updatedAt: Date;
@@ -34,16 +34,36 @@ export class ShippingZone {
     this.props = props;
   }
 
-  get shippingZoneId(): string { return this.props.shippingZoneId; }
-  get name(): string { return this.props.name; }
-  get description(): string | undefined { return this.props.description; }
-  get locations(): ZoneLocation[] { return [...this.props.locations]; }
-  get isDefault(): boolean { return this.props.isDefault; }
-  get isActive(): boolean { return this.props.isActive; }
-  get storeId(): string | undefined { return this.props.storeId; }
-  get merchantId(): string | undefined { return this.props.merchantId; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get shippingZoneId(): string {
+    return this.props.shippingZoneId;
+  }
+  get name(): string {
+    return this.props.name;
+  }
+  get description(): string | undefined {
+    return this.props.description;
+  }
+  get locations(): ZoneLocation[] {
+    return [...this.props.locations];
+  }
+  get isDefault(): boolean {
+    return this.props.isDefault;
+  }
+  get isActive(): boolean {
+    return this.props.isActive;
+  }
+  get storeId(): string | undefined {
+    return this.props.storeId;
+  }
+  get merchantId(): string | undefined {
+    return this.props.merchantId;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   static create(props: Omit<ShippingZoneProps, 'shippingZoneId' | 'createdAt' | 'updatedAt'>): ShippingZone {
     const now = new Date();
@@ -72,9 +92,7 @@ export class ShippingZone {
   }
 
   removeLocation(countryCode: string, stateCode?: string): void {
-    this.props.locations = this.props.locations.filter(loc => 
-      !(loc.countryCode === countryCode && loc.stateCode === stateCode)
-    );
+    this.props.locations = this.props.locations.filter(loc => !(loc.countryCode === countryCode && loc.stateCode === stateCode));
     this.props.updatedAt = new Date();
   }
 

@@ -14,7 +14,13 @@ import { VerifyCustomerCommand, VerifyCustomerUseCase } from '../../useCases/Ver
 import { DeactivateCustomerCommand, DeactivateCustomerUseCase } from '../../useCases/DeactivateCustomer';
 import { ReactivateCustomerCommand, ReactivateCustomerUseCase } from '../../useCases/ReactivateCustomer';
 import { ChangePasswordCommand, ChangePasswordUseCase } from '../../useCases/ChangePassword';
-import { AddAddressCommand, UpdateAddressCommand, DeleteAddressCommand, SetDefaultAddressCommand, ManageAddressesUseCase } from '../../useCases/ManageAddresses';
+import {
+  AddAddressCommand,
+  UpdateAddressCommand,
+  DeleteAddressCommand,
+  SetDefaultAddressCommand,
+  ManageAddressesUseCase,
+} from '../../useCases/ManageAddresses';
 
 // ============================================================================
 // Helpers
@@ -37,9 +43,14 @@ export const registerCustomer = async (req: Request, res: Response): Promise<voi
     const { email, firstName, lastName, password, phone, dateOfBirth, preferredCurrency, preferredLanguage } = req.body;
 
     const command = new RegisterCustomerCommand(
-      email, firstName, lastName, password, phone,
+      email,
+      firstName,
+      lastName,
+      password,
+      phone,
       dateOfBirth ? new Date(dateOfBirth) : undefined,
-      preferredCurrency, preferredLanguage
+      preferredCurrency,
+      preferredLanguage,
     );
 
     const useCase = new RegisterCustomerUseCase(CustomerRepo);
@@ -48,7 +59,7 @@ export const registerCustomer = async (req: Request, res: Response): Promise<voi
     respond(req, res, result, 201);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     respondError(req, res, error.message || 'Failed to register', error.message.includes('exists') ? 409 : 500);
   }
 };
@@ -68,7 +79,7 @@ export const getCustomer = async (req: Request, res: Response): Promise<void> =>
     respond(req, res, customer);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     respondError(req, res, error.message || 'Failed to get customer', 500);
   }
 };
@@ -93,7 +104,7 @@ export const getMyProfile = async (req: Request, res: Response): Promise<void> =
     respond(req, res, customer);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     respondError(req, res, error.message || 'Failed to get profile', 500);
   }
 };
@@ -113,7 +124,7 @@ export const updateMyProfile = async (req: Request, res: Response): Promise<void
     respond(req, res, result);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     respondError(req, res, error.message || 'Failed to update profile', 500);
   }
 };
@@ -136,7 +147,7 @@ export const getAddresses = async (req: Request, res: Response): Promise<void> =
     respond(req, res, { addresses });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     respondError(req, res, error.message || 'Failed to get addresses', 500);
   }
 };
@@ -149,11 +160,37 @@ export const addAddress = async (req: Request, res: Response): Promise<void> => 
       return;
     }
 
-    const { addressLine1, addressLine2, city, state, postalCode, country, countryCode, addressType, phone, firstName, lastName, company, isDefault } = req.body;
+    const {
+      addressLine1,
+      addressLine2,
+      city,
+      state,
+      postalCode,
+      country,
+      countryCode,
+      addressType,
+      phone,
+      firstName,
+      lastName,
+      company,
+      isDefault,
+    } = req.body;
 
     const command = new AddAddressCommand(
-      customerId, addressLine1, city, state, postalCode, country, countryCode || country, addressType,
-      addressLine2, phone, firstName, lastName, company, isDefault
+      customerId,
+      addressLine1,
+      city,
+      state,
+      postalCode,
+      country,
+      countryCode || country,
+      addressType,
+      addressLine2,
+      phone,
+      firstName,
+      lastName,
+      company,
+      isDefault,
     );
 
     const useCase = new ManageAddressesUseCase(CustomerRepo);
@@ -162,7 +199,7 @@ export const addAddress = async (req: Request, res: Response): Promise<void> => 
     respond(req, res, address, 201);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     respondError(req, res, error.message || 'Failed to add address', 500);
   }
 };
@@ -184,7 +221,7 @@ export const updateAddress = async (req: Request, res: Response): Promise<void> 
     respond(req, res, address);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     respondError(req, res, error.message || 'Failed to update address', 500);
   }
 };
@@ -206,7 +243,7 @@ export const deleteAddress = async (req: Request, res: Response): Promise<void> 
     respond(req, res, { deleted: true });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     respondError(req, res, error.message || 'Failed to delete address', 500);
   }
 };
@@ -234,7 +271,7 @@ export const setDefaultAddress = async (req: Request, res: Response): Promise<vo
     respond(req, res, { success: true });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     respondError(req, res, error.message || 'Failed to set default address', 500);
   }
 };
@@ -246,7 +283,7 @@ export const setDefaultAddress = async (req: Request, res: Response): Promise<vo
 export const listCustomers = async (req: Request, res: Response): Promise<void> => {
   try {
     const { limit = 20, offset = 0, search, status, isVerified } = req.query;
-    
+
     const filters: any = {};
     if (search) filters.search = search as string;
     if (status) filters.status = status as string;
@@ -254,13 +291,13 @@ export const listCustomers = async (req: Request, res: Response): Promise<void> 
 
     const customers = await CustomerRepo.findAll(filters, {
       limit: Number(limit),
-      offset: Number(offset)
+      offset: Number(offset),
     });
 
     respond(req, res, customers);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     respondError(req, res, error.message || 'Failed to list customers', 500);
   }
 };
@@ -270,9 +307,14 @@ export const createCustomer = async (req: Request, res: Response): Promise<void>
     const { email, firstName, lastName, password, phone, dateOfBirth, preferredCurrency, preferredLanguage } = req.body;
 
     const command = new RegisterCustomerCommand(
-      email, firstName, lastName, password, phone,
+      email,
+      firstName,
+      lastName,
+      password,
+      phone,
       dateOfBirth ? new Date(dateOfBirth) : undefined,
-      preferredCurrency, preferredLanguage
+      preferredCurrency,
+      preferredLanguage,
     );
 
     const useCase = new RegisterCustomerUseCase(CustomerRepo);
@@ -281,7 +323,7 @@ export const createCustomer = async (req: Request, res: Response): Promise<void>
     respond(req, res, result, 201);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     respondError(req, res, error.message || 'Failed to create customer', error.message?.includes('exists') ? 409 : 500);
   }
 };
@@ -296,7 +338,7 @@ export const updateCustomer = async (req: Request, res: Response): Promise<void>
     respond(req, res, result);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     respondError(req, res, error.message || 'Failed to update customer', 500);
   }
 };
@@ -313,7 +355,7 @@ export const deleteCustomer = async (req: Request, res: Response): Promise<void>
     respond(req, res, result);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     respondError(req, res, error.message || 'Failed to delete customer', error.message?.includes('not found') ? 404 : 500);
   }
 };
@@ -330,7 +372,7 @@ export const verifyCustomer = async (req: Request, res: Response): Promise<void>
     respond(req, res, result);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     respondError(req, res, error.message || 'Failed to verify customer', error.message?.includes('not found') ? 404 : 500);
   }
 };
@@ -347,7 +389,7 @@ export const deactivateCustomer = async (req: Request, res: Response): Promise<v
     respond(req, res, result);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     respondError(req, res, error.message || 'Failed to deactivate customer', error.message?.includes('not found') ? 404 : 500);
   }
 };
@@ -363,7 +405,7 @@ export const reactivateCustomer = async (req: Request, res: Response): Promise<v
     respond(req, res, result);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     respondError(req, res, error.message || 'Failed to reactivate customer', error.message?.includes('not found') ? 404 : 500);
   }
 };
@@ -384,7 +426,7 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
     respond(req, res, result);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     respondError(req, res, error.message || 'Failed to change password', error.message?.includes('incorrect') ? 401 : 500);
   }
 };
@@ -402,7 +444,7 @@ export const getCustomerAddresses = async (req: Request, res: Response): Promise
     respond(req, res, { addresses });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     respondError(req, res, error.message || 'Failed to get addresses', 500);
   }
 };
@@ -410,11 +452,37 @@ export const getCustomerAddresses = async (req: Request, res: Response): Promise
 export const addCustomerAddress = async (req: Request, res: Response): Promise<void> => {
   try {
     const { customerId } = req.params;
-    const { addressLine1, addressLine2, city, state, postalCode, country, countryCode, addressType, phone, firstName, lastName, company, isDefault } = req.body;
+    const {
+      addressLine1,
+      addressLine2,
+      city,
+      state,
+      postalCode,
+      country,
+      countryCode,
+      addressType,
+      phone,
+      firstName,
+      lastName,
+      company,
+      isDefault,
+    } = req.body;
 
     const command = new AddAddressCommand(
-      customerId, addressLine1, city, state, postalCode, country, countryCode || country, addressType,
-      addressLine2, phone, firstName, lastName, company, isDefault
+      customerId,
+      addressLine1,
+      city,
+      state,
+      postalCode,
+      country,
+      countryCode || country,
+      addressType,
+      addressLine2,
+      phone,
+      firstName,
+      lastName,
+      company,
+      isDefault,
     );
 
     const useCase = new ManageAddressesUseCase(CustomerRepo);
@@ -423,7 +491,7 @@ export const addCustomerAddress = async (req: Request, res: Response): Promise<v
     respond(req, res, address, 201);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     respondError(req, res, error.message || 'Failed to add address', 500);
   }
 };

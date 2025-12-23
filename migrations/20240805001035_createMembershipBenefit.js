@@ -11,12 +11,21 @@ exports.up = function (knex) {
     t.string('shortDescription', 255);
     t.boolean('isActive').notNullable().defaultTo(true);
     t.integer('priority').defaultTo(0);
-    t.enum('benefitType', ['discount', 'freeShipping', 'contentAccess', 'prioritySupport', 'rewardPoints', 'gift', 'earlyAccess', 'custom']).notNullable();
+    t.enum('benefitType', [
+      'discount',
+      'freeShipping',
+      'contentAccess',
+      'prioritySupport',
+      'rewardPoints',
+      'gift',
+      'earlyAccess',
+      'custom',
+    ]).notNullable();
     t.enum('valueType', ['fixed', 'percentage', 'boolean', 'text', 'json']).notNullable().defaultTo('fixed');
     t.jsonb('value');
     t.text('icon');
     t.jsonb('rules');
-    
+
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     t.uuid('createdBy');

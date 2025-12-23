@@ -27,13 +27,14 @@ export interface ProductReview {
   adminResponseDate?: string;
 }
 
-export type ProductReviewCreateParams = Omit<ProductReview, 
+export type ProductReviewCreateParams = Omit<
+  ProductReview,
   'productReviewId' | 'createdAt' | 'updatedAt' | 'helpfulCount' | 'unhelpfulCount' | 'reportCount' | 'isHighlighted'
 >;
 
-export type ProductReviewUpdateParams = Partial<Pick<ProductReview, 
-  'rating' | 'title' | 'content' | 'status' | 'isHighlighted' | 'adminResponse' | 'adminResponseDate'
->>;
+export type ProductReviewUpdateParams = Partial<
+  Pick<ProductReview, 'rating' | 'title' | 'content' | 'status' | 'isHighlighted' | 'adminResponse' | 'adminResponseDate'>
+>;
 
 export interface ReviewFilters {
   productId?: string;
@@ -52,32 +53,24 @@ export class ProductReviewRepo {
    * Find review by ID
    */
   async findById(productReviewId: string): Promise<ProductReview | null> {
-    return await queryOne<ProductReview>(
-      `SELECT * FROM "public"."productReview" WHERE "productReviewId" = $1`,
-      [productReviewId]
-    );
+    return await queryOne<ProductReview>(`SELECT * FROM "public"."productReview" WHERE "productReviewId" = $1`, [productReviewId]);
   }
 
   /**
    * Find all reviews for a product
    */
-  async findByProductId(
-    productId: string, 
-    status?: ReviewStatus,
-    limit: number = 50, 
-    offset: number = 0
-  ): Promise<ProductReview[]> {
+  async findByProductId(productId: string, status?: ReviewStatus, limit: number = 50, offset: number = 0): Promise<ProductReview[]> {
     let sql = `SELECT * FROM "public"."productReview" WHERE "productId" = $1`;
     const params: any[] = [productId];
-    
+
     if (status) {
       sql += ` AND "status" = $2`;
       params.push(status);
     }
-    
+
     sql += ` ORDER BY "createdAt" DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
     params.push(limit, offset);
-    
+
     const results = await query<ProductReview[]>(sql, params);
     return results || [];
   }
@@ -91,7 +84,7 @@ export class ProductReviewRepo {
        WHERE "customerId" = $1 
        ORDER BY "createdAt" DESC 
        LIMIT $2 OFFSET $3`,
-      [customerId, limit, offset]
+      [customerId, limit, offset],
     );
     return results || [];
   }
@@ -150,7 +143,7 @@ export class ProductReviewRepo {
     }
 
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
-    
+
     params.push(limit, offset);
 
     const results = await query<ProductReview[]>(
@@ -158,7 +151,7 @@ export class ProductReviewRepo {
        ${whereClause}
        ORDER BY "createdAt" DESC 
        LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
-      params
+      params,
     );
 
     return results || [];
@@ -173,7 +166,7 @@ export class ProductReviewRepo {
        WHERE "status" = 'pending' 
        ORDER BY "createdAt" ASC 
        LIMIT $1 OFFSET $2`,
-      [limit, offset]
+      [limit, offset],
     );
     return results || [];
   }
@@ -184,15 +177,15 @@ export class ProductReviewRepo {
   async findHighlighted(productId?: string, limit: number = 10): Promise<ProductReview[]> {
     let sql = `SELECT * FROM "public"."productReview" WHERE "isHighlighted" = true AND "status" = 'approved'`;
     const params: any[] = [];
-    
+
     if (productId) {
       sql += ` AND "productId" = $1`;
       params.push(productId);
     }
-    
+
     sql += ` ORDER BY "createdAt" DESC LIMIT $${params.length + 1}`;
     params.push(limit);
-    
+
     const results = await query<ProductReview[]>(sql, params);
     return results || [];
   }
@@ -226,8 +219,8 @@ export class ProductReviewRepo {
         params.reviewerName || null,
         params.reviewerEmail || null,
         now,
-        now
-      ]
+        now,
+      ],
     );
 
     if (!result) {
@@ -265,7 +258,7 @@ export class ProductReviewRepo {
        SET ${updateFields.join(', ')}
        WHERE "productReviewId" = $${paramIndex}
        RETURNING *`,
-      values
+      values,
     );
 
     return result;
@@ -305,7 +298,7 @@ export class ProductReviewRepo {
   async addAdminResponse(productReviewId: string, response: string): Promise<ProductReview | null> {
     return this.update(productReviewId, {
       adminResponse: response,
-      adminResponseDate: unixTimestamp()
+      adminResponseDate: unixTimestamp(),
     });
   }
 
@@ -318,7 +311,7 @@ export class ProductReviewRepo {
        SET "helpfulCount" = "helpfulCount" + 1, "updatedAt" = $1
        WHERE "productReviewId" = $2
        RETURNING *`,
-      [unixTimestamp(), productReviewId]
+      [unixTimestamp(), productReviewId],
     );
 
     return result;
@@ -333,7 +326,7 @@ export class ProductReviewRepo {
        SET "unhelpfulCount" = "unhelpfulCount" + 1, "updatedAt" = $1
        WHERE "productReviewId" = $2
        RETURNING *`,
-      [unixTimestamp(), productReviewId]
+      [unixTimestamp(), productReviewId],
     );
 
     return result;
@@ -348,7 +341,7 @@ export class ProductReviewRepo {
        SET "reportCount" = "reportCount" + 1, "updatedAt" = $1
        WHERE "productReviewId" = $2
        RETURNING *`,
-      [unixTimestamp(), productReviewId]
+      [unixTimestamp(), productReviewId],
     );
 
     return result;
@@ -360,7 +353,7 @@ export class ProductReviewRepo {
   async delete(productReviewId: string): Promise<boolean> {
     const result = await queryOne<{ productReviewId: string }>(
       `DELETE FROM "public"."productReview" WHERE "productReviewId" = $1 RETURNING "productReviewId"`,
-      [productReviewId]
+      [productReviewId],
     );
 
     return !!result;
@@ -372,12 +365,12 @@ export class ProductReviewRepo {
   async countByProductId(productId: string, status?: ReviewStatus): Promise<number> {
     let sql = `SELECT COUNT(*) as count FROM "public"."productReview" WHERE "productId" = $1`;
     const params: any[] = [productId];
-    
+
     if (status) {
       sql += ` AND "status" = $2`;
       params.push(status);
     }
-    
+
     const result = await queryOne<{ count: string }>(sql, params);
 
     return result ? parseInt(result.count, 10) : 0;
@@ -391,7 +384,7 @@ export class ProductReviewRepo {
       `SELECT AVG("rating") as avg 
        FROM "public"."productReview" 
        WHERE "productId" = $1 AND "status" = 'approved'`,
-      [productId]
+      [productId],
     );
 
     return result && result.avg ? parseFloat(result.avg) : 0;
@@ -407,11 +400,11 @@ export class ProductReviewRepo {
        WHERE "productId" = $1 AND "status" = 'approved'
        GROUP BY "rating"
        ORDER BY "rating" DESC`,
-      [productId]
+      [productId],
     );
 
     const distribution: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
-    
+
     if (results) {
       results.forEach(row => {
         distribution[row.rating] = parseInt(row.count, 10);
@@ -433,12 +426,12 @@ export class ProductReviewRepo {
     const totalReviews = await this.countByProductId(productId, 'approved');
     const averageRating = await this.getAverageRating(productId);
     const distribution = await this.getRatingDistribution(productId);
-    
+
     const verifiedResult = await queryOne<{ count: string }>(
       `SELECT COUNT(*) as count 
        FROM "public"."productReview" 
        WHERE "productId" = $1 AND "status" = 'approved' AND "isVerifiedPurchase" = true`,
-      [productId]
+      [productId],
     );
     const verifiedPurchaseCount = verifiedResult ? parseInt(verifiedResult.count, 10) : 0;
 
@@ -446,7 +439,7 @@ export class ProductReviewRepo {
       totalReviews,
       averageRating,
       distribution,
-      verifiedPurchaseCount
+      verifiedPurchaseCount,
     };
   }
 }

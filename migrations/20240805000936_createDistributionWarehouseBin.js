@@ -5,8 +5,15 @@
 exports.up = function (knex) {
   return knex.schema.createTable('distributionWarehouseBin', t => {
     t.uuid('distributionWarehouseBinId').primary().defaultTo(knex.raw('uuidv7()'));
-    t.uuid('distributionWarehouseId').notNullable().references('distributionWarehouseId').inTable('distributionWarehouse').onDelete('CASCADE');
-    t.uuid('distributionWarehouseZoneId').references('distributionWarehouseZoneId').inTable('distributionWarehouseZone').onDelete('SET NULL');
+    t.uuid('distributionWarehouseId')
+      .notNullable()
+      .references('distributionWarehouseId')
+      .inTable('distributionWarehouse')
+      .onDelete('CASCADE');
+    t.uuid('distributionWarehouseZoneId')
+      .references('distributionWarehouseZoneId')
+      .inTable('distributionWarehouseZone')
+      .onDelete('SET NULL');
     t.string('locationCode', 50).notNullable();
     t.boolean('isActive').notNullable().defaultTo(true);
     t.enu('binType', ['storage', 'picking', 'receiving', 'packing', 'shipping', 'returns', 'damaged', 'inspection']).notNullable();
@@ -19,7 +26,7 @@ exports.up = function (knex) {
     t.boolean('isReceivable').notNullable().defaultTo(true);
     t.boolean('isMixed').notNullable().defaultTo(true);
     t.integer('priority').defaultTo(0);
-    
+
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     t.index('distributionWarehouseId');

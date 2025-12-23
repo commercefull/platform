@@ -8,21 +8,22 @@ import { ADMIN_CREDENTIALS } from '../../testConstants';
 
 const API_BASE = '/business/analytics';
 
-const createClient = (): AxiosInstance => axios.create({
-  baseURL: process.env.API_URL || 'http://localhost:3000',
-  validateStatus: () => true,
-  headers: {
-    'Accept': 'application/json',
-    'Content-Type': 'application/json'
-  }
-});
+const createClient = (): AxiosInstance =>
+  axios.create({
+    baseURL: process.env.API_URL || 'http://localhost:3000',
+    validateStatus: () => true,
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+  });
 
 describe('Analytics Reports API', () => {
   let client: AxiosInstance;
 
   beforeAll(async () => {
     client = createClient();
-    
+
     // Get auth token
     const loginResponse = await client.post('/business/auth/login', ADMIN_CREDENTIALS, { headers: { 'X-Test-Request': 'true' } });
     if (loginResponse.data.accessToken) {
@@ -46,7 +47,7 @@ describe('Analytics Reports API', () => {
         const endDate = new Date();
 
         const response = await client.get(
-          `${API_BASE}/sales/dashboard?startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`
+          `${API_BASE}/sales/dashboard?startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`,
         );
 
         expect(response.status).toBe(200);
@@ -75,9 +76,7 @@ describe('Analytics Reports API', () => {
         startDate.setDate(startDate.getDate() - 7);
         const endDate = new Date();
 
-        const response = await client.get(
-          `${API_BASE}/sales/daily?startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`
-        );
+        const response = await client.get(`${API_BASE}/sales/daily?startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`);
 
         expect(response.status).toBe(200);
         expect(response.data.success).toBe(true);

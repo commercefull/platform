@@ -1,6 +1,6 @@
 /**
  * Inventory Integration Tests
- * 
+ *
  * Tests for inventory management endpoints.
  */
 
@@ -15,7 +15,7 @@ const API_URL = process.env.API_URL || 'http://localhost:3000';
 // Test credentials (from seeded data)
 const TEST_MERCHANT = {
   email: 'merchant@example.com',
-  password: 'password123'
+  password: 'password123',
 };
 
 let client: AxiosInstance;
@@ -30,9 +30,9 @@ beforeAll(async () => {
     baseURL: API_URL,
     validateStatus: () => true,
     headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    }
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
   });
 
   // Login as merchant
@@ -54,7 +54,7 @@ describe('Inventory Feature Tests', () => {
       it('should list inventory locations with pagination', async () => {
         const response = await client.get('/business/inventory/locations', {
           headers: { Authorization: `Bearer ${merchantToken}` },
-          params: { limit: 10, offset: 0 }
+          params: { limit: 10, offset: 0 },
         });
 
         expect(response.status).toBe(200);
@@ -68,7 +68,7 @@ describe('Inventory Feature Tests', () => {
       it('should filter locations by warehouse', async () => {
         const response = await client.get('/business/inventory/locations', {
           headers: { Authorization: `Bearer ${merchantToken}` },
-          params: { warehouseId: '00000000-0000-0000-0000-000000000001' }
+          params: { warehouseId: '00000000-0000-0000-0000-000000000001' },
         });
 
         expect(response.status).toBe(200);
@@ -86,7 +86,7 @@ describe('Inventory Feature Tests', () => {
     describe('GET /business/inventory/locations/low-stock', () => {
       it('should return low stock items', async () => {
         const response = await client.get('/business/inventory/locations/low-stock', {
-          headers: { Authorization: `Bearer ${merchantToken}` }
+          headers: { Authorization: `Bearer ${merchantToken}` },
         });
 
         expect(response.status).toBe(200);
@@ -98,7 +98,7 @@ describe('Inventory Feature Tests', () => {
     describe('GET /business/inventory/locations/out-of-stock', () => {
       it('should return out of stock items', async () => {
         const response = await client.get('/business/inventory/locations/out-of-stock', {
-          headers: { Authorization: `Bearer ${merchantToken}` }
+          headers: { Authorization: `Bearer ${merchantToken}` },
         });
 
         expect(response.status).toBe(200);
@@ -119,7 +119,7 @@ describe('Inventory Feature Tests', () => {
       // Get a test location
       const response = await client.get('/business/inventory/locations', {
         headers: { Authorization: `Bearer ${merchantToken}` },
-        params: { limit: 1 }
+        params: { limit: 1 },
       });
 
       if (response.data.data && response.data.data.length > 0) {
@@ -130,14 +130,13 @@ describe('Inventory Feature Tests', () => {
     describe('POST /business/inventory/locations/:id/adjust', () => {
       it('should adjust stock quantity', async () => {
         if (!testLocationId) {
-          
           return;
         }
 
         const response = await client.post(
           `/business/inventory/locations/${testLocationId}/adjust`,
           { quantityChange: 10, reason: 'Test adjustment' },
-          { headers: { Authorization: `Bearer ${merchantToken}` } }
+          { headers: { Authorization: `Bearer ${merchantToken}` } },
         );
 
         expect(response.status).toBe(200);
@@ -147,14 +146,13 @@ describe('Inventory Feature Tests', () => {
 
       it('should require quantityChange', async () => {
         if (!testLocationId) {
-          
           return;
         }
 
         const response = await client.post(
           `/business/inventory/locations/${testLocationId}/adjust`,
           { reason: 'Missing quantity' },
-          { headers: { Authorization: `Bearer ${merchantToken}` } }
+          { headers: { Authorization: `Bearer ${merchantToken}` } },
         );
 
         expect(response.status).toBe(400);
@@ -165,14 +163,13 @@ describe('Inventory Feature Tests', () => {
     describe('POST /business/inventory/locations/:id/reserve', () => {
       it('should reserve stock', async () => {
         if (!testLocationId) {
-          
           return;
         }
 
         const response = await client.post(
           `/business/inventory/locations/${testLocationId}/reserve`,
           { quantity: 5 },
-          { headers: { Authorization: `Bearer ${merchantToken}` } }
+          { headers: { Authorization: `Bearer ${merchantToken}` } },
         );
 
         expect(response.status).toBe(200);
@@ -182,14 +179,13 @@ describe('Inventory Feature Tests', () => {
 
       it('should require positive quantity', async () => {
         if (!testLocationId) {
-          
           return;
         }
 
         const response = await client.post(
           `/business/inventory/locations/${testLocationId}/reserve`,
           { quantity: -5 },
-          { headers: { Authorization: `Bearer ${merchantToken}` } }
+          { headers: { Authorization: `Bearer ${merchantToken}` } },
         );
 
         expect(response.status).toBe(400);
@@ -200,14 +196,13 @@ describe('Inventory Feature Tests', () => {
     describe('POST /business/inventory/locations/:id/release', () => {
       it('should release reserved stock', async () => {
         if (!testLocationId) {
-          
           return;
         }
 
         const response = await client.post(
           `/business/inventory/locations/${testLocationId}/release`,
           { quantity: 2 },
-          { headers: { Authorization: `Bearer ${merchantToken}` } }
+          { headers: { Authorization: `Bearer ${merchantToken}` } },
         );
 
         expect(response.status).toBe(200);
@@ -224,13 +219,13 @@ describe('Inventory Feature Tests', () => {
     describe('GET /business/inventory/transactions/types', () => {
       it('should return transaction types', async () => {
         const response = await client.get('/business/inventory/transactions/types', {
-          headers: { Authorization: `Bearer ${merchantToken}` }
+          headers: { Authorization: `Bearer ${merchantToken}` },
         });
 
         expect(response.status).toBe(200);
         expect(response.data.success).toBe(true);
         expect(Array.isArray(response.data.data)).toBe(true);
-        
+
         // Should have seeded transaction types
         if (response.data.data.length > 0) {
           expect(response.data.data[0]).toHaveProperty('code');
@@ -268,7 +263,7 @@ describe('Inventory Feature Tests', () => {
 
       it('should accept quantity parameter', async () => {
         const response = await client.get('/customer/inventory/availability/TEST-INV-001', {
-          params: { quantity: 50 }
+          params: { quantity: 50 },
         });
 
         expect(response.status).toBe(200);

@@ -1,4 +1,4 @@
-import { Item } from "./item";
+import { Item } from './item';
 
 export class Inventory {
   constructor(
@@ -9,5 +9,5 @@ export class Inventory {
     private readonly quantity: number,
     private readonly image: string,
     private readonly items: Item[],
-  ) { }
+  ) {}
 }

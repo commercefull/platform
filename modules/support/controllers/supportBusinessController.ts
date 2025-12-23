@@ -21,12 +21,12 @@ export const getAgents: AsyncHandler = async (req, res, next) => {
     const agents = await supportRepo.getAgents({
       isActive: isActive === 'true' ? true : isActive === 'false' ? false : undefined,
       isAvailable: isAvailable === 'true' ? true : isAvailable === 'false' ? false : undefined,
-      department: department as string
+      department: department as string,
     });
     res.json({ success: true, data: agents });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -41,7 +41,7 @@ export const getAgent: AsyncHandler = async (req, res, next) => {
     res.json({ success: true, data: agent });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -52,7 +52,7 @@ export const createAgent: AsyncHandler = async (req, res, next) => {
     res.status(201).json({ success: true, data: agent });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -61,12 +61,12 @@ export const updateAgent: AsyncHandler = async (req, res, next) => {
   try {
     const agent = await supportRepo.saveAgent({
       supportAgentId: req.params.id,
-      ...req.body
+      ...req.body,
     });
     res.json({ success: true, data: agent });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -85,14 +85,14 @@ export const getTickets: AsyncHandler = async (req, res, next) => {
         status: status as any,
         priority: priority as any,
         category: category as any,
-        isEscalated: isEscalated === 'true' ? true : isEscalated === 'false' ? false : undefined
+        isEscalated: isEscalated === 'true' ? true : isEscalated === 'false' ? false : undefined,
       },
-      { limit: parseInt(limit as string) || 20, offset: parseInt(offset as string) || 0 }
+      { limit: parseInt(limit as string) || 20, offset: parseInt(offset as string) || 0 },
     );
     res.json({ success: true, ...result });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -104,14 +104,14 @@ export const getTicket: AsyncHandler = async (req, res, next) => {
       res.status(404).json({ success: false, message: 'Ticket not found' });
       return;
     }
-    
+
     const messages = await supportRepo.getMessages(req.params.id, true);
     const attachments = await supportRepo.getAttachments(req.params.id);
-    
+
     res.json({ success: true, data: { ...ticket, messages, attachments } });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -122,7 +122,7 @@ export const updateTicket: AsyncHandler = async (req, res, next) => {
     res.json({ success: true, data: ticket });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -134,7 +134,7 @@ export const assignTicket: AsyncHandler = async (req, res, next) => {
     res.json({ success: true, data: ticket });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -146,7 +146,7 @@ export const resolveTicket: AsyncHandler = async (req, res, next) => {
     res.json({ success: true, message: 'Ticket resolved' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -157,7 +157,7 @@ export const closeTicket: AsyncHandler = async (req, res, next) => {
     res.json({ success: true, message: 'Ticket closed' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -169,7 +169,7 @@ export const escalateTicket: AsyncHandler = async (req, res, next) => {
     res.json({ success: true, message: 'Ticket escalated' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -178,7 +178,7 @@ export const addAgentMessage: AsyncHandler = async (req, res, next) => {
   try {
     const agentId = (req as any).userId || (req as any).merchantId;
     const agent = await supportRepo.getAgent(agentId);
-    
+
     const message = await supportRepo.addMessage({
       supportTicketId: req.params.id,
       senderId: agentId,
@@ -187,13 +187,13 @@ export const addAgentMessage: AsyncHandler = async (req, res, next) => {
       senderEmail: agent?.email,
       message: req.body.message,
       messageHtml: req.body.messageHtml,
-      isInternal: req.body.isInternal || false
+      isInternal: req.body.isInternal || false,
     });
-    
+
     res.status(201).json({ success: true, data: message });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -209,7 +209,7 @@ export const getFaqCategories: AsyncHandler = async (req, res, next) => {
     res.json({ success: true, data: categories });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -224,7 +224,7 @@ export const getFaqCategory: AsyncHandler = async (req, res, next) => {
     res.json({ success: true, data: category });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -235,7 +235,7 @@ export const createFaqCategory: AsyncHandler = async (req, res, next) => {
     res.status(201).json({ success: true, data: category });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -244,12 +244,12 @@ export const updateFaqCategory: AsyncHandler = async (req, res, next) => {
   try {
     const category = await faqRepo.saveCategory({
       faqCategoryId: req.params.id,
-      ...req.body
+      ...req.body,
     });
     res.json({ success: true, data: category });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -260,7 +260,7 @@ export const deleteFaqCategory: AsyncHandler = async (req, res, next) => {
     res.json({ success: true, message: 'Category deleted' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -276,14 +276,14 @@ export const getFaqArticles: AsyncHandler = async (req, res, next) => {
       {
         faqCategoryId: faqCategoryId as string,
         isPublished: isPublished === 'true' ? true : isPublished === 'false' ? false : undefined,
-        isFeatured: isFeatured === 'true' ? true : undefined
+        isFeatured: isFeatured === 'true' ? true : undefined,
       },
-      { limit: parseInt(limit as string) || 20, offset: parseInt(offset as string) || 0 }
+      { limit: parseInt(limit as string) || 20, offset: parseInt(offset as string) || 0 },
     );
     res.json({ success: true, ...result });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -298,7 +298,7 @@ export const getFaqArticle: AsyncHandler = async (req, res, next) => {
     res.json({ success: true, data: article });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -308,12 +308,12 @@ export const createFaqArticle: AsyncHandler = async (req, res, next) => {
     const authorId = (req as any).userId || (req as any).merchantId;
     const article = await faqRepo.saveArticle({
       authorId,
-      ...req.body
+      ...req.body,
     });
     res.status(201).json({ success: true, data: article });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -324,12 +324,12 @@ export const updateFaqArticle: AsyncHandler = async (req, res, next) => {
     const article = await faqRepo.saveArticle({
       faqArticleId: req.params.id,
       lastEditedBy,
-      ...req.body
+      ...req.body,
     });
     res.json({ success: true, data: article });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -340,7 +340,7 @@ export const publishFaqArticle: AsyncHandler = async (req, res, next) => {
     res.json({ success: true, message: 'Article published' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -351,7 +351,7 @@ export const unpublishFaqArticle: AsyncHandler = async (req, res, next) => {
     res.json({ success: true, message: 'Article unpublished' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -362,7 +362,7 @@ export const deleteFaqArticle: AsyncHandler = async (req, res, next) => {
     res.json({ success: true, message: 'Article deleted' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -376,12 +376,12 @@ export const getStockAlerts: AsyncHandler = async (req, res, next) => {
     const { customerId, productId, status, limit, offset } = req.query;
     const result = await alertRepo.getStockAlerts(
       { customerId: customerId as string, productId: productId as string, status: status as any },
-      { limit: parseInt(limit as string) || 20, offset: parseInt(offset as string) || 0 }
+      { limit: parseInt(limit as string) || 20, offset: parseInt(offset as string) || 0 },
     );
     res.json({ success: true, ...result });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -391,12 +391,12 @@ export const getPriceAlerts: AsyncHandler = async (req, res, next) => {
     const { customerId, productId, status, limit, offset } = req.query;
     const result = await alertRepo.getPriceAlerts(
       { customerId: customerId as string, productId: productId as string, status: status as any },
-      { limit: parseInt(limit as string) || 20, offset: parseInt(offset as string) || 0 }
+      { limit: parseInt(limit as string) || 20, offset: parseInt(offset as string) || 0 },
     );
     res.json({ success: true, ...result });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -405,16 +405,16 @@ export const notifyStockAlerts: AsyncHandler = async (req, res, next) => {
   try {
     const { productId, productVariantId } = req.body;
     const alerts = await alertRepo.getActiveStockAlertsForProduct(productId, productVariantId);
-    
+
     for (const alert of alerts) {
       await alertRepo.notifyStockAlert(alert.stockAlertId);
       // TODO: Send actual notification (email/SMS/push)
     }
-    
+
     res.json({ success: true, message: `Notified ${alerts.length} alerts` });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -423,19 +423,19 @@ export const notifyPriceAlerts: AsyncHandler = async (req, res, next) => {
   try {
     const { productId, newPrice } = req.body;
     const alerts = await alertRepo.getPriceAlertsToNotify(productId, newPrice);
-    
+
     for (const alert of alerts) {
       await alertRepo.notifyPriceAlert(alert.priceAlertId, newPrice);
       // TODO: Send actual notification (email/SMS/push)
     }
-    
+
     // Update current price for all alerts
     await alertRepo.updatePriceAlertCurrentPrice(productId, newPrice);
-    
+
     res.json({ success: true, message: `Notified ${alerts.length} alerts` });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(400).json({ success: false, message: error.message });
   }
 };

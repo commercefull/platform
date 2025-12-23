@@ -1,6 +1,6 @@
 /**
  * Channel Controller
- * 
+ *
  * HTTP interface for channel management.
  */
 

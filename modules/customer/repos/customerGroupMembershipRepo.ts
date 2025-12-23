@@ -8,14 +8,17 @@ import { CustomerGroupMembership as DbCustomerGroupMembership } from '../../../l
 export type CustomerGroupMembership = DbCustomerGroupMembership;
 
 // Derived types for create/update operations
-export type CustomerGroupMembershipCreateParams = Omit<CustomerGroupMembership, 'customerGroupMembershipId' | 'createdAt' | 'updatedAt' | 'deletedAt'>;
+export type CustomerGroupMembershipCreateParams = Omit<
+  CustomerGroupMembership,
+  'customerGroupMembershipId' | 'createdAt' | 'updatedAt' | 'deletedAt'
+>;
 export type CustomerGroupMembershipUpdateParams = Partial<Pick<CustomerGroupMembership, 'isActive' | 'expiresAt'>>;
 
 export class CustomerGroupMembershipRepo {
   async findById(id: string): Promise<CustomerGroupMembership | null> {
     return await queryOne<CustomerGroupMembership>(
       `SELECT * FROM "customerGroupMembership" WHERE "customerGroupMembershipId" = $1 AND "deletedAt" IS NULL`,
-      [id]
+      [id],
     );
   }
 
@@ -36,7 +39,7 @@ export class CustomerGroupMembershipRepo {
   async findByCustomerAndGroup(customerId: string, customerGroupId: string): Promise<CustomerGroupMembership | null> {
     return await queryOne<CustomerGroupMembership>(
       `SELECT * FROM "customerGroupMembership" WHERE "customerId" = $1 AND "customerGroupId" = $2 AND "deletedAt" IS NULL`,
-      [customerId, customerGroupId]
+      [customerId, customerGroupId],
     );
   }
 
@@ -45,7 +48,7 @@ export class CustomerGroupMembershipRepo {
       `SELECT COUNT(*) as count FROM "customerGroupMembership" 
        WHERE "customerId" = $1 AND "customerGroupId" = $2 AND "isActive" = true AND "deletedAt" IS NULL 
        AND ("expiresAt" IS NULL OR "expiresAt" > $3)`,
-      [customerId, customerGroupId, unixTimestamp()]
+      [customerId, customerGroupId, unixTimestamp()],
     );
     return membership ? parseInt(membership.count, 10) > 0 : false;
   }
@@ -63,10 +66,7 @@ export class CustomerGroupMembershipRepo {
       `INSERT INTO "customerGroupMembership" (
         "customerId", "customerGroupId", "isActive", "expiresAt", "addedBy", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
-      [
-        params.customerId, params.customerGroupId, params.isActive ?? true,
-        params.expiresAt || null, params.addedBy || null, now, now
-      ]
+      [params.customerId, params.customerGroupId, params.isActive ?? true, params.expiresAt || null, params.addedBy || null, now, now],
     );
 
     if (!result) throw new Error('Failed to create customer group membership');
@@ -93,7 +93,7 @@ export class CustomerGroupMembershipRepo {
     return await queryOne<CustomerGroupMembership>(
       `UPDATE "customerGroupMembership" SET ${updateFields.join(', ')} 
        WHERE "customerGroupMembershipId" = $${paramIndex} AND "deletedAt" IS NULL RETURNING *`,
-      values
+      values,
     );
   }
 
@@ -108,7 +108,7 @@ export class CustomerGroupMembershipRepo {
   async delete(id: string): Promise<boolean> {
     const result = await queryOne<{ customerGroupMembershipId: string }>(
       `UPDATE "customerGroupMembership" SET "deletedAt" = $1 WHERE "customerGroupMembershipId" = $2 AND "deletedAt" IS NULL RETURNING "customerGroupMembershipId"`,
-      [unixTimestamp(), id]
+      [unixTimestamp(), id],
     );
     return !!result;
   }
@@ -116,7 +116,7 @@ export class CustomerGroupMembershipRepo {
   async hardDelete(id: string): Promise<boolean> {
     const result = await queryOne<{ customerGroupMembershipId: string }>(
       `DELETE FROM "customerGroupMembership" WHERE "customerGroupMembershipId" = $1 RETURNING "customerGroupMembershipId"`,
-      [id]
+      [id],
     );
     return !!result;
   }
@@ -127,7 +127,7 @@ export class CustomerGroupMembershipRepo {
       `UPDATE "customerGroupMembership" SET "isActive" = false, "updatedAt" = $1 
        WHERE "expiresAt" IS NOT NULL AND "expiresAt" < $1 AND "isActive" = true AND "deletedAt" IS NULL 
        RETURNING "customerGroupMembershipId"`,
-      [now]
+      [now],
     );
     return results ? results.length : 0;
   }

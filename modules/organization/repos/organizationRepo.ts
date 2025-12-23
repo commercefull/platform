@@ -1,6 +1,6 @@
 /**
  * Organization Repository
- * 
+ *
  * Manages multi-tenant organizations and their hierarchies.
  */
 
@@ -50,32 +50,23 @@ export async function create(params: CreateOrganizationParams): Promise<Organiza
 }
 
 export async function findById(organizationId: string): Promise<Organization | null> {
-  const result = await queryOne<Organization>(
-    'SELECT * FROM "organization" WHERE "organizationId" = $1 AND "deletedAt" IS NULL',
-    [organizationId]
-  );
+  const result = await queryOne<Organization>('SELECT * FROM "organization" WHERE "organizationId" = $1 AND "deletedAt" IS NULL', [
+    organizationId,
+  ]);
   return result;
 }
 
 export async function findBySlug(slug: string): Promise<Organization | null> {
-  const result = await queryOne<Organization>(
-    'SELECT * FROM "organization" WHERE "slug" = $1 AND "deletedAt" IS NULL',
-    [slug]
-  );
+  const result = await queryOne<Organization>('SELECT * FROM "organization" WHERE "slug" = $1 AND "deletedAt" IS NULL', [slug]);
   return result;
 }
 
 export async function findAll(): Promise<Organization[]> {
-  const result = await query<{ rows: Organization[] }>(
-    'SELECT * FROM "organization" WHERE "deletedAt" IS NULL ORDER BY "name" ASC'
-  );
+  const result = await query<{ rows: Organization[] }>('SELECT * FROM "organization" WHERE "deletedAt" IS NULL ORDER BY "name" ASC');
   return result?.rows ?? [];
 }
 
-export async function update(
-  organizationId: string,
-  params: UpdateOrganizationParams
-): Promise<Organization | null> {
+export async function update(organizationId: string, params: UpdateOrganizationParams): Promise<Organization | null> {
   const updates: string[] = ['"updatedAt" = $1'];
   const values: unknown[] = [new Date()];
   let paramIndex = 2;
@@ -112,24 +103,18 @@ export async function update(
 export async function softDelete(organizationId: string): Promise<boolean> {
   const result = await query<{ rowCount: number }>(
     'UPDATE "organization" SET "deletedAt" = $1 WHERE "organizationId" = $2 AND "deletedAt" IS NULL',
-    [new Date(), organizationId]
+    [new Date(), organizationId],
   );
   return (result?.rowCount ?? 0) > 0;
 }
 
 export async function getStoresByOrganization(organizationId: string): Promise<any[]> {
-  const result = await query<{ rows: any[] }>(
-    'SELECT * FROM "store" WHERE "organizationId" = $1 ORDER BY "name" ASC',
-    [organizationId]
-  );
+  const result = await query<{ rows: any[] }>('SELECT * FROM "store" WHERE "organizationId" = $1 ORDER BY "name" ASC', [organizationId]);
   return result?.rows ?? [];
 }
 
 export async function getChannelsByOrganization(organizationId: string): Promise<any[]> {
-  const result = await query<{ rows: any[] }>(
-    'SELECT * FROM "channel" WHERE "organizationId" = $1 ORDER BY "name" ASC',
-    [organizationId]
-  );
+  const result = await query<{ rows: any[] }>('SELECT * FROM "channel" WHERE "organizationId" = $1 ORDER BY "name" ASC', [organizationId]);
   return result?.rows ?? [];
 }
 

@@ -7,7 +7,7 @@ import { ProductVariantRepository, ProductVariantFilters } from '../../infrastru
 export class GetProductVariantsCommand {
   constructor(
     public readonly productId: string,
-    public readonly includeInactive?: boolean
+    public readonly includeInactive?: boolean,
   ) {}
 }
 
@@ -52,7 +52,7 @@ export class GetProductVariantsUseCase {
 
   async execute(command: GetProductVariantsCommand): Promise<ProductVariantResponse[]> {
     const filters: ProductVariantFilters = {
-      productId: command.productId
+      productId: command.productId,
     };
 
     if (command.includeInactive !== true) {
@@ -62,7 +62,7 @@ export class GetProductVariantsUseCase {
     const result = await this.variantRepository.findAll(filters, {
       limit: 100, // Reasonable limit for variants
       orderBy: 'sortOrder',
-      orderDirection: 'asc'
+      orderDirection: 'asc',
     });
 
     return result.data.map(variant => ({
@@ -75,13 +75,13 @@ export class GetProductVariantsUseCase {
         attributeId: attr.attributeId,
         attributeName: attr.attributeName,
         value: attr.value,
-        displayValue: attr.displayValue
+        displayValue: attr.displayValue,
       })),
       price: {
         amount: variant.price.effectivePrice,
         currency: variant.price.currency,
         saleAmount: variant.price.salePrice ?? undefined,
-        cost: variant.price.cost ?? undefined
+        cost: variant.price.cost ?? undefined,
       },
       trackInventory: true, // Always track inventory for variants
       inventoryQuantity: variant.stockQuantity,
@@ -94,7 +94,7 @@ export class GetProductVariantsUseCase {
       isLowStock: variant.isLowStock,
       isOutOfStock: variant.isOutOfStock,
       hasDiscount: variant.price.isOnSale,
-      discountPercentage: variant.price.isOnSale ? variant.price.discountPercentage : undefined
+      discountPercentage: variant.price.isOnSale ? variant.price.discountPercentage : undefined,
     }));
   }
 }

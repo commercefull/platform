@@ -73,7 +73,7 @@ export class OrderAddress {
       isDefault: props.isDefault || false,
       metadata: props.metadata,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     });
   }
 
@@ -82,25 +82,63 @@ export class OrderAddress {
   }
 
   // Getters
-  get orderAddressId(): string { return this.props.orderAddressId; }
-  get orderId(): string { return this.props.orderId; }
-  get addressType(): AddressType { return this.props.addressType; }
-  get firstName(): string { return this.props.firstName; }
-  get lastName(): string { return this.props.lastName; }
-  get company(): string | undefined { return this.props.company; }
-  get address1(): string { return this.props.address1; }
-  get address2(): string | undefined { return this.props.address2; }
-  get city(): string { return this.props.city; }
-  get state(): string { return this.props.state; }
-  get postalCode(): string { return this.props.postalCode; }
-  get country(): string { return this.props.country; }
-  get countryCode(): string { return this.props.countryCode; }
-  get phone(): string | undefined { return this.props.phone; }
-  get email(): string | undefined { return this.props.email; }
-  get isDefault(): boolean { return this.props.isDefault; }
-  get metadata(): Record<string, any> | undefined { return this.props.metadata; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get orderAddressId(): string {
+    return this.props.orderAddressId;
+  }
+  get orderId(): string {
+    return this.props.orderId;
+  }
+  get addressType(): AddressType {
+    return this.props.addressType;
+  }
+  get firstName(): string {
+    return this.props.firstName;
+  }
+  get lastName(): string {
+    return this.props.lastName;
+  }
+  get company(): string | undefined {
+    return this.props.company;
+  }
+  get address1(): string {
+    return this.props.address1;
+  }
+  get address2(): string | undefined {
+    return this.props.address2;
+  }
+  get city(): string {
+    return this.props.city;
+  }
+  get state(): string {
+    return this.props.state;
+  }
+  get postalCode(): string {
+    return this.props.postalCode;
+  }
+  get country(): string {
+    return this.props.country;
+  }
+  get countryCode(): string {
+    return this.props.countryCode;
+  }
+  get phone(): string | undefined {
+    return this.props.phone;
+  }
+  get email(): string | undefined {
+    return this.props.email;
+  }
+  get isDefault(): boolean {
+    return this.props.isDefault;
+  }
+  get metadata(): Record<string, any> | undefined {
+    return this.props.metadata;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   // Calculated properties
   get fullName(): string {
@@ -114,7 +152,7 @@ export class OrderAddress {
       this.props.city,
       this.props.state,
       this.props.postalCode,
-      this.props.country
+      this.props.country,
     ].filter(Boolean);
     return parts.join(', ');
   }
@@ -159,7 +197,7 @@ export class OrderAddress {
       fullAddress: this.fullAddress,
       metadata: this.props.metadata,
       createdAt: this.props.createdAt.toISOString(),
-      updatedAt: this.props.updatedAt.toISOString()
+      updatedAt: this.props.updatedAt.toISOString(),
     };
   }
 }

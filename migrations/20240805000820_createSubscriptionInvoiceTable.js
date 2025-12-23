@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function (knex) {
   return knex.schema.createTable('subscriptionInvoice', t => {
     t.uuid('subscriptionInvoiceId').primary().defaultTo(knex.raw('uuidv7()'));
     t.uuid('paymentSubscriptionId').notNullable().references('paymentSubscriptionId').inTable('paymentSubscription').onDelete('CASCADE');
@@ -19,7 +19,7 @@ exports.up = function(knex) {
     t.decimal('tax', 15, 2).notNullable().defaultTo(0);
     t.decimal('discount', 15, 2).notNullable().defaultTo(0);
     t.string('gatewayInvoiceId', 255);
-    
+
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('deletedAt');
@@ -36,6 +36,6 @@ exports.up = function(knex) {
   });
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTable('subscriptionInvoice');
 };

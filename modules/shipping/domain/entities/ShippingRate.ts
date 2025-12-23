@@ -41,7 +41,7 @@ export class ShippingRate {
       ...props,
       isActive: true,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     });
   }
 
@@ -49,10 +49,18 @@ export class ShippingRate {
     return new ShippingRate(props);
   }
 
-  get rateId(): string { return this.props.rateId; }
-  get name(): string { return this.props.name; }
-  get baseRate(): number { return this.props.baseRate; }
-  get isActive(): boolean { return this.props.isActive; }
+  get rateId(): string {
+    return this.props.rateId;
+  }
+  get name(): string {
+    return this.props.name;
+  }
+  get baseRate(): number {
+    return this.props.baseRate;
+  }
+  get isActive(): boolean {
+    return this.props.isActive;
+  }
 
   calculateRate(weight: number, subtotal: number, quantity: number): number {
     if (this.props.freeShippingThreshold && subtotal >= this.props.freeShippingThreshold) {

@@ -1,7 +1,7 @@
 /**
  * GDPR Data Request Table
  * Tracks customer requests for data export, deletion, rectification per GDPR Articles 15-21
- * 
+ *
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
@@ -13,21 +13,23 @@ exports.up = function (knex) {
     t.uuid('customerId').notNullable().references('customerId').inTable('customer').onDelete('CASCADE');
     // Request type per GDPR articles
     t.enum('requestType', [
-      'export',       // Article 20 - Data portability
-      'deletion',     // Article 17 - Right to erasure
+      'export', // Article 20 - Data portability
+      'deletion', // Article 17 - Right to erasure
       'rectification', // Article 16 - Right to rectification
-      'restriction',  // Article 18 - Right to restriction
-      'access',       // Article 15 - Right of access
-      'objection'     // Article 21 - Right to object
+      'restriction', // Article 18 - Right to restriction
+      'access', // Article 15 - Right of access
+      'objection', // Article 21 - Right to object
     ]).notNullable();
     t.enum('status', [
-      'pending',      // Awaiting processing
-      'processing',   // Being processed
-      'completed',    // Successfully completed
-      'rejected',     // Rejected (with reason)
-      'cancelled',    // Cancelled by customer
-      'failed'        // Technical failure
-    ]).notNullable().defaultTo('pending');
+      'pending', // Awaiting processing
+      'processing', // Being processed
+      'completed', // Successfully completed
+      'rejected', // Rejected (with reason)
+      'cancelled', // Cancelled by customer
+      'failed', // Technical failure
+    ])
+      .notNullable()
+      .defaultTo('pending');
     t.text('reason'); // Customer's reason for request
     t.jsonb('requestedData'); // Specific data categories requested
     // For export requests
@@ -51,7 +53,7 @@ exports.up = function (knex) {
     // Audit
     t.string('ipAddress', 50);
     t.string('userAgent', 255);
-    
+
     t.index('customerId');
     t.index('requestType');
     t.index('status');

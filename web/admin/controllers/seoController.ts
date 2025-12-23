@@ -19,7 +19,8 @@ export const listSEOSettings = async (req: Request, res: Response): Promise<void
       siteName: 'Commercefull Store',
       siteDescription: 'Your complete e-commerce solution',
       defaultMetaTitle: 'Commercefull - Complete E-Commerce Platform',
-      defaultMetaDescription: 'Shop the best products with our comprehensive e-commerce platform featuring advanced product management, secure payments, and fast shipping.',
+      defaultMetaDescription:
+        'Shop the best products with our comprehensive e-commerce platform featuring advanced product management, secure payments, and fast shipping.',
       defaultKeywords: 'ecommerce, online shopping, products, store',
       robotsTxt: 'User-agent: *\nAllow: /\n\nSitemap: https://commercefull.com/sitemap.xml',
       googleAnalyticsId: '',
@@ -28,18 +29,18 @@ export const listSEOSettings = async (req: Request, res: Response): Promise<void
       ogImageUrl: '/images/og-default.jpg',
       structuredData: true,
       canonicalUrls: true,
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     };
 
     adminRespond(req, res, 'marketing/seo/index', {
       pageName: 'SEO Settings',
       seoSettings,
-      
-      success: req.query.success || null
+
+      success: req.query.success || null,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load SEO settings',
@@ -61,7 +62,7 @@ export const updateSEOSettings = async (req: Request, res: Response): Promise<vo
       twitterCardType,
       ogImageUrl,
       structuredData,
-      canonicalUrls
+      canonicalUrls,
     } = req.body;
 
     // In a real implementation, this would save to database
@@ -77,13 +78,12 @@ export const updateSEOSettings = async (req: Request, res: Response): Promise<vo
       twitterCardType,
       ogImageUrl,
       structuredData: structuredData === 'true',
-      canonicalUrls: canonicalUrls === 'true'
+      canonicalUrls: canonicalUrls === 'true',
     });
 
     res.redirect('/hub/marketing/seo?success=SEO settings updated successfully');
   } catch (error: any) {
     logger.error('Error:', error);
-    
 
     adminRespond(req, res, 'marketing/seo/index', {
       pageName: 'SEO Settings',
@@ -115,7 +115,7 @@ Sitemap: https://commercefull.com/sitemap.xml`;
     res.send(robotsTxt);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ error: 'Failed to generate robots.txt' });
   }
 };
@@ -162,7 +162,7 @@ export const generateSitemap = async (req: Request, res: Response): Promise<void
     res.send(sitemapXml);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ error: 'Failed to generate sitemap' });
   }
 };

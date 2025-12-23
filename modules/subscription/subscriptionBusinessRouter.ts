@@ -34,7 +34,7 @@ import {
   getPendingDunning,
   // Billing
   getSubscriptionsDueBilling,
-  processBillingCycle
+  processBillingCycle,
 } from './controllers/subscriptionBusinessController';
 
 const router = Router();

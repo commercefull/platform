@@ -25,7 +25,7 @@ exports.up = async function (knex) {
       isDefault: true,
       isActive: true,
       flatRate: 5.99,
-      freeShippingThreshold: 50.00,
+      freeShippingThreshold: 50.0,
       processingTime: 2,
       rulesType: 'flat',
     });

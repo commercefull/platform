@@ -29,7 +29,7 @@ import {
   // Approvals
   getMyApprovalRequests,
   getPendingApprovals,
-  processApproval
+  processApproval,
 } from './controllers/b2bCustomerController';
 
 const router = Router();

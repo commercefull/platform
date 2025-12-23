@@ -12,7 +12,7 @@ exports.up = function (knex) {
     t.string('newStatus', 20).notNullable();
     t.text('changeReason');
     t.enum('changeSource', ['system', 'admin', 'customer', 'payment', 'api']).notNullable().defaultTo('system');
-    
+
     t.uuid('createdBy');
     t.index('subscriptionId');
     t.index('previousStatus');

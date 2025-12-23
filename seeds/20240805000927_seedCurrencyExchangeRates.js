@@ -68,18 +68,18 @@ exports.up = function (knex) {
  * @returns { Promise<void> }
  */
 exports.down = async function (knex) {
-    const currencies = await knex('currency').whereIn('code', ['USD', 'EUR', 'GBP', 'CAD']).select('currencyId', 'code');
-    const currencyMap = currencies.reduce((acc, curr) => ({ ...acc, [curr.code]: curr.currencyId }), {});
+  const currencies = await knex('currency').whereIn('code', ['USD', 'EUR', 'GBP', 'CAD']).select('currencyId', 'code');
+  const currencyMap = currencies.reduce((acc, curr) => ({ ...acc, [curr.code]: curr.currencyId }), {});
 
-    if (currencyMap.USD && currencyMap.EUR) {
-        await knex('currencyExchangeRate').where({ sourceCurrencyId: currencyMap.USD, targetCurrencyId: currencyMap.EUR }).delete();
-    }
-    if (currencyMap.USD && currencyMap.GBP) {
-        await knex('currencyExchangeRate').where({ sourceCurrencyId: currencyMap.USD, targetCurrencyId: currencyMap.GBP }).delete();
-    }
-    if (currencyMap.USD && currencyMap.CAD) {
-        await knex('currencyExchangeRate').where({ sourceCurrencyId: currencyMap.USD, targetCurrencyId: currencyMap.CAD }).delete();
-    }
+  if (currencyMap.USD && currencyMap.EUR) {
+    await knex('currencyExchangeRate').where({ sourceCurrencyId: currencyMap.USD, targetCurrencyId: currencyMap.EUR }).delete();
+  }
+  if (currencyMap.USD && currencyMap.GBP) {
+    await knex('currencyExchangeRate').where({ sourceCurrencyId: currencyMap.USD, targetCurrencyId: currencyMap.GBP }).delete();
+  }
+  if (currencyMap.USD && currencyMap.CAD) {
+    await knex('currencyExchangeRate').where({ sourceCurrencyId: currencyMap.USD, targetCurrencyId: currencyMap.CAD }).delete();
+  }
 };
 
 exports.seed = async function (knex) {

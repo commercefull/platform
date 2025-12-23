@@ -8,9 +8,7 @@ exports.up = function (knex) {
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     t.uuid('customerId').notNullable().references('customerId').inTable('customer').onDelete('CASCADE');
-    t.enum('type', [
-      'creditCard', 'debitCard', 'paypal', 'applePay', 'googlePay', 'bankTransfer'
-    ]).notNullable();
+    t.enum('type', ['creditCard', 'debitCard', 'paypal', 'applePay', 'googlePay', 'bankTransfer']).notNullable();
     t.string('provider', 100).notNullable();
     t.string('token', 255);
     t.string('gatewayCustomerId', 255);
@@ -22,7 +20,7 @@ exports.up = function (knex) {
     t.string('cardholderName', 255);
     t.boolean('isDefault').notNullable().defaultTo(false);
     t.uuid('billingAddressId').references('customerAddressId').inTable('customerAddress');
-    
+
     t.index('customerId');
     t.index('type');
     t.index('provider');

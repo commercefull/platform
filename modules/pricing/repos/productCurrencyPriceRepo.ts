@@ -10,31 +10,26 @@ export class ProductCurrencyPriceRepo {
    * Find price by ID
    */
   async findById(productCurrencyPriceId: string): Promise<ProductCurrencyPrice | null> {
-    return await queryOne<ProductCurrencyPrice>(
-      `SELECT * FROM "${Table.ProductCurrencyPrice}" WHERE "productCurrencyPriceId" = $1`,
-      [productCurrencyPriceId]
-    );
+    return await queryOne<ProductCurrencyPrice>(`SELECT * FROM "${Table.ProductCurrencyPrice}" WHERE "productCurrencyPriceId" = $1`, [
+      productCurrencyPriceId,
+    ]);
   }
 
   /**
    * Find price for product in specific currency
    */
-  async findByProductAndCurrency(
-    productId: string,
-    currencyId: string,
-    productVariantId?: string
-  ): Promise<ProductCurrencyPrice | null> {
+  async findByProductAndCurrency(productId: string, currencyId: string, productVariantId?: string): Promise<ProductCurrencyPrice | null> {
     if (productVariantId) {
       return await queryOne<ProductCurrencyPrice>(
         `SELECT * FROM "${Table.ProductCurrencyPrice}" 
          WHERE "productId" = $1 AND "productVariantId" = $2 AND "currencyId" = $3`,
-        [productId, productVariantId, currencyId]
+        [productId, productVariantId, currencyId],
       );
     } else {
       return await queryOne<ProductCurrencyPrice>(
         `SELECT * FROM "${Table.ProductCurrencyPrice}" 
          WHERE "productId" = $1 AND "productVariantId" IS NULL AND "currencyId" = $2`,
-        [productId, currencyId]
+        [productId, currencyId],
       );
     }
   }
@@ -48,7 +43,7 @@ export class ProductCurrencyPriceRepo {
         `SELECT * FROM "${Table.ProductCurrencyPrice}" 
          WHERE "productId" = $1 AND "productVariantId" = $2
          ORDER BY "currencyId" ASC`,
-        [productId, productVariantId]
+        [productId, productVariantId],
       );
       return results || [];
     } else {
@@ -56,7 +51,7 @@ export class ProductCurrencyPriceRepo {
         `SELECT * FROM "${Table.ProductCurrencyPrice}" 
          WHERE "productId" = $1 AND "productVariantId" IS NULL
          ORDER BY "currencyId" ASC`,
-        [productId]
+        [productId],
       );
       return results || [];
     }
@@ -70,7 +65,7 @@ export class ProductCurrencyPriceRepo {
       `SELECT * FROM "${Table.ProductCurrencyPrice}" 
        WHERE "productVariantId" = $1
        ORDER BY "currencyId" ASC`,
-      [productVariantId]
+      [productVariantId],
     );
     return results || [];
   }
@@ -84,7 +79,7 @@ export class ProductCurrencyPriceRepo {
        WHERE "currencyId" = $1
        ORDER BY "productId" ASC
        LIMIT $2 OFFSET $3`,
-      [currencyId, limit, offset]
+      [currencyId, limit, offset],
     );
     return results || [];
   }
@@ -98,7 +93,7 @@ export class ProductCurrencyPriceRepo {
        WHERE "isManual" = true
        ORDER BY "updatedAt" DESC
        LIMIT $1 OFFSET $2`,
-      [limit, offset]
+      [limit, offset],
     );
     return results || [];
   }
@@ -112,7 +107,7 @@ export class ProductCurrencyPriceRepo {
        WHERE "isManual" = false
        ORDER BY "updatedAt" DESC
        LIMIT $1 OFFSET $2`,
-      [limit, offset]
+      [limit, offset],
     );
     return results || [];
   }
@@ -124,11 +119,7 @@ export class ProductCurrencyPriceRepo {
     const now = unixTimestamp();
 
     // Check if price already exists for this combination
-    const existing = await this.findByProductAndCurrency(
-      params.productId,
-      params.currencyId,
-      params.productVariantId ?? undefined
-    );
+    const existing = await this.findByProductAndCurrency(params.productId, params.currencyId, params.productVariantId ?? undefined);
 
     if (existing) {
       throw new Error('Price already exists for this product/variant and currency combination');
@@ -149,8 +140,8 @@ export class ProductCurrencyPriceRepo {
         params.isManual !== undefined ? params.isManual : true,
         params.updatedBy || null,
         now,
-        now
-      ]
+        now,
+      ],
     );
 
     if (!result) {
@@ -164,24 +155,20 @@ export class ProductCurrencyPriceRepo {
    * Upsert currency price (create or update)
    */
   async upsert(params: ProductCurrencyPriceCreateParams): Promise<ProductCurrencyPrice> {
-    const existing = await this.findByProductAndCurrency(
-      params.productId,
-      params.currencyId,
-      params.productVariantId ?? undefined
-    );
+    const existing = await this.findByProductAndCurrency(params.productId, params.currencyId, params.productVariantId ?? undefined);
 
     if (existing) {
       const updated = await this.update(existing.productCurrencyPriceId, {
         price: params.price,
         compareAtPrice: params.compareAtPrice,
         isManual: params.isManual,
-        updatedBy: params.updatedBy
+        updatedBy: params.updatedBy,
       });
-      
+
       if (!updated) {
         throw new Error('Failed to update existing price');
       }
-      
+
       return updated;
     }
 
@@ -216,7 +203,7 @@ export class ProductCurrencyPriceRepo {
        SET ${updateFields.join(', ')}
        WHERE "productCurrencyPriceId" = $${paramIndex}
        RETURNING *`,
-      values
+      values,
     );
 
     return result;
@@ -226,10 +213,10 @@ export class ProductCurrencyPriceRepo {
    * Update price value
    */
   async updatePrice(productCurrencyPriceId: string, price: number, updatedBy?: string): Promise<ProductCurrencyPrice | null> {
-    return this.update(productCurrencyPriceId, { 
+    return this.update(productCurrencyPriceId, {
       price: price.toString(),
       isManual: true,
-      updatedBy: updatedBy ?? null
+      updatedBy: updatedBy ?? null,
     });
   }
 
@@ -257,10 +244,7 @@ export class ProductCurrencyPriceRepo {
   /**
    * Bulk update prices for currency (e.g., when exchange rate changes)
    */
-  async bulkUpdateForCurrency(
-    currencyId: string,
-    priceUpdates: Array<{ productCurrencyPriceId: string; price: number }>
-  ): Promise<number> {
+  async bulkUpdateForCurrency(currencyId: string, priceUpdates: Array<{ productCurrencyPriceId: string; price: number }>): Promise<number> {
     const now = unixTimestamp();
     let updated = 0;
 
@@ -269,7 +253,7 @@ export class ProductCurrencyPriceRepo {
         `UPDATE "${Table.ProductCurrencyPrice}" 
          SET "price" = $1, "updatedAt" = $2, "isManual" = false
          WHERE "productCurrencyPriceId" = $3`,
-        [update.price, now, update.productCurrencyPriceId]
+        [update.price, now, update.productCurrencyPriceId],
       );
       updated++;
     }
@@ -283,7 +267,7 @@ export class ProductCurrencyPriceRepo {
   async delete(productCurrencyPriceId: string): Promise<boolean> {
     const result = await queryOne<{ productCurrencyPriceId: string }>(
       `DELETE FROM "${Table.ProductCurrencyPrice}" WHERE "productCurrencyPriceId" = $1 RETURNING "productCurrencyPriceId"`,
-      [productCurrencyPriceId]
+      [productCurrencyPriceId],
     );
 
     return !!result;
@@ -315,7 +299,7 @@ export class ProductCurrencyPriceRepo {
   async deleteByCurrency(currencyId: string): Promise<number> {
     const results = await query<{ productCurrencyPriceId: string }[]>(
       `DELETE FROM "${Table.ProductCurrencyPrice}" WHERE "currencyId" = $1 RETURNING "productCurrencyPriceId"`,
-      [currencyId]
+      [currencyId],
     );
     return results ? results.length : 0;
   }
@@ -324,10 +308,7 @@ export class ProductCurrencyPriceRepo {
    * Count prices
    */
   async count(): Promise<number> {
-    const result = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM "${Table.ProductCurrencyPrice}"`,
-      []
-    );
+    const result = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "${Table.ProductCurrencyPrice}"`, []);
 
     return result ? parseInt(result.count, 10) : 0;
   }
@@ -338,7 +319,7 @@ export class ProductCurrencyPriceRepo {
   async countByProduct(productId: string): Promise<number> {
     const result = await queryOne<{ count: string }>(
       `SELECT COUNT(*) as count FROM "${Table.ProductCurrencyPrice}" WHERE "productId" = $1`,
-      [productId]
+      [productId],
     );
 
     return result ? parseInt(result.count, 10) : 0;
@@ -358,7 +339,7 @@ export class ProductCurrencyPriceRepo {
 
     const manualResult = await queryOne<{ count: string }>(
       `SELECT COUNT(*) as count FROM "${Table.ProductCurrencyPrice}" WHERE "isManual" = true`,
-      []
+      [],
     );
     const manual = manualResult ? parseInt(manualResult.count, 10) : 0;
 
@@ -368,7 +349,7 @@ export class ProductCurrencyPriceRepo {
       `SELECT "currencyId", COUNT(*) as count 
        FROM "${Table.ProductCurrencyPrice}" 
        GROUP BY "currencyId"`,
-      []
+      [],
     );
 
     const byCurrency: Record<string, number> = {};
@@ -380,7 +361,7 @@ export class ProductCurrencyPriceRepo {
 
     const compareResult = await queryOne<{ count: string }>(
       `SELECT COUNT(*) as count FROM "${Table.ProductCurrencyPrice}" WHERE "compareAtPrice" IS NOT NULL`,
-      []
+      [],
     );
     const withCompareAtPrice = compareResult ? parseInt(compareResult.count, 10) : 0;
 
@@ -389,7 +370,7 @@ export class ProductCurrencyPriceRepo {
       manual,
       auto,
       byCurrency,
-      withCompareAtPrice
+      withCompareAtPrice,
     };
   }
 
@@ -404,13 +385,13 @@ export class ProductCurrencyPriceRepo {
         AVG("price") as avg
        FROM "${Table.ProductCurrencyPrice}" 
        WHERE "currencyId" = $1`,
-      [currencyId]
+      [currencyId],
     );
 
     return {
       min: result && result.min ? parseFloat(result.min) : 0,
       max: result && result.max ? parseFloat(result.max) : 0,
-      avg: result && result.avg ? parseFloat(result.avg) : 0
+      avg: result && result.avg ? parseFloat(result.avg) : 0,
     };
   }
 }

@@ -27,14 +27,7 @@ export class PageCreatedEvent implements DomainEvent {
     createdBy?: string;
   };
 
-  constructor(
-    pageId: string,
-    title: string,
-    slug: string,
-    contentTypeId: string,
-    status: string,
-    createdBy?: string
-  ) {
+  constructor(pageId: string, title: string, slug: string, contentTypeId: string, status: string, createdBy?: string) {
     this.occurredAt = new Date();
     this.aggregateId = pageId;
     this.payload = { pageId, title, slug, contentTypeId, status, createdBy };
@@ -53,13 +46,7 @@ export class PageUpdatedEvent implements DomainEvent {
     changes: string[];
   };
 
-  constructor(
-    pageId: string,
-    title: string,
-    slug: string,
-    changes: string[],
-    updatedBy?: string
-  ) {
+  constructor(pageId: string, title: string, slug: string, changes: string[], updatedBy?: string) {
     this.occurredAt = new Date();
     this.aggregateId = pageId;
     this.payload = { pageId, title, slug, updatedBy, changes };
@@ -78,12 +65,7 @@ export class PagePublishedEvent implements DomainEvent {
     publishedBy?: string;
   };
 
-  constructor(
-    pageId: string,
-    title: string,
-    slug: string,
-    publishedBy?: string
-  ) {
+  constructor(pageId: string, title: string, slug: string, publishedBy?: string) {
     this.occurredAt = new Date();
     this.aggregateId = pageId;
     this.payload = {
@@ -91,7 +73,7 @@ export class PagePublishedEvent implements DomainEvent {
       title,
       slug,
       publishedAt: new Date().toISOString(),
-      publishedBy
+      publishedBy,
     };
   }
 }
@@ -107,12 +89,7 @@ export class PageUnpublishedEvent implements DomainEvent {
     unpublishedBy?: string;
   };
 
-  constructor(
-    pageId: string,
-    title: string,
-    slug: string,
-    unpublishedBy?: string
-  ) {
+  constructor(pageId: string, title: string, slug: string, unpublishedBy?: string) {
     this.occurredAt = new Date();
     this.aggregateId = pageId;
     this.payload = { pageId, title, slug, unpublishedBy };
@@ -164,12 +141,7 @@ export class PageVersionCreatedEvent implements DomainEvent {
     createdBy?: string;
   };
 
-  constructor(
-    pageId: string,
-    versionId: string,
-    version: number,
-    createdBy?: string
-  ) {
+  constructor(pageId: string, versionId: string, version: number, createdBy?: string) {
     this.occurredAt = new Date();
     this.aggregateId = pageId;
     this.payload = { pageId, versionId, version, createdBy };
@@ -192,13 +164,7 @@ export class BlockCreatedEvent implements DomainEvent {
     order: number;
   };
 
-  constructor(
-    blockId: string,
-    pageId: string,
-    name: string,
-    contentTypeId: string,
-    order: number
-  ) {
+  constructor(blockId: string, pageId: string, name: string, contentTypeId: string, order: number) {
     this.occurredAt = new Date();
     this.aggregateId = blockId;
     this.payload = { blockId, pageId, name, contentTypeId, order };
@@ -378,14 +344,7 @@ export class MediaUploadedEvent implements DomainEvent {
     uploadedBy?: string;
   };
 
-  constructor(
-    mediaId: string,
-    title: string,
-    fileName: string,
-    fileType: string,
-    fileSize: number,
-    uploadedBy?: string
-  ) {
+  constructor(mediaId: string, title: string, fileName: string, fileType: string, fileSize: number, uploadedBy?: string) {
     this.occurredAt = new Date();
     this.aggregateId = mediaId;
     this.payload = { mediaId, title, fileName, fileType, fileSize, uploadedBy };

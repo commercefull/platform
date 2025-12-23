@@ -1,6 +1,6 @@
 /**
  * ReserveStock Use Case
- * 
+ *
  * Reserves inventory for an order, preventing overselling.
  */
 
@@ -43,7 +43,7 @@ export interface ReserveStockOutput {
 
 export class ReserveStockUseCase {
   constructor(
-    private readonly inventoryRepository: any // InventoryRepository
+    private readonly inventoryRepository: any, // InventoryRepository
   ) {}
 
   async execute(input: ReserveStockInput): Promise<ReserveStockOutput> {
@@ -56,11 +56,7 @@ export class ReserveStockUseCase {
 
     for (const item of input.items) {
       // Get current inventory level
-      const inventory = await this.inventoryRepository.findByProduct(
-        item.productId,
-        item.variantId,
-        item.locationId
-      );
+      const inventory = await this.inventoryRepository.findByProduct(item.productId, item.variantId, item.locationId);
 
       if (!inventory) {
         results.push({
@@ -99,7 +95,7 @@ export class ReserveStockUseCase {
         // Update reserved quantity on inventory
         await this.inventoryRepository.updateReservedQuantity(
           inventory.inventoryItemId,
-          (inventory.reservedQuantity || 0) + reserveQuantity
+          (inventory.reservedQuantity || 0) + reserveQuantity,
         );
       }
 

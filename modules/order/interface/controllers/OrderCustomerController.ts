@@ -6,12 +6,7 @@
 import { logger } from '../../../../libs/logger';
 import { Request, Response } from 'express';
 import OrderRepo from '../../infrastructure/repositories/OrderRepository';
-import { 
-  CreateOrderCommand, 
-  CreateOrderUseCase,
-  OrderItemInput,
-  AddressInput
-} from '../../application/useCases/CreateOrder';
+import { CreateOrderCommand, CreateOrderUseCase, OrderItemInput, AddressInput } from '../../application/useCases/CreateOrder';
 import { GetOrderCommand, GetOrderUseCase } from '../../application/useCases/GetOrder';
 import { GetCustomerOrdersCommand, GetCustomerOrdersUseCase } from '../../application/useCases/GetCustomerOrders';
 import { CancelOrderCommand, CancelOrderUseCase } from '../../application/useCases/CancelOrder';
@@ -25,13 +20,7 @@ type ResponseData = Record<string, any>;
 /**
  * Respond with JSON or HTML based on Accept header
  */
-function respond(
-  req: Request,
-  res: Response,
-  data: ResponseData,
-  statusCode: number = 200,
-  htmlTemplate?: string
-): void {
+function respond(req: Request, res: Response, data: ResponseData, statusCode: number = 200, htmlTemplate?: string): void {
   const acceptHeader = req.get('Accept') || 'application/json';
 
   if (acceptHeader.includes('text/html') && htmlTemplate) {
@@ -44,13 +33,7 @@ function respond(
 /**
  * Respond with error in JSON or HTML based on Accept header
  */
-function respondError(
-  req: Request,
-  res: Response,
-  message: string,
-  statusCode: number = 500,
-  htmlTemplate?: string
-): void {
+function respondError(req: Request, res: Response, message: string, statusCode: number = 500, htmlTemplate?: string): void {
   const acceptHeader = req.get('Accept') || 'application/json';
 
   if (acceptHeader.includes('text/html') && htmlTemplate) {
@@ -87,7 +70,7 @@ export const getMyOrders = async (req: Request, res: Response): Promise<void> =>
     respond(req, res, result, 200, 'order/list');
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     respondError(req, res, error.message || 'Failed to get orders', 500, 'order/error');
   }
 };
@@ -113,13 +96,12 @@ export const getOrder = async (req: Request, res: Response): Promise<void> => {
     respond(req, res, order, 200, 'order/detail');
   } catch (error: any) {
     logger.error('Error:', error);
-    
-    
+
     if (error.message.includes('permission')) {
       respondError(req, res, error.message, 403, 'order/error');
       return;
     }
-    
+
     respondError(req, res, error.message || 'Failed to get order', 500, 'order/error');
   }
 };
@@ -145,13 +127,12 @@ export const getOrderByNumber = async (req: Request, res: Response): Promise<voi
     respond(req, res, order, 200, 'order/detail');
   } catch (error: any) {
     logger.error('Error:', error);
-    
-    
+
     if (error.message.includes('permission')) {
       respondError(req, res, error.message, 403, 'order/error');
       return;
     }
-    
+
     respondError(req, res, error.message || 'Failed to get order', 500, 'order/error');
   }
 };
@@ -176,7 +157,7 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
       shippingTotal,
       hasGiftWrapping,
       giftMessage,
-      isGift
+      isGift,
     } = req.body;
 
     // Validation
@@ -212,7 +193,7 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
       giftMessage,
       isGift,
       req.ip,
-      req.get('User-Agent')
+      req.get('User-Agent'),
     );
 
     const useCase = new CreateOrderUseCase(OrderRepo);
@@ -221,7 +202,7 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
     respond(req, res, order, 201, 'order/confirmation');
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     respondError(req, res, error.message || 'Failed to create order', 500, 'order/error');
   }
 };
@@ -250,18 +231,17 @@ export const cancelOrder = async (req: Request, res: Response): Promise<void> =>
     respond(req, res, result, 200, 'order/cancelled');
   } catch (error: any) {
     logger.error('Error:', error);
-    
-    
+
     if (error.message.includes('permission')) {
       respondError(req, res, error.message, 403, 'order/error');
       return;
     }
-    
+
     if (error.message.includes('cannot be cancelled')) {
       respondError(req, res, error.message, 400, 'order/error');
       return;
     }
-    
+
     respondError(req, res, error.message || 'Failed to cancel order', 500, 'order/error');
   }
 };

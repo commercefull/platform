@@ -16,7 +16,7 @@ exports.up = function (knex) {
     state: 'State',
     postalCode: '12345',
     country: 'US',
-    timezone: 'America/New_York'
+    timezone: 'America/New_York',
   });
 };
 

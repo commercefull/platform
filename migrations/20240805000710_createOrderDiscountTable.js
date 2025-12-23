@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function (knex) {
   return knex.schema.createTable('orderDiscount', t => {
     t.uuid('orderDiscountId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
@@ -11,7 +11,6 @@ exports.up = function(knex) {
     t.string('type', 50).notNullable().checkIn(['percentage', 'fixedAmount', 'freeShipping', 'buyXGetY', 'giftCard']);
     t.decimal('value', 15, 2).notNullable();
     t.decimal('discountAmount', 15, 2).notNullable();
-    
 
     t.index('orderId');
     t.index('orderItemId');
@@ -20,6 +19,6 @@ exports.up = function(knex) {
   });
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTable('orderDiscount');
 };

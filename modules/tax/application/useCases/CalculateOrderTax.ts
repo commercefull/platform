@@ -31,7 +31,7 @@ export class CalculateOrderTaxCommand {
     public readonly items: OrderLineItem[],
     public readonly shippingAddress: TaxAddress,
     public readonly shippingAmount: number = 0,
-    public readonly customerId?: string
+    public readonly customerId?: string,
   ) {}
 }
 
@@ -75,7 +75,7 @@ export class CalculateOrderTaxUseCase {
           total: command.shippingAmount,
           taxRate: 0,
           lineItems: [],
-          message: 'No items to calculate tax for'
+          message: 'No items to calculate tax for',
         };
       }
 
@@ -88,7 +88,7 @@ export class CalculateOrderTaxUseCase {
           total: command.shippingAmount,
           taxRate: 0,
           lineItems: [],
-          message: 'Shipping address country is required for tax calculation'
+          message: 'Shipping address country is required for tax calculation',
         };
       }
 
@@ -97,16 +97,13 @@ export class CalculateOrderTaxUseCase {
         country: command.shippingAddress.country,
         region: command.shippingAddress.region || command.shippingAddress.state,
         postalCode: command.shippingAddress.postalCode,
-        city: command.shippingAddress.city
+        city: command.shippingAddress.city,
       });
 
       // Check for customer tax exemptions if customerId is provided
       let isExempt = false;
       if (command.customerId) {
-        const exemptions = await taxQueryRepo.findCustomerTaxExemptions(
-          command.customerId,
-          'active'
-        );
+        const exemptions = await taxQueryRepo.findCustomerTaxExemptions(command.customerId, 'active');
         isExempt = exemptions.length > 0;
       }
 
@@ -119,20 +116,20 @@ export class CalculateOrderTaxUseCase {
         subtotal += itemSubtotal;
 
         // Calculate tax for this item (skip if not taxable or customer is exempt)
-        const shouldTax = (item.taxable !== false) && !isExempt;
-        const itemTaxAmount = shouldTax ? (itemSubtotal * taxRate / 100) : 0;
+        const shouldTax = item.taxable !== false && !isExempt;
+        const itemTaxAmount = shouldTax ? (itemSubtotal * taxRate) / 100 : 0;
 
         lineItems.push({
           productId: item.productId,
           name: item.name,
           subtotal: itemSubtotal,
           taxAmount: itemTaxAmount,
-          taxRate: shouldTax ? taxRate : 0
+          taxRate: shouldTax ? taxRate : 0,
         });
       }
 
       // Calculate tax on shipping (if applicable and not exempt)
-      const shippingTaxAmount = !isExempt ? (command.shippingAmount * taxRate / 100) : 0;
+      const shippingTaxAmount = !isExempt ? (command.shippingAmount * taxRate) / 100 : 0;
 
       // Calculate total tax
       const totalTaxAmount = lineItems.reduce((sum, item) => sum + item.taxAmount, 0) + shippingTaxAmount;
@@ -148,14 +145,12 @@ export class CalculateOrderTaxUseCase {
         total,
         taxRate,
         lineItems,
-        message: isExempt ? 'Customer is tax exempt' : undefined
+        message: isExempt ? 'Customer is tax exempt' : undefined,
       };
     } catch (error: any) {
-      
-      
       // Return a safe fallback with zero tax
-      const subtotal = command.items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
-      
+      const subtotal = command.items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
+
       return {
         success: false,
         subtotal,
@@ -168,9 +163,9 @@ export class CalculateOrderTaxUseCase {
           name: item.name,
           subtotal: item.quantity * item.unitPrice,
           taxAmount: 0,
-          taxRate: 0
+          taxRate: 0,
         })),
-        message: error.message || 'Failed to calculate tax'
+        message: error.message || 'Failed to calculate tax',
       };
     }
   }

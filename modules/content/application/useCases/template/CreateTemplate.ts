@@ -20,7 +20,7 @@ export class CreateTemplateCommand {
     public readonly compatibleContentTypes?: string[],
     public readonly isSystem?: boolean,
     public readonly isActive?: boolean,
-    public readonly createdBy?: string
+    public readonly createdBy?: string,
   ) {}
 }
 
@@ -66,13 +66,13 @@ export class CreateTemplateUseCase {
       compatibleContentTypes: command.compatibleContentTypes,
       isSystem: command.isSystem || false,
       isActive: command.isActive !== undefined ? command.isActive : true,
-      createdBy: command.createdBy
+      createdBy: command.createdBy,
     });
 
     eventBus.emit('content.template.created', {
       templateId: template.id,
       name: template.name,
-      slug: template.slug
+      slug: template.slug,
     });
 
     return {
@@ -83,7 +83,7 @@ export class CreateTemplateUseCase {
       thumbnail: template.thumbnail,
       isSystem: template.isSystem,
       isActive: template.isActive,
-      createdAt: template.createdAt
+      createdAt: template.createdAt,
     };
   }
 }

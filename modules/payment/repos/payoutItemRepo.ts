@@ -24,31 +24,32 @@ export type PayoutItemCreateParams = Omit<PayoutItem, 'payoutItemId' | 'createdA
 
 export class PayoutItemRepo {
   async findById(id: string): Promise<PayoutItem | null> {
-    return await queryOne<PayoutItem>(
-      `SELECT * FROM "payoutItem" WHERE "payoutItemId" = $1 AND "deletedAt" IS NULL`,
-      [id]
-    );
+    return await queryOne<PayoutItem>(`SELECT * FROM "payoutItem" WHERE "payoutItemId" = $1 AND "deletedAt" IS NULL`, [id]);
   }
 
   async findByPayout(payoutId: string): Promise<PayoutItem[]> {
-    return (await query<PayoutItem[]>(
-      `SELECT * FROM "payoutItem" WHERE "payoutId" = $1 AND "deletedAt" IS NULL ORDER BY "createdAt" ASC`,
-      [payoutId]
-    )) || [];
+    return (
+      (await query<PayoutItem[]>(`SELECT * FROM "payoutItem" WHERE "payoutId" = $1 AND "deletedAt" IS NULL ORDER BY "createdAt" ASC`, [
+        payoutId,
+      ])) || []
+    );
   }
 
   async findByType(payoutId: string, type: PayoutItemType): Promise<PayoutItem[]> {
-    return (await query<PayoutItem[]>(
-      `SELECT * FROM "payoutItem" WHERE "payoutId" = $1 AND "type" = $2 AND "deletedAt" IS NULL ORDER BY "createdAt" ASC`,
-      [payoutId, type]
-    )) || [];
+    return (
+      (await query<PayoutItem[]>(
+        `SELECT * FROM "payoutItem" WHERE "payoutId" = $1 AND "type" = $2 AND "deletedAt" IS NULL ORDER BY "createdAt" ASC`,
+        [payoutId, type],
+      )) || []
+    );
   }
 
   async findByOrder(orderId: string): Promise<PayoutItem[]> {
-    return (await query<PayoutItem[]>(
-      `SELECT * FROM "payoutItem" WHERE "orderId" = $1 AND "deletedAt" IS NULL ORDER BY "createdAt" DESC`,
-      [orderId]
-    )) || [];
+    return (
+      (await query<PayoutItem[]>(`SELECT * FROM "payoutItem" WHERE "orderId" = $1 AND "deletedAt" IS NULL ORDER BY "createdAt" DESC`, [
+        orderId,
+      ])) || []
+    );
   }
 
   async create(params: PayoutItemCreateParams): Promise<PayoutItem> {
@@ -59,10 +60,19 @@ export class PayoutItemRepo {
         "orderId", "orderPaymentId", "paymentRefundId", "disputeId", "createdAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *`,
       [
-        params.payoutId, params.type, params.amount, params.fee || 0, params.netAmount,
-        params.currencyCode || 'USD', params.description || null, params.orderId || null,
-        params.orderPaymentId || null, params.paymentRefundId || null, params.disputeId || null, now
-      ]
+        params.payoutId,
+        params.type,
+        params.amount,
+        params.fee || 0,
+        params.netAmount,
+        params.currencyCode || 'USD',
+        params.description || null,
+        params.orderId || null,
+        params.orderPaymentId || null,
+        params.paymentRefundId || null,
+        params.disputeId || null,
+        now,
+      ],
     );
     if (!result) throw new Error('Failed to create payout item');
     return result;
@@ -71,7 +81,7 @@ export class PayoutItemRepo {
   async delete(id: string): Promise<boolean> {
     const result = await queryOne<{ payoutItemId: string }>(
       `UPDATE "payoutItem" SET "deletedAt" = $1 WHERE "payoutItemId" = $2 AND "deletedAt" IS NULL RETURNING "payoutItemId"`,
-      [unixTimestamp(), id]
+      [unixTimestamp(), id],
     );
     return !!result;
   }
@@ -79,7 +89,7 @@ export class PayoutItemRepo {
   async deleteByPayout(payoutId: string): Promise<number> {
     const results = await query<{ payoutItemId: string }[]>(
       `UPDATE "payoutItem" SET "deletedAt" = $1 WHERE "payoutId" = $2 AND "deletedAt" IS NULL RETURNING "payoutItemId"`,
-      [unixTimestamp(), payoutId]
+      [unixTimestamp(), payoutId],
     );
     return results ? results.length : 0;
   }
@@ -87,7 +97,7 @@ export class PayoutItemRepo {
   async getTotalAmount(payoutId: string): Promise<number> {
     const result = await queryOne<{ total: string }>(
       `SELECT SUM("amount") as total FROM "payoutItem" WHERE "payoutId" = $1 AND "deletedAt" IS NULL`,
-      [payoutId]
+      [payoutId],
     );
     return result ? parseFloat(result.total) || 0 : 0;
   }

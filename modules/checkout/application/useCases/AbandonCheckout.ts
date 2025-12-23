@@ -11,9 +11,7 @@ import { eventBus } from '../../../../libs/events/eventBus';
 // ============================================================================
 
 export class AbandonCheckoutCommand {
-  constructor(
-    public readonly checkoutId: string
-  ) {}
+  constructor(public readonly checkoutId: string) {}
 }
 
 // ============================================================================
@@ -34,7 +32,7 @@ export class AbandonCheckoutUseCase {
 
   async execute(command: AbandonCheckoutCommand): Promise<AbandonCheckoutResponse> {
     const session = await this.checkoutRepository.findById(command.checkoutId);
-    
+
     if (session) {
       session.abandon();
       await this.checkoutRepository.save(session);
@@ -44,13 +42,13 @@ export class AbandonCheckoutUseCase {
         basketId: session.basketId,
         customerId: session.customerId,
         lastStep: session.status,
-        totalValue: session.total.amount
+        totalValue: session.total.amount,
       });
     }
 
     return {
       message: 'Checkout abandoned successfully',
-      checkoutId: command.checkoutId
+      checkoutId: command.checkoutId,
     };
   }
 }

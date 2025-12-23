@@ -11,22 +11,23 @@ This document provides an in-depth comparison between the CommerceFull platform'
 ## Executive Summary
 
 The CommerceFull platform has a solid foundation but requires several enhancements to fully support:
+
 - **Multi-Store**: Regional brands with shared inventory
 - **Marketplace**: Multi-seller platform with commission management
 - **B2B**: Account-based pricing, approval workflows, credit terms
 
 ### Key Gaps Identified
 
-| Area | Current State | Required State | Priority |
-|------|---------------|----------------|----------|
-| **Organization/Store Hierarchy** | Flat store model | Hierarchical org → store → channel | HIGH |
-| **Channel Management** | Basic | Multi-channel with store mapping | HIGH |
-| **Assortment Management** | None | Scoped assortments (store/seller/account) | HIGH |
-| **Price List Scoping** | Basic | Multi-scope with priority resolution | HIGH |
-| **Seller/Marketplace** | Partial | Full seller lifecycle + payouts | MEDIUM |
-| **Inventory Pooling** | Basic | Location-based with reservations | HIGH |
-| **B2B Accounts** | Partial | Full account hierarchy + terms | MEDIUM |
-| **Order Splitting** | None | Multi-seller/warehouse splitting | HIGH |
+| Area                             | Current State    | Required State                            | Priority |
+| -------------------------------- | ---------------- | ----------------------------------------- | -------- |
+| **Organization/Store Hierarchy** | Flat store model | Hierarchical org → store → channel        | HIGH     |
+| **Channel Management**           | Basic            | Multi-channel with store mapping          | HIGH     |
+| **Assortment Management**        | None             | Scoped assortments (store/seller/account) | HIGH     |
+| **Price List Scoping**           | Basic            | Multi-scope with priority resolution      | HIGH     |
+| **Seller/Marketplace**           | Partial          | Full seller lifecycle + payouts           | MEDIUM   |
+| **Inventory Pooling**            | Basic            | Location-based with reservations          | HIGH     |
+| **B2B Accounts**                 | Partial          | Full account hierarchy + terms            | MEDIUM   |
+| **Order Splitting**              | None             | Multi-seller/warehouse splitting          | HIGH     |
 
 ---
 
@@ -35,6 +36,7 @@ The CommerceFull platform has a solid foundation but requires several enhancemen
 ### 1.1 Organization Entity
 
 **Reference Model:**
+
 ```
 Organization
 ├── orgId (PK)
@@ -43,6 +45,7 @@ Organization
 ```
 
 **CommerceFull Current State:**
+
 - ❌ No explicit `organization` table
 - Stores exist independently without parent organization
 
@@ -68,6 +71,7 @@ ALTER TABLE "store" ADD COLUMN "organizationId" VARCHAR(50) REFERENCES "organiza
 ### 1.2 Store Entity
 
 **Reference Model:**
+
 ```
 Store
 ├── storeId (PK)
@@ -79,6 +83,7 @@ Store
 ```
 
 **CommerceFull Current State:**
+
 - ✅ `store` table exists
 - ⚠️ Missing `organizationId` foreign key
 - ⚠️ Missing `taxZoneId` reference
@@ -98,6 +103,7 @@ ALTER TABLE "store" ADD COLUMN "defaultLanguage" VARCHAR(10) DEFAULT 'en';
 ### 1.3 Channel Entity
 
 **Reference Model:**
+
 ```
 Channel
 ├── channelId (PK)
@@ -108,6 +114,7 @@ Channel
 ```
 
 **CommerceFull Current State:**
+
 - ✅ `channel` table exists in modules/channel
 - ⚠️ Missing `orgId` reference
 - ⚠️ Limited channel types
@@ -128,6 +135,7 @@ ALTER TABLE "channel" ADD COLUMN "appId" VARCHAR(100);
 ### 1.4 StoreChannel (Many-to-Many)
 
 **Reference Model:**
+
 ```
 StoreChannel
 ├── storeId (FK)
@@ -137,6 +145,7 @@ StoreChannel
 ```
 
 **CommerceFull Current State:**
+
 - ❌ No `storeChannel` junction table
 
 **Required Changes:**
@@ -162,6 +171,7 @@ CREATE TABLE "storeChannel" (
 ### 2.1 Product Entity
 
 **Reference Model:**
+
 ```
 Product
 ├── productId (PK)
@@ -172,6 +182,7 @@ Product
 ```
 
 **CommerceFull Current State:**
+
 - ✅ `product` table exists with most fields
 - ⚠️ Missing `organizationId` for multi-tenant
 - ⚠️ `attributes` stored differently
@@ -187,6 +198,7 @@ ALTER TABLE "product" ADD COLUMN "platformVisible" BOOLEAN DEFAULT true;
 ### 2.2 Variant (SKU) Entity
 
 **Reference Model:**
+
 ```
 Variant (SKU)
 ├── skuId (PK)
@@ -197,6 +209,7 @@ Variant (SKU)
 ```
 
 **CommerceFull Current State:**
+
 - ✅ `productVariant` table exists
 - ✅ Has `sku`, `barcode`, `weight`
 - ⚠️ Dimensions stored in separate fields vs JSON
@@ -210,6 +223,7 @@ Variant (SKU)
 ### 3.1 Assortment Entity
 
 **Reference Model:**
+
 ```
 Assortment
 ├── assortmentId (PK)
@@ -219,6 +233,7 @@ Assortment
 ```
 
 **CommerceFull Current State:**
+
 - ❌ No `assortment` table
 - Products are globally visible
 
@@ -272,6 +287,7 @@ CREATE TABLE "assortmentItem" (
 ### 4.1 Price List Entity
 
 **Reference Model:**
+
 ```
 PriceList
 ├── priceListId (PK)
@@ -282,6 +298,7 @@ PriceList
 ```
 
 **CommerceFull Current State:**
+
 - ✅ `priceList` table exists
 - ⚠️ Missing `organizationId`
 - ⚠️ Limited scope support
@@ -308,6 +325,7 @@ CREATE TABLE "priceListScope" (
 ### 4.2 Price Entity
 
 **Reference Model:**
+
 ```
 Price
 ├── priceListId (FK)
@@ -318,6 +336,7 @@ Price
 ```
 
 **CommerceFull Current State:**
+
 - ✅ Price-related tables exist
 - ⚠️ Tier pricing (minQty) support is limited
 
@@ -330,6 +349,7 @@ Price
 ### 5.1 Seller Entity
 
 **Reference Model:**
+
 ```
 Seller
 ├── sellerId (PK)
@@ -340,6 +360,7 @@ Seller
 ```
 
 **CommerceFull Current State:**
+
 - ⚠️ `merchant` table exists but different structure
 - ⚠️ Commission plans partially implemented
 
@@ -378,6 +399,7 @@ CREATE TABLE "sellerPolicy" (
 ### 6.1 Location Entity
 
 **Reference Model:**
+
 ```
 Location
 ├── locationId (PK)
@@ -388,6 +410,7 @@ Location
 ```
 
 **CommerceFull Current State:**
+
 - ✅ `warehouse` table exists
 - ✅ `inventoryLocation` exists
 - ⚠️ Missing unified location concept with types
@@ -415,6 +438,7 @@ CREATE TABLE "fulfillmentLocation" (
 ### 6.2 Inventory Balance
 
 **Reference Model:**
+
 ```
 InventoryBalance
 ├── locationId (FK)
@@ -425,6 +449,7 @@ InventoryBalance
 ```
 
 **CommerceFull Current State:**
+
 - ✅ `inventoryLevel` table exists
 - ⚠️ Missing `safetyStockQty` and `inboundQty`
 
@@ -439,6 +464,7 @@ ALTER TABLE "inventoryLevel" ADD COLUMN "locationId" VARCHAR(50);
 ### 6.3 Inventory Reservation
 
 **Reference Model:**
+
 ```
 InventoryReservation
 ├── reservationId (PK)
@@ -450,6 +476,7 @@ InventoryReservation
 ```
 
 **CommerceFull Current State:**
+
 - ⚠️ Reservation tracking is implicit in `reservedQuantity` field
 - ❌ No dedicated reservation table
 
@@ -472,6 +499,7 @@ CREATE TABLE "inventoryReservation" (
 ### 6.4 Fulfillment Network Rules
 
 **Reference Model:**
+
 ```
 FulfillmentNetworkRule
 ├── ruleId (PK)
@@ -482,6 +510,7 @@ FulfillmentNetworkRule
 ```
 
 **CommerceFull Current State:**
+
 - ❌ No fulfillment routing rules table
 
 **Required Changes:**
@@ -510,6 +539,7 @@ CREATE TABLE "fulfillmentNetworkRule" (
 ### 7.1 Account (B2B Company)
 
 **Reference Model:**
+
 ```
 Account
 ├── accountId (PK)
@@ -520,6 +550,7 @@ Account
 ```
 
 **CommerceFull Current State:**
+
 - ✅ `b2bCompany` table exists
 - ⚠️ Missing some fields
 
@@ -535,6 +566,7 @@ ALTER TABLE "b2bCompany" ADD COLUMN "availableCredit" DECIMAL(15,2);
 ### 7.2 Account User
 
 **Reference Model:**
+
 ```
 AccountUser
 ├── accountId (FK)
@@ -543,6 +575,7 @@ AccountUser
 ```
 
 **CommerceFull Current State:**
+
 - ✅ `b2bUser` table exists
 - ✅ Role field exists
 
@@ -551,6 +584,7 @@ AccountUser
 ### 7.3 Payment Terms
 
 **Reference Model:**
+
 ```
 PaymentTerms
 ├── paymentTermsId (PK)
@@ -559,6 +593,7 @@ PaymentTerms
 ```
 
 **CommerceFull Current State:**
+
 - ❌ No dedicated payment terms table
 
 **Required Changes:**
@@ -581,6 +616,7 @@ CREATE TABLE "paymentTerms" (
 ### 7.4 Tax Exemption
 
 **Reference Model:**
+
 ```
 TaxExemption
 ├── taxExemptionId (PK)
@@ -590,6 +626,7 @@ TaxExemption
 ```
 
 **CommerceFull Current State:**
+
 - ⚠️ Partial support in tax module
 
 **Required Changes:**
@@ -619,6 +656,7 @@ CREATE TABLE "taxExemption" (
 ### 8.1 Cart Entity
 
 **Reference Model:**
+
 ```
 Cart
 ├── cartId (PK)
@@ -629,6 +667,7 @@ Cart
 ```
 
 **CommerceFull Current State:**
+
 - ✅ `basket` table exists (different naming)
 - ⚠️ Missing `storeId`, `channelId`, `accountId`
 
@@ -643,6 +682,7 @@ ALTER TABLE "basket" ADD COLUMN "accountId" VARCHAR(50); -- B2B
 ### 8.2 Cart Item with Seller
 
 **Reference Model:**
+
 ```
 CartItem
 ├── cartId (FK)
@@ -653,6 +693,7 @@ CartItem
 ```
 
 **CommerceFull Current State:**
+
 - ✅ `basketItem` exists
 - ❌ Missing `sellerId` for marketplace
 
@@ -665,6 +706,7 @@ ALTER TABLE "basketItem" ADD COLUMN "sellerId" VARCHAR(50);
 ### 8.3 Order Entity
 
 **Reference Model:**
+
 ```
 Order
 ├── orderId (PK)
@@ -675,6 +717,7 @@ Order
 ```
 
 **CommerceFull Current State:**
+
 - ✅ `order` table exists
 - ⚠️ Missing some marketplace/B2B fields
 
@@ -692,6 +735,7 @@ ALTER TABLE "order" ADD COLUMN "parentOrderId" VARCHAR(50); -- For split orders
 ### 8.4 Order Line with Seller
 
 **Reference Model:**
+
 ```
 OrderLine
 ├── orderLineId (PK)
@@ -703,6 +747,7 @@ OrderLine
 ```
 
 **CommerceFull Current State:**
+
 - ✅ `orderLine` exists
 - ❌ Missing `sellerId`
 
@@ -715,6 +760,7 @@ ALTER TABLE "orderLine" ADD COLUMN "sellerId" VARCHAR(50);
 ### 8.5 Order Allocation (CRITICAL for Multi-Warehouse)
 
 **Reference Model:**
+
 ```
 OrderAllocation
 ├── allocationId (PK)
@@ -724,6 +770,7 @@ OrderAllocation
 ```
 
 **CommerceFull Current State:**
+
 - ❌ No order allocation table
 
 **Required Changes:**
@@ -744,6 +791,7 @@ CREATE TABLE "orderAllocation" (
 ### 8.6 Payout (Marketplace)
 
 **Reference Model:**
+
 ```
 Payout
 ├── payoutId (PK)
@@ -754,6 +802,7 @@ Payout
 ```
 
 **CommerceFull Current State:**
+
 - ⚠️ `merchantSettlement` exists but different structure
 
 **Required Changes:**
@@ -783,37 +832,41 @@ CREATE TABLE "payout" (
 ## 9. Implementation Priority Matrix
 
 ### Phase 1: Foundation (Weeks 1-4)
-| Task | Priority | Effort |
-|------|----------|--------|
-| Add `organization` table | HIGH | Small |
-| Add org references to store, channel, product | HIGH | Medium |
-| Create `storeChannel` junction table | HIGH | Small |
-| Add marketplace fields to basket/order | HIGH | Small |
+
+| Task                                          | Priority | Effort |
+| --------------------------------------------- | -------- | ------ |
+| Add `organization` table                      | HIGH     | Small  |
+| Add org references to store, channel, product | HIGH     | Medium |
+| Create `storeChannel` junction table          | HIGH     | Small  |
+| Add marketplace fields to basket/order        | HIGH     | Small  |
 
 ### Phase 2: Assortment & Pricing (Weeks 5-8)
-| Task | Priority | Effort |
-|------|----------|--------|
-| Create `assortment` tables | HIGH | Large |
-| Create `priceListScope` table | HIGH | Medium |
-| Add tier pricing support | MEDIUM | Medium |
-| Create `fulfillmentNetworkRule` table | HIGH | Medium |
+
+| Task                                  | Priority | Effort |
+| ------------------------------------- | -------- | ------ |
+| Create `assortment` tables            | HIGH     | Large  |
+| Create `priceListScope` table         | HIGH     | Medium |
+| Add tier pricing support              | MEDIUM   | Medium |
+| Create `fulfillmentNetworkRule` table | HIGH     | Medium |
 
 ### Phase 3: Inventory & Fulfillment (Weeks 9-12)
-| Task | Priority | Effort |
-|------|----------|--------|
-| Create `fulfillmentLocation` unified table | HIGH | Large |
-| Create `inventoryReservation` table | HIGH | Medium |
-| Create `orderAllocation` table | HIGH | Medium |
-| Add inventory balance fields | MEDIUM | Small |
+
+| Task                                       | Priority | Effort |
+| ------------------------------------------ | -------- | ------ |
+| Create `fulfillmentLocation` unified table | HIGH     | Large  |
+| Create `inventoryReservation` table        | HIGH     | Medium |
+| Create `orderAllocation` table             | HIGH     | Medium |
+| Add inventory balance fields               | MEDIUM   | Small  |
 
 ### Phase 4: Marketplace & B2B (Weeks 13-16)
-| Task | Priority | Effort |
-|------|----------|--------|
-| Create `commissionPlan` table | MEDIUM | Medium |
-| Create `sellerPolicy` table | MEDIUM | Small |
-| Create `payout` table | MEDIUM | Medium |
-| Create `paymentTerms` table | MEDIUM | Small |
-| Create `taxExemption` table | MEDIUM | Small |
+
+| Task                          | Priority | Effort |
+| ----------------------------- | -------- | ------ |
+| Create `commissionPlan` table | MEDIUM   | Medium |
+| Create `sellerPolicy` table   | MEDIUM   | Small  |
+| Create `payout` table         | MEDIUM   | Medium |
+| Create `paymentTerms` table   | MEDIUM   | Small  |
+| Create `taxExemption` table   | MEDIUM   | Small  |
 
 ---
 
@@ -845,7 +898,7 @@ UPDATE "store" SET "organizationId" = 'org_default' WHERE "organizationId" IS NU
 
 -- Create default assortment for each store
 INSERT INTO "assortment" ("assortmentId", "organizationId", "name", "scopeType", "isDefault")
-SELECT 
+SELECT
   'asmt_' || "storeId",
   "organizationId",
   "name" || ' Default Assortment',
@@ -861,8 +914,9 @@ FROM "store";
 After implementing all changes, these will be the primary join patterns:
 
 ### What can I sell here?
+
 ```sql
-SELECT pv.* 
+SELECT pv.*
 FROM "productVariant" pv
 JOIN "assortmentItem" ai ON ai."productVariantId" = pv."productVariantId"
 JOIN "assortmentScope" as2 ON as2."assortmentId" = ai."assortmentId"
@@ -870,8 +924,9 @@ WHERE as2."storeId" = $1 AND ai."visibility" = 'listed' AND ai."buyable" = true;
 ```
 
 ### What price does this buyer get?
+
 ```sql
-SELECT p.* 
+SELECT p.*
 FROM "price" p
 JOIN "priceListScope" pls ON pls."priceListId" = p."priceListId"
 WHERE p."productVariantId" = $1
@@ -883,8 +938,9 @@ LIMIT 1;
 ```
 
 ### Where can I fulfill from?
+
 ```sql
-SELECT fl.* 
+SELECT fl.*
 FROM "fulfillmentLocation" fl
 JOIN "fulfillmentNetworkRule" fnr ON fnr."organizationId" = fl."organizationId"
 WHERE fnr."storeId" = $1
@@ -894,11 +950,12 @@ ORDER BY fnr."priority" DESC;
 ```
 
 ### Do I have stock?
+
 ```sql
-SELECT 
+SELECT
   il."quantity" - COALESCE(SUM(ir."quantity"), 0) - il."safetyStockQty" AS availableToSell
 FROM "inventoryLevel" il
-LEFT JOIN "inventoryReservation" ir ON ir."productVariantId" = il."productVariantId" 
+LEFT JOIN "inventoryReservation" ir ON ir."productVariantId" = il."productVariantId"
   AND ir."locationId" = il."locationId" AND ir."status" = 'reserved'
 WHERE il."productVariantId" = $1 AND il."locationId" = $2
 GROUP BY il."inventoryLevelId";
@@ -909,6 +966,7 @@ GROUP BY il."inventoryLevelId";
 ## 12. Summary
 
 ### Tables to Create
+
 1. `organization` - Multi-tenant root
 2. `storeChannel` - Store-channel mapping
 3. `assortment` - Catalog scoping
@@ -926,6 +984,7 @@ GROUP BY il."inventoryLevelId";
 15. `taxExemption` - B2B tax certificates
 
 ### Tables to Modify
+
 1. `store` - Add organizationId, taxZoneId, priceRoundingRules
 2. `channel` - Add organizationId, region, domain
 3. `product` - Add organizationId, approvalStatus
@@ -940,6 +999,6 @@ GROUP BY il."inventoryLevelId";
 
 ---
 
-*Document Version: 1.0*
-*Last Updated: December 23, 2024*
-*Author: CommerceFull Platform Team*
+_Document Version: 1.0_
+_Last Updated: December 23, 2024_
+_Author: CommerceFull Platform Team_

@@ -38,7 +38,7 @@ describe('Business API Integration', () => {
         businessType: 'single_store',
         defaultCurrency: 'USD',
         defaultLanguage: 'en',
-        timezone: 'UTC'
+        timezone: 'UTC',
       };
 
       const response = await axios.post('/business/businesses', businessData);
@@ -65,7 +65,7 @@ describe('Business API Integration', () => {
         allowMultipleStores: true,
         defaultCurrency: 'EUR',
         defaultLanguage: 'de',
-        timezone: 'Europe/Berlin'
+        timezone: 'Europe/Berlin',
       };
 
       const response = await axios.post('/business/businesses', businessData);
@@ -82,7 +82,7 @@ describe('Business API Integration', () => {
         slug: 'marketplace-business',
         domain: 'marketplacebiz.com',
         businessType: 'marketplace',
-        defaultCurrency: 'GBP'
+        defaultCurrency: 'GBP',
       };
 
       const response = await axios.post('/business/businesses', businessData);
@@ -97,7 +97,7 @@ describe('Business API Integration', () => {
       const businessData1 = {
         name: 'First Business',
         slug: 'unique-slug',
-        domain: 'first.com'
+        domain: 'first.com',
       };
 
       await axios.post('/business/businesses', businessData1);
@@ -106,7 +106,7 @@ describe('Business API Integration', () => {
       const businessData2 = {
         name: 'Second Business',
         slug: 'unique-slug', // Same slug
-        domain: 'second.com'
+        domain: 'second.com',
       };
 
       const response = await axios.post('/business/businesses', businessData2);
@@ -121,7 +121,7 @@ describe('Business API Integration', () => {
       const businessData1 = {
         name: 'Domain Business 1',
         slug: 'domain-business-1',
-        domain: 'unique-domain.com'
+        domain: 'unique-domain.com',
       };
 
       await axios.post('/business/businesses', businessData1);
@@ -130,7 +130,7 @@ describe('Business API Integration', () => {
       const businessData2 = {
         name: 'Domain Business 2',
         slug: 'domain-business-2',
-        domain: 'unique-domain.com' // Same domain
+        domain: 'unique-domain.com', // Same domain
       };
 
       const response = await axios.post('/business/businesses', businessData2);
@@ -146,7 +146,7 @@ describe('Business API Integration', () => {
         name: 'Validation Test Business',
         slug: 'validation-test',
         domain: 'validation.com',
-        businessType: 'marketplace' // Not allowed in single_store mode
+        businessType: 'marketplace', // Not allowed in single_store mode
       };
 
       const response = await axios.post('/business/businesses', businessData);
@@ -166,7 +166,7 @@ describe('Business API Integration', () => {
         name: 'Get Test Business',
         slug: 'get-test-business',
         domain: 'gettest.com',
-        businessType: 'single_store'
+        businessType: 'single_store',
       };
 
       const response = await axios.post('/business/businesses', businessData);
@@ -199,7 +199,7 @@ describe('Business API Integration', () => {
       const businessData = {
         name: 'Slug Test Business',
         slug: 'slug-test-business',
-        domain: 'slugtest.com'
+        domain: 'slugtest.com',
       };
 
       await axios.post('/business/businesses', businessData);
@@ -220,13 +220,13 @@ describe('Business API Integration', () => {
         {
           name: 'List Business 1',
           slug: 'list-business-1',
-          domain: 'list1.com'
+          domain: 'list1.com',
         },
         {
           name: 'List Business 2',
           slug: 'list-business-2',
-          domain: 'list2.com'
-        }
+          domain: 'list2.com',
+        },
       ];
 
       for (const business of businesses) {

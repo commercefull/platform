@@ -20,7 +20,7 @@ exports.up = function (knex) {
     t.timestamp('reviewedAt');
     t.uuid('reviewedBy');
     t.text('reviewNotes');
-    
+
     t.index('merchantId');
     t.index('documentType');
     t.index('uploadedAt');

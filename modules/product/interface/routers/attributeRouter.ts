@@ -87,6 +87,10 @@ router.post('/products/:productId/attributes', isMerchantLoggedIn, attributeCont
 router.put('/products/:productId/attributes', isMerchantLoggedIn, attributeController.setProductAttributes.bind(attributeController));
 
 // Remove product attribute
-router.delete('/products/:productId/attributes/:attributeId', isMerchantLoggedIn, attributeController.removeProductAttribute.bind(attributeController));
+router.delete(
+  '/products/:productId/attributes/:attributeId',
+  isMerchantLoggedIn,
+  attributeController.removeProductAttribute.bind(attributeController),
+);
 
 export const attributeBusinessRouter = router;

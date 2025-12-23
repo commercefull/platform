@@ -14,7 +14,7 @@ exports.up = async function (knex) {
     t.enum('locationType', ['country', 'state', 'zipcode', 'region', 'continent']).notNullable().defaultTo('country');
     t.jsonb('locations').notNullable();
     t.jsonb('excludedLocations');
-    
+
     t.uuid('createdBy');
     t.index('name');
     t.index('isActive');

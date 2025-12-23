@@ -8,7 +8,7 @@ describe('Support Feature Tests', () => {
   const createdResources = {
     ticketIds: [] as string[],
     categoryIds: [] as string[],
-    articleIds: [] as string[]
+    articleIds: [] as string[],
   };
 
   beforeAll(async () => {
@@ -33,7 +33,7 @@ describe('Support Feature Tests', () => {
       // Create a ticket as customer first
       const ticketData = createTestTicket();
       const response = await client.post('/api/support/tickets', ticketData, {
-        headers: { Authorization: `Bearer ${customerToken}` }
+        headers: { Authorization: `Bearer ${customerToken}` },
       });
       if (response.data.data) {
         testTicketId = response.data.data.id;
@@ -43,7 +43,7 @@ describe('Support Feature Tests', () => {
 
     it('UC-SUP-005: should list tickets (admin)', async () => {
       const response = await client.get('/business/support/tickets', {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
 
       expect(response.status).toBe(200);
@@ -54,7 +54,7 @@ describe('Support Feature Tests', () => {
     it('should filter tickets by status', async () => {
       const response = await client.get('/business/support/tickets', {
         headers: { Authorization: `Bearer ${adminToken}` },
-        params: { status: 'open' }
+        params: { status: 'open' },
       });
 
       expect(response.status).toBe(200);
@@ -65,7 +65,7 @@ describe('Support Feature Tests', () => {
       if (!testTicketId) return;
 
       const response = await client.get(`/business/support/tickets/${testTicketId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
 
       expect(response.status).toBe(200);
@@ -75,11 +75,15 @@ describe('Support Feature Tests', () => {
     it('UC-SUP-008: should assign a ticket', async () => {
       if (!testTicketId) return;
 
-      const response = await client.post(`/business/support/tickets/${testTicketId}/assign`, {
-        agentId: 'agent-001'
-      }, {
-        headers: { Authorization: `Bearer ${adminToken}` }
-      });
+      const response = await client.post(
+        `/business/support/tickets/${testTicketId}/assign`,
+        {
+          agentId: 'agent-001',
+        },
+        {
+          headers: { Authorization: `Bearer ${adminToken}` },
+        },
+      );
 
       expect(response.status).toBe(200);
     });
@@ -87,12 +91,16 @@ describe('Support Feature Tests', () => {
     it('UC-SUP-012: should add agent message', async () => {
       if (!testTicketId) return;
 
-      const response = await client.post(`/business/support/tickets/${testTicketId}/messages`, {
-        message: 'This is an agent response.',
-        isInternal: false
-      }, {
-        headers: { Authorization: `Bearer ${adminToken}` }
-      });
+      const response = await client.post(
+        `/business/support/tickets/${testTicketId}/messages`,
+        {
+          message: 'This is an agent response.',
+          isInternal: false,
+        },
+        {
+          headers: { Authorization: `Bearer ${adminToken}` },
+        },
+      );
 
       expect(response.status).toBe(201);
       expect(response.data.success).toBe(true);
@@ -101,11 +109,15 @@ describe('Support Feature Tests', () => {
     it('UC-SUP-009: should resolve a ticket', async () => {
       if (!testTicketId) return;
 
-      const response = await client.post(`/business/support/tickets/${testTicketId}/resolve`, {
-        resolution: 'Issue resolved via integration test'
-      }, {
-        headers: { Authorization: `Bearer ${adminToken}` }
-      });
+      const response = await client.post(
+        `/business/support/tickets/${testTicketId}/resolve`,
+        {
+          resolution: 'Issue resolved via integration test',
+        },
+        {
+          headers: { Authorization: `Bearer ${adminToken}` },
+        },
+      );
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
@@ -124,7 +136,7 @@ describe('Support Feature Tests', () => {
       const categoryData = createTestFaqCategory();
 
       const response = await client.post('/business/support/faq/categories', categoryData, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
 
       expect(response.status).toBe(201);
@@ -139,7 +151,7 @@ describe('Support Feature Tests', () => {
 
     it('UC-SUP-013: should list FAQ categories', async () => {
       const response = await client.get('/business/support/faq/categories', {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
 
       expect(response.status).toBe(200);
@@ -151,7 +163,7 @@ describe('Support Feature Tests', () => {
       const articleData = createTestFaqArticle(testCategoryId);
 
       const response = await client.post('/business/support/faq/articles', articleData, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
 
       expect(response.status).toBe(201);
@@ -166,7 +178,7 @@ describe('Support Feature Tests', () => {
 
     it('UC-SUP-017: should list FAQ articles', async () => {
       const response = await client.get('/business/support/faq/articles', {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
 
       expect(response.status).toBe(200);
@@ -175,9 +187,13 @@ describe('Support Feature Tests', () => {
     });
 
     it('UC-SUP-020: should publish FAQ article', async () => {
-      const response = await client.post(`/business/support/faq/articles/${testArticleId}/publish`, {}, {
-        headers: { Authorization: `Bearer ${adminToken}` }
-      });
+      const response = await client.post(
+        `/business/support/faq/articles/${testArticleId}/publish`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${adminToken}` },
+        },
+      );
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
@@ -195,7 +211,7 @@ describe('Support Feature Tests', () => {
       const ticketData = createTestTicket({ subject: 'Customer Test Ticket' });
 
       const response = await client.post('/api/support/tickets', ticketData, {
-        headers: { Authorization: `Bearer ${customerToken}` }
+        headers: { Authorization: `Bearer ${customerToken}` },
       });
 
       expect(response.status).toBe(201);
@@ -208,7 +224,7 @@ describe('Support Feature Tests', () => {
 
     it('UC-SUP-032: should get my tickets (customer)', async () => {
       const response = await client.get('/api/support/tickets/mine', {
-        headers: { Authorization: `Bearer ${customerToken}` }
+        headers: { Authorization: `Bearer ${customerToken}` },
       });
 
       expect(response.status).toBe(200);
@@ -218,7 +234,7 @@ describe('Support Feature Tests', () => {
 
     it('UC-SUP-033: should get my ticket details (customer)', async () => {
       const response = await client.get(`/api/support/tickets/mine/${customerTicketId}`, {
-        headers: { Authorization: `Bearer ${customerToken}` }
+        headers: { Authorization: `Bearer ${customerToken}` },
       });
 
       expect(response.status).toBe(200);
@@ -226,11 +242,15 @@ describe('Support Feature Tests', () => {
     });
 
     it('UC-SUP-034: should add customer message', async () => {
-      const response = await client.post(`/api/support/tickets/mine/${customerTicketId}/messages`, {
-        message: 'Customer follow-up message'
-      }, {
-        headers: { Authorization: `Bearer ${customerToken}` }
-      });
+      const response = await client.post(
+        `/api/support/tickets/mine/${customerTicketId}/messages`,
+        {
+          message: 'Customer follow-up message',
+        },
+        {
+          headers: { Authorization: `Bearer ${customerToken}` },
+        },
+      );
 
       expect(response.status).toBe(201);
       expect(response.data.success).toBe(true);
@@ -251,7 +271,7 @@ describe('Support Feature Tests', () => {
 
     it('UC-SUP-029: should search FAQ', async () => {
       const response = await client.get('/api/support/faq/search', {
-        params: { q: 'test' }
+        params: { q: 'test' },
       });
 
       expect(response.status).toBe(200);
@@ -265,29 +285,37 @@ describe('Support Feature Tests', () => {
 
   describe('Alerts', () => {
     it('UC-SUP-036: should create stock alert (customer)', async () => {
-      const response = await client.post('/api/support/alerts/stock', {
-        productId: 'prod-001'
-      }, {
-        headers: { Authorization: `Bearer ${customerToken}` }
-      });
+      const response = await client.post(
+        '/api/support/alerts/stock',
+        {
+          productId: 'prod-001',
+        },
+        {
+          headers: { Authorization: `Bearer ${customerToken}` },
+        },
+      );
 
       expect(response.status).toBe(201);
     });
 
     it('UC-SUP-039: should create price alert (customer)', async () => {
-      const response = await client.post('/api/support/alerts/price', {
-        productId: 'prod-001',
-        targetPrice: 50.00
-      }, {
-        headers: { Authorization: `Bearer ${customerToken}` }
-      });
+      const response = await client.post(
+        '/api/support/alerts/price',
+        {
+          productId: 'prod-001',
+          targetPrice: 50.0,
+        },
+        {
+          headers: { Authorization: `Bearer ${customerToken}` },
+        },
+      );
 
       expect(response.status).toBe(201);
     });
 
     it('UC-SUP-023: should get stock alerts (admin)', async () => {
       const response = await client.get('/business/support/alerts/stock', {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
 
       expect(response.status).toBe(200);
@@ -296,7 +324,7 @@ describe('Support Feature Tests', () => {
 
     it('UC-SUP-024: should get price alerts (admin)', async () => {
       const response = await client.get('/business/support/alerts/price', {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
 
       expect(response.status).toBe(200);

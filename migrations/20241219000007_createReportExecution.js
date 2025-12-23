@@ -3,8 +3,8 @@
  * @returns { Promise<void> }
  */
 exports.up = function (knex) {
-    return knex.schema.createTable('reportExecution', t => {
-      t.uuid('reportExecutionId').primary().defaultTo(knex.raw('uuidv7()'));
+  return knex.schema.createTable('reportExecution', t => {
+    t.uuid('reportExecutionId').primary().defaultTo(knex.raw('uuidv7()'));
     t.uuid('reportScheduleId').notNullable().references('reportScheduleId').inTable('reportSchedule').onDelete('CASCADE');
     t.enu('status', ['pending', 'running', 'completed', 'failed']).notNullable().defaultTo('pending');
     t.timestamp('startedAt', { useTz: true }).notNullable().defaultTo(knex.fn.now());

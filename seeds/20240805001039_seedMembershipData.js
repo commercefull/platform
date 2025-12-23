@@ -18,7 +18,7 @@ exports.up = async function (knex) {
       price: 9.99,
       billingCycle: 'monthly',
       billingPeriod: 1,
-      autoRenew: true
+      autoRenew: true,
     },
     {
       name: 'Premium',
@@ -33,7 +33,7 @@ exports.up = async function (knex) {
       price: 19.99,
       billingCycle: 'monthly',
       billingPeriod: 1,
-      autoRenew: true
+      autoRenew: true,
     },
     {
       name: 'Annual Premium',
@@ -48,18 +48,78 @@ exports.up = async function (knex) {
       price: 199.99,
       billingCycle: 'annual',
       billingPeriod: 1,
-      autoRenew: true
-    }
+      autoRenew: true,
+    },
   ]);
 
   // Insert default membership benefits
   await knex('membershipBenefit').insert([
-    { name: 'Member Discount', code: 'MEMBER_DISCOUNT', description: 'Discount on all purchases', shortDescription: 'Save on every order', isActive: true, priority: 10, benefitType: 'discount', valueType: 'percentage', value: JSON.stringify({ percentage: 10 }) },
-    { name: 'Free Shipping', code: 'FREE_SHIPPING', description: 'Free shipping on all orders', shortDescription: 'No shipping costs', isActive: true, priority: 20, benefitType: 'freeShipping', valueType: 'boolean', value: JSON.stringify({ enabled: true, minimumOrderValue: 25 }) },
-    { name: 'Priority Support', code: 'PRIORITY_SUPPORT', description: 'Access to priority customer support', shortDescription: 'Get help faster', isActive: true, priority: 30, benefitType: 'prioritySupport', valueType: 'boolean', value: JSON.stringify({ enabled: true }) },
-    { name: 'Double Points', code: 'DOUBLE_POINTS', description: 'Earn double loyalty points on purchases', shortDescription: 'Earn rewards faster', isActive: true, priority: 40, benefitType: 'rewardPoints', valueType: 'fixed', value: JSON.stringify({ multiplier: 2 }) },
-    { name: 'Exclusive Content', code: 'EXCLUSIVE_CONTENT', description: 'Access to exclusive member-only content', shortDescription: 'Members-only content', isActive: true, priority: 50, benefitType: 'contentAccess', valueType: 'boolean', value: JSON.stringify({ enabled: true }) },
-    { name: 'Early Access', code: 'EARLY_ACCESS', description: 'Early access to new products and sales', shortDescription: 'Shop before everyone else', isActive: true, priority: 60, benefitType: 'earlyAccess', valueType: 'fixed', value: JSON.stringify({ daysEarly: 2 }) }
+    {
+      name: 'Member Discount',
+      code: 'MEMBER_DISCOUNT',
+      description: 'Discount on all purchases',
+      shortDescription: 'Save on every order',
+      isActive: true,
+      priority: 10,
+      benefitType: 'discount',
+      valueType: 'percentage',
+      value: JSON.stringify({ percentage: 10 }),
+    },
+    {
+      name: 'Free Shipping',
+      code: 'FREE_SHIPPING',
+      description: 'Free shipping on all orders',
+      shortDescription: 'No shipping costs',
+      isActive: true,
+      priority: 20,
+      benefitType: 'freeShipping',
+      valueType: 'boolean',
+      value: JSON.stringify({ enabled: true, minimumOrderValue: 25 }),
+    },
+    {
+      name: 'Priority Support',
+      code: 'PRIORITY_SUPPORT',
+      description: 'Access to priority customer support',
+      shortDescription: 'Get help faster',
+      isActive: true,
+      priority: 30,
+      benefitType: 'prioritySupport',
+      valueType: 'boolean',
+      value: JSON.stringify({ enabled: true }),
+    },
+    {
+      name: 'Double Points',
+      code: 'DOUBLE_POINTS',
+      description: 'Earn double loyalty points on purchases',
+      shortDescription: 'Earn rewards faster',
+      isActive: true,
+      priority: 40,
+      benefitType: 'rewardPoints',
+      valueType: 'fixed',
+      value: JSON.stringify({ multiplier: 2 }),
+    },
+    {
+      name: 'Exclusive Content',
+      code: 'EXCLUSIVE_CONTENT',
+      description: 'Access to exclusive member-only content',
+      shortDescription: 'Members-only content',
+      isActive: true,
+      priority: 50,
+      benefitType: 'contentAccess',
+      valueType: 'boolean',
+      value: JSON.stringify({ enabled: true }),
+    },
+    {
+      name: 'Early Access',
+      code: 'EARLY_ACCESS',
+      description: 'Early access to new products and sales',
+      shortDescription: 'Shop before everyone else',
+      isActive: true,
+      priority: 60,
+      benefitType: 'earlyAccess',
+      valueType: 'fixed',
+      value: JSON.stringify({ daysEarly: 2 }),
+    },
   ]);
 
   // Link benefits to plans
@@ -84,7 +144,7 @@ exports.up = async function (knex) {
     { planId: planMap.ANNUAL_PREMIUM, benefitId: benefitMap.PRIORITY_SUPPORT, isActive: true, priority: 30 },
     { planId: planMap.ANNUAL_PREMIUM, benefitId: benefitMap.DOUBLE_POINTS, isActive: true, priority: 40 },
     { planId: planMap.ANNUAL_PREMIUM, benefitId: benefitMap.EXCLUSIVE_CONTENT, isActive: true, priority: 50 },
-    { planId: planMap.ANNUAL_PREMIUM, benefitId: benefitMap.EARLY_ACCESS, isActive: true, priority: 60 }
+    { planId: planMap.ANNUAL_PREMIUM, benefitId: benefitMap.EARLY_ACCESS, isActive: true, priority: 60 },
   ]);
 
   // Add discount rules for membership plans
@@ -97,7 +157,7 @@ exports.up = async function (knex) {
       priority: 10,
       discountType: 'percentage',
       discountValue: 10,
-      appliesTo: 'entireOrder'
+      appliesTo: 'entireOrder',
     },
     {
       planId: planMap.PREMIUM,
@@ -107,8 +167,8 @@ exports.up = async function (knex) {
       priority: 10,
       discountType: 'percentage',
       discountValue: 15,
-      appliesTo: 'entireOrder'
-    }
+      appliesTo: 'entireOrder',
+    },
   ]);
 };
 

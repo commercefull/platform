@@ -72,7 +72,7 @@ export class OrderItem {
     const effectivePrice = props.discountedUnitPrice || props.unitPrice;
     const lineTotal = effectivePrice.multiply(props.quantity);
     const taxAmount = props.taxRate ? lineTotal.multiply(props.taxRate / 100) : Money.zero(props.unitPrice.currency);
-    const discountTotal = props.discountedUnitPrice 
+    const discountTotal = props.discountedUnitPrice
       ? props.unitPrice.subtract(props.discountedUnitPrice).multiply(props.quantity)
       : Money.zero(props.unitPrice.currency);
 
@@ -104,7 +104,7 @@ export class OrderItem {
       subscriptionInfo: props.subscriptionInfo,
       metadata: props.metadata,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     });
   }
 
@@ -113,34 +113,90 @@ export class OrderItem {
   }
 
   // Getters
-  get orderItemId(): string { return this.props.orderItemId; }
-  get orderId(): string { return this.props.orderId; }
-  get productId(): string { return this.props.productId; }
-  get productVariantId(): string | undefined { return this.props.productVariantId; }
-  get sku(): string { return this.props.sku; }
-  get name(): string { return this.props.name; }
-  get description(): string | undefined { return this.props.description; }
-  get quantity(): number { return this.props.quantity; }
-  get unitPrice(): Money { return this.props.unitPrice; }
-  get unitCost(): Money | undefined { return this.props.unitCost; }
-  get discountedUnitPrice(): Money | undefined { return this.props.discountedUnitPrice; }
-  get lineTotal(): Money { return this.props.lineTotal; }
-  get discountTotal(): Money { return this.props.discountTotal; }
-  get taxTotal(): Money { return this.props.taxTotal; }
-  get taxRate(): number | undefined { return this.props.taxRate; }
-  get taxExempt(): boolean { return this.props.taxExempt; }
-  get fulfillmentStatus(): FulfillmentStatus { return this.props.fulfillmentStatus; }
-  get options(): Record<string, any> | undefined { return this.props.options; }
-  get attributes(): Record<string, any> | undefined { return this.props.attributes; }
-  get giftWrapped(): boolean { return this.props.giftWrapped; }
-  get giftMessage(): string | undefined { return this.props.giftMessage; }
-  get weight(): number | undefined { return this.props.weight; }
-  get dimensions(): { length: number; width: number; height: number } | undefined { return this.props.dimensions; }
-  get isDigital(): boolean { return this.props.isDigital; }
-  get subscriptionInfo(): Record<string, any> | undefined { return this.props.subscriptionInfo; }
-  get metadata(): Record<string, any> | undefined { return this.props.metadata; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get orderItemId(): string {
+    return this.props.orderItemId;
+  }
+  get orderId(): string {
+    return this.props.orderId;
+  }
+  get productId(): string {
+    return this.props.productId;
+  }
+  get productVariantId(): string | undefined {
+    return this.props.productVariantId;
+  }
+  get sku(): string {
+    return this.props.sku;
+  }
+  get name(): string {
+    return this.props.name;
+  }
+  get description(): string | undefined {
+    return this.props.description;
+  }
+  get quantity(): number {
+    return this.props.quantity;
+  }
+  get unitPrice(): Money {
+    return this.props.unitPrice;
+  }
+  get unitCost(): Money | undefined {
+    return this.props.unitCost;
+  }
+  get discountedUnitPrice(): Money | undefined {
+    return this.props.discountedUnitPrice;
+  }
+  get lineTotal(): Money {
+    return this.props.lineTotal;
+  }
+  get discountTotal(): Money {
+    return this.props.discountTotal;
+  }
+  get taxTotal(): Money {
+    return this.props.taxTotal;
+  }
+  get taxRate(): number | undefined {
+    return this.props.taxRate;
+  }
+  get taxExempt(): boolean {
+    return this.props.taxExempt;
+  }
+  get fulfillmentStatus(): FulfillmentStatus {
+    return this.props.fulfillmentStatus;
+  }
+  get options(): Record<string, any> | undefined {
+    return this.props.options;
+  }
+  get attributes(): Record<string, any> | undefined {
+    return this.props.attributes;
+  }
+  get giftWrapped(): boolean {
+    return this.props.giftWrapped;
+  }
+  get giftMessage(): string | undefined {
+    return this.props.giftMessage;
+  }
+  get weight(): number | undefined {
+    return this.props.weight;
+  }
+  get dimensions(): { length: number; width: number; height: number } | undefined {
+    return this.props.dimensions;
+  }
+  get isDigital(): boolean {
+    return this.props.isDigital;
+  }
+  get subscriptionInfo(): Record<string, any> | undefined {
+    return this.props.subscriptionInfo;
+  }
+  get metadata(): Record<string, any> | undefined {
+    return this.props.metadata;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   // Calculated properties
   get total(): Money {
@@ -184,8 +240,8 @@ export class OrderItem {
     this.props.discountTotal = this.props.discountedUnitPrice
       ? this.props.unitPrice.subtract(this.props.discountedUnitPrice).multiply(this.props.quantity)
       : Money.zero(this.props.unitPrice.currency);
-    this.props.taxTotal = this.props.taxRate 
-      ? this.props.lineTotal.multiply(this.props.taxRate / 100) 
+    this.props.taxTotal = this.props.taxRate
+      ? this.props.lineTotal.multiply(this.props.taxRate / 100)
       : Money.zero(this.props.unitPrice.currency);
   }
 
@@ -222,7 +278,7 @@ export class OrderItem {
       subscriptionInfo: this.props.subscriptionInfo,
       metadata: this.props.metadata,
       createdAt: this.props.createdAt.toISOString(),
-      updatedAt: this.props.updatedAt.toISOString()
+      updatedAt: this.props.updatedAt.toISOString(),
     };
   }
 }

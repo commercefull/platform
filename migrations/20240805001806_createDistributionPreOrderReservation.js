@@ -2,10 +2,15 @@
  * Distribution Pre-Order Reservation Migration
  * Creates the distributionPreOrderReservation table for customer pre-order reservations
  */
-exports.up = function(knex) {
-  return knex.schema.createTable('distributionPreOrderReservation', function(table) {
+exports.up = function (knex) {
+  return knex.schema.createTable('distributionPreOrderReservation', function (table) {
     table.uuid('distributionPreOrderReservationId').primary().defaultTo(knex.raw('uuidv7()'));
-    table.uuid('distributionPreOrderId').notNullable().references('distributionPreOrderId').inTable('distributionPreOrder').onDelete('CASCADE');
+    table
+      .uuid('distributionPreOrderId')
+      .notNullable()
+      .references('distributionPreOrderId')
+      .inTable('distributionPreOrder')
+      .onDelete('CASCADE');
     table.uuid('customerId').notNullable().references('customerId').inTable('customer').onDelete('CASCADE');
     table.uuid('orderId').references('orderId').inTable('order').onDelete('SET NULL');
     table.string('reservationNumber').unique();
@@ -28,7 +33,7 @@ exports.up = function(knex) {
     table.jsonb('metadata');
     table.timestamp('createdAt').defaultTo(knex.fn.now());
     table.timestamp('updatedAt').defaultTo(knex.fn.now());
-    
+
     table.index('distributionPreOrderId');
     table.index('customerId');
     table.index('orderId');
@@ -36,6 +41,6 @@ exports.up = function(knex) {
   });
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTableIfExists('distributionPreOrderReservation');
 };

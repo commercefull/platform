@@ -15,6 +15,7 @@ This guide provides comprehensive instructions for migrating from WooCommerce to
 ## WooCommerce Data Architecture
 
 ### Core Tables
+
 - `wp_posts` - Products, pages, posts
 - `wp_postmeta` - Product metadata and custom fields
 - `wp_users` - Customer accounts
@@ -23,6 +24,7 @@ This guide provides comprehensive instructions for migrating from WooCommerce to
 - `wp_woocommerce_order_itemmeta` - Order item metadata
 
 ### Key Challenges
+
 - Meta field storage (key-value pairs)
 - Product variation relationships
 - Custom field proliferation
@@ -63,7 +65,7 @@ class WooCommerceExtractor {
       user: config.username,
       password: config.password,
       database: config.database,
-      charset: 'utf8mb4'
+      charset: 'utf8mb4',
     });
   }
 
@@ -77,14 +79,18 @@ class WooCommerceExtractor {
 ### 2. Data Assessment
 
 ```javascript
-const assessWooCommerceData = async (db) => {
+const assessWooCommerceData = async db => {
   const assessment = {
     products: await db.query('SELECT COUNT(*) as count FROM wp_posts WHERE post_type = "product"'),
     variations: await db.query('SELECT COUNT(*) as count FROM wp_posts WHERE post_type = "product_variation"'),
-    categories: await db.query('SELECT COUNT(*) as count FROM wp_terms t JOIN wp_term_taxonomy tt ON t.term_id = tt.term_id WHERE tt.taxonomy = "product_cat"'),
+    categories: await db.query(
+      'SELECT COUNT(*) as count FROM wp_terms t JOIN wp_term_taxonomy tt ON t.term_id = tt.term_id WHERE tt.taxonomy = "product_cat"',
+    ),
     customers: await db.query('SELECT COUNT(*) as count FROM wp_users'),
     orders: await db.query('SELECT COUNT(*) as count FROM wp_posts WHERE post_type = "shop_order"'),
-    attributes: await db.query('SELECT COUNT(*) as count FROM wp_terms t JOIN wp_term_taxonomy tt ON t.term_id = tt.term_id WHERE tt.taxonomy LIKE "pa_%"')
+    attributes: await db.query(
+      'SELECT COUNT(*) as count FROM wp_terms t JOIN wp_term_taxonomy tt ON t.term_id = tt.term_id WHERE tt.taxonomy LIKE "pa_%"',
+    ),
   };
 
   return assessment;
@@ -116,18 +122,21 @@ class WooCommerceAttributeMigrator {
         description: attr.description || '',
         position: 1,
         isComparable: true,
-        isGlobal: true
+        isGlobal: true,
       });
 
       // Get attribute values/terms
-      const terms = await db.query(`
+      const terms = await db.query(
+        `
         SELECT name, slug, description
         FROM wp_terms
         WHERE term_id IN (
           SELECT term_id FROM wp_term_taxonomy
           WHERE parent = ? AND taxonomy = ?
         )
-      `, [attr.term_id, `pa_${attr.slug}`]);
+      `,
+        [attr.term_id, `pa_${attr.slug}`],
+      );
 
       // Create the attribute
       await cf.productAttributes.create({
@@ -150,16 +159,17 @@ class WooCommerceAttributeMigrator {
         position: 1,
         options: terms.map(term => ({
           label: term.name,
-          value: term.slug
-        }))
+          value: term.slug,
+        })),
       });
     }
   }
 
   formatAttributeName(slug) {
-    return slug.split('-').map(word =>
-      word.charAt(0).toUpperCase() + word.slice(1)
-    ).join(' ');
+    return slug
+      .split('-')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
   }
 }
 ```
@@ -186,7 +196,7 @@ class WooCommerceCategoryMigrator {
         slug: cat.slug,
         description: cat.description,
         parentId: cat.parent ? categoryMap.get(cat.parent) : null,
-        isActive: true
+        isActive: true,
       });
 
       categoryMap.set(cat.term_id, category.id);
@@ -225,7 +235,7 @@ class WooCommerceProductExtractor {
         meta,
         categories,
         attributes,
-        images
+        images,
       });
     }
 
@@ -233,11 +243,14 @@ class WooCommerceProductExtractor {
   }
 
   async extractProductMeta(db, productId) {
-    const meta = await db.query(`
+    const meta = await db.query(
+      `
       SELECT meta_key, meta_value
       FROM wp_postmeta
       WHERE post_id = ?
-    `, [productId]);
+    `,
+      [productId],
+    );
 
     return meta.reduce((acc, item) => {
       acc[item.meta_key] = item.meta_value;
@@ -246,37 +259,49 @@ class WooCommerceProductExtractor {
   }
 
   async extractProductCategories(db, productId) {
-    return await db.query(`
+    return await db.query(
+      `
       SELECT t.term_id, t.name, t.slug
       FROM wp_terms t
       JOIN wp_term_taxonomy tt ON t.term_id = tt.term_id
       JOIN wp_term_relationships tr ON tt.term_taxonomy_id = tr.term_taxonomy_id
       WHERE tr.object_id = ? AND tt.taxonomy = 'product_cat'
-    `, [productId]);
+    `,
+      [productId],
+    );
   }
 
   async extractProductAttributes(db, productId) {
-    return await db.query(`
+    return await db.query(
+      `
       SELECT tm.name, tm.slug, pm.meta_value
       FROM wp_postmeta pm
       JOIN wp_terms tm ON pm.meta_value = tm.slug
       WHERE pm.post_id = ?
       AND pm.meta_key LIKE 'attribute_pa_%'
-    `, [productId]);
+    `,
+      [productId],
+    );
   }
 
   async extractProductImages(db, productId) {
-    const gallery = await db.query(`
+    const gallery = await db.query(
+      `
       SELECT meta_value
       FROM wp_postmeta
       WHERE post_id = ? AND meta_key = '_product_image_gallery'
-    `, [productId]);
+    `,
+      [productId],
+    );
 
-    const featured = await db.query(`
+    const featured = await db.query(
+      `
       SELECT meta_value
       FROM wp_postmeta
       WHERE post_id = ? AND meta_key = '_thumbnail_id'
-    `, [productId]);
+    `,
+      [productId],
+    );
 
     const images = [];
 
@@ -299,17 +324,22 @@ class WooCommerceProductExtractor {
   }
 
   async getImageData(db, attachmentId) {
-    const image = await db.query(`
+    const image = await db.query(
+      `
       SELECT p.guid, pm.meta_value as alt
       FROM wp_posts p
       LEFT JOIN wp_postmeta pm ON p.ID = pm.post_id AND pm.meta_key = '_wp_attachment_image_alt'
       WHERE p.ID = ?
-    `, [attachmentId]);
+    `,
+      [attachmentId],
+    );
 
-    return image.length > 0 ? {
-      url: image[0].guid,
-      alt: image[0].alt || ''
-    } : null;
+    return image.length > 0
+      ? {
+          url: image[0].guid,
+          alt: image[0].alt || '',
+        }
+      : null;
   }
 }
 ```
@@ -354,38 +384,38 @@ class WooCommerceProductTransformer {
       seo: {
         title: wooProduct.meta._yoast_wpseo_title,
         description: wooProduct.meta._yoast_wpseo_metadesc,
-        focusKeyword: wooProduct.meta._yoast_wpseo_focuskw
+        focusKeyword: wooProduct.meta._yoast_wpseo_focuskw,
       },
       createdAt: wooProduct.post_date,
-      updatedAt: wooProduct.post_modified
+      updatedAt: wooProduct.post_modified,
     };
   }
 
   mapProductType(wooType) {
     const typeMapping = {
-      'simple': 'simple',
-      'variable': 'configurable',
-      'grouped': 'grouped',
-      'external': 'external'
+      simple: 'simple',
+      variable: 'configurable',
+      grouped: 'grouped',
+      external: 'external',
     };
     return typeMapping[wooType] || 'simple';
   }
 
   mapStatus(wooStatus) {
     const statusMapping = {
-      'publish': 'published',
-      'draft': 'draft',
-      'private': 'private'
+      publish: 'published',
+      draft: 'draft',
+      private: 'private',
     };
     return statusMapping[wooStatus] || 'draft';
   }
 
   mapVisibility(wooVisibility) {
     const visibilityMapping = {
-      'visible': 'public',
-      'catalog': 'catalog',
-      'search': 'search',
-      'hidden': 'hidden'
+      visible: 'public',
+      catalog: 'catalog',
+      search: 'search',
+      hidden: 'hidden',
     };
     return visibilityMapping[wooVisibility] || 'public';
   }
@@ -400,7 +430,7 @@ class WooCommerceProductTransformer {
       name: attr.name,
       value: attr.meta_value,
       isVisible: true,
-      isForVariations: false // Would need additional logic to determine
+      isForVariations: false, // Would need additional logic to determine
     }));
   }
 
@@ -439,7 +469,7 @@ class WooCommerceCustomerExtractor {
       enrichedCustomers.push({
         ...customer,
         meta,
-        addresses
+        addresses,
       });
     }
 
@@ -447,11 +477,14 @@ class WooCommerceCustomerExtractor {
   }
 
   async extractCustomerMeta(db, userId) {
-    const meta = await db.query(`
+    const meta = await db.query(
+      `
       SELECT meta_key, meta_value
       FROM wp_usermeta
       WHERE user_id = ?
-    `, [userId]);
+    `,
+      [userId],
+    );
 
     return meta.reduce((acc, item) => {
       acc[item.meta_key] = item.meta_value;
@@ -460,21 +493,27 @@ class WooCommerceCustomerExtractor {
   }
 
   async extractCustomerAddresses(db, userId) {
-    const billing = await db.query(`
+    const billing = await db.query(
+      `
       SELECT meta_key, meta_value
       FROM wp_usermeta
       WHERE user_id = ? AND meta_key LIKE 'billing_%'
-    `, [userId]);
+    `,
+      [userId],
+    );
 
-    const shipping = await db.query(`
+    const shipping = await db.query(
+      `
       SELECT meta_key, meta_value
       FROM wp_usermeta
       WHERE user_id = ? AND meta_key LIKE 'shipping_%'
-    `, [userId]);
+    `,
+      [userId],
+    );
 
     return {
       billing: this.organizeAddress(billing, 'billing'),
-      shipping: this.organizeAddress(shipping, 'shipping')
+      shipping: this.organizeAddress(shipping, 'shipping'),
     };
   }
 
@@ -512,7 +551,7 @@ class WooCommerceCustomerTransformer {
       notes: wooCustomer.meta.customer_notes || '',
       tags: this.extractCustomerTags(wooCustomer.meta),
       createdAt: wooCustomer.user_registered,
-      updatedAt: wooCustomer.user_registered
+      updatedAt: wooCustomer.user_registered,
     };
   }
 
@@ -528,7 +567,7 @@ class WooCommerceCustomerTransformer {
       city: wooAddress.city || '',
       state: wooAddress.state || '',
       postcode: wooAddress.postcode || '',
-      country: wooAddress.country || 'US'
+      country: wooAddress.country || 'US',
     };
   }
 
@@ -572,7 +611,7 @@ class WooCommerceOrderExtractor {
         ...order,
         meta,
         items,
-        addresses
+        addresses,
       });
     }
 
@@ -580,11 +619,14 @@ class WooCommerceOrderExtractor {
   }
 
   async extractOrderMeta(db, orderId) {
-    const meta = await db.query(`
+    const meta = await db.query(
+      `
       SELECT meta_key, meta_value
       FROM wp_postmeta
       WHERE post_id = ?
-    `, [orderId]);
+    `,
+      [orderId],
+    );
 
     return meta.reduce((acc, item) => {
       acc[item.meta_key] = item.meta_value;
@@ -593,13 +635,16 @@ class WooCommerceOrderExtractor {
   }
 
   async extractOrderItems(db, orderId) {
-    const items = await db.query(`
+    const items = await db.query(
+      `
       SELECT oi.order_item_id, oi.order_item_name, oi.order_item_type,
              oim.meta_value as product_id
       FROM wp_woocommerce_order_items oi
       LEFT JOIN wp_woocommerce_order_itemmeta oim ON oi.order_item_id = oim.order_item_id
       WHERE oi.order_id = ? AND oim.meta_key = '_product_id'
-    `, [orderId]);
+    `,
+      [orderId],
+    );
 
     const enrichedItems = [];
 
@@ -607,7 +652,7 @@ class WooCommerceOrderExtractor {
       const itemMeta = await this.extractOrderItemMeta(db, item.order_item_id);
       enrichedItems.push({
         ...item,
-        meta: itemMeta
+        meta: itemMeta,
       });
     }
 
@@ -615,11 +660,14 @@ class WooCommerceOrderExtractor {
   }
 
   async extractOrderItemMeta(db, orderItemId) {
-    const meta = await db.query(`
+    const meta = await db.query(
+      `
       SELECT meta_key, meta_value
       FROM wp_woocommerce_order_itemmeta
       WHERE order_item_id = ?
-    `, [orderItemId]);
+    `,
+      [orderItemId],
+    );
 
     return meta.reduce((acc, item) => {
       acc[item.meta_key] = item.meta_value;
@@ -628,12 +676,15 @@ class WooCommerceOrderExtractor {
   }
 
   async extractOrderAddresses(db, orderId) {
-    const addressMeta = await db.query(`
+    const addressMeta = await db.query(
+      `
       SELECT meta_key, meta_value
       FROM wp_postmeta
       WHERE post_id = ?
       AND (meta_key LIKE '_billing_%' OR meta_key LIKE '_shipping_%')
-    `, [orderId]);
+    `,
+      [orderId],
+    );
 
     return addressMeta.reduce((acc, item) => {
       const [, type, field] = item.meta_key.split('_');
@@ -672,7 +723,7 @@ class WooCommerceOrderTransformer {
       customerNote: wooOrder.meta._customer_note || '',
       orderNotes: [], // Would need separate query
       createdAt: wooOrder.post_date,
-      updatedAt: wooOrder.post_modified
+      updatedAt: wooOrder.post_modified,
     };
   }
 
@@ -684,7 +735,7 @@ class WooCommerceOrderTransformer {
       'wc-completed': 'completed',
       'wc-cancelled': 'cancelled',
       'wc-refunded': 'refunded',
-      'wc-failed': 'failed'
+      'wc-failed': 'failed',
     };
     return statusMapping[wooStatus] || 'pending';
   }
@@ -703,7 +754,7 @@ class WooCommerceOrderTransformer {
       postcode: wooAddress.postcode || '',
       country: wooAddress.country || 'US',
       phone: wooAddress.phone || '',
-      email: wooAddress.email || ''
+      email: wooAddress.email || '',
     };
   }
 
@@ -719,7 +770,7 @@ class WooCommerceOrderTransformer {
         price: parseFloat(item.meta._line_total || 0) / parseInt(item.meta._qty || 1),
         total: parseFloat(item.meta._line_total || 0),
         taxTotal: parseFloat(item.meta._line_tax || 0),
-        variationId: item.meta._variation_id ? parseInt(item.meta._variation_id) : null
+        variationId: item.meta._variation_id ? parseInt(item.meta._variation_id) : null,
       };
     });
   }
@@ -737,23 +788,21 @@ async function runWooCommerceMigration() {
       host: process.env.WC_DB_HOST,
       database: process.env.WC_DB_NAME,
       username: process.env.WC_DB_USER,
-      password: process.env.WC_DB_PASSWORD
+      password: process.env.WC_DB_PASSWORD,
     },
     commercefull: {
       baseURL: process.env.COMMERCEFULL_URL,
-      apiKey: process.env.COMMERCEFULL_API_KEY
+      apiKey: process.env.COMMERCEFULL_API_KEY,
     },
     options: {
       batchSize: 100,
       concurrency: 2,
       continueOnError: true,
-      tablePrefix: 'wp_' // WooCommerce table prefix
-    }
+      tablePrefix: 'wp_', // WooCommerce table prefix
+    },
   });
 
   try {
-    
-
     // Phase 1: Foundation data
     await runner.migrateAttributes();
     await runner.migrateCategories();
@@ -771,11 +820,8 @@ async function runWooCommerceMigration() {
     // Phase 5: Content
     await runner.migrateContent();
 
-    
     console.log(runner.monitor.generateReport());
-
   } catch (error) {
-    
     console.log('Partial results:', runner.monitor.generateReport());
   }
 }
@@ -791,7 +837,8 @@ runWooCommerceMigration();
 class OptimizedWooCommerceExtractor {
   // Single query with JOINs instead of multiple queries
   async extractProductsBatch(db, offset, limit) {
-    return await db.query(`
+    return await db.query(
+      `
       SELECT
         p.ID, p.post_title, p.post_content, p.post_excerpt,
         p.post_status, p.post_date, p.post_modified,
@@ -809,7 +856,9 @@ class OptimizedWooCommerceExtractor {
       GROUP BY p.ID
       ORDER BY p.ID
       LIMIT ? OFFSET ?
-    `, [limit, offset]);
+    `,
+      [limit, offset],
+    );
   }
 
   // Bulk category assignment
@@ -817,14 +866,17 @@ class OptimizedWooCommerceExtractor {
     if (productIds.length === 0) return [];
 
     const placeholders = productIds.map(() => '?').join(',');
-    return await db.query(`
+    return await db.query(
+      `
       SELECT tr.object_id as product_id, t.term_id, t.name, t.slug
       FROM wp_term_relationships tr
       JOIN wp_term_taxonomy tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
       JOIN wp_terms t ON tt.term_id = t.term_id
       WHERE tr.object_id IN (${placeholders})
       AND tt.taxonomy = 'product_cat'
-    `, productIds);
+    `,
+      productIds,
+    );
   }
 }
 ```
@@ -865,8 +917,6 @@ class MemoryEfficientMigrator {
       if (global.gc) {
         global.gc();
       }
-
-      
     }
   }
 }
@@ -885,7 +935,7 @@ const WooCommerceValidation = {
     return {
       woocommerce: wooCount[0].count,
       commercefull: cfCount,
-      difference: Math.abs(wooCount[0].count - cfCount)
+      difference: Math.abs(wooCount[0].count - cfCount),
     };
   },
 
@@ -897,7 +947,7 @@ const WooCommerceValidation = {
     return {
       woocommerce: parseFloat(wooTotal[0].total),
       commercefull: cfTotal,
-      difference: Math.abs(parseFloat(wooTotal[0].total) - cfTotal)
+      difference: Math.abs(parseFloat(wooTotal[0].total) - cfTotal),
     };
   },
 
@@ -913,9 +963,9 @@ const WooCommerceValidation = {
 
     return {
       woocommerce: wooAddresses[0].count,
-      commercefull: cfAddressCount
+      commercefull: cfAddressCount,
     };
-  }
+  },
 };
 ```
 
@@ -954,12 +1004,7 @@ function fixEncoding(text) {
   if (!text) return text;
 
   // Convert common encoding issues
-  return text
-    .replace(/â€™/g, "'")
-    .replace(/â€œ/g, '"')
-    .replace(/â€/g, '"')
-    .replace(/â€"/g, '–')
-    .replace(/â€"/g, '—');
+  return text.replace(/â€™/g, "'").replace(/â€œ/g, '"').replace(/â€/g, '"').replace(/â€"/g, '–').replace(/â€"/g, '—');
 }
 ```
 

@@ -2,8 +2,8 @@
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.up = function(knex) {
-  return knex.schema.createTable('b2bCompany', function(table) {
+exports.up = function (knex) {
+  return knex.schema.createTable('b2bCompany', function (table) {
     table.uuid('b2bCompanyId').primary().defaultTo(knex.raw('uuidv7()'));
     table.string('name').notNullable();
     table.string('legalName');
@@ -12,7 +12,10 @@ exports.up = function(knex) {
     table.string('taxId');
     table.string('dunsNumber');
     table.string('status').defaultTo('pending').checkIn(['pending', 'active', 'suspended', 'closed']);
-    table.string('companyType').defaultTo('corporation').checkIn(['sole_proprietorship', 'partnership', 'corporation', 'llc', 'nonprofit', 'government', 'other']);
+    table
+      .string('companyType')
+      .defaultTo('corporation')
+      .checkIn(['sole_proprietorship', 'partnership', 'corporation', 'llc', 'nonprofit', 'government', 'other']);
     table.string('industry');
     table.string('industryCode');
     table.integer('employeeCount');
@@ -68,6 +71,6 @@ exports.up = function(knex) {
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTableIfExists('b2bCompany');
 };

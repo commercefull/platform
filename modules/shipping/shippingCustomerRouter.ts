@@ -18,4 +18,3 @@ router.post('/calculate-rates', shippingController.calculateRates);
 router.get('/packaging-types', shippingController.getPackagingTypes);
 
 export const shippingCustomerRouter = router;
-

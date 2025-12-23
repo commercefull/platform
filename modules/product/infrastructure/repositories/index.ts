@@ -7,12 +7,7 @@
 export { default as productRepository } from './ProductRepository';
 
 // Product Type Repository
-export { 
-  ProductTypeRepository,
-  ProductType,
-  ProductTypeCreateInput,
-  ProductTypeUpdateInput
-} from './ProductTypeRepository';
+export { ProductTypeRepository, ProductType, ProductTypeCreateInput, ProductTypeUpdateInput } from './ProductTypeRepository';
 export { default as productTypeRepository } from './ProductTypeRepository';
 
 // Attribute Set Repository
@@ -23,7 +18,7 @@ export {
   ProductAttributeSetAttribute,
   ProductAttributeSetCreateInput,
   ProductAttributeSetUpdateInput,
-  AttributeSetMappingInput
+  AttributeSetMappingInput,
 } from './ProductAttributeSetRepository';
 export { default as productAttributeSetRepository } from './ProductAttributeSetRepository';
 
@@ -38,6 +33,6 @@ export {
   ProductAttributeCreateInput,
   ProductAttributeUpdateInput,
   AttributeValueCreateInput,
-  SetProductAttributeInput
+  SetProductAttributeInput,
 } from './DynamicAttributeRepository';
 export { default as dynamicAttributeRepository } from './DynamicAttributeRepository';

@@ -15,7 +15,7 @@ import { BasketNotFoundError, BasketItemNotFoundError } from '../../domain/error
 export class RemoveItemCommand {
   constructor(
     public readonly basketId: string,
-    public readonly basketItemId: string
+    public readonly basketItemId: string,
   ) {}
 }
 
@@ -42,7 +42,7 @@ export class RemoveItemUseCase {
     eventBus.emit('basket.item_removed', {
       basketId: command.basketId,
       basketItemId: command.basketItemId,
-      productId: item.productId
+      productId: item.productId,
     });
 
     const updatedBasket = await this.basketRepository.findById(command.basketId);
@@ -66,12 +66,12 @@ export class RemoveItemUseCase {
         unitPrice: item.unitPrice.amount,
         lineTotal: item.lineTotal.amount,
         imageUrl: item.imageUrl,
-        isGift: item.isGift
+        isGift: item.isGift,
       })),
       itemCount: basket.itemCount,
       subtotal: basket.subtotal.amount,
       createdAt: basket.createdAt.toISOString(),
-      updatedAt: basket.updatedAt.toISOString()
+      updatedAt: basket.updatedAt.toISOString(),
     };
   }
 }

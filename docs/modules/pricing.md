@@ -11,6 +11,7 @@ The Pricing feature manages product pricing including pricing rules, tier/volume
 ### Pricing Rules
 
 ### UC-PRC-001: List Pricing Rules (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** High
 
@@ -21,11 +22,13 @@ The Pricing feature manages product pricing including pricing rules, tier/volume
 **Then** the system returns all configured pricing rules
 
 #### API Endpoint
+
 ```
 GET /business/pricing/rules
 ```
 
 #### Business Rules
+
 - Returns all active and inactive rules
 - Rules are evaluated in priority order
 - Includes conditions and discount configuration
@@ -33,6 +36,7 @@ GET /business/pricing/rules
 ---
 
 ### UC-PRC-002: Get Pricing Rule (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
@@ -44,6 +48,7 @@ GET /business/pricing/rules
 **Then** the system returns the rule configuration
 
 #### API Endpoint
+
 ```
 GET /business/pricing/rules/:id
 ```
@@ -51,6 +56,7 @@ GET /business/pricing/rules/:id
 ---
 
 ### UC-PRC-003: Create Pricing Rule (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** High
 
@@ -62,6 +68,7 @@ GET /business/pricing/rules/:id
 **Then** the rule is created and active
 
 #### API Endpoint
+
 ```
 POST /business/pricing/rules
 Body: {
@@ -79,6 +86,7 @@ Body: {
 ```
 
 #### Business Rules
+
 - Rule types: percentage discount, fixed discount, fixed price
 - Conditions can combine multiple criteria
 - Priority determines evaluation order
@@ -87,6 +95,7 @@ Body: {
 ---
 
 ### UC-PRC-004: Update Pricing Rule (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
@@ -98,6 +107,7 @@ Body: {
 **Then** the changes are saved
 
 #### API Endpoint
+
 ```
 PUT /business/pricing/rules/:id
 Body: { name?, discountValue?, conditions?, priority?, isActive? }
@@ -106,6 +116,7 @@ Body: { name?, discountValue?, conditions?, priority?, isActive? }
 ---
 
 ### UC-PRC-005: Delete Pricing Rule (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Low
 
@@ -117,6 +128,7 @@ Body: { name?, discountValue?, conditions?, priority?, isActive? }
 **Then** the rule is removed
 
 #### API Endpoint
+
 ```
 DELETE /business/pricing/rules/:id
 ```
@@ -126,6 +138,7 @@ DELETE /business/pricing/rules/:id
 ### Tier Pricing
 
 ### UC-PRC-006: List Tier Prices (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** High
 
@@ -136,6 +149,7 @@ DELETE /business/pricing/rules/:id
 **Then** the system returns volume-based pricing tiers
 
 #### API Endpoint
+
 ```
 GET /business/pricing/tier-prices
 Query: productId?, limit, offset
@@ -144,10 +158,12 @@ Query: productId?, limit, offset
 ---
 
 ### UC-PRC-007: Get Tier Price (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
 #### API Endpoint
+
 ```
 GET /business/pricing/tier-prices/:id
 ```
@@ -155,6 +171,7 @@ GET /business/pricing/tier-prices/:id
 ---
 
 ### UC-PRC-008: Create Tier Price (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** High
 
@@ -166,6 +183,7 @@ GET /business/pricing/tier-prices/:id
 **Then** volume discounts are configured
 
 #### API Endpoint
+
 ```
 POST /business/pricing/tier-prices
 Body: {
@@ -181,6 +199,7 @@ Body: {
 ```
 
 #### Business Rules
+
 - Tiers based on quantity ranges
 - Can be percentage or fixed discount
 - Can be customer group specific
@@ -189,10 +208,12 @@ Body: {
 ---
 
 ### UC-PRC-009: Update Tier Price (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
 #### API Endpoint
+
 ```
 PUT /business/pricing/tier-prices/:id
 ```
@@ -200,10 +221,12 @@ PUT /business/pricing/tier-prices/:id
 ---
 
 ### UC-PRC-010: Delete Tier Price (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Low
 
 #### API Endpoint
+
 ```
 DELETE /business/pricing/tier-prices/:id
 ```
@@ -213,6 +236,7 @@ DELETE /business/pricing/tier-prices/:id
 ### Price Lists (Customer-Specific Pricing)
 
 ### UC-PRC-011: List Price Lists (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
@@ -223,6 +247,7 @@ DELETE /business/pricing/tier-prices/:id
 **Then** the system returns customer price lists
 
 #### API Endpoint
+
 ```
 GET /business/pricing/price-lists
 ```
@@ -230,10 +255,12 @@ GET /business/pricing/price-lists
 ---
 
 ### UC-PRC-012: Get Price List (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
 #### API Endpoint
+
 ```
 GET /business/pricing/price-lists/:id
 ```
@@ -241,6 +268,7 @@ GET /business/pricing/price-lists/:id
 ---
 
 ### UC-PRC-013: Create Price List (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
@@ -252,6 +280,7 @@ GET /business/pricing/price-lists/:id
 **Then** custom pricing is available for assigned customers
 
 #### API Endpoint
+
 ```
 POST /business/pricing/price-lists
 Body: {
@@ -266,6 +295,7 @@ Body: {
 ```
 
 #### Business Rules
+
 - Can assign to specific customers or groups
 - Priority determines which list applies
 - Currency-specific lists supported
@@ -273,10 +303,12 @@ Body: {
 ---
 
 ### UC-PRC-014: Update Price List (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
 #### API Endpoint
+
 ```
 PUT /business/pricing/price-lists/:id
 ```
@@ -284,10 +316,12 @@ PUT /business/pricing/price-lists/:id
 ---
 
 ### UC-PRC-015: Delete Price List (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Low
 
 #### API Endpoint
+
 ```
 DELETE /business/pricing/price-lists/:id
 ```
@@ -295,6 +329,7 @@ DELETE /business/pricing/price-lists/:id
 ---
 
 ### UC-PRC-016: Add Price to List (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
@@ -306,6 +341,7 @@ DELETE /business/pricing/price-lists/:id
 **Then** the product has special pricing for that list
 
 #### API Endpoint
+
 ```
 POST /business/pricing/price-lists/:priceListId/prices
 Body: { productId, productVariantId?, price }
@@ -316,6 +352,7 @@ Body: { productId, productVariantId?, price }
 ### Currency Management
 
 ### UC-PRC-017: List Currencies (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** High
 
@@ -326,6 +363,7 @@ Body: { productId, productVariantId?, price }
 **Then** the system returns configured currencies
 
 #### API Endpoint
+
 ```
 GET /business/pricing/currencies
 ```
@@ -333,10 +371,12 @@ GET /business/pricing/currencies
 ---
 
 ### UC-PRC-018: Get Currency (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
 #### API Endpoint
+
 ```
 GET /business/pricing/currencies/:code
 ```
@@ -344,6 +384,7 @@ GET /business/pricing/currencies/:code
 ---
 
 ### UC-PRC-019: Save Currency (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** High
 
@@ -355,6 +396,7 @@ GET /business/pricing/currencies/:code
 **Then** the currency is configured
 
 #### API Endpoint
+
 ```
 POST /business/pricing/currencies
 Body: {
@@ -368,6 +410,7 @@ Body: {
 ```
 
 #### Business Rules
+
 - ISO 4217 currency codes
 - Exchange rate relative to base currency
 - One default currency required
@@ -376,21 +419,25 @@ Body: {
 ---
 
 ### UC-PRC-020: Delete Currency (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Low
 
 #### API Endpoint
+
 ```
 DELETE /business/pricing/currencies/:code
 ```
 
 #### Business Rules
+
 - Cannot delete default currency
 - Cannot delete currency with active orders
 
 ---
 
 ### UC-PRC-021: Update Exchange Rates (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
@@ -401,12 +448,14 @@ DELETE /business/pricing/currencies/:code
 **Then** all currency rates are refreshed
 
 #### API Endpoint
+
 ```
 POST /business/pricing/currencies/update-exchange-rates
 Body: { provider?: string } // Optional: specify rate provider
 ```
 
 #### Business Rules
+
 - Can use automatic provider (fixer.io, etc.)
 - Or manual rate entry
 - Creates rate history record
@@ -416,6 +465,7 @@ Body: { provider?: string } // Optional: specify rate provider
 ### Currency Regions
 
 ### UC-PRC-022: List Currency Regions (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
@@ -426,6 +476,7 @@ Body: { provider?: string } // Optional: specify rate provider
 **Then** the system returns geographic currency mappings
 
 #### API Endpoint
+
 ```
 GET /business/pricing/currency-regions
 ```
@@ -433,6 +484,7 @@ GET /business/pricing/currency-regions
 ---
 
 ### UC-PRC-023: Create Currency Region (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
@@ -444,6 +496,7 @@ GET /business/pricing/currency-regions
 **Then** visitors from that region see that currency
 
 #### API Endpoint
+
 ```
 POST /business/pricing/currency-regions
 Body: {
@@ -455,6 +508,7 @@ Body: {
 ```
 
 #### Business Rules
+
 - Maps countries to preferred currency
 - Used for automatic currency detection
 - Customer can override
@@ -462,10 +516,12 @@ Body: {
 ---
 
 ### UC-PRC-024: Update Currency Region (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Low
 
 #### API Endpoint
+
 ```
 PUT /business/pricing/currency-regions/:id
 ```
@@ -473,10 +529,12 @@ PUT /business/pricing/currency-regions/:id
 ---
 
 ### UC-PRC-025: Delete Currency Region (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Low
 
 #### API Endpoint
+
 ```
 DELETE /business/pricing/currency-regions/:id
 ```
@@ -486,6 +544,7 @@ DELETE /business/pricing/currency-regions/:id
 ### Currency Price Rules
 
 ### UC-PRC-026: List Currency Price Rules (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
@@ -496,6 +555,7 @@ DELETE /business/pricing/currency-regions/:id
 **Then** the system returns currency-specific pricing rules
 
 #### API Endpoint
+
 ```
 GET /business/pricing/currency-price-rules
 ```
@@ -503,6 +563,7 @@ GET /business/pricing/currency-price-rules
 ---
 
 ### UC-PRC-027: Create Currency Price Rule (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
@@ -514,6 +575,7 @@ GET /business/pricing/currency-price-rules
 **Then** prices are adjusted for that currency
 
 #### API Endpoint
+
 ```
 POST /business/pricing/currency-price-rules
 Body: {
@@ -527,6 +589,7 @@ Body: {
 ```
 
 #### Business Rules
+
 - Adjust prices beyond exchange rate
 - Account for market conditions
 - Apply psychological pricing (rounding)
@@ -534,10 +597,12 @@ Body: {
 ---
 
 ### UC-PRC-028: Update Currency Price Rule (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Low
 
 #### API Endpoint
+
 ```
 PUT /business/pricing/currency-price-rules/:id
 ```
@@ -545,10 +610,12 @@ PUT /business/pricing/currency-price-rules/:id
 ---
 
 ### UC-PRC-029: Delete Currency Price Rule (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Low
 
 #### API Endpoint
+
 ```
 DELETE /business/pricing/currency-price-rules/:id
 ```
@@ -558,7 +625,7 @@ DELETE /business/pricing/currency-price-rules/:id
 ## Price Calculation Logic
 
 ```
-Final Price = 
+Final Price =
   (Base Price × Exchange Rate)
   + Currency Adjustment
   + Tier Discount (if applicable)
@@ -569,19 +636,19 @@ Final Price =
 
 ## Events Emitted
 
-| Event | Trigger | Payload |
-|-------|---------|---------|
+| Event                   | Trigger       | Payload                       |
+| ----------------------- | ------------- | ----------------------------- |
 | `product.price_changed` | Price updated | productId, oldPrice, newPrice |
 
 ---
 
 ## Integration Test Coverage
 
-| Use Case | Test File | Status |
-|----------|-----------|--------|
-| UC-PRC-001 to UC-PRC-005 | `pricing/rules.test.ts` | ❌ |
-| UC-PRC-006 to UC-PRC-010 | `pricing/tiers.test.ts` | ❌ |
-| UC-PRC-011 to UC-PRC-016 | `pricing/pricelists.test.ts` | ❌ |
-| UC-PRC-017 to UC-PRC-021 | `pricing/currencies.test.ts` | ❌ |
-| UC-PRC-022 to UC-PRC-025 | `pricing/regions.test.ts` | ❌ |
-| UC-PRC-026 to UC-PRC-029 | `pricing/currencyrules.test.ts` | ❌ |
+| Use Case                 | Test File                       | Status |
+| ------------------------ | ------------------------------- | ------ |
+| UC-PRC-001 to UC-PRC-005 | `pricing/rules.test.ts`         | ❌     |
+| UC-PRC-006 to UC-PRC-010 | `pricing/tiers.test.ts`         | ❌     |
+| UC-PRC-011 to UC-PRC-016 | `pricing/pricelists.test.ts`    | ❌     |
+| UC-PRC-017 to UC-PRC-021 | `pricing/currencies.test.ts`    | ❌     |
+| UC-PRC-022 to UC-PRC-025 | `pricing/regions.test.ts`       | ❌     |
+| UC-PRC-026 to UC-PRC-029 | `pricing/currencyrules.test.ts` | ❌     |

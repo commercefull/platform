@@ -46,7 +46,19 @@ export interface SupplierReceivingItem {
 }
 
 export type SupplierReceivingItemCreateParams = Omit<SupplierReceivingItem, 'supplierReceivingItemId' | 'createdAt' | 'updatedAt'>;
-export type SupplierReceivingItemUpdateParams = Partial<Pick<SupplierReceivingItem, 'receivedQuantity' | 'rejectedQuantity' | 'status' | 'acceptanceStatus' | 'inspectionNotes' | 'discrepancyReason' | 'processedAt' | 'processedBy'>>;
+export type SupplierReceivingItemUpdateParams = Partial<
+  Pick<
+    SupplierReceivingItem,
+    | 'receivedQuantity'
+    | 'rejectedQuantity'
+    | 'status'
+    | 'acceptanceStatus'
+    | 'inspectionNotes'
+    | 'discrepancyReason'
+    | 'processedAt'
+    | 'processedBy'
+  >
+>;
 
 export class SupplierReceivingItemRepo {
   async findById(id: string): Promise<SupplierReceivingItem | null> {
@@ -54,17 +66,21 @@ export class SupplierReceivingItemRepo {
   }
 
   async findByReceivingRecordId(supplierReceivingRecordId: string): Promise<SupplierReceivingItem[]> {
-    return (await query<SupplierReceivingItem[]>(
-      `SELECT * FROM "supplierReceivingItem" WHERE "supplierReceivingRecordId" = $1 ORDER BY "createdAt" ASC`,
-      [supplierReceivingRecordId]
-    )) || [];
+    return (
+      (await query<SupplierReceivingItem[]>(
+        `SELECT * FROM "supplierReceivingItem" WHERE "supplierReceivingRecordId" = $1 ORDER BY "createdAt" ASC`,
+        [supplierReceivingRecordId],
+      )) || []
+    );
   }
 
   async findByPurchaseOrderItemId(supplierPurchaseOrderItemId: string): Promise<SupplierReceivingItem[]> {
-    return (await query<SupplierReceivingItem[]>(
-      `SELECT * FROM "supplierReceivingItem" WHERE "supplierPurchaseOrderItemId" = $1 ORDER BY "createdAt" DESC`,
-      [supplierPurchaseOrderItemId]
-    )) || [];
+    return (
+      (await query<SupplierReceivingItem[]>(
+        `SELECT * FROM "supplierReceivingItem" WHERE "supplierPurchaseOrderItemId" = $1 ORDER BY "createdAt" DESC`,
+        [supplierPurchaseOrderItemId],
+      )) || []
+    );
   }
 
   async findByProduct(productId: string, productVariantId?: string): Promise<SupplierReceivingItem[]> {
@@ -81,23 +97,29 @@ export class SupplierReceivingItemRepo {
   }
 
   async findByStatus(status: SupplierReceivingItemStatus, limit = 100): Promise<SupplierReceivingItem[]> {
-    return (await query<SupplierReceivingItem[]>(
-      `SELECT * FROM "supplierReceivingItem" WHERE "status" = $1 ORDER BY "createdAt" DESC LIMIT $2`,
-      [status, limit]
-    )) || [];
+    return (
+      (await query<SupplierReceivingItem[]>(
+        `SELECT * FROM "supplierReceivingItem" WHERE "status" = $1 ORDER BY "createdAt" DESC LIMIT $2`,
+        [status, limit],
+      )) || []
+    );
   }
 
   async findBySupplierReceivingAcceptanceStatus(acceptanceStatus: SupplierReceivingAcceptanceStatus): Promise<SupplierReceivingItem[]> {
-    return (await query<SupplierReceivingItem[]>(
-      `SELECT * FROM "supplierReceivingItem" WHERE "acceptanceStatus" = $1 ORDER BY "createdAt" DESC`,
-      [acceptanceStatus]
-    )) || [];
+    return (
+      (await query<SupplierReceivingItem[]>(
+        `SELECT * FROM "supplierReceivingItem" WHERE "acceptanceStatus" = $1 ORDER BY "createdAt" DESC`,
+        [acceptanceStatus],
+      )) || []
+    );
   }
 
   async findWithDiscrepancies(): Promise<SupplierReceivingItem[]> {
-    return (await query<SupplierReceivingItem[]>(
-      `SELECT * FROM "supplierReceivingItem" WHERE "discrepancyReason" IS NOT NULL OR "rejectedQuantity" > 0 ORDER BY "createdAt" DESC`
-    )) || [];
+    return (
+      (await query<SupplierReceivingItem[]>(
+        `SELECT * FROM "supplierReceivingItem" WHERE "discrepancyReason" IS NOT NULL OR "rejectedQuantity" > 0 ORDER BY "createdAt" DESC`,
+      )) || []
+    );
   }
 
   async create(params: SupplierReceivingItemCreateParams): Promise<SupplierReceivingItem> {
@@ -111,13 +133,26 @@ export class SupplierReceivingItemRepo {
         "discrepancyReason", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19) RETURNING *`,
       [
-        params.supplierReceivingRecordId, params.supplierPurchaseOrderItemId || null, params.productId,
-        params.productVariantId || null, params.sku, params.name, params.expectedQuantity || null,
-        params.receivedQuantity, params.rejectedQuantity || 0, params.warehouseBinId || null,
-        params.lotNumber || null, params.serialNumbers || null, params.expiryDate || null,
-        params.status || 'received', params.acceptanceStatus || 'pending', params.inspectionNotes || null,
-        params.discrepancyReason || null, now, now
-      ]
+        params.supplierReceivingRecordId,
+        params.supplierPurchaseOrderItemId || null,
+        params.productId,
+        params.productVariantId || null,
+        params.sku,
+        params.name,
+        params.expectedQuantity || null,
+        params.receivedQuantity,
+        params.rejectedQuantity || 0,
+        params.warehouseBinId || null,
+        params.lotNumber || null,
+        params.serialNumbers || null,
+        params.expiryDate || null,
+        params.status || 'received',
+        params.acceptanceStatus || 'pending',
+        params.inspectionNotes || null,
+        params.discrepancyReason || null,
+        now,
+        now,
+      ],
     );
 
     if (!result) throw new Error('Failed to create receiving item');
@@ -143,7 +178,7 @@ export class SupplierReceivingItemRepo {
 
     return await queryOne<SupplierReceivingItem>(
       `UPDATE "supplierReceivingItem" SET ${updateFields.join(', ')} WHERE "supplierReceivingItemId" = $${paramIndex} RETURNING *`,
-      values
+      values,
     );
   }
 
@@ -152,7 +187,7 @@ export class SupplierReceivingItemRepo {
       status: 'accepted',
       acceptanceStatus: 'accepted',
       processedAt: unixTimestamp(),
-      processedBy
+      processedBy,
     });
   }
 
@@ -162,34 +197,41 @@ export class SupplierReceivingItemRepo {
       acceptanceStatus: 'rejected',
       discrepancyReason: reason,
       processedAt: unixTimestamp(),
-      processedBy
+      processedBy,
     });
   }
 
   async delete(id: string): Promise<boolean> {
     const result = await queryOne<{ supplierReceivingItemId: string }>(
       `DELETE FROM "supplierReceivingItem" WHERE "supplierReceivingItemId" = $1 RETURNING "supplierReceivingItemId"`,
-      [id]
+      [id],
     );
     return !!result;
   }
 
-  async getStatistics(): Promise<{ byStatus: Record<SupplierReceivingItemStatus, number>; byAcceptance: Record<SupplierReceivingAcceptanceStatus, number> }> {
+  async getStatistics(): Promise<{
+    byStatus: Record<SupplierReceivingItemStatus, number>;
+    byAcceptance: Record<SupplierReceivingAcceptanceStatus, number>;
+  }> {
     const statusResults = await query<{ status: SupplierReceivingItemStatus; count: string }[]>(
-      `SELECT "status", COUNT(*) as count FROM "supplierReceivingItem" GROUP BY "status"`
+      `SELECT "status", COUNT(*) as count FROM "supplierReceivingItem" GROUP BY "status"`,
     );
     const byStatus: Record<string, number> = {};
-    statusResults?.forEach(row => { byStatus[row.status] = parseInt(row.count, 10); });
+    statusResults?.forEach(row => {
+      byStatus[row.status] = parseInt(row.count, 10);
+    });
 
     const acceptanceResults = await query<{ acceptanceStatus: SupplierReceivingAcceptanceStatus; count: string }[]>(
-      `SELECT "acceptanceStatus", COUNT(*) as count FROM "supplierReceivingItem" WHERE "acceptanceStatus" IS NOT NULL GROUP BY "acceptanceStatus"`
+      `SELECT "acceptanceStatus", COUNT(*) as count FROM "supplierReceivingItem" WHERE "acceptanceStatus" IS NOT NULL GROUP BY "acceptanceStatus"`,
     );
     const byAcceptance: Record<string, number> = {};
-    acceptanceResults?.forEach(row => { byAcceptance[row.acceptanceStatus] = parseInt(row.count, 10); });
+    acceptanceResults?.forEach(row => {
+      byAcceptance[row.acceptanceStatus] = parseInt(row.count, 10);
+    });
 
     return {
       byStatus: byStatus as Record<SupplierReceivingItemStatus, number>,
-      byAcceptance: byAcceptance as Record<SupplierReceivingAcceptanceStatus, number>
+      byAcceptance: byAcceptance as Record<SupplierReceivingAcceptanceStatus, number>,
     };
   }
 }

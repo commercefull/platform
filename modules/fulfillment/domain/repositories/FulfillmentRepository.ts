@@ -1,6 +1,6 @@
 /**
  * Fulfillment Repository Interface
- * 
+ *
  * Defines the contract for Fulfillment persistence operations.
  */
 
@@ -41,14 +41,14 @@ export interface IFulfillmentRepository {
   findAll(filters?: FulfillmentFilters, pagination?: PaginationOptions): Promise<PaginatedResult<Fulfillment>>;
   findByTrackingNumber(trackingNumber: string): Promise<Fulfillment | null>;
   delete(fulfillmentId: string): Promise<boolean>;
-  
+
   // Fulfillment Item operations
   saveItem(item: FulfillmentItem): Promise<FulfillmentItem>;
   saveItems(items: FulfillmentItem[]): Promise<FulfillmentItem[]>;
   findItemsByFulfillmentId(fulfillmentId: string): Promise<FulfillmentItem[]>;
   findItem(fulfillmentItemId: string): Promise<FulfillmentItem | null>;
   deleteItem(fulfillmentItemId: string): Promise<boolean>;
-  
+
   // Batch operations
   updateStatus(fulfillmentId: string, status: FulfillmentStatus): Promise<boolean>;
   bulkUpdateStatus(fulfillmentIds: string[], status: FulfillmentStatus): Promise<number>;

@@ -1,6 +1,6 @@
 /**
  * ListChannels Use Case
- * 
+ *
  * Lists channels with optional filtering and pagination.
  */
 

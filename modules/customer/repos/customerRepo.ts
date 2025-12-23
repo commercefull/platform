@@ -9,7 +9,7 @@ import {
   CustomerGroup as DbCustomerGroup,
   CustomerGroupMembership as DbCustomerGroupMembership,
   CustomerWishlist as DbCustomerWishlist,
-  CustomerWishlistItem as DbCustomerWishlistItem
+  CustomerWishlistItem as DbCustomerWishlistItem,
 } from '../../../libs/db/types';
 
 // Re-export DB types for use in this feature
@@ -49,25 +49,19 @@ export interface CustomerCreateParams {
 export class CustomerRepo {
   // Customer methods
   async findAllCustomers(limit: number = 100, offset: number = 0): Promise<Customer[]> {
-    const customers = await query<Customer[]>(
-      'SELECT * FROM "customer" ORDER BY "lastName", "firstName" LIMIT $1 OFFSET $2',
-      [limit, offset]
-    );
+    const customers = await query<Customer[]>('SELECT * FROM "customer" ORDER BY "lastName", "firstName" LIMIT $1 OFFSET $2', [
+      limit,
+      offset,
+    ]);
     return customers || [];
   }
 
   async findCustomerById(customerId: string): Promise<Customer | null> {
-    return await queryOne<Customer>(
-      'SELECT * FROM "customer" WHERE "customerId" = $1',
-      [customerId]
-    );
+    return await queryOne<Customer>('SELECT * FROM "customer" WHERE "customerId" = $1', [customerId]);
   }
 
   async findCustomerByEmail(email: string): Promise<Customer | null> {
-    return await queryOne<Customer>(
-      'SELECT * FROM "customer" WHERE "email" = $1',
-      [email]
-    );
+    return await queryOne<Customer>('SELECT * FROM "customer" WHERE "email" = $1', [email]);
   }
 
   async authenticateCustomer(credentials: CustomerAuthCredentials): Promise<CustomerAuthResult | null> {
@@ -75,7 +69,7 @@ export class CustomerRepo {
 
     const customer = await queryOne<{ customerId: string; email: string; password: string; firstName?: string; lastName?: string }>(
       'SELECT "customerId", "email", "password", "firstName", "lastName" FROM "customer" WHERE "email" = $1',
-      [email]
+      [email],
     );
 
     if (!customer) {
@@ -91,7 +85,7 @@ export class CustomerRepo {
       customerId: customer.customerId,
       email: customer.email,
       firstName: customer.firstName,
-      lastName: customer.lastName
+      lastName: customer.lastName,
     };
   }
 
@@ -104,7 +98,7 @@ export class CustomerRepo {
       `SELECT * FROM "customer" 
        WHERE "email" ILIKE $1 OR "firstName" ILIKE $1 OR "lastName" ILIKE $1 OR "phone" ILIKE $1
        ORDER BY "lastName", "firstName" LIMIT $2`,
-      [`%${searchTerm}%`, limit]
+      [`%${searchTerm}%`, limit],
     );
     return customers || [];
   }
@@ -129,8 +123,8 @@ export class CustomerRepo {
         params.isVerified ?? false,
         now,
         params.lastLoginAt ?? null,
-        params.note ?? null
-      ]
+        params.note ?? null,
+      ],
     );
 
     if (!result) {
@@ -164,7 +158,7 @@ export class CustomerRepo {
 
     const result = await queryOne<Customer>(
       `UPDATE "customer" SET ${setClauses.join(', ')} WHERE "customerId" = $${paramIndex} RETURNING *`,
-      values
+      values,
     );
 
     if (!result) throw new Error(`Failed to update customer ${customerId}`);
@@ -175,7 +169,7 @@ export class CustomerRepo {
     const now = new Date();
     const result = await queryOne<Customer>(
       'UPDATE "customer" SET "lastLoginAt" = $1, "updatedAt" = $1 WHERE "customerId" = $2 RETURNING *',
-      [now, customerId]
+      [now, customerId],
     );
     if (!result) throw new Error(`Failed to update login timestamp for ${customerId}`);
     return result;
@@ -184,7 +178,7 @@ export class CustomerRepo {
   async deleteCustomer(customerId: string): Promise<boolean> {
     const result = await queryOne<{ count: string }>(
       `WITH deleted AS (DELETE FROM "customer" WHERE "customerId" = $1 RETURNING *) SELECT COUNT(*) as count FROM deleted`,
-      [customerId]
+      [customerId],
     );
     return result ? parseInt(result.count) > 0 : false;
   }
@@ -198,7 +192,7 @@ export class CustomerRepo {
     await queryOne(
       `INSERT INTO "customerPasswordReset" ("customerId", "token", "expiresAt", "isUsed", "createdAt", "updatedAt")
        VALUES ($1, $2, $3, false, $4, $4) RETURNING "customerPasswordResetId"`,
-      [customerId, hashedToken, expiresAt, now]
+      [customerId, hashedToken, expiresAt, now],
     );
     return token;
   }
@@ -207,7 +201,7 @@ export class CustomerRepo {
     const resetRecord = await queryOne<{ customerPasswordResetId: string; customerId: string; token: string }>(
       `SELECT "customerPasswordResetId", "customerId", "token" FROM "customerPasswordReset"
        WHERE "isUsed" = false AND "expiresAt" > $1 ORDER BY "createdAt" DESC LIMIT 1`,
-      [new Date()]
+      [new Date()],
     );
 
     if (!resetRecord) return null;
@@ -215,10 +209,10 @@ export class CustomerRepo {
     const isValid = await bcryptjs.compare(token, resetRecord.token);
     if (!isValid) return null;
 
-    await queryOne(
-      'UPDATE "customerPasswordReset" SET "isUsed" = true, "updatedAt" = $1 WHERE "customerPasswordResetId" = $2',
-      [new Date(), resetRecord.customerPasswordResetId]
-    );
+    await queryOne('UPDATE "customerPasswordReset" SET "isUsed" = true, "updatedAt" = $1 WHERE "customerPasswordResetId" = $2', [
+      new Date(),
+      resetRecord.customerPasswordResetId,
+    ]);
     return resetRecord.customerId;
   }
 
@@ -226,7 +220,7 @@ export class CustomerRepo {
     const hashedPassword = await this.hashPassword(newPassword);
     const result = await queryOne<{ customerId: string }>(
       'UPDATE "customer" SET "password" = $1, "updatedAt" = $2 WHERE "customerId" = $3 RETURNING "customerId"',
-      [hashedPassword, new Date(), customerId]
+      [hashedPassword, new Date(), customerId],
     );
     return !!result;
   }
@@ -235,42 +229,52 @@ export class CustomerRepo {
   async findCustomerAddresses(customerId: string): Promise<CustomerAddress[]> {
     const addresses = await query<CustomerAddress[]>(
       'SELECT * FROM "customerAddress" WHERE "customerId" = $1 ORDER BY "isDefault" DESC, "createdAt" DESC',
-      [customerId]
+      [customerId],
     );
     return addresses || [];
   }
 
   async findCustomerAddressById(addressId: string): Promise<CustomerAddress | null> {
-    return await queryOne<CustomerAddress>(
-      'SELECT * FROM "customerAddress" WHERE "customerAddressId" = $1',
-      [addressId]
-    );
+    return await queryOne<CustomerAddress>('SELECT * FROM "customerAddress" WHERE "customerAddressId" = $1', [addressId]);
   }
 
   async findDefaultCustomerAddress(customerId: string, addressType: CustomerAddress['addressType']): Promise<CustomerAddress | null> {
     return await queryOne<CustomerAddress>(
       'SELECT * FROM "customerAddress" WHERE "customerId" = $1 AND "addressType" = $2 AND "isDefault" = true LIMIT 1',
-      [customerId, addressType]
+      [customerId, addressType],
     );
   }
 
   async createCustomerAddress(address: Omit<CustomerAddress, 'customerAddressId' | 'createdAt' | 'updatedAt'>): Promise<CustomerAddress> {
     const now = new Date();
-    
+
     if (address.isDefault) {
       await query(
         'UPDATE "customerAddress" SET "isDefault" = false WHERE "customerId" = $1 AND "addressType" = $2 AND "isDefault" = true',
-        [address.customerId, address.addressType]
+        [address.customerId, address.addressType],
       );
     }
-    
+
     const result = await queryOne<CustomerAddress>(
       `INSERT INTO "customerAddress" 
       ("customerId", "addressLine1", "addressLine2", "city", "state", "postalCode", "country", "addressType", "isDefault", "phone", "createdAt", "updatedAt") 
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *`,
-      [address.customerId, address.addressLine1, address.addressLine2, address.city, address.state, address.postalCode, address.country, address.addressType, address.isDefault, address.phone, now, now]
+      [
+        address.customerId,
+        address.addressLine1,
+        address.addressLine2,
+        address.city,
+        address.state,
+        address.postalCode,
+        address.country,
+        address.addressType,
+        address.isDefault,
+        address.phone,
+        now,
+        now,
+      ],
     );
-    
+
     if (!result) throw new Error('Failed to create customer address');
     return result;
   }
@@ -278,14 +282,14 @@ export class CustomerRepo {
   async updateCustomerAddress(addressId: string, updates: Partial<CustomerAddress>): Promise<CustomerAddress> {
     const existing = await this.findCustomerAddressById(addressId);
     if (!existing) throw new Error(`Address ${addressId} not found`);
-    
+
     if (updates.isDefault) {
       await query(
         'UPDATE "customerAddress" SET "isDefault" = false WHERE "customerId" = $1 AND "addressType" = $2 AND "isDefault" = true',
-        [existing.customerId, updates.addressType || existing.addressType]
+        [existing.customerId, updates.addressType || existing.addressType],
       );
     }
-    
+
     const fields = ['addressLine1', 'addressLine2', 'city', 'state', 'postalCode', 'country', 'addressType', 'isDefault', 'phone'];
     const setClauses: string[] = [];
     const values: any[] = [];
@@ -306,7 +310,7 @@ export class CustomerRepo {
 
     const result = await queryOne<CustomerAddress>(
       `UPDATE "customerAddress" SET ${setClauses.join(', ')} WHERE "customerAddressId" = $${paramIndex} RETURNING *`,
-      values
+      values,
     );
 
     if (!result) throw new Error(`Failed to update address ${addressId}`);
@@ -316,7 +320,7 @@ export class CustomerRepo {
   async deleteCustomerAddress(addressId: string): Promise<boolean> {
     const result = await queryOne<{ count: string }>(
       `WITH deleted AS (DELETE FROM "customerAddress" WHERE "customerAddressId" = $1 RETURNING *) SELECT COUNT(*) as count FROM deleted`,
-      [addressId]
+      [addressId],
     );
     return result ? parseInt(result.count) > 0 : false;
   }
@@ -342,7 +346,7 @@ export class CustomerRepo {
     const result = await queryOne<CustomerGroup>(
       `INSERT INTO "customerGroup" ("name", "description", "discountPercent", "isActive", "code", "createdAt", "updatedAt") 
        VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
-      [group.name, group.description, group.discountPercent, group.isActive, code, now, now]
+      [group.name, group.description, group.discountPercent, group.isActive, code, now, now],
     );
     if (!result) throw new Error('Failed to create customer group');
     return result;
@@ -372,7 +376,7 @@ export class CustomerRepo {
 
     const result = await queryOne<CustomerGroup>(
       `UPDATE "customerGroup" SET ${setClauses.join(', ')} WHERE "customerGroupId" = $${paramIndex} RETURNING *`,
-      values
+      values,
     );
 
     if (!result) throw new Error(`Failed to update group ${groupId}`);
@@ -382,17 +386,16 @@ export class CustomerRepo {
   async deleteCustomerGroup(groupId: string): Promise<boolean> {
     const result = await queryOne<{ count: string }>(
       `WITH deleted AS (DELETE FROM "customerGroup" WHERE "customerGroupId" = $1 RETURNING *) SELECT COUNT(*) as count FROM deleted`,
-      [groupId]
+      [groupId],
     );
     return result ? parseInt(result.count) > 0 : false;
   }
 
   // Customer Group Membership methods
   async findCustomerGroupMemberships(customerId: string): Promise<CustomerGroupMembership[]> {
-    const memberships = await query<CustomerGroupMembership[]>(
-      'SELECT * FROM "customerGroupMembership" WHERE "customerId" = $1',
-      [customerId]
-    );
+    const memberships = await query<CustomerGroupMembership[]>('SELECT * FROM "customerGroupMembership" WHERE "customerId" = $1', [
+      customerId,
+    ]);
     return memberships || [];
   }
 
@@ -402,7 +405,7 @@ export class CustomerRepo {
        JOIN "customerGroupMembership" m ON c."customerId" = m."customerId"
        WHERE m."customerGroupId" = $1
        ORDER BY c."lastName", c."firstName"`,
-      [groupId]
+      [groupId],
     );
     return customers || [];
   }
@@ -410,13 +413,13 @@ export class CustomerRepo {
   async addCustomerToGroup(customerId: string, groupId: string): Promise<CustomerGroupMembership> {
     const existing = await queryOne<CustomerGroupMembership>(
       'SELECT * FROM "customerGroupMembership" WHERE "customerId" = $1 AND "customerGroupId" = $2',
-      [customerId, groupId]
+      [customerId, groupId],
     );
     if (existing) return existing;
-    
+
     const result = await queryOne<CustomerGroupMembership>(
       `INSERT INTO "customerGroupMembership" ("customerId", "customerGroupId", "createdAt") VALUES ($1, $2, $3) RETURNING *`,
-      [customerId, groupId, new Date()]
+      [customerId, groupId, new Date()],
     );
     if (!result) throw new Error(`Failed to add customer ${customerId} to group ${groupId}`);
     return result;
@@ -425,7 +428,7 @@ export class CustomerRepo {
   async removeCustomerFromGroup(customerId: string, groupId: string): Promise<boolean> {
     const result = await queryOne<{ count: string }>(
       `WITH deleted AS (DELETE FROM "customerGroupMembership" WHERE "customerId" = $1 AND "customerGroupId" = $2 RETURNING *) SELECT COUNT(*) as count FROM deleted`,
-      [customerId, groupId]
+      [customerId, groupId],
     );
     return result ? parseInt(result.count) > 0 : false;
   }
@@ -434,7 +437,7 @@ export class CustomerRepo {
   async findCustomerWishlists(customerId: string): Promise<CustomerWishlist[]> {
     const wishlists = await query<CustomerWishlist[]>(
       'SELECT * FROM "customerWishlist" WHERE "customerId" = $1 ORDER BY "createdAt" DESC',
-      [customerId]
+      [customerId],
     );
     return wishlists || [];
   }
@@ -443,11 +446,13 @@ export class CustomerRepo {
     return await queryOne<CustomerWishlist>('SELECT * FROM "customerWishlist" WHERE "customerWishlistId" = $1', [wishlistId]);
   }
 
-  async createCustomerWishlist(wishlist: Omit<CustomerWishlist, 'customerWishlistId' | 'createdAt' | 'updatedAt'>): Promise<CustomerWishlist> {
+  async createCustomerWishlist(
+    wishlist: Omit<CustomerWishlist, 'customerWishlistId' | 'createdAt' | 'updatedAt'>,
+  ): Promise<CustomerWishlist> {
     const now = new Date();
     const result = await queryOne<CustomerWishlist>(
       `INSERT INTO "customerWishlist" ("customerId", "wishlistName", "isPublic", "createdAt", "updatedAt") VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-      [wishlist.customerId, wishlist.wishlistName, wishlist.isPublic, now, now]
+      [wishlist.customerId, wishlist.wishlistName, wishlist.isPublic, now, now],
     );
     if (!result) throw new Error('Failed to create wishlist');
     return result;
@@ -477,7 +482,7 @@ export class CustomerRepo {
 
     const result = await queryOne<CustomerWishlist>(
       `UPDATE "customerWishlist" SET ${setClauses.join(', ')} WHERE "customerWishlistId" = $${paramIndex} RETURNING *`,
-      values
+      values,
     );
 
     if (!result) throw new Error(`Failed to update wishlist ${wishlistId}`);
@@ -487,7 +492,7 @@ export class CustomerRepo {
   async deleteCustomerWishlist(wishlistId: string): Promise<boolean> {
     const result = await queryOne<{ count: string }>(
       `WITH deleted AS (DELETE FROM "customerWishlist" WHERE "customerWishlistId" = $1 RETURNING *) SELECT COUNT(*) as count FROM deleted`,
-      [wishlistId]
+      [wishlistId],
     );
     return result ? parseInt(result.count) > 0 : false;
   }
@@ -496,7 +501,7 @@ export class CustomerRepo {
   async findWishlistItems(wishlistId: string): Promise<CustomerWishlistItem[]> {
     const items = await query<CustomerWishlistItem[]>(
       'SELECT * FROM "customerWishlistItem" WHERE "customerWishlistId" = $1 ORDER BY "createdAt" DESC',
-      [wishlistId]
+      [wishlistId],
     );
     return items || [];
   }
@@ -508,23 +513,23 @@ export class CustomerRepo {
   async addItemToWishlist(item: Omit<CustomerWishlistItem, 'customerWishlistItemId'>): Promise<CustomerWishlistItem> {
     const existing = await queryOne<CustomerWishlistItem>(
       'SELECT * FROM "customerWishlistItem" WHERE "customerWishlistId" = $1 AND "productId" = $2 AND "productVariantId" IS NOT DISTINCT FROM $3',
-      [item.customerWishlistId, item.productId, item.productVariantId]
+      [item.customerWishlistId, item.productId, item.productVariantId],
     );
-    
+
     if (existing) {
       if (item.note !== existing.note) {
         const updated = await queryOne<CustomerWishlistItem>(
           'UPDATE "customerWishlistItem" SET "note" = $1, "updatedAt" = $2 WHERE "customerWishlistItemId" = $3 RETURNING *',
-          [item.note, new Date(), existing.customerWishlistItemId]
+          [item.note, new Date(), existing.customerWishlistItemId],
         );
         return updated || existing;
       }
       return existing;
     }
-    
+
     const result = await queryOne<CustomerWishlistItem>(
       `INSERT INTO "customerWishlistItem" ("customerWishlistId", "productId", "productVariantId", "note", "createdAt", "updatedAt") VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-      [item.customerWishlistId, item.productId, item.productVariantId, item.note, new Date(), new Date()]
+      [item.customerWishlistId, item.productId, item.productVariantId, item.note, new Date(), new Date()],
     );
     if (!result) throw new Error('Failed to add item to wishlist');
     return result;
@@ -533,7 +538,7 @@ export class CustomerRepo {
   async removeItemFromWishlist(itemId: string): Promise<boolean> {
     const result = await queryOne<{ count: string }>(
       `WITH deleted AS (DELETE FROM "customerWishlistItem" WHERE "customerWishlistItemId" = $1 RETURNING *) SELECT COUNT(*) as count FROM deleted`,
-      [itemId]
+      [itemId],
     );
     return result ? parseInt(result.count) > 0 : false;
   }
@@ -541,31 +546,33 @@ export class CustomerRepo {
   async updateWishlistItemNote(itemId: string, note: string): Promise<CustomerWishlistItem> {
     const result = await queryOne<CustomerWishlistItem>(
       'UPDATE "customerWishlistItem" SET "note" = $1 WHERE "customerWishlistItemId" = $2 RETURNING *',
-      [note, itemId]
+      [note, itemId],
     );
     if (!result) throw new Error(`Failed to update wishlist item ${itemId}`);
     return result;
   }
 
   // Advanced customer queries
-  async getCustomerStats(customerId: string): Promise<{ orderCount: number; totalSpent: number; averageOrderValue: number; lastOrderDate: Date | null }> {
+  async getCustomerStats(
+    customerId: string,
+  ): Promise<{ orderCount: number; totalSpent: number; averageOrderValue: number; lastOrderDate: Date | null }> {
     const stats = await queryOne<{ orderCount: string; totalSpent: string; averageOrderValue: string; lastOrderDate: Date | null }>(
       `SELECT COUNT(*) as "orderCount", COALESCE(SUM("grandTotal"), 0) as "totalSpent", COALESCE(AVG("grandTotal"), 0) as "averageOrderValue", MAX("createdAt") as "lastOrderDate"
        FROM "order" WHERE "customerId" = $1`,
-      [customerId]
+      [customerId],
     );
-    
+
     return {
       orderCount: parseInt(stats?.orderCount || '0'),
       totalSpent: parseFloat(stats?.totalSpent || '0'),
       averageOrderValue: parseFloat(stats?.averageOrderValue || '0'),
-      lastOrderDate: stats?.lastOrderDate || null
+      lastOrderDate: stats?.lastOrderDate || null,
     };
   }
 
   async getNewCustomersCount(days: number = 30): Promise<number> {
     const result = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM "customer" WHERE "createdAt" >= NOW() - INTERVAL '${days} days'`
+      `SELECT COUNT(*) as count FROM "customer" WHERE "createdAt" >= NOW() - INTERVAL '${days} days'`,
     );
     return parseInt(result?.count || '0');
   }
@@ -575,7 +582,7 @@ export class CustomerRepo {
       `SELECT c.*, COALESCE(SUM(o."grandTotal"), 0) as "totalSpent", COUNT(o."orderId") as "orderCount"
        FROM "customer" c LEFT JOIN "order" o ON c."customerId" = o."customerId"
        GROUP BY c."customerId" ORDER BY "totalSpent" DESC LIMIT $1`,
-      [limit]
+      [limit],
     );
     return customers || [];
   }

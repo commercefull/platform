@@ -1,4 +1,4 @@
-import { FilterOption } from "./filterOption";
+import { FilterOption } from './filterOption';
 
 export class Filter {
   constructor(

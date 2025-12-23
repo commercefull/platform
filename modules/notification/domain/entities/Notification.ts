@@ -55,7 +55,7 @@ export class Notification {
       status: 'pending',
       retryCount: 0,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     });
   }
 
@@ -63,12 +63,24 @@ export class Notification {
     return new Notification(props);
   }
 
-  get notificationId(): string { return this.props.notificationId; }
-  get recipientId(): string { return this.props.recipientId; }
-  get type(): NotificationType { return this.props.type; }
-  get status(): NotificationStatus { return this.props.status; }
-  get content(): string { return this.props.content; }
-  get createdAt(): Date { return this.props.createdAt; }
+  get notificationId(): string {
+    return this.props.notificationId;
+  }
+  get recipientId(): string {
+    return this.props.recipientId;
+  }
+  get type(): NotificationType {
+    return this.props.type;
+  }
+  get status(): NotificationStatus {
+    return this.props.status;
+  }
+  get content(): string {
+    return this.props.content;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
 
   markAsSent(): void {
     this.props.status = 'sent';

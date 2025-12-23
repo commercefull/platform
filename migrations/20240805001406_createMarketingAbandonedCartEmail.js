@@ -2,10 +2,15 @@
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.up = function(knex) {
-  return knex.schema.createTable('marketingAbandonedCartEmail', function(table) {
+exports.up = function (knex) {
+  return knex.schema.createTable('marketingAbandonedCartEmail', function (table) {
     table.uuid('marketingAbandonedCartEmailId').primary().defaultTo(knex.raw('uuidv7()'));
-    table.uuid('marketingAbandonedCartId').notNullable().references('marketingAbandonedCartId').inTable('marketingAbandonedCart').onDelete('CASCADE');
+    table
+      .uuid('marketingAbandonedCartId')
+      .notNullable()
+      .references('marketingAbandonedCartId')
+      .inTable('marketingAbandonedCart')
+      .onDelete('CASCADE');
     table.uuid('marketingEmailTemplateId').references('marketingEmailTemplateId').inTable('marketingEmailTemplate').onDelete('SET NULL');
     table.integer('sequenceNumber').notNullable();
     table.string('subject');
@@ -38,6 +43,6 @@ exports.up = function(knex) {
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTableIfExists('marketingAbandonedCartEmail');
 };

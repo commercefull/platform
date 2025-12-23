@@ -2,44 +2,38 @@
  * Unit Tests for Shipping Use Cases
  */
 
-import { 
-  CalculateShippingRatesCommand, 
-  CalculateShippingRatesUseCase 
-} from './CalculateShippingRates';
-import { 
-  GetShippingMethodsQuery, 
-  GetShippingMethodsUseCase 
-} from './GetShippingMethods';
+import { CalculateShippingRatesCommand, CalculateShippingRatesUseCase } from './CalculateShippingRates';
+import { GetShippingMethodsQuery, GetShippingMethodsUseCase } from './GetShippingMethods';
 
 // Mock the repositories
 jest.mock('../../repos/shippingZoneRepo', () => ({
   __esModule: true,
   default: {
-    findByLocation: jest.fn()
-  }
+    findByLocation: jest.fn(),
+  },
 }));
 
 jest.mock('../../repos/shippingMethodRepo', () => ({
   __esModule: true,
   default: {
     findAll: jest.fn(),
-    findByCarrier: jest.fn()
-  }
+    findByCarrier: jest.fn(),
+  },
 }));
 
 jest.mock('../../repos/shippingRateRepo', () => ({
   __esModule: true,
   default: {
     findByZoneAndMethod: jest.fn(),
-    calculateRate: jest.fn()
-  }
+    calculateRate: jest.fn(),
+  },
 }));
 
 jest.mock('../../repos/shippingCarrierRepo', () => ({
   __esModule: true,
   default: {
-    findById: jest.fn()
-  }
+    findById: jest.fn(),
+  },
 }));
 
 import shippingZoneRepo from '../../repos/shippingZoneRepo';
@@ -55,10 +49,7 @@ describe('CalculateShippingRatesUseCase', () => {
   });
 
   it('should return error when country is missing', async () => {
-    const command = new CalculateShippingRatesCommand(
-      { country: '' },
-      { subtotal: 100, itemCount: 1 }
-    );
+    const command = new CalculateShippingRatesCommand({ country: '' }, { subtotal: 100, itemCount: 1 });
 
     const result = await useCase.execute(command);
 
@@ -69,10 +60,7 @@ describe('CalculateShippingRatesUseCase', () => {
   it('should return error when no zone found', async () => {
     (shippingZoneRepo.findByLocation as jest.Mock).mockResolvedValue([]);
 
-    const command = new CalculateShippingRatesCommand(
-      { country: 'US', state: 'CA' },
-      { subtotal: 100, itemCount: 1 }
-    );
+    const command = new CalculateShippingRatesCommand({ country: 'US', state: 'CA' }, { subtotal: 100, itemCount: 1 });
 
     const result = await useCase.execute(command);
 
@@ -81,15 +69,10 @@ describe('CalculateShippingRatesUseCase', () => {
   });
 
   it('should return error when no methods available', async () => {
-    (shippingZoneRepo.findByLocation as jest.Mock).mockResolvedValue([
-      { shippingZoneId: 'zone-1', name: 'US Domestic' }
-    ]);
+    (shippingZoneRepo.findByLocation as jest.Mock).mockResolvedValue([{ shippingZoneId: 'zone-1', name: 'US Domestic' }]);
     (shippingMethodRepo.findAll as jest.Mock).mockResolvedValue([]);
 
-    const command = new CalculateShippingRatesCommand(
-      { country: 'US' },
-      { subtotal: 100, itemCount: 1 }
-    );
+    const command = new CalculateShippingRatesCommand({ country: 'US' }, { subtotal: 100, itemCount: 1 });
 
     const result = await useCase.execute(command);
 
@@ -104,7 +87,7 @@ describe('CalculateShippingRatesUseCase', () => {
       name: 'Standard Shipping',
       code: 'STANDARD',
       shippingCarrierId: 'carrier-1',
-      handlingDays: 3
+      handlingDays: 3,
     };
     const mockRate = {
       shippingRateId: 'rate-1',
@@ -112,7 +95,7 @@ describe('CalculateShippingRatesUseCase', () => {
       rateType: 'flat',
       baseRate: '9.99',
       currency: 'USD',
-      taxable: true
+      taxable: true,
     };
 
     (shippingZoneRepo.findByLocation as jest.Mock).mockResolvedValue([mockZone]);
@@ -120,10 +103,7 @@ describe('CalculateShippingRatesUseCase', () => {
     (shippingRateRepo.findByZoneAndMethod as jest.Mock).mockResolvedValue(mockRate);
     (shippingRateRepo.calculateRate as jest.Mock).mockReturnValue(9.99);
 
-    const command = new CalculateShippingRatesCommand(
-      { country: 'US', state: 'CA' },
-      { subtotal: 100, itemCount: 2 }
-    );
+    const command = new CalculateShippingRatesCommand({ country: 'US', state: 'CA' }, { subtotal: 100, itemCount: 2 });
 
     const result = await useCase.execute(command);
 
@@ -140,7 +120,7 @@ describe('CalculateShippingRatesUseCase', () => {
       name: 'Free Shipping',
       code: 'FREE',
       shippingCarrierId: null,
-      handlingDays: 5
+      handlingDays: 5,
     };
     const mockRate = {
       shippingRateId: 'rate-1',
@@ -148,7 +128,7 @@ describe('CalculateShippingRatesUseCase', () => {
       rateType: 'free',
       baseRate: '0',
       currency: 'USD',
-      taxable: false
+      taxable: false,
     };
 
     (shippingZoneRepo.findByLocation as jest.Mock).mockResolvedValue([mockZone]);
@@ -156,10 +136,7 @@ describe('CalculateShippingRatesUseCase', () => {
     (shippingRateRepo.findByZoneAndMethod as jest.Mock).mockResolvedValue(mockRate);
     (shippingRateRepo.calculateRate as jest.Mock).mockReturnValue(0);
 
-    const command = new CalculateShippingRatesCommand(
-      { country: 'US' },
-      { subtotal: 100, itemCount: 1 }
-    );
+    const command = new CalculateShippingRatesCommand({ country: 'US' }, { subtotal: 100, itemCount: 1 });
 
     const result = await useCase.execute(command);
 
@@ -179,7 +156,7 @@ describe('GetShippingMethodsUseCase', () => {
   it('should return all methods', async () => {
     const mockMethods = [
       { shippingMethodId: 'method-1', name: 'Standard', code: 'STD', shippingCarrierId: null },
-      { shippingMethodId: 'method-2', name: 'Express', code: 'EXP', shippingCarrierId: 'carrier-1' }
+      { shippingMethodId: 'method-2', name: 'Express', code: 'EXP', shippingCarrierId: 'carrier-1' },
     ];
 
     (shippingMethodRepo.findAll as jest.Mock).mockResolvedValue(mockMethods);
@@ -194,9 +171,7 @@ describe('GetShippingMethodsUseCase', () => {
   });
 
   it('should filter by carrier', async () => {
-    const mockMethods = [
-      { shippingMethodId: 'method-1', name: 'UPS Ground', code: 'UPS_GND', shippingCarrierId: 'carrier-1' }
-    ];
+    const mockMethods = [{ shippingMethodId: 'method-1', name: 'UPS Ground', code: 'UPS_GND', shippingCarrierId: 'carrier-1' }];
 
     (shippingMethodRepo.findByCarrier as jest.Mock).mockResolvedValue(mockMethods);
     (shippingCarrierRepo.findById as jest.Mock).mockResolvedValue({ shippingCarrierId: 'carrier-1', name: 'UPS' });
@@ -210,9 +185,7 @@ describe('GetShippingMethodsUseCase', () => {
   });
 
   it('should enrich methods with carrier info', async () => {
-    const mockMethods = [
-      { shippingMethodId: 'method-1', name: 'UPS Ground', code: 'UPS_GND', shippingCarrierId: 'carrier-1' }
-    ];
+    const mockMethods = [{ shippingMethodId: 'method-1', name: 'UPS Ground', code: 'UPS_GND', shippingCarrierId: 'carrier-1' }];
     const mockCarrier = { shippingCarrierId: 'carrier-1', name: 'UPS', code: 'UPS' };
 
     (shippingMethodRepo.findAll as jest.Mock).mockResolvedValue(mockMethods);

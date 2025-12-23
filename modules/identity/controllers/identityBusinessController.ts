@@ -2,16 +2,8 @@ import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import { MerchantRepo } from '../../merchant/repos/merchantRepo';
 import { AuthRefreshTokenRepo } from '../repos/identityRefreshTokenRepo';
-import {
-  generateAccessToken,
-  verifyAccessToken,
-  parseExpirationDate
-} from '../utils/jwtHelpers';
-import {
-  emitMerchantLogin,
-  emitMerchantRegistered,
-  emitMerchantTokenRefreshed
-} from '../domain/events/emitIdentityEvent';
+import { generateAccessToken, verifyAccessToken, parseExpirationDate } from '../utils/jwtHelpers';
+import { emitMerchantLogin, emitMerchantRegistered, emitMerchantTokenRefreshed } from '../domain/events/emitIdentityEvent';
 
 // Environment configuration with secure defaults
 const MERCHANT_JWT_SECRET = process.env.MERCHANT_JWT_SECRET || 'merchant-secret-key-should-be-in-env';
@@ -31,9 +23,9 @@ export const loginMerchant = async (req: Request, res: Response): Promise<void> 
 
     // Validate required fields
     if (!email || !password) {
-      res.status(400).json({ 
-        success: false, 
-        message: 'Email and password are required' 
+      res.status(400).json({
+        success: false,
+        message: 'Email and password are required',
       });
       return;
     }
@@ -41,9 +33,9 @@ export const loginMerchant = async (req: Request, res: Response): Promise<void> 
     // Authenticate merchant
     const merchant = await merchantRepo.authenticateMerchant({ email, password });
     if (!merchant) {
-      res.status(401).json({ 
-        success: false, 
-        message: 'Invalid email or password' 
+      res.status(401).json({
+        success: false,
+        message: 'Invalid email or password',
       });
       return;
     }
@@ -52,7 +44,7 @@ export const loginMerchant = async (req: Request, res: Response): Promise<void> 
     if (merchant.status !== 'active') {
       res.status(403).json({
         success: false,
-        message: `Your account is ${merchant.status}. Please contact support for assistance.`
+        message: `Your account is ${merchant.status}. Please contact support for assistance.`,
       });
       return;
     }
@@ -63,17 +55,11 @@ export const loginMerchant = async (req: Request, res: Response): Promise<void> 
       email: merchant.email,
       name: merchant.name || '',
       ipAddress: req.ip,
-      userAgent: req.headers['user-agent']
+      userAgent: req.headers['user-agent'],
     });
 
     // Generate access token
-    const accessToken = generateAccessToken(
-      merchant.merchantId,
-      merchant.email,
-      'merchant',
-      MERCHANT_JWT_SECRET,
-      ACCESS_TOKEN_DURATION
-    );
+    const accessToken = generateAccessToken(merchant.merchantId, merchant.email, 'merchant', MERCHANT_JWT_SECRET, ACCESS_TOKEN_DURATION);
 
     res.json({
       success: true,
@@ -82,15 +68,15 @@ export const loginMerchant = async (req: Request, res: Response): Promise<void> 
         id: merchant.merchantId,
         email: merchant.email,
         name: merchant.name,
-        status: merchant.status
-      }
+        status: merchant.status,
+      },
     });
   } catch (error) {
     logger.error('Error:', error);
-    
-    res.status(500).json({ 
-      success: false, 
-      message: 'Login failed. Please try again.' 
+
+    res.status(500).json({
+      success: false,
+      message: 'Login failed. Please try again.',
     });
   }
 };
@@ -107,7 +93,7 @@ export const registerMerchant = async (req: Request, res: Response): Promise<voi
     if (!email || !password || !name) {
       res.status(400).json({
         success: false,
-        message: 'Email, password, and business name are required'
+        message: 'Email, password, and business name are required',
       });
       return;
     }
@@ -115,9 +101,9 @@ export const registerMerchant = async (req: Request, res: Response): Promise<voi
     // Check for existing merchant
     const existingMerchant = await merchantRepo.findByEmail(email);
     if (existingMerchant) {
-      res.status(409).json({ 
-        success: false, 
-        message: 'A merchant account with this email already exists' 
+      res.status(409).json({
+        success: false,
+        message: 'A merchant account with this email already exists',
       });
       return;
     }
@@ -131,7 +117,7 @@ export const registerMerchant = async (req: Request, res: Response): Promise<voi
       logo: undefined,
       description,
       status: 'pending',
-      password
+      password,
     });
 
     // Emit registration event
@@ -139,7 +125,7 @@ export const registerMerchant = async (req: Request, res: Response): Promise<voi
       merchantId: newMerchant.merchantId,
       email: newMerchant.email,
       name: newMerchant.name || '',
-      status: newMerchant.status || 'pending'
+      status: newMerchant.status || 'pending',
     });
 
     res.status(201).json({
@@ -149,15 +135,15 @@ export const registerMerchant = async (req: Request, res: Response): Promise<voi
         id: newMerchant.merchantId,
         email: newMerchant.email,
         name: newMerchant.name,
-        status: newMerchant.status
-      }
+        status: newMerchant.status,
+      },
     });
   } catch (error) {
     logger.error('Error:', error);
-    
-    res.status(500).json({ 
-      success: false, 
-      message: 'Registration failed. Please try again.' 
+
+    res.status(500).json({
+      success: false,
+      message: 'Registration failed. Please try again.',
     });
   }
 };
@@ -172,18 +158,18 @@ export const issueTokenPair = async (req: Request, res: Response): Promise<void>
 
     // Validate credentials
     if (!email || !password) {
-      res.status(400).json({ 
-        success: false, 
-        message: 'Email and password are required' 
+      res.status(400).json({
+        success: false,
+        message: 'Email and password are required',
       });
       return;
     }
 
     const merchant = await merchantRepo.authenticateMerchant({ email, password });
     if (!merchant) {
-      res.status(401).json({ 
-        success: false, 
-        message: 'Invalid email or password' 
+      res.status(401).json({
+        success: false,
+        message: 'Invalid email or password',
       });
       return;
     }
@@ -192,28 +178,16 @@ export const issueTokenPair = async (req: Request, res: Response): Promise<void>
     if (merchant.status !== 'active') {
       res.status(403).json({
         success: false,
-        message: `Your account is ${merchant.status}. Please contact support for assistance.`
+        message: `Your account is ${merchant.status}. Please contact support for assistance.`,
       });
       return;
     }
 
     // Generate access token (short-lived)
-    const accessToken = generateAccessToken(
-      merchant.merchantId,
-      merchant.email,
-      'merchant',
-      MERCHANT_JWT_SECRET,
-      ACCESS_TOKEN_DURATION
-    );
+    const accessToken = generateAccessToken(merchant.merchantId, merchant.email, 'merchant', MERCHANT_JWT_SECRET, ACCESS_TOKEN_DURATION);
 
     // Generate refresh token (long-lived)
-    const refreshToken = generateAccessToken(
-      merchant.merchantId,
-      merchant.email,
-      'merchant',
-      MERCHANT_JWT_SECRET,
-      REFRESH_TOKEN_DURATION
-    );
+    const refreshToken = generateAccessToken(merchant.merchantId, merchant.email, 'merchant', MERCHANT_JWT_SECRET, REFRESH_TOKEN_DURATION);
 
     // Store refresh token in database for tracking/revocation
     await refreshTokenRepo.create({
@@ -222,7 +196,7 @@ export const issueTokenPair = async (req: Request, res: Response): Promise<void>
       userId: merchant.merchantId,
       expiresAt: parseExpirationDate(REFRESH_TOKEN_DURATION),
       userAgent: req.headers['user-agent'] || null,
-      ipAddress: req.ip || null
+      ipAddress: req.ip || null,
     });
 
     res.json({
@@ -234,15 +208,15 @@ export const issueTokenPair = async (req: Request, res: Response): Promise<void>
       merchant: {
         id: merchant.merchantId,
         email: merchant.email,
-        name: merchant.name
-      }
+        name: merchant.name,
+      },
     });
   } catch (error) {
     logger.error('Error:', error);
-    
-    res.status(500).json({ 
-      success: false, 
-      message: 'Token generation failed. Please try again.' 
+
+    res.status(500).json({
+      success: false,
+      message: 'Token generation failed. Please try again.',
     });
   }
 };
@@ -255,9 +229,9 @@ export const renewAccessToken = async (req: Request, res: Response): Promise<voi
     const { refreshToken } = req.body;
 
     if (!refreshToken) {
-      res.status(400).json({ 
-        success: false, 
-        message: 'Refresh token is required' 
+      res.status(400).json({
+        success: false,
+        message: 'Refresh token is required',
       });
       return;
     }
@@ -265,9 +239,9 @@ export const renewAccessToken = async (req: Request, res: Response): Promise<voi
     // Verify refresh token signature
     const tokenPayload = verifyAccessToken(refreshToken, MERCHANT_JWT_SECRET);
     if (!tokenPayload || !tokenPayload.id) {
-      res.status(401).json({ 
-        success: false, 
-        message: 'Invalid or expired refresh token' 
+      res.status(401).json({
+        success: false,
+        message: 'Invalid or expired refresh token',
       });
       return;
     }
@@ -275,9 +249,9 @@ export const renewAccessToken = async (req: Request, res: Response): Promise<voi
     // Verify refresh token exists in database and hasn't been revoked
     const storedToken = await refreshTokenRepo.findValidByToken(refreshToken);
     if (!storedToken || storedToken.userId !== tokenPayload.id || storedToken.userType !== 'merchant') {
-      res.status(401).json({ 
-        success: false, 
-        message: 'Refresh token has been revoked or is invalid' 
+      res.status(401).json({
+        success: false,
+        message: 'Refresh token has been revoked or is invalid',
       });
       return;
     }
@@ -285,9 +259,9 @@ export const renewAccessToken = async (req: Request, res: Response): Promise<voi
     // Verify merchant still exists and is active
     const merchant = await merchantRepo.findById(tokenPayload.id);
     if (!merchant) {
-      res.status(401).json({ 
-        success: false, 
-        message: 'Merchant account not found' 
+      res.status(401).json({
+        success: false,
+        message: 'Merchant account not found',
       });
       return;
     }
@@ -295,19 +269,13 @@ export const renewAccessToken = async (req: Request, res: Response): Promise<voi
     if (merchant.status !== 'active') {
       res.status(403).json({
         success: false,
-        message: `Your account is ${merchant.status}. Please contact support.`
+        message: `Your account is ${merchant.status}. Please contact support.`,
       });
       return;
     }
 
     // Generate new access token
-    const newAccessToken = generateAccessToken(
-      merchant.merchantId,
-      merchant.email,
-      'merchant',
-      MERCHANT_JWT_SECRET,
-      ACCESS_TOKEN_DURATION
-    );
+    const newAccessToken = generateAccessToken(merchant.merchantId, merchant.email, 'merchant', MERCHANT_JWT_SECRET, ACCESS_TOKEN_DURATION);
 
     // Mark refresh token as used (optional - for tracking)
     await refreshTokenRepo.markUsed(refreshToken);
@@ -315,21 +283,21 @@ export const renewAccessToken = async (req: Request, res: Response): Promise<voi
     // Emit token refreshed event
     emitMerchantTokenRefreshed({
       userId: merchant.merchantId,
-      ipAddress: req.ip
+      ipAddress: req.ip,
     });
 
     res.json({
       success: true,
       accessToken: newAccessToken,
       tokenType: 'Bearer',
-      expiresIn: ACCESS_TOKEN_DURATION
+      expiresIn: ACCESS_TOKEN_DURATION,
     });
   } catch (error) {
     logger.error('Error:', error);
-    
-    res.status(500).json({ 
-      success: false, 
-      message: 'Token renewal failed. Please log in again.' 
+
+    res.status(500).json({
+      success: false,
+      message: 'Token renewal failed. Please log in again.',
     });
   }
 };
@@ -342,21 +310,21 @@ export const checkTokenValidity = async (req: Request, res: Response): Promise<v
     const { token } = req.body;
 
     if (!token) {
-      res.status(400).json({ 
-        success: false, 
-        message: 'Token is required' 
+      res.status(400).json({
+        success: false,
+        message: 'Token is required',
       });
       return;
     }
 
     // Verify token signature and expiration
     const decodedPayload = verifyAccessToken(token, MERCHANT_JWT_SECRET);
-    
+
     if (!decodedPayload || decodedPayload.role !== 'merchant') {
-      res.status(401).json({ 
-        success: false, 
-        valid: false, 
-        message: 'Token is invalid or has expired' 
+      res.status(401).json({
+        success: false,
+        valid: false,
+        message: 'Token is invalid or has expired',
       });
       return;
     }
@@ -367,15 +335,15 @@ export const checkTokenValidity = async (req: Request, res: Response): Promise<v
       merchant: {
         id: decodedPayload.id,
         email: decodedPayload.email,
-        role: decodedPayload.role
-      }
+        role: decodedPayload.role,
+      },
     });
   } catch (error) {
     logger.error('Error:', error);
-    
-    res.status(500).json({ 
-      success: false, 
-      message: 'Token validation failed.' 
+
+    res.status(500).json({
+      success: false,
+      message: 'Token validation failed.',
     });
   }
 };
@@ -388,9 +356,9 @@ export const requestPasswordReset = async (req: Request, res: Response): Promise
     const { email } = req.body;
 
     if (!email) {
-      res.status(400).json({ 
-        success: false, 
-        message: 'Email is required' 
+      res.status(400).json({
+        success: false,
+        message: 'Email is required',
       });
       return;
     }
@@ -401,7 +369,7 @@ export const requestPasswordReset = async (req: Request, res: Response): Promise
     if (!merchant?.merchantId) {
       res.json({
         success: true,
-        message: 'If an account exists with that email, a password reset link has been sent'
+        message: 'If an account exists with that email, a password reset link has been sent',
       });
       return;
     }
@@ -416,14 +384,14 @@ export const requestPasswordReset = async (req: Request, res: Response): Promise
       success: true,
       message: 'Password reset instructions have been sent to your email',
       // REMOVE IN PRODUCTION - only for development
-      resetToken
+      resetToken,
     });
   } catch (error) {
     logger.error('Error:', error);
-    
-    res.status(500).json({ 
-      success: false, 
-      message: 'Password reset request failed. Please try again.' 
+
+    res.status(500).json({
+      success: false,
+      message: 'Password reset request failed. Please try again.',
     });
   }
 };
@@ -438,7 +406,7 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
     if (!token || !newPassword) {
       res.status(400).json({
         success: false,
-        message: 'Reset token and new password are required'
+        message: 'Reset token and new password are required',
       });
       return;
     }
@@ -446,9 +414,9 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
     // Verify reset token and get merchant ID
     const merchantId = await merchantRepo.verifyPasswordResetToken(token);
     if (!merchantId) {
-      res.status(400).json({ 
-        success: false, 
-        message: 'Password reset token is invalid or has expired' 
+      res.status(400).json({
+        success: false,
+        message: 'Password reset token is invalid or has expired',
       });
       return;
     }
@@ -458,14 +426,14 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
 
     res.json({
       success: true,
-      message: 'Your password has been successfully reset'
+      message: 'Your password has been successfully reset',
     });
   } catch (error) {
     logger.error('Error:', error);
-    
-    res.status(500).json({ 
-      success: false, 
-      message: 'Password reset failed. Please request a new reset link.' 
+
+    res.status(500).json({
+      success: false,
+      message: 'Password reset failed. Please request a new reset link.',
     });
   }
 };

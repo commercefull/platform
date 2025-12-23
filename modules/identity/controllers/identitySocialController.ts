@@ -1,6 +1,6 @@
 /**
  * Identity Social Login Controller
- * 
+ *
  * Handles OAuth/social login authentication endpoints.
  */
 
@@ -14,12 +14,9 @@ import {
   SocialLoginUseCase,
   LinkSocialAccountUseCase,
   UnlinkSocialAccountUseCase,
-  GetLinkedAccountsUseCase
+  GetLinkedAccountsUseCase,
 } from '../application/useCases/SocialLogin';
-import {
-  generateAccessToken,
-  parseExpirationDate
-} from '../utils/jwtHelpers';
+import { generateAccessToken, parseExpirationDate } from '../utils/jwtHelpers';
 import { eventBus } from '../../../libs/events/eventBus';
 
 // Environment configuration
@@ -52,7 +49,7 @@ export async function getOAuthConfig(req: Request, res: Response): Promise<void>
     if (!isValidProvider(provider)) {
       res.status(400).json({
         success: false,
-        message: `Unsupported provider: ${provider}. Supported providers: ${SUPPORTED_PROVIDERS.join(', ')}`
+        message: `Unsupported provider: ${provider}. Supported providers: ${SUPPORTED_PROVIDERS.join(', ')}`,
       });
       return;
     }
@@ -62,51 +59,51 @@ export async function getOAuthConfig(req: Request, res: Response): Promise<void>
       google: {
         clientId: process.env.GOOGLE_CLIENT_ID || '',
         authUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
-        scopes: ['openid', 'email', 'profile']
+        scopes: ['openid', 'email', 'profile'],
       },
       facebook: {
         clientId: process.env.FACEBOOK_APP_ID || '',
         authUrl: 'https://www.facebook.com/v18.0/dialog/oauth',
-        scopes: ['email', 'public_profile']
+        scopes: ['email', 'public_profile'],
       },
       apple: {
         clientId: process.env.APPLE_CLIENT_ID || '',
         authUrl: 'https://appleid.apple.com/auth/authorize',
-        scopes: ['name', 'email']
+        scopes: ['name', 'email'],
       },
       github: {
         clientId: process.env.GITHUB_CLIENT_ID || '',
         authUrl: 'https://github.com/login/oauth/authorize',
-        scopes: ['read:user', 'user:email']
+        scopes: ['read:user', 'user:email'],
       },
       twitter: {
         clientId: process.env.TWITTER_CLIENT_ID || '',
         authUrl: 'https://twitter.com/i/oauth2/authorize',
-        scopes: ['tweet.read', 'users.read']
+        scopes: ['tweet.read', 'users.read'],
       },
       linkedin: {
         clientId: process.env.LINKEDIN_CLIENT_ID || '',
         authUrl: 'https://www.linkedin.com/oauth/v2/authorization',
-        scopes: ['openid', 'profile', 'email']
+        scopes: ['openid', 'profile', 'email'],
       },
       microsoft: {
         clientId: process.env.MICROSOFT_CLIENT_ID || '',
         authUrl: 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize',
-        scopes: ['openid', 'email', 'profile']
-      }
+        scopes: ['openid', 'email', 'profile'],
+      },
     };
 
     res.json({
       success: true,
       provider,
-      config: config[provider]
+      config: config[provider],
     });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({
       success: false,
-      message: 'Failed to get OAuth configuration'
+      message: 'Failed to get OAuth configuration',
     });
   }
 }
@@ -122,7 +119,7 @@ export async function customerSocialLogin(req: Request, res: Response): Promise<
     if (!isValidProvider(provider)) {
       res.status(400).json({
         success: false,
-        message: `Unsupported provider: ${provider}`
+        message: `Unsupported provider: ${provider}`,
       });
       return;
     }
@@ -130,7 +127,7 @@ export async function customerSocialLogin(req: Request, res: Response): Promise<
     if (!accessToken && !idToken) {
       res.status(400).json({
         success: false,
-        message: 'Access token or ID token is required'
+        message: 'Access token or ID token is required',
       });
       return;
     }
@@ -139,11 +136,11 @@ export async function customerSocialLogin(req: Request, res: Response): Promise<
     // 1. Verify the token with the provider
     // 2. Extract user profile from the verified token
     // For now, we'll use the profile sent by the client (after frontend verification)
-    
+
     if (!clientProfile || !clientProfile.id || !clientProfile.email) {
       res.status(400).json({
         success: false,
-        message: 'Profile with id and email is required'
+        message: 'Profile with id and email is required',
       });
       return;
     }
@@ -160,49 +157,40 @@ export async function customerSocialLogin(req: Request, res: Response): Promise<
       refreshToken: req.body.refreshToken,
       tokenExpiresAt: req.body.expiresAt ? new Date(req.body.expiresAt) : undefined,
       scopes: req.body.scopes,
-      rawData: clientProfile
+      rawData: clientProfile,
     };
 
     // Create use case with customer finder/creator
-    const socialLoginUseCase = new SocialLoginUseCase(
-      socialAccountRepo,
-      async (email, profileData, userType) => {
-        // Try to find existing customer
-        let customer = await customerRepo.findCustomerByEmail(email);
-        
-        if (customer) {
-          return { userId: customer.customerId, isNew: false };
-        }
+    const socialLoginUseCase = new SocialLoginUseCase(socialAccountRepo, async (email, profileData, userType) => {
+      // Try to find existing customer
+      let customer = await customerRepo.findCustomerByEmail(email);
 
-        // Create new customer
-        customer = await customerRepo.createCustomerWithPassword({
-          email,
-          firstName: profileData.firstName || '',
-          lastName: profileData.lastName || '',
-          password: '', // No password for social-only accounts
-          isActive: true,
-          isVerified: true // Social login implies verified email
-        });
-
-        return { userId: customer.customerId, isNew: true };
+      if (customer) {
+        return { userId: customer.customerId, isNew: false };
       }
-    );
+
+      // Create new customer
+      customer = await customerRepo.createCustomerWithPassword({
+        email,
+        firstName: profileData.firstName || '',
+        lastName: profileData.lastName || '',
+        password: '', // No password for social-only accounts
+        isActive: true,
+        isVerified: true, // Social login implies verified email
+      });
+
+      return { userId: customer.customerId, isNew: true };
+    });
 
     const result = await socialLoginUseCase.execute({
       provider,
       profile,
       userType: 'customer',
-      ip: req.ip
+      ip: req.ip,
     });
 
     // Generate JWT token
-    const jwtToken = generateAccessToken(
-      result.userId,
-      result.email,
-      'customer',
-      CUSTOMER_JWT_SECRET,
-      ACCESS_TOKEN_DURATION
-    );
+    const jwtToken = generateAccessToken(result.userId, result.email, 'customer', CUSTOMER_JWT_SECRET, ACCESS_TOKEN_DURATION);
 
     // Emit social login event
     eventBus.emit('identity.customer.social_login', {
@@ -213,7 +201,7 @@ export async function customerSocialLogin(req: Request, res: Response): Promise<
       providerUserId: profile.providerUserId,
       isNewUser: result.isNewUser,
       ipAddress: req.ip,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     res.json({
@@ -227,16 +215,16 @@ export async function customerSocialLogin(req: Request, res: Response): Promise<
         email: result.email,
         firstName: result.profile.firstName,
         lastName: result.profile.lastName,
-        avatarUrl: result.profile.avatarUrl
+        avatarUrl: result.profile.avatarUrl,
       },
-      provider: result.provider
+      provider: result.provider,
     });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({
       success: false,
-      message: error instanceof Error ? error.message : 'Social login failed'
+      message: error instanceof Error ? error.message : 'Social login failed',
     });
   }
 }
@@ -252,7 +240,7 @@ export async function merchantSocialLogin(req: Request, res: Response): Promise<
     if (!isValidProvider(provider)) {
       res.status(400).json({
         success: false,
-        message: `Unsupported provider: ${provider}`
+        message: `Unsupported provider: ${provider}`,
       });
       return;
     }
@@ -260,7 +248,7 @@ export async function merchantSocialLogin(req: Request, res: Response): Promise<
     if (!accessToken && !idToken) {
       res.status(400).json({
         success: false,
-        message: 'Access token or ID token is required'
+        message: 'Access token or ID token is required',
       });
       return;
     }
@@ -268,7 +256,7 @@ export async function merchantSocialLogin(req: Request, res: Response): Promise<
     if (!clientProfile || !clientProfile.id || !clientProfile.email) {
       res.status(400).json({
         success: false,
-        message: 'Profile with id and email is required'
+        message: 'Profile with id and email is required',
       });
       return;
     }
@@ -285,51 +273,42 @@ export async function merchantSocialLogin(req: Request, res: Response): Promise<
       refreshToken: req.body.refreshToken,
       tokenExpiresAt: req.body.expiresAt ? new Date(req.body.expiresAt) : undefined,
       scopes: req.body.scopes,
-      rawData: clientProfile
+      rawData: clientProfile,
     };
 
     // Create use case with merchant finder/creator
-    const socialLoginUseCase = new SocialLoginUseCase(
-      socialAccountRepo,
-      async (email, profileData, userType) => {
-        // Try to find existing merchant
-        let merchant = await merchantRepo.findByEmail(email);
-        
-        if (merchant) {
-          // Check if merchant is active
-          if (merchant.status !== 'active') {
-            throw new Error(`Your account is ${merchant.status}. Please contact support.`);
-          }
-          return { userId: merchant.merchantId, isNew: false };
+    const socialLoginUseCase = new SocialLoginUseCase(socialAccountRepo, async (email, profileData, userType) => {
+      // Try to find existing merchant
+      let merchant = await merchantRepo.findByEmail(email);
+
+      if (merchant) {
+        // Check if merchant is active
+        if (merchant.status !== 'active') {
+          throw new Error(`Your account is ${merchant.status}. Please contact support.`);
         }
-
-        // Create new merchant (pending approval)
-        merchant = await merchantRepo.createMerchantWithPassword({
-          name: profileData.displayName || `${profileData.firstName} ${profileData.lastName}`.trim() || email.split('@')[0],
-          email,
-          password: '', // No password for social-only accounts
-          status: 'pending'
-        });
-
-        return { userId: merchant.merchantId, isNew: true };
+        return { userId: merchant.merchantId, isNew: false };
       }
-    );
+
+      // Create new merchant (pending approval)
+      merchant = await merchantRepo.createMerchantWithPassword({
+        name: profileData.displayName || `${profileData.firstName} ${profileData.lastName}`.trim() || email.split('@')[0],
+        email,
+        password: '', // No password for social-only accounts
+        status: 'pending',
+      });
+
+      return { userId: merchant.merchantId, isNew: true };
+    });
 
     const result = await socialLoginUseCase.execute({
       provider,
       profile,
       userType: 'merchant',
-      ip: req.ip
+      ip: req.ip,
     });
 
     // Generate JWT token
-    const jwtToken = generateAccessToken(
-      result.userId,
-      result.email,
-      'merchant',
-      MERCHANT_JWT_SECRET,
-      ACCESS_TOKEN_DURATION
-    );
+    const jwtToken = generateAccessToken(result.userId, result.email, 'merchant', MERCHANT_JWT_SECRET, ACCESS_TOKEN_DURATION);
 
     // Emit social login event
     eventBus.emit('identity.merchant.social_login', {
@@ -340,7 +319,7 @@ export async function merchantSocialLogin(req: Request, res: Response): Promise<
       providerUserId: profile.providerUserId,
       isNewUser: result.isNewUser,
       ipAddress: req.ip,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     res.json({
@@ -353,16 +332,16 @@ export async function merchantSocialLogin(req: Request, res: Response): Promise<
         id: result.userId,
         email: result.email,
         name: result.profile.displayName,
-        avatarUrl: result.profile.avatarUrl
+        avatarUrl: result.profile.avatarUrl,
       },
-      provider: result.provider
+      provider: result.provider,
     });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({
       success: false,
-      message: error instanceof Error ? error.message : 'Social login failed'
+      message: error instanceof Error ? error.message : 'Social login failed',
     });
   }
 }
@@ -378,7 +357,7 @@ export async function linkCustomerSocialAccount(req: Request, res: Response): Pr
     if (!customerId) {
       res.status(401).json({
         success: false,
-        message: 'Authentication required'
+        message: 'Authentication required',
       });
       return;
     }
@@ -386,7 +365,7 @@ export async function linkCustomerSocialAccount(req: Request, res: Response): Pr
     if (!isValidProvider(provider)) {
       res.status(400).json({
         success: false,
-        message: `Unsupported provider: ${provider}`
+        message: `Unsupported provider: ${provider}`,
       });
       return;
     }
@@ -396,7 +375,7 @@ export async function linkCustomerSocialAccount(req: Request, res: Response): Pr
     if (!clientProfile || !clientProfile.id) {
       res.status(400).json({
         success: false,
-        message: 'Profile with id is required'
+        message: 'Profile with id is required',
       });
       return;
     }
@@ -412,7 +391,7 @@ export async function linkCustomerSocialAccount(req: Request, res: Response): Pr
       refreshToken: req.body.refreshToken,
       tokenExpiresAt: req.body.expiresAt ? new Date(req.body.expiresAt) : undefined,
       scopes: req.body.scopes,
-      rawData: clientProfile
+      rawData: clientProfile,
     };
 
     const linkUseCase = new LinkSocialAccountUseCase(socialAccountRepo);
@@ -420,7 +399,7 @@ export async function linkCustomerSocialAccount(req: Request, res: Response): Pr
       userId: customerId,
       userType: 'customer',
       provider,
-      profile
+      profile,
     });
 
     // Emit event
@@ -430,20 +409,20 @@ export async function linkCustomerSocialAccount(req: Request, res: Response): Pr
       provider,
       providerUserId: clientProfile.id,
       providerEmail: clientProfile.email,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     res.json({
       success: true,
       message: `${provider} account linked successfully`,
-      linkedAccount
+      linkedAccount,
     });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({
       success: false,
-      message: error instanceof Error ? error.message : 'Failed to link social account'
+      message: error instanceof Error ? error.message : 'Failed to link social account',
     });
   }
 }
@@ -459,7 +438,7 @@ export async function unlinkCustomerSocialAccount(req: Request, res: Response): 
     if (!customerId) {
       res.status(401).json({
         success: false,
-        message: 'Authentication required'
+        message: 'Authentication required',
       });
       return;
     }
@@ -467,7 +446,7 @@ export async function unlinkCustomerSocialAccount(req: Request, res: Response): 
     if (!isValidProvider(provider)) {
       res.status(400).json({
         success: false,
-        message: `Unsupported provider: ${provider}`
+        message: `Unsupported provider: ${provider}`,
       });
       return;
     }
@@ -476,7 +455,7 @@ export async function unlinkCustomerSocialAccount(req: Request, res: Response): 
     await unlinkUseCase.execute({
       userId: customerId,
       userType: 'customer',
-      provider
+      provider,
     });
 
     // Emit event
@@ -484,19 +463,19 @@ export async function unlinkCustomerSocialAccount(req: Request, res: Response): 
       userId: customerId,
       userType: 'customer',
       provider,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     res.json({
       success: true,
-      message: `${provider} account unlinked successfully`
+      message: `${provider} account unlinked successfully`,
     });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({
       success: false,
-      message: error instanceof Error ? error.message : 'Failed to unlink social account'
+      message: error instanceof Error ? error.message : 'Failed to unlink social account',
     });
   }
 }
@@ -511,7 +490,7 @@ export async function getCustomerLinkedAccounts(req: Request, res: Response): Pr
     if (!customerId) {
       res.status(401).json({
         success: false,
-        message: 'Authentication required'
+        message: 'Authentication required',
       });
       return;
     }
@@ -522,14 +501,14 @@ export async function getCustomerLinkedAccounts(req: Request, res: Response): Pr
     res.json({
       success: true,
       linkedAccounts,
-      supportedProviders: SUPPORTED_PROVIDERS
+      supportedProviders: SUPPORTED_PROVIDERS,
     });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({
       success: false,
-      message: 'Failed to get linked accounts'
+      message: 'Failed to get linked accounts',
     });
   }
 }
@@ -544,7 +523,7 @@ export async function getMerchantLinkedAccounts(req: Request, res: Response): Pr
     if (!merchantId) {
       res.status(401).json({
         success: false,
-        message: 'Authentication required'
+        message: 'Authentication required',
       });
       return;
     }
@@ -555,14 +534,14 @@ export async function getMerchantLinkedAccounts(req: Request, res: Response): Pr
     res.json({
       success: true,
       linkedAccounts,
-      supportedProviders: SUPPORTED_PROVIDERS
+      supportedProviders: SUPPORTED_PROVIDERS,
     });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({
       success: false,
-      message: 'Failed to get linked accounts'
+      message: 'Failed to get linked accounts',
     });
   }
 }

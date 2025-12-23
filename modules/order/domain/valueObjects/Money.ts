@@ -6,7 +6,7 @@
 export class Money {
   private constructor(
     private readonly _amount: number,
-    private readonly _currency: string
+    private readonly _currency: string,
   ) {}
 
   static create(amount: number, currency: string = 'USD'): Money {
@@ -83,7 +83,7 @@ export class Money {
   format(locale: string = 'en-US'): string {
     return new Intl.NumberFormat(locale, {
       style: 'currency',
-      currency: this._currency
+      currency: this._currency,
     }).format(this._amount);
   }
 
@@ -96,7 +96,7 @@ export class Money {
   toJSON(): { amount: number; currency: string } {
     return {
       amount: this._amount,
-      currency: this._currency
+      currency: this._currency,
     };
   }
 }

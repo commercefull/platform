@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function (knex) {
   return knex.schema.createTable('productAttribute', t => {
     t.uuid('productAttributeId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
@@ -7,8 +7,23 @@ exports.up = function(knex) {
     t.string('code', 50).notNullable().unique();
     t.text('description');
     t.uuid('groupId').references('productAttributeGroupId').inTable('productAttributeGroup');
-    t.enum('type', ['text', 'number', 'select', 'checkbox', 'radio', 'date', 'datetime', 'time', 'file', 'image', 'video', 'document']).notNullable().defaultTo('text');
-    t.enum('inputType', ['text', 'number', 'select', 'checkbox', 'radio', 'date', 'datetime', 'time', 'file', 'image', 'video', 'document']).defaultTo('text');
+    t.enum('type', ['text', 'number', 'select', 'checkbox', 'radio', 'date', 'datetime', 'time', 'file', 'image', 'video', 'document'])
+      .notNullable()
+      .defaultTo('text');
+    t.enum('inputType', [
+      'text',
+      'number',
+      'select',
+      'checkbox',
+      'radio',
+      'date',
+      'datetime',
+      'time',
+      'file',
+      'image',
+      'video',
+      'document',
+    ]).defaultTo('text');
     t.boolean('isRequired').notNullable().defaultTo(false);
     t.boolean('isUnique').notNullable().defaultTo(false);
     t.boolean('isSystem').notNullable().defaultTo(false);
@@ -25,7 +40,6 @@ exports.up = function(knex) {
     t.jsonb('options');
     t.uuid('merchantId').references('merchantId').inTable('merchant');
     t.boolean('isGlobal').notNullable().defaultTo(true);
-    
 
     t.index('code');
     t.index('groupId');
@@ -43,6 +57,6 @@ exports.up = function(knex) {
   });
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTable('productAttribute');
 };

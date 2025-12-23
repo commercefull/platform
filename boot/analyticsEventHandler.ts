@@ -56,8 +56,6 @@ export function initializeAnalyticsHandlers(): void {
 
   // Alert events
   eventBus.registerHandler('alert.stock.created', handleStockAlertCreated);
-
-  
 }
 
 // ============================================================================
@@ -85,8 +83,8 @@ async function handleOrderCreated(payload: any): Promise<void> {
       eventData: {
         orderNumber: data.orderNumber,
         paymentMethod: data.paymentMethod,
-        shippingMethod: data.shippingMethod
-      }
+        shippingMethod: data.shippingMethod,
+      },
     });
 
     // Update daily sales
@@ -108,7 +106,7 @@ async function handleOrderCreated(payload: any): Promise<void> {
       newCustomers: isNewCustomer ? 1 : 0,
       returningCustomers: !isNewCustomer && !isGuest ? 1 : 0,
       guestOrders: isGuest ? 1 : 0,
-      checkoutCompleted: 1
+      checkoutCompleted: 1,
     });
 
     // Update product performance for each item
@@ -122,13 +120,11 @@ async function handleOrderCreated(payload: any): Promise<void> {
           purchases: 1,
           quantitySold: item.quantity || 1,
           revenue: item.total || item.price * (item.quantity || 1),
-          averagePrice: item.price
+          averagePrice: item.price,
         });
       }
     }
-  } catch (error) {
-    
-  }
+  } catch (error) {}
 }
 
 async function handleOrderCompleted(payload: any): Promise<void> {
@@ -139,11 +135,9 @@ async function handleOrderCompleted(payload: any): Promise<void> {
       eventAction: 'completed',
       orderId: payload.data.orderId,
       customerId: payload.data.customerId,
-      eventValue: payload.data.grandTotal
+      eventValue: payload.data.grandTotal,
     });
-  } catch (error) {
-    
-  }
+  } catch (error) {}
 }
 
 async function handleOrderCancelled(payload: any): Promise<void> {
@@ -155,11 +149,9 @@ async function handleOrderCancelled(payload: any): Promise<void> {
       orderId: payload.data.orderId,
       customerId: payload.data.customerId,
       eventValue: payload.data.grandTotal,
-      eventData: { reason: payload.data.reason }
+      eventData: { reason: payload.data.reason },
     });
-  } catch (error) {
-    
-  }
+  } catch (error) {}
 }
 
 async function handleOrderRefunded(payload: any): Promise<void> {
@@ -174,17 +166,15 @@ async function handleOrderRefunded(payload: any): Promise<void> {
       eventAction: 'refunded',
       orderId: data.orderId,
       customerId: data.customerId,
-      eventValue: data.refundAmount
+      eventValue: data.refundAmount,
     });
 
     await analyticsRepo.upsertSalesDaily({
       date: today,
       merchantId: data.merchantId,
-      refundTotal: data.refundAmount || 0
+      refundTotal: data.refundAmount || 0,
     });
-  } catch (error) {
-    
-  }
+  } catch (error) {}
 }
 
 // ============================================================================
@@ -203,17 +193,15 @@ async function handleCartCreated(payload: any): Promise<void> {
       basketId: payload.data.basketId,
       customerId: payload.data.customerId,
       sessionId: payload.data.sessionId,
-      visitorId: payload.data.visitorId
+      visitorId: payload.data.visitorId,
     });
 
     await analyticsRepo.upsertSalesDaily({
       date: today,
       merchantId: payload.data.merchantId,
-      cartCreated: 1
+      cartCreated: 1,
     });
-  } catch (error) {
-    
-  }
+  } catch (error) {}
 }
 
 async function handleCartItemAdded(payload: any): Promise<void> {
@@ -230,18 +218,16 @@ async function handleCartItemAdded(payload: any): Promise<void> {
       productId: data.productId,
       customerId: data.customerId,
       eventQuantity: data.quantity,
-      eventValue: data.price
+      eventValue: data.price,
     });
 
     await analyticsRepo.upsertProductPerformance({
       productId: data.productId,
       productVariantId: data.productVariantId,
       date: today,
-      addToCarts: 1
+      addToCarts: 1,
     });
-  } catch (error) {
-    
-  }
+  } catch (error) {}
 }
 
 async function handleCartItemRemoved(payload: any): Promise<void> {
@@ -257,18 +243,16 @@ async function handleCartItemRemoved(payload: any): Promise<void> {
       basketId: data.basketId,
       productId: data.productId,
       customerId: data.customerId,
-      eventQuantity: data.quantity
+      eventQuantity: data.quantity,
     });
 
     await analyticsRepo.upsertProductPerformance({
       productId: data.productId,
       productVariantId: data.productVariantId,
       date: today,
-      removeFromCarts: 1
+      removeFromCarts: 1,
     });
-  } catch (error) {
-    
-  }
+  } catch (error) {}
 }
 
 async function handleCartAbandoned(payload: any): Promise<void> {
@@ -282,17 +266,15 @@ async function handleCartAbandoned(payload: any): Promise<void> {
       eventAction: 'abandoned',
       basketId: payload.data.basketId,
       customerId: payload.data.customerId,
-      eventValue: payload.data.cartValue
+      eventValue: payload.data.cartValue,
     });
 
     await analyticsRepo.upsertSalesDaily({
       date: today,
       merchantId: payload.data.merchantId,
-      cartAbandoned: 1
+      cartAbandoned: 1,
     });
-  } catch (error) {
-    
-  }
+  } catch (error) {}
 }
 
 // ============================================================================
@@ -310,17 +292,15 @@ async function handleCheckoutStarted(payload: any): Promise<void> {
       eventAction: 'started',
       basketId: payload.data.basketId,
       customerId: payload.data.customerId,
-      eventValue: payload.data.cartValue
+      eventValue: payload.data.cartValue,
     });
 
     await analyticsRepo.upsertSalesDaily({
       date: today,
       merchantId: payload.data.merchantId,
-      checkoutStarted: 1
+      checkoutStarted: 1,
     });
-  } catch (error) {
-    
-  }
+  } catch (error) {}
 }
 
 async function handleCheckoutCompleted(payload: any): Promise<void> {
@@ -331,11 +311,9 @@ async function handleCheckoutCompleted(payload: any): Promise<void> {
       eventAction: 'completed',
       orderId: payload.data.orderId,
       customerId: payload.data.customerId,
-      eventValue: payload.data.orderTotal
+      eventValue: payload.data.orderTotal,
     });
-  } catch (error) {
-    
-  }
+  } catch (error) {}
 }
 
 // ============================================================================
@@ -354,17 +332,15 @@ async function handlePaymentSuccess(payload: any): Promise<void> {
       orderId: payload.data.orderId,
       customerId: payload.data.customerId,
       eventValue: payload.data.amount,
-      eventData: { paymentMethod: payload.data.paymentMethod }
+      eventData: { paymentMethod: payload.data.paymentMethod },
     });
 
     await analyticsRepo.upsertSalesDaily({
       date: today,
       merchantId: payload.data.merchantId,
-      paymentSuccessCount: 1
+      paymentSuccessCount: 1,
     });
-  } catch (error) {
-    
-  }
+  } catch (error) {}
 }
 
 async function handlePaymentFailed(payload: any): Promise<void> {
@@ -379,17 +355,15 @@ async function handlePaymentFailed(payload: any): Promise<void> {
       orderId: payload.data.orderId,
       customerId: payload.data.customerId,
       eventValue: payload.data.amount,
-      eventData: { reason: payload.data.failureReason }
+      eventData: { reason: payload.data.failureReason },
     });
 
     await analyticsRepo.upsertSalesDaily({
       date: today,
       merchantId: payload.data.merchantId,
-      paymentFailedCount: 1
+      paymentFailedCount: 1,
     });
-  } catch (error) {
-    
-  }
+  } catch (error) {}
 }
 
 // ============================================================================
@@ -409,7 +383,7 @@ async function handleProductViewed(payload: any): Promise<void> {
       productId: data.productId,
       customerId: data.customerId,
       sessionId: data.sessionId,
-      visitorId: data.visitorId
+      visitorId: data.visitorId,
     });
 
     await analyticsRepo.upsertProductPerformance({
@@ -419,11 +393,9 @@ async function handleProductViewed(payload: any): Promise<void> {
       views: 1,
       uniqueViews: data.isFirstView ? 1 : 0,
       detailViews: 1,
-      outOfStockViews: data.isOutOfStock ? 1 : 0
+      outOfStockViews: data.isOutOfStock ? 1 : 0,
     });
-  } catch (error) {
-    
-  }
+  } catch (error) {}
 }
 
 async function handleProductCreated(payload: any): Promise<void> {
@@ -433,11 +405,9 @@ async function handleProductCreated(payload: any): Promise<void> {
       eventCategory: 'product',
       eventAction: 'created',
       productId: payload.data.productId,
-      eventData: { name: payload.data.name, sku: payload.data.sku }
+      eventData: { name: payload.data.name, sku: payload.data.sku },
     });
-  } catch (error) {
-    
-  }
+  } catch (error) {}
 }
 
 // ============================================================================
@@ -452,11 +422,9 @@ async function handleCustomerCreated(payload: any): Promise<void> {
       eventAction: 'created',
       customerId: payload.data.customerId,
       channel: payload.data.channel,
-      eventData: { source: payload.data.source }
+      eventData: { source: payload.data.source },
     });
-  } catch (error) {
-    
-  }
+  } catch (error) {}
 }
 
 async function handleCustomerUpdated(payload: any): Promise<void> {
@@ -465,11 +433,9 @@ async function handleCustomerUpdated(payload: any): Promise<void> {
       eventType: 'customer.updated',
       eventCategory: 'customer',
       eventAction: 'updated',
-      customerId: payload.data.customerId
+      customerId: payload.data.customerId,
     });
-  } catch (error) {
-    
-  }
+  } catch (error) {}
 }
 
 // ============================================================================
@@ -484,11 +450,9 @@ async function handleSubscriptionCreated(payload: any): Promise<void> {
       eventAction: 'created',
       customerId: payload.data.customerId,
       eventValue: payload.data.monthlyValue,
-      eventData: { planId: payload.data.planId }
+      eventData: { planId: payload.data.planId },
     });
-  } catch (error) {
-    
-  }
+  } catch (error) {}
 }
 
 async function handleSubscriptionCancelled(payload: any): Promise<void> {
@@ -498,11 +462,9 @@ async function handleSubscriptionCancelled(payload: any): Promise<void> {
       eventCategory: 'subscription',
       eventAction: 'cancelled',
       customerId: payload.data.customerId,
-      eventData: { reason: payload.data.reason }
+      eventData: { reason: payload.data.reason },
     });
-  } catch (error) {
-    
-  }
+  } catch (error) {}
 }
 
 // ============================================================================
@@ -517,11 +479,9 @@ async function handleTicketCreated(payload: any): Promise<void> {
       eventAction: 'created',
       customerId: payload.data.customerId,
       orderId: payload.data.orderId,
-      eventData: { category: payload.data.category, priority: payload.data.priority }
+      eventData: { category: payload.data.category, priority: payload.data.priority },
     });
-  } catch (error) {
-    
-  }
+  } catch (error) {}
 }
 
 async function handleTicketResolved(payload: any): Promise<void> {
@@ -531,11 +491,9 @@ async function handleTicketResolved(payload: any): Promise<void> {
       eventCategory: 'support',
       eventAction: 'resolved',
       customerId: payload.data.customerId,
-      eventData: { resolutionTime: payload.data.resolutionTimeMinutes }
+      eventData: { resolutionTime: payload.data.resolutionTimeMinutes },
     });
-  } catch (error) {
-    
-  }
+  } catch (error) {}
 }
 
 // ============================================================================
@@ -554,18 +512,16 @@ async function handleReviewCreated(payload: any): Promise<void> {
       eventAction: 'created',
       productId: data.productId,
       customerId: data.customerId,
-      eventData: { rating: data.rating }
+      eventData: { rating: data.rating },
     });
 
     await analyticsRepo.upsertProductPerformance({
       productId: data.productId,
       date: today,
       reviews: 1,
-      averageRating: data.rating
+      averageRating: data.rating,
     });
-  } catch (error) {
-    
-  }
+  } catch (error) {}
 }
 
 // ============================================================================
@@ -583,15 +539,13 @@ async function handleStockAlertCreated(payload: any): Promise<void> {
       eventCategory: 'alert',
       eventAction: 'stock_alert_created',
       productId: data.productId,
-      customerId: data.customerId
+      customerId: data.customerId,
     });
 
     await analyticsRepo.upsertProductPerformance({
       productId: data.productId,
       date: today,
-      stockAlerts: 1
+      stockAlerts: 1,
     });
-  } catch (error) {
-    
-  }
+  } catch (error) {}
 }

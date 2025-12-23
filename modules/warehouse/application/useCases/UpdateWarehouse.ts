@@ -42,7 +42,7 @@ export class UpdateWarehouseUseCase {
     }
 
     const updates: Record<string, unknown> = {};
-    
+
     if (input.name !== undefined) updates.name = input.name;
     if (input.code !== undefined) updates.code = input.code;
     if (input.address !== undefined) updates.address = input.address;

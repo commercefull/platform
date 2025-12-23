@@ -15,7 +15,7 @@ const TABLES = {
   SUBSCRIPTION_PLAN: Table.SubscriptionPlan,
   CUSTOMER_SUBSCRIPTION: Table.CustomerSubscription,
   SUBSCRIPTION_ORDER: Table.SubscriptionOrder,
-  SUBSCRIPTION_PAUSE: Table.SubscriptionPause
+  SUBSCRIPTION_PAUSE: Table.SubscriptionPause,
 };
 
 // ============================================================================
@@ -214,18 +214,14 @@ export interface DunningAttempt {
 // ============================================================================
 
 export async function getSubscriptionProduct(subscriptionProductId: string): Promise<SubscriptionProduct | null> {
-  const row = await queryOne<Record<string, any>>(
-    'SELECT * FROM "subscriptionProduct" WHERE "subscriptionProductId" = $1',
-    [subscriptionProductId]
-  );
+  const row = await queryOne<Record<string, any>>('SELECT * FROM "subscriptionProduct" WHERE "subscriptionProductId" = $1', [
+    subscriptionProductId,
+  ]);
   return row ? mapToSubscriptionProduct(row) : null;
 }
 
 export async function getSubscriptionProductByProductId(productId: string): Promise<SubscriptionProduct | null> {
-  const row = await queryOne<Record<string, any>>(
-    'SELECT * FROM "subscriptionProduct" WHERE "productId" = $1',
-    [productId]
-  );
+  const row = await queryOne<Record<string, any>>('SELECT * FROM "subscriptionProduct" WHERE "productId" = $1', [productId]);
   return row ? mapToSubscriptionProduct(row) : null;
 }
 
@@ -234,10 +230,8 @@ export async function getSubscriptionProducts(activeOnly: boolean = true): Promi
   if (activeOnly) {
     whereClause = '"isActive" = true';
   }
-  
-  const rows = await query<Record<string, any>[]>(
-    `SELECT * FROM "subscriptionProduct" WHERE ${whereClause} ORDER BY "createdAt" DESC`
-  );
+
+  const rows = await query<Record<string, any>[]>(`SELECT * FROM "subscriptionProduct" WHERE ${whereClause} ORDER BY "createdAt" DESC`);
   return (rows || []).map(mapToSubscriptionProduct);
 }
 
@@ -256,18 +250,30 @@ export async function saveSubscriptionProduct(product: Partial<SubscriptionProdu
         "renewalReminderDays" = $19, "metadata" = $20, "isActive" = $21, "updatedAt" = $22
       WHERE "subscriptionProductId" = $23`,
       [
-        product.isSubscriptionOnly || false, product.allowOneTimePurchase !== false,
-        product.minSubscriptionLength, product.maxSubscriptionLength,
-        product.trialDays || 0, product.trialRequiresPayment || false,
-        product.billingAnchor || 'subscription_start', product.billingAnchorDay,
-        product.prorateOnChange !== false, product.allowPause !== false,
-        product.maxPauseDays, product.maxPausesPerYear, product.allowSkip !== false,
-        product.maxSkipsPerYear, product.allowEarlyCancel !== false,
-        product.cancelNoticeDays || 0, product.earlyTerminationFee,
-        product.autoRenew !== false, product.renewalReminderDays || 7,
+        product.isSubscriptionOnly || false,
+        product.allowOneTimePurchase !== false,
+        product.minSubscriptionLength,
+        product.maxSubscriptionLength,
+        product.trialDays || 0,
+        product.trialRequiresPayment || false,
+        product.billingAnchor || 'subscription_start',
+        product.billingAnchorDay,
+        product.prorateOnChange !== false,
+        product.allowPause !== false,
+        product.maxPauseDays,
+        product.maxPausesPerYear,
+        product.allowSkip !== false,
+        product.maxSkipsPerYear,
+        product.allowEarlyCancel !== false,
+        product.cancelNoticeDays || 0,
+        product.earlyTerminationFee,
+        product.autoRenew !== false,
+        product.renewalReminderDays || 7,
         product.metadata ? JSON.stringify(product.metadata) : null,
-        product.isActive !== false, now, product.subscriptionProductId
-      ]
+        product.isActive !== false,
+        now,
+        product.subscriptionProductId,
+      ],
     );
     return (await getSubscriptionProduct(product.subscriptionProductId))!;
   } else {
@@ -282,28 +288,41 @@ export async function saveSubscriptionProduct(product: Partial<SubscriptionProdu
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24)
       RETURNING *`,
       [
-        product.productId, product.isSubscriptionOnly || false,
-        product.allowOneTimePurchase !== false, product.minSubscriptionLength,
-        product.maxSubscriptionLength, product.trialDays || 0,
-        product.trialRequiresPayment || false, product.billingAnchor || 'subscription_start',
-        product.billingAnchorDay, product.prorateOnChange !== false,
-        product.allowPause !== false, product.maxPauseDays, product.maxPausesPerYear,
-        product.allowSkip !== false, product.maxSkipsPerYear,
-        product.allowEarlyCancel !== false, product.cancelNoticeDays || 0,
-        product.earlyTerminationFee, product.autoRenew !== false,
+        product.productId,
+        product.isSubscriptionOnly || false,
+        product.allowOneTimePurchase !== false,
+        product.minSubscriptionLength,
+        product.maxSubscriptionLength,
+        product.trialDays || 0,
+        product.trialRequiresPayment || false,
+        product.billingAnchor || 'subscription_start',
+        product.billingAnchorDay,
+        product.prorateOnChange !== false,
+        product.allowPause !== false,
+        product.maxPauseDays,
+        product.maxPausesPerYear,
+        product.allowSkip !== false,
+        product.maxSkipsPerYear,
+        product.allowEarlyCancel !== false,
+        product.cancelNoticeDays || 0,
+        product.earlyTerminationFee,
+        product.autoRenew !== false,
         product.renewalReminderDays || 7,
-        product.metadata ? JSON.stringify(product.metadata) : null, true, now, now
-      ]
+        product.metadata ? JSON.stringify(product.metadata) : null,
+        true,
+        now,
+        now,
+      ],
     );
     return mapToSubscriptionProduct(result!);
   }
 }
 
 export async function deleteSubscriptionProduct(subscriptionProductId: string): Promise<void> {
-  await query(
-    'UPDATE "subscriptionProduct" SET "isActive" = false, "updatedAt" = $1 WHERE "subscriptionProductId" = $2',
-    [new Date().toISOString(), subscriptionProductId]
-  );
+  await query('UPDATE "subscriptionProduct" SET "isActive" = false, "updatedAt" = $1 WHERE "subscriptionProductId" = $2', [
+    new Date().toISOString(),
+    subscriptionProductId,
+  ]);
 }
 
 // ============================================================================
@@ -311,10 +330,7 @@ export async function deleteSubscriptionProduct(subscriptionProductId: string): 
 // ============================================================================
 
 export async function getSubscriptionPlan(subscriptionPlanId: string): Promise<SubscriptionPlan | null> {
-  const row = await queryOne<Record<string, any>>(
-    'SELECT * FROM "subscriptionPlan" WHERE "subscriptionPlanId" = $1',
-    [subscriptionPlanId]
-  );
+  const row = await queryOne<Record<string, any>>('SELECT * FROM "subscriptionPlan" WHERE "subscriptionPlanId" = $1', [subscriptionPlanId]);
   return row ? mapToSubscriptionPlan(row) : null;
 }
 
@@ -323,19 +339,21 @@ export async function getSubscriptionPlans(subscriptionProductId: string, active
   if (activeOnly) {
     whereClause += ' AND "isActive" = true';
   }
-  
+
   const rows = await query<Record<string, any>[]>(
     `SELECT * FROM "subscriptionPlan" WHERE ${whereClause} ORDER BY "sortOrder" ASC, "price" ASC`,
-    [subscriptionProductId]
+    [subscriptionProductId],
   );
   return (rows || []).map(mapToSubscriptionPlan);
 }
 
-export async function saveSubscriptionPlan(plan: Partial<SubscriptionPlan> & {
-  subscriptionProductId: string;
-  name: string;
-  price: number;
-}): Promise<SubscriptionPlan> {
+export async function saveSubscriptionPlan(
+  plan: Partial<SubscriptionPlan> & {
+    subscriptionProductId: string;
+    name: string;
+    price: number;
+  },
+): Promise<SubscriptionPlan> {
   const now = new Date().toISOString();
   const slug = plan.slug || plan.name.toLowerCase().replace(/\s+/g, '-');
 
@@ -351,18 +369,31 @@ export async function saveSubscriptionPlan(plan: Partial<SubscriptionPlan> & {
         "sortOrder" = $20, "isPopular" = $21, "isActive" = $22, "updatedAt" = $23
       WHERE "subscriptionPlanId" = $24`,
       [
-        plan.name, slug, plan.description, plan.billingInterval || 'month',
-        plan.billingIntervalCount || 1, plan.price, plan.compareAtPrice,
-        plan.currency || 'USD', plan.setupFee || 0, plan.trialDays,
-        plan.contractLength, plan.isContractRequired || false,
-        plan.discountPercent || 0, plan.discountAmount || 0,
-        plan.freeShippingThreshold, plan.includesFreeShipping || false,
+        plan.name,
+        slug,
+        plan.description,
+        plan.billingInterval || 'month',
+        plan.billingIntervalCount || 1,
+        plan.price,
+        plan.compareAtPrice,
+        plan.currency || 'USD',
+        plan.setupFee || 0,
+        plan.trialDays,
+        plan.contractLength,
+        plan.isContractRequired || false,
+        plan.discountPercent || 0,
+        plan.discountAmount || 0,
+        plan.freeShippingThreshold,
+        plan.includesFreeShipping || false,
         plan.includedProducts ? JSON.stringify(plan.includedProducts) : null,
         plan.features ? JSON.stringify(plan.features) : null,
         plan.metadata ? JSON.stringify(plan.metadata) : null,
-        plan.sortOrder || 0, plan.isPopular || false, plan.isActive !== false,
-        now, plan.subscriptionPlanId
-      ]
+        plan.sortOrder || 0,
+        plan.isPopular || false,
+        plan.isActive !== false,
+        now,
+        plan.subscriptionPlanId,
+      ],
     );
     return (await getSubscriptionPlan(plan.subscriptionPlanId))!;
   } else {
@@ -377,28 +408,42 @@ export async function saveSubscriptionPlan(plan: Partial<SubscriptionPlan> & {
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25)
       RETURNING *`,
       [
-        plan.subscriptionProductId, plan.name, slug, plan.description,
-        plan.billingInterval || 'month', plan.billingIntervalCount || 1,
-        plan.price, plan.compareAtPrice, plan.currency || 'USD',
-        plan.setupFee || 0, plan.trialDays, plan.contractLength,
-        plan.isContractRequired || false, plan.discountPercent || 0,
-        plan.discountAmount || 0, plan.freeShippingThreshold,
+        plan.subscriptionProductId,
+        plan.name,
+        slug,
+        plan.description,
+        plan.billingInterval || 'month',
+        plan.billingIntervalCount || 1,
+        plan.price,
+        plan.compareAtPrice,
+        plan.currency || 'USD',
+        plan.setupFee || 0,
+        plan.trialDays,
+        plan.contractLength,
+        plan.isContractRequired || false,
+        plan.discountPercent || 0,
+        plan.discountAmount || 0,
+        plan.freeShippingThreshold,
         plan.includesFreeShipping || false,
         plan.includedProducts ? JSON.stringify(plan.includedProducts) : null,
         plan.features ? JSON.stringify(plan.features) : null,
         plan.metadata ? JSON.stringify(plan.metadata) : null,
-        plan.sortOrder || 0, plan.isPopular || false, true, now, now
-      ]
+        plan.sortOrder || 0,
+        plan.isPopular || false,
+        true,
+        now,
+        now,
+      ],
     );
     return mapToSubscriptionPlan(result!);
   }
 }
 
 export async function deleteSubscriptionPlan(subscriptionPlanId: string): Promise<void> {
-  await query(
-    'UPDATE "subscriptionPlan" SET "isActive" = false, "updatedAt" = $1 WHERE "subscriptionPlanId" = $2',
-    [new Date().toISOString(), subscriptionPlanId]
-  );
+  await query('UPDATE "subscriptionPlan" SET "isActive" = false, "updatedAt" = $1 WHERE "subscriptionPlanId" = $2', [
+    new Date().toISOString(),
+    subscriptionPlanId,
+  ]);
 }
 
 // ============================================================================
@@ -406,24 +451,22 @@ export async function deleteSubscriptionPlan(subscriptionPlanId: string): Promis
 // ============================================================================
 
 export async function getCustomerSubscription(customerSubscriptionId: string): Promise<CustomerSubscription | null> {
-  const row = await queryOne<Record<string, any>>(
-    'SELECT * FROM "customerSubscription" WHERE "customerSubscriptionId" = $1',
-    [customerSubscriptionId]
-  );
+  const row = await queryOne<Record<string, any>>('SELECT * FROM "customerSubscription" WHERE "customerSubscriptionId" = $1', [
+    customerSubscriptionId,
+  ]);
   return row ? mapToCustomerSubscription(row) : null;
 }
 
 export async function getCustomerSubscriptionByNumber(subscriptionNumber: string): Promise<CustomerSubscription | null> {
-  const row = await queryOne<Record<string, any>>(
-    'SELECT * FROM "customerSubscription" WHERE "subscriptionNumber" = $1',
-    [subscriptionNumber]
-  );
+  const row = await queryOne<Record<string, any>>('SELECT * FROM "customerSubscription" WHERE "subscriptionNumber" = $1', [
+    subscriptionNumber,
+  ]);
   return row ? mapToCustomerSubscription(row) : null;
 }
 
 export async function getCustomerSubscriptions(
   filters?: { customerId?: string; status?: SubscriptionStatus },
-  pagination?: { limit?: number; offset?: number }
+  pagination?: { limit?: number; offset?: number },
 ): Promise<{ data: CustomerSubscription[]; total: number }> {
   let whereClause = '1=1';
   const params: any[] = [];
@@ -440,7 +483,7 @@ export async function getCustomerSubscriptions(
 
   const countResult = await queryOne<{ count: string }>(
     `SELECT COUNT(*) as count FROM "customerSubscription" WHERE ${whereClause}`,
-    params
+    params,
   );
 
   const limit = pagination?.limit || 20;
@@ -449,12 +492,12 @@ export async function getCustomerSubscriptions(
   const rows = await query<Record<string, any>[]>(
     `SELECT * FROM "customerSubscription" WHERE ${whereClause} 
      ORDER BY "createdAt" DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
-    [...params, limit, offset]
+    [...params, limit, offset],
   );
 
   return {
     data: (rows || []).map(mapToCustomerSubscription),
-    total: parseInt(countResult?.count || '0')
+    total: parseInt(countResult?.count || '0'),
   };
 }
 
@@ -464,7 +507,7 @@ export async function getSubscriptionsDueBilling(beforeDate: Date): Promise<Cust
      WHERE "status" IN ('active', 'trialing') 
      AND "nextBillingAt" <= $1 
      ORDER BY "nextBillingAt" ASC`,
-    [beforeDate.toISOString()]
+    [beforeDate.toISOString()],
   );
   return (rows || []).map(mapToCustomerSubscription);
 }
@@ -487,8 +530,8 @@ export async function createCustomerSubscription(subscription: {
   const subscriptionNumber = await generateSubscriptionNumber();
   const quantity = subscription.quantity || 1;
   const unitPrice = plan.price;
-  const discountAmount = plan.discountAmount || (unitPrice * (plan.discountPercent || 0) / 100);
-  const totalPrice = (unitPrice * quantity) - discountAmount;
+  const discountAmount = plan.discountAmount || (unitPrice * (plan.discountPercent || 0)) / 100;
+  const totalPrice = unitPrice * quantity - discountAmount;
 
   // Calculate trial and billing dates
   const trialDays = plan.trialDays || 0;
@@ -509,18 +552,33 @@ export async function createCustomerSubscription(subscription: {
     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26)
     RETURNING *`,
     [
-      subscriptionNumber, subscription.customerId, subscription.subscriptionPlanId,
-      subscription.subscriptionProductId, subscription.productVariantId,
-      trialDays > 0 ? 'trialing' : 'active', quantity, unitPrice, discountAmount,
-      0, totalPrice, plan.currency, plan.billingInterval, plan.billingIntervalCount,
-      trialStartAt?.toISOString(), trialEndAt?.toISOString(),
-      currentPeriodStart.toISOString(), currentPeriodEnd.toISOString(),
-      nextBillingAt.toISOString(), plan.contractLength,
-      subscription.shippingAddressId, subscription.billingAddressId,
+      subscriptionNumber,
+      subscription.customerId,
+      subscription.subscriptionPlanId,
+      subscription.subscriptionProductId,
+      subscription.productVariantId,
+      trialDays > 0 ? 'trialing' : 'active',
+      quantity,
+      unitPrice,
+      discountAmount,
+      0,
+      totalPrice,
+      plan.currency,
+      plan.billingInterval,
+      plan.billingIntervalCount,
+      trialStartAt?.toISOString(),
+      trialEndAt?.toISOString(),
+      currentPeriodStart.toISOString(),
+      currentPeriodEnd.toISOString(),
+      nextBillingAt.toISOString(),
+      plan.contractLength,
+      subscription.shippingAddressId,
+      subscription.billingAddressId,
       subscription.paymentMethodId,
       subscription.customizations ? JSON.stringify(subscription.customizations) : null,
-      now.toISOString(), now.toISOString()
-    ]
+      now.toISOString(),
+      now.toISOString(),
+    ],
   );
 
   return mapToCustomerSubscription(result!);
@@ -529,7 +587,7 @@ export async function createCustomerSubscription(subscription: {
 export async function updateSubscriptionStatus(
   customerSubscriptionId: string,
   status: SubscriptionStatus,
-  additionalFields?: Partial<CustomerSubscription>
+  additionalFields?: Partial<CustomerSubscription>,
 ): Promise<void> {
   const now = new Date().toISOString();
   let setClause = '"status" = $1, "updatedAt" = $2';
@@ -558,26 +616,23 @@ export async function updateSubscriptionStatus(
   }
 
   params.push(customerSubscriptionId);
-  await query(
-    `UPDATE "customerSubscription" SET ${setClause} WHERE "customerSubscriptionId" = $${paramIndex}`,
-    params
-  );
+  await query(`UPDATE "customerSubscription" SET ${setClause} WHERE "customerSubscriptionId" = $${paramIndex}`, params);
 }
 
 export async function cancelSubscription(
   customerSubscriptionId: string,
   reason?: string,
   cancelledBy?: string,
-  cancelAtPeriodEnd: boolean = true
+  cancelAtPeriodEnd: boolean = true,
 ): Promise<void> {
   const now = new Date().toISOString();
-  
+
   if (cancelAtPeriodEnd) {
     await query(
       `UPDATE "customerSubscription" SET 
         "cancelAtPeriodEnd" = true, "cancellationReason" = $1, "cancelledBy" = $2, "updatedAt" = $3
        WHERE "customerSubscriptionId" = $4`,
-      [reason, cancelledBy, now, customerSubscriptionId]
+      [reason, cancelledBy, now, customerSubscriptionId],
     );
   } else {
     await query(
@@ -585,7 +640,7 @@ export async function cancelSubscription(
         "status" = 'cancelled', "cancelledAt" = $1, "cancellationReason" = $2, 
         "cancelledBy" = $3, "updatedAt" = $1
        WHERE "customerSubscriptionId" = $4`,
-      [now, reason, cancelledBy, customerSubscriptionId]
+      [now, reason, cancelledBy, customerSubscriptionId],
     );
   }
 }
@@ -594,17 +649,17 @@ export async function pauseSubscription(
   customerSubscriptionId: string,
   resumeAt?: Date,
   reason?: string,
-  pausedBy?: string
+  pausedBy?: string,
 ): Promise<SubscriptionPause> {
   const now = new Date();
-  
+
   // Update subscription status
   await query(
     `UPDATE "customerSubscription" SET 
       "status" = 'paused', "pausedAt" = $1, "resumeAt" = $2, "pauseReason" = $3,
       "pauseCount" = "pauseCount" + 1, "updatedAt" = $1
      WHERE "customerSubscriptionId" = $4`,
-    [now.toISOString(), resumeAt?.toISOString(), reason, customerSubscriptionId]
+    [now.toISOString(), resumeAt?.toISOString(), reason, customerSubscriptionId],
   );
 
   // Create pause record
@@ -614,19 +669,13 @@ export async function pauseSubscription(
       "reason", "pausedBy", "createdAt", "updatedAt"
     ) VALUES ($1, 'active', $2, $3, $4, $5, $6, $7)
     RETURNING *`,
-    [
-      customerSubscriptionId, now.toISOString(), resumeAt?.toISOString(),
-      reason, pausedBy, now.toISOString(), now.toISOString()
-    ]
+    [customerSubscriptionId, now.toISOString(), resumeAt?.toISOString(), reason, pausedBy, now.toISOString(), now.toISOString()],
   );
 
   return mapToSubscriptionPause(result!);
 }
 
-export async function resumeSubscription(
-  customerSubscriptionId: string,
-  resumedBy?: string
-): Promise<void> {
+export async function resumeSubscription(customerSubscriptionId: string, resumedBy?: string): Promise<void> {
   const now = new Date();
   const subscription = await getCustomerSubscription(customerSubscriptionId);
   if (!subscription) throw new Error('Subscription not found');
@@ -640,7 +689,7 @@ export async function resumeSubscription(
       "status" = 'active', "pausedAt" = NULL, "resumeAt" = NULL, "pauseReason" = NULL,
       "currentPeriodStart" = $1, "currentPeriodEnd" = $2, "nextBillingAt" = $2, "updatedAt" = $1
      WHERE "customerSubscriptionId" = $3`,
-    [now.toISOString(), nextBillingAt.toISOString(), customerSubscriptionId]
+    [now.toISOString(), nextBillingAt.toISOString(), customerSubscriptionId],
   );
 
   // Update pause record
@@ -648,7 +697,7 @@ export async function resumeSubscription(
     `UPDATE "subscriptionPause" SET 
       "status" = 'resumed', "actualResumeAt" = $1, "resumedBy" = $2, "updatedAt" = $1
      WHERE "customerSubscriptionId" = $3 AND "status" = 'active'`,
-    [now.toISOString(), resumedBy, customerSubscriptionId]
+    [now.toISOString(), resumedBy, customerSubscriptionId],
   );
 }
 
@@ -665,7 +714,7 @@ export async function advanceBillingCycle(customerSubscriptionId: string): Promi
       "currentPeriodStart" = $1, "currentPeriodEnd" = $2, "nextBillingAt" = $2,
       "billingCycleCount" = "billingCycleCount" + 1, "lastPaymentAt" = $3, "updatedAt" = $3
      WHERE "customerSubscriptionId" = $4`,
-    [newPeriodStart.toISOString(), newPeriodEnd.toISOString(), now.toISOString(), customerSubscriptionId]
+    [newPeriodStart.toISOString(), newPeriodEnd.toISOString(), now.toISOString(), customerSubscriptionId],
   );
 }
 
@@ -674,17 +723,16 @@ export async function advanceBillingCycle(customerSubscriptionId: string): Promi
 // ============================================================================
 
 export async function getSubscriptionOrder(subscriptionOrderId: string): Promise<SubscriptionOrder | null> {
-  const row = await queryOne<Record<string, any>>(
-    'SELECT * FROM "subscriptionOrder" WHERE "subscriptionOrderId" = $1',
-    [subscriptionOrderId]
-  );
+  const row = await queryOne<Record<string, any>>('SELECT * FROM "subscriptionOrder" WHERE "subscriptionOrderId" = $1', [
+    subscriptionOrderId,
+  ]);
   return row ? mapToSubscriptionOrder(row) : null;
 }
 
 export async function getSubscriptionOrders(customerSubscriptionId: string): Promise<SubscriptionOrder[]> {
   const rows = await query<Record<string, any>[]>(
     'SELECT * FROM "subscriptionOrder" WHERE "customerSubscriptionId" = $1 ORDER BY "billingCycleNumber" DESC',
-    [customerSubscriptionId]
+    [customerSubscriptionId],
   );
   return (rows || []).map(mapToSubscriptionOrder);
 }
@@ -693,7 +741,7 @@ export async function getSubscriptionOrdersPending(): Promise<SubscriptionOrder[
   const rows = await query<Record<string, any>[]>(
     `SELECT * FROM "subscriptionOrder" 
      WHERE "status" = 'pending' 
-     ORDER BY "scheduledAt" ASC`
+     ORDER BY "scheduledAt" ASC`,
   );
   return (rows || []).map(mapToSubscriptionOrder);
 }
@@ -703,7 +751,7 @@ export async function getFailedSubscriptionPayments(): Promise<SubscriptionOrder
     `SELECT * FROM "subscriptionOrder" 
      WHERE "status" = 'failed' 
      ORDER BY "failedAt" DESC 
-     LIMIT 100`
+     LIMIT 100`,
   );
   return (rows || []).map(mapToSubscriptionOrder);
 }
@@ -730,12 +778,19 @@ export async function createSubscriptionOrder(order: {
     ) VALUES ($1, $2, $3, $4, 'pending', $5, $6, $7, $8, $9, $10, $11, $12)
     RETURNING *`,
     [
-      order.customerSubscriptionId, order.billingCycleNumber,
-      order.periodStart.toISOString(), order.periodEnd.toISOString(),
-      order.subtotal, order.discountAmount || 0, order.taxAmount || 0,
-      order.shippingAmount || 0, totalAmount, order.scheduledAt?.toISOString(),
-      now, now
-    ]
+      order.customerSubscriptionId,
+      order.billingCycleNumber,
+      order.periodStart.toISOString(),
+      order.periodEnd.toISOString(),
+      order.subtotal,
+      order.discountAmount || 0,
+      order.taxAmount || 0,
+      order.shippingAmount || 0,
+      totalAmount,
+      order.scheduledAt?.toISOString(),
+      now,
+      now,
+    ],
   );
 
   return mapToSubscriptionOrder(result!);
@@ -744,7 +799,7 @@ export async function createSubscriptionOrder(order: {
 export async function updateSubscriptionOrderStatus(
   subscriptionOrderId: string,
   status: SubscriptionOrderStatus,
-  additionalFields?: { orderId?: string; failureReason?: string; paymentIntentId?: string }
+  additionalFields?: { orderId?: string; failureReason?: string; paymentIntentId?: string },
 ): Promise<void> {
   const now = new Date().toISOString();
   let setClause = '"status" = $1, "updatedAt" = $2';
@@ -777,10 +832,7 @@ export async function updateSubscriptionOrderStatus(
   }
 
   params.push(subscriptionOrderId);
-  await query(
-    `UPDATE "subscriptionOrder" SET ${setClause} WHERE "subscriptionOrderId" = $${paramIndex}`,
-    params
-  );
+  await query(`UPDATE "subscriptionOrder" SET ${setClause} WHERE "subscriptionOrderId" = $${paramIndex}`, params);
 }
 
 // ============================================================================
@@ -804,10 +856,15 @@ export async function createDunningAttempt(attempt: {
     ) VALUES ($1, $2, $3, 'pending', $4, $5, $6, $7, $8)
     RETURNING *`,
     [
-      attempt.customerSubscriptionId, attempt.subscriptionOrderId,
-      attempt.attemptNumber, attempt.amount, attempt.currency || 'USD',
-      attempt.scheduledAt.toISOString(), now, now
-    ]
+      attempt.customerSubscriptionId,
+      attempt.subscriptionOrderId,
+      attempt.attemptNumber,
+      attempt.amount,
+      attempt.currency || 'USD',
+      attempt.scheduledAt.toISOString(),
+      now,
+      now,
+    ],
   );
 
   return mapToDunningAttempt(result!);
@@ -816,7 +873,7 @@ export async function createDunningAttempt(attempt: {
 export async function getDunningAttempts(customerSubscriptionId: string): Promise<DunningAttempt[]> {
   const rows = await query<Record<string, any>[]>(
     'SELECT * FROM "dunningAttempt" WHERE "customerSubscriptionId" = $1 ORDER BY "attemptNumber" ASC',
-    [customerSubscriptionId]
+    [customerSubscriptionId],
   );
   return (rows || []).map(mapToDunningAttempt);
 }
@@ -826,7 +883,7 @@ export async function getPendingDunningAttempts(beforeDate: Date): Promise<Dunni
     `SELECT * FROM "dunningAttempt" 
      WHERE "status" = 'pending' AND "scheduledAt" <= $1 
      ORDER BY "scheduledAt" ASC`,
-    [beforeDate.toISOString()]
+    [beforeDate.toISOString()],
   );
   return (rows || []).map(mapToDunningAttempt);
 }
@@ -834,7 +891,7 @@ export async function getPendingDunningAttempts(beforeDate: Date): Promise<Dunni
 export async function updateDunningAttempt(
   dunningAttemptId: string,
   status: DunningStatus,
-  additionalFields?: Partial<DunningAttempt>
+  additionalFields?: Partial<DunningAttempt>,
 ): Promise<void> {
   const now = new Date().toISOString();
   let setClause = '"status" = $1, "updatedAt" = $2';
@@ -859,10 +916,7 @@ export async function updateDunningAttempt(
   }
 
   params.push(dunningAttemptId);
-  await query(
-    `UPDATE "dunningAttempt" SET ${setClause} WHERE "dunningAttemptId" = $${paramIndex}`,
-    params
-  );
+  await query(`UPDATE "dunningAttempt" SET ${setClause} WHERE "dunningAttemptId" = $${paramIndex}`, params);
 }
 
 // ============================================================================
@@ -873,7 +927,7 @@ async function generateSubscriptionNumber(): Promise<string> {
   const year = new Date().getFullYear();
   const result = await queryOne<{ count: string }>(
     `SELECT COUNT(*) as count FROM "customerSubscription" WHERE "subscriptionNumber" LIKE $1`,
-    [`SUB${year}%`]
+    [`SUB${year}%`],
   );
   const count = parseInt(result?.count || '0') + 1;
   return `SUB${year}-${count.toString().padStart(6, '0')}`;
@@ -886,7 +940,7 @@ function calculateNextBillingDate(from: Date, interval: BillingInterval, count: 
       date.setDate(date.getDate() + count);
       break;
     case 'week':
-      date.setDate(date.getDate() + (count * 7));
+      date.setDate(date.getDate() + count * 7);
       break;
     case 'month':
       date.setMonth(date.getMonth() + count);
@@ -924,7 +978,7 @@ function mapToSubscriptionProduct(row: Record<string, any>): SubscriptionProduct
     metadata: row.metadata,
     isActive: Boolean(row.isActive),
     createdAt: new Date(row.createdAt),
-    updatedAt: new Date(row.updatedAt)
+    updatedAt: new Date(row.updatedAt),
   };
 }
 
@@ -955,7 +1009,7 @@ function mapToSubscriptionPlan(row: Record<string, any>): SubscriptionPlan {
     isPopular: Boolean(row.isPopular),
     isActive: Boolean(row.isActive),
     createdAt: new Date(row.createdAt),
-    updatedAt: new Date(row.updatedAt)
+    updatedAt: new Date(row.updatedAt),
   };
 }
 
@@ -1003,7 +1057,7 @@ function mapToCustomerSubscription(row: Record<string, any>): CustomerSubscripti
     customizations: row.customizations,
     metadata: row.metadata,
     createdAt: new Date(row.createdAt),
-    updatedAt: new Date(row.updatedAt)
+    updatedAt: new Date(row.updatedAt),
   };
 }
 
@@ -1035,7 +1089,7 @@ function mapToSubscriptionOrder(row: Record<string, any>): SubscriptionOrder {
     lineItems: row.lineItems,
     metadata: row.metadata,
     createdAt: new Date(row.createdAt),
-    updatedAt: new Date(row.updatedAt)
+    updatedAt: new Date(row.updatedAt),
   };
 }
 
@@ -1057,7 +1111,7 @@ function mapToSubscriptionPause(row: Record<string, any>): SubscriptionPause {
     creditApplied: Boolean(row.creditApplied),
     metadata: row.metadata,
     createdAt: new Date(row.createdAt),
-    updatedAt: new Date(row.updatedAt)
+    updatedAt: new Date(row.updatedAt),
   };
 }
 
@@ -1086,6 +1140,6 @@ function mapToDunningAttempt(row: Record<string, any>): DunningAttempt {
     actionTakenAt: row.actionTakenAt ? new Date(row.actionTakenAt) : undefined,
     metadata: row.metadata,
     createdAt: new Date(row.createdAt),
-    updatedAt: new Date(row.updatedAt)
+    updatedAt: new Date(row.updatedAt),
   };
 }

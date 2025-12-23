@@ -39,10 +39,7 @@ export const listQuotes = async (req: Request, res: Response) => {
       params.push(status);
     }
 
-    const countResult = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM "b2bQuote" q ${whereClause}`,
-      params
-    );
+    const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "b2bQuote" q ${whereClause}`, params);
     const total = parseInt(countResult?.count || '0');
 
     params.push(limit, offset);
@@ -53,7 +50,7 @@ export const listQuotes = async (req: Request, res: Response) => {
        ${whereClause}
        ORDER BY q."createdAt" DESC
        LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`,
-      params
+      params,
     );
 
     const pages = Math.ceil(total / limit);
@@ -74,7 +71,7 @@ export const listQuotes = async (req: Request, res: Response) => {
     });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     b2bRespond(req, res, 'error', {
       pageName: 'Error',
       error: 'Failed to load quotes',
@@ -100,7 +97,7 @@ export const viewQuote = async (req: Request, res: Response) => {
        FROM "b2bQuote" q
        LEFT JOIN "b2bUser" u ON q."createdBy" = u."b2bUserId"
        WHERE q."quoteId" = $1 AND q."b2bCompanyId" = $2`,
-      [quoteId, user.companyId]
+      [quoteId, user.companyId],
     );
 
     if (!quote) {
@@ -116,7 +113,7 @@ export const viewQuote = async (req: Request, res: Response) => {
        FROM "b2bQuoteItem" qi
        JOIN "product" p ON qi."productId" = p."productId"
        WHERE qi."quoteId" = $1`,
-      [quoteId]
+      [quoteId],
     );
 
     b2bRespond(req, res, 'quotes/view', {
@@ -127,7 +124,7 @@ export const viewQuote = async (req: Request, res: Response) => {
     });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     b2bRespond(req, res, 'error', {
       pageName: 'Error',
       error: 'Failed to load quote',
@@ -152,7 +149,7 @@ export const createQuoteForm = async (req: Request, res: Response) => {
     });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     b2bRespond(req, res, 'error', {
       pageName: 'Error',
       error: 'Failed to load form',

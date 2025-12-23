@@ -14,7 +14,7 @@ export class GetOrderCommand {
   constructor(
     public readonly orderId?: string,
     public readonly orderNumber?: string,
-    public readonly customerId?: string // For authorization check
+    public readonly customerId?: string, // For authorization check
   ) {
     if (!orderId && !orderNumber) {
       throw new Error('Either orderId or orderNumber must be provided');
@@ -180,48 +180,52 @@ export class GetOrderUseCase {
         fulfillmentStatus: item.fulfillmentStatus,
         giftWrapped: item.giftWrapped,
         giftMessage: item.giftMessage,
-        isDigital: item.isDigital
+        isDigital: item.isDigital,
       })),
-      shippingAddress: order.shippingAddress ? {
-        orderAddressId: order.shippingAddress.orderAddressId,
-        addressType: order.shippingAddress.addressType,
-        firstName: order.shippingAddress.firstName,
-        lastName: order.shippingAddress.lastName,
-        fullName: order.shippingAddress.fullName,
-        company: order.shippingAddress.company,
-        address1: order.shippingAddress.address1,
-        address2: order.shippingAddress.address2,
-        city: order.shippingAddress.city,
-        state: order.shippingAddress.state,
-        postalCode: order.shippingAddress.postalCode,
-        country: order.shippingAddress.country,
-        countryCode: order.shippingAddress.countryCode,
-        phone: order.shippingAddress.phone,
-        email: order.shippingAddress.email,
-        fullAddress: order.shippingAddress.fullAddress
-      } : undefined,
-      billingAddress: order.billingAddress ? {
-        orderAddressId: order.billingAddress.orderAddressId,
-        addressType: order.billingAddress.addressType,
-        firstName: order.billingAddress.firstName,
-        lastName: order.billingAddress.lastName,
-        fullName: order.billingAddress.fullName,
-        company: order.billingAddress.company,
-        address1: order.billingAddress.address1,
-        address2: order.billingAddress.address2,
-        city: order.billingAddress.city,
-        state: order.billingAddress.state,
-        postalCode: order.billingAddress.postalCode,
-        country: order.billingAddress.country,
-        countryCode: order.billingAddress.countryCode,
-        phone: order.billingAddress.phone,
-        email: order.billingAddress.email,
-        fullAddress: order.billingAddress.fullAddress
-      } : undefined,
+      shippingAddress: order.shippingAddress
+        ? {
+            orderAddressId: order.shippingAddress.orderAddressId,
+            addressType: order.shippingAddress.addressType,
+            firstName: order.shippingAddress.firstName,
+            lastName: order.shippingAddress.lastName,
+            fullName: order.shippingAddress.fullName,
+            company: order.shippingAddress.company,
+            address1: order.shippingAddress.address1,
+            address2: order.shippingAddress.address2,
+            city: order.shippingAddress.city,
+            state: order.shippingAddress.state,
+            postalCode: order.shippingAddress.postalCode,
+            country: order.shippingAddress.country,
+            countryCode: order.shippingAddress.countryCode,
+            phone: order.shippingAddress.phone,
+            email: order.shippingAddress.email,
+            fullAddress: order.shippingAddress.fullAddress,
+          }
+        : undefined,
+      billingAddress: order.billingAddress
+        ? {
+            orderAddressId: order.billingAddress.orderAddressId,
+            addressType: order.billingAddress.addressType,
+            firstName: order.billingAddress.firstName,
+            lastName: order.billingAddress.lastName,
+            fullName: order.billingAddress.fullName,
+            company: order.billingAddress.company,
+            address1: order.billingAddress.address1,
+            address2: order.billingAddress.address2,
+            city: order.billingAddress.city,
+            state: order.billingAddress.state,
+            postalCode: order.billingAddress.postalCode,
+            country: order.billingAddress.country,
+            countryCode: order.billingAddress.countryCode,
+            phone: order.billingAddress.phone,
+            email: order.billingAddress.email,
+            fullAddress: order.billingAddress.fullAddress,
+          }
+        : undefined,
       tags: order.tags,
       metadata: order.metadata,
       createdAt: order.createdAt.toISOString(),
-      updatedAt: order.updatedAt.toISOString()
+      updatedAt: order.updatedAt.toISOString(),
     };
   }
 }

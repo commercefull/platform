@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function (knex) {
   return knex.schema.createTable('orderFulfillmentPackage', t => {
     t.uuid('orderFulfillmentPackageId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
@@ -12,7 +12,6 @@ exports.up = function(knex) {
     t.text('shippingLabelUrl');
     t.text('commercialInvoiceUrl');
     t.jsonb('customsInfo');
-    
 
     t.index('orderFulfillmentId');
     t.index('packageNumber');
@@ -22,6 +21,6 @@ exports.up = function(knex) {
   });
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTable('orderFulfillmentPackage');
 };

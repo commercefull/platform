@@ -2,8 +2,8 @@
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.up = function(knex) {
-  return knex.schema.createTable('fraudCheck', function(table) {
+exports.up = function (knex) {
+  return knex.schema.createTable('fraudCheck', function (table) {
     table.uuid('fraudCheckId').primary().defaultTo(knex.raw('uuidv7()'));
     table.uuid('orderId').references('orderId').inTable('order').onDelete('CASCADE');
     table.uuid('customerId').references('customerId').inTable('customer').onDelete('SET NULL');
@@ -41,7 +41,7 @@ exports.up = function(knex) {
     table.jsonb('metadata');
     table.timestamp('createdAt').defaultTo(knex.fn.now());
     table.timestamp('updatedAt').defaultTo(knex.fn.now());
-    
+
     table.index('orderId');
     table.index('customerId');
     table.index('status');
@@ -54,6 +54,6 @@ exports.up = function(knex) {
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTableIfExists('fraudCheck');
 };

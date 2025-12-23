@@ -1,12 +1,21 @@
 /**
  * Segment Entity
- * 
+ *
  * Represents a customer segment for targeted marketing and pricing.
  */
 
 export type SegmentType = 'static' | 'dynamic' | 'hybrid';
 export type EvaluationFrequency = 'realtime' | 'hourly' | 'daily' | 'weekly';
-export type RuleOperator = 'equals' | 'not_equals' | 'greater_than' | 'less_than' | 'contains' | 'not_contains' | 'in' | 'not_in' | 'between';
+export type RuleOperator =
+  | 'equals'
+  | 'not_equals'
+  | 'greater_than'
+  | 'less_than'
+  | 'contains'
+  | 'not_contains'
+  | 'in'
+  | 'not_in'
+  | 'between';
 export type LogicalOperator = 'AND' | 'OR';
 
 export interface SegmentRule {
@@ -39,19 +48,45 @@ export class Segment {
     this.props = props;
   }
 
-  get segmentId(): string { return this.props.segmentId; }
-  get name(): string { return this.props.name; }
-  get description(): string | undefined { return this.props.description; }
-  get type(): SegmentType { return this.props.type; }
-  get rules(): SegmentRule[] { return [...this.props.rules]; }
-  get staticMemberIds(): string[] { return [...this.props.staticMemberIds]; }
-  get evaluationFrequency(): EvaluationFrequency { return this.props.evaluationFrequency; }
-  get lastEvaluatedAt(): Date | undefined { return this.props.lastEvaluatedAt; }
-  get memberCount(): number { return this.props.memberCount; }
-  get isActive(): boolean { return this.props.isActive; }
-  get metadata(): Record<string, unknown> | undefined { return this.props.metadata; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get segmentId(): string {
+    return this.props.segmentId;
+  }
+  get name(): string {
+    return this.props.name;
+  }
+  get description(): string | undefined {
+    return this.props.description;
+  }
+  get type(): SegmentType {
+    return this.props.type;
+  }
+  get rules(): SegmentRule[] {
+    return [...this.props.rules];
+  }
+  get staticMemberIds(): string[] {
+    return [...this.props.staticMemberIds];
+  }
+  get evaluationFrequency(): EvaluationFrequency {
+    return this.props.evaluationFrequency;
+  }
+  get lastEvaluatedAt(): Date | undefined {
+    return this.props.lastEvaluatedAt;
+  }
+  get memberCount(): number {
+    return this.props.memberCount;
+  }
+  get isActive(): boolean {
+    return this.props.isActive;
+  }
+  get metadata(): Record<string, unknown> | undefined {
+    return this.props.metadata;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   static create(props: Omit<SegmentProps, 'segmentId' | 'createdAt' | 'updatedAt' | 'memberCount'>): Segment {
     const now = new Date();

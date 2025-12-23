@@ -1,6 +1,6 @@
 /**
  * GetPointsHistory Use Case
- * 
+ *
  * Retrieves the points transaction history for a customer.
  */
 

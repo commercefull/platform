@@ -8,7 +8,7 @@ const app = new cdk.App();
 // Environment configuration
 const env = {
   account: process.env.CDK_DEFAULT_ACCOUNT,
-  region: process.env.CDK_DEFAULT_REGION || 'us-east-1'
+  region: process.env.CDK_DEFAULT_REGION || 'us-east-1',
 };
 
 // Stack configuration
@@ -18,19 +18,19 @@ const stackProps = {
   tags: {
     Project: 'CommerceFull',
     Environment: process.env.ENVIRONMENT || 'prod',
-    ManagedBy: 'CDK'
-  }
+    ManagedBy: 'CDK',
+  },
 };
 
 // Deploy stacks
 new CommerceFullStack(app, 'CommerceFull-Infra', {
   ...stackProps,
-  stackName: 'CommerceFull-Infra'
+  stackName: 'CommerceFull-Infra',
 });
 
 new CommerceFullStack(app, 'CommerceFull-App', {
   ...stackProps,
-  stackName: 'CommerceFull-App'
+  stackName: 'CommerceFull-App',
 });
 
 app.synth();

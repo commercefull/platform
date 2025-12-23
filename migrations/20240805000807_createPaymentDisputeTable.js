@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function (knex) {
   return knex.schema.createTable('paymentDispute', t => {
     t.uuid('paymentDisputeId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
@@ -16,7 +16,6 @@ exports.up = function(knex) {
     t.timestamp('evidenceDueBy');
     t.string('gatewayDisputeId', 255);
     t.timestamp('resolvedAt');
-    
 
     t.index('merchantId');
     t.index('orderPaymentId');
@@ -28,6 +27,6 @@ exports.up = function(knex) {
   });
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTable('paymentDispute');
 };

@@ -31,10 +31,21 @@ export interface OrderFulfillment {
 }
 
 export type OrderFulfillmentCreateParams = Omit<OrderFulfillment, 'orderFulfillmentId' | 'createdAt' | 'updatedAt' | 'fulfillmentNumber'>;
-export type OrderFulfillmentUpdateParams = Partial<Pick<OrderFulfillment, 
-  'status' | 'trackingNumber' | 'trackingUrl' | 'carrierCode' | 'carrierName' | 
-  'shippingMethod' | 'shippedAt' | 'deliveredAt' | 'estimatedDeliveryDate' | 'notes'
->>;
+export type OrderFulfillmentUpdateParams = Partial<
+  Pick<
+    OrderFulfillment,
+    | 'status'
+    | 'trackingNumber'
+    | 'trackingUrl'
+    | 'carrierCode'
+    | 'carrierName'
+    | 'shippingMethod'
+    | 'shippedAt'
+    | 'deliveredAt'
+    | 'estimatedDeliveryDate'
+    | 'notes'
+  >
+>;
 
 export class OrderFulfillmentRepo {
   /**
@@ -50,20 +61,18 @@ export class OrderFulfillmentRepo {
    * Find fulfillment by ID
    */
   async findById(orderFulfillmentId: string): Promise<OrderFulfillment | null> {
-    return await queryOne<OrderFulfillment>(
-      `SELECT * FROM "public"."orderFulfillment" WHERE "orderFulfillmentId" = $1`,
-      [orderFulfillmentId]
-    );
+    return await queryOne<OrderFulfillment>(`SELECT * FROM "public"."orderFulfillment" WHERE "orderFulfillmentId" = $1`, [
+      orderFulfillmentId,
+    ]);
   }
 
   /**
    * Find fulfillment by number
    */
   async findByFulfillmentNumber(fulfillmentNumber: string): Promise<OrderFulfillment | null> {
-    return await queryOne<OrderFulfillment>(
-      `SELECT * FROM "public"."orderFulfillment" WHERE "fulfillmentNumber" = $1`,
-      [fulfillmentNumber]
-    );
+    return await queryOne<OrderFulfillment>(`SELECT * FROM "public"."orderFulfillment" WHERE "fulfillmentNumber" = $1`, [
+      fulfillmentNumber,
+    ]);
   }
 
   /**
@@ -72,7 +81,7 @@ export class OrderFulfillmentRepo {
   async findByOrderId(orderId: string): Promise<OrderFulfillment[]> {
     const results = await query<OrderFulfillment[]>(
       `SELECT * FROM "public"."orderFulfillment" WHERE "orderId" = $1 ORDER BY "createdAt" DESC`,
-      [orderId]
+      [orderId],
     );
     return results || [];
   }
@@ -86,7 +95,7 @@ export class OrderFulfillmentRepo {
        WHERE "status" = $1 
        ORDER BY "createdAt" DESC 
        LIMIT $2 OFFSET $3`,
-      [status, limit, offset]
+      [status, limit, offset],
     );
     return results || [];
   }
@@ -95,10 +104,9 @@ export class OrderFulfillmentRepo {
    * Find fulfillments by tracking number
    */
   async findByTrackingNumber(trackingNumber: string): Promise<OrderFulfillment[]> {
-    const results = await query<OrderFulfillment[]>(
-      `SELECT * FROM "public"."orderFulfillment" WHERE "trackingNumber" = $1`,
-      [trackingNumber]
-    );
+    const results = await query<OrderFulfillment[]>(`SELECT * FROM "public"."orderFulfillment" WHERE "trackingNumber" = $1`, [
+      trackingNumber,
+    ]);
     return results || [];
   }
 
@@ -111,7 +119,7 @@ export class OrderFulfillmentRepo {
        WHERE "carrierCode" = $1 
        ORDER BY "createdAt" DESC 
        LIMIT $2 OFFSET $3`,
-      [carrierCode, limit, offset]
+      [carrierCode, limit, offset],
     );
     return results || [];
   }
@@ -156,8 +164,8 @@ export class OrderFulfillmentRepo {
         params.notes || null,
         params.fulfilledBy || null,
         now,
-        now
-      ]
+        now,
+      ],
     );
 
     if (!result) {
@@ -195,7 +203,7 @@ export class OrderFulfillmentRepo {
        SET ${updateFields.join(', ')}
        WHERE "orderFulfillmentId" = $${paramIndex}
        RETURNING *`,
-      values
+      values,
     );
 
     return result;
@@ -221,17 +229,17 @@ export class OrderFulfillmentRepo {
    * Add tracking information
    */
   async addTracking(
-    orderFulfillmentId: string, 
-    trackingNumber: string, 
+    orderFulfillmentId: string,
+    trackingNumber: string,
     carrierCode?: string,
     carrierName?: string,
-    trackingUrl?: string
+    trackingUrl?: string,
   ): Promise<OrderFulfillment | null> {
     return this.update(orderFulfillmentId, {
       trackingNumber,
       carrierCode,
       carrierName,
-      trackingUrl
+      trackingUrl,
     });
   }
 
@@ -241,7 +249,7 @@ export class OrderFulfillmentRepo {
   async markAsShipped(orderFulfillmentId: string, shippedAt?: string): Promise<OrderFulfillment | null> {
     return this.update(orderFulfillmentId, {
       status: 'shipped',
-      shippedAt: shippedAt || unixTimestamp()
+      shippedAt: shippedAt || unixTimestamp(),
     });
   }
 
@@ -251,7 +259,7 @@ export class OrderFulfillmentRepo {
   async markAsDelivered(orderFulfillmentId: string, deliveredAt?: string): Promise<OrderFulfillment | null> {
     return this.update(orderFulfillmentId, {
       status: 'delivered',
-      deliveredAt: deliveredAt || unixTimestamp()
+      deliveredAt: deliveredAt || unixTimestamp(),
     });
   }
 
@@ -261,7 +269,7 @@ export class OrderFulfillmentRepo {
   async cancel(orderFulfillmentId: string, notes?: string): Promise<OrderFulfillment | null> {
     return this.update(orderFulfillmentId, {
       status: 'cancelled',
-      notes
+      notes,
     });
   }
 
@@ -271,7 +279,7 @@ export class OrderFulfillmentRepo {
   async delete(orderFulfillmentId: string): Promise<boolean> {
     const result = await queryOne<{ orderFulfillmentId: string }>(
       `DELETE FROM "public"."orderFulfillment" WHERE "orderFulfillmentId" = $1 RETURNING "orderFulfillmentId"`,
-      [orderFulfillmentId]
+      [orderFulfillmentId],
     );
 
     return !!result;
@@ -281,10 +289,9 @@ export class OrderFulfillmentRepo {
    * Count fulfillments by order
    */
   async countByOrderId(orderId: string): Promise<number> {
-    const result = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM "public"."orderFulfillment" WHERE "orderId" = $1`,
-      [orderId]
-    );
+    const result = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "public"."orderFulfillment" WHERE "orderId" = $1`, [
+      orderId,
+    ]);
 
     return result ? parseInt(result.count, 10) : 0;
   }
@@ -297,7 +304,7 @@ export class OrderFulfillmentRepo {
       `SELECT "status", COUNT(*) as count 
        FROM "public"."orderFulfillment" 
        GROUP BY "status"`,
-      []
+      [],
     );
 
     const stats: Record<string, number> = {};
@@ -321,7 +328,7 @@ export class OrderFulfillmentRepo {
        AND "estimatedDeliveryDate" IS NOT NULL 
        AND "estimatedDeliveryDate" < $1
        ORDER BY "estimatedDeliveryDate" ASC`,
-      [now]
+      [now],
     );
     return results || [];
   }
@@ -335,7 +342,7 @@ export class OrderFulfillmentRepo {
        WHERE "status" = 'shipped' 
        AND DATE("shippedAt") = CURRENT_DATE
        ORDER BY "shippedAt" DESC`,
-      []
+      [],
     );
     return results || [];
   }

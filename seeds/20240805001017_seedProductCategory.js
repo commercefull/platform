@@ -11,7 +11,7 @@ exports.up = function (knex) {
       isActive: true,
       includeInMenu: true,
       depth: 0,
-      path: '/'
+      path: '/',
     },
     {
       name: 'Electronics',
@@ -20,7 +20,7 @@ exports.up = function (knex) {
       isActive: true,
       includeInMenu: true,
       depth: 1,
-      path: '/electronics'
+      path: '/electronics',
     },
     {
       name: 'Apparel',
@@ -29,7 +29,7 @@ exports.up = function (knex) {
       isActive: true,
       includeInMenu: true,
       depth: 1,
-      path: '/apparel'
+      path: '/apparel',
     },
     {
       name: 'Home & Garden',
@@ -38,8 +38,8 @@ exports.up = function (knex) {
       isActive: true,
       includeInMenu: true,
       depth: 1,
-      path: '/home-garden'
-    }
+      path: '/home-garden',
+    },
   ]);
 };
 

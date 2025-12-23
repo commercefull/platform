@@ -10,11 +10,28 @@ exports.up = function (knex) {
     t.uuid('customerId').notNullable().references('customerId').inTable('customer').onDelete('CASCADE');
     t.string('sessionId', 255);
     t.enum('activityType', [
-      'login', 'logout', 'registration', 'passwordChange', 'profileUpdate', 
-      'orderPlaced', 'cartUpdate', 'wishlistUpdate', 'reviewSubmitted', 
-      'supportTicket', 'productView', 'categoryView', 'search', 'emailOpen', 
-      'emailClick', 'paymentMethodAdded', 'addressAdded', 'addressUpdated', 
-      'failedLogin', 'passwordReset', 'accountLocked', 'accountUnlocked'
+      'login',
+      'logout',
+      'registration',
+      'passwordChange',
+      'profileUpdate',
+      'orderPlaced',
+      'cartUpdate',
+      'wishlistUpdate',
+      'reviewSubmitted',
+      'supportTicket',
+      'productView',
+      'categoryView',
+      'search',
+      'emailOpen',
+      'emailClick',
+      'paymentMethodAdded',
+      'addressAdded',
+      'addressUpdated',
+      'failedLogin',
+      'passwordReset',
+      'accountLocked',
+      'accountUnlocked',
     ]).notNullable();
     t.string('ipAddress', 50);
     t.string('userAgent', 255);

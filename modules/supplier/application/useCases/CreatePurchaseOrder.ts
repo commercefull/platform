@@ -40,7 +40,7 @@ export interface CreatePurchaseOrderOutput {
 export class CreatePurchaseOrderUseCase {
   constructor(
     private readonly supplierRepository: any,
-    private readonly purchaseOrderRepository: any
+    private readonly purchaseOrderRepository: any,
   ) {}
 
   async execute(input: CreatePurchaseOrderInput): Promise<CreatePurchaseOrderOutput> {
@@ -64,8 +64,7 @@ export class CreatePurchaseOrderUseCase {
     const purchaseOrderId = `po_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 9)}`;
     const poNumber = `PO-${Date.now().toString().slice(-8)}`;
 
-    const expectedDelivery = input.expectedDeliveryDate || 
-      new Date(Date.now() + (supplier.leadTimeDays || 7) * 24 * 60 * 60 * 1000);
+    const expectedDelivery = input.expectedDeliveryDate || new Date(Date.now() + (supplier.leadTimeDays || 7) * 24 * 60 * 60 * 1000);
 
     const purchaseOrder = await this.purchaseOrderRepository.create({
       purchaseOrderId,

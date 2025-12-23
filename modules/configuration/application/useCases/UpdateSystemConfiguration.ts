@@ -24,7 +24,7 @@ export class UpdateSystemConfigurationCommand {
       notificationSettings?: any;
       integrationSettings?: any;
       metadata?: any;
-    }
+    },
   ) {}
 }
 
@@ -36,9 +36,7 @@ export interface UpdateSystemConfigurationResponse {
 }
 
 export class UpdateSystemConfigurationUseCase {
-  constructor(
-    private readonly systemConfigRepository: SystemConfigurationRepository
-  ) {}
+  constructor(private readonly systemConfigRepository: SystemConfigurationRepository) {}
 
   async execute(command: UpdateSystemConfigurationCommand): Promise<UpdateSystemConfigurationResponse> {
     // Find existing configuration
@@ -52,16 +50,21 @@ export class UpdateSystemConfigurationUseCase {
       existingConfig.changeSystemMode(command.updates.systemMode);
     }
 
-    if (command.updates.platformName || command.updates.platformDomain ||
-        command.updates.supportEmail || command.updates.defaultCurrency ||
-        command.updates.defaultLanguage || command.updates.timezone) {
+    if (
+      command.updates.platformName ||
+      command.updates.platformDomain ||
+      command.updates.supportEmail ||
+      command.updates.defaultCurrency ||
+      command.updates.defaultLanguage ||
+      command.updates.timezone
+    ) {
       existingConfig.updatePlatformSettings({
         platformName: command.updates.platformName,
         platformDomain: command.updates.platformDomain,
         supportEmail: command.updates.supportEmail,
         defaultCurrency: command.updates.defaultCurrency,
         defaultLanguage: command.updates.defaultLanguage,
-        timezone: command.updates.timezone
+        timezone: command.updates.timezone,
       });
     }
 
@@ -96,7 +99,7 @@ export class UpdateSystemConfigurationUseCase {
       configId: updatedConfig.configId,
       systemMode: updatedConfig.systemMode,
       platformName: updatedConfig.platformSettings.platformName,
-      updatedAt: updatedConfig.updatedAt.toISOString()
+      updatedAt: updatedConfig.updatedAt.toISOString(),
     };
   }
 }

@@ -16,7 +16,7 @@ export class GetCustomerOrdersCommand {
     public readonly limit: number = 20,
     public readonly offset: number = 0,
     public readonly orderBy: string = 'createdAt',
-    public readonly orderDirection: 'asc' | 'desc' = 'desc'
+    public readonly orderDirection: 'asc' | 'desc' = 'desc',
   ) {}
 }
 
@@ -61,7 +61,7 @@ export class GetCustomerOrdersUseCase {
       limit: command.limit,
       offset: command.offset,
       orderBy: command.orderBy,
-      orderDirection: command.orderDirection
+      orderDirection: command.orderDirection,
     };
 
     const result = await this.orderRepository.findByCustomerId(command.customerId, pagination);
@@ -71,7 +71,7 @@ export class GetCustomerOrdersUseCase {
       total: result.total,
       limit: result.limit,
       offset: result.offset,
-      hasMore: result.hasMore
+      hasMore: result.hasMore,
     };
   }
 
@@ -86,7 +86,7 @@ export class GetCustomerOrdersUseCase {
       totalItems: order.totalItems,
       currencyCode: order.currencyCode,
       orderDate: order.orderDate.toISOString(),
-      createdAt: order.createdAt.toISOString()
+      createdAt: order.createdAt.toISOString(),
     };
   }
 }

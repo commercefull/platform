@@ -18,7 +18,7 @@ export class CreateDataRequestCommand {
     public readonly reason?: string,
     public readonly requestedData?: string[],
     public readonly ipAddress?: string,
-    public readonly userAgent?: string
+    public readonly userAgent?: string,
   ) {}
 }
 
@@ -39,9 +39,7 @@ export interface CreateDataRequestResponse {
 // ============================================================================
 
 export class CreateDataRequestUseCase {
-  constructor(
-    private readonly gdprRepository: GdprDataRequestRepository
-  ) {}
+  constructor(private readonly gdprRepository: GdprDataRequestRepository) {}
 
   async execute(command: CreateDataRequestCommand): Promise<CreateDataRequestResponse> {
     // Validate
@@ -55,8 +53,7 @@ export class CreateDataRequestUseCase {
     // Check for existing pending request of same type
     const existingRequests = await this.gdprRepository.findByCustomerId(command.customerId);
     const hasPendingRequest = existingRequests.some(
-      r => r.requestType === command.requestType && 
-           ['pending', 'processing'].includes(r.status)
+      r => r.requestType === command.requestType && ['pending', 'processing'].includes(r.status),
     );
 
     if (hasPendingRequest) {
@@ -71,7 +68,7 @@ export class CreateDataRequestUseCase {
       reason: command.reason,
       requestedData: command.requestedData,
       ipAddress: command.ipAddress,
-      userAgent: command.userAgent
+      userAgent: command.userAgent,
     });
 
     // Save
@@ -82,7 +79,7 @@ export class CreateDataRequestUseCase {
       gdprDataRequestId: request.gdprDataRequestId,
       customerId: request.customerId,
       requestType: request.requestType,
-      deadlineAt: request.deadlineAt.toISOString()
+      deadlineAt: request.deadlineAt.toISOString(),
     });
 
     return {
@@ -90,7 +87,7 @@ export class CreateDataRequestUseCase {
       requestType: request.requestType,
       status: request.status,
       deadlineAt: request.deadlineAt.toISOString(),
-      createdAt: request.createdAt.toISOString()
+      createdAt: request.createdAt.toISOString(),
     };
   }
 }

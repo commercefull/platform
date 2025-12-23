@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function (knex) {
   return knex.schema.createTable('promotionRule', t => {
     t.uuid('promotionRuleId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
@@ -12,7 +12,6 @@ exports.up = function(knex) {
     t.boolean('isRequired').notNullable().defaultTo(true);
     t.string('ruleGroup', 100).defaultTo('default');
     t.integer('sortOrder').notNullable().defaultTo(0);
-    
 
     t.index('promotionId');
     t.index('condition');
@@ -23,6 +22,6 @@ exports.up = function(knex) {
   });
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTable('promotionRule');
 };

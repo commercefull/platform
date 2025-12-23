@@ -30,7 +30,7 @@ import {
   deleteQuote,
   getQuoteItems,
   saveQuoteItem,
-  deleteQuoteItem
+  deleteQuoteItem,
 } from '../../../modules/b2b/repos/quoteRepo';
 import { adminRespond } from 'web/respond';
 
@@ -46,11 +46,14 @@ export const listB2bCompanies = async (req: Request, res: Response): Promise<voi
     const limit = parseInt(req.query.limit as string) || 50;
     const offset = parseInt(req.query.offset as string) || 0;
 
-    const result = await getCompanies({
-      status: status as any,
-      tier: tier as any,
-      search
-    }, { limit, offset });
+    const result = await getCompanies(
+      {
+        status: status as any,
+        tier: tier as any,
+        search,
+      },
+      { limit, offset },
+    );
 
     adminRespond(req, res, 'programs/b2b/companies/index', {
       pageName: 'B2B Companies',
@@ -58,12 +61,12 @@ export const listB2bCompanies = async (req: Request, res: Response): Promise<voi
       total: result.total,
       filters: { status, tier, search },
       pagination: { limit, offset },
-      
-      success: req.query.success || null
+
+      success: req.query.success || null,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load B2B companies',
@@ -78,7 +81,7 @@ export const createB2bCompanyForm = async (req: Request, res: Response): Promise
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -112,7 +115,7 @@ export const createB2bCompany = async (req: Request, res: Response): Promise<voi
       requiresApproval,
       orderMinimum,
       orderMaximum,
-      taxExempt
+      taxExempt,
     } = req.body;
 
     const company = await saveCompany({
@@ -139,13 +142,12 @@ export const createB2bCompany = async (req: Request, res: Response): Promise<voi
       requiresApproval: requiresApproval === 'true',
       orderMinimum: orderMinimum ? parseFloat(orderMinimum) : undefined,
       orderMaximum: orderMaximum ? parseFloat(orderMaximum) : undefined,
-      taxExempt: taxExempt === 'true'
+      taxExempt: taxExempt === 'true',
     });
 
     res.redirect(`/hub/b2b/companies/${company.b2bCompanyId}?success=B2B company created successfully`);
   } catch (error: any) {
     logger.error('Error:', error);
-    
 
     adminRespond(req, res, 'programs/b2b/companies/create', {
       pageName: 'Create B2B Company',
@@ -178,12 +180,12 @@ export const viewB2bCompany = async (req: Request, res: Response): Promise<void>
       company,
       users,
       addresses,
-      
-      success: req.query.success || null
+
+      success: req.query.success || null,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load B2B company',
@@ -211,7 +213,7 @@ export const editB2bCompanyForm = async (req: Request, res: Response): Promise<v
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -248,7 +250,7 @@ export const updateB2bCompany = async (req: Request, res: Response): Promise<voi
       requiresApproval,
       orderMinimum,
       orderMaximum,
-      taxExempt
+      taxExempt,
     } = req.body;
 
     if (name !== undefined) updates.name = name;
@@ -278,13 +280,12 @@ export const updateB2bCompany = async (req: Request, res: Response): Promise<voi
 
     const company = await saveCompany({
       b2bCompanyId: companyId,
-      ...updates
+      ...updates,
     });
 
     res.redirect(`/hub/b2b/companies/${companyId}?success=B2B company updated successfully`);
   } catch (error: any) {
     logger.error('Error:', error);
-    
 
     try {
       const company = await getCompany(req.params.companyId);
@@ -313,7 +314,7 @@ export const approveB2bCompany = async (req: Request, res: Response): Promise<vo
     res.json({ success: true, message: 'B2B company approved successfully' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to approve B2B company' });
   }
 };
@@ -327,7 +328,7 @@ export const suspendB2bCompany = async (req: Request, res: Response): Promise<vo
     res.json({ success: true, message: 'B2B company suspended successfully' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to suspend B2B company' });
   }
 };
@@ -341,7 +342,7 @@ export const deleteB2bCompany = async (req: Request, res: Response): Promise<voi
     res.json({ success: true, message: 'B2B company deleted successfully' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to delete B2B company' });
   }
 };
@@ -371,12 +372,12 @@ export const listB2bCompanyUsers = async (req: Request, res: Response): Promise<
       company,
       users,
       filters: { includeInactive },
-      
-      success: req.query.success || null
+
+      success: req.query.success || null,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load B2B company users',
@@ -387,15 +388,7 @@ export const listB2bCompanyUsers = async (req: Request, res: Response): Promise<
 export const createB2bCompanyUser = async (req: Request, res: Response): Promise<void> => {
   try {
     const { companyId } = req.params;
-    const {
-      email,
-      firstName,
-      lastName,
-      phone,
-      jobTitle,
-      department,
-      role
-    } = req.body;
+    const { email, firstName, lastName, phone, jobTitle, department, role } = req.body;
 
     const user = await saveCompanyUser({
       b2bCompanyId: companyId,
@@ -405,13 +398,13 @@ export const createB2bCompanyUser = async (req: Request, res: Response): Promise
       phone: phone || undefined,
       jobTitle: jobTitle || undefined,
       department: department || undefined,
-      role: role || 'buyer'
+      role: role || 'buyer',
     });
 
     res.redirect(`/hub/b2b/companies/${companyId}/users?success=Company user created successfully`);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to create company user' });
   }
 };
@@ -425,7 +418,7 @@ export const deleteB2bCompanyUser = async (req: Request, res: Response): Promise
     res.json({ success: true, message: 'Company user deleted successfully' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to delete company user' });
   }
 };
@@ -442,11 +435,14 @@ export const listB2bQuotes = async (req: Request, res: Response): Promise<void> 
     const limit = parseInt(req.query.limit as string) || 50;
     const offset = parseInt(req.query.offset as string) || 0;
 
-    const result = await getQuotes({
-      companyId,
-      customerId,
-      status: status as any
-    }, { limit, offset });
+    const result = await getQuotes(
+      {
+        companyId,
+        customerId,
+        status: status as any,
+      },
+      { limit, offset },
+    );
 
     // Get companies for filtering
     const companies = await getCompanies();
@@ -458,12 +454,12 @@ export const listB2bQuotes = async (req: Request, res: Response): Promise<void> 
       companies,
       filters: { companyId, customerId, status },
       pagination: { limit, offset },
-      
-      success: req.query.success || null
+
+      success: req.query.success || null,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load B2B quotes',
@@ -485,7 +481,7 @@ export const createB2bQuoteForm = async (req: Request, res: Response): Promise<v
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -506,7 +502,7 @@ export const createB2bQuote = async (req: Request, res: Response): Promise<void>
       terms,
       conditions,
       paymentTerms,
-      paymentTermsDays
+      paymentTermsDays,
     } = req.body;
 
     const quote = await saveQuote({
@@ -520,13 +516,12 @@ export const createB2bQuote = async (req: Request, res: Response): Promise<void>
       terms,
       conditions,
       paymentTerms,
-      paymentTermsDays: paymentTermsDays ? parseInt(paymentTermsDays) : undefined
+      paymentTermsDays: paymentTermsDays ? parseInt(paymentTermsDays) : undefined,
     });
 
     res.redirect(`/hub/b2b/quotes/${quote.b2bQuoteId}?success=B2B quote created successfully`);
   } catch (error: any) {
     logger.error('Error:', error);
-    
 
     try {
       const companies = await getCompanies();
@@ -574,12 +569,12 @@ export const viewB2bQuote = async (req: Request, res: Response): Promise<void> =
       quote,
       items,
       company,
-      
-      success: req.query.success || null
+
+      success: req.query.success || null,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load B2B quote',
@@ -615,7 +610,7 @@ export const editB2bQuoteForm = async (req: Request, res: Response): Promise<voi
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -645,7 +640,7 @@ export const updateB2bQuote = async (req: Request, res: Response): Promise<void>
       discountValue,
       discountReason,
       shippingTotal,
-      handlingTotal
+      handlingTotal,
     } = req.body;
 
     if (b2bCompanyId !== undefined) updates.b2bCompanyId = b2bCompanyId;
@@ -668,13 +663,12 @@ export const updateB2bQuote = async (req: Request, res: Response): Promise<void>
 
     const quote = await saveQuote({
       b2bQuoteId: quoteId,
-      ...updates
+      ...updates,
     });
 
     res.redirect(`/hub/b2b/quotes/${quoteId}?success=B2B quote updated successfully`);
   } catch (error: any) {
     logger.error('Error:', error);
-    
 
     try {
       const quote = await getQuote(req.params.quoteId);
@@ -707,7 +701,7 @@ export const sendB2bQuote = async (req: Request, res: Response): Promise<void> =
     res.json({ success: true, message: 'Quote sent successfully' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to send quote' });
   }
 };
@@ -721,7 +715,7 @@ export const acceptB2bQuote = async (req: Request, res: Response): Promise<void>
     res.json({ success: true, message: 'Quote accepted successfully' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to accept quote' });
   }
 };
@@ -736,7 +730,7 @@ export const rejectB2bQuote = async (req: Request, res: Response): Promise<void>
     res.json({ success: true, message: 'Quote rejected successfully' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to reject quote' });
   }
 };
@@ -751,7 +745,7 @@ export const convertB2bQuoteToOrder = async (req: Request, res: Response): Promi
     res.json({ success: true, message: 'Quote converted to order successfully' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to convert quote to order' });
   }
 };
@@ -765,7 +759,7 @@ export const createB2bQuoteRevision = async (req: Request, res: Response): Promi
     res.redirect(`/hub/b2b/quotes/${newQuote.b2bQuoteId}?success=Quote revision created successfully`);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to create quote revision' });
   }
 };
@@ -779,7 +773,7 @@ export const deleteB2bQuote = async (req: Request, res: Response): Promise<void>
     res.json({ success: true, message: 'Quote deleted successfully' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to delete quote' });
   }
 };
@@ -810,7 +804,7 @@ export const addB2bQuoteItem = async (req: Request, res: Response): Promise<void
       position,
       notes,
       requestedDeliveryDate,
-      leadTimeDays
+      leadTimeDays,
     } = req.body;
 
     const item = await saveQuoteItem({
@@ -833,13 +827,13 @@ export const addB2bQuoteItem = async (req: Request, res: Response): Promise<void
       position: position ? parseInt(position) : 0,
       notes,
       requestedDeliveryDate: requestedDeliveryDate ? new Date(requestedDeliveryDate) : undefined,
-      leadTimeDays: leadTimeDays ? parseInt(leadTimeDays) : undefined
+      leadTimeDays: leadTimeDays ? parseInt(leadTimeDays) : undefined,
     });
 
     res.json({ success: true, message: 'Quote item added successfully', item });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to add quote item' });
   }
 };
@@ -849,17 +843,8 @@ export const updateB2bQuoteItem = async (req: Request, res: Response): Promise<v
     const { quoteId, itemId } = req.params;
     const updates: any = {};
 
-    const {
-      quantity,
-      unitPrice,
-      costPrice,
-      discountPercent,
-      discountAmount,
-      taxRate,
-      notes,
-      requestedDeliveryDate,
-      leadTimeDays
-    } = req.body;
+    const { quantity, unitPrice, costPrice, discountPercent, discountAmount, taxRate, notes, requestedDeliveryDate, leadTimeDays } =
+      req.body;
 
     if (quantity !== undefined) updates.quantity = parseInt(quantity);
     if (unitPrice !== undefined) updates.unitPrice = parseFloat(unitPrice);
@@ -868,19 +853,20 @@ export const updateB2bQuoteItem = async (req: Request, res: Response): Promise<v
     if (discountAmount !== undefined) updates.discountAmount = parseFloat(discountAmount);
     if (taxRate !== undefined) updates.taxRate = parseFloat(taxRate);
     if (notes !== undefined) updates.notes = notes;
-    if (requestedDeliveryDate !== undefined) updates.requestedDeliveryDate = requestedDeliveryDate ? new Date(requestedDeliveryDate) : undefined;
+    if (requestedDeliveryDate !== undefined)
+      updates.requestedDeliveryDate = requestedDeliveryDate ? new Date(requestedDeliveryDate) : undefined;
     if (leadTimeDays !== undefined) updates.leadTimeDays = leadTimeDays ? parseInt(leadTimeDays) : undefined;
 
     const item = await saveQuoteItem({
       b2bQuoteItemId: itemId,
       b2bQuoteId: quoteId,
-      ...updates
+      ...updates,
     });
 
     res.json({ success: true, message: 'Quote item updated successfully', item });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to update quote item' });
   }
 };
@@ -894,7 +880,7 @@ export const deleteB2bQuoteItem = async (req: Request, res: Response): Promise<v
     res.json({ success: true, message: 'Quote item deleted successfully' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to delete quote item' });
   }
 };
@@ -918,7 +904,7 @@ export const b2bQuoteAnalytics = async (req: Request, res: Response): Promise<vo
       quotesByStatus: {},
       quotesByMonth: [],
       topCustomers: [],
-      quoteApprovalTime: 0
+      quoteApprovalTime: 0,
     };
 
     adminRespond(req, res, 'programs/b2b/analytics/index', {
@@ -927,7 +913,7 @@ export const b2bQuoteAnalytics = async (req: Request, res: Response): Promise<vo
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load B2B quote analytics',

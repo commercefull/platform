@@ -8,25 +8,25 @@
  * @param requiredFields Array of required field names
  * @returns Validation result with isValid flag and message
  */
-export function validateRequest(data: any, requiredFields: string[]): { isValid: boolean, message: string } {
+export function validateRequest(data: any, requiredFields: string[]): { isValid: boolean; message: string } {
   const missingFields: string[] = [];
-  
+
   for (const field of requiredFields) {
     if (data[field] === undefined || data[field] === null || data[field] === '') {
       missingFields.push(field);
     }
   }
-  
+
   if (missingFields.length > 0) {
     return {
       isValid: false,
-      message: `Missing required fields: ${missingFields.join(', ')}`
+      message: `Missing required fields: ${missingFields.join(', ')}`,
     };
   }
-  
+
   return {
     isValid: true,
-    message: 'All required fields provided'
+    message: 'All required fields provided',
   };
 }
 
@@ -58,12 +58,12 @@ export function validatePhone(phone: string): boolean {
  */
 export function validatePassword(password: string, minLength: number = 8): boolean {
   if (password.length < minLength) return false;
-  
+
   // Check for at least one uppercase letter, one lowercase letter, and one digit
   const hasUppercase = /[A-Z]/.test(password);
   const hasLowercase = /[a-z]/.test(password);
   const hasDigit = /[0-9]/.test(password);
-  
+
   return hasUppercase && hasLowercase && hasDigit;
 }
 
@@ -71,5 +71,5 @@ export default {
   validateRequest,
   validateEmail,
   validatePhone,
-  validatePassword
+  validatePassword,
 };

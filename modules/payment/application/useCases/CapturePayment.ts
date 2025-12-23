@@ -1,6 +1,6 @@
 /**
  * CapturePayment Use Case
- * 
+ *
  * Captures a previously authorized payment.
  */
 
@@ -23,7 +23,7 @@ export interface CapturePaymentOutput {
 export class CapturePaymentUseCase {
   constructor(
     private readonly paymentRepository: any, // PaymentRepository
-    private readonly paymentGateway: any // PaymentGatewayService
+    private readonly paymentGateway: any, // PaymentGatewayService
   ) {}
 
   async execute(input: CapturePaymentInput): Promise<CapturePaymentOutput> {
@@ -67,7 +67,7 @@ export class CapturePaymentUseCase {
     transaction.capturedAmount = captureAmount;
     transaction.capturedAt = new Date();
     transaction.gatewayResponse = gatewayResult.response;
-    
+
     await this.paymentRepository.updateTransaction(transaction);
 
     // Emit event

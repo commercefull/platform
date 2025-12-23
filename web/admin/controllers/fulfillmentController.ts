@@ -44,12 +44,12 @@ export const listFulfillments = async (req: Request, res: Response): Promise<voi
       filters: { status, warehouseId },
       warehouses,
       pagination: { limit, offset },
-      
-      success: req.query.success || null
+
+      success: req.query.success || null,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load fulfillments',
@@ -78,12 +78,12 @@ export const viewFulfillment = async (req: Request, res: Response): Promise<void
       pageName: `Fulfillment: ${fulfillment.fulfillmentNumber}`,
       fulfillment,
       order,
-      
-      success: req.query.success || null
+
+      success: req.query.success || null,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load fulfillment',
@@ -116,11 +116,11 @@ export const updateFulfillmentStatus = async (req: Request, res: Response): Prom
     res.json({
       success: true,
       message: `Fulfillment status updated to ${status}`,
-      fulfillment
+      fulfillment,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to update fulfillment status' });
   }
 };
@@ -145,11 +145,11 @@ export const markAsShipped = async (req: Request, res: Response): Promise<void> 
     res.json({
       success: true,
       message: 'Fulfillment marked as shipped',
-      fulfillment
+      fulfillment,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to mark as shipped' });
   }
 };
@@ -167,11 +167,11 @@ export const markAsDelivered = async (req: Request, res: Response): Promise<void
     res.json({
       success: true,
       message: 'Fulfillment marked as delivered',
-      fulfillment
+      fulfillment,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to mark as delivered' });
   }
 };
@@ -190,11 +190,11 @@ export const cancelFulfillment = async (req: Request, res: Response): Promise<vo
     res.json({
       success: true,
       message: 'Fulfillment cancelled',
-      fulfillment
+      fulfillment,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to cancel fulfillment' });
   }
 };
@@ -209,11 +209,11 @@ export const getFulfillmentStats = async (req: Request, res: Response): Promise<
       success: true,
       stats,
       overdueCount: overdue.length,
-      shippedTodayCount: shippedToday.length
+      shippedTodayCount: shippedToday.length,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to get fulfillment stats' });
   }
 };
@@ -252,7 +252,7 @@ export const warehouseDashboard = async (req: Request, res: Response): Promise<v
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load warehouse dashboard',

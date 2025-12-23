@@ -33,12 +33,12 @@ export const listContentPages = async (req: Request, res: Response): Promise<voi
       contentTypes,
       filters: { status, contentTypeId },
       pagination: { limit, offset },
-      
-      success: req.query.success || null
+
+      success: req.query.success || null,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load content pages',
@@ -58,7 +58,7 @@ export const createContentPageForm = async (req: Request, res: Response): Promis
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -81,27 +81,27 @@ export const createContentPage = async (req: Request, res: Response): Promise<vo
       status,
       visibility,
       accessPassword,
-      isHomePage
+      isHomePage,
     } = req.body;
 
     const command = new CreatePageCommand(
-      title,                                                                 // 1. title
-      slug,                                                                  // 2. slug
-      contentTypeId,                                                         // 3. contentTypeId
-      templateId || undefined,                                              // 4. templateId
-      status as 'draft' | 'published' | 'scheduled' | 'archived',           // 5. status
-      visibility as 'public' | 'private' | 'password_protected',            // 6. visibility
-      summary || undefined,                                                 // 7. summary
-      featuredImage || undefined,                                           // 8. featuredImage
-      undefined,                                                            // 9. parentId (not implemented yet)
-      metaTitle || undefined,                                               // 10. metaTitle
-      metaDescription || undefined,                                         // 11. metaDescription
-      metaKeywords || undefined,                                            // 12. metaKeywords
-      undefined,                                                            // 13. customFields (not implemented yet)
-      undefined,                                                            // 14. publishedAt (handled by status)
-      undefined,                                                            // 15. scheduledAt (not implemented yet)
-      isHomePage === 'true',                                                // 16. isHomePage
-      undefined                                                             // 17. createdBy (not implemented yet)
+      title, // 1. title
+      slug, // 2. slug
+      contentTypeId, // 3. contentTypeId
+      templateId || undefined, // 4. templateId
+      status as 'draft' | 'published' | 'scheduled' | 'archived', // 5. status
+      visibility as 'public' | 'private' | 'password_protected', // 6. visibility
+      summary || undefined, // 7. summary
+      featuredImage || undefined, // 8. featuredImage
+      undefined, // 9. parentId (not implemented yet)
+      metaTitle || undefined, // 10. metaTitle
+      metaDescription || undefined, // 11. metaDescription
+      metaKeywords || undefined, // 12. metaKeywords
+      undefined, // 13. customFields (not implemented yet)
+      undefined, // 14. publishedAt (handled by status)
+      undefined, // 15. scheduledAt (not implemented yet)
+      isHomePage === 'true', // 16. isHomePage
+      undefined, // 17. createdBy (not implemented yet)
     );
 
     const useCase = new CreatePageUseCase(ContentRepo);
@@ -110,7 +110,6 @@ export const createContentPage = async (req: Request, res: Response): Promise<vo
     res.redirect(`/hub/content/pages/${result.id}?success=Content page created successfully`);
   } catch (error: any) {
     logger.error('Error:', error);
-    
 
     try {
       const contentTypes = await ContentRepo.findAllContentTypes(true);
@@ -153,12 +152,12 @@ export const viewContentPage = async (req: Request, res: Response): Promise<void
       pageName: `Page: ${page.title}`,
       page,
       blocks,
-      
-      success: req.query.success || null
+
+      success: req.query.success || null,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load content page',
@@ -191,7 +190,7 @@ export const editContentPageForm = async (req: Request, res: Response): Promise<
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -217,7 +216,7 @@ export const updateContentPage = async (req: Request, res: Response): Promise<vo
       status,
       visibility,
       accessPassword,
-      isHomePage
+      isHomePage,
     } = req.body;
 
     if (title !== undefined) updates.title = title;
@@ -241,7 +240,6 @@ export const updateContentPage = async (req: Request, res: Response): Promise<vo
     res.redirect(`/hub/content/pages/${pageId}?success=Content page updated successfully`);
   } catch (error: any) {
     logger.error('Error:', error);
-    
 
     try {
       const page = await ContentRepo.findPageById(req.params.pageId);
@@ -276,7 +274,7 @@ export const publishContentPage = async (req: Request, res: Response): Promise<v
     res.json({ success: true, message: 'Content page published successfully' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to publish content page' });
   }
 };
@@ -294,7 +292,7 @@ export const deleteContentPage = async (req: Request, res: Response): Promise<vo
     res.json({ success: true, message: 'Content page deleted successfully' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to delete content page' });
   }
 };
@@ -310,12 +308,12 @@ export const listContentTemplates = async (req: Request, res: Response): Promise
     adminRespond(req, res, 'content/templates/index', {
       pageName: 'Content Templates',
       templates,
-      
-      success: req.query.success || null
+
+      success: req.query.success || null,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load content templates',
@@ -335,12 +333,12 @@ export const listContentMedia = async (req: Request, res: Response): Promise<voi
     adminRespond(req, res, 'content/media/index', {
       pageName: 'Media Library',
       mediaItems,
-      
-      success: req.query.success || null
+
+      success: req.query.success || null,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load media library',

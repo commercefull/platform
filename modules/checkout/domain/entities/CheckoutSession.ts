@@ -44,13 +44,7 @@ export class CheckoutSession {
     this.props = props;
   }
 
-  static create(props: {
-    id: string;
-    basketId: string;
-    customerId?: string;
-    guestEmail?: string;
-    currency?: string;
-  }): CheckoutSession {
+  static create(props: { id: string; basketId: string; customerId?: string; guestEmail?: string; currency?: string }): CheckoutSession {
     const now = new Date();
     const currency = props.currency || 'USD';
 
@@ -69,7 +63,7 @@ export class CheckoutSession {
       total: Money.zero(currency),
       createdAt: now,
       updatedAt: now,
-      expiresAt: new Date(now.getTime() + 30 * 60 * 1000) // 30 minutes
+      expiresAt: new Date(now.getTime() + 30 * 60 * 1000), // 30 minutes
     });
   }
 
@@ -191,11 +185,7 @@ export class CheckoutSession {
   }
 
   get isReadyForPayment(): boolean {
-    return (
-      !!this.props.shippingAddress &&
-      !!this.props.shippingMethodId &&
-      !this.props.total.isZero()
-    );
+    return !!this.props.shippingAddress && !!this.props.shippingMethodId && !this.props.total.isZero();
   }
 
   // Domain methods
@@ -324,15 +314,10 @@ export class CheckoutSession {
 
   private recalculateTotal(): void {
     const currency = this.props.subtotal.currency;
-    let total = this.props.subtotal
-      .add(this.props.taxAmount)
-      .add(this.props.shippingAmount);
+    let total = this.props.subtotal.add(this.props.taxAmount).add(this.props.shippingAmount);
 
     if (!this.props.discountAmount.isZero()) {
-      total = Money.create(
-        Math.max(0, total.amount - this.props.discountAmount.amount),
-        currency
-      );
+      total = Money.create(Math.max(0, total.amount - this.props.discountAmount.amount), currency);
     }
 
     this.props.total = total;
@@ -370,7 +355,7 @@ export class CheckoutSession {
       createdAt: this.props.createdAt.toISOString(),
       updatedAt: this.props.updatedAt.toISOString(),
       completedAt: this.props.completedAt?.toISOString(),
-      expiresAt: this.props.expiresAt.toISOString()
+      expiresAt: this.props.expiresAt.toISOString(),
     };
   }
 }

@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function (knex) {
   return knex.schema.createTable('productSeo', t => {
     t.uuid('productSeoId').primary().defaultTo(knex.raw('uuidv7()'));
     t.uuid('productId').notNullable().references('productId').inTable('product').onDelete('CASCADE').unique();
@@ -24,6 +24,6 @@ exports.up = function(knex) {
   });
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTable('productSeo');
 };

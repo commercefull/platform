@@ -7,14 +7,15 @@ import axios, { AxiosInstance } from 'axios';
 import { API_BASE, TEST_DATA } from '../testConstants';
 import { ADMIN_CREDENTIALS } from '../../testConstants';
 
-const createClient = (): AxiosInstance => axios.create({
-  baseURL: process.env.API_URL || 'http://localhost:3000',
-  validateStatus: () => true,
-  headers: {
-    'Accept': 'application/json',
-    'Content-Type': 'application/json'
-  }
-});
+const createClient = (): AxiosInstance =>
+  axios.create({
+    baseURL: process.env.API_URL || 'http://localhost:3000',
+    validateStatus: () => true,
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+  });
 
 describe('Content Media API', () => {
   let client: AxiosInstance;
@@ -24,7 +25,7 @@ describe('Content Media API', () => {
 
   beforeAll(async () => {
     client = createClient();
-    
+
     // Get auth token
     const loginResponse = await client.post('/business/auth/login', ADMIN_CREDENTIALS, { headers: { 'X-Test-Request': 'true' } });
     if (loginResponse.data.accessToken) {
@@ -59,7 +60,7 @@ describe('Content Media API', () => {
     describe('POST /content/media-folders', () => {
       it('should create a new folder', async () => {
         const folderData = {
-          name: `Test Folder ${Date.now()}`
+          name: `Test Folder ${Date.now()}`,
         };
 
         const response = await client.post(`${API_BASE}/media-folders`, folderData);
@@ -77,7 +78,7 @@ describe('Content Media API', () => {
 
         const childFolderData = {
           name: `Child Folder ${Date.now()}`,
-          parentId: createdFolderId
+          parentId: createdFolderId,
         };
 
         const response = await client.post(`${API_BASE}/media-folders`, childFolderData);
@@ -112,7 +113,7 @@ describe('Content Media API', () => {
         if (!createdFolderId) return;
 
         const updateData = {
-          name: 'Updated Folder Name'
+          name: 'Updated Folder Name',
         };
 
         const response = await client.put(`${API_BASE}/media-folders/${createdFolderId}`, updateData);
@@ -157,14 +158,13 @@ describe('Content Media API', () => {
           ...TEST_DATA.media,
           title: `Test Media ${Date.now()}`,
           fileName: `test-media-${Date.now()}.jpg`,
-          contentMediaFolderId: createdFolderId
+          contentMediaFolderId: createdFolderId,
         };
 
         const response = await client.post(`${API_BASE}/media`, mediaData);
 
         // Accept 201 (success) or 500 (server issues with media upload)
         if (response.status === 500) {
-          
           return;
         }
 
@@ -211,7 +211,7 @@ describe('Content Media API', () => {
 
         const updateData = {
           title: 'Updated Media Title',
-          altText: 'Updated alt text'
+          altText: 'Updated alt text',
         };
 
         const response = await client.put(`${API_BASE}/media/${createdMediaId}`, updateData);
@@ -228,7 +228,7 @@ describe('Content Media API', () => {
 
         const response = await client.post(`${API_BASE}/media/move`, {
           mediaIds: [createdMediaId],
-          contentMediaFolderId: createdChildFolderId
+          contentMediaFolderId: createdChildFolderId,
         });
 
         expect(response.status).toBe(200);
@@ -241,7 +241,7 @@ describe('Content Media API', () => {
 
         const response = await client.post(`${API_BASE}/media/move`, {
           mediaIds: [createdMediaId],
-          contentMediaFolderId: null
+          contentMediaFolderId: null,
         });
 
         expect(response.status).toBe(200);

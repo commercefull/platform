@@ -5,7 +5,7 @@ describe('Warehouse Feature Tests', () => {
   let client: AxiosInstance;
   let adminToken: string;
   const createdResources = {
-    warehouseIds: [] as string[]
+    warehouseIds: [] as string[],
   };
 
   beforeAll(async () => {
@@ -29,7 +29,7 @@ describe('Warehouse Feature Tests', () => {
       const warehouseData = createTestWarehouse();
 
       const response = await client.post('/business/warehouses', warehouseData, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
 
       expect(response.status).toBe(201);
@@ -42,7 +42,7 @@ describe('Warehouse Feature Tests', () => {
 
     it('UC-WHS-001: should list warehouses', async () => {
       const response = await client.get('/business/warehouses', {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
 
       expect(response.status).toBe(200);
@@ -52,7 +52,7 @@ describe('Warehouse Feature Tests', () => {
 
     it('UC-WHS-002: should get a specific warehouse', async () => {
       const response = await client.get(`/business/warehouses/${testWarehouseId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
 
       expect(response.status).toBe(200);
@@ -64,7 +64,7 @@ describe('Warehouse Feature Tests', () => {
       const updateData = { description: 'Updated warehouse description' };
 
       const response = await client.put(`/business/warehouses/${testWarehouseId}`, updateData, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
 
       expect(response.status).toBe(200);
@@ -84,7 +84,7 @@ describe('Warehouse Feature Tests', () => {
     beforeAll(async () => {
       const warehouseData = createTestWarehouse();
       const response = await client.post('/business/warehouses', warehouseData, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
       testWarehouseId = response.data.data.distributionWarehouseId;
       createdResources.warehouseIds.push(testWarehouseId);
@@ -94,7 +94,7 @@ describe('Warehouse Feature Tests', () => {
       const zoneData = createTestZone();
 
       const response = await client.post(`/business/warehouses/${testWarehouseId}/zones`, zoneData, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
 
       expect(response.status).toBe(201);
@@ -106,7 +106,7 @@ describe('Warehouse Feature Tests', () => {
 
     it('UC-WHS-006: should list warehouse zones', async () => {
       const response = await client.get(`/business/warehouses/${testWarehouseId}/zones`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
 
       expect(response.status).toBe(200);
@@ -118,7 +118,7 @@ describe('Warehouse Feature Tests', () => {
       const updateData = { type: 'picking' };
 
       const response = await client.put(`/business/warehouses/${testWarehouseId}/zones/${testZoneId}`, updateData, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
 
       expect(response.status).toBe(200);
@@ -139,14 +139,14 @@ describe('Warehouse Feature Tests', () => {
     beforeAll(async () => {
       const warehouseData = createTestWarehouse();
       const whResponse = await client.post('/business/warehouses', warehouseData, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
       testWarehouseId = whResponse.data.data.distributionWarehouseId;
       createdResources.warehouseIds.push(testWarehouseId);
 
       const zoneData = createTestZone();
       const zoneResponse = await client.post(`/business/warehouses/${testWarehouseId}/zones`, zoneData, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
       testZoneId = zoneResponse.data.data.distributionWarehouseZoneId;
     });
@@ -158,11 +158,11 @@ describe('Warehouse Feature Tests', () => {
         aisle: 'A',
         rack: '1',
         shelf: '1',
-        bin: '1'
+        bin: '1',
       };
 
       const response = await client.post(`/business/warehouses/${testWarehouseId}/bins`, binData, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
 
       expect(response.status).toBe(201);
@@ -174,7 +174,7 @@ describe('Warehouse Feature Tests', () => {
 
     it('UC-WHS-010: should list bin locations', async () => {
       const response = await client.get(`/business/warehouses/${testWarehouseId}/bins`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
 
       expect(response.status).toBe(200);
@@ -186,7 +186,7 @@ describe('Warehouse Feature Tests', () => {
       const updateData = { shelf: '2' };
 
       const response = await client.put(`/business/warehouses/${testWarehouseId}/bins/${testBinId}`, updateData, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
 
       expect(response.status).toBe(200);
@@ -205,7 +205,7 @@ describe('Warehouse Feature Tests', () => {
     beforeAll(async () => {
       const warehouseData = createTestWarehouse();
       const response = await client.post('/business/warehouses', warehouseData, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
       testWarehouseId = response.data.data.distributionWarehouseId;
       createdResources.warehouseIds.push(testWarehouseId);
@@ -214,11 +214,11 @@ describe('Warehouse Feature Tests', () => {
     it('UC-WHS-016: should create a pick task', async () => {
       const pickData = {
         orderIds: ['order-001'],
-        priority: 'high'
+        priority: 'high',
       };
 
       const response = await client.post(`/business/warehouses/${testWarehouseId}/pick-tasks`, pickData, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
 
       expect(response.status).toBe(201);
@@ -237,7 +237,7 @@ describe('Warehouse Feature Tests', () => {
 
     it('should reject invalid tokens', async () => {
       const response = await client.get('/business/warehouses', {
-        headers: { Authorization: 'Bearer invalid-token' }
+        headers: { Authorization: 'Bearer invalid-token' },
       });
       expect(response.status).toBe(401);
     });

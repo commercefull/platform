@@ -1,5 +1,5 @@
 // FAQ Accordion Functionality
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   const faqToggles = document.querySelectorAll('.faq-toggle');
   const categoryButtons = document.querySelectorAll('#faqCategories button');
   const faqItems = document.querySelectorAll('.faq-item');
@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Toggle FAQ items
   faqToggles.forEach(toggle => {
-    toggle.addEventListener('click', function() {
+    toggle.addEventListener('click', function () {
       const content = this.nextElementSibling;
       const icon = this.querySelector('svg');
 
@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Category filtering
   categoryButtons.forEach(button => {
-    button.addEventListener('click', function() {
+    button.addEventListener('click', function () {
       const category = this.getAttribute('data-category');
 
       // Update active button styling
@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Search functionality
   let searchTimeout;
-  searchInput.addEventListener('input', function() {
+  searchInput.addEventListener('input', function () {
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
       const searchTerm = this.value.toLowerCase().trim();

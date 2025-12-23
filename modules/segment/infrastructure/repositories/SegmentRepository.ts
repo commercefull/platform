@@ -5,22 +5,14 @@
 
 import { query, queryOne } from '../../../../libs/db';
 import { Segment, SegmentType } from '../../domain/entities/Segment';
-import {
-  ISegmentRepository,
-  SegmentFilters,
-  PaginationOptions,
-  PaginatedResult,
-} from '../../domain/repositories/SegmentRepository';
+import { ISegmentRepository, SegmentFilters, PaginationOptions, PaginatedResult } from '../../domain/repositories/SegmentRepository';
 
 export class SegmentRepository implements ISegmentRepository {
   async save(segment: Segment): Promise<Segment> {
     const props = segment.toPersistence();
     const now = new Date().toISOString();
 
-    const existing = await queryOne<Record<string, any>>(
-      'SELECT "segmentId" FROM segment WHERE "segmentId" = $1',
-      [props.segmentId]
-    );
+    const existing = await queryOne<Record<string, any>>('SELECT "segmentId" FROM segment WHERE "segmentId" = $1', [props.segmentId]);
 
     if (existing) {
       // Update
@@ -51,7 +43,7 @@ export class SegmentRepository implements ISegmentRepository {
           props.metadata ? JSON.stringify(props.metadata) : null,
           now,
           props.segmentId,
-        ]
+        ],
       );
     } else {
       // Insert
@@ -75,7 +67,7 @@ export class SegmentRepository implements ISegmentRepository {
           props.metadata ? JSON.stringify(props.metadata) : null,
           now,
           now,
-        ]
+        ],
       );
     }
 
@@ -84,39 +76,30 @@ export class SegmentRepository implements ISegmentRepository {
   }
 
   async findById(segmentId: string): Promise<Segment | null> {
-    const row = await queryOne<Record<string, any>>(
-      'SELECT * FROM segment WHERE "segmentId" = $1',
-      [segmentId]
-    );
+    const row = await queryOne<Record<string, any>>('SELECT * FROM segment WHERE "segmentId" = $1', [segmentId]);
 
     if (!row) return null;
     return this.mapToSegment(row);
   }
 
-  async findAll(
-    filters?: SegmentFilters,
-    pagination?: PaginationOptions
-  ): Promise<PaginatedResult<Segment>> {
+  async findAll(filters?: SegmentFilters, pagination?: PaginationOptions): Promise<PaginatedResult<Segment>> {
     const page = pagination?.page || 1;
     const limit = pagination?.limit || 20;
     const offset = (page - 1) * limit;
 
     const { whereClause, params } = this.buildWhereClause(filters);
 
-    const countResult = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM segment ${whereClause}`,
-      params
-    );
+    const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM segment ${whereClause}`, params);
     const total = parseInt(countResult?.count || '0', 10);
 
     const rows = await query<Record<string, any>[]>(
       `SELECT * FROM segment ${whereClause}
        ORDER BY name ASC
        LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
-      [...params, limit, offset]
+      [...params, limit, offset],
     );
 
-    const data = (rows || []).map((row) => this.mapToSegment(row));
+    const data = (rows || []).map(row => this.mapToSegment(row));
 
     return {
       data,
@@ -129,22 +112,18 @@ export class SegmentRepository implements ISegmentRepository {
 
   async findByCustomerId(customerId: string): Promise<Segment[]> {
     // Find segments where customer is a static member
-    const rows = await query<Record<string, any>[]>(
-      `SELECT * FROM segment WHERE "staticMemberIds"::jsonb ? $1 AND "isActive" = true`,
-      [customerId]
-    );
+    const rows = await query<Record<string, any>[]>(`SELECT * FROM segment WHERE "staticMemberIds"::jsonb ? $1 AND "isActive" = true`, [
+      customerId,
+    ]);
 
-    return (rows || []).map((row) => this.mapToSegment(row));
+    return (rows || []).map(row => this.mapToSegment(row));
   }
 
   async delete(segmentId: string): Promise<boolean> {
     // First delete memberships
     await query('DELETE FROM "segmentMember" WHERE "segmentId" = $1', [segmentId]);
 
-    const result = await query<{ rowCount?: number }>(
-      'DELETE FROM segment WHERE "segmentId" = $1',
-      [segmentId]
-    );
+    const result = await query<{ rowCount?: number }>('DELETE FROM segment WHERE "segmentId" = $1', [segmentId]);
 
     return (result as any)?.rowCount > 0;
   }
@@ -152,49 +131,42 @@ export class SegmentRepository implements ISegmentRepository {
   // ===== Membership Operations =====
 
   async addMember(segmentId: string, customerId: string): Promise<void> {
-    const existing = await queryOne<Record<string, any>>(
-      'SELECT * FROM "segmentMember" WHERE "segmentId" = $1 AND "customerId" = $2',
-      [segmentId, customerId]
-    );
+    const existing = await queryOne<Record<string, any>>('SELECT * FROM "segmentMember" WHERE "segmentId" = $1 AND "customerId" = $2', [
+      segmentId,
+      customerId,
+    ]);
 
     if (!existing) {
       await query(
         `INSERT INTO "segmentMember" ("segmentId", "customerId", "addedAt")
          VALUES ($1, $2, NOW())`,
-        [segmentId, customerId]
+        [segmentId, customerId],
       );
     }
   }
 
   async removeMember(segmentId: string, customerId: string): Promise<void> {
-    await query(
-      'DELETE FROM "segmentMember" WHERE "segmentId" = $1 AND "customerId" = $2',
-      [segmentId, customerId]
-    );
+    await query('DELETE FROM "segmentMember" WHERE "segmentId" = $1 AND "customerId" = $2', [segmentId, customerId]);
   }
 
-  async getMembers(
-    segmentId: string,
-    pagination?: PaginationOptions
-  ): Promise<PaginatedResult<string>> {
+  async getMembers(segmentId: string, pagination?: PaginationOptions): Promise<PaginatedResult<string>> {
     const page = pagination?.page || 1;
     const limit = pagination?.limit || 20;
     const offset = (page - 1) * limit;
 
-    const countResult = await queryOne<{ count: string }>(
-      'SELECT COUNT(*) as count FROM "segmentMember" WHERE "segmentId" = $1',
-      [segmentId]
-    );
+    const countResult = await queryOne<{ count: string }>('SELECT COUNT(*) as count FROM "segmentMember" WHERE "segmentId" = $1', [
+      segmentId,
+    ]);
     const total = parseInt(countResult?.count || '0', 10);
 
     const rows = await query<{ customerId: string }[]>(
       `SELECT "customerId" FROM "segmentMember" WHERE "segmentId" = $1
        ORDER BY "addedAt" DESC
        LIMIT $2 OFFSET $3`,
-      [segmentId, limit, offset]
+      [segmentId, limit, offset],
     );
 
-    const data = (rows || []).map((row) => row.customerId);
+    const data = (rows || []).map(row => row.customerId);
 
     return {
       data,
@@ -207,10 +179,10 @@ export class SegmentRepository implements ISegmentRepository {
 
   async isMember(segmentId: string, customerId: string): Promise<boolean> {
     // Check dynamic membership table
-    const memberRow = await queryOne<Record<string, any>>(
-      'SELECT * FROM "segmentMember" WHERE "segmentId" = $1 AND "customerId" = $2',
-      [segmentId, customerId]
-    );
+    const memberRow = await queryOne<Record<string, any>>('SELECT * FROM "segmentMember" WHERE "segmentId" = $1 AND "customerId" = $2', [
+      segmentId,
+      customerId,
+    ]);
 
     if (memberRow) return true;
 
@@ -245,7 +217,7 @@ export class SegmentRepository implements ISegmentRepository {
     await query(
       `UPDATE segment SET "memberCount" = $1, "lastEvaluatedAt" = NOW(), "updatedAt" = NOW()
        WHERE "segmentId" = $2`,
-      [count, segmentId]
+      [count, segmentId],
     );
   }
 
@@ -269,9 +241,7 @@ export class SegmentRepository implements ISegmentRepository {
     }
 
     if (filters?.search) {
-      conditions.push(
-        `(name ILIKE $${params.length + 1} OR description ILIKE $${params.length + 1})`
-      );
+      conditions.push(`(name ILIKE $${params.length + 1} OR description ILIKE $${params.length + 1})`);
       params.push(`%${filters.search}%`);
     }
 
@@ -293,11 +263,7 @@ export class SegmentRepository implements ISegmentRepository {
       lastEvaluatedAt: row.lastEvaluatedAt ? new Date(row.lastEvaluatedAt) : undefined,
       memberCount: parseInt(row.memberCount || '0', 10),
       isActive: Boolean(row.isActive),
-      metadata: row.metadata
-        ? typeof row.metadata === 'string'
-          ? JSON.parse(row.metadata)
-          : row.metadata
-        : undefined,
+      metadata: row.metadata ? (typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata) : undefined,
       createdAt: new Date(row.createdAt),
       updatedAt: new Date(row.updatedAt),
     });

@@ -13,7 +13,7 @@ export class ChangePasswordCommand {
   constructor(
     public readonly customerId: string,
     public readonly currentPassword: string,
-    public readonly newPassword: string
+    public readonly newPassword: string,
   ) {}
 }
 
@@ -68,13 +68,13 @@ export class ChangePasswordUseCase {
 
     // Emit event
     (eventBus as any).emit('customer.password_changed', {
-      customerId: customer.customerId
+      customerId: customer.customerId,
     });
 
     return {
       success: true,
       customerId: customer.customerId,
-      changedAt: new Date().toISOString()
+      changedAt: new Date().toISOString(),
     };
   }
 }

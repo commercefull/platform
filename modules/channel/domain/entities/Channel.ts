@@ -1,6 +1,6 @@
 /**
  * Channel Entity
- * 
+ *
  * Represents a distribution channel through which products are sold.
  * Channels can be web, mobile app, marketplace, POS, B2B portal, etc.
  */
@@ -14,38 +14,38 @@ export interface ChannelProps {
   name: string;
   code: string;
   type: ChannelType;
-  
+
   // Ownership context
   ownerType: OwnerType;
   ownerId?: string; // merchantId or businessId
-  
+
   // Multi-store support
   storeIds: string[];
   defaultStoreId?: string;
-  
+
   // Catalog & Pricing
   catalogId?: string;
   priceListId?: string;
   currencyCode: string;
   localeCode: string;
-  
+
   // Fulfillment
   warehouseIds: string[];
   fulfillmentStrategy: FulfillmentStrategy;
-  
+
   // B2B specific
   requiresApproval?: boolean;
   allowCreditPayment?: boolean;
   b2bPricingEnabled?: boolean;
-  
+
   // Marketplace specific
   commissionRate?: number;
   merchantVisible?: boolean;
-  
+
   isActive: boolean;
   isDefault: boolean;
   settings?: Record<string, unknown>;
-  
+
   // Audit fields
   createdAt: Date;
   updatedAt: Date;
@@ -59,30 +59,78 @@ export class Channel {
   }
 
   // Getters
-  get channelId(): string { return this.props.channelId; }
-  get name(): string { return this.props.name; }
-  get code(): string { return this.props.code; }
-  get type(): ChannelType { return this.props.type; }
-  get ownerType(): OwnerType { return this.props.ownerType; }
-  get ownerId(): string | undefined { return this.props.ownerId; }
-  get storeIds(): string[] { return [...this.props.storeIds]; }
-  get defaultStoreId(): string | undefined { return this.props.defaultStoreId; }
-  get catalogId(): string | undefined { return this.props.catalogId; }
-  get priceListId(): string | undefined { return this.props.priceListId; }
-  get currencyCode(): string { return this.props.currencyCode; }
-  get localeCode(): string { return this.props.localeCode; }
-  get warehouseIds(): string[] { return [...this.props.warehouseIds]; }
-  get fulfillmentStrategy(): FulfillmentStrategy { return this.props.fulfillmentStrategy; }
-  get requiresApproval(): boolean { return this.props.requiresApproval ?? false; }
-  get allowCreditPayment(): boolean { return this.props.allowCreditPayment ?? false; }
-  get b2bPricingEnabled(): boolean { return this.props.b2bPricingEnabled ?? false; }
-  get commissionRate(): number | undefined { return this.props.commissionRate; }
-  get merchantVisible(): boolean { return this.props.merchantVisible ?? true; }
-  get isActive(): boolean { return this.props.isActive; }
-  get isDefault(): boolean { return this.props.isDefault; }
-  get settings(): Record<string, unknown> | undefined { return this.props.settings; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get channelId(): string {
+    return this.props.channelId;
+  }
+  get name(): string {
+    return this.props.name;
+  }
+  get code(): string {
+    return this.props.code;
+  }
+  get type(): ChannelType {
+    return this.props.type;
+  }
+  get ownerType(): OwnerType {
+    return this.props.ownerType;
+  }
+  get ownerId(): string | undefined {
+    return this.props.ownerId;
+  }
+  get storeIds(): string[] {
+    return [...this.props.storeIds];
+  }
+  get defaultStoreId(): string | undefined {
+    return this.props.defaultStoreId;
+  }
+  get catalogId(): string | undefined {
+    return this.props.catalogId;
+  }
+  get priceListId(): string | undefined {
+    return this.props.priceListId;
+  }
+  get currencyCode(): string {
+    return this.props.currencyCode;
+  }
+  get localeCode(): string {
+    return this.props.localeCode;
+  }
+  get warehouseIds(): string[] {
+    return [...this.props.warehouseIds];
+  }
+  get fulfillmentStrategy(): FulfillmentStrategy {
+    return this.props.fulfillmentStrategy;
+  }
+  get requiresApproval(): boolean {
+    return this.props.requiresApproval ?? false;
+  }
+  get allowCreditPayment(): boolean {
+    return this.props.allowCreditPayment ?? false;
+  }
+  get b2bPricingEnabled(): boolean {
+    return this.props.b2bPricingEnabled ?? false;
+  }
+  get commissionRate(): number | undefined {
+    return this.props.commissionRate;
+  }
+  get merchantVisible(): boolean {
+    return this.props.merchantVisible ?? true;
+  }
+  get isActive(): boolean {
+    return this.props.isActive;
+  }
+  get isDefault(): boolean {
+    return this.props.isDefault;
+  }
+  get settings(): Record<string, unknown> | undefined {
+    return this.props.settings;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   /**
    * Create a new Channel

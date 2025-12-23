@@ -9,7 +9,18 @@ import { query, queryOne } from '../../../libs/db';
 // Types
 // ============================================================================
 
-export type QuoteStatus = 'draft' | 'pending_review' | 'pending_approval' | 'sent' | 'viewed' | 'negotiating' | 'accepted' | 'rejected' | 'expired' | 'converted' | 'cancelled';
+export type QuoteStatus =
+  | 'draft'
+  | 'pending_review'
+  | 'pending_approval'
+  | 'sent'
+  | 'viewed'
+  | 'negotiating'
+  | 'accepted'
+  | 'rejected'
+  | 'expired'
+  | 'converted'
+  | 'cancelled';
 
 export interface B2bQuote {
   b2bQuoteId: string;
@@ -97,29 +108,25 @@ export interface B2bQuoteItem {
 // ============================================================================
 
 export async function getQuote(quoteId: string): Promise<B2bQuote | null> {
-  const row = await queryOne<Record<string, any>>(
-    'SELECT * FROM "b2bQuote" WHERE "b2bQuoteId" = $1 AND "deletedAt" IS NULL',
-    [quoteId]
-  );
+  const row = await queryOne<Record<string, any>>('SELECT * FROM "b2bQuote" WHERE "b2bQuoteId" = $1 AND "deletedAt" IS NULL', [quoteId]);
   return row ? mapToQuote(row) : null;
 }
 
 export async function getQuoteByNumber(quoteNumber: string): Promise<B2bQuote | null> {
-  const row = await queryOne<Record<string, any>>(
-    'SELECT * FROM "b2bQuote" WHERE "quoteNumber" = $1 AND "deletedAt" IS NULL',
-    [quoteNumber]
-  );
+  const row = await queryOne<Record<string, any>>('SELECT * FROM "b2bQuote" WHERE "quoteNumber" = $1 AND "deletedAt" IS NULL', [
+    quoteNumber,
+  ]);
   return row ? mapToQuote(row) : null;
 }
 
 export async function getQuotes(
-  filters?: { 
-    companyId?: string; 
-    customerId?: string; 
+  filters?: {
+    companyId?: string;
+    customerId?: string;
     salesRepId?: string;
     status?: QuoteStatus;
   },
-  pagination?: { limit?: number; offset?: number }
+  pagination?: { limit?: number; offset?: number },
 ): Promise<{ data: B2bQuote[]; total: number }> {
   let whereClause = '"deletedAt" IS NULL';
   const params: any[] = [];
@@ -142,10 +149,7 @@ export async function getQuotes(
     params.push(filters.status);
   }
 
-  const countResult = await queryOne<{ count: string }>(
-    `SELECT COUNT(*) as count FROM "b2bQuote" WHERE ${whereClause}`,
-    params
-  );
+  const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "b2bQuote" WHERE ${whereClause}`, params);
 
   const limit = pagination?.limit || 20;
   const offset = pagination?.offset || 0;
@@ -153,12 +157,12 @@ export async function getQuotes(
   const rows = await query<Record<string, any>[]>(
     `SELECT * FROM "b2bQuote" WHERE ${whereClause} 
      ORDER BY "createdAt" DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
-    [...params, limit, offset]
+    [...params, limit, offset],
   );
 
   return {
     data: (rows || []).map(mapToQuote),
-    total: parseInt(countResult?.count || '0')
+    total: parseInt(countResult?.count || '0'),
   };
 }
 
@@ -178,24 +182,43 @@ export async function saveQuote(quote: Partial<B2bQuote>): Promise<B2bQuote> {
         "paymentTermsDays" = $26, "attachments" = $27, "metadata" = $28, "updatedAt" = $29
       WHERE "b2bQuoteId" = $30`,
       [
-        quote.b2bCompanyId, quote.customerId, quote.b2bCompanyUserId, quote.salesRepId,
-        quote.status || 'draft', quote.currency || 'USD', quote.subtotal || 0,
-        quote.discountTotal || 0, quote.discountType, quote.discountValue,
-        quote.discountReason, quote.taxTotal || 0, quote.shippingTotal || 0,
-        quote.handlingTotal || 0, quote.grandTotal || 0,
-        quote.validUntil?.toISOString(), quote.validityDays || 30,
-        quote.billingAddressId, quote.shippingAddressId, quote.shippingMethod,
-        quote.customerNotes, quote.internalNotes, quote.terms, quote.conditions,
-        quote.paymentTerms, quote.paymentTermsDays,
+        quote.b2bCompanyId,
+        quote.customerId,
+        quote.b2bCompanyUserId,
+        quote.salesRepId,
+        quote.status || 'draft',
+        quote.currency || 'USD',
+        quote.subtotal || 0,
+        quote.discountTotal || 0,
+        quote.discountType,
+        quote.discountValue,
+        quote.discountReason,
+        quote.taxTotal || 0,
+        quote.shippingTotal || 0,
+        quote.handlingTotal || 0,
+        quote.grandTotal || 0,
+        quote.validUntil?.toISOString(),
+        quote.validityDays || 30,
+        quote.billingAddressId,
+        quote.shippingAddressId,
+        quote.shippingMethod,
+        quote.customerNotes,
+        quote.internalNotes,
+        quote.terms,
+        quote.conditions,
+        quote.paymentTerms,
+        quote.paymentTermsDays,
         JSON.stringify(quote.attachments || []),
-        quote.metadata ? JSON.stringify(quote.metadata) : null, now, quote.b2bQuoteId
-      ]
+        quote.metadata ? JSON.stringify(quote.metadata) : null,
+        now,
+        quote.b2bQuoteId,
+      ],
     );
     return (await getQuote(quote.b2bQuoteId))!;
   } else {
     // Generate quote number
     const quoteNumber = await generateQuoteNumber();
-    
+
     const result = await queryOne<Record<string, any>>(
       `INSERT INTO "b2bQuote" (
         "quoteNumber", "b2bCompanyId", "customerId", "b2bCompanyUserId", "salesRepId",
@@ -208,14 +231,39 @@ export async function saveQuote(quote: Partial<B2bQuote>): Promise<B2bQuote> {
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32)
       RETURNING *`,
       [
-        quoteNumber, quote.b2bCompanyId, quote.customerId, quote.b2bCompanyUserId,
-        quote.salesRepId, 'draft', quote.currency || 'USD', 0, 0, null, null, null,
-        0, 0, 0, 0, null, quote.validityDays || 30, quote.billingAddressId,
-        quote.shippingAddressId, quote.shippingMethod, quote.customerNotes,
-        quote.internalNotes, quote.terms, quote.conditions, quote.paymentTerms,
-        quote.paymentTermsDays, 1, '[]', quote.metadata ? JSON.stringify(quote.metadata) : null,
-        now, now
-      ]
+        quoteNumber,
+        quote.b2bCompanyId,
+        quote.customerId,
+        quote.b2bCompanyUserId,
+        quote.salesRepId,
+        'draft',
+        quote.currency || 'USD',
+        0,
+        0,
+        null,
+        null,
+        null,
+        0,
+        0,
+        0,
+        0,
+        null,
+        quote.validityDays || 30,
+        quote.billingAddressId,
+        quote.shippingAddressId,
+        quote.shippingMethod,
+        quote.customerNotes,
+        quote.internalNotes,
+        quote.terms,
+        quote.conditions,
+        quote.paymentTerms,
+        quote.paymentTermsDays,
+        1,
+        '[]',
+        quote.metadata ? JSON.stringify(quote.metadata) : null,
+        now,
+        now,
+      ],
     );
     return mapToQuote(result!);
   }
@@ -224,12 +272,12 @@ export async function saveQuote(quote: Partial<B2bQuote>): Promise<B2bQuote> {
 export async function sendQuote(quoteId: string): Promise<void> {
   const now = new Date().toISOString();
   const validUntil = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(); // 30 days
-  
+
   await query(
     `UPDATE "b2bQuote" SET 
       "status" = 'sent', "sentAt" = $1, "validUntil" = $2, "expiresAt" = $3, "updatedAt" = $4
      WHERE "b2bQuoteId" = $5`,
-    [now, validUntil, validUntil, now, quoteId]
+    [now, validUntil, validUntil, now, quoteId],
   );
 }
 
@@ -238,7 +286,7 @@ export async function markQuoteViewed(quoteId: string): Promise<void> {
   await query(
     `UPDATE "b2bQuote" SET "status" = 'viewed', "viewedAt" = $1, "updatedAt" = $1
      WHERE "b2bQuoteId" = $2 AND "viewedAt" IS NULL`,
-    [now, quoteId]
+    [now, quoteId],
   );
 }
 
@@ -247,7 +295,7 @@ export async function acceptQuote(quoteId: string): Promise<void> {
   await query(
     `UPDATE "b2bQuote" SET "status" = 'accepted', "acceptedAt" = $1, "updatedAt" = $1
      WHERE "b2bQuoteId" = $2`,
-    [now, quoteId]
+    [now, quoteId],
   );
 }
 
@@ -256,7 +304,7 @@ export async function rejectQuote(quoteId: string, reason?: string): Promise<voi
   await query(
     `UPDATE "b2bQuote" SET "status" = 'rejected', "rejectedAt" = $1, "rejectionReason" = $2, "updatedAt" = $1
      WHERE "b2bQuoteId" = $3`,
-    [now, reason, quoteId]
+    [now, reason, quoteId],
   );
 }
 
@@ -265,7 +313,7 @@ export async function convertQuoteToOrder(quoteId: string, orderId: string): Pro
   await query(
     `UPDATE "b2bQuote" SET "status" = 'converted', "convertedOrderId" = $1, "convertedAt" = $2, "updatedAt" = $2
      WHERE "b2bQuoteId" = $3`,
-    [orderId, now, quoteId]
+    [orderId, now, quoteId],
   );
 }
 
@@ -274,7 +322,7 @@ export async function createQuoteRevision(quoteId: string): Promise<B2bQuote> {
   if (!original) throw new Error('Quote not found');
 
   const items = await getQuoteItems(quoteId);
-  
+
   // Create new quote as revision
   const newQuote = await saveQuote({
     ...original,
@@ -286,7 +334,7 @@ export async function createQuoteRevision(quoteId: string): Promise<B2bQuote> {
     viewedAt: undefined,
     acceptedAt: undefined,
     rejectedAt: undefined,
-    convertedAt: undefined
+    convertedAt: undefined,
   });
 
   // Copy items
@@ -294,7 +342,7 @@ export async function createQuoteRevision(quoteId: string): Promise<B2bQuote> {
     await saveQuoteItem({
       ...item,
       b2bQuoteItemId: undefined,
-      b2bQuoteId: newQuote.b2bQuoteId
+      b2bQuoteId: newQuote.b2bQuoteId,
     });
   }
 
@@ -302,10 +350,7 @@ export async function createQuoteRevision(quoteId: string): Promise<B2bQuote> {
 }
 
 export async function deleteQuote(quoteId: string): Promise<void> {
-  await query(
-    'UPDATE "b2bQuote" SET "deletedAt" = $1 WHERE "b2bQuoteId" = $2',
-    [new Date().toISOString(), quoteId]
-  );
+  await query('UPDATE "b2bQuote" SET "deletedAt" = $1 WHERE "b2bQuoteId" = $2', [new Date().toISOString(), quoteId]);
 }
 
 // ============================================================================
@@ -313,24 +358,20 @@ export async function deleteQuote(quoteId: string): Promise<void> {
 // ============================================================================
 
 export async function getQuoteItem(quoteItemId: string): Promise<B2bQuoteItem | null> {
-  const row = await queryOne<Record<string, any>>(
-    'SELECT * FROM "b2bQuoteItem" WHERE "b2bQuoteItemId" = $1',
-    [quoteItemId]
-  );
+  const row = await queryOne<Record<string, any>>('SELECT * FROM "b2bQuoteItem" WHERE "b2bQuoteItemId" = $1', [quoteItemId]);
   return row ? mapToQuoteItem(row) : null;
 }
 
 export async function getQuoteItems(quoteId: string): Promise<B2bQuoteItem[]> {
-  const rows = await query<Record<string, any>[]>(
-    'SELECT * FROM "b2bQuoteItem" WHERE "b2bQuoteId" = $1 ORDER BY "position" ASC',
-    [quoteId]
-  );
+  const rows = await query<Record<string, any>[]>('SELECT * FROM "b2bQuoteItem" WHERE "b2bQuoteId" = $1 ORDER BY "position" ASC', [
+    quoteId,
+  ]);
   return (rows || []).map(mapToQuoteItem);
 }
 
 export async function saveQuoteItem(item: Partial<B2bQuoteItem> & { b2bQuoteId: string }): Promise<B2bQuoteItem> {
   const now = new Date().toISOString();
-  
+
   // For updates, merge with existing item data
   let mergedItem = { ...item };
   if (item.b2bQuoteItemId) {
@@ -339,11 +380,11 @@ export async function saveQuoteItem(item: Partial<B2bQuoteItem> & { b2bQuoteId: 
       mergedItem = { ...existingItem, ...item };
     }
   }
-  
+
   const quantity = mergedItem.quantity || 1;
   const unitPrice = mergedItem.unitPrice || 0;
   const discountAmount = mergedItem.discountAmount || 0;
-  const lineTotal = (quantity * unitPrice) - discountAmount;
+  const lineTotal = quantity * unitPrice - discountAmount;
   const taxAmount = lineTotal * ((mergedItem.taxRate || 0) / 100);
 
   if (item.b2bQuoteItemId) {
@@ -358,17 +399,35 @@ export async function saveQuoteItem(item: Partial<B2bQuoteItem> & { b2bQuoteId: 
         "leadTimeDays" = $22, "customFields" = $23, "metadata" = $24, "updatedAt" = $25
       WHERE "b2bQuoteItemId" = $26`,
       [
-        mergedItem.productId, mergedItem.productVariantId, mergedItem.sku, mergedItem.name, mergedItem.description,
-        quantity, mergedItem.unit || 'each', mergedItem.listPrice, unitPrice, mergedItem.costPrice,
-        mergedItem.discountPercent || 0, discountAmount, lineTotal, mergedItem.taxRate || 0,
-        taxAmount, mergedItem.isCustomItem || false, mergedItem.isPriceOverride || false,
-        mergedItem.priceOverrideReason, mergedItem.position || 0, mergedItem.notes,
-        mergedItem.requestedDeliveryDate?.toISOString(), mergedItem.leadTimeDays,
+        mergedItem.productId,
+        mergedItem.productVariantId,
+        mergedItem.sku,
+        mergedItem.name,
+        mergedItem.description,
+        quantity,
+        mergedItem.unit || 'each',
+        mergedItem.listPrice,
+        unitPrice,
+        mergedItem.costPrice,
+        mergedItem.discountPercent || 0,
+        discountAmount,
+        lineTotal,
+        mergedItem.taxRate || 0,
+        taxAmount,
+        mergedItem.isCustomItem || false,
+        mergedItem.isPriceOverride || false,
+        mergedItem.priceOverrideReason,
+        mergedItem.position || 0,
+        mergedItem.notes,
+        mergedItem.requestedDeliveryDate?.toISOString(),
+        mergedItem.leadTimeDays,
         mergedItem.customFields ? JSON.stringify(mergedItem.customFields) : null,
-        mergedItem.metadata ? JSON.stringify(mergedItem.metadata) : null, now, item.b2bQuoteItemId
-      ]
+        mergedItem.metadata ? JSON.stringify(mergedItem.metadata) : null,
+        now,
+        item.b2bQuoteItemId,
+      ],
     );
-    
+
     await recalculateQuoteTotals(mergedItem.b2bQuoteId);
     return (await getQuoteItem(item.b2bQuoteItemId))!;
   } else {
@@ -383,15 +442,34 @@ export async function saveQuoteItem(item: Partial<B2bQuoteItem> & { b2bQuoteId: 
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27)
       RETURNING *`,
       [
-        item.b2bQuoteId, item.productId, item.productVariantId, item.sku, item.name,
-        item.description, quantity, item.unit || 'each', item.listPrice, unitPrice,
-        item.costPrice, item.discountPercent || 0, discountAmount, lineTotal,
-        item.taxRate || 0, taxAmount, item.isCustomItem || false,
-        item.isPriceOverride || false, item.priceOverrideReason, item.position || 0,
-        item.notes, item.requestedDeliveryDate?.toISOString(), item.leadTimeDays,
+        item.b2bQuoteId,
+        item.productId,
+        item.productVariantId,
+        item.sku,
+        item.name,
+        item.description,
+        quantity,
+        item.unit || 'each',
+        item.listPrice,
+        unitPrice,
+        item.costPrice,
+        item.discountPercent || 0,
+        discountAmount,
+        lineTotal,
+        item.taxRate || 0,
+        taxAmount,
+        item.isCustomItem || false,
+        item.isPriceOverride || false,
+        item.priceOverrideReason,
+        item.position || 0,
+        item.notes,
+        item.requestedDeliveryDate?.toISOString(),
+        item.leadTimeDays,
         item.customFields ? JSON.stringify(item.customFields) : null,
-        item.metadata ? JSON.stringify(item.metadata) : null, now, now
-      ]
+        item.metadata ? JSON.stringify(item.metadata) : null,
+        now,
+        now,
+      ],
     );
 
     await recalculateQuoteTotals(item.b2bQuoteId);
@@ -413,24 +491,24 @@ async function recalculateQuoteTotals(quoteId: string): Promise<void> {
       COALESCE(SUM("lineTotal"), 0) as subtotal,
       COALESCE(SUM("taxAmount"), 0) as "taxTotal"
     FROM "b2bQuoteItem" WHERE "b2bQuoteId" = $1`,
-    [quoteId]
+    [quoteId],
   );
 
   const subtotal = parseFloat(result?.subtotal || '0');
   const taxTotal = parseFloat(result?.taxTotal || '0');
-  
+
   // Get current quote for discount and shipping
   const quote = await getQuote(quoteId);
   const discountTotal = quote?.discountTotal || 0;
   const shippingTotal = quote?.shippingTotal || 0;
   const handlingTotal = quote?.handlingTotal || 0;
-  
+
   const grandTotal = subtotal - discountTotal + taxTotal + shippingTotal + handlingTotal;
 
   await query(
     `UPDATE "b2bQuote" SET "subtotal" = $1, "taxTotal" = $2, "grandTotal" = $3, "updatedAt" = $4
      WHERE "b2bQuoteId" = $5`,
-    [subtotal, taxTotal, grandTotal, new Date().toISOString(), quoteId]
+    [subtotal, taxTotal, grandTotal, new Date().toISOString(), quoteId],
   );
 }
 
@@ -440,10 +518,7 @@ async function recalculateQuoteTotals(quoteId: string): Promise<void> {
 
 async function generateQuoteNumber(): Promise<string> {
   const year = new Date().getFullYear();
-  const result = await queryOne<{ count: string }>(
-    `SELECT COUNT(*) as count FROM "b2bQuote" WHERE "quoteNumber" LIKE $1`,
-    [`Q${year}%`]
-  );
+  const result = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "b2bQuote" WHERE "quoteNumber" LIKE $1`, [`Q${year}%`]);
   const count = parseInt(result?.count || '0') + 1;
   return `Q${year}-${count.toString().padStart(5, '0')}`;
 }
@@ -494,7 +569,7 @@ function mapToQuote(row: Record<string, any>): B2bQuote {
     expiresAt: row.expiresAt ? new Date(row.expiresAt) : undefined,
     createdAt: new Date(row.createdAt),
     updatedAt: new Date(row.updatedAt),
-    deletedAt: row.deletedAt ? new Date(row.deletedAt) : undefined
+    deletedAt: row.deletedAt ? new Date(row.deletedAt) : undefined,
   };
 }
 
@@ -529,6 +604,6 @@ function mapToQuoteItem(row: Record<string, any>): B2bQuoteItem {
     customFields: row.customFields,
     metadata: row.metadata,
     createdAt: new Date(row.createdAt),
-    updatedAt: new Date(row.updatedAt)
+    updatedAt: new Date(row.updatedAt),
   };
 }

@@ -11,7 +11,7 @@ export class DuplicatePageCommand {
     public readonly pageId: string,
     public readonly newTitle: string,
     public readonly newSlug: string,
-    public readonly duplicatedBy?: string
+    public readonly duplicatedBy?: string,
   ) {}
 }
 
@@ -52,7 +52,7 @@ export class DuplicatePageUseCase {
       metaDescription: original.metaDescription,
       metaKeywords: original.metaKeywords,
       customFields: original.customFields,
-      isHomePage: false // Never duplicate as home page
+      isHomePage: false, // Never duplicate as home page
     });
 
     // Get and duplicate all blocks
@@ -66,7 +66,7 @@ export class DuplicatePageUseCase {
         name: block.name,
         order: block.order,
         content: block.content,
-        status: block.status
+        status: block.status,
       });
       blocksCopied++;
     }
@@ -77,7 +77,7 @@ export class DuplicatePageUseCase {
       slug: duplicatePage.slug,
       contentTypeId: duplicatePage.contentTypeId,
       status: duplicatePage.status,
-      createdBy: command.duplicatedBy
+      createdBy: command.duplicatedBy,
     });
 
     return {
@@ -86,7 +86,7 @@ export class DuplicatePageUseCase {
       slug: duplicatePage.slug,
       originalPageId: command.pageId,
       blocksCopied,
-      createdAt: duplicatePage.createdAt
+      createdAt: duplicatePage.createdAt,
     };
   }
 }

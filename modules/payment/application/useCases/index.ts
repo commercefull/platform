@@ -1,6 +1,6 @@
 /**
  * Payment Use Cases
- * 
+ *
  * Barrel export for all payment-related use cases.
  */
 

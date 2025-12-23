@@ -1,6 +1,6 @@
 /**
  * Payment Terms Repository
- * 
+ *
  * Manages B2B payment terms (Net 30, Net 60, etc.).
  */
 
@@ -27,10 +27,7 @@ export async function create(params: CreatePaymentTermsParams): Promise<PaymentT
 
   // If setting as default, unset other defaults
   if (params.isDefault) {
-    await query(
-      'UPDATE "paymentTerms" SET "isDefault" = false WHERE "organizationId" = $1',
-      [params.organizationId]
-    );
+    await query('UPDATE "paymentTerms" SET "isDefault" = false WHERE "organizationId" = $1', [params.organizationId]);
   }
 
   const sql = `
@@ -58,32 +55,22 @@ export async function create(params: CreatePaymentTermsParams): Promise<PaymentT
 }
 
 export async function findById(paymentTermsId: string): Promise<PaymentTerms | null> {
-  return queryOne<PaymentTerms>(
-    'SELECT * FROM "paymentTerms" WHERE "paymentTermsId" = $1',
-    [paymentTermsId]
-  );
+  return queryOne<PaymentTerms>('SELECT * FROM "paymentTerms" WHERE "paymentTermsId" = $1', [paymentTermsId]);
 }
 
 export async function findByCode(code: string): Promise<PaymentTerms | null> {
-  return queryOne<PaymentTerms>(
-    'SELECT * FROM "paymentTerms" WHERE "code" = $1',
-    [code]
-  );
+  return queryOne<PaymentTerms>('SELECT * FROM "paymentTerms" WHERE "code" = $1', [code]);
 }
 
 export async function findByOrganization(organizationId: string): Promise<PaymentTerms[]> {
-  const result = await query<{ rows: PaymentTerms[] }>(
-    'SELECT * FROM "paymentTerms" WHERE "organizationId" = $1 ORDER BY "days" ASC',
-    [organizationId]
-  );
+  const result = await query<{ rows: PaymentTerms[] }>('SELECT * FROM "paymentTerms" WHERE "organizationId" = $1 ORDER BY "days" ASC', [
+    organizationId,
+  ]);
   return result?.rows ?? [];
 }
 
 export async function findDefault(organizationId: string): Promise<PaymentTerms | null> {
-  return queryOne<PaymentTerms>(
-    'SELECT * FROM "paymentTerms" WHERE "organizationId" = $1 AND "isDefault" = true',
-    [organizationId]
-  );
+  return queryOne<PaymentTerms>('SELECT * FROM "paymentTerms" WHERE "organizationId" = $1 AND "isDefault" = true', [organizationId]);
 }
 
 export async function setDefault(paymentTermsId: string): Promise<boolean> {
@@ -91,22 +78,19 @@ export async function setDefault(paymentTermsId: string): Promise<boolean> {
   if (!terms) return false;
 
   // Unset other defaults
-  await query(
-    'UPDATE "paymentTerms" SET "isDefault" = false WHERE "organizationId" = $1',
-    [terms.organizationId]
-  );
+  await query('UPDATE "paymentTerms" SET "isDefault" = false WHERE "organizationId" = $1', [terms.organizationId]);
 
   // Set this one as default
   const result = await query<{ rowCount: number }>(
     'UPDATE "paymentTerms" SET "isDefault" = true, "updatedAt" = $1 WHERE "paymentTermsId" = $2',
-    [new Date(), paymentTermsId]
+    [new Date(), paymentTermsId],
   );
   return (result?.rowCount ?? 0) > 0;
 }
 
 export async function calculateDueDate(
   paymentTermsId: string,
-  invoiceDate: Date
+  invoiceDate: Date,
 ): Promise<{ dueDate: Date; discountDate?: Date; discountPercentage?: number }> {
   const terms = await findById(paymentTermsId);
   if (!terms) {

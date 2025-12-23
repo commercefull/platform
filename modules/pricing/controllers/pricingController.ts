@@ -1,27 +1,16 @@
 import { logger } from '../../../libs/logger';
-import { Request, Response } from "express";
-import pricingRuleRepo from "../repos/pricingRuleRepo";
-import tierPriceRepo from "../repos/tierPriceRepo";
-import customerPriceRepo from "../repos/customerPriceRepo";
-import { CustomerPriceList, PricingRuleStatus } from "../domain/pricingRule";
+import { Request, Response } from 'express';
+import pricingRuleRepo from '../repos/pricingRuleRepo';
+import tierPriceRepo from '../repos/tierPriceRepo';
+import customerPriceRepo from '../repos/customerPriceRepo';
+import { CustomerPriceList, PricingRuleStatus } from '../domain/pricingRule';
 
 /**
  * Get all pricing rules with pagination and filtering
  */
 export const getPricingRules = async (req: Request, res: Response): Promise<void> => {
   try {
-    const {
-      page = "1",
-      limit = "20",
-      status,
-      scope,
-      type,
-      productId,
-      categoryId,
-      customerId,
-      customerGroupId,
-      search,
-    } = req.query;
+    const { page = '1', limit = '20', status, scope, type, productId, categoryId, customerId, customerGroupId, search } = req.query;
 
     const pageNum = parseInt(page as string, 10);
     const limitNum = parseInt(limit as string, 10);
@@ -41,7 +30,7 @@ export const getPricingRules = async (req: Request, res: Response): Promise<void
     // Get the rules with proper pagination (offset based on page number)
     const rules = await pricingRuleRepo.findAllRules(filters, {
       limit: limitNum,
-      offset: (pageNum - 1) * limitNum  // Convert page to offset
+      offset: (pageNum - 1) * limitNum, // Convert page to offset
     });
 
     // Get the total count for pagination
@@ -59,14 +48,14 @@ export const getPricingRules = async (req: Request, res: Response): Promise<void
     });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({
       success: false,
-      message: "Failed to get pricing rules",
+      message: 'Failed to get pricing rules',
       error: (error as Error).message,
     });
   }
-}
+};
 
 /**
  * Get a pricing rule by ID
@@ -79,7 +68,7 @@ export const getPricingRule = async (req: Request, res: Response): Promise<void>
     if (!rule) {
       res.status(404).json({
         success: false,
-        message: "Pricing rule not found",
+        message: 'Pricing rule not found',
       });
       return;
     }
@@ -90,14 +79,14 @@ export const getPricingRule = async (req: Request, res: Response): Promise<void>
     });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({
       success: false,
-      message: "Failed to get pricing rule",
+      message: 'Failed to get pricing rule',
       error: (error as Error).message,
     });
   }
-}
+};
 
 /**
  * Create a new pricing rule
@@ -110,7 +99,7 @@ export const createPricingRule = async (req: Request, res: Response): Promise<vo
     if (!ruleData.name || !ruleData.type || !ruleData.scope) {
       res.status(400).json({
         success: false,
-        message: "Missing required fields: name, type, and scope are required",
+        message: 'Missing required fields: name, type, and scope are required',
       });
       return;
     }
@@ -119,7 +108,7 @@ export const createPricingRule = async (req: Request, res: Response): Promise<vo
     if (!ruleData.adjustments || ruleData.adjustments.length === 0) {
       res.status(400).json({
         success: false,
-        message: "At least one adjustment is required",
+        message: 'At least one adjustment is required',
       });
       return;
     }
@@ -132,14 +121,14 @@ export const createPricingRule = async (req: Request, res: Response): Promise<vo
     });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({
       success: false,
-      message: "Failed to create pricing rule",
+      message: 'Failed to create pricing rule',
       error: (error as Error).message,
     });
   }
-}
+};
 
 /**
  * Update a pricing rule
@@ -153,7 +142,7 @@ export const updatePricingRule = async (req: Request, res: Response): Promise<vo
     if (!existingRule) {
       res.status(404).json({
         success: false,
-        message: "Pricing rule not found",
+        message: 'Pricing rule not found',
       });
       return;
     }
@@ -166,14 +155,14 @@ export const updatePricingRule = async (req: Request, res: Response): Promise<vo
     });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({
       success: false,
-      message: "Failed to update pricing rule",
+      message: 'Failed to update pricing rule',
       error: (error as Error).message,
     });
   }
-}
+};
 
 /**
  * Delete a pricing rule
@@ -186,7 +175,7 @@ export const deletePricingRule = async (req: Request, res: Response): Promise<vo
     if (!existingRule) {
       res.status(404).json({
         success: false,
-        message: "Pricing rule not found",
+        message: 'Pricing rule not found',
       });
       return;
     }
@@ -195,31 +184,25 @@ export const deletePricingRule = async (req: Request, res: Response): Promise<vo
 
     res.json({
       success: true,
-      message: "Pricing rule deleted successfully",
+      message: 'Pricing rule deleted successfully',
     });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({
       success: false,
-      message: "Failed to delete pricing rule",
+      message: 'Failed to delete pricing rule',
       error: (error as Error).message,
     });
   }
-}
+};
 
 /**
  * Get tier prices with pagination and filtering
  */
 export const getTierPrices = async (req: Request, res: Response): Promise<void> => {
   try {
-    const {
-      page = "1",
-      limit = "20",
-      productId,
-      variantId,
-      customerGroupId,
-    } = req.query;
+    const { page = '1', limit = '20', productId, variantId, customerGroupId } = req.query;
 
     const pageNum = parseInt(page as string, 10);
     const limitNum = parseInt(limit as string, 10);
@@ -244,14 +227,14 @@ export const getTierPrices = async (req: Request, res: Response): Promise<void> 
     });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({
       success: false,
-      message: "Failed to get tier prices",
+      message: 'Failed to get tier prices',
       error: (error as Error).message,
     });
   }
-}
+};
 
 /**
  * Get a tier price by ID
@@ -264,7 +247,7 @@ export const getTierPrice = async (req: Request, res: Response): Promise<void> =
     if (!tierPrice) {
       res.status(404).json({
         success: false,
-        message: "Tier price not found",
+        message: 'Tier price not found',
       });
       return;
     }
@@ -275,14 +258,14 @@ export const getTierPrice = async (req: Request, res: Response): Promise<void> =
     });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({
       success: false,
-      message: "Failed to get tier price",
+      message: 'Failed to get tier price',
       error: (error as Error).message,
     });
   }
-}
+};
 
 /**
  * Create a new tier price
@@ -295,7 +278,7 @@ export const createTierPrice = async (req: Request, res: Response): Promise<void
     if (!tierPriceData.productId || !tierPriceData.quantityMin || !tierPriceData.price) {
       res.status(400).json({
         success: false,
-        message: "Missing required fields: productId, quantityMin, and price are required",
+        message: 'Missing required fields: productId, quantityMin, and price are required',
       });
       return;
     }
@@ -308,14 +291,14 @@ export const createTierPrice = async (req: Request, res: Response): Promise<void
     });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({
       success: false,
-      message: "Failed to create tier price",
+      message: 'Failed to create tier price',
       error: (error as Error).message,
     });
   }
-}
+};
 
 /**
  * Update a tier price
@@ -329,7 +312,7 @@ export const updateTierPrice = async (req: Request, res: Response): Promise<void
     if (!existingTierPrice) {
       res.status(404).json({
         success: false,
-        message: "Tier price not found",
+        message: 'Tier price not found',
       });
       return;
     }
@@ -342,14 +325,14 @@ export const updateTierPrice = async (req: Request, res: Response): Promise<void
     });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({
       success: false,
-      message: "Failed to update tier price",
+      message: 'Failed to update tier price',
       error: (error as Error).message,
     });
   }
-}
+};
 
 /**
  * Delete a tier price
@@ -362,7 +345,7 @@ export const deleteTierPrice = async (req: Request, res: Response): Promise<void
     if (!existingTierPrice) {
       res.status(404).json({
         success: false,
-        message: "Tier price not found",
+        message: 'Tier price not found',
       });
       return;
     }
@@ -371,31 +354,25 @@ export const deleteTierPrice = async (req: Request, res: Response): Promise<void
 
     res.json({
       success: true,
-      message: "Tier price deleted successfully",
+      message: 'Tier price deleted successfully',
     });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({
       success: false,
-      message: "Failed to delete tier price",
+      message: 'Failed to delete tier price',
       error: (error as Error).message,
     });
   }
-}
+};
 
 /**
  * Get customer price lists with pagination and filtering
  */
 export const getPriceLists = async (req: Request, res: Response): Promise<void> => {
   try {
-    const {
-      page = "1",
-      limit = "20",
-      customerId,
-      customerGroupId,
-      status,
-    } = req.query;
+    const { page = '1', limit = '20', customerId, customerGroupId, status } = req.query;
 
     const pageNum = parseInt(page as string, 10);
     const limitNum = parseInt(limit as string, 10);
@@ -405,10 +382,7 @@ export const getPriceLists = async (req: Request, res: Response): Promise<void> 
 
     if (customerId) {
       const customerGroupIds = customerGroupId ? [customerGroupId as string] : [];
-      priceLists = await customerPriceRepo.findPriceListsForCustomer(
-        customerId as string,
-        customerGroupIds
-      );
+      priceLists = await customerPriceRepo.findPriceListsForCustomer(customerId as string, customerGroupIds);
     } else {
       // This would need to be implemented in the repo
       // For now, return an empty array
@@ -427,14 +401,14 @@ export const getPriceLists = async (req: Request, res: Response): Promise<void> 
     });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({
       success: false,
-      message: "Failed to get price lists",
+      message: 'Failed to get price lists',
       error: (error as Error).message,
     });
   }
-}
+};
 
 /**
  * Get a price list by ID
@@ -447,7 +421,7 @@ export const getPriceList = async (req: Request, res: Response): Promise<void> =
     if (!priceList) {
       res.status(404).json({
         success: false,
-        message: "Price list not found",
+        message: 'Price list not found',
       });
       return;
     }
@@ -464,14 +438,14 @@ export const getPriceList = async (req: Request, res: Response): Promise<void> =
     });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({
       success: false,
-      message: "Failed to get price list",
+      message: 'Failed to get price list',
       error: (error as Error).message,
     });
   }
-}
+};
 
 /**
  * Create a new price list
@@ -484,7 +458,7 @@ export const createPriceList = async (req: Request, res: Response): Promise<void
     if (!priceListData.name) {
       res.status(400).json({
         success: false,
-        message: "Missing required field: name is required",
+        message: 'Missing required field: name is required',
       });
       return;
     }
@@ -497,14 +471,14 @@ export const createPriceList = async (req: Request, res: Response): Promise<void
     });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({
       success: false,
-      message: "Failed to create price list",
+      message: 'Failed to create price list',
       error: (error as Error).message,
     });
   }
-}
+};
 
 /**
  * Update a price list
@@ -518,7 +492,7 @@ export const updatePriceList = async (req: Request, res: Response): Promise<void
     if (!existingPriceList) {
       res.status(404).json({
         success: false,
-        message: "Price list not found",
+        message: 'Price list not found',
       });
       return;
     }
@@ -531,14 +505,14 @@ export const updatePriceList = async (req: Request, res: Response): Promise<void
     });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({
       success: false,
-      message: "Failed to update price list",
+      message: 'Failed to update price list',
       error: (error as Error).message,
     });
   }
-}
+};
 
 /**
  * Delete a price list
@@ -551,7 +525,7 @@ export const deletePriceList = async (req: Request, res: Response): Promise<void
     if (!existingPriceList) {
       res.status(404).json({
         success: false,
-        message: "Price list not found",
+        message: 'Price list not found',
       });
       return;
     }
@@ -560,18 +534,18 @@ export const deletePriceList = async (req: Request, res: Response): Promise<void
 
     res.json({
       success: true,
-      message: "Price list deleted successfully",
+      message: 'Price list deleted successfully',
     });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({
       success: false,
-      message: "Failed to delete price list",
+      message: 'Failed to delete price list',
       error: (error as Error).message,
     });
   }
-}
+};
 
 /**
  * Add a price to a price list
@@ -586,7 +560,7 @@ export const addPriceToList = async (req: Request, res: Response): Promise<void>
     if (!existingPriceList) {
       res.status(404).json({
         success: false,
-        message: "Price list not found",
+        message: 'Price list not found',
       });
       return;
     }
@@ -595,7 +569,7 @@ export const addPriceToList = async (req: Request, res: Response): Promise<void>
     if (!priceData.productId || !priceData.adjustmentType || priceData.adjustmentValue === undefined) {
       res.status(400).json({
         success: false,
-        message: "Missing required fields: productId, adjustmentType, and adjustmentValue are required",
+        message: 'Missing required fields: productId, adjustmentType, and adjustmentValue are required',
       });
       return;
     }
@@ -611,11 +585,11 @@ export const addPriceToList = async (req: Request, res: Response): Promise<void>
     });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({
       success: false,
-      message: "Failed to add price to list",
+      message: 'Failed to add price to list',
       error: (error as Error).message,
     });
   }
-}
+};

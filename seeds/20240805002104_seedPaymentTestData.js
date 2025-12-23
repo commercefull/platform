@@ -2,14 +2,11 @@
  * Seed payment test data for integration tests
  */
 
-exports.seed = async function(knex) {
+exports.seed = async function (knex) {
   // Get the test merchant
-  const testMerchant = await knex('merchant')
-    .where({ email: 'merchant@example.com' })
-    .first('merchantId');
+  const testMerchant = await knex('merchant').where({ email: 'merchant@example.com' }).first('merchantId');
 
   if (!testMerchant) {
-    
     return;
   }
 
@@ -20,20 +17,22 @@ exports.seed = async function(knex) {
   await knex('paymentGateway').where({ merchantId }).del();
 
   // Insert test payment gateway
-  const [gateway] = await knex('paymentGateway').insert({
-    merchantId,
-    name: 'Test Stripe Gateway',
-    provider: 'stripe',
-    isActive: true,
-    isDefault: true,
-    isTestMode: true,
-    apiKey: 'sk_test_xxx',
-    apiSecret: 'whsec_xxx',
-    publicKey: 'pk_test_xxx',
-    supportedPaymentMethods: 'creditCard',
-    createdAt: knex.fn.now(),
-    updatedAt: knex.fn.now()
-  }).returning('paymentGatewayId');
+  const [gateway] = await knex('paymentGateway')
+    .insert({
+      merchantId,
+      name: 'Test Stripe Gateway',
+      provider: 'stripe',
+      isActive: true,
+      isDefault: true,
+      isTestMode: true,
+      apiKey: 'sk_test_xxx',
+      apiSecret: 'whsec_xxx',
+      publicKey: 'pk_test_xxx',
+      supportedPaymentMethods: 'creditCard',
+      createdAt: knex.fn.now(),
+      updatedAt: knex.fn.now(),
+    })
+    .returning('paymentGatewayId');
 
   const gatewayId = gateway.paymentGatewayId;
 
@@ -50,7 +49,7 @@ exports.seed = async function(knex) {
       supportedCurrencies: ['USD', 'EUR', 'GBP'],
       gatewayId,
       createdAt: knex.fn.now(),
-      updatedAt: knex.fn.now()
+      updatedAt: knex.fn.now(),
     },
     {
       merchantId,
@@ -63,9 +62,7 @@ exports.seed = async function(knex) {
       supportedCurrencies: ['USD'],
       gatewayId,
       createdAt: knex.fn.now(),
-      updatedAt: knex.fn.now()
-    }
+      updatedAt: knex.fn.now(),
+    },
   ]);
-
-  
 };

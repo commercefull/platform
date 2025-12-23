@@ -12,9 +12,7 @@ import { eventBus } from '../../../../libs/events/eventBus';
 // ============================================================================
 
 export class RemoveCouponCommand {
-  constructor(
-    public readonly checkoutId: string
-  ) {}
+  constructor(public readonly checkoutId: string) {}
 }
 
 // ============================================================================
@@ -38,7 +36,7 @@ export class RemoveCouponUseCase {
       checkoutId: session.id,
       field: 'coupon',
       couponCode: null,
-      previousCoupon
+      previousCoupon,
     });
 
     return mapCheckoutToResponse(session);

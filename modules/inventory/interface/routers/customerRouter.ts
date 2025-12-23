@@ -1,6 +1,6 @@
 /**
  * Inventory Customer Router
- * 
+ *
  * Public routes for checking product availability.
  */
 

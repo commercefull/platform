@@ -1,6 +1,6 @@
 /**
  * Channel Use Cases
- * 
+ *
  * Barrel export for all channel-related use cases.
  */
 

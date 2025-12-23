@@ -8,7 +8,7 @@ export enum ProductVisibility {
   HIDDEN = 'hidden',
   CATALOG_ONLY = 'catalog_only',
   SEARCH_ONLY = 'search_only',
-  FEATURED = 'featured'
+  FEATURED = 'featured',
 }
 
 /**
@@ -20,7 +20,7 @@ export function getVisibilityLabel(visibility: ProductVisibility): string {
     [ProductVisibility.HIDDEN]: 'Hidden',
     [ProductVisibility.CATALOG_ONLY]: 'Catalog Only',
     [ProductVisibility.SEARCH_ONLY]: 'Search Only',
-    [ProductVisibility.FEATURED]: 'Featured'
+    [ProductVisibility.FEATURED]: 'Featured',
   };
   return labels[visibility] || visibility;
 }

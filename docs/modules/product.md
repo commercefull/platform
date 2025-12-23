@@ -9,6 +9,7 @@ The Product feature manages the product catalog, including products, variants, b
 ## Use Cases
 
 ### UC-PRD-001: List Products (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** High
 
@@ -19,12 +20,14 @@ The Product feature manages the product catalog, including products, variants, b
 **Then** the system returns a paginated list of products
 
 #### API Endpoint
+
 ```
 GET /business/products
 Query: status, categoryId, search, limit, offset
 ```
 
 #### Business Rules
+
 - Returns all products (including unpublished)
 - Supports filtering by status, category
 - Supports text search
@@ -33,6 +36,7 @@ Query: status, categoryId, search, limit, offset
 ---
 
 ### UC-PRD-002: Create Product (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** High
 
@@ -45,12 +49,14 @@ Query: status, categoryId, search, limit, offset
 **And** emits product.created event
 
 #### API Endpoint
+
 ```
 POST /business/products
 Body: { name, slug, description, sku, price, categoryIds, ... }
 ```
 
 #### Business Rules
+
 - Name and SKU are required
 - Slug is auto-generated if not provided
 - Master variant is created automatically
@@ -60,6 +66,7 @@ Body: { name, slug, description, sku, price, categoryIds, ... }
 ---
 
 ### UC-PRD-003: Get Product Details (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** High
 
@@ -71,11 +78,13 @@ Body: { name, slug, description, sku, price, categoryIds, ... }
 **Then** the system returns the complete product with variants
 
 #### API Endpoint
+
 ```
 GET /business/products/:productId
 ```
 
 #### Business Rules
+
 - Returns full product details
 - Includes all variants
 - Includes category assignments
@@ -84,6 +93,7 @@ GET /business/products/:productId
 ---
 
 ### UC-PRD-004: Update Product (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** High
 
@@ -96,12 +106,14 @@ GET /business/products/:productId
 **And** emits product.updated event
 
 #### API Endpoint
+
 ```
 PUT /business/products/:productId
 Body: { name?, description?, price?, ... }
 ```
 
 #### Business Rules
+
 - Only provided fields are updated
 - SKU change validates uniqueness
 - Price changes may trigger price alerts
@@ -110,6 +122,7 @@ Body: { name?, description?, price?, ... }
 ---
 
 ### UC-PRD-005: Update Product Status (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** High
 
@@ -122,12 +135,14 @@ Body: { name?, description?, price?, ... }
 **And** emits product.status_changed event
 
 #### API Endpoint
+
 ```
 PUT /business/products/:productId/status
 Body: { status: 'draft'|'active'|'archived' }
 ```
 
 #### Business Rules
+
 - Valid statuses: draft, active, archived
 - Archived products are hidden from storefront
 - Active products must be published to be visible
@@ -135,6 +150,7 @@ Body: { status: 'draft'|'active'|'archived' }
 ---
 
 ### UC-PRD-006: Publish Product (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** High
 
@@ -147,11 +163,13 @@ Body: { status: 'draft'|'active'|'archived' }
 **And** emits product.published event
 
 #### API Endpoint
+
 ```
 POST /business/products/:productId/publish
 ```
 
 #### Business Rules
+
 - Product must be in active status
 - Must have at least one variant with stock
 - Must have required fields (name, description, price)
@@ -160,6 +178,7 @@ POST /business/products/:productId/publish
 ---
 
 ### UC-PRD-007: Unpublish Product (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
@@ -172,11 +191,13 @@ POST /business/products/:productId/publish
 **And** emits product.unpublished event
 
 #### API Endpoint
+
 ```
 POST /business/products/:productId/unpublish
 ```
 
 #### Business Rules
+
 - Product is no longer visible to customers
 - Existing cart items may need handling
 - Product data is retained
@@ -184,6 +205,7 @@ POST /business/products/:productId/unpublish
 ---
 
 ### UC-PRD-008: Delete Product (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
@@ -196,11 +218,13 @@ POST /business/products/:productId/unpublish
 **And** emits product.deleted event
 
 #### API Endpoint
+
 ```
 DELETE /business/products/:productId
 ```
 
 #### Business Rules
+
 - Soft delete (sets deletedAt)
 - Product is hidden from all views
 - Cannot delete products with open orders
@@ -209,6 +233,7 @@ DELETE /business/products/:productId
 ---
 
 ### UC-PRD-009: Search Products (Customer)
+
 **Actor:** Customer/Guest  
 **Priority:** High
 
@@ -220,12 +245,14 @@ DELETE /business/products/:productId
 **Then** the system returns matching products
 
 #### API Endpoint
+
 ```
 GET /products/search
 Query: q, categoryId, minPrice, maxPrice, sort, limit, offset
 ```
 
 #### Business Rules
+
 - Only returns published products
 - Searches name, description, SKU
 - Supports price range filtering
@@ -235,6 +262,7 @@ Query: q, categoryId, minPrice, maxPrice, sort, limit, offset
 ---
 
 ### UC-PRD-010: Get Featured Products (Customer)
+
 **Actor:** Customer/Guest  
 **Priority:** Medium
 
@@ -245,12 +273,14 @@ Query: q, categoryId, minPrice, maxPrice, sort, limit, offset
 **Then** the system returns curated featured products
 
 #### API Endpoint
+
 ```
 GET /products/featured
 Query: limit
 ```
 
 #### Business Rules
+
 - Returns products marked as featured
 - Limited to published products
 - May use algorithmic selection
@@ -258,6 +288,7 @@ Query: limit
 ---
 
 ### UC-PRD-011: Get Products by Category (Customer)
+
 **Actor:** Customer/Guest  
 **Priority:** High
 
@@ -269,12 +300,14 @@ Query: limit
 **Then** the system returns products in that category
 
 #### API Endpoint
+
 ```
 GET /products/category/:categoryId
 Query: sort, limit, offset
 ```
 
 #### Business Rules
+
 - Only published products
 - Includes products in subcategories
 - Supports sorting and pagination
@@ -282,6 +315,7 @@ Query: sort, limit, offset
 ---
 
 ### UC-PRD-012: List Products (Customer)
+
 **Actor:** Customer/Guest  
 **Priority:** High
 
@@ -292,12 +326,14 @@ Query: sort, limit, offset
 **Then** the system returns published products
 
 #### API Endpoint
+
 ```
 GET /products
 Query: sort, limit, offset
 ```
 
 #### Business Rules
+
 - Only published products visible
 - Default sorted by newest
 - Supports pagination
@@ -305,6 +341,7 @@ Query: sort, limit, offset
 ---
 
 ### UC-PRD-013: Get Related Products (Customer)
+
 **Actor:** Customer/Guest  
 **Priority:** Medium
 
@@ -315,12 +352,14 @@ Query: sort, limit, offset
 **Then** the system returns similar products
 
 #### API Endpoint
+
 ```
 GET /products/:productId/related
 Query: limit
 ```
 
 #### Business Rules
+
 - Based on category, tags, or recommendations
 - Excludes the source product
 - Only published products
@@ -328,6 +367,7 @@ Query: limit
 ---
 
 ### UC-PRD-014: Get Product Details (Customer)
+
 **Actor:** Customer/Guest  
 **Priority:** High
 
@@ -339,11 +379,13 @@ Query: limit
 **Then** the system returns the product for display
 
 #### API Endpoint
+
 ```
 GET /products/:identifier
 ```
 
 #### Business Rules
+
 - Only published products
 - Accepts ID or slug
 - Includes variants, media, pricing
@@ -354,6 +396,7 @@ GET /products/:identifier
 ## Bundle Use Cases
 
 ### UC-PRD-015: List Bundles (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
@@ -364,6 +407,7 @@ GET /products/:identifier
 **Then** the system returns all product bundles
 
 #### API Endpoint
+
 ```
 GET /business/products/bundles
 ```
@@ -371,6 +415,7 @@ GET /business/products/bundles
 ---
 
 ### UC-PRD-016: Create Bundle (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
@@ -382,12 +427,14 @@ GET /business/products/bundles
 **Then** the system creates the bundle
 
 #### API Endpoint
+
 ```
 POST /business/products/bundles
 Body: { productId, bundleType, discountType, discountValue, ... }
 ```
 
 #### Business Rules
+
 - Bundle types: fixed, dynamic, mix_match
 - Discount types: percentage, fixed, fixed_price
 - Requires at least 2 items for most bundles
@@ -395,10 +442,12 @@ Body: { productId, bundleType, discountType, discountValue, ... }
 ---
 
 ### UC-PRD-017: Get Bundle (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
 #### API Endpoint
+
 ```
 GET /business/products/bundles/:id
 ```
@@ -406,10 +455,12 @@ GET /business/products/bundles/:id
 ---
 
 ### UC-PRD-018: Update Bundle (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
 #### API Endpoint
+
 ```
 PUT /business/products/bundles/:id
 Body: { discountValue?, isActive?, ... }
@@ -418,10 +469,12 @@ Body: { discountValue?, isActive?, ... }
 ---
 
 ### UC-PRD-019: Delete Bundle (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Low
 
 #### API Endpoint
+
 ```
 DELETE /business/products/bundles/:id
 ```
@@ -429,10 +482,12 @@ DELETE /business/products/bundles/:id
 ---
 
 ### UC-PRD-020: Manage Bundle Items (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
 #### API Endpoints
+
 ```
 POST /business/products/bundles/:id/items
 PUT /business/products/bundles/:id/items/:itemId
@@ -442,10 +497,12 @@ DELETE /business/products/bundles/:id/items/:itemId
 ---
 
 ### UC-PRD-021: Get Active Bundles (Customer)
+
 **Actor:** Customer/Guest  
 **Priority:** Medium
 
 #### API Endpoint
+
 ```
 GET /products/bundles
 ```
@@ -453,10 +510,12 @@ GET /products/bundles
 ---
 
 ### UC-PRD-022: Get Bundle Details (Customer)
+
 **Actor:** Customer/Guest  
 **Priority:** Medium
 
 #### API Endpoint
+
 ```
 GET /products/bundles/:id
 ```
@@ -464,10 +523,12 @@ GET /products/bundles/:id
 ---
 
 ### UC-PRD-023: Get Bundle for Product (Customer)
+
 **Actor:** Customer/Guest  
 **Priority:** Medium
 
 #### API Endpoint
+
 ```
 GET /products/bundles/product/:productId
 ```
@@ -475,10 +536,12 @@ GET /products/bundles/product/:productId
 ---
 
 ### UC-PRD-024: Calculate Bundle Price (Customer)
+
 **Actor:** Customer/Guest  
 **Priority:** Medium
 
 #### API Endpoint
+
 ```
 POST /products/bundles/:id/calculate
 Body: { items: [{ productId, variantId, quantity }] }
@@ -488,38 +551,38 @@ Body: { items: [{ productId, variantId, quantity }] }
 
 ## Events Emitted
 
-| Event | Trigger | Payload |
-|-------|---------|---------|
-| `product.created` | Product created | productId, name, sku |
-| `product.updated` | Product modified | productId, changes |
-| `product.deleted` | Product deleted | productId |
-| `product.published` | Product published | productId |
-| `product.unpublished` | Product unpublished | productId |
-| `product.archived` | Product archived | productId |
-| `product.status_changed` | Status changed | productId, oldStatus, newStatus |
-| `product.price_changed` | Price modified | productId, oldPrice, newPrice |
-| `product.viewed` | Customer viewed product | productId, customerId |
-| `bundle.created` | Bundle created | bundleId, productId |
-| `bundle.purchased` | Bundle purchased | bundleId, orderId |
+| Event                    | Trigger                 | Payload                         |
+| ------------------------ | ----------------------- | ------------------------------- |
+| `product.created`        | Product created         | productId, name, sku            |
+| `product.updated`        | Product modified        | productId, changes              |
+| `product.deleted`        | Product deleted         | productId                       |
+| `product.published`      | Product published       | productId                       |
+| `product.unpublished`    | Product unpublished     | productId                       |
+| `product.archived`       | Product archived        | productId                       |
+| `product.status_changed` | Status changed          | productId, oldStatus, newStatus |
+| `product.price_changed`  | Price modified          | productId, oldPrice, newPrice   |
+| `product.viewed`         | Customer viewed product | productId, customerId           |
+| `bundle.created`         | Bundle created          | bundleId, productId             |
+| `bundle.purchased`       | Bundle purchased        | bundleId, orderId               |
 
 ---
 
 ## Integration Test Coverage
 
-| Use Case | Test File | Status |
-|----------|-----------|--------|
-| UC-PRD-001 | `product/product.test.ts` | ✅ |
-| UC-PRD-002 | `product/product.test.ts` | ✅ |
-| UC-PRD-003 | `product/product.test.ts` | ✅ |
-| UC-PRD-004 | `product/product.test.ts` | ✅ |
-| UC-PRD-005 | `product/product.test.ts` | 🟡 |
-| UC-PRD-006 | `product/product.test.ts` | 🟡 |
-| UC-PRD-007 | `product/product.test.ts` | ❌ |
-| UC-PRD-008 | `product/product.test.ts` | ✅ |
-| UC-PRD-009 | `product/product.test.ts` | 🟡 |
-| UC-PRD-010 | `product/product.test.ts` | ❌ |
-| UC-PRD-011 | `product/product.test.ts` | 🟡 |
-| UC-PRD-012 | `product/product.test.ts` | ✅ |
-| UC-PRD-013 | `product/product.test.ts` | ❌ |
-| UC-PRD-014 | `product/product.test.ts` | ✅ |
-| UC-PRD-015 to UC-PRD-024 | `product/bundle.test.ts` | ❌ |
+| Use Case                 | Test File                 | Status |
+| ------------------------ | ------------------------- | ------ |
+| UC-PRD-001               | `product/product.test.ts` | ✅     |
+| UC-PRD-002               | `product/product.test.ts` | ✅     |
+| UC-PRD-003               | `product/product.test.ts` | ✅     |
+| UC-PRD-004               | `product/product.test.ts` | ✅     |
+| UC-PRD-005               | `product/product.test.ts` | 🟡     |
+| UC-PRD-006               | `product/product.test.ts` | 🟡     |
+| UC-PRD-007               | `product/product.test.ts` | ❌     |
+| UC-PRD-008               | `product/product.test.ts` | ✅     |
+| UC-PRD-009               | `product/product.test.ts` | 🟡     |
+| UC-PRD-010               | `product/product.test.ts` | ❌     |
+| UC-PRD-011               | `product/product.test.ts` | 🟡     |
+| UC-PRD-012               | `product/product.test.ts` | ✅     |
+| UC-PRD-013               | `product/product.test.ts` | ❌     |
+| UC-PRD-014               | `product/product.test.ts` | ✅     |
+| UC-PRD-015 to UC-PRD-024 | `product/bundle.test.ts`  | ❌     |

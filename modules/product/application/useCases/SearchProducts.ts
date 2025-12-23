@@ -25,7 +25,7 @@ export class SearchProductsCommand {
     },
     public readonly limit: number = 20,
     public readonly offset: number = 0,
-    public readonly orderBy: 'relevance' | 'price_asc' | 'price_desc' | 'newest' | 'name' = 'relevance'
+    public readonly orderBy: 'relevance' | 'price_asc' | 'price_desc' | 'newest' | 'name' = 'relevance',
   ) {}
 }
 
@@ -74,7 +74,7 @@ export class SearchProductsUseCase {
         limit: command.limit,
         offset: command.offset,
         hasMore: false,
-        query: command.query
+        query: command.query,
       };
     }
 
@@ -83,7 +83,7 @@ export class SearchProductsUseCase {
       status: ProductStatus.ACTIVE,
       visibility: [ProductVisibility.VISIBLE, ProductVisibility.SEARCH_ONLY, ProductVisibility.FEATURED],
       search: command.query,
-      ...command.filters
+      ...command.filters,
     };
 
     // Map orderBy to pagination options
@@ -120,7 +120,7 @@ export class SearchProductsUseCase {
       limit: command.limit,
       offset: command.offset,
       orderBy,
-      orderDirection
+      orderDirection,
     };
 
     const result = await this.productRepository.search(command.query, filters, pagination);
@@ -131,7 +131,7 @@ export class SearchProductsUseCase {
       limit: result.limit,
       offset: result.offset,
       hasMore: result.hasMore,
-      query: command.query
+      query: command.query,
     };
   }
 
@@ -150,7 +150,7 @@ export class SearchProductsUseCase {
       primaryImageUrl: product.primaryImage?.url,
       categoryId: product.categoryId,
       brandId: product.brandId,
-      shortDescription: product.shortDescription
+      shortDescription: product.shortDescription,
     };
   }
 }

@@ -8,15 +8,10 @@ export class Price {
     private readonly _basePrice: number,
     private readonly _salePrice: number | null,
     private readonly _cost: number | null,
-    private readonly _currency: string
+    private readonly _currency: string,
   ) {}
 
-  static create(
-    basePrice: number, 
-    currency: string = 'USD',
-    salePrice?: number,
-    cost?: number
-  ): Price {
+  static create(basePrice: number, currency: string = 'USD', salePrice?: number, cost?: number): Price {
     if (basePrice < 0) {
       throw new Error('Base price cannot be negative');
     }
@@ -88,23 +83,21 @@ export class Price {
     if (basePrice < 0) {
       throw new Error('Base price cannot be negative');
     }
-    const newSalePrice = this._salePrice !== null && this._salePrice > basePrice 
-      ? null 
-      : this._salePrice;
+    const newSalePrice = this._salePrice !== null && this._salePrice > basePrice ? null : this._salePrice;
     return new Price(basePrice, newSalePrice, this._cost, this._currency);
   }
 
   format(locale: string = 'en-US'): string {
     return new Intl.NumberFormat(locale, {
       style: 'currency',
-      currency: this._currency
+      currency: this._currency,
     }).format(this.effectivePrice);
   }
 
   formatBasePrice(locale: string = 'en-US'): string {
     return new Intl.NumberFormat(locale, {
       style: 'currency',
-      currency: this._currency
+      currency: this._currency,
     }).format(this._basePrice);
   }
 
@@ -117,7 +110,7 @@ export class Price {
       effectivePrice: this.effectivePrice,
       isOnSale: this.isOnSale,
       discountAmount: this.discountAmount,
-      discountPercentage: this.discountPercentage
+      discountPercentage: this.discountPercentage,
     };
   }
 }

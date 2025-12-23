@@ -15,14 +15,13 @@ export interface MembershipPlanBenefit {
 }
 
 export type MembershipPlanBenefitCreateParams = Omit<MembershipPlanBenefit, 'membershipPlanBenefitId' | 'createdAt' | 'updatedAt'>;
-export type MembershipPlanBenefitUpdateParams = Partial<Pick<MembershipPlanBenefit, 'isActive' | 'priority' | 'valueOverride' | 'rulesOverride' | 'notes'>>;
+export type MembershipPlanBenefitUpdateParams = Partial<
+  Pick<MembershipPlanBenefit, 'isActive' | 'priority' | 'valueOverride' | 'rulesOverride' | 'notes'>
+>;
 
 export class MembershipPlanBenefitRepo {
   async findById(id: string): Promise<MembershipPlanBenefit | null> {
-    return await queryOne<MembershipPlanBenefit>(
-      `SELECT * FROM "membershipPlanBenefit" WHERE "membershipPlanBenefitId" = $1`,
-      [id]
-    );
+    return await queryOne<MembershipPlanBenefit>(`SELECT * FROM "membershipPlanBenefit" WHERE "membershipPlanBenefitId" = $1`, [id]);
   }
 
   async findByPlanId(planId: string, activeOnly = false): Promise<MembershipPlanBenefit[]> {
@@ -33,17 +32,18 @@ export class MembershipPlanBenefitRepo {
   }
 
   async findByBenefitId(benefitId: string): Promise<MembershipPlanBenefit[]> {
-    return (await query<MembershipPlanBenefit[]>(
-      `SELECT * FROM "membershipPlanBenefit" WHERE "benefitId" = $1 ORDER BY "priority" DESC`,
-      [benefitId]
-    )) || [];
+    return (
+      (await query<MembershipPlanBenefit[]>(`SELECT * FROM "membershipPlanBenefit" WHERE "benefitId" = $1 ORDER BY "priority" DESC`, [
+        benefitId,
+      ])) || []
+    );
   }
 
   async findByPlanAndBenefit(planId: string, benefitId: string): Promise<MembershipPlanBenefit | null> {
-    return await queryOne<MembershipPlanBenefit>(
-      `SELECT * FROM "membershipPlanBenefit" WHERE "planId" = $1 AND "benefitId" = $2`,
-      [planId, benefitId]
-    );
+    return await queryOne<MembershipPlanBenefit>(`SELECT * FROM "membershipPlanBenefit" WHERE "planId" = $1 AND "benefitId" = $2`, [
+      planId,
+      benefitId,
+    ]);
   }
 
   async create(params: MembershipPlanBenefitCreateParams): Promise<MembershipPlanBenefit> {
@@ -61,11 +61,16 @@ export class MembershipPlanBenefitRepo {
         "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
       [
-        params.planId, params.benefitId, params.isActive ?? true, params.priority || 0,
+        params.planId,
+        params.benefitId,
+        params.isActive ?? true,
+        params.priority || 0,
         params.valueOverride ? JSON.stringify(params.valueOverride) : null,
         params.rulesOverride ? JSON.stringify(params.rulesOverride) : null,
-        params.notes || null, now, now
-      ]
+        params.notes || null,
+        now,
+        now,
+      ],
     );
 
     if (!result) throw new Error('Failed to create plan benefit');
@@ -92,7 +97,7 @@ export class MembershipPlanBenefitRepo {
 
     return await queryOne<MembershipPlanBenefit>(
       `UPDATE "membershipPlanBenefit" SET ${updateFields.join(', ')} WHERE "membershipPlanBenefitId" = $${paramIndex} RETURNING *`,
-      values
+      values,
     );
   }
 
@@ -117,7 +122,7 @@ export class MembershipPlanBenefitRepo {
   async delete(id: string): Promise<boolean> {
     const result = await queryOne<{ membershipPlanBenefitId: string }>(
       `DELETE FROM "membershipPlanBenefit" WHERE "membershipPlanBenefitId" = $1 RETURNING "membershipPlanBenefitId"`,
-      [id]
+      [id],
     );
     return !!result;
   }
@@ -125,7 +130,7 @@ export class MembershipPlanBenefitRepo {
   async deleteByPlanId(planId: string): Promise<number> {
     const results = await query<{ membershipPlanBenefitId: string }[]>(
       `DELETE FROM "membershipPlanBenefit" WHERE "planId" = $1 RETURNING "membershipPlanBenefitId"`,
-      [planId]
+      [planId],
     );
     return results ? results.length : 0;
   }

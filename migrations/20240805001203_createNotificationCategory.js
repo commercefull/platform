@@ -12,7 +12,7 @@ exports.up = function (knex) {
     t.text('description');
     t.enum('defaultPriority', ['low', 'normal', 'high']).notNullable().defaultTo('normal');
     t.boolean('isTransactional').notNullable().defaultTo(false);
-    
+
     t.index('code');
     t.index('isTransactional');
   });

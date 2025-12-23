@@ -29,19 +29,19 @@ export interface ProductAttributeProps {
   updatedAt: Date;
 }
 
-export type AttributeType = 
-  | 'text' 
-  | 'number' 
-  | 'select' 
+export type AttributeType =
+  | 'text'
+  | 'number'
+  | 'select'
   | 'multiselect'
-  | 'checkbox' 
-  | 'radio' 
-  | 'date' 
-  | 'datetime' 
-  | 'time' 
-  | 'file' 
-  | 'image' 
-  | 'video' 
+  | 'checkbox'
+  | 'radio'
+  | 'date'
+  | 'datetime'
+  | 'time'
+  | 'file'
+  | 'image'
+  | 'video'
   | 'document'
   | 'color'
   | 'boolean';
@@ -79,30 +79,78 @@ export class ProductAttribute {
   }
 
   // Getters
-  get id(): string { return this.props.productAttributeId; }
-  get name(): string { return this.props.name; }
-  get code(): string { return this.props.code; }
-  get description(): string | undefined { return this.props.description; }
-  get groupId(): string | undefined { return this.props.groupId; }
-  get type(): AttributeType { return this.props.type; }
-  get inputType(): AttributeInputType { return this.props.inputType; }
-  get isRequired(): boolean { return this.props.isRequired; }
-  get isUnique(): boolean { return this.props.isUnique; }
-  get isSystem(): boolean { return this.props.isSystem; }
-  get isSearchable(): boolean { return this.props.isSearchable; }
-  get isFilterable(): boolean { return this.props.isFilterable; }
-  get isComparable(): boolean { return this.props.isComparable; }
-  get isVisibleOnFront(): boolean { return this.props.isVisibleOnFront; }
-  get isUsedInProductListing(): boolean { return this.props.isUsedInProductListing; }
-  get useForVariants(): boolean { return this.props.useForVariants; }
-  get useForConfigurations(): boolean { return this.props.useForConfigurations; }
-  get position(): number { return this.props.position; }
-  get defaultValue(): string | undefined { return this.props.defaultValue; }
-  get validationRules(): ValidationRules | undefined { return this.props.validationRules; }
-  get merchantId(): string | undefined { return this.props.merchantId; }
-  get isGlobal(): boolean { return this.props.isGlobal; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get id(): string {
+    return this.props.productAttributeId;
+  }
+  get name(): string {
+    return this.props.name;
+  }
+  get code(): string {
+    return this.props.code;
+  }
+  get description(): string | undefined {
+    return this.props.description;
+  }
+  get groupId(): string | undefined {
+    return this.props.groupId;
+  }
+  get type(): AttributeType {
+    return this.props.type;
+  }
+  get inputType(): AttributeInputType {
+    return this.props.inputType;
+  }
+  get isRequired(): boolean {
+    return this.props.isRequired;
+  }
+  get isUnique(): boolean {
+    return this.props.isUnique;
+  }
+  get isSystem(): boolean {
+    return this.props.isSystem;
+  }
+  get isSearchable(): boolean {
+    return this.props.isSearchable;
+  }
+  get isFilterable(): boolean {
+    return this.props.isFilterable;
+  }
+  get isComparable(): boolean {
+    return this.props.isComparable;
+  }
+  get isVisibleOnFront(): boolean {
+    return this.props.isVisibleOnFront;
+  }
+  get isUsedInProductListing(): boolean {
+    return this.props.isUsedInProductListing;
+  }
+  get useForVariants(): boolean {
+    return this.props.useForVariants;
+  }
+  get useForConfigurations(): boolean {
+    return this.props.useForConfigurations;
+  }
+  get position(): number {
+    return this.props.position;
+  }
+  get defaultValue(): string | undefined {
+    return this.props.defaultValue;
+  }
+  get validationRules(): ValidationRules | undefined {
+    return this.props.validationRules;
+  }
+  get merchantId(): string | undefined {
+    return this.props.merchantId;
+  }
+  get isGlobal(): boolean {
+    return this.props.isGlobal;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   /**
    * Check if this attribute supports predefined values (select, multiselect, radio, checkbox)
@@ -245,19 +293,21 @@ export class ProductAttribute {
   toObject(): ProductAttributeProps & { values: AttributeValue[] } {
     return {
       ...this.props,
-      values: this.values
+      values: this.values,
     };
   }
 
   /**
    * Create a new ProductAttribute instance
    */
-  static create(props: Omit<ProductAttributeProps, 'productAttributeId' | 'createdAt' | 'updatedAt'> & { productAttributeId?: string }): ProductAttribute {
+  static create(
+    props: Omit<ProductAttributeProps, 'productAttributeId' | 'createdAt' | 'updatedAt'> & { productAttributeId?: string },
+  ): ProductAttribute {
     return new ProductAttribute({
       ...props,
       productAttributeId: props.productAttributeId || '',
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     });
   }
 }

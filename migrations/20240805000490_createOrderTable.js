@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function (knex) {
   return knex.schema.createTable('order', t => {
     t.uuid('orderId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
@@ -6,9 +6,52 @@ exports.up = function(knex) {
     t.string('orderNumber', 50).notNullable().unique();
     t.uuid('customerId').references('customerId').inTable('customer');
     t.uuid('basketId').references('basketId').inTable('basket');
-    t.enum('status', ['pending', 'processing', 'onHold', 'completed', 'shipped', 'delivered', 'cancelled', 'refunded', 'failed', 'paymentPending', 'paymentFailed', 'backordered']).notNullable().defaultTo('pending');
-    t.enum('paymentStatus', ['pending', 'authorized', 'paid', 'partiallyPaid', 'partiallyRefunded', 'refunded', 'failed', 'voided', 'requiresAction']).notNullable().defaultTo('pending');
-    t.enum('fulfillmentStatus', ['unfulfilled', 'partiallyFulfilled', 'fulfilled', 'partiallyShipped', 'shipped', 'delivered', 'restocked', 'failed', 'canceled', 'cancelled', 'pendingPickup', 'pickedUp', 'returned']).notNullable().defaultTo('unfulfilled');
+    t.enum('status', [
+      'pending',
+      'processing',
+      'onHold',
+      'completed',
+      'shipped',
+      'delivered',
+      'cancelled',
+      'refunded',
+      'failed',
+      'paymentPending',
+      'paymentFailed',
+      'backordered',
+    ])
+      .notNullable()
+      .defaultTo('pending');
+    t.enum('paymentStatus', [
+      'pending',
+      'authorized',
+      'paid',
+      'partiallyPaid',
+      'partiallyRefunded',
+      'refunded',
+      'failed',
+      'voided',
+      'requiresAction',
+    ])
+      .notNullable()
+      .defaultTo('pending');
+    t.enum('fulfillmentStatus', [
+      'unfulfilled',
+      'partiallyFulfilled',
+      'fulfilled',
+      'partiallyShipped',
+      'shipped',
+      'delivered',
+      'restocked',
+      'failed',
+      'canceled',
+      'cancelled',
+      'pendingPickup',
+      'pickedUp',
+      'returned',
+    ])
+      .notNullable()
+      .defaultTo('unfulfilled');
     t.string('currencyCode', 3).notNullable().defaultTo('USD');
     t.decimal('subtotal', 15, 2).notNullable().defaultTo(0);
     t.decimal('discountTotal', 15, 2).notNullable().defaultTo(0);
@@ -61,6 +104,6 @@ exports.up = function(knex) {
   });
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTable('order');
 };

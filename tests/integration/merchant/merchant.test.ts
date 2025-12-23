@@ -1,11 +1,5 @@
 import { AxiosInstance } from 'axios';
-import { 
-  setupMerchantTests, 
-  cleanupMerchantTests, 
-  testMerchant, 
-  testMerchantAddress,
-  testMerchantPaymentInfo
-} from './testUtils';
+import { setupMerchantTests, cleanupMerchantTests, testMerchant, testMerchantAddress, testMerchantPaymentInfo } from './testUtils';
 
 describe('Merchant Tests', () => {
   let client: AxiosInstance;
@@ -30,18 +24,17 @@ describe('Merchant Tests', () => {
   describe('Merchant CRUD Operations', () => {
     it('should get a merchant by ID', async () => {
       if (!testMerchantId) {
-        
         return;
       }
-      
+
       const response = await client.get(`/business/merchants/${testMerchantId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       expect(response.data.data).toHaveProperty('merchantId', testMerchantId);
-      
+
       // Verify camelCase property names in response (TypeScript interface)
       expect(response.data.data).toHaveProperty('logo');
       expect(response.data.data).toHaveProperty('createdAt');
@@ -50,9 +43,9 @@ describe('Merchant Tests', () => {
 
     it('should list all merchants with pagination', async () => {
       const response = await client.get('/business/merchants', {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       expect(response.data.data).toBeDefined();
@@ -62,19 +55,18 @@ describe('Merchant Tests', () => {
 
     it('should update a merchant', async () => {
       if (!testMerchantId) {
-        
         return;
       }
-      
+
       const updateData = {
         name: 'Updated Test Merchant',
-        description: 'Updated description for testing'
+        description: 'Updated description for testing',
       };
-      
+
       const response = await client.put(`/business/merchants/${testMerchantId}`, updateData, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       expect(response.data.data).toHaveProperty('name', updateData.name);
@@ -83,13 +75,13 @@ describe('Merchant Tests', () => {
 
     it('should filter merchants by status', async () => {
       const response = await client.get('/business/merchants?status=active', {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       expect(response.data.data).toBeDefined();
-      
+
       // All returned merchants should have status 'active'
       if (response.data.data.length > 0) {
         response.data.data.forEach((merchant: any) => {
@@ -102,19 +94,18 @@ describe('Merchant Tests', () => {
   describe('Merchant Address Operations', () => {
     it('should get addresses for a merchant', async () => {
       if (!testMerchantId) {
-        
         return;
       }
-      
+
       const response = await client.get(`/business/merchants/${testMerchantId}/addresses`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       expect(response.data.data).toBeDefined();
       expect(Array.isArray(response.data.data)).toBe(true);
-      
+
       if (response.data.data.length > 0) {
         const address = response.data.data[0];
         expect(address).toHaveProperty('merchantId', testMerchantId);
@@ -126,23 +117,18 @@ describe('Merchant Tests', () => {
 
     it('should update a merchant address', async () => {
       if (!testMerchantId || !testAddressId) {
-        
         return;
       }
-      
+
       const updateData = {
         addressLine1: '456 Updated Street',
-        city: 'New Test City'
+        city: 'New Test City',
       };
-      
-      const response = await client.put(
-        `/business/merchants/${testMerchantId}/addresses/${testAddressId}`, 
-        updateData, 
-        {
-          headers: { Authorization: `Bearer ${adminToken}` }
-        }
-      );
-      
+
+      const response = await client.put(`/business/merchants/${testMerchantId}/addresses/${testAddressId}`, updateData, {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      });
+
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       expect(response.data.data).toHaveProperty('addressLine1', updateData.addressLine1);
@@ -153,14 +139,13 @@ describe('Merchant Tests', () => {
   describe('Merchant Payment Info Operations', () => {
     it('should get payment info for a merchant', async () => {
       if (!testMerchantId) {
-        
         return;
       }
-      
+
       const response = await client.get(`/business/merchants/${testMerchantId}/payment-info`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       expect(response.data.data).toBeDefined();
@@ -178,23 +163,18 @@ describe('Merchant Tests', () => {
 
     it('should update merchant payment info', async () => {
       if (!testMerchantId || !testPaymentInfoId) {
-        
         return;
       }
-      
+
       const updateData = {
         accountHolderName: 'Updated Company Name',
-        bankName: 'Updated Bank'
+        bankName: 'Updated Bank',
       };
-      
-      const response = await client.put(
-        `/business/merchants/${testMerchantId}/payment-info/${testPaymentInfoId}`, 
-        updateData, 
-        {
-          headers: { Authorization: `Bearer ${adminToken}` }
-        }
-      );
-      
+
+      const response = await client.put(`/business/merchants/${testMerchantId}/payment-info/${testPaymentInfoId}`, updateData, {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      });
+
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       expect(response.data.data).toHaveProperty('accountHolderName', updateData.accountHolderName);
@@ -207,18 +187,18 @@ describe('Merchant Tests', () => {
       // Note: Public merchant API would be at a customer-facing route
       // For now, we test the business API with status filter
       const response = await client.get('/business/merchants?status=active', {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
-      
+
       if (response.data.data.length > 0) {
         // Public API should only return merchants with status 'active'
         response.data.data.forEach((merchant: any) => {
           expect(merchant.status).toBe('active');
         });
-        
+
         // Business API returns full merchant data
         const merchant = response.data.data[0];
         expect(merchant).toHaveProperty('name');
@@ -228,14 +208,13 @@ describe('Merchant Tests', () => {
 
     it('should get merchant information by ID via business API', async () => {
       if (!testMerchantId) {
-        
         return;
       }
-      
+
       const response = await client.get(`/business/merchants/${testMerchantId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       expect(response.data.data).toHaveProperty('merchantId', testMerchantId);

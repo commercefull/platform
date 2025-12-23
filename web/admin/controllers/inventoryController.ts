@@ -88,7 +88,7 @@ export const listInventory = async (req: Request, res: Response): Promise<void> 
        ${whereClause}
        ORDER BY p."name" ASC
        LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`,
-      [...params, limit, offset]
+      [...params, limit, offset],
     );
 
     // Get total count
@@ -97,7 +97,7 @@ export const listInventory = async (req: Request, res: Response): Promise<void> 
        FROM "inventoryLevel" il
        LEFT JOIN "product" p ON il."productId" = p."productId"
        ${whereClause}`,
-      params
+      params,
     );
 
     // Get stats
@@ -105,7 +105,7 @@ export const listInventory = async (req: Request, res: Response): Promise<void> 
 
     // Get locations for filter
     const locations = await query<Array<{ locationId: string; name: string }>>(
-      `SELECT "locationId", "name" FROM "inventoryLocation" ORDER BY "name"`
+      `SELECT "locationId", "name" FROM "inventoryLocation" ORDER BY "name"`,
     );
 
     // Get low stock items
@@ -120,7 +120,7 @@ export const listInventory = async (req: Request, res: Response): Promise<void> 
        WHERE (il."quantity" - il."reserved") > 0 
          AND (il."quantity" - il."reserved") <= il."reorderPoint"
        ORDER BY (il."quantity" - il."reserved") ASC
-       LIMIT 10`
+       LIMIT 10`,
     );
 
     const total = parseInt(countResult?.count || '0');
@@ -135,13 +135,13 @@ export const listInventory = async (req: Request, res: Response): Promise<void> 
         total,
         limit,
         page: parseInt(page as string),
-        pages: Math.ceil(total / limit)
+        pages: Math.ceil(total / limit),
       },
       filters: { search, stockStatus, locationId },
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load inventory',
@@ -163,10 +163,9 @@ export const adjustStock = async (req: Request, res: Response): Promise<void> =>
       return;
     }
 
-    const inventoryLevel = await queryOne<InventoryLevel>(
-      `SELECT * FROM "inventoryLevel" WHERE "inventoryLevelId" = $1`,
-      [inventoryLevelId]
-    );
+    const inventoryLevel = await queryOne<InventoryLevel>(`SELECT * FROM "inventoryLevel" WHERE "inventoryLevelId" = $1`, [
+      inventoryLevelId,
+    ]);
 
     if (!inventoryLevel) {
       res.status(404).json({ success: false, message: 'Inventory level not found' });
@@ -194,10 +193,11 @@ export const adjustStock = async (req: Request, res: Response): Promise<void> =>
     const now = new Date();
 
     // Update inventory level
-    await query(
-      `UPDATE "inventoryLevel" SET "quantity" = $1, "updatedAt" = $2 WHERE "inventoryLevelId" = $3`,
-      [newQuantity, now, inventoryLevelId]
-    );
+    await query(`UPDATE "inventoryLevel" SET "quantity" = $1, "updatedAt" = $2 WHERE "inventoryLevelId" = $3`, [
+      newQuantity,
+      now,
+      inventoryLevelId,
+    ]);
 
     // Create inventory transaction record
     await query(
@@ -218,14 +218,14 @@ export const adjustStock = async (req: Request, res: Response): Promise<void> =>
         reason || 'manual_adjustment',
         notes || null,
         userId,
-        now
-      ]
+        now,
+      ],
     );
 
     res.json({ success: true, message: 'Stock adjusted successfully', newQuantity });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to adjust stock' });
   }
 };
@@ -246,7 +246,7 @@ export const viewInventoryHistory = async (req: Request, res: Response): Promise
        FROM "inventoryLevel" il
        LEFT JOIN "product" p ON il."productId" = p."productId"
        WHERE il."inventoryLevelId" = $1`,
-      [inventoryLevelId]
+      [inventoryLevelId],
     );
 
     if (!inventoryLevel) {
@@ -262,12 +262,12 @@ export const viewInventoryHistory = async (req: Request, res: Response): Promise
        WHERE "inventoryLevelId" = $1
        ORDER BY "createdAt" DESC
        LIMIT $2 OFFSET $3`,
-      [inventoryLevelId, limit, offset]
+      [inventoryLevelId, limit, offset],
     );
 
     const countResult = await queryOne<{ count: string }>(
       `SELECT COUNT(*) as count FROM "inventoryTransaction" WHERE "inventoryLevelId" = $1`,
-      [inventoryLevelId]
+      [inventoryLevelId],
     );
 
     const total = parseInt(countResult?.count || '0');
@@ -280,12 +280,12 @@ export const viewInventoryHistory = async (req: Request, res: Response): Promise
         total,
         limit,
         page: parseInt(page as string),
-        pages: Math.ceil(total / limit)
+        pages: Math.ceil(total / limit),
       },
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load inventory history',
@@ -307,7 +307,7 @@ export const listLocations = async (req: Request, res: Response): Promise<void> 
        FROM "inventoryLocation" loc
        LEFT JOIN "inventoryLevel" il ON loc."locationId" = il."locationId"
        GROUP BY loc."locationId"
-       ORDER BY loc."name"`
+       ORDER BY loc."name"`,
     );
 
     adminRespond(req, res, 'inventory/locations', {
@@ -316,7 +316,7 @@ export const listLocations = async (req: Request, res: Response): Promise<void> 
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load locations',
@@ -341,7 +341,7 @@ export const lowStockReport = async (req: Request, res: Response): Promise<void>
        LEFT JOIN "product" p ON il."productId" = p."productId"
        LEFT JOIN "inventoryLocation" loc ON il."locationId" = loc."locationId"
        WHERE (il."quantity" - il."reserved") <= il."reorderPoint"
-       ORDER BY (il."quantity" - il."reserved") ASC`
+       ORDER BY (il."quantity" - il."reserved") ASC`,
     );
 
     adminRespond(req, res, 'inventory/low-stock', {
@@ -350,7 +350,7 @@ export const lowStockReport = async (req: Request, res: Response): Promise<void>
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to generate report',
@@ -369,13 +369,13 @@ async function getInventoryStats(): Promise<InventoryStats> {
       SUM(CASE WHEN (il."quantity" - il."reserved") > il."reorderPoint" THEN 1 ELSE 0 END) as "inStock",
       SUM(CASE WHEN (il."quantity" - il."reserved") > 0 AND (il."quantity" - il."reserved") <= il."reorderPoint" THEN 1 ELSE 0 END) as "lowStock",
       SUM(CASE WHEN (il."quantity" - il."reserved") <= 0 THEN 1 ELSE 0 END) as "outOfStock"
-     FROM "inventoryLevel" il`
+     FROM "inventoryLevel" il`,
   );
 
   return {
     totalProducts: parseInt(result?.totalProducts || '0'),
     inStock: parseInt(result?.inStock || '0'),
     lowStock: parseInt(result?.lowStock || '0'),
-    outOfStock: parseInt(result?.outOfStock || '0')
+    outOfStock: parseInt(result?.outOfStock || '0'),
   };
 }

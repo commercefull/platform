@@ -42,7 +42,7 @@ export class ApproveCompanyUseCase {
         await companyRepo.updateCompanyCredit(
           command.companyId,
           command.creditLimit,
-          command.creditLimit // Available credit starts at full limit
+          command.creditLimit, // Available credit starts at full limit
         );
       }
 
@@ -59,7 +59,7 @@ export class ApproveCompanyUseCase {
         approvedBy: command.approvedBy,
         creditLimit: command.creditLimit || company.creditLimit,
         paymentTerms: `net${command.paymentTermsDays || company.paymentTermsDays}`,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
 
       return {
@@ -69,8 +69,8 @@ export class ApproveCompanyUseCase {
           name: updatedCompany!.name,
           status: updatedCompany!.status,
           creditLimit: updatedCompany!.creditLimit,
-          approvedAt: updatedCompany!.approvedAt || new Date()
-        }
+          approvedAt: updatedCompany!.approvedAt || new Date(),
+        },
       };
     } catch (error: any) {
       return { success: false, error: error.message };

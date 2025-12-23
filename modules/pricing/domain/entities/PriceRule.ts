@@ -76,7 +76,7 @@ export class PriceRule {
       merchantId: props.merchantId,
       metadata: props.metadata,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     });
   }
 
@@ -85,18 +85,42 @@ export class PriceRule {
   }
 
   // Getters
-  get ruleId(): string { return this.props.ruleId; }
-  get name(): string { return this.props.name; }
-  get type(): PriceRuleType { return this.props.type; }
-  get target(): PriceRuleTarget { return this.props.target; }
-  get value(): number { return this.props.value; }
-  get tiers(): TierPrice[] | undefined { return this.props.tiers; }
-  get priority(): number { return this.props.priority; }
-  get isActive(): boolean { return this.props.isActive; }
-  get startDate(): Date | undefined { return this.props.startDate; }
-  get endDate(): Date | undefined { return this.props.endDate; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get ruleId(): string {
+    return this.props.ruleId;
+  }
+  get name(): string {
+    return this.props.name;
+  }
+  get type(): PriceRuleType {
+    return this.props.type;
+  }
+  get target(): PriceRuleTarget {
+    return this.props.target;
+  }
+  get value(): number {
+    return this.props.value;
+  }
+  get tiers(): TierPrice[] | undefined {
+    return this.props.tiers;
+  }
+  get priority(): number {
+    return this.props.priority;
+  }
+  get isActive(): boolean {
+    return this.props.isActive;
+  }
+  get startDate(): Date | undefined {
+    return this.props.startDate;
+  }
+  get endDate(): Date | undefined {
+    return this.props.endDate;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   // Computed
   get isCurrentlyActive(): boolean {
@@ -127,11 +151,9 @@ export class PriceRule {
 
   private calculateTieredPrice(basePrice: number, quantity: number): number {
     if (!this.props.tiers?.length) return basePrice;
-    
-    const tier = this.props.tiers.find(t => 
-      quantity >= t.minQuantity && (!t.maxQuantity || quantity <= t.maxQuantity)
-    );
-    
+
+    const tier = this.props.tiers.find(t => quantity >= t.minQuantity && (!t.maxQuantity || quantity <= t.maxQuantity));
+
     if (!tier) return basePrice;
     return tier.price ?? basePrice * (1 - (tier.discountPercent || 0) / 100);
   }
@@ -174,7 +196,7 @@ export class PriceRule {
       endDate: this.props.endDate?.toISOString(),
       metadata: this.props.metadata,
       createdAt: this.props.createdAt.toISOString(),
-      updatedAt: this.props.updatedAt.toISOString()
+      updatedAt: this.props.updatedAt.toISOString(),
     };
   }
 }

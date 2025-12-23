@@ -16,7 +16,7 @@ export class CreateCategoryCommand {
     public readonly metaTitle?: string,
     public readonly metaDescription?: string,
     public readonly sortOrder?: number,
-    public readonly isActive?: boolean
+    public readonly isActive?: boolean,
   ) {}
 }
 
@@ -58,14 +58,14 @@ export class CreateCategoryUseCase {
       sortOrder: command.sortOrder || 0,
       isActive: command.isActive !== undefined ? command.isActive : true,
       depth: 0,
-      path: command.slug
+      path: command.slug,
     });
 
     eventBus.emit('content.category.created', {
       categoryId: category.contentCategoryId,
       name: category.name,
       slug: category.slug,
-      parentId: category.parentId
+      parentId: category.parentId,
     });
 
     return {
@@ -76,7 +76,7 @@ export class CreateCategoryUseCase {
       path: category.path ?? undefined,
       depth: category.depth,
       isActive: category.isActive,
-      createdAt: category.createdAt instanceof Date ? category.createdAt.toISOString() : String(category.createdAt)
+      createdAt: category.createdAt instanceof Date ? category.createdAt.toISOString() : String(category.createdAt),
     };
   }
 }

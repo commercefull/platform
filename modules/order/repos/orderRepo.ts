@@ -1,28 +1,52 @@
-import { queryOne, query } from "../../../libs/db";
+import { queryOne, query } from '../../../libs/db';
 
 // Import types from generated DB types - single source of truth
-import { 
-  Order as DbOrder,
-  OrderItem as DbOrderItem 
-} from '../../../libs/db/types';
+import { Order as DbOrder, OrderItem as DbOrderItem } from '../../../libs/db/types';
 
 // Re-export DB types
 export type Order = DbOrder;
 export type OrderItem = DbOrderItem;
 
 // Status types based on database enum values
-export type OrderStatus = 'pending' | 'processing' | 'onHold' | 'completed' | 'shipped' | 
-                         'delivered' | 'cancelled' | 'refunded' | 'failed' | 
-                         'paymentPending' | 'paymentFailed' | 'backordered';
+export type OrderStatus =
+  | 'pending'
+  | 'processing'
+  | 'onHold'
+  | 'completed'
+  | 'shipped'
+  | 'delivered'
+  | 'cancelled'
+  | 'refunded'
+  | 'failed'
+  | 'paymentPending'
+  | 'paymentFailed'
+  | 'backordered';
 
-export type PaymentStatus = 'pending' | 'authorized' | 'paid' | 'partiallyPaid' | 
-                           'partiallyRefunded' | 'refunded' | 'failed' | 
-                           'voided' | 'requiresAction';
+export type PaymentStatus =
+  | 'pending'
+  | 'authorized'
+  | 'paid'
+  | 'partiallyPaid'
+  | 'partiallyRefunded'
+  | 'refunded'
+  | 'failed'
+  | 'voided'
+  | 'requiresAction';
 
-export type FulfillmentStatus = 'unfulfilled' | 'partiallyFulfilled' | 'fulfilled' | 
-                               'partiallyShipped' | 'shipped' | 'delivered' | 'restocked' |
-                               'failed' | 'canceled' | 'cancelled' | 'pendingPickup' | 
-                               'pickedUp' | 'returned';
+export type FulfillmentStatus =
+  | 'unfulfilled'
+  | 'partiallyFulfilled'
+  | 'fulfilled'
+  | 'partiallyShipped'
+  | 'shipped'
+  | 'delivered'
+  | 'restocked'
+  | 'failed'
+  | 'canceled'
+  | 'cancelled'
+  | 'pendingPickup'
+  | 'pickedUp'
+  | 'returned';
 
 // Derived types for create/update operations
 export type OrderCreateParams = Partial<Omit<Order, 'orderId' | 'createdAt' | 'updatedAt'>> & {
@@ -38,55 +62,49 @@ export class OrderRepo {
   // ============================================================================
 
   async findById(orderId: string): Promise<Order | null> {
-    return await queryOne<Order>(
-      'SELECT * FROM "order" WHERE "orderId" = $1',
-      [orderId]
-    );
+    return await queryOne<Order>('SELECT * FROM "order" WHERE "orderId" = $1', [orderId]);
   }
 
   async findByOrderNumber(orderNumber: string): Promise<Order | null> {
-    return await queryOne<Order>(
-      'SELECT * FROM "order" WHERE "orderNumber" = $1',
-      [orderNumber]
-    );
+    return await queryOne<Order>('SELECT * FROM "order" WHERE "orderNumber" = $1', [orderNumber]);
   }
 
   async findByCustomer(customerId: string, limit: number = 100, offset: number = 0): Promise<Order[]> {
-    const results = await query<Order[]>(
-      'SELECT * FROM "order" WHERE "customerId" = $1 ORDER BY "createdAt" DESC LIMIT $2 OFFSET $3',
-      [customerId, limit, offset]
-    );
+    const results = await query<Order[]>('SELECT * FROM "order" WHERE "customerId" = $1 ORDER BY "createdAt" DESC LIMIT $2 OFFSET $3', [
+      customerId,
+      limit,
+      offset,
+    ]);
     return results || [];
   }
 
   async findAll(limit: number = 100, offset: number = 0): Promise<Order[]> {
-    const results = await query<Order[]>(
-      'SELECT * FROM "order" ORDER BY "createdAt" DESC LIMIT $1 OFFSET $2',
-      [limit, offset]
-    );
+    const results = await query<Order[]>('SELECT * FROM "order" ORDER BY "createdAt" DESC LIMIT $1 OFFSET $2', [limit, offset]);
     return results || [];
   }
 
   async findByStatus(status: OrderStatus, limit: number = 100, offset: number = 0): Promise<Order[]> {
-    const results = await query<Order[]>(
-      'SELECT * FROM "order" WHERE status = $1 ORDER BY "createdAt" DESC LIMIT $2 OFFSET $3',
-      [status, limit, offset]
-    );
+    const results = await query<Order[]>('SELECT * FROM "order" WHERE status = $1 ORDER BY "createdAt" DESC LIMIT $2 OFFSET $3', [
+      status,
+      limit,
+      offset,
+    ]);
     return results || [];
   }
 
   async findByPaymentStatus(paymentStatus: PaymentStatus, limit: number = 100, offset: number = 0): Promise<Order[]> {
-    const results = await query<Order[]>(
-      'SELECT * FROM "order" WHERE "paymentStatus" = $1 ORDER BY "createdAt" DESC LIMIT $2 OFFSET $3',
-      [paymentStatus, limit, offset]
-    );
+    const results = await query<Order[]>('SELECT * FROM "order" WHERE "paymentStatus" = $1 ORDER BY "createdAt" DESC LIMIT $2 OFFSET $3', [
+      paymentStatus,
+      limit,
+      offset,
+    ]);
     return results || [];
   }
 
   async findByFulfillmentStatus(fulfillmentStatus: FulfillmentStatus, limit: number = 100, offset: number = 0): Promise<Order[]> {
     const results = await query<Order[]>(
       'SELECT * FROM "order" WHERE "fulfillmentStatus" = $1 ORDER BY "createdAt" DESC LIMIT $2 OFFSET $3',
-      [fulfillmentStatus, limit, offset]
+      [fulfillmentStatus, limit, offset],
     );
     return results || [];
   }
@@ -94,7 +112,7 @@ export class OrderRepo {
   async findByDateRange(startDate: Date, endDate: Date, limit: number = 100, offset: number = 0): Promise<Order[]> {
     const results = await query<Order[]>(
       'SELECT * FROM "order" WHERE "createdAt" >= $1 AND "createdAt" <= $2 ORDER BY "createdAt" DESC LIMIT $3 OFFSET $4',
-      [startDate, endDate, limit, offset]
+      [startDate, endDate, limit, offset],
     );
     return results || [];
   }
@@ -104,23 +122,17 @@ export class OrderRepo {
   // ============================================================================
 
   async count(): Promise<number> {
-    const result = await queryOne<{count: string}>('SELECT COUNT(*) as count FROM "order"');
+    const result = await queryOne<{ count: string }>('SELECT COUNT(*) as count FROM "order"');
     return result ? parseInt(result.count) : 0;
   }
 
   async countByCustomer(customerId: string): Promise<number> {
-    const result = await queryOne<{count: string}>(
-      'SELECT COUNT(*) as count FROM "order" WHERE "customerId" = $1',
-      [customerId]
-    );
+    const result = await queryOne<{ count: string }>('SELECT COUNT(*) as count FROM "order" WHERE "customerId" = $1', [customerId]);
     return result ? parseInt(result.count) : 0;
   }
 
   async countByStatus(status: OrderStatus): Promise<number> {
-    const result = await queryOne<{count: string}>(
-      'SELECT COUNT(*) as count FROM "order" WHERE status = $1',
-      [status]
-    );
+    const result = await queryOne<{ count: string }>('SELECT COUNT(*) as count FROM "order" WHERE status = $1', [status]);
     return result ? parseInt(result.count) : 0;
   }
 
@@ -129,10 +141,7 @@ export class OrderRepo {
   // ============================================================================
 
   async getOrderItems(orderId: string): Promise<OrderItem[]> {
-    const results = await query<OrderItem[]>(
-      'SELECT * FROM "orderItem" WHERE "orderId" = $1 ORDER BY "orderItemId"',
-      [orderId]
-    );
+    const results = await query<OrderItem[]>('SELECT * FROM "orderItem" WHERE "orderId" = $1 ORDER BY "orderItemId"', [orderId]);
     return results || [];
   }
 
@@ -186,7 +195,7 @@ export class OrderRepo {
       params.isSubscriptionOrder || false,
       params.metadata ? JSON.stringify(params.metadata) : null,
       now,
-      now
+      now,
     ]);
 
     if (!result) {
@@ -230,18 +239,16 @@ export class OrderRepo {
 
   async updateStatus(orderId: string, status: OrderStatus): Promise<Order | null> {
     const now = new Date();
-    
-    const result = await queryOne<Order>(
-      'UPDATE "order" SET status = $1, "updatedAt" = $2 WHERE "orderId" = $3 RETURNING *',
-      [status, now, orderId]
-    );
+
+    const result = await queryOne<Order>('UPDATE "order" SET status = $1, "updatedAt" = $2 WHERE "orderId" = $3 RETURNING *', [
+      status,
+      now,
+      orderId,
+    ]);
 
     if (result) {
       // Record status change in history
-      await query(
-        'INSERT INTO "orderStatusHistory" ("orderId", status, "createdAt") VALUES ($1, $2, $3)',
-        [orderId, status, now]
-      );
+      await query('INSERT INTO "orderStatusHistory" ("orderId", status, "createdAt") VALUES ($1, $2, $3)', [orderId, status, now]);
     }
 
     return result;
@@ -249,27 +256,26 @@ export class OrderRepo {
 
   async updatePaymentStatus(orderId: string, paymentStatus: PaymentStatus): Promise<Order | null> {
     const now = new Date();
-    
-    return await queryOne<Order>(
-      'UPDATE "order" SET "paymentStatus" = $1, "updatedAt" = $2 WHERE "orderId" = $3 RETURNING *',
-      [paymentStatus, now, orderId]
-    );
+
+    return await queryOne<Order>('UPDATE "order" SET "paymentStatus" = $1, "updatedAt" = $2 WHERE "orderId" = $3 RETURNING *', [
+      paymentStatus,
+      now,
+      orderId,
+    ]);
   }
 
   async updateFulfillmentStatus(orderId: string, fulfillmentStatus: FulfillmentStatus): Promise<Order | null> {
     const now = new Date();
-    
-    return await queryOne<Order>(
-      'UPDATE "order" SET "fulfillmentStatus" = $1, "updatedAt" = $2 WHERE "orderId" = $3 RETURNING *',
-      [fulfillmentStatus, now, orderId]
-    );
+
+    return await queryOne<Order>('UPDATE "order" SET "fulfillmentStatus" = $1, "updatedAt" = $2 WHERE "orderId" = $3 RETURNING *', [
+      fulfillmentStatus,
+      now,
+      orderId,
+    ]);
   }
 
   async delete(orderId: string): Promise<boolean> {
-    const result = await queryOne<{ orderId: string }>(
-      'DELETE FROM "order" WHERE "orderId" = $1 RETURNING "orderId"',
-      [orderId]
-    );
+    const result = await queryOne<{ orderId: string }>('DELETE FROM "order" WHERE "orderId" = $1 RETURNING "orderId"', [orderId]);
     return !!result;
   }
 
@@ -295,7 +301,7 @@ export class OrderRepo {
       pendingOrders: pending,
       processingOrders: processing,
       completedOrders: completed,
-      cancelledOrders: cancelled
+      cancelledOrders: cancelled,
     };
   }
 }

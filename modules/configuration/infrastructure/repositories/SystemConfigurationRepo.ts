@@ -8,38 +8,30 @@ import { SystemConfigurationRepository as ISystemConfigurationRepository } from 
 import { SystemConfiguration } from '../../domain/entities/SystemConfiguration';
 
 export class SystemConfigurationRepo implements ISystemConfigurationRepository {
-
   async findById(configId: string): Promise<SystemConfiguration | null> {
-    const row = await queryOne<Record<string, any>>(
-      'SELECT * FROM "systemConfiguration" WHERE "configId" = $1',
-      [configId]
-    );
+    const row = await queryOne<Record<string, any>>('SELECT * FROM "systemConfiguration" WHERE "configId" = $1', [configId]);
     return row ? this.mapToSystemConfiguration(row) : null;
   }
 
   async findActive(): Promise<SystemConfiguration | null> {
     const row = await queryOne<Record<string, any>>(
       'SELECT * FROM "systemConfiguration" WHERE "isActive" = true ORDER BY "createdAt" DESC LIMIT 1',
-      []
+      [],
     );
     return row ? this.mapToSystemConfiguration(row) : null;
   }
 
   async findAll(): Promise<SystemConfiguration[]> {
-    const rows = await query<Record<string, any>[]>(
-      'SELECT * FROM "systemConfiguration" ORDER BY "createdAt" DESC',
-      []
-    );
+    const rows = await query<Record<string, any>[]>('SELECT * FROM "systemConfiguration" ORDER BY "createdAt" DESC', []);
     return (rows || []).map(row => this.mapToSystemConfiguration(row));
   }
 
   async save(config: SystemConfiguration): Promise<SystemConfiguration> {
     const now = new Date().toISOString();
 
-    const existing = await queryOne<Record<string, any>>(
-      'SELECT "configId" FROM "systemConfiguration" WHERE "configId" = $1',
-      [config.configId]
-    );
+    const existing = await queryOne<Record<string, any>>('SELECT "configId" FROM "systemConfiguration" WHERE "configId" = $1', [
+      config.configId,
+    ]);
 
     if (existing) {
       await query(
@@ -49,12 +41,17 @@ export class SystemConfigurationRepo implements ISystemConfigurationRepository {
           "integrationSettings" = $7, metadata = $8, "updatedAt" = $9
         WHERE "configId" = $10`,
         [
-          config.systemMode, JSON.stringify(config.features),
-          JSON.stringify(config.businessSettings), JSON.stringify(config.platformSettings),
-          JSON.stringify(config.securitySettings), JSON.stringify(config.notificationSettings),
-          JSON.stringify(config.integrationSettings), JSON.stringify(config.metadata || {}),
-          now, config.configId
-        ]
+          config.systemMode,
+          JSON.stringify(config.features),
+          JSON.stringify(config.businessSettings),
+          JSON.stringify(config.platformSettings),
+          JSON.stringify(config.securitySettings),
+          JSON.stringify(config.notificationSettings),
+          JSON.stringify(config.integrationSettings),
+          JSON.stringify(config.metadata || {}),
+          now,
+          config.configId,
+        ],
       );
     } else {
       await query(
@@ -64,12 +61,18 @@ export class SystemConfigurationRepo implements ISystemConfigurationRepository {
           "integrationSettings", metadata, "createdAt", "updatedAt"
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
         [
-          config.configId, config.systemMode, JSON.stringify(config.features),
-          JSON.stringify(config.businessSettings), JSON.stringify(config.platformSettings),
-          JSON.stringify(config.securitySettings), JSON.stringify(config.notificationSettings),
-          JSON.stringify(config.integrationSettings), JSON.stringify(config.metadata || {}),
-          now, now
-        ]
+          config.configId,
+          config.systemMode,
+          JSON.stringify(config.features),
+          JSON.stringify(config.businessSettings),
+          JSON.stringify(config.platformSettings),
+          JSON.stringify(config.securitySettings),
+          JSON.stringify(config.notificationSettings),
+          JSON.stringify(config.integrationSettings),
+          JSON.stringify(config.metadata || {}),
+          now,
+          now,
+        ],
       );
     }
 
@@ -81,10 +84,7 @@ export class SystemConfigurationRepo implements ISystemConfigurationRepository {
   }
 
   async count(): Promise<number> {
-    const result = await queryOne<{ count: string }>(
-      'SELECT COUNT(*) as count FROM "systemConfiguration"',
-      []
-    );
+    const result = await queryOne<{ count: string }>('SELECT COUNT(*) as count FROM "systemConfiguration"', []);
     return parseInt(result?.count || '0');
   }
 
@@ -100,7 +100,7 @@ export class SystemConfigurationRepo implements ISystemConfigurationRepository {
       integrationSettings: typeof row.integrationSettings === 'string' ? JSON.parse(row.integrationSettings) : row.integrationSettings,
       metadata: typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata,
       createdAt: new Date(row.createdAt),
-      updatedAt: new Date(row.updatedAt)
+      updatedAt: new Date(row.updatedAt),
     });
   }
 }

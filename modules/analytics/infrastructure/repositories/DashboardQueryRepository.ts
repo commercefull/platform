@@ -48,12 +48,19 @@ class DashboardQueryRepositoryClass {
 
     const [ordersResult, revenueResult, customersResult, productsResult, pendingResult, lowStockResult, todayResult] = await Promise.all([
       queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "order" WHERE "deletedAt" IS NULL`),
-      queryOne<{ total: string }>(`SELECT COALESCE(SUM("totalAmount"), 0) as total FROM "order" WHERE "deletedAt" IS NULL AND "paymentStatus" = 'paid'`),
+      queryOne<{ total: string }>(
+        `SELECT COALESCE(SUM("totalAmount"), 0) as total FROM "order" WHERE "deletedAt" IS NULL AND "paymentStatus" = 'paid'`,
+      ),
       queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "customer" WHERE "deletedAt" IS NULL`),
       queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "product" WHERE "deletedAt" IS NULL`),
-      queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "order" WHERE "deletedAt" IS NULL AND "status" IN ('pending', 'processing')`),
+      queryOne<{ count: string }>(
+        `SELECT COUNT(*) as count FROM "order" WHERE "deletedAt" IS NULL AND "status" IN ('pending', 'processing')`,
+      ),
       queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "inventoryLevel" WHERE ("quantity" - "reserved") <= "reorderPoint"`),
-      queryOne<{ count: string; total: string }>(`SELECT COUNT(*) as count, COALESCE(SUM("totalAmount"), 0) as total FROM "order" WHERE "deletedAt" IS NULL AND "createdAt" >= $1`, [today]),
+      queryOne<{ count: string; total: string }>(
+        `SELECT COUNT(*) as count, COALESCE(SUM("totalAmount"), 0) as total FROM "order" WHERE "deletedAt" IS NULL AND "createdAt" >= $1`,
+        [today],
+      ),
     ]);
 
     return {
@@ -81,7 +88,7 @@ class DashboardQueryRepositoryClass {
        JOIN "orderItem" oi ON o."orderId" = oi."orderId"
        JOIN "product" p ON oi."productId" = p."productId"
        WHERE p."merchantId" = $1 AND o."deletedAt" IS NULL`,
-      [merchantId]
+      [merchantId],
     );
 
     const todayResult = await queryOne<{ count: string; total: string }>(
@@ -90,12 +97,12 @@ class DashboardQueryRepositoryClass {
        JOIN "orderItem" oi ON o."orderId" = oi."orderId"
        JOIN "product" p ON oi."productId" = p."productId"
        WHERE p."merchantId" = $1 AND o."deletedAt" IS NULL AND o."createdAt" >= $2`,
-      [merchantId, today]
+      [merchantId, today],
     );
 
     const productsResult = await queryOne<{ count: string }>(
       `SELECT COUNT(*) as count FROM "product" WHERE "merchantId" = $1 AND "deletedAt" IS NULL`,
-      [merchantId]
+      [merchantId],
     );
 
     const pendingResult = await queryOne<{ count: string }>(
@@ -104,7 +111,7 @@ class DashboardQueryRepositoryClass {
        JOIN "orderItem" oi ON o."orderId" = oi."orderId"
        JOIN "product" p ON oi."productId" = p."productId"
        WHERE p."merchantId" = $1 AND o."deletedAt" IS NULL AND o."status" IN ('pending', 'processing')`,
-      [merchantId]
+      [merchantId],
     );
 
     const lowStockResult = await queryOne<{ count: string }>(
@@ -112,7 +119,7 @@ class DashboardQueryRepositoryClass {
        FROM "product" p
        JOIN "inventoryLevel" il ON p."productId" = il."productId"
        WHERE p."merchantId" = $1 AND p."deletedAt" IS NULL AND (il."quantity" - il."reserved") <= il."reorderPoint"`,
-      [merchantId]
+      [merchantId],
     );
 
     return {
@@ -141,7 +148,7 @@ class DashboardQueryRepositoryClass {
        WHERE o."deletedAt" IS NULL
        ORDER BY o."createdAt" DESC
        LIMIT $1`,
-      [limit]
+      [limit],
     );
     return orders || [];
   }
@@ -162,7 +169,7 @@ class DashboardQueryRepositoryClass {
        WHERE p."merchantId" = $1 AND o."deletedAt" IS NULL
        ORDER BY o."orderId", o."createdAt" DESC
        LIMIT $2`,
-      [merchantId, limit]
+      [merchantId, limit],
     );
     return orders || [];
   }
@@ -182,7 +189,7 @@ class DashboardQueryRepositoryClass {
        GROUP BY p."productId", p."name"
        ORDER BY "totalSold" DESC
        LIMIT $1`,
-      [limit]
+      [limit],
     );
     return products || [];
   }
@@ -202,7 +209,7 @@ class DashboardQueryRepositoryClass {
        GROUP BY p."productId", p."name"
        ORDER BY "totalSold" DESC
        LIMIT $2`,
-      [merchantId, limit]
+      [merchantId, limit],
     );
     return products || [];
   }
@@ -220,7 +227,7 @@ class DashboardQueryRepositoryClass {
        WHERE "deletedAt" IS NULL 
          AND "createdAt" >= NOW() - INTERVAL '${days} days'
        GROUP BY DATE("createdAt")
-       ORDER BY date ASC`
+       ORDER BY date ASC`,
     );
     return (result || []).map(r => ({
       date: r.date,

@@ -14,6 +14,7 @@ This guide provides detailed instructions for migrating from PrestaShop to Comme
 ## PrestaShop Data Architecture
 
 ### Core Tables
+
 - `ps_product` - Main product table
 - `ps_product_lang` - Multi-language product data
 - `ps_customer` - Customer accounts
@@ -23,6 +24,7 @@ This guide provides detailed instructions for migrating from PrestaShop to Comme
 - `ps_attribute` - Product attributes
 
 ### Key Challenges
+
 - Multi-language content (product descriptions, categories)
 - Complex product combinations (variants)
 - Multi-shop configurations
@@ -76,17 +78,20 @@ class PrestaShopExtractor {
       password: config.password,
       database: config.database,
       charset: 'utf8',
-      tablePrefix: config.tablePrefix || 'ps_'
+      tablePrefix: config.tablePrefix || 'ps_',
     });
     this.tablePrefix = config.tablePrefix || 'ps_';
   }
 
   async getLocalizedValue(table, field, id, idLang = 1) {
     const langTable = `${this.tablePrefix}${table}_lang`;
-    const [rows] = await this.pool.execute(`
+    const [rows] = await this.pool.execute(
+      `
       SELECT ${field} FROM ${langTable}
       WHERE id_${table} = ? AND id_lang = ?
-    `, [id, idLang]);
+    `,
+      [id, idLang],
+    );
 
     return rows.length > 0 ? rows[0][field] : null;
   }
@@ -96,7 +101,7 @@ class PrestaShopExtractor {
 ### 2. Data Assessment
 
 ```javascript
-const assessPrestaShopData = async (db) => {
+const assessPrestaShopData = async db => {
   const tablePrefix = 'ps_'; // Adjust based on your installation
 
   const assessment = {
@@ -106,7 +111,7 @@ const assessPrestaShopData = async (db) => {
     customers: await db.query(`SELECT COUNT(*) as count FROM ${tablePrefix}customer`),
     orders: await db.query(`SELECT COUNT(*) as count FROM ${tablePrefix}orders`),
     languages: await db.query(`SELECT COUNT(*) as count FROM ${tablePrefix}lang WHERE active = 1`),
-    shops: await db.query(`SELECT COUNT(*) as count FROM ${tablePrefix}shop`)
+    shops: await db.query(`SELECT COUNT(*) as count FROM ${tablePrefix}shop`),
   };
 
   // Get product type breakdown
@@ -145,14 +150,17 @@ const assessPrestaShopData = async (db) => {
 ```javascript
 class PrestaShopCategoryMigrator {
   async migrateCategories(db, cf, defaultLangId = 1) {
-    const categories = await db.query(`
+    const categories = await db.query(
+      `
       SELECT c.id_category, c.id_parent, c.active, c.position,
              cl.name, cl.description, cl.meta_title, cl.meta_description
       FROM ps_category c
       LEFT JOIN ps_category_lang cl ON c.id_category = cl.id_category AND cl.id_lang = ?
       WHERE c.active = 1
       ORDER BY c.level_depth, c.id_parent, c.position
-    `, [defaultLangId]);
+    `,
+      [defaultLangId],
+    );
 
     const categoryMap = new Map();
 
@@ -168,7 +176,7 @@ class PrestaShopCategoryMigrator {
         isActive: cat.active === 1,
         position: cat.position,
         metaTitle: cat.meta_title,
-        metaDescription: cat.meta_description
+        metaDescription: cat.meta_description,
       });
 
       categoryMap.set(cat.id_category, category.id);
@@ -192,12 +200,15 @@ class PrestaShopCategoryMigrator {
 class PrestaShopAttributeMigrator {
   async migrateAttributes(db, cf, defaultLangId = 1) {
     // Get attribute groups
-    const attributeGroups = await db.query(`
+    const attributeGroups = await db.query(
+      `
       SELECT ag.id_attribute_group, agl.name, agl.public_name, ag.position
       FROM ps_attribute_group ag
       LEFT JOIN ps_attribute_group_lang agl ON ag.id_attribute_group = agl.id_attribute_group AND agl.id_lang = ?
       ORDER BY ag.position
-    `, [defaultLangId]);
+    `,
+      [defaultLangId],
+    );
 
     for (const group of attributeGroups) {
       // Create attribute group in CommerceFull
@@ -207,17 +218,20 @@ class PrestaShopAttributeMigrator {
         description: `PrestaShop attribute group: ${group.name}`,
         position: group.position,
         isComparable: true,
-        isGlobal: true
+        isGlobal: true,
       });
 
       // Get attributes in this group
-      const attributes = await db.query(`
+      const attributes = await db.query(
+        `
         SELECT a.id_attribute, al.name, a.position
         FROM ps_attribute a
         LEFT JOIN ps_attribute_lang al ON a.id_attribute = al.id_attribute AND al.id_lang = ?
         WHERE a.id_attribute_group = ?
         ORDER BY a.position
-      `, [defaultLangId, group.id_attribute_group]);
+      `,
+        [defaultLangId, group.id_attribute_group],
+      );
 
       for (const attr of attributes) {
         await cf.productAttributes.create({
@@ -237,7 +251,7 @@ class PrestaShopAttributeMigrator {
           isUsedInProductListing: true,
           useForVariants: true,
           useForConfigurations: false,
-          position: attr.position
+          position: attr.position,
         });
       }
     }
@@ -252,7 +266,8 @@ class PrestaShopAttributeMigrator {
 ```javascript
 class PrestaShopProductExtractor {
   async extractProducts(db, limit = 1000, offset = 0, defaultLangId = 1) {
-    const products = await db.query(`
+    const products = await db.query(
+      `
       SELECT p.id_product, p.reference, p.price, p.wholesale_price, p.weight,
              p.quantity, p.minimal_quantity, p.active, p.available_for_order,
              p.show_price, p.visibility, p.condition, p.id_tax_rules_group,
@@ -264,7 +279,9 @@ class PrestaShopProductExtractor {
       WHERE p.active = 1
       ORDER BY p.id_product
       LIMIT ? OFFSET ?
-    `, [defaultLangId, limit, offset]);
+    `,
+      [defaultLangId, limit, offset],
+    );
 
     const enrichedProducts = [];
 
@@ -279,7 +296,7 @@ class PrestaShopProductExtractor {
         categories,
         combinations,
         images,
-        features
+        features,
       });
     }
 
@@ -287,17 +304,21 @@ class PrestaShopProductExtractor {
   }
 
   async extractProductCategories(db, productId) {
-    return await db.query(`
+    return await db.query(
+      `
       SELECT c.id_category, cl.name
       FROM ps_category_product cp
       JOIN ps_category c ON cp.id_category = c.id_category
       LEFT JOIN ps_category_lang cl ON c.id_category = cl.id_category AND cl.id_lang = 1
       WHERE cp.id_product = ?
-    `, [productId]);
+    `,
+      [productId],
+    );
   }
 
   async extractProductCombinations(db, productId, defaultLangId) {
-    const combinations = await db.query(`
+    const combinations = await db.query(
+      `
       SELECT pa.id_product_attribute, pa.reference, pa.price, pa.weight,
              pa.quantity, pa.minimal_quantity, pa.available_date,
              GROUP_CONCAT(CONCAT(a.id_attribute, ':', al.name) SEPARATOR '|') as attributes
@@ -307,35 +328,45 @@ class PrestaShopProductExtractor {
       LEFT JOIN ps_attribute_lang al ON a.id_attribute = al.id_attribute AND al.id_lang = ?
       WHERE pa.id_product = ?
       GROUP BY pa.id_product_attribute
-    `, [defaultLangId, productId]);
+    `,
+      [defaultLangId, productId],
+    );
 
     return combinations.map(combo => ({
       ...combo,
-      attributes: combo.attributes ? combo.attributes.split('|').map(attr => {
-        const [id, name] = attr.split(':');
-        return { id: parseInt(id), name };
-      }) : []
+      attributes: combo.attributes
+        ? combo.attributes.split('|').map(attr => {
+            const [id, name] = attr.split(':');
+            return { id: parseInt(id), name };
+          })
+        : [],
     }));
   }
 
   async extractProductImages(db, productId) {
-    return await db.query(`
+    return await db.query(
+      `
       SELECT pi.id_image, pi.position, pil.legend
       FROM ps_image pi
       LEFT JOIN ps_image_lang pil ON pi.id_image = pil.id_image AND pil.id_lang = 1
       WHERE pi.id_product = ?
       ORDER BY pi.position
-    `, [productId]);
+    `,
+      [productId],
+    );
   }
 
   async extractProductFeatures(db, productId, defaultLangId) {
-    return await db.query(`
+    return await db.query(
+      `
       SELECT fl.name as feature_name, fvl.value as feature_value
       FROM ps_feature_product fp
       JOIN ps_feature_lang fl ON fp.id_feature = fl.id_feature AND fl.id_lang = ?
       JOIN ps_feature_value_lang fvl ON fp.id_feature_value = fvl.id_feature_value AND fvl.id_lang = ?
       WHERE fp.id_product = ?
-    `, [defaultLangId, defaultLangId, productId]);
+    `,
+      [defaultLangId, defaultLangId, productId],
+    );
   }
 }
 ```
@@ -364,7 +395,7 @@ class PrestaShopProductTransformer {
       dimensions: {
         length: parseFloat(psProduct.depth || 0),
         width: parseFloat(psProduct.width || 0),
-        height: parseFloat(psProduct.height || 0)
+        height: parseFloat(psProduct.height || 0),
       },
       stockQuantity: parseInt(psProduct.quantity || 0),
       stockStatus: psProduct.quantity > 0 ? 'instock' : 'outofstock',
@@ -376,13 +407,13 @@ class PrestaShopProductTransformer {
       variants: hasCombinations ? this.transformCombinations(psProduct.combinations) : [],
       seo: {
         title: psProduct.meta_title,
-        description: psProduct.meta_description
+        description: psProduct.meta_description,
       },
       condition: psProduct.condition,
       isVirtual: psProduct.is_virtual === '1',
       isDownloadable: psProduct.cache_has_attachments === '1',
       createdAt: psProduct.date_add,
-      updatedAt: psProduct.date_upd
+      updatedAt: psProduct.date_upd,
     };
   }
 
@@ -395,41 +426,47 @@ class PrestaShopProductTransformer {
 
   mapVisibility(visibility) {
     const visibilityMap = {
-      'both': 'public',
-      'catalog': 'catalog',
-      'search': 'search',
-      'none': 'hidden'
+      both: 'public',
+      catalog: 'catalog',
+      search: 'search',
+      none: 'hidden',
     };
     return visibilityMap[visibility] || 'public';
   }
 
   transformFeatures(features) {
-    return features?.map(feature => ({
-      name: feature.feature_name,
-      value: feature.feature_value,
-      isVisible: true
-    })) || [];
+    return (
+      features?.map(feature => ({
+        name: feature.feature_name,
+        value: feature.feature_value,
+        isVisible: true,
+      })) || []
+    );
   }
 
   transformImages(images) {
-    return images?.map((image, index) => ({
-      url: `/img/p/${image.id_product}/${image.id_image}.jpg`,
-      alt: image.legend || '',
-      position: image.position,
-      isMain: index === 0
-    })) || [];
+    return (
+      images?.map((image, index) => ({
+        url: `/img/p/${image.id_product}/${image.id_image}.jpg`,
+        alt: image.legend || '',
+        position: image.position,
+        isMain: index === 0,
+      })) || []
+    );
   }
 
   transformCombinations(combinations) {
-    return combinations?.map(combo => ({
-      variantId: generateUUID(),
-      sku: combo.reference || combo.id_product_attribute.toString(),
-      price: parseFloat(combo.price || 0),
-      stockQuantity: parseInt(combo.quantity || 0),
-      weight: parseFloat(combo.weight || 0),
-      attributes: combo.attributes,
-      isActive: true
-    })) || [];
+    return (
+      combinations?.map(combo => ({
+        variantId: generateUUID(),
+        sku: combo.reference || combo.id_product_attribute.toString(),
+        price: parseFloat(combo.price || 0),
+        stockQuantity: parseInt(combo.quantity || 0),
+        weight: parseFloat(combo.weight || 0),
+        attributes: combo.attributes,
+        isActive: true,
+      })) || []
+    );
   }
 
   generateSlug(name) {
@@ -448,7 +485,8 @@ class PrestaShopProductTransformer {
 ```javascript
 class PrestaShopCustomerExtractor {
   async extractCustomers(db, limit = 1000, offset = 0, defaultLangId = 1) {
-    const customers = await db.query(`
+    const customers = await db.query(
+      `
       SELECT c.id_customer, c.email, c.passwd, c.firstname, c.lastname,
              c.birthday, c.active, c.date_add, c.date_upd, c.id_gender,
              c.company, c.newsletter, c.optin,
@@ -460,18 +498,23 @@ class PrestaShopCustomerExtractor {
       LEFT JOIN ps_country co ON a.id_country = co.id_country
       ORDER BY c.id_customer
       LIMIT ? OFFSET ?
-    `, [limit, offset]);
+    `,
+      [limit, offset],
+    );
 
     return customers;
   }
 
   async extractCustomerOrders(db, customerId) {
-    return await db.query(`
+    return await db.query(
+      `
       SELECT id_order, reference, total_paid, date_add
       FROM ps_orders
       WHERE id_customer = ?
       ORDER BY date_add DESC
-    `, [customerId]);
+    `,
+      [customerId],
+    );
   }
 }
 ```
@@ -489,40 +532,44 @@ class PrestaShopCustomerTransformer {
       phone: psCustomer.phone || psCustomer.phone_mobile,
       dateOfBirth: psCustomer.birthday && psCustomer.birthday !== '0000-00-00' ? psCustomer.birthday : null,
       gender: this.mapGender(psCustomer.id_gender),
-      billingAddress: psCustomer.address1 ? {
-        firstName: psCustomer.firstname,
-        lastName: psCustomer.lastname,
-        company: psCustomer.company,
-        address1: psCustomer.address1,
-        address2: psCustomer.address2,
-        city: psCustomer.city,
-        state: psCustomer.state,
-        postcode: psCustomer.postcode,
-        country: psCustomer.country || 'US'
-      } : null,
-      shippingAddress: psCustomer.address1 ? {
-        firstName: psCustomer.firstname,
-        lastName: psCustomer.lastname,
-        company: psCustomer.company,
-        address1: psCustomer.address1,
-        address2: psCustomer.address2,
-        city: psCustomer.city,
-        state: psCustomer.state,
-        postcode: psCustomer.postcode,
-        country: psCustomer.country || 'US'
-      } : null,
+      billingAddress: psCustomer.address1
+        ? {
+            firstName: psCustomer.firstname,
+            lastName: psCustomer.lastname,
+            company: psCustomer.company,
+            address1: psCustomer.address1,
+            address2: psCustomer.address2,
+            city: psCustomer.city,
+            state: psCustomer.state,
+            postcode: psCustomer.postcode,
+            country: psCustomer.country || 'US',
+          }
+        : null,
+      shippingAddress: psCustomer.address1
+        ? {
+            firstName: psCustomer.firstname,
+            lastName: psCustomer.lastname,
+            company: psCustomer.company,
+            address1: psCustomer.address1,
+            address2: psCustomer.address2,
+            city: psCustomer.city,
+            state: psCustomer.state,
+            postcode: psCustomer.postcode,
+            country: psCustomer.country || 'US',
+          }
+        : null,
       isActive: psCustomer.active === 1,
       acceptsMarketing: psCustomer.newsletter === 1,
       notes: psCustomer.note || '',
       createdAt: psCustomer.date_add,
-      updatedAt: psCustomer.date_upd
+      updatedAt: psCustomer.date_upd,
     };
   }
 
   mapGender(genderId) {
     const genderMap = {
       1: 'Male',
-      2: 'Female'
+      2: 'Female',
     };
     return genderMap[genderId] || null;
   }
@@ -541,23 +588,21 @@ async function runPrestaShopMigration() {
       database: process.env.PS_DB_NAME,
       username: process.env.PS_DB_USER,
       password: process.env.PS_DB_PASSWORD,
-      tablePrefix: 'ps_'
+      tablePrefix: 'ps_',
     },
     commercefull: {
       baseURL: process.env.COMMERCEFULL_URL,
-      apiKey: process.env.COMMERCEFULL_API_KEY
+      apiKey: process.env.COMMERCEFULL_API_KEY,
     },
     options: {
       batchSize: 500,
       concurrency: 3,
       continueOnError: true,
-      defaultLanguageId: 1
-    }
+      defaultLanguageId: 1,
+    },
   });
 
   try {
-    
-
     // Phase 1: Foundation data
     await runner.migrateCategories();
     await runner.migrateAttributes();
@@ -574,11 +619,8 @@ async function runPrestaShopMigration() {
     // Phase 5: Content
     await runner.migrateContent();
 
-    
     console.log(runner.monitor.generateReport());
-
   } catch (error) {
-    
     console.log('Partial results:', runner.monitor.generateReport());
   }
 }
@@ -640,7 +682,6 @@ class BatchProcessor {
       await processor(batch);
 
       processed += batch.length;
-      
 
       // Prevent memory issues
       if (global.gc) global.gc();
@@ -678,7 +719,7 @@ const PrestaShopValidation = {
     return {
       prestashop: psCount[0].count,
       commercefull: cfCount,
-      difference: Math.abs(psCount[0].count - cfCount)
+      difference: Math.abs(psCount[0].count - cfCount),
     };
   },
 
@@ -689,7 +730,7 @@ const PrestaShopValidation = {
 
     return {
       prestashop: psCount[0].count,
-      commercefull: cfCount
+      commercefull: cfCount,
     };
   },
 
@@ -699,9 +740,9 @@ const PrestaShopValidation = {
 
     return {
       prestashop: psCount[0].count,
-      commercefull: cfCount
+      commercefull: cfCount,
     };
-  }
+  },
 };
 ```
 
@@ -736,26 +777,29 @@ function fixEncoding(text) {
 class CombinationHandler {
   async resolveCombinations(db, productId) {
     // Get all combinations for a product
-    const combinations = await db.query(`
+    const combinations = await db.query(
+      `
       SELECT pa.*, pac.id_attribute, a.id_attribute_group
       FROM ps_product_attribute pa
       JOIN ps_product_attribute_combination pac ON pa.id_product_attribute = pac.id_product_attribute
       JOIN ps_attribute a ON pac.id_attribute = a.id_attribute
       WHERE pa.id_product = ?
       ORDER BY pa.id_product_attribute, a.id_attribute_group
-    `, [productId]);
+    `,
+      [productId],
+    );
 
     // Group by combination
     const grouped = combinations.reduce((acc, combo) => {
       if (!acc[combo.id_product_attribute]) {
         acc[combo.id_product_attribute] = {
           id: combo.id_product_attribute,
-          attributes: []
+          attributes: [],
         };
       }
       acc[combo.id_product_attribute].attributes.push({
         groupId: combo.id_attribute_group,
-        attributeId: combo.id_attribute
+        attributeId: combo.id_attribute,
       });
       return acc;
     }, {});

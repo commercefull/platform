@@ -17,7 +17,7 @@ const SEEDED_GIFT_CARD_DEPLETED_ID = '01935f00-0000-7000-8000-000000000031';
 const SEEDED_MERCHANT_ID = '01935e00-0000-7000-8000-000000000001';
 const SEEDED_CUSTOMER_ID = '01935e00-0000-7000-8000-000000000100';
 
-exports.seed = async function(knex) {
+exports.seed = async function (knex) {
   const now = new Date();
   const futureDate = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000); // 1 year from now
   const pastDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000); // 30 days ago
@@ -51,12 +51,12 @@ exports.seed = async function(knex) {
       maxUsage: 1000,
       usageCount: 0,
       maxUsagePerCustomer: 5,
-      minOrderAmount: 10.00,
-      maxDiscountAmount: 100.00,
+      minOrderAmount: 10.0,
+      maxDiscountAmount: 100.0,
       merchantId: null,
       isGlobal: true,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     },
     {
       promotionId: SEEDED_PROMOTION_CART_ID,
@@ -72,13 +72,13 @@ exports.seed = async function(knex) {
       maxUsage: 500,
       usageCount: 0,
       maxUsagePerCustomer: 3,
-      minOrderAmount: 50.00,
-      maxDiscountAmount: 50.00,
+      minOrderAmount: 50.0,
+      maxDiscountAmount: 50.0,
       merchantId: null,
       isGlobal: true,
       createdAt: now,
-      updatedAt: now
-    }
+      updatedAt: now,
+    },
   ]);
 
   // Seed promotion rules
@@ -94,7 +94,7 @@ exports.seed = async function(knex) {
       ruleGroup: 'default',
       sortOrder: 0,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     },
     {
       promotionId: SEEDED_PROMOTION_CART_ID,
@@ -107,8 +107,8 @@ exports.seed = async function(knex) {
       ruleGroup: 'default',
       sortOrder: 0,
       createdAt: now,
-      updatedAt: now
-    }
+      updatedAt: now,
+    },
   ]);
 
   // Seed promotion actions
@@ -123,7 +123,7 @@ exports.seed = async function(knex) {
       targetIds: null,
       sortOrder: 0,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     },
     {
       promotionId: SEEDED_PROMOTION_CART_ID,
@@ -135,8 +135,8 @@ exports.seed = async function(knex) {
       targetIds: null,
       sortOrder: 1,
       createdAt: now,
-      updatedAt: now
-    }
+      updatedAt: now,
+    },
   ]);
 
   // Seed coupons
@@ -148,9 +148,9 @@ exports.seed = async function(knex) {
       name: 'Test Fixed Amount Coupon',
       description: '$10 off your order',
       type: 'fixedAmount',
-      discountAmount: 10.00,
+      discountAmount: 10.0,
       currencyCode: 'USD',
-      minOrderAmount: 25.00,
+      minOrderAmount: 25.0,
       maxDiscountAmount: null,
       startDate: now,
       endDate: futureDate,
@@ -165,7 +165,7 @@ exports.seed = async function(knex) {
       isPublic: true,
       merchantId: null,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     },
     {
       promotionCouponId: SEEDED_COUPON_PERCENTAGE_ID,
@@ -174,10 +174,10 @@ exports.seed = async function(knex) {
       name: 'Test Percentage Coupon',
       description: '15% off your order',
       type: 'percentage',
-      discountAmount: 15.00,
+      discountAmount: 15.0,
       currencyCode: 'USD',
-      minOrderAmount: 50.00,
-      maxDiscountAmount: 100.00,
+      minOrderAmount: 50.0,
+      maxDiscountAmount: 100.0,
       startDate: now,
       endDate: futureDate,
       isActive: true,
@@ -191,7 +191,7 @@ exports.seed = async function(knex) {
       isPublic: true,
       merchantId: null,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     },
     {
       promotionCouponId: SEEDED_COUPON_EXPIRED_ID,
@@ -200,7 +200,7 @@ exports.seed = async function(knex) {
       name: 'Expired Coupon',
       description: 'This coupon has expired',
       type: 'percentage',
-      discountAmount: 20.00,
+      discountAmount: 20.0,
       currencyCode: 'USD',
       minOrderAmount: null,
       maxDiscountAmount: null,
@@ -217,8 +217,8 @@ exports.seed = async function(knex) {
       isPublic: false,
       merchantId: null,
       createdAt: pastDate,
-      updatedAt: pastDate
-    }
+      updatedAt: pastDate,
+    },
   ]);
 
   // Seed product discounts
@@ -229,7 +229,7 @@ exports.seed = async function(knex) {
       name: 'Test Product Discount',
       description: '10% off selected products',
       discountType: 'percentage',
-      discountValue: 10.00,
+      discountValue: 10.0,
       currencyCode: 'USD',
       startDate: now,
       endDate: futureDate,
@@ -239,7 +239,7 @@ exports.seed = async function(knex) {
       minimumQuantity: 1,
       maximumQuantity: null,
       minimumAmount: null,
-      maximumDiscountAmount: 50.00,
+      maximumDiscountAmount: 50.0,
       stackable: false,
       displayOnProductPage: true,
       displayInListing: true,
@@ -247,8 +247,8 @@ exports.seed = async function(knex) {
       badgeStyle: JSON.stringify({ backgroundColor: '#ff0000', color: '#ffffff' }),
       merchantId: null,
       createdAt: now,
-      updatedAt: now
-    }
+      updatedAt: now,
+    },
   ]);
 
   // Seed gift cards
@@ -257,8 +257,8 @@ exports.seed = async function(knex) {
       promotionGiftCardId: SEEDED_GIFT_CARD_ID,
       code: 'GIFT-TEST-0001',
       type: 'standard',
-      initialBalance: 100.00,
-      currentBalance: 100.00,
+      initialBalance: 100.0,
+      currentBalance: 100.0,
       currency: 'USD',
       status: 'active',
       purchasedBy: null,
@@ -278,19 +278,19 @@ exports.seed = async function(knex) {
       usageCount: 0,
       totalRedeemed: 0,
       isReloadable: true,
-      minReloadAmount: 10.00,
-      maxReloadAmount: 500.00,
-      maxBalance: 1000.00,
+      minReloadAmount: 10.0,
+      maxReloadAmount: 500.0,
+      maxBalance: 1000.0,
       restrictions: null,
       metadata: null,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     },
     {
       promotionGiftCardId: SEEDED_GIFT_CARD_DEPLETED_ID,
       code: 'GIFT-TEST-0002',
       type: 'standard',
-      initialBalance: 50.00,
+      initialBalance: 50.0,
       currentBalance: 0,
       currency: 'USD',
       status: 'depleted',
@@ -309,7 +309,7 @@ exports.seed = async function(knex) {
       expiresAt: futureDate,
       lastUsedAt: now,
       usageCount: 1,
-      totalRedeemed: 50.00,
+      totalRedeemed: 50.0,
       isReloadable: false,
       minReloadAmount: null,
       maxReloadAmount: null,
@@ -317,8 +317,8 @@ exports.seed = async function(knex) {
       restrictions: null,
       metadata: null,
       createdAt: pastDate,
-      updatedAt: now
-    }
+      updatedAt: now,
+    },
   ]);
 
   // Seed gift card transaction for depleted card
@@ -326,8 +326,8 @@ exports.seed = async function(knex) {
     {
       promotionGiftCardId: SEEDED_GIFT_CARD_DEPLETED_ID,
       type: 'redemption',
-      amount: -50.00,
-      balanceBefore: 50.00,
+      amount: -50.0,
+      balanceBefore: 50.0,
       balanceAfter: 0,
       currency: 'USD',
       orderId: null,
@@ -337,11 +337,9 @@ exports.seed = async function(knex) {
       notes: 'Test redemption',
       referenceNumber: 'GCT-TEST-001',
       metadata: null,
-      createdAt: now
-    }
+      createdAt: now,
+    },
   ]);
-
-  
 };
 
 // Export IDs for use in tests

@@ -1,6 +1,6 @@
 /**
  * Loyalty Repository
- * 
+ *
  * Handles persistence for loyalty-related entities.
  */
 
@@ -11,7 +11,7 @@ import {
   LoyaltyPoints as DbLoyaltyPoints,
   LoyaltyTransaction as DbLoyaltyTransaction,
   LoyaltyReward as DbLoyaltyReward,
-  LoyaltyRedemption as DbLoyaltyRedemption
+  LoyaltyRedemption as DbLoyaltyRedemption,
 } from '../../../libs/db/types';
 
 // ============================================================================
@@ -33,7 +33,7 @@ export enum LoyaltyTierType {
   SILVER = 'silver',
   GOLD = 'gold',
   PLATINUM = 'platinum',
-  CUSTOM = 'custom'
+  CUSTOM = 'custom',
 }
 
 export enum LoyaltyPointsAction {
@@ -45,7 +45,7 @@ export enum LoyaltyPointsAction {
   ANNIVERSARY = 'anniversary',
   MANUAL_ADJUSTMENT = 'manual_adjustment',
   REDEMPTION = 'redemption',
-  EXPIRATION = 'expiration'
+  EXPIRATION = 'expiration',
 }
 
 // ============================================================================
@@ -159,7 +159,7 @@ export class LoyaltyRepo {
       input.benefits ? JSON.stringify(input.benefits) : null,
       input.isActive !== false,
       now,
-      now
+      now,
     ]);
     if (!result) throw new Error('Failed to create loyalty tier');
     return result;
@@ -254,15 +254,7 @@ export class LoyaltyRepo {
         "updatedAt" = EXCLUDED."updatedAt"
       RETURNING *
     `;
-    const result = await queryOne<LoyaltyPoints>(sql, [
-      customerId,
-      tierId,
-      0,
-      0,
-      now,
-      now,
-      now
-    ]);
+    const result = await queryOne<LoyaltyPoints>(sql, [customerId, tierId, 0, 0, now, now, now]);
     if (!result) throw new Error('Failed to initialize customer points');
     return result;
   }
@@ -273,7 +265,7 @@ export class LoyaltyRepo {
     action: string,
     description?: string,
     orderId?: string,
-    referenceId?: string
+    referenceId?: string,
   ): Promise<LoyaltyPoints> {
     const now = new Date();
 
@@ -287,9 +279,7 @@ export class LoyaltyRepo {
     }
 
     const newCurrentPoints = Math.max(0, customerPoints.currentPoints + pointsChange);
-    const newLifetimePoints = pointsChange > 0 
-      ? customerPoints.lifetimePoints + pointsChange 
-      : customerPoints.lifetimePoints;
+    const newLifetimePoints = pointsChange > 0 ? customerPoints.lifetimePoints + pointsChange : customerPoints.lifetimePoints;
 
     // Update points
     const updateSql = `
@@ -298,13 +288,7 @@ export class LoyaltyRepo {
       WHERE "customerId" = $1
       RETURNING *
     `;
-    const updatedPoints = await queryOne<LoyaltyPoints>(updateSql, [
-      customerId,
-      newCurrentPoints,
-      newLifetimePoints,
-      now,
-      now
-    ]);
+    const updatedPoints = await queryOne<LoyaltyPoints>(updateSql, [customerId, newCurrentPoints, newLifetimePoints, now, now]);
 
     // Record transaction
     await this.createTransaction({
@@ -313,7 +297,7 @@ export class LoyaltyRepo {
       action,
       points: pointsChange,
       description,
-      referenceId
+      referenceId,
     });
 
     // Check for tier upgrade
@@ -372,7 +356,7 @@ export class LoyaltyRepo {
       input.description || null,
       input.referenceId || null,
       now,
-      now
+      now,
     ]);
     if (!result) throw new Error('Failed to create loyalty transaction');
     return result;
@@ -429,7 +413,7 @@ export class LoyaltyRepo {
       input.expiresAt || null,
       input.isActive !== false,
       now,
-      now
+      now,
     ]);
     if (!result) throw new Error('Failed to create loyalty reward');
     return result;
@@ -561,7 +545,7 @@ export class LoyaltyRepo {
       'pending',
       expiresAt,
       now,
-      now
+      now,
     ]);
 
     if (!redemption) throw new Error('Failed to create redemption');
@@ -573,7 +557,7 @@ export class LoyaltyRepo {
       LoyaltyPointsAction.REDEMPTION,
       `Redeemed: ${reward.name}`,
       undefined,
-      redemption.loyaltyRedemptionId
+      redemption.loyaltyRedemptionId,
     );
 
     return redemption;
@@ -581,7 +565,7 @@ export class LoyaltyRepo {
 
   async updateRedemptionStatus(
     loyaltyRedemptionId: string,
-    status: 'pending' | 'used' | 'expired' | 'cancelled'
+    status: 'pending' | 'used' | 'expired' | 'cancelled',
   ): Promise<LoyaltyRedemption> {
     const now = new Date();
     const usedAt = status === 'used' ? now : null;
@@ -592,12 +576,7 @@ export class LoyaltyRepo {
       WHERE "loyaltyRedemptionId" = $1
       RETURNING *
     `;
-    const result = await queryOne<LoyaltyRedemption>(sql, [
-      loyaltyRedemptionId,
-      status,
-      usedAt,
-      now
-    ]);
+    const result = await queryOne<LoyaltyRedemption>(sql, [loyaltyRedemptionId, status, usedAt, now]);
     if (!result) throw new Error(`Redemption ${loyaltyRedemptionId} not found`);
     return result;
   }
@@ -606,17 +585,11 @@ export class LoyaltyRepo {
   // Order Points Processing
   // ==========================================================================
 
-  async processOrderPoints(
-    customerId: string,
-    orderId: string,
-    orderAmount: number
-  ): Promise<LoyaltyPoints> {
+  async processOrderPoints(customerId: string, orderId: string, orderAmount: number): Promise<LoyaltyPoints> {
     // Get customer's tier for multiplier
     const pointsData = await this.findCustomerPointsWithTier(customerId);
     // Convert multiplier to number (PostgreSQL decimal fields are returned as strings)
-    const multiplier = pointsData?.tier?.multiplier 
-      ? parseFloat(String(pointsData.tier.multiplier)) 
-      : 1;
+    const multiplier = pointsData?.tier?.multiplier ? parseFloat(String(pointsData.tier.multiplier)) : 1;
 
     // Calculate points (1 point per dollar, multiplied by tier multiplier)
     const basePoints = Math.floor(orderAmount);
@@ -628,7 +601,7 @@ export class LoyaltyRepo {
       earnedPoints,
       LoyaltyPointsAction.PURCHASE,
       `Order ${orderId}: Earned ${earnedPoints} points`,
-      orderId
+      orderId,
     );
   }
 }

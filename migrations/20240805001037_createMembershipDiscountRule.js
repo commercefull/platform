@@ -24,7 +24,7 @@ exports.up = function (knex) {
     t.timestamp('startDate');
     t.timestamp('endDate');
     t.jsonb('conditions');
-    
+
     t.index('planId');
     t.index('isActive');
     t.index('priority');

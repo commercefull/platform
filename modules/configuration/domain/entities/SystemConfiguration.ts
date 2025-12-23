@@ -115,14 +115,14 @@ export class SystemConfiguration {
         enableGuestCheckout: true,
         enableWishlist: true,
         enableProductReviews: true,
-        enableStoreLocator: systemMode === 'multi_store'
+        enableStoreLocator: systemMode === 'multi_store',
       },
       businessSettings: {
         defaultBusinessType: systemMode,
         allowBusinessTypeChanges: systemMode === 'marketplace',
         maxStoresPerBusiness: systemMode === 'multi_store' ? 50 : 1,
         maxWarehousesPerBusiness: systemMode !== 'single_store' ? 20 : 1,
-        maxMerchantsInMarketplace: systemMode === 'marketplace' ? 10000 : 0
+        maxMerchantsInMarketplace: systemMode === 'marketplace' ? 10000 : 0,
       },
       platformSettings: {
         platformName: props.platformName,
@@ -133,8 +133,8 @@ export class SystemConfiguration {
         timezone: props.timezone || 'UTC',
         commissionStructure: {
           defaultCommissionRate: systemMode === 'marketplace' ? 15 : 0,
-          commissionType: 'percentage'
-        }
+          commissionType: 'percentage',
+        },
       },
       securitySettings: {
         enableTwoFactorAuth: false,
@@ -143,10 +143,10 @@ export class SystemConfiguration {
           requireUppercase: true,
           requireLowercase: true,
           requireNumbers: true,
-          requireSpecialChars: false
+          requireSpecialChars: false,
         },
         sessionTimeout: 480, // 8 hours
-        maxLoginAttempts: 5
+        maxLoginAttempts: 5,
       },
       notificationSettings: {
         emailEnabled: true,
@@ -156,18 +156,18 @@ export class SystemConfiguration {
           orderConfirmation: true,
           shippingUpdate: true,
           passwordReset: true,
-          accountVerification: true
-        }
+          accountVerification: true,
+        },
       },
       integrationSettings: {
         paymentGateways: ['stripe'],
         shippingProviders: ['fedex', 'ups', 'usps'],
         analyticsProviders: ['google_analytics'],
-        emailProviders: ['sendgrid']
+        emailProviders: ['sendgrid'],
       },
       metadata: props.metadata,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     });
   }
 
@@ -176,22 +176,50 @@ export class SystemConfiguration {
   }
 
   // Getters
-  get configId(): string { return this.props.configId; }
-  get systemMode(): SystemMode { return this.props.systemMode; }
-  get features(): SystemConfigurationProps['features'] { return this.props.features; }
-  get businessSettings(): SystemConfigurationProps['businessSettings'] { return this.props.businessSettings; }
-  get platformSettings(): SystemConfigurationProps['platformSettings'] { return this.props.platformSettings; }
-  get securitySettings(): SystemConfigurationProps['securitySettings'] { return this.props.securitySettings; }
-  get notificationSettings(): SystemConfigurationProps['notificationSettings'] { return this.props.notificationSettings; }
-  get integrationSettings(): SystemConfigurationProps['integrationSettings'] { return this.props.integrationSettings; }
-  get metadata(): Record<string, any> | undefined { return this.props.metadata; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get configId(): string {
+    return this.props.configId;
+  }
+  get systemMode(): SystemMode {
+    return this.props.systemMode;
+  }
+  get features(): SystemConfigurationProps['features'] {
+    return this.props.features;
+  }
+  get businessSettings(): SystemConfigurationProps['businessSettings'] {
+    return this.props.businessSettings;
+  }
+  get platformSettings(): SystemConfigurationProps['platformSettings'] {
+    return this.props.platformSettings;
+  }
+  get securitySettings(): SystemConfigurationProps['securitySettings'] {
+    return this.props.securitySettings;
+  }
+  get notificationSettings(): SystemConfigurationProps['notificationSettings'] {
+    return this.props.notificationSettings;
+  }
+  get integrationSettings(): SystemConfigurationProps['integrationSettings'] {
+    return this.props.integrationSettings;
+  }
+  get metadata(): Record<string, any> | undefined {
+    return this.props.metadata;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   // Computed properties
-  get isMarketplace(): boolean { return this.props.systemMode === 'marketplace'; }
-  get isMultiStore(): boolean { return this.props.systemMode === 'multi_store'; }
-  get isSingleStore(): boolean { return this.props.systemMode === 'single_store'; }
+  get isMarketplace(): boolean {
+    return this.props.systemMode === 'marketplace';
+  }
+  get isMultiStore(): boolean {
+    return this.props.systemMode === 'multi_store';
+  }
+  get isSingleStore(): boolean {
+    return this.props.systemMode === 'single_store';
+  }
 
   // Domain methods
   changeSystemMode(newMode: SystemMode): void {
@@ -260,7 +288,7 @@ export class SystemConfiguration {
       ...this.props,
       isMarketplace: this.isMarketplace,
       isMultiStore: this.isMultiStore,
-      isSingleStore: this.isSingleStore
+      isSingleStore: this.isSingleStore,
     };
   }
 }

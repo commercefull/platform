@@ -45,11 +45,7 @@ export class GetInventoryItemUseCase {
     } else if (input.sku && input.warehouseId) {
       item = await this.inventoryRepository.findBySkuAndWarehouse(input.sku, input.warehouseId);
     } else if (input.productId && input.warehouseId) {
-      item = await this.inventoryRepository.findByProductAndWarehouse(
-        input.productId,
-        input.warehouseId,
-        input.variantId
-      );
+      item = await this.inventoryRepository.findByProductAndWarehouse(input.productId, input.warehouseId, input.variantId);
     } else {
       throw new Error('Must provide inventoryItemId, sku+warehouseId, or productId+warehouseId');
     }

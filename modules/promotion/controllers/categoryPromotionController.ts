@@ -1,6 +1,6 @@
 import { logger } from '../../../libs/logger';
-import { Request, Response } from "express";
-import { CategoryPromotionRepo } from "../repos/categoryRepo";
+import { Request, Response } from 'express';
+import { CategoryPromotionRepo } from '../repos/categoryRepo';
 
 const categoryPromotionRepo = new CategoryPromotionRepo();
 
@@ -33,7 +33,7 @@ export const getCategoryPromotionById = async (req: Request, res: Response): Pro
     const promotion = await categoryPromotionRepo.getById(id);
 
     if (!promotion) {
-      res.status(404).json({ success: false, message: "Category promotion not found" });
+      res.status(404).json({ success: false, message: 'Category promotion not found' });
       return;
     }
 
@@ -80,7 +80,7 @@ export const deleteCategoryPromotion = async (req: Request, res: Response): Prom
   try {
     const { id } = req.params;
     await categoryPromotionRepo.delete(id);
-    res.status(200).json({ success: true, message: "Category promotion deleted successfully" });
+    res.status(200).json({ success: true, message: 'Category promotion deleted successfully' });
   } catch (error: any) {
     logger.error('Error:', error);
     res.status(500).json({ success: false, message: error.message });

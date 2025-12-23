@@ -16,7 +16,7 @@ exports.up = function (knex) {
     t.enum('targetType', ['cart', 'item', 'shipping']).notNullable();
     t.uuid('targetId'); // For item-specific discounts, references basketItem.id
     t.integer('priority').notNullable().defaultTo(0);
-    
+
     t.index('basketId');
     t.index('code');
     t.index('targetId');

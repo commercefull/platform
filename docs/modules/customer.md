@@ -9,6 +9,7 @@ The Customer feature manages customer accounts, profiles, and addresses. It hand
 ## Use Cases
 
 ### UC-CUS-001: Register Customer
+
 **Actor:** Guest  
 **Priority:** High
 
@@ -22,12 +23,14 @@ The Customer feature manages customer accounts, profiles, and addresses. It hand
 **And** emits customer.created event
 
 #### API Endpoint
+
 ```
 POST /customers/register
 Body: { email, password, firstName, lastName, phone? }
 ```
 
 #### Business Rules
+
 - Email must be unique and valid
 - Password must meet strength requirements
 - Email verification may be required
@@ -36,6 +39,7 @@ Body: { email, password, firstName, lastName, phone? }
 ---
 
 ### UC-CUS-002: Get My Profile
+
 **Actor:** Customer  
 **Priority:** High
 
@@ -46,11 +50,13 @@ Body: { email, password, firstName, lastName, phone? }
 **Then** the system returns their customer data
 
 #### API Endpoint
+
 ```
 GET /customers/me
 ```
 
 #### Business Rules
+
 - Returns customer profile without sensitive data
 - Includes preferences and settings
 - Password is never returned
@@ -58,6 +64,7 @@ GET /customers/me
 ---
 
 ### UC-CUS-003: Update My Profile
+
 **Actor:** Customer  
 **Priority:** High
 
@@ -70,12 +77,14 @@ GET /customers/me
 **And** emits customer.updated event
 
 #### API Endpoint
+
 ```
 PUT /customers/me
 Body: { firstName?, lastName?, phone?, preferences? }
 ```
 
 #### Business Rules
+
 - Email change may require verification
 - Only provided fields are updated
 - Some fields may be read-only
@@ -83,6 +92,7 @@ Body: { firstName?, lastName?, phone?, preferences? }
 ---
 
 ### UC-CUS-004: Get My Addresses
+
 **Actor:** Customer  
 **Priority:** High
 
@@ -93,11 +103,13 @@ Body: { firstName?, lastName?, phone?, preferences? }
 **Then** the system returns their address book
 
 #### API Endpoint
+
 ```
 GET /customers/me/addresses
 ```
 
 #### Business Rules
+
 - Returns all customer addresses
 - Default address is flagged
 - Sorted by default first, then by name
@@ -105,6 +117,7 @@ GET /customers/me/addresses
 ---
 
 ### UC-CUS-005: Add Address
+
 **Actor:** Customer  
 **Priority:** High
 
@@ -116,6 +129,7 @@ GET /customers/me/addresses
 **Then** the system creates the address
 
 #### API Endpoint
+
 ```
 POST /customers/me/addresses
 Body: {
@@ -125,6 +139,7 @@ Body: {
 ```
 
 #### Business Rules
+
 - First address becomes default automatically
 - Can optionally set as default
 - Address is validated
@@ -132,6 +147,7 @@ Body: {
 ---
 
 ### UC-CUS-006: Update Address
+
 **Actor:** Customer  
 **Priority:** Medium
 
@@ -143,18 +159,21 @@ Body: {
 **Then** the system saves the changes
 
 #### API Endpoint
+
 ```
 PUT /customers/me/addresses/:addressId
 Body: { firstName?, addressLine1?, city?, ... }
 ```
 
 #### Business Rules
+
 - Only customer's own addresses
 - Only provided fields are updated
 
 ---
 
 ### UC-CUS-007: Delete Address
+
 **Actor:** Customer  
 **Priority:** Medium
 
@@ -166,11 +185,13 @@ Body: { firstName?, addressLine1?, city?, ... }
 **Then** the system removes the address
 
 #### API Endpoint
+
 ```
 DELETE /customers/me/addresses/:addressId
 ```
 
 #### Business Rules
+
 - Cannot delete address used in active orders
 - If default is deleted, another becomes default
 - Soft delete for audit trail
@@ -178,6 +199,7 @@ DELETE /customers/me/addresses/:addressId
 ---
 
 ### UC-CUS-008: Set Default Address
+
 **Actor:** Customer  
 **Priority:** Medium
 
@@ -189,17 +211,20 @@ DELETE /customers/me/addresses/:addressId
 **Then** the address becomes the default
 
 #### API Endpoint
+
 ```
 POST /customers/me/addresses/:addressId/default
 ```
 
 #### Business Rules
+
 - Removes default from previous address
 - Used for checkout auto-fill
 
 ---
 
 ### UC-CUS-009: Get Customer (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** High
 
@@ -211,11 +236,13 @@ POST /customers/me/addresses/:addressId/default
 **Then** the system returns the customer profile
 
 #### API Endpoint
+
 ```
 GET /business/customers/:customerId
 ```
 
 #### Business Rules
+
 - Returns full customer profile
 - Includes order history summary
 - Includes address book
@@ -225,24 +252,24 @@ GET /business/customers/:customerId
 
 ## Events Emitted
 
-| Event | Trigger | Payload |
-|-------|---------|---------|
-| `customer.created` | Registration | customerId, email |
-| `customer.registered` | Registration complete | customerId |
-| `customer.updated` | Profile updated | customerId, changes |
+| Event                 | Trigger               | Payload             |
+| --------------------- | --------------------- | ------------------- |
+| `customer.created`    | Registration          | customerId, email   |
+| `customer.registered` | Registration complete | customerId          |
+| `customer.updated`    | Profile updated       | customerId, changes |
 
 ---
 
 ## Integration Test Coverage
 
-| Use Case | Test File | Status |
-|----------|-----------|--------|
-| UC-CUS-001 | `customer/customer.test.ts` | ✅ |
-| UC-CUS-002 | `customer/customer.test.ts` | ✅ |
-| UC-CUS-003 | `customer/customer.test.ts` | ✅ |
-| UC-CUS-004 | `customer/customer.test.ts` | 🟡 |
-| UC-CUS-005 | `customer/customer.test.ts` | 🟡 |
-| UC-CUS-006 | `customer/customer.test.ts` | ❌ |
-| UC-CUS-007 | `customer/customer.test.ts` | ❌ |
-| UC-CUS-008 | `customer/customer.test.ts` | ❌ |
-| UC-CUS-009 | `customer/customer.test.ts` | 🟡 |
+| Use Case   | Test File                   | Status |
+| ---------- | --------------------------- | ------ |
+| UC-CUS-001 | `customer/customer.test.ts` | ✅     |
+| UC-CUS-002 | `customer/customer.test.ts` | ✅     |
+| UC-CUS-003 | `customer/customer.test.ts` | ✅     |
+| UC-CUS-004 | `customer/customer.test.ts` | 🟡     |
+| UC-CUS-005 | `customer/customer.test.ts` | 🟡     |
+| UC-CUS-006 | `customer/customer.test.ts` | ❌     |
+| UC-CUS-007 | `customer/customer.test.ts` | ❌     |
+| UC-CUS-008 | `customer/customer.test.ts` | ❌     |
+| UC-CUS-009 | `customer/customer.test.ts` | 🟡     |

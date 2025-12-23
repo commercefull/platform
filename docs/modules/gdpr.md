@@ -11,6 +11,7 @@ The GDPR (General Data Protection Regulation) feature handles compliance with EU
 ### Cookie Consent
 
 ### UC-GDP-001: Record Cookie Consent
+
 **Actor:** Customer/Guest  
 **Priority:** High
 
@@ -22,6 +23,7 @@ The GDPR (General Data Protection Regulation) feature handles compliance with EU
 **And** emits gdpr.consent.recorded event
 
 #### API Endpoint
+
 ```
 POST /gdpr/cookies/consent
 Body: {
@@ -34,6 +36,7 @@ Body: {
 ```
 
 #### Business Rules
+
 - Necessary cookies are always allowed
 - Consent is stored with timestamp
 - IP and user agent are recorded
@@ -42,6 +45,7 @@ Body: {
 ---
 
 ### UC-GDP-002: Get Cookie Consent
+
 **Actor:** Customer/Guest  
 **Priority:** Medium
 
@@ -52,18 +56,21 @@ Body: {
 **Then** the system returns their current consent settings
 
 #### API Endpoint
+
 ```
 GET /gdpr/cookies/consent
 Query: consentId
 ```
 
 #### Business Rules
+
 - Returns current consent status
 - Returns null if no consent recorded
 
 ---
 
 ### UC-GDP-003: Accept All Cookies
+
 **Actor:** Customer/Guest  
 **Priority:** High
 
@@ -74,6 +81,7 @@ Query: consentId
 **Then** all cookie categories are enabled
 
 #### API Endpoint
+
 ```
 POST /gdpr/cookies/accept-all
 Body: { consentId?: string }
@@ -82,6 +90,7 @@ Body: { consentId?: string }
 ---
 
 ### UC-GDP-004: Reject All Optional Cookies
+
 **Actor:** Customer/Guest  
 **Priority:** High
 
@@ -92,6 +101,7 @@ Body: { consentId?: string }
 **Then** only necessary cookies remain enabled
 
 #### API Endpoint
+
 ```
 POST /gdpr/cookies/reject-all
 Body: { consentId?: string }
@@ -100,6 +110,7 @@ Body: { consentId?: string }
 ---
 
 ### UC-GDP-005: Update Cookie Consent
+
 **Actor:** Customer/Guest  
 **Priority:** Medium
 
@@ -111,6 +122,7 @@ Body: { consentId?: string }
 **And** emits gdpr.consent.updated event
 
 #### API Endpoint
+
 ```
 PUT /gdpr/cookies/consent/:cookieConsentId
 Body: { analyticsCookies?, marketingCookies?, preferenceCookies? }
@@ -121,6 +133,7 @@ Body: { analyticsCookies?, marketingCookies?, preferenceCookies? }
 ### Data Subject Requests
 
 ### UC-GDP-006: Create Data Request
+
 **Actor:** Customer  
 **Priority:** High
 
@@ -134,12 +147,14 @@ Body: { analyticsCookies?, marketingCookies?, preferenceCookies? }
 **And** emits gdpr.request.created event
 
 #### API Endpoint
+
 ```
 POST /gdpr/requests
 Body: { requestType: 'access'|'portability'|'deletion'|'rectification', notes?: string }
 ```
 
 #### Business Rules
+
 - Request types: access, portability, deletion, rectification
 - Must be processed within 30 days (GDPR deadline)
 - Identity verification may be required
@@ -148,6 +163,7 @@ Body: { requestType: 'access'|'portability'|'deletion'|'rectification', notes?: 
 ---
 
 ### UC-GDP-007: Get My Data Requests
+
 **Actor:** Customer  
 **Priority:** Medium
 
@@ -158,17 +174,20 @@ Body: { requestType: 'access'|'portability'|'deletion'|'rectification', notes?: 
 **Then** the system returns their request history
 
 #### API Endpoint
+
 ```
 GET /gdpr/requests
 ```
 
 #### Business Rules
+
 - Only returns customer's own requests
 - Includes status and history
 
 ---
 
 ### UC-GDP-008: Cancel Data Request
+
 **Actor:** Customer  
 **Priority:** Low
 
@@ -180,11 +199,13 @@ GET /gdpr/requests
 **Then** the request is marked as cancelled
 
 #### API Endpoint
+
 ```
 POST /gdpr/requests/:gdprDataRequestId/cancel
 ```
 
 #### Business Rules
+
 - Can only cancel pending requests
 - Already processed requests cannot be cancelled
 
@@ -193,6 +214,7 @@ POST /gdpr/requests/:gdprDataRequestId/cancel
 ### Business/Admin Use Cases
 
 ### UC-GDP-009: List Data Requests (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** High
 
@@ -203,12 +225,14 @@ POST /gdpr/requests/:gdprDataRequestId/cancel
 **Then** the system returns all GDPR requests
 
 #### API Endpoint
+
 ```
 GET /business/gdpr/requests
 Query: status, requestType, customerId, limit, offset
 ```
 
 #### Business Rules
+
 - Returns all requests for the merchant
 - Supports filtering by status, type
 - Ordered by deadline (oldest first)
@@ -216,6 +240,7 @@ Query: status, requestType, customerId, limit, offset
 ---
 
 ### UC-GDP-010: Get Data Request (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** High
 
@@ -227,6 +252,7 @@ Query: status, requestType, customerId, limit, offset
 **Then** the system returns the request with full history
 
 #### API Endpoint
+
 ```
 GET /business/gdpr/requests/:gdprDataRequestId
 ```
@@ -234,6 +260,7 @@ GET /business/gdpr/requests/:gdprDataRequestId
 ---
 
 ### UC-GDP-011: Get Overdue Requests (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** High
 
@@ -244,17 +271,20 @@ GET /business/gdpr/requests/:gdprDataRequestId
 **Then** the system returns requests past their deadline
 
 #### API Endpoint
+
 ```
 GET /business/gdpr/requests/overdue
 ```
 
 #### Business Rules
+
 - Returns requests past 30-day deadline
 - Critical for compliance monitoring
 
 ---
 
 ### UC-GDP-012: Get GDPR Statistics (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
@@ -265,11 +295,13 @@ GET /business/gdpr/requests/overdue
 **Then** the system returns aggregated metrics
 
 #### API Endpoint
+
 ```
 GET /business/gdpr/statistics
 ```
 
 #### Business Rules
+
 - Returns request counts by type and status
 - Includes average processing time
 - Includes compliance rate
@@ -277,6 +309,7 @@ GET /business/gdpr/statistics
 ---
 
 ### UC-GDP-013: Verify Identity (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** High
 
@@ -288,12 +321,14 @@ GET /business/gdpr/statistics
 **Then** the request is marked as verified
 
 #### API Endpoint
+
 ```
 POST /business/gdpr/requests/:gdprDataRequestId/verify
 Body: { verificationMethod: string, notes?: string }
 ```
 
 #### Business Rules
+
 - Required before processing sensitive requests
 - Documents verification method
 - Creates audit trail
@@ -301,6 +336,7 @@ Body: { verificationMethod: string, notes?: string }
 ---
 
 ### UC-GDP-014: Process Export Request (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** High
 
@@ -314,11 +350,13 @@ Body: { verificationMethod: string, notes?: string }
 **And** emits gdpr.data.exported event
 
 #### API Endpoint
+
 ```
 POST /business/gdpr/requests/:gdprDataRequestId/export
 ```
 
 #### Business Rules
+
 - Generates JSON/CSV export of customer data
 - Includes all data categories
 - Secure download link sent to customer
@@ -327,6 +365,7 @@ POST /business/gdpr/requests/:gdprDataRequestId/export
 ---
 
 ### UC-GDP-015: Process Deletion Request (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** High
 
@@ -339,11 +378,13 @@ POST /business/gdpr/requests/:gdprDataRequestId/export
 **And** emits gdpr.data.deleted event
 
 #### API Endpoint
+
 ```
 POST /business/gdpr/requests/:gdprDataRequestId/delete
 ```
 
 #### Business Rules
+
 - Anonymizes PII in historical records
 - Deletes data where legally permitted
 - Retains data required for legal compliance
@@ -352,6 +393,7 @@ POST /business/gdpr/requests/:gdprDataRequestId/delete
 ---
 
 ### UC-GDP-016: Reject Request (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
@@ -365,12 +407,14 @@ POST /business/gdpr/requests/:gdprDataRequestId/delete
 **And** emits gdpr.request.rejected event
 
 #### API Endpoint
+
 ```
 POST /business/gdpr/requests/:gdprDataRequestId/reject
 Body: { reason: string }
 ```
 
 #### Business Rules
+
 - Reason is required
 - Customer can appeal
 - Creates audit trail
@@ -378,6 +422,7 @@ Body: { reason: string }
 ---
 
 ### UC-GDP-017: Get Cookie Consent Statistics (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Low
 
@@ -388,11 +433,13 @@ Body: { reason: string }
 **Then** the system returns consent metrics
 
 #### API Endpoint
+
 ```
 GET /business/gdpr/cookies/statistics
 ```
 
 #### Business Rules
+
 - Returns consent rates by category
 - Useful for compliance reporting
 
@@ -400,25 +447,27 @@ GET /business/gdpr/cookies/statistics
 
 ## Events Emitted
 
-| Event | Trigger | Payload |
-|-------|---------|---------|
-| `gdpr.request.created` | Request created | requestId, customerId, type |
-| `gdpr.request.completed` | Request processed | requestId, completedAt |
-| `gdpr.request.rejected` | Request rejected | requestId, reason |
-| `gdpr.data.exported` | Data exported | requestId, customerId |
-| `gdpr.data.deleted` | Data deleted | requestId, customerId |
-| `gdpr.consent.recorded` | Consent recorded | consentId, preferences |
-| `gdpr.consent.updated` | Consent updated | consentId, changes |
+| Event                    | Trigger           | Payload                     |
+| ------------------------ | ----------------- | --------------------------- |
+| `gdpr.request.created`   | Request created   | requestId, customerId, type |
+| `gdpr.request.completed` | Request processed | requestId, completedAt      |
+| `gdpr.request.rejected`  | Request rejected  | requestId, reason           |
+| `gdpr.data.exported`     | Data exported     | requestId, customerId       |
+| `gdpr.data.deleted`      | Data deleted      | requestId, customerId       |
+| `gdpr.consent.recorded`  | Consent recorded  | consentId, preferences      |
+| `gdpr.consent.updated`   | Consent updated   | consentId, changes          |
 
 ---
 
 ## Compliance Notes
 
 ### GDPR Deadlines
+
 - Data requests must be processed within **30 days**
 - Extensions up to **60 days** require notification
 
 ### Data Categories
+
 - Personal identifiers (name, email, phone)
 - Order history
 - Payment methods (masked)
@@ -427,6 +476,7 @@ GET /business/gdpr/cookies/statistics
 - Activity logs
 
 ### Retention Requirements
+
 - Invoice data: 7 years (legal requirement)
 - Tax records: 7 years (legal requirement)
 - Anonymized analytics: Indefinite
@@ -435,22 +485,22 @@ GET /business/gdpr/cookies/statistics
 
 ## Integration Test Coverage
 
-| Use Case | Test File | Status |
-|----------|-----------|--------|
-| UC-GDP-001 | `gdpr/gdpr.test.ts` | ❌ |
-| UC-GDP-002 | `gdpr/gdpr.test.ts` | ❌ |
-| UC-GDP-003 | `gdpr/gdpr.test.ts` | ❌ |
-| UC-GDP-004 | `gdpr/gdpr.test.ts` | ❌ |
-| UC-GDP-005 | `gdpr/gdpr.test.ts` | ❌ |
-| UC-GDP-006 | `gdpr/gdpr.test.ts` | ❌ |
-| UC-GDP-007 | `gdpr/gdpr.test.ts` | ❌ |
-| UC-GDP-008 | `gdpr/gdpr.test.ts` | ❌ |
-| UC-GDP-009 | `gdpr/gdpr.test.ts` | ❌ |
-| UC-GDP-010 | `gdpr/gdpr.test.ts` | ❌ |
-| UC-GDP-011 | `gdpr/gdpr.test.ts` | ❌ |
-| UC-GDP-012 | `gdpr/gdpr.test.ts` | ❌ |
-| UC-GDP-013 | `gdpr/gdpr.test.ts` | ❌ |
-| UC-GDP-014 | `gdpr/gdpr.test.ts` | ❌ |
-| UC-GDP-015 | `gdpr/gdpr.test.ts` | ❌ |
-| UC-GDP-016 | `gdpr/gdpr.test.ts` | ❌ |
-| UC-GDP-017 | `gdpr/gdpr.test.ts` | ❌ |
+| Use Case   | Test File           | Status |
+| ---------- | ------------------- | ------ |
+| UC-GDP-001 | `gdpr/gdpr.test.ts` | ❌     |
+| UC-GDP-002 | `gdpr/gdpr.test.ts` | ❌     |
+| UC-GDP-003 | `gdpr/gdpr.test.ts` | ❌     |
+| UC-GDP-004 | `gdpr/gdpr.test.ts` | ❌     |
+| UC-GDP-005 | `gdpr/gdpr.test.ts` | ❌     |
+| UC-GDP-006 | `gdpr/gdpr.test.ts` | ❌     |
+| UC-GDP-007 | `gdpr/gdpr.test.ts` | ❌     |
+| UC-GDP-008 | `gdpr/gdpr.test.ts` | ❌     |
+| UC-GDP-009 | `gdpr/gdpr.test.ts` | ❌     |
+| UC-GDP-010 | `gdpr/gdpr.test.ts` | ❌     |
+| UC-GDP-011 | `gdpr/gdpr.test.ts` | ❌     |
+| UC-GDP-012 | `gdpr/gdpr.test.ts` | ❌     |
+| UC-GDP-013 | `gdpr/gdpr.test.ts` | ❌     |
+| UC-GDP-014 | `gdpr/gdpr.test.ts` | ❌     |
+| UC-GDP-015 | `gdpr/gdpr.test.ts` | ❌     |
+| UC-GDP-016 | `gdpr/gdpr.test.ts` | ❌     |
+| UC-GDP-017 | `gdpr/gdpr.test.ts` | ❌     |

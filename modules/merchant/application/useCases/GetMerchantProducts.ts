@@ -46,7 +46,7 @@ export interface MerchantProductRepository {
     limit: number,
     offset: number,
     orderBy: string,
-    orderDirection: 'asc' | 'desc'
+    orderDirection: 'asc' | 'desc',
   ): Promise<{ products: MerchantProduct[]; total: number }>;
 }
 
@@ -73,7 +73,7 @@ export class GetMerchantProductsUseCase {
       limit,
       offset,
       orderBy,
-      orderDirection
+      orderDirection,
     );
 
     return {

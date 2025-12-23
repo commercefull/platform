@@ -20,10 +20,8 @@ export const query = async <T>(text: string, params?: Array<unknown>): Promise<T
     } else {
       res = await pool.query(text);
     }
-
   } catch (e: any) {
-    
-    throw new Error(`Query failed: ${e.message}`)
+    throw new Error(`Query failed: ${e.message}`);
   }
 
   if (res.rows.length > 0) {
@@ -31,7 +29,7 @@ export const query = async <T>(text: string, params?: Array<unknown>): Promise<T
   }
 
   return null;
-}
+};
 
 export const queryOne = async <T>(text: string, params: Array<unknown>): Promise<T | null> => {
   let res: PG.QueryResult;
@@ -39,8 +37,7 @@ export const queryOne = async <T>(text: string, params: Array<unknown>): Promise
   try {
     res = await pool.query(text, params);
   } catch (e: any) {
-    
-    throw new Error(`Query failed: ${e.message}`)
+    throw new Error(`Query failed: ${e.message}`);
   }
 
   if (res.rows.length === 1) {
@@ -48,4 +45,4 @@ export const queryOne = async <T>(text: string, params: Array<unknown>): Promise
   }
 
   return null;
-}
+};

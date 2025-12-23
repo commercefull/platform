@@ -12,10 +12,7 @@ import FormData from 'form-data';
 // Create a minimal 1x1 transparent PNG for testing
 const createTestImageBuffer = (): Buffer => {
   // This is a minimal 1x1 transparent PNG
-  return Buffer.from(
-    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChAI9jU77yQAAAABJRU5ErkJggg==',
-    'base64'
-  );
+  return Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChAI9jU77yQAAAABJRU5ErkJggg==', 'base64');
 };
 
 describe('Media API Integration', () => {
@@ -38,7 +35,6 @@ describe('Media API Integration', () => {
     axios.defaults.baseURL = baseURL;
     axios.defaults.validateStatus = () => true; // Don't throw on any status code
   });
-
 
   describe('POST /business/media/upload', () => {
     it('should upload and process an image successfully', async () => {
@@ -219,7 +215,7 @@ describe('Media API Integration', () => {
             headers: {
               'Content-Type': 'multipart/form-data',
             },
-          })
+          }),
         );
       }
 

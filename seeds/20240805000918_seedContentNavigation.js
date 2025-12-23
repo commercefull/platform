@@ -5,7 +5,7 @@
 const NAV_ITEMS = [
   { name: 'Main Menu', slug: 'main-menu', location: 'header' },
   { name: 'Footer Menu', slug: 'footer-menu', location: 'footer' },
-  { name: 'Account Menu', slug: 'account-menu', location: 'account' }
+  { name: 'Account Menu', slug: 'account-menu', location: 'account' },
 ];
 
 exports.up = function (knex) {
@@ -17,7 +17,12 @@ exports.up = function (knex) {
  * @returns { Promise<void> }
  */
 exports.down = function (knex) {
-  return knex('contentNavigation').whereIn('slug', NAV_ITEMS.map(item => item.slug)).delete();
+  return knex('contentNavigation')
+    .whereIn(
+      'slug',
+      NAV_ITEMS.map(item => item.slug),
+    )
+    .delete();
 };
 
 exports.seed = async function (knex) {

@@ -21,21 +21,21 @@ export class RecordCookieConsentCommand {
     public readonly country?: string,
     public readonly region?: string,
     public readonly consentBannerVersion?: string,
-    public readonly consentMethod?: 'banner' | 'settings' | 'api'
+    public readonly consentMethod?: 'banner' | 'settings' | 'api',
   ) {}
 }
 
 export class UpdateCookieConsentCommand {
   constructor(
     public readonly cookieConsentId: string,
-    public readonly preferences: Partial<CookiePreferences>
+    public readonly preferences: Partial<CookiePreferences>,
   ) {}
 }
 
 export class LinkConsentToCustomerCommand {
   constructor(
     public readonly sessionId: string,
-    public readonly customerId: string
+    public readonly customerId: string,
   ) {}
 }
 
@@ -55,9 +55,7 @@ export interface CookieConsentResponse {
 // ============================================================================
 
 export class ManageCookieConsentUseCase {
-  constructor(
-    private readonly consentRepository: GdprCookieConsentRepository
-  ) {}
+  constructor(private readonly consentRepository: GdprCookieConsentRepository) {}
 
   /**
    * Record new cookie consent
@@ -84,7 +82,7 @@ export class ManageCookieConsentUseCase {
         userAgent: command.userAgent,
         country: command.country,
         consentBannerVersion: command.consentBannerVersion,
-        consentMethod: command.consentMethod
+        consentMethod: command.consentMethod,
       });
     } else {
       // Create consent for anonymous user
@@ -98,7 +96,7 @@ export class ManageCookieConsentUseCase {
         country: command.country,
         region: command.region,
         consentBannerVersion: command.consentBannerVersion,
-        consentMethod: command.consentMethod
+        consentMethod: command.consentMethod,
       });
     }
 
@@ -108,7 +106,7 @@ export class ManageCookieConsentUseCase {
       gdprCookieConsentId: consent.gdprCookieConsentId,
       preferences: consent.getPreferences(),
       consentedAt: consent.consentedAt.toISOString(),
-      expiresAt: consent.expiresAt?.toISOString()
+      expiresAt: consent.expiresAt?.toISOString(),
     };
   }
 
@@ -128,7 +126,7 @@ export class ManageCookieConsentUseCase {
       gdprCookieConsentId: consent.gdprCookieConsentId,
       preferences: consent.getPreferences(),
       consentedAt: consent.consentedAt.toISOString(),
-      expiresAt: consent.expiresAt?.toISOString()
+      expiresAt: consent.expiresAt?.toISOString(),
     };
   }
 
@@ -137,7 +135,7 @@ export class ManageCookieConsentUseCase {
    */
   async acceptAll(sessionId: string): Promise<CookieConsentResponse> {
     let consent = await this.consentRepository.findBySessionId(sessionId);
-    
+
     if (!consent) {
       consent = GdprCookieConsent.createAnonymous({
         gdprCookieConsentId: generateUUID(),
@@ -147,8 +145,8 @@ export class ManageCookieConsentUseCase {
           functional: true,
           analytics: true,
           marketing: true,
-          thirdParty: true
-        }
+          thirdParty: true,
+        },
       });
     } else {
       consent.acceptAll();
@@ -160,7 +158,7 @@ export class ManageCookieConsentUseCase {
       gdprCookieConsentId: consent.gdprCookieConsentId,
       preferences: consent.getPreferences(),
       consentedAt: consent.consentedAt.toISOString(),
-      expiresAt: consent.expiresAt?.toISOString()
+      expiresAt: consent.expiresAt?.toISOString(),
     };
   }
 
@@ -169,7 +167,7 @@ export class ManageCookieConsentUseCase {
    */
   async rejectAll(sessionId: string): Promise<CookieConsentResponse> {
     let consent = await this.consentRepository.findBySessionId(sessionId);
-    
+
     if (!consent) {
       consent = GdprCookieConsent.createAnonymous({
         gdprCookieConsentId: generateUUID(),
@@ -179,8 +177,8 @@ export class ManageCookieConsentUseCase {
           functional: false,
           analytics: false,
           marketing: false,
-          thirdParty: false
-        }
+          thirdParty: false,
+        },
       });
     } else {
       consent.rejectAll();
@@ -192,7 +190,7 @@ export class ManageCookieConsentUseCase {
       gdprCookieConsentId: consent.gdprCookieConsentId,
       preferences: consent.getPreferences(),
       consentedAt: consent.consentedAt.toISOString(),
-      expiresAt: consent.expiresAt?.toISOString()
+      expiresAt: consent.expiresAt?.toISOString(),
     };
   }
 
@@ -207,7 +205,7 @@ export class ManageCookieConsentUseCase {
       gdprCookieConsentId: consent.gdprCookieConsentId,
       preferences: consent.getPreferences(),
       consentedAt: consent.consentedAt.toISOString(),
-      expiresAt: consent.expiresAt?.toISOString()
+      expiresAt: consent.expiresAt?.toISOString(),
     };
   }
 
@@ -226,7 +224,7 @@ export class ManageCookieConsentUseCase {
         gdprCookieConsentId: existingCustomerConsent.gdprCookieConsentId,
         preferences: existingCustomerConsent.getPreferences(),
         consentedAt: existingCustomerConsent.consentedAt.toISOString(),
-        expiresAt: existingCustomerConsent.expiresAt?.toISOString()
+        expiresAt: existingCustomerConsent.expiresAt?.toISOString(),
       };
     }
 
@@ -238,7 +236,7 @@ export class ManageCookieConsentUseCase {
       gdprCookieConsentId: consent.gdprCookieConsentId,
       preferences: consent.getPreferences(),
       consentedAt: consent.consentedAt.toISOString(),
-      expiresAt: consent.expiresAt?.toISOString()
+      expiresAt: consent.expiresAt?.toISOString(),
     };
   }
 }

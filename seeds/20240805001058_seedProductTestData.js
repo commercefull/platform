@@ -2,7 +2,7 @@
  * Seed test products with fixed UUIDs for integration testing
  * @param { import('knex').Knex } knex
  */
-exports.seed = async function(knex) {
+exports.seed = async function (knex) {
   // Fixed UUIDs for test products
   const TEST_PRODUCT_1_ID = '10000000-0000-0000-0000-000000000001';
   const TEST_PRODUCT_2_ID = '10000000-0000-0000-0000-000000000002';
@@ -38,7 +38,7 @@ exports.seed = async function(knex) {
       price: 99.99,
       basePrice: 99.99,
       salePrice: 79.99,
-      costPrice: 50.00,
+      costPrice: 50.0,
       weight: 500,
       weightUnit: 'g',
       length: 10,
@@ -54,7 +54,7 @@ exports.seed = async function(knex) {
       taxClass: 'standard',
       isVirtual: false,
       isDownloadable: false,
-      isSubscription: false
+      isSubscription: false,
     },
     {
       productId: TEST_PRODUCT_2_ID,
@@ -70,7 +70,7 @@ exports.seed = async function(knex) {
       price: 149.99,
       basePrice: 149.99,
       salePrice: null,
-      costPrice: 75.00,
+      costPrice: 75.0,
       weight: 1000,
       weightUnit: 'g',
       length: 20,
@@ -87,7 +87,7 @@ exports.seed = async function(knex) {
       isVirtual: false,
       isDownloadable: false,
       isSubscription: false,
-      variantAttributes: JSON.stringify(['color', 'size'])
+      variantAttributes: JSON.stringify(['color', 'size']),
     },
     {
       productId: TEST_PRODUCT_3_ID,
@@ -119,22 +119,23 @@ exports.seed = async function(knex) {
       taxClass: 'digital',
       isVirtual: true,
       isDownloadable: true,
-      isSubscription: false
-    }
+      isSubscription: false,
+    },
   ]);
 
   // Link products to categories
   if (electronicsCategory) {
     await knex('productCategoryMap').insert([
       { productId: TEST_PRODUCT_1_ID, productCategoryId: electronicsCategory.productCategoryId, isPrimary: true },
-      { productId: TEST_PRODUCT_2_ID, productCategoryId: electronicsCategory.productCategoryId, isPrimary: true }
+      { productId: TEST_PRODUCT_2_ID, productCategoryId: electronicsCategory.productCategoryId, isPrimary: true },
     ]);
   }
 
   if (fashionCategory) {
-    await knex('productCategoryMap').insert([
-      { productId: TEST_PRODUCT_2_ID, productCategoryId: fashionCategory.productCategoryId, isPrimary: false }
-    ]).onConflict().ignore();
+    await knex('productCategoryMap')
+      .insert([{ productId: TEST_PRODUCT_2_ID, productCategoryId: fashionCategory.productCategoryId, isPrimary: false }])
+      .onConflict()
+      .ignore();
   }
 
   // Insert test variants for product 2
@@ -151,7 +152,7 @@ exports.seed = async function(knex) {
       isDefault: true,
       position: 0,
       barcode: '1234567890123',
-      optionValues: JSON.stringify({ color: 'red', size: 'm' })
+      optionValues: JSON.stringify({ color: 'red', size: 'm' }),
     },
     {
       productVariantId: TEST_VARIANT_2_ID,
@@ -165,9 +166,7 @@ exports.seed = async function(knex) {
       isDefault: false,
       position: 1,
       barcode: '1234567890124',
-      optionValues: JSON.stringify({ color: 'blue', size: 'l' })
-    }
+      optionValues: JSON.stringify({ color: 'blue', size: 'l' }),
+    },
   ]);
-
-  
 };

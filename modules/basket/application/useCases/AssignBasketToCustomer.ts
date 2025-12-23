@@ -14,7 +14,7 @@ import { BasketResponse } from './GetOrCreateBasket';
 export class AssignBasketToCustomerCommand {
   constructor(
     public readonly basketId: string,
-    public readonly customerId: string
+    public readonly customerId: string,
   ) {}
 }
 
@@ -39,7 +39,7 @@ export class AssignBasketToCustomerUseCase {
     eventBus.emit('basket.assigned_to_customer', {
       basketId: command.basketId,
       customerId: command.customerId,
-      previousSessionId
+      previousSessionId,
     });
 
     const updatedBasket = await this.basketRepository.findById(command.basketId);
@@ -63,12 +63,12 @@ export class AssignBasketToCustomerUseCase {
         unitPrice: item.unitPrice.amount,
         lineTotal: item.lineTotal.amount,
         imageUrl: item.imageUrl,
-        isGift: item.isGift
+        isGift: item.isGift,
       })),
       itemCount: basket.itemCount,
       subtotal: basket.subtotal.amount,
       createdAt: basket.createdAt.toISOString(),
-      updatedAt: basket.updatedAt.toISOString()
+      updatedAt: basket.updatedAt.toISOString(),
     };
   }
 }

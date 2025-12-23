@@ -16,14 +16,7 @@ import { GetProductCommand, GetProductUseCase } from '../../../modules/product/a
 
 export const listProducts = async (req: Request, res: Response): Promise<void> => {
   try {
-    const {
-      category,
-      search,
-      page = '1',
-      limit = '12',
-      sort = 'name',
-      order = 'asc'
-    } = req.query;
+    const { category, search, page = '1', limit = '12', sort = 'name', order = 'asc' } = req.query;
 
     // Build filters
     const filters: any = {};
@@ -35,11 +28,7 @@ export const listProducts = async (req: Request, res: Response): Promise<void> =
       filters.search = search as string;
     }
 
-    const command = new ListProductsCommand(
-      filters,
-      parseInt(limit as string),
-      (parseInt(page as string) - 1) * parseInt(limit as string)
-    );
+    const command = new ListProductsCommand(filters, parseInt(limit as string), (parseInt(page as string) - 1) * parseInt(limit as string));
 
     const useCase = new ListProductsUseCase(ProductRepo);
     const result = await useCase.execute(command);
@@ -55,17 +44,17 @@ export const listProducts = async (req: Request, res: Response): Promise<void> =
         currentPage: parseInt(page as string),
         totalPages: Math.ceil(result.total / parseInt(limit as string)),
         totalProducts: result.total,
-        hasNext: (parseInt(page as string) * parseInt(limit as string)) < result.total,
-        hasPrev: parseInt(page as string) > 1
+        hasNext: parseInt(page as string) * parseInt(limit as string) < result.total,
+        hasPrev: parseInt(page as string) > 1,
       },
-      filters: { category, search, sort, order }
+      filters: { category, search, sort, order },
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     storefrontRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load products'
+      error: error.message || 'Failed to load products',
     });
   }
 };
@@ -85,35 +74,29 @@ export const getProduct = async (req: Request, res: Response): Promise<void> => 
     if (!product) {
       storefrontRespond(req, res, '404', {
         pageName: 'Product Not Found',
-        user: req.user
+        user: req.user,
       });
       return;
     }
 
     // Get related products from same category
-    const relatedCommand = new ListProductsCommand(
-      { categoryId: product.categoryId },
-      5,
-      0
-    );
+    const relatedCommand = new ListProductsCommand({ categoryId: product.categoryId }, 5, 0);
     const relatedUseCase = new ListProductsUseCase(ProductRepo);
     const relatedResult = await relatedUseCase.execute(relatedCommand);
     // Filter out the current product
-    const relatedProducts = (relatedResult.products || []).filter(
-      (p: any) => p.productId !== product.productId
-    ).slice(0, 4);
+    const relatedProducts = (relatedResult.products || []).filter((p: any) => p.productId !== product.productId).slice(0, 4);
 
     storefrontRespond(req, res, 'product/pdp', {
       pageName: product.name,
       product,
-      relatedProducts
+      relatedProducts,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     storefrontRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load product'
+      error: error.message || 'Failed to load product',
     });
   }
 };
@@ -131,7 +114,7 @@ export const getCategoryProducts = async (req: Request, res: Response): Promise<
     const command = new ListProductsCommand(
       { search: categorySlug as string },
       parseInt(limit as string),
-      (parseInt(page as string) - 1) * parseInt(limit as string)
+      (parseInt(page as string) - 1) * parseInt(limit as string),
     );
 
     const useCase = new ListProductsUseCase(ProductRepo);
@@ -147,17 +130,17 @@ export const getCategoryProducts = async (req: Request, res: Response): Promise<
         currentPage: parseInt(page as string),
         totalPages: Math.ceil(result.total / parseInt(limit as string)),
         totalProducts: result.total,
-        hasNext: (parseInt(page as string) * parseInt(limit as string)) < result.total,
-        hasPrev: parseInt(page as string) > 1
+        hasNext: parseInt(page as string) * parseInt(limit as string) < result.total,
+        hasPrev: parseInt(page as string) > 1,
       },
-      filters: { category: categorySlug, sort, order }
+      filters: { category: categorySlug, sort, order },
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     storefrontRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load category products'
+      error: error.message || 'Failed to load category products',
     });
   }
 };
@@ -177,7 +160,7 @@ export const searchProducts = async (req: Request, res: Response): Promise<void>
     const command = new ListProductsCommand(
       { search: search as string },
       parseInt(limit as string),
-      (parseInt(page as string) - 1) * parseInt(limit as string)
+      (parseInt(page as string) - 1) * parseInt(limit as string),
     );
 
     const useCase = new ListProductsUseCase(ProductRepo);
@@ -192,18 +175,18 @@ export const searchProducts = async (req: Request, res: Response): Promise<void>
         currentPage: parseInt(page as string),
         totalPages: Math.ceil(result.total / parseInt(limit as string)),
         totalProducts: result.total,
-        hasNext: (parseInt(page as string) * parseInt(limit as string)) < result.total,
-        hasPrev: parseInt(page as string) > 1
+        hasNext: parseInt(page as string) * parseInt(limit as string) < result.total,
+        hasPrev: parseInt(page as string) > 1,
       },
       filters: { search, sort: 'relevance' },
-      searchQuery: search
+      searchQuery: search,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     storefrontRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to search products'
+      error: error.message || 'Failed to search products',
     });
   }
 };

@@ -1,4 +1,4 @@
-import { queryOne, query } from "../../../libs/db";
+import { queryOne, query } from '../../../libs/db';
 
 // Import types from generated DB types - single source of truth
 import { Notification as DbNotification } from '../../../libs/db/types';
@@ -24,41 +24,35 @@ export class NotificationRepo {
   // ============================================================================
 
   async findById(notificationId: string): Promise<Notification | null> {
-    return await queryOne<Notification>(
-      'SELECT * FROM notification WHERE "notificationId" = $1',
-      [notificationId]
-    );
+    return await queryOne<Notification>('SELECT * FROM notification WHERE "notificationId" = $1', [notificationId]);
   }
 
   async findAll(limit: number = 50, offset: number = 0): Promise<Notification[]> {
-    const results = await query<Notification[]>(
-      'SELECT * FROM notification ORDER BY "createdAt" DESC LIMIT $1 OFFSET $2',
-      [limit, offset]
-    );
+    const results = await query<Notification[]>('SELECT * FROM notification ORDER BY "createdAt" DESC LIMIT $1 OFFSET $2', [limit, offset]);
     return results || [];
   }
 
   async findByUser(userId: string, limit: number = 50): Promise<Notification[]> {
-    const results = await query<Notification[]>(
-      'SELECT * FROM notification WHERE "userId" = $1 ORDER BY "createdAt" DESC LIMIT $2',
-      [userId, limit]
-    );
+    const results = await query<Notification[]>('SELECT * FROM notification WHERE "userId" = $1 ORDER BY "createdAt" DESC LIMIT $2', [
+      userId,
+      limit,
+    ]);
     return results || [];
   }
 
   async findUnreadByUser(userId: string): Promise<Notification[]> {
     const results = await query<Notification[]>(
       'SELECT * FROM notification WHERE "userId" = $1 AND "isRead" = false ORDER BY "createdAt" DESC',
-      [userId]
+      [userId],
     );
     return results || [];
   }
 
   async findByUserAndType(userId: string, type: string): Promise<Notification[]> {
-    const results = await query<Notification[]>(
-      'SELECT * FROM notification WHERE "userId" = $1 AND type = $2 ORDER BY "createdAt" DESC',
-      [userId, type]
-    );
+    const results = await query<Notification[]>('SELECT * FROM notification WHERE "userId" = $1 AND type = $2 ORDER BY "createdAt" DESC', [
+      userId,
+      type,
+    ]);
     return results || [];
   }
 
@@ -84,8 +78,8 @@ export class NotificationRepo {
         params.data ? JSON.stringify(params.data) : null,
         params.metadata ? JSON.stringify(params.metadata) : null,
         now,
-        now
-      ]
+        now,
+      ],
     );
 
     if (!result) {
@@ -122,7 +116,7 @@ export class NotificationRepo {
 
     const result = await queryOne<Notification>(
       `UPDATE notification SET ${updateFields.join(', ')} WHERE "notificationId" = $${paramIndex} RETURNING *`,
-      values
+      values,
     );
 
     return result;
@@ -132,7 +126,7 @@ export class NotificationRepo {
     const now = new Date();
     return await queryOne<Notification>(
       'UPDATE notification SET "isRead" = true, "readAt" = $1, "updatedAt" = $2 WHERE "notificationId" = $3 RETURNING *',
-      [now, now, notificationId]
+      [now, now, notificationId],
     );
   }
 
@@ -140,39 +134,39 @@ export class NotificationRepo {
     const now = new Date();
     const result = await query<{ notificationId: string }[]>(
       'UPDATE notification SET "isRead" = true, "readAt" = $1, "updatedAt" = $2 WHERE "userId" = $3 AND "isRead" = false RETURNING "notificationId"',
-      [now, now, userId]
+      [now, now, userId],
     );
     return result ? result.length : 0;
   }
 
   async markAsSent(notificationId: string): Promise<Notification | null> {
     const now = new Date();
-    return await queryOne<Notification>(
-      'UPDATE notification SET "sentAt" = $1, "updatedAt" = $2 WHERE "notificationId" = $3 RETURNING *',
-      [now, now, notificationId]
-    );
+    return await queryOne<Notification>('UPDATE notification SET "sentAt" = $1, "updatedAt" = $2 WHERE "notificationId" = $3 RETURNING *', [
+      now,
+      now,
+      notificationId,
+    ]);
   }
 
   async delete(notificationId: string): Promise<boolean> {
     const result = await queryOne<{ notificationId: string }>(
       'DELETE FROM notification WHERE "notificationId" = $1 RETURNING "notificationId"',
-      [notificationId]
+      [notificationId],
     );
     return !!result;
   }
 
   async deleteAllForUser(userId: string): Promise<number> {
-    const result = await query<{ notificationId: string }[]>(
-      'DELETE FROM notification WHERE "userId" = $1 RETURNING "notificationId"',
-      [userId]
-    );
+    const result = await query<{ notificationId: string }[]>('DELETE FROM notification WHERE "userId" = $1 RETURNING "notificationId"', [
+      userId,
+    ]);
     return result ? result.length : 0;
   }
 
   async countUnread(userId: string): Promise<number> {
     const result = await queryOne<{ count: string }>(
       'SELECT COUNT(*) as count FROM notification WHERE "userId" = $1 AND "isRead" = false',
-      [userId]
+      [userId],
     );
     return result ? parseInt(result.count, 10) : 0;
   }

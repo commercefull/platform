@@ -1,7 +1,7 @@
 import { query, queryOne } from '../../../libs/db';
 import { unixTimestamp } from '../../../libs/date';
 
-export type NotificationType = 
+export type NotificationType =
   | 'account_registration'
   | 'password_reset'
   | 'email_verification'
@@ -44,37 +44,34 @@ export interface NotificationTemplate {
 }
 
 export type NotificationTemplateCreateParams = Omit<NotificationTemplate, 'notificationTemplateId' | 'createdAt' | 'updatedAt'>;
-export type NotificationTemplateUpdateParams = Partial<Omit<NotificationTemplate, 'notificationTemplateId' | 'code' | 'createdAt' | 'updatedAt'>>;
+export type NotificationTemplateUpdateParams = Partial<
+  Omit<NotificationTemplate, 'notificationTemplateId' | 'code' | 'createdAt' | 'updatedAt'>
+>;
 
 export class NotificationTemplateRepo {
   /**
    * Find template by ID
    */
   async findById(notificationTemplateId: string): Promise<NotificationTemplate | null> {
-    return await queryOne<NotificationTemplate>(
-      `SELECT * FROM "public"."notificationTemplate" WHERE "notificationTemplateId" = $1`,
-      [notificationTemplateId]
-    );
+    return await queryOne<NotificationTemplate>(`SELECT * FROM "public"."notificationTemplate" WHERE "notificationTemplateId" = $1`, [
+      notificationTemplateId,
+    ]);
   }
 
   /**
    * Find template by code
    */
   async findByCode(code: string): Promise<NotificationTemplate | null> {
-    return await queryOne<NotificationTemplate>(
-      `SELECT * FROM "public"."notificationTemplate" WHERE "code" = $1`,
-      [code]
-    );
+    return await queryOne<NotificationTemplate>(`SELECT * FROM "public"."notificationTemplate" WHERE "code" = $1`, [code]);
   }
 
   /**
    * Find template by type
    */
   async findByType(type: NotificationType): Promise<NotificationTemplate | null> {
-    return await queryOne<NotificationTemplate>(
-      `SELECT * FROM "public"."notificationTemplate" WHERE "type" = $1 AND "isActive" = true`,
-      [type]
-    );
+    return await queryOne<NotificationTemplate>(`SELECT * FROM "public"."notificationTemplate" WHERE "type" = $1 AND "isActive" = true`, [
+      type,
+    ]);
   }
 
   /**
@@ -82,13 +79,13 @@ export class NotificationTemplateRepo {
    */
   async findAll(activeOnly: boolean = false): Promise<NotificationTemplate[]> {
     let sql = `SELECT * FROM "public"."notificationTemplate"`;
-    
+
     if (activeOnly) {
       sql += ` WHERE "isActive" = true`;
     }
-    
+
     sql += ` ORDER BY "name" ASC`;
-    
+
     const results = await query<NotificationTemplate[]>(sql);
     return results || [];
   }
@@ -99,13 +96,13 @@ export class NotificationTemplateRepo {
   async findByCategory(categoryCode: string, activeOnly: boolean = true): Promise<NotificationTemplate[]> {
     let sql = `SELECT * FROM "public"."notificationTemplate" WHERE "categoryCode" = $1`;
     const params: any[] = [categoryCode];
-    
+
     if (activeOnly) {
       sql += ` AND "isActive" = true`;
     }
-    
+
     sql += ` ORDER BY "name" ASC`;
-    
+
     const results = await query<NotificationTemplate[]>(sql, params);
     return results || [];
   }
@@ -116,13 +113,13 @@ export class NotificationTemplateRepo {
   async findByChannel(channel: NotificationChannel, activeOnly: boolean = true): Promise<NotificationTemplate[]> {
     let sql = `SELECT * FROM "public"."notificationTemplate" WHERE "supportedChannels" = $1`;
     const params: any[] = [channel];
-    
+
     if (activeOnly) {
       sql += ` AND "isActive" = true`;
     }
-    
+
     sql += ` ORDER BY "name" ASC`;
-    
+
     const results = await query<NotificationTemplate[]>(sql, params);
     return results || [];
   }
@@ -167,8 +164,8 @@ export class NotificationTemplateRepo {
         params.previewData ? JSON.stringify(params.previewData) : null,
         params.createdBy || null,
         now,
-        now
-      ]
+        now,
+      ],
     );
 
     if (!result) {
@@ -207,7 +204,7 @@ export class NotificationTemplateRepo {
        SET ${updateFields.join(', ')}
        WHERE "notificationTemplateId" = $${paramIndex}
        RETURNING *`,
-      values
+      values,
     );
 
     return result;
@@ -224,7 +221,7 @@ export class NotificationTemplateRepo {
       textTemplate?: string;
       pushTemplate?: string;
       smsTemplate?: string;
-    }
+    },
   ): Promise<NotificationTemplate | null> {
     return this.update(notificationTemplateId, content);
   }
@@ -248,7 +245,7 @@ export class NotificationTemplateRepo {
    */
   async clone(notificationTemplateId: string, newCode: string, newName: string): Promise<NotificationTemplate> {
     const original = await this.findById(notificationTemplateId);
-    
+
     if (!original) {
       throw new Error(`Template with ID '${notificationTemplateId}' not found`);
     }
@@ -269,7 +266,7 @@ export class NotificationTemplateRepo {
       isActive: false, // Cloned templates are inactive by default
       categoryCode: original.categoryCode,
       previewData: original.previewData,
-      createdBy: original.createdBy
+      createdBy: original.createdBy,
     };
 
     return this.create(cloneParams);
@@ -281,7 +278,7 @@ export class NotificationTemplateRepo {
   async delete(notificationTemplateId: string): Promise<boolean> {
     const result = await queryOne<{ notificationTemplateId: string }>(
       `DELETE FROM "public"."notificationTemplate" WHERE "notificationTemplateId" = $1 RETURNING "notificationTemplateId"`,
-      [notificationTemplateId]
+      [notificationTemplateId],
     );
 
     return !!result;
@@ -292,11 +289,11 @@ export class NotificationTemplateRepo {
    */
   async count(activeOnly: boolean = false): Promise<number> {
     let sql = `SELECT COUNT(*) as count FROM "public"."notificationTemplate"`;
-    
+
     if (activeOnly) {
       sql += ` WHERE "isActive" = true`;
     }
-    
+
     const result = await queryOne<{ count: string }>(sql);
 
     return result ? parseInt(result.count, 10) : 0;
@@ -309,13 +306,13 @@ export class NotificationTemplateRepo {
     let sql = `SELECT * FROM "public"."notificationTemplate" 
                WHERE ("name" ILIKE $1 OR "description" ILIKE $1)`;
     const params: any[] = [`%${searchTerm}%`];
-    
+
     if (activeOnly) {
       sql += ` AND "isActive" = true`;
     }
-    
+
     sql += ` ORDER BY "name" ASC`;
-    
+
     const results = await query<NotificationTemplate[]>(sql, params);
     return results || [];
   }
@@ -323,7 +320,10 @@ export class NotificationTemplateRepo {
   /**
    * Get template with compiled preview
    */
-  async getPreview(notificationTemplateId: string, data?: Record<string, any>): Promise<{
+  async getPreview(
+    notificationTemplateId: string,
+    data?: Record<string, any>,
+  ): Promise<{
     template: NotificationTemplate;
     compiledHtml?: string;
     compiledText?: string;
@@ -331,7 +331,7 @@ export class NotificationTemplateRepo {
     compiledSms?: string;
   }> {
     const template = await this.findById(notificationTemplateId);
-    
+
     if (!template) {
       throw new Error(`Template with ID '${notificationTemplateId}' not found`);
     }
@@ -341,7 +341,7 @@ export class NotificationTemplateRepo {
     // Simple template variable replacement ({{variable}})
     const compile = (text?: string): string | undefined => {
       if (!text) return undefined;
-      
+
       return text.replace(/\{\{(\w+)\}\}/g, (match, key) => {
         return previewData[key] !== undefined ? String(previewData[key]) : match;
       });
@@ -352,7 +352,7 @@ export class NotificationTemplateRepo {
       compiledHtml: compile(template.htmlTemplate),
       compiledText: compile(template.textTemplate),
       compiledPush: compile(template.pushTemplate),
-      compiledSms: compile(template.smsTemplate)
+      compiledSms: compile(template.smsTemplate),
     };
   }
 }

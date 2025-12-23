@@ -15,7 +15,7 @@ import { eventBus } from '../../../../libs/events/eventBus';
 export class ApplyCouponCommand {
   constructor(
     public readonly checkoutId: string,
-    public readonly couponCode: string
+    public readonly couponCode: string,
   ) {}
 }
 
@@ -34,10 +34,7 @@ export class ApplyCouponUseCase {
 
     // TODO: Validate coupon code against coupon service
     // For now, apply a 10% discount as placeholder
-    const discountAmount = Money.create(
-      session.subtotal.amount * 0.1,
-      session.subtotal.currency
-    );
+    const discountAmount = Money.create(session.subtotal.amount * 0.1, session.subtotal.currency);
 
     session.applyCoupon(command.couponCode, discountAmount);
     await this.checkoutRepository.save(session);
@@ -46,7 +43,7 @@ export class ApplyCouponUseCase {
       checkoutId: session.id,
       field: 'coupon',
       couponCode: command.couponCode,
-      discountAmount: discountAmount.amount
+      discountAmount: discountAmount.amount,
     });
 
     return mapCheckoutToResponse(session);

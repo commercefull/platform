@@ -2,7 +2,7 @@
  * Seed product types for dynamic product attribution
  * @param { import('knex').Knex } knex
  */
-exports.seed = async function(knex) {
+exports.seed = async function (knex) {
   // Define product types that support different product configurations
   const productTypes = [
     {
@@ -32,13 +32,10 @@ exports.seed = async function(knex) {
     {
       name: 'Subscription Product',
       slug: 'subscription',
-    }
+    },
   ];
 
   for (const productType of productTypes) {
-    await knex('productType')
-      .insert(productType)
-      .onConflict('slug')
-      .merge();
+    await knex('productType').insert(productType).onConflict('slug').merge();
   }
 };

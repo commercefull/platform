@@ -27,14 +27,7 @@ export class OrderCreatedEvent implements DomainEvent {
     currency: string;
   };
 
-  constructor(
-    orderId: string,
-    orderNumber: string,
-    totalAmount: number,
-    currency: string,
-    customerId?: string,
-    basketId?: string
-  ) {
+  constructor(orderId: string, orderNumber: string, totalAmount: number, currency: string, customerId?: string, basketId?: string) {
     this.occurredAt = new Date();
     this.aggregateId = orderId;
     this.payload = { orderId, orderNumber, customerId, basketId, totalAmount, currency };
@@ -53,13 +46,7 @@ export class OrderStatusChangedEvent implements DomainEvent {
     reason?: string;
   };
 
-  constructor(
-    orderId: string,
-    orderNumber: string,
-    previousStatus: OrderStatus,
-    newStatus: OrderStatus,
-    reason?: string
-  ) {
+  constructor(orderId: string, orderNumber: string, previousStatus: OrderStatus, newStatus: OrderStatus, reason?: string) {
     this.occurredAt = new Date();
     this.aggregateId = orderId;
     this.payload = { orderId, orderNumber, previousStatus, newStatus, reason };
@@ -78,13 +65,7 @@ export class OrderPaymentStatusChangedEvent implements DomainEvent {
     transactionId?: string;
   };
 
-  constructor(
-    orderId: string,
-    orderNumber: string,
-    previousStatus: PaymentStatus,
-    newStatus: PaymentStatus,
-    transactionId?: string
-  ) {
+  constructor(orderId: string, orderNumber: string, previousStatus: PaymentStatus, newStatus: PaymentStatus, transactionId?: string) {
     this.occurredAt = new Date();
     this.aggregateId = orderId;
     this.payload = { orderId, orderNumber, previousStatus, newStatus, transactionId };
@@ -102,12 +83,7 @@ export class OrderFulfillmentStatusChangedEvent implements DomainEvent {
     newStatus: FulfillmentStatus;
   };
 
-  constructor(
-    orderId: string,
-    orderNumber: string,
-    previousStatus: FulfillmentStatus,
-    newStatus: FulfillmentStatus
-  ) {
+  constructor(orderId: string, orderNumber: string, previousStatus: FulfillmentStatus, newStatus: FulfillmentStatus) {
     this.occurredAt = new Date();
     this.aggregateId = orderId;
     this.payload = { orderId, orderNumber, previousStatus, newStatus };
@@ -126,13 +102,7 @@ export class OrderCancelledEvent implements DomainEvent {
     refundAmount?: number;
   };
 
-  constructor(
-    orderId: string,
-    orderNumber: string,
-    customerId?: string,
-    reason?: string,
-    refundAmount?: number
-  ) {
+  constructor(orderId: string, orderNumber: string, customerId?: string, reason?: string, refundAmount?: number) {
     this.occurredAt = new Date();
     this.aggregateId = orderId;
     this.payload = { orderId, orderNumber, customerId, reason, refundAmount };
@@ -152,14 +122,7 @@ export class OrderRefundedEvent implements DomainEvent {
     isFullRefund: boolean;
   };
 
-  constructor(
-    orderId: string,
-    orderNumber: string,
-    refundAmount: number,
-    reason: string,
-    isFullRefund: boolean,
-    customerId?: string
-  ) {
+  constructor(orderId: string, orderNumber: string, refundAmount: number, reason: string, isFullRefund: boolean, customerId?: string) {
     this.occurredAt = new Date();
     this.aggregateId = orderId;
     this.payload = { orderId, orderNumber, customerId, refundAmount, reason, isFullRefund };
@@ -185,7 +148,7 @@ export class OrderShippedEvent implements DomainEvent {
     customerId?: string,
     trackingNumber?: string,
     carrier?: string,
-    estimatedDeliveryDate?: Date
+    estimatedDeliveryDate?: Date,
   ) {
     this.occurredAt = new Date();
     this.aggregateId = orderId;
@@ -195,7 +158,7 @@ export class OrderShippedEvent implements DomainEvent {
       customerId,
       trackingNumber,
       carrier,
-      estimatedDeliveryDate: estimatedDeliveryDate?.toISOString()
+      estimatedDeliveryDate: estimatedDeliveryDate?.toISOString(),
     };
   }
 }
@@ -218,7 +181,7 @@ export class OrderDeliveredEvent implements DomainEvent {
       orderId,
       orderNumber,
       customerId,
-      deliveredAt: new Date().toISOString()
+      deliveredAt: new Date().toISOString(),
     };
   }
 }
@@ -243,7 +206,7 @@ export class OrderCompletedEvent implements DomainEvent {
       orderNumber,
       customerId,
       totalAmount,
-      completedAt: new Date().toISOString()
+      completedAt: new Date().toISOString(),
     };
   }
 }
@@ -261,14 +224,7 @@ export class OrderItemAddedEvent implements DomainEvent {
     unitPrice: number;
   };
 
-  constructor(
-    orderId: string,
-    orderItemId: string,
-    productId: string,
-    quantity: number,
-    unitPrice: number,
-    productVariantId?: string
-  ) {
+  constructor(orderId: string, orderItemId: string, productId: string, quantity: number, unitPrice: number, productVariantId?: string) {
     this.occurredAt = new Date();
     this.aggregateId = orderId;
     this.payload = { orderId, orderItemId, productId, productVariantId, quantity, unitPrice };

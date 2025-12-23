@@ -5,6 +5,7 @@ Deploy CommerceFull platform to Amazon Web Services using ECS (Elastic Container
 ## Overview
 
 This deployment strategy uses AWS managed services for maximum scalability and reliability:
+
 - Amazon ECS (container orchestration)
 - Amazon RDS PostgreSQL 18 (managed database)
 - Amazon ECR (container registry)
@@ -18,12 +19,14 @@ This deployment strategy uses AWS managed services for maximum scalability and r
 ## Prerequisites
 
 ### AWS Account
+
 - AWS account with billing enabled
 - AWS CLI installed and configured
 - IAM user with appropriate permissions
 - Route 53 hosted zone (for DNS)
 
 ### Local Machine
+
 - Docker and Docker Compose
 - AWS CLI (`aws`)
 - AWS CDK CLI (`cdk`)
@@ -31,12 +34,14 @@ This deployment strategy uses AWS managed services for maximum scalability and r
 - Git
 
 ### DNS
+
 - Domain name registered in Route 53
 - SSL certificate via AWS Certificate Manager
 
 ## Quick Start
 
 ### 1. Setup AWS Environment
+
 ```bash
 # Configure AWS CLI
 aws configure
@@ -53,6 +58,7 @@ cdk bootstrap aws://$(aws sts get-caller-identity --query Account --output text)
 ```
 
 ### 2. Deploy Infrastructure
+
 ```bash
 cd infra/ecs-aws
 
@@ -70,6 +76,7 @@ cdk deploy CommerceFull-App --require-approval never --outputs-file outputs.json
 ```
 
 ### 3. Deploy Application
+
 ```bash
 # Build and push Docker image
 aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $(aws sts get-caller-identity --query Account --output text).dkr.ecr.$AWS_REGION.amazonaws.com
@@ -227,9 +234,10 @@ ecs-aws/
 ### 1. Infrastructure Components
 
 #### VPC and Networking
+
 ```typescript
 const vpc = new ec2.Vpc(this, 'CommerceFullVPC', {
-  maxAzs: 3,  // Multi-AZ for high availability
+  maxAzs: 3, // Multi-AZ for high availability
   subnetConfiguration: [
     {
       name: 'Public',
@@ -251,18 +259,16 @@ const vpc = new ec2.Vpc(this, 'CommerceFullVPC', {
 ```
 
 #### RDS PostgreSQL Database
+
 ```typescript
 const database = new rds.DatabaseInstance(this, 'CommerceFullDB', {
   engine: rds.DatabaseInstanceEngine.postgres({
-    version: rds.PostgresEngineVersion.VER_15
+    version: rds.PostgresEngineVersion.VER_15,
   }),
-  instanceType: ec2.InstanceType.of(
-    ec2.InstanceClass.BURSTABLE3,
-    ec2.InstanceSize.MICRO
-  ),
+  instanceType: ec2.InstanceType.of(ec2.InstanceClass.BURSTABLE3, ec2.InstanceSize.MICRO),
   vpc,
   vpcSubnets: {
-    subnetType: ec2.SubnetType.PRIVATE_ISOLATED
+    subnetType: ec2.SubnetType.PRIVATE_ISOLATED,
   },
   multiAz: true,
   allocatedStorage: 20,
@@ -275,6 +281,7 @@ const database = new rds.DatabaseInstance(this, 'CommerceFullDB', {
 ```
 
 #### ECS Cluster and Service
+
 ```typescript
 const cluster = new ecs.Cluster(this, 'CommerceFullCluster', {
   vpc,
@@ -316,6 +323,7 @@ const service = new ecs.FargateService(this, 'CommerceFullService', {
 ```
 
 #### Application Load Balancer
+
 ```typescript
 const loadBalancer = new elbv2.ApplicationLoadBalancer(this, 'CommerceFullALB', {
   vpc,
@@ -344,10 +352,12 @@ const httpsListener = loadBalancer.addListener('HTTPSListener', {
 
 httpsListener.addTargets('CommerceFullTargets', {
   port: 80,
-  targets: [service.loadBalancerTarget({
-    containerName: 'CommerceFullContainer',
-    containerPort: 3000,
-  })],
+  targets: [
+    service.loadBalancerTarget({
+      containerName: 'CommerceFullContainer',
+      containerPort: 3000,
+    }),
+  ],
   healthCheck: {
     path: '/health',
     interval: Duration.seconds(30),
@@ -361,6 +371,7 @@ httpsListener.addTargets('CommerceFullTargets', {
 ### 2. Application Container
 
 #### Dockerfile
+
 ```dockerfile
 FROM node:18-alpine
 
@@ -402,59 +413,61 @@ CMD ["npm", "start"]
 ### 3. CI/CD Pipeline
 
 #### GitHub Actions Example
+
 ```yaml
 name: Deploy to AWS
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v2
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-east-1
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
 
-    - name: Login to Amazon ECR
-      id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v1
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
 
-    - name: Build and push Docker image
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: commercefull
-      run: |
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_SHA .
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_SHA
-        echo "IMAGE_URI=$ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_SHA" >> $GITHUB_ENV
+      - name: Build and push Docker image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: commercefull
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_SHA .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_SHA
+          echo "IMAGE_URI=$ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_SHA" >> $GITHUB_ENV
 
-    - name: Update ECS service
-      run: |
-        aws ecs update-service \
-          --cluster commercefull-cluster \
-          --service commercefull-service \
-          --force-new-deployment \
-          --task-definition $(aws ecs describe-task-definition --task-definition commercefull-app --query 'taskDefinition.taskDefinitionArn' --output text)
+      - name: Update ECS service
+        run: |
+          aws ecs update-service \
+            --cluster commercefull-cluster \
+            --service commercefull-service \
+            --force-new-deployment \
+            --task-definition $(aws ecs describe-task-definition --task-definition commercefull-app --query 'taskDefinition.taskDefinitionArn' --output text)
 
-    - name: Wait for deployment
-      run: |
-        aws ecs wait services-stable \
-          --cluster commercefull-cluster \
-          --services commercefull-service
+      - name: Wait for deployment
+        run: |
+          aws ecs wait services-stable \
+            --cluster commercefull-cluster \
+            --services commercefull-service
 ```
 
 ## Deployment
 
 ### Automated Deployment
+
 ```bash
 # Push to main branch
 git add .
@@ -465,6 +478,7 @@ git push origin main
 ```
 
 ### Manual Deployment
+
 ```bash
 # Build and push Docker image
 aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
@@ -489,6 +503,7 @@ aws ecs describe-services \
 ## Monitoring & Maintenance
 
 ### CloudWatch Monitoring
+
 ```bash
 # View ECS service metrics
 aws cloudwatch get-metric-statistics \
@@ -515,6 +530,7 @@ aws cloudwatch put-metric-alarm \
 ```
 
 ### RDS Management
+
 ```bash
 # Create database backup
 aws rds create-db-snapshot \
@@ -534,6 +550,7 @@ aws rds describe-db-instances \
 ```
 
 ### Scaling
+
 ```bash
 # Scale ECS service
 aws ecs update-service \
@@ -561,6 +578,7 @@ aws application-autoscaling put-scaling-policy \
 ## Security
 
 ### AWS Systems Manager Parameter Store
+
 ```bash
 # Store secrets
 aws ssm put-parameter \
@@ -577,6 +595,7 @@ aws ssm get-parameter \
 ```
 
 ### Network Security
+
 - Security groups restrict access to necessary ports only
 - RDS in private subnets, accessible only from ECS tasks
 - AWS WAF provides application-level protection
@@ -584,26 +603,19 @@ aws ssm get-parameter \
 - VPC endpoints for AWS service access
 
 ### IAM Roles and Policies
+
 ```json
 {
   "Version": "2012-10-17",
   "Statement": [
     {
       "Effect": "Allow",
-      "Action": [
-        "ssm:GetParameter",
-        "ssm:GetParameters",
-        "ssm:GetParametersByPath"
-      ],
+      "Action": ["ssm:GetParameter", "ssm:GetParameters", "ssm:GetParametersByPath"],
       "Resource": "arn:aws:ssm:us-east-1:123456789012:parameter/commercefull/prod/*"
     },
     {
       "Effect": "Allow",
-      "Action": [
-        "s3:GetObject",
-        "s3:PutObject",
-        "s3:DeleteObject"
-      ],
+      "Action": ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"],
       "Resource": "arn:aws:s3:::commercefull-media/*"
     }
   ]
@@ -613,6 +625,7 @@ aws ssm get-parameter \
 ## Cost Optimization
 
 ### AWS Pricing Calculator
+
 - ECS Fargate: $0.04048 per vCPU-hour + $0.004445 per GB-hour
 - RDS PostgreSQL: $0.018/hour for db.t3.micro
 - Application Load Balancer: $0.0225/hour + $0.008/hour per LCU
@@ -620,6 +633,7 @@ aws ssm get-parameter \
 - S3: $0.023/GB/month
 
 ### Cost Management
+
 ```bash
 # Set up billing alerts
 aws budgets create-budget \
@@ -641,6 +655,7 @@ aws ce get-cost-and-usage \
 ### Common Issues
 
 #### ECS Deployment Failures
+
 ```bash
 # Check service events
 aws ecs describe-services \
@@ -659,6 +674,7 @@ aws logs get-log-events \
 ```
 
 #### Database Connection Issues
+
 ```bash
 # Check RDS status
 aws rds describe-db-instances \
@@ -675,6 +691,7 @@ aws ecs execute-command \
 ```
 
 #### Load Balancer Issues
+
 ```bash
 # Check ALB health
 aws elbv2 describe-target-health \
@@ -687,6 +704,7 @@ aws s3 cp s3://commercefull-alb-logs/2024/01/01/ access.log - | head -20
 ## Migration
 
 ### From Other Platforms to AWS
+
 ```bash
 # Export database from source
 pg_dump source_db > backup.sql
@@ -710,6 +728,7 @@ aws rds failover-db-cluster --db-cluster-identifier commercefull-cluster
 ```
 
 ### Blue-Green Deployments
+
 ```bash
 # Create new task definition with updated image
 aws ecs register-task-definition --cli-input-json file://task-definition-v2.json
@@ -737,6 +756,7 @@ aws ecs update-service \
 ## Performance
 
 ### Optimization Strategies
+
 - Use AWS Global Accelerator for global performance
 - Implement CloudFront caching for static assets
 - Use RDS read replicas for read-heavy workloads
@@ -744,6 +764,7 @@ aws ecs update-service \
 - Use AWS WAF for application-level optimization
 
 ### Monitoring Dashboard
+
 ```bash
 # Create CloudWatch dashboard
 aws cloudwatch put-dashboard \

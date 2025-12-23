@@ -8,7 +8,7 @@ const tableName = 'systemConfiguration';
 // Use fixed UUIDs for test configurations
 const TEST_CONFIG_IDS = {
   SINGLE_STORE: '00000000-0000-0000-0000-000000000001',
-  MARKETPLACE: '00000000-0000-0000-0000-000000000002'
+  MARKETPLACE: '00000000-0000-0000-0000-000000000002',
 };
 
 exports.seed = async function (knex) {
@@ -35,14 +35,14 @@ exports.seed = async function (knex) {
         enableWishlist: true,
         enableProductReviews: true,
         enableStoreLocator: false,
-        enableB2B: false
+        enableB2B: false,
       }),
       businessSettings: JSON.stringify({
         defaultBusinessType: 'single_store',
         allowBusinessTypeChanges: false,
         maxStoresPerBusiness: 1,
         maxWarehousesPerBusiness: 1,
-        maxMerchantsInMarketplace: 0
+        maxMerchantsInMarketplace: 0,
       }),
       platformSettings: JSON.stringify({
         platformName: 'Test Platform',
@@ -53,8 +53,8 @@ exports.seed = async function (knex) {
         timezone: 'UTC',
         commissionStructure: {
           defaultCommissionRate: 0,
-          commissionType: 'percentage'
-        }
+          commissionType: 'percentage',
+        },
       }),
       securitySettings: JSON.stringify({
         enableTwoFactorAuth: false,
@@ -63,10 +63,10 @@ exports.seed = async function (knex) {
           requireUppercase: true,
           requireLowercase: true,
           requireNumbers: true,
-          requireSpecialChars: false
+          requireSpecialChars: false,
         },
         sessionTimeout: 480,
-        maxLoginAttempts: 5
+        maxLoginAttempts: 5,
       }),
       notificationSettings: JSON.stringify({
         emailEnabled: true,
@@ -76,18 +76,18 @@ exports.seed = async function (knex) {
           orderConfirmation: true,
           shippingUpdate: true,
           passwordReset: true,
-          accountVerification: true
-        }
+          accountVerification: true,
+        },
       }),
       integrationSettings: JSON.stringify({
         paymentGateways: ['stripe'],
         shippingProviders: ['fedex', 'ups', 'usps'],
         analyticsProviders: ['google_analytics'],
-        emailProviders: ['sendgrid']
+        emailProviders: ['sendgrid'],
       }),
       isActive: true,
       createdAt: knex.fn.now(),
-      updatedAt: knex.fn.now()
+      updatedAt: knex.fn.now(),
     },
     {
       configId: TEST_CONFIG_IDS.MARKETPLACE,
@@ -107,14 +107,14 @@ exports.seed = async function (knex) {
         enableWishlist: true,
         enableProductReviews: true,
         enableStoreLocator: false,
-        enableB2B: true
+        enableB2B: true,
       }),
       businessSettings: JSON.stringify({
         defaultBusinessType: 'marketplace',
         allowBusinessTypeChanges: true,
         maxStoresPerBusiness: 1,
         maxWarehousesPerBusiness: 5,
-        maxMerchantsInMarketplace: 1000
+        maxMerchantsInMarketplace: 1000,
       }),
       platformSettings: JSON.stringify({
         platformName: 'Marketplace Platform',
@@ -125,8 +125,8 @@ exports.seed = async function (knex) {
         timezone: 'Europe/London',
         commissionStructure: {
           defaultCommissionRate: 15,
-          commissionType: 'percentage'
-        }
+          commissionType: 'percentage',
+        },
       }),
       securitySettings: JSON.stringify({
         enableTwoFactorAuth: true,
@@ -135,10 +135,10 @@ exports.seed = async function (knex) {
           requireUppercase: true,
           requireLowercase: true,
           requireNumbers: true,
-          requireSpecialChars: true
+          requireSpecialChars: true,
         },
         sessionTimeout: 240,
-        maxLoginAttempts: 3
+        maxLoginAttempts: 3,
       }),
       notificationSettings: JSON.stringify({
         emailEnabled: true,
@@ -148,18 +148,18 @@ exports.seed = async function (knex) {
           orderConfirmation: true,
           shippingUpdate: true,
           passwordReset: true,
-          accountVerification: true
-        }
+          accountVerification: true,
+        },
       }),
       integrationSettings: JSON.stringify({
         paymentGateways: ['stripe', 'paypal'],
         shippingProviders: ['fedex', 'ups', 'usps', 'dhl'],
         analyticsProviders: ['google_analytics', 'segment'],
-        emailProviders: ['sendgrid', 'mailgun']
+        emailProviders: ['sendgrid', 'mailgun'],
       }),
       isActive: true,
       createdAt: knex.fn.now(),
-      updatedAt: knex.fn.now()
-    }
+      updatedAt: knex.fn.now(),
+    },
   ]);
 };

@@ -1,7 +1,7 @@
 /**
  * VAT OSS Report Table
  * Tracks quarterly VAT OSS (One-Stop Shop) reports for EU cross-border sales
- * 
+ *
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
@@ -22,14 +22,16 @@ exports.up = function (knex) {
     t.integer('transactionCount').notNullable().defaultTo(0);
     // Report status
     t.enum('status', [
-      'draft',        // Being prepared
-      'ready',        // Ready for submission
-      'submitted',    // Submitted to tax authority
-      'accepted',     // Accepted by tax authority
-      'rejected',     // Rejected by tax authority
-      'amended',      // Amendment submitted
-      'paid'          // VAT paid
-    ]).notNullable().defaultTo('draft');
+      'draft', // Being prepared
+      'ready', // Ready for submission
+      'submitted', // Submitted to tax authority
+      'accepted', // Accepted by tax authority
+      'rejected', // Rejected by tax authority
+      'amended', // Amendment submitted
+      'paid', // VAT paid
+    ])
+      .notNullable()
+      .defaultTo('draft');
     // Submission details
     t.string('submissionReference', 100);
     t.timestamp('submittedAt');
@@ -46,7 +48,7 @@ exports.up = function (knex) {
     t.uuid('generatedBy');
     t.uuid('submittedBy');
     t.jsonb('metadata');
-    
+
     t.index('merchantId');
     t.index(['year', 'quarter']);
     t.index('status');

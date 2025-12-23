@@ -10,7 +10,7 @@ const TEST_STORE_IDS = {
   ACTIVE: '20000000-0000-0000-0000-000000000001',
   INACTIVE: '20000000-0000-0000-0000-000000000002',
   FEATURED: '20000000-0000-0000-0000-000000000003',
-  MERCHANT: '20000000-0000-0000-0000-000000000004'
+  MERCHANT: '20000000-0000-0000-0000-000000000004',
 };
 
 // Merchant ID (if needed)
@@ -20,7 +20,7 @@ const TEST_MERCHANT_ID = '40000000-0000-0000-0000-000000000001';
 const TEST_BUSINESS_IDS = {
   MULTI_STORE: '10000000-0000-0000-0000-000000000001',
   SINGLE_STORE: '10000000-0000-0000-0000-000000000002',
-  MARKETPLACE: '10000000-0000-0000-0000-000000000003'
+  MARKETPLACE: '10000000-0000-0000-0000-000000000003',
 };
 
 exports.seed = async function (knex) {
@@ -43,7 +43,7 @@ exports.seed = async function (knex) {
         city: 'Test City',
         state: 'TS',
         postalCode: '12345',
-        country: 'US'
+        country: 'US',
       }),
       theme: 'modern',
       primaryColor: '#FF6B6B',
@@ -57,12 +57,12 @@ exports.seed = async function (knex) {
         enableProductReviews: true,
         enableStoreLocator: false,
         inventoryDisplayMode: 'show_low_stock',
-        priceDisplayMode: 'exclusive_tax'
+        priceDisplayMode: 'exclusive_tax',
       }),
       storePolicies: JSON.stringify({
         returnPolicy: '30-day return policy for all items',
         shippingPolicy: 'Free shipping over $50',
-        privacyPolicy: 'We respect your privacy and data rights'
+        privacyPolicy: 'We respect your privacy and data rights',
       }),
       openingHours: JSON.stringify({
         monday: { open: '09:00', close: '17:00' },
@@ -70,12 +70,12 @@ exports.seed = async function (knex) {
         wednesday: { open: '09:00', close: '17:00' },
         thursday: { open: '09:00', close: '17:00' },
         friday: { open: '09:00', close: '17:00' },
-        saturday: { open: '10:00', close: '16:00' }
+        saturday: { open: '10:00', close: '16:00' },
       }),
       socialLinks: JSON.stringify({
         facebook: 'https://facebook.com/activeteststore',
         instagram: 'https://instagram.com/activeteststore',
-        twitter: 'https://twitter.com/activeteststore'
+        twitter: 'https://twitter.com/activeteststore',
       }),
       isActive: true,
       isVerified: true,
@@ -86,7 +86,7 @@ exports.seed = async function (knex) {
       productCount: 150,
       orderCount: 450,
       createdAt: knex.fn.now(),
-      updatedAt: knex.fn.now()
+      updatedAt: knex.fn.now(),
     },
     {
       storeId: TEST_STORE_IDS.INACTIVE,
@@ -103,7 +103,7 @@ exports.seed = async function (knex) {
         enableWishlist: false,
         enableProductReviews: false,
         inventoryDisplayMode: 'always_show',
-        priceDisplayMode: 'inclusive_tax'
+        priceDisplayMode: 'inclusive_tax',
       }),
       isActive: false,
       isVerified: false,
@@ -114,7 +114,7 @@ exports.seed = async function (knex) {
       productCount: 25,
       orderCount: 67,
       createdAt: knex.fn.now(),
-      updatedAt: knex.fn.now()
+      updatedAt: knex.fn.now(),
     },
     {
       storeId: TEST_STORE_IDS.FEATURED,
@@ -137,12 +137,12 @@ exports.seed = async function (knex) {
         enableProductReviews: true,
         enableStoreLocator: true,
         inventoryDisplayMode: 'hide_when_out',
-        priceDisplayMode: 'inclusive_tax'
+        priceDisplayMode: 'inclusive_tax',
       }),
       socialLinks: JSON.stringify({
         facebook: 'https://facebook.com/featuredteststore',
         instagram: 'https://instagram.com/featuredteststore',
-        linkedin: 'https://linkedin.com/company/featuredteststore'
+        linkedin: 'https://linkedin.com/company/featuredteststore',
       }),
       isActive: true,
       isVerified: true,
@@ -153,7 +153,7 @@ exports.seed = async function (knex) {
       productCount: 320,
       orderCount: 1200,
       createdAt: knex.fn.now(),
-      updatedAt: knex.fn.now()
+      updatedAt: knex.fn.now(),
     },
     {
       storeId: TEST_STORE_IDS.MERCHANT,
@@ -169,7 +169,7 @@ exports.seed = async function (knex) {
         enableWishlist: true,
         enableProductReviews: true,
         inventoryDisplayMode: 'show_low_stock',
-        priceDisplayMode: 'exclusive_tax'
+        priceDisplayMode: 'exclusive_tax',
       }),
       isActive: true,
       isVerified: true,
@@ -180,7 +180,7 @@ exports.seed = async function (knex) {
       productCount: 89,
       orderCount: 234,
       createdAt: knex.fn.now(),
-      updatedAt: knex.fn.now()
-    }
+      updatedAt: knex.fn.now(),
+    },
   ]);
 };

@@ -36,14 +36,28 @@ export interface OrderReturn {
   inspectionFailedItems?: Record<string, any>;
 }
 
-export type OrderReturnCreateParams = Omit<OrderReturn, 
+export type OrderReturnCreateParams = Omit<
+  OrderReturn,
   'orderReturnId' | 'createdAt' | 'updatedAt' | 'returnNumber' | 'requestedAt' | 'approvedAt' | 'receivedAt' | 'completedAt'
 >;
 
-export type OrderReturnUpdateParams = Partial<Pick<OrderReturn,
-  'status' | 'rmaNumber' | 'paymentRefundId' | 'returnShippingPaid' | 'returnShippingAmount' | 'returnShippingLabel' |
-  'returnTrackingNumber' | 'returnTrackingUrl' | 'customerNotes' | 'adminNotes' | 'inspectionPassedItems' | 'inspectionFailedItems'
->>;
+export type OrderReturnUpdateParams = Partial<
+  Pick<
+    OrderReturn,
+    | 'status'
+    | 'rmaNumber'
+    | 'paymentRefundId'
+    | 'returnShippingPaid'
+    | 'returnShippingAmount'
+    | 'returnShippingLabel'
+    | 'returnTrackingNumber'
+    | 'returnTrackingUrl'
+    | 'customerNotes'
+    | 'adminNotes'
+    | 'inspectionPassedItems'
+    | 'inspectionFailedItems'
+  >
+>;
 
 export class OrderReturnRepo {
   /**
@@ -59,20 +73,14 @@ export class OrderReturnRepo {
    * Find return by ID
    */
   async findById(orderReturnId: string): Promise<OrderReturn | null> {
-    return await queryOne<OrderReturn>(
-      `SELECT * FROM "public"."orderReturn" WHERE "orderReturnId" = $1`,
-      [orderReturnId]
-    );
+    return await queryOne<OrderReturn>(`SELECT * FROM "public"."orderReturn" WHERE "orderReturnId" = $1`, [orderReturnId]);
   }
 
   /**
    * Find return by return number
    */
   async findByReturnNumber(returnNumber: string): Promise<OrderReturn | null> {
-    return await queryOne<OrderReturn>(
-      `SELECT * FROM "public"."orderReturn" WHERE "returnNumber" = $1`,
-      [returnNumber]
-    );
+    return await queryOne<OrderReturn>(`SELECT * FROM "public"."orderReturn" WHERE "returnNumber" = $1`, [returnNumber]);
   }
 
   /**
@@ -83,7 +91,7 @@ export class OrderReturnRepo {
       `SELECT * FROM "public"."orderReturn" 
        WHERE "orderId" = $1 
        ORDER BY "createdAt" DESC`,
-      [orderId]
+      [orderId],
     );
     return results || [];
   }
@@ -97,7 +105,7 @@ export class OrderReturnRepo {
        WHERE "customerId" = $1 
        ORDER BY "createdAt" DESC 
        LIMIT $2 OFFSET $3`,
-      [customerId, limit, offset]
+      [customerId, limit, offset],
     );
     return results || [];
   }
@@ -111,7 +119,7 @@ export class OrderReturnRepo {
        WHERE "status" = $1 
        ORDER BY "createdAt" DESC 
        LIMIT $2 OFFSET $3`,
-      [status, limit, offset]
+      [status, limit, offset],
     );
     return results || [];
   }
@@ -125,7 +133,7 @@ export class OrderReturnRepo {
        WHERE "status" = 'requested' 
        ORDER BY "requestedAt" ASC 
        LIMIT $1`,
-      [limit]
+      [limit],
     );
     return results || [];
   }
@@ -139,7 +147,7 @@ export class OrderReturnRepo {
        WHERE "status" = 'inTransit' 
        ORDER BY "approvedAt" ASC 
        LIMIT $1`,
-      [limit]
+      [limit],
     );
     return results || [];
   }
@@ -153,7 +161,7 @@ export class OrderReturnRepo {
        WHERE "status" = 'received' AND "requiresInspection" = true 
        ORDER BY "receivedAt" ASC 
        LIMIT $1`,
-      [limit]
+      [limit],
     );
     return results || [];
   }
@@ -200,8 +208,8 @@ export class OrderReturnRepo {
         params.inspectionPassedItems ? JSON.stringify(params.inspectionPassedItems) : null,
         params.inspectionFailedItems ? JSON.stringify(params.inspectionFailedItems) : null,
         now,
-        now
-      ]
+        now,
+      ],
     );
 
     if (!result) {
@@ -240,7 +248,7 @@ export class OrderReturnRepo {
        SET ${updateFields.join(', ')}
        WHERE "orderReturnId" = $${paramIndex}
        RETURNING *`,
-      values
+      values,
     );
 
     return result;
@@ -285,7 +293,7 @@ export class OrderReturnRepo {
        SET ${updateFields.join(', ')}
        WHERE "orderReturnId" = $${paramIndex}
        RETURNING *`,
-      values
+      values,
     );
 
     return result;
@@ -297,7 +305,7 @@ export class OrderReturnRepo {
   async approve(orderReturnId: string, rmaNumber?: string): Promise<OrderReturn | null> {
     const updates: any = { status: 'approved' };
     if (rmaNumber) updates.rmaNumber = rmaNumber;
-    
+
     return this.updateStatus(orderReturnId, 'approved');
   }
 
@@ -307,7 +315,7 @@ export class OrderReturnRepo {
   async deny(orderReturnId: string, adminNotes?: string): Promise<OrderReturn | null> {
     const updates: any = { status: 'denied' };
     if (adminNotes) updates.adminNotes = adminNotes;
-    
+
     return this.update(orderReturnId, updates);
   }
 
@@ -318,7 +326,7 @@ export class OrderReturnRepo {
     const updates: any = { status: 'inTransit' };
     if (trackingNumber) updates.returnTrackingNumber = trackingNumber;
     if (trackingUrl) updates.returnTrackingUrl = trackingUrl;
-    
+
     return this.update(orderReturnId, updates);
   }
 
@@ -335,12 +343,12 @@ export class OrderReturnRepo {
   async completeInspection(
     orderReturnId: string,
     passedItems?: Record<string, any>,
-    failedItems?: Record<string, any>
+    failedItems?: Record<string, any>,
   ): Promise<OrderReturn | null> {
     return this.update(orderReturnId, {
       status: 'inspected',
       inspectionPassedItems: passedItems,
-      inspectionFailedItems: failedItems
+      inspectionFailedItems: failedItems,
     });
   }
 
@@ -357,7 +365,7 @@ export class OrderReturnRepo {
   async cancel(orderReturnId: string, reason?: string): Promise<OrderReturn | null> {
     const updates: any = { status: 'cancelled' };
     if (reason) updates.adminNotes = reason;
-    
+
     return this.update(orderReturnId, updates);
   }
 
@@ -368,14 +376,14 @@ export class OrderReturnRepo {
     orderReturnId: string,
     trackingNumber: string,
     trackingUrl?: string,
-    carrier?: ReturnCarrier
+    carrier?: ReturnCarrier,
   ): Promise<OrderReturn | null> {
     const updates: any = {
       returnTrackingNumber: trackingNumber,
-      returnTrackingUrl: trackingUrl
+      returnTrackingUrl: trackingUrl,
     };
     if (carrier) updates.returnCarrier = carrier;
-    
+
     return this.update(orderReturnId, updates);
   }
 
@@ -392,7 +400,7 @@ export class OrderReturnRepo {
   async delete(orderReturnId: string): Promise<boolean> {
     const result = await queryOne<{ orderReturnId: string }>(
       `DELETE FROM "public"."orderReturn" WHERE "orderReturnId" = $1 RETURNING "orderReturnId"`,
-      [orderReturnId]
+      [orderReturnId],
     );
 
     return !!result;
@@ -402,10 +410,7 @@ export class OrderReturnRepo {
    * Count returns by status
    */
   async countByStatus(status: OrderReturnStatus): Promise<number> {
-    const result = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM "public"."orderReturn" WHERE "status" = $1`,
-      [status]
-    );
+    const result = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "public"."orderReturn" WHERE "status" = $1`, [status]);
 
     return result ? parseInt(result.count, 10) : 0;
   }
@@ -414,10 +419,9 @@ export class OrderReturnRepo {
    * Count returns by customer
    */
   async countByCustomerId(customerId: string): Promise<number> {
-    const result = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM "public"."orderReturn" WHERE "customerId" = $1`,
-      [customerId]
-    );
+    const result = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "public"."orderReturn" WHERE "customerId" = $1`, [
+      customerId,
+    ]);
 
     return result ? parseInt(result.count, 10) : 0;
   }
@@ -438,7 +442,7 @@ export class OrderReturnRepo {
   }> {
     const results = await query<{ status: OrderReturnStatus; count: string }[]>(
       `SELECT "status", COUNT(*) as count FROM "public"."orderReturn" GROUP BY "status"`,
-      []
+      [],
     );
 
     const stats: Record<string, number> = {
@@ -450,7 +454,7 @@ export class OrderReturnRepo {
       received: 0,
       inspected: 0,
       completed: 0,
-      cancelled: 0
+      cancelled: 0,
     };
 
     if (results) {
@@ -469,14 +473,14 @@ export class OrderReturnRepo {
   async getStatisticsByType(): Promise<Record<OrderReturnType, number>> {
     const results = await query<{ returnType: OrderReturnType; count: string }[]>(
       `SELECT "returnType", COUNT(*) as count FROM "public"."orderReturn" GROUP BY "returnType"`,
-      []
+      [],
     );
 
     const stats: Record<string, number> = {
       refund: 0,
       exchange: 0,
       storeCredit: 0,
-      repair: 0
+      repair: 0,
     };
 
     if (results) {

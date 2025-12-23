@@ -14,7 +14,7 @@ export class GetShippingMethodsQuery {
   constructor(
     public readonly activeOnly: boolean = true,
     public readonly displayOnFrontend: boolean = false,
-    public readonly carrierId?: string
+    public readonly carrierId?: string,
   ) {}
 }
 
@@ -58,7 +58,7 @@ export class GetShippingMethodsUseCase {
         if (method.shippingCarrierId) {
           let carrier = carrierCache.get(method.shippingCarrierId);
           if (!carrier) {
-            carrier = await shippingCarrierRepo.findById(method.shippingCarrierId) || undefined;
+            carrier = (await shippingCarrierRepo.findById(method.shippingCarrierId)) || undefined;
             if (carrier) {
               carrierCache.set(method.shippingCarrierId, carrier);
             }
@@ -73,14 +73,14 @@ export class GetShippingMethodsUseCase {
         success: true,
         methods: methodsWithCarriers,
         total: methodsWithCarriers.length,
-        message: `Found ${methodsWithCarriers.length} shipping method(s)`
+        message: `Found ${methodsWithCarriers.length} shipping method(s)`,
       };
     } catch (error: any) {
       return {
         success: false,
         methods: [],
         total: 0,
-        message: error.message || 'Failed to retrieve shipping methods'
+        message: error.message || 'Failed to retrieve shipping methods',
       };
     }
   }

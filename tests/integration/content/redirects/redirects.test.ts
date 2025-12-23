@@ -7,14 +7,15 @@ import axios, { AxiosInstance } from 'axios';
 import { API_BASE, TEST_DATA } from '../testConstants';
 import { ADMIN_CREDENTIALS } from '../../testConstants';
 
-const createClient = (): AxiosInstance => axios.create({
-  baseURL: process.env.API_URL || 'http://localhost:3000',
-  validateStatus: () => true,
-  headers: {
-    'Accept': 'application/json',
-    'Content-Type': 'application/json'
-  }
-});
+const createClient = (): AxiosInstance =>
+  axios.create({
+    baseURL: process.env.API_URL || 'http://localhost:3000',
+    validateStatus: () => true,
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+  });
 
 describe('Content Redirects API', () => {
   let client: AxiosInstance;
@@ -23,7 +24,7 @@ describe('Content Redirects API', () => {
 
   beforeAll(async () => {
     client = createClient();
-    
+
     // Get auth token
     const loginResponse = await client.post('/business/auth/login', ADMIN_CREDENTIALS, { headers: { 'X-Test-Request': 'true' } });
     if (loginResponse.data.accessToken) {
@@ -70,7 +71,7 @@ describe('Content Redirects API', () => {
       const redirectData = {
         ...TEST_DATA.redirect,
         sourceUrl: `/old-page-${Date.now()}`,
-        targetUrl: `/new-page-${Date.now()}`
+        targetUrl: `/new-page-${Date.now()}`,
       };
 
       const response = await client.post(`${API_BASE}/redirects`, redirectData);
@@ -91,7 +92,7 @@ describe('Content Redirects API', () => {
         sourceUrl: `/temp-redirect-${Date.now()}`,
         targetUrl: `/destination-${Date.now()}`,
         statusCode: 302,
-        isActive: true
+        isActive: true,
       };
 
       const response = await client.post(`${API_BASE}/redirects`, redirectData);
@@ -110,7 +111,7 @@ describe('Content Redirects API', () => {
   describe('POST /content/redirects', () => {
     it('should return 400 if sourceUrl is missing', async () => {
       const response = await client.post(`${API_BASE}/redirects`, {
-        targetUrl: '/destination'
+        targetUrl: '/destination',
       });
 
       expect(response.status).toBe(400);
@@ -119,7 +120,7 @@ describe('Content Redirects API', () => {
 
     it('should return 400 if targetUrl is missing', async () => {
       const response = await client.post(`${API_BASE}/redirects`, {
-        sourceUrl: '/source'
+        sourceUrl: '/source',
       });
 
       expect(response.status).toBe(400);
@@ -152,7 +153,7 @@ describe('Content Redirects API', () => {
 
       const updateData = {
         targetUrl: '/updated-destination',
-        notes: 'Updated redirect notes'
+        notes: 'Updated redirect notes',
       };
 
       const response = await client.put(`${API_BASE}/redirects/${createdRedirectId}`, updateData);
@@ -166,7 +167,7 @@ describe('Content Redirects API', () => {
       if (!createdRedirectId) return;
 
       const response = await client.put(`${API_BASE}/redirects/${createdRedirectId}`, {
-        isActive: false
+        isActive: false,
       });
 
       expect(response.status).toBe(200);
@@ -178,7 +179,7 @@ describe('Content Redirects API', () => {
       if (!createdRedirectId) return;
 
       const response = await client.put(`${API_BASE}/redirects/${createdRedirectId}`, {
-        isActive: true
+        isActive: true,
       });
 
       expect(response.status).toBe(200);

@@ -4,12 +4,7 @@
  */
 
 import { query, queryOne } from '../../../libs/db';
-import { 
-  PaymentGateway,
-  PaymentMethodConfig,
-  PaymentTransaction,
-  PaymentRefund
-} from '../../../libs/db/types';
+import { PaymentGateway, PaymentMethodConfig, PaymentTransaction, PaymentRefund } from '../../../libs/db/types';
 
 // ============================================================================
 // Types
@@ -83,7 +78,7 @@ export class PaymentRepo {
       `SELECT * FROM "paymentGateway" 
        WHERE "merchantId" = $1 AND "deletedAt" IS NULL 
        ORDER BY "name" ASC`,
-      [merchantId]
+      [merchantId],
     );
     return results || [];
   }
@@ -92,7 +87,7 @@ export class PaymentRepo {
     return queryOne<PaymentGateway>(
       `SELECT * FROM "paymentGateway" 
        WHERE "paymentGatewayId" = $1 AND "deletedAt" IS NULL`,
-      [id]
+      [id],
     );
   }
 
@@ -100,7 +95,7 @@ export class PaymentRepo {
     return queryOne<PaymentGateway>(
       `SELECT * FROM "paymentGateway" 
        WHERE "merchantId" = $1 AND "isDefault" = true AND "deletedAt" IS NULL`,
-      [merchantId]
+      [merchantId],
     );
   }
 
@@ -115,14 +110,25 @@ export class PaymentRepo {
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
        RETURNING *`,
       [
-        params.merchantId, params.name, params.provider, params.isActive ?? true,
-        params.isDefault ?? false, params.isTestMode ?? false,
-        params.apiKey || null, params.apiSecret || null, params.publicKey || null,
-        params.webhookSecret || null, params.apiEndpoint || null,
-        params.supportedPaymentMethods || [], params.supportedCurrencies || [],
-        params.processingFees || null, params.checkoutSettings || null,
-        params.metadata || null, now, now
-      ]
+        params.merchantId,
+        params.name,
+        params.provider,
+        params.isActive ?? true,
+        params.isDefault ?? false,
+        params.isTestMode ?? false,
+        params.apiKey || null,
+        params.apiSecret || null,
+        params.publicKey || null,
+        params.webhookSecret || null,
+        params.apiEndpoint || null,
+        params.supportedPaymentMethods || [],
+        params.supportedCurrencies || [],
+        params.processingFees || null,
+        params.checkoutSettings || null,
+        params.metadata || null,
+        now,
+        now,
+      ],
     );
 
     if (!result) throw new Error('Failed to create payment gateway');
@@ -133,7 +139,7 @@ export class PaymentRepo {
         `UPDATE "paymentGateway" 
          SET "isDefault" = false 
          WHERE "merchantId" = $1 AND "paymentGatewayId" != $2 AND "deletedAt" IS NULL`,
-        [params.merchantId, result.paymentGatewayId]
+        [params.merchantId, result.paymentGatewayId],
       );
     }
 
@@ -168,7 +174,7 @@ export class PaymentRepo {
        SET ${updates.join(', ')} 
        WHERE "paymentGatewayId" = $${paramIndex} AND "deletedAt" IS NULL
        RETURNING *`,
-      values
+      values,
     );
 
     if (!result) throw new Error('Failed to update payment gateway');
@@ -181,7 +187,7 @@ export class PaymentRepo {
           `UPDATE "paymentGateway" 
            SET "isDefault" = false 
            WHERE "merchantId" = $1 AND "paymentGatewayId" != $2 AND "deletedAt" IS NULL`,
-          [existing.merchantId, id]
+          [existing.merchantId, id],
         );
       }
     }
@@ -196,7 +202,7 @@ export class PaymentRepo {
        SET "deletedAt" = $1 
        WHERE "paymentGatewayId" = $2 AND "deletedAt" IS NULL
        RETURNING "paymentGatewayId"`,
-      [now, id]
+      [now, id],
     );
     return !!result;
   }
@@ -210,7 +216,7 @@ export class PaymentRepo {
       `SELECT * FROM "paymentMethodConfig" 
        WHERE "merchantId" = $1 AND "deletedAt" IS NULL 
        ORDER BY "displayOrder" ASC, "displayName" ASC`,
-      [merchantId]
+      [merchantId],
     );
     return results || [];
   }
@@ -219,7 +225,7 @@ export class PaymentRepo {
     return queryOne<PaymentMethodConfig>(
       `SELECT * FROM "paymentMethodConfig" 
        WHERE "paymentMethodConfigId" = $1 AND "deletedAt" IS NULL`,
-      [id]
+      [id],
     );
   }
 
@@ -228,7 +234,7 @@ export class PaymentRepo {
       `SELECT * FROM "paymentMethodConfig" 
        WHERE "merchantId" = $1 AND "isEnabled" = true AND "deletedAt" IS NULL 
        ORDER BY "displayOrder" ASC, "displayName" ASC`,
-      [merchantId]
+      [merchantId],
     );
     return results || [];
   }
@@ -244,14 +250,24 @@ export class PaymentRepo {
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
        RETURNING *`,
       [
-        params.merchantId, params.paymentMethod, params.isEnabled ?? true,
-        params.displayName || null, params.description || null,
-        params.processingFee || null, params.minimumAmount || null,
-        params.maximumAmount || null, params.displayOrder ?? 0, params.icon || null,
-        params.supportedCurrencies || [], params.countries || null,
-        params.gatewayId || null, params.configuration || null,
-        params.metadata || null, now, now
-      ]
+        params.merchantId,
+        params.paymentMethod,
+        params.isEnabled ?? true,
+        params.displayName || null,
+        params.description || null,
+        params.processingFee || null,
+        params.minimumAmount || null,
+        params.maximumAmount || null,
+        params.displayOrder ?? 0,
+        params.icon || null,
+        params.supportedCurrencies || [],
+        params.countries || null,
+        params.gatewayId || null,
+        params.configuration || null,
+        params.metadata || null,
+        now,
+        now,
+      ],
     );
 
     if (!result) throw new Error('Failed to create payment method configuration');
@@ -286,7 +302,7 @@ export class PaymentRepo {
        SET ${updates.join(', ')} 
        WHERE "paymentMethodConfigId" = $${paramIndex} AND "deletedAt" IS NULL
        RETURNING *`,
-      values
+      values,
     );
 
     if (!result) throw new Error('Failed to update payment method configuration');
@@ -300,7 +316,7 @@ export class PaymentRepo {
        SET "deletedAt" = $1 
        WHERE "paymentMethodConfigId" = $2 AND "deletedAt" IS NULL
        RETURNING "paymentMethodConfigId"`,
-      [now, id]
+      [now, id],
     );
     return !!result;
   }
@@ -313,7 +329,7 @@ export class PaymentRepo {
     return queryOne<PaymentTransaction>(
       `SELECT * FROM "paymentTransaction" 
        WHERE "paymentTransactionId" = $1 AND "deletedAt" IS NULL`,
-      [id]
+      [id],
     );
   }
 
@@ -322,7 +338,7 @@ export class PaymentRepo {
       `SELECT * FROM "paymentTransaction" 
        WHERE "orderId" = $1 AND "deletedAt" IS NULL 
        ORDER BY "createdAt" DESC`,
-      [orderId]
+      [orderId],
     );
     return results || [];
   }
@@ -333,7 +349,7 @@ export class PaymentRepo {
        WHERE "customerId" = $1 AND "deletedAt" IS NULL 
        ORDER BY "createdAt" DESC
        LIMIT $2 OFFSET $3`,
-      [customerId, limit, offset]
+      [customerId, limit, offset],
     );
     return results || [];
   }
@@ -349,13 +365,28 @@ export class PaymentRepo {
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
        RETURNING *`,
       [
-        params.orderPaymentId, params.orderId, params.type, params.amount, params.currencyCode, params.status,
-        params.customerId || null, params.paymentMethodId || null, params.paymentGatewayId || null,
-        params.externalTransactionId || null, params.currency || null, params.paymentMethodDetails || null,
-        params.gatewayResponse || null, params.errorCode || null, params.errorMessage || null,
-        params.refundedAmount || null, params.metadata || null, params.customerIp || null,
-        params.capturedAt || null, now, now
-      ]
+        params.orderPaymentId,
+        params.orderId,
+        params.type,
+        params.amount,
+        params.currencyCode,
+        params.status,
+        params.customerId || null,
+        params.paymentMethodId || null,
+        params.paymentGatewayId || null,
+        params.externalTransactionId || null,
+        params.currency || null,
+        params.paymentMethodDetails || null,
+        params.gatewayResponse || null,
+        params.errorCode || null,
+        params.errorMessage || null,
+        params.refundedAmount || null,
+        params.metadata || null,
+        params.customerIp || null,
+        params.capturedAt || null,
+        now,
+        now,
+      ],
     );
 
     if (!result) throw new Error('Failed to create payment transaction');
@@ -390,7 +421,7 @@ export class PaymentRepo {
        SET ${updates.join(', ')} 
        WHERE "paymentTransactionId" = $${paramIndex} AND "deletedAt" IS NULL
        RETURNING *`,
-      values
+      values,
     );
 
     if (!result) throw new Error('Failed to update payment transaction');
@@ -405,7 +436,7 @@ export class PaymentRepo {
     return queryOne<PaymentRefund>(
       `SELECT * FROM "paymentRefund" 
        WHERE "paymentRefundId" = $1`,
-      [id]
+      [id],
     );
   }
 
@@ -414,7 +445,7 @@ export class PaymentRepo {
       `SELECT * FROM "paymentRefund" 
        WHERE "paymentTransactionId" = $1 
        ORDER BY "createdAt" DESC`,
-      [transactionId]
+      [transactionId],
     );
     return results || [];
   }
@@ -429,12 +460,23 @@ export class PaymentRepo {
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
        RETURNING *`,
       [
-        params.orderPaymentId, params.orderId, params.transactionId || null,
-        params.amount, params.currencyCode, params.reason || null, params.status,
-        params.paymentTransactionId || null, params.externalRefundId || null,
-        params.currency || null, params.gatewayResponse || null,
-        params.errorCode || null, params.errorMessage || null, params.metadata || null, now, now
-      ]
+        params.orderPaymentId,
+        params.orderId,
+        params.transactionId || null,
+        params.amount,
+        params.currencyCode,
+        params.reason || null,
+        params.status,
+        params.paymentTransactionId || null,
+        params.externalRefundId || null,
+        params.currency || null,
+        params.gatewayResponse || null,
+        params.errorCode || null,
+        params.errorMessage || null,
+        params.metadata || null,
+        now,
+        now,
+      ],
     );
 
     if (!result) throw new Error('Failed to create payment refund');
@@ -449,7 +491,7 @@ export class PaymentRepo {
            END,
            "updatedAt" = $2
        WHERE "paymentTransactionId" = $3 AND "deletedAt" IS NULL`,
-      [params.amount, now, params.paymentTransactionId]
+      [params.amount, now, params.paymentTransactionId],
     );
 
     return result;
@@ -483,7 +525,7 @@ export class PaymentRepo {
        SET ${updates.join(', ')} 
        WHERE "paymentRefundId" = $${paramIndex}
        RETURNING *`,
-      values
+      values,
     );
 
     if (!result) throw new Error('Failed to update payment refund');
@@ -504,8 +546,6 @@ export class PaymentRepo {
     paymentGatewayId?: string;
   }): Promise<{ success: boolean; transactionId?: string; error?: string }> {
     try {
-      
-
       const transaction = await this.createTransaction({
         orderPaymentId: paymentData.orderPaymentId,
         orderId: paymentData.orderId,
@@ -516,12 +556,11 @@ export class PaymentRepo {
         customerId: paymentData.customerId || null,
         paymentMethodId: paymentData.paymentMethodId || null,
         paymentGatewayId: paymentData.paymentGatewayId || null,
-        gatewayResponse: { mock: true }
+        gatewayResponse: { mock: true },
       });
 
       return { success: true, transactionId: transaction.paymentTransactionId };
     } catch (error: any) {
-      
       return { success: false, error: error.message };
     }
   }
@@ -535,8 +574,6 @@ export class PaymentRepo {
     reason?: string;
   }): Promise<{ success: boolean; refundId?: string; error?: string }> {
     try {
-      
-
       const refund = await this.createRefund({
         orderPaymentId: refundData.orderPaymentId,
         orderId: refundData.orderId,
@@ -545,12 +582,11 @@ export class PaymentRepo {
         currencyCode: refundData.currency,
         reason: refundData.reason || null,
         status: 'completed',
-        gatewayResponse: { mock: true }
+        gatewayResponse: { mock: true },
       });
 
       return { success: true, refundId: refund.paymentRefundId };
     } catch (error: any) {
-      
       return { success: false, error: error.message };
     }
   }

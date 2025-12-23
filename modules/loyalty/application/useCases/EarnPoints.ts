@@ -23,7 +23,7 @@ export interface EarnPointsOutput {
 export class EarnPointsUseCase {
   constructor(
     private readonly loyaltyRepository: any,
-    private readonly loyaltyProgramRepository: any
+    private readonly loyaltyProgramRepository: any,
   ) {}
 
   async execute(input: EarnPointsInput): Promise<EarnPointsOutput> {
@@ -47,7 +47,7 @@ export class EarnPointsUseCase {
 
     // Calculate points
     let pointsToEarn = input.points || 0;
-    
+
     if (input.actionType === 'purchase' && input.amount) {
       // Points per dollar/currency unit
       const earnRate = program.earnRates?.[member.tierId] || program.baseEarnRate || 1;
@@ -60,7 +60,7 @@ export class EarnPointsUseCase {
 
     // Create transaction
     const transactionId = `lpt_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 9)}`;
-    
+
     await this.loyaltyRepository.createTransaction({
       transactionId,
       memberId: member.memberId,

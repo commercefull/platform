@@ -1,6 +1,6 @@
 /**
  * RedeemCoupon Use Case
- * 
+ *
  * Finalizes coupon redemption when order is placed.
  */
 

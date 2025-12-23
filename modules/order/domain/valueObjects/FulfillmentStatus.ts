@@ -12,7 +12,7 @@ export enum FulfillmentStatus {
   CANCELLED = 'cancelled',
   RETURNED = 'returned',
   PENDING_PICKUP = 'pending_pickup',
-  PICKED_UP = 'picked_up'
+  PICKED_UP = 'picked_up',
 }
 
 /**
@@ -27,7 +27,7 @@ export const FulfillmentStatusTransitions: Record<FulfillmentStatus, Fulfillment
   [FulfillmentStatus.PICKED_UP]: [FulfillmentStatus.RETURNED],
   [FulfillmentStatus.DELIVERED]: [FulfillmentStatus.RETURNED],
   [FulfillmentStatus.CANCELLED]: [],
-  [FulfillmentStatus.RETURNED]: []
+  [FulfillmentStatus.RETURNED]: [],
 };
 
 /**
@@ -51,7 +51,7 @@ export function getFulfillmentStatusLabel(status: FulfillmentStatus): string {
     [FulfillmentStatus.CANCELLED]: 'Cancelled',
     [FulfillmentStatus.RETURNED]: 'Returned',
     [FulfillmentStatus.PENDING_PICKUP]: 'Pending Pickup',
-    [FulfillmentStatus.PICKED_UP]: 'Picked Up'
+    [FulfillmentStatus.PICKED_UP]: 'Picked Up',
   };
   return labels[status] || status;
 }

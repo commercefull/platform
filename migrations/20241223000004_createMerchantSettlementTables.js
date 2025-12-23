@@ -2,9 +2,9 @@
  * Migration: Create Merchant Settlement Tables
  */
 
-exports.up = async function(knex) {
+exports.up = async function (knex) {
   // Create merchant_settlement table
-  await knex.schema.createTable('merchantSettlement', (table) => {
+  await knex.schema.createTable('merchantSettlement', table => {
     table.string('settlementId').primary();
     table.string('merchantId').notNullable();
     table.timestamp('periodStart').notNullable();
@@ -23,14 +23,14 @@ exports.up = async function(knex) {
     table.timestamp('paidAt');
     table.timestamp('createdAt').defaultTo(knex.fn.now());
     table.timestamp('updatedAt').defaultTo(knex.fn.now());
-    
+
     table.index(['merchantId']);
     table.index(['status']);
     table.index(['periodStart', 'periodEnd']);
   });
 
   // Create merchant_settlement_line table
-  await knex.schema.createTable('merchantSettlementLine', (table) => {
+  await knex.schema.createTable('merchantSettlementLine', table => {
     table.string('settlementLineId').primary();
     table.string('settlementId').notNullable().references('settlementId').inTable('merchantSettlement').onDelete('CASCADE');
     table.string('orderId').notNullable();
@@ -42,13 +42,13 @@ exports.up = async function(knex) {
     table.decimal('netAmount', 12, 2).notNullable();
     table.string('type').defaultTo('sale'); // sale, refund, chargeback, adjustment
     table.timestamp('createdAt').defaultTo(knex.fn.now());
-    
+
     table.index(['settlementId']);
     table.index(['orderId']);
   });
 
   // Create merchant_payout table
-  await knex.schema.createTable('merchantPayout', (table) => {
+  await knex.schema.createTable('merchantPayout', table => {
     table.string('payoutId').primary();
     table.string('settlementId').notNullable().references('settlementId').inTable('merchantSettlement');
     table.string('merchantId').notNullable();
@@ -62,13 +62,13 @@ exports.up = async function(knex) {
     table.text('notes');
     table.timestamp('createdAt').defaultTo(knex.fn.now());
     table.timestamp('updatedAt').defaultTo(knex.fn.now());
-    
+
     table.index(['merchantId']);
     table.index(['status']);
   });
 
   // Create commission_profile table
-  await knex.schema.createTable('commissionProfile', (table) => {
+  await knex.schema.createTable('commissionProfile', table => {
     table.string('commissionProfileId').primary();
     table.string('name').notNullable();
     table.decimal('baseRate', 5, 4).notNullable();
@@ -79,12 +79,12 @@ exports.up = async function(knex) {
     table.boolean('isActive').defaultTo(true);
     table.timestamp('createdAt').defaultTo(knex.fn.now());
     table.timestamp('updatedAt').defaultTo(knex.fn.now());
-    
+
     table.index(['isActive']);
   });
 };
 
-exports.down = async function(knex) {
+exports.down = async function (knex) {
   await knex.schema.dropTableIfExists('commissionProfile');
   await knex.schema.dropTableIfExists('merchantPayout');
   await knex.schema.dropTableIfExists('merchantSettlementLine');

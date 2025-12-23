@@ -22,7 +22,7 @@ export class LoginCustomerUseCase {
   constructor(
     private readonly customerRepo: any,
     private readonly authService: any,
-    private readonly tokenService: any
+    private readonly tokenService: any,
   ) {}
 
   async execute(input: LoginCustomerInput): Promise<LoginCustomerOutput> {
@@ -37,10 +37,7 @@ export class LoginCustomerUseCase {
     }
 
     // Verify password
-    const isValidPassword = await this.authService.verifyPassword(
-      input.password,
-      customer.passwordHash
-    );
+    const isValidPassword = await this.authService.verifyPassword(input.password, customer.passwordHash);
     if (!isValidPassword) {
       // Emit failed login event
       eventBus.emit('customer.login_failed', {

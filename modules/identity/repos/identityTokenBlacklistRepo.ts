@@ -19,16 +19,7 @@ export class AuthTokenBlacklistRepo {
         "token", "userType", "userId", "expiresAt", "invalidatedAt", "reason", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       RETURNING *`,
-      [
-        params.token,
-        params.userType,
-        params.userId,
-        expiresAt,
-        now,
-        params.reason ?? 'logout',
-        now,
-        now
-      ]
+      [params.token, params.userType, params.userId, expiresAt, now, params.reason ?? 'logout', now, now],
     );
 
     if (!record) {
@@ -42,7 +33,7 @@ export class AuthTokenBlacklistRepo {
     const result = await queryOne<IdentityTokenBlacklist>(
       `SELECT * FROM "public"."identityTokenBlacklist"
        WHERE "token" = $1 AND "expiresAt" > $2`,
-      [token, new Date()]
+      [token, new Date()],
     );
 
     return !!result;
@@ -52,17 +43,19 @@ export class AuthTokenBlacklistRepo {
     return queryOne<IdentityTokenBlacklist>(
       `SELECT * FROM "public"."identityTokenBlacklist"
        WHERE "token" = $1`,
-      [token]
+      [token],
     );
   }
 
   async findForUser(userId: string, userType: string): Promise<IdentityTokenBlacklist[]> {
-    return (await query<IdentityTokenBlacklist[]>(
-      `SELECT * FROM "public"."identityTokenBlacklist"
+    return (
+      (await query<IdentityTokenBlacklist[]>(
+        `SELECT * FROM "public"."identityTokenBlacklist"
        WHERE "userId" = $1 AND "userType" = $2
        ORDER BY "invalidatedAt" DESC`,
-      [userId, userType]
-    )) || [];
+        [userId, userType],
+      )) || []
+    );
   }
 
   async cleanupExpired(now: Date = new Date()): Promise<number> {
@@ -70,7 +63,7 @@ export class AuthTokenBlacklistRepo {
       `DELETE FROM "public"."identityTokenBlacklist"
        WHERE "expiresAt" < $1
        RETURNING "identityTokenBlacklistId"`,
-      [now]
+      [now],
     );
 
     return result ? result.length : 0;

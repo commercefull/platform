@@ -2,13 +2,16 @@
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.up = function(knex) {
-  return knex.schema.createTable('marketingEmailTemplate', function(table) {
+exports.up = function (knex) {
+  return knex.schema.createTable('marketingEmailTemplate', function (table) {
     table.uuid('marketingEmailTemplateId').primary().defaultTo(knex.raw('uuidv7()'));
     table.uuid('merchantId').references('merchantId').inTable('merchant').onDelete('CASCADE');
     table.string('name').notNullable();
     table.string('slug').unique();
-    table.string('category').defaultTo('marketing').checkIn(['marketing', 'transactional', 'notification', 'abandoned_cart', 'welcome', 'custom']);
+    table
+      .string('category')
+      .defaultTo('marketing')
+      .checkIn(['marketing', 'transactional', 'notification', 'abandoned_cart', 'welcome', 'custom']);
     table.text('description');
     table.string('subject');
     table.string('preheader');
@@ -34,6 +37,6 @@ exports.up = function(knex) {
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTableIfExists('marketingEmailTemplate');
 };

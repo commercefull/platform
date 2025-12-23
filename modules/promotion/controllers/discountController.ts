@@ -1,6 +1,6 @@
 import { logger } from '../../../libs/logger';
-import { Request, Response } from "express";
-import discountRepo, { CreateProductDiscountInput, UpdateProductDiscountInput } from "../repos/discountRepo";
+import { Request, Response } from 'express';
+import discountRepo, { CreateProductDiscountInput, UpdateProductDiscountInput } from '../repos/discountRepo';
 
 // Get all active discounts
 export const getActiveDiscounts = async (req: Request, res: Response): Promise<void> => {
@@ -45,12 +45,12 @@ export const getDiscountById = async (req: Request, res: Response): Promise<void
   try {
     const { id } = req.params;
     const discount = await discountRepo.findById(id);
-    
+
     if (!discount) {
-      res.status(404).json({ success: false, message: "Discount not found" });
+      res.status(404).json({ success: false, message: 'Discount not found' });
       return;
     }
-    
+
     res.status(200).json({ success: true, data: discount });
   } catch (error: any) {
     logger.error('Error:', error);
@@ -62,13 +62,13 @@ export const getDiscountById = async (req: Request, res: Response): Promise<void
 export const createDiscount = async (req: Request, res: Response): Promise<void> => {
   try {
     const discountData: CreateProductDiscountInput = req.body;
-    
+
     // Validate required fields
     if (!discountData.name || !discountData.discountType || discountData.discountValue === undefined) {
       res.status(400).json({ success: false, message: 'Missing required fields: name, discountType, and discountValue are required' });
       return;
     }
-    
+
     const discount = await discountRepo.create(discountData);
     res.status(201).json({ success: true, data: discount });
   } catch (error: any) {
@@ -82,7 +82,7 @@ export const updateDiscount = async (req: Request, res: Response): Promise<void>
   try {
     const { id } = req.params;
     const discountData: UpdateProductDiscountInput = req.body;
-    
+
     const discount = await discountRepo.update(id, discountData);
     res.status(200).json({ success: true, data: discount });
   } catch (error: any) {
@@ -95,14 +95,14 @@ export const updateDiscount = async (req: Request, res: Response): Promise<void>
 export const deleteDiscount = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    
+
     const deleted = await discountRepo.delete(id);
     if (!deleted) {
-      res.status(404).json({ success: false, message: "Discount not found" });
+      res.status(404).json({ success: false, message: 'Discount not found' });
       return;
     }
-    
-    res.status(200).json({ success: true, message: "Discount deleted successfully" });
+
+    res.status(200).json({ success: true, message: 'Discount deleted successfully' });
   } catch (error: any) {
     logger.error('Error:', error);
     res.status(500).json({ success: false, message: error.message });

@@ -15,6 +15,7 @@ This guide provides detailed instructions for migrating from Squarespace E-comme
 ## Squarespace Data Architecture
 
 ### API Limitations
+
 - Very limited REST API access
 - No bulk data export APIs
 - No programmatic product/order access
@@ -22,6 +23,7 @@ This guide provides detailed instructions for migrating from Squarespace E-comme
 - Commerce API in beta with limited functionality
 
 ### Key Challenges
+
 - No automated API access for core commerce data
 - Manual data extraction required
 - Limited historical data access
@@ -37,17 +39,20 @@ This guide provides detailed instructions for migrating from Squarespace E-comme
 Squarespace provides CSV export functionality for key data:
 
 **Products Export:**
+
 1. Go to Commerce → Inventory
 2. Click "Export" → "Products"
 3. Download the CSV file
 
 **Orders Export:**
+
 1. Go to Commerce → Orders
 2. Use filters to select date ranges
 3. Click "Export" → "Orders"
 4. Download the CSV file
 
 **Customers Export:**
+
 1. Go to Commerce → Customers
 2. Click "Export" → "Customers"
 3. Download the CSV file
@@ -55,11 +60,13 @@ Squarespace provides CSV export functionality for key data:
 #### Content Export
 
 **Pages and Content:**
+
 - Manual copy/paste approach for static content
 - Use browser developer tools to extract HTML
 - Screenshot-based content preservation
 
 **Media Assets:**
+
 - Download images manually from Squarespace media library
 - Use browser network tab to identify asset URLs
 - Bulk download tools for media assets
@@ -67,23 +74,23 @@ Squarespace provides CSV export functionality for key data:
 ### 2. Data Assessment
 
 ```javascript
-const assessSquarespaceData = (csvFiles) => {
+const assessSquarespaceData = csvFiles => {
   const assessment = {
     products: {
       count: csvFiles.products ? csvFiles.products.length : 0,
       categories: new Set(),
       variants: 0,
-      mediaFiles: 0
+      mediaFiles: 0,
     },
     orders: {
       count: csvFiles.orders ? csvFiles.orders.length : 0,
       dateRange: {},
-      totalValue: 0
+      totalValue: 0,
     },
     customers: {
       count: csvFiles.customers ? csvFiles.customers.length : 0,
-      withAddresses: 0
-    }
+      withAddresses: 0,
+    },
   };
 
   // Analyze products
@@ -106,17 +113,15 @@ const assessSquarespaceData = (csvFiles) => {
     const dates = csvFiles.orders.map(order => new Date(order.created_date));
     assessment.orders.dateRange = {
       start: new Date(Math.min(...dates)),
-      end: new Date(Math.max(...dates))
+      end: new Date(Math.max(...dates)),
     };
-    assessment.orders.totalValue = csvFiles.orders.reduce(
-      (sum, order) => sum + parseFloat(order.total_price || 0), 0
-    );
+    assessment.orders.totalValue = csvFiles.orders.reduce((sum, order) => sum + parseFloat(order.total_price || 0), 0);
   }
 
   // Analyze customers
   if (csvFiles.customers) {
     assessment.customers.withAddresses = csvFiles.customers.filter(
-      customer => customer.shipping_address_1 || customer.billing_address_1
+      customer => customer.shipping_address_1 || customer.billing_address_1,
     ).length;
   }
 
@@ -154,7 +159,7 @@ class SquarespaceCategoryMigrator {
         name: categoryName,
         slug: this.generateSlug(categoryName),
         description: '',
-        isActive: true
+        isActive: true,
       });
 
       categoryMap.set(categoryName, category.id);
@@ -183,26 +188,26 @@ class SquarespaceAttributeSetup {
         name: 'Size',
         code: 'size',
         type: 'select',
-        group: 'Physical'
+        group: 'Physical',
       },
       {
         name: 'Color',
         code: 'color',
         type: 'select',
-        group: 'Visual'
+        group: 'Visual',
       },
       {
         name: 'Material',
         code: 'material',
         type: 'text',
-        group: 'Technical'
+        group: 'Technical',
       },
       {
         name: 'Brand',
         code: 'brand',
         type: 'text',
-        group: 'General'
-      }
+        group: 'General',
+      },
     ];
 
     // Create attribute groups first
@@ -215,7 +220,7 @@ class SquarespaceAttributeSetup {
           description: `${attr.group} product attributes`,
           position: 1,
           isComparable: true,
-          isGlobal: true
+          isGlobal: true,
         });
         groups[attr.group] = group.id;
       }
@@ -240,7 +245,7 @@ class SquarespaceAttributeSetup {
         isUsedInProductListing: true,
         useForVariants: true,
         useForConfigurations: false,
-        position: 1
+        position: 1,
       });
     }
   }
@@ -263,7 +268,7 @@ class SquarespaceProductMigrator {
     return new Promise((resolve, reject) => {
       fs.createReadStream(csvPath)
         .pipe(csv())
-        .on('data', (row) => {
+        .on('data', row => {
           // Process each product row
           const productData = this.parseProductRow(row);
           products.push(productData);
@@ -310,7 +315,7 @@ class SquarespaceProductMigrator {
       seoTitle: row.seo_title,
       seoDescription: row.seo_description,
       createdAt: row.created_date ? new Date(row.created_date) : new Date(),
-      updatedAt: row.updated_date ? new Date(row.updated_date) : new Date()
+      updatedAt: row.updated_date ? new Date(row.updated_date) : new Date(),
     };
   }
 
@@ -321,7 +326,7 @@ class SquarespaceProductMigrator {
       salePrice: row.variant_sale_price ? parseFloat(row.variant_sale_price) : null,
       stockQuantity: parseInt(row.variant_stock_quantity || 0),
       attributes: this.parseVariantAttributes(row),
-      isActive: row.variant_visible !== 'false'
+      isActive: row.variant_visible !== 'false',
     };
   }
 
@@ -386,14 +391,14 @@ class SquarespaceProductMigrator {
             url: url,
             alt: product.name,
             position: index,
-            isMain: index === 0
+            isMain: index === 0,
           })),
           seo: {
             title: product.seoTitle,
-            description: product.seoDescription
+            description: product.seoDescription,
           },
           createdAt: product.createdAt.toISOString(),
-          updatedAt: product.updatedAt.toISOString()
+          updatedAt: product.updatedAt.toISOString(),
         });
 
         // Add variants if any
@@ -407,16 +412,11 @@ class SquarespaceProductMigrator {
               salePrice: variant.salePrice,
               stockQuantity: variant.stockQuantity,
               attributes: variant.attributes,
-              isActive: variant.isActive
+              isActive: variant.isActive,
             });
           }
         }
-
-        
-
-      } catch (error) {
-        
-      }
+      } catch (error) {}
     }
   }
 
@@ -441,7 +441,7 @@ class SquarespaceCustomerMigrator {
     return new Promise((resolve, reject) => {
       fs.createReadStream(csvPath)
         .pipe(csv())
-        .on('data', (row) => {
+        .on('data', row => {
           customers.push(this.parseCustomerRow(row));
         })
         .on('end', async () => {
@@ -472,7 +472,7 @@ class SquarespaceCustomerMigrator {
         city: row.billing_city,
         state: row.billing_state,
         postcode: row.billing_zip,
-        country: row.billing_country
+        country: row.billing_country,
       },
       shippingAddress: {
         firstName: row.first_name,
@@ -483,12 +483,12 @@ class SquarespaceCustomerMigrator {
         city: row.shipping_city,
         state: row.shipping_state,
         postcode: row.shipping_zip,
-        country: row.shipping_country
+        country: row.shipping_country,
       },
       acceptsMarketing: row.accepts_marketing === 'true' || row.accepts_marketing === '1',
       isActive: row.is_active !== 'false',
       createdAt: row.created_date ? new Date(row.created_date) : new Date(),
-      updatedAt: row.updated_date ? new Date(row.updated_date) : new Date()
+      updatedAt: row.updated_date ? new Date(row.updated_date) : new Date(),
     };
   }
 
@@ -506,14 +506,9 @@ class SquarespaceCustomerMigrator {
           isActive: customer.isActive,
           acceptsMarketing: customer.acceptsMarketing,
           createdAt: customer.createdAt.toISOString(),
-          updatedAt: customer.updatedAt.toISOString()
+          updatedAt: customer.updatedAt.toISOString(),
         });
-
-        
-
-      } catch (error) {
-        
-      }
+      } catch (error) {}
     }
   }
 }
@@ -531,7 +526,7 @@ class SquarespaceOrderMigrator {
     return new Promise((resolve, reject) => {
       fs.createReadStream(csvPath)
         .pipe(csv())
-        .on('data', (row) => {
+        .on('data', row => {
           orders.push(this.parseOrderRow(row));
         })
         .on('end', async () => {
@@ -571,7 +566,7 @@ class SquarespaceOrderMigrator {
         city: row.billing_city,
         state: row.billing_state,
         postcode: row.billing_zip,
-        country: row.billing_country
+        country: row.billing_country,
       },
       shippingAddress: {
         firstName: row.shipping_first_name,
@@ -582,11 +577,11 @@ class SquarespaceOrderMigrator {
         city: row.shipping_city,
         state: row.shipping_state,
         postcode: row.shipping_zip,
-        country: row.shipping_country
+        country: row.shipping_country,
       },
       lineItems: this.parseLineItems(row),
       createdAt: row.created_date ? new Date(row.created_date) : new Date(),
-      updatedAt: row.updated_date ? new Date(row.updated_date) : new Date()
+      updatedAt: row.updated_date ? new Date(row.updated_date) : new Date(),
     };
   }
 
@@ -602,7 +597,7 @@ class SquarespaceOrderMigrator {
         name: row[`item_${itemIndex}_name`],
         quantity: parseInt(row[`item_${itemIndex}_quantity`] || 1),
         price: parseFloat(row[`item_${itemIndex}_price`] || 0),
-        total: parseFloat(row[`item_${itemIndex}_total`] || 0)
+        total: parseFloat(row[`item_${itemIndex}_total`] || 0),
       });
       itemIndex++;
     }
@@ -634,7 +629,7 @@ class SquarespaceOrderMigrator {
             name: item.name,
             quantity: item.quantity,
             price: item.price,
-            total: item.total
+            total: item.total,
           })),
           shippingTotal: order.shippingTotal,
           taxTotal: order.taxTotal,
@@ -644,14 +639,9 @@ class SquarespaceOrderMigrator {
           paymentMethod: order.paymentMethod,
           customerNote: order.customerNote,
           createdAt: order.createdAt.toISOString(),
-          updatedAt: order.updatedAt.toISOString()
+          updatedAt: order.updatedAt.toISOString(),
         });
-
-        
-
-      } catch (error) {
-        
-      }
+      } catch (error) {}
     }
   }
 
@@ -676,14 +666,12 @@ async function runSquarespaceMigration() {
   const csvFiles = {
     products: './exports/products.csv',
     customers: './exports/customers.csv',
-    orders: './exports/orders.csv'
+    orders: './exports/orders.csv',
   };
 
   // Check if files exist
   for (const [type, path] of Object.entries(csvFiles)) {
     if (!fs.existsSync(path)) {
-      
-      
       return;
     }
   }
@@ -691,19 +679,16 @@ async function runSquarespaceMigration() {
   const runner = new SquarespaceMigrationRunner({
     commercefull: {
       baseURL: process.env.COMMERCEFULL_URL,
-      apiKey: process.env.COMMERCEFULL_API_KEY
+      apiKey: process.env.COMMERCEFULL_API_KEY,
     },
     csvFiles: csvFiles,
     options: {
       batchSize: 100,
-      continueOnError: true
-    }
+      continueOnError: true,
+    },
   });
 
   try {
-    
-    
-
     // Phase 1: Setup foundation data
     await runner.setupAttributes();
 
@@ -718,13 +703,7 @@ async function runSquarespaceMigration() {
 
     // Phase 5: Migrate orders
     await runner.migrateOrders(customerMap, productMap);
-
-    
-    
-
-  } catch (error) {
-    
-  }
+  } catch (error) {}
 }
 
 runSquarespaceMigration();
@@ -754,9 +733,7 @@ class SquarespaceMediaMigrator {
       try {
         await this.downloadMedia(url, this.outputDir);
         this.downloaded.add(url);
-      } catch (error) {
-        
-      }
+      } catch (error) {}
     }
 
     return Array.from(this.downloaded);
@@ -773,22 +750,24 @@ class SquarespaceMediaMigrator {
 
       const file = fs.createWriteStream(filepath);
 
-      https.get(url, (response) => {
-        if (response.statusCode !== 200) {
-          reject(new Error(`HTTP ${response.statusCode}`));
-          return;
-        }
+      https
+        .get(url, response => {
+          if (response.statusCode !== 200) {
+            reject(new Error(`HTTP ${response.statusCode}`));
+            return;
+          }
 
-        response.pipe(file);
+          response.pipe(file);
 
-        file.on('finish', () => {
-          file.close();
-          resolve(filepath);
+          file.on('finish', () => {
+            file.close();
+            resolve(filepath);
+          });
+        })
+        .on('error', error => {
+          fs.unlink(filepath, () => {}); // Delete partial file
+          reject(error);
         });
-      }).on('error', (error) => {
-        fs.unlink(filepath, () => {}); // Delete partial file
-        reject(error);
-      });
     });
   }
 
@@ -797,10 +776,7 @@ class SquarespaceMediaMigrator {
     for (const localFile of localFiles) {
       try {
         const media = await cf.media.upload(localFile);
-        
-      } catch (error) {
-        
-      }
+      } catch (error) {}
     }
   }
 }
@@ -825,8 +801,8 @@ class SquarespaceContentMigrator {
         published: page.published,
         seo: {
           title: page.seoTitle,
-          description: page.seoDescription
-        }
+          description: page.seoDescription,
+        },
       });
     }
   }
@@ -843,8 +819,8 @@ class SquarespaceContentMigrator {
         tags: post.tags,
         seo: {
           title: post.seoTitle,
-          description: post.seoDescription
-        }
+          description: post.seoDescription,
+        },
       });
     }
   }
@@ -871,13 +847,12 @@ const SquarespaceValidation = {
     return {
       squarespace: csvCount,
       commercefull: cfCount,
-      difference: Math.abs(csvCount - cfCount)
+      difference: Math.abs(csvCount - cfCount),
     };
   },
 
   async validateOrderTotals(csvData, cfApi) {
-    const csvTotal = csvData.orders ?
-      csvData.orders.reduce((sum, order) => sum + parseFloat(order.total_price || 0), 0) : 0;
+    const csvTotal = csvData.orders ? csvData.orders.reduce((sum, order) => sum + parseFloat(order.total_price || 0), 0) : 0;
 
     const cfOrders = await cfApi.orders.list({ limit: 1000 });
     const cfTotal = cfOrders.reduce((sum, order) => sum + order.total, 0);
@@ -885,7 +860,7 @@ const SquarespaceValidation = {
     return {
       squarespace: csvTotal,
       commercefull: cfTotal,
-      difference: Math.abs(csvTotal - cfTotal)
+      difference: Math.abs(csvTotal - cfTotal),
     };
   },
 
@@ -902,12 +877,12 @@ const SquarespaceValidation = {
         product: csvProduct.product_name,
         priceMatch: parseFloat(csvProduct.price) === cfProduct.price,
         skuMatch: csvProduct.sku === cfProduct.sku,
-        nameMatch: csvProduct.product_name === cfProduct.name
+        nameMatch: csvProduct.product_name === cfProduct.name,
       };
     });
 
     return integrityChecks;
-  }
+  },
 };
 ```
 

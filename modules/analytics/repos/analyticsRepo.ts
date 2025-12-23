@@ -1,6 +1,6 @@
 /**
  * Analytics Repository
- * 
+ *
  * Handles CRUD and aggregation operations for analytics data including:
  * - Daily sales metrics and summaries
  * - Product performance tracking
@@ -164,7 +164,7 @@ const TABLES = {
 
 export async function getSalesDaily(
   filters: { startDate?: Date; endDate?: Date; channel?: string; merchantId?: string },
-  pagination?: { limit?: number; offset?: number }
+  pagination?: { limit?: number; offset?: number },
 ): Promise<{ data: SalesDaily[]; total: number }> {
   let whereClause = '1=1';
   const params: any[] = [];
@@ -189,7 +189,7 @@ export async function getSalesDaily(
 
   const countResult = await queryOne<{ count: string }>(
     `SELECT COUNT(*) as count FROM "${TABLES.SALES_DAILY}" WHERE ${whereClause}`,
-    params
+    params,
   );
 
   const limit = pagination?.limit || 30;
@@ -198,19 +198,19 @@ export async function getSalesDaily(
   const rows = await query<Record<string, any>[]>(
     `SELECT * FROM "${TABLES.SALES_DAILY}" WHERE ${whereClause} 
      ORDER BY "date" DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
-    [...params, limit, offset]
+    [...params, limit, offset],
   );
 
   return {
     data: (rows || []).map(mapToSalesDaily),
-    total: parseInt(countResult?.count || '0')
+    total: parseInt(countResult?.count || '0'),
   };
 }
 
 export async function getSalesSummary(
   startDate: Date,
   endDate: Date,
-  merchantId?: string
+  merchantId?: string,
 ): Promise<{
   totalRevenue: number;
   totalOrders: number;
@@ -238,7 +238,7 @@ export async function getSalesSummary(
         THEN SUM("checkoutCompleted")::decimal / SUM("checkoutStarted") 
         ELSE 0 END as "conversionRate"
      FROM "${TABLES.SALES_DAILY}" WHERE ${whereClause}`,
-    params
+    params,
   );
 
   return {
@@ -246,15 +246,17 @@ export async function getSalesSummary(
     totalOrders: parseInt(result?.totalOrders || '0'),
     averageOrderValue: parseFloat(result?.averageOrderValue || '0'),
     newCustomers: parseInt(result?.newCustomers || '0'),
-    conversionRate: parseFloat(result?.conversionRate || '0')
+    conversionRate: parseFloat(result?.conversionRate || '0'),
   };
 }
 
-export async function upsertSalesDaily(data: Partial<SalesDaily> & {
-  date: Date;
-  channel?: string;
-  merchantId?: string;
-}): Promise<void> {
+export async function upsertSalesDaily(
+  data: Partial<SalesDaily> & {
+    date: Date;
+    channel?: string;
+    merchantId?: string;
+  },
+): Promise<void> {
   const now = new Date().toISOString();
   const channel = data.channel || 'all';
 
@@ -288,16 +290,34 @@ export async function upsertSalesDaily(data: Partial<SalesDaily> & {
       "paymentFailedCount" = "analyticsSalesDaily"."paymentFailedCount" + EXCLUDED."paymentFailedCount",
       "updatedAt" = $27`,
     [
-      data.merchantId, data.date, channel, data.currency || 'USD',
-      data.orderCount || 0, data.itemsSold || 0, data.grossRevenue || 0,
-      data.discountTotal || 0, data.refundTotal || 0, data.netRevenue || 0,
-      data.taxTotal || 0, data.shippingRevenue || 0, data.averageOrderValue || 0,
-      data.newCustomers || 0, data.returningCustomers || 0, data.guestOrders || 0,
-      data.cartCreated || 0, data.cartAbandoned || 0, data.checkoutStarted || 0,
-      data.checkoutCompleted || 0, data.conversionRate || 0,
-      data.paymentSuccessCount || 0, data.paymentFailedCount || 0, data.paymentSuccessRate || 0,
-      now, now, now
-    ]
+      data.merchantId,
+      data.date,
+      channel,
+      data.currency || 'USD',
+      data.orderCount || 0,
+      data.itemsSold || 0,
+      data.grossRevenue || 0,
+      data.discountTotal || 0,
+      data.refundTotal || 0,
+      data.netRevenue || 0,
+      data.taxTotal || 0,
+      data.shippingRevenue || 0,
+      data.averageOrderValue || 0,
+      data.newCustomers || 0,
+      data.returningCustomers || 0,
+      data.guestOrders || 0,
+      data.cartCreated || 0,
+      data.cartAbandoned || 0,
+      data.checkoutStarted || 0,
+      data.checkoutCompleted || 0,
+      data.conversionRate || 0,
+      data.paymentSuccessCount || 0,
+      data.paymentFailedCount || 0,
+      data.paymentSuccessRate || 0,
+      now,
+      now,
+      now,
+    ],
   );
 }
 
@@ -307,7 +327,7 @@ export async function upsertSalesDaily(data: Partial<SalesDaily> & {
 
 export async function getProductPerformance(
   filters: { productId?: string; startDate?: Date; endDate?: Date },
-  pagination?: { limit?: number; offset?: number }
+  pagination?: { limit?: number; offset?: number },
 ): Promise<{ data: ProductPerformance[]; total: number }> {
   let whereClause = '1=1';
   const params: any[] = [];
@@ -328,7 +348,7 @@ export async function getProductPerformance(
 
   const countResult = await queryOne<{ count: string }>(
     `SELECT COUNT(*) as count FROM "analyticsProductPerformance" WHERE ${whereClause}`,
-    params
+    params,
   );
 
   const limit = pagination?.limit || 30;
@@ -337,12 +357,12 @@ export async function getProductPerformance(
   const rows = await query<Record<string, any>[]>(
     `SELECT * FROM "analyticsProductPerformance" WHERE ${whereClause} 
      ORDER BY "date" DESC, "revenue" DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
-    [...params, limit, offset]
+    [...params, limit, offset],
   );
 
   return {
     data: (rows || []).map(mapToProductPerformance),
-    total: parseInt(countResult?.count || '0')
+    total: parseInt(countResult?.count || '0'),
   };
 }
 
@@ -350,7 +370,7 @@ export async function getTopProducts(
   startDate: Date,
   endDate: Date,
   metric: 'revenue' | 'purchases' | 'views' = 'revenue',
-  limit: number = 10
+  limit: number = 10,
 ): Promise<ProductPerformance[]> {
   const rows = await query<Record<string, any>[]>(
     `SELECT "productId", 
@@ -366,16 +386,18 @@ export async function getTopProducts(
      GROUP BY "productId"
      ORDER BY SUM("${metric}") DESC
      LIMIT $3`,
-    [startDate, endDate, limit]
+    [startDate, endDate, limit],
   );
 
   return (rows || []).map(mapToProductPerformance);
 }
 
-export async function upsertProductPerformance(data: Partial<ProductPerformance> & {
-  productId: string;
-  date: Date;
-}): Promise<void> {
+export async function upsertProductPerformance(
+  data: Partial<ProductPerformance> & {
+    productId: string;
+    date: Date;
+  },
+): Promise<void> {
   const now = new Date().toISOString();
 
   await query(
@@ -402,15 +424,31 @@ export async function upsertProductPerformance(data: Partial<ProductPerformance>
       "stockAlerts" = "analyticsProductPerformance"."stockAlerts" + EXCLUDED."stockAlerts",
       "outOfStockViews" = "analyticsProductPerformance"."outOfStockViews" + EXCLUDED."outOfStockViews"`,
     [
-      data.productId, data.productVariantId, data.date, data.channel || 'all',
-      data.views || 0, data.uniqueViews || 0, data.detailViews || 0,
-      data.addToCarts || 0, data.removeFromCarts || 0, data.viewToCartRate || 0,
-      data.purchases || 0, data.quantitySold || 0, data.revenue || 0,
-      data.averagePrice || 0, data.cartToOrderRate || 0,
-      data.returns || 0, data.returnQuantity || 0, data.returnRate || 0,
-      data.reviews || 0, data.averageRating, data.stockAlerts || 0, data.outOfStockViews || 0,
-      now, now
-    ]
+      data.productId,
+      data.productVariantId,
+      data.date,
+      data.channel || 'all',
+      data.views || 0,
+      data.uniqueViews || 0,
+      data.detailViews || 0,
+      data.addToCarts || 0,
+      data.removeFromCarts || 0,
+      data.viewToCartRate || 0,
+      data.purchases || 0,
+      data.quantitySold || 0,
+      data.revenue || 0,
+      data.averagePrice || 0,
+      data.cartToOrderRate || 0,
+      data.returns || 0,
+      data.returnQuantity || 0,
+      data.returnRate || 0,
+      data.reviews || 0,
+      data.averageRating,
+      data.stockAlerts || 0,
+      data.outOfStockViews || 0,
+      now,
+      now,
+    ],
   );
 }
 
@@ -420,7 +458,7 @@ export async function upsertProductPerformance(data: Partial<ProductPerformance>
 
 export async function getSearchQueries(
   filters: { startDate?: Date; endDate?: Date; isZeroResult?: boolean; query?: string },
-  pagination?: { limit?: number; offset?: number }
+  pagination?: { limit?: number; offset?: number },
 ): Promise<{ data: SearchQuery[]; total: number }> {
   let whereClause = '1=1';
   const params: any[] = [];
@@ -445,7 +483,7 @@ export async function getSearchQueries(
 
   const countResult = await queryOne<{ count: string }>(
     `SELECT COUNT(*) as count FROM "analyticsSearchQuery" WHERE ${whereClause}`,
-    params
+    params,
   );
 
   const limit = pagination?.limit || 50;
@@ -454,12 +492,12 @@ export async function getSearchQueries(
   const rows = await query<Record<string, any>[]>(
     `SELECT * FROM "analyticsSearchQuery" WHERE ${whereClause} 
      ORDER BY "searchCount" DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
-    [...params, limit, offset]
+    [...params, limit, offset],
   );
 
   return {
     data: (rows || []).map(mapToSearchQuery),
-    total: parseInt(countResult?.count || '0')
+    total: parseInt(countResult?.count || '0'),
   };
 }
 
@@ -489,11 +527,18 @@ export async function upsertSearchQuery(data: {
       "revenue" = "analyticsSearchQuery"."revenue" + EXCLUDED."revenue",
       "updatedAt" = $11`,
     [
-      data.merchantId, data.query, normalized, data.date,
-      data.resultCount || 0, (data.resultCount || 0) === 0,
-      data.clicked ? 1 : 0, data.purchased ? 1 : 0, data.revenue || 0,
-      now, now
-    ]
+      data.merchantId,
+      data.query,
+      normalized,
+      data.date,
+      data.resultCount || 0,
+      (data.resultCount || 0) === 0,
+      data.clicked ? 1 : 0,
+      data.purchased ? 1 : 0,
+      data.revenue || 0,
+      now,
+      now,
+    ],
   );
 }
 
@@ -501,10 +546,7 @@ export async function upsertSearchQuery(data: {
 // Customer Cohorts
 // ============================================================================
 
-export async function getCustomerCohorts(
-  startMonth?: Date,
-  endMonth?: Date
-): Promise<CustomerCohort[]> {
+export async function getCustomerCohorts(startMonth?: Date, endMonth?: Date): Promise<CustomerCohort[]> {
   let whereClause = '1=1';
   const params: any[] = [];
   let paramIndex = 1;
@@ -521,7 +563,7 @@ export async function getCustomerCohorts(
   const rows = await query<Record<string, any>[]>(
     `SELECT * FROM "analyticsCustomerCohort" WHERE ${whereClause} 
      ORDER BY "cohortMonth" DESC, "monthNumber" ASC`,
-    params
+    params,
   );
 
   return (rows || []).map(mapToCustomerCohort);
@@ -560,7 +602,7 @@ function mapToSalesDaily(row: Record<string, any>): SalesDaily {
     paymentSuccessRate: parseFloat(row.paymentSuccessRate) || 0,
     computedAt: row.computedAt ? new Date(row.computedAt) : undefined,
     createdAt: new Date(row.createdAt),
-    updatedAt: new Date(row.updatedAt)
+    updatedAt: new Date(row.updatedAt),
   };
 }
 
@@ -590,7 +632,7 @@ function mapToProductPerformance(row: Record<string, any>): ProductPerformance {
     stockAlerts: parseInt(row.stockAlerts) || 0,
     outOfStockViews: parseInt(row.outOfStockViews) || 0,
     computedAt: row.computedAt ? new Date(row.computedAt) : undefined,
-    createdAt: new Date(row.createdAt)
+    createdAt: new Date(row.createdAt),
   };
 }
 
@@ -615,7 +657,7 @@ function mapToSearchQuery(row: Record<string, any>): SearchQuery {
     refinementCount: parseInt(row.refinementCount) || 0,
     exitCount: parseInt(row.exitCount) || 0,
     createdAt: new Date(row.createdAt),
-    updatedAt: new Date(row.updatedAt)
+    updatedAt: new Date(row.updatedAt),
   };
 }
 
@@ -636,6 +678,6 @@ function mapToCustomerCohort(row: Record<string, any>): CustomerCohort {
     repeatPurchaseRate: parseFloat(row.repeatPurchaseRate) || 0,
     averageOrdersPerCustomer: parseFloat(row.averageOrdersPerCustomer) || 0,
     computedAt: row.computedAt ? new Date(row.computedAt) : undefined,
-    createdAt: new Date(row.createdAt)
+    createdAt: new Date(row.createdAt),
   };
 }

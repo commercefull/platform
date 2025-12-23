@@ -3,6 +3,7 @@
 **Last Updated: December 23, 2024**
 
 This document provides a comprehensive analysis of all modules in the CommerceFull platform, identifying misalignments between:
+
 - **Routers** (API endpoints)
 - **Controllers** (HTTP request handlers)
 - **Use Cases** (Application/business logic)
@@ -13,13 +14,13 @@ This document provides a comprehensive analysis of all modules in the CommerceFu
 
 ### Progress Update ✅
 
-| Category | Previous | Current | Status |
-|----------|----------|---------|--------|
-| **Modules with full DDD stack** | 12 | 20+ | ✅ Improved |
-| **Missing Routers** | 10 | 8 | ⚠️ In Progress |
-| **Missing Controllers** | 10 | 8 | ⚠️ In Progress |
-| **Use Cases** | ~200 | 272 | ✅ Significantly expanded |
-| **Missing Index Exports** | 18 | 0 | ✅ COMPLETE |
+| Category                        | Previous | Current | Status                    |
+| ------------------------------- | -------- | ------- | ------------------------- |
+| **Modules with full DDD stack** | 12       | 20+     | ✅ Improved               |
+| **Missing Routers**             | 10       | 8       | ⚠️ In Progress            |
+| **Missing Controllers**         | 10       | 8       | ⚠️ In Progress            |
+| **Use Cases**                   | ~200     | 272     | ✅ Significantly expanded |
+| **Missing Index Exports**       | 18       | 0       | ✅ COMPLETE               |
 
 ### Recent Completions (December 2024)
 
@@ -36,6 +37,7 @@ This document provides a comprehensive analysis of all modules in the CommerceFu
 ## Module-by-Module Analysis
 
 ### Legend
+
 - ✅ Complete and aligned
 - ⚠️ Partial - needs enhancement
 - ❌ Missing - needs creation
@@ -55,13 +57,14 @@ This document provides a comprehensive analysis of all modules in the CommerceFu
 
 **Gaps Identified:**
 
-| Gap | Description | Priority |
-|-----|-------------|----------|
-| Missing Use Cases | Need: GetDashboardMetrics, GetSalesAnalytics, GetCustomerAnalytics, GetProductPerformance, ExportReport | HIGH |
-| Controller Logic | Business logic in controller needs extraction to use cases | MEDIUM |
-| Missing Index | No barrel export for use cases | LOW |
+| Gap               | Description                                                                                             | Priority |
+| ----------------- | ------------------------------------------------------------------------------------------------------- | -------- |
+| Missing Use Cases | Need: GetDashboardMetrics, GetSalesAnalytics, GetCustomerAnalytics, GetProductPerformance, ExportReport | HIGH     |
+| Controller Logic  | Business logic in controller needs extraction to use cases                                              | MEDIUM   |
+| Missing Index     | No barrel export for use cases                                                                          | LOW      |
 
 **Required Changes:**
+
 ```
 modules/analytics/
 ├── application/
@@ -91,14 +94,15 @@ modules/analytics/
 
 **Gaps Identified:**
 
-| Gap | Description | Priority |
-|-----|-------------|----------|
-| Missing Router | No HTTP endpoints | HIGH |
-| Missing Controller | No request handlers | HIGH |
-| Missing Use Cases | No application logic | HIGH |
-| Missing Domain | No entities/interfaces | MEDIUM |
+| Gap                | Description            | Priority |
+| ------------------ | ---------------------- | -------- |
+| Missing Router     | No HTTP endpoints      | HIGH     |
+| Missing Controller | No request handlers    | HIGH     |
+| Missing Use Cases  | No application logic   | HIGH     |
+| Missing Domain     | No entities/interfaces | MEDIUM   |
 
 **Required Changes:**
+
 ```
 modules/assortment/
 ├── application/
@@ -140,13 +144,14 @@ modules/assortment/
 
 **Gaps Identified:**
 
-| Gap | Description | Priority |
-|-----|-------------|----------|
-| Missing Use Cases | Need: ManageCompanyCredit, ProcessInvoice, GetCompanyDashboard | HIGH |
-| Missing Repos | Need: creditTransactionRepo (uses b2bCompanyCreditTransaction table) | HIGH |
-| Controller Logic | Some logic not using use cases | MEDIUM |
+| Gap               | Description                                                          | Priority |
+| ----------------- | -------------------------------------------------------------------- | -------- |
+| Missing Use Cases | Need: ManageCompanyCredit, ProcessInvoice, GetCompanyDashboard       | HIGH     |
+| Missing Repos     | Need: creditTransactionRepo (uses b2bCompanyCreditTransaction table) | HIGH     |
+| Controller Logic  | Some logic not using use cases                                       | MEDIUM   |
 
 **Required Changes:**
+
 ```
 modules/b2b/
 ├── application/
@@ -179,6 +184,7 @@ modules/b2b/
 **Status:** ✅ Well-aligned
 
 **Minor Gaps:**
+
 - Missing: `MergeBaskets` use case for guest→customer conversion
 - Missing: `SaveForLater` use case
 
@@ -196,13 +202,14 @@ modules/b2b/
 
 **Gaps Identified:**
 
-| Gap | Description | Priority |
-|-----|-------------|----------|
-| Missing Router | No HTTP endpoints for brand management | HIGH |
-| Missing Controller | No request handlers | HIGH |
-| Repo needs enhancement | Missing: findBySlug, search, listWithProductCounts | MEDIUM |
+| Gap                    | Description                                        | Priority |
+| ---------------------- | -------------------------------------------------- | -------- |
+| Missing Router         | No HTTP endpoints for brand management             | HIGH     |
+| Missing Controller     | No request handlers                                | HIGH     |
+| Repo needs enhancement | Missing: findBySlug, search, listWithProductCounts | MEDIUM   |
 
 **Required Changes:**
+
 ```
 modules/brand/
 ├── interface/
@@ -229,13 +236,14 @@ modules/brand/
 
 **Gaps Identified:**
 
-| Gap | Description | Priority |
-|-----|-------------|----------|
-| Missing Router | No HTTP endpoints | HIGH |
-| Missing Controller | No request handlers | HIGH |
-| Missing Repo Methods | Need: assignProducts, assignWarehouses | MEDIUM |
+| Gap                  | Description                            | Priority |
+| -------------------- | -------------------------------------- | -------- |
+| Missing Router       | No HTTP endpoints                      | HIGH     |
+| Missing Controller   | No request handlers                    | HIGH     |
+| Missing Repo Methods | Need: assignProducts, assignWarehouses | MEDIUM   |
 
 **Required Changes:**
+
 ```
 modules/channel/
 ├── interface/
@@ -263,6 +271,7 @@ modules/channel/
 **Status:** ✅ Well-aligned
 
 **Minor Gaps:**
+
 - Missing: `ValidateCheckout` use case for pre-submission validation
 - Missing: `ApplyGiftCard` use case
 
@@ -294,12 +303,13 @@ modules/channel/
 
 **Gaps Identified:**
 
-| Gap | Description | Priority |
-|-----|-------------|----------|
-| Missing Customer Router | Only has business router, need customer-facing | MEDIUM |
-| Controller not using use cases | Direct repo calls in some methods | MEDIUM |
+| Gap                            | Description                                    | Priority |
+| ------------------------------ | ---------------------------------------------- | -------- |
+| Missing Customer Router        | Only has business router, need customer-facing | MEDIUM   |
+| Controller not using use cases | Direct repo calls in some methods              | MEDIUM   |
 
 **Required Changes:**
+
 ```
 modules/content/
 └── interface/
@@ -321,13 +331,14 @@ modules/content/
 
 **Gaps Identified:**
 
-| Gap | Description | Priority |
-|-----|-------------|----------|
-| Missing Router | No HTTP endpoints | HIGH |
-| Missing Controller | No request handlers | HIGH |
-| Repo in wrong location | Should be in infrastructure/ | LOW |
+| Gap                    | Description                  | Priority |
+| ---------------------- | ---------------------------- | -------- |
+| Missing Router         | No HTTP endpoints            | HIGH     |
+| Missing Controller     | No request handlers          | HIGH     |
+| Repo in wrong location | Should be in infrastructure/ | LOW      |
 
 **Required Changes:**
+
 ```
 modules/coupon/
 ├── interface/
@@ -354,13 +365,14 @@ modules/coupon/
 
 **Gaps Identified:**
 
-| Gap | Description | Priority |
-|-----|-------------|----------|
-| Use Cases in wrong location | Under `useCases/` not `application/useCases/` | MEDIUM |
-| Missing Use Cases | Need: UpdateProfile, ChangePassword, ManageAddresses | HIGH |
-| Controller logic | Business logic needs extraction | MEDIUM |
+| Gap                         | Description                                          | Priority |
+| --------------------------- | ---------------------------------------------------- | -------- |
+| Use Cases in wrong location | Under `useCases/` not `application/useCases/`        | MEDIUM   |
+| Missing Use Cases           | Need: UpdateProfile, ChangePassword, ManageAddresses | HIGH     |
+| Controller logic            | Business logic needs extraction                      | MEDIUM   |
 
 **Required Changes:**
+
 ```
 modules/customer/
 ├── application/
@@ -387,13 +399,14 @@ modules/customer/
 
 **Gaps Identified:**
 
-| Gap | Description | Priority |
-|-----|-------------|----------|
-| Missing Router | No HTTP endpoints | HIGH |
-| Missing Controller | No request handlers | HIGH |
-| Missing Use Cases | Need: CancelFulfillment, SplitFulfillment, RetryFulfillment | MEDIUM |
+| Gap                | Description                                                 | Priority |
+| ------------------ | ----------------------------------------------------------- | -------- |
+| Missing Router     | No HTTP endpoints                                           | HIGH     |
+| Missing Controller | No request handlers                                         | HIGH     |
+| Missing Use Cases  | Need: CancelFulfillment, SplitFulfillment, RetryFulfillment | MEDIUM   |
 
 **Required Changes:**
+
 ```
 modules/fulfillment/
 ├── application/
@@ -424,10 +437,10 @@ modules/fulfillment/
 
 **Gaps Identified:**
 
-| Gap | Description | Priority |
-|-----|-------------|----------|
-| Missing Use Cases | Need: GetConsentStatus, UpdateConsent, ProcessDeletionRequest | HIGH |
-| Use Cases in wrong location | Not in application/useCases/ | MEDIUM |
+| Gap                         | Description                                                   | Priority |
+| --------------------------- | ------------------------------------------------------------- | -------- |
+| Missing Use Cases           | Need: GetConsentStatus, UpdateConsent, ProcessDeletionRequest | HIGH     |
+| Use Cases in wrong location | Not in application/useCases/                                  | MEDIUM   |
 
 ---
 
@@ -443,12 +456,13 @@ modules/fulfillment/
 
 **Gaps Identified:**
 
-| Gap | Description | Priority |
-|-----|-------------|----------|
-| Missing Use Cases | Almost all logic in controllers | CRITICAL |
-| Need Use Cases | Login, Logout, Register, ResetPassword, VerifyEmail, RefreshToken, RevokeToken | HIGH |
+| Gap               | Description                                                                    | Priority |
+| ----------------- | ------------------------------------------------------------------------------ | -------- |
+| Missing Use Cases | Almost all logic in controllers                                                | CRITICAL |
+| Need Use Cases    | Login, Logout, Register, ResetPassword, VerifyEmail, RefreshToken, RevokeToken | HIGH     |
 
 **Required Changes:**
+
 ```
 modules/identity/
 └── application/
@@ -484,6 +498,7 @@ modules/identity/
 **Status:** ✅ Well-aligned
 
 **Minor Gaps:**
+
 - Controller needs refactoring to use all new use cases
 - Missing: `BulkAdjustStock` use case
 
@@ -515,13 +530,14 @@ modules/identity/
 
 **Gaps Identified:**
 
-| Gap | Description | Priority |
-|-----|-------------|----------|
-| Missing Use Cases | Need: CreateLoyaltyProgram, UpdateLoyaltyProgram, GetPointsHistory, CalculateTier, RedeemReward | HIGH |
-| Controller Logic | Business logic in controllers | MEDIUM |
-| Missing Repo Methods | Need: tier management, reward management | MEDIUM |
+| Gap                  | Description                                                                                     | Priority |
+| -------------------- | ----------------------------------------------------------------------------------------------- | -------- |
+| Missing Use Cases    | Need: CreateLoyaltyProgram, UpdateLoyaltyProgram, GetPointsHistory, CalculateTier, RedeemReward | HIGH     |
+| Controller Logic     | Business logic in controllers                                                                   | MEDIUM   |
+| Missing Repo Methods | Need: tier management, reward management                                                        | MEDIUM   |
 
 **Required Changes:**
+
 ```
 modules/loyalty/
 ├── application/
@@ -553,6 +569,7 @@ modules/loyalty/
 **Status:** ⚠️ Mostly aligned
 
 **Minor Gaps:**
+
 - Missing repo for `referral` table
 - Some use cases not wired to controllers
 
@@ -584,10 +601,10 @@ modules/loyalty/
 
 **Gaps Identified:**
 
-| Gap | Description | Priority |
-|-----|-------------|----------|
-| Missing Use Cases | Need: UpgradeMembership, DowngradeMembership, CancelMembership, RenewMembership | HIGH |
-| Controller Logic | Direct repo calls | MEDIUM |
+| Gap               | Description                                                                     | Priority |
+| ----------------- | ------------------------------------------------------------------------------- | -------- |
+| Missing Use Cases | Need: UpgradeMembership, DowngradeMembership, CancelMembership, RenewMembership | HIGH     |
+| Controller Logic  | Direct repo calls                                                               | MEDIUM   |
 
 ---
 
@@ -603,10 +620,10 @@ modules/loyalty/
 
 **Gaps Identified:**
 
-| Gap | Description | Priority |
-|-----|-------------|----------|
-| Missing Use Cases | Need: UpdateMerchant, GetMerchant, ListMerchants, OnboardMerchant, GetMerchantAnalytics | HIGH |
-| Missing Repo Methods | Need: verification document management | MEDIUM |
+| Gap                  | Description                                                                             | Priority |
+| -------------------- | --------------------------------------------------------------------------------------- | -------- |
+| Missing Use Cases    | Need: UpdateMerchant, GetMerchant, ListMerchants, OnboardMerchant, GetMerchantAnalytics | HIGH     |
+| Missing Repo Methods | Need: verification document management                                                  | MEDIUM   |
 
 ---
 
@@ -622,11 +639,11 @@ modules/loyalty/
 
 **Gaps Identified:**
 
-| Gap | Description | Priority |
-|-----|-------------|----------|
-| Missing Customer Router | Only business router exists | HIGH |
-| Missing Use Cases | Need: SendEmail, SendSMS, SendPushNotification, CreateTemplate, SetPreferences | HIGH |
-| Controller Logic | Direct service calls | MEDIUM |
+| Gap                     | Description                                                                    | Priority |
+| ----------------------- | ------------------------------------------------------------------------------ | -------- |
+| Missing Customer Router | Only business router exists                                                    | HIGH     |
+| Missing Use Cases       | Need: SendEmail, SendSMS, SendPushNotification, CreateTemplate, SetPreferences | HIGH     |
+| Controller Logic        | Direct service calls                                                           | MEDIUM   |
 
 ---
 
@@ -642,11 +659,11 @@ modules/loyalty/
 
 **Gaps Identified:**
 
-| Gap | Description | Priority |
-|-----|-------------|----------|
-| Extra Router | OrderRouter is a domain service, not HTTP router | LOW |
-| Missing Use Cases | Need: CancelOrder, RefundOrder, SplitOrder, GetOrderHistory, ReorderFromOrder | HIGH |
-| Controller Logic | Some business logic in controllers | MEDIUM |
+| Gap               | Description                                                                   | Priority |
+| ----------------- | ----------------------------------------------------------------------------- | -------- |
+| Extra Router      | OrderRouter is a domain service, not HTTP router                              | LOW      |
+| Missing Use Cases | Need: CancelOrder, RefundOrder, SplitOrder, GetOrderHistory, ReorderFromOrder | HIGH     |
+| Controller Logic  | Some business logic in controllers                                            | MEDIUM   |
 
 ---
 
@@ -662,11 +679,12 @@ modules/loyalty/
 
 **Gaps Identified:**
 
-| Gap | Description | Priority |
-|-----|-------------|----------|
-| Missing All Layers | Only repo exists | HIGH |
+| Gap                | Description      | Priority |
+| ------------------ | ---------------- | -------- |
+| Missing All Layers | Only repo exists | HIGH     |
 
 **Required Changes:**
+
 ```
 modules/organization/
 ├── application/
@@ -703,10 +721,10 @@ modules/organization/
 
 **Gaps Identified:**
 
-| Gap | Description | Priority |
-|-----|-------------|----------|
-| Duplicate Repo | paymentRepo.ts and paymentRepoUpdated.ts | MEDIUM |
-| Missing Use Cases | Need: DeletePaymentMethod, SetDefaultPaymentMethod | LOW |
+| Gap               | Description                                        | Priority |
+| ----------------- | -------------------------------------------------- | -------- |
+| Duplicate Repo    | paymentRepo.ts and paymentRepoUpdated.ts           | MEDIUM   |
+| Missing Use Cases | Need: DeletePaymentMethod, SetDefaultPaymentMethod | LOW      |
 
 ---
 
@@ -722,11 +740,11 @@ modules/organization/
 
 **Gaps Identified:**
 
-| Gap | Description | Priority |
-|-----|-------------|----------|
-| Missing Customer Router | Only business router | HIGH |
-| Missing Use Cases | Need: GetPriceForCustomer, ApplyVolumeDiscount, GetB2BPricing, UpdatePriceList | HIGH |
-| Controller Logic | Heavy business logic in controllers | MEDIUM |
+| Gap                     | Description                                                                    | Priority |
+| ----------------------- | ------------------------------------------------------------------------------ | -------- |
+| Missing Customer Router | Only business router                                                           | HIGH     |
+| Missing Use Cases       | Need: GetPriceForCustomer, ApplyVolumeDiscount, GetB2BPricing, UpdatePriceList | HIGH     |
+| Controller Logic        | Heavy business logic in controllers                                            | MEDIUM   |
 
 ---
 
@@ -742,10 +760,10 @@ modules/organization/
 
 **Gaps Identified:**
 
-| Gap | Description | Priority |
-|-----|-------------|----------|
-| Missing Use Cases | Need: BulkUpdateProducts, ImportProducts, ExportProducts, CloneProduct | HIGH |
-| Use Case Index | Missing barrel export | LOW |
+| Gap               | Description                                                            | Priority |
+| ----------------- | ---------------------------------------------------------------------- | -------- |
+| Missing Use Cases | Need: BulkUpdateProducts, ImportProducts, ExportProducts, CloneProduct | HIGH     |
+| Use Case Index    | Missing barrel export                                                  | LOW      |
 
 ---
 
@@ -761,11 +779,11 @@ modules/organization/
 
 **Gaps Identified:**
 
-| Gap | Description | Priority |
-|-----|-------------|----------|
-| Too Many Controllers | Should consolidate | MEDIUM |
-| Missing Use Cases | Need: ValidatePromotion, CalculateDiscount, GetActivePromotions | HIGH |
-| Controller Logic | Heavy business logic | MEDIUM |
+| Gap                  | Description                                                     | Priority |
+| -------------------- | --------------------------------------------------------------- | -------- |
+| Too Many Controllers | Should consolidate                                              | MEDIUM   |
+| Missing Use Cases    | Need: ValidatePromotion, CalculateDiscount, GetActivePromotions | HIGH     |
+| Controller Logic     | Heavy business logic                                            | MEDIUM   |
 
 ---
 
@@ -781,12 +799,13 @@ modules/organization/
 
 **Gaps Identified:**
 
-| Gap | Description | Priority |
-|-----|-------------|----------|
-| Missing Router | No HTTP endpoints | HIGH |
-| Missing Controller | No request handlers | HIGH |
+| Gap                | Description         | Priority |
+| ------------------ | ------------------- | -------- |
+| Missing Router     | No HTTP endpoints   | HIGH     |
+| Missing Controller | No request handlers | HIGH     |
 
 **Required Changes:**
+
 ```
 modules/segment/
 └── interface/
@@ -810,10 +829,10 @@ modules/segment/
 
 **Gaps Identified:**
 
-| Gap | Description | Priority |
-|-----|-------------|----------|
-| Missing Controller | Need separate business/customer controllers | MEDIUM |
-| Controller Logic | Some business logic not in use cases | MEDIUM |
+| Gap                | Description                                 | Priority |
+| ------------------ | ------------------------------------------- | -------- |
+| Missing Controller | Need separate business/customer controllers | MEDIUM   |
+| Controller Logic   | Some business logic not in use cases        | MEDIUM   |
 
 ---
 
@@ -829,10 +848,10 @@ modules/segment/
 
 **Gaps Identified:**
 
-| Gap | Description | Priority |
-|-----|-------------|----------|
-| Missing Customer Router | Only has one router | MEDIUM |
-| Missing Use Cases | Need: DeleteStore, ActivateStore, DeactivateStore, GetStoreAnalytics | MEDIUM |
+| Gap                     | Description                                                          | Priority |
+| ----------------------- | -------------------------------------------------------------------- | -------- |
+| Missing Customer Router | Only has one router                                                  | MEDIUM   |
+| Missing Use Cases       | Need: DeleteStore, ActivateStore, DeactivateStore, GetStoreAnalytics | MEDIUM   |
 
 ---
 
@@ -848,11 +867,11 @@ modules/segment/
 
 **Gaps Identified:**
 
-| Gap | Description | Priority |
-|-----|-------------|----------|
+| Gap               | Description                                                                                                                 | Priority |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------- | -------- |
 | Missing Use Cases | Need: CreateSubscription, CancelSubscription, PauseSubscription, ResumeSubscription, ChangeSubscriptionPlan, ProcessRenewal | CRITICAL |
-| Controller Logic | All business logic in controllers | HIGH |
-| Missing Repos | Need: subscriptionPlanRepo, subscriptionInvoiceRepo | HIGH |
+| Controller Logic  | All business logic in controllers                                                                                           | HIGH     |
+| Missing Repos     | Need: subscriptionPlanRepo, subscriptionInvoiceRepo                                                                         | HIGH     |
 
 ---
 
@@ -868,10 +887,10 @@ modules/segment/
 
 **Gaps Identified:**
 
-| Gap | Description | Priority |
-|-----|-------------|----------|
-| Missing Use Cases | Need: UpdateSupplier, GetSupplier, ListSuppliers, ApproveSupplier, SuspendSupplier, ConfigureDropship | HIGH |
-| Missing Customer Router | Only business router | MEDIUM |
+| Gap                     | Description                                                                                           | Priority |
+| ----------------------- | ----------------------------------------------------------------------------------------------------- | -------- |
+| Missing Use Cases       | Need: UpdateSupplier, GetSupplier, ListSuppliers, ApproveSupplier, SuspendSupplier, ConfigureDropship | HIGH     |
+| Missing Customer Router | Only business router                                                                                  | MEDIUM   |
 
 ---
 
@@ -888,6 +907,7 @@ modules/segment/
 **Status:** ⚠️ Mostly aligned
 
 **Minor Gaps:**
+
 - Missing: `EscalateTicket`, `ResolveTicket`, `AssignTicket` use cases
 - Missing: FAQ management use cases
 
@@ -905,10 +925,10 @@ modules/segment/
 
 **Gaps Identified:**
 
-| Gap | Description | Priority |
-|-----|-------------|----------|
-| Missing Use Cases | Need: UpdateTaxRate, DeleteTaxRate, CreateTaxZone, SetTaxExemption, ValidateTaxId | HIGH |
-| Controller Logic | Business logic in controllers | MEDIUM |
+| Gap               | Description                                                                       | Priority |
+| ----------------- | --------------------------------------------------------------------------------- | -------- |
+| Missing Use Cases | Need: UpdateTaxRate, DeleteTaxRate, CreateTaxZone, SetTaxExemption, ValidateTaxId | HIGH     |
+| Controller Logic  | Business logic in controllers                                                     | MEDIUM   |
 
 ---
 
@@ -924,10 +944,10 @@ modules/segment/
 
 **Gaps Identified:**
 
-| Gap | Description | Priority |
-|-----|-------------|----------|
-| Missing Repo | Need: warehouseZoneRepo, warehouseBinRepo | HIGH |
-| Controller Logic | Not fully using use cases | MEDIUM |
+| Gap              | Description                               | Priority |
+| ---------------- | ----------------------------------------- | -------- |
+| Missing Repo     | Need: warehouseZoneRepo, warehouseBinRepo | HIGH     |
+| Controller Logic | Not fully using use cases                 | MEDIUM   |
 
 ---
 
@@ -935,41 +955,41 @@ modules/segment/
 
 ### Phase 1: Critical Missing Infrastructure (Week 1-2)
 
-| Module | Task | Priority |
-|--------|------|----------|
-| **Identity** | Create all authentication use cases | CRITICAL |
-| **Subscription** | Create subscription management use cases | CRITICAL |
-| **Organization** | Create full stack (router, controller, use cases) | HIGH |
-| **Assortment** | Create full stack (router, controller, use cases) | HIGH |
-| **Segment** | Create router and controller | HIGH |
+| Module           | Task                                              | Priority |
+| ---------------- | ------------------------------------------------- | -------- |
+| **Identity**     | Create all authentication use cases               | CRITICAL |
+| **Subscription** | Create subscription management use cases          | CRITICAL |
+| **Organization** | Create full stack (router, controller, use cases) | HIGH     |
+| **Assortment**   | Create full stack (router, controller, use cases) | HIGH     |
+| **Segment**      | Create router and controller                      | HIGH     |
 
 ### Phase 2: High Priority Gaps (Week 3-4)
 
-| Module | Task | Priority |
-|--------|------|----------|
-| **Brand** | Create router and controller | HIGH |
-| **Channel** | Create router and controller | HIGH |
-| **Coupon** | Create router and controller | HIGH |
-| **Fulfillment** | Create router and controller | HIGH |
-| **Notification** | Create customer router, add use cases | HIGH |
+| Module           | Task                                  | Priority |
+| ---------------- | ------------------------------------- | -------- |
+| **Brand**        | Create router and controller          | HIGH     |
+| **Channel**      | Create router and controller          | HIGH     |
+| **Coupon**       | Create router and controller          | HIGH     |
+| **Fulfillment**  | Create router and controller          | HIGH     |
+| **Notification** | Create customer router, add use cases | HIGH     |
 
 ### Phase 3: Medium Priority Enhancements (Week 5-6)
 
-| Module | Task | Priority |
-|--------|------|----------|
-| **Customer** | Move use cases, add missing | MEDIUM |
-| **Loyalty** | Add missing use cases and repos | MEDIUM |
-| **Membership** | Add missing use cases | MEDIUM |
-| **Merchant** | Add missing use cases | MEDIUM |
-| **Pricing** | Add customer router, use cases | MEDIUM |
+| Module         | Task                            | Priority |
+| -------------- | ------------------------------- | -------- |
+| **Customer**   | Move use cases, add missing     | MEDIUM   |
+| **Loyalty**    | Add missing use cases and repos | MEDIUM   |
+| **Membership** | Add missing use cases           | MEDIUM   |
+| **Merchant**   | Add missing use cases           | MEDIUM   |
+| **Pricing**    | Add customer router, use cases  | MEDIUM   |
 
 ### Phase 4: Controller Refactoring (Week 7-8)
 
-| Module | Task | Priority |
-|--------|------|----------|
-| **All modules** | Extract business logic to use cases | MEDIUM |
-| **Promotion** | Consolidate controllers | MEDIUM |
-| **Analytics** | Add use cases, refactor controller | MEDIUM |
+| Module          | Task                                | Priority |
+| --------------- | ----------------------------------- | -------- |
+| **All modules** | Extract business logic to use cases | MEDIUM   |
+| **Promotion**   | Consolidate controllers             | MEDIUM   |
+| **Analytics**   | Add use cases, refactor controller  | MEDIUM   |
 
 ---
 
@@ -1011,17 +1031,17 @@ modules/<module>/
 
 ## Summary Statistics
 
-| Category | Count |
-|----------|-------|
-| **Modules requiring new routers** | 10 |
-| **Modules requiring new controllers** | 10 |
-| **Use cases to create** | ~75 |
-| **Use cases to migrate** | ~40 |
-| **Repos to create** | ~15 |
-| **Index exports to create** | ~20 |
+| Category                              | Count |
+| ------------------------------------- | ----- |
+| **Modules requiring new routers**     | 10    |
+| **Modules requiring new controllers** | 10    |
+| **Use cases to create**               | ~75   |
+| **Use cases to migrate**              | ~40   |
+| **Repos to create**                   | ~15   |
+| **Index exports to create**           | ~20   |
 
 ---
 
-*Document Version: 1.0*
-*Last Updated: December 23, 2024*
-*Author: CommerceFull Platform Team*
+_Document Version: 1.0_
+_Last Updated: December 23, 2024_
+_Author: CommerceFull Platform Team_

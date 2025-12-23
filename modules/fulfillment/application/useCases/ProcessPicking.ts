@@ -1,6 +1,6 @@
 /**
  * ProcessPicking Use Case
- * 
+ *
  * Handles the picking process for a fulfillment.
  */
 
@@ -47,7 +47,7 @@ export class ProcessPickingUseCase {
     if (fulfillment.status === 'assigned' || fulfillment.status === 'pending') {
       fulfillment.startPicking();
       await this.fulfillmentRepository.save(fulfillment);
-      
+
       emitFulfillmentPickingStarted({
         fulfillmentId: fulfillment.fulfillmentId,
         orderId: fulfillment.orderId,

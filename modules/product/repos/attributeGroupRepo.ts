@@ -1,31 +1,23 @@
-import { queryOne, query } from "../../../libs/db";
-import { Table, ProductAttributeGroup } from "../../../libs/db/types";
+import { queryOne, query } from '../../../libs/db';
+import { Table, ProductAttributeGroup } from '../../../libs/db/types';
 
 // Use ProductAttributeGroup type directly from libs/db/types.ts
 export type { ProductAttributeGroup };
 
-type CreateProps = Pick<ProductAttributeGroup, "name" | "code" | "description" | "position">;
+type CreateProps = Pick<ProductAttributeGroup, 'name' | 'code' | 'description' | 'position'>;
 type UpdateProps = Partial<CreateProps>;
 
 export class AttributeGroupRepo {
   async findOne(id: string): Promise<ProductAttributeGroup | null> {
-    return queryOne<ProductAttributeGroup>(
-      `SELECT * FROM "${Table.ProductAttributeGroup}" WHERE "productAttributeGroupId" = $1`,
-      [id]
-    );
+    return queryOne<ProductAttributeGroup>(`SELECT * FROM "${Table.ProductAttributeGroup}" WHERE "productAttributeGroupId" = $1`, [id]);
   }
 
   async findByCode(code: string): Promise<ProductAttributeGroup | null> {
-    return queryOne<ProductAttributeGroup>(
-      `SELECT * FROM "${Table.ProductAttributeGroup}" WHERE "code" = $1`,
-      [code]
-    );
+    return queryOne<ProductAttributeGroup>(`SELECT * FROM "${Table.ProductAttributeGroup}" WHERE "code" = $1`, [code]);
   }
 
   async findAll(): Promise<ProductAttributeGroup[]> {
-    return await query<ProductAttributeGroup[]>(
-      `SELECT * FROM "${Table.ProductAttributeGroup}" ORDER BY "position" ASC`
-    ) || [];
+    return (await query<ProductAttributeGroup[]>(`SELECT * FROM "${Table.ProductAttributeGroup}" ORDER BY "position" ASC`)) || [];
   }
 
   async create(props: CreateProps): Promise<ProductAttributeGroup> {
@@ -35,7 +27,7 @@ export class AttributeGroupRepo {
        ("name", "code", "description", "position", "createdAt", "updatedAt") 
        VALUES ($1, $2, $3, $4, $5, $6) 
        RETURNING *`,
-      [props.name, props.code, props.description, props.position, now, now]
+      [props.name, props.code, props.description, props.position, now, now],
     );
 
     if (!row) {
@@ -60,17 +52,17 @@ export class AttributeGroupRepo {
     values.push(id);
     return queryOne<ProductAttributeGroup>(
       `UPDATE "${Table.ProductAttributeGroup}" 
-       SET ${updates.join(", ")} 
+       SET ${updates.join(', ')} 
        WHERE "productAttributeGroupId" = $${paramIndex} 
        RETURNING *`,
-      values
+      values,
     );
   }
 
   async delete(id: string): Promise<ProductAttributeGroup | null> {
     return queryOne<ProductAttributeGroup>(
       `DELETE FROM "${Table.ProductAttributeGroup}" WHERE "productAttributeGroupId" = $1 RETURNING *`,
-      [id]
+      [id],
     );
   }
 }

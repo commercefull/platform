@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function (knex) {
   return knex.schema.createTable('taxRule', t => {
     t.uuid('taxRuleId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
@@ -10,7 +10,6 @@ exports.up = function(knex) {
     t.jsonb('conditionValue').notNullable();
     t.integer('sortOrder').notNullable().defaultTo(0);
     t.boolean('isActive').notNullable().defaultTo(true);
-    
 
     t.index('taxRateId');
     t.index('conditionType');
@@ -19,6 +18,6 @@ exports.up = function(knex) {
   });
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTable('taxRule');
 };

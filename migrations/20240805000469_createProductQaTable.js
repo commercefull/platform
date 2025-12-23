@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function (knex) {
   return knex.schema.createTable('productQa', t => {
     t.uuid('productQaId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
@@ -12,7 +12,6 @@ exports.up = function(knex) {
     t.boolean('isAnonymous').notNullable().defaultTo(false);
     t.integer('helpfulCount').notNullable().defaultTo(0);
     t.integer('viewCount').notNullable().defaultTo(0);
-    
 
     t.index('productId');
     t.index('customerId');
@@ -22,6 +21,6 @@ exports.up = function(knex) {
   });
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTable('productQa');
 };

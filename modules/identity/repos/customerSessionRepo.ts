@@ -27,10 +27,12 @@ export class CustomerSessionRepo {
   }
 
   async findByCustomerId(customerId: string): Promise<CustomerSession[]> {
-    return (await query<CustomerSession[]>(
-      `SELECT * FROM "identityCustomerSession" WHERE "customerId" = $1 AND "isActive" = true ORDER BY "createdAt" DESC`,
-      [customerId]
-    )) || [];
+    return (
+      (await query<CustomerSession[]>(
+        `SELECT * FROM "identityCustomerSession" WHERE "customerId" = $1 AND "isActive" = true ORDER BY "createdAt" DESC`,
+        [customerId],
+      )) || []
+    );
   }
 
   async create(params: CustomerSessionCreateParams): Promise<CustomerSession> {
@@ -43,16 +45,7 @@ export class CustomerSessionRepo {
       `INSERT INTO "identityCustomerSession" (
         "customerId", "token", "deviceInfo", "ipAddress", "userAgent", "isActive", "expiresAt", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, true, $6, $7, $8) RETURNING *`,
-      [
-        params.customerId,
-        token,
-        params.deviceInfo ?? null,
-        params.ipAddress ?? null,
-        params.userAgent ?? null,
-        expiresAt,
-        now,
-        now
-      ]
+      [params.customerId, token, params.deviceInfo ?? null, params.ipAddress ?? null, params.userAgent ?? null, expiresAt, now, now],
     );
 
     if (!result) throw new Error('Failed to create session');
@@ -61,17 +54,17 @@ export class CustomerSessionRepo {
 
   async updateActivity(token: string): Promise<CustomerSession | null> {
     const timestamp = new Date();
-    return await queryOne<CustomerSession>(
-      `UPDATE "identityCustomerSession" SET "updatedAt" = $1 WHERE "token" = $2 RETURNING *`,
-      [timestamp, token]
-    );
+    return await queryOne<CustomerSession>(`UPDATE "identityCustomerSession" SET "updatedAt" = $1 WHERE "token" = $2 RETURNING *`, [
+      timestamp,
+      token,
+    ]);
   }
 
   async invalidate(token: string): Promise<boolean> {
     const timestamp = new Date();
     const result = await queryOne<{ customerSessionId: string }>(
       `UPDATE "identityCustomerSession" SET "isActive" = false, "updatedAt" = $1 WHERE "token" = $2 RETURNING "customerSessionId"`,
-      [timestamp, token]
+      [timestamp, token],
     );
     return !!result;
   }
@@ -80,7 +73,7 @@ export class CustomerSessionRepo {
     const timestamp = new Date();
     const results = await query<{ customerSessionId: string }[]>(
       `UPDATE "identityCustomerSession" SET "isActive" = false, "updatedAt" = $1 WHERE "customerId" = $2 RETURNING "customerSessionId"`,
-      [timestamp, customerId]
+      [timestamp, customerId],
     );
     return results ? results.length : 0;
   }
@@ -89,7 +82,7 @@ export class CustomerSessionRepo {
     const now = new Date();
     const results = await query<{ customerSessionId: string }[]>(
       `DELETE FROM "identityCustomerSession" WHERE "expiresAt" < $1 RETURNING "customerSessionId"`,
-      [now]
+      [now],
     );
     return results ? results.length : 0;
   }
@@ -97,7 +90,7 @@ export class CustomerSessionRepo {
   async delete(id: string): Promise<boolean> {
     const result = await queryOne<{ customerSessionId: string }>(
       `DELETE FROM "identityCustomerSession" WHERE "customerSessionId" = $1 RETURNING "customerSessionId"`,
-      [id]
+      [id],
     );
     return !!result;
   }

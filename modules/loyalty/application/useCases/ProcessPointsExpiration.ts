@@ -1,6 +1,6 @@
 /**
  * ProcessPointsExpiration Use Case
- * 
+ *
  * Processes expiring loyalty points for all customers.
  * Typically run as a scheduled job.
  */

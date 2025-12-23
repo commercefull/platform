@@ -31,38 +31,42 @@ export class MembershipPaymentRepo {
   }
 
   async findBySubscriptionId(subscriptionId: string): Promise<MembershipPayment[]> {
-    return (await query<MembershipPayment[]>(
-      `SELECT * FROM "membershipPayment" WHERE "subscriptionId" = $1 ORDER BY "paymentDate" DESC`,
-      [subscriptionId]
-    )) || [];
-  }
-
-  async findByCustomerId(customerId: string, limit = 50): Promise<MembershipPayment[]> {
-    return (await query<MembershipPayment[]>(
-      `SELECT * FROM "membershipPayment" WHERE "customerId" = $1 ORDER BY "paymentDate" DESC LIMIT $2`,
-      [customerId, limit]
-    )) || [];
-  }
-
-  async findByStatus(status: PaymentStatus, limit = 100): Promise<MembershipPayment[]> {
-    return (await query<MembershipPayment[]>(
-      `SELECT * FROM "membershipPayment" WHERE "status" = $1 ORDER BY "paymentDate" DESC LIMIT $2`,
-      [status, limit]
-    )) || [];
-  }
-
-  async findByTransactionId(transactionId: string): Promise<MembershipPayment | null> {
-    return await queryOne<MembershipPayment>(
-      `SELECT * FROM "membershipPayment" WHERE "transactionId" = $1`,
-      [transactionId]
+    return (
+      (await query<MembershipPayment[]>(`SELECT * FROM "membershipPayment" WHERE "subscriptionId" = $1 ORDER BY "paymentDate" DESC`, [
+        subscriptionId,
+      ])) || []
     );
   }
 
+  async findByCustomerId(customerId: string, limit = 50): Promise<MembershipPayment[]> {
+    return (
+      (await query<MembershipPayment[]>(`SELECT * FROM "membershipPayment" WHERE "customerId" = $1 ORDER BY "paymentDate" DESC LIMIT $2`, [
+        customerId,
+        limit,
+      ])) || []
+    );
+  }
+
+  async findByStatus(status: PaymentStatus, limit = 100): Promise<MembershipPayment[]> {
+    return (
+      (await query<MembershipPayment[]>(`SELECT * FROM "membershipPayment" WHERE "status" = $1 ORDER BY "paymentDate" DESC LIMIT $2`, [
+        status,
+        limit,
+      ])) || []
+    );
+  }
+
+  async findByTransactionId(transactionId: string): Promise<MembershipPayment | null> {
+    return await queryOne<MembershipPayment>(`SELECT * FROM "membershipPayment" WHERE "transactionId" = $1`, [transactionId]);
+  }
+
   async findByDateRange(startDate: string, endDate: string): Promise<MembershipPayment[]> {
-    return (await query<MembershipPayment[]>(
-      `SELECT * FROM "membershipPayment" WHERE "paymentDate" BETWEEN $1 AND $2 ORDER BY "paymentDate" DESC`,
-      [startDate, endDate]
-    )) || [];
+    return (
+      (await query<MembershipPayment[]>(
+        `SELECT * FROM "membershipPayment" WHERE "paymentDate" BETWEEN $1 AND $2 ORDER BY "paymentDate" DESC`,
+        [startDate, endDate],
+      )) || []
+    );
   }
 
   async create(params: MembershipPaymentCreateParams): Promise<MembershipPayment> {
@@ -75,11 +79,21 @@ export class MembershipPaymentRepo {
         "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING *`,
       [
-        params.subscriptionId, params.customerId, params.amount, params.currency || 'USD',
-        params.paymentDate || now, params.status || 'pending', params.paymentType,
-        params.paymentMethod || null, params.transactionId || null, params.billingPeriodStart || null,
-        params.billingPeriodEnd || null, params.notes || null, now, now
-      ]
+        params.subscriptionId,
+        params.customerId,
+        params.amount,
+        params.currency || 'USD',
+        params.paymentDate || now,
+        params.status || 'pending',
+        params.paymentType,
+        params.paymentMethod || null,
+        params.transactionId || null,
+        params.billingPeriodStart || null,
+        params.billingPeriodEnd || null,
+        params.notes || null,
+        now,
+        now,
+      ],
     );
 
     if (!result) throw new Error('Failed to create membership payment');
@@ -105,7 +119,7 @@ export class MembershipPaymentRepo {
 
     return await queryOne<MembershipPayment>(
       `UPDATE "membershipPayment" SET ${updateFields.join(', ')} WHERE "membershipPaymentId" = $${paramIndex} RETURNING *`,
-      values
+      values,
     );
   }
 
@@ -124,7 +138,7 @@ export class MembershipPaymentRepo {
   async delete(id: string): Promise<boolean> {
     const result = await queryOne<{ membershipPaymentId: string }>(
       `DELETE FROM "membershipPayment" WHERE "membershipPaymentId" = $1 RETURNING "membershipPaymentId"`,
-      [id]
+      [id],
     );
     return !!result;
   }
@@ -142,23 +156,30 @@ export class MembershipPaymentRepo {
     return result && result.total ? parseFloat(result.total) : 0;
   }
 
-  async getStatistics(): Promise<{ total: number; byStatus: Record<PaymentStatus, number>; byType: Record<PaymentType, number>; revenue: number }> {
-    const totalResult = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM "membershipPayment"`
-    );
+  async getStatistics(): Promise<{
+    total: number;
+    byStatus: Record<PaymentStatus, number>;
+    byType: Record<PaymentType, number>;
+    revenue: number;
+  }> {
+    const totalResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "membershipPayment"`);
     const total = totalResult ? parseInt(totalResult.count, 10) : 0;
 
     const statusResults = await query<{ status: PaymentStatus; count: string }[]>(
-      `SELECT "status", COUNT(*) as count FROM "membershipPayment" GROUP BY "status"`
+      `SELECT "status", COUNT(*) as count FROM "membershipPayment" GROUP BY "status"`,
     );
     const byStatus: Record<string, number> = {};
-    statusResults?.forEach(row => { byStatus[row.status] = parseInt(row.count, 10); });
+    statusResults?.forEach(row => {
+      byStatus[row.status] = parseInt(row.count, 10);
+    });
 
     const typeResults = await query<{ paymentType: PaymentType; count: string }[]>(
-      `SELECT "paymentType", COUNT(*) as count FROM "membershipPayment" GROUP BY "paymentType"`
+      `SELECT "paymentType", COUNT(*) as count FROM "membershipPayment" GROUP BY "paymentType"`,
     );
     const byType: Record<string, number> = {};
-    typeResults?.forEach(row => { byType[row.paymentType] = parseInt(row.count, 10); });
+    typeResults?.forEach(row => {
+      byType[row.paymentType] = parseInt(row.count, 10);
+    });
 
     const revenue = await this.getTotalRevenue();
 

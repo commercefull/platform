@@ -1,6 +1,6 @@
 /**
  * ReceiveGoods Use Case
- * 
+ *
  * Records receipt of goods from a purchase order.
  */
 
@@ -35,7 +35,7 @@ export class ReceiveGoodsUseCase {
   constructor(
     private readonly purchaseOrderRepository: any,
     private readonly receivingRepository: any,
-    private readonly inventoryRepository: any
+    private readonly inventoryRepository: any,
   ) {}
 
   async execute(input: ReceiveGoodsInput): Promise<ReceiveGoodsOutput> {

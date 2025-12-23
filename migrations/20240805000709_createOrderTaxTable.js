@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function (knex) {
   return knex.schema.createTable('orderTax', t => {
     t.uuid('orderTaxId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
@@ -13,7 +13,6 @@ exports.up = function(knex) {
     t.string('taxProvider', 255);
     t.string('providerTaxId', 255);
     t.boolean('isIncludedInPrice').notNullable().defaultTo(false);
-    
 
     t.index('orderId');
     t.index('orderItemId');
@@ -21,6 +20,6 @@ exports.up = function(knex) {
   });
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTable('orderTax');
 };

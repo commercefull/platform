@@ -18,7 +18,7 @@ exports.up = function (knex) {
     t.string('transactionId', 255);
     t.timestamp('billingPeriodStart');
     t.timestamp('billingPeriodEnd');
-    
+
     t.text('notes');
     t.index('subscriptionId');
     t.index('customerId');

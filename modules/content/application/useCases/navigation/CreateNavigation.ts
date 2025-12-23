@@ -13,7 +13,7 @@ export class CreateNavigationCommand {
     public readonly description?: string,
     public readonly location?: string,
     public readonly isActive?: boolean,
-    public readonly createdBy?: string
+    public readonly createdBy?: string,
   ) {}
 }
 
@@ -42,14 +42,14 @@ export class CreateNavigationUseCase {
       location: command.location ?? null,
       isActive: command.isActive !== undefined ? command.isActive : true,
       createdBy: command.createdBy ?? null,
-      updatedBy: null
+      updatedBy: null,
     });
 
     eventBus.emit('content.navigation.created', {
       navigationId: navigation.contentNavigationId,
       name: navigation.name,
       slug: navigation.slug,
-      location: navigation.location
+      location: navigation.location,
     });
 
     return {
@@ -59,7 +59,7 @@ export class CreateNavigationUseCase {
       description: navigation.description ?? undefined,
       location: navigation.location ?? undefined,
       isActive: navigation.isActive,
-      createdAt: navigation.createdAt instanceof Date ? navigation.createdAt.toISOString() : String(navigation.createdAt)
+      createdAt: navigation.createdAt instanceof Date ? navigation.createdAt.toISOString() : String(navigation.createdAt),
     };
   }
 }

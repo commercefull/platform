@@ -2,7 +2,7 @@
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.up = async function(knex) {
+exports.up = async function (knex) {
   // Insert business
   await knex('business').insert([
     {
@@ -20,8 +20,8 @@ exports.up = async function(knex) {
       timezone: 'UTC',
       isActive: true,
       createdAt: knex.fn.now(),
-      updatedAt: knex.fn.now()
-    }
+      updatedAt: knex.fn.now(),
+    },
   ]);
 };
 
@@ -29,7 +29,7 @@ exports.up = async function(knex) {
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.down = async function(knex) {
+exports.down = async function (knex) {
   // Delete business
   await knex('business').where('businessId', '019b3dd7-d9b9-7fc1-9f98-e69fb8eca01e').del();
 };

@@ -1,6 +1,6 @@
-import { AttributeGroup } from "./attributeGroup";
+import { AttributeGroup } from './attributeGroup';
 
-export class Variant {    
+export class Variant {
   constructor(
     private readonly id: string,
     private readonly name: string,

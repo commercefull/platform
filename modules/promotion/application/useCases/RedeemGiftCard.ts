@@ -14,7 +14,7 @@ export class RedeemGiftCardCommand {
     public readonly code: string,
     public readonly amount: number,
     public readonly orderId?: string,
-    public readonly customerId?: string
+    public readonly customerId?: string,
   ) {}
 }
 
@@ -47,17 +47,17 @@ export class RedeemGiftCardUseCase {
 
     // Find gift card by code
     const giftCard = await giftCardRepo.getGiftCardByCode(command.code);
-    
+
     if (!giftCard) {
       return { success: false, message: 'Gift card not found', errors: ['gift_card_not_found'] };
     }
 
     // Check if gift card is active
     if (giftCard.status !== 'active') {
-      return { 
-        success: false, 
-        message: `Gift card is ${giftCard.status}`, 
-        errors: ['gift_card_not_active'] 
+      return {
+        success: false,
+        message: `Gift card is ${giftCard.status}`,
+        errors: ['gift_card_not_active'],
       };
     }
 
@@ -68,10 +68,10 @@ export class RedeemGiftCardUseCase {
 
     // Check balance
     if (giftCard.currentBalance < command.amount) {
-      return { 
-        success: false, 
-        message: `Insufficient balance. Available: ${giftCard.currentBalance}`, 
-        errors: ['insufficient_balance'] 
+      return {
+        success: false,
+        message: `Insufficient balance. Available: ${giftCard.currentBalance}`,
+        errors: ['insufficient_balance'],
       };
     }
 
@@ -81,7 +81,7 @@ export class RedeemGiftCardUseCase {
         giftCard.promotionGiftCardId,
         command.amount,
         command.orderId,
-        command.customerId
+        command.customerId,
       );
 
       // Get updated gift card for remaining balance
@@ -91,13 +91,13 @@ export class RedeemGiftCardUseCase {
         success: true,
         transaction,
         remainingBalance: updatedGiftCard?.currentBalance ?? 0,
-        message: 'Gift card redeemed successfully'
+        message: 'Gift card redeemed successfully',
       };
     } catch (error: any) {
       return {
         success: false,
         message: error.message || 'Failed to redeem gift card',
-        errors: ['redemption_failed']
+        errors: ['redemption_failed'],
       };
     }
   }

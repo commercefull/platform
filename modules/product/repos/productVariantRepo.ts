@@ -1,6 +1,6 @@
-import { queryOne, query } from "../../../libs/db";
-import { Table, ProductVariant as DbProductVariant } from "../../../libs/db/types";
-import { generateUUID } from "../../../libs/uuid";
+import { queryOne, query } from '../../../libs/db';
+import { Table, ProductVariant as DbProductVariant } from '../../../libs/db/types';
+import { generateUUID } from '../../../libs/uuid';
 
 export type ProductVariant = {
   id: string;
@@ -30,7 +30,7 @@ export type ProductVariant = {
 
 export enum InventoryPolicy {
   DENY = 'deny',
-  CONTINUE = 'continue'
+  CONTINUE = 'continue',
 }
 
 export type ProductVariantCreateProps = Omit<ProductVariant, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>;
@@ -43,15 +43,34 @@ export type VariantOption = {
 
 // DB column names - database uses camelCase so no mapping needed
 const dbColumns = [
-  'productVariantId', 'productId', 'sku', 'name', 'barcode', 'price',
-  'compareAtPrice', 'costPrice', 'salePrice', 'weight', 'length', 'width', 'height',
-  'isDefault', 'position', 'optionValues', 'status', 'barcode', 'mpn',
-  'createdAt', 'updatedAt'
+  'productVariantId',
+  'productId',
+  'sku',
+  'name',
+  'barcode',
+  'price',
+  'compareAtPrice',
+  'costPrice',
+  'salePrice',
+  'weight',
+  'length',
+  'width',
+  'height',
+  'isDefault',
+  'position',
+  'optionValues',
+  'status',
+  'barcode',
+  'mpn',
+  'createdAt',
+  'updatedAt',
 ];
 
 // Identity mapping since DB uses camelCase
 const dbToTsMapping: Record<string, string> = {};
-dbColumns.forEach(col => { dbToTsMapping[col] = col; });
+dbColumns.forEach(col => {
+  dbToTsMapping[col] = col;
+});
 
 // No conversion needed - use column names directly
 const tsToDbMapping = dbToTsMapping;
@@ -68,10 +87,12 @@ export class ProductVariantRepo {
    * Generate field mapping for SELECT statements
    */
   private generateSelectFields(fields: string[] = Object.values(dbToTsMapping)): string {
-    return fields.map(field => {
-      const dbField = this.tsToDb(field);
-      return `"${dbField}" AS "${field}"`;
-    }).join(', ');
+    return fields
+      .map(field => {
+        const dbField = this.tsToDb(field);
+        return `"${dbField}" AS "${field}"`;
+      })
+      .join(', ');
   }
 
   /**
@@ -79,7 +100,9 @@ export class ProductVariantRepo {
    */
   async findById(id: string): Promise<ProductVariant | null> {
     const selectFields = this.generateSelectFields();
-    return await queryOne<ProductVariant>(`SELECT ${selectFields} FROM "${Table.ProductVariant}" WHERE "id" = $1 AND "deletedAt" IS NULL`, [id]);
+    return await queryOne<ProductVariant>(`SELECT ${selectFields} FROM "${Table.ProductVariant}" WHERE "id" = $1 AND "deletedAt" IS NULL`, [
+      id,
+    ]);
   }
 
   /**
@@ -87,7 +110,10 @@ export class ProductVariantRepo {
    */
   async findBySku(sku: string): Promise<ProductVariant | null> {
     const selectFields = this.generateSelectFields();
-    return await queryOne<ProductVariant>(`SELECT ${selectFields} FROM "${Table.ProductVariant}" WHERE "sku" = $1 AND "deletedAt" IS NULL`, [sku]);
+    return await queryOne<ProductVariant>(
+      `SELECT ${selectFields} FROM "${Table.ProductVariant}" WHERE "sku" = $1 AND "deletedAt" IS NULL`,
+      [sku],
+    );
   }
 
   /**
@@ -95,10 +121,12 @@ export class ProductVariantRepo {
    */
   async findByProductId(productId: string): Promise<ProductVariant[]> {
     const selectFields = this.generateSelectFields();
-    return await query<ProductVariant[]>(
-      `SELECT ${selectFields} FROM "${Table.ProductVariant}" WHERE "productId" = $1 AND "deletedAt" IS NULL ORDER BY "position" ASC`, 
-      [productId]
-    ) || [];
+    return (
+      (await query<ProductVariant[]>(
+        `SELECT ${selectFields} FROM "${Table.ProductVariant}" WHERE "productId" = $1 AND "deletedAt" IS NULL ORDER BY "position" ASC`,
+        [productId],
+      )) || []
+    );
   }
 
   /**
@@ -107,8 +135,8 @@ export class ProductVariantRepo {
   async findDefaultForProduct(productId: string): Promise<ProductVariant | null> {
     const selectFields = this.generateSelectFields();
     return await queryOne<ProductVariant>(
-      `SELECT ${selectFields} FROM "${Table.ProductVariant}" WHERE "productId" = $1 AND "isDefault" = true AND "deletedAt" IS NULL`, 
-      [productId]
+      `SELECT ${selectFields} FROM "${Table.ProductVariant}" WHERE "productId" = $1 AND "isDefault" = true AND "deletedAt" IS NULL`,
+      [productId],
     );
   }
 
@@ -118,14 +146,14 @@ export class ProductVariantRepo {
   async create(variant: ProductVariantCreateProps): Promise<ProductVariant> {
     const now = new Date();
     const id = generateUUID();
-    
+
     // Convert property names to DB column names
     const columnMap: Record<string, any> = {
       id,
       created_at: now,
-      updated_at: now
+      updated_at: now,
     };
-    
+
     // Map all properties to their DB column names
     for (const [key, value] of Object.entries(variant)) {
       if (value !== undefined) {
@@ -133,33 +161,31 @@ export class ProductVariantRepo {
         columnMap[dbColumn] = value;
       }
     }
-    
+
     const columns = Object.keys(columnMap);
     const values = Object.values(columnMap);
     const placeholders = columns.map((_, i) => `$${i + 1}`).join(', ');
-    
+
     // Create SQL statement with field mapping for the RETURNING clause
-    const returnFields = columns.map(col => 
-      `"${col}" AS "${dbToTsMapping[col] || col}"`
-    ).join(', ');
-    
+    const returnFields = columns.map(col => `"${col}" AS "${dbToTsMapping[col] || col}"`).join(', ');
+
     const sql = `
       INSERT INTO "${Table.ProductVariant}" (${columns.map(c => `"${c}"`).join(', ')})
       VALUES (${placeholders})
       RETURNING ${returnFields}
     `;
-    
+
     const result = await queryOne<ProductVariant>(sql, values);
-    
+
     if (!result) {
       throw new Error('Failed to create product variant');
     }
-    
+
     // If this is the default variant, ensure no other variants are set as default
     if (variant.isDefault) {
       await this.updateOtherVariantsNonDefault(id, variant.productId);
     }
-    
+
     return result;
   }
 
@@ -168,52 +194,50 @@ export class ProductVariantRepo {
    */
   async update(id: string, variant: ProductVariantUpdateProps): Promise<ProductVariant> {
     const now = new Date();
-    
+
     // Convert property names to DB column names
     const updateData: Record<string, any> = { updated_at: now };
-    
+
     for (const [key, value] of Object.entries(variant)) {
       if (value !== undefined) {
         const dbColumn = this.tsToDb(key);
         updateData[dbColumn] = value;
       }
     }
-    
-    if (Object.keys(updateData).length === 1) { // Only updatedAt
+
+    if (Object.keys(updateData).length === 1) {
+      // Only updatedAt
       const existingVariant = await this.findById(id);
       if (!existingVariant) {
         throw new Error('Variant not found');
       }
       return existingVariant;
     }
-    
+
     // Generate set statements for each field
     const setStatements: string[] = Object.keys(updateData).map((key, i) => `"${key}" = $${i + 1}`);
-    
+
     // Create values array with the updated fields
-    const values = [
-      ...Object.values(updateData),
-      id
-    ];
-    
+    const values = [...Object.values(updateData), id];
+
     // Generate SELECT AS mapping for returning values in camelCase
-    const returnFields = Object.keys(dbToTsMapping).map(dbCol => 
-      `"${dbCol}" AS "${dbToTsMapping[dbCol]}"`
-    ).join(', ');
-    
+    const returnFields = Object.keys(dbToTsMapping)
+      .map(dbCol => `"${dbCol}" AS "${dbToTsMapping[dbCol]}"`)
+      .join(', ');
+
     const sql = `
       UPDATE "${Table.ProductVariant}" 
       SET ${setStatements.join(', ')} 
       WHERE "id" = $${values.length} AND "deletedAt" IS NULL 
       RETURNING ${returnFields}
     `;
-    
+
     const result = await queryOne<ProductVariant>(sql, values);
-    
+
     if (!result) {
       throw new Error('Failed to update product variant');
     }
-    
+
     // If this variant is now set as default, update other variants
     if (variant.isDefault === true) {
       const existingVariant = await this.findById(id);
@@ -221,7 +245,7 @@ export class ProductVariantRepo {
         await this.updateOtherVariantsNonDefault(id, existingVariant.productId);
       }
     }
-    
+
     return result;
   }
 
@@ -232,23 +256,20 @@ export class ProductVariantRepo {
   async delete(id: string): Promise<boolean> {
     // First check if this is a default (master) variant
     const variant = await this.findById(id);
-    
+
     if (!variant) {
       return false;
     }
-    
+
     // Prevent deletion of the master variant
     if (variant.isDefault) {
       throw new Error('Cannot delete the master variant of a product. The master variant is required.');
     }
-    
+
     const now = new Date();
-    
-    await query(
-      `UPDATE "${Table.ProductVariant}" SET "deletedAt" = $1, "updatedAt" = $2 WHERE "id" = $3`,
-      [now, now, id]
-    );
-    
+
+    await query(`UPDATE "${Table.ProductVariant}" SET "deletedAt" = $1, "updatedAt" = $2 WHERE "id" = $3`, [now, now, id]);
+
     return true;
   }
 
@@ -259,11 +280,11 @@ export class ProductVariantRepo {
   async ensureMasterVariantExists(product: any): Promise<ProductVariant | null> {
     // Check if a default variant already exists
     const defaultVariant = await this.findDefaultForProduct(product.id);
-    
+
     if (defaultVariant) {
       return defaultVariant;
     }
-    
+
     // No master variant exists, create one
     try {
       const masterVariant = {
@@ -281,15 +302,14 @@ export class ProductVariantRepo {
         width: product.width,
         height: product.height,
         dimensionUnit: product.dimensionUnit,
-        isDefault: true,  // This is the master variant
-        position: 0,      // First position
-        options: [],      // No options for master variant
-        isActive: true
+        isDefault: true, // This is the master variant
+        position: 0, // First position
+        options: [], // No options for master variant
+        isActive: true,
       };
-      
+
       return await this.create(masterVariant);
     } catch (error) {
-      
       return null;
     }
   }
@@ -299,24 +319,24 @@ export class ProductVariantRepo {
    */
   async setDefault(id: string): Promise<ProductVariant> {
     const variant = await this.findById(id);
-    
+
     if (!variant) {
       throw new Error('Variant not found');
     }
-    
+
     const now = new Date();
-    
+
     // Generate SELECT AS mapping for returning values in camelCase
-    const returnFields = Object.keys(dbToTsMapping).map(dbCol => 
-      `"${dbCol}" AS "${dbToTsMapping[dbCol]}"`
-    ).join(', ');
-    
+    const returnFields = Object.keys(dbToTsMapping)
+      .map(dbCol => `"${dbCol}" AS "${dbToTsMapping[dbCol]}"`)
+      .join(', ');
+
     // First, unset default on all variants for this product
     await query(
       `UPDATE "${Table.ProductVariant}" SET "isDefault" = false, "updatedAt" = $1 WHERE "productId" = $2 AND "deletedAt" IS NULL`,
-      [now, variant.productId]
+      [now, variant.productId],
     );
-    
+
     // Then set this variant as default
     const sql = `
       UPDATE "${Table.ProductVariant}" 
@@ -324,13 +344,13 @@ export class ProductVariantRepo {
       WHERE "id" = $2 AND "deletedAt" IS NULL 
       RETURNING ${returnFields}
     `;
-    
+
     const result = await queryOne<ProductVariant>(sql, [now, id]);
-    
+
     if (!result) {
       throw new Error('Failed to set default variant');
     }
-    
+
     return result;
   }
 
@@ -339,25 +359,25 @@ export class ProductVariantRepo {
    */
   async updateInventory(id: string, inventory: number): Promise<ProductVariant> {
     const now = new Date();
-    
+
     // Generate SELECT AS mapping for returning values in camelCase
-    const returnFields = Object.keys(dbToTsMapping).map(dbCol => 
-      `"${dbCol}" AS "${dbToTsMapping[dbCol]}"`
-    ).join(', ');
-    
+    const returnFields = Object.keys(dbToTsMapping)
+      .map(dbCol => `"${dbCol}" AS "${dbToTsMapping[dbCol]}"`)
+      .join(', ');
+
     const sql = `
       UPDATE "${Table.ProductVariant}" 
       SET "inventory" = $1, "updatedAt" = $2 
       WHERE "id" = $3 AND "deletedAt" IS NULL 
       RETURNING ${returnFields}
     `;
-    
+
     const result = await queryOne<ProductVariant>(sql, [inventory, now, id]);
-    
+
     if (!result) {
       throw new Error('Failed to update inventory');
     }
-    
+
     return result;
   }
 
@@ -366,11 +386,11 @@ export class ProductVariantRepo {
    */
   async adjustInventory(id: string, adjustmentValue: number): Promise<ProductVariant> {
     const variant = await this.findById(id);
-    
+
     if (!variant) {
       throw new Error('Variant not found');
     }
-    
+
     const newInventory = Math.max(0, variant.inventory + adjustmentValue);
     return await this.updateInventory(id, newInventory);
   }
@@ -380,18 +400,18 @@ export class ProductVariantRepo {
    */
   async reorder(productId: string, variantIds: string[]): Promise<boolean> {
     const now = new Date();
-    
+
     // Create statements for reordering
     const queries = variantIds.map((id, index) => ({
       sql: `UPDATE "${Table.ProductVariant}" SET "position" = $1, "updatedAt" = $2 WHERE "id" = $3 AND "productId" = $4 AND "deletedAt" IS NULL`,
-      params: [index, now, id, productId]
+      params: [index, now, id, productId],
     }));
-    
+
     // Execute all queries
     for (const q of queries) {
       await query(q.sql, q.params);
     }
-    
+
     return true;
   }
 
@@ -402,7 +422,7 @@ export class ProductVariantRepo {
     const now = new Date();
     await query(
       `UPDATE "${Table.ProductVariant}" SET "isDefault" = false, "updatedAt" = $1 WHERE "productId" = $2 AND "id" != $3 AND "deletedAt" IS NULL`,
-      [now, productId, currentVariantId]
+      [now, productId, currentVariantId],
     );
   }
 }

@@ -20,7 +20,7 @@ exports.up = function (knex) {
     t.boolean('requiresContract').notNullable().defaultTo(false);
     t.boolean('hasApiIntegration').notNullable().defaultTo(false);
     t.jsonb('customFields');
-    
+
     t.uuid('createdBy');
     t.index('code');
     t.index('isActive');

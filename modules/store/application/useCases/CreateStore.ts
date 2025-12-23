@@ -45,7 +45,7 @@ export class CreateStoreCommand {
       customPages?: any;
       customFields?: any;
       metadata?: any;
-    }
+    },
   ) {}
 }
 
@@ -74,7 +74,7 @@ export class CreateStoreUseCase {
   constructor(
     private readonly storeRepository: StoreRepository,
     private readonly businessRepository: BusinessRepository,
-    private readonly systemConfigRepository: SystemConfigurationRepository
+    private readonly systemConfigRepository: SystemConfigurationRepository,
   ) {}
 
   async execute(command: CreateStoreCommand): Promise<CreateStoreResponse> {
@@ -125,7 +125,7 @@ export class CreateStoreUseCase {
       theme: command.storeData.theme,
       defaultCurrency: command.storeData.defaultCurrency,
       supportedCurrencies: command.storeData.supportedCurrencies,
-      metadata: command.storeData.metadata
+      metadata: command.storeData.metadata,
     });
 
     // Save store
@@ -141,7 +141,7 @@ export class CreateStoreUseCase {
       storeUrl: savedStore.storeUrl,
       isActive: savedStore.isActive,
       isVerified: savedStore.isVerified,
-      createdAt: savedStore.createdAt.toISOString()
+      createdAt: savedStore.createdAt.toISOString(),
     };
   }
 
@@ -164,7 +164,6 @@ export class CreateStoreUseCase {
       // if (!merchant) {
       //   throw new Error('Merchant not found.');
       // }
-
     } else if (storeType === 'business_store') {
       // Multi-store mode: store must belong to a business
       if (!businessId) {

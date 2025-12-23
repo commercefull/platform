@@ -12,11 +12,11 @@ export function generateSlug(text: string): string {
     .toString()
     .toLowerCase()
     .trim()
-    .replace(/[\s_]+/g, '-')     // Replace spaces and underscores with hyphens
-    .replace(/[^\w\-]+/g, '')    // Remove all non-word characters except hyphens
-    .replace(/\-\-+/g, '-')      // Replace multiple hyphens with single hyphen
-    .replace(/^-+/, '')          // Trim hyphens from start
-    .replace(/-+$/, '');         // Trim hyphens from end
+    .replace(/[\s_]+/g, '-') // Replace spaces and underscores with hyphens
+    .replace(/[^\w\-]+/g, '') // Remove all non-word characters except hyphens
+    .replace(/\-\-+/g, '-') // Replace multiple hyphens with single hyphen
+    .replace(/^-+/, '') // Trim hyphens from start
+    .replace(/-+$/, ''); // Trim hyphens from end
 }
 
 /**
@@ -28,16 +28,16 @@ export function generateSlug(text: string): string {
 export function generateUniqueSlug(baseSlug: string, existingSlugs: string[]): string {
   let slug = baseSlug;
   let counter = 1;
-  
+
   while (existingSlugs.includes(slug)) {
     slug = `${baseSlug}-${counter}`;
     counter++;
   }
-  
+
   return slug;
 }
 
 export default {
   generateSlug,
-  generateUniqueSlug
+  generateUniqueSlug,
 };

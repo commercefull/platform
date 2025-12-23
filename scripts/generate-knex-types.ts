@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 import fs from 'fs';
 import path from 'path';
 import { knex, Knex } from 'knex';
@@ -26,21 +25,17 @@ async function main(): Promise<void> {
 
   try {
     const options: Options = {
-      output: OUTPUT_PATH
+      output: OUTPUT_PATH,
     };
 
     fs.mkdirSync(path.dirname(OUTPUT_PATH), { recursive: true });
 
     await updateTypes(db, options);
-    // eslint-disable-next-line no-console
-    
   } finally {
     await db.destroy();
   }
 }
 
 main().catch(error => {
-  // eslint-disable-next-line no-console
-  
   process.exit(1);
 });

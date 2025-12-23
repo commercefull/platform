@@ -32,7 +32,9 @@ export interface TaxCalculationApplied {
 }
 
 export type TaxCalculationAppliedCreateParams = Omit<TaxCalculationApplied, 'taxCalculationAppliedId' | 'createdAt' | 'updatedAt'>;
-export type TaxCalculationAppliedUpdateParams = Partial<Omit<TaxCalculationApplied, 'taxCalculationAppliedId' | 'calculationId' | 'createdAt' | 'updatedAt'>>;
+export type TaxCalculationAppliedUpdateParams = Partial<
+  Omit<TaxCalculationApplied, 'taxCalculationAppliedId' | 'calculationId' | 'createdAt' | 'updatedAt'>
+>;
 
 export class TaxCalculationAppliedRepo {
   async findById(id: string): Promise<TaxCalculationApplied | null> {
@@ -40,24 +42,30 @@ export class TaxCalculationAppliedRepo {
   }
 
   async findByCalculation(calculationId: string): Promise<TaxCalculationApplied[]> {
-    return (await query<TaxCalculationApplied[]>(
-      `SELECT * FROM "taxCalculationApplied" WHERE "calculationId" = $1 ORDER BY "jurisdictionLevel" ASC`,
-      [calculationId]
-    )) || [];
+    return (
+      (await query<TaxCalculationApplied[]>(
+        `SELECT * FROM "taxCalculationApplied" WHERE "calculationId" = $1 ORDER BY "jurisdictionLevel" ASC`,
+        [calculationId],
+      )) || []
+    );
   }
 
   async findByCalculationLine(calculationLineId: string): Promise<TaxCalculationApplied[]> {
-    return (await query<TaxCalculationApplied[]>(
-      `SELECT * FROM "taxCalculationApplied" WHERE "calculationLineId" = $1 ORDER BY "jurisdictionLevel" ASC`,
-      [calculationLineId]
-    )) || [];
+    return (
+      (await query<TaxCalculationApplied[]>(
+        `SELECT * FROM "taxCalculationApplied" WHERE "calculationLineId" = $1 ORDER BY "jurisdictionLevel" ASC`,
+        [calculationLineId],
+      )) || []
+    );
   }
 
   async findByJurisdiction(calculationId: string, jurisdictionLevel: TaxJurisdictionLevel): Promise<TaxCalculationApplied[]> {
-    return (await query<TaxCalculationApplied[]>(
-      `SELECT * FROM "taxCalculationApplied" WHERE "calculationId" = $1 AND "jurisdictionLevel" = $2`,
-      [calculationId, jurisdictionLevel]
-    )) || [];
+    return (
+      (await query<TaxCalculationApplied[]>(
+        `SELECT * FROM "taxCalculationApplied" WHERE "calculationId" = $1 AND "jurisdictionLevel" = $2`,
+        [calculationId, jurisdictionLevel],
+      )) || []
+    );
   }
 
   async create(params: TaxCalculationAppliedCreateParams): Promise<TaxCalculationApplied> {
@@ -69,11 +77,23 @@ export class TaxCalculationAppliedRepo {
         "isCompound", "taxableAmount", "taxAmount", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) RETURNING *`,
       [
-        params.calculationId, params.calculationLineId || null, params.taxRateId || null, params.taxRateName,
-        params.taxZoneId || null, params.taxZoneName || null, params.taxCategoryId || null,
-        params.taxCategoryName || null, params.jurisdictionLevel, params.jurisdictionName, params.rate,
-        params.isCompound || false, params.taxableAmount, params.taxAmount, now, now
-      ]
+        params.calculationId,
+        params.calculationLineId || null,
+        params.taxRateId || null,
+        params.taxRateName,
+        params.taxZoneId || null,
+        params.taxZoneName || null,
+        params.taxCategoryId || null,
+        params.taxCategoryName || null,
+        params.jurisdictionLevel,
+        params.jurisdictionName,
+        params.rate,
+        params.isCompound || false,
+        params.taxableAmount,
+        params.taxAmount,
+        now,
+        now,
+      ],
     );
     if (!result) throw new Error('Failed to create tax calculation applied');
     return result;
@@ -98,14 +118,14 @@ export class TaxCalculationAppliedRepo {
 
     return await queryOne<TaxCalculationApplied>(
       `UPDATE "taxCalculationApplied" SET ${updateFields.join(', ')} WHERE "taxCalculationAppliedId" = $${paramIndex} RETURNING *`,
-      values
+      values,
     );
   }
 
   async delete(id: string): Promise<boolean> {
     const result = await queryOne<{ taxCalculationAppliedId: string }>(
       `DELETE FROM "taxCalculationApplied" WHERE "taxCalculationAppliedId" = $1 RETURNING "taxCalculationAppliedId"`,
-      [id]
+      [id],
     );
     return !!result;
   }
@@ -113,7 +133,7 @@ export class TaxCalculationAppliedRepo {
   async deleteByCalculation(calculationId: string): Promise<number> {
     const results = await query<{ taxCalculationAppliedId: string }[]>(
       `DELETE FROM "taxCalculationApplied" WHERE "calculationId" = $1 RETURNING "taxCalculationAppliedId"`,
-      [calculationId]
+      [calculationId],
     );
     return results ? results.length : 0;
   }
@@ -121,7 +141,7 @@ export class TaxCalculationAppliedRepo {
   async getTotalTaxAmount(calculationId: string): Promise<number> {
     const result = await queryOne<{ total: string }>(
       `SELECT SUM("taxAmount") as total FROM "taxCalculationApplied" WHERE "calculationId" = $1`,
-      [calculationId]
+      [calculationId],
     );
     return result ? parseFloat(result.total) || 0 : 0;
   }

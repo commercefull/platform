@@ -1,12 +1,12 @@
-import { queryOne, query } from "../../../libs/db";
-import { Table, CartPromotion } from "../../../libs/db/types";
+import { queryOne, query } from '../../../libs/db';
+import { Table, CartPromotion } from '../../../libs/db/types';
 
 // Use CartPromotion type directly from libs/db/types.ts
 export type { CartPromotion };
 
-type CreateProps = Pick<CartPromotion, "basketId" | "promotionId" | "discountAmount" | "status"> & 
-  Partial<Pick<CartPromotion, "promotionCouponId" | "couponCode" | "currencyCode" | "appliedBy">>;
-type UpdateProps = Partial<Pick<CartPromotion, "discountAmount" | "status">>;
+type CreateProps = Pick<CartPromotion, 'basketId' | 'promotionId' | 'discountAmount' | 'status'> &
+  Partial<Pick<CartPromotion, 'promotionCouponId' | 'couponCode' | 'currencyCode' | 'appliedBy'>>;
+type UpdateProps = Partial<Pick<CartPromotion, 'discountAmount' | 'status'>>;
 
 export class CartPromotionRepo {
   async create(props: CreateProps): Promise<CartPromotion> {
@@ -27,8 +27,8 @@ export class CartPromotionRepo {
         props.appliedBy || null,
         now,
         now,
-        now
-      ]
+        now,
+      ],
     );
 
     if (!row) {
@@ -56,7 +56,7 @@ export class CartPromotionRepo {
        SET ${updates.join(', ')} 
        WHERE "cartPromotionId" = $${paramIndex} 
        RETURNING *`,
-      values
+      values,
     );
 
     if (!row) {
@@ -66,24 +66,15 @@ export class CartPromotionRepo {
   }
 
   async getById(id: string): Promise<CartPromotion | null> {
-    return queryOne<CartPromotion>(
-      `SELECT * FROM "${Table.CartPromotion}" WHERE "cartPromotionId" = $1`,
-      [id]
-    );
+    return queryOne<CartPromotion>(`SELECT * FROM "${Table.CartPromotion}" WHERE "cartPromotionId" = $1`, [id]);
   }
 
   async getByBasketId(basketId: string): Promise<CartPromotion[]> {
-    return await query<CartPromotion[]>(
-      `SELECT * FROM "${Table.CartPromotion}" WHERE "basketId" = $1`,
-      [basketId]
-    ) || [];
+    return (await query<CartPromotion[]>(`SELECT * FROM "${Table.CartPromotion}" WHERE "basketId" = $1`, [basketId])) || [];
   }
 
   async delete(id: string): Promise<boolean> {
-    const result = await query(
-      `DELETE FROM "${Table.CartPromotion}" WHERE "cartPromotionId" = $1`,
-      [id]
-    );
+    const result = await query(`DELETE FROM "${Table.CartPromotion}" WHERE "cartPromotionId" = $1`, [id]);
     return result !== null;
   }
 }

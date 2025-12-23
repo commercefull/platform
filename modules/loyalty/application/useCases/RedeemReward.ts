@@ -1,6 +1,6 @@
 /**
  * RedeemReward Use Case
- * 
+ *
  * Redeems a specific reward using customer's loyalty points.
  */
 
@@ -103,9 +103,7 @@ export class RedeemRewardUseCase {
       pointsSpent: reward.pointsCost,
       status: 'completed',
       redeemedAt: now,
-      expiresAt: reward.redemptionExpiryDays
-        ? new Date(now.getTime() + reward.redemptionExpiryDays * 24 * 60 * 60 * 1000)
-        : undefined,
+      expiresAt: reward.redemptionExpiryDays ? new Date(now.getTime() + reward.redemptionExpiryDays * 24 * 60 * 60 * 1000) : undefined,
     });
 
     // Generate coupon code if discount type reward

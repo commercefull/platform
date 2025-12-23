@@ -17,7 +17,7 @@ export class RestockCommand {
     public readonly quantity: number,
     public readonly reference?: string,
     public readonly notes?: string,
-    public readonly createdBy: string = 'system'
+    public readonly createdBy: string = 'system',
   ) {}
 }
 
@@ -26,7 +26,7 @@ export class AdjustStockCommand {
     public readonly inventoryId: string,
     public readonly newQuantity: number,
     public readonly reason: string,
-    public readonly createdBy: string = 'system'
+    public readonly createdBy: string = 'system',
   ) {}
 }
 
@@ -36,7 +36,7 @@ export class ReserveStockCommand {
     public readonly quantity: number,
     public readonly orderId?: string,
     public readonly basketId?: string,
-    public readonly expiresInMinutes: number = 15
+    public readonly expiresInMinutes: number = 15,
   ) {}
 }
 
@@ -81,7 +81,7 @@ export class RestockUseCase {
       quantity: command.quantity,
       reference: command.reference,
       notes: command.notes,
-      createdBy: command.createdBy
+      createdBy: command.createdBy,
     });
 
     return {
@@ -90,7 +90,7 @@ export class RestockUseCase {
       previousQuantity,
       newQuantity: item.quantity,
       availableQuantity: item.availableQuantity,
-      operation: 'restock'
+      operation: 'restock',
     };
   }
 }
@@ -112,7 +112,7 @@ export class AdjustStockUseCase {
       type: 'adjustment',
       quantity: difference,
       notes: command.reason,
-      createdBy: command.createdBy
+      createdBy: command.createdBy,
     });
 
     return {
@@ -121,7 +121,7 @@ export class AdjustStockUseCase {
       previousQuantity,
       newQuantity: item.quantity,
       availableQuantity: item.availableQuantity,
-      operation: 'adjustment'
+      operation: 'adjustment',
     };
   }
 }
@@ -149,20 +149,20 @@ export class ReserveStockUseCase {
       quantity: command.quantity,
       orderId: command.orderId,
       basketId: command.basketId,
-      expiresAt
+      expiresAt,
     });
 
     eventBus.emit('inventory.reserved', {
       reservationId,
       inventoryId: command.inventoryId,
-      quantity: command.quantity
+      quantity: command.quantity,
     });
 
     return {
       reservationId,
       inventoryId: item.inventoryId,
       quantity: command.quantity,
-      expiresAt: expiresAt.toISOString()
+      expiresAt: expiresAt.toISOString(),
     };
   }
 }

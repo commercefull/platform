@@ -64,7 +64,7 @@ export class CreateOrderCommand {
     public readonly ipAddress?: string,
     public readonly userAgent?: string,
     public readonly referralSource?: string,
-    public readonly metadata?: Record<string, any>
+    public readonly metadata?: Record<string, any>,
   ) {}
 }
 
@@ -131,7 +131,7 @@ export class CreateOrderUseCase {
       ipAddress: command.ipAddress,
       userAgent: command.userAgent,
       referralSource: command.referralSource,
-      metadata: command.metadata
+      metadata: command.metadata,
     });
 
     // Add items
@@ -146,13 +146,11 @@ export class CreateOrderUseCase {
         description: itemInput.description,
         quantity: itemInput.quantity,
         unitPrice: Money.create(itemInput.unitPrice, currency),
-        discountedUnitPrice: itemInput.discountedUnitPrice 
-          ? Money.create(itemInput.discountedUnitPrice, currency) 
-          : undefined,
+        discountedUnitPrice: itemInput.discountedUnitPrice ? Money.create(itemInput.discountedUnitPrice, currency) : undefined,
         taxRate: itemInput.taxRate,
         options: itemInput.options,
         attributes: itemInput.attributes,
-        isDigital: itemInput.isDigital
+        isDigital: itemInput.isDigital,
       });
       order.addItem(item);
     }
@@ -167,7 +165,7 @@ export class CreateOrderUseCase {
       orderAddressId: generateUUID(),
       orderId,
       addressType: 'shipping',
-      ...command.shippingAddress
+      ...command.shippingAddress,
     });
     order.setShippingAddress(shippingAddress);
 
@@ -177,7 +175,7 @@ export class CreateOrderUseCase {
       orderAddressId: generateUUID(),
       orderId,
       addressType: 'billing',
-      ...billingAddressInput
+      ...billingAddressInput,
     });
     order.setBillingAddress(billingAddress);
 
@@ -190,7 +188,7 @@ export class CreateOrderUseCase {
       orderNumber: savedOrder.orderNumber,
       customerId: savedOrder.customerId,
       totalAmount: savedOrder.totalAmount.amount,
-      currency: savedOrder.currencyCode
+      currency: savedOrder.currencyCode,
     });
 
     return this.mapToResponse(savedOrder);
@@ -213,7 +211,7 @@ export class CreateOrderUseCase {
       totalQuantity: order.totalQuantity,
       currencyCode: order.currencyCode,
       customerEmail: order.customerEmail,
-      createdAt: order.createdAt.toISOString()
+      createdAt: order.createdAt.toISOString(),
     };
   }
 }

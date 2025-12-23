@@ -3,14 +3,7 @@
  */
 
 import { Router } from 'express';
-import {
-  createChannel,
-  getChannel,
-  updateChannel,
-  listChannels,
-  assignProducts,
-  assignWarehouse,
-} from '../controllers/ChannelController';
+import { createChannel, getChannel, updateChannel, listChannels, assignProducts, assignWarehouse } from '../controllers/ChannelController';
 
 const router = Router();
 

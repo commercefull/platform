@@ -6,9 +6,7 @@
 import { ContentRedirectRepo } from '../../../repos/contentRedirectRepo';
 
 export class ProcessRedirectQuery {
-  constructor(
-    public readonly url: string
-  ) {}
+  constructor(public readonly url: string) {}
 }
 
 export interface RedirectResult {
@@ -51,7 +49,7 @@ export class ProcessRedirectUseCase {
       shouldRedirect: true,
       targetUrl,
       statusCode: parseInt(redirect.statusCode, 10),
-      redirectId: redirect.contentRedirectId
+      redirectId: redirect.contentRedirectId,
     };
   }
 }

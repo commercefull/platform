@@ -45,9 +45,7 @@ export class TaxZoneRepo {
   }
 
   async findDefault(): Promise<TaxZone | null> {
-    return await queryOne<TaxZone>(
-      `SELECT * FROM "taxZone" WHERE "isDefault" = true AND "isActive" = true LIMIT 1`
-    );
+    return await queryOne<TaxZone>(`SELECT * FROM "taxZone" WHERE "isDefault" = true AND "isActive" = true LIMIT 1`);
   }
 
   async findAll(activeOnly = false): Promise<TaxZone[]> {
@@ -70,11 +68,18 @@ export class TaxZoneRepo {
         "postcodes", "cities", "isActive", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *`,
       [
-        params.name, params.code, params.description || null, params.isDefault || false,
-        JSON.stringify(params.countries), JSON.stringify(params.states || []),
-        JSON.stringify(params.postcodes || []), JSON.stringify(params.cities || []),
-        params.isActive ?? true, now, now
-      ]
+        params.name,
+        params.code,
+        params.description || null,
+        params.isDefault || false,
+        JSON.stringify(params.countries),
+        JSON.stringify(params.states || []),
+        JSON.stringify(params.postcodes || []),
+        JSON.stringify(params.cities || []),
+        params.isActive ?? true,
+        now,
+        now,
+      ],
     );
     if (!result) throw new Error('Failed to create tax zone');
     return result;
@@ -82,10 +87,10 @@ export class TaxZoneRepo {
 
   async update(id: string, params: TaxZoneUpdateParams): Promise<TaxZone | null> {
     if (params.isDefault === true) {
-      await query(
-        `UPDATE "taxZone" SET "isDefault" = false, "updatedAt" = $1 WHERE "isDefault" = true AND "taxZoneId" != $2`,
-        [unixTimestamp(), id]
-      );
+      await query(`UPDATE "taxZone" SET "isDefault" = false, "updatedAt" = $1 WHERE "isDefault" = true AND "taxZoneId" != $2`, [
+        unixTimestamp(),
+        id,
+      ]);
     }
 
     const updateFields: string[] = [];
@@ -110,7 +115,7 @@ export class TaxZoneRepo {
 
     return await queryOne<TaxZone>(
       `UPDATE "taxZone" SET ${updateFields.join(', ')} WHERE "taxZoneId" = $${paramIndex} RETURNING *`,
-      values
+      values,
     );
   }
 
@@ -123,10 +128,7 @@ export class TaxZoneRepo {
   }
 
   async delete(id: string): Promise<boolean> {
-    const result = await queryOne<{ taxZoneId: string }>(
-      `DELETE FROM "taxZone" WHERE "taxZoneId" = $1 RETURNING "taxZoneId"`,
-      [id]
-    );
+    const result = await queryOne<{ taxZoneId: string }>(`DELETE FROM "taxZone" WHERE "taxZoneId" = $1 RETURNING "taxZoneId"`, [id]);
     return !!result;
   }
 

@@ -9,38 +9,25 @@ import { BusinessRepository as IBusinessRepository, BusinessFilters } from '../.
 import { Business } from '../../domain/entities/Business';
 
 export class BusinessRepo implements IBusinessRepository {
-
   async findById(businessId: string): Promise<Business | null> {
-    const row = await queryOne<Record<string, any>>(
-      'SELECT * FROM "business" WHERE "businessId" = $1',
-      [businessId]
-    );
+    const row = await queryOne<Record<string, any>>('SELECT * FROM "business" WHERE "businessId" = $1', [businessId]);
     return row ? this.mapToBusiness(row) : null;
   }
 
   async findBySlug(slug: string): Promise<Business | null> {
-    const row = await queryOne<Record<string, any>>(
-      'SELECT * FROM "business" WHERE "slug" = $1',
-      [slug]
-    );
+    const row = await queryOne<Record<string, any>>('SELECT * FROM "business" WHERE "slug" = $1', [slug]);
     return row ? this.mapToBusiness(row) : null;
   }
 
   async findByDomain(domain: string): Promise<Business | null> {
-    const row = await queryOne<Record<string, any>>(
-      'SELECT * FROM "business" WHERE "domain" = $1',
-      [domain]
-    );
+    const row = await queryOne<Record<string, any>>('SELECT * FROM "business" WHERE "domain" = $1', [domain]);
     return row ? this.mapToBusiness(row) : null;
   }
 
   async findAll(filters?: BusinessFilters): Promise<Business[]> {
     const { whereClause, params } = this.buildWhereClause(filters);
 
-    const rows = await query<Record<string, any>[]>(
-      `SELECT * FROM "business" ${whereClause} ORDER BY "createdAt" DESC`,
-      params
-    );
+    const rows = await query<Record<string, any>[]>(`SELECT * FROM "business" ${whereClause} ORDER BY "createdAt" DESC`, params);
 
     return (rows || []).map(row => this.mapToBusiness(row));
   }
@@ -48,10 +35,9 @@ export class BusinessRepo implements IBusinessRepository {
   async save(business: Business): Promise<Business> {
     const now = new Date().toISOString();
 
-    const existing = await queryOne<Record<string, any>>(
-      'SELECT "businessId" FROM "business" WHERE "businessId" = $1',
-      [business.businessId]
-    );
+    const existing = await queryOne<Record<string, any>>('SELECT "businessId" FROM "business" WHERE "businessId" = $1', [
+      business.businessId,
+    ]);
 
     if (existing) {
       await query(
@@ -63,14 +49,26 @@ export class BusinessRepo implements IBusinessRepository {
           "timezone" = $16, "metadata" = $17, "updatedAt" = $18
         WHERE "businessId" = $19`,
         [
-          business.name, business.slug, business.description, business.businessType,
-          business.domain, business.logo, business.favicon, business.primaryColor,
-          business.secondaryColor, business.isActive,
-          business.settings.allowMultipleStores, business.settings.allowMultipleWarehouses,
-          business.settings.enableMarketplace, business.settings.defaultCurrency,
-          business.settings.defaultLanguage, business.settings.timezone,
-          JSON.stringify(business.metadata || {}), now, business.businessId
-        ]
+          business.name,
+          business.slug,
+          business.description,
+          business.businessType,
+          business.domain,
+          business.logo,
+          business.favicon,
+          business.primaryColor,
+          business.secondaryColor,
+          business.isActive,
+          business.settings.allowMultipleStores,
+          business.settings.allowMultipleWarehouses,
+          business.settings.enableMarketplace,
+          business.settings.defaultCurrency,
+          business.settings.defaultLanguage,
+          business.settings.timezone,
+          JSON.stringify(business.metadata || {}),
+          now,
+          business.businessId,
+        ],
       );
     } else {
       await query(
@@ -81,14 +79,27 @@ export class BusinessRepo implements IBusinessRepository {
           "defaultCurrency", "defaultLanguage", timezone, metadata, "createdAt", "updatedAt"
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)`,
         [
-          business.businessId, business.name, business.slug, business.description,
-          business.businessType, business.domain, business.logo, business.favicon,
-          business.primaryColor, business.secondaryColor, business.isActive,
-          business.settings.allowMultipleStores, business.settings.allowMultipleWarehouses,
-          business.settings.enableMarketplace, business.settings.defaultCurrency,
-          business.settings.defaultLanguage, business.settings.timezone,
-          JSON.stringify(business.metadata || {}), now, now
-        ]
+          business.businessId,
+          business.name,
+          business.slug,
+          business.description,
+          business.businessType,
+          business.domain,
+          business.logo,
+          business.favicon,
+          business.primaryColor,
+          business.secondaryColor,
+          business.isActive,
+          business.settings.allowMultipleStores,
+          business.settings.allowMultipleWarehouses,
+          business.settings.enableMarketplace,
+          business.settings.defaultCurrency,
+          business.settings.defaultLanguage,
+          business.settings.timezone,
+          JSON.stringify(business.metadata || {}),
+          now,
+          now,
+        ],
       );
     }
 
@@ -101,10 +112,7 @@ export class BusinessRepo implements IBusinessRepository {
 
   async count(filters?: BusinessFilters): Promise<number> {
     const { whereClause, params } = this.buildWhereClause(filters);
-    const result = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM "business" ${whereClause}`,
-      params
-    );
+    const result = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "business" ${whereClause}`, params);
     return parseInt(result?.count || '0');
   }
 
@@ -132,7 +140,7 @@ export class BusinessRepo implements IBusinessRepository {
 
     return {
       whereClause: conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '',
-      params
+      params,
     };
   }
 
@@ -155,11 +163,11 @@ export class BusinessRepo implements IBusinessRepository {
         enableMarketplace: Boolean(row.enableMarketplace),
         defaultCurrency: row.defaultCurrency || 'USD',
         defaultLanguage: row.defaultLanguage || 'en',
-        timezone: row.timezone || 'UTC'
+        timezone: row.timezone || 'UTC',
       },
       metadata: typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata,
       createdAt: new Date(row.createdAt),
-      updatedAt: new Date(row.updatedAt)
+      updatedAt: new Date(row.updatedAt),
     });
   }
 }

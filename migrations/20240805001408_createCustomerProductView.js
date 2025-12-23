@@ -2,8 +2,8 @@
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.up = function(knex) {
-  return knex.schema.createTable('customerProductView', function(table) {
+exports.up = function (knex) {
+  return knex.schema.createTable('customerProductView', function (table) {
     table.uuid('customerProductViewId').primary().defaultTo(knex.raw('uuidv7()'));
     table.uuid('customerId').references('customerId').inTable('customer').onDelete('CASCADE');
     table.string('sessionId');
@@ -34,6 +34,6 @@ exports.up = function(knex) {
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTableIfExists('customerProductView');
 };

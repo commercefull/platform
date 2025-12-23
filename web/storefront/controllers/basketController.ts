@@ -34,14 +34,14 @@ export const viewBasket = async (req: Request, res: Response): Promise<void> => 
 
     storefrontRespond(req, res, 'basket/basket', {
       pageName: 'Shopping Cart',
-      basket: { ...basket, totals }
+      basket: { ...basket, totals },
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     storefrontRespond(req, res, 'error', {
       pageName: 'Error',
-      error: error.message || 'Failed to load shopping cart'
+      error: error.message || 'Failed to load shopping cart',
     });
   }
 };
@@ -77,11 +77,11 @@ export const addToBasket = async (req: Request, res: Response): Promise<void> =>
       product.sku || product.productId,
       product.name,
       parseInt(quantity as string),
-      (product.effectivePrice ?? product.basePrice ?? 0),
+      product.effectivePrice ?? product.basePrice ?? 0,
       variantId,
       product.primaryImage?.url,
       undefined,
-      product.hasVariants ? 'physical' : 'physical'
+      product.hasVariants ? 'physical' : 'physical',
     );
 
     const addUc = new AddItemUseCase(BasketRepo);
@@ -90,10 +90,9 @@ export const addToBasket = async (req: Request, res: Response): Promise<void> =>
     // Redirect back to product page or cart with success message
     const redirectTo = req.body.redirectTo || '/basket';
     res.redirect(redirectTo + '?success=' + encodeURIComponent('Item added to cart'));
-
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.redirect('/?error=' + encodeURIComponent(error.message || 'Failed to add item to cart'));
   }
 };
@@ -113,11 +112,7 @@ export const updateBasketItem = async (req: Request, res: Response): Promise<voi
     const getUc = new GetOrCreateBasketUseCase(BasketRepo);
     const basket = await getUc.execute(getCmd);
 
-    const updCmd = new UpdateItemQuantityCommand(
-      basket.basketId,
-      basketItemId,
-      parseInt(quantity as string)
-    );
+    const updCmd = new UpdateItemQuantityCommand(basket.basketId, basketItemId, parseInt(quantity as string));
 
     const updUc = new UpdateItemQuantityUseCase(BasketRepo);
     await updUc.execute(updCmd);
@@ -129,7 +124,7 @@ export const updateBasketItem = async (req: Request, res: Response): Promise<voi
     }
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     if (req.xhr || req.headers.accept?.includes('application/json')) {
       res.status(500).json({ success: false, message: error.message });
     } else {
@@ -163,7 +158,7 @@ export const removeFromBasket = async (req: Request, res: Response): Promise<voi
     }
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     if (req.xhr || req.headers.accept?.includes('application/json')) {
       res.status(500).json({ success: false, message: error.message });
     } else {
@@ -196,7 +191,7 @@ export const clearBasket = async (req: Request, res: Response): Promise<void> =>
     }
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     if (req.xhr || req.headers.accept?.includes('application/json')) {
       res.status(500).json({ success: false, message: error.message });
     } else {
@@ -210,16 +205,17 @@ export const clearBasket = async (req: Request, res: Response): Promise<void> =>
 // ============================================================================
 
 async function calculateBasketTotals(basket: any, user: any) {
-  const subtotal = typeof basket.subtotal === 'number'
-    ? basket.subtotal
-    : (basket.items?.reduce((sum: number, item: any) => sum + (item.lineTotal ?? (item.unitPrice * item.quantity)), 0) || 0);
+  const subtotal =
+    typeof basket.subtotal === 'number'
+      ? basket.subtotal
+      : basket.items?.reduce((sum: number, item: any) => sum + (item.lineTotal ?? item.unitPrice * item.quantity), 0) || 0;
 
   // Use a default US address for basket tax calculation (will be recalculated at checkout with actual address)
   const defaultAddress = {
     country: 'US',
     region: '',
     postalCode: '',
-    city: ''
+    city: '',
   };
 
   // Calculate tax using the tax service
@@ -228,11 +224,11 @@ async function calculateBasketTotals(basket: any, user: any) {
       productId: item.productId,
       name: item.name,
       quantity: item.quantity,
-      unitPrice: item.unitPrice
+      unitPrice: item.unitPrice,
     })) || [],
     defaultAddress,
     0, // No shipping in basket view
-    user?.customerId
+    user?.customerId,
   );
 
   const taxUseCase = new CalculateOrderTaxUseCase();
@@ -244,6 +240,6 @@ async function calculateBasketTotals(basket: any, user: any) {
     subtotal: subtotal.toFixed(2),
     tax: taxResult.taxAmount.toFixed(2),
     total: total.toFixed(2),
-    taxRate: taxResult.taxRate
+    taxRate: taxResult.taxRate,
   };
 }

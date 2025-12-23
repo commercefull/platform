@@ -25,11 +25,13 @@ tests/integration/content/
 ## Running Tests
 
 ### Run all content tests
+
 ```bash
 npm test -- --testPathPattern="tests/integration/content"
 ```
 
 ### Run specific domain tests
+
 ```bash
 # Pages
 npm test -- --testPathPattern="tests/integration/content/pages"
@@ -53,6 +55,7 @@ npm test -- --testPathPattern="tests/integration/content/templates"
 ## Test Coverage
 
 ### Pages (`pages.test.ts`)
+
 - GET /content/pages - List pages with pagination
 - POST /content/pages - Create new page
 - GET /content/pages/:id - Get page by ID
@@ -65,6 +68,7 @@ npm test -- --testPathPattern="tests/integration/content/templates"
 - POST /content/pages/:id/duplicate - Duplicate page
 
 ### Categories (`categories.test.ts`)
+
 - GET /content/categories - List categories
 - GET /content/categories/tree - Get category tree
 - POST /content/categories - Create category
@@ -74,6 +78,7 @@ npm test -- --testPathPattern="tests/integration/content/templates"
 - POST /content/categories/:id/move - Move category in hierarchy
 
 ### Navigation (`navigation.test.ts`)
+
 - GET /content/navigations - List navigations
 - POST /content/navigations - Create navigation
 - GET /content/navigations/:id - Get navigation by ID
@@ -86,6 +91,7 @@ npm test -- --testPathPattern="tests/integration/content/templates"
 - POST /content/navigations/:navigationId/items/reorder - Reorder items
 
 ### Media (`media.test.ts`)
+
 - GET /content/media - List media files
 - POST /content/media - Upload/register media
 - GET /content/media/:id - Get media by ID
@@ -99,6 +105,7 @@ npm test -- --testPathPattern="tests/integration/content/templates"
 - DELETE /content/media-folders/:id - Delete folder
 
 ### Redirects (`redirects.test.ts`)
+
 - GET /content/redirects - List redirects
 - POST /content/redirects - Create redirect
 - GET /content/redirects/:id - Get redirect by ID
@@ -106,6 +113,7 @@ npm test -- --testPathPattern="tests/integration/content/templates"
 - DELETE /content/redirects/:id - Delete redirect
 
 ### Templates (`templates.test.ts`)
+
 - GET /content/templates - List templates
 - POST /content/templates - Create template
 - GET /content/templates/:id - Get template by ID

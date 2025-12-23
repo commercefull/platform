@@ -2,7 +2,7 @@
  * Base notification type that all specific notifications will extend
  * These values are stored in the database as enum values, so we keep them in snake_case
  */
-export type NotificationType = 
+export type NotificationType =
   | 'account_registration'
   | 'password_reset'
   | 'email_verification'
@@ -70,18 +70,18 @@ export const formatDate = (date: Date = new Date()): string => {
 export abstract class NotificationBuilder<T> {
   protected userId: string;
   protected userType: NotificationUserType;
-  protected type!: NotificationType;  // Using definite assignment assertion
-  protected title!: string;           // Using definite assignment assertion
-  protected content!: string;         // Using definite assignment assertion
+  protected type!: NotificationType; // Using definite assignment assertion
+  protected title!: string; // Using definite assignment assertion
+  protected content!: string; // Using definite assignment assertion
   protected channel: NotificationChannel[];
   protected priority: NotificationPriority;
   protected metadata?: Record<string, unknown>;
-  
+
   constructor(
-    userId: string, 
+    userId: string,
     userType: NotificationUserType = 'customer',
     channels: NotificationChannel[] = ['email'],
-    priority: NotificationPriority = 'normal'
+    priority: NotificationPriority = 'normal',
   ) {
     this.userId = userId;
     this.userType = userType;
@@ -92,7 +92,7 @@ export abstract class NotificationBuilder<T> {
   abstract buildTitle(): string;
   abstract buildContent(): string;
   abstract getMetadata(): Record<string, unknown> | undefined;
-  
+
   build(): BaseNotification {
     return {
       userId: this.userId,
@@ -104,7 +104,7 @@ export abstract class NotificationBuilder<T> {
       isRead: false,
       priority: this.priority,
       createdAt: formatDate(),
-      metadata: this.getMetadata()
+      metadata: this.getMetadata(),
     };
   }
 }

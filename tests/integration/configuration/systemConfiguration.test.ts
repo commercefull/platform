@@ -37,7 +37,7 @@ describe('SystemConfiguration API Integration', () => {
         platformDomain: 'test.com',
         supportEmail: 'support@test.com',
         defaultCurrency: 'USD',
-        defaultLanguage: 'en'
+        defaultLanguage: 'en',
       };
 
       const response = await axios.post('/business/configuration', configData);
@@ -60,7 +60,7 @@ describe('SystemConfiguration API Integration', () => {
         defaultCurrency: 'EUR',
         defaultLanguage: 'de',
         timezone: 'Europe/Berlin',
-        systemMode: 'marketplace'
+        systemMode: 'marketplace',
       };
 
       const response = await axios.post('/business/configuration', configData);
@@ -83,7 +83,7 @@ describe('SystemConfiguration API Integration', () => {
         configId: 'test-config-update',
         platformName: 'Update Test Platform',
         platformDomain: 'updatetest.com',
-        supportEmail: 'support@updatetest.com'
+        supportEmail: 'support@updatetest.com',
       };
 
       const response = await axios.post('/business/configuration', configData);
@@ -96,7 +96,7 @@ describe('SystemConfiguration API Integration', () => {
         platformName: 'Updated Platform Name',
         platformDomain: 'updateddomain.com',
         defaultCurrency: 'GBP',
-        defaultLanguage: 'en'
+        defaultLanguage: 'en',
       };
 
       const response = await axios.put(`/business/configuration/${testConfigId}`, updateData);
@@ -109,7 +109,7 @@ describe('SystemConfiguration API Integration', () => {
 
     it('should change system mode', async () => {
       const updateData = {
-        systemMode: 'multi_store'
+        systemMode: 'multi_store',
       };
 
       const response = await axios.put(`/business/configuration/${testConfigId}`, updateData);
@@ -126,8 +126,8 @@ describe('SystemConfiguration API Integration', () => {
           enableWishlist: false,
           enableProductReviews: false,
           enableCoupons: true,
-          enableSubscriptions: true
-        }
+          enableSubscriptions: true,
+        },
       };
 
       const response = await axios.put(`/business/configuration/${testConfigId}`, updateData);
@@ -145,8 +145,8 @@ describe('SystemConfiguration API Integration', () => {
         businessSettings: {
           maxStoresPerBusiness: 25,
           maxWarehousesPerBusiness: 10,
-          allowBusinessTypeChanges: true
-        }
+          allowBusinessTypeChanges: true,
+        },
       };
 
       const response = await axios.put(`/business/configuration/${testConfigId}`, updateData);
@@ -160,7 +160,7 @@ describe('SystemConfiguration API Integration', () => {
 
     it('should return 400 for non-existent configuration', async () => {
       const updateData = {
-        platformName: 'Non-existent Update'
+        platformName: 'Non-existent Update',
       };
 
       const response = await axios.put('/business/configuration/non-existent-id', updateData);
@@ -181,7 +181,7 @@ describe('SystemConfiguration API Integration', () => {
         platformName: 'Get Test Platform',
         platformDomain: 'gettest.com',
         supportEmail: 'support@gettest.com',
-        systemMode: 'marketplace'
+        systemMode: 'marketplace',
       };
 
       const response = await axios.post('/business/configuration', configData);
@@ -217,7 +217,7 @@ describe('SystemConfiguration API Integration', () => {
         platformName: 'Active Config Platform',
         platformDomain: 'activeconfig.com',
         supportEmail: 'support@activeconfig.com',
-        systemMode: 'multi_store'
+        systemMode: 'multi_store',
       };
 
       await axios.post('/business/configuration', configData);
@@ -242,15 +242,15 @@ describe('SystemConfiguration API Integration', () => {
           configId: 'test-list-1',
           platformName: 'List Config 1',
           platformDomain: 'list1.com',
-          supportEmail: 'support@list1.com'
+          supportEmail: 'support@list1.com',
         },
         {
           configId: 'test-list-2',
           platformName: 'List Config 2',
           platformDomain: 'list2.com',
           supportEmail: 'support@list2.com',
-          systemMode: 'marketplace'
-        }
+          systemMode: 'marketplace',
+        },
       ];
 
       for (const config of configs) {
@@ -285,7 +285,7 @@ describe('SystemConfiguration API Integration', () => {
         configId: 'test-complex-config',
         platformName: 'Complex Config Platform',
         platformDomain: 'complexconfig.com',
-        supportEmail: 'support@complexconfig.com'
+        supportEmail: 'support@complexconfig.com',
       };
 
       const response = await axios.post('/business/configuration', configData);
@@ -303,9 +303,9 @@ describe('SystemConfiguration API Integration', () => {
             orderConfirmation: true,
             shippingUpdate: true,
             passwordReset: false,
-            accountVerification: true
-          }
-        }
+            accountVerification: true,
+          },
+        },
       };
 
       const response = await axios.put(`/business/configuration/${testConfigId}`, updateData);
@@ -324,8 +324,8 @@ describe('SystemConfiguration API Integration', () => {
           paymentGateways: ['stripe', 'paypal', 'square'],
           shippingProviders: ['fedex', 'ups', 'usps', 'dhl'],
           analyticsProviders: ['google_analytics', 'segment', 'mixpanel'],
-          emailProviders: ['sendgrid', 'mailgun', 'postmark']
-        }
+          emailProviders: ['sendgrid', 'mailgun', 'postmark'],
+        },
       };
 
       const response = await axios.put(`/business/configuration/${testConfigId}`, updateData);
@@ -346,11 +346,11 @@ describe('SystemConfiguration API Integration', () => {
             requireUppercase: true,
             requireLowercase: true,
             requireNumbers: true,
-            requireSpecialChars: true
+            requireSpecialChars: true,
           },
           sessionTimeout: 180,
-          maxLoginAttempts: 3
-        }
+          maxLoginAttempts: 3,
+        },
       };
 
       const response = await axios.put(`/business/configuration/${testConfigId}`, updateData);
@@ -369,7 +369,7 @@ describe('SystemConfiguration API Integration', () => {
       const invalidData = {
         configId: 'test-invalid',
         platformName: '', // Invalid empty name
-        platformDomain: 'invalid.com'
+        platformDomain: 'invalid.com',
         // Missing required supportEmail
       };
 
@@ -384,7 +384,7 @@ describe('SystemConfiguration API Integration', () => {
         configId: 'test-concurrent-config',
         platformName: 'Concurrent Config Platform',
         platformDomain: 'concurrentconfig.com',
-        supportEmail: 'support@concurrentconfig.com'
+        supportEmail: 'support@concurrentconfig.com',
       };
 
       // Create config first
@@ -394,12 +394,10 @@ describe('SystemConfiguration API Integration', () => {
       const updates = [
         { platformName: 'Updated by Request 1' },
         { platformName: 'Updated by Request 2' },
-        { platformName: 'Updated by Request 3' }
+        { platformName: 'Updated by Request 3' },
       ];
 
-      const promises = updates.map(update =>
-        axios.put('/business/configuration/test-concurrent-config', update)
-      );
+      const promises = updates.map(update => axios.put('/business/configuration/test-concurrent-config', update));
 
       const responses = await Promise.all(promises);
 

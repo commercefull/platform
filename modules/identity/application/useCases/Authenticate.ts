@@ -15,7 +15,7 @@ export class LoginCommand {
   constructor(
     public readonly email: string,
     public readonly password: string,
-    public readonly ip?: string
+    public readonly ip?: string,
   ) {}
 }
 
@@ -49,7 +49,7 @@ export class LoginUseCase {
 
   async execute(command: LoginCommand): Promise<AuthResponse> {
     const user = await this.userRepository.validateCredentials(command.email, command.password);
-    
+
     if (!user) {
       throw new Error('Invalid credentials');
     }
@@ -62,7 +62,7 @@ export class LoginUseCase {
     }
 
     user.recordLogin(command.ip);
-    
+
     const accessToken = generateUUID(); // Would use JWT in real implementation
     const refreshToken = generateUUID();
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
@@ -74,7 +74,7 @@ export class LoginUseCase {
       userId: user.userId,
       email: user.email,
       userType: user.userType,
-      ip: command.ip
+      ip: command.ip,
     });
 
     return {
@@ -83,7 +83,7 @@ export class LoginUseCase {
       userType: user.userType,
       accessToken,
       refreshToken,
-      expiresIn: 3600 // 1 hour
+      expiresIn: 3600, // 1 hour
     };
   }
 }
@@ -93,7 +93,7 @@ export class RefreshTokenUseCase {
 
   async execute(command: RefreshTokenCommand): Promise<AuthResponse> {
     const user = await this.userRepository.findByRefreshToken(command.refreshToken);
-    
+
     if (!user || !user.canLogin) {
       throw new Error('Invalid refresh token');
     }
@@ -111,7 +111,7 @@ export class RefreshTokenUseCase {
       userType: user.userType,
       accessToken,
       refreshToken,
-      expiresIn: 3600
+      expiresIn: 3600,
     };
   }
 }
@@ -126,7 +126,7 @@ export class LogoutUseCase {
       await this.userRepository.save(user);
 
       eventBus.emit('identity.logout', {
-        userId: user.userId
+        userId: user.userId,
       });
     }
   }

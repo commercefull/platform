@@ -35,41 +35,37 @@ describe('Product Variant Tests', () => {
             isDefault: true,
             options: [
               { name: 'Color', value: 'Blue' },
-              { name: 'Size', value: 'Medium' }
-            ]
+              { name: 'Size', value: 'Medium' },
+            ],
           };
-          
+
           const response = await client.post(`/business/products/${testProductId}/variants`, variantData, {
-            headers: { Authorization: `Bearer ${adminToken}` }
+            headers: { Authorization: `Bearer ${adminToken}` },
           });
-          
+
           if (response.status === 201) {
             testVariantId = response.data.data.productVariantId || response.data.data.id;
-            
           }
-        } catch (error) {
-          
-        }
+        } catch (error) {}
       }
     });
 
     it('should get a variant by ID', async () => {
       if (!testVariantId) {
-        
         return;
       }
 
       const response = await client.get(`/business/products/variants/${testVariantId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       // DB returns productVariantId, not id
       const variantId = response.data.data.productVariantId || response.data.data.id;
       expect(variantId).toBe(testVariantId);
       expect(response.data.data).toHaveProperty('productId', testProductId);
-      
+
       // Verify camelCase property names in response (TypeScript interface)
       expect(response.data.data).toHaveProperty('isDefault');
       expect(response.data.data).toHaveProperty('createdAt');
@@ -78,9 +74,9 @@ describe('Product Variant Tests', () => {
 
     it('should get all variants for a product', async () => {
       const response = await client.get(`/business/products/${testProductId}/variants`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       expect(Array.isArray(response.data.data)).toBe(true);
@@ -98,14 +94,14 @@ describe('Product Variant Tests', () => {
         isDefault: false,
         options: [
           { name: 'Color', value: 'Red' },
-          { name: 'Size', value: 'Large' }
-        ]
+          { name: 'Size', value: 'Large' },
+        ],
       };
-      
+
       const response = await client.post(`/business/products/${testProductId}/variants`, newVariantData, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       expect(response.status).toBe(201);
       expect(response.data.success).toBe(true);
       // DB returns productVariantId, not id
@@ -114,32 +110,31 @@ describe('Product Variant Tests', () => {
       expect(response.data.data).toHaveProperty('name', newVariantData.name);
       expect(response.data.data).toHaveProperty('sku', newVariantData.sku);
       expect(response.data.data).toHaveProperty('price', newVariantData.price);
-      
+
       // Save the ID for later tests
       const newVariantId = response.data.data.id;
-      
+
       // Clean up - delete the new variant
       await client.delete(`/business/products/variants/${newVariantId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
     });
 
     it('should update a variant', async () => {
       if (!testVariantId) {
-        
         return;
       }
 
       const updatedData = {
         name: 'Updated Variant Name',
         price: 79.99,
-        inventory: 200
+        inventory: 200,
       };
-      
+
       const response = await client.put(`/business/products/variants/${testVariantId}`, updatedData, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       expect(response.data.data).toHaveProperty('name', updatedData.name);
@@ -149,16 +144,15 @@ describe('Product Variant Tests', () => {
 
     it('should update variant inventory', async () => {
       if (!testVariantId) {
-        
         return;
       }
 
       const inventoryData = { inventory: 150 };
-      
+
       const response = await client.patch(`/business/products/variants/${testVariantId}/inventory`, inventoryData, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       expect(response.data.data).toHaveProperty('inventory', inventoryData.inventory);

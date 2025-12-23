@@ -11,6 +11,7 @@ The Loyalty feature manages customer loyalty programs including points earning, 
 ### Tier Management (Business)
 
 ### UC-LOY-001: List Tiers (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** High
 
@@ -21,6 +22,7 @@ The Loyalty feature manages customer loyalty programs including points earning, 
 **Then** the system returns all tier configurations
 
 #### API Endpoint
+
 ```
 GET /business/loyalty/tiers
 ```
@@ -28,10 +30,12 @@ GET /business/loyalty/tiers
 ---
 
 ### UC-LOY-002: Get Tier (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
 #### API Endpoint
+
 ```
 GET /business/loyalty/tiers/:id
 ```
@@ -39,6 +43,7 @@ GET /business/loyalty/tiers/:id
 ---
 
 ### UC-LOY-003: Create Tier (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** High
 
@@ -50,6 +55,7 @@ GET /business/loyalty/tiers/:id
 **Then** customers can progress to that tier
 
 #### API Endpoint
+
 ```
 POST /business/loyalty/tiers
 Body: {
@@ -62,6 +68,7 @@ Body: {
 ```
 
 #### Business Rules
+
 - Tiers are ordered by minPoints
 - Higher tiers have better multipliers
 - Benefits can include discounts, free shipping, etc.
@@ -69,10 +76,12 @@ Body: {
 ---
 
 ### UC-LOY-004: Update Tier (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
 #### API Endpoint
+
 ```
 PUT /business/loyalty/tiers/:id
 ```
@@ -82,6 +91,7 @@ PUT /business/loyalty/tiers/:id
 ### Reward Management (Business)
 
 ### UC-LOY-005: List Rewards (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** High
 
@@ -92,6 +102,7 @@ PUT /business/loyalty/tiers/:id
 **Then** the system returns all available rewards
 
 #### API Endpoint
+
 ```
 GET /business/loyalty/rewards
 ```
@@ -99,10 +110,12 @@ GET /business/loyalty/rewards
 ---
 
 ### UC-LOY-006: Get Reward (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
 #### API Endpoint
+
 ```
 GET /business/loyalty/rewards/:id
 ```
@@ -110,6 +123,7 @@ GET /business/loyalty/rewards/:id
 ---
 
 ### UC-LOY-007: Create Reward (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** High
 
@@ -121,6 +135,7 @@ GET /business/loyalty/rewards/:id
 **Then** customers can redeem points for it
 
 #### API Endpoint
+
 ```
 POST /business/loyalty/rewards
 Body: {
@@ -135,6 +150,7 @@ Body: {
 ```
 
 #### Business Rules
+
 - Rewards can be tier-restricted
 - Can have limited stock
 - Different reward types available
@@ -142,10 +158,12 @@ Body: {
 ---
 
 ### UC-LOY-008: Update Reward (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
 #### API Endpoint
+
 ```
 PUT /business/loyalty/rewards/:id
 ```
@@ -155,6 +173,7 @@ PUT /business/loyalty/rewards/:id
 ### Customer Points Management (Business)
 
 ### UC-LOY-009: Get Customer Points (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** High
 
@@ -166,6 +185,7 @@ PUT /business/loyalty/rewards/:id
 **Then** the system returns the customer's points
 
 #### API Endpoint
+
 ```
 GET /business/loyalty/customers/:customerId/points
 ```
@@ -173,10 +193,12 @@ GET /business/loyalty/customers/:customerId/points
 ---
 
 ### UC-LOY-010: Get Customer Transactions (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
 #### API Endpoint
+
 ```
 GET /business/loyalty/customers/:customerId/transactions
 Query: type?, dateFrom?, dateTo?, limit, offset
@@ -185,6 +207,7 @@ Query: type?, dateFrom?, dateTo?, limit, offset
 ---
 
 ### UC-LOY-011: Adjust Customer Points (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
@@ -196,6 +219,7 @@ Query: type?, dateFrom?, dateTo?, limit, offset
 **Then** the balance is updated with audit trail
 
 #### API Endpoint
+
 ```
 POST /business/loyalty/customers/:customerId/points/adjust
 Body: { amount, reason, type: 'credit'|'debit' }
@@ -204,10 +228,12 @@ Body: { amount, reason, type: 'credit'|'debit' }
 ---
 
 ### UC-LOY-012: Get Customer Redemptions (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
 #### API Endpoint
+
 ```
 GET /business/loyalty/customers/:customerId/redemptions
 ```
@@ -215,10 +241,12 @@ GET /business/loyalty/customers/:customerId/redemptions
 ---
 
 ### UC-LOY-013: Update Redemption Status (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
 #### API Endpoint
+
 ```
 PUT /business/loyalty/redemptions/:id/status
 Body: { status: 'pending'|'fulfilled'|'cancelled' }
@@ -227,6 +255,7 @@ Body: { status: 'pending'|'fulfilled'|'cancelled' }
 ---
 
 ### UC-LOY-014: Process Order Points (Business)
+
 **Actor:** System/Merchant  
 **Priority:** High
 
@@ -237,11 +266,13 @@ Body: { status: 'pending'|'fulfilled'|'cancelled' }
 **Then** points are awarded based on order value
 
 #### API Endpoint
+
 ```
 POST /business/loyalty/orders/:orderId/points
 ```
 
 #### Business Rules
+
 - Points calculated based on order total
 - Tier multiplier applied
 - Bonus points for promotions
@@ -251,6 +282,7 @@ POST /business/loyalty/orders/:orderId/points
 ### Customer-Facing Use Cases
 
 ### UC-LOY-015: Get Public Tiers (Customer)
+
 **Actor:** Customer/Guest  
 **Priority:** High
 
@@ -261,6 +293,7 @@ POST /business/loyalty/orders/:orderId/points
 **Then** the system returns public tier information
 
 #### API Endpoint
+
 ```
 GET /loyalty/tiers
 ```
@@ -268,10 +301,12 @@ GET /loyalty/tiers
 ---
 
 ### UC-LOY-016: Get Public Rewards (Customer)
+
 **Actor:** Customer/Guest  
 **Priority:** High
 
 #### API Endpoint
+
 ```
 GET /loyalty/rewards
 ```
@@ -279,6 +314,7 @@ GET /loyalty/rewards
 ---
 
 ### UC-LOY-017: Get My Loyalty Status (Customer)
+
 **Actor:** Customer  
 **Priority:** High
 
@@ -289,6 +325,7 @@ GET /loyalty/rewards
 **Then** the system returns their tier and points
 
 #### API Endpoint
+
 ```
 GET /loyalty/my-status
 ```
@@ -296,10 +333,12 @@ GET /loyalty/my-status
 ---
 
 ### UC-LOY-018: Get My Transactions (Customer)
+
 **Actor:** Customer  
 **Priority:** Medium
 
 #### API Endpoint
+
 ```
 GET /loyalty/my-transactions
 Query: limit, offset
@@ -308,10 +347,12 @@ Query: limit, offset
 ---
 
 ### UC-LOY-019: Get My Redemptions (Customer)
+
 **Actor:** Customer  
 **Priority:** Medium
 
 #### API Endpoint
+
 ```
 GET /loyalty/my-redemptions
 ```
@@ -319,6 +360,7 @@ GET /loyalty/my-redemptions
 ---
 
 ### UC-LOY-020: Redeem Reward (Customer)
+
 **Actor:** Customer  
 **Priority:** High
 
@@ -330,12 +372,14 @@ GET /loyalty/my-redemptions
 **Then** points are deducted and reward is issued
 
 #### API Endpoint
+
 ```
 POST /loyalty/redeem
 Body: { rewardId }
 ```
 
 #### Business Rules
+
 - Customer must have enough points
 - Reward must be in stock
 - Customer must meet tier requirement
@@ -345,22 +389,22 @@ Body: { rewardId }
 
 ## Events Emitted
 
-| Event | Trigger | Payload |
-|-------|---------|---------|
-| `loyalty.points.earned` | Points awarded | customerId, points, orderId |
-| `loyalty.points.redeemed` | Points spent | customerId, points, rewardId |
-| `loyalty.points.adjusted` | Manual adjustment | customerId, points, reason |
-| `loyalty.tier.upgraded` | Tier promotion | customerId, oldTier, newTier |
-| `loyalty.tier.downgraded` | Tier demotion | customerId, oldTier, newTier |
-| `loyalty.reward.redeemed` | Reward claimed | redemptionId, customerId, rewardId |
+| Event                     | Trigger           | Payload                            |
+| ------------------------- | ----------------- | ---------------------------------- |
+| `loyalty.points.earned`   | Points awarded    | customerId, points, orderId        |
+| `loyalty.points.redeemed` | Points spent      | customerId, points, rewardId       |
+| `loyalty.points.adjusted` | Manual adjustment | customerId, points, reason         |
+| `loyalty.tier.upgraded`   | Tier promotion    | customerId, oldTier, newTier       |
+| `loyalty.tier.downgraded` | Tier demotion     | customerId, oldTier, newTier       |
+| `loyalty.reward.redeemed` | Reward claimed    | redemptionId, customerId, rewardId |
 
 ---
 
 ## Integration Test Coverage
 
-| Use Case | Test File | Status |
-|----------|-----------|--------|
-| UC-LOY-001 to UC-LOY-004 | `loyalty/tiers.test.ts` | 🟡 |
-| UC-LOY-005 to UC-LOY-008 | `loyalty/rewards.test.ts` | 🟡 |
-| UC-LOY-009 to UC-LOY-014 | `loyalty/admin.test.ts` | ❌ |
-| UC-LOY-015 to UC-LOY-020 | `loyalty/customer.test.ts` | 🟡 |
+| Use Case                 | Test File                  | Status |
+| ------------------------ | -------------------------- | ------ |
+| UC-LOY-001 to UC-LOY-004 | `loyalty/tiers.test.ts`    | 🟡     |
+| UC-LOY-005 to UC-LOY-008 | `loyalty/rewards.test.ts`  | 🟡     |
+| UC-LOY-009 to UC-LOY-014 | `loyalty/admin.test.ts`    | ❌     |
+| UC-LOY-015 to UC-LOY-020 | `loyalty/customer.test.ts` | 🟡     |

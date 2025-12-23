@@ -18,7 +18,7 @@ exports.up = function (knex) {
     t.timestamp('expiryDate');
     t.enum('status', ['pending', 'inTransit', 'partiallyReceived', 'received', 'cancelled']).notNullable().defaultTo('pending');
     t.text('notes');
-    
+
     t.index('transferId');
     t.index('productId');
     t.index('productVariantId');

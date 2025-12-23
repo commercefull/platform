@@ -64,7 +64,7 @@ export class User {
       failedLoginAttempts: 0,
       metadata: props.metadata,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     });
   }
 
@@ -73,26 +73,62 @@ export class User {
   }
 
   // Getters
-  get userId(): string { return this.props.userId; }
-  get email(): string { return this.props.email; }
-  get passwordHash(): string { return this.props.passwordHash; }
-  get userType(): UserType { return this.props.userType; }
-  get status(): UserStatus { return this.props.status; }
-  get firstName(): string | undefined { return this.props.firstName; }
-  get lastName(): string | undefined { return this.props.lastName; }
-  get emailVerified(): boolean { return this.props.emailVerified; }
-  get mfaEnabled(): boolean { return this.props.mfaEnabled; }
-  get lastLoginAt(): Date | undefined { return this.props.lastLoginAt; }
-  get loginCount(): number { return this.props.loginCount; }
-  get refreshToken(): string | undefined { return this.props.refreshToken; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get userId(): string {
+    return this.props.userId;
+  }
+  get email(): string {
+    return this.props.email;
+  }
+  get passwordHash(): string {
+    return this.props.passwordHash;
+  }
+  get userType(): UserType {
+    return this.props.userType;
+  }
+  get status(): UserStatus {
+    return this.props.status;
+  }
+  get firstName(): string | undefined {
+    return this.props.firstName;
+  }
+  get lastName(): string | undefined {
+    return this.props.lastName;
+  }
+  get emailVerified(): boolean {
+    return this.props.emailVerified;
+  }
+  get mfaEnabled(): boolean {
+    return this.props.mfaEnabled;
+  }
+  get lastLoginAt(): Date | undefined {
+    return this.props.lastLoginAt;
+  }
+  get loginCount(): number {
+    return this.props.loginCount;
+  }
+  get refreshToken(): string | undefined {
+    return this.props.refreshToken;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   // Computed
-  get fullName(): string { return `${this.props.firstName || ''} ${this.props.lastName || ''}`.trim(); }
-  get isActive(): boolean { return this.props.status === 'active'; }
-  get isLocked(): boolean { return this.props.lockedUntil ? this.props.lockedUntil > new Date() : false; }
-  get canLogin(): boolean { return this.isActive && !this.isLocked; }
+  get fullName(): string {
+    return `${this.props.firstName || ''} ${this.props.lastName || ''}`.trim();
+  }
+  get isActive(): boolean {
+    return this.props.status === 'active';
+  }
+  get isLocked(): boolean {
+    return this.props.lockedUntil ? this.props.lockedUntil > new Date() : false;
+  }
+  get canLogin(): boolean {
+    return this.isActive && !this.isLocked;
+  }
 
   // Domain methods
   verifyEmail(): void {
@@ -179,7 +215,7 @@ export class User {
       lastLoginAt: this.props.lastLoginAt?.toISOString(),
       loginCount: this.props.loginCount,
       createdAt: this.props.createdAt.toISOString(),
-      updatedAt: this.props.updatedAt.toISOString()
+      updatedAt: this.props.updatedAt.toISOString(),
     };
   }
 }

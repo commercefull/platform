@@ -1,6 +1,6 @@
 /**
  * Fulfillment Domain Events
- * 
+ *
  * Events emitted by the Fulfillment module.
  */
 

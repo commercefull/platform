@@ -42,15 +42,17 @@ export class SupplierAddressRepo {
   async findDefaultBySupplierId(supplierId: string): Promise<SupplierAddress | null> {
     return await queryOne<SupplierAddress>(
       `SELECT * FROM "supplierAddress" WHERE "supplierId" = $1 AND "isDefault" = true AND "isActive" = true LIMIT 1`,
-      [supplierId]
+      [supplierId],
     );
   }
 
   async findByType(supplierId: string, addressType: SupplierAddressType): Promise<SupplierAddress[]> {
-    return (await query<SupplierAddress[]>(
-      `SELECT * FROM "supplierAddress" WHERE "supplierId" = $1 AND "addressType" = $2 AND "isActive" = true ORDER BY "isDefault" DESC`,
-      [supplierId, addressType]
-    )) || [];
+    return (
+      (await query<SupplierAddress[]>(
+        `SELECT * FROM "supplierAddress" WHERE "supplierId" = $1 AND "addressType" = $2 AND "isActive" = true ORDER BY "isDefault" DESC`,
+        [supplierId, addressType],
+      )) || []
+    );
   }
 
   async create(params: SupplierAddressCreateParams): Promise<SupplierAddress> {
@@ -67,11 +69,24 @@ export class SupplierAddressRepo {
         "notes", "isActive", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17) RETURNING *`,
       [
-        params.supplierId, params.name, params.addressLine1, params.addressLine2 || null,
-        params.city, params.state, params.postalCode, params.country, params.addressType || 'headquarters',
-        params.isDefault || false, params.contactName || null, params.contactEmail || null,
-        params.contactPhone || null, params.notes || null, params.isActive ?? true, now, now
-      ]
+        params.supplierId,
+        params.name,
+        params.addressLine1,
+        params.addressLine2 || null,
+        params.city,
+        params.state,
+        params.postalCode,
+        params.country,
+        params.addressType || 'headquarters',
+        params.isDefault || false,
+        params.contactName || null,
+        params.contactEmail || null,
+        params.contactPhone || null,
+        params.notes || null,
+        params.isActive ?? true,
+        now,
+        now,
+      ],
     );
 
     if (!result) throw new Error('Failed to create supplier address');
@@ -104,7 +119,7 @@ export class SupplierAddressRepo {
 
     return await queryOne<SupplierAddress>(
       `UPDATE "supplierAddress" SET ${updateFields.join(', ')} WHERE "supplierAddressId" = $${paramIndex} RETURNING *`,
-      values
+      values,
     );
   }
 
@@ -129,7 +144,7 @@ export class SupplierAddressRepo {
   async delete(id: string): Promise<boolean> {
     const result = await queryOne<{ supplierAddressId: string }>(
       `DELETE FROM "supplierAddress" WHERE "supplierAddressId" = $1 RETURNING "supplierAddressId"`,
-      [id]
+      [id],
     );
     return !!result;
   }

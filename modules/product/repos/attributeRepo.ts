@@ -1,48 +1,42 @@
-import { queryOne, query } from "../../../libs/db";
-import { Table, ProductAttribute } from "../../../libs/db/types";
+import { queryOne, query } from '../../../libs/db';
+import { Table, ProductAttribute } from '../../../libs/db/types';
 
 // Use ProductAttribute type directly from libs/db/types.ts
 export type { ProductAttribute };
 
 // Create/Update props use the entity type directly
 type AttributeCreateProps = Pick<
-  ProductAttribute, 
-  "name" | "code" | "description" | "groupId" | "type" | "isRequired" | "isFilterable" | "isSearchable" | "position"
+  ProductAttribute,
+  'name' | 'code' | 'description' | 'groupId' | 'type' | 'isRequired' | 'isFilterable' | 'isSearchable' | 'position'
 >;
 
 type AttributeUpdateProps = Partial<AttributeCreateProps>;
 
 export class AttributeRepo {
   async findOne(id: string): Promise<ProductAttribute | null> {
-    return queryOne<ProductAttribute>(
-      `SELECT * FROM "${Table.ProductAttribute}" WHERE "productAttributeId" = $1`, 
-      [id]
-    );
+    return queryOne<ProductAttribute>(`SELECT * FROM "${Table.ProductAttribute}" WHERE "productAttributeId" = $1`, [id]);
   }
 
   async findAll(): Promise<ProductAttribute[]> {
-    return await query<ProductAttribute[]>(
-      `SELECT * FROM "${Table.ProductAttribute}" ORDER BY "name" ASC`
-    ) || [];
+    return (await query<ProductAttribute[]>(`SELECT * FROM "${Table.ProductAttribute}" ORDER BY "name" ASC`)) || [];
   }
 
   async findByGroup(groupId: string): Promise<ProductAttribute[]> {
-    return await query<ProductAttribute[]>(
-      `SELECT * FROM "${Table.ProductAttribute}" WHERE "groupId" = $1 ORDER BY "position" ASC, "name" ASC`, 
-      [groupId]
-    ) || [];
+    return (
+      (await query<ProductAttribute[]>(
+        `SELECT * FROM "${Table.ProductAttribute}" WHERE "groupId" = $1 ORDER BY "position" ASC, "name" ASC`,
+        [groupId],
+      )) || []
+    );
   }
 
   async findByCode(code: string): Promise<ProductAttribute | null> {
-    return queryOne<ProductAttribute>(
-      `SELECT * FROM "${Table.ProductAttribute}" WHERE "code" = $1`, 
-      [code]
-    );
+    return queryOne<ProductAttribute>(`SELECT * FROM "${Table.ProductAttribute}" WHERE "code" = $1`, [code]);
   }
 
   async create(attribute: AttributeCreateProps): Promise<ProductAttribute> {
     const now = new Date();
-    
+
     const row = await queryOne<ProductAttribute>(
       `INSERT INTO "${Table.ProductAttribute}" 
        ("name", "code", "description", "groupId", "type", "isRequired", "isFilterable", "isSearchable", "position", "createdAt", "updatedAt") 
@@ -59,20 +53,20 @@ export class AttributeRepo {
         attribute.isSearchable,
         attribute.position,
         now,
-        now
-      ]
+        now,
+      ],
     );
-    
+
     if (!row) {
       throw new Error('Failed to create attribute');
     }
-    
+
     return row;
   }
 
   async update(id: string, attribute: AttributeUpdateProps): Promise<ProductAttribute> {
     const now = new Date();
-    
+
     // Build dynamic update
     const updates: string[] = ['"updatedAt" = $1'];
     const values: any[] = [now];
@@ -84,45 +78,40 @@ export class AttributeRepo {
         values.push(value);
       }
     }
-    
+
     values.push(id);
-    
+
     const row = await queryOne<ProductAttribute>(
       `UPDATE "${Table.ProductAttribute}" 
        SET ${updates.join(', ')} 
        WHERE "productAttributeId" = $${paramIndex} 
        RETURNING *`,
-      values
+      values,
     );
-    
+
     if (!row) {
       throw new Error('Failed to update attribute');
     }
-    
+
     return row;
   }
 
   async delete(id: string): Promise<boolean> {
     // Check for references before deleting
-    const optionsResult = await query<Array<{count: string}>>(
+    const optionsResult = await query<Array<{ count: string }>>(
       `SELECT COUNT(*) as count FROM "${Table.ProductAttributeOption}" WHERE "attributeId" = $1`,
-      [id]
+      [id],
     );
-    
+
     // Check if there are any associated options
-    const hasAssociatedOptions = optionsResult && 
-                                 optionsResult.length > 0 && 
-                                 parseInt(optionsResult[0].count) > 0;
-    
+    const hasAssociatedOptions = optionsResult && optionsResult.length > 0 && parseInt(optionsResult[0].count) > 0;
+
     if (hasAssociatedOptions) {
       throw new Error('Cannot delete attribute with associated options');
     }
-    
-    const result = await query(
-      `DELETE FROM "${Table.ProductAttribute}" WHERE "productAttributeId" = $1`,
-      [id]
-    );
-    
+
+    const result = await query(`DELETE FROM "${Table.ProductAttribute}" WHERE "productAttributeId" = $1`, [id]);
+
     return result !== null;
   }
 }

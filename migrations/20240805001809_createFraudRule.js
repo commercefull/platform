@@ -2,8 +2,8 @@
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.up = function(knex) {
-  return knex.schema.createTable('fraudRule', function(table) {
+exports.up = function (knex) {
+  return knex.schema.createTable('fraudRule', function (table) {
     table.uuid('fraudRuleId').primary().defaultTo(knex.raw('uuidv7()'));
     table.string('name').notNullable();
     table.text('description');
@@ -19,7 +19,7 @@ exports.up = function(knex) {
     table.jsonb('metadata');
     table.timestamp('createdAt').defaultTo(knex.fn.now());
     table.timestamp('updatedAt').defaultTo(knex.fn.now());
-    
+
     table.index('ruleType');
     table.index('isActive');
     table.index('priority');
@@ -30,6 +30,6 @@ exports.up = function(knex) {
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTableIfExists('fraudRule');
 };

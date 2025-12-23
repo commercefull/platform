@@ -39,7 +39,7 @@ export class Locale {
       ...props,
       isActive: true,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     });
   }
 
@@ -47,14 +47,30 @@ export class Locale {
     return new Locale(props);
   }
 
-  get localeId(): string { return this.props.localeId; }
-  get code(): string { return this.props.code; }
-  get name(): string { return this.props.name; }
-  get languageCode(): string { return this.props.languageCode; }
-  get direction(): 'ltr' | 'rtl' { return this.props.direction; }
-  get currencyCode(): string { return this.props.currencyCode; }
-  get isActive(): boolean { return this.props.isActive; }
-  get isDefault(): boolean { return this.props.isDefault; }
+  get localeId(): string {
+    return this.props.localeId;
+  }
+  get code(): string {
+    return this.props.code;
+  }
+  get name(): string {
+    return this.props.name;
+  }
+  get languageCode(): string {
+    return this.props.languageCode;
+  }
+  get direction(): 'ltr' | 'rtl' {
+    return this.props.direction;
+  }
+  get currencyCode(): string {
+    return this.props.currencyCode;
+  }
+  get isActive(): boolean {
+    return this.props.isActive;
+  }
+  get isDefault(): boolean {
+    return this.props.isDefault;
+  }
 
   translate(key: string): string {
     return this.props.translations?.[key] || key;

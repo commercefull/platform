@@ -1,7 +1,7 @@
 /**
  * VAT OSS Report Line Table
  * Breakdown of VAT OSS report by consumption country and VAT rate
- * 
+ *
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
@@ -14,10 +14,10 @@ exports.up = function (knex) {
     t.string('consumptionCountry', 2).notNullable();
     // VAT rate type and rate
     t.enum('vatRateType', [
-      'standard',      // Standard rate
-      'reduced',       // Reduced rate
+      'standard', // Standard rate
+      'reduced', // Reduced rate
       'super_reduced', // Super reduced rate
-      'zero'           // Zero rate
+      'zero', // Zero rate
     ]).notNullable();
     t.decimal('vatRate', 5, 2).notNullable(); // Actual rate percentage
     // Amounts
@@ -30,7 +30,7 @@ exports.up = function (knex) {
     // Currency (for reference, OSS reports in EUR)
     t.string('currency', 3).notNullable().defaultTo('EUR');
     t.decimal('exchangeRate', 15, 6).defaultTo(1); // Rate to EUR
-    
+
     t.index('vatOssReportId');
     t.index('consumptionCountry');
     t.index('vatRateType');

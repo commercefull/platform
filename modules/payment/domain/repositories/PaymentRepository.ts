@@ -46,14 +46,19 @@ export interface PaymentRepository {
   saveRefund(refund: PaymentRefund): Promise<PaymentRefund>;
 
   // Payment Methods
-  getEnabledPaymentMethods(merchantId: string, currency?: string): Promise<Array<{
-    paymentMethodConfigId: string;
-    paymentMethod: string;
-    displayName: string;
-    description?: string;
-    icon?: string;
-    processingFee?: number;
-  }>>;
+  getEnabledPaymentMethods(
+    merchantId: string,
+    currency?: string,
+  ): Promise<
+    Array<{
+      paymentMethodConfigId: string;
+      paymentMethod: string;
+      displayName: string;
+      description?: string;
+      icon?: string;
+      processingFee?: number;
+    }>
+  >;
 
   // Gateways
   getDefaultGateway(merchantId: string): Promise<{

@@ -61,7 +61,7 @@ export const postLogin = async (req: Request, res: Response) => {
        FROM "b2bUser" u
        JOIN "b2bCompany" c ON u."b2bCompanyId" = c."b2bCompanyId"
        WHERE u."email" = $1 AND u."deletedAt" IS NULL`,
-      [email.toLowerCase()]
+      [email.toLowerCase()],
     );
 
     if (!user) {
@@ -110,15 +110,12 @@ export const postLogin = async (req: Request, res: Response) => {
     });
 
     // Update last login
-    await query(
-      `UPDATE "b2bUser" SET "lastLoginAt" = NOW() WHERE "b2bUserId" = $1`,
-      [user.b2bUserId]
-    );
+    await query(`UPDATE "b2bUser" SET "lastLoginAt" = NOW() WHERE "b2bUserId" = $1`, [user.b2bUserId]);
 
     return res.redirect('/b2b');
   } catch (error) {
     logger.error('Error:', error);
-    
+
     b2bRespond(req, res, 'login', {
       pageName: 'B2B Portal Login',
       error: 'An error occurred during login',
@@ -139,7 +136,7 @@ export const postLogout = async (req: Request, res: Response) => {
     res.redirect('/b2b/login');
   } catch (error) {
     logger.error('Error:', error);
-    
+
     res.clearCookie(SESSION_COOKIE_NAME);
     res.redirect('/b2b/login');
   }

@@ -1,7 +1,7 @@
 /**
  * VAT Registration Table
  * Tracks merchant VAT registrations per country for EU/UK compliance
- * 
+ *
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
@@ -18,13 +18,15 @@ exports.up = function (knex) {
     t.string('legalName', 255);
     // Registration type
     t.enum('registrationType', [
-      'standard',   // Standard VAT registration
-      'oss',        // EU One-Stop Shop
-      'ioss',       // Import One-Stop Shop (for imports < €150)
-      'moss',       // Mini One-Stop Shop (legacy, pre-2021)
-      'non_union',  // Non-Union OSS scheme
-      'distance_selling' // Distance selling threshold
-    ]).notNullable().defaultTo('standard');
+      'standard', // Standard VAT registration
+      'oss', // EU One-Stop Shop
+      'ioss', // Import One-Stop Shop (for imports < €150)
+      'moss', // Mini One-Stop Shop (legacy, pre-2021)
+      'non_union', // Non-Union OSS scheme
+      'distance_selling', // Distance selling threshold
+    ])
+      .notNullable()
+      .defaultTo('standard');
     // Verification
     t.boolean('isVerified').notNullable().defaultTo(false);
     t.timestamp('verifiedAt');
@@ -46,7 +48,7 @@ exports.up = function (knex) {
     t.text('notes');
     // Document storage
     t.string('certificateUrl', 500); // VAT registration certificate
-    
+
     t.index('merchantId');
     t.index('countryCode');
     t.index('vatNumber');

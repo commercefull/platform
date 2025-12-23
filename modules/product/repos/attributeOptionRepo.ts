@@ -1,32 +1,31 @@
-import { queryOne, query } from "../../../libs/db";
-import { Table, ProductAttributeOption } from "../../../libs/db/types";
+import { queryOne, query } from '../../../libs/db';
+import { Table, ProductAttributeOption } from '../../../libs/db/types';
 
 // Use ProductAttributeOption type directly from libs/db/types.ts
 export type { ProductAttributeOption };
 
-type CreateProps = Pick<ProductAttributeOption, "attributeId" | "value" | "label" | "position">;
+type CreateProps = Pick<ProductAttributeOption, 'attributeId' | 'value' | 'label' | 'position'>;
 type UpdateProps = Partial<CreateProps>;
 
 export class AttributeOptionRepo {
   async findOne(id: string): Promise<ProductAttributeOption | null> {
-    return queryOne<ProductAttributeOption>(
-      `SELECT * FROM "${Table.ProductAttributeOption}" WHERE "productAttributeOptionId" = $1`,
-      [id]
-    );
+    return queryOne<ProductAttributeOption>(`SELECT * FROM "${Table.ProductAttributeOption}" WHERE "productAttributeOptionId" = $1`, [id]);
   }
 
   async findByValue(attributeId: string, value: string): Promise<ProductAttributeOption | null> {
-    return queryOne<ProductAttributeOption>(
-      `SELECT * FROM "${Table.ProductAttributeOption}" WHERE "attributeId" = $1 AND "value" = $2`,
-      [attributeId, value]
-    );
+    return queryOne<ProductAttributeOption>(`SELECT * FROM "${Table.ProductAttributeOption}" WHERE "attributeId" = $1 AND "value" = $2`, [
+      attributeId,
+      value,
+    ]);
   }
 
   async findByAttribute(attributeId: string): Promise<ProductAttributeOption[]> {
-    return await query<ProductAttributeOption[]>(
-      `SELECT * FROM "${Table.ProductAttributeOption}" WHERE "attributeId" = $1 ORDER BY "position" ASC`,
-      [attributeId]
-    ) || [];
+    return (
+      (await query<ProductAttributeOption[]>(
+        `SELECT * FROM "${Table.ProductAttributeOption}" WHERE "attributeId" = $1 ORDER BY "position" ASC`,
+        [attributeId],
+      )) || []
+    );
   }
 
   async create(props: CreateProps): Promise<ProductAttributeOption> {
@@ -36,7 +35,7 @@ export class AttributeOptionRepo {
        ("attributeId", "value", "label", "position", "createdAt", "updatedAt") 
        VALUES ($1, $2, $3, $4, $5, $6) 
        RETURNING *`,
-      [props.attributeId, props.value, props.label, props.position, now, now]
+      [props.attributeId, props.value, props.label, props.position, now, now],
     );
 
     if (!row) {
@@ -54,17 +53,17 @@ export class AttributeOptionRepo {
       return `($${offset + 1}, $${offset + 2}, $${offset + 3}, $${offset + 4}, $${offset + 5}, $${offset + 6})`;
     });
 
-    const values = options.flatMap(opt => [
-      opt.attributeId, opt.value, opt.label, opt.position, now, now
-    ]);
+    const values = options.flatMap(opt => [opt.attributeId, opt.value, opt.label, opt.position, now, now]);
 
-    return await query<ProductAttributeOption[]>(
-      `INSERT INTO "${Table.ProductAttributeOption}" 
+    return (
+      (await query<ProductAttributeOption[]>(
+        `INSERT INTO "${Table.ProductAttributeOption}" 
        ("attributeId", "value", "label", "position", "createdAt", "updatedAt") 
        VALUES ${valueGroups.join(', ')} 
        RETURNING *`,
-      values
-    ) || [];
+        values,
+      )) || []
+    );
   }
 
   async update(id: string, props: UpdateProps): Promise<ProductAttributeOption | null> {
@@ -83,25 +82,22 @@ export class AttributeOptionRepo {
     values.push(id);
     return queryOne<ProductAttributeOption>(
       `UPDATE "${Table.ProductAttributeOption}" 
-       SET ${updates.join(", ")} 
+       SET ${updates.join(', ')} 
        WHERE "productAttributeOptionId" = $${paramIndex} 
        RETURNING *`,
-      values
+      values,
     );
   }
 
   async delete(id: string): Promise<ProductAttributeOption | null> {
     return queryOne<ProductAttributeOption>(
       `DELETE FROM "${Table.ProductAttributeOption}" WHERE "productAttributeOptionId" = $1 RETURNING *`,
-      [id]
+      [id],
     );
   }
 
   async deleteByAttribute(attributeId: string): Promise<number> {
-    const result = await query<any>(
-      `DELETE FROM "${Table.ProductAttributeOption}" WHERE "attributeId" = $1`,
-      [attributeId]
-    );
+    const result = await query<any>(`DELETE FROM "${Table.ProductAttributeOption}" WHERE "attributeId" = $1`, [attributeId]);
     return result?.rowCount || 0;
   }
 }

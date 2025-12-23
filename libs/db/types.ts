@@ -2,691 +2,691 @@
 // Do not touch them, or risk, your modifications being lost.
 
 export enum Table {
-  AdminUserRole = "adminUserRole",
-  AnalyticsChannelAttribution = "analyticsChannelAttribution",
-  AnalyticsCustomer = "analyticsCustomer",
-  AnalyticsCustomerCohort = "analyticsCustomerCohort",
-  AnalyticsProductPerformance = "analyticsProductPerformance",
-  AnalyticsReportDashboard = "analyticsReportDashboard",
-  AnalyticsReportEvent = "analyticsReportEvent",
-  AnalyticsReportSnapshot = "analyticsReportSnapshot",
-  AnalyticsSalesDaily = "analyticsSalesDaily",
-  AnalyticsSearchQuery = "analyticsSearchQuery",
-  ApiKey = "apiKey",
-  AttributeOptionTranslation = "attributeOptionTranslation",
-  AttributeTranslation = "attributeTranslation",
-  AuditLog = "auditLog",
-  B2BApprovalAction = "b2bApprovalAction",
-  B2BApprovalRequest = "b2bApprovalRequest",
-  B2BApprovalWorkflow = "b2bApprovalWorkflow",
-  B2BApprovalWorkflowStep = "b2bApprovalWorkflowStep",
-  B2BCompany = "b2bCompany",
-  B2BCompanyAddress = "b2bCompanyAddress",
-  B2BCompanyCreditLimit = "b2bCompanyCreditLimit",
-  B2BCompanyCreditTransaction = "b2bCompanyCreditTransaction",
-  B2BCompanyUser = "b2bCompanyUser",
-  B2BQuote = "b2bQuote",
-  B2BQuoteItem = "b2bQuoteItem",
-  Basket = "basket",
-  BasketAnalytics = "basketAnalytics",
-  BasketDiscount = "basketDiscount",
-  BasketHistory = "basketHistory",
-  BasketItem = "basketItem",
-  BasketMerge = "basketMerge",
-  BasketSavedItem = "basketSavedItem",
-  BrandTranslation = "brandTranslation",
-  BundleItem = "bundleItem",
-  Business = "business",
-  CartPromotion = "cartPromotion",
-  CartPromotionItem = "cartPromotionItem",
-  CategoryPromotion = "categoryPromotion",
-  CategoryPromotionProduct = "categoryPromotionProduct",
-  CategoryTranslation = "categoryTranslation",
-  CheckoutSession = "checkoutSession",
-  CollectionTranslation = "collectionTranslation",
-  ContentBlock = "contentBlock",
-  ContentBlockType = "contentBlockType",
-  ContentCategorization = "contentCategorization",
-  ContentCategory = "contentCategory",
-  ContentMedia = "contentMedia",
-  ContentMediaFolder = "contentMediaFolder",
-  ContentMediaUsage = "contentMediaUsage",
-  ContentNavigation = "contentNavigation",
-  ContentNavigationItem = "contentNavigationItem",
-  ContentPage = "contentPage",
-  ContentPageTranslation = "contentPageTranslation",
-  ContentPageVersion = "contentPageVersion",
-  ContentRedirect = "contentRedirect",
-  ContentTemplate = "contentTemplate",
-  ContentType = "contentType",
-  Country = "country",
-  Currency = "currency",
-  CurrencyExchangeRate = "currencyExchangeRate",
-  CurrencyExchangeRateHistory = "currencyExchangeRateHistory",
-  CurrencyLocalization = "currencyLocalization",
-  CurrencyProvider = "currencyProvider",
-  CurrencyRegion = "currencyRegion",
-  Customer = "customer",
-  CustomerActivity = "customerActivity",
-  CustomerAddress = "customerAddress",
-  CustomerConsent = "customerConsent",
-  CustomerContact = "customerContact",
-  CustomerCurrencyPreference = "customerCurrencyPreference",
-  CustomerEmailVerification = "customerEmailVerification",
-  CustomerGroup = "customerGroup",
-  CustomerGroupMembership = "customerGroupMembership",
-  CustomerGroupTaxOverride = "customerGroupTaxOverride",
-  CustomerLoyaltyAccount = "customerLoyaltyAccount",
-  CustomerLoyaltyProgram = "customerLoyaltyProgram",
-  CustomerLoyaltyTransaction = "customerLoyaltyTransaction",
-  CustomerNote = "customerNote",
-  CustomerPasswordReset = "customerPasswordReset",
-  CustomerPreference = "customerPreference",
-  CustomerPrice = "customerPrice",
-  CustomerPriceList = "customerPriceList",
-  CustomerProductView = "customerProductView",
-  CustomerSegmentMembership = "customerSegmentMembership",
-  CustomerSegments = "customerSegments",
-  CustomerSubscription = "customerSubscription",
-  CustomerTaxExemption = "customerTaxExemption",
-  CustomerTaxExemptionCategory = "customerTaxExemptionCategory",
-  CustomerWishlist = "customerWishlist",
-  CustomerWishlistItem = "customerWishlistItem",
-  DistributionChannel = "distributionChannel",
-  DistributionChannelProduct = "distributionChannelProduct",
-  DistributionFulfillmentPartner = "distributionFulfillmentPartner",
-  DistributionInventoryMovement = "distributionInventoryMovement",
-  DistributionOrderFulfillment = "distributionOrderFulfillment",
-  DistributionPickupOrder = "distributionPickupOrder",
-  DistributionPreOrder = "distributionPreOrder",
-  DistributionPreOrderReservation = "distributionPreOrderReservation",
-  DistributionRule = "distributionRule",
-  DistributionShippingCarrier = "distributionShippingCarrier",
-  DistributionShippingMethod = "distributionShippingMethod",
-  DistributionShippingRate = "distributionShippingRate",
-  DistributionShippingZone = "distributionShippingZone",
-  DistributionWarehouse = "distributionWarehouse",
-  DistributionWarehouseBin = "distributionWarehouseBin",
-  DistributionWarehouseZone = "distributionWarehouseZone",
-  DunningAttempt = "dunningAttempt",
-  FaqArticle = "faqArticle",
-  FaqCategory = "faqCategory",
-  FraudBlacklist = "fraudBlacklist",
-  FraudCheck = "fraudCheck",
-  FraudRule = "fraudRule",
-  FulfillmentStatusHistory = "fulfillmentStatusHistory",
-  GdprCookieConsent = "gdprCookieConsent",
-  GdprDataRequest = "gdprDataRequest",
-  IdentityCustomerSession = "identityCustomerSession",
-  IdentityMerchantSession = "identityMerchantSession",
-  IdentityRefreshTokens = "identityRefreshTokens",
-  IdentitySocialAccount = "identitySocialAccount",
-  IdentityTokenBlacklist = "identityTokenBlacklist",
-  InventoryCount = "inventoryCount",
-  InventoryCountItem = "inventoryCountItem",
-  InventoryLevel = "inventoryLevel",
-  InventoryLocation = "inventoryLocation",
-  InventoryLot = "inventoryLot",
-  InventoryTransaction = "inventoryTransaction",
-  InventoryTransactionType = "inventoryTransactionType",
-  InventoryTransfer = "inventoryTransfer",
-  InventoryTransferItem = "inventoryTransferItem",
-  KnexMigrations = "knexMigrations",
-  KnexMigrationsLock = "knexMigrations_lock",
-  Language = "language",
-  Locale = "locale",
-  LowStockNotification = "lowStockNotification",
-  LoyaltyPoints = "loyaltyPoints",
-  LoyaltyRedemption = "loyaltyRedemption",
-  LoyaltyReward = "loyaltyReward",
-  LoyaltyTier = "loyaltyTier",
-  LoyaltyTransaction = "loyaltyTransaction",
-  MarketingAbandonedCart = "marketingAbandonedCart",
-  MarketingAbandonedCartEmail = "marketingAbandonedCartEmail",
-  MarketingAffiliate = "marketingAffiliate",
-  MarketingAffiliateCommission = "marketingAffiliateCommission",
-  MarketingAffiliateLink = "marketingAffiliateLink",
-  MarketingAffiliatePayout = "marketingAffiliatePayout",
-  MarketingEmailCampaign = "marketingEmailCampaign",
-  MarketingEmailCampaignLink = "marketingEmailCampaignLink",
-  MarketingEmailCampaignRecipient = "marketingEmailCampaignRecipient",
-  MarketingEmailTemplate = "marketingEmailTemplate",
-  MarketingProductRecommendation = "marketingProductRecommendation",
-  Media = "media",
-  MembershipBenefit = "membershipBenefit",
-  MembershipBenefitUsage = "membershipBenefitUsage",
-  MembershipContentAccess = "membershipContentAccess",
-  MembershipDiscountCode = "membershipDiscountCode",
-  MembershipDiscountCodeUsage = "membershipDiscountCodeUsage",
-  MembershipDiscountRule = "membershipDiscountRule",
-  MembershipGroup = "membershipGroup",
-  MembershipGroupMember = "membershipGroupMember",
-  MembershipPayment = "membershipPayment",
-  MembershipPlan = "membershipPlan",
-  MembershipPlanBenefit = "membershipPlanBenefit",
-  MembershipStatusLog = "membershipStatusLog",
-  MembershipSubscription = "membershipSubscription",
-  Merchant = "merchant",
-  MerchantAddress = "merchantAddress",
-  MerchantBalance = "merchantBalance",
-  MerchantContact = "merchantContact",
-  MerchantEmailVerification = "merchantEmailVerification",
-  MerchantFollower = "merchantFollower",
-  MerchantInvoice = "merchantInvoice",
-  MerchantOrder = "merchantOrder",
-  MerchantPasswordReset = "merchantPasswordReset",
-  MerchantPaymentInfo = "merchantPaymentInfo",
-  MerchantPayout = "merchantPayout",
-  MerchantPayoutItem = "merchantPayoutItem",
-  MerchantProduct = "merchantProduct",
-  MerchantProductVariant = "merchantProductVariant",
-  MerchantReview = "merchantReview",
-  MerchantSettings = "merchantSettings",
-  MerchantShippingTemplate = "merchantShippingTemplate",
-  MerchantStore = "merchantStore",
-  MerchantTaxInfo = "merchantTaxInfo",
-  MerchantTransaction = "merchantTransaction",
-  MerchantVerificationDocument = "merchantVerificationDocument",
-  Notification = "notification",
-  NotificationBatch = "notificationBatch",
-  NotificationCategory = "notificationCategory",
-  NotificationDeliveryLog = "notificationDeliveryLog",
-  NotificationDevice = "notificationDevice",
-  NotificationEventLog = "notificationEventLog",
-  NotificationPreference = "notificationPreference",
-  NotificationTemplate = "notificationTemplate",
-  NotificationTemplateTranslation = "notificationTemplateTranslation",
-  NotificationUnsubscribe = "notificationUnsubscribe",
-  NotificationWebhook = "notificationWebhook",
-  Order = "order",
-  OrderAddress = "orderAddress",
-  OrderDiscount = "orderDiscount",
-  OrderFulfillment = "orderFulfillment",
-  OrderFulfillmentItem = "orderFulfillmentItem",
-  OrderFulfillmentPackage = "orderFulfillmentPackage",
-  OrderItem = "orderItem",
-  OrderNote = "orderNote",
-  OrderPayment = "orderPayment",
-  OrderPaymentRefund = "orderPaymentRefund",
-  OrderReturn = "orderReturn",
-  OrderReturnItem = "orderReturnItem",
-  OrderShipping = "orderShipping",
-  OrderShippingRate = "orderShippingRate",
-  OrderStatusHistory = "orderStatusHistory",
-  OrderTax = "orderTax",
-  PaymentBalance = "paymentBalance",
-  PaymentDispute = "paymentDispute",
-  PaymentFee = "paymentFee",
-  PaymentGateway = "paymentGateway",
-  PaymentMethod = "paymentMethod",
-  PaymentMethodConfig = "paymentMethodConfig",
-  PaymentPlan = "paymentPlan",
-  PaymentRefund = "paymentRefund",
-  PaymentReport = "paymentReport",
-  PaymentSettings = "paymentSettings",
-  PaymentSubscription = "paymentSubscription",
-  PaymentTransaction = "paymentTransaction",
-  PaymentWebhook = "paymentWebhook",
-  Payout = "payout",
-  PayoutItem = "payoutItem",
-  PayoutSettings = "payoutSettings",
-  PlatformConfig = "platformConfig",
-  PriceAlert = "priceAlert",
-  PriceList = "priceList",
-  PricingRule = "pricingRule",
-  Product = "product",
-  ProductAttribute = "productAttribute",
-  ProductAttributeGroup = "productAttributeGroup",
-  ProductAttributeOption = "productAttributeOption",
-  ProductAttributeSet = "productAttributeSet",
-  ProductAttributeSetMapping = "productAttributeSetMapping",
-  ProductAttributeToGroup = "productAttributeToGroup",
-  ProductAttributeValue = "productAttributeValue",
-  ProductAttributeValueMap = "productAttributeValueMap",
-  ProductBrand = "productBrand",
-  ProductBundle = "productBundle",
-  ProductCategory = "productCategory",
-  ProductCategoryMap = "productCategoryMap",
-  ProductCollection = "productCollection",
-  ProductCollectionMap = "productCollectionMap",
-  ProductCurrencyPrice = "productCurrencyPrice",
-  ProductDownload = "productDownload",
-  ProductImage = "productImage",
-  ProductList = "productList",
-  ProductListItem = "productListItem",
-  ProductMedia = "productMedia",
-  ProductPrice = "productPrice",
-  ProductQa = "productQa",
-  ProductQaAnswer = "productQaAnswer",
-  ProductQaVote = "productQaVote",
-  ProductRelated = "productRelated",
-  ProductReview = "productReview",
-  ProductReviewMedia = "productReviewMedia",
-  ProductReviewVote = "productReviewVote",
-  ProductSeo = "productSeo",
-  ProductTag = "productTag",
-  ProductTagMap = "productTagMap",
-  ProductTaxCategory = "productTaxCategory",
-  ProductTaxExemption = "productTaxExemption",
-  ProductTieredPrice = "productTieredPrice",
-  ProductToCategory = "productToCategory",
-  ProductToTag = "productToTag",
-  ProductTranslation = "productTranslation",
-  ProductType = "productType",
-  ProductVariant = "productVariant",
-  Promotion = "promotion",
-  PromotionAction = "promotionAction",
-  PromotionBuyXGetYDiscount = "promotionBuyXGetYDiscount",
-  PromotionCoupon = "promotionCoupon",
-  PromotionCouponBatch = "promotionCouponBatch",
-  PromotionCouponRestriction = "promotionCouponRestriction",
-  PromotionCouponUsage = "promotionCouponUsage",
-  PromotionGiftCard = "promotionGiftCard",
-  PromotionGiftCardTransaction = "promotionGiftCardTransaction",
-  PromotionProductDiscount = "promotionProductDiscount",
-  PromotionProductDiscountCustomerGroup = "promotionProductDiscountCustomerGroup",
-  PromotionProductDiscountItem = "promotionProductDiscountItem",
-  PromotionRule = "promotionRule",
-  PromotionUsage = "promotionUsage",
-  Referral = "referral",
-  ReferralReward = "referralReward",
-  ReportExecution = "reportExecution",
-  ReportSchedule = "reportSchedule",
-  Role = "role",
-  RuleAdjustment = "ruleAdjustment",
-  RuleCondition = "ruleCondition",
-  Session = "session",
-  ShippingCarrier = "shippingCarrier",
-  ShippingMethod = "shippingMethod",
-  ShippingPackagingType = "shippingPackagingType",
-  ShippingRate = "shippingRate",
-  ShippingZone = "shippingZone",
-  StockAlert = "stockAlert",
-  StockReservation = "stockReservation",
-  Store = "store",
-  StoreCurrencySettings = "storeCurrencySettings",
-  StoreLocation = "storeLocation",
-  StoredPaymentMethod = "storedPaymentMethod",
-  SubscriptionInvoice = "subscriptionInvoice",
-  SubscriptionOrder = "subscriptionOrder",
-  SubscriptionPause = "subscriptionPause",
-  SubscriptionPlan = "subscriptionPlan",
-  SubscriptionProduct = "subscriptionProduct",
-  Supplier = "supplier",
-  SupplierAddress = "supplierAddress",
-  SupplierProduct = "supplierProduct",
-  SupplierPurchaseOrder = "supplierPurchaseOrder",
-  SupplierPurchaseOrderItem = "supplierPurchaseOrderItem",
-  SupplierReceivingItem = "supplierReceivingItem",
-  SupplierReceivingRecord = "supplierReceivingRecord",
-  SupportAgent = "supportAgent",
-  SupportAttachment = "supportAttachment",
-  SupportMessage = "supportMessage",
-  SupportTicket = "supportTicket",
-  SystemConfiguration = "systemConfiguration",
-  TaxCalculation = "taxCalculation",
-  TaxCalculationApplied = "taxCalculationApplied",
-  TaxCalculationLine = "taxCalculationLine",
-  TaxCategory = "taxCategory",
-  TaxNexus = "taxNexus",
-  TaxProviderLog = "taxProviderLog",
-  TaxRate = "taxRate",
-  TaxReport = "taxReport",
-  TaxRule = "taxRule",
-  TaxSettings = "taxSettings",
-  TaxZone = "taxZone",
-  TierPrice = "tierPrice",
-  User = "user",
-  VatOssReport = "vatOssReport",
-  VatOssReportLine = "vatOssReportLine",
-  VatRegistration = "vatRegistration",
-  VatValidationLog = "vatValidationLog",
-  WebhookDelivery = "webhookDelivery",
-  WebhookEndpoint = "webhookEndpoint",
+  AdminUserRole = 'adminUserRole',
+  AnalyticsChannelAttribution = 'analyticsChannelAttribution',
+  AnalyticsCustomer = 'analyticsCustomer',
+  AnalyticsCustomerCohort = 'analyticsCustomerCohort',
+  AnalyticsProductPerformance = 'analyticsProductPerformance',
+  AnalyticsReportDashboard = 'analyticsReportDashboard',
+  AnalyticsReportEvent = 'analyticsReportEvent',
+  AnalyticsReportSnapshot = 'analyticsReportSnapshot',
+  AnalyticsSalesDaily = 'analyticsSalesDaily',
+  AnalyticsSearchQuery = 'analyticsSearchQuery',
+  ApiKey = 'apiKey',
+  AttributeOptionTranslation = 'attributeOptionTranslation',
+  AttributeTranslation = 'attributeTranslation',
+  AuditLog = 'auditLog',
+  B2BApprovalAction = 'b2bApprovalAction',
+  B2BApprovalRequest = 'b2bApprovalRequest',
+  B2BApprovalWorkflow = 'b2bApprovalWorkflow',
+  B2BApprovalWorkflowStep = 'b2bApprovalWorkflowStep',
+  B2BCompany = 'b2bCompany',
+  B2BCompanyAddress = 'b2bCompanyAddress',
+  B2BCompanyCreditLimit = 'b2bCompanyCreditLimit',
+  B2BCompanyCreditTransaction = 'b2bCompanyCreditTransaction',
+  B2BCompanyUser = 'b2bCompanyUser',
+  B2BQuote = 'b2bQuote',
+  B2BQuoteItem = 'b2bQuoteItem',
+  Basket = 'basket',
+  BasketAnalytics = 'basketAnalytics',
+  BasketDiscount = 'basketDiscount',
+  BasketHistory = 'basketHistory',
+  BasketItem = 'basketItem',
+  BasketMerge = 'basketMerge',
+  BasketSavedItem = 'basketSavedItem',
+  BrandTranslation = 'brandTranslation',
+  BundleItem = 'bundleItem',
+  Business = 'business',
+  CartPromotion = 'cartPromotion',
+  CartPromotionItem = 'cartPromotionItem',
+  CategoryPromotion = 'categoryPromotion',
+  CategoryPromotionProduct = 'categoryPromotionProduct',
+  CategoryTranslation = 'categoryTranslation',
+  CheckoutSession = 'checkoutSession',
+  CollectionTranslation = 'collectionTranslation',
+  ContentBlock = 'contentBlock',
+  ContentBlockType = 'contentBlockType',
+  ContentCategorization = 'contentCategorization',
+  ContentCategory = 'contentCategory',
+  ContentMedia = 'contentMedia',
+  ContentMediaFolder = 'contentMediaFolder',
+  ContentMediaUsage = 'contentMediaUsage',
+  ContentNavigation = 'contentNavigation',
+  ContentNavigationItem = 'contentNavigationItem',
+  ContentPage = 'contentPage',
+  ContentPageTranslation = 'contentPageTranslation',
+  ContentPageVersion = 'contentPageVersion',
+  ContentRedirect = 'contentRedirect',
+  ContentTemplate = 'contentTemplate',
+  ContentType = 'contentType',
+  Country = 'country',
+  Currency = 'currency',
+  CurrencyExchangeRate = 'currencyExchangeRate',
+  CurrencyExchangeRateHistory = 'currencyExchangeRateHistory',
+  CurrencyLocalization = 'currencyLocalization',
+  CurrencyProvider = 'currencyProvider',
+  CurrencyRegion = 'currencyRegion',
+  Customer = 'customer',
+  CustomerActivity = 'customerActivity',
+  CustomerAddress = 'customerAddress',
+  CustomerConsent = 'customerConsent',
+  CustomerContact = 'customerContact',
+  CustomerCurrencyPreference = 'customerCurrencyPreference',
+  CustomerEmailVerification = 'customerEmailVerification',
+  CustomerGroup = 'customerGroup',
+  CustomerGroupMembership = 'customerGroupMembership',
+  CustomerGroupTaxOverride = 'customerGroupTaxOverride',
+  CustomerLoyaltyAccount = 'customerLoyaltyAccount',
+  CustomerLoyaltyProgram = 'customerLoyaltyProgram',
+  CustomerLoyaltyTransaction = 'customerLoyaltyTransaction',
+  CustomerNote = 'customerNote',
+  CustomerPasswordReset = 'customerPasswordReset',
+  CustomerPreference = 'customerPreference',
+  CustomerPrice = 'customerPrice',
+  CustomerPriceList = 'customerPriceList',
+  CustomerProductView = 'customerProductView',
+  CustomerSegmentMembership = 'customerSegmentMembership',
+  CustomerSegments = 'customerSegments',
+  CustomerSubscription = 'customerSubscription',
+  CustomerTaxExemption = 'customerTaxExemption',
+  CustomerTaxExemptionCategory = 'customerTaxExemptionCategory',
+  CustomerWishlist = 'customerWishlist',
+  CustomerWishlistItem = 'customerWishlistItem',
+  DistributionChannel = 'distributionChannel',
+  DistributionChannelProduct = 'distributionChannelProduct',
+  DistributionFulfillmentPartner = 'distributionFulfillmentPartner',
+  DistributionInventoryMovement = 'distributionInventoryMovement',
+  DistributionOrderFulfillment = 'distributionOrderFulfillment',
+  DistributionPickupOrder = 'distributionPickupOrder',
+  DistributionPreOrder = 'distributionPreOrder',
+  DistributionPreOrderReservation = 'distributionPreOrderReservation',
+  DistributionRule = 'distributionRule',
+  DistributionShippingCarrier = 'distributionShippingCarrier',
+  DistributionShippingMethod = 'distributionShippingMethod',
+  DistributionShippingRate = 'distributionShippingRate',
+  DistributionShippingZone = 'distributionShippingZone',
+  DistributionWarehouse = 'distributionWarehouse',
+  DistributionWarehouseBin = 'distributionWarehouseBin',
+  DistributionWarehouseZone = 'distributionWarehouseZone',
+  DunningAttempt = 'dunningAttempt',
+  FaqArticle = 'faqArticle',
+  FaqCategory = 'faqCategory',
+  FraudBlacklist = 'fraudBlacklist',
+  FraudCheck = 'fraudCheck',
+  FraudRule = 'fraudRule',
+  FulfillmentStatusHistory = 'fulfillmentStatusHistory',
+  GdprCookieConsent = 'gdprCookieConsent',
+  GdprDataRequest = 'gdprDataRequest',
+  IdentityCustomerSession = 'identityCustomerSession',
+  IdentityMerchantSession = 'identityMerchantSession',
+  IdentityRefreshTokens = 'identityRefreshTokens',
+  IdentitySocialAccount = 'identitySocialAccount',
+  IdentityTokenBlacklist = 'identityTokenBlacklist',
+  InventoryCount = 'inventoryCount',
+  InventoryCountItem = 'inventoryCountItem',
+  InventoryLevel = 'inventoryLevel',
+  InventoryLocation = 'inventoryLocation',
+  InventoryLot = 'inventoryLot',
+  InventoryTransaction = 'inventoryTransaction',
+  InventoryTransactionType = 'inventoryTransactionType',
+  InventoryTransfer = 'inventoryTransfer',
+  InventoryTransferItem = 'inventoryTransferItem',
+  KnexMigrations = 'knexMigrations',
+  KnexMigrationsLock = 'knexMigrations_lock',
+  Language = 'language',
+  Locale = 'locale',
+  LowStockNotification = 'lowStockNotification',
+  LoyaltyPoints = 'loyaltyPoints',
+  LoyaltyRedemption = 'loyaltyRedemption',
+  LoyaltyReward = 'loyaltyReward',
+  LoyaltyTier = 'loyaltyTier',
+  LoyaltyTransaction = 'loyaltyTransaction',
+  MarketingAbandonedCart = 'marketingAbandonedCart',
+  MarketingAbandonedCartEmail = 'marketingAbandonedCartEmail',
+  MarketingAffiliate = 'marketingAffiliate',
+  MarketingAffiliateCommission = 'marketingAffiliateCommission',
+  MarketingAffiliateLink = 'marketingAffiliateLink',
+  MarketingAffiliatePayout = 'marketingAffiliatePayout',
+  MarketingEmailCampaign = 'marketingEmailCampaign',
+  MarketingEmailCampaignLink = 'marketingEmailCampaignLink',
+  MarketingEmailCampaignRecipient = 'marketingEmailCampaignRecipient',
+  MarketingEmailTemplate = 'marketingEmailTemplate',
+  MarketingProductRecommendation = 'marketingProductRecommendation',
+  Media = 'media',
+  MembershipBenefit = 'membershipBenefit',
+  MembershipBenefitUsage = 'membershipBenefitUsage',
+  MembershipContentAccess = 'membershipContentAccess',
+  MembershipDiscountCode = 'membershipDiscountCode',
+  MembershipDiscountCodeUsage = 'membershipDiscountCodeUsage',
+  MembershipDiscountRule = 'membershipDiscountRule',
+  MembershipGroup = 'membershipGroup',
+  MembershipGroupMember = 'membershipGroupMember',
+  MembershipPayment = 'membershipPayment',
+  MembershipPlan = 'membershipPlan',
+  MembershipPlanBenefit = 'membershipPlanBenefit',
+  MembershipStatusLog = 'membershipStatusLog',
+  MembershipSubscription = 'membershipSubscription',
+  Merchant = 'merchant',
+  MerchantAddress = 'merchantAddress',
+  MerchantBalance = 'merchantBalance',
+  MerchantContact = 'merchantContact',
+  MerchantEmailVerification = 'merchantEmailVerification',
+  MerchantFollower = 'merchantFollower',
+  MerchantInvoice = 'merchantInvoice',
+  MerchantOrder = 'merchantOrder',
+  MerchantPasswordReset = 'merchantPasswordReset',
+  MerchantPaymentInfo = 'merchantPaymentInfo',
+  MerchantPayout = 'merchantPayout',
+  MerchantPayoutItem = 'merchantPayoutItem',
+  MerchantProduct = 'merchantProduct',
+  MerchantProductVariant = 'merchantProductVariant',
+  MerchantReview = 'merchantReview',
+  MerchantSettings = 'merchantSettings',
+  MerchantShippingTemplate = 'merchantShippingTemplate',
+  MerchantStore = 'merchantStore',
+  MerchantTaxInfo = 'merchantTaxInfo',
+  MerchantTransaction = 'merchantTransaction',
+  MerchantVerificationDocument = 'merchantVerificationDocument',
+  Notification = 'notification',
+  NotificationBatch = 'notificationBatch',
+  NotificationCategory = 'notificationCategory',
+  NotificationDeliveryLog = 'notificationDeliveryLog',
+  NotificationDevice = 'notificationDevice',
+  NotificationEventLog = 'notificationEventLog',
+  NotificationPreference = 'notificationPreference',
+  NotificationTemplate = 'notificationTemplate',
+  NotificationTemplateTranslation = 'notificationTemplateTranslation',
+  NotificationUnsubscribe = 'notificationUnsubscribe',
+  NotificationWebhook = 'notificationWebhook',
+  Order = 'order',
+  OrderAddress = 'orderAddress',
+  OrderDiscount = 'orderDiscount',
+  OrderFulfillment = 'orderFulfillment',
+  OrderFulfillmentItem = 'orderFulfillmentItem',
+  OrderFulfillmentPackage = 'orderFulfillmentPackage',
+  OrderItem = 'orderItem',
+  OrderNote = 'orderNote',
+  OrderPayment = 'orderPayment',
+  OrderPaymentRefund = 'orderPaymentRefund',
+  OrderReturn = 'orderReturn',
+  OrderReturnItem = 'orderReturnItem',
+  OrderShipping = 'orderShipping',
+  OrderShippingRate = 'orderShippingRate',
+  OrderStatusHistory = 'orderStatusHistory',
+  OrderTax = 'orderTax',
+  PaymentBalance = 'paymentBalance',
+  PaymentDispute = 'paymentDispute',
+  PaymentFee = 'paymentFee',
+  PaymentGateway = 'paymentGateway',
+  PaymentMethod = 'paymentMethod',
+  PaymentMethodConfig = 'paymentMethodConfig',
+  PaymentPlan = 'paymentPlan',
+  PaymentRefund = 'paymentRefund',
+  PaymentReport = 'paymentReport',
+  PaymentSettings = 'paymentSettings',
+  PaymentSubscription = 'paymentSubscription',
+  PaymentTransaction = 'paymentTransaction',
+  PaymentWebhook = 'paymentWebhook',
+  Payout = 'payout',
+  PayoutItem = 'payoutItem',
+  PayoutSettings = 'payoutSettings',
+  PlatformConfig = 'platformConfig',
+  PriceAlert = 'priceAlert',
+  PriceList = 'priceList',
+  PricingRule = 'pricingRule',
+  Product = 'product',
+  ProductAttribute = 'productAttribute',
+  ProductAttributeGroup = 'productAttributeGroup',
+  ProductAttributeOption = 'productAttributeOption',
+  ProductAttributeSet = 'productAttributeSet',
+  ProductAttributeSetMapping = 'productAttributeSetMapping',
+  ProductAttributeToGroup = 'productAttributeToGroup',
+  ProductAttributeValue = 'productAttributeValue',
+  ProductAttributeValueMap = 'productAttributeValueMap',
+  ProductBrand = 'productBrand',
+  ProductBundle = 'productBundle',
+  ProductCategory = 'productCategory',
+  ProductCategoryMap = 'productCategoryMap',
+  ProductCollection = 'productCollection',
+  ProductCollectionMap = 'productCollectionMap',
+  ProductCurrencyPrice = 'productCurrencyPrice',
+  ProductDownload = 'productDownload',
+  ProductImage = 'productImage',
+  ProductList = 'productList',
+  ProductListItem = 'productListItem',
+  ProductMedia = 'productMedia',
+  ProductPrice = 'productPrice',
+  ProductQa = 'productQa',
+  ProductQaAnswer = 'productQaAnswer',
+  ProductQaVote = 'productQaVote',
+  ProductRelated = 'productRelated',
+  ProductReview = 'productReview',
+  ProductReviewMedia = 'productReviewMedia',
+  ProductReviewVote = 'productReviewVote',
+  ProductSeo = 'productSeo',
+  ProductTag = 'productTag',
+  ProductTagMap = 'productTagMap',
+  ProductTaxCategory = 'productTaxCategory',
+  ProductTaxExemption = 'productTaxExemption',
+  ProductTieredPrice = 'productTieredPrice',
+  ProductToCategory = 'productToCategory',
+  ProductToTag = 'productToTag',
+  ProductTranslation = 'productTranslation',
+  ProductType = 'productType',
+  ProductVariant = 'productVariant',
+  Promotion = 'promotion',
+  PromotionAction = 'promotionAction',
+  PromotionBuyXGetYDiscount = 'promotionBuyXGetYDiscount',
+  PromotionCoupon = 'promotionCoupon',
+  PromotionCouponBatch = 'promotionCouponBatch',
+  PromotionCouponRestriction = 'promotionCouponRestriction',
+  PromotionCouponUsage = 'promotionCouponUsage',
+  PromotionGiftCard = 'promotionGiftCard',
+  PromotionGiftCardTransaction = 'promotionGiftCardTransaction',
+  PromotionProductDiscount = 'promotionProductDiscount',
+  PromotionProductDiscountCustomerGroup = 'promotionProductDiscountCustomerGroup',
+  PromotionProductDiscountItem = 'promotionProductDiscountItem',
+  PromotionRule = 'promotionRule',
+  PromotionUsage = 'promotionUsage',
+  Referral = 'referral',
+  ReferralReward = 'referralReward',
+  ReportExecution = 'reportExecution',
+  ReportSchedule = 'reportSchedule',
+  Role = 'role',
+  RuleAdjustment = 'ruleAdjustment',
+  RuleCondition = 'ruleCondition',
+  Session = 'session',
+  ShippingCarrier = 'shippingCarrier',
+  ShippingMethod = 'shippingMethod',
+  ShippingPackagingType = 'shippingPackagingType',
+  ShippingRate = 'shippingRate',
+  ShippingZone = 'shippingZone',
+  StockAlert = 'stockAlert',
+  StockReservation = 'stockReservation',
+  Store = 'store',
+  StoreCurrencySettings = 'storeCurrencySettings',
+  StoreLocation = 'storeLocation',
+  StoredPaymentMethod = 'storedPaymentMethod',
+  SubscriptionInvoice = 'subscriptionInvoice',
+  SubscriptionOrder = 'subscriptionOrder',
+  SubscriptionPause = 'subscriptionPause',
+  SubscriptionPlan = 'subscriptionPlan',
+  SubscriptionProduct = 'subscriptionProduct',
+  Supplier = 'supplier',
+  SupplierAddress = 'supplierAddress',
+  SupplierProduct = 'supplierProduct',
+  SupplierPurchaseOrder = 'supplierPurchaseOrder',
+  SupplierPurchaseOrderItem = 'supplierPurchaseOrderItem',
+  SupplierReceivingItem = 'supplierReceivingItem',
+  SupplierReceivingRecord = 'supplierReceivingRecord',
+  SupportAgent = 'supportAgent',
+  SupportAttachment = 'supportAttachment',
+  SupportMessage = 'supportMessage',
+  SupportTicket = 'supportTicket',
+  SystemConfiguration = 'systemConfiguration',
+  TaxCalculation = 'taxCalculation',
+  TaxCalculationApplied = 'taxCalculationApplied',
+  TaxCalculationLine = 'taxCalculationLine',
+  TaxCategory = 'taxCategory',
+  TaxNexus = 'taxNexus',
+  TaxProviderLog = 'taxProviderLog',
+  TaxRate = 'taxRate',
+  TaxReport = 'taxReport',
+  TaxRule = 'taxRule',
+  TaxSettings = 'taxSettings',
+  TaxZone = 'taxZone',
+  TierPrice = 'tierPrice',
+  User = 'user',
+  VatOssReport = 'vatOssReport',
+  VatOssReportLine = 'vatOssReportLine',
+  VatRegistration = 'vatRegistration',
+  VatValidationLog = 'vatValidationLog',
+  WebhookDelivery = 'webhookDelivery',
+  WebhookEndpoint = 'webhookEndpoint',
 }
 
 export type Tables = {
-  "adminUserRole": AdminUserRole,
-  "analyticsChannelAttribution": AnalyticsChannelAttribution,
-  "analyticsCustomer": AnalyticsCustomer,
-  "analyticsCustomerCohort": AnalyticsCustomerCohort,
-  "analyticsProductPerformance": AnalyticsProductPerformance,
-  "analyticsReportDashboard": AnalyticsReportDashboard,
-  "analyticsReportEvent": AnalyticsReportEvent,
-  "analyticsReportSnapshot": AnalyticsReportSnapshot,
-  "analyticsSalesDaily": AnalyticsSalesDaily,
-  "analyticsSearchQuery": AnalyticsSearchQuery,
-  "apiKey": ApiKey,
-  "attributeOptionTranslation": AttributeOptionTranslation,
-  "attributeTranslation": AttributeTranslation,
-  "auditLog": AuditLog,
-  "b2bApprovalAction": B2BApprovalAction,
-  "b2bApprovalRequest": B2BApprovalRequest,
-  "b2bApprovalWorkflow": B2BApprovalWorkflow,
-  "b2bApprovalWorkflowStep": B2BApprovalWorkflowStep,
-  "b2bCompany": B2BCompany,
-  "b2bCompanyAddress": B2BCompanyAddress,
-  "b2bCompanyCreditLimit": B2BCompanyCreditLimit,
-  "b2bCompanyCreditTransaction": B2BCompanyCreditTransaction,
-  "b2bCompanyUser": B2BCompanyUser,
-  "b2bQuote": B2BQuote,
-  "b2bQuoteItem": B2BQuoteItem,
-  "basket": Basket,
-  "basketAnalytics": BasketAnalytics,
-  "basketDiscount": BasketDiscount,
-  "basketHistory": BasketHistory,
-  "basketItem": BasketItem,
-  "basketMerge": BasketMerge,
-  "basketSavedItem": BasketSavedItem,
-  "brandTranslation": BrandTranslation,
-  "bundleItem": BundleItem,
-  "business": Business,
-  "cartPromotion": CartPromotion,
-  "cartPromotionItem": CartPromotionItem,
-  "categoryPromotion": CategoryPromotion,
-  "categoryPromotionProduct": CategoryPromotionProduct,
-  "categoryTranslation": CategoryTranslation,
-  "checkoutSession": CheckoutSession,
-  "collectionTranslation": CollectionTranslation,
-  "contentBlock": ContentBlock,
-  "contentBlockType": ContentBlockType,
-  "contentCategorization": ContentCategorization,
-  "contentCategory": ContentCategory,
-  "contentMedia": ContentMedia,
-  "contentMediaFolder": ContentMediaFolder,
-  "contentMediaUsage": ContentMediaUsage,
-  "contentNavigation": ContentNavigation,
-  "contentNavigationItem": ContentNavigationItem,
-  "contentPage": ContentPage,
-  "contentPageTranslation": ContentPageTranslation,
-  "contentPageVersion": ContentPageVersion,
-  "contentRedirect": ContentRedirect,
-  "contentTemplate": ContentTemplate,
-  "contentType": ContentType,
-  "country": Country,
-  "currency": Currency,
-  "currencyExchangeRate": CurrencyExchangeRate,
-  "currencyExchangeRateHistory": CurrencyExchangeRateHistory,
-  "currencyLocalization": CurrencyLocalization,
-  "currencyProvider": CurrencyProvider,
-  "currencyRegion": CurrencyRegion,
-  "customer": Customer,
-  "customerActivity": CustomerActivity,
-  "customerAddress": CustomerAddress,
-  "customerConsent": CustomerConsent,
-  "customerContact": CustomerContact,
-  "customerCurrencyPreference": CustomerCurrencyPreference,
-  "customerEmailVerification": CustomerEmailVerification,
-  "customerGroup": CustomerGroup,
-  "customerGroupMembership": CustomerGroupMembership,
-  "customerGroupTaxOverride": CustomerGroupTaxOverride,
-  "customerLoyaltyAccount": CustomerLoyaltyAccount,
-  "customerLoyaltyProgram": CustomerLoyaltyProgram,
-  "customerLoyaltyTransaction": CustomerLoyaltyTransaction,
-  "customerNote": CustomerNote,
-  "customerPasswordReset": CustomerPasswordReset,
-  "customerPreference": CustomerPreference,
-  "customerPrice": CustomerPrice,
-  "customerPriceList": CustomerPriceList,
-  "customerProductView": CustomerProductView,
-  "customerSegmentMembership": CustomerSegmentMembership,
-  "customerSegments": CustomerSegments,
-  "customerSubscription": CustomerSubscription,
-  "customerTaxExemption": CustomerTaxExemption,
-  "customerTaxExemptionCategory": CustomerTaxExemptionCategory,
-  "customerWishlist": CustomerWishlist,
-  "customerWishlistItem": CustomerWishlistItem,
-  "distributionChannel": DistributionChannel,
-  "distributionChannelProduct": DistributionChannelProduct,
-  "distributionFulfillmentPartner": DistributionFulfillmentPartner,
-  "distributionInventoryMovement": DistributionInventoryMovement,
-  "distributionOrderFulfillment": DistributionOrderFulfillment,
-  "distributionPickupOrder": DistributionPickupOrder,
-  "distributionPreOrder": DistributionPreOrder,
-  "distributionPreOrderReservation": DistributionPreOrderReservation,
-  "distributionRule": DistributionRule,
-  "distributionShippingCarrier": DistributionShippingCarrier,
-  "distributionShippingMethod": DistributionShippingMethod,
-  "distributionShippingRate": DistributionShippingRate,
-  "distributionShippingZone": DistributionShippingZone,
-  "distributionWarehouse": DistributionWarehouse,
-  "distributionWarehouseBin": DistributionWarehouseBin,
-  "distributionWarehouseZone": DistributionWarehouseZone,
-  "dunningAttempt": DunningAttempt,
-  "faqArticle": FaqArticle,
-  "faqCategory": FaqCategory,
-  "fraudBlacklist": FraudBlacklist,
-  "fraudCheck": FraudCheck,
-  "fraudRule": FraudRule,
-  "fulfillmentStatusHistory": FulfillmentStatusHistory,
-  "gdprCookieConsent": GdprCookieConsent,
-  "gdprDataRequest": GdprDataRequest,
-  "identityCustomerSession": IdentityCustomerSession,
-  "identityMerchantSession": IdentityMerchantSession,
-  "identityRefreshTokens": IdentityRefreshTokens,
-  "identitySocialAccount": IdentitySocialAccount,
-  "identityTokenBlacklist": IdentityTokenBlacklist,
-  "inventoryCount": InventoryCount,
-  "inventoryCountItem": InventoryCountItem,
-  "inventoryLevel": InventoryLevel,
-  "inventoryLocation": InventoryLocation,
-  "inventoryLot": InventoryLot,
-  "inventoryTransaction": InventoryTransaction,
-  "inventoryTransactionType": InventoryTransactionType,
-  "inventoryTransfer": InventoryTransfer,
-  "inventoryTransferItem": InventoryTransferItem,
-  "knexMigrations": KnexMigrations,
-  "knexMigrations_lock": KnexMigrationsLock,
-  "language": Language,
-  "locale": Locale,
-  "lowStockNotification": LowStockNotification,
-  "loyaltyPoints": LoyaltyPoints,
-  "loyaltyRedemption": LoyaltyRedemption,
-  "loyaltyReward": LoyaltyReward,
-  "loyaltyTier": LoyaltyTier,
-  "loyaltyTransaction": LoyaltyTransaction,
-  "marketingAbandonedCart": MarketingAbandonedCart,
-  "marketingAbandonedCartEmail": MarketingAbandonedCartEmail,
-  "marketingAffiliate": MarketingAffiliate,
-  "marketingAffiliateCommission": MarketingAffiliateCommission,
-  "marketingAffiliateLink": MarketingAffiliateLink,
-  "marketingAffiliatePayout": MarketingAffiliatePayout,
-  "marketingEmailCampaign": MarketingEmailCampaign,
-  "marketingEmailCampaignLink": MarketingEmailCampaignLink,
-  "marketingEmailCampaignRecipient": MarketingEmailCampaignRecipient,
-  "marketingEmailTemplate": MarketingEmailTemplate,
-  "marketingProductRecommendation": MarketingProductRecommendation,
-  "media": Media,
-  "membershipBenefit": MembershipBenefit,
-  "membershipBenefitUsage": MembershipBenefitUsage,
-  "membershipContentAccess": MembershipContentAccess,
-  "membershipDiscountCode": MembershipDiscountCode,
-  "membershipDiscountCodeUsage": MembershipDiscountCodeUsage,
-  "membershipDiscountRule": MembershipDiscountRule,
-  "membershipGroup": MembershipGroup,
-  "membershipGroupMember": MembershipGroupMember,
-  "membershipPayment": MembershipPayment,
-  "membershipPlan": MembershipPlan,
-  "membershipPlanBenefit": MembershipPlanBenefit,
-  "membershipStatusLog": MembershipStatusLog,
-  "membershipSubscription": MembershipSubscription,
-  "merchant": Merchant,
-  "merchantAddress": MerchantAddress,
-  "merchantBalance": MerchantBalance,
-  "merchantContact": MerchantContact,
-  "merchantEmailVerification": MerchantEmailVerification,
-  "merchantFollower": MerchantFollower,
-  "merchantInvoice": MerchantInvoice,
-  "merchantOrder": MerchantOrder,
-  "merchantPasswordReset": MerchantPasswordReset,
-  "merchantPaymentInfo": MerchantPaymentInfo,
-  "merchantPayout": MerchantPayout,
-  "merchantPayoutItem": MerchantPayoutItem,
-  "merchantProduct": MerchantProduct,
-  "merchantProductVariant": MerchantProductVariant,
-  "merchantReview": MerchantReview,
-  "merchantSettings": MerchantSettings,
-  "merchantShippingTemplate": MerchantShippingTemplate,
-  "merchantStore": MerchantStore,
-  "merchantTaxInfo": MerchantTaxInfo,
-  "merchantTransaction": MerchantTransaction,
-  "merchantVerificationDocument": MerchantVerificationDocument,
-  "notification": Notification,
-  "notificationBatch": NotificationBatch,
-  "notificationCategory": NotificationCategory,
-  "notificationDeliveryLog": NotificationDeliveryLog,
-  "notificationDevice": NotificationDevice,
-  "notificationEventLog": NotificationEventLog,
-  "notificationPreference": NotificationPreference,
-  "notificationTemplate": NotificationTemplate,
-  "notificationTemplateTranslation": NotificationTemplateTranslation,
-  "notificationUnsubscribe": NotificationUnsubscribe,
-  "notificationWebhook": NotificationWebhook,
-  "order": Order,
-  "orderAddress": OrderAddress,
-  "orderDiscount": OrderDiscount,
-  "orderFulfillment": OrderFulfillment,
-  "orderFulfillmentItem": OrderFulfillmentItem,
-  "orderFulfillmentPackage": OrderFulfillmentPackage,
-  "orderItem": OrderItem,
-  "orderNote": OrderNote,
-  "orderPayment": OrderPayment,
-  "orderPaymentRefund": OrderPaymentRefund,
-  "orderReturn": OrderReturn,
-  "orderReturnItem": OrderReturnItem,
-  "orderShipping": OrderShipping,
-  "orderShippingRate": OrderShippingRate,
-  "orderStatusHistory": OrderStatusHistory,
-  "orderTax": OrderTax,
-  "paymentBalance": PaymentBalance,
-  "paymentDispute": PaymentDispute,
-  "paymentFee": PaymentFee,
-  "paymentGateway": PaymentGateway,
-  "paymentMethod": PaymentMethod,
-  "paymentMethodConfig": PaymentMethodConfig,
-  "paymentPlan": PaymentPlan,
-  "paymentRefund": PaymentRefund,
-  "paymentReport": PaymentReport,
-  "paymentSettings": PaymentSettings,
-  "paymentSubscription": PaymentSubscription,
-  "paymentTransaction": PaymentTransaction,
-  "paymentWebhook": PaymentWebhook,
-  "payout": Payout,
-  "payoutItem": PayoutItem,
-  "payoutSettings": PayoutSettings,
-  "platformConfig": PlatformConfig,
-  "priceAlert": PriceAlert,
-  "priceList": PriceList,
-  "pricingRule": PricingRule,
-  "product": Product,
-  "productAttribute": ProductAttribute,
-  "productAttributeGroup": ProductAttributeGroup,
-  "productAttributeOption": ProductAttributeOption,
-  "productAttributeSet": ProductAttributeSet,
-  "productAttributeSetMapping": ProductAttributeSetMapping,
-  "productAttributeToGroup": ProductAttributeToGroup,
-  "productAttributeValue": ProductAttributeValue,
-  "productAttributeValueMap": ProductAttributeValueMap,
-  "productBrand": ProductBrand,
-  "productBundle": ProductBundle,
-  "productCategory": ProductCategory,
-  "productCategoryMap": ProductCategoryMap,
-  "productCollection": ProductCollection,
-  "productCollectionMap": ProductCollectionMap,
-  "productCurrencyPrice": ProductCurrencyPrice,
-  "productDownload": ProductDownload,
-  "productImage": ProductImage,
-  "productList": ProductList,
-  "productListItem": ProductListItem,
-  "productMedia": ProductMedia,
-  "productPrice": ProductPrice,
-  "productQa": ProductQa,
-  "productQaAnswer": ProductQaAnswer,
-  "productQaVote": ProductQaVote,
-  "productRelated": ProductRelated,
-  "productReview": ProductReview,
-  "productReviewMedia": ProductReviewMedia,
-  "productReviewVote": ProductReviewVote,
-  "productSeo": ProductSeo,
-  "productTag": ProductTag,
-  "productTagMap": ProductTagMap,
-  "productTaxCategory": ProductTaxCategory,
-  "productTaxExemption": ProductTaxExemption,
-  "productTieredPrice": ProductTieredPrice,
-  "productToCategory": ProductToCategory,
-  "productToTag": ProductToTag,
-  "productTranslation": ProductTranslation,
-  "productType": ProductType,
-  "productVariant": ProductVariant,
-  "promotion": Promotion,
-  "promotionAction": PromotionAction,
-  "promotionBuyXGetYDiscount": PromotionBuyXGetYDiscount,
-  "promotionCoupon": PromotionCoupon,
-  "promotionCouponBatch": PromotionCouponBatch,
-  "promotionCouponRestriction": PromotionCouponRestriction,
-  "promotionCouponUsage": PromotionCouponUsage,
-  "promotionGiftCard": PromotionGiftCard,
-  "promotionGiftCardTransaction": PromotionGiftCardTransaction,
-  "promotionProductDiscount": PromotionProductDiscount,
-  "promotionProductDiscountCustomerGroup": PromotionProductDiscountCustomerGroup,
-  "promotionProductDiscountItem": PromotionProductDiscountItem,
-  "promotionRule": PromotionRule,
-  "promotionUsage": PromotionUsage,
-  "referral": Referral,
-  "referralReward": ReferralReward,
-  "reportExecution": ReportExecution,
-  "reportSchedule": ReportSchedule,
-  "role": Role,
-  "ruleAdjustment": RuleAdjustment,
-  "ruleCondition": RuleCondition,
-  "session": Session,
-  "shippingCarrier": ShippingCarrier,
-  "shippingMethod": ShippingMethod,
-  "shippingPackagingType": ShippingPackagingType,
-  "shippingRate": ShippingRate,
-  "shippingZone": ShippingZone,
-  "stockAlert": StockAlert,
-  "stockReservation": StockReservation,
-  "store": Store,
-  "storeCurrencySettings": StoreCurrencySettings,
-  "storeLocation": StoreLocation,
-  "storedPaymentMethod": StoredPaymentMethod,
-  "subscriptionInvoice": SubscriptionInvoice,
-  "subscriptionOrder": SubscriptionOrder,
-  "subscriptionPause": SubscriptionPause,
-  "subscriptionPlan": SubscriptionPlan,
-  "subscriptionProduct": SubscriptionProduct,
-  "supplier": Supplier,
-  "supplierAddress": SupplierAddress,
-  "supplierProduct": SupplierProduct,
-  "supplierPurchaseOrder": SupplierPurchaseOrder,
-  "supplierPurchaseOrderItem": SupplierPurchaseOrderItem,
-  "supplierReceivingItem": SupplierReceivingItem,
-  "supplierReceivingRecord": SupplierReceivingRecord,
-  "supportAgent": SupportAgent,
-  "supportAttachment": SupportAttachment,
-  "supportMessage": SupportMessage,
-  "supportTicket": SupportTicket,
-  "systemConfiguration": SystemConfiguration,
-  "taxCalculation": TaxCalculation,
-  "taxCalculationApplied": TaxCalculationApplied,
-  "taxCalculationLine": TaxCalculationLine,
-  "taxCategory": TaxCategory,
-  "taxNexus": TaxNexus,
-  "taxProviderLog": TaxProviderLog,
-  "taxRate": TaxRate,
-  "taxReport": TaxReport,
-  "taxRule": TaxRule,
-  "taxSettings": TaxSettings,
-  "taxZone": TaxZone,
-  "tierPrice": TierPrice,
-  "user": User,
-  "vatOssReport": VatOssReport,
-  "vatOssReportLine": VatOssReportLine,
-  "vatRegistration": VatRegistration,
-  "vatValidationLog": VatValidationLog,
-  "webhookDelivery": WebhookDelivery,
-  "webhookEndpoint": WebhookEndpoint,
+  adminUserRole: AdminUserRole;
+  analyticsChannelAttribution: AnalyticsChannelAttribution;
+  analyticsCustomer: AnalyticsCustomer;
+  analyticsCustomerCohort: AnalyticsCustomerCohort;
+  analyticsProductPerformance: AnalyticsProductPerformance;
+  analyticsReportDashboard: AnalyticsReportDashboard;
+  analyticsReportEvent: AnalyticsReportEvent;
+  analyticsReportSnapshot: AnalyticsReportSnapshot;
+  analyticsSalesDaily: AnalyticsSalesDaily;
+  analyticsSearchQuery: AnalyticsSearchQuery;
+  apiKey: ApiKey;
+  attributeOptionTranslation: AttributeOptionTranslation;
+  attributeTranslation: AttributeTranslation;
+  auditLog: AuditLog;
+  b2bApprovalAction: B2BApprovalAction;
+  b2bApprovalRequest: B2BApprovalRequest;
+  b2bApprovalWorkflow: B2BApprovalWorkflow;
+  b2bApprovalWorkflowStep: B2BApprovalWorkflowStep;
+  b2bCompany: B2BCompany;
+  b2bCompanyAddress: B2BCompanyAddress;
+  b2bCompanyCreditLimit: B2BCompanyCreditLimit;
+  b2bCompanyCreditTransaction: B2BCompanyCreditTransaction;
+  b2bCompanyUser: B2BCompanyUser;
+  b2bQuote: B2BQuote;
+  b2bQuoteItem: B2BQuoteItem;
+  basket: Basket;
+  basketAnalytics: BasketAnalytics;
+  basketDiscount: BasketDiscount;
+  basketHistory: BasketHistory;
+  basketItem: BasketItem;
+  basketMerge: BasketMerge;
+  basketSavedItem: BasketSavedItem;
+  brandTranslation: BrandTranslation;
+  bundleItem: BundleItem;
+  business: Business;
+  cartPromotion: CartPromotion;
+  cartPromotionItem: CartPromotionItem;
+  categoryPromotion: CategoryPromotion;
+  categoryPromotionProduct: CategoryPromotionProduct;
+  categoryTranslation: CategoryTranslation;
+  checkoutSession: CheckoutSession;
+  collectionTranslation: CollectionTranslation;
+  contentBlock: ContentBlock;
+  contentBlockType: ContentBlockType;
+  contentCategorization: ContentCategorization;
+  contentCategory: ContentCategory;
+  contentMedia: ContentMedia;
+  contentMediaFolder: ContentMediaFolder;
+  contentMediaUsage: ContentMediaUsage;
+  contentNavigation: ContentNavigation;
+  contentNavigationItem: ContentNavigationItem;
+  contentPage: ContentPage;
+  contentPageTranslation: ContentPageTranslation;
+  contentPageVersion: ContentPageVersion;
+  contentRedirect: ContentRedirect;
+  contentTemplate: ContentTemplate;
+  contentType: ContentType;
+  country: Country;
+  currency: Currency;
+  currencyExchangeRate: CurrencyExchangeRate;
+  currencyExchangeRateHistory: CurrencyExchangeRateHistory;
+  currencyLocalization: CurrencyLocalization;
+  currencyProvider: CurrencyProvider;
+  currencyRegion: CurrencyRegion;
+  customer: Customer;
+  customerActivity: CustomerActivity;
+  customerAddress: CustomerAddress;
+  customerConsent: CustomerConsent;
+  customerContact: CustomerContact;
+  customerCurrencyPreference: CustomerCurrencyPreference;
+  customerEmailVerification: CustomerEmailVerification;
+  customerGroup: CustomerGroup;
+  customerGroupMembership: CustomerGroupMembership;
+  customerGroupTaxOverride: CustomerGroupTaxOverride;
+  customerLoyaltyAccount: CustomerLoyaltyAccount;
+  customerLoyaltyProgram: CustomerLoyaltyProgram;
+  customerLoyaltyTransaction: CustomerLoyaltyTransaction;
+  customerNote: CustomerNote;
+  customerPasswordReset: CustomerPasswordReset;
+  customerPreference: CustomerPreference;
+  customerPrice: CustomerPrice;
+  customerPriceList: CustomerPriceList;
+  customerProductView: CustomerProductView;
+  customerSegmentMembership: CustomerSegmentMembership;
+  customerSegments: CustomerSegments;
+  customerSubscription: CustomerSubscription;
+  customerTaxExemption: CustomerTaxExemption;
+  customerTaxExemptionCategory: CustomerTaxExemptionCategory;
+  customerWishlist: CustomerWishlist;
+  customerWishlistItem: CustomerWishlistItem;
+  distributionChannel: DistributionChannel;
+  distributionChannelProduct: DistributionChannelProduct;
+  distributionFulfillmentPartner: DistributionFulfillmentPartner;
+  distributionInventoryMovement: DistributionInventoryMovement;
+  distributionOrderFulfillment: DistributionOrderFulfillment;
+  distributionPickupOrder: DistributionPickupOrder;
+  distributionPreOrder: DistributionPreOrder;
+  distributionPreOrderReservation: DistributionPreOrderReservation;
+  distributionRule: DistributionRule;
+  distributionShippingCarrier: DistributionShippingCarrier;
+  distributionShippingMethod: DistributionShippingMethod;
+  distributionShippingRate: DistributionShippingRate;
+  distributionShippingZone: DistributionShippingZone;
+  distributionWarehouse: DistributionWarehouse;
+  distributionWarehouseBin: DistributionWarehouseBin;
+  distributionWarehouseZone: DistributionWarehouseZone;
+  dunningAttempt: DunningAttempt;
+  faqArticle: FaqArticle;
+  faqCategory: FaqCategory;
+  fraudBlacklist: FraudBlacklist;
+  fraudCheck: FraudCheck;
+  fraudRule: FraudRule;
+  fulfillmentStatusHistory: FulfillmentStatusHistory;
+  gdprCookieConsent: GdprCookieConsent;
+  gdprDataRequest: GdprDataRequest;
+  identityCustomerSession: IdentityCustomerSession;
+  identityMerchantSession: IdentityMerchantSession;
+  identityRefreshTokens: IdentityRefreshTokens;
+  identitySocialAccount: IdentitySocialAccount;
+  identityTokenBlacklist: IdentityTokenBlacklist;
+  inventoryCount: InventoryCount;
+  inventoryCountItem: InventoryCountItem;
+  inventoryLevel: InventoryLevel;
+  inventoryLocation: InventoryLocation;
+  inventoryLot: InventoryLot;
+  inventoryTransaction: InventoryTransaction;
+  inventoryTransactionType: InventoryTransactionType;
+  inventoryTransfer: InventoryTransfer;
+  inventoryTransferItem: InventoryTransferItem;
+  knexMigrations: KnexMigrations;
+  knexMigrations_lock: KnexMigrationsLock;
+  language: Language;
+  locale: Locale;
+  lowStockNotification: LowStockNotification;
+  loyaltyPoints: LoyaltyPoints;
+  loyaltyRedemption: LoyaltyRedemption;
+  loyaltyReward: LoyaltyReward;
+  loyaltyTier: LoyaltyTier;
+  loyaltyTransaction: LoyaltyTransaction;
+  marketingAbandonedCart: MarketingAbandonedCart;
+  marketingAbandonedCartEmail: MarketingAbandonedCartEmail;
+  marketingAffiliate: MarketingAffiliate;
+  marketingAffiliateCommission: MarketingAffiliateCommission;
+  marketingAffiliateLink: MarketingAffiliateLink;
+  marketingAffiliatePayout: MarketingAffiliatePayout;
+  marketingEmailCampaign: MarketingEmailCampaign;
+  marketingEmailCampaignLink: MarketingEmailCampaignLink;
+  marketingEmailCampaignRecipient: MarketingEmailCampaignRecipient;
+  marketingEmailTemplate: MarketingEmailTemplate;
+  marketingProductRecommendation: MarketingProductRecommendation;
+  media: Media;
+  membershipBenefit: MembershipBenefit;
+  membershipBenefitUsage: MembershipBenefitUsage;
+  membershipContentAccess: MembershipContentAccess;
+  membershipDiscountCode: MembershipDiscountCode;
+  membershipDiscountCodeUsage: MembershipDiscountCodeUsage;
+  membershipDiscountRule: MembershipDiscountRule;
+  membershipGroup: MembershipGroup;
+  membershipGroupMember: MembershipGroupMember;
+  membershipPayment: MembershipPayment;
+  membershipPlan: MembershipPlan;
+  membershipPlanBenefit: MembershipPlanBenefit;
+  membershipStatusLog: MembershipStatusLog;
+  membershipSubscription: MembershipSubscription;
+  merchant: Merchant;
+  merchantAddress: MerchantAddress;
+  merchantBalance: MerchantBalance;
+  merchantContact: MerchantContact;
+  merchantEmailVerification: MerchantEmailVerification;
+  merchantFollower: MerchantFollower;
+  merchantInvoice: MerchantInvoice;
+  merchantOrder: MerchantOrder;
+  merchantPasswordReset: MerchantPasswordReset;
+  merchantPaymentInfo: MerchantPaymentInfo;
+  merchantPayout: MerchantPayout;
+  merchantPayoutItem: MerchantPayoutItem;
+  merchantProduct: MerchantProduct;
+  merchantProductVariant: MerchantProductVariant;
+  merchantReview: MerchantReview;
+  merchantSettings: MerchantSettings;
+  merchantShippingTemplate: MerchantShippingTemplate;
+  merchantStore: MerchantStore;
+  merchantTaxInfo: MerchantTaxInfo;
+  merchantTransaction: MerchantTransaction;
+  merchantVerificationDocument: MerchantVerificationDocument;
+  notification: Notification;
+  notificationBatch: NotificationBatch;
+  notificationCategory: NotificationCategory;
+  notificationDeliveryLog: NotificationDeliveryLog;
+  notificationDevice: NotificationDevice;
+  notificationEventLog: NotificationEventLog;
+  notificationPreference: NotificationPreference;
+  notificationTemplate: NotificationTemplate;
+  notificationTemplateTranslation: NotificationTemplateTranslation;
+  notificationUnsubscribe: NotificationUnsubscribe;
+  notificationWebhook: NotificationWebhook;
+  order: Order;
+  orderAddress: OrderAddress;
+  orderDiscount: OrderDiscount;
+  orderFulfillment: OrderFulfillment;
+  orderFulfillmentItem: OrderFulfillmentItem;
+  orderFulfillmentPackage: OrderFulfillmentPackage;
+  orderItem: OrderItem;
+  orderNote: OrderNote;
+  orderPayment: OrderPayment;
+  orderPaymentRefund: OrderPaymentRefund;
+  orderReturn: OrderReturn;
+  orderReturnItem: OrderReturnItem;
+  orderShipping: OrderShipping;
+  orderShippingRate: OrderShippingRate;
+  orderStatusHistory: OrderStatusHistory;
+  orderTax: OrderTax;
+  paymentBalance: PaymentBalance;
+  paymentDispute: PaymentDispute;
+  paymentFee: PaymentFee;
+  paymentGateway: PaymentGateway;
+  paymentMethod: PaymentMethod;
+  paymentMethodConfig: PaymentMethodConfig;
+  paymentPlan: PaymentPlan;
+  paymentRefund: PaymentRefund;
+  paymentReport: PaymentReport;
+  paymentSettings: PaymentSettings;
+  paymentSubscription: PaymentSubscription;
+  paymentTransaction: PaymentTransaction;
+  paymentWebhook: PaymentWebhook;
+  payout: Payout;
+  payoutItem: PayoutItem;
+  payoutSettings: PayoutSettings;
+  platformConfig: PlatformConfig;
+  priceAlert: PriceAlert;
+  priceList: PriceList;
+  pricingRule: PricingRule;
+  product: Product;
+  productAttribute: ProductAttribute;
+  productAttributeGroup: ProductAttributeGroup;
+  productAttributeOption: ProductAttributeOption;
+  productAttributeSet: ProductAttributeSet;
+  productAttributeSetMapping: ProductAttributeSetMapping;
+  productAttributeToGroup: ProductAttributeToGroup;
+  productAttributeValue: ProductAttributeValue;
+  productAttributeValueMap: ProductAttributeValueMap;
+  productBrand: ProductBrand;
+  productBundle: ProductBundle;
+  productCategory: ProductCategory;
+  productCategoryMap: ProductCategoryMap;
+  productCollection: ProductCollection;
+  productCollectionMap: ProductCollectionMap;
+  productCurrencyPrice: ProductCurrencyPrice;
+  productDownload: ProductDownload;
+  productImage: ProductImage;
+  productList: ProductList;
+  productListItem: ProductListItem;
+  productMedia: ProductMedia;
+  productPrice: ProductPrice;
+  productQa: ProductQa;
+  productQaAnswer: ProductQaAnswer;
+  productQaVote: ProductQaVote;
+  productRelated: ProductRelated;
+  productReview: ProductReview;
+  productReviewMedia: ProductReviewMedia;
+  productReviewVote: ProductReviewVote;
+  productSeo: ProductSeo;
+  productTag: ProductTag;
+  productTagMap: ProductTagMap;
+  productTaxCategory: ProductTaxCategory;
+  productTaxExemption: ProductTaxExemption;
+  productTieredPrice: ProductTieredPrice;
+  productToCategory: ProductToCategory;
+  productToTag: ProductToTag;
+  productTranslation: ProductTranslation;
+  productType: ProductType;
+  productVariant: ProductVariant;
+  promotion: Promotion;
+  promotionAction: PromotionAction;
+  promotionBuyXGetYDiscount: PromotionBuyXGetYDiscount;
+  promotionCoupon: PromotionCoupon;
+  promotionCouponBatch: PromotionCouponBatch;
+  promotionCouponRestriction: PromotionCouponRestriction;
+  promotionCouponUsage: PromotionCouponUsage;
+  promotionGiftCard: PromotionGiftCard;
+  promotionGiftCardTransaction: PromotionGiftCardTransaction;
+  promotionProductDiscount: PromotionProductDiscount;
+  promotionProductDiscountCustomerGroup: PromotionProductDiscountCustomerGroup;
+  promotionProductDiscountItem: PromotionProductDiscountItem;
+  promotionRule: PromotionRule;
+  promotionUsage: PromotionUsage;
+  referral: Referral;
+  referralReward: ReferralReward;
+  reportExecution: ReportExecution;
+  reportSchedule: ReportSchedule;
+  role: Role;
+  ruleAdjustment: RuleAdjustment;
+  ruleCondition: RuleCondition;
+  session: Session;
+  shippingCarrier: ShippingCarrier;
+  shippingMethod: ShippingMethod;
+  shippingPackagingType: ShippingPackagingType;
+  shippingRate: ShippingRate;
+  shippingZone: ShippingZone;
+  stockAlert: StockAlert;
+  stockReservation: StockReservation;
+  store: Store;
+  storeCurrencySettings: StoreCurrencySettings;
+  storeLocation: StoreLocation;
+  storedPaymentMethod: StoredPaymentMethod;
+  subscriptionInvoice: SubscriptionInvoice;
+  subscriptionOrder: SubscriptionOrder;
+  subscriptionPause: SubscriptionPause;
+  subscriptionPlan: SubscriptionPlan;
+  subscriptionProduct: SubscriptionProduct;
+  supplier: Supplier;
+  supplierAddress: SupplierAddress;
+  supplierProduct: SupplierProduct;
+  supplierPurchaseOrder: SupplierPurchaseOrder;
+  supplierPurchaseOrderItem: SupplierPurchaseOrderItem;
+  supplierReceivingItem: SupplierReceivingItem;
+  supplierReceivingRecord: SupplierReceivingRecord;
+  supportAgent: SupportAgent;
+  supportAttachment: SupportAttachment;
+  supportMessage: SupportMessage;
+  supportTicket: SupportTicket;
+  systemConfiguration: SystemConfiguration;
+  taxCalculation: TaxCalculation;
+  taxCalculationApplied: TaxCalculationApplied;
+  taxCalculationLine: TaxCalculationLine;
+  taxCategory: TaxCategory;
+  taxNexus: TaxNexus;
+  taxProviderLog: TaxProviderLog;
+  taxRate: TaxRate;
+  taxReport: TaxReport;
+  taxRule: TaxRule;
+  taxSettings: TaxSettings;
+  taxZone: TaxZone;
+  tierPrice: TierPrice;
+  user: User;
+  vatOssReport: VatOssReport;
+  vatOssReportLine: VatOssReportLine;
+  vatRegistration: VatRegistration;
+  vatValidationLog: VatValidationLog;
+  webhookDelivery: WebhookDelivery;
+  webhookEndpoint: WebhookEndpoint;
 };
 
 export type AdminUserRole = {
@@ -7490,4 +7490,3 @@ export type WebhookEndpoint = {
   createdAt: Date;
   updatedAt: Date;
 };
-

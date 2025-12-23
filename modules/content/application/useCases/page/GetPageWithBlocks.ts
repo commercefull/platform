@@ -9,7 +9,7 @@ export class GetPageWithBlocksQuery {
   constructor(
     public readonly pageId?: string,
     public readonly slug?: string,
-    public readonly includeInactiveBlocks: boolean = false
+    public readonly includeInactiveBlocks: boolean = false,
   ) {}
 }
 
@@ -81,7 +81,7 @@ export class GetPageWithBlocksUseCase {
         contentType = {
           id: ct.id,
           name: ct.name,
-          slug: ct.slug
+          slug: ct.slug,
         };
       }
     }
@@ -95,16 +95,14 @@ export class GetPageWithBlocksUseCase {
           id: t.id,
           name: t.name,
           slug: t.slug,
-          htmlStructure: t.htmlStructure
+          htmlStructure: t.htmlStructure,
         };
       }
     }
 
     // Get blocks
     const allBlocks = await this.contentRepo.findBlocksByPageId(page.id);
-    const filteredBlocks = query.includeInactiveBlocks 
-      ? allBlocks 
-      : allBlocks.filter(b => b.status === 'active');
+    const filteredBlocks = query.includeInactiveBlocks ? allBlocks : allBlocks.filter(b => b.status === 'active');
 
     // Enrich blocks with content type info
     const blocksWithTypes: BlockWithType[] = [];
@@ -116,15 +114,17 @@ export class GetPageWithBlocksUseCase {
         order: block.order,
         content: block.content,
         status: block.status,
-        contentType: blockType ? {
-          id: blockType.id,
-          name: blockType.name,
-          slug: blockType.slug
-        } : {
-          id: block.contentTypeId,
-          name: 'Unknown',
-          slug: 'unknown'
-        }
+        contentType: blockType
+          ? {
+              id: blockType.id,
+              name: blockType.name,
+              slug: blockType.slug,
+            }
+          : {
+              id: block.contentTypeId,
+              name: 'Unknown',
+              slug: 'unknown',
+            },
       });
     }
 
@@ -144,11 +144,11 @@ export class GetPageWithBlocksUseCase {
         metaDescription: page.metaDescription,
         publishedAt: page.publishedAt,
         createdAt: page.createdAt,
-        updatedAt: page.updatedAt
+        updatedAt: page.updatedAt,
       },
       contentType,
       template,
-      blocks: blocksWithTypes
+      blocks: blocksWithTypes,
     };
   }
 }

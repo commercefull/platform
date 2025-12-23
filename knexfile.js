@@ -12,11 +12,11 @@ module.exports = {
     },
     migrations: {
       directory: './migrations',
-      tableName: 'knexMigrations'
+      tableName: 'knexMigrations',
     },
     seeds: {
-      directory: './seeds'
-    }
+      directory: './seeds',
+    },
   },
 
   staging: {
@@ -30,11 +30,11 @@ module.exports = {
     },
     migrations: {
       directory: './migrations',
-      tableName: 'knexMigrations'
+      tableName: 'knexMigrations',
     },
     seeds: {
-      directory: './seeds'
-    }
+      directory: './seeds',
+    },
   },
 
   production: {
@@ -48,10 +48,10 @@ module.exports = {
     },
     migrations: {
       directory: './migrations',
-      tableName: 'knexMigrations'
+      tableName: 'knexMigrations',
     },
     seeds: {
-      directory: './seeds'
-    }
-  }
+      directory: './seeds',
+    },
+  },
 };

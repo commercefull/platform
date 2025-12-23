@@ -55,7 +55,7 @@ export class LoyaltyProgram {
       ...props,
       isActive: true,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     });
   }
 
@@ -63,22 +63,34 @@ export class LoyaltyProgram {
     return new LoyaltyProgram(props);
   }
 
-  get programId(): string { return this.props.programId; }
-  get name(): string { return this.props.name; }
-  get pointsName(): string { return this.props.pointsName; }
-  get earnRules(): EarnRule[] { return this.props.earnRules; }
-  get redemptionRules(): RedemptionRule[] { return this.props.redemptionRules; }
-  get isActive(): boolean { return this.props.isActive; }
+  get programId(): string {
+    return this.props.programId;
+  }
+  get name(): string {
+    return this.props.name;
+  }
+  get pointsName(): string {
+    return this.props.pointsName;
+  }
+  get earnRules(): EarnRule[] {
+    return this.props.earnRules;
+  }
+  get redemptionRules(): RedemptionRule[] {
+    return this.props.redemptionRules;
+  }
+  get isActive(): boolean {
+    return this.props.isActive;
+  }
 
   calculatePointsForPurchase(amount: number): number {
     const rule = this.props.earnRules.find(r => r.type === 'purchase' && r.isActive);
     if (!rule) return 0;
     if (rule.minPurchase && amount < rule.minPurchase) return 0;
-    
+
     let points = Math.floor(amount / (rule.unit === 'dollar' ? 1 : 100)) * rule.pointsPerUnit;
     if (rule.multiplier) points *= rule.multiplier;
     if (rule.maxPoints) points = Math.min(points, rule.maxPoints);
-    
+
     return points;
   }
 

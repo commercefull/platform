@@ -8,12 +8,7 @@ export interface ShippingRepository {
   findRateById(rateId: string): Promise<ShippingRate | null>;
   findRatesByCarrier(carrierId: string): Promise<ShippingRate[]>;
   findActiveRates(): Promise<ShippingRate[]>;
-  findApplicableRates(params: {
-    weight: number;
-    subtotal: number;
-    countryCode: string;
-    postalCode?: string;
-  }): Promise<ShippingRate[]>;
+  findApplicableRates(params: { weight: number; subtotal: number; countryCode: string; postalCode?: string }): Promise<ShippingRate[]>;
   saveRate(rate: ShippingRate): Promise<ShippingRate>;
   deleteRate(rateId: string): Promise<void>;
 

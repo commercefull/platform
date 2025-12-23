@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function (knex) {
   return knex.schema.createTable('notificationBatch', t => {
     t.uuid('notificationBatchId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
@@ -8,7 +8,10 @@ exports.up = function(knex) {
     t.enum('type', ['orderStatus', 'promotion', 'accountAlert']).notNullable();
     t.uuid('templateId').references('notificationTemplateId').inTable('notificationTemplate');
     t.enum('channel', ['email', 'sms', 'inApp', 'push']).notNullable();
-    t.string('status', 20).notNullable().defaultTo('draft').checkIn(['draft', 'scheduled', 'inProgress', 'completed', 'cancelled', 'failed']);
+    t.string('status', 20)
+      .notNullable()
+      .defaultTo('draft')
+      .checkIn(['draft', 'scheduled', 'inProgress', 'completed', 'cancelled', 'failed']);
     t.timestamp('scheduledAt');
     t.timestamp('startedAt');
     t.timestamp('completedAt');
@@ -34,6 +37,6 @@ exports.up = function(knex) {
   });
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTable('notificationBatch');
 };

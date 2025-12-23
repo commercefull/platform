@@ -1,6 +1,6 @@
 /**
  * Brand Entity
- * 
+ *
  * Represents a product brand in the catalog.
  */
 
@@ -28,20 +28,48 @@ export class Brand {
     this.props = props;
   }
 
-  get brandId(): string { return this.props.brandId; }
-  get name(): string { return this.props.name; }
-  get slug(): string { return this.props.slug; }
-  get description(): string | undefined { return this.props.description; }
-  get logoMediaId(): string | undefined { return this.props.logoMediaId; }
-  get coverImageMediaId(): string | undefined { return this.props.coverImageMediaId; }
-  get website(): string | undefined { return this.props.website; }
-  get countryOfOrigin(): string | undefined { return this.props.countryOfOrigin; }
-  get isActive(): boolean { return this.props.isActive; }
-  get isFeatured(): boolean { return this.props.isFeatured; }
-  get sortOrder(): number { return this.props.sortOrder; }
-  get metadata(): Record<string, unknown> | undefined { return this.props.metadata; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get brandId(): string {
+    return this.props.brandId;
+  }
+  get name(): string {
+    return this.props.name;
+  }
+  get slug(): string {
+    return this.props.slug;
+  }
+  get description(): string | undefined {
+    return this.props.description;
+  }
+  get logoMediaId(): string | undefined {
+    return this.props.logoMediaId;
+  }
+  get coverImageMediaId(): string | undefined {
+    return this.props.coverImageMediaId;
+  }
+  get website(): string | undefined {
+    return this.props.website;
+  }
+  get countryOfOrigin(): string | undefined {
+    return this.props.countryOfOrigin;
+  }
+  get isActive(): boolean {
+    return this.props.isActive;
+  }
+  get isFeatured(): boolean {
+    return this.props.isFeatured;
+  }
+  get sortOrder(): number {
+    return this.props.sortOrder;
+  }
+  get metadata(): Record<string, unknown> | undefined {
+    return this.props.metadata;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   static create(props: Omit<BrandProps, 'brandId' | 'createdAt' | 'updatedAt' | 'slug'> & { slug?: string }): Brand {
     const now = new Date();

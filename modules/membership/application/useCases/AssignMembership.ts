@@ -49,7 +49,7 @@ export class AssignMembershipUseCase {
 
     const membershipId = `mbr_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 9)}`;
     const startDate = input.startDate || new Date();
-    
+
     // Calculate end date based on billing period
     let endDate: Date | undefined;
     if (tier.billingPeriod && tier.billingPeriod !== 'lifetime') {

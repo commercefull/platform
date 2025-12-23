@@ -21,27 +21,24 @@ describe('Category Promotion Tests', () => {
     // Create a new promotion to apply to category
     try {
       const promotionResponse = await client.post('/business/promotions', testPromotion, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       if (promotionResponse.data?.data?.id) {
         promotionId = promotionResponse.data.data.id;
       } else {
-        
         promotionId = '';
       }
     } catch (error) {
-      
       promotionId = '';
     }
   });
 
   it('should create a category promotion', async () => {
     if (!adminToken || !testCategoryId || !promotionId) {
-      
       return;
     }
-    
+
     const categoryPromotionData = {
       categoryId: testCategoryId,
       promotionId: promotionId,
@@ -50,34 +47,33 @@ describe('Category Promotion Tests', () => {
       maxDiscountAmount: 100,
       startDate: new Date().toISOString(),
       endDate: new Date(new Date().getTime() + 86400000).toISOString(),
-      status: 'active'
+      status: 'active',
     };
-    
+
     const response = await client.post('/business/category-promotions', categoryPromotionData, {
-      headers: { Authorization: `Bearer ${adminToken}` }
+      headers: { Authorization: `Bearer ${adminToken}` },
     });
-    
+
     expect(response.status).toBe(201);
     expect(response.data.success).toBe(true);
     expect(response.data.data).toHaveProperty('categoryPromotionId');
-    
+
     categoryPromotionId = response.data.data.categoryPromotionId;
   });
 
   it('should get promotions by category ID', async () => {
     if (!adminToken || !testCategoryId) {
-      
       return;
     }
-    
+
     const response = await client.get(`/business/category-promotions/category/${testCategoryId}`, {
-      headers: { Authorization: `Bearer ${adminToken}` }
+      headers: { Authorization: `Bearer ${adminToken}` },
     });
-    
+
     expect(response.status).toBe(200);
     expect(response.data.success).toBe(true);
     expect(Array.isArray(response.data.data)).toBe(true);
-    
+
     if (categoryPromotionId && response.data.data.length > 0) {
       const foundPromotion = response.data.data.find((p: any) => p.categoryPromotionId === categoryPromotionId);
       if (foundPromotion) {
@@ -89,18 +85,17 @@ describe('Category Promotion Tests', () => {
 
   it('should get active category promotions', async () => {
     if (!adminToken) {
-      
       return;
     }
-    
+
     const response = await client.get('/business/category-promotions', {
-      headers: { Authorization: `Bearer ${adminToken}` }
+      headers: { Authorization: `Bearer ${adminToken}` },
     });
-    
+
     expect(response.status).toBe(200);
     expect(response.data.success).toBe(true);
     expect(Array.isArray(response.data.data)).toBe(true);
-    
+
     if (categoryPromotionId) {
       const foundPromotion = response.data.data.find((p: any) => p.categoryPromotionId === categoryPromotionId);
       // Promotion may or may not be found depending on setup
@@ -109,22 +104,21 @@ describe('Category Promotion Tests', () => {
 
   it('should delete a category promotion', async () => {
     if (!adminToken || !categoryPromotionId) {
-      
       return;
     }
-    
+
     const response = await client.delete(`/business/category-promotions/${categoryPromotionId}`, {
-      headers: { Authorization: `Bearer ${adminToken}` }
+      headers: { Authorization: `Bearer ${adminToken}` },
     });
-    
+
     expect(response.status).toBe(200);
     expect(response.data.success).toBe(true);
-    
+
     // Verify the category promotion is deleted
     const getResponse = await client.get(`/business/category-promotions/category/${testCategoryId}`, {
-      headers: { Authorization: `Bearer ${adminToken}` }
+      headers: { Authorization: `Bearer ${adminToken}` },
     });
-    
+
     if (getResponse.status === 200 && getResponse.data?.data) {
       const foundPromotion = getResponse.data.data.find((p: any) => p.categoryPromotionId === categoryPromotionId);
       expect(foundPromotion).toBeUndefined();
@@ -135,11 +129,9 @@ describe('Category Promotion Tests', () => {
     // Clean up the promotion we created in this test
     try {
       await client.delete(`/business/promotions/${promotionId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-    } catch (error) {
-      
-    }
+    } catch (error) {}
 
     await cleanupPromotionTests(client, adminToken, testCartId, testProductId, testCategoryId);
   });

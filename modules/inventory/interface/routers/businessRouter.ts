@@ -1,6 +1,6 @@
 /**
  * Inventory Business Router
- * 
+ *
  * Routes for inventory management (merchant/admin access).
  */
 

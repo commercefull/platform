@@ -10,7 +10,7 @@ export const testCustomer = {
   dateOfBirth: new Date('1990-01-01').toISOString().split('T')[0],
   isActive: true,
   isVerified: false,
-  notes: 'Test customer for integration tests'
+  notes: 'Test customer for integration tests',
 };
 
 export const testCustomerAddress = {
@@ -22,25 +22,25 @@ export const testCustomerAddress = {
   country: 'US',
   addressType: 'shipping',
   isDefault: true,
-  phone: '555-987-6543'
+  phone: '555-987-6543',
 };
 
 export const testCustomerGroup = {
   name: `Test Group ${Math.floor(Math.random() * 10000)}`,
   description: 'Test customer group for integration tests',
   discountPercentage: 10,
-  isActive: true
+  isActive: true,
 };
 
 export const testCustomerWishlist = {
   name: 'Test Wishlist',
-  isPublic: false
+  isPublic: false,
 };
 
 // Test credentials - IMPORTANT: Make sure these match working credentials in the system
 const adminCredentials = {
   email: 'merchant@example.com', // Replace with valid admin credentials
-  password: 'password123'     // Replace with valid admin password
+  password: 'password123', // Replace with valid admin password
 };
 
 /**
@@ -52,10 +52,10 @@ export async function setupCustomerTests() {
     baseURL: process.env.API_URL || 'http://localhost:3000',
     validateStatus: () => true,
     headers: {
-      'Accept': 'application/json',
+      Accept: 'application/json',
       'Content-Type': 'application/json',
-      'X-Test-Request': 'true'
-    } // Don't throw HTTP errors
+      'X-Test-Request': 'true',
+    }, // Don't throw HTTP errors
   });
 
   let adminToken = '';
@@ -70,11 +70,9 @@ export async function setupCustomerTests() {
     adminToken = loginResponse.data?.accessToken || '';
 
     if (!adminToken) {
-      
       return { client, adminToken, testCustomerId, testCustomerAddressId, testCustomerGroupId, testWishlistId };
     }
   } catch (error) {
-    
     return { client, adminToken, testCustomerId, testCustomerAddressId, testCustomerGroupId, testWishlistId };
   }
 
@@ -82,63 +80,64 @@ export async function setupCustomerTests() {
     // Create test data
     // 1. Create Customer
     const customerResponse = await client.post('/business/customers', testCustomer, {
-      headers: { Authorization: `Bearer ${adminToken}` }
+      headers: { Authorization: `Bearer ${adminToken}` },
     });
-    
+
     if (customerResponse.data?.success && customerResponse.data?.data) {
       testCustomerId = customerResponse.data.data.customerId || customerResponse.data.data.id || '';
     } else {
-      
     }
 
     // 2. Create Customer Address (only if customer was created)
     if (testCustomerId) {
       const addressResponse = await client.post(`/business/customers/${testCustomerId}/addresses`, testCustomerAddress, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       if (addressResponse.data?.success && addressResponse.data?.data) {
-        testCustomerAddressId = addressResponse.data.data.customerAddressId || addressResponse.data.data.addressId || addressResponse.data.data.id || '';
+        testCustomerAddressId =
+          addressResponse.data.data.customerAddressId || addressResponse.data.data.addressId || addressResponse.data.data.id || '';
       } else {
-        
       }
 
       // 3. Create Customer Group (optional - endpoint may not exist)
       try {
         const groupResponse = await client.post('/business/customer-groups', testCustomerGroup, {
-          headers: { Authorization: `Bearer ${adminToken}` }
+          headers: { Authorization: `Bearer ${adminToken}` },
         });
-        
+
         if (groupResponse.data?.success && groupResponse.data?.data) {
           testCustomerGroupId = groupResponse.data.data.customerGroupId || groupResponse.data.data.id;
-          
+
           // 4. Add Customer to Group
-          await client.post(`/business/customers/${testCustomerId}/groups/${testCustomerGroupId}`, {}, {
-            headers: { Authorization: `Bearer ${adminToken}` }
-          });
+          await client.post(
+            `/business/customers/${testCustomerId}/groups/${testCustomerGroupId}`,
+            {},
+            {
+              headers: { Authorization: `Bearer ${adminToken}` },
+            },
+          );
         }
-      } catch (e) {
-        
-      }
+      } catch (e) {}
 
       // 5. Create Wishlist (optional - endpoint may not exist)
       try {
-        const wishlistResponse = await client.post(`/business/customers/${testCustomerId}/wishlists`, {
-          ...testCustomerWishlist
-        }, {
-          headers: { Authorization: `Bearer ${adminToken}` }
-        });
-        
+        const wishlistResponse = await client.post(
+          `/business/customers/${testCustomerId}/wishlists`,
+          {
+            ...testCustomerWishlist,
+          },
+          {
+            headers: { Authorization: `Bearer ${adminToken}` },
+          },
+        );
+
         if (wishlistResponse.data?.success && wishlistResponse.data?.data) {
           testWishlistId = wishlistResponse.data.data.customerWishlistId || wishlistResponse.data.data.id;
         }
-      } catch (e) {
-        
-      }
+      } catch (e) {}
     }
-  } catch (error) {
-    
-  }
+  } catch (error) {}
 
   // Return all test data and helper objects
   return {
@@ -147,7 +146,7 @@ export async function setupCustomerTests() {
     testCustomerId,
     testCustomerAddressId,
     testCustomerGroupId,
-    testWishlistId
+    testWishlistId,
   };
 }
 
@@ -155,46 +154,46 @@ export async function setupCustomerTests() {
  * Cleanup function for customer integration tests
  */
 export async function cleanupCustomerTests(
-  client: AxiosInstance, 
-  adminToken: string, 
-  { 
+  client: AxiosInstance,
+  adminToken: string,
+  {
     testCustomerId,
     testCustomerAddressId,
     testCustomerGroupId,
-    testWishlistId
+    testWishlistId,
   }: {
-    testCustomerId: string,
-    testCustomerAddressId: string,
-    testCustomerGroupId: string | null,
-    testWishlistId: string | null
-  }
+    testCustomerId: string;
+    testCustomerAddressId: string;
+    testCustomerGroupId: string | null;
+    testWishlistId: string | null;
+  },
 ) {
   // Delete in reverse order of dependencies
   // 1. Delete Wishlist (if created)
   if (testWishlistId) {
     await client.delete(`/business/wishlists/${testWishlistId}`, {
-      headers: { Authorization: `Bearer ${adminToken}` }
+      headers: { Authorization: `Bearer ${adminToken}` },
     });
   }
 
   // 2. Delete Customer Group (will also delete memberships)
   if (testCustomerGroupId) {
     await client.delete(`/business/customer-groups/${testCustomerGroupId}`, {
-      headers: { Authorization: `Bearer ${adminToken}` }
+      headers: { Authorization: `Bearer ${adminToken}` },
     });
   }
 
   // 3. Delete Customer Address
   if (testCustomerAddressId) {
     await client.delete(`/business/customer-addresses/${testCustomerAddressId}`, {
-      headers: { Authorization: `Bearer ${adminToken}` }
+      headers: { Authorization: `Bearer ${adminToken}` },
     });
   }
 
   // 4. Delete Customer
   if (testCustomerId) {
     await client.delete(`/business/customers/${testCustomerId}`, {
-      headers: { Authorization: `Bearer ${adminToken}` }
+      headers: { Authorization: `Bearer ${adminToken}` },
     });
   }
 }

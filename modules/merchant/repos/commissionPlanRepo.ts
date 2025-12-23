@@ -1,6 +1,6 @@
 /**
  * Commission Plan Repository
- * 
+ *
  * Manages marketplace commission plans for sellers.
  */
 
@@ -36,10 +36,7 @@ export async function create(params: CreateCommissionPlanParams): Promise<Commis
 
   // If setting as default, unset other defaults
   if (params.isDefault) {
-    await query(
-      'UPDATE "commissionPlan" SET "isDefault" = false WHERE "organizationId" = $1',
-      [params.organizationId]
-    );
+    await query('UPDATE "commissionPlan" SET "isDefault" = false WHERE "organizationId" = $1', [params.organizationId]);
   }
 
   const sql = `
@@ -63,30 +60,23 @@ export async function create(params: CreateCommissionPlanParams): Promise<Commis
 }
 
 export async function findById(commissionPlanId: string): Promise<CommissionPlan | null> {
-  return queryOne<CommissionPlan>(
-    'SELECT * FROM "commissionPlan" WHERE "commissionPlanId" = $1',
-    [commissionPlanId]
-  );
+  return queryOne<CommissionPlan>('SELECT * FROM "commissionPlan" WHERE "commissionPlanId" = $1', [commissionPlanId]);
 }
 
 export async function findByOrganization(organizationId: string): Promise<CommissionPlan[]> {
-  const result = await query<{ rows: CommissionPlan[] }>(
-    'SELECT * FROM "commissionPlan" WHERE "organizationId" = $1 ORDER BY "name" ASC',
-    [organizationId]
-  );
+  const result = await query<{ rows: CommissionPlan[] }>('SELECT * FROM "commissionPlan" WHERE "organizationId" = $1 ORDER BY "name" ASC', [
+    organizationId,
+  ]);
   return result?.rows ?? [];
 }
 
 export async function findDefault(organizationId: string): Promise<CommissionPlan | null> {
-  return queryOne<CommissionPlan>(
-    'SELECT * FROM "commissionPlan" WHERE "organizationId" = $1 AND "isDefault" = true',
-    [organizationId]
-  );
+  return queryOne<CommissionPlan>('SELECT * FROM "commissionPlan" WHERE "organizationId" = $1 AND "isDefault" = true', [organizationId]);
 }
 
 export async function update(
   commissionPlanId: string,
-  params: { name?: string; rules?: CommissionRules; isDefault?: boolean }
+  params: { name?: string; rules?: CommissionRules; isDefault?: boolean },
 ): Promise<CommissionPlan | null> {
   const current = await findById(commissionPlanId);
   if (!current) return null;
@@ -106,10 +96,7 @@ export async function update(
   if (params.isDefault !== undefined) {
     if (params.isDefault) {
       // Unset other defaults
-      await query(
-        'UPDATE "commissionPlan" SET "isDefault" = false WHERE "organizationId" = $1',
-        [current.organizationId]
-      );
+      await query('UPDATE "commissionPlan" SET "isDefault" = false WHERE "organizationId" = $1', [current.organizationId]);
     }
     updates.push(`"isDefault" = $${paramIndex++}`);
     values.push(params.isDefault);
@@ -130,7 +117,7 @@ export async function update(
 export function calculateCommission(
   plan: CommissionPlan,
   orderAmount: number,
-  categoryId?: string
+  categoryId?: string,
 ): { commission: number; fees: number; total: number } {
   const rules = plan.rules as CommissionRules;
   let percentage = rules.defaultPercentage || 10;

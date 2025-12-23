@@ -1,6 +1,6 @@
 /**
  * UpdateChannel Use Case
- * 
+ *
  * Updates an existing distribution channel.
  */
 
@@ -39,7 +39,7 @@ export class UpdateChannelUseCase {
 
     // Build updates object
     const updates: Record<string, unknown> = {};
-    
+
     if (input.name !== undefined) updates.name = input.name;
     if (input.catalogId !== undefined) updates.catalogId = input.catalogId;
     if (input.priceListId !== undefined) updates.priceListId = input.priceListId;

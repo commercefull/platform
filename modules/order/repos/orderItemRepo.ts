@@ -1,15 +1,15 @@
 import { query, queryOne } from '../../../libs/db';
 import { unixTimestamp } from '../../../libs/date';
 
-export type FulfillmentStatus = 
-  | 'unfulfilled' 
-  | 'partiallyFulfilled' 
-  | 'fulfilled' 
-  | 'shipped' 
-  | 'delivered' 
-  | 'cancelled' 
-  | 'returned' 
-  | 'pendingPickup' 
+export type FulfillmentStatus =
+  | 'unfulfilled'
+  | 'partiallyFulfilled'
+  | 'fulfilled'
+  | 'shipped'
+  | 'delivered'
+  | 'cancelled'
+  | 'returned'
+  | 'pendingPickup'
   | 'pickedUp';
 
 export interface OrderItem {
@@ -47,30 +47,36 @@ export interface OrderItem {
 }
 
 export type OrderItemCreateParams = Omit<OrderItem, 'orderItemId' | 'createdAt' | 'updatedAt'>;
-export type OrderItemUpdateParams = Partial<Pick<OrderItem, 
-  'quantity' | 'unitPrice' | 'discountedUnitPrice' | 'lineTotal' | 'discountTotal' | 'taxTotal' | 
-  'fulfillmentStatus' | 'options' | 'attributes' | 'giftWrapped' | 'giftMessage'
->>;
+export type OrderItemUpdateParams = Partial<
+  Pick<
+    OrderItem,
+    | 'quantity'
+    | 'unitPrice'
+    | 'discountedUnitPrice'
+    | 'lineTotal'
+    | 'discountTotal'
+    | 'taxTotal'
+    | 'fulfillmentStatus'
+    | 'options'
+    | 'attributes'
+    | 'giftWrapped'
+    | 'giftMessage'
+  >
+>;
 
 export class OrderItemRepo {
   /**
    * Find order item by ID
    */
   async findById(orderItemId: string): Promise<OrderItem | null> {
-    return await queryOne<OrderItem>(
-      `SELECT * FROM "public"."orderItem" WHERE "orderItemId" = $1`,
-      [orderItemId]
-    );
+    return await queryOne<OrderItem>(`SELECT * FROM "public"."orderItem" WHERE "orderItemId" = $1`, [orderItemId]);
   }
 
   /**
    * Find all items in an order
    */
   async findByOrderId(orderId: string): Promise<OrderItem[]> {
-    const results = await query<OrderItem[]>(
-      `SELECT * FROM "public"."orderItem" WHERE "orderId" = $1 ORDER BY "createdAt" ASC`,
-      [orderId]
-    );
+    const results = await query<OrderItem[]>(`SELECT * FROM "public"."orderItem" WHERE "orderId" = $1 ORDER BY "createdAt" ASC`, [orderId]);
     return results || [];
   }
 
@@ -82,7 +88,7 @@ export class OrderItemRepo {
       `SELECT * FROM "public"."orderItem" 
        WHERE "orderId" = $1 AND "fulfillmentStatus" = $2 
        ORDER BY "createdAt" ASC`,
-      [orderId, status]
+      [orderId, status],
     );
     return results || [];
   }
@@ -95,7 +101,7 @@ export class OrderItemRepo {
       `SELECT * FROM "public"."orderItem" 
        WHERE "orderId" = $1 AND "isDigital" = true 
        ORDER BY "createdAt" ASC`,
-      [orderId]
+      [orderId],
     );
     return results || [];
   }
@@ -151,8 +157,8 @@ export class OrderItemRepo {
         params.downloadLimit || null,
         params.subscriptionInfo ? JSON.stringify(params.subscriptionInfo) : null,
         now,
-        now
-      ]
+        now,
+      ],
     );
 
     if (!result) {
@@ -167,12 +173,12 @@ export class OrderItemRepo {
    */
   async createMany(items: OrderItemCreateParams[]): Promise<OrderItem[]> {
     const createdItems: OrderItem[] = [];
-    
+
     for (const item of items) {
       const created = await this.create(item);
       createdItems.push(created);
     }
-    
+
     return createdItems;
   }
 
@@ -205,7 +211,7 @@ export class OrderItemRepo {
        SET ${updateFields.join(', ')}
        WHERE "orderItemId" = $${paramIndex}
        RETURNING *`,
-      values
+      values,
     );
 
     return result;
@@ -220,7 +226,7 @@ export class OrderItemRepo {
        SET "fulfillmentStatus" = $1, "updatedAt" = $2
        WHERE "orderItemId" = $3
        RETURNING *`,
-      [status, unixTimestamp(), orderItemId]
+      [status, unixTimestamp(), orderItemId],
     );
 
     return result;
@@ -231,13 +237,13 @@ export class OrderItemRepo {
    */
   async bulkUpdateFulfillmentStatus(orderItemIds: string[], status: FulfillmentStatus): Promise<number> {
     const placeholders = orderItemIds.map((_, i) => `$${i + 1}`).join(', ');
-    
+
     const result = await queryOne<{ count: string }>(
       `UPDATE "public"."orderItem" 
        SET "fulfillmentStatus" = $${orderItemIds.length + 1}, "updatedAt" = $${orderItemIds.length + 2}
        WHERE "orderItemId" IN (${placeholders})
        RETURNING COUNT(*) as count`,
-      [...orderItemIds, status, unixTimestamp()]
+      [...orderItemIds, status, unixTimestamp()],
     );
 
     return result ? parseInt(result.count, 10) : 0;
@@ -249,7 +255,7 @@ export class OrderItemRepo {
   async delete(orderItemId: string): Promise<boolean> {
     const result = await queryOne<{ orderItemId: string }>(
       `DELETE FROM "public"."orderItem" WHERE "orderItemId" = $1 RETURNING "orderItemId"`,
-      [orderItemId]
+      [orderItemId],
     );
 
     return !!result;
@@ -259,10 +265,7 @@ export class OrderItemRepo {
    * Count items by order
    */
   async countByOrderId(orderId: string): Promise<number> {
-    const result = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM "public"."orderItem" WHERE "orderId" = $1`,
-      [orderId]
-    );
+    const result = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "public"."orderItem" WHERE "orderId" = $1`, [orderId]);
 
     return result ? parseInt(result.count, 10) : 0;
   }
@@ -292,7 +295,7 @@ export class OrderItemRepo {
         COALESCE(SUM("lineTotal" - "discountTotal" + "taxTotal"), 0) as "grandTotal"
        FROM "public"."orderItem" 
        WHERE "orderId" = $1`,
-      [orderId]
+      [orderId],
     );
 
     return {
@@ -300,7 +303,7 @@ export class OrderItemRepo {
       subTotal: result ? parseFloat(result.subTotal) : 0,
       discountTotal: result ? parseFloat(result.discountTotal) : 0,
       taxTotal: result ? parseFloat(result.taxTotal) : 0,
-      grandTotal: result ? parseFloat(result.grandTotal) : 0
+      grandTotal: result ? parseFloat(result.grandTotal) : 0,
     };
   }
 
@@ -313,7 +316,7 @@ export class OrderItemRepo {
        FROM "public"."orderItem" 
        WHERE "orderId" = $1 
        GROUP BY "fulfillmentStatus"`,
-      [orderId]
+      [orderId],
     );
 
     const summary: Record<string, number> = {};

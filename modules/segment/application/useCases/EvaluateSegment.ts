@@ -1,6 +1,6 @@
 /**
  * EvaluateSegment Use Case
- * 
+ *
  * Evaluates segment membership for all customers or a specific customer.
  */
 
@@ -25,7 +25,7 @@ export class EvaluateSegmentUseCase {
 
   constructor(
     private readonly segmentRepository: ISegmentRepository,
-    private readonly customerRepository: any // CustomerRepository
+    private readonly customerRepository: any, // CustomerRepository
   ) {
     this.evaluator = new SegmentEvaluator();
   }
@@ -86,7 +86,7 @@ export class EvaluateSegmentUseCase {
 
   private async buildCustomerData(customer: any): Promise<CustomerData> {
     // Get order statistics for the customer
-    const orderStats = await this.customerRepository.getOrderStats?.(customer.customerId) || {};
+    const orderStats = (await this.customerRepository.getOrderStats?.(customer.customerId)) || {};
 
     return {
       customerId: customer.customerId,

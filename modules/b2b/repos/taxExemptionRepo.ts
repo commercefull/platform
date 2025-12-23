@@ -1,6 +1,6 @@
 /**
  * Tax Exemption Repository
- * 
+ *
  * Manages B2B tax exemption certificates.
  */
 
@@ -51,22 +51,19 @@ export async function create(params: CreateTaxExemptionParams): Promise<TaxExemp
 }
 
 export async function findById(taxExemptionId: string): Promise<TaxExemption | null> {
-  return queryOne<TaxExemption>(
-    'SELECT * FROM "taxExemption" WHERE "taxExemptionId" = $1',
-    [taxExemptionId]
-  );
+  return queryOne<TaxExemption>('SELECT * FROM "taxExemption" WHERE "taxExemptionId" = $1', [taxExemptionId]);
 }
 
 export async function findByAccount(accountId: string): Promise<TaxExemption[]> {
-  const result = await query<{ rows: TaxExemption[] }>(
-    'SELECT * FROM "taxExemption" WHERE "accountId" = $1 ORDER BY "createdAt" DESC',
-    [accountId]
-  );
+  const result = await query<{ rows: TaxExemption[] }>('SELECT * FROM "taxExemption" WHERE "accountId" = $1 ORDER BY "createdAt" DESC', [
+    accountId,
+  ]);
   return result?.rows ?? [];
 }
 
 export async function findActiveByAccount(accountId: string, jurisdiction?: string): Promise<TaxExemption[]> {
-  let sql = 'SELECT * FROM "taxExemption" WHERE "accountId" = $1 AND "status" = \'active\' AND ("validTo" IS NULL OR "validTo" >= CURRENT_DATE)';
+  let sql =
+    'SELECT * FROM "taxExemption" WHERE "accountId" = $1 AND "status" = \'active\' AND ("validTo" IS NULL OR "validTo" >= CURRENT_DATE)';
   const params: unknown[] = [accountId];
 
   if (jurisdiction) {
@@ -80,14 +77,11 @@ export async function findActiveByAccount(accountId: string, jurisdiction?: stri
   return result?.rows ?? [];
 }
 
-export async function verify(
-  taxExemptionId: string,
-  verifiedBy: string
-): Promise<TaxExemption | null> {
+export async function verify(taxExemptionId: string, verifiedBy: string): Promise<TaxExemption | null> {
   const now = new Date();
   const result = await query<{ rows: TaxExemption[] }>(
     'UPDATE "taxExemption" SET "verifiedAt" = $1, "verifiedBy" = $2, "updatedAt" = $3 WHERE "taxExemptionId" = $4 RETURNING *',
-    [now, verifiedBy, now, taxExemptionId]
+    [now, verifiedBy, now, taxExemptionId],
   );
   return result?.rows?.[0] ?? null;
 }
@@ -95,7 +89,7 @@ export async function verify(
 export async function revoke(taxExemptionId: string): Promise<boolean> {
   const result = await query<{ rowCount: number }>(
     'UPDATE "taxExemption" SET "status" = \'revoked\', "updatedAt" = $1 WHERE "taxExemptionId" = $2',
-    [new Date(), taxExemptionId]
+    [new Date(), taxExemptionId],
   );
   return (result?.rowCount ?? 0) > 0;
 }
@@ -103,15 +97,12 @@ export async function revoke(taxExemptionId: string): Promise<boolean> {
 export async function expireOutdated(): Promise<number> {
   const result = await query<{ rowCount: number }>(
     'UPDATE "taxExemption" SET "status" = \'expired\', "updatedAt" = $1 WHERE "status" = \'active\' AND "validTo" IS NOT NULL AND "validTo" < CURRENT_DATE',
-    [new Date()]
+    [new Date()],
   );
   return result?.rowCount ?? 0;
 }
 
-export async function isExempt(
-  accountId: string,
-  jurisdiction: string
-): Promise<boolean> {
+export async function isExempt(accountId: string, jurisdiction: string): Promise<boolean> {
   const exemptions = await findActiveByAccount(accountId, jurisdiction);
   return exemptions.length > 0;
 }

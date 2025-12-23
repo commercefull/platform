@@ -2,7 +2,7 @@
  * Cron Job Scheduler
  * A lightweight background job scheduler that runs directly on the EC2 instance.
  * Uses Node.js setInterval for recurring tasks - no external dependencies like Redis/Bull.
- * 
+ *
  * For production, these jobs can also be triggered via system crontab on EC2.
  */
 
@@ -33,20 +33,12 @@ class CronScheduler {
   private jobHistory: JobResult[] = [];
   private maxHistorySize: number = 100;
 
-  constructor() {
-    
-  }
+  constructor() {}
 
   /**
    * Register a new scheduled job
    */
-  registerJob(
-    id: string,
-    name: string,
-    handler: () => Promise<void>,
-    intervalMs: number,
-    startImmediately: boolean = false
-  ): void {
+  registerJob(id: string, name: string, handler: () => Promise<void>, intervalMs: number, startImmediately: boolean = false): void {
     if (this.jobs.has(id)) {
       console.warn(`Job ${id} already exists. Use updateJob() to modify.`);
       return;
@@ -61,7 +53,7 @@ class CronScheduler {
       runCount: 0,
       errorCount: 0,
       enabled: true,
-      nextRun: new Date(Date.now() + intervalMs)
+      nextRun: new Date(Date.now() + intervalMs),
     };
 
     this.jobs.set(id, job);
@@ -98,30 +90,26 @@ class CronScheduler {
         jobId: id,
         success: true,
         duration: Date.now() - startTime,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
 
       this.addToHistory(result);
       job.runCount++;
       job.lastRun = new Date();
       job.nextRun = new Date(Date.now() + job.intervalMs);
-
-      
     } catch (error: any) {
       const result: JobResult = {
         jobId: id,
         success: false,
         duration: Date.now() - startTime,
         error: error.message,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
 
       this.addToHistory(result);
       job.errorCount++;
       job.lastRun = new Date();
       job.nextRun = new Date(Date.now() + job.intervalMs);
-
-      
     } finally {
       job.isRunning = false;
     }
@@ -133,7 +121,6 @@ class CronScheduler {
   async runJobNow(id: string): Promise<JobResult | null> {
     const job = this.jobs.get(id);
     if (!job) {
-      
       return null;
     }
 
@@ -153,7 +140,6 @@ class CronScheduler {
     const job = this.jobs.get(id);
     if (job) {
       job.enabled = enabled;
-      
     }
   }
 
@@ -167,7 +153,6 @@ class CronScheduler {
       this.intervals.delete(id);
     }
     this.jobs.delete(id);
-    
   }
 
   /**
@@ -211,7 +196,7 @@ class CronScheduler {
       activeJobs: jobs.filter(j => j.enabled).length,
       runningJobs: jobs.filter(j => j.isRunning).length,
       totalRuns: jobs.reduce((sum, j) => sum + j.runCount, 0),
-      totalErrors: jobs.reduce((sum, j) => sum + j.errorCount, 0)
+      totalErrors: jobs.reduce((sum, j) => sum + j.errorCount, 0),
     };
   }
 
@@ -219,14 +204,11 @@ class CronScheduler {
    * Stop all jobs and shutdown scheduler
    */
   shutdown(): void {
-    
     Array.from(this.intervals.entries()).forEach(([id, interval]) => {
       clearInterval(interval);
-      
     });
     this.intervals.clear();
     this.jobs.clear();
-    
   }
 
   private addToHistory(result: JobResult): void {
@@ -255,18 +237,15 @@ const HOURS = 60 * MINUTES;
  * Call this from your app.ts or main entry point
  */
 export const initializeScheduledJobs = (): void => {
-  
-
   // Cleanup expired reservations every 5 minutes
   cronScheduler.registerJob(
     'cleanup-expired-reservations',
     'Cleanup Expired Reservations',
     async () => {
       // TODO: Import and call inventory service
-      
       // await inventoryService.releaseExpiredReservations();
     },
-    5 * MINUTES
+    5 * MINUTES,
   );
 
   // Sync inventory every 6 hours
@@ -274,10 +253,9 @@ export const initializeScheduledJobs = (): void => {
     'inventory-sync',
     'Inventory Sync',
     async () => {
-      
       // TODO: Implement inventory sync logic
     },
-    6 * HOURS
+    6 * HOURS,
   );
 
   // Check low stock items every hour
@@ -285,10 +263,9 @@ export const initializeScheduledJobs = (): void => {
     'low-stock-check',
     'Low Stock Check',
     async () => {
-      
       // TODO: Check inventory levels and send alerts
     },
-    1 * HOURS
+    1 * HOURS,
   );
 
   // Cleanup old sessions every 30 minutes
@@ -296,10 +273,9 @@ export const initializeScheduledJobs = (): void => {
     'session-cleanup',
     'Session Cleanup',
     async () => {
-      
       // TODO: Remove expired sessions from database
     },
-    30 * MINUTES
+    30 * MINUTES,
   );
 
   // Daily sales report at midnight (runs every 24 hours)
@@ -307,10 +283,9 @@ export const initializeScheduledJobs = (): void => {
     'daily-sales-report',
     'Daily Sales Report',
     async () => {
-      
       // TODO: Generate and email daily sales report
     },
-    24 * HOURS
+    24 * HOURS,
   );
 
   // Cleanup old job history every day
@@ -318,10 +293,9 @@ export const initializeScheduledJobs = (): void => {
     'cleanup-job-history',
     'Cleanup Job History',
     async () => {
-      
       // TODO: Remove old logs and notifications
     },
-    24 * HOURS
+    24 * HOURS,
   );
 
   // Cart abandonment reminders every hour
@@ -329,13 +303,10 @@ export const initializeScheduledJobs = (): void => {
     'cart-abandonment',
     'Cart Abandonment Reminders',
     async () => {
-      
       // TODO: Find abandoned carts and send reminder emails
     },
-    1 * HOURS
+    1 * HOURS,
   );
-
-  
 };
 
 /**
@@ -404,7 +375,8 @@ class AsyncJobQueue {
       if (!job) break;
 
       this.activeJobs++;
-      job.handler()
+      job
+        .handler()
         .catch(err => console.error(`Job ${job.id} failed:`, err))
         .finally(() => {
           this.activeJobs--;
@@ -432,28 +404,24 @@ export const asyncJobQueue = new AsyncJobQueue();
 export class JobScheduler {
   static async scheduleEmail(data: EmailJobData, _delay?: number): Promise<void> {
     await asyncJobQueue.add(async () => {
-      
       // TODO: Integrate with actual email service (SendGrid, SES, etc.)
     });
   }
 
   static async scheduleInventorySync(data: InventorySyncJobData, _priority: 'low' | 'normal' | 'high' = 'normal'): Promise<void> {
     await asyncJobQueue.add(async () => {
-      
       // TODO: Implement inventory sync logic
     });
   }
 
   static async scheduleReport(data: ReportJobData): Promise<void> {
     await asyncJobQueue.add(async () => {
-      
       // TODO: Generate and send report
     });
   }
 
   static async scheduleNotification(data: NotificationJobData): Promise<void> {
     await asyncJobQueue.add(async () => {
-      
       // TODO: Send notification via appropriate channels
     });
   }
@@ -470,7 +438,7 @@ export const getQueueStats = async (): Promise<{
     scheduled: cronScheduler.getStats(),
     async: {
       queueSize: asyncJobQueue.getQueueSize(),
-      activeJobs: asyncJobQueue.getActiveJobs()
-    }
+      activeJobs: asyncJobQueue.getActiveJobs(),
+    },
   };
 };

@@ -28,13 +28,13 @@ describe('Attribute Option Tests', () => {
         ...testAttributeOption,
         value: 'New Test Option',
         label: 'New Test Option Label',
-        attributeId: testAttributeId
+        attributeId: testAttributeId,
       };
-      
+
       const response = await client.post('/business/attribute-options', newOption, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       expect(response.status).toBe(201);
       expect(response.data.success).toBe(true);
       // DB returns productAttributeOptionId, not id
@@ -46,53 +46,53 @@ describe('Attribute Option Tests', () => {
       // Verify camelCase property names in response (TypeScript interface)
       expect(response.data.data).toHaveProperty('sortOrder');
       expect(response.data.data).toHaveProperty('createdAt');
-      
+
       // Save the ID for later tests
       createdOptionId = optionId;
     });
 
     it('should get an attribute option by ID', async () => {
       const response = await client.get(`/business/attribute-options/${testAttributeOptionId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       // DB returns productAttributeOptionId, not id
       const optionId = response.data.data.productAttributeOptionId || response.data.data.id;
       expect(optionId).toBe(testAttributeOptionId);
     });
-    
+
     it('should get options by attribute', async () => {
       const response = await client.get(`/business/attribute-options/attribute/${testAttributeId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       expect(Array.isArray(response.data.data)).toBe(true);
       expect(response.data.data.length).toBeGreaterThan(0);
-      
+
       // Should find our test options - uses productAttributeOptionId
       const foundOriginalOption = response.data.data.find((o: any) => (o.productAttributeOptionId || o.id) === testAttributeOptionId);
       const foundNewOption = response.data.data.find((o: any) => (o.productAttributeOptionId || o.id) === createdOptionId);
-      
+
       expect(foundOriginalOption).toBeDefined();
       expect(foundNewOption).toBeDefined();
     });
-    
+
     it('should find option by value', async () => {
       // First get the option to find its value
       const getResponse = await client.get(`/business/attribute-options/${createdOptionId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       const optionValue = getResponse.data.data.value;
-      
+
       const response = await client.get(`/business/attribute-options/attribute/${testAttributeId}/value/${optionValue}`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       expect(response.data.data).toHaveProperty('id', createdOptionId);
@@ -103,13 +103,13 @@ describe('Attribute Option Tests', () => {
       const updatedData = {
         value: 'Updated Option Value',
         label: 'Updated Option Label',
-        sortOrder: 2
+        sortOrder: 2,
       };
-      
+
       const response = await client.put(`/business/attribute-options/${createdOptionId}`, updatedData, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       expect(response.data.data).toHaveProperty('value', updatedData.value);
@@ -119,17 +119,17 @@ describe('Attribute Option Tests', () => {
 
     it('should delete an attribute option', async () => {
       const response = await client.delete(`/business/attribute-options/${createdOptionId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
-      
+
       // Verify the option is deleted
       const getResponse = await client.get(`/business/attribute-options/${createdOptionId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       expect(getResponse.status).toBe(404);
     });
   });

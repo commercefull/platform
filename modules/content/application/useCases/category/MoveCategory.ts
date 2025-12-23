@@ -10,7 +10,7 @@ export class MoveCategoryCommand {
   constructor(
     public readonly categoryId: string,
     public readonly newParentId: string | null,
-    public readonly movedBy?: string
+    public readonly movedBy?: string,
   ) {}
 }
 
@@ -55,15 +55,12 @@ export class MoveCategoryUseCase {
       }
     }
 
-    const updatedCategory = await this.categoryRepo.moveCategory(
-      command.categoryId,
-      command.newParentId
-    );
+    const updatedCategory = await this.categoryRepo.moveCategory(command.categoryId, command.newParentId);
 
     eventBus.emit('content.category.updated', {
       categoryId: updatedCategory.contentCategoryId,
       name: updatedCategory.name,
-      slug: updatedCategory.slug
+      slug: updatedCategory.slug,
     });
 
     return {
@@ -72,7 +69,7 @@ export class MoveCategoryUseCase {
       slug: updatedCategory.slug,
       parentId: updatedCategory.parentId ?? undefined,
       path: updatedCategory.path ?? undefined,
-      depth: updatedCategory.depth
+      depth: updatedCategory.depth,
     };
   }
 }

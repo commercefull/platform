@@ -14,7 +14,7 @@ import { generateUUID } from '../../../libs/uuid';
 
 const TABLES = {
   PURCHASE_ORDER: Table.SupplierPurchaseOrder,
-  PURCHASE_ORDER_ITEM: Table.SupplierPurchaseOrderItem
+  PURCHASE_ORDER_ITEM: Table.SupplierPurchaseOrderItem,
 };
 
 // ============================================================================
@@ -83,16 +83,49 @@ export interface SupplierPurchaseOrderItem {
   notes?: string;
 }
 
-export type SupplierPurchaseOrderCreateParams = Omit<SupplierPurchaseOrder, 'supplierPurchaseOrderId' | 'createdAt' | 'updatedAt' | 'poNumber' | 'approvedAt' | 'sentAt' | 'confirmedAt' | 'completedAt' | 'cancelledAt'>;
-export type SupplierPurchaseOrderUpdateParams = Partial<Pick<SupplierPurchaseOrder, 
-  'status' | 'expectedDeliveryDate' | 'deliveryDate' | 'shippingMethod' | 'trackingNumber' | 
-  'carrierName' | 'paymentTerms' | 'subtotal' | 'tax' | 'shipping' | 'discount' | 'total' | 'notes' | 'supplierNotes' | 'attachments'
->>;
+export type SupplierPurchaseOrderCreateParams = Omit<
+  SupplierPurchaseOrder,
+  | 'supplierPurchaseOrderId'
+  | 'createdAt'
+  | 'updatedAt'
+  | 'poNumber'
+  | 'approvedAt'
+  | 'sentAt'
+  | 'confirmedAt'
+  | 'completedAt'
+  | 'cancelledAt'
+>;
+export type SupplierPurchaseOrderUpdateParams = Partial<
+  Pick<
+    SupplierPurchaseOrder,
+    | 'status'
+    | 'expectedDeliveryDate'
+    | 'deliveryDate'
+    | 'shippingMethod'
+    | 'trackingNumber'
+    | 'carrierName'
+    | 'paymentTerms'
+    | 'subtotal'
+    | 'tax'
+    | 'shipping'
+    | 'discount'
+    | 'total'
+    | 'notes'
+    | 'supplierNotes'
+    | 'attachments'
+  >
+>;
 
-export type SupplierPurchaseOrderItemCreateParams = Omit<SupplierPurchaseOrderItem, 'supplierPurchaseOrderItemId' | 'createdAt' | 'updatedAt' | 'receivedAt'>;
-export type SupplierPurchaseOrderItemUpdateParams = Partial<Pick<SupplierPurchaseOrderItem, 
-  'quantity' | 'receivedQuantity' | 'unitCost' | 'tax' | 'discount' | 'total' | 'status' | 'expectedDeliveryDate' | 'notes'
->>;
+export type SupplierPurchaseOrderItemCreateParams = Omit<
+  SupplierPurchaseOrderItem,
+  'supplierPurchaseOrderItemId' | 'createdAt' | 'updatedAt' | 'receivedAt'
+>;
+export type SupplierPurchaseOrderItemUpdateParams = Partial<
+  Pick<
+    SupplierPurchaseOrderItem,
+    'quantity' | 'receivedQuantity' | 'unitCost' | 'tax' | 'discount' | 'total' | 'status' | 'expectedDeliveryDate' | 'notes'
+  >
+>;
 
 export class SupplierPurchaseOrderRepo {
   /**
@@ -108,20 +141,16 @@ export class SupplierPurchaseOrderRepo {
    * Find purchase order by ID
    */
   async findById(supplierPurchaseOrderId: string): Promise<SupplierPurchaseOrder | null> {
-    return await queryOne<SupplierPurchaseOrder>(
-      `SELECT * FROM "public"."supplierPurchaseOrder" WHERE "supplierPurchaseOrderId" = $1`,
-      [supplierPurchaseOrderId]
-    );
+    return await queryOne<SupplierPurchaseOrder>(`SELECT * FROM "public"."supplierPurchaseOrder" WHERE "supplierPurchaseOrderId" = $1`, [
+      supplierPurchaseOrderId,
+    ]);
   }
 
   /**
    * Find purchase order by PO number
    */
   async findByPONumber(poNumber: string): Promise<SupplierPurchaseOrder | null> {
-    return await queryOne<SupplierPurchaseOrder>(
-      `SELECT * FROM "public"."supplierPurchaseOrder" WHERE "poNumber" = $1`,
-      [poNumber]
-    );
+    return await queryOne<SupplierPurchaseOrder>(`SELECT * FROM "public"."supplierPurchaseOrder" WHERE "poNumber" = $1`, [poNumber]);
   }
 
   /**
@@ -133,7 +162,7 @@ export class SupplierPurchaseOrderRepo {
        WHERE "supplierId" = $1 
        ORDER BY "createdAt" DESC 
        LIMIT $2 OFFSET $3`,
-      [supplierId, limit, offset]
+      [supplierId, limit, offset],
     );
     return results || [];
   }
@@ -147,7 +176,7 @@ export class SupplierPurchaseOrderRepo {
        WHERE "warehouseId" = $1 
        ORDER BY "createdAt" DESC 
        LIMIT $2 OFFSET $3`,
-      [warehouseId, limit, offset]
+      [warehouseId, limit, offset],
     );
     return results || [];
   }
@@ -161,7 +190,7 @@ export class SupplierPurchaseOrderRepo {
        WHERE "status" = $1 
        ORDER BY "createdAt" DESC 
        LIMIT $2 OFFSET $3`,
-      [status, limit, offset]
+      [status, limit, offset],
     );
     return results || [];
   }
@@ -177,7 +206,7 @@ export class SupplierPurchaseOrderRepo {
        AND "expectedDeliveryDate" IS NOT NULL 
        AND "expectedDeliveryDate" < $1
        ORDER BY "expectedDeliveryDate" ASC`,
-      [now]
+      [now],
     );
     return results || [];
   }
@@ -225,8 +254,8 @@ export class SupplierPurchaseOrderRepo {
         params.supplierNotes || null,
         params.attachments ? JSON.stringify(params.attachments) : null,
         now,
-        now
-      ]
+        now,
+      ],
     );
 
     if (!result) {
@@ -264,7 +293,7 @@ export class SupplierPurchaseOrderRepo {
        SET ${updateFields.join(', ')}
        WHERE "supplierPurchaseOrderId" = $${paramIndex}
        RETURNING *`,
-      values
+      values,
     );
 
     return result;
@@ -315,7 +344,7 @@ export class SupplierPurchaseOrderRepo {
        SET ${updateFields.join(', ')}
        WHERE "supplierPurchaseOrderId" = $${paramIndex}
        RETURNING *`,
-      values
+      values,
     );
 
     return result;
@@ -362,7 +391,7 @@ export class SupplierPurchaseOrderRepo {
   async delete(supplierPurchaseOrderId: string): Promise<boolean> {
     const result = await queryOne<{ supplierPurchaseOrderId: string }>(
       `DELETE FROM "public"."supplierPurchaseOrder" WHERE "supplierPurchaseOrderId" = $1 RETURNING "supplierPurchaseOrderId"`,
-      [supplierPurchaseOrderId]
+      [supplierPurchaseOrderId],
     );
 
     return !!result;
@@ -376,7 +405,7 @@ export class SupplierPurchaseOrderRepo {
   async findItemById(supplierPurchaseOrderItemId: string): Promise<SupplierPurchaseOrderItem | null> {
     return await queryOne<SupplierPurchaseOrderItem>(
       `SELECT * FROM "public"."supplierPurchaseOrderItem" WHERE "supplierPurchaseOrderItemId" = $1`,
-      [supplierPurchaseOrderItemId]
+      [supplierPurchaseOrderItemId],
     );
   }
 
@@ -388,7 +417,7 @@ export class SupplierPurchaseOrderRepo {
       `SELECT * FROM "public"."supplierPurchaseOrderItem" 
        WHERE "supplierPurchaseOrderId" = $1 
        ORDER BY "createdAt" ASC`,
-      [supplierPurchaseOrderId]
+      [supplierPurchaseOrderId],
     );
     return results || [];
   }
@@ -429,8 +458,8 @@ export class SupplierPurchaseOrderRepo {
         params.expectedDeliveryDate || null,
         params.notes || null,
         now,
-        now
-      ]
+        now,
+      ],
     );
 
     if (!result) {
@@ -443,7 +472,10 @@ export class SupplierPurchaseOrderRepo {
   /**
    * Update purchase order item
    */
-  async updateItem(supplierPurchaseOrderItemId: string, params: SupplierPurchaseOrderItemUpdateParams): Promise<SupplierPurchaseOrderItem | null> {
+  async updateItem(
+    supplierPurchaseOrderItemId: string,
+    params: SupplierPurchaseOrderItemUpdateParams,
+  ): Promise<SupplierPurchaseOrderItem | null> {
     const updateFields: string[] = [];
     const values: any[] = [];
     let paramIndex = 1;
@@ -468,7 +500,7 @@ export class SupplierPurchaseOrderRepo {
        SET ${updateFields.join(', ')}
        WHERE "supplierPurchaseOrderItemId" = $${paramIndex}
        RETURNING *`,
-      values
+      values,
     );
 
     return result;
@@ -479,7 +511,7 @@ export class SupplierPurchaseOrderRepo {
    */
   async receiveItem(supplierPurchaseOrderItemId: string, quantityReceived: number): Promise<SupplierPurchaseOrderItem | null> {
     const item = await this.findItemById(supplierPurchaseOrderItemId);
-    
+
     if (!item) {
       throw new Error(`Purchase order item ${supplierPurchaseOrderItemId} not found`);
     }
@@ -496,7 +528,7 @@ export class SupplierPurchaseOrderRepo {
     return this.updateItem(supplierPurchaseOrderItemId, {
       receivedQuantity: newReceivedQuantity,
       status: newStatus,
-      ...(newStatus === 'received' ? { receivedAt: unixTimestamp() as any } : {})
+      ...(newStatus === 'received' ? { receivedAt: unixTimestamp() as any } : {}),
     });
   }
 
@@ -506,7 +538,7 @@ export class SupplierPurchaseOrderRepo {
   async deleteItem(supplierPurchaseOrderItemId: string): Promise<boolean> {
     const result = await queryOne<{ supplierPurchaseOrderItemId: string }>(
       `DELETE FROM "public"."supplierPurchaseOrderItem" WHERE "supplierPurchaseOrderItemId" = $1 RETURNING "supplierPurchaseOrderItemId"`,
-      [supplierPurchaseOrderItemId]
+      [supplierPurchaseOrderItemId],
     );
 
     return !!result;
@@ -527,7 +559,7 @@ export class SupplierPurchaseOrderRepo {
   }> {
     const results = await query<{ status: SupplierPurchaseOrderStatus; count: string }[]>(
       `SELECT "status", COUNT(*) as count FROM "public"."supplierPurchaseOrder" GROUP BY "status"`,
-      []
+      [],
     );
 
     const stats: Record<string, number> = {
@@ -538,7 +570,7 @@ export class SupplierPurchaseOrderRepo {
       sent: 0,
       completed: 0,
       cancelled: 0,
-      overdue: 0
+      overdue: 0,
     };
 
     if (results) {

@@ -29,21 +29,28 @@ export interface SubscriptionInvoice {
 }
 
 export type SubscriptionInvoiceCreateParams = Omit<SubscriptionInvoice, 'subscriptionInvoiceId' | 'createdAt' | 'updatedAt' | 'deletedAt'>;
-export type SubscriptionInvoiceUpdateParams = Partial<Omit<SubscriptionInvoice, 'subscriptionInvoiceId' | 'paymentSubscriptionId' | 'customerId' | 'merchantId' | 'createdAt' | 'updatedAt' | 'deletedAt'>>;
+export type SubscriptionInvoiceUpdateParams = Partial<
+  Omit<
+    SubscriptionInvoice,
+    'subscriptionInvoiceId' | 'paymentSubscriptionId' | 'customerId' | 'merchantId' | 'createdAt' | 'updatedAt' | 'deletedAt'
+  >
+>;
 
 export class SubscriptionInvoiceRepo {
   async findById(id: string): Promise<SubscriptionInvoice | null> {
     return await queryOne<SubscriptionInvoice>(
       `SELECT * FROM "subscriptionInvoice" WHERE "subscriptionInvoiceId" = $1 AND "deletedAt" IS NULL`,
-      [id]
+      [id],
     );
   }
 
   async findBySubscription(paymentSubscriptionId: string, limit = 100): Promise<SubscriptionInvoice[]> {
-    return (await query<SubscriptionInvoice[]>(
-      `SELECT * FROM "subscriptionInvoice" WHERE "paymentSubscriptionId" = $1 AND "deletedAt" IS NULL ORDER BY "dueDate" DESC LIMIT $2`,
-      [paymentSubscriptionId, limit]
-    )) || [];
+    return (
+      (await query<SubscriptionInvoice[]>(
+        `SELECT * FROM "subscriptionInvoice" WHERE "paymentSubscriptionId" = $1 AND "deletedAt" IS NULL ORDER BY "dueDate" DESC LIMIT $2`,
+        [paymentSubscriptionId, limit],
+      )) || []
+    );
   }
 
   async findByCustomer(customerId: string, status?: SubscriptionInvoiceStatus, limit = 100): Promise<SubscriptionInvoice[]> {
@@ -59,17 +66,18 @@ export class SubscriptionInvoiceRepo {
   }
 
   async findByInvoiceNumber(invoiceNumber: string): Promise<SubscriptionInvoice | null> {
-    return await queryOne<SubscriptionInvoice>(
-      `SELECT * FROM "subscriptionInvoice" WHERE "invoiceNumber" = $1 AND "deletedAt" IS NULL`,
-      [invoiceNumber]
-    );
+    return await queryOne<SubscriptionInvoice>(`SELECT * FROM "subscriptionInvoice" WHERE "invoiceNumber" = $1 AND "deletedAt" IS NULL`, [
+      invoiceNumber,
+    ]);
   }
 
   async findOverdue(): Promise<SubscriptionInvoice[]> {
-    return (await query<SubscriptionInvoice[]>(
-      `SELECT * FROM "subscriptionInvoice" WHERE "status" IN ('open', 'past_due') AND "dueDate" < $1 AND "deletedAt" IS NULL ORDER BY "dueDate" ASC`,
-      [unixTimestamp()]
-    )) || [];
+    return (
+      (await query<SubscriptionInvoice[]>(
+        `SELECT * FROM "subscriptionInvoice" WHERE "status" IN ('open', 'past_due') AND "dueDate" < $1 AND "deletedAt" IS NULL ORDER BY "dueDate" ASC`,
+        [unixTimestamp()],
+      )) || []
+    );
   }
 
   async create(params: SubscriptionInvoiceCreateParams): Promise<SubscriptionInvoice> {
@@ -81,12 +89,27 @@ export class SubscriptionInvoiceRepo {
         "invoiceUrl", "items", "subtotal", "tax", "discount", "gatewayInvoiceId", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20) RETURNING *`,
       [
-        params.paymentSubscriptionId, params.customerId, params.merchantId, params.amount,
-        params.currencyCode || 'USD', params.status || 'draft', params.dueDate, params.paidDate || null,
-        params.periodStart, params.periodEnd, params.orderPaymentId || null, params.invoiceNumber || null,
-        params.invoiceUrl || null, JSON.stringify(params.items), params.subtotal, params.tax || 0,
-        params.discount || 0, params.gatewayInvoiceId || null, now, now
-      ]
+        params.paymentSubscriptionId,
+        params.customerId,
+        params.merchantId,
+        params.amount,
+        params.currencyCode || 'USD',
+        params.status || 'draft',
+        params.dueDate,
+        params.paidDate || null,
+        params.periodStart,
+        params.periodEnd,
+        params.orderPaymentId || null,
+        params.invoiceNumber || null,
+        params.invoiceUrl || null,
+        JSON.stringify(params.items),
+        params.subtotal,
+        params.tax || 0,
+        params.discount || 0,
+        params.gatewayInvoiceId || null,
+        now,
+        now,
+      ],
     );
     if (!result) throw new Error('Failed to create subscription invoice');
     return result;
@@ -111,7 +134,7 @@ export class SubscriptionInvoiceRepo {
 
     return await queryOne<SubscriptionInvoice>(
       `UPDATE "subscriptionInvoice" SET ${updateFields.join(', ')} WHERE "subscriptionInvoiceId" = $${paramIndex} AND "deletedAt" IS NULL RETURNING *`,
-      values
+      values,
     );
   }
 
@@ -126,7 +149,7 @@ export class SubscriptionInvoiceRepo {
   async delete(id: string): Promise<boolean> {
     const result = await queryOne<{ subscriptionInvoiceId: string }>(
       `UPDATE "subscriptionInvoice" SET "deletedAt" = $1 WHERE "subscriptionInvoiceId" = $2 AND "deletedAt" IS NULL RETURNING "subscriptionInvoiceId"`,
-      [unixTimestamp(), id]
+      [unixTimestamp(), id],
     );
     return !!result;
   }

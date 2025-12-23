@@ -9,7 +9,11 @@ exports.up = function (knex) {
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     t.uuid('productId').notNullable().references('productId').inTable('product').onDelete('CASCADE');
     t.uuid('productVariantId').references('productVariantId').inTable('productVariant').onDelete('CASCADE');
-    t.uuid('distributionWarehouseId').notNullable().references('distributionWarehouseId').inTable('distributionWarehouse').onDelete('CASCADE');
+    t.uuid('distributionWarehouseId')
+      .notNullable()
+      .references('distributionWarehouseId')
+      .inTable('distributionWarehouse')
+      .onDelete('CASCADE');
     t.boolean('isTracked').notNullable().defaultTo(true);
     t.boolean('isBackorderable').notNullable().defaultTo(false);
     t.boolean('isPurchasableOutOfStock').notNullable().defaultTo(false);

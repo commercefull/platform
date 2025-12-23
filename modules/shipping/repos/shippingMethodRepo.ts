@@ -14,17 +14,11 @@ export type UpdateShippingMethodInput = Partial<Omit<ShippingMethod, 'shippingMe
 const TABLE = Table.ShippingMethod;
 
 export async function findById(id: string): Promise<ShippingMethod | null> {
-  return queryOne<ShippingMethod>(
-    `SELECT * FROM "${TABLE}" WHERE "shippingMethodId" = $1`,
-    [id]
-  );
+  return queryOne<ShippingMethod>(`SELECT * FROM "${TABLE}" WHERE "shippingMethodId" = $1`, [id]);
 }
 
 export async function findByCode(code: string): Promise<ShippingMethod | null> {
-  return queryOne<ShippingMethod>(
-    `SELECT * FROM "${TABLE}" WHERE "code" = $1`,
-    [code]
-  );
+  return queryOne<ShippingMethod>(`SELECT * FROM "${TABLE}" WHERE "code" = $1`, [code]);
 }
 
 export async function findByCarrier(carrierId: string, activeOnly = false): Promise<ShippingMethod[]> {
@@ -43,9 +37,7 @@ export async function findAll(activeOnly = false, displayOnFrontend = false): Pr
 }
 
 export async function findDefault(): Promise<ShippingMethod | null> {
-  return queryOne<ShippingMethod>(
-    `SELECT * FROM "${TABLE}" WHERE "isDefault" = true AND "isActive" = true LIMIT 1`
-  );
+  return queryOne<ShippingMethod>(`SELECT * FROM "${TABLE}" WHERE "isDefault" = true AND "isActive" = true LIMIT 1`);
 }
 
 export async function create(input: CreateShippingMethodInput): Promise<ShippingMethod> {
@@ -81,8 +73,8 @@ export async function create(input: CreateShippingMethodInput): Promise<Shipping
       input.dimensionRestrictions ? JSON.stringify(input.dimensionRestrictions) : null,
       input.shippingClass || null,
       input.customFields ? JSON.stringify(input.customFields) : null,
-      input.createdBy || null
-    ]
+      input.createdBy || null,
+    ],
   );
 
   if (!result) throw new Error('Failed to create shipping method');
@@ -91,10 +83,9 @@ export async function create(input: CreateShippingMethodInput): Promise<Shipping
 
 export async function update(id: string, input: UpdateShippingMethodInput): Promise<ShippingMethod | null> {
   if (input.isDefault === true) {
-    await query(
-      `UPDATE "${TABLE}" SET "isDefault" = false, "updatedAt" = NOW() WHERE "isDefault" = true AND "shippingMethodId" != $1`,
-      [id]
-    );
+    await query(`UPDATE "${TABLE}" SET "isDefault" = false, "updatedAt" = NOW() WHERE "isDefault" = true AND "shippingMethodId" != $1`, [
+      id,
+    ]);
   }
 
   const updateFields: string[] = [];
@@ -116,7 +107,7 @@ export async function update(id: string, input: UpdateShippingMethodInput): Prom
 
   return queryOne<ShippingMethod>(
     `UPDATE "${TABLE}" SET ${updateFields.join(', ')} WHERE "shippingMethodId" = $${paramIndex} RETURNING *`,
-    values
+    values,
   );
 }
 
@@ -131,7 +122,7 @@ export async function deactivate(id: string): Promise<ShippingMethod | null> {
 export async function deleteMethod(id: string): Promise<boolean> {
   const result = await queryOne<{ shippingMethodId: string }>(
     `DELETE FROM "${TABLE}" WHERE "shippingMethodId" = $1 RETURNING "shippingMethodId"`,
-    [id]
+    [id],
   );
   return !!result;
 }
@@ -154,5 +145,5 @@ export default {
   activate,
   deactivate,
   delete: deleteMethod,
-  count
+  count,
 };

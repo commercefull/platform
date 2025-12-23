@@ -44,7 +44,7 @@ exports.up = async function (knex) {
       description: '10% off for new members',
       isActive: true,
       discountType: 'percentage',
-      discountValue: 10.00,
+      discountValue: 10.0,
       validTo: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
       maxUses: 100,
       uses_remaining: 100,

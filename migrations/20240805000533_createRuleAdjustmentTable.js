@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function (knex) {
   return knex.schema.createTable('ruleAdjustment', t => {
     t.uuid('ruleAdjustmentId').primary().defaultTo(knex.raw('uuidv7()'));
     t.uuid('pricingRuleId').notNullable().references('pricingRuleId').inTable('pricingRule').onDelete('CASCADE');
@@ -12,6 +12,6 @@ exports.up = function(knex) {
   });
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTable('ruleAdjustment');
 };

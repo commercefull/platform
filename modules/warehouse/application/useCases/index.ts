@@ -1,6 +1,6 @@
 /**
  * Warehouse Use Cases
- * 
+ *
  * Barrel export for all warehouse-related use cases.
  */
 

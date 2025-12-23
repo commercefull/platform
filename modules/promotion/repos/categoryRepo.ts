@@ -1,12 +1,17 @@
-import { queryOne, query } from "../../../libs/db";
-import { Table, CategoryPromotion } from "../../../libs/db/types";
+import { queryOne, query } from '../../../libs/db';
+import { Table, CategoryPromotion } from '../../../libs/db/types';
 
 // Use CategoryPromotion type directly from libs/db/types.ts
 export type { CategoryPromotion };
 
-type CreateProps = Pick<CategoryPromotion, "productCategoryId" | "promotionId" | "displayOrder"> &
-  Partial<Pick<CategoryPromotion, "bannerText" | "bannerColor" | "bannerBackgroundColor" | "bannerImageUrl" | "isDisplayedOnCategoryPage" | "isDisplayedOnProductPage">>;
-type UpdateProps = Partial<Omit<CreateProps, "productCategoryId" | "promotionId">>;
+type CreateProps = Pick<CategoryPromotion, 'productCategoryId' | 'promotionId' | 'displayOrder'> &
+  Partial<
+    Pick<
+      CategoryPromotion,
+      'bannerText' | 'bannerColor' | 'bannerBackgroundColor' | 'bannerImageUrl' | 'isDisplayedOnCategoryPage' | 'isDisplayedOnProductPage'
+    >
+  >;
+type UpdateProps = Partial<Omit<CreateProps, 'productCategoryId' | 'promotionId'>>;
 
 export class CategoryPromotionRepo {
   async create(props: CreateProps): Promise<CategoryPromotion> {
@@ -27,8 +32,8 @@ export class CategoryPromotionRepo {
         props.isDisplayedOnCategoryPage ?? true,
         props.isDisplayedOnProductPage ?? true,
         now,
-        now
-      ]
+        now,
+      ],
     );
 
     if (!row) {
@@ -56,7 +61,7 @@ export class CategoryPromotionRepo {
        SET ${updates.join(', ')} 
        WHERE "categoryPromotionId" = $${paramIndex} 
        RETURNING *`,
-      values
+      values,
     );
 
     if (!row) {
@@ -66,41 +71,33 @@ export class CategoryPromotionRepo {
   }
 
   async getById(id: string): Promise<CategoryPromotion | null> {
-    return queryOne<CategoryPromotion>(
-      `SELECT * FROM "${Table.CategoryPromotion}" WHERE "categoryPromotionId" = $1`,
-      [id]
-    );
+    return queryOne<CategoryPromotion>(`SELECT * FROM "${Table.CategoryPromotion}" WHERE "categoryPromotionId" = $1`, [id]);
   }
 
   async getByCategoryId(categoryId: string): Promise<CategoryPromotion[]> {
-    return await query<CategoryPromotion[]>(
-      `SELECT * FROM "${Table.CategoryPromotion}" WHERE "productCategoryId" = $1`,
-      [categoryId]
-    ) || [];
+    return (
+      (await query<CategoryPromotion[]>(`SELECT * FROM "${Table.CategoryPromotion}" WHERE "productCategoryId" = $1`, [categoryId])) || []
+    );
   }
 
   async getByPromotionId(promotionId: string): Promise<CategoryPromotion[]> {
-    return await query<CategoryPromotion[]>(
-      `SELECT * FROM "${Table.CategoryPromotion}" WHERE "promotionId" = $1`,
-      [promotionId]
-    ) || [];
+    return (await query<CategoryPromotion[]>(`SELECT * FROM "${Table.CategoryPromotion}" WHERE "promotionId" = $1`, [promotionId])) || [];
   }
 
   async getActivePromotions(): Promise<CategoryPromotion[]> {
-    return await query<CategoryPromotion[]>(
-      `SELECT cp.* FROM "${Table.CategoryPromotion}" cp
+    return (
+      (await query<CategoryPromotion[]>(
+        `SELECT cp.* FROM "${Table.CategoryPromotion}" cp
        INNER JOIN "${Table.Promotion}" p ON cp."promotionId" = p."promotionId"
        WHERE p."isActive" = true AND p."deletedAt" IS NULL
        ORDER BY cp."displayOrder" ASC`,
-      []
-    ) || [];
+        [],
+      )) || []
+    );
   }
 
   async delete(id: string): Promise<boolean> {
-    const result = await query(
-      `DELETE FROM "${Table.CategoryPromotion}" WHERE "categoryPromotionId" = $1`,
-      [id]
-    );
+    const result = await query(`DELETE FROM "${Table.CategoryPromotion}" WHERE "categoryPromotionId" = $1`, [id]);
     return result !== null;
   }
 }

@@ -111,7 +111,7 @@ export class Address {
       this.props.addressLine1,
       this.props.addressLine2,
       `${this.props.city}, ${this.props.region || ''} ${this.props.postalCode}`,
-      this.props.country
+      this.props.country,
     ].filter(Boolean);
     return parts.join('\n');
   }

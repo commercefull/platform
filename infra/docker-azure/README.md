@@ -5,6 +5,7 @@ Deploy CommerceFull platform to Microsoft Azure using Docker containers.
 ## Overview
 
 This deployment strategy uses Azure cloud services with Docker for containerized deployment:
+
 - Azure Container Apps (serverless containers)
 - Azure Database for PostgreSQL 18 (managed database)
 - Azure Storage Account (blob storage)
@@ -15,23 +16,27 @@ This deployment strategy uses Azure cloud services with Docker for containerized
 ## Prerequisites
 
 ### Azure Account
+
 - Microsoft Azure subscription
 - Azure CLI installed and configured
 - Resource group created
 - Contributor role access
 
 ### Local Machine
+
 - Docker and Docker Compose
 - Azure CLI (`az`)
 - Git
 
 ### DNS
+
 - Domain name
 - Azure DNS or external DNS provider
 
 ## Quick Start
 
 ### 1. Setup Azure Environment
+
 ```bash
 # Login to Azure
 az login
@@ -49,6 +54,7 @@ az ad sp create-for-rbac --name "commercefull-sp" --role contributor \
 ```
 
 ### 2. Deploy Infrastructure
+
 ```bash
 cd infra/docker-azure
 
@@ -63,6 +69,7 @@ az deployment group create \
 ```
 
 ### 3. Deploy Application
+
 ```bash
 # Build and push Docker image
 az acr build --registry commercefullacr --image commercefull:latest .
@@ -203,6 +210,7 @@ docker-azure/
 ### 1. Infrastructure Components
 
 #### Azure Container Apps Environment
+
 ```bicep
 resource containerEnvironment 'Microsoft.App/managedEnvironments@2023-05-01' = {
   name: 'commercefull-env-${environment}'
@@ -220,6 +228,7 @@ resource containerEnvironment 'Microsoft.App/managedEnvironments@2023-05-01' = {
 ```
 
 #### Azure Database for PostgreSQL
+
 ```bicep
 resource postgresServer 'Microsoft.DBforPostgreSQL/flexibleServers@2023-03-01-preview' = {
   name: 'commercefull-db-${environment}'
@@ -249,6 +258,7 @@ resource postgresServer 'Microsoft.DBforPostgreSQL/flexibleServers@2023-03-01-pr
 ```
 
 #### Azure Storage Account
+
 ```bicep
 resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
   name: 'commercefullstorage${uniqueString(resourceGroup().id)}'
@@ -269,6 +279,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
 ### 2. Application Container
 
 #### Dockerfile
+
 ```dockerfile
 FROM node:18-alpine
 
@@ -310,12 +321,13 @@ CMD ["npm", "start"]
 ### 3. CI/CD Pipeline
 
 #### Azure DevOps Pipeline (`azure-pipelines.yml`)
+
 ```yaml
 trigger:
   branches:
     include:
-    - main
-    - develop
+      - main
+      - develop
 
 pool:
   vmImage: 'ubuntu-latest'
@@ -328,54 +340,55 @@ variables:
   environment: 'prod'
 
 stages:
-- stage: Build
-  jobs:
-  - job: BuildAndPush
-    steps:
-    - task: Docker@2
-      inputs:
-        containerRegistry: 'commercefull-acr'
-        repository: 'commercefull'
-        command: 'buildAndPush'
-        Dockerfile: '**/Dockerfile'
-        tags: |
-          $(Build.BuildNumber)
-          latest
-
-- stage: Deploy
-  jobs:
-  - deployment: DeployToStaging
-    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
-    environment: 'staging'
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - task: AzureContainerApps@1
+  - stage: Build
+    jobs:
+      - job: BuildAndPush
+        steps:
+          - task: Docker@2
             inputs:
-              azureSubscription: $(azureSubscription)
-              containerAppName: $(containerApp)-staging
-              resourceGroup: $(resourceGroup)
-              imageName: $(containerRegistry)/commercefull:$(Build.BuildNumber)
+              containerRegistry: 'commercefull-acr'
+              repository: 'commercefull'
+              command: 'buildAndPush'
+              Dockerfile: '**/Dockerfile'
+              tags: |
+                $(Build.BuildNumber)
+                latest
 
-  - deployment: DeployToProduction
-    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
-    environment: 'production'
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - task: AzureContainerApps@1
-            inputs:
-              azureSubscription: $(azureSubscription)
-              containerAppName: $(containerApp)
-              resourceGroup: $(resourceGroup)
-              imageName: $(containerRegistry)/commercefull:$(Build.BuildNumber)
+  - stage: Deploy
+    jobs:
+      - deployment: DeployToStaging
+        condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
+        environment: 'staging'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: AzureContainerApps@1
+                  inputs:
+                    azureSubscription: $(azureSubscription)
+                    containerAppName: $(containerApp)-staging
+                    resourceGroup: $(resourceGroup)
+                    imageName: $(containerRegistry)/commercefull:$(Build.BuildNumber)
+
+      - deployment: DeployToProduction
+        condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+        environment: 'production'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: AzureContainerApps@1
+                  inputs:
+                    azureSubscription: $(azureSubscription)
+                    containerAppName: $(containerApp)
+                    resourceGroup: $(resourceGroup)
+                    imageName: $(containerRegistry)/commercefull:$(Build.BuildNumber)
 ```
 
 ## Deployment
 
 ### Automated Deployment
+
 ```bash
 # Commit and push changes
 git add .
@@ -386,6 +399,7 @@ git push origin main
 ```
 
 ### Manual Deployment
+
 ```bash
 # Login to Azure
 az login
@@ -407,6 +421,7 @@ az containerapp update \
 ## Monitoring & Maintenance
 
 ### Azure Monitor
+
 ```bash
 # View application logs
 az monitor app-insights query \
@@ -422,6 +437,7 @@ az monitor metrics alert create \
 ```
 
 ### Database Management
+
 ```bash
 # Connect to PostgreSQL
 az postgres flexible-server connect \
@@ -442,6 +458,7 @@ az postgres flexible-server restore \
 ```
 
 ### Scaling
+
 ```bash
 # Scale Container App
 az containerapp update \
@@ -462,6 +479,7 @@ az postgres flexible-server update \
 ## Security
 
 ### Azure Key Vault
+
 ```bash
 # Create Key Vault
 az keyvault create \
@@ -483,6 +501,7 @@ az keyvault set-policy \
 ```
 
 ### Network Security
+
 - Azure Front Door provides WAF and DDoS protection
 - Private endpoints for database connectivity
 - Network security groups restrict access
@@ -491,12 +510,14 @@ az keyvault set-policy \
 ## Cost Optimization
 
 ### Azure Pricing Calculator
+
 - Container Apps: $0.000024 per vCPU-second + $0.0000023 per GB-second
 - PostgreSQL Flexible Server: $0.014/hour for B1ms
 - Storage Account: $0.0184/GB/month
 - Front Door: $0.025/hour + data transfer
 
 ### Cost Management
+
 ```bash
 # Set budget alerts
 az consumption budget create \
@@ -518,6 +539,7 @@ az costmanagement query \
 ### Common Issues
 
 #### Container App Deployment Failures
+
 ```bash
 # Check deployment status
 az containerapp show --name commercefull-app --resource-group commercefull-rg
@@ -530,6 +552,7 @@ az containerapp secret list --name commercefull-app --resource-group commerceful
 ```
 
 #### Database Connection Issues
+
 ```bash
 # Test database connectivity
 az postgres flexible-server connect \
@@ -543,6 +566,7 @@ az postgres flexible-server firewall-rule list \
 ```
 
 #### Performance Issues
+
 ```bash
 # Monitor Container App metrics
 az monitor metrics list \
@@ -559,6 +583,7 @@ az containerapp update \
 ## Migration
 
 ### From Development to Azure
+
 ```bash
 # Export local database
 pg_dump local_db > backup.sql
@@ -581,6 +606,7 @@ az network dns record-set a add-record \
 ```
 
 ### Rollback
+
 ```bash
 # Rollback to previous revision
 az containerapp update \

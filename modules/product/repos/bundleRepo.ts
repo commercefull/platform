@@ -69,24 +69,18 @@ export interface BundleItem {
 // ============================================================================
 
 export async function getBundle(productBundleId: string): Promise<ProductBundle | null> {
-  const row = await queryOne<Record<string, any>>(
-    'SELECT * FROM "productBundle" WHERE "productBundleId" = $1',
-    [productBundleId]
-  );
+  const row = await queryOne<Record<string, any>>('SELECT * FROM "productBundle" WHERE "productBundleId" = $1', [productBundleId]);
   return row ? mapToBundle(row) : null;
 }
 
 export async function getBundleByProductId(productId: string): Promise<ProductBundle | null> {
-  const row = await queryOne<Record<string, any>>(
-    'SELECT * FROM "productBundle" WHERE "productId" = $1',
-    [productId]
-  );
+  const row = await queryOne<Record<string, any>>('SELECT * FROM "productBundle" WHERE "productId" = $1', [productId]);
   return row ? mapToBundle(row) : null;
 }
 
 export async function getBundles(
   filters?: { bundleType?: BundleType; isActive?: boolean },
-  pagination?: { limit?: number; offset?: number }
+  pagination?: { limit?: number; offset?: number },
 ): Promise<{ data: ProductBundle[]; total: number }> {
   let whereClause = '1=1';
   const params: any[] = [];
@@ -101,10 +95,7 @@ export async function getBundles(
     params.push(filters.isActive);
   }
 
-  const countResult = await queryOne<{ count: string }>(
-    `SELECT COUNT(*) as count FROM "productBundle" WHERE ${whereClause}`,
-    params
-  );
+  const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "productBundle" WHERE ${whereClause}`, params);
 
   const limit = pagination?.limit || 20;
   const offset = pagination?.offset || 0;
@@ -113,12 +104,12 @@ export async function getBundles(
     `SELECT * FROM "productBundle" WHERE ${whereClause} 
      ORDER BY "sortOrder" ASC, "createdAt" DESC
      LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
-    [...params, limit, offset]
+    [...params, limit, offset],
   );
 
   return {
     data: (rows || []).map(mapToBundle),
-    total: parseInt(countResult?.count || '0')
+    total: parseInt(countResult?.count || '0'),
   };
 }
 
@@ -130,15 +121,17 @@ export async function getActiveBundles(): Promise<ProductBundle[]> {
      AND ("startDate" IS NULL OR "startDate" <= $1)
      AND ("endDate" IS NULL OR "endDate" >= $1)
      ORDER BY "sortOrder" ASC`,
-    [now]
+    [now],
   );
   return (rows || []).map(mapToBundle);
 }
 
-export async function saveBundle(bundle: Partial<ProductBundle> & {
-  productId: string;
-  name: string;
-}): Promise<ProductBundle> {
+export async function saveBundle(
+  bundle: Partial<ProductBundle> & {
+    productId: string;
+    name: string;
+  },
+): Promise<ProductBundle> {
   const now = new Date().toISOString();
   const slug = bundle.slug || bundle.name.toLowerCase().replace(/\s+/g, '-');
 
@@ -155,17 +148,35 @@ export async function saveBundle(bundle: Partial<ProductBundle> & {
         "metadata" = $26, "updatedAt" = $27
       WHERE "productBundleId" = $28`,
       [
-        bundle.name, slug, bundle.description, bundle.bundleType || 'fixed',
-        bundle.pricingType || 'fixed', bundle.fixedPrice, bundle.discountPercent,
-        bundle.discountAmount, bundle.minPrice, bundle.maxPrice, bundle.currency || 'USD',
-        bundle.minItems, bundle.maxItems, bundle.minQuantity || 1, bundle.maxQuantity,
-        bundle.requireAllItems !== false, bundle.allowDuplicates || false,
-        bundle.showSavings !== false, bundle.savingsAmount, bundle.savingsPercent,
-        bundle.imageUrl, bundle.sortOrder || 0, bundle.isActive !== false,
-        bundle.startDate?.toISOString(), bundle.endDate?.toISOString(),
+        bundle.name,
+        slug,
+        bundle.description,
+        bundle.bundleType || 'fixed',
+        bundle.pricingType || 'fixed',
+        bundle.fixedPrice,
+        bundle.discountPercent,
+        bundle.discountAmount,
+        bundle.minPrice,
+        bundle.maxPrice,
+        bundle.currency || 'USD',
+        bundle.minItems,
+        bundle.maxItems,
+        bundle.minQuantity || 1,
+        bundle.maxQuantity,
+        bundle.requireAllItems !== false,
+        bundle.allowDuplicates || false,
+        bundle.showSavings !== false,
+        bundle.savingsAmount,
+        bundle.savingsPercent,
+        bundle.imageUrl,
+        bundle.sortOrder || 0,
+        bundle.isActive !== false,
+        bundle.startDate?.toISOString(),
+        bundle.endDate?.toISOString(),
         bundle.metadata ? JSON.stringify(bundle.metadata) : null,
-        now, bundle.productBundleId
-      ]
+        now,
+        bundle.productBundleId,
+      ],
     );
     return (await getBundle(bundle.productBundleId))!;
   } else {
@@ -180,17 +191,36 @@ export async function saveBundle(bundle: Partial<ProductBundle> & {
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29)
       RETURNING *`,
       [
-        bundle.productId, bundle.name, slug, bundle.description,
-        bundle.bundleType || 'fixed', bundle.pricingType || 'fixed',
-        bundle.fixedPrice, bundle.discountPercent, bundle.discountAmount,
-        bundle.minPrice, bundle.maxPrice, bundle.currency || 'USD',
-        bundle.minItems, bundle.maxItems, bundle.minQuantity || 1, bundle.maxQuantity,
-        bundle.requireAllItems !== false, bundle.allowDuplicates || false,
-        bundle.showSavings !== false, bundle.savingsAmount, bundle.savingsPercent,
-        bundle.imageUrl, bundle.sortOrder || 0, true,
-        bundle.startDate?.toISOString(), bundle.endDate?.toISOString(),
-        bundle.metadata ? JSON.stringify(bundle.metadata) : null, now, now
-      ]
+        bundle.productId,
+        bundle.name,
+        slug,
+        bundle.description,
+        bundle.bundleType || 'fixed',
+        bundle.pricingType || 'fixed',
+        bundle.fixedPrice,
+        bundle.discountPercent,
+        bundle.discountAmount,
+        bundle.minPrice,
+        bundle.maxPrice,
+        bundle.currency || 'USD',
+        bundle.minItems,
+        bundle.maxItems,
+        bundle.minQuantity || 1,
+        bundle.maxQuantity,
+        bundle.requireAllItems !== false,
+        bundle.allowDuplicates || false,
+        bundle.showSavings !== false,
+        bundle.savingsAmount,
+        bundle.savingsPercent,
+        bundle.imageUrl,
+        bundle.sortOrder || 0,
+        true,
+        bundle.startDate?.toISOString(),
+        bundle.endDate?.toISOString(),
+        bundle.metadata ? JSON.stringify(bundle.metadata) : null,
+        now,
+        now,
+      ],
     );
     return mapToBundle(result!);
   }
@@ -206,25 +236,23 @@ export async function deleteBundle(productBundleId: string): Promise<void> {
 // ============================================================================
 
 export async function getBundleItem(bundleItemId: string): Promise<BundleItem | null> {
-  const row = await queryOne<Record<string, any>>(
-    'SELECT * FROM "bundleItem" WHERE "bundleItemId" = $1',
-    [bundleItemId]
-  );
+  const row = await queryOne<Record<string, any>>('SELECT * FROM "bundleItem" WHERE "bundleItemId" = $1', [bundleItemId]);
   return row ? mapToBundleItem(row) : null;
 }
 
 export async function getBundleItems(productBundleId: string): Promise<BundleItem[]> {
-  const rows = await query<Record<string, any>[]>(
-    'SELECT * FROM "bundleItem" WHERE "productBundleId" = $1 ORDER BY "sortOrder" ASC',
-    [productBundleId]
-  );
+  const rows = await query<Record<string, any>[]>('SELECT * FROM "bundleItem" WHERE "productBundleId" = $1 ORDER BY "sortOrder" ASC', [
+    productBundleId,
+  ]);
   return (rows || []).map(mapToBundleItem);
 }
 
-export async function saveBundleItem(item: Partial<BundleItem> & {
-  productBundleId: string;
-  productId: string;
-}): Promise<BundleItem> {
+export async function saveBundleItem(
+  item: Partial<BundleItem> & {
+    productBundleId: string;
+    productId: string;
+  },
+): Promise<BundleItem> {
   const now = new Date().toISOString();
 
   if (item.bundleItemId) {
@@ -236,14 +264,21 @@ export async function saveBundleItem(item: Partial<BundleItem> & {
         "discountPercent" = $10, "sortOrder" = $11, "metadata" = $12, "updatedAt" = $13
       WHERE "bundleItemId" = $14`,
       [
-        item.productId, item.productVariantId, item.slotName,
-        item.quantity || 1, item.minQuantity || 1, item.maxQuantity,
-        item.isRequired !== false, item.isDefault || false,
-        item.priceAdjustment || 0, item.discountPercent || 0,
+        item.productId,
+        item.productVariantId,
+        item.slotName,
+        item.quantity || 1,
+        item.minQuantity || 1,
+        item.maxQuantity,
+        item.isRequired !== false,
+        item.isDefault || false,
+        item.priceAdjustment || 0,
+        item.discountPercent || 0,
         item.sortOrder || 0,
         item.metadata ? JSON.stringify(item.metadata) : null,
-        now, item.bundleItemId
-      ]
+        now,
+        item.bundleItemId,
+      ],
     );
     return (await getBundleItem(item.bundleItemId))!;
   } else {
@@ -256,12 +291,22 @@ export async function saveBundleItem(item: Partial<BundleItem> & {
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
       RETURNING *`,
       [
-        item.productBundleId, item.productId, item.productVariantId, item.slotName,
-        item.quantity || 1, item.minQuantity || 1, item.maxQuantity,
-        item.isRequired !== false, item.isDefault || false,
-        item.priceAdjustment || 0, item.discountPercent || 0, item.sortOrder || 0,
-        item.metadata ? JSON.stringify(item.metadata) : null, now, now
-      ]
+        item.productBundleId,
+        item.productId,
+        item.productVariantId,
+        item.slotName,
+        item.quantity || 1,
+        item.minQuantity || 1,
+        item.maxQuantity,
+        item.isRequired !== false,
+        item.isDefault || false,
+        item.priceAdjustment || 0,
+        item.discountPercent || 0,
+        item.sortOrder || 0,
+        item.metadata ? JSON.stringify(item.metadata) : null,
+        now,
+        now,
+      ],
     );
     return mapToBundleItem(result!);
   }
@@ -277,13 +322,13 @@ export async function deleteBundleItem(bundleItemId: string): Promise<void> {
 
 export async function calculateBundlePrice(
   productBundleId: string,
-  selectedItems?: { productId: string; productVariantId?: string; quantity: number }[]
+  selectedItems?: { productId: string; productVariantId?: string; quantity: number }[],
 ): Promise<{ price: number; savings: number; savingsPercent: number }> {
   const bundle = await getBundle(productBundleId);
   if (!bundle) throw new Error('Bundle not found');
 
   const items = await getBundleItems(productBundleId);
-  
+
   if (bundle.pricingType === 'fixed' && bundle.fixedPrice) {
     // Calculate savings from individual prices
     let individualTotal = 0;
@@ -295,19 +340,19 @@ export async function calculateBundlePrice(
     return {
       price: bundle.fixedPrice,
       savings: savings > 0 ? savings : 0,
-      savingsPercent: savings > 0 ? (savings / individualTotal) * 100 : 0
+      savingsPercent: savings > 0 ? (savings / individualTotal) * 100 : 0,
     };
   }
 
   // For calculated pricing, sum up item prices with discounts
   let total = 0;
   let originalTotal = 0;
-  
+
   for (const item of items) {
     const itemPrice = 100; // Placeholder - would fetch actual price
     const quantity = selectedItems?.find(s => s.productId === item.productId)?.quantity || item.quantity;
-    const discountedPrice = itemPrice * (1 - (item.discountPercent / 100)) + item.priceAdjustment;
-    
+    const discountedPrice = itemPrice * (1 - item.discountPercent / 100) + item.priceAdjustment;
+
     total += discountedPrice * quantity;
     originalTotal += itemPrice * quantity;
   }
@@ -324,7 +369,7 @@ export async function calculateBundlePrice(
   return {
     price: Math.max(total, bundle.minPrice || 0),
     savings: savings > 0 ? savings : 0,
-    savingsPercent: savings > 0 ? (savings / originalTotal) * 100 : 0
+    savingsPercent: savings > 0 ? (savings / originalTotal) * 100 : 0,
   };
 }
 
@@ -363,7 +408,7 @@ function mapToBundle(row: Record<string, any>): ProductBundle {
     endDate: row.endDate ? new Date(row.endDate) : undefined,
     metadata: row.metadata,
     createdAt: new Date(row.createdAt),
-    updatedAt: new Date(row.updatedAt)
+    updatedAt: new Date(row.updatedAt),
   };
 }
 
@@ -384,6 +429,6 @@ function mapToBundleItem(row: Record<string, any>): BundleItem {
     sortOrder: parseInt(row.sortOrder) || 0,
     metadata: row.metadata,
     createdAt: new Date(row.createdAt),
-    updatedAt: new Date(row.updatedAt)
+    updatedAt: new Date(row.updatedAt),
   };
 }

@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, Response } from 'express';
 
 type ResponseData = Record<string, any>;
 
@@ -18,7 +18,7 @@ export async function adminRespond(req: Request, res: Response, view: string, da
     successMsg,
     errorMsg,
     // User-provided data
-    ...data
+    ...data,
   });
 }
 
@@ -40,7 +40,7 @@ export async function merchantRespond(req: Request, res: Response, view: string,
     // Merchant-specific data
     merchantId: (req as any).user?.merchantId,
     // User-provided data
-    ...data
+    ...data,
   });
 }
 
@@ -63,7 +63,7 @@ export async function b2bRespond(req: Request, res: Response, view: string, data
     companyId: (req as any).user?.companyId,
     userRole: (req as any).user?.role,
     // User-provided data
-    ...data
+    ...data,
   });
 }
 
@@ -84,6 +84,6 @@ export async function storefrontRespond(req: Request, res: Response, view: strin
     successMsg,
     errorMsg,
     // User-provided data
-    ...data
+    ...data,
   });
 }

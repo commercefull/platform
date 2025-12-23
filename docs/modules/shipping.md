@@ -11,6 +11,7 @@ The Shipping feature manages carrier integrations, rate calculations, and label 
 ### Carrier Management (Business)
 
 ### UC-SHP-001: List Carriers (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** High
 
@@ -21,6 +22,7 @@ The Shipping feature manages carrier integrations, rate calculations, and label 
 **Then** the system returns configured carriers
 
 #### API Endpoint
+
 ```
 GET /business/shipping/carriers
 ```
@@ -28,10 +30,12 @@ GET /business/shipping/carriers
 ---
 
 ### UC-SHP-002: Get Carrier (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
 #### API Endpoint
+
 ```
 GET /business/shipping/carriers/:id
 ```
@@ -39,6 +43,7 @@ GET /business/shipping/carriers/:id
 ---
 
 ### UC-SHP-003: Create Carrier (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** High
 
@@ -50,6 +55,7 @@ GET /business/shipping/carriers/:id
 **Then** the carrier is available for shipping
 
 #### API Endpoint
+
 ```
 POST /business/shipping/carriers
 Body: {
@@ -63,10 +69,12 @@ Body: {
 ---
 
 ### UC-SHP-004: Update Carrier (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
 #### API Endpoint
+
 ```
 PUT /business/shipping/carriers/:id
 ```
@@ -74,10 +82,12 @@ PUT /business/shipping/carriers/:id
 ---
 
 ### UC-SHP-005: Delete Carrier (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Low
 
 #### API Endpoint
+
 ```
 DELETE /business/shipping/carriers/:id
 ```
@@ -87,6 +97,7 @@ DELETE /business/shipping/carriers/:id
 ### Rate Calculation
 
 ### UC-SHP-006: Get Shipping Rates (Customer)
+
 **Actor:** Customer  
 **Priority:** High
 
@@ -97,6 +108,7 @@ DELETE /business/shipping/carriers/:id
 **Then** the system returns available rates
 
 #### API Endpoint
+
 ```
 POST /shipping/rates
 Body: {
@@ -107,6 +119,7 @@ Body: {
 ```
 
 #### Business Rules
+
 - Queries configured carriers
 - Returns rates sorted by price
 - Includes estimated delivery dates
@@ -116,6 +129,7 @@ Body: {
 ### Label Generation (Business)
 
 ### UC-SHP-007: Create Shipping Label (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** High
 
@@ -126,6 +140,7 @@ Body: {
 **Then** the label is generated and tracking starts
 
 #### API Endpoint
+
 ```
 POST /business/shipping/labels
 Body: {
@@ -138,10 +153,12 @@ Body: {
 ---
 
 ### UC-SHP-008: Get Shipping Label (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** High
 
 #### API Endpoint
+
 ```
 GET /business/shipping/labels/:id
 ```
@@ -149,10 +166,12 @@ GET /business/shipping/labels/:id
 ---
 
 ### UC-SHP-009: Void Shipping Label (Business)
+
 **Actor:** Merchant/Admin  
 **Priority:** Medium
 
 #### API Endpoint
+
 ```
 POST /business/shipping/labels/:id/void
 ```
@@ -162,6 +181,7 @@ POST /business/shipping/labels/:id/void
 ### Tracking
 
 ### UC-SHP-010: Get Tracking Info (Customer)
+
 **Actor:** Customer  
 **Priority:** High
 
@@ -172,6 +192,7 @@ POST /business/shipping/labels/:id/void
 **Then** the system returns shipment status
 
 #### API Endpoint
+
 ```
 GET /shipping/tracking/:trackingNumber
 ```
@@ -180,20 +201,20 @@ GET /shipping/tracking/:trackingNumber
 
 ## Events Emitted
 
-| Event | Trigger | Payload |
-|-------|---------|---------|
-| `shipping.label.created` | Label generated | labelId, orderId, trackingNumber |
-| `shipping.label.voided` | Label voided | labelId |
-| `shipping.tracking.updated` | Tracking update | trackingNumber, status |
-| `shipping.delivered` | Package delivered | trackingNumber, orderId |
+| Event                       | Trigger           | Payload                          |
+| --------------------------- | ----------------- | -------------------------------- |
+| `shipping.label.created`    | Label generated   | labelId, orderId, trackingNumber |
+| `shipping.label.voided`     | Label voided      | labelId                          |
+| `shipping.tracking.updated` | Tracking update   | trackingNumber, status           |
+| `shipping.delivered`        | Package delivered | trackingNumber, orderId          |
 
 ---
 
 ## Integration Test Coverage
 
-| Use Case | Test File | Status |
-|----------|-----------|--------|
-| UC-SHP-001 to UC-SHP-005 | `shipping/carriers.test.ts` | ❌ |
-| UC-SHP-006 | `shipping/rates.test.ts` | ❌ |
-| UC-SHP-007 to UC-SHP-009 | `shipping/labels.test.ts` | ❌ |
-| UC-SHP-010 | `shipping/tracking.test.ts` | ❌ |
+| Use Case                 | Test File                   | Status |
+| ------------------------ | --------------------------- | ------ |
+| UC-SHP-001 to UC-SHP-005 | `shipping/carriers.test.ts` | ❌     |
+| UC-SHP-006               | `shipping/rates.test.ts`    | ❌     |
+| UC-SHP-007 to UC-SHP-009 | `shipping/labels.test.ts`   | ❌     |
+| UC-SHP-010               | `shipping/tracking.test.ts` | ❌     |

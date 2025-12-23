@@ -54,7 +54,7 @@ export class InventoryItem {
       reorderQuantity: props.reorderQuantity || 50,
       metadata: props.metadata,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     });
   }
 
@@ -63,33 +63,61 @@ export class InventoryItem {
   }
 
   // Getters
-  get inventoryId(): string { return this.props.inventoryId; }
-  get productId(): string { return this.props.productId; }
-  get variantId(): string | undefined { return this.props.variantId; }
-  get sku(): string { return this.props.sku; }
-  get locationId(): string { return this.props.locationId; }
-  get quantity(): number { return this.props.quantity; }
-  get reservedQuantity(): number { return this.props.reservedQuantity; }
-  get lowStockThreshold(): number { return this.props.lowStockThreshold; }
-  get reorderPoint(): number { return this.props.reorderPoint; }
-  get reorderQuantity(): number { return this.props.reorderQuantity; }
-  get lastRestockAt(): Date | undefined { return this.props.lastRestockAt; }
-  get metadata(): Record<string, any> | undefined { return this.props.metadata; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get inventoryId(): string {
+    return this.props.inventoryId;
+  }
+  get productId(): string {
+    return this.props.productId;
+  }
+  get variantId(): string | undefined {
+    return this.props.variantId;
+  }
+  get sku(): string {
+    return this.props.sku;
+  }
+  get locationId(): string {
+    return this.props.locationId;
+  }
+  get quantity(): number {
+    return this.props.quantity;
+  }
+  get reservedQuantity(): number {
+    return this.props.reservedQuantity;
+  }
+  get lowStockThreshold(): number {
+    return this.props.lowStockThreshold;
+  }
+  get reorderPoint(): number {
+    return this.props.reorderPoint;
+  }
+  get reorderQuantity(): number {
+    return this.props.reorderQuantity;
+  }
+  get lastRestockAt(): Date | undefined {
+    return this.props.lastRestockAt;
+  }
+  get metadata(): Record<string, any> | undefined {
+    return this.props.metadata;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   // Computed
-  get availableQuantity(): number { 
-    return Math.max(0, this.props.quantity - this.props.reservedQuantity); 
+  get availableQuantity(): number {
+    return Math.max(0, this.props.quantity - this.props.reservedQuantity);
   }
-  get isLowStock(): boolean { 
-    return this.availableQuantity <= this.props.lowStockThreshold; 
+  get isLowStock(): boolean {
+    return this.availableQuantity <= this.props.lowStockThreshold;
   }
-  get isOutOfStock(): boolean { 
-    return this.availableQuantity <= 0; 
+  get isOutOfStock(): boolean {
+    return this.availableQuantity <= 0;
   }
-  get needsReorder(): boolean { 
-    return this.availableQuantity <= this.props.reorderPoint; 
+  get needsReorder(): boolean {
+    return this.availableQuantity <= this.props.reorderPoint;
   }
 
   // Domain methods
@@ -142,11 +170,7 @@ export class InventoryItem {
     this.touch();
   }
 
-  updateThresholds(thresholds: {
-    lowStockThreshold?: number;
-    reorderPoint?: number;
-    reorderQuantity?: number;
-  }): void {
+  updateThresholds(thresholds: { lowStockThreshold?: number; reorderPoint?: number; reorderQuantity?: number }): void {
     if (thresholds.lowStockThreshold !== undefined) {
       this.props.lowStockThreshold = thresholds.lowStockThreshold;
     }
@@ -182,7 +206,7 @@ export class InventoryItem {
       lastRestockAt: this.props.lastRestockAt?.toISOString(),
       metadata: this.props.metadata,
       createdAt: this.props.createdAt.toISOString(),
-      updatedAt: this.props.updatedAt.toISOString()
+      updatedAt: this.props.updatedAt.toISOString(),
     };
   }
 }

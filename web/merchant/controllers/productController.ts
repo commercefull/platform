@@ -44,10 +44,7 @@ export const listProducts = async (req: Request, res: Response) => {
       paramIndex++;
     }
 
-    const countResult = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM "product" p ${whereClause}`,
-      params
-    );
+    const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "product" p ${whereClause}`, params);
     const total = parseInt(countResult?.count || '0');
 
     params.push(limit, offset);
@@ -60,7 +57,7 @@ export const listProducts = async (req: Request, res: Response) => {
        ${whereClause}
        ORDER BY p."createdAt" DESC
        LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`,
-      params
+      params,
     );
 
     const pages = Math.ceil(total / limit);
@@ -80,7 +77,7 @@ export const listProducts = async (req: Request, res: Response) => {
     });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     merchantRespond(req, res, 'error', {
       pageName: 'Error',
       error: 'Failed to load products',
@@ -108,7 +105,7 @@ export const viewProduct = async (req: Request, res: Response) => {
        FROM "product" p
        LEFT JOIN "inventoryLevel" il ON p."productId" = il."productId"
        WHERE p."productId" = $1 AND p."merchantId" = $2 AND p."deletedAt" IS NULL`,
-      [productId, user.merchantId]
+      [productId, user.merchantId],
     );
 
     if (!product) {
@@ -126,7 +123,7 @@ export const viewProduct = async (req: Request, res: Response) => {
     });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     merchantRespond(req, res, 'error', {
       pageName: 'Error',
       error: 'Failed to load product',
@@ -146,9 +143,7 @@ export const createProductForm = async (req: Request, res: Response) => {
     }
 
     // Get categories for dropdown
-    const categories = await query<any[]>(
-      `SELECT "categoryId", "name" FROM "category" WHERE "deletedAt" IS NULL ORDER BY "name"`
-    );
+    const categories = await query<any[]>(`SELECT "categoryId", "name" FROM "category" WHERE "deletedAt" IS NULL ORDER BY "name"`);
 
     merchantRespond(req, res, 'products/create', {
       pageName: 'Create Product',
@@ -157,7 +152,7 @@ export const createProductForm = async (req: Request, res: Response) => {
     });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     merchantRespond(req, res, 'error', {
       pageName: 'Error',
       error: 'Failed to load form',
@@ -181,7 +176,7 @@ export const editProductForm = async (req: Request, res: Response) => {
     const product = await queryOne<any>(
       `SELECT * FROM "product" 
        WHERE "productId" = $1 AND "merchantId" = $2 AND "deletedAt" IS NULL`,
-      [productId, user.merchantId]
+      [productId, user.merchantId],
     );
 
     if (!product) {
@@ -192,9 +187,7 @@ export const editProductForm = async (req: Request, res: Response) => {
       });
     }
 
-    const categories = await query<any[]>(
-      `SELECT "categoryId", "name" FROM "category" WHERE "deletedAt" IS NULL ORDER BY "name"`
-    );
+    const categories = await query<any[]>(`SELECT "categoryId", "name" FROM "category" WHERE "deletedAt" IS NULL ORDER BY "name"`);
 
     merchantRespond(req, res, 'products/edit', {
       pageName: `Edit: ${product.name}`,
@@ -204,7 +197,7 @@ export const editProductForm = async (req: Request, res: Response) => {
     });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     merchantRespond(req, res, 'error', {
       pageName: 'Error',
       error: 'Failed to load product',

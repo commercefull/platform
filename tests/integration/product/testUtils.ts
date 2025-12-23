@@ -45,7 +45,7 @@ export const testProduct = {
   price: 99.99,
   basePrice: 99.99,
   salePrice: 79.99,
-  costPrice: 50.00,
+  costPrice: 50.0,
   sku: `TST${Math.floor(Math.random() * 10000)}`,
   weight: 1.5,
   weightUnit: 'kg',
@@ -59,7 +59,7 @@ export const testProduct = {
   isSubscription: false,
   isTaxable: true,
   hasVariants: false,
-  type: 'simple'
+  type: 'simple',
 };
 
 // Common test data for attribute group
@@ -67,7 +67,7 @@ export const testAttributeGroup = {
   name: 'Test Attribute Group',
   description: 'Test attribute group for integration tests',
   code: `test-group-${Math.floor(Math.random() * 10000)}`,
-  sortOrder: 1
+  sortOrder: 1,
 };
 
 // Common test data for attribute
@@ -79,14 +79,14 @@ export const testAttribute = {
   isRequired: true,
   isFilterable: true,
   isSearchable: true,
-  sortOrder: 1
+  sortOrder: 1,
 };
 
 // Common test data for attribute option
 export const testAttributeOption = {
   value: 'Test Option',
   label: 'Test Option Label',
-  sortOrder: 1
+  sortOrder: 1,
 };
 
 // Common test data for category
@@ -96,28 +96,27 @@ export const testCategory = {
   code: `test-category-${Math.floor(Math.random() * 10000)}`,
   isActive: true,
   sortOrder: 1,
-  parentId: null
+  parentId: null,
 };
 
 // Helper function to create a test product
 export async function createTestProduct(client: AxiosInstance, adminToken: string, brandId?: string) {
   const productData: any = { ...testProduct };
-  
+
   if (brandId) {
     productData.brandId = brandId;
   }
-  
+
   const response = await client.post('/business/products', productData, {
-    headers: { Authorization: `Bearer ${adminToken}` }
+    headers: { Authorization: `Bearer ${adminToken}` },
   });
-  
+
   // Handle different response formats
   if (response.data?.data?.id) return response.data.data.id;
   if (response.data?.data?.productId) return response.data.data.productId;
   if (response.data?.id) return response.data.id;
   if (response.data?.productId) return response.data.productId;
-  
-  
+
   return null;
 }
 
@@ -133,39 +132,38 @@ export async function createTestProductVariant(client: AxiosInstance, adminToken
     isDefault: true,
     options: [
       { name: 'Color', value: 'Blue' },
-      { name: 'Size', value: 'Medium' }
-    ]
+      { name: 'Size', value: 'Medium' },
+    ],
   };
-  
+
   const response = await client.post(`/business/products/${productId}/variants`, variantData, {
-    headers: { Authorization: `Bearer ${adminToken}` }
+    headers: { Authorization: `Bearer ${adminToken}` },
   });
-  
+
   return response.data.data.id;
 }
 
 // Helper function to create a test category
 export async function createTestCategory(client: AxiosInstance, adminToken: string) {
   const response = await client.post('/business/categories', testCategory, {
-    headers: { Authorization: `Bearer ${adminToken}` }
+    headers: { Authorization: `Bearer ${adminToken}` },
   });
-  
+
   // Handle different response formats
   if (response.data?.data?.id) return response.data.data.id;
   if (response.data?.data?.categoryId) return response.data.data.categoryId;
   if (response.data?.id) return response.data.id;
   if (response.data?.categoryId) return response.data.categoryId;
-  
-  
+
   return null;
 }
 
 // Helper function to create a test attribute group
 export async function createTestAttributeGroup(client: AxiosInstance, adminToken: string) {
   const response = await client.post('/business/attribute-groups', testAttributeGroup, {
-    headers: { Authorization: `Bearer ${adminToken}` }
+    headers: { Authorization: `Bearer ${adminToken}` },
   });
-  
+
   return response.data.data.id;
 }
 
@@ -173,13 +171,13 @@ export async function createTestAttributeGroup(client: AxiosInstance, adminToken
 export async function createTestAttribute(client: AxiosInstance, adminToken: string, attributeGroupId: string) {
   const attributeData = {
     ...testAttribute,
-    attributeGroupId
+    attributeGroupId,
   };
-  
+
   const response = await client.post('/business/attributes', attributeData, {
-    headers: { Authorization: `Bearer ${adminToken}` }
+    headers: { Authorization: `Bearer ${adminToken}` },
   });
-  
+
   return response.data.data.id;
 }
 
@@ -187,13 +185,13 @@ export async function createTestAttribute(client: AxiosInstance, adminToken: str
 export async function createTestAttributeOption(client: AxiosInstance, adminToken: string, attributeId: string) {
   const optionData = {
     ...testAttributeOption,
-    attributeId
+    attributeId,
   };
-  
+
   const response = await client.post('/business/attribute-options', optionData, {
-    headers: { Authorization: `Bearer ${adminToken}` }
+    headers: { Authorization: `Bearer ${adminToken}` },
   });
-  
+
   return response.data.data.id;
 }
 
@@ -202,14 +200,12 @@ export async function createTestAttributeOption(client: AxiosInstance, adminToke
 export async function setupProductTests() {
   const client = createTestClient();
   let adminToken = '';
-  
+
   try {
     // Use merchant login for business routes
     adminToken = await loginTestAdmin(client);
-  } catch (error) {
-    
-  }
-  
+  } catch (error) {}
+
   // Use seeded product data - these products are created by the seed file
   // with fixed UUIDs for consistent testing
   return {
@@ -220,7 +216,7 @@ export async function setupProductTests() {
     testVariantId: SEEDED_VARIANT_1_ID,
     testAttributeGroupId: null as string | null,
     testAttributeId: null as string | null,
-    testAttributeOptionId: null as string | null
+    testAttributeOptionId: null as string | null,
   };
 }
 
@@ -230,24 +226,22 @@ export async function cleanupProductTests(
   adminToken: string,
   testProductId: string | null,
   testCategoryId: string | null,
-  testAttributeGroupId: string | null
+  testAttributeGroupId: string | null,
 ) {
   try {
     // Delete test product (this should cascade delete variants)
     await client.delete(`/business/products/${testProductId}`, {
-      headers: { Authorization: `Bearer ${adminToken}` }
+      headers: { Authorization: `Bearer ${adminToken}` },
     });
-    
+
     // Delete test category
     await client.delete(`/business/categories/${testCategoryId}`, {
-      headers: { Authorization: `Bearer ${adminToken}` }
+      headers: { Authorization: `Bearer ${adminToken}` },
     });
-    
+
     // Delete test attribute group (this should cascade delete attributes and options)
     await client.delete(`/business/attribute-groups/${testAttributeGroupId}`, {
-      headers: { Authorization: `Bearer ${adminToken}` }
+      headers: { Authorization: `Bearer ${adminToken}` },
     });
-  } catch (error) {
-    
-  }
+  } catch (error) {}
 }

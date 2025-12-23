@@ -3,11 +3,11 @@
  * Adds organization hierarchy and settings tables for multi-tenant support
  */
 
-exports.up = async function(knex) {
+exports.up = async function (knex) {
   // Create organization table if not exists
   const hasOrganization = await knex.schema.hasTable('organization');
   if (!hasOrganization) {
-    await knex.schema.createTable('organization', (table) => {
+    await knex.schema.createTable('organization', table => {
       table.string('organizationId', 50).primary();
       table.string('parentOrganizationId', 50).nullable();
       table.string('name', 255).notNullable();
@@ -38,7 +38,7 @@ exports.up = async function(knex) {
   // Create organizationMember table for user-organization relationships
   const hasOrganizationMember = await knex.schema.hasTable('organizationMember');
   if (!hasOrganizationMember) {
-    await knex.schema.createTable('organizationMember', (table) => {
+    await knex.schema.createTable('organizationMember', table => {
       table.string('memberId', 50).primary();
       table.string('organizationId', 50).notNullable();
       table.string('userId', 50).notNullable();
@@ -60,7 +60,7 @@ exports.up = async function(knex) {
   // Create organizationSettings table for detailed configurations
   const hasOrganizationSettings = await knex.schema.hasTable('organizationSettings');
   if (!hasOrganizationSettings) {
-    await knex.schema.createTable('organizationSettings', (table) => {
+    await knex.schema.createTable('organizationSettings', table => {
       table.string('settingId', 50).primary();
       table.string('organizationId', 50).notNullable();
       table.string('category', 50).notNullable(); // 'billing', 'shipping', 'notifications', 'integrations'
@@ -78,7 +78,7 @@ exports.up = async function(knex) {
   }
 };
 
-exports.down = async function(knex) {
+exports.down = async function (knex) {
   await knex.schema.dropTableIfExists('organizationSettings');
   await knex.schema.dropTableIfExists('organizationMember');
   await knex.schema.dropTableIfExists('organization');

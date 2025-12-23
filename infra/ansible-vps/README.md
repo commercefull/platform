@@ -5,6 +5,7 @@ Deploy CommerceFull platform to a VPS using Ansible for configuration management
 ## Overview
 
 This deployment strategy uses Ansible to provision and configure a VPS with:
+
 - Ubuntu 22.04 LTS
 - Node.js 18+
 - PostgreSQL 18+
@@ -17,12 +18,14 @@ This deployment strategy uses Ansible to provision and configure a VPS with:
 ## Prerequisites
 
 ### Local Machine
+
 - Ansible 2.10+
 - Python 3.8+
 - SSH client
 - Git
 
 ### VPS Requirements
+
 - Ubuntu 22.04 LTS (fresh install)
 - 2GB RAM minimum, 4GB recommended
 - 2 CPU cores minimum
@@ -31,12 +34,14 @@ This deployment strategy uses Ansible to provision and configure a VPS with:
 - SSH access enabled
 
 ### DNS
+
 - Domain name pointing to VPS IP
 - Ability to modify DNS records
 
 ## Quick Start
 
 ### 1. Prepare VPS
+
 ```bash
 # On your VPS (as root)
 apt update && apt upgrade -y
@@ -53,6 +58,7 @@ chmod 700 /home/deploy/.ssh
 ```
 
 ### 2. Clone and Configure
+
 ```bash
 # On your local machine
 git clone <repository-url> commercefull
@@ -68,6 +74,7 @@ vim group_vars/all.yml
 ```
 
 ### 3. Deploy
+
 ```bash
 # Run deployment
 ansible-playbook -i inventory.ini deploy.yml
@@ -101,7 +108,7 @@ app_port: 3000
 # Database
 db_name: commercefull_prod
 db_user: commercefull_user
-db_password: "{{ vault_db_password }}"  # Use Ansible Vault
+db_password: '{{ vault_db_password }}' # Use Ansible Vault
 
 # SSL
 ssl_email: admin@yourdomain.com
@@ -178,6 +185,7 @@ ssl_domains:
 ### 3. Database Configuration
 
 PostgreSQL is configured with:
+
 - Dedicated database user
 - Password authentication
 - Connection pooling (PgBouncer)
@@ -188,6 +196,7 @@ PostgreSQL is configured with:
 ### 4. Application Deployment
 
 The Node.js application is deployed as a systemd service:
+
 - Automatic restarts on failure
 - Log rotation
 - Environment-specific configuration
@@ -196,6 +205,7 @@ The Node.js application is deployed as a systemd service:
 ## Maintenance
 
 ### Updates
+
 ```bash
 # Update application
 ansible-playbook -i inventory.ini deploy.yml --tags app
@@ -208,6 +218,7 @@ ansible-playbook -i inventory.ini deploy.yml --tags ssl
 ```
 
 ### Backups
+
 ```bash
 # Manual database backup
 ansible-playbook -i inventory.ini deploy.yml --tags backup
@@ -217,6 +228,7 @@ ansible-playbook -i inventory.ini deploy.yml --tags logs
 ```
 
 ### Monitoring
+
 ```bash
 # Check service status
 ansible-playbook -i inventory.ini deploy.yml --tags status
@@ -228,16 +240,19 @@ ansible-playbook -i inventory.ini deploy.yml --tags restart
 ## Security
 
 ### Firewall
+
 - UFW configured with minimal open ports
 - SSH restricted to key-based authentication
 - Fail2ban for brute force protection
 
 ### SSL/TLS
+
 - A+ SSL rating with Let's Encrypt
 - Automatic certificate renewal
 - HSTS headers configured
 
 ### Database
+
 - PostgreSQL running on local socket only
 - Strong passwords required
 - Connection encryption enabled
@@ -247,6 +262,7 @@ ansible-playbook -i inventory.ini deploy.yml --tags restart
 ### Common Issues
 
 #### SSH Connection Failed
+
 ```bash
 # Check SSH key permissions
 chmod 600 ~/.ssh/your-key
@@ -257,6 +273,7 @@ ssh -i ~/.ssh/your-key deploy@YOUR_VPS_IP
 ```
 
 #### SSL Certificate Issues
+
 ```bash
 # Check certificate status
 ansible-playbook -i inventory.ini deploy.yml --tags ssl-check
@@ -266,6 +283,7 @@ certbot renew --dry-run
 ```
 
 #### Database Connection Issues
+
 ```bash
 # Check PostgreSQL status
 sudo systemctl status postgresql
@@ -275,6 +293,7 @@ sudo -u postgres psql -d commercefull_prod
 ```
 
 #### Application Not Starting
+
 ```bash
 # Check application logs
 sudo journalctl -u commercefull -f
@@ -286,12 +305,15 @@ sudo systemctl status commercefull
 ## Scaling
 
 ### Vertical Scaling
+
 - Increase VPS resources (CPU, RAM)
 - Update Ansible variables
 - Redeploy configuration
 
 ### Horizontal Scaling
+
 For multiple servers, consider:
+
 - Load balancer (Nginx upstream)
 - Shared database
 - Session storage (Redis)
@@ -300,12 +322,14 @@ For multiple servers, consider:
 ## Cost Estimate
 
 ### Monthly Costs (USD)
+
 - VPS: $12-24 (2GB RAM, 2 CPUs)
 - Domain: $10-15/year
 - SSL: Free (Let's Encrypt)
 - **Total: ~$12-24/month**
 
 ### Scaling Costs
+
 - 4GB RAM VPS: $24-48/month
 - 8GB RAM VPS: $48-96/month
 - Multiple servers: 2x-4x base cost
@@ -313,6 +337,7 @@ For multiple servers, consider:
 ## Migration
 
 ### From Development to Production
+
 ```bash
 # 1. Update environment variables
 cp .env.production.example .env.production
@@ -329,6 +354,7 @@ pg_dump local_db | ssh deploy@server "pg_restore -d commercefull_prod"
 ```
 
 ### Rollback
+
 ```bash
 # Rollback application
 ansible-playbook -i inventory.ini rollback.yml

@@ -11,7 +11,7 @@ import { CustomerRepository } from '../domain/repositories/CustomerRepository';
 export class AuthenticateCustomerCommand {
   constructor(
     public readonly email: string,
-    public readonly password: string
+    public readonly password: string,
   ) {}
 }
 
@@ -56,7 +56,7 @@ export class AuthenticateCustomerUseCase {
     // Verify password
     const bcrypt = await import('bcryptjs');
     const isValid = await bcrypt.compare(command.password, passwordHash);
-    
+
     if (!isValid) {
       return null;
     }
@@ -69,7 +69,7 @@ export class AuthenticateCustomerUseCase {
       email: customer.email,
       firstName: customer.firstName,
       lastName: customer.lastName,
-      isVerified: customer.isVerified
+      isVerified: customer.isVerified,
     };
   }
 }

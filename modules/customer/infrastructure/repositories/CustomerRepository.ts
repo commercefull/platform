@@ -5,53 +5,43 @@
 
 import { query, queryOne } from '../../../../libs/db';
 import { generateUUID } from '../../../../libs/uuid';
-import { 
-  CustomerRepository as ICustomerRepository, 
-  CustomerFilters, 
+import {
+  CustomerRepository as ICustomerRepository,
+  CustomerFilters,
   PaginationOptions,
-  PaginatedResult 
+  PaginatedResult,
 } from '../../domain/repositories/CustomerRepository';
 import { Customer, CustomerAddress } from '../../domain/entities/Customer';
 import type { CustomerStatus } from '../../domain/entities/Customer';
 
 export class CustomerRepo implements ICustomerRepository {
-
   async findById(customerId: string): Promise<Customer | null> {
-    const row = await queryOne<Record<string, any>>(
-      'SELECT * FROM customer WHERE "customerId" = $1 AND "deletedAt" IS NULL',
-      [customerId]
-    );
+    const row = await queryOne<Record<string, any>>('SELECT * FROM customer WHERE "customerId" = $1 AND "deletedAt" IS NULL', [customerId]);
     if (!row) return null;
-    
+
     const addresses = await this.getAddresses(customerId);
     const groupIds = await this.getCustomerGroupIds(customerId);
-    
+
     return this.mapToCustomer(row, addresses, groupIds);
   }
 
   async findByEmail(email: string): Promise<Customer | null> {
-    const row = await queryOne<Record<string, any>>(
-      'SELECT * FROM customer WHERE email = $1 AND "deletedAt" IS NULL',
-      [email]
-    );
+    const row = await queryOne<Record<string, any>>('SELECT * FROM customer WHERE email = $1 AND "deletedAt" IS NULL', [email]);
     if (!row) return null;
-    
+
     const addresses = await this.getAddresses(row.customerId);
     const groupIds = await this.getCustomerGroupIds(row.customerId);
-    
+
     return this.mapToCustomer(row, addresses, groupIds);
   }
 
   async findByPhone(phone: string): Promise<Customer | null> {
-    const row = await queryOne<Record<string, any>>(
-      'SELECT * FROM customer WHERE phone = $1 AND "deletedAt" IS NULL',
-      [phone]
-    );
+    const row = await queryOne<Record<string, any>>('SELECT * FROM customer WHERE phone = $1 AND "deletedAt" IS NULL', [phone]);
     if (!row) return null;
-    
+
     const addresses = await this.getAddresses(row.customerId);
     const groupIds = await this.getCustomerGroupIds(row.customerId);
-    
+
     return this.mapToCustomer(row, addresses, groupIds);
   }
 
@@ -63,17 +53,14 @@ export class CustomerRepo implements ICustomerRepository {
 
     const { whereClause, params } = this.buildWhereClause(filters);
 
-    const countResult = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM customer ${whereClause}`,
-      params
-    );
+    const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM customer ${whereClause}`, params);
     const total = parseInt(countResult?.count || '0');
 
     const rows = await query<Record<string, any>[]>(
       `SELECT * FROM customer ${whereClause}
        ORDER BY "${orderBy}" ${orderDir.toUpperCase()}
        LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
-      [...params, limit, offset]
+      [...params, limit, offset],
     );
 
     const customers: Customer[] = [];
@@ -88,11 +75,10 @@ export class CustomerRepo implements ICustomerRepository {
 
   async save(customer: Customer): Promise<Customer> {
     const now = new Date().toISOString();
-    
-    const existing = await queryOne<Record<string, any>>(
-      'SELECT "customerId" FROM customer WHERE "customerId" = $1',
-      [customer.customerId]
-    );
+
+    const existing = await queryOne<Record<string, any>>('SELECT "customerId" FROM customer WHERE "customerId" = $1', [
+      customer.customerId,
+    ]);
 
     if (existing) {
       await query(
@@ -104,14 +90,24 @@ export class CustomerRepo implements ICustomerRepository {
           "taxExempt" = $15, "updatedAt" = $16
         WHERE "customerId" = $17`,
         [
-          customer.email, customer.firstName, customer.lastName, customer.phone || null,
-          customer.dateOfBirth?.toISOString() || null, customer.status === 'active',
-          customer.isVerified, customer.emailVerifiedAt !== undefined,
-          customer.isVerified, customer.lastLoginAt?.toISOString() || null,
-          customer.preferredLanguage || null, false,
+          customer.email,
+          customer.firstName,
+          customer.lastName,
+          customer.phone || null,
+          customer.dateOfBirth?.toISOString() || null,
+          customer.status === 'active',
+          customer.isVerified,
+          customer.emailVerifiedAt !== undefined,
+          customer.isVerified,
+          customer.lastLoginAt?.toISOString() || null,
+          customer.preferredLanguage || null,
+          false,
           customer.tags.length > 0 ? JSON.stringify(customer.tags) : null,
-          customer.notes || null, customer.taxExempt, now, customer.customerId
-        ]
+          customer.notes || null,
+          customer.taxExempt,
+          now,
+          customer.customerId,
+        ],
       );
     } else {
       await query(
@@ -122,14 +118,25 @@ export class CustomerRepo implements ICustomerRepository {
           "createdAt", "updatedAt"
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`,
         [
-          customer.customerId, customer.email, customer.firstName, customer.lastName,
-          '', customer.phone || null, customer.dateOfBirth?.toISOString() || null,
-          customer.status === 'active', customer.isVerified,
-          customer.emailVerifiedAt !== undefined, customer.isVerified,
-          customer.preferredLanguage || null, false,
+          customer.customerId,
+          customer.email,
+          customer.firstName,
+          customer.lastName,
+          '',
+          customer.phone || null,
+          customer.dateOfBirth?.toISOString() || null,
+          customer.status === 'active',
+          customer.isVerified,
+          customer.emailVerifiedAt !== undefined,
+          customer.isVerified,
+          customer.preferredLanguage || null,
+          false,
           customer.tags.length > 0 ? JSON.stringify(customer.tags) : null,
-          customer.notes || null, customer.taxExempt, now, now
-        ]
+          customer.notes || null,
+          customer.taxExempt,
+          now,
+          now,
+        ],
       );
     }
 
@@ -143,57 +150,45 @@ export class CustomerRepo implements ICustomerRepository {
 
   async delete(customerId: string): Promise<void> {
     const now = new Date().toISOString();
-    await query(
-      'UPDATE customer SET "deletedAt" = $1, "isActive" = false, "updatedAt" = $1 WHERE "customerId" = $2',
-      [now, customerId]
-    );
+    await query('UPDATE customer SET "deletedAt" = $1, "isActive" = false, "updatedAt" = $1 WHERE "customerId" = $2', [now, customerId]);
   }
 
   async count(filters?: CustomerFilters): Promise<number> {
     const { whereClause, params } = this.buildWhereClause(filters);
-    const result = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM customer ${whereClause}`,
-      params
-    );
+    const result = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM customer ${whereClause}`, params);
     return parseInt(result?.count || '0');
   }
 
   async updateLastLogin(customerId: string): Promise<void> {
     const now = new Date().toISOString();
-    await query(
-      'UPDATE customer SET "lastLoginAt" = $1, "failedLoginAttempts" = 0, "updatedAt" = $1 WHERE "customerId" = $2',
-      [now, customerId]
-    );
+    await query('UPDATE customer SET "lastLoginAt" = $1, "failedLoginAttempts" = 0, "updatedAt" = $1 WHERE "customerId" = $2', [
+      now,
+      customerId,
+    ]);
   }
 
   async incrementLoginCount(customerId: string): Promise<void> {
-    await query(
-      'UPDATE customer SET "failedLoginAttempts" = "failedLoginAttempts" + 1 WHERE "customerId" = $1',
-      [customerId]
-    );
+    await query('UPDATE customer SET "failedLoginAttempts" = "failedLoginAttempts" + 1 WHERE "customerId" = $1', [customerId]);
   }
 
   async verifyEmail(customerId: string): Promise<void> {
     const now = new Date().toISOString();
-    await query(
-      'UPDATE customer SET "emailVerified" = true, "isVerified" = true, "updatedAt" = $1 WHERE "customerId" = $2',
-      [now, customerId]
-    );
+    await query('UPDATE customer SET "emailVerified" = true, "isVerified" = true, "updatedAt" = $1 WHERE "customerId" = $2', [
+      now,
+      customerId,
+    ]);
   }
 
   async verifyPhone(customerId: string): Promise<void> {
     const now = new Date().toISOString();
-    await query(
-      'UPDATE customer SET "phoneVerified" = true, "updatedAt" = $1 WHERE "customerId" = $2',
-      [now, customerId]
-    );
+    await query('UPDATE customer SET "phoneVerified" = true, "updatedAt" = $1 WHERE "customerId" = $2', [now, customerId]);
   }
 
   // Address methods
   async getAddresses(customerId: string): Promise<CustomerAddress[]> {
     const rows = await query<Record<string, any>[]>(
       'SELECT * FROM "customerAddress" WHERE "customerId" = $1 ORDER BY "isDefault" DESC, "createdAt" ASC',
-      [customerId]
+      [customerId],
     );
     return (rows || []).map(row => this.mapToAddress(row));
   }
@@ -201,7 +196,7 @@ export class CustomerRepo implements ICustomerRepository {
   async getDefaultShippingAddress(customerId: string): Promise<CustomerAddress | null> {
     const row = await queryOne<Record<string, any>>(
       `SELECT * FROM "customerAddress" WHERE "customerId" = $1 AND "addressType" = 'shipping' AND "isDefault" = true`,
-      [customerId]
+      [customerId],
     );
     return row ? this.mapToAddress(row) : null;
   }
@@ -209,31 +204,30 @@ export class CustomerRepo implements ICustomerRepository {
   async getDefaultBillingAddress(customerId: string): Promise<CustomerAddress | null> {
     const row = await queryOne<Record<string, any>>(
       `SELECT * FROM "customerAddress" WHERE "customerId" = $1 AND "addressType" = 'billing' AND "isDefault" = true`,
-      [customerId]
+      [customerId],
     );
     return row ? this.mapToAddress(row) : null;
   }
 
   async saveAddress(address: CustomerAddress): Promise<CustomerAddress> {
     // For public API, get customerId from existing record
-    const existing = await queryOne<Record<string, any>>(
-      'SELECT "customerId" FROM "customerAddress" WHERE "customerAddressId" = $1',
-      [address.addressId]
-    );
-    
+    const existing = await queryOne<Record<string, any>>('SELECT "customerId" FROM "customerAddress" WHERE "customerAddressId" = $1', [
+      address.addressId,
+    ]);
+
     if (existing) {
       return this.saveAddressForCustomer(existing.customerId, address);
     }
-    
+
     throw new Error('Cannot save new address without customerId. Use addAddress method instead.');
   }
 
   private async saveAddressForCustomer(customerId: string, address: CustomerAddress): Promise<CustomerAddress> {
     const now = new Date().toISOString();
-    
+
     const existing = await queryOne<Record<string, any>>(
       'SELECT "customerAddressId" FROM "customerAddress" WHERE "customerAddressId" = $1',
-      [address.addressId]
+      [address.addressId],
     );
 
     if (existing) {
@@ -245,12 +239,21 @@ export class CustomerRepo implements ICustomerRepository {
           "isDefault" = $12, "updatedAt" = $13
         WHERE "customerAddressId" = $14`,
         [
-          address.firstName, address.lastName, address.company || null,
-          address.addressLine1, address.addressLine2 || null, address.city,
-          address.state, address.postalCode, address.country,
-          address.phone || null, address.addressType, address.isDefault, now,
-          address.addressId
-        ]
+          address.firstName,
+          address.lastName,
+          address.company || null,
+          address.addressLine1,
+          address.addressLine2 || null,
+          address.city,
+          address.state,
+          address.postalCode,
+          address.country,
+          address.phone || null,
+          address.addressType,
+          address.isDefault,
+          now,
+          address.addressId,
+        ],
       );
     } else {
       await query(
@@ -261,12 +264,23 @@ export class CustomerRepo implements ICustomerRepository {
           "createdAt", "updatedAt"
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`,
         [
-          address.addressId, customerId, address.firstName, address.lastName,
-          address.company || null, address.addressLine1, address.addressLine2 || null,
-          address.city, address.state, address.postalCode, address.country,
-          address.phone || null, address.addressType,
-          address.isDefault, now, now
-        ]
+          address.addressId,
+          customerId,
+          address.firstName,
+          address.lastName,
+          address.company || null,
+          address.addressLine1,
+          address.addressLine2 || null,
+          address.city,
+          address.state,
+          address.postalCode,
+          address.country,
+          address.phone || null,
+          address.addressType,
+          address.isDefault,
+          now,
+          now,
+        ],
       );
     }
 
@@ -283,12 +297,9 @@ export class CustomerRepo implements ICustomerRepository {
 
   async updateAddress(addressId: string, updates: Partial<CustomerAddress>): Promise<CustomerAddress> {
     const now = new Date().toISOString();
-    const existing = await queryOne<Record<string, any>>(
-      'SELECT * FROM "customerAddress" WHERE "customerAddressId" = $1',
-      [addressId]
-    );
+    const existing = await queryOne<Record<string, any>>('SELECT * FROM "customerAddress" WHERE "customerAddressId" = $1', [addressId]);
     if (!existing) throw new Error('Address not found');
-    
+
     const merged = { ...this.mapToAddress(existing), ...updates };
     return this.saveAddressForCustomer(existing.customerId, merged);
   }
@@ -296,15 +307,13 @@ export class CustomerRepo implements ICustomerRepository {
   async setDefaultAddress(customerId: string, addressId: string, addressType: 'shipping' | 'billing'): Promise<void> {
     const now = new Date().toISOString();
     // Clear existing default
-    await query(
-      'UPDATE "customerAddress" SET "isDefault" = false, "updatedAt" = $1 WHERE "customerId" = $2 AND "addressType" = $3',
-      [now, customerId, addressType]
-    );
+    await query('UPDATE "customerAddress" SET "isDefault" = false, "updatedAt" = $1 WHERE "customerId" = $2 AND "addressType" = $3', [
+      now,
+      customerId,
+      addressType,
+    ]);
     // Set new default
-    await query(
-      'UPDATE "customerAddress" SET "isDefault" = true, "updatedAt" = $1 WHERE "customerAddressId" = $2',
-      [now, addressId]
-    );
+    await query('UPDATE "customerAddress" SET "isDefault" = true, "updatedAt" = $1 WHERE "customerAddressId" = $2', [now, addressId]);
   }
 
   // Query methods
@@ -325,31 +334,26 @@ export class CustomerRepo implements ICustomerRepository {
       `SELECT cg."customerGroupId", cg.name FROM "customerGroup" cg
        JOIN "customerGroupMembership" cgm ON cgm."customerGroupId" = cg."customerGroupId"
        WHERE cgm."customerId" = $1`,
-      [customerId]
+      [customerId],
     );
     return (rows || []).map(row => ({ groupId: row.customerGroupId, name: row.name }));
   }
 
   async getPasswordHash(customerId: string): Promise<string | null> {
-    const row = await queryOne<Record<string, any>>(
-      'SELECT password FROM customer WHERE "customerId" = $1',
-      [customerId]
-    );
+    const row = await queryOne<Record<string, any>>('SELECT password FROM customer WHERE "customerId" = $1', [customerId]);
     return row?.password || null;
   }
 
   async updatePasswordHash(customerId: string, passwordHash: string): Promise<void> {
-    await query(
-      'UPDATE customer SET password = $1, "updatedAt" = $2 WHERE "customerId" = $3',
-      [passwordHash, new Date().toISOString(), customerId]
-    );
+    await query('UPDATE customer SET password = $1, "updatedAt" = $2 WHERE "customerId" = $3', [
+      passwordHash,
+      new Date().toISOString(),
+      customerId,
+    ]);
   }
 
   async recordFailedLogin(customerId: string): Promise<void> {
-    await query(
-      'UPDATE customer SET "failedLoginAttempts" = "failedLoginAttempts" + 1 WHERE "customerId" = $1',
-      [customerId]
-    );
+    await query('UPDATE customer SET "failedLoginAttempts" = "failedLoginAttempts" + 1 WHERE "customerId" = $1', [customerId]);
   }
 
   async updatePassword(customerId: string, passwordHash: string): Promise<void> {
@@ -362,10 +366,9 @@ export class CustomerRepo implements ICustomerRepository {
 
   // Group methods
   async getCustomerGroupIds(customerId: string): Promise<string[]> {
-    const rows = await query<Record<string, any>[]>(
-      'SELECT "customerGroupId" FROM "customerGroupMembership" WHERE "customerId" = $1',
-      [customerId]
-    );
+    const rows = await query<Record<string, any>[]>('SELECT "customerGroupId" FROM "customerGroupMembership" WHERE "customerId" = $1', [
+      customerId,
+    ]);
     return (rows || []).map(row => row.customerGroupId);
   }
 
@@ -374,22 +377,19 @@ export class CustomerRepo implements ICustomerRepository {
     await query(
       `INSERT INTO "customerGroupMembership" ("customerGroupMembershipId", "customerId", "customerGroupId", "createdAt")
        VALUES ($1, $2, $3, $4) ON CONFLICT DO NOTHING`,
-      [generateUUID(), customerId, groupId, now]
+      [generateUUID(), customerId, groupId, now],
     );
   }
 
   async removeFromGroup(customerId: string, groupId: string): Promise<void> {
-    await query(
-      'DELETE FROM "customerGroupMembership" WHERE "customerId" = $1 AND "customerGroupId" = $2',
-      [customerId, groupId]
-    );
+    await query('DELETE FROM "customerGroupMembership" WHERE "customerId" = $1 AND "customerGroupId" = $2', [customerId, groupId]);
   }
 
   // Private helper methods
   private async syncAddresses(customer: Customer): Promise<void> {
     const existingAddresses = await query<Record<string, any>[]>(
       'SELECT "customerAddressId" FROM "customerAddress" WHERE "customerId" = $1',
-      [customer.customerId]
+      [customer.customerId],
     );
     const existingIds = new Set((existingAddresses || []).map(a => a.customerAddressId));
     const addressesToKeep = new Set<string>();
@@ -441,7 +441,9 @@ export class CustomerRepo implements ICustomerRepository {
       params.push(filters.isVerified);
     }
     if (filters?.search) {
-      conditions.push(`(email ILIKE $${paramIndex} OR "firstName" ILIKE $${paramIndex} OR "lastName" ILIKE $${paramIndex} OR phone ILIKE $${paramIndex})`);
+      conditions.push(
+        `(email ILIKE $${paramIndex} OR "firstName" ILIKE $${paramIndex} OR "lastName" ILIKE $${paramIndex} OR phone ILIKE $${paramIndex})`,
+      );
       params.push(`%${filters.search}%`);
       paramIndex++;
     }
@@ -452,7 +454,7 @@ export class CustomerRepo implements ICustomerRepository {
 
     return {
       whereClause: conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '',
-      params
+      params,
     };
   }
 
@@ -482,7 +484,7 @@ export class CustomerRepo implements ICustomerRepository {
       loginCount: row.failedLoginAttempts || 0,
       groupIds,
       createdAt: new Date(row.createdAt),
-      updatedAt: new Date(row.updatedAt)
+      updatedAt: new Date(row.updatedAt),
     });
   }
 
@@ -501,7 +503,7 @@ export class CustomerRepo implements ICustomerRepository {
       countryCode: row.country, // Use country as countryCode since DB doesn't have separate column
       phone: row.phone || undefined,
       addressType: row.addressType,
-      isDefault: Boolean(row.isDefault)
+      isDefault: Boolean(row.isDefault),
     };
   }
 }

@@ -34,7 +34,7 @@ const upload = multer({
     } else {
       cb(new Error('Only image files are allowed'));
     }
-  }
+  },
 });
 
 export class MediaController {
@@ -45,11 +45,7 @@ export class MediaController {
     const imageProcessingService = new SharpImageProcessingService();
     const storageService = StorageServiceFactory.create();
 
-    this.processImageUseCase = new ProcessImageUseCase(
-      mediaRepository,
-      imageProcessingService,
-      storageService
-    );
+    this.processImageUseCase = new ProcessImageUseCase(mediaRepository, imageProcessingService, storageService);
   }
 
   // Middleware for handling single file upload
@@ -66,7 +62,7 @@ export class MediaController {
       if (!req.file) {
         return res.status(400).json({
           success: false,
-          message: 'No image file provided'
+          message: 'No image file provided',
         });
       }
 
@@ -75,30 +71,30 @@ export class MediaController {
           buffer: req.file.buffer,
           originalname: req.file.originalname,
           mimetype: req.file.mimetype,
-          size: req.file.size
+          size: req.file.size,
         },
         altText: req.body.altText,
         title: req.body.title,
         description: req.body.description,
         tags: req.body.tags ? JSON.parse(req.body.tags) : undefined,
-        metadata: req.body.metadata ? JSON.parse(req.body.metadata) : undefined
+        metadata: req.body.metadata ? JSON.parse(req.body.metadata) : undefined,
       });
 
       res.json({
         success: true,
         data: {
           media: result.media.toJSON(),
-          urls: result.urls
-        }
+          urls: result.urls,
+        },
       });
     } catch (error) {
       logger.error('Error:', error);
-      
+
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       res.status(500).json({
         success: false,
         message: 'Failed to process image',
-        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
       });
     }
   };
@@ -111,7 +107,7 @@ export class MediaController {
       if (!req.files || !Array.isArray(req.files)) {
         return res.status(400).json({
           success: false,
-          message: 'No image files provided'
+          message: 'No image files provided',
         });
       }
 
@@ -122,32 +118,32 @@ export class MediaController {
               buffer: file.buffer,
               originalname: file.originalname,
               mimetype: file.mimetype,
-              size: file.size
+              size: file.size,
             },
             altText: req.body.altText,
             title: req.body.title,
             description: req.body.description,
             tags: req.body.tags ? JSON.parse(req.body.tags) : undefined,
-            metadata: req.body.metadata ? JSON.parse(req.body.metadata) : undefined
+            metadata: req.body.metadata ? JSON.parse(req.body.metadata) : undefined,
           });
-        })
+        }),
       );
 
       res.json({
         success: true,
         data: results.map(result => ({
           media: result.media.toJSON(),
-          urls: result.urls
-        }))
+          urls: result.urls,
+        })),
       });
     } catch (error) {
       logger.error('Error:', error);
-      
+
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       res.status(500).json({
         success: false,
         message: 'Failed to process images',
-        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
       });
     }
   };

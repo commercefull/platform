@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function (knex) {
   return knex.schema.createTable('storedPaymentMethod', t => {
     t.uuid('storedPaymentMethodId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
@@ -18,7 +18,6 @@ exports.up = function(knex) {
     t.boolean('isDefault').notNullable().defaultTo(false);
     t.boolean('isExpired').notNullable().defaultTo(false);
     t.string('customerPaymentProfileId', 255);
-    
 
     t.index('customerId');
     t.index('paymentMethod');
@@ -31,6 +30,6 @@ exports.up = function(knex) {
   });
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTable('storedPaymentMethod');
 };

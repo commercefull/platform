@@ -112,6 +112,7 @@ const migrateWooCommerceProducts = async (sourceDb, targetDb) => {
 ```
 
 **Key Challenges**:
+
 - Complex meta field storage
 - Variable product relationships
 - Custom field proliferation
@@ -144,6 +145,7 @@ class MagentoProductExtractor {
 ```
 
 **Key Considerations**:
+
 - EAV (Entity-Attribute-Value) data model
 - Complex product types (configurable, bundle, grouped)
 - Multi-store configurations
@@ -151,6 +153,7 @@ class MagentoProductExtractor {
 #### PrestaShop
 
 **Migration Focus**:
+
 - Product combinations (variants)
 - Multi-language content
 - Module-specific data
@@ -160,7 +163,9 @@ class MagentoProductExtractor {
 #### Custom E-Commerce Platforms
 
 **Assessment Requirements**:
+
 1. **Database Schema Analysis**
+
    ```sql
    -- Extract table structures
    SELECT table_name, column_name, data_type, is_nullable
@@ -180,13 +185,14 @@ class MagentoProductExtractor {
    - Integration points
 
 **Migration Strategy**:
+
 ```javascript
 const migrateCustomPlatform = async (sourceDb, targetDb, config) => {
   // Dynamic mapping based on configuration
   const entityMappers = {
     products: new ProductMapper(config.productMapping),
     customers: new CustomerMapper(config.customerMapping),
-    orders: new OrderMapper(config.orderMapping)
+    orders: new OrderMapper(config.orderMapping),
   };
 
   for (const [entity, mapper] of Object.entries(entityMappers)) {
@@ -213,7 +219,7 @@ const migrateFromShopify = async (shopifyApi, commercefullApi) => {
       variants: product.variants.map(variant => ({
         sku: variant.sku,
         price: variant.price,
-        inventory: variant.inventory_quantity
+        inventory: variant.inventory_quantity,
       })),
       images: product.images.map(img => img.src),
       // Additional mappings
@@ -225,6 +231,7 @@ const migrateFromShopify = async (shopifyApi, commercefullApi) => {
 ```
 
 **Key Challenges**:
+
 - API rate limiting
 - Data pagination
 - Webhook dependency
@@ -232,6 +239,7 @@ const migrateFromShopify = async (shopifyApi, commercefullApi) => {
 #### BigCommerce
 
 **Migration Considerations**:
+
 - Complex product options
 - Customer groups and pricing
 - Multi-channel inventory
@@ -242,34 +250,34 @@ const migrateFromShopify = async (shopifyApi, commercefullApi) => {
 
 #### Products
 
-| Source Field | Target Field | Transformation Notes |
-|-------------|-------------|---------------------|
-| product_id | productId | UUID generation |
-| name/title | name | Text sanitization |
-| description | description | HTML parsing |
-| sku | sku | Uniqueness validation |
-| price | price | Currency conversion |
-| weight | weight | Unit standardization |
-| dimensions | dimensions | Format normalization |
+| Source Field | Target Field | Transformation Notes  |
+| ------------ | ------------ | --------------------- |
+| product_id   | productId    | UUID generation       |
+| name/title   | name         | Text sanitization     |
+| description  | description  | HTML parsing          |
+| sku          | sku          | Uniqueness validation |
+| price        | price        | Currency conversion   |
+| weight       | weight       | Unit standardization  |
+| dimensions   | dimensions   | Format normalization  |
 
 #### Customers
 
 | Source Field | Target Field | Transformation Notes |
-|-------------|-------------|---------------------|
-| customer_id | customerId | UUID generation |
-| email | email | Validation |
-| first_name | firstName | Text sanitization |
-| last_name | lastName | Text sanitization |
-| addresses | addresses | Address validation |
+| ------------ | ------------ | -------------------- |
+| customer_id  | customerId   | UUID generation      |
+| email        | email        | Validation           |
+| first_name   | firstName    | Text sanitization    |
+| last_name    | lastName     | Text sanitization    |
+| addresses    | addresses    | Address validation   |
 
 #### Orders
 
-| Source Field | Target Field | Transformation Notes |
-|-------------|-------------|---------------------|
-| order_id | orderId | UUID generation |
-| order_date | createdAt | Date formatting |
-| total | total | Currency handling |
-| items | items | Product reference mapping |
+| Source Field | Target Field | Transformation Notes      |
+| ------------ | ------------ | ------------------------- |
+| order_id     | orderId      | UUID generation           |
+| order_date   | createdAt    | Date formatting           |
+| total        | total        | Currency handling         |
+| items        | items        | Product reference mapping |
 
 ## Technical Implementation
 
@@ -304,7 +312,6 @@ class EcommerceMigrationPipeline {
       await this.target.load(entityType, transformedData);
 
       this.logger.log(`Migrated ${transformedData.length} ${entityType} records`);
-
     } catch (error) {
       this.logger.error(`Migration failed for ${entityType}:`, error);
       throw error;
@@ -328,7 +335,7 @@ class MigrationErrorHandler {
       entity,
       data,
       error: error.message,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     // Create recovery checkpoint
@@ -356,12 +363,12 @@ class MigrationErrorHandler {
 ### Database Connection Utilities
 
 ```javascript
-const createDatabaseConnection = (config) => {
+const createDatabaseConnection = config => {
   const connections = {
     mysql: () => mysql.createConnection(config.mysql),
     postgresql: () => new pg.Client(config.postgresql),
     mongodb: () => mongodb.MongoClient.connect(config.mongodb.uri),
-    api: () => new APIClient(config.api)
+    api: () => new APIClient(config.api),
   };
 
   return connections[config.type]();
@@ -383,14 +390,14 @@ const transformationHelpers = {
   },
 
   // Address validation
-  validateAddress: async (address) => {
+  validateAddress: async address => {
     // Integration with address validation service
   },
 
   // HTML sanitization
-  sanitizeHtml: (html) => {
+  sanitizeHtml: html => {
     return DOMPurify.sanitize(html);
-  }
+  },
 };
 ```
 
@@ -440,7 +447,7 @@ const validationSuite = {
     return {
       source: sourceCounts,
       target: targetCounts,
-      difference: Math.abs(sourceCounts - targetCounts)
+      difference: Math.abs(sourceCounts - targetCounts),
     };
   },
 
@@ -456,20 +463,17 @@ const validationSuite = {
       field: check.field,
       match: check.source === check.target,
       sourceValue: check.source,
-      targetValue: check.target
+      targetValue: check.target,
     }));
   },
 
   // Referential integrity validation
-  validateReferentialIntegrity: async (db) => {
+  validateReferentialIntegrity: async db => {
     // Check foreign key relationships
-    const orphanedRecords = await db('order_items')
-      .leftJoin('orders', 'order_items.order_id', 'orders.id')
-      .whereNull('orders.id')
-      .count();
+    const orphanedRecords = await db('order_items').leftJoin('orders', 'order_items.order_id', 'orders.id').whereNull('orders.id').count();
 
     return orphanedRecords === 0;
-  }
+  },
 };
 ```
 
@@ -495,19 +499,21 @@ const performanceValidator = {
 
   // Load testing
   simulateLoad: async (api, concurrentUsers = 100) => {
-    const promises = Array(concurrentUsers).fill().map(async () => {
-      const startTime = Date.now();
-      await api.get('/products');
-      return Date.now() - startTime;
-    });
+    const promises = Array(concurrentUsers)
+      .fill()
+      .map(async () => {
+        const startTime = Date.now();
+        await api.get('/products');
+        return Date.now() - startTime;
+      });
 
     const responseTimes = await Promise.all(promises);
     return {
       averageResponseTime: responseTimes.reduce((a, b) => a + b) / responseTimes.length,
       maxResponseTime: Math.max(...responseTimes),
-      minResponseTime: Math.min(...responseTimes)
+      minResponseTime: Math.min(...responseTimes),
     };
-  }
+  },
 };
 ```
 
@@ -517,10 +523,11 @@ const performanceValidator = {
 
 **Problem**: Incomplete or malformed data in source system
 **Solution**:
+
 ```javascript
 const dataCleaningPipeline = {
   // Remove duplicates
-  deduplicate: (records) => {
+  deduplicate: records => {
     const seen = new Set();
     return records.filter(record => {
       const key = `${record.email}-${record.name}`;
@@ -546,7 +553,7 @@ const dataCleaningPipeline = {
     }
 
     return errors;
-  }
+  },
 };
 ```
 
@@ -554,6 +561,7 @@ const dataCleaningPipeline = {
 
 **Problem**: Large dataset migration takes too long
 **Solution**:
+
 ```javascript
 const performanceOptimization = {
   // Batch processing
@@ -569,21 +577,15 @@ const performanceOptimization = {
   processInParallel: async (data, concurrency, processor) => {
     const chunks = chunkArray(data, Math.ceil(data.length / concurrency));
 
-    await Promise.all(
-      chunks.map(chunk => processor(chunk))
-    );
+    await Promise.all(chunks.map(chunk => processor(chunk)));
   },
 
   // Memory optimization
   streamProcessing: (source, transformer, target) => {
     return new Promise((resolve, reject) => {
-      source
-        .pipe(transformer)
-        .pipe(target)
-        .on('finish', resolve)
-        .on('error', reject);
+      source.pipe(transformer).pipe(target).on('finish', resolve).on('error', reject);
     });
-  }
+  },
 };
 ```
 
@@ -591,6 +593,7 @@ const performanceOptimization = {
 
 **Problem**: Rate limiting and pagination issues
 **Solution**:
+
 ```javascript
 class RateLimitedAPIClient {
   constructor(apiClient, rateLimit) {

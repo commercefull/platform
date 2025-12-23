@@ -1,6 +1,6 @@
 /**
  * CalculateRates Use Case
- * 
+ *
  * Calculates available shipping rates for an order.
  */
 
@@ -48,7 +48,7 @@ export interface CalculateRatesOutput {
 export class CalculateRatesUseCase {
   constructor(
     private readonly shippingRepository: any, // ShippingRepository
-    private readonly currencyCode: string = 'USD'
+    private readonly currencyCode: string = 'USD',
   ) {}
 
   async execute(input: CalculateRatesInput): Promise<CalculateRatesOutput> {
@@ -59,7 +59,7 @@ export class CalculateRatesUseCase {
     const zones = await this.shippingRepository.findZonesForAddress(
       input.destinationAddress.countryCode,
       input.destinationAddress.stateCode,
-      input.destinationAddress.postalCode
+      input.destinationAddress.postalCode,
     );
 
     if (zones.length === 0) {

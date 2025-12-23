@@ -27,9 +27,7 @@ export class DeleteMediaUseCase {
     if (!input.force) {
       const usages = await this.mediaRepository.findUsages(input.mediaId);
       if (usages && usages.length > 0) {
-        throw new Error(
-          `Media is in use by ${usages.length} entities. Use force=true to delete anyway.`
-        );
+        throw new Error(`Media is in use by ${usages.length} entities. Use force=true to delete anyway.`);
       }
     }
 

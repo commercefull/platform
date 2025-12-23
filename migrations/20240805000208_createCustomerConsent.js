@@ -10,12 +10,25 @@ exports.up = function (knex) {
     t.uuid('customerId').notNullable().references('customerId').inTable('customer').onDelete('CASCADE');
     // Extended consent types for GDPR compliance
     t.enum('type', [
-      'terms', 'privacy', 'marketing', 'cookies', 'dataProcessing', 
-      'thirdParty', 'ageVerification', 'sms', 'phoneCalls', 'personalization',
+      'terms',
+      'privacy',
+      'marketing',
+      'cookies',
+      'dataProcessing',
+      'thirdParty',
+      'ageVerification',
+      'sms',
+      'phoneCalls',
+      'personalization',
       // GDPR-specific consent types
-      'analyticsCookies', 'functionalCookies', 'marketingCookies',
-      'dataPortability', 'dataDeletion', 'profileAnalysis',
-      'crossBorderTransfer', 'automatedDecision'
+      'analyticsCookies',
+      'functionalCookies',
+      'marketingCookies',
+      'dataPortability',
+      'dataDeletion',
+      'profileAnalysis',
+      'crossBorderTransfer',
+      'automatedDecision',
     ]).notNullable();
     t.boolean('given').notNullable();
     t.string('ipAddress', 50);

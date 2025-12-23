@@ -13,7 +13,7 @@ export const checkGiftCardBalance: AsyncHandler = async (req, res, next) => {
   try {
     const { code } = req.params;
     const giftCard = await giftCardRepo.getGiftCardByCode(code);
-    
+
     if (!giftCard) {
       res.status(404).json({ success: false, message: 'Gift card not found' });
       return;
@@ -35,12 +35,12 @@ export const checkGiftCardBalance: AsyncHandler = async (req, res, next) => {
         code: giftCard.code,
         currentBalance: giftCard.currentBalance,
         currency: giftCard.currency,
-        expiresAt: giftCard.expiresAt
-      }
+        expiresAt: giftCard.expiresAt,
+      },
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -56,17 +56,12 @@ export const redeemGiftCard: AsyncHandler = async (req, res, next) => {
       return;
     }
 
-    const transaction = await giftCardRepo.redeemGiftCard(
-      giftCard.promotionGiftCardId,
-      amount,
-      orderId,
-      customerId
-    );
+    const transaction = await giftCardRepo.redeemGiftCard(giftCard.promotionGiftCardId, amount, orderId, customerId);
 
     res.json({ success: true, data: transaction });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -78,13 +73,13 @@ export const getMyGiftCards: AsyncHandler = async (req, res, next) => {
 
     const result = await giftCardRepo.getGiftCards(
       { assignedTo: customerId },
-      { limit: parseInt(limit as string) || 20, offset: parseInt(offset as string) || 0 }
+      { limit: parseInt(limit as string) || 20, offset: parseInt(offset as string) || 0 },
     );
 
     res.json({ success: true, ...result });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -105,17 +100,12 @@ export const reloadGiftCard: AsyncHandler = async (req, res, next) => {
       return;
     }
 
-    const transaction = await giftCardRepo.reloadGiftCard(
-      giftCard.promotionGiftCardId,
-      amount,
-      orderId,
-      customerId
-    );
+    const transaction = await giftCardRepo.reloadGiftCard(giftCard.promotionGiftCardId, amount, orderId, customerId);
 
     res.json({ success: true, data: transaction });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(400).json({ success: false, message: error.message });
   }
 };

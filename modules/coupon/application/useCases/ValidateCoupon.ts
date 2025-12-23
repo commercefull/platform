@@ -14,7 +14,7 @@ export class ValidateCouponCommand {
       categoryId?: string;
       quantity: number;
       price: number;
-    }>
+    }>,
   ) {}
 }
 
@@ -39,16 +39,12 @@ export class ValidateCouponUseCase {
   constructor(private readonly couponRepository: CouponRepository) {}
 
   async execute(command: ValidateCouponCommand): Promise<CouponValidationResult> {
-    const validation = await this.couponRepository.validateCouponCode(
-      command.code,
-      command.orderValue,
-      command.customerId
-    );
+    const validation = await this.couponRepository.validateCouponCode(command.code, command.orderValue, command.customerId);
 
     if (!validation.valid || !validation.coupon) {
       return {
         valid: false,
-        error: validation.error || 'Invalid coupon'
+        error: validation.error || 'Invalid coupon',
       };
     }
 
@@ -67,7 +63,7 @@ export class ValidateCouponUseCase {
           const itemDiscount = coupon.calculateDiscount(item.price * item.quantity, item.price * item.quantity);
           applicableItems.push({
             productId: item.productId,
-            discountAmount: itemDiscount
+            discountAmount: itemDiscount,
           });
         }
       }
@@ -81,9 +77,9 @@ export class ValidateCouponUseCase {
         name: coupon.name,
         type: coupon.type,
         value: coupon.value,
-        discountAmount
+        discountAmount,
       },
-      applicableItems
+      applicableItems,
     };
   }
 }

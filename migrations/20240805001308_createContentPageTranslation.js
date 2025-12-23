@@ -1,7 +1,7 @@
 /**
  * Content Page Translation Table
  * Stores multi-language translations for CMS content pages
- * 
+ *
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
@@ -32,7 +32,7 @@ exports.up = function (knex) {
     t.boolean('isApproved').notNullable().defaultTo(false);
     t.boolean('isPublished').notNullable().defaultTo(false);
     t.timestamp('publishedAt');
-    
+
     t.index('contentPageId');
     t.index('localeId');
     t.index('slug');

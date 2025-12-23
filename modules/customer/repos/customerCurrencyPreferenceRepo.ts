@@ -8,35 +8,37 @@ import { CustomerCurrencyPreference as DbCustomerCurrencyPreference } from '../.
 export type CustomerCurrencyPreference = DbCustomerCurrencyPreference;
 
 // Derived types for create/update operations
-export type CustomerCurrencyPreferenceCreateParams = Omit<CustomerCurrencyPreference, 'customerCurrencyPreferenceId' | 'createdAt' | 'updatedAt'>;
+export type CustomerCurrencyPreferenceCreateParams = Omit<
+  CustomerCurrencyPreference,
+  'customerCurrencyPreferenceId' | 'createdAt' | 'updatedAt'
+>;
 export type CustomerCurrencyPreferenceUpdateParams = Partial<Pick<CustomerCurrencyPreference, 'currencyId' | 'automaticDetection'>>;
 
 export class CustomerCurrencyPreferenceRepo {
   async findById(id: string): Promise<CustomerCurrencyPreference | null> {
     return await queryOne<CustomerCurrencyPreference>(
       `SELECT * FROM "customerCurrencyPreference" WHERE "customerCurrencyPreferenceId" = $1`,
-      [id]
+      [id],
     );
   }
 
   async findByCustomerId(customerId: string): Promise<CustomerCurrencyPreference | null> {
-    return await queryOne<CustomerCurrencyPreference>(
-      `SELECT * FROM "customerCurrencyPreference" WHERE "customerId" = $1`,
-      [customerId]
-    );
+    return await queryOne<CustomerCurrencyPreference>(`SELECT * FROM "customerCurrencyPreference" WHERE "customerId" = $1`, [customerId]);
   }
 
   async findByCurrencyId(currencyId: string, limit = 100): Promise<CustomerCurrencyPreference[]> {
-    return (await query<CustomerCurrencyPreference[]>(
-      `SELECT * FROM "customerCurrencyPreference" WHERE "currencyId" = $1 LIMIT $2`,
-      [currencyId, limit]
-    )) || [];
+    return (
+      (await query<CustomerCurrencyPreference[]>(`SELECT * FROM "customerCurrencyPreference" WHERE "currencyId" = $1 LIMIT $2`, [
+        currencyId,
+        limit,
+      ])) || []
+    );
   }
 
   async findWithAutoDetection(): Promise<CustomerCurrencyPreference[]> {
-    return (await query<CustomerCurrencyPreference[]>(
-      `SELECT * FROM "customerCurrencyPreference" WHERE "automaticDetection" = true`
-    )) || [];
+    return (
+      (await query<CustomerCurrencyPreference[]>(`SELECT * FROM "customerCurrencyPreference" WHERE "automaticDetection" = true`)) || []
+    );
   }
 
   async create(params: CustomerCurrencyPreferenceCreateParams): Promise<CustomerCurrencyPreference> {
@@ -52,7 +54,7 @@ export class CustomerCurrencyPreferenceRepo {
       `INSERT INTO "customerCurrencyPreference" (
         "customerId", "currencyId", "automaticDetection", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-      [params.customerId, params.currencyId, params.automaticDetection ?? true, now, now]
+      [params.customerId, params.currencyId, params.automaticDetection ?? true, now, now],
     );
 
     if (!result) throw new Error('Failed to create currency preference');
@@ -65,7 +67,7 @@ export class CustomerCurrencyPreferenceRepo {
     if (existing) {
       const updated = await this.update(existing.customerCurrencyPreferenceId, {
         currencyId: params.currencyId,
-        automaticDetection: params.automaticDetection
+        automaticDetection: params.automaticDetection,
       });
       if (!updated) throw new Error('Failed to update preference');
       return updated;
@@ -93,7 +95,7 @@ export class CustomerCurrencyPreferenceRepo {
 
     return await queryOne<CustomerCurrencyPreference>(
       `UPDATE "customerCurrencyPreference" SET ${updateFields.join(', ')} WHERE "customerCurrencyPreferenceId" = $${paramIndex} RETURNING *`,
-      values
+      values,
     );
   }
 
@@ -118,7 +120,7 @@ export class CustomerCurrencyPreferenceRepo {
   async delete(id: string): Promise<boolean> {
     const result = await queryOne<{ customerCurrencyPreferenceId: string }>(
       `DELETE FROM "customerCurrencyPreference" WHERE "customerCurrencyPreferenceId" = $1 RETURNING "customerCurrencyPreferenceId"`,
-      [id]
+      [id],
     );
     return !!result;
   }
@@ -126,15 +128,13 @@ export class CustomerCurrencyPreferenceRepo {
   async deleteByCustomerId(customerId: string): Promise<boolean> {
     const result = await queryOne<{ customerCurrencyPreferenceId: string }>(
       `DELETE FROM "customerCurrencyPreference" WHERE "customerId" = $1 RETURNING "customerCurrencyPreferenceId"`,
-      [customerId]
+      [customerId],
     );
     return !!result;
   }
 
   async count(): Promise<number> {
-    const result = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM "customerCurrencyPreference"`
-    );
+    const result = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "customerCurrencyPreference"`);
     return result ? parseInt(result.count, 10) : 0;
   }
 
@@ -142,15 +142,17 @@ export class CustomerCurrencyPreferenceRepo {
     const total = await this.count();
 
     const autoResult = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM "customerCurrencyPreference" WHERE "automaticDetection" = true`
+      `SELECT COUNT(*) as count FROM "customerCurrencyPreference" WHERE "automaticDetection" = true`,
     );
     const withAutoDetection = autoResult ? parseInt(autoResult.count, 10) : 0;
 
     const currencyResults = await query<{ currencyId: string; count: string }[]>(
-      `SELECT "currencyId", COUNT(*) as count FROM "customerCurrencyPreference" GROUP BY "currencyId"`
+      `SELECT "currencyId", COUNT(*) as count FROM "customerCurrencyPreference" GROUP BY "currencyId"`,
     );
     const byCurrency: Record<string, number> = {};
-    currencyResults?.forEach(row => { byCurrency[row.currencyId] = parseInt(row.count, 10); });
+    currencyResults?.forEach(row => {
+      byCurrency[row.currencyId] = parseInt(row.count, 10);
+    });
 
     return { total, withAutoDetection, byCurrency };
   }

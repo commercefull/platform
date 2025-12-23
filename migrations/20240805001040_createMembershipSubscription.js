@@ -23,7 +23,7 @@ exports.up = function (knex) {
     t.string('billingCycleOverride', 20);
     t.uuid('paymentMethodId');
     t.text('notes');
-    
+
     t.uuid('createdBy');
     t.index('customerId');
     t.index('membershipPlanId');

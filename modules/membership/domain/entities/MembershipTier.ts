@@ -43,7 +43,7 @@ export class MembershipTier {
       ...props,
       isActive: true,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     });
   }
 
@@ -51,14 +51,30 @@ export class MembershipTier {
     return new MembershipTier(props);
   }
 
-  get tierId(): string { return this.props.tierId; }
-  get name(): string { return this.props.name; }
-  get level(): number { return this.props.level; }
-  get pointsRequired(): number { return this.props.pointsRequired; }
-  get benefits(): TierBenefit[] { return this.props.benefits; }
-  get discountPercentage(): number | undefined { return this.props.discountPercentage; }
-  get pointsMultiplier(): number { return this.props.pointsMultiplier; }
-  get isActive(): boolean { return this.props.isActive; }
+  get tierId(): string {
+    return this.props.tierId;
+  }
+  get name(): string {
+    return this.props.name;
+  }
+  get level(): number {
+    return this.props.level;
+  }
+  get pointsRequired(): number {
+    return this.props.pointsRequired;
+  }
+  get benefits(): TierBenefit[] {
+    return this.props.benefits;
+  }
+  get discountPercentage(): number | undefined {
+    return this.props.discountPercentage;
+  }
+  get pointsMultiplier(): number {
+    return this.props.pointsMultiplier;
+  }
+  get isActive(): boolean {
+    return this.props.isActive;
+  }
 
   addBenefit(benefit: TierBenefit): void {
     this.props.benefits.push(benefit);

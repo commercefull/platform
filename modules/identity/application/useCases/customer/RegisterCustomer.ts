@@ -23,7 +23,7 @@ export class RegisterCustomerUseCase {
   constructor(
     private readonly customerRepo: any,
     private readonly authService: any,
-    private readonly emailService: any
+    private readonly emailService: any,
   ) {}
 
   async execute(input: RegisterCustomerInput): Promise<RegisterCustomerOutput> {
@@ -53,7 +53,7 @@ export class RegisterCustomerUseCase {
 
     // Create customer
     const customerId = `cust_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 9)}`;
-    
+
     await this.customerRepo.create({
       customerId,
       email: input.email.toLowerCase(),
@@ -76,9 +76,7 @@ export class RegisterCustomerUseCase {
         token: verificationToken,
         firstName: input.firstName,
       });
-    } catch (error) {
-      
-    }
+    } catch (error) {}
 
     // Emit event
     eventBus.emit('customer.registered', {

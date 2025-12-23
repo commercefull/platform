@@ -13,7 +13,7 @@ import { eventBus } from '../../../../libs/events/eventBus';
 export class PublishPageCommand {
   constructor(
     public readonly pageId: string,
-    public readonly publishedBy?: string
+    public readonly publishedBy?: string,
   ) {}
 }
 
@@ -57,7 +57,7 @@ export class PublishPageUseCase {
     const now = new Date().toISOString();
     const updatedPage = await this.contentRepo.updatePage(command.pageId, {
       status: 'published',
-      publishedAt: now
+      publishedAt: now,
     });
 
     // Emit event
@@ -66,7 +66,7 @@ export class PublishPageUseCase {
       title: updatedPage.title,
       slug: updatedPage.slug,
       publishedAt: now,
-      publishedBy: command.publishedBy
+      publishedBy: command.publishedBy,
     });
 
     return {
@@ -74,7 +74,7 @@ export class PublishPageUseCase {
       title: updatedPage.title,
       slug: updatedPage.slug,
       status: updatedPage.status,
-      publishedAt: updatedPage.publishedAt || now
+      publishedAt: updatedPage.publishedAt || now,
     };
   }
 }

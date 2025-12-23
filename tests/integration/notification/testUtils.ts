@@ -3,24 +3,26 @@ import { createTestClient, loginTestAdmin } from '../testUtils';
 
 // Export loginTestUser function for the tests
 export const loginTestUser = async (
-  client: AxiosInstance, 
-  email: string = 'customer@example.com', 
-  password: string = 'password123'
+  client: AxiosInstance,
+  email: string = 'customer@example.com',
+  password: string = 'password123',
 ): Promise<string> => {
   try {
-    const response = await client.post('/customer/identity/login', {
-      email,
-      password
-    }, { headers: { 'X-Test-Request': 'true' } });
-    
+    const response = await client.post(
+      '/customer/identity/login',
+      {
+        email,
+        password,
+      },
+      { headers: { 'X-Test-Request': 'true' } },
+    );
+
     if (response.status === 200 && response.data?.accessToken) {
       return response.data.accessToken;
     }
-    
-    
+
     return '';
   } catch (error) {
-    
     return '';
   }
 };
@@ -35,12 +37,12 @@ export const testNotificationData = {
   category: 'order',
   data: {
     orderNumber: 'TEST-123',
-    orderTotal: 99.99
+    orderTotal: 99.99,
   },
   isRead: false,
   metadata: {
-    source: 'integration_test'
-  }
+    source: 'integration_test',
+  },
 };
 
 // Test data for notification templates
@@ -56,14 +58,14 @@ export const testTemplateData = {
   textTemplate: 'Hello {{name}}. This is a test notification.',
   parameters: {
     name: 'string',
-    testParam: 'string'
+    testParam: 'string',
   },
   isActive: true,
   categoryCode: 'order',
   previewData: {
     name: 'Test User',
-    testParam: 'Test Value'
-  }
+    testParam: 'Test Value',
+  },
 };
 
 // Test data for notification preferences
@@ -73,14 +75,14 @@ export const testPreferenceData = {
     email: true,
     sms: false,
     in_app: true,
-    push: false
+    push: false,
   },
   isEnabled: true,
   schedulePreferences: {
     doNotDisturbStart: '22:00',
     doNotDisturbEnd: '08:00',
-    timezone: 'UTC'
-  }
+    timezone: 'UTC',
+  },
 };
 
 /**
@@ -95,53 +97,45 @@ export const setupNotificationTests = async () => {
   let testTemplateId = '';
   let testPreferenceId = '';
   const testUserId = '00000000-0000-0000-0000-000000000001';
-  
+
   try {
     adminToken = await loginTestAdmin(client);
-  } catch (error) {
-    
-  }
-  
+  } catch (error) {}
+
   try {
     customerToken = await loginTestUser(client);
-  } catch (error) {
-    
-  }
-  
+  } catch (error) {}
+
   if (adminToken) {
     try {
       // Create test notification
       const notificationData = {
         ...testNotificationData,
         userId: testUserId,
-        userType: 'customer'
+        userType: 'customer',
       };
-      
+
       const createNotificationResponse = await client.post('/business/notifications', notificationData, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       if (createNotificationResponse.data?.data?.notificationId) {
         testNotificationId = createNotificationResponse.data.data.notificationId;
       } else {
-        
       }
-      
+
       // Create test template
       const createTemplateResponse = await client.post('/business/notification-templates', testTemplateData, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       if (createTemplateResponse.data?.data?.notificationTemplateId) {
         testTemplateId = createTemplateResponse.data.data.notificationTemplateId;
       } else {
-        
       }
-    } catch (error) {
-      
-    }
+    } catch (error) {}
   }
-  
+
   return {
     client,
     adminToken,
@@ -149,7 +143,7 @@ export const setupNotificationTests = async () => {
     testUserId,
     testNotificationId,
     testTemplateId,
-    testPreferenceId
+    testPreferenceId,
   };
 };
 
@@ -158,36 +152,42 @@ export const setupNotificationTests = async () => {
  * Removes test data created during setup
  */
 export const cleanupNotificationTests = async (
-  client: AxiosInstance | undefined, 
-  adminToken: string | undefined, 
-  testNotificationId?: string, 
-  testTemplateId?: string, 
-  testPreferenceId?: string
+  client: AxiosInstance | undefined,
+  adminToken: string | undefined,
+  testNotificationId?: string,
+  testTemplateId?: string,
+  testPreferenceId?: string,
 ) => {
   if (!client || !adminToken) {
     return;
   }
-  
+
   try {
     // Delete test notification
     if (testNotificationId) {
-      await client.delete(`/business/notifications/${testNotificationId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
-      }).catch(() => {});
+      await client
+        .delete(`/business/notifications/${testNotificationId}`, {
+          headers: { Authorization: `Bearer ${adminToken}` },
+        })
+        .catch(() => {});
     }
-    
+
     // Delete test template
     if (testTemplateId) {
-      await client.delete(`/business/notification-templates/${testTemplateId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
-      }).catch(() => {});
+      await client
+        .delete(`/business/notification-templates/${testTemplateId}`, {
+          headers: { Authorization: `Bearer ${adminToken}` },
+        })
+        .catch(() => {});
     }
-    
+
     // Delete test preference
     if (testPreferenceId) {
-      await client.delete(`/business/notification-preferences/${testPreferenceId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
-      }).catch(() => {});
+      await client
+        .delete(`/business/notification-preferences/${testPreferenceId}`, {
+          headers: { Authorization: `Bearer ${adminToken}` },
+        })
+        .catch(() => {});
     }
   } catch (error) {
     // Silently ignore cleanup errors

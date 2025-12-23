@@ -38,7 +38,7 @@ export class ProcessImageUseCase {
   constructor(
     private readonly mediaRepository: MediaRepository,
     private readonly imageProcessingService: ImageProcessingService,
-    private readonly storageService: StorageService
+    private readonly storageService: StorageService,
   ) {}
 
   async execute(command: ProcessImageCommand): Promise<ProcessImageResult> {
@@ -49,19 +49,11 @@ export class ProcessImageUseCase {
     const baseKey = `media/${mediaId}`;
 
     // Process the image
-    const processingResult = await this.imageProcessingService.processImage(
-      file.buffer,
-      options
-    );
+    const processingResult = await this.imageProcessingService.processImage(file.buffer, options);
 
     // Upload original image
     const originalKey = `${baseKey}/original.${this.getExtension(file.mimetype)}`;
-    const originalUpload = await this.storageService.upload(
-      processingResult.original.buffer,
-      originalKey,
-      file.mimetype,
-      { public: true }
-    );
+    const originalUpload = await this.storageService.upload(processingResult.original.buffer, originalKey, file.mimetype, { public: true });
 
     // Create media entity
     const media = Media.create({
@@ -77,24 +69,19 @@ export class ProcessImageUseCase {
       metadata: {
         ...command.metadata,
         processingOptions: options,
-        originalSize: processingResult.original.size
-      }
+        originalSize: processingResult.original.size,
+      },
     });
 
     const urls: ProcessImageResult['urls'] = {
       original: originalUpload.url,
-      responsive: {}
+      responsive: {},
     };
 
     // Upload WebP version if generated
     if (processingResult.webp) {
       const webpKey = `${baseKey}/image.webp`;
-      const webpUpload = await this.storageService.upload(
-        processingResult.webp.buffer,
-        webpKey,
-        'image/webp',
-        { public: true }
-      );
+      const webpUpload = await this.storageService.upload(processingResult.webp.buffer, webpKey, 'image/webp', { public: true });
 
       media.addProcessedFile({
         url: webpUpload.url,
@@ -102,7 +89,7 @@ export class ProcessImageUseCase {
         width: processingResult.webp.width,
         height: processingResult.webp.height,
         size: processingResult.webp.size,
-        quality: options.compression?.quality
+        quality: options.compression?.quality,
       });
 
       urls.webp = webpUpload.url;
@@ -111,12 +98,9 @@ export class ProcessImageUseCase {
     // Upload thumbnail if generated
     if (processingResult.thumbnail && options.generateThumbnail) {
       const thumbnailKey = `${baseKey}/thumbnail.webp`;
-      const thumbnailUpload = await this.storageService.upload(
-        processingResult.thumbnail.buffer,
-        thumbnailKey,
-        'image/webp',
-        { public: true }
-      );
+      const thumbnailUpload = await this.storageService.upload(processingResult.thumbnail.buffer, thumbnailKey, 'image/webp', {
+        public: true,
+      });
 
       media.setThumbnail(thumbnailUpload.url);
       urls.thumbnail = thumbnailUpload.url;
@@ -125,18 +109,11 @@ export class ProcessImageUseCase {
     // Upload responsive sizes
     if (processingResult.responsiveSizes && options.responsiveSizes) {
       for (const responsiveSize of processingResult.responsiveSizes) {
-        const responsiveOption = options.responsiveSizes.find(
-          opt => opt.width === responsiveSize.width
-        );
+        const responsiveOption = options.responsiveSizes.find(opt => opt.width === responsiveSize.width);
 
         if (responsiveOption) {
           const responsiveKey = `${baseKey}/image${responsiveOption.suffix}.webp`;
-          const responsiveUpload = await this.storageService.upload(
-            responsiveSize.buffer,
-            responsiveKey,
-            'image/webp',
-            { public: true }
-          );
+          const responsiveUpload = await this.storageService.upload(responsiveSize.buffer, responsiveKey, 'image/webp', { public: true });
 
           media.addProcessedFile({
             url: responsiveUpload.url,
@@ -144,7 +121,7 @@ export class ProcessImageUseCase {
             width: responsiveSize.width,
             height: responsiveSize.height,
             size: responsiveSize.size,
-            quality: options.compression?.quality
+            quality: options.compression?.quality,
           });
 
           urls.responsive![responsiveOption.suffix] = responsiveUpload.url;
@@ -157,7 +134,7 @@ export class ProcessImageUseCase {
 
     return {
       media,
-      urls
+      urls,
     };
   }
 
@@ -173,7 +150,7 @@ export class ProcessImageUseCase {
       'image/png': 'png',
       'image/webp': 'webp',
       'image/gif': 'gif',
-      'image/avif': 'avif'
+      'image/avif': 'avif',
     };
     return extensions[mimeType] || 'bin';
   }

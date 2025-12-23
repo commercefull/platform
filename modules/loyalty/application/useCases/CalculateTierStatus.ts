@@ -1,6 +1,6 @@
 /**
  * CalculateTierStatus Use Case
- * 
+ *
  * Calculates and updates a customer's loyalty tier based on their activity.
  */
 
@@ -51,16 +51,13 @@ export class CalculateTierStatusUseCase {
     const qualifyingMetrics = await this.loyaltyRepository.getQualifyingMetrics(
       customerId,
       qualificationPeriod.startDate,
-      qualificationPeriod.endDate
+      qualificationPeriod.endDate,
     );
 
     // Determine new tier based on qualifying metrics
     let newTier = sortedTiers[0]; // Default to lowest tier
     for (const tier of sortedTiers) {
-      if (
-        qualifyingMetrics.points >= tier.pointsThreshold &&
-        qualifyingMetrics.purchases >= (tier.purchasesThreshold || 0)
-      ) {
+      if (qualifyingMetrics.points >= tier.pointsThreshold && qualifyingMetrics.purchases >= (tier.purchasesThreshold || 0)) {
         newTier = tier;
       }
     }
@@ -76,23 +73,18 @@ export class CalculateTierStatusUseCase {
       await this.loyaltyRepository.updateCustomerTier(customerId, newTier.tierId);
 
       // Emit event
-      await eventBus.emit(
-        changeType === 'upgraded' ? 'loyalty.tier_upgraded' : 'loyalty.tier_downgraded',
-        {
-          customerId,
-          previousTierId: previousTier?.tierId,
-          newTierId: newTier.tierId,
-          tierName: newTier.name,
-        }
-      );
+      await eventBus.emit(changeType === 'upgraded' ? 'loyalty.tier_upgraded' : 'loyalty.tier_downgraded', {
+        customerId,
+        previousTierId: previousTier?.tierId,
+        newTierId: newTier.tierId,
+        tierName: newTier.name,
+      });
     }
 
     // Calculate points to next tier
     const nextTierIndex = sortedTiers.findIndex((t: any) => t.tierId === newTier.tierId) + 1;
     const nextTier = nextTierIndex < sortedTiers.length ? sortedTiers[nextTierIndex] : undefined;
-    const pointsToNextTier = nextTier
-      ? Math.max(0, nextTier.pointsThreshold - qualifyingMetrics.points)
-      : undefined;
+    const pointsToNextTier = nextTier ? Math.max(0, nextTier.pointsThreshold - qualifyingMetrics.points) : undefined;
 
     return {
       currentTier: {

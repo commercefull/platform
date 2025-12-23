@@ -12,7 +12,7 @@ import { eventBus } from '../../../libs/events/eventBus';
 export class DeleteCustomerCommand {
   constructor(
     public readonly customerId: string,
-    public readonly reason?: string
+    public readonly reason?: string,
   ) {}
 }
 
@@ -50,13 +50,13 @@ export class DeleteCustomerUseCase {
     (eventBus as any).emit('customer.deleted', {
       customerId: customer.customerId,
       email: customer.email,
-      reason: command.reason
+      reason: command.reason,
     });
 
     return {
       success: true,
       customerId: command.customerId,
-      deletedAt: new Date().toISOString()
+      deletedAt: new Date().toISOString(),
     };
   }
 }

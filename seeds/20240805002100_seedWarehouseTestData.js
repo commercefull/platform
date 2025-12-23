@@ -8,35 +8,43 @@ const WAREHOUSE_IDS = {
   MAIN: '0193b000-0000-7000-8000-000000000001',
   WEST_COAST: '0193b000-0000-7000-8000-000000000002',
   EAST_COAST: '0193b000-0000-7000-8000-000000000003',
-  RETURNS: '0193b000-0000-7000-8000-000000000004'
+  RETURNS: '0193b000-0000-7000-8000-000000000004',
 };
 
 const ZONE_IDS = {
   MAIN_STORAGE: '0193b001-0000-7000-8000-000000000001',
   MAIN_PICKING: '0193b001-0000-7000-8000-000000000002',
   MAIN_SHIPPING: '0193b001-0000-7000-8000-000000000003',
-  WEST_STORAGE: '0193b001-0000-7000-8000-000000000004'
+  WEST_STORAGE: '0193b001-0000-7000-8000-000000000004',
 };
 
 const BIN_IDS = {
   A1_01: '0193b002-0000-7000-8000-000000000001',
   A1_02: '0193b002-0000-7000-8000-000000000002',
   B1_01: '0193b002-0000-7000-8000-000000000003',
-  SHIP_01: '0193b002-0000-7000-8000-000000000004'
+  SHIP_01: '0193b002-0000-7000-8000-000000000004',
 };
 
-exports.seed = async function(knex) {
+exports.seed = async function (knex) {
   // Check if required tables exist
   const hasWarehouseTable = await knex.schema.hasTable('distributionWarehouse');
   if (!hasWarehouseTable) {
-    
     return;
   }
 
   // Clean up existing test data in reverse order of dependencies
-  await knex('distributionWarehouseBin').whereIn('distributionWarehouseBinId', Object.values(BIN_IDS)).del().catch(() => {});
-  await knex('distributionWarehouseZone').whereIn('distributionWarehouseZoneId', Object.values(ZONE_IDS)).del().catch(() => {});
-  await knex('distributionWarehouse').whereIn('distributionWarehouseId', Object.values(WAREHOUSE_IDS)).del().catch(() => {});
+  await knex('distributionWarehouseBin')
+    .whereIn('distributionWarehouseBinId', Object.values(BIN_IDS))
+    .del()
+    .catch(() => {});
+  await knex('distributionWarehouseZone')
+    .whereIn('distributionWarehouseZoneId', Object.values(ZONE_IDS))
+    .del()
+    .catch(() => {});
+  await knex('distributionWarehouse')
+    .whereIn('distributionWarehouseId', Object.values(WAREHOUSE_IDS))
+    .del()
+    .catch(() => {});
 
   // Seed Warehouses
   await knex('distributionWarehouse').insert([
@@ -56,7 +64,7 @@ exports.seed = async function(knex) {
       postalCode: '75001',
       country: 'US',
       latitude: 32.7767,
-      longitude: -96.7970,
+      longitude: -96.797,
       email: 'main@testwarehouse.com',
       phone: '555-0100',
       contactName: 'John Manager',
@@ -68,10 +76,10 @@ exports.seed = async function(knex) {
         tuesday: { open: '08:00', close: '18:00' },
         wednesday: { open: '08:00', close: '18:00' },
         thursday: { open: '08:00', close: '18:00' },
-        friday: { open: '08:00', close: '18:00' }
+        friday: { open: '08:00', close: '18:00' },
       }),
       capabilities: JSON.stringify(['standard', 'express', 'hazmat']),
-      shippingMethods: ['ground', 'express', 'overnight']
+      shippingMethods: ['ground', 'express', 'overnight'],
     },
     {
       distributionWarehouseId: WAREHOUSE_IDS.WEST_COAST,
@@ -95,7 +103,7 @@ exports.seed = async function(knex) {
       contactName: 'Jane Manager',
       timezone: 'America/Los_Angeles',
       cutoffTime: '15:00:00',
-      processingTime: 1
+      processingTime: 1,
     },
     {
       distributionWarehouseId: WAREHOUSE_IDS.EAST_COAST,
@@ -113,13 +121,13 @@ exports.seed = async function(knex) {
       postalCode: '10001',
       country: 'US',
       latitude: 40.7128,
-      longitude: -74.0060,
+      longitude: -74.006,
       email: 'east@testwarehouse.com',
       phone: '555-0300',
       contactName: 'Bob Manager',
       timezone: 'America/New_York',
       cutoffTime: '13:00:00',
-      processingTime: 1
+      processingTime: 1,
     },
     {
       distributionWarehouseId: WAREHOUSE_IDS.RETURNS,
@@ -140,8 +148,8 @@ exports.seed = async function(knex) {
       phone: '555-0400',
       contactName: 'Returns Team',
       timezone: 'America/Chicago',
-      processingTime: 2
-    }
+      processingTime: 2,
+    },
   ]);
 
   // Seed Warehouse Zones
@@ -156,7 +164,7 @@ exports.seed = async function(knex) {
       zoneType: 'storage',
       priority: 1,
       capacity: 10000,
-      capacityUnit: 'sqft'
+      capacityUnit: 'sqft',
     },
     {
       distributionWarehouseZoneId: ZONE_IDS.MAIN_PICKING,
@@ -168,7 +176,7 @@ exports.seed = async function(knex) {
       zoneType: 'picking',
       priority: 2,
       capacity: 5000,
-      capacityUnit: 'sqft'
+      capacityUnit: 'sqft',
     },
     {
       distributionWarehouseZoneId: ZONE_IDS.MAIN_SHIPPING,
@@ -180,7 +188,7 @@ exports.seed = async function(knex) {
       zoneType: 'shipping',
       priority: 3,
       capacity: 3000,
-      capacityUnit: 'sqft'
+      capacityUnit: 'sqft',
     },
     {
       distributionWarehouseZoneId: ZONE_IDS.WEST_STORAGE,
@@ -192,8 +200,8 @@ exports.seed = async function(knex) {
       zoneType: 'storage',
       priority: 1,
       capacity: 8000,
-      capacityUnit: 'sqft'
-    }
+      capacityUnit: 'sqft',
+    },
   ]);
 
   // Seed Warehouse Bins
@@ -213,7 +221,7 @@ exports.seed = async function(knex) {
       isPickable: true,
       isReceivable: true,
       isMixed: true,
-      priority: 1
+      priority: 1,
     },
     {
       distributionWarehouseBinId: BIN_IDS.A1_02,
@@ -230,7 +238,7 @@ exports.seed = async function(knex) {
       isPickable: true,
       isReceivable: true,
       isMixed: true,
-      priority: 2
+      priority: 2,
     },
     {
       distributionWarehouseBinId: BIN_IDS.B1_01,
@@ -247,7 +255,7 @@ exports.seed = async function(knex) {
       isPickable: true,
       isReceivable: false,
       isMixed: false,
-      priority: 1
+      priority: 1,
     },
     {
       distributionWarehouseBinId: BIN_IDS.SHIP_01,
@@ -264,9 +272,7 @@ exports.seed = async function(knex) {
       isPickable: false,
       isReceivable: false,
       isMixed: true,
-      priority: 1
-    }
+      priority: 1,
+    },
   ]);
-
-  
 };

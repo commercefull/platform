@@ -1,8 +1,8 @@
 /**
  * Seed Inventory Test Data
- * 
+ *
  * Creates test inventory locations for integration testing.
- * 
+ *
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
@@ -10,21 +10,17 @@ exports.seed = async function (knex) {
   // Get a sample warehouse
   const warehouse = await knex('distributionWarehouse').first();
   if (!warehouse) {
-    
     return;
   }
 
   // Get a sample product
   const product = await knex('product').first();
   if (!product) {
-    
     return;
   }
 
   // Delete existing test inventory locations
-  await knex('inventoryLocation')
-    .where('sku', 'like', 'TEST-INV-%')
-    .del();
+  await knex('inventoryLocation').where('sku', 'like', 'TEST-INV-%').del();
 
   // Insert test inventory locations
   await knex('inventoryLocation').insert([
@@ -37,7 +33,7 @@ exports.seed = async function (knex) {
       availableQuantity: 100,
       minimumStockLevel: 10,
       maximumStockLevel: 500,
-      status: 'available'
+      status: 'available',
     },
     {
       distributionWarehouseId: warehouse.distributionWarehouseId,
@@ -48,7 +44,7 @@ exports.seed = async function (knex) {
       availableQuantity: 5,
       minimumStockLevel: 10,
       maximumStockLevel: 200,
-      status: 'available'
+      status: 'available',
     },
     {
       distributionWarehouseId: warehouse.distributionWarehouseId,
@@ -59,9 +55,7 @@ exports.seed = async function (knex) {
       availableQuantity: 0,
       minimumStockLevel: 5,
       maximumStockLevel: 100,
-      status: 'available'
-    }
+      status: 'available',
+    },
   ]);
-
-  
 };

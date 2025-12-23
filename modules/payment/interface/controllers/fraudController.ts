@@ -20,7 +20,7 @@ export const getFraudRules: AsyncHandler = async (req, res, next) => {
     res.json({ success: true, data: rules });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -35,7 +35,7 @@ export const getFraudRule: AsyncHandler = async (req, res, next) => {
     res.json({ success: true, data: rule });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -46,7 +46,7 @@ export const createFraudRule: AsyncHandler = async (req, res, next) => {
     res.status(201).json({ success: true, data: rule });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -55,12 +55,12 @@ export const updateFraudRule: AsyncHandler = async (req, res, next) => {
   try {
     const rule = await fraudRepo.saveRule({
       fraudRuleId: req.params.id,
-      ...req.body
+      ...req.body,
     });
     res.json({ success: true, data: rule });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -71,7 +71,7 @@ export const deleteFraudRule: AsyncHandler = async (req, res, next) => {
     res.json({ success: true, message: 'Rule deactivated' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -85,12 +85,12 @@ export const getFraudChecks: AsyncHandler = async (req, res, next) => {
     const { status, riskLevel, customerId, limit, offset } = req.query;
     const result = await fraudRepo.getChecks(
       { status: status as any, riskLevel: riskLevel as any, customerId: customerId as string },
-      { limit: parseInt(limit as string) || 20, offset: parseInt(offset as string) || 0 }
+      { limit: parseInt(limit as string) || 20, offset: parseInt(offset as string) || 0 },
     );
     res.json({ success: true, ...result });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -105,7 +105,7 @@ export const getFraudCheck: AsyncHandler = async (req, res, next) => {
     res.json({ success: true, data: check });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -116,7 +116,7 @@ export const getPendingReviews: AsyncHandler = async (req, res, next) => {
     res.json({ success: true, data: checks });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -128,7 +128,7 @@ export const reviewFraudCheck: AsyncHandler = async (req, res, next) => {
     res.json({ success: true, message: 'Review submitted' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -142,12 +142,12 @@ export const getBlacklist: AsyncHandler = async (req, res, next) => {
     const { type, isActive, limit, offset } = req.query;
     const result = await fraudRepo.getBlacklist(
       { type: type as any, isActive: isActive === 'true' ? true : isActive === 'false' ? false : undefined },
-      { limit: parseInt(limit as string) || 20, offset: parseInt(offset as string) || 0 }
+      { limit: parseInt(limit as string) || 20, offset: parseInt(offset as string) || 0 },
     );
     res.json({ success: true, ...result });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -159,7 +159,7 @@ export const addToBlacklist: AsyncHandler = async (req, res, next) => {
     res.status(201).json({ success: true, data: entry });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -170,7 +170,7 @@ export const removeFromBlacklist: AsyncHandler = async (req, res, next) => {
     res.json({ success: true, message: 'Entry removed from blacklist' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(400).json({ success: false, message: error.message });
   }
 };

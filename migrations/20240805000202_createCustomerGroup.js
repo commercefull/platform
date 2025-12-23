@@ -14,7 +14,7 @@ exports.up = function (knex) {
     t.boolean('isSystem').notNullable().defaultTo(false);
     t.integer('sortOrder').notNullable().defaultTo(0);
     t.decimal('discountPercent', 5, 2).defaultTo(0);
-    
+
     t.uuid('createdBy');
     t.timestamp('deletedAt');
     t.index('code');

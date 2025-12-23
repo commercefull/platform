@@ -50,17 +50,16 @@ export class PayoutRepo {
   }
 
   async findByStatus(status: PayoutStatus, limit = 100): Promise<Payout[]> {
-    return (await query<Payout[]>(
-      `SELECT * FROM "payout" WHERE "status" = $1 AND "deletedAt" IS NULL ORDER BY "createdAt" DESC LIMIT $2`,
-      [status, limit]
-    )) || [];
+    return (
+      (await query<Payout[]>(`SELECT * FROM "payout" WHERE "status" = $1 AND "deletedAt" IS NULL ORDER BY "createdAt" DESC LIMIT $2`, [
+        status,
+        limit,
+      ])) || []
+    );
   }
 
   async findByGatewayId(gatewayPayoutId: string): Promise<Payout | null> {
-    return await queryOne<Payout>(
-      `SELECT * FROM "payout" WHERE "gatewayPayoutId" = $1 AND "deletedAt" IS NULL`,
-      [gatewayPayoutId]
-    );
+    return await queryOne<Payout>(`SELECT * FROM "payout" WHERE "gatewayPayoutId" = $1 AND "deletedAt" IS NULL`, [gatewayPayoutId]);
   }
 
   async create(params: PayoutCreateParams): Promise<Payout> {
@@ -73,13 +72,27 @@ export class PayoutRepo {
         "gatewayPayoutId", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20) RETURNING *`,
       [
-        params.merchantId, params.amount, params.fee || 0, params.netAmount, params.currencyCode || 'USD',
-        params.status || 'pending', params.payoutMethod || 'bank_transfer', params.bankAccountId || null,
-        JSON.stringify(params.bankAccountDetails || {}), params.description || null,
-        params.statementDescriptor || null, params.periodStart || null, params.periodEnd || null,
-        params.expectedArrivalDate || null, params.completedAt || null, params.failureReason || null,
-        params.transactionReference || null, params.gatewayPayoutId || null, now, now
-      ]
+        params.merchantId,
+        params.amount,
+        params.fee || 0,
+        params.netAmount,
+        params.currencyCode || 'USD',
+        params.status || 'pending',
+        params.payoutMethod || 'bank_transfer',
+        params.bankAccountId || null,
+        JSON.stringify(params.bankAccountDetails || {}),
+        params.description || null,
+        params.statementDescriptor || null,
+        params.periodStart || null,
+        params.periodEnd || null,
+        params.expectedArrivalDate || null,
+        params.completedAt || null,
+        params.failureReason || null,
+        params.transactionReference || null,
+        params.gatewayPayoutId || null,
+        now,
+        now,
+      ],
     );
     if (!result) throw new Error('Failed to create payout');
     return result;
@@ -104,7 +117,7 @@ export class PayoutRepo {
 
     return await queryOne<Payout>(
       `UPDATE "payout" SET ${updateFields.join(', ')} WHERE "payoutId" = $${paramIndex} AND "deletedAt" IS NULL RETURNING *`,
-      values
+      values,
     );
   }
 
@@ -119,7 +132,7 @@ export class PayoutRepo {
   async delete(id: string): Promise<boolean> {
     const result = await queryOne<{ payoutId: string }>(
       `UPDATE "payout" SET "deletedAt" = $1 WHERE "payoutId" = $2 AND "deletedAt" IS NULL RETURNING "payoutId"`,
-      [unixTimestamp(), id]
+      [unixTimestamp(), id],
     );
     return !!result;
   }

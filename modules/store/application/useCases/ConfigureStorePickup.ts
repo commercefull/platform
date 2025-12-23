@@ -1,6 +1,6 @@
 /**
  * ConfigureStorePickup Use Case
- * 
+ *
  * Configures BOPIS (Buy Online, Pick Up In Store) for a store.
  */
 
@@ -56,10 +56,7 @@ export class ConfigureStorePickupUseCase {
       },
     };
 
-    const updatedStore = await this.storeRepository.updatePickupSettings(
-      input.storeId,
-      pickupSettings
-    );
+    const updatedStore = await this.storeRepository.updatePickupSettings(input.storeId, pickupSettings);
 
     return {
       storeId: updatedStore.storeId,

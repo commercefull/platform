@@ -7,40 +7,40 @@
 const SUPPORT_AGENT_IDS = {
   AGENT_JOHN: '01939000-0000-7000-8000-000000000001',
   AGENT_JANE: '01939000-0000-7000-8000-000000000002',
-  SUPERVISOR_BOB: '01939000-0000-7000-8000-000000000003'
+  SUPERVISOR_BOB: '01939000-0000-7000-8000-000000000003',
 };
 
 const SUPPORT_TICKET_IDS = {
   TICKET_OPEN: '01939001-0000-7000-8000-000000000001',
   TICKET_IN_PROGRESS: '01939001-0000-7000-8000-000000000002',
-  TICKET_RESOLVED: '01939001-0000-7000-8000-000000000003'
+  TICKET_RESOLVED: '01939001-0000-7000-8000-000000000003',
 };
 
 const SUPPORT_MESSAGE_IDS = {
   MSG_INITIAL: '01939002-0000-7000-8000-000000000001',
-  MSG_REPLY: '01939002-0000-7000-8000-000000000002'
+  MSG_REPLY: '01939002-0000-7000-8000-000000000002',
 };
 
 const FAQ_CATEGORY_IDS = {
   ORDERS: '01939003-0000-7000-8000-000000000001',
   SHIPPING: '01939003-0000-7000-8000-000000000002',
-  RETURNS: '01939003-0000-7000-8000-000000000003'
+  RETURNS: '01939003-0000-7000-8000-000000000003',
 };
 
 const FAQ_ARTICLE_IDS = {
   HOW_TO_ORDER: '01939004-0000-7000-8000-000000000001',
   SHIPPING_TIMES: '01939004-0000-7000-8000-000000000002',
-  RETURN_POLICY: '01939004-0000-7000-8000-000000000003'
+  RETURN_POLICY: '01939004-0000-7000-8000-000000000003',
 };
 
 const STOCK_ALERT_IDS = {
   ALERT_1: '01939005-0000-7000-8000-000000000001',
-  ALERT_2: '01939005-0000-7000-8000-000000000002'
+  ALERT_2: '01939005-0000-7000-8000-000000000002',
 };
 
 const PRICE_ALERT_IDS = {
   ALERT_1: '01939006-0000-7000-8000-000000000001',
-  ALERT_2: '01939006-0000-7000-8000-000000000002'
+  ALERT_2: '01939006-0000-7000-8000-000000000002',
 };
 
 // Test customer ID (should exist from customer seeds)
@@ -48,16 +48,40 @@ const TEST_CUSTOMER_ID = '01910000-0000-7000-8000-000000000001';
 // Test product ID (should exist from product seeds)
 const TEST_PRODUCT_ID = '01912000-0000-7000-8000-000000000001';
 
-exports.seed = async function(knex) {
+exports.seed = async function (knex) {
   // Clean up existing test data in reverse order of dependencies
-  await knex('supportAttachment').whereIn('supportTicketId', Object.values(SUPPORT_TICKET_IDS)).del().catch(() => {});
-  await knex('supportMessage').whereIn('supportMessageId', Object.values(SUPPORT_MESSAGE_IDS)).del().catch(() => {});
-  await knex('supportTicket').whereIn('supportTicketId', Object.values(SUPPORT_TICKET_IDS)).del().catch(() => {});
-  await knex('supportAgent').whereIn('supportAgentId', Object.values(SUPPORT_AGENT_IDS)).del().catch(() => {});
-  await knex('faqArticle').whereIn('faqArticleId', Object.values(FAQ_ARTICLE_IDS)).del().catch(() => {});
-  await knex('faqCategory').whereIn('faqCategoryId', Object.values(FAQ_CATEGORY_IDS)).del().catch(() => {});
-  await knex('stockAlert').whereIn('stockAlertId', Object.values(STOCK_ALERT_IDS)).del().catch(() => {});
-  await knex('priceAlert').whereIn('priceAlertId', Object.values(PRICE_ALERT_IDS)).del().catch(() => {});
+  await knex('supportAttachment')
+    .whereIn('supportTicketId', Object.values(SUPPORT_TICKET_IDS))
+    .del()
+    .catch(() => {});
+  await knex('supportMessage')
+    .whereIn('supportMessageId', Object.values(SUPPORT_MESSAGE_IDS))
+    .del()
+    .catch(() => {});
+  await knex('supportTicket')
+    .whereIn('supportTicketId', Object.values(SUPPORT_TICKET_IDS))
+    .del()
+    .catch(() => {});
+  await knex('supportAgent')
+    .whereIn('supportAgentId', Object.values(SUPPORT_AGENT_IDS))
+    .del()
+    .catch(() => {});
+  await knex('faqArticle')
+    .whereIn('faqArticleId', Object.values(FAQ_ARTICLE_IDS))
+    .del()
+    .catch(() => {});
+  await knex('faqCategory')
+    .whereIn('faqCategoryId', Object.values(FAQ_CATEGORY_IDS))
+    .del()
+    .catch(() => {});
+  await knex('stockAlert')
+    .whereIn('stockAlertId', Object.values(STOCK_ALERT_IDS))
+    .del()
+    .catch(() => {});
+  await knex('priceAlert')
+    .whereIn('priceAlertId', Object.values(PRICE_ALERT_IDS))
+    .del()
+    .catch(() => {});
 
   // Seed Support Agents
   await knex('supportAgent').insert([
@@ -80,7 +104,7 @@ exports.seed = async function(knex) {
       averageResolutionTimeMinutes: 120,
       satisfactionScore: 4.5,
       satisfactionCount: 100,
-      timezone: 'America/New_York'
+      timezone: 'America/New_York',
     },
     {
       supportAgentId: SUPPORT_AGENT_IDS.AGENT_JANE,
@@ -101,7 +125,7 @@ exports.seed = async function(knex) {
       averageResolutionTimeMinutes: 90,
       satisfactionScore: 4.8,
       satisfactionCount: 180,
-      timezone: 'America/Los_Angeles'
+      timezone: 'America/Los_Angeles',
     },
     {
       supportAgentId: SUPPORT_AGENT_IDS.SUPERVISOR_BOB,
@@ -122,8 +146,8 @@ exports.seed = async function(knex) {
       averageResolutionTimeMinutes: 60,
       satisfactionScore: 4.9,
       satisfactionCount: 400,
-      timezone: 'America/Chicago'
-    }
+      timezone: 'America/Chicago',
+    },
   ]);
 
   // Check if test customer exists
@@ -150,7 +174,7 @@ exports.seed = async function(knex) {
       priority: 'medium',
       category: 'order',
       channel: 'web',
-      createdAt: now
+      createdAt: now,
     },
     {
       supportTicketId: SUPPORT_TICKET_IDS.TICKET_IN_PROGRESS,
@@ -167,7 +191,7 @@ exports.seed = async function(knex) {
       assignedAgentId: SUPPORT_AGENT_IDS.AGENT_JOHN,
       firstResponseAt: yesterday,
       responseTimeMinutes: 30,
-      createdAt: yesterday
+      createdAt: yesterday,
     },
     {
       supportTicketId: SUPPORT_TICKET_IDS.TICKET_RESOLVED,
@@ -190,8 +214,8 @@ exports.seed = async function(knex) {
       resolutionNotes: 'Return processed successfully',
       customerSatisfaction: 5,
       customerFeedback: 'Great service!',
-      createdAt: lastWeek
-    }
+      createdAt: lastWeek,
+    },
   ]);
 
   // Seed Support Messages
@@ -207,7 +231,7 @@ exports.seed = async function(knex) {
       messageType: 'reply',
       isInternal: false,
       isRead: true,
-      createdAt: yesterday
+      createdAt: yesterday,
     },
     {
       supportMessageId: SUPPORT_MESSAGE_IDS.MSG_REPLY,
@@ -220,8 +244,8 @@ exports.seed = async function(knex) {
       messageType: 'reply',
       isInternal: false,
       isRead: true,
-      createdAt: now
-    }
+      createdAt: now,
+    },
   ]);
 
   // Seed FAQ Categories
@@ -235,7 +259,7 @@ exports.seed = async function(knex) {
       sortOrder: 1,
       articleCount: 1,
       isActive: true,
-      isFeatured: true
+      isFeatured: true,
     },
     {
       faqCategoryId: FAQ_CATEGORY_IDS.SHIPPING,
@@ -246,7 +270,7 @@ exports.seed = async function(knex) {
       sortOrder: 2,
       articleCount: 1,
       isActive: true,
-      isFeatured: true
+      isFeatured: true,
     },
     {
       faqCategoryId: FAQ_CATEGORY_IDS.RETURNS,
@@ -257,8 +281,8 @@ exports.seed = async function(knex) {
       sortOrder: 3,
       articleCount: 1,
       isActive: true,
-      isFeatured: false
-    }
+      isFeatured: false,
+    },
   ]);
 
   // Seed FAQ Articles
@@ -281,7 +305,7 @@ exports.seed = async function(knex) {
       isPublished: true,
       isFeatured: true,
       isPinned: false,
-      publishedAt: lastWeek
+      publishedAt: lastWeek,
     },
     {
       faqArticleId: FAQ_ARTICLE_IDS.SHIPPING_TIMES,
@@ -301,7 +325,7 @@ exports.seed = async function(knex) {
       isPublished: true,
       isFeatured: true,
       isPinned: true,
-      publishedAt: lastWeek
+      publishedAt: lastWeek,
     },
     {
       faqArticleId: FAQ_ARTICLE_IDS.RETURN_POLICY,
@@ -321,13 +345,13 @@ exports.seed = async function(knex) {
       isPublished: true,
       isFeatured: false,
       isPinned: false,
-      publishedAt: lastWeek
-    }
+      publishedAt: lastWeek,
+    },
   ]);
 
   // Check if test product exists before seeding alerts
   const productExists = await knex('product').where('productId', TEST_PRODUCT_ID).first();
-  
+
   if (productExists) {
     // Seed Stock Alerts
     await knex('stockAlert').insert([
@@ -342,7 +366,7 @@ exports.seed = async function(knex) {
         stockThreshold: 1,
         notifyOnAnyStock: true,
         notificationChannel: 'email',
-        notificationCount: 0
+        notificationCount: 0,
       },
       {
         stockAlertId: STOCK_ALERT_IDS.ALERT_2,
@@ -354,8 +378,8 @@ exports.seed = async function(knex) {
         stockThreshold: 5,
         notifyOnAnyStock: false,
         notificationChannel: 'email',
-        notificationCount: 0
-      }
+        notificationCount: 0,
+      },
     ]);
 
     // Seed Price Alerts
@@ -368,10 +392,10 @@ exports.seed = async function(knex) {
         productName: 'Test Product',
         status: 'active',
         alertType: 'target',
-        targetPrice: 50.00,
-        originalPrice: 100.00,
+        targetPrice: 50.0,
+        originalPrice: 100.0,
         notificationChannel: 'email',
-        notificationCount: 0
+        notificationCount: 0,
       },
       {
         priceAlertId: PRICE_ALERT_IDS.ALERT_2,
@@ -381,10 +405,10 @@ exports.seed = async function(knex) {
         status: 'active',
         alertType: 'percentage_drop',
         percentageThreshold: 20,
-        originalPrice: 100.00,
+        originalPrice: 100.0,
         notificationChannel: 'email',
-        notificationCount: 0
-      }
+        notificationCount: 0,
+      },
     ]);
 
     console.log('Support test data seeded successfully (with alerts)');

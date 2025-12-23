@@ -22,7 +22,7 @@ exports.up = function (knex) {
     t.string('contactPhone', 30);
     t.text('notes');
     t.boolean('isActive').notNullable().defaultTo(true);
-    
+
     t.index('supplierId');
     t.index('addressType');
     t.index('isDefault');

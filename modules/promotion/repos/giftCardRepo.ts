@@ -82,24 +82,18 @@ export type GiftCardTransaction = PromotionGiftCardTransaction;
 // ============================================================================
 
 export async function getGiftCard(giftCardId: string): Promise<PromotionGiftCard | null> {
-  const row = await queryOne<Record<string, any>>(
-    `SELECT * FROM "${GIFT_CARD_TABLE}" WHERE "promotionGiftCardId" = $1`,
-    [giftCardId]
-  );
+  const row = await queryOne<Record<string, any>>(`SELECT * FROM "${GIFT_CARD_TABLE}" WHERE "promotionGiftCardId" = $1`, [giftCardId]);
   return row ? mapToGiftCard(row) : null;
 }
 
 export async function getGiftCardByCode(code: string): Promise<PromotionGiftCard | null> {
-  const row = await queryOne<Record<string, any>>(
-    `SELECT * FROM "${GIFT_CARD_TABLE}" WHERE "code" = $1`,
-    [code.toUpperCase()]
-  );
+  const row = await queryOne<Record<string, any>>(`SELECT * FROM "${GIFT_CARD_TABLE}" WHERE "code" = $1`, [code.toUpperCase()]);
   return row ? mapToGiftCard(row) : null;
 }
 
 export async function getGiftCards(
   filters?: { status?: GiftCardStatus; purchasedBy?: string; assignedTo?: string },
-  pagination?: { limit?: number; offset?: number }
+  pagination?: { limit?: number; offset?: number },
 ): Promise<{ data: PromotionGiftCard[]; total: number }> {
   let whereClause = '1=1';
   const params: any[] = [];
@@ -118,10 +112,7 @@ export async function getGiftCards(
     params.push(filters.assignedTo);
   }
 
-  const countResult = await queryOne<{ count: string }>(
-    `SELECT COUNT(*) as count FROM "${GIFT_CARD_TABLE}" WHERE ${whereClause}`,
-    params
-  );
+  const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "${GIFT_CARD_TABLE}" WHERE ${whereClause}`, params);
 
   const limit = pagination?.limit || 20;
   const offset = pagination?.offset || 0;
@@ -129,12 +120,12 @@ export async function getGiftCards(
   const rows = await query<Record<string, any>[]>(
     `SELECT * FROM "${GIFT_CARD_TABLE}" WHERE ${whereClause} 
      ORDER BY "createdAt" DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
-    [...params, limit, offset]
+    [...params, limit, offset],
   );
 
   return {
     data: (rows || []).map(mapToGiftCard),
-    total: parseInt(countResult?.count || '0')
+    total: parseInt(countResult?.count || '0'),
   };
 }
 
@@ -165,13 +156,24 @@ export async function createGiftCard(giftCard: {
     ) VALUES ($1, $2, $3, $4, $5, 'pending', $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
     RETURNING *`,
     [
-      code, giftCard.type || 'standard', giftCard.initialBalance, giftCard.initialBalance,
-      giftCard.currency || 'USD', giftCard.purchasedBy, giftCard.purchaseOrderId,
-      giftCard.recipientEmail, giftCard.recipientName, giftCard.personalMessage,
-      giftCard.deliveryDate?.toISOString(), giftCard.deliveryMethod || 'email',
-      giftCard.expiresAt?.toISOString(), giftCard.isReloadable || false,
-      giftCard.restrictions ? JSON.stringify(giftCard.restrictions) : null, now, now
-    ]
+      code,
+      giftCard.type || 'standard',
+      giftCard.initialBalance,
+      giftCard.initialBalance,
+      giftCard.currency || 'USD',
+      giftCard.purchasedBy,
+      giftCard.purchaseOrderId,
+      giftCard.recipientEmail,
+      giftCard.recipientName,
+      giftCard.personalMessage,
+      giftCard.deliveryDate?.toISOString(),
+      giftCard.deliveryMethod || 'email',
+      giftCard.expiresAt?.toISOString(),
+      giftCard.isReloadable || false,
+      giftCard.restrictions ? JSON.stringify(giftCard.restrictions) : null,
+      now,
+      now,
+    ],
   );
 
   return mapToGiftCard(result!);
@@ -182,7 +184,7 @@ export async function activateGiftCard(giftCardId: string): Promise<void> {
   await query(
     `UPDATE "${GIFT_CARD_TABLE}" SET "status" = 'active', "activatedAt" = $1, "updatedAt" = $1
      WHERE "promotionGiftCardId" = $2`,
-    [now, giftCardId]
+    [now, giftCardId],
   );
 }
 
@@ -191,7 +193,7 @@ export async function assignGiftCard(giftCardId: string, customerId: string): Pr
   await query(
     `UPDATE "${GIFT_CARD_TABLE}" SET "assignedTo" = $1, "assignedAt" = $2, "updatedAt" = $2
      WHERE "promotionGiftCardId" = $3`,
-    [customerId, now, giftCardId]
+    [customerId, now, giftCardId],
   );
 }
 
@@ -200,7 +202,7 @@ export async function redeemGiftCard(
   amount: number,
   orderId?: string,
   customerId?: string,
-  performedBy?: string
+  performedBy?: string,
 ): Promise<PromotionGiftCardTransaction> {
   const giftCard = await getGiftCard(giftCardId);
   if (!giftCard) throw new Error('Gift card not found');
@@ -219,7 +221,7 @@ export async function redeemGiftCard(
       "currentBalance" = $1, "status" = $2, "lastUsedAt" = $3,
       "usageCount" = "usageCount" + 1, "totalRedeemed" = "totalRedeemed" + $4, "updatedAt" = $3
      WHERE "promotionGiftCardId" = $5`,
-    [newBalance, newStatus, now, amount, giftCardId]
+    [newBalance, newStatus, now, amount, giftCardId],
   );
 
   return createTransaction({
@@ -232,7 +234,7 @@ export async function redeemGiftCard(
     orderId,
     customerId,
     performedBy,
-    performedByType: performedBy ? 'customer' : 'system'
+    performedByType: performedBy ? 'customer' : 'system',
   });
 }
 
@@ -240,7 +242,7 @@ export async function reloadGiftCard(
   giftCardId: string,
   amount: number,
   orderId?: string,
-  performedBy?: string
+  performedBy?: string,
 ): Promise<PromotionGiftCardTransaction> {
   const giftCard = await getGiftCard(giftCardId);
   if (!giftCard) throw new Error('Gift card not found');
@@ -263,7 +265,7 @@ export async function reloadGiftCard(
   await query(
     `UPDATE "${GIFT_CARD_TABLE}" SET "currentBalance" = $1, "status" = $2, "updatedAt" = $3
      WHERE "promotionGiftCardId" = $4`,
-    [newBalance, newStatus, now, giftCardId]
+    [newBalance, newStatus, now, giftCardId],
   );
 
   return createTransaction({
@@ -275,7 +277,7 @@ export async function reloadGiftCard(
     currency: giftCard.currency,
     orderId,
     performedBy,
-    performedByType: 'customer'
+    performedByType: 'customer',
   });
 }
 
@@ -284,7 +286,7 @@ export async function refundToGiftCard(
   amount: number,
   orderId?: string,
   performedBy?: string,
-  notes?: string
+  notes?: string,
 ): Promise<PromotionGiftCardTransaction> {
   const giftCard = await getGiftCard(giftCardId);
   if (!giftCard) throw new Error('Gift card not found');
@@ -296,7 +298,7 @@ export async function refundToGiftCard(
   await query(
     `UPDATE "${GIFT_CARD_TABLE}" SET "currentBalance" = $1, "status" = $2, "updatedAt" = $3
      WHERE "promotionGiftCardId" = $4`,
-    [newBalance, newStatus, now, giftCardId]
+    [newBalance, newStatus, now, giftCardId],
   );
 
   return createTransaction({
@@ -309,7 +311,7 @@ export async function refundToGiftCard(
     orderId,
     performedBy,
     performedByType: 'admin',
-    notes
+    notes,
   });
 }
 
@@ -317,7 +319,7 @@ export async function cancelGiftCard(giftCardId: string): Promise<void> {
   await query(
     `UPDATE "${GIFT_CARD_TABLE}" SET "status" = 'cancelled', "updatedAt" = $1
      WHERE "promotionGiftCardId" = $2`,
-    [new Date().toISOString(), giftCardId]
+    [new Date().toISOString(), giftCardId],
   );
 }
 
@@ -325,7 +327,7 @@ export async function expireGiftCards(): Promise<number> {
   const result = await query(
     `UPDATE "${GIFT_CARD_TABLE}" SET "status" = 'expired', "updatedAt" = $1
      WHERE "status" = 'active' AND "expiresAt" < NOW()`,
-    [new Date().toISOString()]
+    [new Date().toISOString()],
   );
   return (result as any)?.rowCount || 0;
 }
@@ -358,11 +360,20 @@ async function createTransaction(transaction: {
     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
     RETURNING *`,
     [
-      transaction.promotionGiftCardId, transaction.type, transaction.amount,
-      transaction.balanceBefore, transaction.balanceAfter, transaction.currency,
-      transaction.orderId, transaction.customerId, transaction.performedBy,
-      transaction.performedByType, transaction.notes, referenceNumber, now
-    ]
+      transaction.promotionGiftCardId,
+      transaction.type,
+      transaction.amount,
+      transaction.balanceBefore,
+      transaction.balanceAfter,
+      transaction.currency,
+      transaction.orderId,
+      transaction.customerId,
+      transaction.performedBy,
+      transaction.performedByType,
+      transaction.notes,
+      referenceNumber,
+      now,
+    ],
   );
 
   return mapToTransaction(result!);
@@ -371,7 +382,7 @@ async function createTransaction(transaction: {
 export async function getTransactions(giftCardId: string): Promise<PromotionGiftCardTransaction[]> {
   const rows = await query<Record<string, any>[]>(
     `SELECT * FROM "${GIFT_CARD_TRANSACTION_TABLE}" WHERE "promotionGiftCardId" = $1 ORDER BY "createdAt" DESC`,
-    [giftCardId]
+    [giftCardId],
   );
   return (rows || []).map(mapToTransaction);
 }
@@ -422,7 +433,7 @@ function mapToGiftCard(row: Record<string, any>): PromotionGiftCard {
     restrictions: row.restrictions,
     metadata: row.metadata,
     createdAt: new Date(row.createdAt),
-    updatedAt: new Date(row.updatedAt)
+    updatedAt: new Date(row.updatedAt),
   };
 }
 
@@ -442,6 +453,6 @@ function mapToTransaction(row: Record<string, any>): PromotionGiftCardTransactio
     notes: row.notes,
     referenceNumber: row.referenceNumber,
     metadata: row.metadata,
-    createdAt: new Date(row.createdAt)
+    createdAt: new Date(row.createdAt),
   };
 }

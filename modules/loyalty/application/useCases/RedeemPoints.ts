@@ -23,7 +23,7 @@ export interface RedeemPointsOutput {
 export class RedeemPointsUseCase {
   constructor(
     private readonly loyaltyRepository: any,
-    private readonly rewardRepository: any
+    private readonly rewardRepository: any,
   ) {}
 
   async execute(input: RedeemPointsInput): Promise<RedeemPointsOutput> {
@@ -51,14 +51,14 @@ export class RedeemPointsUseCase {
       if (reward.pointsCost > input.points) {
         throw new Error(`Reward requires ${reward.pointsCost} points`);
       }
-      
+
       discountValue = reward.discountValue;
       description = description || `Redeemed for ${reward.name}`;
     }
 
     // Create redemption transaction
     const transactionId = `lpt_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 9)}`;
-    
+
     await this.loyaltyRepository.createTransaction({
       transactionId,
       memberId: member.memberId,

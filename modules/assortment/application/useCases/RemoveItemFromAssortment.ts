@@ -15,10 +15,7 @@ export class RemoveItemFromAssortmentUseCase {
       throw new Error('Assortment ID and product variant ID are required');
     }
 
-    const removed = await assortmentRepo.removeAssortmentItem(
-      input.assortmentId,
-      input.productVariantId
-    );
+    const removed = await assortmentRepo.removeAssortmentItem(input.assortmentId, input.productVariantId);
 
     if (!removed) {
       throw new Error('Item not found in assortment');

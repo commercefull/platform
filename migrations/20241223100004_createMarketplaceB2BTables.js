@@ -3,11 +3,11 @@
  * Phase 4: Marketplace & B2B - Commission plans, payouts, payment terms, tax exemptions
  */
 
-exports.up = async function(knex) {
+exports.up = async function (knex) {
   // Create commissionPlan table
   const hasCommissionPlan = await knex.schema.hasTable('commissionPlan');
   if (!hasCommissionPlan) {
-    await knex.schema.createTable('commissionPlan', (table) => {
+    await knex.schema.createTable('commissionPlan', table => {
       table.string('commissionPlanId', 50).primary();
       table.string('organizationId', 50).notNullable();
       table.string('name', 255).notNullable();
@@ -15,7 +15,7 @@ exports.up = async function(knex) {
       table.boolean('isDefault').defaultTo(false);
       table.timestamp('createdAt').defaultTo(knex.fn.now());
       table.timestamp('updatedAt').defaultTo(knex.fn.now());
-      
+
       table.index('organizationId');
       table.index('isDefault');
     });
@@ -24,7 +24,7 @@ exports.up = async function(knex) {
   // Create sellerPolicy table
   const hasSellerPolicy = await knex.schema.hasTable('sellerPolicy');
   if (!hasSellerPolicy) {
-    await knex.schema.createTable('sellerPolicy', (table) => {
+    await knex.schema.createTable('sellerPolicy', table => {
       table.string('sellerPolicyId', 50).primary();
       table.string('sellerId', 50).notNullable();
       table.text('returnsPolicy').nullable();
@@ -33,7 +33,7 @@ exports.up = async function(knex) {
       table.jsonb('customPolicies').defaultTo('{}');
       table.timestamp('createdAt').defaultTo(knex.fn.now());
       table.timestamp('updatedAt').defaultTo(knex.fn.now());
-      
+
       table.index('sellerId');
     });
   }
@@ -41,7 +41,7 @@ exports.up = async function(knex) {
   // Create payout table
   const hasPayout = await knex.schema.hasTable('payout');
   if (!hasPayout) {
-    await knex.schema.createTable('payout', (table) => {
+    await knex.schema.createTable('payout', table => {
       table.string('payoutId', 50).primary();
       table.string('sellerId', 50).notNullable();
       table.string('orderId', 50).nullable();
@@ -57,7 +57,7 @@ exports.up = async function(knex) {
       table.string('paymentReference', 100).nullable();
       table.timestamp('createdAt').defaultTo(knex.fn.now());
       table.timestamp('updatedAt').defaultTo(knex.fn.now());
-      
+
       table.index('sellerId');
       table.index('orderId');
       table.index('settlementId');
@@ -69,7 +69,7 @@ exports.up = async function(knex) {
   // Create paymentTerms table
   const hasPaymentTerms = await knex.schema.hasTable('paymentTerms');
   if (!hasPaymentTerms) {
-    await knex.schema.createTable('paymentTerms', (table) => {
+    await knex.schema.createTable('paymentTerms', table => {
       table.string('paymentTermsId', 50).primary();
       table.string('organizationId', 50).notNullable();
       table.string('name', 100).notNullable(); // 'Net 30', 'Net 60', 'Due on Receipt'
@@ -80,7 +80,7 @@ exports.up = async function(knex) {
       table.boolean('isDefault').defaultTo(false);
       table.timestamp('createdAt').defaultTo(knex.fn.now());
       table.timestamp('updatedAt').defaultTo(knex.fn.now());
-      
+
       table.index('organizationId');
       table.index('isDefault');
     });
@@ -89,7 +89,7 @@ exports.up = async function(knex) {
   // Create taxExemption table
   const hasTaxExemption = await knex.schema.hasTable('taxExemption');
   if (!hasTaxExemption) {
-    await knex.schema.createTable('taxExemption', (table) => {
+    await knex.schema.createTable('taxExemption', table => {
       table.string('taxExemptionId', 50).primary();
       table.string('accountId', 50).notNullable();
       table.string('type', 30).notNullable(); // 'resale', 'nonprofit', 'government', 'manufacturing'
@@ -103,7 +103,7 @@ exports.up = async function(knex) {
       table.string('verifiedBy', 50).nullable();
       table.timestamp('createdAt').defaultTo(knex.fn.now());
       table.timestamp('updatedAt').defaultTo(knex.fn.now());
-      
+
       table.index('accountId');
       table.index('type');
       table.index('status');
@@ -114,7 +114,7 @@ exports.up = async function(knex) {
   // Add fields to merchant table if not exists
   const hasMerchantType = await knex.schema.hasColumn('merchant', 'type');
   if (!hasMerchantType) {
-    await knex.schema.alterTable('merchant', (table) => {
+    await knex.schema.alterTable('merchant', table => {
       table.string('type', 20).defaultTo('external'); // 'internal', 'external'
       table.string('commissionPlanId', 50).nullable();
     });
@@ -123,7 +123,7 @@ exports.up = async function(knex) {
   // Add fields to b2bCompany table if not exists
   const hasB2BCompanyOrgId = await knex.schema.hasColumn('b2bCompany', 'organizationId');
   if (!hasB2BCompanyOrgId) {
-    await knex.schema.alterTable('b2bCompany', (table) => {
+    await knex.schema.alterTable('b2bCompany', table => {
       table.string('organizationId', 50).nullable();
       table.string('paymentTermsId', 50).nullable();
       table.decimal('creditLimit', 15, 2).nullable();
@@ -171,11 +171,11 @@ exports.up = async function(knex) {
   }
 };
 
-exports.down = async function(knex) {
+exports.down = async function (knex) {
   // Remove added columns from b2bCompany
   const hasB2BCompanyOrgId = await knex.schema.hasColumn('b2bCompany', 'organizationId');
   if (hasB2BCompanyOrgId) {
-    await knex.schema.alterTable('b2bCompany', (table) => {
+    await knex.schema.alterTable('b2bCompany', table => {
       table.dropColumn('organizationId');
       table.dropColumn('paymentTermsId');
       table.dropColumn('creditLimit');
@@ -186,7 +186,7 @@ exports.down = async function(knex) {
   // Remove added columns from merchant
   const hasMerchantType = await knex.schema.hasColumn('merchant', 'type');
   if (hasMerchantType) {
-    await knex.schema.alterTable('merchant', (table) => {
+    await knex.schema.alterTable('merchant', table => {
       table.dropColumn('type');
       table.dropColumn('commissionPlanId');
     });

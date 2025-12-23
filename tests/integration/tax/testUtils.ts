@@ -5,14 +5,14 @@ export const SEEDED_TAX_CATEGORY_IDS = {
   STANDARD: '0193a000-0000-7000-8000-000000000001',
   REDUCED: '0193a000-0000-7000-8000-000000000002',
   ZERO: '0193a000-0000-7000-8000-000000000003',
-  EXEMPT: '0193a000-0000-7000-8000-000000000004'
+  EXEMPT: '0193a000-0000-7000-8000-000000000004',
 };
 
 export const SEEDED_TAX_ZONE_IDS = {
   US_DOMESTIC: '0193a001-0000-7000-8000-000000000001',
   US_CALIFORNIA: '0193a001-0000-7000-8000-000000000002',
   EU_STANDARD: '0193a001-0000-7000-8000-000000000003',
-  UK: '0193a001-0000-7000-8000-000000000004'
+  UK: '0193a001-0000-7000-8000-000000000004',
 };
 
 export const SEEDED_TAX_RATE_IDS = {
@@ -20,21 +20,21 @@ export const SEEDED_TAX_RATE_IDS = {
   US_CA_STATE: '0193a002-0000-7000-8000-000000000002',
   EU_VAT_STANDARD: '0193a002-0000-7000-8000-000000000003',
   UK_VAT: '0193a002-0000-7000-8000-000000000004',
-  ZERO_RATE: '0193a002-0000-7000-8000-000000000005'
+  ZERO_RATE: '0193a002-0000-7000-8000-000000000005',
 };
 
 export const SEEDED_TAX_RULE_IDS = {
   ELECTRONICS: '0193a003-0000-7000-8000-000000000001',
-  FOOD: '0193a003-0000-7000-8000-000000000002'
+  FOOD: '0193a003-0000-7000-8000-000000000002',
 };
 
 export const SEEDED_TAX_SETTINGS_IDS = {
-  DEFAULT: '0193a004-0000-7000-8000-000000000001'
+  DEFAULT: '0193a004-0000-7000-8000-000000000001',
 };
 
 const adminCredentials = {
   email: 'merchant@example.com',
-  password: 'password123'
+  password: 'password123',
 };
 
 export function createTestClient(): AxiosInstance {
@@ -42,10 +42,10 @@ export function createTestClient(): AxiosInstance {
     baseURL: process.env.API_URL || 'http://localhost:3000',
     validateStatus: () => true,
     headers: {
-      'Accept': 'application/json',
+      Accept: 'application/json',
       'Content-Type': 'application/json',
-      'X-Test-Request': 'true'
-    }
+      'X-Test-Request': 'true',
+    },
   });
 }
 
@@ -71,7 +71,7 @@ export function createTestTaxCategory(overrides: Partial<any> = {}) {
     isDefault: false,
     sortOrder: 100,
     isActive: true,
-    ...overrides
+    ...overrides,
   };
 }
 
@@ -84,7 +84,7 @@ export function createTestTaxZone(overrides: Partial<any> = {}) {
     isDefault: false,
     countries: ['US'],
     isActive: true,
-    ...overrides
+    ...overrides,
   };
 }
 
@@ -100,7 +100,7 @@ export function createTestTaxRate(taxCategoryId: string, taxZoneId: string, over
     includeInPrice: false,
     isShippingTaxable: true,
     isActive: true,
-    ...overrides
+    ...overrides,
   };
 }
 
@@ -113,19 +113,19 @@ export function createTestTaxRule(taxRateId: string, overrides: Partial<any> = {
     conditionValue: { categoryCode: 'test' },
     sortOrder: 1,
     isActive: true,
-    ...overrides
+    ...overrides,
   };
 }
 
 export async function cleanupTaxTests(
   client: AxiosInstance,
   adminToken: string,
-  resources: { 
-    categoryIds?: string[]; 
-    zoneIds?: string[]; 
+  resources: {
+    categoryIds?: string[];
+    zoneIds?: string[];
     rateIds?: string[];
     ruleIds?: string[];
-  } = {}
+  } = {},
 ) {
   const headers = { Authorization: `Bearer ${adminToken}` };
 

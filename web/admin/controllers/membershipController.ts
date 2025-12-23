@@ -30,12 +30,12 @@ export const listMembershipPlans = async (req: Request, res: Response): Promise<
       stats,
       filters: { activeOnly },
       pagination: { limit, offset },
-      
-      success: req.query.success || null
+
+      success: req.query.success || null,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load membership plans',
@@ -50,7 +50,7 @@ export const createMembershipPlanForm = async (req: Request, res: Response): Pro
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -81,7 +81,7 @@ export const createMembershipPlan = async (req: Request, res: Response): Promise
       autoRenew,
       duration,
       gracePeriodsAllowed,
-      gracePeriodDays
+      gracePeriodDays,
     } = req.body;
 
     const plan = await membershipPlanRepo.create({
@@ -112,13 +112,12 @@ export const createMembershipPlan = async (req: Request, res: Response): Promise
       visibilityRules: null, // Optional field
       availabilityRules: null, // Optional field
       customFields: null, // Optional field
-      createdBy: null // Optional field - could be set to current user ID
+      createdBy: null, // Optional field - could be set to current user ID
     });
 
     res.redirect(`/hub/membership/plans/${plan.membershipPlanId}?success=Membership plan created successfully`);
   } catch (error: any) {
     logger.error('Error:', error);
-    
 
     adminRespond(req, res, 'programs/membership/plans/create', {
       pageName: 'Create Membership Plan',
@@ -158,7 +157,7 @@ export const viewMembershipPlan = async (req: Request, res: Response): Promise<v
           priority: planBenefit.priority,
           valueOverride: planBenefit.valueOverride,
           rulesOverride: planBenefit.rulesOverride,
-          notes: planBenefit.notes
+          notes: planBenefit.notes,
         });
       }
     }
@@ -167,12 +166,12 @@ export const viewMembershipPlan = async (req: Request, res: Response): Promise<v
       pageName: `Plan: ${plan.name}`,
       plan,
       benefits,
-      
-      success: req.query.success || null
+
+      success: req.query.success || null,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load membership plan',
@@ -200,7 +199,7 @@ export const editMembershipPlanForm = async (req: Request, res: Response): Promi
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -233,7 +232,7 @@ export const updateMembershipPlan = async (req: Request, res: Response): Promise
       autoRenew,
       duration,
       gracePeriodsAllowed,
-      gracePeriodDays
+      gracePeriodDays,
     } = req.body;
 
     if (name !== undefined) updates.name = name;
@@ -266,7 +265,6 @@ export const updateMembershipPlan = async (req: Request, res: Response): Promise
     res.redirect(`/hub/membership/plans/${planId}?success=Membership plan updated successfully`);
   } catch (error: any) {
     logger.error('Error:', error);
-    
 
     try {
       const plan = await membershipPlanRepo.findById(req.params.planId);
@@ -299,7 +297,7 @@ export const activateMembershipPlan = async (req: Request, res: Response): Promi
     res.json({ success: true, message: 'Membership plan activated successfully' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to activate membership plan' });
   }
 };
@@ -317,7 +315,7 @@ export const deactivateMembershipPlan = async (req: Request, res: Response): Pro
     res.json({ success: true, message: 'Membership plan deactivated successfully' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to deactivate membership plan' });
   }
 };
@@ -335,7 +333,7 @@ export const deleteMembershipPlan = async (req: Request, res: Response): Promise
     res.json({ success: true, message: 'Membership plan deleted successfully' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to delete membership plan' });
   }
 };
@@ -368,12 +366,12 @@ export const listMembershipBenefits = async (req: Request, res: Response): Promi
       plans,
       filters: { planId },
       pagination: { limit, offset },
-      
-      success: req.query.success || null
+
+      success: req.query.success || null,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load membership benefits',
@@ -404,12 +402,12 @@ export const listMemberships = async (req: Request, res: Response): Promise<void
       plans,
       filters: { status, planId },
       pagination: { limit, offset },
-      
-      success: req.query.success || null
+
+      success: req.query.success || null,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load memberships',
@@ -474,11 +472,11 @@ export const bulkMembershipOperations = async (req: Request, res: Response): Pro
     res.json({
       success: true,
       message: `Bulk operation completed: ${successCount} successful, ${failureCount} failed`,
-      results
+      results,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to perform bulk operations' });
   }
 };
@@ -513,13 +511,12 @@ export const membershipUpgradeDowngrade = async (req: Request, res: Response): P
     if (effective <= new Date()) {
       await updateUserMembership(membershipId, {
         tierId: newTierId,
-        notes: notes || `Tier ${isUpgrade ? 'upgraded' : 'downgraded'} to ${newTier.name}`
+        notes: notes || `Tier ${isUpgrade ? 'upgraded' : 'downgraded'} to ${newTier.name}`,
       });
 
       // Handle prorating if requested
       if (prorate && isUpgrade) {
         // Calculate proration (would need billing integration)
-        
       }
     } else {
       // Schedule the change (would need job scheduling system)
@@ -533,12 +530,12 @@ export const membershipUpgradeDowngrade = async (req: Request, res: Response): P
         from: currentTier?.name,
         to: newTier.name,
         effective: effective.toISOString(),
-        prorated: prorate && isUpgrade
-      }
+        prorated: prorate && isUpgrade,
+      },
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to change membership tier' });
   }
 };
@@ -557,7 +554,7 @@ export const membershipAnalytics = async (req: Request, res: Response): Promise<
       averageLifetime: 0,
       revenueByTier: {},
       topTiers: [],
-      renewalRate: 0
+      renewalRate: 0,
     };
 
     // Get tier statistics
@@ -569,7 +566,7 @@ export const membershipAnalytics = async (req: Request, res: Response): Promise<
       tierStats[tier.name] = {
         count: 0, // Would query actual counts
         revenue: 0, // Would calculate based on pricing
-        growth: 0 // Would calculate month-over-month growth
+        growth: 0, // Would calculate month-over-month growth
       };
     }
 
@@ -582,7 +579,7 @@ export const membershipAnalytics = async (req: Request, res: Response): Promise<
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load membership analytics',

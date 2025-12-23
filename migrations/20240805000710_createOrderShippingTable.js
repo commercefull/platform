@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function (knex) {
   return knex.schema.createTable('orderShipping', t => {
     t.uuid('orderShippingId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
@@ -12,7 +12,6 @@ exports.up = function(knex) {
     t.string('trackingNumber', 100);
     t.text('trackingUrl');
     t.timestamp('estimatedDeliveryDate');
-    
 
     t.index('orderId');
     t.index('shippingMethod');
@@ -21,6 +20,6 @@ exports.up = function(knex) {
   });
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTable('orderShipping');
 };

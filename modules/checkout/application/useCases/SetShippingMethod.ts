@@ -15,7 +15,7 @@ import { eventBus } from '../../../../libs/events/eventBus';
 export class SetShippingMethodCommand {
   constructor(
     public readonly checkoutId: string,
-    public readonly shippingMethodId: string
+    public readonly shippingMethodId: string,
   ) {}
 }
 
@@ -38,7 +38,7 @@ export class SetShippingMethodUseCase {
 
     const methods = await this.checkoutRepository.getAvailableShippingMethods(
       session.shippingAddress.country,
-      session.shippingAddress.postalCode
+      session.shippingAddress.postalCode,
     );
 
     const selectedMethod = methods.find(m => m.id === command.shippingMethodId);
@@ -46,11 +46,7 @@ export class SetShippingMethodUseCase {
       throw new Error('Invalid shipping method');
     }
 
-    session.setShippingMethod(
-      selectedMethod.id,
-      selectedMethod.name,
-      Money.create(selectedMethod.price, selectedMethod.currency)
-    );
+    session.setShippingMethod(selectedMethod.id, selectedMethod.name, Money.create(selectedMethod.price, selectedMethod.currency));
 
     await this.checkoutRepository.save(session);
 
@@ -59,7 +55,7 @@ export class SetShippingMethodUseCase {
       field: 'shippingMethod',
       methodId: selectedMethod.id,
       methodName: selectedMethod.name,
-      amount: selectedMethod.price
+      amount: selectedMethod.price,
     });
 
     return mapCheckoutToResponse(session);

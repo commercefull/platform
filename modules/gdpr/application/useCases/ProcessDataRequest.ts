@@ -14,7 +14,7 @@ export class ProcessExportRequestCommand {
   constructor(
     public readonly gdprDataRequestId: string,
     public readonly adminId: string,
-    public readonly format: 'json' | 'csv' | 'xml' = 'json'
+    public readonly format: 'json' | 'csv' | 'xml' = 'json',
   ) {}
 }
 
@@ -22,7 +22,7 @@ export class ProcessDeletionRequestCommand {
   constructor(
     public readonly gdprDataRequestId: string,
     public readonly adminId: string,
-    public readonly notes?: string
+    public readonly notes?: string,
   ) {}
 }
 
@@ -30,14 +30,14 @@ export class RejectRequestCommand {
   constructor(
     public readonly gdprDataRequestId: string,
     public readonly adminId: string,
-    public readonly reason: string
+    public readonly reason: string,
   ) {}
 }
 
 export class VerifyIdentityCommand {
   constructor(
     public readonly gdprDataRequestId: string,
-    public readonly verificationMethod: string
+    public readonly verificationMethod: string,
   ) {}
 }
 
@@ -60,7 +60,7 @@ export interface ProcessDataRequestResponse {
 export class ProcessDataRequestUseCase {
   constructor(
     private readonly gdprRepository: GdprDataRequestRepository,
-    private readonly gdprService: GdprService
+    private readonly gdprService: GdprService,
   ) {}
 
   /**
@@ -78,7 +78,7 @@ export class ProcessDataRequestUseCase {
     return {
       gdprDataRequestId: request.gdprDataRequestId,
       status: request.status,
-      message: 'Identity verified successfully'
+      message: 'Identity verified successfully',
     };
   }
 
@@ -106,15 +106,15 @@ export class ProcessDataRequestUseCase {
     try {
       // Export customer data
       const exportedData = await this.gdprService.exportCustomerData(request.customerId);
-      
+
       // In a real implementation, this would:
       // 1. Generate the file in the requested format
       // 2. Upload to secure storage
       // 3. Generate a signed download URL
-      
+
       // For now, we'll simulate with a placeholder
       const downloadUrl = `/gdpr/download/${request.gdprDataRequestId}`;
-      
+
       // Complete the request
       request.completeWithDownload(downloadUrl, command.format, command.adminId);
       await this.gdprRepository.save(request);
@@ -124,7 +124,7 @@ export class ProcessDataRequestUseCase {
         status: request.status,
         processedAt: request.processedAt?.toISOString(),
         downloadUrl: request.downloadUrl,
-        message: 'Export completed successfully. Download link will expire in 7 days.'
+        message: 'Export completed successfully. Download link will expire in 7 days.',
       };
     } catch (error) {
       // Handle failure
@@ -156,7 +156,7 @@ export class ProcessDataRequestUseCase {
     try {
       // Delete or anonymize customer data
       await this.gdprService.anonymizeCustomerData(request.customerId);
-      
+
       // Complete the request
       request.complete(command.adminId, command.notes);
       await this.gdprRepository.save(request);
@@ -165,7 +165,7 @@ export class ProcessDataRequestUseCase {
         gdprDataRequestId: request.gdprDataRequestId,
         status: request.status,
         processedAt: request.processedAt?.toISOString(),
-        message: 'Data deletion completed successfully'
+        message: 'Data deletion completed successfully',
       };
     } catch (error) {
       throw new Error(`Failed to delete data: ${error}`);
@@ -192,7 +192,7 @@ export class ProcessDataRequestUseCase {
       gdprDataRequestId: request.gdprDataRequestId,
       status: request.status,
       processedAt: request.processedAt?.toISOString(),
-      message: 'Request rejected'
+      message: 'Request rejected',
     };
   }
 }

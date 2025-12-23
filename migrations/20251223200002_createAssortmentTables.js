@@ -3,11 +3,11 @@
  * Adds product assortment management for controlling product visibility per store/channel
  */
 
-exports.up = async function(knex) {
+exports.up = async function (knex) {
   // Create assortment table
   const hasAssortment = await knex.schema.hasTable('assortment');
   if (!hasAssortment) {
-    await knex.schema.createTable('assortment', (table) => {
+    await knex.schema.createTable('assortment', table => {
       table.string('assortmentId', 50).primary();
       table.string('organizationId', 50).notNullable();
       table.string('name', 255).notNullable();
@@ -30,7 +30,7 @@ exports.up = async function(knex) {
   // Create assortmentScope table for linking assortments to specific stores/channels/sellers
   const hasAssortmentScope = await knex.schema.hasTable('assortmentScope');
   if (!hasAssortmentScope) {
-    await knex.schema.createTable('assortmentScope', (table) => {
+    await knex.schema.createTable('assortmentScope', table => {
       table.string('scopeId', 50).primary();
       table.string('assortmentId', 50).notNullable();
       table.string('scopeType', 30).notNullable(); // 'store', 'channel', 'seller', 'account'
@@ -50,7 +50,7 @@ exports.up = async function(knex) {
   // Create assortmentItem table for products in an assortment
   const hasAssortmentItem = await knex.schema.hasTable('assortmentItem');
   if (!hasAssortmentItem) {
-    await knex.schema.createTable('assortmentItem', (table) => {
+    await knex.schema.createTable('assortmentItem', table => {
       table.string('itemId', 50).primary();
       table.string('assortmentId', 50).notNullable();
       table.string('productVariantId', 50).notNullable();
@@ -76,7 +76,7 @@ exports.up = async function(knex) {
   // Create assortmentRule table for dynamic assortment rules
   const hasAssortmentRule = await knex.schema.hasTable('assortmentRule');
   if (!hasAssortmentRule) {
-    await knex.schema.createTable('assortmentRule', (table) => {
+    await knex.schema.createTable('assortmentRule', table => {
       table.string('ruleId', 50).primary();
       table.string('assortmentId', 50).notNullable();
       table.string('name', 255).notNullable();
@@ -95,7 +95,7 @@ exports.up = async function(knex) {
   }
 };
 
-exports.down = async function(knex) {
+exports.down = async function (knex) {
   await knex.schema.dropTableIfExists('assortmentRule');
   await knex.schema.dropTableIfExists('assortmentItem');
   await knex.schema.dropTableIfExists('assortmentScope');

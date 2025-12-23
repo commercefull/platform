@@ -47,18 +47,24 @@ export class TaxCalculationRepo {
   }
 
   async findByOrder(orderId: string): Promise<TaxCalculation | null> {
-    return await queryOne<TaxCalculation>(`SELECT * FROM "taxCalculation" WHERE "orderId" = $1 ORDER BY "createdAt" DESC LIMIT 1`, [orderId]);
+    return await queryOne<TaxCalculation>(`SELECT * FROM "taxCalculation" WHERE "orderId" = $1 ORDER BY "createdAt" DESC LIMIT 1`, [
+      orderId,
+    ]);
   }
 
   async findByBasket(basketId: string): Promise<TaxCalculation | null> {
-    return await queryOne<TaxCalculation>(`SELECT * FROM "taxCalculation" WHERE "basketId" = $1 ORDER BY "createdAt" DESC LIMIT 1`, [basketId]);
+    return await queryOne<TaxCalculation>(`SELECT * FROM "taxCalculation" WHERE "basketId" = $1 ORDER BY "createdAt" DESC LIMIT 1`, [
+      basketId,
+    ]);
   }
 
   async findBySource(sourceType: TaxCalculationSourceType, sourceId: string): Promise<TaxCalculation[]> {
-    return (await query<TaxCalculation[]>(
-      `SELECT * FROM "taxCalculation" WHERE "sourceType" = $1 AND "sourceId" = $2 ORDER BY "createdAt" DESC`,
-      [sourceType, sourceId]
-    )) || [];
+    return (
+      (await query<TaxCalculation[]>(
+        `SELECT * FROM "taxCalculation" WHERE "sourceType" = $1 AND "sourceId" = $2 ORDER BY "createdAt" DESC`,
+        [sourceType, sourceId],
+      )) || []
+    );
   }
 
   async findByMerchant(merchantId: string, status?: TaxCalculationStatus, limit = 100): Promise<TaxCalculation[]> {
@@ -83,14 +89,28 @@ export class TaxCalculationRepo {
         "taxProviderReference", "errorMessage", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21) RETURNING *`,
       [
-        params.merchantId, params.orderId || null, params.invoiceId || null, params.basketId || null,
-        params.customerId || null, params.calculationMethod || 'unitBased', params.status || 'pending',
-        params.sourceType, params.sourceId || null, JSON.stringify(params.taxAddress || {}),
-        params.taxableAmount || 0, params.taxExemptAmount || 0, params.taxAmount || 0,
-        params.totalAmount || 0, params.currencyCode || 'USD', params.exchangeRate || 1.0,
-        JSON.stringify(params.taxProviderResponse || {}), params.taxProviderReference || null,
-        params.errorMessage || null, now, now
-      ]
+        params.merchantId,
+        params.orderId || null,
+        params.invoiceId || null,
+        params.basketId || null,
+        params.customerId || null,
+        params.calculationMethod || 'unitBased',
+        params.status || 'pending',
+        params.sourceType,
+        params.sourceId || null,
+        JSON.stringify(params.taxAddress || {}),
+        params.taxableAmount || 0,
+        params.taxExemptAmount || 0,
+        params.taxAmount || 0,
+        params.totalAmount || 0,
+        params.currencyCode || 'USD',
+        params.exchangeRate || 1.0,
+        JSON.stringify(params.taxProviderResponse || {}),
+        params.taxProviderReference || null,
+        params.errorMessage || null,
+        now,
+        now,
+      ],
     );
     if (!result) throw new Error('Failed to create tax calculation');
     return result;
@@ -119,7 +139,7 @@ export class TaxCalculationRepo {
 
     return await queryOne<TaxCalculation>(
       `UPDATE "taxCalculation" SET ${updateFields.join(', ')} WHERE "taxCalculationId" = $${paramIndex} RETURNING *`,
-      values
+      values,
     );
   }
 
@@ -134,7 +154,7 @@ export class TaxCalculationRepo {
   async delete(id: string): Promise<boolean> {
     const result = await queryOne<{ taxCalculationId: string }>(
       `DELETE FROM "taxCalculation" WHERE "taxCalculationId" = $1 RETURNING "taxCalculationId"`,
-      [id]
+      [id],
     );
     return !!result;
   }

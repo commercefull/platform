@@ -1,40 +1,35 @@
-import { queryOne, query } from "../../../libs/db";
-import { Table, ProductImage } from "../../../libs/db/types";
+import { queryOne, query } from '../../../libs/db';
+import { Table, ProductImage } from '../../../libs/db/types';
 
 // Use ProductImage type directly from libs/db/types.ts
 export type { ProductImage };
 
-type CreateProps = Pick<ProductImage, "productId" | "url" | "position" | "isPrimary" | "isVisible"> & 
-  Partial<Pick<ProductImage, "productVariantId" | "alt" | "title" | "width" | "height" | "size" | "type">>;
-type UpdateProps = Partial<Omit<CreateProps, "productId">>;
+type CreateProps = Pick<ProductImage, 'productId' | 'url' | 'position' | 'isPrimary' | 'isVisible'> &
+  Partial<Pick<ProductImage, 'productVariantId' | 'alt' | 'title' | 'width' | 'height' | 'size' | 'type'>>;
+type UpdateProps = Partial<Omit<CreateProps, 'productId'>>;
 
 export class ProductImageRepo {
   async findById(id: string): Promise<ProductImage | null> {
-    return queryOne<ProductImage>(
-      `SELECT * FROM "${Table.ProductImage}" WHERE "productImageId" = $1`,
-      [id]
-    );
+    return queryOne<ProductImage>(`SELECT * FROM "${Table.ProductImage}" WHERE "productImageId" = $1`, [id]);
   }
 
   async findByProductId(productId: string): Promise<ProductImage[]> {
-    return await query<ProductImage[]>(
-      `SELECT * FROM "${Table.ProductImage}" WHERE "productId" = $1 ORDER BY "position" ASC`,
-      [productId]
-    ) || [];
+    return (
+      (await query<ProductImage[]>(`SELECT * FROM "${Table.ProductImage}" WHERE "productId" = $1 ORDER BY "position" ASC`, [productId])) ||
+      []
+    );
   }
 
   async findByVariantId(variantId: string): Promise<ProductImage[]> {
-    return await query<ProductImage[]>(
-      `SELECT * FROM "${Table.ProductImage}" WHERE "productVariantId" = $1 ORDER BY "position" ASC`,
-      [variantId]
-    ) || [];
+    return (
+      (await query<ProductImage[]>(`SELECT * FROM "${Table.ProductImage}" WHERE "productVariantId" = $1 ORDER BY "position" ASC`, [
+        variantId,
+      ])) || []
+    );
   }
 
   async findPrimaryForProduct(productId: string): Promise<ProductImage | null> {
-    return queryOne<ProductImage>(
-      `SELECT * FROM "${Table.ProductImage}" WHERE "productId" = $1 AND "isPrimary" = true`,
-      [productId]
-    );
+    return queryOne<ProductImage>(`SELECT * FROM "${Table.ProductImage}" WHERE "productId" = $1 AND "isPrimary" = true`, [productId]);
   }
 
   async create(props: CreateProps): Promise<ProductImage> {
@@ -58,8 +53,8 @@ export class ProductImageRepo {
         props.isPrimary,
         props.isVisible,
         now,
-        now
-      ]
+        now,
+      ],
     );
 
     if (!row) {
@@ -92,7 +87,7 @@ export class ProductImageRepo {
        SET ${updates.join(', ')} 
        WHERE "productImageId" = $${paramIndex} 
        RETURNING *`,
-      values
+      values,
     );
 
     if (!row) {
@@ -110,15 +105,12 @@ export class ProductImageRepo {
     const now = new Date();
     await query(
       `UPDATE "${Table.ProductImage}" SET "isPrimary" = false, "updatedAt" = $1 WHERE "productId" = $2 AND "productImageId" != $3`,
-      [now, productId, currentImageId]
+      [now, productId, currentImageId],
     );
   }
 
   async delete(id: string): Promise<boolean> {
-    const result = await query(
-      `DELETE FROM "${Table.ProductImage}" WHERE "productImageId" = $1`,
-      [id]
-    );
+    const result = await query(`DELETE FROM "${Table.ProductImage}" WHERE "productImageId" = $1`, [id]);
     return result !== null;
   }
 
@@ -129,14 +121,11 @@ export class ProductImageRepo {
     }
 
     const now = new Date();
-    await query(
-      `UPDATE "${Table.ProductImage}" SET "isPrimary" = false, "updatedAt" = $1 WHERE "productId" = $2`,
-      [now, image.productId]
-    );
+    await query(`UPDATE "${Table.ProductImage}" SET "isPrimary" = false, "updatedAt" = $1 WHERE "productId" = $2`, [now, image.productId]);
 
     const row = await queryOne<ProductImage>(
       `UPDATE "${Table.ProductImage}" SET "isPrimary" = true, "updatedAt" = $1 WHERE "productImageId" = $2 RETURNING *`,
-      [now, id]
+      [now, id],
     );
 
     if (!row) {
@@ -148,10 +137,12 @@ export class ProductImageRepo {
   async reorder(productId: string, imageIds: string[]): Promise<boolean> {
     const now = new Date();
     for (let i = 0; i < imageIds.length; i++) {
-      await query(
-        `UPDATE "${Table.ProductImage}" SET "position" = $1, "updatedAt" = $2 WHERE "productImageId" = $3 AND "productId" = $4`,
-        [i, now, imageIds[i], productId]
-      );
+      await query(`UPDATE "${Table.ProductImage}" SET "position" = $1, "updatedAt" = $2 WHERE "productImageId" = $3 AND "productId" = $4`, [
+        i,
+        now,
+        imageIds[i],
+        productId,
+      ]);
     }
     return true;
   }

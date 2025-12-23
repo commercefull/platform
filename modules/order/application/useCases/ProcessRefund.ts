@@ -17,7 +17,7 @@ export class ProcessRefundCommand {
     public readonly orderId: string,
     public readonly amount: number,
     public readonly reason: string,
-    public readonly transactionId?: string
+    public readonly transactionId?: string,
   ) {}
 }
 
@@ -45,7 +45,7 @@ export class ProcessRefundUseCase {
 
   async execute(command: ProcessRefundCommand): Promise<ProcessRefundResponse> {
     const order = await this.orderRepository.findById(command.orderId);
-    
+
     if (!order) {
       throw new Error('Order not found');
     }
@@ -82,11 +82,7 @@ export class ProcessRefundUseCase {
     await this.orderRepository.save(order);
 
     // Record payment status change
-    await this.orderRepository.recordPaymentStatusChange(
-      command.orderId,
-      order.paymentStatus,
-      command.transactionId
-    );
+    await this.orderRepository.recordPaymentStatusChange(command.orderId, order.paymentStatus, command.transactionId);
 
     // Emit event
     eventBus.emit('order.refunded', {
@@ -95,7 +91,7 @@ export class ProcessRefundUseCase {
       customerId: order.customerId,
       refundAmount: command.amount,
       reason: command.reason,
-      isFullRefund
+      isFullRefund,
     });
 
     return {
@@ -106,7 +102,7 @@ export class ProcessRefundUseCase {
       previousPaymentStatus,
       newPaymentStatus: order.paymentStatus,
       orderStatus: order.status,
-      processedAt: new Date().toISOString()
+      processedAt: new Date().toISOString(),
     };
   }
 }

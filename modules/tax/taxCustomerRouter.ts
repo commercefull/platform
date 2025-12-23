@@ -1,5 +1,13 @@
 import { Router } from 'express';
-import { calculateTaxForBasket, calculateTaxForLineItem, checkCustomerTaxExemption, findTaxZoneForAddress, getCustomerTaxSettings, getTaxCategoryByCode, getTaxRates } from './controllers/taxCustomerController';
+import {
+  calculateTaxForBasket,
+  calculateTaxForLineItem,
+  checkCustomerTaxExemption,
+  findTaxZoneForAddress,
+  getCustomerTaxSettings,
+  getTaxCategoryByCode,
+  getTaxRates,
+} from './controllers/taxCustomerController';
 import { isCustomerLoggedIn } from '../../libs/auth';
 
 const router = Router();

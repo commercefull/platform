@@ -25,7 +25,7 @@ exports.up = function (knex) {
     t.timestamp('deliveredAt');
     t.timestamp('estimatedDeliveryDate');
     t.text('notes');
-    
+
     t.uuid('fulfilledBy');
     t.index('orderId');
     t.index('fulfillmentNumber');

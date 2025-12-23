@@ -56,7 +56,7 @@ export const listOrders = async (req: Request, res: Response) => {
        JOIN "orderItem" oi ON o."orderId" = oi."orderId"
        JOIN "product" p ON oi."productId" = p."productId"
        ${whereClause}`,
-      params
+      params,
     );
     const total = parseInt(countResult?.count || '0');
 
@@ -80,7 +80,7 @@ export const listOrders = async (req: Request, res: Response) => {
        ${whereClause}
        ORDER BY o."orderId", o."createdAt" DESC
        LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`,
-      params
+      params,
     );
 
     const pages = Math.ceil(total / limit);
@@ -101,7 +101,7 @@ export const listOrders = async (req: Request, res: Response) => {
     });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     merchantRespond(req, res, 'error', {
       pageName: 'Error',
       error: 'Failed to load orders',
@@ -135,7 +135,7 @@ export const viewOrder = async (req: Request, res: Response) => {
            JOIN "product" p ON oi."productId" = p."productId"
            WHERE oi."orderId" = o."orderId" AND p."merchantId" = $2
          )`,
-      [orderId, user.merchantId]
+      [orderId, user.merchantId],
     );
 
     if (!orderCheck) {
@@ -152,7 +152,7 @@ export const viewOrder = async (req: Request, res: Response) => {
        FROM "orderItem" oi
        JOIN "product" p ON oi."productId" = p."productId"
        WHERE oi."orderId" = $1 AND p."merchantId" = $2`,
-      [orderId, user.merchantId]
+      [orderId, user.merchantId],
     );
 
     merchantRespond(req, res, 'orders/view', {
@@ -163,7 +163,7 @@ export const viewOrder = async (req: Request, res: Response) => {
     });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     merchantRespond(req, res, 'error', {
       pageName: 'Error',
       error: 'Failed to load order',

@@ -14,17 +14,11 @@ export type UpdateShippingPackagingTypeInput = Partial<Omit<ShippingPackagingTyp
 const TABLE = Table.ShippingPackagingType;
 
 export async function findById(id: string): Promise<ShippingPackagingType | null> {
-  return queryOne<ShippingPackagingType>(
-    `SELECT * FROM "${TABLE}" WHERE "shippingPackagingTypeId" = $1`,
-    [id]
-  );
+  return queryOne<ShippingPackagingType>(`SELECT * FROM "${TABLE}" WHERE "shippingPackagingTypeId" = $1`, [id]);
 }
 
 export async function findByCode(code: string): Promise<ShippingPackagingType | null> {
-  return queryOne<ShippingPackagingType>(
-    `SELECT * FROM "${TABLE}" WHERE "code" = $1`,
-    [code]
-  );
+  return queryOne<ShippingPackagingType>(`SELECT * FROM "${TABLE}" WHERE "code" = $1`, [code]);
 }
 
 export async function findAll(activeOnly = false): Promise<ShippingPackagingType[]> {
@@ -35,16 +29,16 @@ export async function findAll(activeOnly = false): Promise<ShippingPackagingType
 }
 
 export async function findDefault(): Promise<ShippingPackagingType | null> {
-  return queryOne<ShippingPackagingType>(
-    `SELECT * FROM "${TABLE}" WHERE "isDefault" = true AND "isActive" = true LIMIT 1`
-  );
+  return queryOne<ShippingPackagingType>(`SELECT * FROM "${TABLE}" WHERE "isDefault" = true AND "isActive" = true LIMIT 1`);
 }
 
 export async function findByMaxWeight(weight: number): Promise<ShippingPackagingType[]> {
-  return (await query<ShippingPackagingType[]>(
-    `SELECT * FROM "${TABLE}" WHERE "isActive" = true AND ("maxWeight" IS NULL OR "maxWeight" >= $1) ORDER BY "volume" ASC`,
-    [weight]
-  )) || [];
+  return (
+    (await query<ShippingPackagingType[]>(
+      `SELECT * FROM "${TABLE}" WHERE "isActive" = true AND ("maxWeight" IS NULL OR "maxWeight" >= $1) ORDER BY "volume" ASC`,
+      [weight],
+    )) || []
+  );
 }
 
 export async function create(input: CreateShippingPackagingTypeInput): Promise<ShippingPackagingType> {
@@ -76,8 +70,8 @@ export async function create(input: CreateShippingPackagingTypeInput): Promise<S
       input.recyclable ?? false,
       input.imageUrl || null,
       input.validCarriers || null,
-      input.createdBy || null
-    ]
+      input.createdBy || null,
+    ],
   );
 
   if (!result) throw new Error('Failed to create packaging type');
@@ -88,7 +82,7 @@ export async function update(id: string, input: UpdateShippingPackagingTypeInput
   if (input.isDefault === true) {
     await query(
       `UPDATE "${TABLE}" SET "isDefault" = false, "updatedAt" = NOW() WHERE "isDefault" = true AND "shippingPackagingTypeId" != $1`,
-      [id]
+      [id],
     );
   }
 
@@ -110,7 +104,7 @@ export async function update(id: string, input: UpdateShippingPackagingTypeInput
 
   return queryOne<ShippingPackagingType>(
     `UPDATE "${TABLE}" SET ${updateFields.join(', ')} WHERE "shippingPackagingTypeId" = $${paramIndex} RETURNING *`,
-    values
+    values,
   );
 }
 
@@ -125,7 +119,7 @@ export async function deactivate(id: string): Promise<ShippingPackagingType | nu
 export async function deletePackagingType(id: string): Promise<boolean> {
   const result = await queryOne<{ shippingPackagingTypeId: string }>(
     `DELETE FROM "${TABLE}" WHERE "shippingPackagingTypeId" = $1 RETURNING "shippingPackagingTypeId"`,
-    [id]
+    [id],
   );
   return !!result;
 }
@@ -148,5 +142,5 @@ export default {
   activate,
   deactivate,
   delete: deletePackagingType,
-  count
+  count,
 };

@@ -2,8 +2,8 @@
  * Distribution Pickup Order Migration
  * Creates the distributionPickupOrder table for in-store pickup management
  */
-exports.up = function(knex) {
-  return knex.schema.createTable('distributionPickupOrder', function(table) {
+exports.up = function (knex) {
+  return knex.schema.createTable('distributionPickupOrder', function (table) {
     table.uuid('distributionPickupOrderId').primary().defaultTo(knex.raw('uuidv7()'));
     table.uuid('orderId').notNullable().references('orderId').inTable('order').onDelete('CASCADE');
     table.uuid('storeLocationId').notNullable().references('storeLocationId').inTable('storeLocation').onDelete('RESTRICT');
@@ -31,7 +31,7 @@ exports.up = function(knex) {
     table.jsonb('metadata');
     table.timestamp('createdAt').defaultTo(knex.fn.now());
     table.timestamp('updatedAt').defaultTo(knex.fn.now());
-    
+
     table.index('orderId');
     table.index('storeLocationId');
     table.index('customerId');
@@ -40,6 +40,6 @@ exports.up = function(knex) {
   });
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTableIfExists('distributionPickupOrder');
 };

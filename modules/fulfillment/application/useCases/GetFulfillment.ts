@@ -1,6 +1,6 @@
 /**
  * GetFulfillment Use Case
- * 
+ *
  * Retrieves a fulfillment with its items.
  */
 

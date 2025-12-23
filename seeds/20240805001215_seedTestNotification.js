@@ -25,6 +25,6 @@ exports.seed = async function (knex) {
     data: JSON.stringify({ orderNumber: 'TEST-001', orderTotal: 99.99 }),
     metadata: JSON.stringify({ source: 'seed' }),
     createdAt: knex.fn.now(),
-    updatedAt: knex.fn.now()
+    updatedAt: knex.fn.now(),
   });
 };

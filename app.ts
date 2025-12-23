@@ -1,23 +1,23 @@
-import express, { Request, Response, NextFunction } from "express";
-import path from "path";
-import cookieParser from "cookie-parser";
-import flash from "connect-flash";
+import express, { Request, Response, NextFunction } from 'express';
+import path from 'path';
+import cookieParser from 'cookie-parser';
+import flash from 'connect-flash';
 import i18next from 'i18next';
 import Backend from 'i18next-fs-backend';
-import bodyParser from 'body-parser'
+import bodyParser from 'body-parser';
 import i18nextMiddleware from 'i18next-http-middleware';
-import helmet from "helmet";
-import compression from "compression";
-import session from "express-session";
+import helmet from 'helmet';
+import compression from 'compression';
+import session from 'express-session';
 import cors from 'cors';
 import hpp from 'hpp';
-import { pool } from "./libs/db/pool";
-import passport from "passport";
-import { formCheckbox, formHidden, formInput, formLegend, formMultiSelect, formSelect, formSubmit, formText } from "./libs/form";
+import { pool } from './libs/db/pool';
+import passport from 'passport';
+import { formCheckbox, formHidden, formInput, formLegend, formMultiSelect, formSelect, formSubmit, formText } from './libs/form';
 import { createSessionStore } from './libs/session/sessionStoreFactory';
-import { initializeAnalyticsHandlers } from "./boot/analyticsEventHandler";
-import { configureRoutes } from "./boot/routes";
-import { expressHttpLogger } from "./libs/logger";
+import { initializeAnalyticsHandlers } from './boot/analyticsEventHandler';
+import { configureRoutes } from './boot/routes';
+import { expressHttpLogger } from './libs/logger';
 
 // Initialize analytics event handlers
 initializeAnalyticsHandlers();
@@ -36,21 +36,30 @@ if (isProduction) {
 }
 
 // Static file serving - must be before security middleware
-app.use('/javascripts', express.static(path.join(__dirname, 'public/javascripts'), {
-  maxAge: isProduction ? '1y' : 0, // Cache for 1 year in production
-  etag: true,
-  lastModified: true,
-}));
-app.use('/stylesheets', express.static(path.join(__dirname, 'public/stylesheets'), {
-  maxAge: isProduction ? '1y' : 0,
-  etag: true,
-  lastModified: true,
-}));
-app.use('/images', express.static(path.join(__dirname, 'public/images'), {
-  maxAge: isProduction ? '1y' : 0,
-  etag: true,
-  lastModified: true,
-}));
+app.use(
+  '/javascripts',
+  express.static(path.join(__dirname, 'public/javascripts'), {
+    maxAge: isProduction ? '1y' : 0, // Cache for 1 year in production
+    etag: true,
+    lastModified: true,
+  }),
+);
+app.use(
+  '/stylesheets',
+  express.static(path.join(__dirname, 'public/stylesheets'), {
+    maxAge: isProduction ? '1y' : 0,
+    etag: true,
+    lastModified: true,
+  }),
+);
+app.use(
+  '/images',
+  express.static(path.join(__dirname, 'public/images'), {
+    maxAge: isProduction ? '1y' : 0,
+    etag: true,
+    lastModified: true,
+  }),
+);
 
 // ============================================================================
 // Security Middleware (applied in ALL environments)
@@ -66,18 +75,24 @@ app.use(
   helmet({
     contentSecurityPolicy: {
       directives: {
-        "default-src": ["'self'"],
-        "style-src": ["'self'", "https://fonts.googleapis.com", "'unsafe-inline'"],
-        "script-src": ["'self'", 'https://www.google-analytics.com', 'https://ssl.google-analytics.com', 'https://www.googletagmanager.com', 'https://unpkg.com'],
-        "img-src": ["'self'", "data:", "https:", 'https://www.google-analytics.com', 'https://www.googletagmanager.com'],
-        "connect-src": ["'self'", 'https://www.google-analytics.com', 'https://api.stripe.com'],
-        "font-src": ["'self'", 'https://fonts.gstatic.com'],
-        "base-uri": ["'self'"],
-        "form-action": ["'self'"],
-        "frame-ancestors": ["'self'"],
-        "object-src": ["'none'"],
-        "script-src-attr": ["'none'"],
-        "upgrade-insecure-requests": isProduction ? [] : null,
+        'default-src': ["'self'"],
+        'style-src': ["'self'", 'https://fonts.googleapis.com', "'unsafe-inline'"],
+        'script-src': [
+          "'self'",
+          'https://www.google-analytics.com',
+          'https://ssl.google-analytics.com',
+          'https://www.googletagmanager.com',
+          'https://unpkg.com',
+        ],
+        'img-src': ["'self'", 'data:', 'https:', 'https://www.google-analytics.com', 'https://www.googletagmanager.com'],
+        'connect-src': ["'self'", 'https://www.google-analytics.com', 'https://api.stripe.com'],
+        'font-src': ["'self'", 'https://fonts.gstatic.com'],
+        'base-uri': ["'self'"],
+        'form-action': ["'self'"],
+        'frame-ancestors': ["'self'"],
+        'object-src': ["'none'"],
+        'script-src-attr': ["'none'"],
+        'upgrade-insecure-requests': isProduction ? [] : null,
       },
     },
     crossOriginEmbedderPolicy: false, // May need adjustment for external resources
@@ -87,7 +102,7 @@ app.use(
 
 // CORS configuration
 const corsOptions: cors.CorsOptions = {
-  origin: isProduction 
+  origin: isProduction
     ? process.env.ALLOWED_ORIGINS?.split(',') || ['https://yourdomain.com']
     : ['http://localhost:3000', 'http://localhost:10000', 'http://127.0.0.1:3000'],
   credentials: true,
@@ -99,31 +114,35 @@ app.use(cors(corsOptions));
 
 // HTTP Parameter Pollution protection
 // Prevents attackers from polluting query/body parameters
-app.use(hpp({
-  whitelist: [
-    // Allow arrays for these common filter parameters
-    'ids',
-    'tags',
-    'categories',
-    'status',
-    'types',
-    'fields',
-    'include',
-    'sort',
-  ],
-}));
+app.use(
+  hpp({
+    whitelist: [
+      // Allow arrays for these common filter parameters
+      'ids',
+      'tags',
+      'categories',
+      'status',
+      'types',
+      'fields',
+      'include',
+      'sort',
+    ],
+  }),
+);
 
 // Compression (production only for performance)
 if (isProduction) {
-  app.use(compression({
-    filter: (req: Request, res: Response) => {
-      if (req.headers['x-no-compression']) {
-        return false;
-      }
-      return compression.filter(req, res);
-    },
-    level: 6,
-  }));
+  app.use(
+    compression({
+      filter: (req: Request, res: Response) => {
+        if (req.headers['x-no-compression']) {
+          return false;
+        }
+        return compression.filter(req, res);
+      },
+      level: 6,
+    }),
+  );
 }
 
 // ============================================================================
@@ -132,15 +151,17 @@ if (isProduction) {
 
 if (isProduction) {
   const __dirname = path.resolve();
-  app.set("views", path.join(__dirname, "web"));
-  app.use(express.static(path.join(__dirname, "public"), {
-    maxAge: '1d',
-    etag: true,
-  }));
+  app.set('views', path.join(__dirname, 'web'));
+  app.use(
+    express.static(path.join(__dirname, 'public'), {
+      maxAge: '1d',
+      etag: true,
+    }),
+  );
   loadPath = path.join(__dirname, 'locales/{{lng}}/{{ns}}.json');
 } else {
-  app.set("views", path.join(__dirname, "web"));
-  app.use(express.static(path.join(__dirname, "public")));
+  app.set('views', path.join(__dirname, 'web'));
+  app.use(express.static(path.join(__dirname, 'public')));
   loadPath = __dirname + '/locales/{{lng}}/{{ns}}.json';
 }
 
@@ -150,7 +171,7 @@ i18next
   .init({
     debug: false,
     backend: {
-      loadPath
+      loadPath,
     },
     fallbackLng: 'en',
     preload: ['en', 'de', 'es', 'fr', 'it', 'el', 'sq'],
@@ -162,7 +183,7 @@ i18next
       lookupQuerystring: 'lang',
       lookupCookie: 'lang',
       ignoreCase: true,
-      cookieSecure: false
+      cookieSecure: false,
     },
     initImmediate: true, // Initialize i18next synchronously to prevent race conditions
   });
@@ -170,13 +191,13 @@ i18next
 app.use(
   i18nextMiddleware.handle(i18next, {
     ignoreRoutes: ['/css', '/fonts', '/images', '/js', '/vendors', '/webfonts'],
-    removeLngFromUrl: false
-  })
-)
+    removeLngFromUrl: false,
+  }),
+);
 
-app.use(bodyParser.urlencoded({ limit: "10mb", extended: true, parameterLimit: 1000 }))
+app.use(bodyParser.urlencoded({ limit: '10mb', extended: true, parameterLimit: 1000 }));
 
-app.set("view engine", "ejs");
+app.set('view engine', 'ejs');
 app.locals.t = function (key: string) {
   return i18next.t(key);
 };
@@ -208,7 +229,6 @@ const sessionStoreResult = createSessionStore({
   },
 });
 
-
 app.use(
   session({
     secret: sessionSecret || 'dev-only-insecure-secret-do-not-use-in-production',
@@ -224,7 +244,7 @@ app.use(
       sameSite: 'lax', // CSRF protection
       domain: isProduction ? process.env.COOKIE_DOMAIN : undefined,
     },
-  })
+  }),
 );
 app.use(flash());
 app.use(passport.initialize());
@@ -255,10 +275,10 @@ app.use(function (err: any, req: Request, res: Response, _next: NextFunction) {
   // Don't leak error details in production
   res.locals.message = isProduction ? 'An error occurred' : err.message;
   res.locals.error = isProduction ? {} : err;
-  
+
   const status = err.status || 500;
   res.status(status);
-  
+
   // Return JSON for API requests
   if (req.xhr || req.headers.accept?.includes('application/json')) {
     res.json({
@@ -267,15 +287,15 @@ app.use(function (err: any, req: Request, res: Response, _next: NextFunction) {
       ...(isProduction ? {} : { stack: err.stack }),
     });
   } else {
-    res.render("storefront/views/error", {
-      pageName: "Error",
+    res.render('storefront/views/error', {
+      pageName: 'Error',
       message: res.locals.message,
       error: res.locals.error,
       user: req.user,
       session: req.session,
       successMsg: res.locals.successMsg,
       errorMsg: res.locals.errorMsg,
-      categories: []
+      categories: [],
     });
   }
 });
@@ -290,9 +310,7 @@ app.locals.formHidden = formHidden;
 app.locals.formSubmit = formSubmit;
 
 const port = process.env.PORT || 10000;
-app.set("port", port);
-app.listen(port, () => {
-  
-});
+app.set('port', port);
+app.listen(port, () => {});
 
 module.exports = app;

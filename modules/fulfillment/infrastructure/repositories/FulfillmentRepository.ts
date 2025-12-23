@@ -20,10 +20,9 @@ export class FulfillmentRepository implements IFulfillmentRepository {
     const props = fulfillment.toPersistence();
     const now = new Date().toISOString();
 
-    const existing = await queryOne<Record<string, any>>(
-      'SELECT "fulfillmentId" FROM fulfillment WHERE "fulfillmentId" = $1',
-      [props.fulfillmentId]
-    );
+    const existing = await queryOne<Record<string, any>>('SELECT "fulfillmentId" FROM fulfillment WHERE "fulfillmentId" = $1', [
+      props.fulfillmentId,
+    ]);
 
     if (existing) {
       // Update
@@ -106,7 +105,7 @@ export class FulfillmentRepository implements IFulfillmentRepository {
           props.failureReason || null,
           now,
           props.fulfillmentId,
-        ]
+        ],
       );
     } else {
       // Insert
@@ -166,7 +165,7 @@ export class FulfillmentRepository implements IFulfillmentRepository {
           props.failureReason || null,
           now,
           now,
-        ]
+        ],
       );
     }
 
@@ -175,48 +174,36 @@ export class FulfillmentRepository implements IFulfillmentRepository {
   }
 
   async findById(fulfillmentId: string): Promise<Fulfillment | null> {
-    const row = await queryOne<Record<string, any>>(
-      'SELECT * FROM fulfillment WHERE "fulfillmentId" = $1',
-      [fulfillmentId]
-    );
+    const row = await queryOne<Record<string, any>>('SELECT * FROM fulfillment WHERE "fulfillmentId" = $1', [fulfillmentId]);
 
     if (!row) return null;
     return this.mapToFulfillment(row);
   }
 
   async findByOrderId(orderId: string): Promise<Fulfillment[]> {
-    const rows = await query<Record<string, any>[]>(
-      'SELECT * FROM fulfillment WHERE "orderId" = $1 ORDER BY "createdAt" DESC',
-      [orderId]
-    );
+    const rows = await query<Record<string, any>[]>('SELECT * FROM fulfillment WHERE "orderId" = $1 ORDER BY "createdAt" DESC', [orderId]);
 
-    return (rows || []).map((row) => this.mapToFulfillment(row));
+    return (rows || []).map(row => this.mapToFulfillment(row));
   }
 
-  async findAll(
-    filters?: FulfillmentFilters,
-    pagination?: PaginationOptions
-  ): Promise<PaginatedResult<Fulfillment>> {
+  async findAll(filters?: FulfillmentFilters, pagination?: PaginationOptions): Promise<PaginatedResult<Fulfillment>> {
     const page = pagination?.page || 1;
     const limit = pagination?.limit || 20;
     const offset = (page - 1) * limit;
 
     const { whereClause, params } = this.buildWhereClause(filters);
 
-    const countResult = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM fulfillment ${whereClause}`,
-      params
-    );
+    const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM fulfillment ${whereClause}`, params);
     const total = parseInt(countResult?.count || '0', 10);
 
     const rows = await query<Record<string, any>[]>(
       `SELECT * FROM fulfillment ${whereClause}
        ORDER BY "createdAt" DESC
        LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
-      [...params, limit, offset]
+      [...params, limit, offset],
     );
 
-    const data = (rows || []).map((row) => this.mapToFulfillment(row));
+    const data = (rows || []).map(row => this.mapToFulfillment(row));
 
     return {
       data,
@@ -228,10 +215,7 @@ export class FulfillmentRepository implements IFulfillmentRepository {
   }
 
   async findByTrackingNumber(trackingNumber: string): Promise<Fulfillment | null> {
-    const row = await queryOne<Record<string, any>>(
-      'SELECT * FROM fulfillment WHERE "trackingNumber" = $1',
-      [trackingNumber]
-    );
+    const row = await queryOne<Record<string, any>>('SELECT * FROM fulfillment WHERE "trackingNumber" = $1', [trackingNumber]);
 
     if (!row) return null;
     return this.mapToFulfillment(row);
@@ -239,14 +223,9 @@ export class FulfillmentRepository implements IFulfillmentRepository {
 
   async delete(fulfillmentId: string): Promise<boolean> {
     // Delete items first
-    await query('DELETE FROM "fulfillmentItem" WHERE "fulfillmentId" = $1', [
-      fulfillmentId,
-    ]);
+    await query('DELETE FROM "fulfillmentItem" WHERE "fulfillmentId" = $1', [fulfillmentId]);
 
-    const result = await query<{ rowCount?: number }>(
-      'DELETE FROM fulfillment WHERE "fulfillmentId" = $1',
-      [fulfillmentId]
-    );
+    const result = await query<{ rowCount?: number }>('DELETE FROM fulfillment WHERE "fulfillmentId" = $1', [fulfillmentId]);
 
     return (result as any)?.rowCount > 0;
   }
@@ -259,7 +238,7 @@ export class FulfillmentRepository implements IFulfillmentRepository {
 
     const existing = await queryOne<Record<string, any>>(
       'SELECT "fulfillmentItemId" FROM "fulfillmentItem" WHERE "fulfillmentItemId" = $1',
-      [props.fulfillmentItemId]
+      [props.fulfillmentItemId],
     );
 
     if (existing) {
@@ -294,7 +273,7 @@ export class FulfillmentRepository implements IFulfillmentRepository {
           props.packedAt?.toISOString() || null,
           now,
           props.fulfillmentItemId,
-        ]
+        ],
       );
     } else {
       await query(
@@ -327,7 +306,7 @@ export class FulfillmentRepository implements IFulfillmentRepository {
           props.packedAt?.toISOString() || null,
           now,
           now,
-        ]
+        ],
       );
     }
 
@@ -345,29 +324,22 @@ export class FulfillmentRepository implements IFulfillmentRepository {
   }
 
   async findItemsByFulfillmentId(fulfillmentId: string): Promise<FulfillmentItem[]> {
-    const rows = await query<Record<string, any>[]>(
-      'SELECT * FROM "fulfillmentItem" WHERE "fulfillmentId" = $1 ORDER BY "createdAt" ASC',
-      [fulfillmentId]
-    );
+    const rows = await query<Record<string, any>[]>('SELECT * FROM "fulfillmentItem" WHERE "fulfillmentId" = $1 ORDER BY "createdAt" ASC', [
+      fulfillmentId,
+    ]);
 
-    return (rows || []).map((row) => this.mapToFulfillmentItem(row));
+    return (rows || []).map(row => this.mapToFulfillmentItem(row));
   }
 
   async findItem(fulfillmentItemId: string): Promise<FulfillmentItem | null> {
-    const row = await queryOne<Record<string, any>>(
-      'SELECT * FROM "fulfillmentItem" WHERE "fulfillmentItemId" = $1',
-      [fulfillmentItemId]
-    );
+    const row = await queryOne<Record<string, any>>('SELECT * FROM "fulfillmentItem" WHERE "fulfillmentItemId" = $1', [fulfillmentItemId]);
 
     if (!row) return null;
     return this.mapToFulfillmentItem(row);
   }
 
   async deleteItem(fulfillmentItemId: string): Promise<boolean> {
-    const result = await query<{ rowCount?: number }>(
-      'DELETE FROM "fulfillmentItem" WHERE "fulfillmentItemId" = $1',
-      [fulfillmentItemId]
-    );
+    const result = await query<{ rowCount?: number }>('DELETE FROM "fulfillmentItem" WHERE "fulfillmentItemId" = $1', [fulfillmentItemId]);
 
     return (result as any)?.rowCount > 0;
   }
@@ -377,23 +349,20 @@ export class FulfillmentRepository implements IFulfillmentRepository {
   async updateStatus(fulfillmentId: string, status: FulfillmentStatus): Promise<boolean> {
     const result = await query<{ rowCount?: number }>(
       'UPDATE fulfillment SET status = $1, "updatedAt" = NOW() WHERE "fulfillmentId" = $2',
-      [status, fulfillmentId]
+      [status, fulfillmentId],
     );
 
     return (result as any)?.rowCount > 0;
   }
 
-  async bulkUpdateStatus(
-    fulfillmentIds: string[],
-    status: FulfillmentStatus
-  ): Promise<number> {
+  async bulkUpdateStatus(fulfillmentIds: string[], status: FulfillmentStatus): Promise<number> {
     if (fulfillmentIds.length === 0) return 0;
 
     const placeholders = fulfillmentIds.map((_, i) => `$${i + 2}`).join(', ');
     const result = await query<{ rowCount?: number }>(
       `UPDATE fulfillment SET status = $1, "updatedAt" = NOW()
        WHERE "fulfillmentId" IN (${placeholders})`,
-      [status, ...fulfillmentIds]
+      [status, ...fulfillmentIds],
     );
 
     return (result as any)?.rowCount || 0;

@@ -18,7 +18,7 @@ export class ListPromotionsCommand {
       offset?: number;
       orderBy?: string;
       direction?: 'ASC' | 'DESC';
-    }
+    },
   ) {}
 }
 
@@ -40,14 +40,14 @@ export class ListPromotionsUseCase {
       {
         status: command.filters?.status as any, // Cast to match repo interface
         isActive: command.filters?.isActive,
-        merchantId: command.filters?.merchantId
+        merchantId: command.filters?.merchantId,
       },
       {
         limit: command.pagination?.limit || 50,
         offset: command.pagination?.offset || 0,
         orderBy: command.pagination?.orderBy || 'createdAt',
-        direction: command.pagination?.direction || 'DESC'
-      }
+        direction: command.pagination?.direction || 'DESC',
+      },
     );
 
     // Calculate total (approximate for now)
@@ -58,7 +58,7 @@ export class ListPromotionsUseCase {
       total,
       limit: command.pagination?.limit || 50,
       offset: command.pagination?.offset || 0,
-      hasMore: promotions.length === (command.pagination?.limit || 50)
+      hasMore: promotions.length === (command.pagination?.limit || 50),
     };
   }
 }

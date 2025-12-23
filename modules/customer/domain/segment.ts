@@ -4,6 +4,6 @@ export class Segment {
     public name: string,
     public description: string,
     public criteria: string,
-    public createdAt?: Date
+    public createdAt?: Date,
   ) {}
 }

@@ -1,6 +1,6 @@
 /**
  * Loyalty Customer Controller
- * 
+ *
  * Handles public and customer-facing loyalty endpoints.
  */
 
@@ -56,13 +56,13 @@ export const getPublicTiers = async (req: Request, res: Response): Promise<void>
       name: tier.name,
       description: tier.description,
       pointsThreshold: tier.pointsThreshold,
-      benefits: tier.benefits
+      benefits: tier.benefits,
     }));
 
     respond(res, publicTiers);
   } catch (error) {
     logger.error('Error:', error);
-    
+
     respondError(res, 'Failed to fetch loyalty tiers');
   }
 };
@@ -81,13 +81,13 @@ export const getPublicRewards = async (req: Request, res: Response): Promise<voi
       description: reward.description,
       pointsCost: reward.pointsCost,
       freeShipping: reward.freeShipping,
-      expiresAt: reward.expiresAt
+      expiresAt: reward.expiresAt,
     }));
 
     respond(res, publicRewards);
   } catch (error) {
     logger.error('Error:', error);
-    
+
     respondError(res, 'Failed to fetch loyalty rewards');
   }
 };
@@ -118,8 +118,8 @@ export const getMyLoyaltyStatus = async (req: UserRequest, res: Response): Promi
         tier: {
           name: 'Not Enrolled',
           description: 'Enroll in our loyalty program to start earning points',
-          pointsThreshold: 0
-        }
+          pointsThreshold: 0,
+        },
       });
       return;
     }
@@ -135,12 +135,12 @@ export const getMyLoyaltyStatus = async (req: UserRequest, res: Response): Promi
         name: tier.name,
         description: tier.description,
         pointsThreshold: tier.pointsThreshold,
-        benefits: tier.benefits
-      }
+        benefits: tier.benefits,
+      },
     });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     respondError(res, 'Failed to fetch loyalty status');
   }
 };
@@ -166,17 +166,17 @@ export const getMyTransactions = async (req: UserRequest, res: Response): Promis
       action: transaction.action,
       points: transaction.points,
       description: transaction.description,
-      date: transaction.createdAt
+      date: transaction.createdAt,
     }));
 
     res.json({
       success: true,
       data: formattedTransactions,
-      pagination: { limit }
+      pagination: { limit },
     });
   } catch (error) {
     logger.error('Error:', error);
-    
+
     respondError(res, 'Failed to fetch loyalty transactions');
   }
 };
@@ -202,14 +202,18 @@ export const redeemReward = async (req: UserRequest, res: Response): Promise<voi
 
     const redemption = await loyaltyRepo.redeemReward(customerId, rewardId);
 
-    respondWithMessage(res, {
-      redemptionCode: redemption.redemptionCode,
-      pointsSpent: redemption.pointsSpent,
-      expiresAt: redemption.expiresAt
-    }, 'Reward redeemed successfully');
+    respondWithMessage(
+      res,
+      {
+        redemptionCode: redemption.redemptionCode,
+        pointsSpent: redemption.pointsSpent,
+        expiresAt: redemption.expiresAt,
+      },
+      'Reward redeemed successfully',
+    );
   } catch (error) {
     logger.error('Error:', error);
-    
+
     const errorMessage = (error as Error).message;
 
     if (errorMessage.includes('Insufficient points')) {
@@ -239,7 +243,7 @@ export const getMyRedemptions = async (req: UserRequest, res: Response): Promise
 
     // Add reward details to each redemption
     const detailedRedemptions = await Promise.all(
-      redemptions.map(async (redemption) => {
+      redemptions.map(async redemption => {
         const reward = await loyaltyRepo.findRewardById(redemption.rewardId);
         return {
           id: redemption.loyaltyRedemptionId,
@@ -248,18 +252,20 @@ export const getMyRedemptions = async (req: UserRequest, res: Response): Promise
           status: redemption.status,
           createdAt: redemption.createdAt,
           expiresAt: redemption.expiresAt,
-          reward: reward ? {
-            name: reward.name,
-            description: reward.description
-          } : undefined
+          reward: reward
+            ? {
+                name: reward.name,
+                description: reward.description,
+              }
+            : undefined,
         };
-      })
+      }),
     );
 
     respond(res, detailedRedemptions);
   } catch (error) {
     logger.error('Error:', error);
-    
+
     respondError(res, 'Failed to fetch redemptions');
   }
 };

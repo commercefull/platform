@@ -29,7 +29,7 @@ export const listPromotions = async (req: Request, res: Response): Promise<void>
       limit: parseInt(limit as string) || 50,
       offset: parseInt(offset as string) || 0,
       orderBy: (orderBy as string) || 'createdAt',
-      direction: (orderDirection as 'ASC' | 'DESC') || 'DESC'
+      direction: (orderDirection as 'ASC' | 'DESC') || 'DESC',
     });
 
     const useCase = new ListPromotionsUseCase(PromotionRepo);
@@ -48,19 +48,19 @@ export const listPromotions = async (req: Request, res: Response): Promise<void>
         offset: result.offset,
         page,
         pages,
-        hasMore: result.hasMore
+        hasMore: result.hasMore,
       },
       filters: {
         status: status || '',
         type: type || '',
-        search: search || ''
+        search: search || '',
       },
-      
-      success: req.query.success || null
+
+      success: req.query.success || null,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load promotions',
@@ -79,7 +79,7 @@ export const createPromotionForm = async (req: Request, res: Response): Promise<
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -93,19 +93,8 @@ export const createPromotionForm = async (req: Request, res: Response): Promise<
 
 export const createPromotion = async (req: Request, res: Response): Promise<void> => {
   try {
-    const {
-      code,
-      name,
-      description,
-      type,
-      value,
-      minOrderAmount,
-      maxDiscountAmount,
-      usageLimit,
-      usageLimitPerCustomer,
-      startsAt,
-      endsAt
-    } = req.body;
+    const { code, name, description, type, value, minOrderAmount, maxDiscountAmount, usageLimit, usageLimitPerCustomer, startsAt, endsAt } =
+      req.body;
 
     const command = new CreatePromotionCommand(
       name,
@@ -118,7 +107,7 @@ export const createPromotion = async (req: Request, res: Response): Promise<void
       usageLimit ? parseInt(usageLimit) : undefined,
       usageLimitPerCustomer ? parseInt(usageLimitPerCustomer) : undefined,
       startsAt ? new Date(startsAt) : undefined,
-      endsAt ? new Date(endsAt) : undefined
+      endsAt ? new Date(endsAt) : undefined,
     );
 
     const useCase = new CreatePromotionUseCase(PromotionRepo);
@@ -127,7 +116,6 @@ export const createPromotion = async (req: Request, res: Response): Promise<void
     res.redirect(`/hub/promotions/${result.promotionId}?success=Promotion created successfully`);
   } catch (error: any) {
     logger.error('Error:', error);
-    
 
     // Reload form with error
     adminRespond(req, res, 'promotions/create', {
@@ -160,12 +148,12 @@ export const viewPromotion = async (req: Request, res: Response): Promise<void> 
     adminRespond(req, res, 'promotions/view', {
       pageName: `Promotion: ${promotion.name}`,
       promotion,
-      
-      success: req.query.success || null
+
+      success: req.query.success || null,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load promotion',
@@ -197,7 +185,7 @@ export const editPromotionForm = async (req: Request, res: Response): Promise<vo
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -226,7 +214,7 @@ export const updatePromotion = async (req: Request, res: Response): Promise<void
       usageLimitPerCustomer,
       startsAt,
       endsAt,
-      isActive
+      isActive,
     } = req.body;
 
     if (name !== undefined) updates.name = name;
@@ -236,7 +224,8 @@ export const updatePromotion = async (req: Request, res: Response): Promise<void
     if (minOrderAmount !== undefined) updates.minOrderAmount = minOrderAmount ? parseFloat(minOrderAmount) : undefined;
     if (maxDiscountAmount !== undefined) updates.maxDiscountAmount = maxDiscountAmount ? parseFloat(maxDiscountAmount) : undefined;
     if (usageLimit !== undefined) updates.usageLimit = usageLimit ? parseInt(usageLimit) : undefined;
-    if (usageLimitPerCustomer !== undefined) updates.usageLimitPerCustomer = usageLimitPerCustomer ? parseInt(usageLimitPerCustomer) : undefined;
+    if (usageLimitPerCustomer !== undefined)
+      updates.usageLimitPerCustomer = usageLimitPerCustomer ? parseInt(usageLimitPerCustomer) : undefined;
     if (startsAt !== undefined) updates.startsAt = startsAt ? new Date(startsAt) : undefined;
     if (endsAt !== undefined) updates.endsAt = endsAt ? new Date(endsAt) : undefined;
     if (isActive !== undefined) updates.isActive = isActive === 'true' || isActive === true;
@@ -248,7 +237,6 @@ export const updatePromotion = async (req: Request, res: Response): Promise<void
     res.redirect(`/hub/promotions/${promotionId}?success=Promotion updated successfully`);
   } catch (error: any) {
     logger.error('Error:', error);
-    
 
     // Reload form with error
     try {
@@ -284,7 +272,7 @@ export const deletePromotion = async (req: Request, res: Response): Promise<void
     res.json({ success: true, message: 'Promotion deleted successfully' });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     res.status(500).json({ success: false, message: error.message || 'Failed to delete promotion' });
   }
 };

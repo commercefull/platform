@@ -27,7 +27,7 @@ export class UpdatePageCommand {
     public readonly publishedAt?: string,
     public readonly scheduledAt?: string,
     public readonly isHomePage?: boolean,
-    public readonly updatedBy?: string
+    public readonly updatedBy?: string,
   ) {}
 }
 
@@ -86,7 +86,7 @@ export class UpdatePageUseCase {
       customFields: command.customFields,
       publishedAt: command.publishedAt,
       scheduledAt: command.scheduledAt,
-      isHomePage: command.isHomePage
+      isHomePage: command.isHomePage,
     });
 
     // Emit event
@@ -95,7 +95,7 @@ export class UpdatePageUseCase {
       title: updatedPage.title,
       slug: updatedPage.slug,
       updatedBy: command.updatedBy,
-      changes
+      changes,
     });
 
     return {
@@ -103,7 +103,7 @@ export class UpdatePageUseCase {
       title: updatedPage.title,
       slug: updatedPage.slug,
       status: updatedPage.status,
-      updatedAt: updatedPage.updatedAt
+      updatedAt: updatedPage.updatedAt,
     };
   }
 }

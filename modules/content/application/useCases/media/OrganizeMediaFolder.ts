@@ -9,21 +9,21 @@ export class CreateFolderCommand {
   constructor(
     public readonly name: string,
     public readonly parentId?: string,
-    public readonly createdBy?: string
+    public readonly createdBy?: string,
   ) {}
 }
 
 export class MoveFolderCommand {
   constructor(
     public readonly folderId: string,
-    public readonly newParentId: string | null
+    public readonly newParentId: string | null,
   ) {}
 }
 
 export class MoveMediaToFolderCommand {
   constructor(
     public readonly mediaIds: string[],
-    public readonly folderId: string | null
+    public readonly folderId: string | null,
   ) {}
 }
 
@@ -73,7 +73,7 @@ export class OrganizeMediaFolderUseCase {
       depth,
       sortOrder: 0,
       createdBy: command.createdBy ?? null,
-      updatedBy: null
+      updatedBy: null,
     });
 
     return {
@@ -82,7 +82,7 @@ export class OrganizeMediaFolderUseCase {
       parentId: folder.parentId ?? undefined,
       path: folder.path ?? undefined,
       depth: folder.depth,
-      createdAt: folder.createdAt instanceof Date ? folder.createdAt.toISOString() : String(folder.createdAt)
+      createdAt: folder.createdAt instanceof Date ? folder.createdAt.toISOString() : String(folder.createdAt),
     };
   }
 
@@ -119,7 +119,7 @@ export class OrganizeMediaFolderUseCase {
     const updatedFolder = await this.mediaRepo.updateFolder(command.folderId, {
       parentId: command.newParentId ?? null,
       path,
-      depth
+      depth,
     });
 
     return {
@@ -128,7 +128,7 @@ export class OrganizeMediaFolderUseCase {
       parentId: updatedFolder.parentId ?? undefined,
       path: updatedFolder.path ?? undefined,
       depth: updatedFolder.depth,
-      createdAt: updatedFolder.createdAt instanceof Date ? updatedFolder.createdAt.toISOString() : String(updatedFolder.createdAt)
+      createdAt: updatedFolder.createdAt instanceof Date ? updatedFolder.createdAt.toISOString() : String(updatedFolder.createdAt),
     };
   }
 
@@ -149,7 +149,7 @@ export class OrganizeMediaFolderUseCase {
     for (const mediaId of command.mediaIds) {
       try {
         await this.mediaRepo.updateMedia(mediaId, {
-          contentMediaFolderId: command.folderId ?? null
+          contentMediaFolderId: command.folderId ?? null,
         });
         movedCount++;
       } catch {
@@ -176,7 +176,7 @@ export class OrganizeMediaFolderUseCase {
         name: folder.name,
         path: folder.path ?? undefined,
         depth: folder.depth,
-        children: []
+        children: [],
       });
     }
 
@@ -184,7 +184,7 @@ export class OrganizeMediaFolderUseCase {
     for (const folder of folders) {
       const folderId = folder.contentMediaFolderId || folder.id;
       const node = folderMap.get(folderId)!;
-      
+
       if (folder.parentId && folderMap.has(folder.parentId)) {
         const parent = folderMap.get(folder.parentId)!;
         parent.children.push(node);

@@ -46,7 +46,7 @@ exports.up = function (knex) {
     t.decimal('commissionRate', 5, 2);
     t.enum('commissionType', ['percentage', 'flat', 'tiered']).defaultTo('percentage');
     t.jsonb('commissionTiers');
-    t.decimal('minimumPayoutAmount', 10, 2).defaultTo(50.00);
+    t.decimal('minimumPayoutAmount', 10, 2).defaultTo(50.0);
     t.enum('payoutSchedule', ['weekly', 'biweekly', 'monthly', 'quarterly']).defaultTo('monthly');
     t.boolean('autoApproveProducts').notNullable().defaultTo(false);
     t.boolean('autoApproveReviews').notNullable().defaultTo(false);
@@ -57,7 +57,7 @@ exports.up = function (knex) {
     t.specificType('allowedCategories', 'uuid[]');
     t.text('notes');
     t.jsonb('customFields');
-    
+
     t.timestamp('lastLoginAt');
     t.boolean('emailVerified').notNullable().defaultTo(false);
     t.uuid('createdBy');

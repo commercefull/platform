@@ -25,7 +25,7 @@ export class AddItemCommand {
     public readonly productVariantId?: string,
     public readonly imageUrl?: string,
     public readonly attributes?: Record<string, any>,
-    public readonly itemType: 'physical' | 'digital' | 'subscription' | 'service' = 'physical'
+    public readonly itemType: 'physical' | 'digital' | 'subscription' | 'service' = 'physical',
   ) {}
 }
 
@@ -60,7 +60,7 @@ export class AddItemUseCase {
         imageUrl: command.imageUrl,
         attributes: command.attributes,
         itemType: command.itemType,
-        isGift: false
+        isGift: false,
       });
 
       basket.addItem(newItem);
@@ -70,7 +70,7 @@ export class AddItemUseCase {
     eventBus.emit('basket.item_added', {
       basketId: command.basketId,
       productId: command.productId,
-      quantity: command.quantity
+      quantity: command.quantity,
     });
 
     const updatedBasket = await this.basketRepository.findById(command.basketId);
@@ -94,12 +94,12 @@ export class AddItemUseCase {
         unitPrice: item.unitPrice.amount,
         lineTotal: item.lineTotal.amount,
         imageUrl: item.imageUrl,
-        isGift: item.isGift
+        isGift: item.isGift,
       })),
       itemCount: basket.itemCount,
       subtotal: basket.subtotal.amount,
       createdAt: basket.createdAt.toISOString(),
-      updatedAt: basket.updatedAt.toISOString()
+      updatedAt: basket.updatedAt.toISOString(),
     };
   }
 }

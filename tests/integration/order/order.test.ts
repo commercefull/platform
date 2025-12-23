@@ -39,35 +39,29 @@ describe('Order Tests', () => {
   });
 
   afterAll(async () => {
-    await cleanupOrderTests(
-      client,
-      adminToken,
-      testOrderId
-    );
+    await cleanupOrderTests(client, adminToken, testOrderId);
   });
 
   describe('Admin Order Operations', () => {
     it('should get all orders (admin)', async () => {
       const response = await client.get('/business/orders', {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
-      
+
       // Response may be array or object with orders property
-      const orders = Array.isArray(response.data.data) 
-        ? response.data.data 
-        : (response.data.data.orders || []);
+      const orders = Array.isArray(response.data.data) ? response.data.data : response.data.data.orders || [];
       expect(Array.isArray(orders)).toBe(true);
       expect(orders.length).toBeGreaterThan(0);
-      
+
       // Verify camelCase in response data (TypeScript interface)
       expect(orders[0]).toHaveProperty('orderNumber');
       expect(orders[0]).toHaveProperty('customerId');
       expect(orders[0]).toHaveProperty('paymentStatus');
       expect(orders[0]).toHaveProperty('totalAmount');
-      
+
       // Verify no snake_case properties are exposed in the API
       expect(orders[0]).not.toHaveProperty('order_number');
       expect(orders[0]).not.toHaveProperty('customer_id');
@@ -77,13 +71,13 @@ describe('Order Tests', () => {
 
     it('should get an order by ID (admin)', async () => {
       const response = await client.get(`/business/orders/${testOrderId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       expect(response.data.data).toHaveProperty('orderId', testOrderId);
-      
+
       // Check order properties match our test data
       const order = response.data.data as Order;
       expect(order.status).toBe(testOrderData.status);
@@ -92,7 +86,7 @@ describe('Order Tests', () => {
       expect(order.currencyCode).toBe(testOrderData.currencyCode);
       // Total amount is calculated by the server, just verify it's a number
       expect(typeof parseFloat(String(order.totalAmount))).toBe('number');
-      
+
       // Verify address data is properly mapped
       expect(order.shippingAddress).toHaveProperty('firstName', testOrderData.shippingAddress.firstName);
       expect(order.shippingAddress).toHaveProperty('lastName', testOrderData.shippingAddress.lastName);
@@ -100,22 +94,26 @@ describe('Order Tests', () => {
 
     it('should update an order status (admin)', async () => {
       const newStatus = 'processing';
-      
-      const response = await client.put(`/business/orders/${testOrderId}/status`, {
-        status: newStatus
-      }, {
-        headers: { Authorization: `Bearer ${adminToken}` }
-      });
-      
+
+      const response = await client.put(
+        `/business/orders/${testOrderId}/status`,
+        {
+          status: newStatus,
+        },
+        {
+          headers: { Authorization: `Bearer ${adminToken}` },
+        },
+      );
+
       // May return 200 or 500 depending on order state transitions
       if (response.status === 200) {
         expect(response.data.success).toBe(true);
         expect(response.data.data).toHaveProperty('orderId', testOrderId);
         expect(response.data.data).toHaveProperty('status', newStatus);
-        
+
         // Verify status changed in database
         const getResponse = await client.get(`/business/orders/${testOrderId}`, {
-          headers: { Authorization: `Bearer ${adminToken}` }
+          headers: { Authorization: `Bearer ${adminToken}` },
         });
         expect(getResponse.data.data).toHaveProperty('status', newStatus);
       } else {
@@ -128,18 +126,16 @@ describe('Order Tests', () => {
   describe('Customer Order Operations', () => {
     it('should get customer orders', async () => {
       const response = await client.get('/customer/order', {
-        headers: { Authorization: `Bearer ${customerToken}` }
+        headers: { Authorization: `Bearer ${customerToken}` },
       });
-      
+
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
-      
+
       // Response may be array or object with orders property
-      const orders = Array.isArray(response.data.data) 
-        ? response.data.data 
-        : (response.data.data.orders || []);
+      const orders = Array.isArray(response.data.data) ? response.data.data : response.data.data.orders || [];
       expect(Array.isArray(orders)).toBe(true);
-      
+
       // Should find our test order
       const testOrder = orders.find((o: Order) => o.orderId === testOrderId);
       expect(testOrder).toBeDefined();
@@ -147,18 +143,18 @@ describe('Order Tests', () => {
 
     it('should get order details for customer', async () => {
       const response = await client.get(`/customer/order/${testOrderId}`, {
-        headers: { Authorization: `Bearer ${customerToken}` }
+        headers: { Authorization: `Bearer ${customerToken}` },
       });
-      
+
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       expect(response.data.data).toHaveProperty('orderId', testOrderId);
-      
+
       // Verify order items are included
       expect(response.data.data).toHaveProperty('items');
       expect(Array.isArray(response.data.data.items)).toBe(true);
       expect(response.data.data.items.length).toBeGreaterThan(0);
-      
+
       // Verify camelCase in order items
       const item = response.data.data.items[0] as OrderItem;
       expect(item).toHaveProperty('productId');
@@ -169,24 +165,32 @@ describe('Order Tests', () => {
 
     it('should allow customers to cancel their order', async () => {
       // First ensure order is in a cancellable state (update to pending)
-      await client.put(`/business/orders/${testOrderId}/status`, {
-        status: 'pending'
-      }, {
-        headers: { Authorization: `Bearer ${adminToken}` }
-      });
-      
+      await client.put(
+        `/business/orders/${testOrderId}/status`,
+        {
+          status: 'pending',
+        },
+        {
+          headers: { Authorization: `Bearer ${adminToken}` },
+        },
+      );
+
       // Then try to cancel
-      const response = await client.post(`/customer/order/${testOrderId}/cancel`, {}, {
-        headers: { Authorization: `Bearer ${customerToken}` }
-      });
-      
+      const response = await client.post(
+        `/customer/order/${testOrderId}/cancel`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${customerToken}` },
+        },
+      );
+
       // May return 200 or 400 depending on order state
       if (response.status === 200) {
         expect(response.data.success).toBe(true);
-        
+
         // Verify status changed to cancelled
         const getResponse = await client.get(`/customer/order/${testOrderId}`, {
-          headers: { Authorization: `Bearer ${customerToken}` }
+          headers: { Authorization: `Bearer ${customerToken}` },
         });
         expect(getResponse.data.data).toHaveProperty('status', 'cancelled');
       }
@@ -195,11 +199,11 @@ describe('Order Tests', () => {
     it('should prevent customers from accessing orders that are not theirs', async () => {
       // Try to access an order with a fake/different order ID
       const fakeOrderId = '00000000-0000-0000-0000-000000000999';
-      
+
       const response = await client.get(`/customer/order/${fakeOrderId}`, {
-        headers: { Authorization: `Bearer ${customerToken}` }
+        headers: { Authorization: `Bearer ${customerToken}` },
       });
-      
+
       // Should return 404 (not found)
       expect(response.status).toBe(404);
     });
@@ -211,22 +215,22 @@ describe('Order Tests', () => {
         ...testOrderData,
         orderNumber: `TEST-${Date.now()}-NEW`,
         customerEmail: 'new-test@example.com',
-        customerName: 'New Test Customer'
+        customerName: 'New Test Customer',
       };
-      
+
       const response = await client.post('/customer/order', newOrderData, {
-        headers: { Authorization: `Bearer ${customerToken}` }
+        headers: { Authorization: `Bearer ${customerToken}` },
       });
-      
+
       expect(response.status).toBe(201);
       expect(response.data.success).toBe(true);
       expect(response.data.data).toHaveProperty('orderId');
       expect(response.data.data).toHaveProperty('orderNumber');
-      
+
       // Clean up the new test order
       const newOrderId = response.data.data.orderId;
       await client.delete(`/business/orders/${newOrderId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
     });
   });
@@ -239,12 +243,12 @@ describe('Order Tests', () => {
     it('should filter orders by status', async () => {
       const response = await client.get('/business/orders', {
         headers: { Authorization: `Bearer ${adminToken}` },
-        params: { status: 'pending' }
+        params: { status: 'pending' },
       });
-      
+
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
-      
+
       // All returned orders should have pending status
       const orders = response.data.data.orders || response.data.data;
       if (Array.isArray(orders)) {
@@ -257,9 +261,9 @@ describe('Order Tests', () => {
     it('should paginate orders', async () => {
       const response = await client.get('/business/orders', {
         headers: { Authorization: `Bearer ${adminToken}` },
-        params: { limit: 5, offset: 0 }
+        params: { limit: 5, offset: 0 },
       });
-      
+
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       const orders = response.data.data.orders || response.data.data;
@@ -271,15 +275,15 @@ describe('Order Tests', () => {
     it('should get order by order number (admin)', async () => {
       // First get the test order to know its order number
       const getResponse = await client.get(`/business/orders/${testOrderId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
       const orderNumber = getResponse.data.data?.orderNumber;
       if (!orderNumber) return; // Skip if order not found
 
       const response = await client.get(`/business/orders/number/${orderNumber}`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       // May return 200 or 404 depending on route implementation
       if (response.status === 200) {
         expect(response.data.success).toBe(true);
@@ -289,15 +293,15 @@ describe('Order Tests', () => {
 
     it('should get order by order number (customer)', async () => {
       const getResponse = await client.get(`/customer/order/${testOrderId}`, {
-        headers: { Authorization: `Bearer ${customerToken}` }
+        headers: { Authorization: `Bearer ${customerToken}` },
       });
       const orderNumber = getResponse.data.data?.orderNumber;
       if (!orderNumber) return; // Skip if order not found
 
       const response = await client.get(`/customer/order/number/${orderNumber}`, {
-        headers: { Authorization: `Bearer ${customerToken}` }
+        headers: { Authorization: `Bearer ${customerToken}` },
       });
-      
+
       if (response.status === 200) {
         expect(response.data.success).toBe(true);
         expect(response.data.data).toHaveProperty('orderNumber', orderNumber);
@@ -308,21 +312,25 @@ describe('Order Tests', () => {
   describe('Order Refund (UC-ORD-006)', () => {
     it('should process a refund (admin)', async () => {
       // First ensure order is in a refundable state
-      await client.put(`/business/orders/${testOrderId}/status`, {
-        status: 'completed'
-      }, {
-        headers: { Authorization: `Bearer ${adminToken}` }
-      });
+      await client.put(
+        `/business/orders/${testOrderId}/status`,
+        {
+          status: 'completed',
+        },
+        {
+          headers: { Authorization: `Bearer ${adminToken}` },
+        },
+      );
 
       const refundData = {
-        amount: 10.00,
-        reason: 'Integration test refund'
+        amount: 10.0,
+        reason: 'Integration test refund',
       };
 
       const response = await client.post(`/business/orders/${testOrderId}/refund`, refundData, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       // May return 200, 201, or error depending on payment status
       if (response.status === 200 || response.status === 201) {
         expect(response.data.success).toBe(true);
@@ -343,7 +351,7 @@ describe('Order Tests', () => {
 
     it('should reject invalid tokens', async () => {
       const response = await client.get('/business/orders', {
-        headers: { Authorization: 'Bearer invalid-token' }
+        headers: { Authorization: 'Bearer invalid-token' },
       });
       expect(response.status).toBe(401);
     });

@@ -13,7 +13,7 @@ import { TransactionStatus } from '../../domain/valueObjects/PaymentStatus';
 export class GetTransactionCommand {
   constructor(
     public readonly transactionId?: string,
-    public readonly externalId?: string
+    public readonly externalId?: string,
   ) {
     if (!transactionId && !externalId) {
       throw new Error('Either transactionId or externalId must be provided');
@@ -34,7 +34,7 @@ export class ListTransactionsCommand {
     public readonly limit: number = 50,
     public readonly offset: number = 0,
     public readonly orderBy: string = 'createdAt',
-    public readonly orderDirection: 'asc' | 'desc' = 'desc'
+    public readonly orderDirection: 'asc' | 'desc' = 'desc',
   ) {}
 }
 
@@ -111,7 +111,7 @@ export class GetTransactionUseCase {
       authorizedAt: t.authorizedAt?.toISOString(),
       capturedAt: t.capturedAt?.toISOString(),
       createdAt: t.createdAt.toISOString(),
-      updatedAt: t.updatedAt.toISOString()
+      updatedAt: t.updatedAt.toISOString(),
     };
   }
 }
@@ -125,7 +125,7 @@ export class ListTransactionsUseCase {
       limit: command.limit,
       offset: command.offset,
       orderBy: command.orderBy,
-      orderDirection: command.orderDirection
+      orderDirection: command.orderDirection,
     };
 
     const result = await this.paymentRepository.findAllTransactions(filters, pagination);
@@ -148,12 +148,12 @@ export class ListTransactionsUseCase {
         authorizedAt: t.authorizedAt?.toISOString(),
         capturedAt: t.capturedAt?.toISOString(),
         createdAt: t.createdAt.toISOString(),
-        updatedAt: t.updatedAt.toISOString()
+        updatedAt: t.updatedAt.toISOString(),
       })),
       total: result.total,
       limit: result.limit,
       offset: result.offset,
-      hasMore: result.hasMore
+      hasMore: result.hasMore,
     };
   }
 }

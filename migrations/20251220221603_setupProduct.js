@@ -2,80 +2,77 @@
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.up = async function(knex) {
+exports.up = async function (knex) {
   // Insert product types
   const productTypes = [
     {
       name: 'Simple Product',
-      slug: 'simple'
+      slug: 'simple',
     },
     {
       name: 'Configurable Product',
-      slug: 'configurable'
+      slug: 'configurable',
     },
     {
       name: 'Virtual Product',
-      slug: 'virtual'
+      slug: 'virtual',
     },
     {
       name: 'Downloadable Product',
-      slug: 'downloadable'
+      slug: 'downloadable',
     },
     {
       name: 'Bundle Product',
-      slug: 'bundle'
+      slug: 'bundle',
     },
     {
       name: 'Grouped Product',
-      slug: 'grouped'
+      slug: 'grouped',
     },
     {
       name: 'Subscription Product',
-      slug: 'subscription'
-    }
+      slug: 'subscription',
+    },
   ];
 
   for (const productType of productTypes) {
-    await knex('productType')
-      .insert(productType)
-      .onConflict('slug')
-      .merge();
+    await knex('productType').insert(productType).onConflict('slug').merge();
   }
 
   // Insert product attribute groups
   await knex('productAttributeGroup').insert([
-    { 
-      name: 'General', 
-      code: 'general', 
-      description: 'General product attributes', 
-      position: 1, 
-      isComparable: true, 
-      isGlobal: true 
+    {
+      name: 'General',
+      code: 'general',
+      description: 'General product attributes',
+      position: 1,
+      isComparable: true,
+      isGlobal: true,
     },
-    { 
-      name: 'Technical', 
-      code: 'technical', 
-      description: 'Technical specifications', 
-      position: 2, 
-      isComparable: true, 
-      isGlobal: true 
+    {
+      name: 'Technical',
+      code: 'technical',
+      description: 'Technical specifications',
+      position: 2,
+      isComparable: true,
+      isGlobal: true,
     },
-    { 
-      name: 'Physical', 
-      code: 'physical', 
-      description: 'Physical characteristics like size, weight', 
-      position: 3, 
-      isComparable: true, 
-      isGlobal: true 
+    {
+      name: 'Physical',
+      code: 'physical',
+      description: 'Physical characteristics like size, weight',
+      position: 3,
+      isComparable: true,
+      isGlobal: true,
     },
-    { 
-      name: 'Visual', 
-      code: 'visual', 
-      description: 'Visual properties like color', 
-      position: 4, 
-      isComparable: true, 
-      isGlobal: true 
-    }
+    {
+      name: 'Visual',
+      code: 'visual',
+      description: 'Visual properties like color',
+      position: 4,
+      isComparable: true,
+      isGlobal: true,
+    },
   ]);
 
   // Get the attribute group IDs
@@ -103,7 +100,7 @@ exports.up = async function(knex) {
       isUsedInProductListing: true,
       useForVariants: false,
       useForConfigurations: false,
-      position: 1
+      position: 1,
     },
     {
       groupId: visualGroup.productAttributeGroupId,
@@ -122,7 +119,7 @@ exports.up = async function(knex) {
       isUsedInProductListing: true,
       useForVariants: true,
       useForConfigurations: false,
-      position: 2
+      position: 2,
     },
     {
       groupId: physicalGroup.productAttributeGroupId,
@@ -141,7 +138,7 @@ exports.up = async function(knex) {
       isUsedInProductListing: true,
       useForVariants: true,
       useForConfigurations: false,
-      position: 3
+      position: 3,
     },
     {
       groupId: technicalGroup.productAttributeGroupId,
@@ -160,7 +157,7 @@ exports.up = async function(knex) {
       isUsedInProductListing: false,
       useForVariants: false,
       useForConfigurations: false,
-      position: 4
+      position: 4,
     },
     {
       groupId: technicalGroup.productAttributeGroupId,
@@ -179,8 +176,8 @@ exports.up = async function(knex) {
       isUsedInProductListing: false,
       useForVariants: false,
       useForConfigurations: false,
-      position: 5
-    }
+      position: 5,
+    },
   ]);
 };
 
@@ -188,7 +185,7 @@ exports.up = async function(knex) {
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.down = async function(knex) {
+exports.down = async function (knex) {
   // Delete product attributes first (due to foreign key constraints)
   await knex('productAttribute').whereIn('code', ['brand', 'color', 'size', 'material', 'weight']).del();
 
@@ -196,5 +193,7 @@ exports.down = async function(knex) {
   await knex('productAttributeGroup').whereIn('code', ['general', 'technical', 'physical', 'visual']).del();
 
   // Delete product types
-  await knex('productType').whereIn('slug', ['simple', 'configurable', 'virtual', 'downloadable', 'bundle', 'grouped', 'subscription']).del();
+  await knex('productType')
+    .whereIn('slug', ['simple', 'configurable', 'virtual', 'downloadable', 'bundle', 'grouped', 'subscription'])
+    .del();
 };

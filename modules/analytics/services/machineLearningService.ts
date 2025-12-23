@@ -12,7 +12,7 @@ import { query, queryOne } from '../../../libs/db';
 
 export async function forecastSalesRevenue(
   historicalData: Array<{ date: Date; revenue: number; orders: number }>,
-  forecastDays: number = 30
+  forecastDays: number = 30,
 ): Promise<{
   predictions: Array<{ date: Date; predicted: number; confidence: number }>;
   trends: { slope: number; seasonality: number; accuracy: number };
@@ -51,7 +51,7 @@ export async function forecastSalesRevenue(
     predictions.push({
       date: forecastDate,
       predicted: Math.max(0, predicted),
-      confidence
+      confidence,
     });
   }
 
@@ -60,8 +60,8 @@ export async function forecastSalesRevenue(
     trends: {
       slope,
       seasonality: 1.05, // Simplified seasonal factor
-      accuracy: 0.75 // Would be calculated from validation data
-    }
+      accuracy: 0.75, // Would be calculated from validation data
+    },
   };
 }
 
@@ -71,7 +71,7 @@ export async function forecastSalesRevenue(
 
 export async function predictCustomerChurn(
   customerId: string,
-  historicalData: Array<{ date: Date; orders: number; revenue: number }>
+  historicalData: Array<{ date: Date; orders: number; revenue: number }>,
 ): Promise<{
   churnProbability: number;
   riskLevel: 'low' | 'medium' | 'high';
@@ -93,7 +93,7 @@ export async function predictCustomerChurn(
   const frequencyScore = Math.min(1, 1 / Math.max(1, totalOrders / 12)); // Lower frequency = higher risk
   const monetaryScore = Math.min(1, 500 / Math.max(1, avgOrderValue)); // Lower value = higher risk
 
-  const churnProbability = (recencyScore * 0.4 + frequencyScore * 0.3 + monetaryScore * 0.3);
+  const churnProbability = recencyScore * 0.4 + frequencyScore * 0.3 + monetaryScore * 0.3;
 
   let riskLevel: 'low' | 'medium' | 'high';
   if (churnProbability < 0.3) riskLevel = 'low';
@@ -103,7 +103,7 @@ export async function predictCustomerChurn(
   const factors = [
     { factor: 'Days since last order', impact: recencyScore, weight: 0.4 },
     { factor: 'Order frequency', impact: frequencyScore, weight: 0.3 },
-    { factor: 'Average order value', impact: monetaryScore, weight: 0.3 }
+    { factor: 'Average order value', impact: monetaryScore, weight: 0.3 },
   ];
 
   const recommendations = [];
@@ -120,7 +120,7 @@ export async function predictCustomerChurn(
     churnProbability,
     riskLevel,
     factors,
-    recommendations
+    recommendations,
   };
 }
 
@@ -145,14 +145,16 @@ export async function optimizeInventoryLevels(): Promise<{
   }>;
 }> {
   // Get product sales data
-  const productData = await query<Array<{
-    product_id: string;
-    name: string;
-    stock_quantity: string;
-    reorder_point: string;
-    daily_sales_avg: string;
-    sales_volatility: string;
-  }>>(
+  const productData = await query<
+    Array<{
+      product_id: string;
+      name: string;
+      stock_quantity: string;
+      reorder_point: string;
+      daily_sales_avg: string;
+      sales_volatility: string;
+    }>
+  >(
     `SELECT
       p.product_id,
       p.name,
@@ -164,7 +166,7 @@ export async function optimizeInventoryLevels(): Promise<{
     LEFT JOIN order_item oi ON p.product_id = oi.product_id
     LEFT JOIN "order" o ON oi.order_id = o.order_id AND o.created_at >= CURRENT_DATE - INTERVAL '90 days'
     WHERE p.is_active = true
-    GROUP BY p.product_id, p.name, p.stock_quantity, p.reorder_point`
+    GROUP BY p.product_id, p.name, p.stock_quantity, p.reorder_point`,
   );
 
   const recommendations = [];
@@ -182,9 +184,9 @@ export async function optimizeInventoryLevels(): Promise<{
     const leadTimeDays = 7; // Assume 7-day lead time
     const serviceLevel = 0.95; // 95% service level
     const safetyStock = salesVolatility * Math.sqrt(leadTimeDays) * 1.645; // Z-score for 95%
-    const recommendedStock = (dailySalesAvg * leadTimeDays) + safetyStock + reorderPoint;
+    const recommendedStock = dailySalesAvg * leadTimeDays + safetyStock + reorderPoint;
 
-    const confidence = Math.min(0.9, Math.max(0.5, 1 - (salesVolatility / dailySalesAvg)));
+    const confidence = Math.min(0.9, Math.max(0.5, 1 - salesVolatility / dailySalesAvg));
 
     recommendations.push({
       productId: product.product_id,
@@ -192,7 +194,7 @@ export async function optimizeInventoryLevels(): Promise<{
       recommendedStock: Math.ceil(recommendedStock),
       reorderPoint,
       confidence,
-      reason: `Based on ${dailySalesAvg.toFixed(1)} daily sales with ${leadTimeDays}-day lead time`
+      reason: `Based on ${dailySalesAvg.toFixed(1)} daily sales with ${leadTimeDays}-day lead time`,
     });
 
     // Generate alerts
@@ -201,14 +203,14 @@ export async function optimizeInventoryLevels(): Promise<{
         productId: product.product_id,
         alertType: 'reorder' as const,
         severity: 'high' as const,
-        message: `Stock below reorder point (${currentStock} <= ${reorderPoint})`
+        message: `Stock below reorder point (${currentStock} <= ${reorderPoint})`,
       });
     } else if (currentStock > recommendedStock * 1.5) {
       alerts.push({
         productId: product.product_id,
         alertType: 'overstock' as const,
         severity: 'medium' as const,
-        message: `Potential overstock (${currentStock} vs recommended ${Math.ceil(recommendedStock)})`
+        message: `Potential overstock (${currentStock} vs recommended ${Math.ceil(recommendedStock)})`,
       });
     }
   }
@@ -237,7 +239,7 @@ export async function generateProductRecommendations(customerId: string): Promis
     WHERE o.customer_id = $1 AND o.status = 'completed'
     ORDER BY o.created_at DESC
     LIMIT 50`,
-    [customerId]
+    [customerId],
   );
 
   // Simple collaborative filtering simulation
@@ -258,7 +260,7 @@ export async function generateProductRecommendations(customerId: string): Promis
       `SELECT product_id FROM product
        WHERE category = $1 AND is_active = true
        ORDER BY RANDOM() LIMIT 5`,
-      [category]
+      [category],
     );
 
     if (categoryProducts) {
@@ -266,7 +268,7 @@ export async function generateProductRecommendations(customerId: string): Promis
         personalized.push({
           productId: product.product_id,
           score: count / (customerPurchases?.length || 1),
-          reason: `Based on ${count} purchases in ${category}`
+          reason: `Based on ${count} purchases in ${category}`,
         });
       });
     }
@@ -285,12 +287,16 @@ export async function generateProductRecommendations(customerId: string): Promis
       AND o.status = 'completed'
     GROUP BY oi.product_id, p.category
     ORDER BY sales_count DESC
-    LIMIT 10`
-  ).then(rows => rows ? rows.map(row => ({
-    productId: row.product_id,
-    trend: parseInt(row.sales_count),
-    category: row.category
-  })) : []);
+    LIMIT 10`,
+  ).then(rows =>
+    rows
+      ? rows.map(row => ({
+          productId: row.product_id,
+          trend: parseInt(row.sales_count),
+          category: row.category,
+        }))
+      : [],
+  );
 
   // Simple complementary products (products bought together)
   const complementary = await query<Array<{ product_a: string; product_b: string; frequency: string }>>(
@@ -305,17 +311,21 @@ export async function generateProductRecommendations(customerId: string): Promis
       AND ord.status = 'completed'
     GROUP BY o1.product_id, o2.product_id
     ORDER BY frequency DESC
-    LIMIT 10`
-  ).then(rows => rows ? rows.map(row => ({
-    productId: row.product_b,
-    baseProductId: row.product_a,
-    lift: parseInt(row.frequency)
-  })) : []);
+    LIMIT 10`,
+  ).then(rows =>
+    rows
+      ? rows.map(row => ({
+          productId: row.product_b,
+          baseProductId: row.product_a,
+          lift: parseInt(row.frequency),
+        }))
+      : [],
+  );
 
   return {
     personalized: personalized.slice(0, 10),
     trending,
-    complementary
+    complementary,
   };
 }
 
@@ -340,12 +350,14 @@ export async function performCustomerSegmentation(): Promise<{
   }>;
 }> {
   // RFM (Recency, Frequency, Monetary) segmentation
-  const customerRFM = await query<Array<{
-    customer_id: string;
-    recency: string;
-    frequency: string;
-    monetary: string;
-  }>>(
+  const customerRFM = await query<
+    Array<{
+      customer_id: string;
+      recency: string;
+      frequency: string;
+      monetary: string;
+    }>
+  >(
     `WITH customer_rfm AS (
       SELECT
         customer_id,
@@ -361,7 +373,7 @@ export async function performCustomerSegmentation(): Promise<{
       recency::text,
       frequency::text,
       monetary::text
-    FROM customer_rfm`
+    FROM customer_rfm`,
   );
 
   // Simple segmentation logic
@@ -372,7 +384,7 @@ export async function performCustomerSegmentation(): Promise<{
       size: 0,
       characteristics: { recency: '< 30 days', frequency: 'high', monetary: 'high' },
       avgLifetimeValue: 0,
-      churnRate: 0.05
+      churnRate: 0.05,
     },
     {
       id: 'loyal',
@@ -380,7 +392,7 @@ export async function performCustomerSegmentation(): Promise<{
       size: 0,
       characteristics: { recency: '< 90 days', frequency: 'medium', monetary: 'medium' },
       avgLifetimeValue: 0,
-      churnRate: 0.15
+      churnRate: 0.15,
     },
     {
       id: 'at_risk',
@@ -388,7 +400,7 @@ export async function performCustomerSegmentation(): Promise<{
       size: 0,
       characteristics: { recency: '90-180 days', frequency: 'low', monetary: 'medium' },
       avgLifetimeValue: 0,
-      churnRate: 0.35
+      churnRate: 0.35,
     },
     {
       id: 'lost',
@@ -396,8 +408,8 @@ export async function performCustomerSegmentation(): Promise<{
       size: 0,
       characteristics: { recency: '> 180 days', frequency: 'low', monetary: 'low' },
       avgLifetimeValue: 0,
-      churnRate: 0.75
-    }
+      churnRate: 0.75,
+    },
   ];
 
   // Assign customers to segments (simplified)
@@ -426,7 +438,7 @@ export async function performCustomerSegmentation(): Promise<{
 
   return {
     segments,
-    segmentMigration: [] // Would implement segment migration tracking
+    segmentMigration: [], // Would implement segment migration tracking
   };
 }
 
@@ -461,7 +473,7 @@ function getSeasonalFactor(date: Date): number {
     3: 0.8, // Wednesday
     4: 0.9, // Thursday
     5: 1.2, // Friday
-    6: 1.3  // Saturday
+    6: 1.3, // Saturday
   };
 
   return seasonalFactors[dayOfWeek as keyof typeof seasonalFactors] || 1.0;

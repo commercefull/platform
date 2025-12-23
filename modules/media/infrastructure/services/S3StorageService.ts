@@ -11,19 +11,17 @@ export class S3StorageService implements StorageService {
   private s3Client: S3Client;
   private bucketName: string;
 
-  constructor(
-    bucketName: string,
-    region: string = 'us-east-1',
-    accessKeyId?: string,
-    secretAccessKey?: string
-  ) {
+  constructor(bucketName: string, region: string = 'us-east-1', accessKeyId?: string, secretAccessKey?: string) {
     this.bucketName = bucketName;
     this.s3Client = new S3Client({
       region,
-      credentials: accessKeyId && secretAccessKey ? {
-        accessKeyId,
-        secretAccessKey
-      } : undefined
+      credentials:
+        accessKeyId && secretAccessKey
+          ? {
+              accessKeyId,
+              secretAccessKey,
+            }
+          : undefined,
     });
   }
 
@@ -34,7 +32,7 @@ export class S3StorageService implements StorageService {
     options: {
       public?: boolean;
       metadata?: Record<string, string>;
-    } = {}
+    } = {},
   ): Promise<UploadResult> {
     const command = new PutObjectCommand({
       Bucket: this.bucketName,
@@ -43,21 +41,19 @@ export class S3StorageService implements StorageService {
       ContentType: mimeType,
       ACL: options.public ? 'public-read' : undefined,
       Metadata: options.metadata,
-      CacheControl: 'max-age=31536000' // 1 year for public files
+      CacheControl: 'max-age=31536000', // 1 year for public files
     });
 
     await this.s3Client.send(command);
 
-    const url = options.public
-      ? `https://${this.bucketName}.s3.amazonaws.com/${key}`
-      : await this.getSignedUrl(key);
+    const url = options.public ? `https://${this.bucketName}.s3.amazonaws.com/${key}` : await this.getSignedUrl(key);
 
     return {
       url,
       key,
       bucket: this.bucketName,
       size: buffer.length,
-      mimeType
+      mimeType,
     };
   }
 
@@ -67,7 +63,7 @@ export class S3StorageService implements StorageService {
     options: {
       public?: boolean;
       metadata?: Record<string, string>;
-    } = {}
+    } = {},
   ): Promise<UploadResult> {
     const fs = require('fs').promises;
     const buffer = await fs.readFile(filePath);
@@ -79,7 +75,7 @@ export class S3StorageService implements StorageService {
   async download(key: string): Promise<Buffer> {
     const command = new GetObjectCommand({
       Bucket: this.bucketName,
-      Key: key
+      Key: key,
     });
 
     const response = await this.s3Client.send(command);
@@ -97,7 +93,7 @@ export class S3StorageService implements StorageService {
   async delete(key: string): Promise<void> {
     const command = new DeleteObjectCommand({
       Bucket: this.bucketName,
-      Key: key
+      Key: key,
     });
 
     await this.s3Client.send(command);
@@ -106,7 +102,7 @@ export class S3StorageService implements StorageService {
   async getSignedUrl(key: string, expiresIn: number = 3600): Promise<string> {
     const command = new GetObjectCommand({
       Bucket: this.bucketName,
-      Key: key
+      Key: key,
     });
 
     return getSignedUrl(this.s3Client, command, { expiresIn });
@@ -116,7 +112,7 @@ export class S3StorageService implements StorageService {
     try {
       const command = new HeadObjectCommand({
         Bucket: this.bucketName,
-        Key: key
+        Key: key,
       });
 
       await this.s3Client.send(command);
@@ -132,7 +128,7 @@ export class S3StorageService implements StorageService {
   async getMetadata(key: string): Promise<Record<string, any>> {
     const command = new HeadObjectCommand({
       Bucket: this.bucketName,
-      Key: key
+      Key: key,
     });
 
     const response = await this.s3Client.send(command);
@@ -142,7 +138,7 @@ export class S3StorageService implements StorageService {
       mimeType: response.ContentType,
       lastModified: response.LastModified,
       etag: response.ETag,
-      metadata: response.Metadata || {}
+      metadata: response.Metadata || {},
     };
   }
 
@@ -156,7 +152,7 @@ export class S3StorageService implements StorageService {
       '.webp': 'image/webp',
       '.gif': 'image/gif',
       '.avif': 'image/avif',
-      '.svg': 'image/svg+xml'
+      '.svg': 'image/svg+xml',
     };
     return mimeTypes[ext] || 'application/octet-stream';
   }

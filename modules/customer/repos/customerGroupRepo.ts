@@ -13,17 +13,11 @@ export type CustomerGroupUpdateParams = Partial<Omit<CustomerGroup, 'customerGro
 
 export class CustomerGroupRepo {
   async findById(id: string): Promise<CustomerGroup | null> {
-    return await queryOne<CustomerGroup>(
-      `SELECT * FROM "customerGroup" WHERE "customerGroupId" = $1 AND "deletedAt" IS NULL`,
-      [id]
-    );
+    return await queryOne<CustomerGroup>(`SELECT * FROM "customerGroup" WHERE "customerGroupId" = $1 AND "deletedAt" IS NULL`, [id]);
   }
 
   async findByCode(code: string): Promise<CustomerGroup | null> {
-    return await queryOne<CustomerGroup>(
-      `SELECT * FROM "customerGroup" WHERE "code" = $1 AND "deletedAt" IS NULL`,
-      [code]
-    );
+    return await queryOne<CustomerGroup>(`SELECT * FROM "customerGroup" WHERE "code" = $1 AND "deletedAt" IS NULL`, [code]);
   }
 
   async findAll(activeOnly = false): Promise<CustomerGroup[]> {
@@ -34,9 +28,11 @@ export class CustomerGroupRepo {
   }
 
   async findSystemGroups(): Promise<CustomerGroup[]> {
-    return (await query<CustomerGroup[]>(
-      `SELECT * FROM "customerGroup" WHERE "isSystem" = true AND "deletedAt" IS NULL ORDER BY "sortOrder" ASC`
-    )) || [];
+    return (
+      (await query<CustomerGroup[]>(
+        `SELECT * FROM "customerGroup" WHERE "isSystem" = true AND "deletedAt" IS NULL ORDER BY "sortOrder" ASC`,
+      )) || []
+    );
   }
 
   async create(params: CustomerGroupCreateParams): Promise<CustomerGroup> {
@@ -50,10 +46,17 @@ export class CustomerGroupRepo {
         "createdBy", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
       [
-        params.name, params.description || null, params.code, params.isActive ?? true,
-        params.isSystem || false, params.sortOrder || 0, params.discountPercent || 0,
-        params.createdBy || null, now, now
-      ]
+        params.name,
+        params.description || null,
+        params.code,
+        params.isActive ?? true,
+        params.isSystem || false,
+        params.sortOrder || 0,
+        params.discountPercent || 0,
+        params.createdBy || null,
+        now,
+        now,
+      ],
     );
 
     if (!result) throw new Error('Failed to create customer group');
@@ -79,7 +82,7 @@ export class CustomerGroupRepo {
 
     return await queryOne<CustomerGroup>(
       `UPDATE "customerGroup" SET ${updateFields.join(', ')} WHERE "customerGroupId" = $${paramIndex} AND "deletedAt" IS NULL RETURNING *`,
-      values
+      values,
     );
   }
 
@@ -94,7 +97,7 @@ export class CustomerGroupRepo {
   async delete(id: string): Promise<boolean> {
     const result = await queryOne<{ customerGroupId: string }>(
       `UPDATE "customerGroup" SET "deletedAt" = $1 WHERE "customerGroupId" = $2 AND "deletedAt" IS NULL RETURNING "customerGroupId"`,
-      [unixTimestamp(), id]
+      [unixTimestamp(), id],
     );
     return !!result;
   }
@@ -102,7 +105,7 @@ export class CustomerGroupRepo {
   async hardDelete(id: string): Promise<boolean> {
     const result = await queryOne<{ customerGroupId: string }>(
       `DELETE FROM "customerGroup" WHERE "customerGroupId" = $1 RETURNING "customerGroupId"`,
-      [id]
+      [id],
     );
     return !!result;
   }
@@ -119,12 +122,12 @@ export class CustomerGroupRepo {
     const active = await this.count(true);
 
     const systemResult = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM "customerGroup" WHERE "isSystem" = true AND "deletedAt" IS NULL`
+      `SELECT COUNT(*) as count FROM "customerGroup" WHERE "isSystem" = true AND "deletedAt" IS NULL`,
     );
     const system = systemResult ? parseInt(systemResult.count, 10) : 0;
 
     const avgResult = await queryOne<{ avg: string }>(
-      `SELECT AVG("discountPercent") as avg FROM "customerGroup" WHERE "deletedAt" IS NULL`
+      `SELECT AVG("discountPercent") as avg FROM "customerGroup" WHERE "deletedAt" IS NULL`,
     );
     const avgDiscount = avgResult && avgResult.avg ? parseFloat(avgResult.avg) : 0;
 

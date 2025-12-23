@@ -3,7 +3,7 @@
  * Generic translation entity for multi-language content
  */
 
-export type TranslatableEntityType = 
+export type TranslatableEntityType =
   | 'product'
   | 'category'
   | 'collection'
@@ -86,7 +86,7 @@ export class Translation {
       translationQuality: params.translationQuality,
       isApproved: false,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     });
   }
 
@@ -95,27 +95,69 @@ export class Translation {
   }
 
   // Getters
-  get translationId(): string { return this.props.translationId; }
-  get entityType(): TranslatableEntityType { return this.props.entityType; }
-  get entityId(): string { return this.props.entityId; }
-  get localeId(): string { return this.props.localeId; }
-  get localeCode(): string { return this.props.localeCode; }
-  get name(): string | undefined { return this.props.name; }
-  get slug(): string | undefined { return this.props.slug; }
-  get description(): string | undefined { return this.props.description; }
-  get shortDescription(): string | undefined { return this.props.shortDescription; }
-  get metaTitle(): string | undefined { return this.props.metaTitle; }
-  get metaDescription(): string | undefined { return this.props.metaDescription; }
-  get metaKeywords(): string | undefined { return this.props.metaKeywords; }
-  get additionalFields(): Record<string, any> | undefined { return this.props.additionalFields; }
-  get isAutoTranslated(): boolean { return this.props.isAutoTranslated; }
-  get translationSource(): string | undefined { return this.props.translationSource; }
-  get translationQuality(): number | undefined { return this.props.translationQuality; }
-  get isApproved(): boolean { return this.props.isApproved; }
-  get reviewedAt(): Date | undefined { return this.props.reviewedAt; }
-  get reviewedBy(): string | undefined { return this.props.reviewedBy; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get translationId(): string {
+    return this.props.translationId;
+  }
+  get entityType(): TranslatableEntityType {
+    return this.props.entityType;
+  }
+  get entityId(): string {
+    return this.props.entityId;
+  }
+  get localeId(): string {
+    return this.props.localeId;
+  }
+  get localeCode(): string {
+    return this.props.localeCode;
+  }
+  get name(): string | undefined {
+    return this.props.name;
+  }
+  get slug(): string | undefined {
+    return this.props.slug;
+  }
+  get description(): string | undefined {
+    return this.props.description;
+  }
+  get shortDescription(): string | undefined {
+    return this.props.shortDescription;
+  }
+  get metaTitle(): string | undefined {
+    return this.props.metaTitle;
+  }
+  get metaDescription(): string | undefined {
+    return this.props.metaDescription;
+  }
+  get metaKeywords(): string | undefined {
+    return this.props.metaKeywords;
+  }
+  get additionalFields(): Record<string, any> | undefined {
+    return this.props.additionalFields;
+  }
+  get isAutoTranslated(): boolean {
+    return this.props.isAutoTranslated;
+  }
+  get translationSource(): string | undefined {
+    return this.props.translationSource;
+  }
+  get translationQuality(): number | undefined {
+    return this.props.translationQuality;
+  }
+  get isApproved(): boolean {
+    return this.props.isApproved;
+  }
+  get reviewedAt(): Date | undefined {
+    return this.props.reviewedAt;
+  }
+  get reviewedBy(): string | undefined {
+    return this.props.reviewedBy;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   /**
    * Update translation content

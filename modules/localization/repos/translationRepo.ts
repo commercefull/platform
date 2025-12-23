@@ -15,7 +15,7 @@ const TABLE_MAP: Record<TranslatableEntityType, string> = {
   contentPage: 'contentPageTranslation',
   notificationTemplate: 'notificationTemplateTranslation',
   attribute: 'attributeTranslation',
-  attributeOption: 'attributeOptionTranslation'
+  attributeOption: 'attributeOptionTranslation',
 };
 
 // Primary key mapping
@@ -27,7 +27,7 @@ const PK_MAP: Record<TranslatableEntityType, string> = {
   contentPage: 'contentPageTranslationId',
   notificationTemplate: 'notificationTemplateTranslationId',
   attribute: 'attributeTranslationId',
-  attributeOption: 'attributeOptionTranslationId'
+  attributeOption: 'attributeOptionTranslationId',
 };
 
 // Entity ID column mapping
@@ -39,7 +39,7 @@ const ENTITY_ID_MAP: Record<TranslatableEntityType, string> = {
   contentPage: 'contentPageId',
   notificationTemplate: 'notificationTemplateId',
   attribute: 'productAttributeId',
-  attributeOption: 'productAttributeOptionId'
+  attributeOption: 'productAttributeOptionId',
 };
 
 export interface TranslationFilters {
@@ -68,16 +68,13 @@ export interface PaginatedResult<T> {
 // Product Translation Repository
 // ============================================================================
 
-export async function getProductTranslation(
-  productId: string, 
-  localeId: string
-): Promise<Record<string, any> | null> {
+export async function getProductTranslation(productId: string, localeId: string): Promise<Record<string, any> | null> {
   const row = await queryOne<Record<string, any>>(
     `SELECT pt.*, l.code as "localeCode" 
      FROM "productTranslation" pt
      JOIN locale l ON l."localeId" = pt."localeId"
      WHERE pt."productId" = $1 AND pt."localeId" = $2`,
-    [productId, localeId]
+    [productId, localeId],
   );
   return row;
 }
@@ -89,7 +86,7 @@ export async function getProductTranslations(productId: string): Promise<Record<
      JOIN locale l ON l."localeId" = pt."localeId"
      WHERE pt."productId" = $1
      ORDER BY l."isDefault" DESC, l.code ASC`,
-    [productId]
+    [productId],
   );
   return rows || [];
 }
@@ -115,10 +112,10 @@ export async function saveProductTranslation(data: {
   translationQuality?: number;
 }): Promise<Record<string, any>> {
   const now = new Date().toISOString();
-  
+
   const existing = await queryOne<Record<string, any>>(
     'SELECT "productTranslationId" FROM "productTranslation" WHERE "productId" = $1 AND "localeId" = $2',
-    [data.productId, data.localeId]
+    [data.productId, data.localeId],
   );
 
   if (existing) {
@@ -132,14 +129,25 @@ export async function saveProductTranslation(data: {
         "updatedAt" = $17
       WHERE "productTranslationId" = $18`,
       [
-        data.name, data.slug, data.shortDescription, data.description,
-        data.metaTitle, data.metaDescription, data.metaKeywords,
-        data.returnPolicy, data.warranty, data.careInstructions,
-        data.ingredients, data.usageInstructions, 
+        data.name,
+        data.slug,
+        data.shortDescription,
+        data.description,
+        data.metaTitle,
+        data.metaDescription,
+        data.metaKeywords,
+        data.returnPolicy,
+        data.warranty,
+        data.careInstructions,
+        data.ingredients,
+        data.usageInstructions,
         data.customFields ? JSON.stringify(data.customFields) : null,
-        data.isAutoTranslated || false, data.translationSource || 'manual',
-        data.translationQuality, now, existing.productTranslationId
-      ]
+        data.isAutoTranslated || false,
+        data.translationSource || 'manual',
+        data.translationQuality,
+        now,
+        existing.productTranslationId,
+      ],
     );
     return { ...data, productTranslationId: existing.productTranslationId };
   } else {
@@ -153,36 +161,43 @@ export async function saveProductTranslation(data: {
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
       RETURNING *`,
       [
-        data.productId, data.localeId, data.name, data.slug,
-        data.shortDescription, data.description, data.metaTitle,
-        data.metaDescription, data.metaKeywords, data.returnPolicy,
-        data.warranty, data.careInstructions, data.ingredients,
-        data.usageInstructions, data.customFields ? JSON.stringify(data.customFields) : null,
-        data.isAutoTranslated || false, data.translationSource || 'manual',
-        data.translationQuality, false, now, now
-      ]
+        data.productId,
+        data.localeId,
+        data.name,
+        data.slug,
+        data.shortDescription,
+        data.description,
+        data.metaTitle,
+        data.metaDescription,
+        data.metaKeywords,
+        data.returnPolicy,
+        data.warranty,
+        data.careInstructions,
+        data.ingredients,
+        data.usageInstructions,
+        data.customFields ? JSON.stringify(data.customFields) : null,
+        data.isAutoTranslated || false,
+        data.translationSource || 'manual',
+        data.translationQuality,
+        false,
+        now,
+        now,
+      ],
     );
     return result || data;
   }
 }
 
 export async function deleteProductTranslation(productId: string, localeId: string): Promise<void> {
-  await query(
-    'DELETE FROM "productTranslation" WHERE "productId" = $1 AND "localeId" = $2',
-    [productId, localeId]
-  );
+  await query('DELETE FROM "productTranslation" WHERE "productId" = $1 AND "localeId" = $2', [productId, localeId]);
 }
 
-export async function approveProductTranslation(
-  productId: string, 
-  localeId: string, 
-  reviewerId: string
-): Promise<void> {
+export async function approveProductTranslation(productId: string, localeId: string, reviewerId: string): Promise<void> {
   await query(
     `UPDATE "productTranslation" SET 
       "isApproved" = true, "reviewedAt" = $1, "reviewedBy" = $2, "updatedAt" = $1
      WHERE "productId" = $3 AND "localeId" = $4`,
-    [new Date().toISOString(), reviewerId, productId, localeId]
+    [new Date().toISOString(), reviewerId, productId, localeId],
   );
 }
 
@@ -190,16 +205,13 @@ export async function approveProductTranslation(
 // Category Translation Repository
 // ============================================================================
 
-export async function getCategoryTranslation(
-  categoryId: string, 
-  localeId: string
-): Promise<Record<string, any> | null> {
+export async function getCategoryTranslation(categoryId: string, localeId: string): Promise<Record<string, any> | null> {
   const row = await queryOne<Record<string, any>>(
     `SELECT ct.*, l.code as "localeCode"
      FROM "categoryTranslation" ct
      JOIN locale l ON l."localeId" = ct."localeId"
      WHERE ct."productCategoryId" = $1 AND ct."localeId" = $2`,
-    [categoryId, localeId]
+    [categoryId, localeId],
   );
   return row;
 }
@@ -211,7 +223,7 @@ export async function getCategoryTranslations(categoryId: string): Promise<Recor
      JOIN locale l ON l."localeId" = ct."localeId"
      WHERE ct."productCategoryId" = $1
      ORDER BY l."isDefault" DESC, l.code ASC`,
-    [categoryId]
+    [categoryId],
   );
   return rows || [];
 }
@@ -229,10 +241,10 @@ export async function saveCategoryTranslation(data: {
   translationSource?: string;
 }): Promise<Record<string, any>> {
   const now = new Date().toISOString();
-  
+
   const existing = await queryOne<Record<string, any>>(
     'SELECT "categoryTranslationId" FROM "categoryTranslation" WHERE "productCategoryId" = $1 AND "localeId" = $2',
-    [data.productCategoryId, data.localeId]
+    [data.productCategoryId, data.localeId],
   );
 
   if (existing) {
@@ -243,11 +255,17 @@ export async function saveCategoryTranslation(data: {
         "isAutoTranslated" = $7, "translationSource" = $8, "updatedAt" = $9
       WHERE "categoryTranslationId" = $10`,
       [
-        data.name, data.slug, data.description,
-        data.metaTitle, data.metaDescription, data.metaKeywords,
-        data.isAutoTranslated || false, data.translationSource || 'manual',
-        now, existing.categoryTranslationId
-      ]
+        data.name,
+        data.slug,
+        data.description,
+        data.metaTitle,
+        data.metaDescription,
+        data.metaKeywords,
+        data.isAutoTranslated || false,
+        data.translationSource || 'manual',
+        now,
+        existing.categoryTranslationId,
+      ],
     );
     return { ...data, categoryTranslationId: existing.categoryTranslationId };
   } else {
@@ -260,11 +278,20 @@ export async function saveCategoryTranslation(data: {
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
       RETURNING *`,
       [
-        data.productCategoryId, data.localeId, data.name, data.slug, data.description,
-        data.metaTitle, data.metaDescription, data.metaKeywords,
-        data.isAutoTranslated || false, data.translationSource || 'manual',
-        false, now, now
-      ]
+        data.productCategoryId,
+        data.localeId,
+        data.name,
+        data.slug,
+        data.description,
+        data.metaTitle,
+        data.metaDescription,
+        data.metaKeywords,
+        data.isAutoTranslated || false,
+        data.translationSource || 'manual',
+        false,
+        now,
+        now,
+      ],
     );
     return result || data;
   }
@@ -277,20 +304,17 @@ export async function saveCategoryTranslation(data: {
 /**
  * Get all translations for an entity
  */
-export async function getEntityTranslations(
-  entityType: TranslatableEntityType,
-  entityId: string
-): Promise<Record<string, any>[]> {
+export async function getEntityTranslations(entityType: TranslatableEntityType, entityId: string): Promise<Record<string, any>[]> {
   const table = TABLE_MAP[entityType];
   const entityIdCol = ENTITY_ID_MAP[entityType];
-  
+
   const rows = await query<Record<string, any>[]>(
     `SELECT t.*, l.code as "localeCode", l.name as "localeName"
      FROM "${table}" t
      JOIN locale l ON l."localeId" = t."localeId"
      WHERE t."${entityIdCol}" = $1
      ORDER BY l."isDefault" DESC, l.code ASC`,
-    [entityId]
+    [entityId],
   );
   return rows || [];
 }
@@ -301,17 +325,17 @@ export async function getEntityTranslations(
 export async function getEntityTranslation(
   entityType: TranslatableEntityType,
   entityId: string,
-  localeId: string
+  localeId: string,
 ): Promise<Record<string, any> | null> {
   const table = TABLE_MAP[entityType];
   const entityIdCol = ENTITY_ID_MAP[entityType];
-  
+
   const row = await queryOne<Record<string, any>>(
     `SELECT t.*, l.code as "localeCode"
      FROM "${table}" t
      JOIN locale l ON l."localeId" = t."localeId"
      WHERE t."${entityIdCol}" = $1 AND t."localeId" = $2`,
-    [entityId, localeId]
+    [entityId, localeId],
   );
   return row;
 }
@@ -319,13 +343,10 @@ export async function getEntityTranslation(
 /**
  * Get missing translations for an entity
  */
-export async function getMissingTranslations(
-  entityType: TranslatableEntityType,
-  entityId: string
-): Promise<Record<string, any>[]> {
+export async function getMissingTranslations(entityType: TranslatableEntityType, entityId: string): Promise<Record<string, any>[]> {
   const table = TABLE_MAP[entityType];
   const entityIdCol = ENTITY_ID_MAP[entityType];
-  
+
   const rows = await query<Record<string, any>[]>(
     `SELECT l."localeId", l.code, l.name
      FROM locale l
@@ -334,7 +355,7 @@ export async function getMissingTranslations(
        SELECT "localeId" FROM "${table}" WHERE "${entityIdCol}" = $1
      )
      ORDER BY l."isDefault" DESC, l.code ASC`,
-    [entityId]
+    [entityId],
   );
   return rows || [];
 }
@@ -342,15 +363,17 @@ export async function getMissingTranslations(
 /**
  * Get translation statistics
  */
-export async function getTranslationStatistics(): Promise<{
-  entityType: string;
-  total: number;
-  approved: number;
-  autoTranslated: number;
-  pending: number;
-}[]> {
+export async function getTranslationStatistics(): Promise<
+  {
+    entityType: string;
+    total: number;
+    approved: number;
+    autoTranslated: number;
+    pending: number;
+  }[]
+> {
   const results: any[] = [];
-  
+
   for (const [entityType, table] of Object.entries(TABLE_MAP)) {
     const stats = await queryOne<Record<string, string>>(`
       SELECT 
@@ -360,16 +383,16 @@ export async function getTranslationStatistics(): Promise<{
         COUNT(*) FILTER (WHERE "isApproved" = false) as pending
       FROM "${table}"
     `);
-    
+
     results.push({
       entityType,
       total: parseInt(stats?.total || '0', 10),
       approved: parseInt(stats?.approved || '0', 10),
       autoTranslated: parseInt(stats?.autoTranslated || '0', 10),
-      pending: parseInt(stats?.pending || '0', 10)
+      pending: parseInt(stats?.pending || '0', 10),
     });
   }
-  
+
   return results;
 }
 
@@ -379,17 +402,17 @@ export async function getTranslationStatistics(): Promise<{
 export async function bulkApproveTranslations(
   entityType: TranslatableEntityType,
   translationIds: string[],
-  reviewerId: string
+  reviewerId: string,
 ): Promise<number> {
   const table = TABLE_MAP[entityType];
   const pk = PK_MAP[entityType];
-  
+
   const result = await query(
     `UPDATE "${table}" SET 
       "isApproved" = true, "reviewedAt" = $1, "reviewedBy" = $2, "updatedAt" = $1
      WHERE "${pk}" = ANY($3::uuid[])`,
-    [new Date().toISOString(), reviewerId, translationIds]
+    [new Date().toISOString(), reviewerId, translationIds],
   );
-  
+
   return (result as any)?.rowCount || 0;
 }

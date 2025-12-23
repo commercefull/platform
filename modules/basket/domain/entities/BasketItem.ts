@@ -34,7 +34,7 @@ export class BasketItem {
     return new BasketItem({
       ...props,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     });
   }
 
@@ -172,7 +172,7 @@ export class BasketItem {
       isGift: this.props.isGift,
       giftMessage: this.props.giftMessage,
       createdAt: this.props.createdAt.toISOString(),
-      updatedAt: this.props.updatedAt.toISOString()
+      updatedAt: this.props.updatedAt.toISOString(),
     };
   }
 }

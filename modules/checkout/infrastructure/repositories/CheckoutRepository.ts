@@ -11,12 +11,8 @@ import { Address } from '../../domain/valueObjects/Address';
 import { Money } from '../../../basket/domain/valueObjects/Money';
 
 export class CheckoutRepo implements CheckoutRepository {
-
   async findById(id: string): Promise<CheckoutSession | null> {
-    const row = await queryOne<Record<string, any>>(
-      'SELECT * FROM "checkoutSession" WHERE "checkoutSessionId" = $1',
-      [id]
-    );
+    const row = await queryOne<Record<string, any>>('SELECT * FROM "checkoutSession" WHERE "checkoutSessionId" = $1', [id]);
     if (!row) return null;
     return this.mapToCheckoutSession(row);
   }
@@ -26,7 +22,7 @@ export class CheckoutRepo implements CheckoutRepository {
       `SELECT * FROM "checkoutSession" 
        WHERE "basketId" = $1 AND status IN ('active', 'pending_payment')
        ORDER BY "updatedAt" DESC LIMIT 1`,
-      [basketId]
+      [basketId],
     );
     if (!row) return null;
     return this.mapToCheckoutSession(row);
@@ -37,7 +33,7 @@ export class CheckoutRepo implements CheckoutRepository {
       `SELECT * FROM "checkoutSession" 
        WHERE "customerId" = $1 AND status IN ('active', 'pending_payment')
        ORDER BY "updatedAt" DESC LIMIT 1`,
-      [customerId]
+      [customerId],
     );
     if (!row) return null;
     return this.mapToCheckoutSession(row);
@@ -48,7 +44,7 @@ export class CheckoutRepo implements CheckoutRepository {
 
     const existing = await queryOne<Record<string, any>>(
       'SELECT "checkoutSessionId" FROM "checkoutSession" WHERE "checkoutSessionId" = $1',
-      [session.id]
+      [session.id],
     );
 
     if (existing) {
@@ -61,12 +57,25 @@ export class CheckoutRepo implements CheckoutRepository {
           "lastActivityAt" = $15, "convertedToOrderId" = $16, "expiresAt" = $17
         WHERE "checkoutSessionId" = $18`,
         [
-          session.customerId || null, session.guestEmail || null, session.basketId,
-          session.status, null, null, session.sameAsShipping,
-          session.shippingMethodId || null, true, true,
-          true, false, session.notes || null, now, now,
-          null, session.expiresAt.toISOString(), session.id
-        ]
+          session.customerId || null,
+          session.guestEmail || null,
+          session.basketId,
+          session.status,
+          null,
+          null,
+          session.sameAsShipping,
+          session.shippingMethodId || null,
+          true,
+          true,
+          true,
+          false,
+          session.notes || null,
+          now,
+          now,
+          null,
+          session.expiresAt.toISOString(),
+          session.id,
+        ],
       );
     } else {
       const sessionId = generateUUID();
@@ -77,11 +86,24 @@ export class CheckoutRepo implements CheckoutRepository {
           "agreeToTerms", "agreeToMarketing", notes, "createdAt", "updatedAt", "lastActivityAt", "expiresAt"
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)`,
         [
-          session.id, sessionId, session.basketId, session.customerId || null,
-          session.guestEmail || '', session.status, 'shipping', session.sameAsShipping,
-          false, false, false, false, session.notes || null, now, now, now,
-          session.expiresAt.toISOString()
-        ]
+          session.id,
+          sessionId,
+          session.basketId,
+          session.customerId || null,
+          session.guestEmail || '',
+          session.status,
+          'shipping',
+          session.sameAsShipping,
+          false,
+          false,
+          false,
+          false,
+          session.notes || null,
+          now,
+          now,
+          now,
+          session.expiresAt.toISOString(),
+        ],
       );
     }
 
@@ -97,16 +119,17 @@ export class CheckoutRepo implements CheckoutRepository {
     const rows = await query<Record<string, any>[]>(
       `SELECT * FROM "checkoutSession" 
        WHERE status IN ('active', 'pending_payment') AND "expiresAt" < $1`,
-      [now]
+      [now],
     );
     return (rows || []).map(row => this.mapToCheckoutSession(row));
   }
 
   async markAsAbandoned(id: string): Promise<void> {
-    await query(
-      'UPDATE "checkoutSession" SET status = $1, "updatedAt" = $2 WHERE "checkoutSessionId" = $3',
-      ['abandoned', new Date().toISOString(), id]
-    );
+    await query('UPDATE "checkoutSession" SET status = $1, "updatedAt" = $2 WHERE "checkoutSessionId" = $3', [
+      'abandoned',
+      new Date().toISOString(),
+      id,
+    ]);
   }
 
   async getAvailableShippingMethods(country: string, _postalCode: string): Promise<ShippingMethodData[]> {
@@ -114,14 +137,38 @@ export class CheckoutRepo implements CheckoutRepository {
       `SELECT sm.* FROM "shippingMethod" sm
        JOIN "shippingZone" sz ON sz."shippingZoneId" = sm."shippingZoneId"
        WHERE sm."isActive" = true
-       ORDER BY sm."baseRate" ASC`
+       ORDER BY sm."baseRate" ASC`,
     );
 
     if (!rows || rows.length === 0) {
       return [
-        { id: 'standard', name: 'Standard Shipping', description: '5-7 business days', price: 9.99, currency: 'USD', estimatedDeliveryDays: 7, carrier: 'USPS' },
-        { id: 'express', name: 'Express Shipping', description: '2-3 business days', price: 19.99, currency: 'USD', estimatedDeliveryDays: 3, carrier: 'UPS' },
-        { id: 'overnight', name: 'Overnight Shipping', description: 'Next business day', price: 29.99, currency: 'USD', estimatedDeliveryDays: 1, carrier: 'FedEx' }
+        {
+          id: 'standard',
+          name: 'Standard Shipping',
+          description: '5-7 business days',
+          price: 9.99,
+          currency: 'USD',
+          estimatedDeliveryDays: 7,
+          carrier: 'USPS',
+        },
+        {
+          id: 'express',
+          name: 'Express Shipping',
+          description: '2-3 business days',
+          price: 19.99,
+          currency: 'USD',
+          estimatedDeliveryDays: 3,
+          carrier: 'UPS',
+        },
+        {
+          id: 'overnight',
+          name: 'Overnight Shipping',
+          description: 'Next business day',
+          price: 29.99,
+          currency: 'USD',
+          estimatedDeliveryDays: 1,
+          carrier: 'FedEx',
+        },
       ];
     }
 
@@ -132,19 +179,19 @@ export class CheckoutRepo implements CheckoutRepository {
       price: Number(row.baseRate),
       currency: row.currency || 'USD',
       estimatedDeliveryDays: row.estimatedDeliveryDays,
-      carrier: row.carrierName
+      carrier: row.carrierName,
     }));
   }
 
   async getAvailablePaymentMethods(): Promise<PaymentMethodData[]> {
     const rows = await query<Record<string, any>[]>(
-      'SELECT * FROM "paymentMethod" WHERE "isEnabled" = true ORDER BY "isDefault" DESC, name ASC'
+      'SELECT * FROM "paymentMethod" WHERE "isEnabled" = true ORDER BY "isDefault" DESC, name ASC',
     );
 
     if (!rows || rows.length === 0) {
       return [
         { id: 'card', name: 'Credit/Debit Card', type: 'credit_card', isDefault: true },
-        { id: 'paypal', name: 'PayPal', type: 'paypal', isDefault: false }
+        { id: 'paypal', name: 'PayPal', type: 'paypal', isDefault: false },
       ];
     }
 
@@ -153,7 +200,7 @@ export class CheckoutRepo implements CheckoutRepository {
       name: row.name,
       type: row.type,
       isDefault: Boolean(row.isDefault),
-      processorId: row.processorId
+      processorId: row.processorId,
     }));
   }
 
@@ -174,7 +221,7 @@ export class CheckoutRepo implements CheckoutRepository {
        JOIN "taxZone" tz ON tz."taxZoneId" = tr."taxZoneId"
        WHERE tz.country = $1 AND tr."isActive" = true
        ORDER BY tz.state DESC NULLS LAST LIMIT 1`,
-      [address.country]
+      [address.country],
     );
 
     if (row) {
@@ -215,7 +262,7 @@ export class CheckoutRepo implements CheckoutRepository {
       createdAt: new Date(row.createdAt),
       updatedAt: new Date(row.updatedAt),
       completedAt: row.convertedToOrderId ? new Date(row.updatedAt) : undefined,
-      expiresAt: new Date(row.expiresAt)
+      expiresAt: new Date(row.expiresAt),
     });
   }
 }

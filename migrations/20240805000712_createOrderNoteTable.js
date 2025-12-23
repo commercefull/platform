@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function (knex) {
   return knex.schema.createTable('orderNote', t => {
     t.uuid('orderNoteId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
@@ -7,7 +7,6 @@ exports.up = function(knex) {
     t.text('content').notNullable();
     t.boolean('isCustomerVisible').notNullable().defaultTo(false);
     t.string('createdBy', 255);
-    
 
     t.index('orderId');
     t.index('isCustomerVisible');
@@ -15,6 +14,6 @@ exports.up = function(knex) {
   });
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTable('orderNote');
 };

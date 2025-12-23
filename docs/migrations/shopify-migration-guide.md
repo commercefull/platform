@@ -14,6 +14,7 @@ This guide provides detailed instructions for migrating from Shopify to Commerce
 ## Migration Scope
 
 ### Data Entities
+
 - **Products**: Including variants, images, inventory
 - **Customers**: Profiles, addresses, order history
 - **Orders**: Complete order data with line items
@@ -22,6 +23,7 @@ This guide provides detailed instructions for migrating from Shopify to Commerce
 - **Inventory**: Stock levels, locations
 
 ### Limitations
+
 - Shopify API rate limits (40 requests per minute for basic plan)
 - Historical data availability (limited to 2 years for some endpoints)
 - Webhook dependencies and custom app data
@@ -37,7 +39,7 @@ const shopify = new Shopify({
   shopName: 'your-store.myshopify.com',
   apiKey: process.env.SHOPIFY_API_KEY,
   password: process.env.SHOPIFY_ACCESS_TOKEN,
-  autoLimit: true // Handles rate limiting automatically
+  autoLimit: true, // Handles rate limiting automatically
 });
 ```
 
@@ -48,7 +50,7 @@ const CommerceFullAPI = require('./commercefull-client');
 
 const cf = new CommerceFullAPI({
   baseURL: process.env.COMMERCEFULL_URL,
-  apiKey: process.env.COMMERCEFULL_API_KEY
+  apiKey: process.env.COMMERCEFULL_API_KEY,
 });
 ```
 
@@ -60,10 +62,8 @@ const assessment = {
   customers: await shopify.customer.count(),
   orders: await shopify.order.count(),
   blogs: await shopify.blog.count(),
-  pages: await shopify.page.count()
+  pages: await shopify.page.count(),
 };
-
-
 ```
 
 ## Migration Execution
@@ -77,13 +77,12 @@ const migrateProductTypes = async () => {
   // Shopify doesn't have explicit product types like CommerceFull
   // Map Shopify product types to CommerceFull equivalents
   const productTypeMapping = {
-    'physical': 'Simple Product',
-    'digital': 'Downloadable Product',
-    'service': 'Virtual Product'
+    physical: 'Simple Product',
+    digital: 'Downloadable Product',
+    service: 'Virtual Product',
   };
 
   // These are typically pre-seeded in CommerceFull
-  
 };
 ```
 
@@ -101,7 +100,7 @@ const migrateTaxCategories = async () => {
           name: `${country.name} - ${province.name}`,
           rate: province.tax,
           country: country.code,
-          region: province.code
+          region: province.code,
         });
       }
     }
@@ -167,7 +166,7 @@ class ShopifyToCommerceFullTransformer {
       dimensions: {
         length: parseFloat(shopifyProduct.variants[0]?.length),
         width: parseFloat(shopifyProduct.variants[0]?.width),
-        height: parseFloat(shopifyProduct.variants[0]?.height)
+        height: parseFloat(shopifyProduct.variants[0]?.height),
       },
       tags: shopifyProduct.tags?.split(',').map(tag => tag.trim()),
       categories: this.transformCollections(shopifyProduct.collections),
@@ -176,24 +175,29 @@ class ShopifyToCommerceFullTransformer {
       metafields: this.transformMetafields(shopifyProduct.metafields),
       seo: {
         title: shopifyProduct.metafields?.find(mf => mf.key === 'title_tag')?.value,
-        description: shopifyProduct.metafields?.find(mf => mf.key === 'description_tag')?.value
+        description: shopifyProduct.metafields?.find(mf => mf.key === 'description_tag')?.value,
       },
       createdAt: new Date(shopifyProduct.created_at).toISOString(),
-      updatedAt: new Date(shopifyProduct.updated_at).toISOString()
+      updatedAt: new Date(shopifyProduct.updated_at).toISOString(),
     };
   }
 
   mapProductType(shopifyType) {
     const typeMapping = {
-      'physical': 'simple',
-      'digital': 'downloadable',
-      'service': 'virtual'
+      physical: 'simple',
+      digital: 'downloadable',
+      service: 'virtual',
     };
     return typeMapping[shopifyType?.toLowerCase()] || 'simple';
   }
 
   generateSlug(handle) {
-    return handle?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || '';
+    return (
+      handle
+        ?.toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '') || ''
+    );
   }
 
   extractShortDescription(html) {
@@ -203,46 +207,52 @@ class ShopifyToCommerceFullTransformer {
   }
 
   transformCollections(collections) {
-    return collections?.map(collection => ({
-      id: collection.id,
-      name: collection.title,
-      slug: this.generateSlug(collection.handle)
-    })) || [];
+    return (
+      collections?.map(collection => ({
+        id: collection.id,
+        name: collection.title,
+        slug: this.generateSlug(collection.handle),
+      })) || []
+    );
   }
 
   transformImages(images) {
-    return images?.map(image => ({
-      url: image.src,
-      alt: image.alt || '',
-      position: image.position,
-      width: image.width,
-      height: image.height
-    })) || [];
+    return (
+      images?.map(image => ({
+        url: image.src,
+        alt: image.alt || '',
+        position: image.position,
+        width: image.width,
+        height: image.height,
+      })) || []
+    );
   }
 
   transformVariants(variants) {
-    return variants?.map(variant => ({
-      variantId: generateUUID(),
-      sku: variant.sku,
-      price: parseFloat(variant.price),
-      compareAtPrice: parseFloat(variant.compare_at_price),
-      cost: parseFloat(variant.cost),
-      inventory: {
-        quantity: variant.inventory_quantity,
-        policy: variant.inventory_policy,
-        management: variant.inventory_management
-      },
-      weight: parseFloat(variant.weight),
-      weightUnit: variant.weight_unit,
-      dimensions: {
-        length: parseFloat(variant.length),
-        width: parseFloat(variant.width),
-        height: parseFloat(variant.height)
-      },
-      options: this.parseVariantOptions(variant),
-      barcode: variant.barcode,
-      taxable: variant.taxable
-    })) || [];
+    return (
+      variants?.map(variant => ({
+        variantId: generateUUID(),
+        sku: variant.sku,
+        price: parseFloat(variant.price),
+        compareAtPrice: parseFloat(variant.compare_at_price),
+        cost: parseFloat(variant.cost),
+        inventory: {
+          quantity: variant.inventory_quantity,
+          policy: variant.inventory_policy,
+          management: variant.inventory_management,
+        },
+        weight: parseFloat(variant.weight),
+        weightUnit: variant.weight_unit,
+        dimensions: {
+          length: parseFloat(variant.length),
+          width: parseFloat(variant.width),
+          height: parseFloat(variant.height),
+        },
+        options: this.parseVariantOptions(variant),
+        barcode: variant.barcode,
+        taxable: variant.taxable,
+      })) || []
+    );
   }
 
   parseVariantOptions(variant) {
@@ -254,10 +264,12 @@ class ShopifyToCommerceFullTransformer {
   }
 
   transformMetafields(metafields) {
-    return metafields?.reduce((acc, field) => {
-      acc[field.key] = field.value;
-      return acc;
-    }, {}) || {};
+    return (
+      metafields?.reduce((acc, field) => {
+        acc[field.key] = field.value;
+        return acc;
+      }, {}) || {}
+    );
   }
 }
 ```
@@ -287,7 +299,6 @@ class CommerceFullProductLoader {
 
       return createdProduct;
     } catch (error) {
-      
       throw error;
     }
   }
@@ -358,11 +369,10 @@ class ShopifyCustomerTransformer {
       tags: shopifyCustomer.tags?.split(',').map(tag => tag.trim()),
       note: shopifyCustomer.note,
       addresses: this.transformAddresses(shopifyCustomer.addresses),
-      defaultAddress: shopifyCustomer.default_address ?
-        this.transformAddress(shopifyCustomer.default_address) : null,
+      defaultAddress: shopifyCustomer.default_address ? this.transformAddress(shopifyCustomer.default_address) : null,
       metafields: this.transformMetafields(shopifyCustomer.metafields),
       createdAt: new Date(shopifyCustomer.created_at).toISOString(),
-      updatedAt: new Date(shopifyCustomer.updated_at).toISOString()
+      updatedAt: new Date(shopifyCustomer.updated_at).toISOString(),
     };
   }
 
@@ -384,15 +394,17 @@ class ShopifyCustomerTransformer {
       countryCode: shopifyAddress.country_code,
       zip: shopifyAddress.zip,
       phone: shopifyAddress.phone,
-      isDefault: shopifyAddress.default || false
+      isDefault: shopifyAddress.default || false,
     };
   }
 
   transformMetafields(metafields) {
-    return metafields?.reduce((acc, field) => {
-      acc[field.key] = field.value;
-      return acc;
-    }, {}) || {};
+    return (
+      metafields?.reduce((acc, field) => {
+        acc[field.key] = field.value;
+        return acc;
+      }, {}) || {}
+    );
   }
 }
 ```
@@ -457,7 +469,7 @@ class ShopifyOrderTransformer {
       tags: shopifyOrder.tags?.split(',').map(tag => tag.trim()),
       metafields: this.transformMetafields(shopifyOrder.metafields),
       createdAt: new Date(shopifyOrder.created_at).toISOString(),
-      updatedAt: new Date(shopifyOrder.updated_at).toISOString()
+      updatedAt: new Date(shopifyOrder.updated_at).toISOString(),
     };
   }
 
@@ -471,42 +483,50 @@ class ShopifyOrderTransformer {
   }
 
   transformLineItems(lineItems) {
-    return lineItems?.map(item => ({
-      productId: this.findCommerceFullProductId(item.product_id),
-      variantId: this.findCommerceFullVariantId(item.variant_id),
-      sku: item.sku,
-      name: item.name,
-      quantity: item.quantity,
-      price: parseFloat(item.price),
-      total: parseFloat(item.total_price),
-      properties: item.properties,
-      fulfillmentStatus: item.fulfillment_status
-    })) || [];
+    return (
+      lineItems?.map(item => ({
+        productId: this.findCommerceFullProductId(item.product_id),
+        variantId: this.findCommerceFullVariantId(item.variant_id),
+        sku: item.sku,
+        name: item.name,
+        quantity: item.quantity,
+        price: parseFloat(item.price),
+        total: parseFloat(item.total_price),
+        properties: item.properties,
+        fulfillmentStatus: item.fulfillment_status,
+      })) || []
+    );
   }
 
   transformShippingLines(shippingLines) {
-    return shippingLines?.map(line => ({
-      title: line.title,
-      price: parseFloat(line.price),
-      carrier: line.carrier_identifier,
-      method: line.code
-    })) || [];
+    return (
+      shippingLines?.map(line => ({
+        title: line.title,
+        price: parseFloat(line.price),
+        carrier: line.carrier_identifier,
+        method: line.code,
+      })) || []
+    );
   }
 
   transformTaxLines(taxLines) {
-    return taxLines?.map(line => ({
-      title: line.title,
-      rate: parseFloat(line.rate),
-      price: parseFloat(line.price)
-    })) || [];
+    return (
+      taxLines?.map(line => ({
+        title: line.title,
+        rate: parseFloat(line.rate),
+        price: parseFloat(line.price),
+      })) || []
+    );
   }
 
   transformDiscountCodes(discountCodes) {
-    return discountCodes?.map(code => ({
-      code: code.code,
-      amount: parseFloat(code.amount),
-      type: code.type
-    })) || [];
+    return (
+      discountCodes?.map(code => ({
+        code: code.code,
+        amount: parseFloat(code.amount),
+        type: code.type,
+      })) || []
+    );
   }
 
   mapPaymentMethod(gatewayNames) {
@@ -526,15 +546,17 @@ class ShopifyOrderTransformer {
       province: shopifyAddress.province,
       country: shopifyAddress.country,
       zip: shopifyAddress.zip,
-      phone: shopifyAddress.phone
+      phone: shopifyAddress.phone,
     };
   }
 
   transformMetafields(metafields) {
-    return metafields?.reduce((acc, field) => {
-      acc[field.key] = field.value;
-      return acc;
-    }, {}) || {};
+    return (
+      metafields?.reduce((acc, field) => {
+        acc[field.key] = field.value;
+        return acc;
+      }, {}) || {}
+    );
   }
 }
 ```
@@ -564,8 +586,8 @@ class ShopifyContentMigrator {
           featuredImage: article.image?.src,
           seo: {
             title: article.metafields?.find(mf => mf.key === 'title_tag')?.value,
-            description: article.metafields?.find(mf => mf.key === 'description_tag')?.value
-          }
+            description: article.metafields?.find(mf => mf.key === 'description_tag')?.value,
+          },
         });
       }
     }
@@ -582,8 +604,8 @@ class ShopifyContentMigrator {
         published: page.published,
         seo: {
           title: page.metafields?.find(mf => mf.key === 'title_tag')?.value,
-          description: page.metafields?.find(mf => mf.key === 'description_tag')?.value
-        }
+          description: page.metafields?.find(mf => mf.key === 'description_tag')?.value,
+        },
       });
     }
   }
@@ -598,7 +620,7 @@ class ShopifyAPIManager {
     this.rateLimit = {
       requests: 0,
       resetTime: Date.now() + 60000,
-      limit: 40 // Basic plan limit
+      limit: 40, // Basic plan limit
     };
   }
 
@@ -614,7 +636,7 @@ class ShopifyAPIManager {
       } catch (error) {
         if (error.status === 429) {
           const retryAfter = error.headers['retry-after'] || 60;
-          
+
           await this.sleep(retryAfter * 1000);
           attempt++;
         } else if (error.status >= 500) {
@@ -663,7 +685,7 @@ class MigrationMonitor {
     this.stats = {
       startTime: Date.now(),
       entities: new Map(),
-      errors: []
+      errors: [],
     };
   }
 
@@ -671,7 +693,7 @@ class MigrationMonitor {
     this.stats.entities.set(entityType, {
       processed: 0,
       errors: 0,
-      startTime: Date.now()
+      startTime: Date.now(),
     });
   }
 
@@ -692,7 +714,7 @@ class MigrationMonitor {
       entityType,
       error: error.message,
       data,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 
@@ -707,7 +729,7 @@ class MigrationMonitor {
       processed: entityStats.processed,
       errors: entityStats.errors,
       rate,
-      estimatedTimeRemaining: 'TBD' // Would need total count
+      estimatedTimeRemaining: 'TBD', // Would need total count
     };
   }
 
@@ -720,10 +742,10 @@ class MigrationMonitor {
         type,
         processed: stats.processed,
         errors: stats.errors,
-        successRate: stats.processed / (stats.processed + stats.errors)
+        successRate: stats.processed / (stats.processed + stats.errors),
       })),
       totalErrors: this.stats.errors.length,
-      errorSummary: this.summarizeErrors()
+      errorSummary: this.summarizeErrors(),
     };
   }
 
@@ -756,22 +778,20 @@ async function runShopifyMigration() {
     shopify: {
       shopName: process.env.SHOPIFY_SHOP_NAME,
       apiKey: process.env.SHOPIFY_API_KEY,
-      password: process.env.SHOPIFY_ACCESS_TOKEN
+      password: process.env.SHOPIFY_ACCESS_TOKEN,
     },
     commercefull: {
       baseURL: process.env.COMMERCEFULL_URL,
-      apiKey: process.env.COMMERCEFULL_API_KEY
+      apiKey: process.env.COMMERCEFULL_API_KEY,
     },
     options: {
       batchSize: 50,
       concurrency: 3,
-      continueOnError: true
-    }
+      continueOnError: true,
+    },
   });
 
   try {
-    
-
     // Phase 1: Foundation data
     await runner.migrateProductTypes();
     await runner.migrateTaxCategories();
@@ -788,11 +808,8 @@ async function runShopifyMigration() {
     // Phase 5: Content
     await runner.migrateContent();
 
-    
     console.log(runner.monitor.generateReport());
-
   } catch (error) {
-    
     console.log('Partial results:', runner.monitor.generateReport());
   }
 }
@@ -813,7 +830,7 @@ const validation = {
     return {
       shopify: shopifyCount,
       commercefull: commercefullCount,
-      difference: Math.abs(shopifyCount - commercefullCount)
+      difference: Math.abs(shopifyCount - commercefullCount),
     };
   },
 
@@ -824,7 +841,7 @@ const validation = {
     return {
       shopify: shopifyCount,
       commercefull: commercefullCount,
-      difference: Math.abs(shopifyCount - commercefullCount)
+      difference: Math.abs(shopifyCount - commercefullCount),
     };
   },
 
@@ -838,9 +855,9 @@ const validation = {
     return {
       shopifyTotal,
       commercefullTotal,
-      difference: Math.abs(shopifyTotal - commercefullTotal)
+      difference: Math.abs(shopifyTotal - commercefullTotal),
     };
-  }
+  },
 };
 ```
 

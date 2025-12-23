@@ -10,7 +10,7 @@ export class ReorderPageBlocksCommand {
   constructor(
     public readonly pageId: string,
     public readonly blockOrders: Array<{ id: string; order: number }>,
-    public readonly reorderedBy?: string
+    public readonly reorderedBy?: string,
   ) {}
 }
 
@@ -52,12 +52,12 @@ export class ReorderPageBlocksUseCase {
 
     eventBus.emit('content.blocks.reordered', {
       pageId: command.pageId,
-      blockOrders: command.blockOrders
+      blockOrders: command.blockOrders,
     });
 
     return {
       pageId: command.pageId,
-      blocksReordered: command.blockOrders.length
+      blocksReordered: command.blockOrders.length,
     };
   }
 }

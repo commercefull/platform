@@ -15,7 +15,7 @@ export class UpdateItemQuantityCommand {
   constructor(
     public readonly basketId: string,
     public readonly basketItemId: string,
-    public readonly quantity: number
+    public readonly quantity: number,
   ) {}
 }
 
@@ -43,7 +43,7 @@ export class UpdateItemQuantityUseCase {
 
       eventBus.emit('basket.item_removed', {
         basketId: command.basketId,
-        basketItemId: command.basketItemId
+        basketItemId: command.basketItemId,
       });
     } else {
       item.updateQuantity(command.quantity);
@@ -52,7 +52,7 @@ export class UpdateItemQuantityUseCase {
       eventBus.emit('basket.item_updated', {
         basketId: command.basketId,
         basketItemId: command.basketItemId,
-        quantity: command.quantity
+        quantity: command.quantity,
       });
     }
 
@@ -77,12 +77,12 @@ export class UpdateItemQuantityUseCase {
         unitPrice: item.unitPrice.amount,
         lineTotal: item.lineTotal.amount,
         imageUrl: item.imageUrl,
-        isGift: item.isGift
+        isGift: item.isGift,
       })),
       itemCount: basket.itemCount,
       subtotal: basket.subtotal.amount,
       createdAt: basket.createdAt.toISOString(),
-      updatedAt: basket.updatedAt.toISOString()
+      updatedAt: basket.updatedAt.toISOString(),
     };
   }
 }

@@ -119,15 +119,12 @@ export interface B2bApprovalAction {
 export async function getWorkflow(approvalWorkflowId: string): Promise<B2bApprovalWorkflow | null> {
   const row = await queryOne<Record<string, any>>(
     'SELECT * FROM "b2bApprovalWorkflow" WHERE "b2bApprovalWorkflowId" = $1 AND "deletedAt" IS NULL',
-    [approvalWorkflowId]
+    [approvalWorkflowId],
   );
   return row ? mapToWorkflow(row) : null;
 }
 
-export async function getWorkflows(
-  companyId?: string,
-  workflowType?: WorkflowType
-): Promise<B2bApprovalWorkflow[]> {
+export async function getWorkflows(companyId?: string, workflowType?: WorkflowType): Promise<B2bApprovalWorkflow[]> {
   let whereClause = '"deletedAt" IS NULL';
   const params: any[] = [];
   let paramIndex = 1;
@@ -143,7 +140,7 @@ export async function getWorkflows(
 
   const rows = await query<Record<string, any>[]>(
     `SELECT * FROM "b2bApprovalWorkflow" WHERE ${whereClause} ORDER BY "priority" DESC, "name" ASC`,
-    params
+    params,
   );
   return (rows || []).map(mapToWorkflow);
 }
@@ -158,7 +155,7 @@ export async function getDefaultWorkflow(companyId: string, workflowType: Workfl
      AND "deletedAt" IS NULL
      ORDER BY "b2bCompanyId" NULLS LAST
      LIMIT 1`,
-    [companyId, workflowType]
+    [companyId, workflowType],
   );
   return row ? mapToWorkflow(row) : null;
 }
@@ -166,7 +163,7 @@ export async function getDefaultWorkflow(companyId: string, workflowType: Workfl
 export async function findMatchingWorkflow(
   companyId: string,
   workflowType: WorkflowType,
-  amount?: number
+  amount?: number,
 ): Promise<B2bApprovalWorkflow | null> {
   let whereClause = `("b2bCompanyId" = $1 OR "b2bCompanyId" IS NULL) 
     AND "workflowType" = $2 
@@ -187,12 +184,14 @@ export async function findMatchingWorkflow(
      WHERE ${whereClause}
      ORDER BY "b2bCompanyId" NULLS LAST, "priority" DESC
      LIMIT 1`,
-    params
+    params,
   );
   return row ? mapToWorkflow(row) : null;
 }
 
-export async function saveWorkflow(workflow: Partial<B2bApprovalWorkflow> & { name: string; workflowType: WorkflowType }): Promise<B2bApprovalWorkflow> {
+export async function saveWorkflow(
+  workflow: Partial<B2bApprovalWorkflow> & { name: string; workflowType: WorkflowType },
+): Promise<B2bApprovalWorkflow> {
   const now = new Date().toISOString();
 
   if (workflow.b2bApprovalWorkflowId) {
@@ -207,18 +206,29 @@ export async function saveWorkflow(workflow: Partial<B2bApprovalWorkflow> & { na
         "metadata" = $20, "updatedAt" = $21
       WHERE "b2bApprovalWorkflowId" = $22`,
       [
-        workflow.name, workflow.description, workflow.workflowType,
-        workflow.isActive !== false, workflow.isDefault || false,
-        workflow.priority || 0, JSON.stringify(workflow.conditions || {}),
-        JSON.stringify(workflow.rules || []), workflow.minAmount, workflow.maxAmount,
-        workflow.currency || 'USD', workflow.requiresAllApprovers || false,
-        workflow.autoApproveAfterHours, workflow.autoRejectAfterExpiry || false,
-        workflow.expiryHours || 72, workflow.notifyOnSubmit !== false,
-        workflow.notifyOnApprove !== false, workflow.notifyOnReject !== false,
+        workflow.name,
+        workflow.description,
+        workflow.workflowType,
+        workflow.isActive !== false,
+        workflow.isDefault || false,
+        workflow.priority || 0,
+        JSON.stringify(workflow.conditions || {}),
+        JSON.stringify(workflow.rules || []),
+        workflow.minAmount,
+        workflow.maxAmount,
+        workflow.currency || 'USD',
+        workflow.requiresAllApprovers || false,
+        workflow.autoApproveAfterHours,
+        workflow.autoRejectAfterExpiry || false,
+        workflow.expiryHours || 72,
+        workflow.notifyOnSubmit !== false,
+        workflow.notifyOnApprove !== false,
+        workflow.notifyOnReject !== false,
         workflow.notifyRequester !== false,
         workflow.metadata ? JSON.stringify(workflow.metadata) : null,
-        now, workflow.b2bApprovalWorkflowId
-      ]
+        now,
+        workflow.b2bApprovalWorkflowId,
+      ],
     );
     return (await getWorkflow(workflow.b2bApprovalWorkflowId))!;
   } else {
@@ -232,25 +242,40 @@ export async function saveWorkflow(workflow: Partial<B2bApprovalWorkflow> & { na
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23)
       RETURNING *`,
       [
-        workflow.b2bCompanyId, workflow.name, workflow.description, workflow.workflowType,
-        true, workflow.isDefault || false, workflow.priority || 0,
-        JSON.stringify(workflow.conditions || {}), JSON.stringify(workflow.rules || []),
-        workflow.minAmount, workflow.maxAmount, workflow.currency || 'USD',
-        workflow.requiresAllApprovers || false, workflow.autoApproveAfterHours,
-        workflow.autoRejectAfterExpiry || false, workflow.expiryHours || 72,
-        true, true, true, true,
-        workflow.metadata ? JSON.stringify(workflow.metadata) : null, now, now
-      ]
+        workflow.b2bCompanyId,
+        workflow.name,
+        workflow.description,
+        workflow.workflowType,
+        true,
+        workflow.isDefault || false,
+        workflow.priority || 0,
+        JSON.stringify(workflow.conditions || {}),
+        JSON.stringify(workflow.rules || []),
+        workflow.minAmount,
+        workflow.maxAmount,
+        workflow.currency || 'USD',
+        workflow.requiresAllApprovers || false,
+        workflow.autoApproveAfterHours,
+        workflow.autoRejectAfterExpiry || false,
+        workflow.expiryHours || 72,
+        true,
+        true,
+        true,
+        true,
+        workflow.metadata ? JSON.stringify(workflow.metadata) : null,
+        now,
+        now,
+      ],
     );
     return mapToWorkflow(result!);
   }
 }
 
 export async function deleteWorkflow(approvalWorkflowId: string): Promise<void> {
-  await query(
-    'UPDATE "b2bApprovalWorkflow" SET "deletedAt" = $1 WHERE "b2bApprovalWorkflowId" = $2',
-    [new Date().toISOString(), approvalWorkflowId]
-  );
+  await query('UPDATE "b2bApprovalWorkflow" SET "deletedAt" = $1 WHERE "b2bApprovalWorkflowId" = $2', [
+    new Date().toISOString(),
+    approvalWorkflowId,
+  ]);
 }
 
 // ============================================================================
@@ -260,17 +285,19 @@ export async function deleteWorkflow(approvalWorkflowId: string): Promise<void> 
 export async function getWorkflowSteps(approvalWorkflowId: string): Promise<B2bApprovalWorkflowStep[]> {
   const rows = await query<Record<string, any>[]>(
     'SELECT * FROM "b2bApprovalWorkflowStep" WHERE "b2bApprovalWorkflowId" = $1 ORDER BY "stepNumber" ASC',
-    [approvalWorkflowId]
+    [approvalWorkflowId],
   );
   return (rows || []).map(mapToWorkflowStep);
 }
 
-export async function saveWorkflowStep(step: Partial<B2bApprovalWorkflowStep> & {
-  approvalWorkflowId: string;
-  stepNumber: number;
-  name: string;
-  approverType: ApproverType;
-}): Promise<B2bApprovalWorkflowStep> {
+export async function saveWorkflowStep(
+  step: Partial<B2bApprovalWorkflowStep> & {
+    approvalWorkflowId: string;
+    stepNumber: number;
+    name: string;
+    approverType: ApproverType;
+  },
+): Promise<B2bApprovalWorkflowStep> {
   const now = new Date().toISOString();
 
   if (step.b2bApprovalWorkflowStepId) {
@@ -283,18 +310,29 @@ export async function saveWorkflowStep(step: Partial<B2bApprovalWorkflowStep> & 
         "canSkip" = $14, "conditions" = $15, "metadata" = $16, "updatedAt" = $17
       WHERE "approvalWorkflowStepId" = $18`,
       [
-        step.stepNumber, step.name, step.description, step.approverType,
-        step.approverId, step.approverRole, JSON.stringify(step.approverIds || []),
-        step.requiresAll || false, step.minApprovers || 1, step.timeoutHours,
-        step.escalateTo, step.escalateToUserId, step.canDelegate || false,
-        step.canSkip || false, step.conditions ? JSON.stringify(step.conditions) : null,
-        step.metadata ? JSON.stringify(step.metadata) : null, now, step.b2bApprovalWorkflowStepId
-      ]
+        step.stepNumber,
+        step.name,
+        step.description,
+        step.approverType,
+        step.approverId,
+        step.approverRole,
+        JSON.stringify(step.approverIds || []),
+        step.requiresAll || false,
+        step.minApprovers || 1,
+        step.timeoutHours,
+        step.escalateTo,
+        step.escalateToUserId,
+        step.canDelegate || false,
+        step.canSkip || false,
+        step.conditions ? JSON.stringify(step.conditions) : null,
+        step.metadata ? JSON.stringify(step.metadata) : null,
+        now,
+        step.b2bApprovalWorkflowStepId,
+      ],
     );
-    const result = await queryOne<Record<string, any>>(
-      'SELECT * FROM "b2bApprovalWorkflowStep" WHERE "b2bApprovalWorkflowStepId" = $1',
-      [step.b2bApprovalWorkflowStepId]
-    );
+    const result = await queryOne<Record<string, any>>('SELECT * FROM "b2bApprovalWorkflowStep" WHERE "b2bApprovalWorkflowStepId" = $1', [
+      step.b2bApprovalWorkflowStepId,
+    ]);
     return mapToWorkflowStep(result!);
   } else {
     const result = await queryOne<Record<string, any>>(
@@ -306,24 +344,33 @@ export async function saveWorkflowStep(step: Partial<B2bApprovalWorkflowStep> & 
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
       RETURNING *`,
       [
-        step.b2bApprovalWorkflowId, step.stepNumber, step.name, step.description,
-        step.approverType, step.approverId, step.approverRole,
-        JSON.stringify(step.approverIds || []), step.requiresAll || false,
-        step.minApprovers || 1, step.timeoutHours, step.escalateTo,
-        step.escalateToUserId, step.canDelegate || false, step.canSkip || false,
+        step.b2bApprovalWorkflowId,
+        step.stepNumber,
+        step.name,
+        step.description,
+        step.approverType,
+        step.approverId,
+        step.approverRole,
+        JSON.stringify(step.approverIds || []),
+        step.requiresAll || false,
+        step.minApprovers || 1,
+        step.timeoutHours,
+        step.escalateTo,
+        step.escalateToUserId,
+        step.canDelegate || false,
+        step.canSkip || false,
         step.conditions ? JSON.stringify(step.conditions) : null,
-        step.metadata ? JSON.stringify(step.metadata) : null, now, now
-      ]
+        step.metadata ? JSON.stringify(step.metadata) : null,
+        now,
+        now,
+      ],
     );
     return mapToWorkflowStep(result!);
   }
 }
 
 export async function deleteWorkflowStep(approvalWorkflowStepId: string): Promise<void> {
-  await query(
-    'DELETE FROM "b2bApprovalWorkflowStep" WHERE "approvalWorkflowStepId" = $1',
-    [approvalWorkflowStepId]
-  );
+  await query('DELETE FROM "b2bApprovalWorkflowStep" WHERE "approvalWorkflowStepId" = $1', [approvalWorkflowStepId]);
 }
 
 // ============================================================================
@@ -331,10 +378,9 @@ export async function deleteWorkflowStep(approvalWorkflowStepId: string): Promis
 // ============================================================================
 
 export async function getApprovalRequest(approvalRequestId: string): Promise<B2bApprovalRequest | null> {
-  const row = await queryOne<Record<string, any>>(
-    'SELECT * FROM "b2bApprovalRequest" WHERE "b2bApprovalRequestId" = $1',
-    [approvalRequestId]
-  );
+  const row = await queryOne<Record<string, any>>('SELECT * FROM "b2bApprovalRequest" WHERE "b2bApprovalRequestId" = $1', [
+    approvalRequestId,
+  ]);
   return row ? mapToApprovalRequest(row) : null;
 }
 
@@ -343,7 +389,7 @@ export async function getApprovalRequestByEntity(entityId: string, entityType: s
     `SELECT * FROM "b2bApprovalRequest" 
      WHERE "entityId" = $1 AND "entityType" = $2 AND "status" IN ('pending', 'in_progress')
      ORDER BY "createdAt" DESC LIMIT 1`,
-    [entityId, entityType]
+    [entityId, entityType],
   );
   return row ? mapToApprovalRequest(row) : null;
 }
@@ -356,7 +402,7 @@ export async function getApprovalRequests(
     status?: RequestStatus;
     requestType?: WorkflowType;
   },
-  pagination?: { limit?: number; offset?: number }
+  pagination?: { limit?: number; offset?: number },
 ): Promise<{ data: B2bApprovalRequest[]; total: number }> {
   let whereClause = '1=1';
   const params: any[] = [];
@@ -379,10 +425,7 @@ export async function getApprovalRequests(
     params.push(filters.requestType);
   }
 
-  const countResult = await queryOne<{ count: string }>(
-    `SELECT COUNT(*) as count FROM "b2bApprovalRequest" WHERE ${whereClause}`,
-    params
-  );
+  const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "b2bApprovalRequest" WHERE ${whereClause}`, params);
 
   const limit = pagination?.limit || 20;
   const offset = pagination?.offset || 0;
@@ -390,12 +433,12 @@ export async function getApprovalRequests(
   const rows = await query<Record<string, any>[]>(
     `SELECT * FROM "b2bApprovalRequest" WHERE ${whereClause} 
      ORDER BY "createdAt" DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
-    [...params, limit, offset]
+    [...params, limit, offset],
   );
 
   return {
     data: (rows || []).map(mapToApprovalRequest),
-    total: parseInt(countResult?.count || '0')
+    total: parseInt(countResult?.count || '0'),
   };
 }
 
@@ -412,14 +455,12 @@ export async function createApprovalRequest(request: {
   requestNotes?: string;
 }): Promise<B2bApprovalRequest> {
   const now = new Date().toISOString();
-  
+
   // Get workflow steps count
   const steps = await getWorkflowSteps(request.approvalWorkflowId);
   const workflow = await getWorkflow(request.approvalWorkflowId);
-  
-  const expiresAt = workflow?.expiryHours 
-    ? new Date(Date.now() + workflow.expiryHours * 60 * 60 * 1000)
-    : null;
+
+  const expiresAt = workflow?.expiryHours ? new Date(Date.now() + workflow.expiryHours * 60 * 60 * 1000) : null;
 
   const result = await queryOne<Record<string, any>>(
     `INSERT INTO "b2bApprovalRequest" (
@@ -430,11 +471,22 @@ export async function createApprovalRequest(request: {
     ) VALUES ($1, $2, $3, $4, $5, $6, $7, 'pending', 1, $8, $9, $10, $11, '[]', $12, $13, $14, $15)
     RETURNING *`,
     [
-      request.approvalWorkflowId, request.companyId, request.requestType,
-      request.entityId, request.entityType, request.requesterId, request.requesterType,
-      steps.length, request.amount, request.currency || 'USD', request.requestNotes,
-      now, expiresAt?.toISOString(), now, now
-    ]
+      request.approvalWorkflowId,
+      request.companyId,
+      request.requestType,
+      request.entityId,
+      request.entityType,
+      request.requesterId,
+      request.requesterType,
+      steps.length,
+      request.amount,
+      request.currency || 'USD',
+      request.requestNotes,
+      now,
+      expiresAt?.toISOString(),
+      now,
+      now,
+    ],
   );
 
   return mapToApprovalRequest(result!);
@@ -448,11 +500,11 @@ export async function processApprovalAction(
     action: ActionType;
     comment?: string;
     delegatedTo?: string;
-  }
+  },
 ): Promise<B2bApprovalRequest> {
   const now = new Date().toISOString();
   const request = await getApprovalRequest(approvalRequestId);
-  
+
   if (!request) throw new Error('Approval request not found');
   if (request.status !== 'pending' && request.status !== 'in_progress') {
     throw new Error('Request is not pending approval');
@@ -465,9 +517,16 @@ export async function processApprovalAction(
       "action", "comment", "delegatedTo", "actionAt", "createdAt"
     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
     [
-      approvalRequestId, request.currentStep, action.approverId, action.approverType,
-      action.action, action.comment, action.delegatedTo, now, now
-    ]
+      approvalRequestId,
+      request.currentStep,
+      action.approverId,
+      action.approverType,
+      action.action,
+      action.comment,
+      action.delegatedTo,
+      now,
+      now,
+    ],
   );
 
   // Update approval history
@@ -476,7 +535,7 @@ export async function processApprovalAction(
     approverId: action.approverId,
     action: action.action,
     comment: action.comment,
-    timestamp: now
+    timestamp: now,
   };
   const newHistory = [...request.approvalHistory, historyEntry];
 
@@ -488,7 +547,7 @@ export async function processApprovalAction(
           "status" = 'approved', "approvalHistory" = $1, "finalApproverId" = $2,
           "approvedAt" = $3, "approvalNotes" = $4, "updatedAt" = $3
          WHERE "b2bApprovalRequestId" = $5`,
-        [JSON.stringify(newHistory), action.approverId, now, action.comment, approvalRequestId]
+        [JSON.stringify(newHistory), action.approverId, now, action.comment, approvalRequestId],
       );
     } else {
       // Move to next step
@@ -496,7 +555,7 @@ export async function processApprovalAction(
         `UPDATE "b2bApprovalRequest" SET 
           "status" = 'in_progress', "currentStep" = $1, "approvalHistory" = $2, "updatedAt" = $3
          WHERE "b2bApprovalRequestId" = $4`,
-        [request.currentStep + 1, JSON.stringify(newHistory), now, approvalRequestId]
+        [request.currentStep + 1, JSON.stringify(newHistory), now, approvalRequestId],
       );
     }
   } else if (action.action === 'reject') {
@@ -505,14 +564,14 @@ export async function processApprovalAction(
         "status" = 'rejected', "approvalHistory" = $1, "rejectionReason" = $2,
         "rejectedAt" = $3, "updatedAt" = $3
        WHERE "b2bApprovalRequestId" = $4`,
-      [JSON.stringify(newHistory), action.comment, now, approvalRequestId]
+      [JSON.stringify(newHistory), action.comment, now, approvalRequestId],
     );
   } else {
     // Comment or request info - just update history
     await query(
       `UPDATE "b2bApprovalRequest" SET "approvalHistory" = $1, "updatedAt" = $2
        WHERE "b2bApprovalRequestId" = $3`,
-      [JSON.stringify(newHistory), now, approvalRequestId]
+      [JSON.stringify(newHistory), now, approvalRequestId],
     );
   }
 
@@ -524,7 +583,7 @@ export async function cancelApprovalRequest(approvalRequestId: string): Promise<
   await query(
     `UPDATE "b2bApprovalRequest" SET "status" = 'cancelled', "cancelledAt" = $1, "updatedAt" = $1
      WHERE "b2bApprovalRequestId" = $2`,
-    [now, approvalRequestId]
+    [now, approvalRequestId],
   );
 }
 
@@ -535,7 +594,7 @@ export async function cancelApprovalRequest(approvalRequestId: string): Promise<
 export async function getApprovalActions(approvalRequestId: string): Promise<B2bApprovalAction[]> {
   const rows = await query<Record<string, any>[]>(
     'SELECT * FROM "b2bApprovalAction" WHERE "b2bApprovalRequestId" = $1 ORDER BY "actionAt" ASC',
-    [approvalRequestId]
+    [approvalRequestId],
   );
   return (rows || []).map(mapToApprovalAction);
 }
@@ -570,7 +629,7 @@ function mapToWorkflow(row: Record<string, any>): B2bApprovalWorkflow {
     metadata: row.metadata,
     createdAt: new Date(row.createdAt),
     updatedAt: new Date(row.updatedAt),
-    deletedAt: row.deletedAt ? new Date(row.deletedAt) : undefined
+    deletedAt: row.deletedAt ? new Date(row.deletedAt) : undefined,
   };
 }
 
@@ -595,7 +654,7 @@ function mapToWorkflowStep(row: Record<string, any>): B2bApprovalWorkflowStep {
     conditions: row.conditions,
     metadata: row.metadata,
     createdAt: new Date(row.createdAt),
-    updatedAt: new Date(row.updatedAt)
+    updatedAt: new Date(row.updatedAt),
   };
 }
 
@@ -626,7 +685,7 @@ function mapToApprovalRequest(row: Record<string, any>): B2bApprovalRequest {
     expiresAt: row.expiresAt ? new Date(row.expiresAt) : undefined,
     metadata: row.metadata,
     createdAt: new Date(row.createdAt),
-    updatedAt: new Date(row.updatedAt)
+    updatedAt: new Date(row.updatedAt),
   };
 }
 
@@ -646,6 +705,6 @@ function mapToApprovalAction(row: Record<string, any>): B2bApprovalAction {
     userAgent: row.userAgent,
     metadata: row.metadata,
     actionAt: new Date(row.actionAt),
-    createdAt: new Date(row.createdAt)
+    createdAt: new Date(row.createdAt),
   };
 }

@@ -12,7 +12,7 @@ import {
   getCookieConsent,
   acceptAllCookies,
   rejectAllCookies,
-  updateCookieConsent
+  updateCookieConsent,
 } from './interface/controllers/GdprController';
 import { isCustomerLoggedIn } from '../../libs/auth';
 

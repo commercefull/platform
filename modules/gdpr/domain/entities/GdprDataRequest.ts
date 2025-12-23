@@ -3,21 +3,15 @@
  * Represents a customer's request for data export, deletion, or other GDPR rights
  */
 
-export type GdprRequestType = 
-  | 'export'        // Article 20 - Data portability
-  | 'deletion'      // Article 17 - Right to erasure
+export type GdprRequestType =
+  | 'export' // Article 20 - Data portability
+  | 'deletion' // Article 17 - Right to erasure
   | 'rectification' // Article 16 - Right to rectification
-  | 'restriction'   // Article 18 - Right to restriction
-  | 'access'        // Article 15 - Right of access
-  | 'objection';    // Article 21 - Right to object
+  | 'restriction' // Article 18 - Right to restriction
+  | 'access' // Article 15 - Right of access
+  | 'objection'; // Article 21 - Right to object
 
-export type GdprRequestStatus = 
-  | 'pending'
-  | 'processing'
-  | 'completed'
-  | 'rejected'
-  | 'cancelled'
-  | 'failed';
+export type GdprRequestStatus = 'pending' | 'processing' | 'completed' | 'rejected' | 'cancelled' | 'failed';
 
 export interface GdprDataRequestProps {
   gdprDataRequestId: string;
@@ -88,7 +82,7 @@ export class GdprDataRequest {
       ipAddress: params.ipAddress,
       userAgent: params.userAgent,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     });
   }
 
@@ -100,30 +94,78 @@ export class GdprDataRequest {
   }
 
   // Getters
-  get gdprDataRequestId(): string { return this.props.gdprDataRequestId; }
-  get customerId(): string { return this.props.customerId; }
-  get requestType(): GdprRequestType { return this.props.requestType; }
-  get status(): GdprRequestStatus { return this.props.status; }
-  get reason(): string | undefined { return this.props.reason; }
-  get requestedData(): string[] | undefined { return this.props.requestedData; }
-  get downloadUrl(): string | undefined { return this.props.downloadUrl; }
-  get downloadExpiresAt(): Date | undefined { return this.props.downloadExpiresAt; }
-  get downloadFormat(): string | undefined { return this.props.downloadFormat; }
-  get processedAt(): Date | undefined { return this.props.processedAt; }
-  get processedBy(): string | undefined { return this.props.processedBy; }
-  get adminNotes(): string | undefined { return this.props.adminNotes; }
-  get rejectionReason(): string | undefined { return this.props.rejectionReason; }
-  get identityVerified(): boolean { return this.props.identityVerified; }
-  get verificationMethod(): string | undefined { return this.props.verificationMethod; }
-  get verifiedAt(): Date | undefined { return this.props.verifiedAt; }
-  get deadlineAt(): Date { return this.props.deadlineAt; }
-  get extensionRequested(): boolean { return this.props.extensionRequested; }
-  get extensionReason(): string | undefined { return this.props.extensionReason; }
-  get extendedDeadlineAt(): Date | undefined { return this.props.extendedDeadlineAt; }
-  get ipAddress(): string | undefined { return this.props.ipAddress; }
-  get userAgent(): string | undefined { return this.props.userAgent; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get gdprDataRequestId(): string {
+    return this.props.gdprDataRequestId;
+  }
+  get customerId(): string {
+    return this.props.customerId;
+  }
+  get requestType(): GdprRequestType {
+    return this.props.requestType;
+  }
+  get status(): GdprRequestStatus {
+    return this.props.status;
+  }
+  get reason(): string | undefined {
+    return this.props.reason;
+  }
+  get requestedData(): string[] | undefined {
+    return this.props.requestedData;
+  }
+  get downloadUrl(): string | undefined {
+    return this.props.downloadUrl;
+  }
+  get downloadExpiresAt(): Date | undefined {
+    return this.props.downloadExpiresAt;
+  }
+  get downloadFormat(): string | undefined {
+    return this.props.downloadFormat;
+  }
+  get processedAt(): Date | undefined {
+    return this.props.processedAt;
+  }
+  get processedBy(): string | undefined {
+    return this.props.processedBy;
+  }
+  get adminNotes(): string | undefined {
+    return this.props.adminNotes;
+  }
+  get rejectionReason(): string | undefined {
+    return this.props.rejectionReason;
+  }
+  get identityVerified(): boolean {
+    return this.props.identityVerified;
+  }
+  get verificationMethod(): string | undefined {
+    return this.props.verificationMethod;
+  }
+  get verifiedAt(): Date | undefined {
+    return this.props.verifiedAt;
+  }
+  get deadlineAt(): Date {
+    return this.props.deadlineAt;
+  }
+  get extensionRequested(): boolean {
+    return this.props.extensionRequested;
+  }
+  get extensionReason(): string | undefined {
+    return this.props.extensionReason;
+  }
+  get extendedDeadlineAt(): Date | undefined {
+    return this.props.extendedDeadlineAt;
+  }
+  get ipAddress(): string | undefined {
+    return this.props.ipAddress;
+  }
+  get userAgent(): string | undefined {
+    return this.props.userAgent;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   /**
    * Check if request is overdue
@@ -168,7 +210,7 @@ export class GdprDataRequest {
     if (this.props.status !== 'processing') {
       throw new Error('Can only complete requests that are being processed');
     }
-    
+
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7); // Download expires in 7 days
 
@@ -227,7 +269,7 @@ export class GdprDataRequest {
     if (this.props.extensionRequested) {
       throw new Error('Extension already requested');
     }
-    
+
     const extendedDeadline = new Date(this.props.deadlineAt);
     extendedDeadline.setDate(extendedDeadline.getDate() + 60); // Additional 60 days per GDPR
 
@@ -240,7 +282,7 @@ export class GdprDataRequest {
   toJSON(): Record<string, any> {
     return {
       ...this.props,
-      isOverdue: this.isOverdue()
+      isOverdue: this.isOverdue(),
     };
   }
 }

@@ -1,6 +1,6 @@
 /**
  * DowngradeMembership Use Case
- * 
+ *
  * Downgrades a customer's membership to a lower tier.
  */
 
@@ -51,7 +51,7 @@ export class DowngradeMembershipUseCase {
 
     // Get current tier for comparison
     const currentTier = await this.membershipRepository.getTierById(membership.tierId);
-    
+
     // Validate downgrade (new tier should have lower price or level)
     if (newTier.price >= currentTier.price) {
       throw new Error('Cannot downgrade to a tier with equal or higher price. Use upgrade instead.');
@@ -63,7 +63,7 @@ export class DowngradeMembershipUseCase {
     if (effectiveAtPeriodEnd && membership.currentPeriodEnd) {
       // Schedule downgrade for end of current period
       effectiveDate = new Date(membership.currentPeriodEnd);
-      
+
       await this.membershipRepository.updateMembership(membershipId, {
         scheduledDowngradeTierId: newTierId,
         scheduledDowngradeDate: effectiveDate,
@@ -72,7 +72,7 @@ export class DowngradeMembershipUseCase {
     } else {
       // Immediate downgrade
       effectiveDate = now;
-      
+
       await this.membershipRepository.updateMembership(membershipId, {
         tierId: newTierId,
         downgradedAt: now,

@@ -25,7 +25,7 @@ exports.up = function (knex) {
     t.timestamp('validFrom');
     t.timestamp('validTo');
     t.jsonb('conditions');
-    
+
     t.uuid('createdBy');
     t.index('shippingZoneId');
     t.index('shippingMethodId');

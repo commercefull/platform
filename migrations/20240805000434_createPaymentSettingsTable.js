@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = function (knex) {
   return knex.schema.createTable('paymentSettings', t => {
     t.uuid('paymentSettingsId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
@@ -17,12 +17,11 @@ exports.up = function(knex) {
     t.jsonb('paymentFormCustomization');
     t.boolean('autoRefundOnCancel').notNullable().defaultTo(false);
     t.integer('paymentAttemptLimit').notNullable().defaultTo(3);
-    
 
     t.index('merchantId');
   });
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTable('paymentSettings');
 };

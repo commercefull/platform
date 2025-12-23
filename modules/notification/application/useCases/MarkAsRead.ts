@@ -25,7 +25,7 @@ export class MarkAsReadUseCase {
 
     for (const notificationId of input.notificationIds) {
       const notification = await this.notificationRepository.findById(notificationId);
-      
+
       // Verify ownership and not already read
       if (notification && notification.recipientId === input.recipientId && !notification.isRead) {
         await this.notificationRepository.markAsRead(notificationId, now);

@@ -2,8 +2,8 @@
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.up = function(knex) {
-  return knex.schema.createTable('storeLocation', function(table) {
+exports.up = function (knex) {
+  return knex.schema.createTable('storeLocation', function (table) {
     table.uuid('storeLocationId').primary().defaultTo(knex.raw('uuidv7()'));
     table.string('code').unique().notNullable();
     table.string('name').notNullable();
@@ -37,7 +37,7 @@ exports.up = function(knex) {
     table.jsonb('metadata');
     table.timestamp('createdAt').defaultTo(knex.fn.now());
     table.timestamp('updatedAt').defaultTo(knex.fn.now());
-    
+
     table.index('code');
     table.index('isActive');
     table.index(['latitude', 'longitude']);
@@ -49,6 +49,6 @@ exports.up = function(knex) {
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTableIfExists('storeLocation');
 };

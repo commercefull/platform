@@ -1,6 +1,6 @@
 /**
  * Organization Use Cases
- * 
+ *
  * Barrel export for all organization-related use cases.
  */
 

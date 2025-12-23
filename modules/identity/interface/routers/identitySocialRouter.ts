@@ -1,6 +1,6 @@
 /**
  * Identity Social Login Router
- * 
+ *
  * Routes for OAuth/social login authentication.
  */
 
@@ -12,7 +12,7 @@ import {
   linkCustomerSocialAccount,
   unlinkCustomerSocialAccount,
   getCustomerLinkedAccounts,
-  getMerchantLinkedAccounts
+  getMerchantLinkedAccounts,
 } from '../../controllers/identitySocialController';
 
 const router = Router();

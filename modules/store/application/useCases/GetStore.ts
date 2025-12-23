@@ -14,7 +14,7 @@ export class GetStoreQuery {
   constructor(
     public readonly storeId?: string,
     public readonly slug?: string,
-    public readonly storeUrl?: string
+    public readonly storeUrl?: string,
   ) {}
 }
 

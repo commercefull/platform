@@ -15,7 +15,7 @@ export enum OrderStatus {
   FAILED = 'failed',
   PAYMENT_PENDING = 'payment_pending',
   PAYMENT_FAILED = 'payment_failed',
-  BACKORDERED = 'backordered'
+  BACKORDERED = 'backordered',
 }
 
 /**
@@ -25,7 +25,13 @@ export const OrderStatusTransitions: Record<OrderStatus, OrderStatus[]> = {
   [OrderStatus.PENDING]: [OrderStatus.PROCESSING, OrderStatus.PAYMENT_PENDING, OrderStatus.CANCELLED, OrderStatus.FAILED],
   [OrderStatus.PAYMENT_PENDING]: [OrderStatus.PENDING, OrderStatus.PROCESSING, OrderStatus.PAYMENT_FAILED, OrderStatus.CANCELLED],
   [OrderStatus.PAYMENT_FAILED]: [OrderStatus.PAYMENT_PENDING, OrderStatus.CANCELLED],
-  [OrderStatus.PROCESSING]: [OrderStatus.SHIPPED, OrderStatus.ON_HOLD, OrderStatus.BACKORDERED, OrderStatus.CANCELLED, OrderStatus.REFUNDED],
+  [OrderStatus.PROCESSING]: [
+    OrderStatus.SHIPPED,
+    OrderStatus.ON_HOLD,
+    OrderStatus.BACKORDERED,
+    OrderStatus.CANCELLED,
+    OrderStatus.REFUNDED,
+  ],
   [OrderStatus.ON_HOLD]: [OrderStatus.PROCESSING, OrderStatus.CANCELLED],
   [OrderStatus.BACKORDERED]: [OrderStatus.PROCESSING, OrderStatus.CANCELLED],
   [OrderStatus.SHIPPED]: [OrderStatus.DELIVERED, OrderStatus.REFUNDED],
@@ -33,7 +39,7 @@ export const OrderStatusTransitions: Record<OrderStatus, OrderStatus[]> = {
   [OrderStatus.COMPLETED]: [OrderStatus.REFUNDED],
   [OrderStatus.CANCELLED]: [],
   [OrderStatus.REFUNDED]: [],
-  [OrderStatus.FAILED]: [OrderStatus.PENDING]
+  [OrderStatus.FAILED]: [OrderStatus.PENDING],
 };
 
 /**
@@ -60,7 +66,7 @@ export function getStatusLabel(status: OrderStatus): string {
     [OrderStatus.FAILED]: 'Failed',
     [OrderStatus.PAYMENT_PENDING]: 'Payment Pending',
     [OrderStatus.PAYMENT_FAILED]: 'Payment Failed',
-    [OrderStatus.BACKORDERED]: 'Backordered'
+    [OrderStatus.BACKORDERED]: 'Backordered',
   };
   return labels[status] || status;
 }

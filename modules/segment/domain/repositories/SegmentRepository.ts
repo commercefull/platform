@@ -29,13 +29,13 @@ export interface ISegmentRepository {
   findAll(filters?: SegmentFilters, pagination?: PaginationOptions): Promise<PaginatedResult<Segment>>;
   findByCustomerId(customerId: string): Promise<Segment[]>;
   delete(segmentId: string): Promise<boolean>;
-  
+
   // Membership operations
   addMember(segmentId: string, customerId: string): Promise<void>;
   removeMember(segmentId: string, customerId: string): Promise<void>;
   getMembers(segmentId: string, pagination?: PaginationOptions): Promise<PaginatedResult<string>>;
   isMember(segmentId: string, customerId: string): Promise<boolean>;
-  
+
   // Evaluation
   evaluateSegment(segmentId: string): Promise<string[]>;
   updateMemberCount(segmentId: string, count: number): Promise<void>;

@@ -16,7 +16,7 @@ export class ProcessPaymentRefundCommand {
     public readonly transactionId: string,
     public readonly amount: number,
     public readonly reason?: string,
-    public readonly metadata?: Record<string, any>
+    public readonly metadata?: Record<string, any>,
   ) {}
 }
 
@@ -42,7 +42,7 @@ export class ProcessPaymentRefundUseCase {
 
   async execute(command: ProcessPaymentRefundCommand): Promise<ProcessRefundResponse> {
     const transaction = await this.paymentRepository.findTransactionById(command.transactionId);
-    
+
     if (!transaction) {
       throw new Error('Transaction not found');
     }
@@ -63,7 +63,7 @@ export class ProcessPaymentRefundUseCase {
       amount: command.amount,
       currency: transaction.currency,
       reason: command.reason,
-      metadata: command.metadata
+      metadata: command.metadata,
     });
 
     await this.paymentRepository.saveRefund(refund);
@@ -77,7 +77,7 @@ export class ProcessPaymentRefundUseCase {
       refundId: refund.refundId,
       transactionId: refund.transactionId,
       amount: refund.amount,
-      reason: refund.reason
+      reason: refund.reason,
     });
 
     return {
@@ -86,7 +86,7 @@ export class ProcessPaymentRefundUseCase {
       amount: refund.amount,
       currency: refund.currency,
       status: refund.status,
-      createdAt: refund.createdAt.toISOString()
+      createdAt: refund.createdAt.toISOString(),
     };
   }
 }

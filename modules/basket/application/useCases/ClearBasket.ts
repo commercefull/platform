@@ -29,13 +29,13 @@ export class ClearBasketUseCase {
     }
 
     const itemCount = basket.itemCount;
-    
+
     basket.clearItems();
     await this.basketRepository.clearItems(command.basketId);
 
     eventBus.emit('basket.cleared', {
       basketId: command.basketId,
-      itemCount
+      itemCount,
     });
 
     const updatedBasket = await this.basketRepository.findById(command.basketId);
@@ -59,12 +59,12 @@ export class ClearBasketUseCase {
         unitPrice: item.unitPrice.amount,
         lineTotal: item.lineTotal.amount,
         imageUrl: item.imageUrl,
-        isGift: item.isGift
+        isGift: item.isGift,
       })),
       itemCount: basket.itemCount,
       subtotal: basket.subtotal.amount,
       createdAt: basket.createdAt.toISOString(),
-      updatedAt: basket.updatedAt.toISOString()
+      updatedAt: basket.updatedAt.toISOString(),
     };
   }
 }

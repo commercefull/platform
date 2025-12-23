@@ -25,13 +25,13 @@ describe('Attribute Group Tests', () => {
       const newGroup = {
         ...testAttributeGroup,
         name: 'New Test Group',
-        code: `new-group-${Math.floor(Math.random() * 10000)}`
+        code: `new-group-${Math.floor(Math.random() * 10000)}`,
       };
-      
+
       const response = await client.post('/business/attribute-groups', newGroup, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       expect(response.status).toBe(201);
       expect(response.data.success).toBe(true);
       // DB returns productAttributeGroupId, not id
@@ -43,16 +43,16 @@ describe('Attribute Group Tests', () => {
       // Verify camelCase property names in response (TypeScript interface)
       expect(response.data.data).toHaveProperty('position');
       expect(response.data.data).toHaveProperty('createdAt');
-      
+
       // Save the ID for later tests
       createdGroupId = groupId;
     });
 
     it('should get an attribute group by ID', async () => {
       const response = await client.get(`/business/attribute-groups/${testAttributeGroupId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       // DB returns productAttributeGroupId, not id
@@ -60,22 +60,22 @@ describe('Attribute Group Tests', () => {
       expect(groupId).toBe(testAttributeGroupId);
       expect(response.data.data).toHaveProperty('name', testAttributeGroup.name);
     });
-    
+
     it('should list all attribute groups', async () => {
       const response = await client.get('/business/attribute-groups', {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       expect(Array.isArray(response.data.data)).toBe(true);
       expect(response.data.data.length).toBeGreaterThan(0);
-      
+
       // Should find our test groups - uses productAttributeGroupId
       const foundOriginalGroup = response.data.data.find((g: any) => (g.productAttributeGroupId || g.id) === testAttributeGroupId);
-      
+
       expect(foundOriginalGroup).toBeDefined();
-      
+
       // Only check for new group if it was created
       if (createdGroupId) {
         const foundNewGroup = response.data.data.find((g: any) => (g.productAttributeGroupId || g.id) === createdGroupId);
@@ -87,13 +87,13 @@ describe('Attribute Group Tests', () => {
       const updatedData = {
         name: 'Updated Group Name',
         description: 'Updated group description',
-        sortOrder: 2
+        sortOrder: 2,
       };
-      
+
       const response = await client.put(`/business/attribute-groups/${createdGroupId}`, updatedData, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       expect(response.data.data).toHaveProperty('name', updatedData.name);
@@ -104,17 +104,17 @@ describe('Attribute Group Tests', () => {
 
     it('should delete an attribute group', async () => {
       const response = await client.delete(`/business/attribute-groups/${createdGroupId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
-      
+
       // Verify the group is deleted
       const getResponse = await client.get(`/business/attribute-groups/${createdGroupId}`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      
+
       expect(getResponse.status).toBe(404);
     });
   });

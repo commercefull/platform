@@ -1,6 +1,6 @@
-import { query, queryOne } from "../../../libs/db";
-import { Table, Promotion, PromotionRule, PromotionAction, PromotionUsage } from "../../../libs/db/types";
-import { generateUUID } from "../../../libs/uuid";
+import { query, queryOne } from '../../../libs/db';
+import { Table, Promotion, PromotionRule, PromotionAction, PromotionUsage } from '../../../libs/db/types';
+import { generateUUID } from '../../../libs/uuid';
 
 // Table name constants
 const PROMOTION_TABLE = Table.Promotion;
@@ -21,7 +21,17 @@ export type PromotionScope = 'cart' | 'product' | 'category' | 'merchant' | 'shi
 /**
  * Rule condition types
  */
-export type RuleCondition = 'cartTotal' | 'itemQuantity' | 'productCategory' | 'customerGroup' | 'firstOrder' | 'dateRange' | 'timeOfDay' | 'dayOfWeek' | 'shippingMethod' | 'paymentMethod';
+export type RuleCondition =
+  | 'cartTotal'
+  | 'itemQuantity'
+  | 'productCategory'
+  | 'customerGroup'
+  | 'firstOrder'
+  | 'dateRange'
+  | 'timeOfDay'
+  | 'dayOfWeek'
+  | 'shippingMethod'
+  | 'paymentMethod';
 
 /**
  * Action types
@@ -88,10 +98,7 @@ export class PromotionRepo {
    * Find a promotion by ID
    */
   async findById(id: string): Promise<Promotion | null> {
-    return await queryOne<Promotion>(
-      `SELECT * FROM "${PROMOTION_TABLE}" WHERE "promotionId" = $1`,
-      [id]
-    );
+    return await queryOne<Promotion>(`SELECT * FROM "${PROMOTION_TABLE}" WHERE "promotionId" = $1`, [id]);
   }
 
   /**
@@ -112,15 +119,15 @@ export class PromotionRepo {
       offset?: number;
       orderBy?: string;
       direction?: 'ASC' | 'DESC';
-    } = {}
+    } = {},
   ): Promise<Promotion[]> {
     const { status, scope, merchantId, isActive, isGlobal, startBefore, endAfter } = filters;
     const { limit = 50, offset = 0, orderBy = 'priority', direction = 'DESC' } = options;
-    
+
     let sql = `SELECT * FROM "${PROMOTION_TABLE}" WHERE 1=1`;
     const params: any[] = [];
     let paramIndex = 1;
-    
+
     if (status) {
       if (Array.isArray(status)) {
         sql += ` AND "status" IN (${status.map((_, i) => `$${paramIndex + i}`).join(', ')})`;
@@ -132,7 +139,7 @@ export class PromotionRepo {
         paramIndex++;
       }
     }
-    
+
     if (scope) {
       if (Array.isArray(scope)) {
         sql += ` AND "scope" IN (${scope.map((_, i) => `$${paramIndex + i}`).join(', ')})`;
@@ -144,52 +151,49 @@ export class PromotionRepo {
         paramIndex++;
       }
     }
-    
+
     if (merchantId) {
       sql += ` AND "merchantId" = $${paramIndex}`;
       params.push(merchantId);
       paramIndex++;
     }
-    
+
     if (isActive !== undefined) {
       sql += ` AND "isActive" = $${paramIndex}`;
       params.push(isActive);
       paramIndex++;
     }
-    
+
     if (isGlobal !== undefined) {
       sql += ` AND "isGlobal" = $${paramIndex}`;
       params.push(isGlobal);
       paramIndex++;
     }
-    
+
     if (startBefore) {
       sql += ` AND "startDate" <= $${paramIndex}`;
       params.push(startBefore);
       paramIndex++;
     }
-    
+
     if (endAfter) {
       sql += ` AND ("endDate" IS NULL OR "endDate" >= $${paramIndex})`;
       params.push(endAfter);
       paramIndex++;
     }
-    
+
     sql += ` ORDER BY "${orderBy}" ${direction} LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
     params.push(limit, offset);
-    
-    return await query<Promotion[]>(sql, params) || [];
+
+    return (await query<Promotion[]>(sql, params)) || [];
   }
-  
+
   /**
    * Find active promotions
    */
-  async findActive(
-    scope?: PromotionScope | PromotionScope[],
-    merchantId?: string
-  ): Promise<Promotion[]> {
+  async findActive(scope?: PromotionScope | PromotionScope[], merchantId?: string): Promise<Promotion[]> {
     const now = new Date();
-    
+
     return this.findAll(
       {
         status: 'active',
@@ -197,24 +201,24 @@ export class PromotionRepo {
         merchantId,
         isActive: true,
         startBefore: now,
-        endAfter: now
+        endAfter: now,
       },
       {
         orderBy: 'priority',
-        direction: 'DESC'
-      }
+        direction: 'DESC',
+      },
     );
   }
-  
+
   /**
    * Create a new promotion
    */
   async create(input: CreatePromotionInput): Promise<Promotion> {
     const now = new Date();
-    
+
     // Begin transaction
     await query('BEGIN');
-    
+
     try {
       const promotion = await queryOne<Promotion>(
         `INSERT INTO "${PROMOTION_TABLE}" (
@@ -246,28 +250,28 @@ export class PromotionRepo {
           input.eligibleCustomerGroups ? JSON.stringify(input.eligibleCustomerGroups) : null,
           input.excludedCustomerGroups ? JSON.stringify(input.excludedCustomerGroups) : null,
           now,
-          now
-        ]
+          now,
+        ],
       );
-      
+
       if (!promotion) {
         throw new Error('Failed to create promotion');
       }
-      
+
       // Insert rules if provided
       if (input.rules && input.rules.length > 0) {
         for (const rule of input.rules) {
           await this.createRule(promotion.promotionId, rule);
         }
       }
-      
+
       // Insert actions if provided
       if (input.actions && input.actions.length > 0) {
         for (const action of input.actions) {
           await this.createAction(promotion.promotionId, action);
         }
       }
-      
+
       await query('COMMIT');
       return promotion;
     } catch (error) {
@@ -275,7 +279,7 @@ export class PromotionRepo {
       throw error;
     }
   }
-  
+
   /**
    * Update an existing promotion
    */
@@ -283,14 +287,27 @@ export class PromotionRepo {
     const updateFields: string[] = [];
     const params: any[] = [id];
     let paramIndex = 2;
-    
+
     const allowedFields = [
-      'name', 'description', 'status', 'scope', 'priority',
-      'startDate', 'endDate', 'isActive', 'isExclusive', 'maxUsage',
-      'maxUsagePerCustomer', 'minOrderAmount', 'maxDiscountAmount',
-      'merchantId', 'isGlobal', 'eligibleCustomerGroups', 'excludedCustomerGroups'
+      'name',
+      'description',
+      'status',
+      'scope',
+      'priority',
+      'startDate',
+      'endDate',
+      'isActive',
+      'isExclusive',
+      'maxUsage',
+      'maxUsagePerCustomer',
+      'minOrderAmount',
+      'maxDiscountAmount',
+      'merchantId',
+      'isGlobal',
+      'eligibleCustomerGroups',
+      'excludedCustomerGroups',
     ];
-    
+
     for (const [key, value] of Object.entries(input)) {
       if (allowedFields.includes(key) && value !== undefined) {
         updateFields.push(`"${key}" = $${paramIndex}`);
@@ -302,10 +319,10 @@ export class PromotionRepo {
         paramIndex++;
       }
     }
-    
+
     updateFields.push(`"updatedAt" = $${paramIndex}`);
     params.push(new Date());
-    
+
     if (updateFields.length === 1) {
       const promotion = await this.findById(id);
       if (!promotion) {
@@ -313,36 +330,36 @@ export class PromotionRepo {
       }
       return promotion;
     }
-    
+
     const promotion = await queryOne<Promotion>(
       `UPDATE "${PROMOTION_TABLE}" SET ${updateFields.join(', ')} 
        WHERE "promotionId" = $1 RETURNING *`,
-      params
+      params,
     );
-    
+
     if (!promotion) {
       throw new Error(`Promotion with id ${id} not found`);
     }
-    
+
     return promotion;
   }
-  
+
   /**
    * Delete a promotion
    */
   async delete(id: string): Promise<boolean> {
     await query('BEGIN');
-    
+
     try {
       await query(`DELETE FROM "${PROMOTION_RULE_TABLE}" WHERE "promotionId" = $1`, [id]);
       await query(`DELETE FROM "${PROMOTION_ACTION_TABLE}" WHERE "promotionId" = $1`, [id]);
       await query(`DELETE FROM "${PROMOTION_USAGE_TABLE}" WHERE "promotionId" = $1`, [id]);
-      
+
       const result = await queryOne<{ promotionId: string }>(
         `DELETE FROM "${PROMOTION_TABLE}" WHERE "promotionId" = $1 RETURNING "promotionId"`,
-        [id]
+        [id],
       );
-      
+
       await query('COMMIT');
       return !!result;
     } catch (error) {
@@ -350,67 +367,55 @@ export class PromotionRepo {
       throw error;
     }
   }
-  
+
   // RULE METHODS
-  
+
   /**
    * Create a promotion rule
    */
   async createRule(promotionId: string, input: CreateRuleInput): Promise<PromotionRule> {
     const now = new Date();
-    
+
     const rule = await queryOne<PromotionRule>(
       `INSERT INTO "${PROMOTION_RULE_TABLE}" (
         "promotionId", "name", "condition", "operator", "value", "isActive", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
-      [
-        promotionId,
-        input.name || null,
-        input.condition,
-        input.operator,
-        JSON.stringify(input.value),
-        input.isActive !== false,
-        now,
-        now
-      ]
+      [promotionId, input.name || null, input.condition, input.operator, JSON.stringify(input.value), input.isActive !== false, now, now],
     );
-    
+
     if (!rule) {
       throw new Error('Failed to create promotion rule');
     }
-    
+
     return rule;
   }
-  
+
   /**
    * Find rules by promotion ID
    */
   async findRulesByPromotionId(promotionId: string): Promise<PromotionRule[]> {
-    return await query<PromotionRule[]>(
-      `SELECT * FROM "${PROMOTION_RULE_TABLE}" WHERE "promotionId" = $1`,
-      [promotionId]
-    ) || [];
+    return (await query<PromotionRule[]>(`SELECT * FROM "${PROMOTION_RULE_TABLE}" WHERE "promotionId" = $1`, [promotionId])) || [];
   }
-  
+
   /**
    * Delete a rule
    */
   async deleteRule(ruleId: string): Promise<boolean> {
     const result = await queryOne<{ promotionRuleId: string }>(
       `DELETE FROM "${PROMOTION_RULE_TABLE}" WHERE "promotionRuleId" = $1 RETURNING "promotionRuleId"`,
-      [ruleId]
+      [ruleId],
     );
     return !!result;
   }
-  
+
   // ACTION METHODS
-  
+
   /**
    * Create a promotion action
    */
   async createAction(promotionId: string, input: CreateActionInput): Promise<PromotionAction> {
     const now = new Date();
-    
+
     const action = await queryOne<PromotionAction>(
       `INSERT INTO "${PROMOTION_ACTION_TABLE}" (
         "promotionId", "type", "value", "targetType", "targetId", "metadata", "createdAt", "updatedAt"
@@ -423,71 +428,68 @@ export class PromotionRepo {
         input.targetId || null,
         input.metadata ? JSON.stringify(input.metadata) : null,
         now,
-        now
-      ]
+        now,
+      ],
     );
-    
+
     if (!action) {
       throw new Error('Failed to create promotion action');
     }
-    
+
     return action;
   }
-  
+
   /**
    * Find actions by promotion ID
    */
   async findActionsByPromotionId(promotionId: string): Promise<PromotionAction[]> {
-    return await query<PromotionAction[]>(
-      `SELECT * FROM "${PROMOTION_ACTION_TABLE}" WHERE "promotionId" = $1`,
-      [promotionId]
-    ) || [];
+    return (await query<PromotionAction[]>(`SELECT * FROM "${PROMOTION_ACTION_TABLE}" WHERE "promotionId" = $1`, [promotionId])) || [];
   }
-  
+
   /**
    * Delete an action
    */
   async deleteAction(actionId: string): Promise<boolean> {
     const result = await queryOne<{ promotionActionId: string }>(
       `DELETE FROM "${PROMOTION_ACTION_TABLE}" WHERE "promotionActionId" = $1 RETURNING "promotionActionId"`,
-      [actionId]
+      [actionId],
     );
     return !!result;
   }
-  
+
   // USAGE METHODS
-  
+
   /**
    * Record promotion usage
    */
   async recordUsage(
-    promotionId: string, 
-    orderId: string, 
+    promotionId: string,
+    orderId: string,
     customerId?: string,
     discountAmount: number = 0,
-    currencyCode: string = 'USD'
+    currencyCode: string = 'USD',
   ): Promise<PromotionUsage> {
     const now = new Date();
-    
+
     await query('BEGIN');
-    
+
     try {
       const usage = await queryOne<PromotionUsage>(
         `INSERT INTO "${PROMOTION_USAGE_TABLE}" (
           "promotionId", "orderId", "customerId", "discountAmount", "currencyCode", "usedAt", "createdAt", "updatedAt"
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
-        [promotionId, orderId, customerId || null, discountAmount, currencyCode, now, now, now]
+        [promotionId, orderId, customerId || null, discountAmount, currencyCode, now, now, now],
       );
-      
+
       if (!usage) {
         throw new Error('Failed to record promotion usage');
       }
-      
-      await query(
-        `UPDATE "${PROMOTION_TABLE}" SET "usageCount" = "usageCount" + 1, "updatedAt" = $2 WHERE "promotionId" = $1`,
-        [promotionId, now]
-      );
-      
+
+      await query(`UPDATE "${PROMOTION_TABLE}" SET "usageCount" = "usageCount" + 1, "updatedAt" = $2 WHERE "promotionId" = $1`, [
+        promotionId,
+        now,
+      ]);
+
       await query('COMMIT');
       return usage;
     } catch (error) {
@@ -495,30 +497,30 @@ export class PromotionRepo {
       throw error;
     }
   }
-  
+
   /**
    * Get usage records for a promotion
    */
   async getUsage(promotionId: string): Promise<PromotionUsage[]> {
-    return await query<PromotionUsage[]>(
-      `SELECT * FROM "${PROMOTION_USAGE_TABLE}" WHERE "promotionId" = $1 ORDER BY "usedAt" DESC`,
-      [promotionId]
-    ) || [];
+    return (
+      (await query<PromotionUsage[]>(`SELECT * FROM "${PROMOTION_USAGE_TABLE}" WHERE "promotionId" = $1 ORDER BY "usedAt" DESC`, [
+        promotionId,
+      ])) || []
+    );
   }
-  
+
   /**
    * Get usage count for a promotion
    */
   async getUsageCount(promotionId: string): Promise<number> {
-    const result = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM "${PROMOTION_USAGE_TABLE}" WHERE "promotionId" = $1`,
-      [promotionId]
-    );
+    const result = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "${PROMOTION_USAGE_TABLE}" WHERE "promotionId" = $1`, [
+      promotionId,
+    ]);
     return result ? parseInt(result.count) : 0;
   }
-  
+
   // COMPOSITE METHODS
-  
+
   /**
    * Get promotion with rules and actions
    */
@@ -528,57 +530,50 @@ export class PromotionRepo {
     actions: PromotionAction[];
   } | null> {
     const promotion = await this.findById(id);
-    
+
     if (!promotion) {
       return null;
     }
-    
-    const [rules, actions] = await Promise.all([
-      this.findRulesByPromotionId(id),
-      this.findActionsByPromotionId(id)
-    ]);
-    
+
+    const [rules, actions] = await Promise.all([this.findRulesByPromotionId(id), this.findActionsByPromotionId(id)]);
+
     return { promotion, rules, actions };
   }
-  
+
   /**
    * Validate if a promotion can be applied
    */
-  async isValidForOrder(
-    promotionId: string,
-    orderTotal: number,
-    customerId?: string
-  ): Promise<boolean> {
+  async isValidForOrder(promotionId: string, orderTotal: number, customerId?: string): Promise<boolean> {
     const details = await this.getWithDetails(promotionId);
-    
+
     if (!details) return false;
-    
+
     const { promotion, rules } = details;
-    
+
     // Check basic validity
     if (!promotion.isActive || promotion.status !== 'active') return false;
-    
+
     const now = new Date();
     if (promotion.startDate > now) return false;
     if (promotion.endDate && promotion.endDate < now) return false;
-    
+
     // Check usage limits
     if (promotion.maxUsage && promotion.usageCount >= promotion.maxUsage) return false;
-    
+
     // Check minimum order amount
     if (promotion.minOrderAmount && orderTotal < Number(promotion.minOrderAmount)) return false;
-    
+
     // Check per-customer limit if applicable
     if (customerId && promotion.maxUsagePerCustomer) {
       const customerUsage = await queryOne<{ count: string }>(
         `SELECT COUNT(*) as count FROM "${PROMOTION_USAGE_TABLE}" WHERE "promotionId" = $1 AND "customerId" = $2`,
-        [promotionId, customerId]
+        [promotionId, customerId],
       );
       if (customerUsage && parseInt(customerUsage.count) >= promotion.maxUsagePerCustomer) {
         return false;
       }
     }
-    
+
     // All basic checks passed
     return true;
   }

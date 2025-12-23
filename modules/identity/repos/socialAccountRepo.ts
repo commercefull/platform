@@ -1,17 +1,13 @@
 /**
  * Social Account Repository
- * 
+ *
  * Handles persistence for OAuth/social login accounts.
  */
 
 import { query, queryOne } from '../../../libs/db';
 import { generateUUID } from '../../../libs/uuid';
 import { IdentitySocialAccount } from '../../../libs/db/types';
-import { 
-  SocialAccount, 
-  SocialProvider, 
-  UserType
-} from '../domain/entities/SocialAccount';
+import { SocialAccount, SocialProvider, UserType } from '../domain/entities/SocialAccount';
 
 // ============================================================================
 // Types
@@ -69,7 +65,7 @@ export class SocialAccountRepo {
       lastUsedAt: record.lastUsedAt ? new Date(record.lastUsedAt) : undefined,
       lastLoginIp: record.lastLoginIp || undefined,
       createdAt: new Date(record.createdAt),
-      updatedAt: new Date(record.updatedAt)
+      updatedAt: new Date(record.updatedAt),
     });
   }
 
@@ -113,7 +109,7 @@ export class SocialAccountRepo {
       now,
       input.lastLoginIp || null,
       now,
-      now
+      now,
     ]);
 
     if (!record) {
@@ -135,10 +131,7 @@ export class SocialAccountRepo {
   /**
    * Find by provider and provider user ID
    */
-  async findByProviderUserId(
-    provider: SocialProvider, 
-    providerUserId: string
-  ): Promise<SocialAccount | null> {
+  async findByProviderUserId(provider: SocialProvider, providerUserId: string): Promise<SocialAccount | null> {
     const sql = `SELECT * FROM "identitySocialAccount" WHERE "provider" = $1 AND "providerUserId" = $2`;
     const record = await queryOne<DbSocialAccount>(sql, [provider, providerUserId]);
     return record ? this.toEntity(record) : null;
@@ -147,10 +140,7 @@ export class SocialAccountRepo {
   /**
    * Find by provider email
    */
-  async findByProviderEmail(
-    provider: SocialProvider, 
-    email: string
-  ): Promise<SocialAccount | null> {
+  async findByProviderEmail(provider: SocialProvider, email: string): Promise<SocialAccount | null> {
     const sql = `SELECT * FROM "identitySocialAccount" WHERE "provider" = $1 AND "providerEmail" = $2`;
     const record = await queryOne<DbSocialAccount>(sql, [provider, email]);
     return record ? this.toEntity(record) : null;
@@ -168,11 +158,7 @@ export class SocialAccountRepo {
   /**
    * Find a specific provider account for a user
    */
-  async findByUserAndProvider(
-    userId: string, 
-    userType: UserType, 
-    provider: SocialProvider
-  ): Promise<SocialAccount | null> {
+  async findByUserAndProvider(userId: string, userType: UserType, provider: SocialProvider): Promise<SocialAccount | null> {
     const sql = `SELECT * FROM "identitySocialAccount" WHERE "userId" = $1 AND "userType" = $2 AND "provider" = $3`;
     const record = await queryOne<DbSocialAccount>(sql, [userId, userType, provider]);
     return record ? this.toEntity(record) : null;
@@ -184,7 +170,7 @@ export class SocialAccountRepo {
   async update(socialAccountId: string, updates: Partial<CreateSocialAccountInput>): Promise<SocialAccount | null> {
     const updateData: Record<string, any> = {
       ...updates,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     if (updates.scopes) {
@@ -236,7 +222,7 @@ export class SocialAccountRepo {
       updates.scopes ? JSON.stringify(updates.scopes) : null,
       updates.providerData ? JSON.stringify(updates.providerData) : null,
       updates.lastLoginIp || null,
-      new Date()
+      new Date(),
     ]);
 
     return record ? this.toEntity(record) : null;
@@ -245,12 +231,7 @@ export class SocialAccountRepo {
   /**
    * Update tokens for a social account
    */
-  async updateTokens(
-    socialAccountId: string,
-    accessToken: string,
-    refreshToken?: string,
-    tokenExpiresAt?: Date
-  ): Promise<void> {
+  async updateTokens(socialAccountId: string, accessToken: string, refreshToken?: string, tokenExpiresAt?: Date): Promise<void> {
     const sql = `
       UPDATE "identitySocialAccount" 
       SET "accessToken" = $2, 

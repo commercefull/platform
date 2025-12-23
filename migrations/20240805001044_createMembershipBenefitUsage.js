@@ -12,7 +12,14 @@ exports.up = function (knex) {
     t.uuid('benefitId').notNullable().references('membershipBenefitId').inTable('membershipBenefit').onDelete('CASCADE');
     t.timestamp('usageDate').notNullable().defaultTo(knex.fn.now());
     t.decimal('usageValue', 10, 2).notNullable().defaultTo(1);
-    t.enum('usageType', ['discountApplied', 'freeShipping', 'contentAccess', 'giftRedeemed', 'pointsMultiplier', 'earlyAccess']).notNullable();
+    t.enum('usageType', [
+      'discountApplied',
+      'freeShipping',
+      'contentAccess',
+      'giftRedeemed',
+      'pointsMultiplier',
+      'earlyAccess',
+    ]).notNullable();
     t.string('relatedEntityType', 50);
     t.uuid('relatedEntityId');
     t.jsonb('details');

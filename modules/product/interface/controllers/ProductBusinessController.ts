@@ -60,7 +60,7 @@ export const listProducts = async (req: Request, res: Response): Promise<void> =
       parseInt(limit as string) || 50,
       parseInt(offset as string) || 0,
       (orderBy as string) || 'createdAt',
-      (orderDirection as 'asc' | 'desc') || 'desc'
+      (orderDirection as 'asc' | 'desc') || 'desc',
     );
 
     const useCase = new ListProductsUseCase(ProductRepo);
@@ -69,7 +69,7 @@ export const listProducts = async (req: Request, res: Response): Promise<void> =
     respond(req, res, result, 200, 'admin/product/list');
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     respondError(req, res, error.message || 'Failed to list products', 500, 'admin/product/error');
   }
 };
@@ -94,7 +94,7 @@ export const getProduct = async (req: Request, res: Response): Promise<void> => 
     respond(req, res, product, 200, 'admin/product/detail');
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     respondError(req, res, error.message || 'Failed to get product', 500, 'admin/product/error');
   }
 };
@@ -107,10 +107,35 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
   try {
     const merchantId = (req as any).user?.merchantId;
     const {
-      name, description, productTypeId, sku, slug, shortDescription, categoryId, brandId,
-      basePrice, salePrice, cost, currencyCode, weight, weightUnit, length, width, height,
-      dimensionUnit, isFeatured, isVirtual, isDownloadable, isSubscription, isTaxable,
-      taxClass, metaTitle, metaDescription, metaKeywords, tags, metadata
+      name,
+      description,
+      productTypeId,
+      sku,
+      slug,
+      shortDescription,
+      categoryId,
+      brandId,
+      basePrice,
+      salePrice,
+      cost,
+      currencyCode,
+      weight,
+      weightUnit,
+      length,
+      width,
+      height,
+      dimensionUnit,
+      isFeatured,
+      isVirtual,
+      isDownloadable,
+      isSubscription,
+      isTaxable,
+      taxClass,
+      metaTitle,
+      metaDescription,
+      metaKeywords,
+      tags,
+      metadata,
     } = req.body;
 
     if (!name?.trim()) {
@@ -123,10 +148,36 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
     }
 
     const command = new CreateProductCommand(
-      name, description || '', productTypeId, sku, slug, shortDescription, categoryId, brandId,
-      merchantId, basePrice, salePrice, cost, currencyCode, weight, weightUnit, length, width,
-      height, dimensionUnit, isFeatured, isVirtual, isDownloadable, isSubscription, isTaxable,
-      taxClass, metaTitle, metaDescription, metaKeywords, tags, metadata
+      name,
+      description || '',
+      productTypeId,
+      sku,
+      slug,
+      shortDescription,
+      categoryId,
+      brandId,
+      merchantId,
+      basePrice,
+      salePrice,
+      cost,
+      currencyCode,
+      weight,
+      weightUnit,
+      length,
+      width,
+      height,
+      dimensionUnit,
+      isFeatured,
+      isVirtual,
+      isDownloadable,
+      isSubscription,
+      isTaxable,
+      taxClass,
+      metaTitle,
+      metaDescription,
+      metaKeywords,
+      tags,
+      metadata,
     );
 
     const useCase = new CreateProductUseCase(ProductRepo);
@@ -135,7 +186,7 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
     respond(req, res, product, 201, 'admin/product/created');
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     respondError(req, res, error.message || 'Failed to create product', 500, 'admin/product/error');
   }
 };
@@ -156,7 +207,7 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
     respond(req, res, result, 200, 'admin/product/updated');
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     if (error.message.includes('not found')) {
       respondError(req, res, error.message, 404, 'admin/product/error');
       return;
@@ -192,7 +243,7 @@ export const updateProductStatus = async (req: Request, res: Response): Promise<
     respond(req, res, { productId, status: product.status, updatedAt: product.updatedAt.toISOString() }, 200, 'admin/product/updated');
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     respondError(req, res, error.message || 'Failed to update product status', 500, 'admin/product/error');
   }
 };
@@ -221,10 +272,16 @@ export const updateProductVisibility = async (req: Request, res: Response): Prom
     product.updateVisibility(visibility);
     await ProductRepo.save(product);
 
-    respond(req, res, { productId, visibility: product.visibility, updatedAt: product.updatedAt.toISOString() }, 200, 'admin/product/updated');
+    respond(
+      req,
+      res,
+      { productId, visibility: product.visibility, updatedAt: product.updatedAt.toISOString() },
+      200,
+      'admin/product/updated',
+    );
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     respondError(req, res, error.message || 'Failed to update product visibility', 500, 'admin/product/error');
   }
 };
@@ -253,7 +310,7 @@ export const deleteProduct = async (req: Request, res: Response): Promise<void> 
     respond(req, res, { productId, deleted: true, permanent: permanent === 'true' }, 200, 'admin/product/deleted');
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     respondError(req, res, error.message || 'Failed to delete product', 500, 'admin/product/error');
   }
 };
@@ -275,10 +332,16 @@ export const publishProduct = async (req: Request, res: Response): Promise<void>
     product.publish();
     await ProductRepo.save(product);
 
-    respond(req, res, { productId, status: product.status, visibility: product.visibility, publishedAt: product.publishedAt?.toISOString() }, 200, 'admin/product/published');
+    respond(
+      req,
+      res,
+      { productId, status: product.status, visibility: product.visibility, publishedAt: product.publishedAt?.toISOString() },
+      200,
+      'admin/product/published',
+    );
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     respondError(req, res, error.message || 'Failed to publish product', 500, 'admin/product/error');
   }
 };
@@ -300,10 +363,16 @@ export const unpublishProduct = async (req: Request, res: Response): Promise<voi
     product.unpublish();
     await ProductRepo.save(product);
 
-    respond(req, res, { productId, visibility: product.visibility, updatedAt: product.updatedAt.toISOString() }, 200, 'admin/product/unpublished');
+    respond(
+      req,
+      res,
+      { productId, visibility: product.visibility, updatedAt: product.updatedAt.toISOString() },
+      200,
+      'admin/product/unpublished',
+    );
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     respondError(req, res, error.message || 'Failed to unpublish product', 500, 'admin/product/error');
   }
 };

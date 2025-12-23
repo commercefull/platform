@@ -4,7 +4,7 @@ import axios, { AxiosInstance } from 'axios';
 export const SEEDED_CARRIER_IDS = {
   UPS: '01936000-0000-7000-8000-000000000001',
   FEDEX: '01936000-0000-7000-8000-000000000002',
-  USPS: '01936000-0000-7000-8000-000000000003'
+  USPS: '01936000-0000-7000-8000-000000000003',
 };
 
 export const SEEDED_METHOD_IDS = {
@@ -13,32 +13,32 @@ export const SEEDED_METHOD_IDS = {
   FEDEX_GROUND: '01936001-0000-7000-8000-000000000003',
   FEDEX_OVERNIGHT: '01936001-0000-7000-8000-000000000004',
   USPS_PRIORITY: '01936001-0000-7000-8000-000000000005',
-  FREE_SHIPPING: '01936001-0000-7000-8000-000000000006'
+  FREE_SHIPPING: '01936001-0000-7000-8000-000000000006',
 };
 
 export const SEEDED_ZONE_IDS = {
   US_DOMESTIC: '01936002-0000-7000-8000-000000000001',
   US_WEST: '01936002-0000-7000-8000-000000000002',
-  INTERNATIONAL: '01936002-0000-7000-8000-000000000003'
+  INTERNATIONAL: '01936002-0000-7000-8000-000000000003',
 };
 
 export const SEEDED_RATE_IDS = {
   UPS_GROUND_US: '01936003-0000-7000-8000-000000000001',
   UPS_EXPRESS_US: '01936003-0000-7000-8000-000000000002',
   FEDEX_GROUND_US: '01936003-0000-7000-8000-000000000003',
-  FREE_SHIPPING_US: '01936003-0000-7000-8000-000000000004'
+  FREE_SHIPPING_US: '01936003-0000-7000-8000-000000000004',
 };
 
 export const SEEDED_PACKAGING_IDS = {
   SMALL_BOX: '01936004-0000-7000-8000-000000000001',
   MEDIUM_BOX: '01936004-0000-7000-8000-000000000002',
   LARGE_BOX: '01936004-0000-7000-8000-000000000003',
-  ENVELOPE: '01936004-0000-7000-8000-000000000004'
+  ENVELOPE: '01936004-0000-7000-8000-000000000004',
 };
 
 const adminCredentials = {
   email: 'merchant@example.com',
-  password: 'password123'
+  password: 'password123',
 };
 
 export function createTestClient(): AxiosInstance {
@@ -46,10 +46,10 @@ export function createTestClient(): AxiosInstance {
     baseURL: process.env.API_URL || 'http://localhost:3000',
     validateStatus: () => true,
     headers: {
-      'Accept': 'application/json',
+      Accept: 'application/json',
       'Content-Type': 'application/json',
-      'X-Test-Request': 'true'
-    }
+      'X-Test-Request': 'true',
+    },
   });
 }
 
@@ -75,7 +75,7 @@ export function createTestCarrier(overrides: Partial<any> = {}) {
     isActive: true,
     hasApiIntegration: false,
     requiresContract: false,
-    ...overrides
+    ...overrides,
   };
 }
 
@@ -93,7 +93,7 @@ export function createTestMethod(carrierId: string, overrides: Partial<any> = {}
     allowFreeShipping: true,
     handlingDays: 1,
     priority: 10,
-    ...overrides
+    ...overrides,
   };
 }
 
@@ -106,7 +106,7 @@ export function createTestZone(overrides: Partial<any> = {}) {
     priority: 0,
     locationType: 'country',
     locations: ['US'],
-    ...overrides
+    ...overrides,
   };
 }
 
@@ -121,19 +121,19 @@ export function createTestRate(zoneId: string, methodId: string, overrides: Part
     currency: 'USD',
     taxable: true,
     priority: 0,
-    ...overrides
+    ...overrides,
   };
 }
 
 export async function cleanupShippingTests(
   client: AxiosInstance,
   adminToken: string,
-  resources: { 
-    carrierIds?: string[]; 
+  resources: {
+    carrierIds?: string[];
     methodIds?: string[];
     zoneIds?: string[];
     rateIds?: string[];
-  } = {}
+  } = {},
 ) {
   const headers = { Authorization: `Bearer ${adminToken}` };
 

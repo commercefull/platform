@@ -25,7 +25,7 @@ export class SetShippingAddressCommand {
     public readonly company?: string,
     public readonly addressLine2?: string,
     public readonly region?: string,
-    public readonly phone?: string
+    public readonly phone?: string,
   ) {}
 }
 
@@ -48,7 +48,7 @@ export class SetShippingAddressUseCase {
       addressLine1: command.addressLine1,
       city: command.city,
       postalCode: command.postalCode,
-      country: command.country
+      country: command.country,
     });
 
     if (!validation.valid) {
@@ -65,16 +65,16 @@ export class SetShippingAddressUseCase {
       region: command.region,
       postalCode: command.postalCode,
       country: command.country,
-      phone: command.phone
+      phone: command.phone,
     });
 
     session.setShippingAddress(address);
 
-    const taxAmount = await this.checkoutRepository.calculateTax(
-      session.subtotal.amount,
-      session.shippingAmount.amount,
-      { country: command.country, region: command.region, postalCode: command.postalCode }
-    );
+    const taxAmount = await this.checkoutRepository.calculateTax(session.subtotal.amount, session.shippingAmount.amount, {
+      country: command.country,
+      region: command.region,
+      postalCode: command.postalCode,
+    });
     session.updateAmounts(session.subtotal, Money.create(taxAmount, session.subtotal.currency));
 
     await this.checkoutRepository.save(session);
@@ -83,7 +83,7 @@ export class SetShippingAddressUseCase {
       checkoutId: session.id,
       field: 'shippingAddress',
       country: command.country,
-      postalCode: command.postalCode
+      postalCode: command.postalCode,
     });
 
     return mapCheckoutToResponse(session);

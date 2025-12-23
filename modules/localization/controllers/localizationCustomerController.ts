@@ -27,13 +27,13 @@ export const getActiveLocales = async (_req: Request, res: Response): Promise<vo
       textDirection: locale.textDirection,
       dateFormat: locale.dateFormat,
       timeFormat: locale.timeFormat,
-      timeZone: locale.timeZone
+      timeZone: locale.timeZone,
     }));
 
     successResponse(res, publicLocales);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to fetch locales');
   }
 };
@@ -52,13 +52,13 @@ export const getActiveCountries = async (_req: Request, res: Response): Promise<
       name: country.name,
       alpha3Code: country.alpha3Code,
       flagIcon: country.flagIcon,
-      region: country.region
+      region: country.region,
     }));
 
     successResponse(res, publicCountries);
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to fetch countries');
   }
 };
@@ -71,13 +71,13 @@ export const detectLocale = async (req: Request, res: Response): Promise<void> =
   try {
     // Get Accept-Language header
     const acceptLanguage = req.headers['accept-language'] || '';
-    
+
     // Parse the Accept-Language header to get preferred language codes
     const preferredLanguages = parseAcceptLanguage(acceptLanguage);
-    
+
     // Try to find a matching active locale
     let matchedLocale = null;
-    
+
     for (const lang of preferredLanguages) {
       // Try exact match first (e.g., "en-US")
       const exactMatch = await localeRepo.findByCode(lang.code);
@@ -85,7 +85,7 @@ export const detectLocale = async (req: Request, res: Response): Promise<void> =
         matchedLocale = exactMatch;
         break;
       }
-      
+
       // Try language-only match (e.g., "en" from "en-US")
       if (lang.language) {
         const langMatch = await findLocaleByLanguage(lang.language);
@@ -95,12 +95,12 @@ export const detectLocale = async (req: Request, res: Response): Promise<void> =
         }
       }
     }
-    
+
     // Fallback to default locale
     if (!matchedLocale) {
       matchedLocale = await localeRepo.findDefault();
     }
-    
+
     if (!matchedLocale) {
       // Return a basic fallback if no locale is configured
       successResponse(res, {
@@ -109,13 +109,13 @@ export const detectLocale = async (req: Request, res: Response): Promise<void> =
           code: 'en-US',
           name: 'English (US)',
           language: 'en',
-          textDirection: 'ltr'
+          textDirection: 'ltr',
         },
-        source: 'fallback'
+        source: 'fallback',
       });
       return;
     }
-    
+
     successResponse(res, {
       detected: true,
       locale: {
@@ -126,13 +126,13 @@ export const detectLocale = async (req: Request, res: Response): Promise<void> =
         textDirection: matchedLocale.textDirection,
         dateFormat: matchedLocale.dateFormat,
         timeFormat: matchedLocale.timeFormat,
-        timeZone: matchedLocale.timeZone
+        timeZone: matchedLocale.timeZone,
       },
-      source: preferredLanguages.length > 0 ? 'accept-language' : 'default'
+      source: preferredLanguages.length > 0 ? 'accept-language' : 'default',
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to detect locale');
   }
 };
@@ -166,11 +166,11 @@ export const getLocaleByCode = async (req: Request, res: Response): Promise<void
       textDirection: locale.textDirection,
       dateFormat: locale.dateFormat,
       timeFormat: locale.timeFormat,
-      timeZone: locale.timeZone
+      timeZone: locale.timeZone,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to fetch locale');
   }
 };
@@ -201,11 +201,11 @@ export const getCountryByCode = async (req: Request, res: Response): Promise<voi
       alpha3Code: country.alpha3Code,
       numericCode: country.numericCode,
       flagIcon: country.flagIcon,
-      region: country.region
+      region: country.region,
     });
   } catch (error: any) {
     logger.error('Error:', error);
-    
+
     errorResponse(res, 'Failed to fetch country');
   }
 };
@@ -233,7 +233,7 @@ function parseAcceptLanguage(header: string): ParsedLanguage[] {
   header.split(',').forEach(tag => {
     const parts = tag.trim().split(';');
     const locale = parts[0].trim();
-    
+
     // Parse quality value (default 1.0)
     let quality = 1.0;
     if (parts[1]) {
@@ -249,7 +249,7 @@ function parseAcceptLanguage(header: string): ParsedLanguage[] {
         code: locale,
         language,
         country,
-        quality
+        quality,
       });
     }
   });

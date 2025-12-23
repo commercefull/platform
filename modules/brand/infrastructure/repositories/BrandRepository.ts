@@ -5,22 +5,14 @@
 
 import { query, queryOne } from '../../../../libs/db';
 import { Brand } from '../../domain/entities/Brand';
-import {
-  IBrandRepository,
-  BrandFilters,
-  PaginationOptions,
-  PaginatedResult,
-} from '../../domain/repositories/BrandRepository';
+import { IBrandRepository, BrandFilters, PaginationOptions, PaginatedResult } from '../../domain/repositories/BrandRepository';
 
 export class BrandRepository implements IBrandRepository {
   async save(brand: Brand): Promise<Brand> {
     const props = brand.toPersistence();
     const now = new Date().toISOString();
 
-    const existing = await queryOne<Record<string, any>>(
-      'SELECT "brandId" FROM brand WHERE "brandId" = $1',
-      [props.brandId]
-    );
+    const existing = await queryOne<Record<string, any>>('SELECT "brandId" FROM brand WHERE "brandId" = $1', [props.brandId]);
 
     if (existing) {
       // Update
@@ -53,7 +45,7 @@ export class BrandRepository implements IBrandRepository {
           props.metadata ? JSON.stringify(props.metadata) : null,
           now,
           props.brandId,
-        ]
+        ],
       );
     } else {
       // Insert
@@ -78,7 +70,7 @@ export class BrandRepository implements IBrandRepository {
           props.metadata ? JSON.stringify(props.metadata) : null,
           now,
           now,
-        ]
+        ],
       );
     }
 
@@ -88,29 +80,20 @@ export class BrandRepository implements IBrandRepository {
   }
 
   async findById(brandId: string): Promise<Brand | null> {
-    const row = await queryOne<Record<string, any>>(
-      'SELECT * FROM brand WHERE "brandId" = $1',
-      [brandId]
-    );
+    const row = await queryOne<Record<string, any>>('SELECT * FROM brand WHERE "brandId" = $1', [brandId]);
 
     if (!row) return null;
     return this.mapToBrand(row);
   }
 
   async findBySlug(slug: string): Promise<Brand | null> {
-    const row = await queryOne<Record<string, any>>(
-      'SELECT * FROM brand WHERE slug = $1',
-      [slug]
-    );
+    const row = await queryOne<Record<string, any>>('SELECT * FROM brand WHERE slug = $1', [slug]);
 
     if (!row) return null;
     return this.mapToBrand(row);
   }
 
-  async findAll(
-    filters?: BrandFilters,
-    pagination?: PaginationOptions
-  ): Promise<PaginatedResult<Brand>> {
+  async findAll(filters?: BrandFilters, pagination?: PaginationOptions): Promise<PaginatedResult<Brand>> {
     const page = pagination?.page || 1;
     const limit = pagination?.limit || 20;
     const offset = (page - 1) * limit;
@@ -118,10 +101,7 @@ export class BrandRepository implements IBrandRepository {
     const { whereClause, params } = this.buildWhereClause(filters);
 
     // Get total count
-    const countResult = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM brand ${whereClause}`,
-      params
-    );
+    const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM brand ${whereClause}`, params);
     const total = parseInt(countResult?.count || '0', 10);
 
     // Get paginated data
@@ -129,10 +109,10 @@ export class BrandRepository implements IBrandRepository {
       `SELECT * FROM brand ${whereClause}
        ORDER BY "sortOrder" ASC, name ASC
        LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
-      [...params, limit, offset]
+      [...params, limit, offset],
     );
 
-    const data = (rows || []).map((row) => this.mapToBrand(row));
+    const data = (rows || []).map(row => this.mapToBrand(row));
 
     return {
       data,
@@ -146,17 +126,14 @@ export class BrandRepository implements IBrandRepository {
   async findFeatured(): Promise<Brand[]> {
     const rows = await query<Record<string, any>[]>(
       'SELECT * FROM brand WHERE "isFeatured" = true AND "isActive" = true ORDER BY "sortOrder" ASC',
-      []
+      [],
     );
 
-    return (rows || []).map((row) => this.mapToBrand(row));
+    return (rows || []).map(row => this.mapToBrand(row));
   }
 
   async delete(brandId: string): Promise<boolean> {
-    const result = await query<{ rowCount?: number }>(
-      'DELETE FROM brand WHERE "brandId" = $1',
-      [brandId]
-    );
+    const result = await query<{ rowCount?: number }>('DELETE FROM brand WHERE "brandId" = $1', [brandId]);
 
     return (result as any)?.rowCount > 0;
   }
@@ -164,10 +141,7 @@ export class BrandRepository implements IBrandRepository {
   async count(filters?: BrandFilters): Promise<number> {
     const { whereClause, params } = this.buildWhereClause(filters);
 
-    const result = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM brand ${whereClause}`,
-      params
-    );
+    const result = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM brand ${whereClause}`, params);
 
     return parseInt(result?.count || '0', 10);
   }
@@ -190,9 +164,7 @@ export class BrandRepository implements IBrandRepository {
     }
 
     if (filters?.search) {
-      conditions.push(
-        `(name ILIKE $${params.length + 1} OR description ILIKE $${params.length + 1})`
-      );
+      conditions.push(`(name ILIKE $${params.length + 1} OR description ILIKE $${params.length + 1})`);
       params.push(`%${filters.search}%`);
     }
 
@@ -215,11 +187,7 @@ export class BrandRepository implements IBrandRepository {
       isActive: Boolean(row.isActive),
       isFeatured: Boolean(row.isFeatured),
       sortOrder: parseInt(row.sortOrder || '0', 10),
-      metadata: row.metadata
-        ? typeof row.metadata === 'string'
-          ? JSON.parse(row.metadata)
-          : row.metadata
-        : undefined,
+      metadata: row.metadata ? (typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata) : undefined,
       createdAt: new Date(row.createdAt),
       updatedAt: new Date(row.updatedAt),
     });

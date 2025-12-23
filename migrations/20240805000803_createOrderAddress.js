@@ -24,7 +24,7 @@ exports.up = function (knex) {
     t.boolean('isDefault').notNullable().defaultTo(false);
     t.timestamp('validatedAt');
     t.text('additionalInfo');
-    
+
     t.index('orderId');
     t.index('customerAddressId');
     t.unique(['orderId', 'addressType']);

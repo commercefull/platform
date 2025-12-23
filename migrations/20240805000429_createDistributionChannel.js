@@ -2,7 +2,7 @@
  * Distribution Channel Migration
  * Creates the distributionChannel table for managing sales channels
  */
-exports.up = function(knex) {
+exports.up = function (knex) {
   return knex.schema.createTable('distributionChannel', t => {
     t.uuid('distributionChannelId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
@@ -20,6 +20,6 @@ exports.up = function(knex) {
   });
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema.dropTable('distributionChannel');
 };
