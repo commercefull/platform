@@ -1,6 +1,7 @@
 /**
- * Tax Use Cases
- * Export all tax-related use cases
+ * Tax Use Cases - Barrel Export
  */
 
 export * from './CalculateOrderTax';
+export * from './CreateTaxRate';
+export * from './GetTaxRateForAddress';

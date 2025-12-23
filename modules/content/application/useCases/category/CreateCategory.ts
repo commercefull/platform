@@ -50,11 +50,11 @@ export class CreateCategoryUseCase {
     const category = await this.categoryRepo.createCategory({
       name: command.name,
       slug: command.slug,
-      parentId: command.parentId,
-      description: command.description,
-      featuredImage: command.featuredImage,
-      metaTitle: command.metaTitle,
-      metaDescription: command.metaDescription,
+      parentId: command.parentId ?? null,
+      description: command.description ?? null,
+      featuredImage: command.featuredImage ?? null,
+      metaTitle: command.metaTitle ?? null,
+      metaDescription: command.metaDescription ?? null,
       sortOrder: command.sortOrder || 0,
       isActive: command.isActive !== undefined ? command.isActive : true,
       depth: 0,
@@ -62,21 +62,21 @@ export class CreateCategoryUseCase {
     });
 
     eventBus.emit('content.category.created', {
-      categoryId: category.id,
+      categoryId: category.contentCategoryId,
       name: category.name,
       slug: category.slug,
       parentId: category.parentId
     });
 
     return {
-      id: category.id,
+      id: category.contentCategoryId,
       name: category.name,
       slug: category.slug,
-      parentId: category.parentId,
-      path: category.path,
+      parentId: category.parentId ?? undefined,
+      path: category.path ?? undefined,
       depth: category.depth,
       isActive: category.isActive,
-      createdAt: category.createdAt
+      createdAt: category.createdAt instanceof Date ? category.createdAt.toISOString() : String(category.createdAt)
     };
   }
 }

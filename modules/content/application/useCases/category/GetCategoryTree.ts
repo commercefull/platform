@@ -3,7 +3,8 @@
  * Retrieves the full category hierarchy as a tree structure
  */
 
-import { ContentCategoryRepo, ContentCategory } from '../../../repos/contentCategoryRepo';
+import { ContentCategoryRepo } from '../../../repos/contentCategoryRepo';
+import { ContentCategory } from '../../../../../libs/db/types';
 
 export class GetCategoryTreeQuery {
   constructor(
@@ -40,13 +41,13 @@ export class GetCategoryTreeUseCase {
 
     // First pass: create all nodes
     for (const category of categories) {
-      categoryMap.set(category.id, {
-        id: category.id,
+      categoryMap.set(category.contentCategoryId, {
+        id: category.contentCategoryId,
         name: category.name,
         slug: category.slug,
-        description: category.description,
-        featuredImage: category.featuredImage,
-        path: category.path,
+        description: category.description ?? undefined,
+        featuredImage: category.featuredImage ?? undefined,
+        path: category.path ?? undefined,
         depth: category.depth,
         sortOrder: category.sortOrder,
         isActive: category.isActive,
@@ -56,7 +57,7 @@ export class GetCategoryTreeUseCase {
 
     // Second pass: build hierarchy
     for (const category of categories) {
-      const node = categoryMap.get(category.id)!;
+      const node = categoryMap.get(category.contentCategoryId)!;
       
       if (category.parentId && categoryMap.has(category.parentId)) {
         const parent = categoryMap.get(category.parentId)!;

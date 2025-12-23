@@ -38,27 +38,28 @@ export class CreateNavigationUseCase {
     const navigation = await this.navigationRepo.createNavigation({
       name: command.name,
       slug: command.slug,
-      description: command.description,
-      location: command.location,
+      description: command.description ?? null,
+      location: command.location ?? null,
       isActive: command.isActive !== undefined ? command.isActive : true,
-      createdBy: command.createdBy
+      createdBy: command.createdBy ?? null,
+      updatedBy: null
     });
 
     eventBus.emit('content.navigation.created', {
-      navigationId: navigation.id,
+      navigationId: navigation.contentNavigationId,
       name: navigation.name,
       slug: navigation.slug,
       location: navigation.location
     });
 
     return {
-      id: navigation.id,
+      id: navigation.contentNavigationId,
       name: navigation.name,
       slug: navigation.slug,
-      description: navigation.description,
-      location: navigation.location,
+      description: navigation.description ?? undefined,
+      location: navigation.location ?? undefined,
       isActive: navigation.isActive,
-      createdAt: navigation.createdAt
+      createdAt: navigation.createdAt instanceof Date ? navigation.createdAt.toISOString() : String(navigation.createdAt)
     };
   }
 }

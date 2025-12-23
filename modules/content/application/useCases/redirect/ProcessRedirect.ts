@@ -34,7 +34,7 @@ export class ProcessRedirectUseCase {
     }
 
     // Record the hit
-    await this.redirectRepo.recordHit(redirect.id);
+    await this.redirectRepo.recordHit(redirect.contentRedirectId);
 
     // Handle regex replacement if needed
     let targetUrl = redirect.targetUrl;
@@ -50,8 +50,8 @@ export class ProcessRedirectUseCase {
     return {
       shouldRedirect: true,
       targetUrl,
-      statusCode: redirect.statusCode,
-      redirectId: redirect.id
+      statusCode: parseInt(redirect.statusCode, 10),
+      redirectId: redirect.contentRedirectId
     };
   }
 }

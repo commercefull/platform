@@ -3,7 +3,8 @@
  * Retrieves a navigation menu with all its items in tree structure
  */
 
-import { ContentNavigationRepo, ContentNavigationItem } from '../../../repos/contentNavigationRepo';
+import { ContentNavigationRepo } from '../../../repos/contentNavigationRepo';
+import { ContentNavigationItem } from '../../../../../libs/db/types';
 
 export class GetNavigationWithItemsQuery {
   constructor(
@@ -60,7 +61,7 @@ export class GetNavigationWithItemsUseCase {
     }
 
     // Get all items for this navigation
-    const items = await this.navigationRepo.findAllNavigationItems(navigation.id);
+    const items = await this.navigationRepo.findAllNavigationItems(navigation.contentNavigationId);
     
     // Filter inactive items if needed
     const filteredItems = query.includeInactive 
@@ -71,11 +72,11 @@ export class GetNavigationWithItemsUseCase {
     const itemTree = this.buildItemTree(filteredItems);
 
     return {
-      id: navigation.id,
+      id: navigation.contentNavigationId,
       name: navigation.name,
       slug: navigation.slug,
-      description: navigation.description,
-      location: navigation.location,
+      description: navigation.description ?? undefined,
+      location: navigation.location ?? undefined,
       isActive: navigation.isActive,
       items: itemTree
     };
@@ -87,15 +88,15 @@ export class GetNavigationWithItemsUseCase {
 
     // First pass: create all nodes
     for (const item of items) {
-      itemMap.set(item.id, {
-        id: item.id,
+      itemMap.set(item.contentNavigationItemId, {
+        id: item.contentNavigationItemId,
         title: item.title,
         type: item.type,
-        url: item.url,
-        contentPageId: item.contentPageId,
-        targetSlug: item.targetSlug,
-        icon: item.icon,
-        cssClasses: item.cssClasses,
+        url: item.url ?? undefined,
+        contentPageId: item.contentPageId ?? undefined,
+        targetSlug: item.targetSlug ?? undefined,
+        icon: item.icon ?? undefined,
+        cssClasses: item.cssClasses ?? undefined,
         openInNewTab: item.openInNewTab,
         isActive: item.isActive,
         sortOrder: item.sortOrder,
@@ -105,7 +106,7 @@ export class GetNavigationWithItemsUseCase {
 
     // Second pass: build hierarchy
     for (const item of items) {
-      const node = itemMap.get(item.id)!;
+      const node = itemMap.get(item.contentNavigationItemId)!;
       
       if (item.parentId && itemMap.has(item.parentId)) {
         const parent = itemMap.get(item.parentId)!;

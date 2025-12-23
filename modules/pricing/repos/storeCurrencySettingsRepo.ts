@@ -233,7 +233,7 @@ export class StoreCurrencySettingsRepo {
       throw new Error('Markup percentage must be between 0 and 100');
     }
     
-    return this.update(storeCurrencySettingsId, { markupPercentage });
+    return this.update(storeCurrencySettingsId, { markupPercentage: markupPercentage.toString() });
   }
 
   /**

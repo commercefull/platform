@@ -6,9 +6,9 @@
 
 import { Request, Response } from 'express';
 import inventoryRepo from '../../repos/inventoryRepo';
-import { saveLocation as saveStoreLocation, getLocation as getStoreLocation, getLocations as listStoreLocations, deleteLocation as deleteStoreLocation } from '../../../distribution/repos/pickupRepo';
+import { saveLocation as saveStoreLocation, getLocation as getStoreLocation, getLocations as listStoreLocations, deleteLocation as deleteStoreLocation } from '../../../store/repos/pickupLocationRepo';
 import { eventBus } from '../../../../libs/events/eventBus';
-
+import { updateLocation } from '../../../store/repos/pickupLocationRepo';
 // ============================================================================
 // Helper Functions
 // ============================================================================
@@ -76,8 +76,8 @@ export const listInventoryLocations = async (req: Request, res: Response): Promi
     const offset = parseInt(req.query.offset as string) || 0;
 
     // Prefer store locations listing
-    const result = await listStoreLocations({ isActive: includeInactive ? undefined : true }, { limit, offset });
-    const data = result.data.map((loc: any) => ({ ...loc, id: loc.storeLocationId }));
+    const result = await listStoreLocations();
+    const data = result.map((loc: any) => ({ ...loc, id: loc.pickupLocationId }));
     respondWithPagination(res, data, limit, offset);
   } catch (error: unknown) {
     console.error('List inventory locations error:', error);
@@ -94,17 +94,18 @@ export const createInventoryLocation = async (req: Request, res: Response): Prom
     const { name, type, address, address1, city, state, country, postalCode, isActive } = req.body as any;
     if (name && (address || address1) && city && country) {
       const saved = await saveStoreLocation({
-        code: `LOC-${Date.now()}`,
+        storeId: req.body.storeId || 'default',
         name,
-        type: type || 'store',
-        address1: address || address1,
-        city,
-        state,
-        postalCode,
-        country,
-        isActive: isActive !== false,
+        address: {
+          line1: address || address1,
+          city,
+          state,
+          postalCode,
+          country,
+        },
+        prepareTimeMinutes: 60,
       });
-      respond(res, { ...saved, id: (saved as any).storeLocationId }, 201);
+      respond(res, { ...saved, id: (saved as any).pickupLocationId }, 201);
       return;
     }
 
@@ -162,19 +163,19 @@ export const updateInventoryLocation = async (req: Request, res: Response): Prom
     // Try update store location if it exists
     const existingStore = await getStoreLocation(inventoryLocationId);
     if (existingStore) {
-      const updated = await saveStoreLocation({
-        storeLocationId: inventoryLocationId,
-        code: existingStore.code,
+      // For updates, use the updateLocation function from pickupLocationRepo
+      const updated = await updateLocation(inventoryLocationId, {
         name: name ?? existingStore.name,
-        type: type ?? existingStore.type,
-        address1: (address || address1) ?? existingStore.address1,
-        city: city ?? existingStore.city,
-        state: state ?? existingStore.state,
-        postalCode: postalCode ?? existingStore.postalCode,
-        country: country ?? existingStore.country,
+        address: {
+          line1: (address || address1) ?? existingStore.address.line1,
+          city: city ?? existingStore.address.city,
+          state: state ?? existingStore.address.state,
+          postalCode: postalCode ?? existingStore.address.postalCode,
+          country: country ?? existingStore.address.country,
+        },
         isActive: isActive ?? existingStore.isActive,
       });
-      respond(res, { ...updated, id: (updated as any).storeLocationId });
+      respond(res, { ...updated, id: (updated as any)?.pickupLocationId });
       return;
     }
 

@@ -18,10 +18,8 @@ import { paymentCustomerRouter } from "../modules/payment/interface/routers/paym
 import { supportCustomerRouter } from "../modules/support/supportCustomerRouter";
 import { checkoutCustomerRouter } from "../modules/checkout/interface/routers/checkoutRouter";
 import { inventoryCustomerRouter } from "../modules/inventory/interface/routers/customerRouter";
-import { marketingCustomerRouter } from "../modules/marketing/marketingCustomerRouter";
 import { warehouseCustomerRouter } from "../modules/warehouse/warehouseCustomerRouter";
 import { membershipCustomerRouter } from "../modules/membership/membershipCustomerRouter";
-import { distributionCustomerRouter } from "../modules/distribution/distributionCustomerRouter";
 import { subscriptionCustomerRouter } from "../modules/subscription/subscriptionCustomerRouter";
 import { localizationCustomerRouter } from "../modules/localization/localizationCustomerRouter";
 import { shippingCustomerRouter } from "../modules/shipping/shippingCustomerRouter";
@@ -32,11 +30,9 @@ import { merchantMerchantRouter } from "../modules/merchant/interface/http/merch
 import { promotionBusinessRouter } from "../modules/promotion/interface/routers/businessRouter";
 import { productBusinessRouter } from "../modules/product/interface/routers/productBusinessRouter";
 import { orderBusinessRouter } from "../modules/order/interface/routers/businessRouter";
-import { distributionBusinessRouter } from "../modules/distribution/distributionBusinessRouter";
 import { taxBusinessRouter } from "../modules/tax/taxBusinessRouter";
 import { customerBusinessRouter } from "../modules/customer/interface/routers/businessRouter";
 import { gdprBusinessRouter } from "../modules/gdpr/gdprBusinessRouter";
-import { marketingBusinessRouter } from "../modules/marketing/marketingBusinessRouter";
 import { b2bBusinessRouter } from "../modules/b2b/b2bBusinessRouter";
 import { subscriptionBusinessRouter } from "../modules/subscription/subscriptionBusinessRouter";
 import { supportBusinessRouter } from "../modules/support/supportBusinessRouter";
@@ -82,10 +78,8 @@ export function configureRoutes(app: Express): void {
     supportCustomerRouter,
     checkoutCustomerRouter,
     inventoryCustomerRouter,
-    marketingCustomerRouter,
     warehouseCustomerRouter,
     membershipCustomerRouter,
-    distributionCustomerRouter,
     subscriptionCustomerRouter,
     localizationCustomerRouter,
     shippingCustomerRouter,
@@ -98,11 +92,9 @@ export function configureRoutes(app: Express): void {
     promotionBusinessRouter,
     productBusinessRouter,
     orderBusinessRouter,
-    distributionBusinessRouter,
     taxBusinessRouter,
     customerBusinessRouter,
     gdprBusinessRouter,
-    marketingBusinessRouter,
     b2bBusinessRouter,
     subscriptionBusinessRouter,
     supportBusinessRouter,

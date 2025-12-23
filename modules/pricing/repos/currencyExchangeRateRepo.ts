@@ -134,8 +134,9 @@ export class CurrencyExchangeRateRepo {
       throw new Error('Source and target currencies must be different');
     }
 
-    // Calculate inverse rate
-    const inverseRate = 1 / params.rate;
+    // Calculate inverse rate - convert string to number for calculation
+    const rateNum = typeof params.rate === 'string' ? parseFloat(params.rate) : params.rate;
+    const inverseRate = (1 / rateNum).toString();
 
     const result = await queryOne<CurrencyExchangeRate>(
       `INSERT INTO "${Table.CurrencyExchangeRate}" (
@@ -180,7 +181,8 @@ export class CurrencyExchangeRateRepo {
     // If rate is updated, calculate inverse rate
     if (params.rate !== undefined) {
       updateFields.push(`"rate" = $${paramIndex++}`, `"inverseRate" = $${paramIndex++}`);
-      values.push(params.rate, 1 / params.rate);
+      const rateNum = typeof params.rate === 'string' ? parseFloat(params.rate) : Number(params.rate);
+      values.push(params.rate, (1 / rateNum).toString());
       
       // Remove rate from params since we handled it
       const { rate, ...otherParams } = params;
@@ -219,8 +221,8 @@ export class CurrencyExchangeRateRepo {
    */
   async updateRate(currencyExchangeRateId: string, newRate: number, updatedBy?: string): Promise<CurrencyExchangeRate | null> {
     return this.update(currencyExchangeRateId, { 
-      rate: newRate,
-      updatedBy 
+      rate: newRate.toString(),
+      updatedBy: updatedBy ?? null
     });
   }
 
@@ -243,7 +245,7 @@ export class CurrencyExchangeRateRepo {
    */
   async expire(currencyExchangeRateId: string): Promise<CurrencyExchangeRate | null> {
     return this.update(currencyExchangeRateId, { 
-      effectiveTo: unixTimestamp(),
+      effectiveTo: new Date(),
       isActive: false 
     });
   }
@@ -283,9 +285,10 @@ export class CurrencyExchangeRateRepo {
       return null;
     }
 
+    const rateNum = parseFloat(rate.rate);
     return {
-      convertedAmount: amount * rate.rate,
-      rate: rate.rate,
+      convertedAmount: amount * rateNum,
+      rate: rateNum,
       rateId: rate.currencyExchangeRateId
     };
   }
@@ -311,11 +314,12 @@ export class CurrencyExchangeRateRepo {
 
       if (existing) {
         // Update if rate changed
-        if (Math.abs(existing.rate - rateData.rate) > 0.0001) {
+        const existingRateNum = parseFloat(existing.rate);
+        if (Math.abs(existingRateNum - rateData.rate) > 0.0001) {
           const updated = await this.update(existing.currencyExchangeRateId, {
-            rate: rateData.rate,
+            rate: rateData.rate.toString(),
             provider,
-            providerReference
+            providerReference: providerReference ?? null
           });
           if (updated) created.push(updated);
         } else {
@@ -326,11 +330,13 @@ export class CurrencyExchangeRateRepo {
         const newRate = await this.create({
           sourceCurrencyId: rateData.sourceCurrencyId,
           targetCurrencyId: rateData.targetCurrencyId,
-          rate: rateData.rate,
+          rate: rateData.rate.toString(),
           provider,
-          providerReference,
-          effectiveFrom: now,
-          isActive: true
+          providerReference: providerReference ?? null,
+          effectiveFrom: new Date(),
+          effectiveTo: null,
+          isActive: true,
+          updatedBy: null
         });
         created.push(newRate);
       }

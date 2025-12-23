@@ -61,17 +61,17 @@ export class MoveCategoryUseCase {
     );
 
     eventBus.emit('content.category.updated', {
-      categoryId: updatedCategory.id,
+      categoryId: updatedCategory.contentCategoryId,
       name: updatedCategory.name,
       slug: updatedCategory.slug
     });
 
     return {
-      id: updatedCategory.id,
+      id: updatedCategory.contentCategoryId,
       name: updatedCategory.name,
       slug: updatedCategory.slug,
-      parentId: updatedCategory.parentId,
-      path: updatedCategory.path,
+      parentId: updatedCategory.parentId ?? undefined,
+      path: updatedCategory.path ?? undefined,
       depth: updatedCategory.depth
     };
   }

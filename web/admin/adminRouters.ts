@@ -16,7 +16,6 @@ import * as promotionController from "./controllers/promotionController";
 import * as paymentController from "./controllers/paymentController";
 import * as shippingController from "./controllers/shippingController";
 import * as contentController from "./controllers/contentController";
-import * as marketingController from "./controllers/marketingController";
 import * as couponController from "./controllers/couponController";
 import * as giftCardController from "./controllers/giftCardController";
 import * as shippingZoneController from "./controllers/shippingZoneController";
@@ -33,7 +32,6 @@ import * as subscriptionController from "./controllers/subscriptionController";
 import * as loyaltyController from "./controllers/loyaltyController";
 import * as b2bController from "./controllers/b2bController";
 import * as analyticsController from "./controllers/analyticsController";
-import * as platformController from "./controllers/platformController";
 import * as usersController from "./controllers/usersController";
 import * as settingsController from "./controllers/settingsController";
 import * as inventoryController from "./controllers/inventoryController";
@@ -294,22 +292,6 @@ router.get("/content/templates", contentController.listContentTemplates);
 router.get("/content/media", contentController.listContentMedia);
 
 // ============================================================================
-// Marketing Routes
-// ============================================================================
-
-router.get("/marketing/campaigns", marketingController.listEmailCampaigns);
-router.get("/marketing/campaigns/create", marketingController.createEmailCampaignForm);
-router.post("/marketing/campaigns", marketingController.createEmailCampaign);
-router.get("/marketing/campaigns/:campaignId", marketingController.viewEmailCampaign);
-router.get("/marketing/campaigns/:campaignId/edit", marketingController.editEmailCampaignForm);
-router.post("/marketing/campaigns/:campaignId", marketingController.updateEmailCampaign);
-router.delete("/marketing/campaigns/:campaignId", marketingController.deleteEmailCampaign);
-
-router.get("/marketing/templates", marketingController.listEmailTemplates);
-router.get("/marketing/templates/create", marketingController.createEmailTemplateForm);
-router.post("/marketing/templates", marketingController.createEmailTemplate);
-
-// ============================================================================
 // SEO Routes
 // ============================================================================
 
@@ -528,37 +510,6 @@ router.post("/analytics/reports/schedules", analyticsController.createReportSche
 router.put("/analytics/reports/schedules/:scheduleId", analyticsController.updateReportSchedule);
 router.delete("/analytics/reports/schedules/:scheduleId", analyticsController.deleteReportSchedule);
 router.post("/analytics/reports/run-now", analyticsController.runReportNow);
-
-// ============================================================================
-// Platform Administration (Phase 8)
-// ============================================================================
-
-// Health & Monitoring
-router.get("/platform/health", platformController.healthDashboard);
-router.get("/api/health", platformController.healthApi);
-router.get("/api/health/live", platformController.livenessApi);
-router.get("/api/health/ready", platformController.readinessApi);
-router.post("/platform/alerts/:alertId/acknowledge", platformController.acknowledgeAlertAction);
-
-// Audit Logs
-router.get("/platform/audit-logs", platformController.auditLogsDashboard);
-router.get("/platform/audit-logs/:auditLogId", platformController.auditLogDetail);
-
-// Webhooks
-router.get("/platform/webhooks", platformController.webhooksDashboard);
-router.get("/platform/webhooks/:webhookId", platformController.webhookDetail);
-router.post("/platform/webhooks", platformController.createWebhookAction);
-router.put("/platform/webhooks/:webhookId", platformController.updateWebhookAction);
-router.delete("/platform/webhooks/:webhookId", platformController.deleteWebhookAction);
-
-// Configuration
-router.get("/platform/configuration", platformController.configurationDashboard);
-router.post("/platform/configuration", platformController.updateConfigAction);
-router.delete("/platform/configuration/:key", platformController.deleteConfigAction);
-router.post("/platform/features/:featureKey/toggle", platformController.toggleFeatureFlagAction);
-
-// API Keys
-router.get("/platform/api-keys", platformController.apiKeysDashboard);
 
 // ============================================================================
 // Admin Users & Roles (Phase 8)

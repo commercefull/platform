@@ -80,37 +80,37 @@ export class AddNavigationItemUseCase {
 
     const item = await this.navigationRepo.createNavigationItem({
       navigationId: command.navigationId,
-      parentId: command.parentId,
+      parentId: command.parentId ?? null,
       title: command.title,
       type: command.type,
-      url: command.url,
-      contentPageId: command.contentPageId,
-      targetId: command.targetId,
-      targetSlug: command.targetSlug,
-      icon: command.icon,
-      cssClasses: command.cssClasses,
+      url: command.url ?? null,
+      contentPageId: command.contentPageId ?? null,
+      targetId: command.targetId ?? null,
+      targetSlug: command.targetSlug ?? null,
+      icon: command.icon ?? null,
+      cssClasses: command.cssClasses ?? null,
       openInNewTab: command.openInNewTab || false,
       isActive: command.isActive !== undefined ? command.isActive : true,
       sortOrder: command.sortOrder || 0,
-      conditions: command.conditions,
+      conditions: command.conditions ?? null,
       depth
     });
 
     eventBus.emit('content.navigation.item_added', {
       navigationId: command.navigationId,
-      itemId: item.id,
+      itemId: item.contentNavigationItemId,
       title: item.title,
       type: item.type
     });
 
     return {
-      id: item.id,
+      id: item.contentNavigationItemId,
       navigationId: item.navigationId,
-      parentId: item.parentId,
+      parentId: item.parentId ?? undefined,
       title: item.title,
       type: item.type,
-      url: item.url,
-      contentPageId: item.contentPageId,
+      url: item.url ?? undefined,
+      contentPageId: item.contentPageId ?? undefined,
       isActive: item.isActive,
       sortOrder: item.sortOrder,
       depth: item.depth

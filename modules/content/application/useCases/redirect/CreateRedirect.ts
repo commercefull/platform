@@ -54,29 +54,30 @@ export class CreateRedirectUseCase {
     const redirect = await this.redirectRepo.createRedirect({
       sourceUrl: command.sourceUrl,
       targetUrl: command.targetUrl,
-      statusCode: command.statusCode || 301,
+      statusCode: String(command.statusCode || 301),
       isRegex: command.isRegex || false,
       isActive: command.isActive !== undefined ? command.isActive : true,
-      notes: command.notes,
-      createdBy: command.createdBy
+      notes: command.notes ?? null,
+      createdBy: command.createdBy ?? null,
+      updatedBy: null
     });
 
     eventBus.emit('content.redirect.created', {
-      redirectId: redirect.id,
+      redirectId: redirect.contentRedirectId,
       sourceUrl: redirect.sourceUrl,
       targetUrl: redirect.targetUrl,
       statusCode: redirect.statusCode
     });
 
     return {
-      id: redirect.id,
+      id: redirect.contentRedirectId,
       sourceUrl: redirect.sourceUrl,
       targetUrl: redirect.targetUrl,
-      statusCode: redirect.statusCode,
+      statusCode: parseInt(redirect.statusCode, 10),
       isRegex: redirect.isRegex,
       isActive: redirect.isActive,
       hits: redirect.hits,
-      createdAt: redirect.createdAt
+      createdAt: redirect.createdAt instanceof Date ? redirect.createdAt.toISOString() : String(redirect.createdAt)
     };
   }
 }

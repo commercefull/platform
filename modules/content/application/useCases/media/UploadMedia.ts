@@ -75,24 +75,25 @@ export class UploadMediaUseCase {
       fileType: command.fileType,
       fileSize: command.fileSize,
       url: command.url,
-      width: command.width,
-      height: command.height,
-      duration: command.duration,
-      altText: command.altText,
-      caption: command.caption,
-      description: command.description,
-      folderId: command.folderId,
-      thumbnailUrl: command.thumbnailUrl,
+      width: command.width ?? null,
+      height: command.height ?? null,
+      duration: command.duration ?? null,
+      altText: command.altText ?? null,
+      caption: command.caption ?? null,
+      description: command.description ?? null,
+      contentMediaFolderId: command.folderId ?? null,
+      thumbnailUrl: command.thumbnailUrl ?? null,
       sortOrder: 0,
-      tags: command.tags,
+      tags: command.tags ?? null,
       isExternal: command.isExternal || false,
-      externalService: command.externalService,
-      externalId: command.externalId,
-      createdBy: command.uploadedBy
+      externalService: command.externalService ?? null,
+      externalId: command.externalId ?? null,
+      createdBy: command.uploadedBy ?? null,
+      updatedBy: null
     });
 
     eventBus.emit('content.media.uploaded', {
-      mediaId: media.id,
+      mediaId: media.contentMediaId,
       title: media.title,
       fileName: media.fileName,
       fileType: media.fileType,
@@ -101,18 +102,18 @@ export class UploadMediaUseCase {
     });
 
     return {
-      id: media.id,
+      id: media.contentMediaId,
       title: media.title,
       fileName: media.fileName,
       fileType: media.fileType,
       fileSize: media.fileSize,
       url: media.url,
-      thumbnailUrl: media.thumbnailUrl,
-      width: media.width,
-      height: media.height,
-      altText: media.altText,
-      folderId: media.folderId,
-      createdAt: media.createdAt
+      thumbnailUrl: media.thumbnailUrl ?? undefined,
+      width: media.width ?? undefined,
+      height: media.height ?? undefined,
+      altText: media.altText ?? undefined,
+      folderId: media.contentMediaFolderId ?? undefined,
+      createdAt: media.createdAt instanceof Date ? media.createdAt.toISOString() : String(media.createdAt)
     };
   }
 }

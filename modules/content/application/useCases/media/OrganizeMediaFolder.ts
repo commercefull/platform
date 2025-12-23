@@ -68,20 +68,21 @@ export class OrganizeMediaFolderUseCase {
 
     const folder = await this.mediaRepo.createFolder({
       name: command.name,
-      parentId: command.parentId,
+      parentId: command.parentId ?? null,
       path,
       depth,
       sortOrder: 0,
-      createdBy: command.createdBy
+      createdBy: command.createdBy ?? null,
+      updatedBy: null
     });
 
     return {
-      id: folder.id,
+      id: folder.contentMediaFolderId,
       name: folder.name,
-      parentId: folder.parentId,
-      path: folder.path,
+      parentId: folder.parentId ?? undefined,
+      path: folder.path ?? undefined,
       depth: folder.depth,
-      createdAt: folder.createdAt
+      createdAt: folder.createdAt instanceof Date ? folder.createdAt.toISOString() : String(folder.createdAt)
     };
   }
 
@@ -116,18 +117,18 @@ export class OrganizeMediaFolderUseCase {
     }
 
     const updatedFolder = await this.mediaRepo.updateFolder(command.folderId, {
-      parentId: command.newParentId || undefined,
+      parentId: command.newParentId ?? null,
       path,
       depth
     });
 
     return {
-      id: updatedFolder.id,
+      id: updatedFolder.contentMediaFolderId,
       name: updatedFolder.name,
-      parentId: updatedFolder.parentId,
-      path: updatedFolder.path,
+      parentId: updatedFolder.parentId ?? undefined,
+      path: updatedFolder.path ?? undefined,
       depth: updatedFolder.depth,
-      createdAt: updatedFolder.createdAt
+      createdAt: updatedFolder.createdAt instanceof Date ? updatedFolder.createdAt.toISOString() : String(updatedFolder.createdAt)
     };
   }
 
@@ -148,7 +149,7 @@ export class OrganizeMediaFolderUseCase {
     for (const mediaId of command.mediaIds) {
       try {
         await this.mediaRepo.updateMedia(mediaId, {
-          folderId: command.folderId || undefined
+          contentMediaFolderId: command.folderId ?? null
         });
         movedCount++;
       } catch {
@@ -169,10 +170,11 @@ export class OrganizeMediaFolderUseCase {
 
     // First pass: create all nodes
     for (const folder of folders) {
-      folderMap.set(folder.id, {
-        id: folder.id,
+      const folderId = folder.contentMediaFolderId || folder.id;
+      folderMap.set(folderId, {
+        id: folderId,
         name: folder.name,
-        path: folder.path,
+        path: folder.path ?? undefined,
         depth: folder.depth,
         children: []
       });
@@ -180,7 +182,8 @@ export class OrganizeMediaFolderUseCase {
 
     // Second pass: build hierarchy
     for (const folder of folders) {
-      const node = folderMap.get(folder.id)!;
+      const folderId = folder.contentMediaFolderId || folder.id;
+      const node = folderMap.get(folderId)!;
       
       if (folder.parentId && folderMap.has(folder.parentId)) {
         const parent = folderMap.get(folder.parentId)!;

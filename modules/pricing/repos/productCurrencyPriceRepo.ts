@@ -127,7 +127,7 @@ export class ProductCurrencyPriceRepo {
     const existing = await this.findByProductAndCurrency(
       params.productId,
       params.currencyId,
-      params.productVariantId
+      params.productVariantId ?? undefined
     );
 
     if (existing) {
@@ -167,7 +167,7 @@ export class ProductCurrencyPriceRepo {
     const existing = await this.findByProductAndCurrency(
       params.productId,
       params.currencyId,
-      params.productVariantId
+      params.productVariantId ?? undefined
     );
 
     if (existing) {
@@ -227,9 +227,9 @@ export class ProductCurrencyPriceRepo {
    */
   async updatePrice(productCurrencyPriceId: string, price: number, updatedBy?: string): Promise<ProductCurrencyPrice | null> {
     return this.update(productCurrencyPriceId, { 
-      price,
+      price: price.toString(),
       isManual: true,
-      updatedBy 
+      updatedBy: updatedBy ?? null
     });
   }
 
@@ -237,7 +237,7 @@ export class ProductCurrencyPriceRepo {
    * Update compare at price
    */
   async updateCompareAtPrice(productCurrencyPriceId: string, compareAtPrice: number): Promise<ProductCurrencyPrice | null> {
-    return this.update(productCurrencyPriceId, { compareAtPrice });
+    return this.update(productCurrencyPriceId, { compareAtPrice: compareAtPrice.toString() });
   }
 
   /**
