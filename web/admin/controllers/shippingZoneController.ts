@@ -6,6 +6,7 @@
 import { Request, Response } from 'express';
 import shippingZoneRepo from '../../../modules/shipping/repos/shippingZoneRepo';
 import shippingMethodRepo from '../../../modules/shipping/repos/shippingMethodRepo';
+import { adminRespond } from 'web/respond';
 
 // ============================================================================
 // Shipping Zones Management
@@ -16,35 +17,32 @@ export const listShippingZones = async (req: Request, res: Response): Promise<vo
     const zones = await shippingZoneRepo.findAll();
     const activeCount = zones.filter(z => z.isActive).length;
 
-    res.render('admin/views/shipping/zones/index', {
+    adminRespond(req, res, 'shipping/zones/index', {
       pageName: 'Shipping Zones',
       zones,
       stats: { total: zones.length, active: activeCount },
-      user: req.user,
+      
       success: req.query.success || null
     });
   } catch (error: any) {
     console.error('Error listing shipping zones:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load shipping zones',
-      user: req.user
     });
   }
 };
 
 export const createShippingZoneForm = async (req: Request, res: Response): Promise<void> => {
   try {
-    res.render('admin/views/shipping/zones/create', {
+    adminRespond(req, res, 'shipping/zones/create', {
       pageName: 'Create Shipping Zone',
-      user: req.user
     });
   } catch (error: any) {
     console.error('Error loading create zone form:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
-      user: req.user
     });
   }
 };
@@ -76,11 +74,10 @@ export const createShippingZone = async (req: Request, res: Response): Promise<v
   } catch (error: any) {
     console.error('Error creating shipping zone:', error);
 
-    res.render('admin/views/shipping/zones/create', {
+    adminRespond(req, res, 'shipping/zones/create', {
       pageName: 'Create Shipping Zone',
       error: error.message || 'Failed to create shipping zone',
       formData: req.body,
-      user: req.user
     });
   }
 };
@@ -92,10 +89,9 @@ export const viewShippingZone = async (req: Request, res: Response): Promise<voi
     const zone = await shippingZoneRepo.findById(zoneId);
 
     if (!zone) {
-      res.status(404).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Not Found',
         error: 'Shipping zone not found',
-        user: req.user
       });
       return;
     }
@@ -103,19 +99,18 @@ export const viewShippingZone = async (req: Request, res: Response): Promise<voi
     // Get associated rates
     const rates = await shippingZoneRepo.findById(zoneId) ? [] : []; // Placeholder - would need to get rates for this zone
 
-    res.render('admin/views/shipping/zones/view', {
+    adminRespond(req, res, 'shipping/zones/view', {
       pageName: `Zone: ${zone.name}`,
       zone,
       rates,
-      user: req.user,
+      
       success: req.query.success || null
     });
   } catch (error: any) {
     console.error('Error viewing shipping zone:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load shipping zone',
-      user: req.user
     });
   }
 };
@@ -127,25 +122,22 @@ export const editShippingZoneForm = async (req: Request, res: Response): Promise
     const zone = await shippingZoneRepo.findById(zoneId);
 
     if (!zone) {
-      res.status(404).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Not Found',
         error: 'Shipping zone not found',
-        user: req.user
       });
       return;
     }
 
-    res.render('admin/views/shipping/zones/edit', {
+    adminRespond(req, res, 'shipping/zones/edit', {
       pageName: `Edit: ${zone.name}`,
       zone,
-      user: req.user
     });
   } catch (error: any) {
     console.error('Error loading edit zone form:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
-      user: req.user
     });
   }
 };
@@ -186,18 +178,16 @@ export const updateShippingZone = async (req: Request, res: Response): Promise<v
     try {
       const zone = await shippingZoneRepo.findById(req.params.zoneId);
 
-      res.render('admin/views/shipping/zones/edit', {
+      adminRespond(req, res, 'shipping/zones/edit', {
         pageName: `Edit: ${zone?.name || 'Zone'}`,
         zone,
         error: error.message || 'Failed to update shipping zone',
         formData: req.body,
-        user: req.user
       });
     } catch {
-      res.status(500).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Error',
         error: error.message || 'Failed to update shipping zone',
-        user: req.user
       });
     }
   }

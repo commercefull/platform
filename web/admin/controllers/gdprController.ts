@@ -6,6 +6,7 @@
 import { Request, Response } from 'express';
 import { query, queryOne } from '../../../libs/db';
 import { v4 as uuidv4 } from 'uuid';
+import { adminRespond } from 'web/respond';
 
 // ============================================================================
 // GDPR Dashboard
@@ -42,7 +43,7 @@ export const gdprDashboard = async (req: Request, res: Response): Promise<void> 
        LIMIT 20`
     );
 
-    res.render('admin/views/gdpr/index', {
+    adminRespond(req, res, 'gdpr/index', {
       pageName: 'GDPR Compliance',
       stats: {
         pendingRequests: parseInt(statsResult?.pendingRequests || '0'),
@@ -51,14 +52,12 @@ export const gdprDashboard = async (req: Request, res: Response): Promise<void> 
         consentRate: parseFloat(consentResult?.marketingConsentRate || '0')
       },
       requests: requests || [],
-      user: req.user
     });
   } catch (error: any) {
     console.error('Error loading GDPR dashboard:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load GDPR dashboard',
-      user: req.user
     });
   }
 };
@@ -113,25 +112,22 @@ export const viewGdprRequest = async (req: Request, res: Response): Promise<void
     );
 
     if (!request) {
-      res.status(404).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Not Found',
         error: 'GDPR request not found',
-        user: req.user
       });
       return;
     }
 
-    res.render('admin/views/gdpr/view', {
+    adminRespond(req, res, 'gdpr/view', {
       pageName: `GDPR Request: ${request.requestType}`,
       request,
-      user: req.user
     });
   } catch (error: any) {
     console.error('Error viewing GDPR request:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load GDPR request',
-      user: req.user
     });
   }
 };
@@ -182,17 +178,15 @@ export const consentManagement = async (req: Request, res: Response): Promise<vo
       consentRetentionDays: 365
     };
 
-    res.render('admin/views/gdpr/consent', {
+    adminRespond(req, res, 'gdpr/consent', {
       pageName: 'Consent Management',
       consentSettings,
-      user: req.user
     });
   } catch (error: any) {
     console.error('Error loading consent management:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load consent management',
-      user: req.user
     });
   }
 };

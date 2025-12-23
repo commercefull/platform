@@ -5,6 +5,7 @@
 
 import { Request, Response } from 'express';
 import loyaltyRepo from '../../../modules/loyalty/repos/loyaltyRepo';
+import { adminRespond } from 'web/respond';
 
 // ============================================================================
 // Loyalty Tiers Management
@@ -16,35 +17,31 @@ export const listLoyaltyTiers = async (req: Request, res: Response): Promise<voi
 
     const tiers = await loyaltyRepo.findAllTiers(includeInactive);
 
-    res.render('admin/views/programs/loyalty/tiers/index', {
+    adminRespond(req, res, 'programs/loyalty/tiers/index', {
       pageName: 'Loyalty Tiers',
       tiers,
       filters: { includeInactive },
-      user: req.user,
       success: req.query.success || null
     });
   } catch (error: any) {
     console.error('Error listing loyalty tiers:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load loyalty tiers',
-      user: req.user
     });
   }
 };
 
 export const createLoyaltyTierForm = async (req: Request, res: Response): Promise<void> => {
   try {
-    res.render('admin/views/programs/loyalty/tiers/create', {
+    adminRespond(req, res, 'programs/loyalty/tiers/create', {
       pageName: 'Create Loyalty Tier',
-      user: req.user
     });
   } catch (error: any) {
     console.error('Error loading create tier form:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
-      user: req.user
     });
   }
 };
@@ -73,11 +70,10 @@ export const createLoyaltyTier = async (req: Request, res: Response): Promise<vo
   } catch (error: any) {
     console.error('Error creating loyalty tier:', error);
 
-    res.render('admin/views/programs/loyalty/tiers/create', {
+    adminRespond(req, res, 'programs/loyalty/tiers/create', {
       pageName: 'Create Loyalty Tier',
       error: error.message || 'Failed to create loyalty tier',
       formData: req.body,
-      user: req.user
     });
   }
 };
@@ -89,26 +85,23 @@ export const viewLoyaltyTier = async (req: Request, res: Response): Promise<void
     const tier = await loyaltyRepo.findTierById(tierId);
 
     if (!tier) {
-      res.status(404).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Not Found',
         error: 'Loyalty tier not found',
-        user: req.user
       });
       return;
     }
 
-    res.render('admin/views/programs/loyalty/tiers/view', {
+    adminRespond(req, res, 'programs/loyalty/tiers/view', {
       pageName: `Tier: ${tier.name}`,
       tier,
-      user: req.user,
       success: req.query.success || null
     });
   } catch (error: any) {
     console.error('Error viewing loyalty tier:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load loyalty tier',
-      user: req.user
     });
   }
 };
@@ -120,25 +113,22 @@ export const editLoyaltyTierForm = async (req: Request, res: Response): Promise<
     const tier = await loyaltyRepo.findTierById(tierId);
 
     if (!tier) {
-      res.status(404).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Not Found',
         error: 'Loyalty tier not found',
-        user: req.user
       });
       return;
     }
 
-    res.render('admin/views/programs/loyalty/tiers/edit', {
+    adminRespond(req, res, 'programs/loyalty/tiers/edit', {
       pageName: `Edit: ${tier.name}`,
       tier,
-      user: req.user
     });
   } catch (error: any) {
     console.error('Error loading edit tier form:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
-      user: req.user
     });
   }
 };
@@ -175,18 +165,16 @@ export const updateLoyaltyTier = async (req: Request, res: Response): Promise<vo
     try {
       const tier = await loyaltyRepo.findTierById(req.params.tierId);
 
-      res.render('admin/views/programs/loyalty/tiers/edit', {
+      adminRespond(req, res, 'programs/loyalty/tiers/edit', {
         pageName: `Edit: ${tier?.name || 'Tier'}`,
         tier,
         error: error.message || 'Failed to update loyalty tier',
         formData: req.body,
-        user: req.user
       });
     } catch {
-      res.status(500).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Error',
         error: error.message || 'Failed to update loyalty tier',
-        user: req.user
       });
     }
   }
@@ -215,35 +203,32 @@ export const listLoyaltyRewards = async (req: Request, res: Response): Promise<v
 
     const rewards = await loyaltyRepo.findAllRewards(includeInactive);
 
-    res.render('admin/views/programs/loyalty/rewards/index', {
+    adminRespond(req, res, 'programs/loyalty/rewards/index', {
       pageName: 'Loyalty Rewards',
       rewards,
       filters: { includeInactive },
-      user: req.user,
+      
       success: req.query.success || null
     });
   } catch (error: any) {
     console.error('Error listing loyalty rewards:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load loyalty rewards',
-      user: req.user
     });
   }
 };
 
 export const createLoyaltyRewardForm = async (req: Request, res: Response): Promise<void> => {
   try {
-    res.render('admin/views/programs/loyalty/rewards/create', {
+    adminRespond(req, res, 'programs/loyalty/rewards/create', {
       pageName: 'Create Loyalty Reward',
-      user: req.user
     });
   } catch (error: any) {
     console.error('Error loading create reward form:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
-      user: req.user
     });
   }
 };
@@ -278,11 +263,10 @@ export const createLoyaltyReward = async (req: Request, res: Response): Promise<
   } catch (error: any) {
     console.error('Error creating loyalty reward:', error);
 
-    res.render('admin/views/programs/loyalty/rewards/create', {
+    adminRespond(req, res, 'programs/loyalty/rewards/create', {
       pageName: 'Create Loyalty Reward',
       error: error.message || 'Failed to create loyalty reward',
       formData: req.body,
-      user: req.user
     });
   }
 };
@@ -294,26 +278,24 @@ export const viewLoyaltyReward = async (req: Request, res: Response): Promise<vo
     const reward = await loyaltyRepo.findRewardById(rewardId);
 
     if (!reward) {
-      res.status(404).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Not Found',
         error: 'Loyalty reward not found',
-        user: req.user
       });
       return;
     }
 
-    res.render('admin/views/programs/loyalty/rewards/view', {
+    adminRespond(req, res, 'programs/loyalty/rewards/view', {
       pageName: `Reward: ${reward.name}`,
       reward,
-      user: req.user,
+      
       success: req.query.success || null
     });
   } catch (error: any) {
     console.error('Error viewing loyalty reward:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load loyalty reward',
-      user: req.user
     });
   }
 };
@@ -325,25 +307,22 @@ export const editLoyaltyRewardForm = async (req: Request, res: Response): Promis
     const reward = await loyaltyRepo.findRewardById(rewardId);
 
     if (!reward) {
-      res.status(404).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Not Found',
         error: 'Loyalty reward not found',
-        user: req.user
       });
       return;
     }
 
-    res.render('admin/views/programs/loyalty/rewards/edit', {
+    adminRespond(req, res, 'programs/loyalty/rewards/edit', {
       pageName: `Edit: ${reward.name}`,
       reward,
-      user: req.user
     });
   } catch (error: any) {
     console.error('Error loading edit reward form:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
-      user: req.user
     });
   }
 };
@@ -386,18 +365,16 @@ export const updateLoyaltyReward = async (req: Request, res: Response): Promise<
     try {
       const reward = await loyaltyRepo.findRewardById(req.params.rewardId);
 
-      res.render('admin/views/programs/loyalty/rewards/edit', {
+      adminRespond(req, res, 'programs/loyalty/rewards/edit', {
         pageName: `Edit: ${reward?.name || 'Reward'}`,
         reward,
         error: error.message || 'Failed to update loyalty reward',
         formData: req.body,
-        user: req.user
       });
     } catch {
-      res.status(500).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Error',
         error: error.message || 'Failed to update loyalty reward',
-        user: req.user
       });
     }
   }
@@ -429,20 +406,19 @@ export const listCustomerLoyalty = async (req: Request, res: Response): Promise<
     // Get all customer points (would need to implement search/filter)
     // For now, this is a placeholder
 
-    res.render('admin/views/programs/loyalty/customers/index', {
+    adminRespond(req, res, 'programs/loyalty/customers/index', {
       pageName: 'Customer Loyalty',
       customers: [], // Would need implementation
       filters: { customerId },
       pagination: { limit, offset },
-      user: req.user,
+      
       success: req.query.success || null
     });
   } catch (error: any) {
     console.error('Error listing customer loyalty:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load customer loyalty',
-      user: req.user
     });
   }
 };
@@ -456,28 +432,26 @@ export const viewCustomerLoyalty = async (req: Request, res: Response): Promise<
     const redemptions = await loyaltyRepo.findCustomerRedemptions(customerId, 20);
 
     if (!pointsData) {
-      res.status(404).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Not Found',
         error: 'Customer loyalty account not found',
-        user: req.user
       });
       return;
     }
 
-    res.render('admin/views/programs/loyalty/customers/view', {
+    adminRespond(req, res, 'programs/loyalty/customers/view', {
       pageName: `Loyalty: ${customerId}`,
       pointsData,
       transactions,
       redemptions,
-      user: req.user,
+      
       success: req.query.success || null
     });
   } catch (error: any) {
     console.error('Error viewing customer loyalty:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load customer loyalty',
-      user: req.user
     });
   }
 };
@@ -499,17 +473,15 @@ export const loyaltyAnalytics = async (req: Request, res: Response): Promise<voi
       recentTransactions: []
     };
 
-    res.render('admin/views/programs/loyalty/analytics/index', {
+    adminRespond(req, res, 'programs/loyalty/analytics/index', {
       pageName: 'Loyalty Analytics',
       stats,
-      user: req.user
     });
   } catch (error: any) {
     console.error('Error loading loyalty analytics:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load loyalty analytics',
-      user: req.user
     });
   }
 };

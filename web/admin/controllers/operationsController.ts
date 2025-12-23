@@ -5,6 +5,7 @@
 
 import { Request, Response } from 'express';
 import { query, queryOne } from '../../../libs/db';
+import { adminRespond } from 'web/respond';
 
 // ============================================================================
 // Operations Dashboard
@@ -65,7 +66,7 @@ export const operationsDashboard = async (req: Request, res: Response): Promise<
        ORDER BY w."name"`
     );
 
-    res.render('admin/views/operations/dashboard/index', {
+    adminRespond(req, res, 'operations/dashboard/index', {
       pageName: 'Operations Dashboard',
       stats: {
         pendingFulfillments: parseInt(fulfillmentStats?.pendingFulfillments || '0'),
@@ -78,14 +79,12 @@ export const operationsDashboard = async (req: Request, res: Response): Promise<
       },
       recentFulfillments: recentFulfillments || [],
       warehouses: warehouses || [],
-      user: req.user
     });
   } catch (error: any) {
     console.error('Error loading operations dashboard:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load operations dashboard',
-      user: req.user
     });
   }
 };

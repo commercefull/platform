@@ -5,6 +5,7 @@
 
 import { Request, Response } from 'express';
 import { couponRepo } from '../../../modules/promotion/repos/couponRepo';
+import { adminRespond } from 'web/respond';
 
 // ============================================================================
 // Coupon Management
@@ -26,37 +27,34 @@ export const listCoupons = async (req: Request, res: Response): Promise<void> =>
     // Get active coupons count for stats
     const activeCoupons = await couponRepo.findActiveCoupons('default-merchant');
 
-    res.render('admin/views/promotions/coupons/index', {
+    adminRespond(req, res, 'promotions/coupons/index', {
       pageName: 'Coupon Management',
       coupons,
       activeCoupons: activeCoupons.length,
       filters: { status, isActive },
       pagination: { limit, offset },
-      user: req.user,
+      
       success: req.query.success || null
     });
   } catch (error: any) {
     console.error('Error listing coupons:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load coupons',
-      user: req.user
     });
   }
 };
 
 export const createCouponForm = async (req: Request, res: Response): Promise<void> => {
   try {
-    res.render('admin/views/promotions/coupons/create', {
+    adminRespond(req, res, 'promotions/coupons/create', {
       pageName: 'Create Coupon',
-      user: req.user
     });
   } catch (error: any) {
     console.error('Error loading create coupon form:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
-      user: req.user
     });
   }
 };
@@ -102,11 +100,10 @@ export const createCoupon = async (req: Request, res: Response): Promise<void> =
   } catch (error: any) {
     console.error('Error creating coupon:', error);
 
-    res.render('admin/views/promotions/coupons/create', {
+    adminRespond(req, res, 'promotions/coupons/create', {
       pageName: 'Create Coupon',
       error: error.message || 'Failed to create coupon',
       formData: req.body,
-      user: req.user
     });
   }
 };
@@ -118,10 +115,9 @@ export const viewCoupon = async (req: Request, res: Response): Promise<void> => 
     const coupon = await couponRepo.findById(couponId);
 
     if (!coupon) {
-      res.status(404).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Not Found',
         error: 'Coupon not found',
-        user: req.user
       });
       return;
     }
@@ -129,19 +125,18 @@ export const viewCoupon = async (req: Request, res: Response): Promise<void> => 
     // Get usage records
     const usage = await couponRepo.getUsage(couponId);
 
-    res.render('admin/views/promotions/coupons/view', {
+    adminRespond(req, res, 'promotions/coupons/view', {
       pageName: `Coupon: ${coupon.name}`,
       coupon,
       usage,
-      user: req.user,
+      
       success: req.query.success || null
     });
   } catch (error: any) {
     console.error('Error viewing coupon:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load coupon',
-      user: req.user
     });
   }
 };
@@ -153,25 +148,22 @@ export const editCouponForm = async (req: Request, res: Response): Promise<void>
     const coupon = await couponRepo.findById(couponId);
 
     if (!coupon) {
-      res.status(404).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Not Found',
         error: 'Coupon not found',
-        user: req.user
       });
       return;
     }
 
-    res.render('admin/views/promotions/coupons/edit', {
+    adminRespond(req, res, 'promotions/coupons/edit', {
       pageName: `Edit: ${coupon.name}`,
       coupon,
-      user: req.user
     });
   } catch (error: any) {
     console.error('Error loading edit coupon form:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
-      user: req.user
     });
   }
 };
@@ -220,18 +212,16 @@ export const updateCoupon = async (req: Request, res: Response): Promise<void> =
     try {
       const coupon = await couponRepo.findById(req.params.couponId);
 
-      res.render('admin/views/promotions/coupons/edit', {
+      adminRespond(req, res, 'promotions/coupons/edit', {
         pageName: `Edit: ${coupon?.name || 'Coupon'}`,
         coupon,
         error: error.message || 'Failed to update coupon',
         formData: req.body,
-        user: req.user
       });
     } catch {
-      res.status(500).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Error',
         error: error.message || 'Failed to update coupon',
-        user: req.user
       });
     }
   }

@@ -7,6 +7,7 @@ import { Request, Response } from 'express';
 import orderFulfillmentRepo from '../../../modules/order/repos/orderFulfillmentRepo';
 import orderRepo from '../../../modules/order/repos/orderRepo';
 import warehouseRepo from '../../../modules/warehouse/repos/warehouseRepo';
+import { adminRespond } from 'web/respond';
 
 // ============================================================================
 // Fulfillment Tracking & Management
@@ -35,22 +36,21 @@ export const listFulfillments = async (req: Request, res: Response): Promise<voi
     // Get warehouses for filtering
     const warehouses = await warehouseRepo.findAll(true);
 
-    res.render('admin/views/operations/fulfillments/index', {
+    adminRespond(req, res, 'operations/fulfillments/index', {
       pageName: 'Order Fulfillments',
       fulfillments,
       stats,
       filters: { status, warehouseId },
       warehouses,
       pagination: { limit, offset },
-      user: req.user,
+      
       success: req.query.success || null
     });
   } catch (error: any) {
     console.error('Error listing fulfillments:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load fulfillments',
-      user: req.user
     });
   }
 };
@@ -62,10 +62,9 @@ export const viewFulfillment = async (req: Request, res: Response): Promise<void
     const fulfillment = await orderFulfillmentRepo.findById(fulfillmentId);
 
     if (!fulfillment) {
-      res.status(404).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Not Found',
         error: 'Fulfillment not found',
-        user: req.user
       });
       return;
     }
@@ -73,19 +72,18 @@ export const viewFulfillment = async (req: Request, res: Response): Promise<void
     // Get associated order details
     const order = await orderRepo.findById(fulfillment.orderId);
 
-    res.render('admin/views/operations/fulfillments/view', {
+    adminRespond(req, res, 'operations/fulfillments/view', {
       pageName: `Fulfillment: ${fulfillment.fulfillmentNumber}`,
       fulfillment,
       order,
-      user: req.user,
+      
       success: req.query.success || null
     });
   } catch (error: any) {
     console.error('Error viewing fulfillment:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load fulfillment',
-      user: req.user
     });
   }
 };
@@ -235,7 +233,7 @@ export const warehouseDashboard = async (req: Request, res: Response): Promise<v
     // Get pending fulfillments
     const pendingFulfillments = await orderFulfillmentRepo.findByStatus('pending', 10);
 
-    res.render('admin/views/operations/dashboard', {
+    adminRespond(req, res, 'operations/dashboard', {
       pageName: 'Warehouse Operations',
       warehouseStats,
       fulfillmentStats,
@@ -243,14 +241,12 @@ export const warehouseDashboard = async (req: Request, res: Response): Promise<v
       recentShipments,
       pendingFulfillments,
       selectedWarehouse: warehouseId,
-      user: req.user
     });
   } catch (error: any) {
     console.error('Error loading warehouse dashboard:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load warehouse dashboard',
-      user: req.user
     });
   }
 };

@@ -4,6 +4,7 @@
  */
 
 import { Request, Response } from 'express';
+import { merchantRespond } from '../../respond';
 import DashboardQueryRepository from '../../../modules/analytics/infrastructure/repositories/DashboardQueryRepository';
 
 interface MerchantUser {
@@ -29,19 +30,17 @@ export const getDashboard = async (req: Request, res: Response) => {
       DashboardQueryRepository.getMerchantTopProducts(user.merchantId, 5),
     ]);
 
-    res.render('merchant/views/dashboard', {
+    merchantRespond(req, res, 'dashboard', {
       pageName: 'Dashboard',
-      user,
       stats,
       recentOrders,
       topProducts,
     });
   } catch (error) {
     console.error('Merchant dashboard error:', error);
-    res.status(500).render('merchant/views/error', {
+    merchantRespond(req, res, 'error', {
       pageName: 'Error',
       error: 'Failed to load dashboard',
-      user: req.user,
     });
   }
 };

@@ -7,6 +7,7 @@
 import { Request, Response } from 'express';
 import { query, queryOne } from '../../../libs/db';
 import { v4 as uuidv4 } from 'uuid';
+import { adminRespond } from 'web/respond';
 
 // ============================================================================
 // Types
@@ -59,20 +60,18 @@ export const storeSettings = async (req: Request, res: Response): Promise<void> 
     const currencies = await getCurrencies();
     const locales = getLocales();
 
-    res.render('admin/views/settings/store', {
+    adminRespond(req, res, 'settings/store', {
       pageName: 'Store Settings',
       settings: settings || getDefaultSettings(merchantId),
       timezones,
       currencies,
       locales,
-      user: req.user
     });
   } catch (error: any) {
     console.error('Error loading store settings:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load settings',
-      user: req.user
     });
   }
 };
@@ -157,17 +156,15 @@ export const businessInfo = async (req: Request, res: Response): Promise<void> =
       [merchantId]
     );
 
-    res.render('admin/views/settings/business', {
+    adminRespond(req, res, 'settings/business', {
       pageName: 'Business Information',
       settings: settings || getDefaultSettings(merchantId),
-      user: req.user
     });
   } catch (error: any) {
     console.error('Error loading business info:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load business info',
-      user: req.user
     });
   }
 };
@@ -216,19 +213,17 @@ export const localizationSettings = async (req: Request, res: Response): Promise
       `SELECT * FROM "country" ORDER BY "name"`
     );
 
-    res.render('admin/views/settings/localization', {
+    adminRespond(req, res, 'settings/localization', {
       pageName: 'Localization',
       languages: languages || [],
       currencies: currencies || [],
       countries: countries || [],
-      user: req.user
     });
   } catch (error: any) {
     console.error('Error loading localization settings:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load localization settings',
-      user: req.user
     });
   }
 };

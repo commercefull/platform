@@ -5,6 +5,7 @@
 
 import { Request, Response } from 'express';
 import * as giftCardRepo from '../../../modules/promotion/repos/giftCardRepo';
+import { adminRespond } from 'web/respond';
 
 // ============================================================================
 // Gift Card Management
@@ -26,7 +27,7 @@ export const listGiftCards = async (req: Request, res: Response): Promise<void> 
     const totalValue = totalResult.data.reduce((sum: number, card: any) => sum + card.currentBalance, 0);
     const activeCards = totalResult.data.filter((card: any) => card.status === 'active').length;
 
-    res.render('admin/views/promotions/gift-cards/index', {
+    adminRespond(req, res, 'promotions/gift-cards/index', {
       pageName: 'Gift Cards',
       giftCards: result.data,
       filters: { status },
@@ -36,31 +37,28 @@ export const listGiftCards = async (req: Request, res: Response): Promise<void> 
         activeCards,
         totalValue
       },
-      user: req.user,
+      
       success: req.query.success || null
     });
   } catch (error: any) {
     console.error('Error listing gift cards:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load gift cards',
-      user: req.user
     });
   }
 };
 
 export const createGiftCardForm = async (req: Request, res: Response): Promise<void> => {
   try {
-    res.render('admin/views/promotions/gift-cards/create', {
+    adminRespond(req, res, 'promotions/gift-cards/create', {
       pageName: 'Create Gift Card',
-      user: req.user
     });
   } catch (error: any) {
     console.error('Error loading create gift card form:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
-      user: req.user
     });
   }
 };
@@ -105,11 +103,10 @@ export const createGiftCard = async (req: Request, res: Response): Promise<void>
   } catch (error: any) {
     console.error('Error creating gift card:', error);
 
-    res.render('admin/views/promotions/gift-cards/create', {
+    adminRespond(req, res, 'promotions/gift-cards/create', {
       pageName: 'Create Gift Card',
       error: error.message || 'Failed to create gift card',
       formData: req.body,
-      user: req.user
     });
   }
 };
@@ -121,10 +118,9 @@ export const viewGiftCard = async (req: Request, res: Response): Promise<void> =
     const giftCard = await giftCardRepo.getGiftCard(giftCardId);
 
     if (!giftCard) {
-      res.status(404).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Not Found',
         error: 'Gift card not found',
-        user: req.user
       });
       return;
     }
@@ -132,19 +128,18 @@ export const viewGiftCard = async (req: Request, res: Response): Promise<void> =
     // Get transaction history
     const transactions = await giftCardRepo.getTransactions(giftCardId);
 
-    res.render('admin/views/promotions/gift-cards/view', {
+    adminRespond(req, res, 'promotions/gift-cards/view', {
       pageName: `Gift Card: ${giftCard.code}`,
       giftCard,
       transactions,
-      user: req.user,
+      
       success: req.query.success || null
     });
   } catch (error: any) {
     console.error('Error viewing gift card:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load gift card',
-      user: req.user
     });
   }
 };
@@ -156,25 +151,22 @@ export const editGiftCardForm = async (req: Request, res: Response): Promise<voi
     const giftCard = await giftCardRepo.getGiftCard(giftCardId);
 
     if (!giftCard) {
-      res.status(404).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Not Found',
         error: 'Gift card not found',
-        user: req.user
       });
       return;
     }
 
-    res.render('admin/views/promotions/gift-cards/edit', {
+    adminRespond(req, res, 'promotions/gift-cards/edit', {
       pageName: `Edit: ${giftCard.code}`,
       giftCard,
-      user: req.user
     });
   } catch (error: any) {
     console.error('Error loading edit gift card form:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
-      user: req.user
     });
   }
 };

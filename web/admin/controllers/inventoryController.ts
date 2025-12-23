@@ -6,6 +6,7 @@
 import { Request, Response } from 'express';
 import { query, queryOne } from '../../../libs/db';
 import { v4 as uuidv4 } from 'uuid';
+import { adminRespond } from 'web/respond';
 
 // ============================================================================
 // Types
@@ -123,7 +124,7 @@ export const listInventory = async (req: Request, res: Response): Promise<void> 
 
     const total = parseInt(countResult?.count || '0');
 
-    res.render('admin/views/inventory/index', {
+    adminRespond(req, res, 'inventory/index', {
       pageName: 'Inventory',
       inventory: inventory || [],
       stats,
@@ -136,14 +137,12 @@ export const listInventory = async (req: Request, res: Response): Promise<void> 
         pages: Math.ceil(total / limit)
       },
       filters: { search, stockStatus, locationId },
-      user: req.user
     });
   } catch (error: any) {
     console.error('Error listing inventory:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load inventory',
-      user: req.user
     });
   }
 };
@@ -248,10 +247,9 @@ export const viewInventoryHistory = async (req: Request, res: Response): Promise
     );
 
     if (!inventoryLevel) {
-      res.status(404).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Not Found',
         error: 'Inventory level not found',
-        user: req.user
       });
       return;
     }
@@ -271,7 +269,7 @@ export const viewInventoryHistory = async (req: Request, res: Response): Promise
 
     const total = parseInt(countResult?.count || '0');
 
-    res.render('admin/views/inventory/history', {
+    adminRespond(req, res, 'inventory/history', {
       pageName: `Inventory History: ${inventoryLevel.productName}`,
       inventoryLevel,
       transactions: transactions || [],
@@ -281,14 +279,12 @@ export const viewInventoryHistory = async (req: Request, res: Response): Promise
         page: parseInt(page as string),
         pages: Math.ceil(total / limit)
       },
-      user: req.user
     });
   } catch (error: any) {
     console.error('Error viewing inventory history:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load inventory history',
-      user: req.user
     });
   }
 };
@@ -310,17 +306,15 @@ export const listLocations = async (req: Request, res: Response): Promise<void> 
        ORDER BY loc."name"`
     );
 
-    res.render('admin/views/inventory/locations', {
+    adminRespond(req, res, 'inventory/locations', {
       pageName: 'Inventory Locations',
       locations: locations || [],
-      user: req.user
     });
   } catch (error: any) {
     console.error('Error listing locations:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load locations',
-      user: req.user
     });
   }
 };
@@ -345,17 +339,15 @@ export const lowStockReport = async (req: Request, res: Response): Promise<void>
        ORDER BY (il."quantity" - il."reserved") ASC`
     );
 
-    res.render('admin/views/inventory/low-stock', {
+    adminRespond(req, res, 'inventory/low-stock', {
       pageName: 'Low Stock Report',
       items: lowStockItems || [],
-      user: req.user
     });
   } catch (error: any) {
     console.error('Error generating low stock report:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to generate report',
-      user: req.user
     });
   }
 };

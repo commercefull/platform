@@ -1,10 +1,12 @@
 /**
+import { b2bRespond } from '../../respond';
  * B2B Quote Controller
  * Manages quotes with company isolation
  */
 
 import { Request, Response } from 'express';
 import { query, queryOne } from '../../../libs/db';
+import { b2bRespond } from 'web/respond';
 
 interface B2BUser {
   id: string;
@@ -57,7 +59,7 @@ export const listQuotes = async (req: Request, res: Response) => {
     const pages = Math.ceil(total / limit);
     const currentPage = parseInt(page as string);
 
-    res.render('b2b/views/quotes/index', {
+    b2bRespond(req, res, 'quotes/index', {
       pageName: 'Quotes',
       user,
       quotes: quotes || [],
@@ -72,7 +74,7 @@ export const listQuotes = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('B2B quotes error:', error);
-    res.status(500).render('b2b/views/error', {
+    b2bRespond(req, res, 'error', {
       pageName: 'Error',
       error: 'Failed to load quotes',
       user: req.user,
@@ -101,7 +103,7 @@ export const viewQuote = async (req: Request, res: Response) => {
     );
 
     if (!quote) {
-      return res.status(404).render('b2b/views/error', {
+      return b2bRespond(req, res, 'error', {
         pageName: 'Not Found',
         error: 'Quote not found',
         user,
@@ -116,7 +118,7 @@ export const viewQuote = async (req: Request, res: Response) => {
       [quoteId]
     );
 
-    res.render('b2b/views/quotes/view', {
+    b2bRespond(req, res, 'quotes/view', {
       pageName: `Quote ${quote.quoteNumber || quoteId}`,
       user,
       quote,
@@ -124,7 +126,7 @@ export const viewQuote = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('B2B view quote error:', error);
-    res.status(500).render('b2b/views/error', {
+    b2bRespond(req, res, 'error', {
       pageName: 'Error',
       error: 'Failed to load quote',
       user: req.user,
@@ -142,13 +144,13 @@ export const createQuoteForm = async (req: Request, res: Response) => {
       return res.redirect('/b2b/login');
     }
 
-    res.render('b2b/views/quotes/create', {
+    b2bRespond(req, res, 'quotes/create', {
       pageName: 'Request Quote',
       user,
     });
   } catch (error) {
     console.error('B2B create quote form error:', error);
-    res.status(500).render('b2b/views/error', {
+    b2bRespond(req, res, 'error', {
       pageName: 'Error',
       error: 'Failed to load form',
       user: req.user,

@@ -1,10 +1,12 @@
 /**
+import { b2bRespond } from '../../respond';
  * B2B Order Controller
  * Manages orders with company isolation
  */
 
 import { Request, Response } from 'express';
 import { query, queryOne } from '../../../libs/db';
+import { b2bRespond } from 'web/respond';
 
 interface B2BUser {
   id: string;
@@ -57,7 +59,7 @@ export const listOrders = async (req: Request, res: Response) => {
     const pages = Math.ceil(total / limit);
     const currentPage = parseInt(page as string);
 
-    res.render('b2b/views/orders/index', {
+    b2bRespond(req, res, 'orders/index', {
       pageName: 'Orders',
       user,
       orders: orders || [],
@@ -72,7 +74,7 @@ export const listOrders = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('B2B orders error:', error);
-    res.status(500).render('b2b/views/error', {
+    b2bRespond(req, res, 'error', {
       pageName: 'Error',
       error: 'Failed to load orders',
       user: req.user,
@@ -99,7 +101,7 @@ export const viewOrder = async (req: Request, res: Response) => {
     );
 
     if (!order) {
-      return res.status(404).render('b2b/views/error', {
+      return b2bRespond(req, res, 'error', {
         pageName: 'Not Found',
         error: 'Order not found',
         user,
@@ -114,7 +116,7 @@ export const viewOrder = async (req: Request, res: Response) => {
       [orderId]
     );
 
-    res.render('b2b/views/orders/view', {
+    b2bRespond(req, res, 'orders/view', {
       pageName: `Order ${order.orderNumber}`,
       user,
       order,
@@ -122,7 +124,7 @@ export const viewOrder = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('B2B view order error:', error);
-    res.status(500).render('b2b/views/error', {
+    b2bRespond(req, res, 'error', {
       pageName: 'Error',
       error: 'Failed to load order',
       user: req.user,
@@ -149,7 +151,7 @@ export const reorderForm = async (req: Request, res: Response) => {
     );
 
     if (!order) {
-      return res.status(404).render('b2b/views/error', {
+      return b2bRespond(req, res, 'error', {
         pageName: 'Not Found',
         error: 'Order not found',
         user,
@@ -164,7 +166,7 @@ export const reorderForm = async (req: Request, res: Response) => {
       [orderId]
     );
 
-    res.render('b2b/views/orders/reorder', {
+    b2bRespond(req, res, 'orders/reorder', {
       pageName: 'Reorder',
       user,
       originalOrder: order,
@@ -172,7 +174,7 @@ export const reorderForm = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('B2B reorder error:', error);
-    res.status(500).render('b2b/views/error', {
+    b2bRespond(req, res, 'error', {
       pageName: 'Error',
       error: 'Failed to load reorder form',
       user: req.user,

@@ -13,6 +13,7 @@ import { ProcessRefundCommand, ProcessRefundUseCase } from '../../../modules/ord
 import { OrderStatus } from '../../../modules/order/domain/valueObjects/OrderStatus';
 import { PaymentStatus } from '../../../modules/order/domain/valueObjects/PaymentStatus';
 import { FulfillmentStatus } from '../../../modules/order/domain/valueObjects/FulfillmentStatus';
+import { adminRespond } from 'web/respond';
 
 // ============================================================================
 // List Orders
@@ -46,7 +47,7 @@ export const listOrders = async (req: Request, res: Response): Promise<void> => 
     const page = Math.floor(result.offset / result.limit) + 1;
     const pages = Math.ceil(result.total / result.limit);
 
-    res.render('admin/views/orders/index', {
+    adminRespond(req, res, 'orders/index', {
       pageName: 'Orders',
       orders: result.orders,
       pagination: {
@@ -72,15 +73,14 @@ export const listOrders = async (req: Request, res: Response): Promise<void> => 
       orderStatuses: Object.values(OrderStatus),
       paymentStatuses: Object.values(PaymentStatus),
       fulfillmentStatuses: Object.values(FulfillmentStatus),
-      user: req.user,
+      
       success: req.query.success || null
     });
   } catch (error: any) {
     console.error('Error listing orders:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load orders',
-      user: req.user
     });
   }
 };
@@ -98,29 +98,27 @@ export const viewOrder = async (req: Request, res: Response): Promise<void> => {
     const order = await useCase.execute(command);
 
     if (!order) {
-      res.status(404).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Not Found',
         error: 'Order not found',
-        user: req.user
       });
       return;
     }
 
-    res.render('admin/views/orders/view', {
+    adminRespond(req, res, 'orders/view', {
       pageName: `Order #${order.orderNumber}`,
       order,
       orderStatuses: Object.values(OrderStatus),
       paymentStatuses: Object.values(PaymentStatus),
       fulfillmentStatuses: Object.values(FulfillmentStatus),
-      user: req.user,
+      
       success: req.query.success || null
     });
   } catch (error: any) {
     console.error('Error viewing order:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load order',
-      user: req.user
     });
   }
 };
@@ -203,25 +201,22 @@ export const refundForm = async (req: Request, res: Response): Promise<void> => 
     const order = await useCase.execute(command);
 
     if (!order) {
-      res.status(404).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Not Found',
         error: 'Order not found',
-        user: req.user
       });
       return;
     }
 
-    res.render('admin/views/orders/refund', {
+    adminRespond(req, res, 'orders/refund', {
       pageName: `Refund Order #${order.orderNumber}`,
       order,
-      user: req.user
     });
   } catch (error: any) {
     console.error('Error loading refund form:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load refund form',
-      user: req.user
     });
   }
 };
@@ -261,12 +256,11 @@ export const processRefund = async (req: Request, res: Response): Promise<void> 
         const useCase = new GetOrderUseCase(OrderRepo);
         const order = await useCase.execute(command);
 
-        res.render('admin/views/orders/refund', {
+        adminRespond(req, res, 'orders/refund', {
           pageName: `Refund Order #${order?.orderNumber || 'Unknown'}`,
           order,
           error: error.message || 'Failed to process refund',
           formData: req.body,
-          user: req.user
         });
       } catch {
         res.redirect(`/hub/orders/${req.params.orderId}?error=${encodeURIComponent(error.message)}`);

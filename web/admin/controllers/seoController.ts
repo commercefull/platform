@@ -4,6 +4,7 @@
  */
 
 import { Request, Response } from 'express';
+import { adminRespond } from 'web/respond';
 
 // ============================================================================
 // SEO Settings Management
@@ -29,18 +30,17 @@ export const listSEOSettings = async (req: Request, res: Response): Promise<void
       lastUpdated: new Date()
     };
 
-    res.render('admin/views/marketing/seo/index', {
+    adminRespond(req, res, 'marketing/seo/index', {
       pageName: 'SEO Settings',
       seoSettings,
-      user: req.user,
+      
       success: req.query.success || null
     });
   } catch (error: any) {
     console.error('Error loading SEO settings:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load SEO settings',
-      user: req.user
     });
   }
 };
@@ -82,11 +82,10 @@ export const updateSEOSettings = async (req: Request, res: Response): Promise<vo
   } catch (error: any) {
     console.error('Error updating SEO settings:', error);
 
-    res.render('admin/views/marketing/seo/index', {
+    adminRespond(req, res, 'marketing/seo/index', {
       pageName: 'SEO Settings',
       error: error.message || 'Failed to update SEO settings',
       formData: req.body,
-      user: req.user
     });
   }
 };

@@ -6,6 +6,7 @@
 import { Request, Response } from 'express';
 import { query, queryOne } from '../../../libs/db';
 import { v4 as uuidv4 } from 'uuid';
+import { adminRespond } from 'web/respond';
 
 // ============================================================================
 // Support Dashboard
@@ -49,7 +50,7 @@ export const supportDashboard = async (req: Request, res: Response): Promise<voi
        ORDER BY "category", "sortOrder"`
     );
 
-    res.render('admin/views/support/index', {
+    adminRespond(req, res, 'support/index', {
       pageName: 'Support Center',
       stats: {
         openTickets: parseInt(statsResult?.openTickets || '0'),
@@ -59,14 +60,12 @@ export const supportDashboard = async (req: Request, res: Response): Promise<voi
       },
       tickets: tickets || [],
       faqs: faqs || [],
-      user: req.user
     });
   } catch (error: any) {
     console.error('Error loading support dashboard:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load support dashboard',
-      user: req.user
     });
   }
 };
@@ -112,19 +111,17 @@ export const listSupportTickets = async (req: Request, res: Response): Promise<v
       [...params, parseInt(limit as string) || 50, parseInt(offset as string) || 0]
     );
 
-    res.render('admin/views/support/tickets', {
+    adminRespond(req, res, 'support/tickets', {
       pageName: 'Support Tickets',
       tickets: tickets || [],
       filters: { status, priority, search },
       pagination: { limit: parseInt(limit as string) || 50, offset: parseInt(offset as string) || 0 },
-      user: req.user
     });
   } catch (error: any) {
     console.error('Error listing support tickets:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load support tickets',
-      user: req.user
     });
   }
 };
@@ -143,10 +140,9 @@ export const viewSupportTicket = async (req: Request, res: Response): Promise<vo
     );
 
     if (!ticket) {
-      res.status(404).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Not Found',
         error: 'Support ticket not found',
-        user: req.user
       });
       return;
     }
@@ -160,18 +156,16 @@ export const viewSupportTicket = async (req: Request, res: Response): Promise<vo
       [ticketId]
     );
 
-    res.render('admin/views/support/view-ticket', {
+    adminRespond(req, res, 'support/view-ticket', {
       pageName: `Ticket: ${ticket.ticketNumber}`,
       ticket,
       messages: messages || [],
-      user: req.user
     });
   } catch (error: any) {
     console.error('Error viewing support ticket:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load support ticket',
-      user: req.user
     });
   }
 };
@@ -222,17 +216,15 @@ export const listFaqs = async (req: Request, res: Response): Promise<void> => {
        ORDER BY "category", "sortOrder"`
     );
 
-    res.render('admin/views/support/faqs', {
+    adminRespond(req, res, 'support/faqs', {
       pageName: 'FAQ Management',
       faqs: faqs || [],
-      user: req.user
     });
   } catch (error: any) {
     console.error('Error listing FAQs:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load FAQs',
-      user: req.user
     });
   }
 };

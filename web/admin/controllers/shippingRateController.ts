@@ -7,6 +7,7 @@ import { Request, Response } from 'express';
 import shippingRateRepo from '../../../modules/shipping/repos/shippingRateRepo';
 import shippingZoneRepo from '../../../modules/shipping/repos/shippingZoneRepo';
 import shippingMethodRepo from '../../../modules/shipping/repos/shippingMethodRepo';
+import { adminRespond } from 'web/respond';
 
 // ============================================================================
 // Shipping Rates Management
@@ -25,22 +26,21 @@ export const listShippingRates = async (req: Request, res: Response): Promise<vo
     const zones = await shippingZoneRepo.findAll();
     const methods = await shippingMethodRepo.findAll();
 
-    res.render('admin/views/shipping/rates/index', {
+    adminRespond(req, res, 'shipping/rates/index', {
       pageName: 'Shipping Rates',
       rates,
       zones,
       methods,
       filters: { zoneId, methodId },
       pagination: { limit, offset },
-      user: req.user,
+      
       success: req.query.success || null
     });
   } catch (error: any) {
     console.error('Error listing shipping rates:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load shipping rates',
-      user: req.user
     });
   }
 };
@@ -50,18 +50,16 @@ export const createShippingRateForm = async (req: Request, res: Response): Promi
     const zones = await shippingZoneRepo.findAll();
     const methods = await shippingMethodRepo.findAll();
 
-    res.render('admin/views/shipping/rates/create', {
+    adminRespond(req, res, 'shipping/rates/create', {
       pageName: 'Create Shipping Rate',
       zones,
       methods,
-      user: req.user
     });
   } catch (error: any) {
     console.error('Error loading create rate form:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
-      user: req.user
     });
   }
 };
@@ -116,19 +114,17 @@ export const createShippingRate = async (req: Request, res: Response): Promise<v
       const zones = await shippingZoneRepo.findAll();
       const methods = await shippingMethodRepo.findAll();
 
-      res.render('admin/views/shipping/rates/create', {
+      adminRespond(req, res, 'shipping/rates/create', {
         pageName: 'Create Shipping Rate',
         zones,
         methods,
         error: error.message || 'Failed to create shipping rate',
         formData: req.body,
-        user: req.user
       });
     } catch {
-      res.status(500).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Error',
         error: error.message || 'Failed to create shipping rate',
-        user: req.user
       });
     }
   }
@@ -141,10 +137,9 @@ export const viewShippingRate = async (req: Request, res: Response): Promise<voi
     const rate = await shippingRateRepo.findById(rateId);
 
     if (!rate) {
-      res.status(404).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Not Found',
         error: 'Shipping rate not found',
-        user: req.user
       });
       return;
     }
@@ -153,20 +148,19 @@ export const viewShippingRate = async (req: Request, res: Response): Promise<voi
     const zone = await shippingZoneRepo.findById(rate.shippingZoneId);
     const method = await shippingMethodRepo.findById(rate.shippingMethodId);
 
-    res.render('admin/views/shipping/rates/view', {
+    adminRespond(req, res, 'shipping/rates/view', {
       pageName: `Rate: ${rate.name || `${zone?.name} - ${method?.name}`}`,
       rate,
       zone,
       method,
-      user: req.user,
+      
       success: req.query.success || null
     });
   } catch (error: any) {
     console.error('Error viewing shipping rate:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load shipping rate',
-      user: req.user
     });
   }
 };
@@ -178,10 +172,9 @@ export const editShippingRateForm = async (req: Request, res: Response): Promise
     const rate = await shippingRateRepo.findById(rateId);
 
     if (!rate) {
-      res.status(404).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Not Found',
         error: 'Shipping rate not found',
-        user: req.user
       });
       return;
     }
@@ -189,19 +182,17 @@ export const editShippingRateForm = async (req: Request, res: Response): Promise
     const zones = await shippingZoneRepo.findAll();
     const methods = await shippingMethodRepo.findAll();
 
-    res.render('admin/views/shipping/rates/edit', {
+    adminRespond(req, res, 'shipping/rates/edit', {
       pageName: `Edit: ${rate.name || 'Shipping Rate'}`,
       rate,
       zones,
       methods,
-      user: req.user
     });
   } catch (error: any) {
     console.error('Error loading edit rate form:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
-      user: req.user
     });
   }
 };
@@ -258,20 +249,18 @@ export const updateShippingRate = async (req: Request, res: Response): Promise<v
       const zones = await shippingZoneRepo.findAll();
       const methods = await shippingMethodRepo.findAll();
 
-      res.render('admin/views/shipping/rates/edit', {
+      adminRespond(req, res, 'shipping/rates/edit', {
         pageName: `Edit: ${rate?.name || 'Shipping Rate'}`,
         rate,
         zones,
         methods,
         error: error.message || 'Failed to update shipping rate',
         formData: req.body,
-        user: req.user
       });
     } catch {
-      res.status(500).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Error',
         error: error.message || 'Failed to update shipping rate',
-        user: req.user
       });
     }
   }

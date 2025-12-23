@@ -6,6 +6,7 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import { SessionService } from '../../../libs/session';
+import { merchantRespond } from '../../respond';
 import MerchantRepo from '../../../modules/merchant/repos/merchantRepo';
 
 const SESSION_COOKIE_NAME = 'cf_session';
@@ -23,7 +24,7 @@ export const getLogin = async (req: Request, res: Response) => {
     }
   }
 
-  res.render('merchant/views/login', {
+  merchantRespond(req, res, 'login', {
     pageName: 'Merchant Login',
     error: null,
   });
@@ -37,7 +38,7 @@ export const postLogin = async (req: Request, res: Response) => {
     const { email, password, rememberMe } = req.body;
 
     if (!email || !password) {
-      return res.render('merchant/views/login', {
+      return merchantRespond(req, res, 'login', {
         pageName: 'Merchant Login',
         error: 'Email and password are required',
       });
@@ -47,14 +48,14 @@ export const postLogin = async (req: Request, res: Response) => {
     const merchant = await MerchantRepo.authenticateMerchant({ email, password });
 
     if (!merchant) {
-      return res.render('merchant/views/login', {
+      return merchantRespond(req, res, 'login', {
         pageName: 'Merchant Login',
         error: 'Invalid email or password',
       });
     }
 
     if (merchant.status !== 'active' && merchant.status !== 'approved') {
-      return res.render('merchant/views/login', {
+      return merchantRespond(req, res, 'login', {
         pageName: 'Merchant Login',
         error: 'Your account is not active. Please contact support.',
       });
@@ -88,7 +89,7 @@ export const postLogin = async (req: Request, res: Response) => {
     return res.redirect('/merchant');
   } catch (error) {
     console.error('Merchant login error:', error);
-    res.status(500).render('merchant/views/login', {
+    merchantRespond(req, res, 'login', {
       pageName: 'Merchant Login',
       error: 'An error occurred during login',
     });

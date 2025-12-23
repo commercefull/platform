@@ -5,6 +5,7 @@
 
 import { Request, Response } from 'express';
 import notificationTemplateRepo from '../../../modules/notification/repos/notificationTemplateRepo';
+import { adminRespond } from 'web/respond';
 
 // ============================================================================
 // Notification Templates Management
@@ -32,37 +33,34 @@ export const listNotificationTemplates = async (req: Request, res: Response): Pr
     const totalCount = await notificationTemplateRepo.count(false);
     const activeCount = await notificationTemplateRepo.count(true);
 
-    res.render('admin/views/notifications/templates/index', {
+    adminRespond(req, res, 'notifications/templates/index', {
       pageName: 'Notification Templates',
       templates,
       categories,
       filters: { activeOnly, category },
       stats: { total: totalCount, active: activeCount },
-      user: req.user,
+      
       success: req.query.success || null
     });
   } catch (error: any) {
     console.error('Error listing notification templates:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load notification templates',
-      user: req.user
     });
   }
 };
 
 export const createNotificationTemplateForm = async (req: Request, res: Response): Promise<void> => {
   try {
-    res.render('admin/views/notifications/templates/create', {
+    adminRespond(req, res, 'notifications/templates/create', {
       pageName: 'Create Notification Template',
-      user: req.user
     });
   } catch (error: any) {
     console.error('Error loading create template form:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
-      user: req.user
     });
   }
 };
@@ -107,11 +105,10 @@ export const createNotificationTemplate = async (req: Request, res: Response): P
   } catch (error: any) {
     console.error('Error creating notification template:', error);
 
-    res.render('admin/views/notifications/templates/create', {
+    adminRespond(req, res, 'notifications/templates/create', {
       pageName: 'Create Notification Template',
       error: error.message || 'Failed to create notification template',
       formData: req.body,
-      user: req.user
     });
   }
 };
@@ -123,10 +120,9 @@ export const viewNotificationTemplate = async (req: Request, res: Response): Pro
     const template = await notificationTemplateRepo.findById(templateId);
 
     if (!template) {
-      res.status(404).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Not Found',
         error: 'Notification template not found',
-        user: req.user
       });
       return;
     }
@@ -134,19 +130,18 @@ export const viewNotificationTemplate = async (req: Request, res: Response): Pro
     // Get preview data
     const preview = await notificationTemplateRepo.getPreview(templateId);
 
-    res.render('admin/views/notifications/templates/view', {
+    adminRespond(req, res, 'notifications/templates/view', {
       pageName: `Template: ${template.name}`,
       template,
       preview,
-      user: req.user,
+      
       success: req.query.success || null
     });
   } catch (error: any) {
     console.error('Error viewing notification template:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load notification template',
-      user: req.user
     });
   }
 };
@@ -158,25 +153,22 @@ export const editNotificationTemplateForm = async (req: Request, res: Response):
     const template = await notificationTemplateRepo.findById(templateId);
 
     if (!template) {
-      res.status(404).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Not Found',
         error: 'Notification template not found',
-        user: req.user
       });
       return;
     }
 
-    res.render('admin/views/notifications/templates/edit', {
+    adminRespond(req, res, 'notifications/templates/edit', {
       pageName: `Edit: ${template.name}`,
       template,
-      user: req.user
     });
   } catch (error: any) {
     console.error('Error loading edit template form:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
-      user: req.user
     });
   }
 };
@@ -227,18 +219,16 @@ export const updateNotificationTemplate = async (req: Request, res: Response): P
     try {
       const template = await notificationTemplateRepo.findById(req.params.templateId);
 
-      res.render('admin/views/notifications/templates/edit', {
+      adminRespond(req, res, 'notifications/templates/edit', {
         pageName: `Edit: ${template?.name || 'Template'}`,
         template,
         error: error.message || 'Failed to update notification template',
         formData: req.body,
-        user: req.user
       });
     } catch {
-      res.status(500).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Error',
         error: error.message || 'Failed to update notification template',
-        user: req.user
       });
     }
   }

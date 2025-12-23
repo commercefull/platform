@@ -6,6 +6,7 @@
 import { Request, Response } from 'express';
 import { query, queryOne } from '../../../libs/db';
 import { v4 as uuidv4 } from 'uuid';
+import { adminRespond } from 'web/respond';
 
 // ============================================================================
 // List Tax Settings
@@ -30,20 +31,19 @@ export const listTaxSettings = async (req: Request, res: Response): Promise<void
        ORDER BY tc."name"`
     );
 
-    res.render('admin/views/tax/index', {
+    adminRespond(req, res, 'tax/index', {
       pageName: 'Tax Management',
       taxRates: taxRates || [],
       taxZones: taxZones || [],
       taxClasses: taxClasses || [],
-      user: req.user,
+      
       success: req.query.success || null
     });
   } catch (error: any) {
     console.error('Error listing tax settings:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load tax settings',
-      user: req.user
     });
   }
 };

@@ -8,6 +8,7 @@ import { Request, Response } from 'express';
 import { query, queryOne } from '../../../libs/db';
 import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcryptjs';
+import { adminRespond } from 'web/respond';
 
 // ============================================================================
 // Types
@@ -82,7 +83,7 @@ export const listUsers = async (req: Request, res: Response): Promise<void> => {
 
     const total = parseInt(countResult?.count || '0');
 
-    res.render('admin/views/users/index', {
+    adminRespond(req, res, 'users/index', {
       pageName: 'Admin Users',
       users: users || [],
       roles: roles || [],
@@ -90,14 +91,12 @@ export const listUsers = async (req: Request, res: Response): Promise<void> => {
       currentPage: parseInt(page as string),
       totalPages: Math.ceil(total / limit),
       filters: { status, role },
-      user: req.user
     });
   } catch (error: any) {
     console.error('Error listing users:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load users',
-      user: req.user
     });
   }
 };
@@ -116,10 +115,9 @@ export const viewUser = async (req: Request, res: Response): Promise<void> => {
     );
 
     if (!user) {
-      res.status(404).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Not Found',
         error: 'User not found',
-        user: req.user
       });
       return;
     }
@@ -139,19 +137,17 @@ export const viewUser = async (req: Request, res: Response): Promise<void> => {
       `SELECT * FROM "role" ORDER BY "name"`
     );
 
-    res.render('admin/views/users/view', {
+    adminRespond(req, res, 'users/view', {
       pageName: 'User Details',
       adminUser: user,
       permissions,
       roles: roles || [],
-      user: req.user
     });
   } catch (error: any) {
     console.error('Error viewing user:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load user',
-      user: req.user
     });
   }
 };
@@ -162,17 +158,15 @@ export const createUserForm = async (req: Request, res: Response): Promise<void>
       `SELECT * FROM "role" ORDER BY "name"`
     );
 
-    res.render('admin/views/users/create', {
+    adminRespond(req, res, 'users/create', {
       pageName: 'Create Admin User',
       roles: roles || [],
-      user: req.user
     });
   } catch (error: any) {
     console.error('Error loading create user form:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
-      user: req.user
     });
   }
 };
@@ -309,18 +303,16 @@ export const listRoles = async (req: Request, res: Response): Promise<void> => {
        ORDER BY r."name"`
     );
 
-    res.render('admin/views/users/roles', {
+    adminRespond(req, res, 'users/roles', {
       pageName: 'Roles & Permissions',
       roles: roles || [],
       availablePermissions: AVAILABLE_PERMISSIONS,
-      user: req.user
     });
   } catch (error: any) {
     console.error('Error listing roles:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load roles',
-      user: req.user
     });
   }
 };

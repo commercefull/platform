@@ -5,6 +5,7 @@
 
 import { Request, Response } from 'express';
 import warehouseRepo from '../../../modules/warehouse/repos/warehouseRepo';
+import { adminRespond } from 'web/respond';
 
 // ============================================================================
 // Warehouse Management
@@ -19,37 +20,34 @@ export const listWarehouses = async (req: Request, res: Response): Promise<void>
     const warehouses = await warehouseRepo.findAll(activeOnly);
     const stats = await warehouseRepo.getStatistics();
 
-    res.render('admin/views/operations/warehouses/index', {
+    adminRespond(req, res, 'operations/warehouses/index', {
       pageName: 'Warehouses',
       warehouses,
       stats,
       filters: { activeOnly },
       pagination: { limit, offset },
-      user: req.user,
+      
       success: req.query.success || null
     });
   } catch (error: any) {
     console.error('Error listing warehouses:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load warehouses',
-      user: req.user
     });
   }
 };
 
 export const createWarehouseForm = async (req: Request, res: Response): Promise<void> => {
   try {
-    res.render('admin/views/operations/warehouses/create', {
+    adminRespond(req, res, 'operations/warehouses/create', {
       pageName: 'Create Warehouse',
-      user: req.user
     });
   } catch (error: any) {
     console.error('Error loading create warehouse form:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
-      user: req.user
     });
   }
 };
@@ -110,11 +108,10 @@ export const createWarehouse = async (req: Request, res: Response): Promise<void
   } catch (error: any) {
     console.error('Error creating warehouse:', error);
 
-    res.render('admin/views/operations/warehouses/create', {
+    adminRespond(req, res, 'operations/warehouses/create', {
       pageName: 'Create Warehouse',
       error: error.message || 'Failed to create warehouse',
       formData: req.body,
-      user: req.user
     });
   }
 };
@@ -126,26 +123,24 @@ export const viewWarehouse = async (req: Request, res: Response): Promise<void> 
     const warehouse = await warehouseRepo.findById(warehouseId);
 
     if (!warehouse) {
-      res.status(404).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Not Found',
         error: 'Warehouse not found',
-        user: req.user
       });
       return;
     }
 
-    res.render('admin/views/operations/warehouses/view', {
+    adminRespond(req, res, 'operations/warehouses/view', {
       pageName: `Warehouse: ${warehouse.name}`,
       warehouse,
-      user: req.user,
+      
       success: req.query.success || null
     });
   } catch (error: any) {
     console.error('Error viewing warehouse:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load warehouse',
-      user: req.user
     });
   }
 };
@@ -157,25 +152,22 @@ export const editWarehouseForm = async (req: Request, res: Response): Promise<vo
     const warehouse = await warehouseRepo.findById(warehouseId);
 
     if (!warehouse) {
-      res.status(404).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Not Found',
         error: 'Warehouse not found',
-        user: req.user
       });
       return;
     }
 
-    res.render('admin/views/operations/warehouses/edit', {
+    adminRespond(req, res, 'operations/warehouses/edit', {
       pageName: `Edit: ${warehouse.name}`,
       warehouse,
-      user: req.user
     });
   } catch (error: any) {
     console.error('Error loading edit warehouse form:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
-      user: req.user
     });
   }
 };
@@ -244,18 +236,16 @@ export const updateWarehouse = async (req: Request, res: Response): Promise<void
     try {
       const warehouse = await warehouseRepo.findById(req.params.warehouseId);
 
-      res.render('admin/views/operations/warehouses/edit', {
+      adminRespond(req, res, 'operations/warehouses/edit', {
         pageName: `Edit: ${warehouse?.name || 'Warehouse'}`,
         warehouse,
         error: error.message || 'Failed to update warehouse',
         formData: req.body,
-        user: req.user
       });
     } catch {
-      res.status(500).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Error',
         error: error.message || 'Failed to update warehouse',
-        user: req.user
       });
     }
   }

@@ -4,6 +4,7 @@
  */
 
 import { Request, Response } from 'express';
+import { b2bRespond } from '../../respond';
 import { query, queryOne } from '../../../libs/db';
 
 interface B2BUser {
@@ -102,19 +103,17 @@ export const getDashboard = async (req: Request, res: Response) => {
       getPendingApprovals(user.companyId, user.id, user.role, 5),
     ]);
 
-    res.render('b2b/views/dashboard', {
+    b2bRespond(req, res, 'dashboard', {
       pageName: 'Dashboard',
-      user,
       stats,
       recentOrders,
       pendingApprovals,
     });
   } catch (error) {
     console.error('B2B dashboard error:', error);
-    res.status(500).render('b2b/views/error', {
+    b2bRespond(req, res, 'error', {
       pageName: 'Error',
       error: 'Failed to load dashboard',
-      user: req.user,
     });
   }
 };

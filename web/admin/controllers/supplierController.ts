@@ -5,6 +5,7 @@
 
 import { Request, Response } from 'express';
 import supplierRepo from '../../../modules/supplier/repos/supplierRepo';
+import { adminRespond } from 'web/respond';
 
 // ============================================================================
 // Supplier Management
@@ -29,37 +30,34 @@ export const listSuppliers = async (req: Request, res: Response): Promise<void> 
     // Get statistics
     const stats = await supplierRepo.getStatistics();
 
-    res.render('admin/views/operations/suppliers/index', {
+    adminRespond(req, res, 'operations/suppliers/index', {
       pageName: 'Suppliers',
       suppliers,
       stats,
       filters: { status, isActive, isApproved },
       pagination: { limit, offset },
-      user: req.user,
+      
       success: req.query.success || null
     });
   } catch (error: any) {
     console.error('Error listing suppliers:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load suppliers',
-      user: req.user
     });
   }
 };
 
 export const createSupplierForm = async (req: Request, res: Response): Promise<void> => {
   try {
-    res.render('admin/views/operations/suppliers/create', {
+    adminRespond(req, res, 'operations/suppliers/create', {
       pageName: 'Create Supplier',
-      user: req.user
     });
   } catch (error: any) {
     console.error('Error loading create supplier form:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
-      user: req.user
     });
   }
 };
@@ -110,11 +108,10 @@ export const createSupplier = async (req: Request, res: Response): Promise<void>
   } catch (error: any) {
     console.error('Error creating supplier:', error);
 
-    res.render('admin/views/operations/suppliers/create', {
+    adminRespond(req, res, 'operations/suppliers/create', {
       pageName: 'Create Supplier',
       error: error.message || 'Failed to create supplier',
       formData: req.body,
-      user: req.user
     });
   }
 };
@@ -126,26 +123,24 @@ export const viewSupplier = async (req: Request, res: Response): Promise<void> =
     const supplier = await supplierRepo.findById(supplierId);
 
     if (!supplier) {
-      res.status(404).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Not Found',
         error: 'Supplier not found',
-        user: req.user
       });
       return;
     }
 
-    res.render('admin/views/operations/suppliers/view', {
+    adminRespond(req, res, 'operations/suppliers/view', {
       pageName: `Supplier: ${supplier.name}`,
       supplier,
-      user: req.user,
+      
       success: req.query.success || null
     });
   } catch (error: any) {
     console.error('Error viewing supplier:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load supplier',
-      user: req.user
     });
   }
 };
@@ -157,25 +152,22 @@ export const editSupplierForm = async (req: Request, res: Response): Promise<voi
     const supplier = await supplierRepo.findById(supplierId);
 
     if (!supplier) {
-      res.status(404).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Not Found',
         error: 'Supplier not found',
-        user: req.user
       });
       return;
     }
 
-    res.render('admin/views/operations/suppliers/edit', {
+    adminRespond(req, res, 'operations/suppliers/edit', {
       pageName: `Edit: ${supplier.name}`,
       supplier,
-      user: req.user
     });
   } catch (error: any) {
     console.error('Error loading edit supplier form:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
-      user: req.user
     });
   }
 };
@@ -234,18 +226,16 @@ export const updateSupplier = async (req: Request, res: Response): Promise<void>
     try {
       const supplier = await supplierRepo.findById(req.params.supplierId);
 
-      res.render('admin/views/operations/suppliers/edit', {
+      adminRespond(req, res, 'operations/suppliers/edit', {
         pageName: `Edit: ${supplier?.name || 'Supplier'}`,
         supplier,
         error: error.message || 'Failed to update supplier',
         formData: req.body,
-        user: req.user
       });
     } catch {
-      res.status(500).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Error',
         error: error.message || 'Failed to update supplier',
-        user: req.user
       });
     }
   }

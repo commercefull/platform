@@ -1,10 +1,12 @@
 /**
+import { b2bRespond } from '../../respond';
  * B2B Approval Controller
  * Manages approval workflows with company isolation
  */
 
 import { Request, Response } from 'express';
 import { query, queryOne } from '../../../libs/db';
+import { b2bRespond } from 'web/respond';
 
 interface B2BUser {
   id: string;
@@ -26,7 +28,7 @@ export const listPendingApprovals = async (req: Request, res: Response) => {
 
     // Only approvers and admins can see approvals
     if (user.role !== 'approver' && user.role !== 'admin') {
-      return res.status(403).render('b2b/views/error', {
+      return b2bRespond(req, res, 'error', {
         pageName: 'Access Denied',
         error: 'You do not have permission to view approvals',
         user,
@@ -57,7 +59,7 @@ export const listPendingApprovals = async (req: Request, res: Response) => {
     const pages = Math.ceil(total / limit);
     const currentPage = parseInt(page as string);
 
-    res.render('b2b/views/approvals/pending', {
+    b2bRespond(req, res, 'approvals/pending', {
       pageName: 'Pending Approvals',
       user,
       approvals: approvals || [],
@@ -71,7 +73,7 @@ export const listPendingApprovals = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('B2B pending approvals error:', error);
-    res.status(500).render('b2b/views/error', {
+    b2bRespond(req, res, 'error', {
       pageName: 'Error',
       error: 'Failed to load approvals',
       user: req.user,
@@ -116,7 +118,7 @@ export const listApprovalHistory = async (req: Request, res: Response) => {
     const pages = Math.ceil(total / limit);
     const currentPage = parseInt(page as string);
 
-    res.render('b2b/views/approvals/history', {
+    b2bRespond(req, res, 'approvals/history', {
       pageName: 'Approval History',
       user,
       approvals: approvals || [],
@@ -130,7 +132,7 @@ export const listApprovalHistory = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('B2B approval history error:', error);
-    res.status(500).render('b2b/views/error', {
+    b2bRespond(req, res, 'error', {
       pageName: 'Error',
       error: 'Failed to load approval history',
       user: req.user,
@@ -159,14 +161,14 @@ export const viewApproval = async (req: Request, res: Response) => {
     );
 
     if (!approval) {
-      return res.status(404).render('b2b/views/error', {
+      return b2bRespond(req, res, 'error', {
         pageName: 'Not Found',
         error: 'Approval request not found',
         user,
       });
     }
 
-    res.render('b2b/views/approvals/view', {
+    b2bRespond(req, res, 'approvals/view', {
       pageName: 'Approval Request',
       user,
       approval,
@@ -174,7 +176,7 @@ export const viewApproval = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('B2B view approval error:', error);
-    res.status(500).render('b2b/views/error', {
+    b2bRespond(req, res, 'error', {
       pageName: 'Error',
       error: 'Failed to load approval',
       user: req.user,

@@ -1,10 +1,12 @@
 /**
+import { merchantRespond } from '../../respond';
  * Merchant Order Controller
  * Manages orders with merchant isolation
  */
 
 import { Request, Response } from 'express';
 import { query, queryOne } from '../../../libs/db';
+import { merchantRespond } from 'web/respond';
 
 interface MerchantUser {
   id: string;
@@ -84,7 +86,7 @@ export const listOrders = async (req: Request, res: Response) => {
     const pages = Math.ceil(total / limit);
     const currentPage = parseInt(page as string);
 
-    res.render('merchant/views/orders/index', {
+    merchantRespond(req, res, 'orders/index', {
       pageName: 'Orders',
       user,
       orders: orders || [],
@@ -99,7 +101,7 @@ export const listOrders = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('Merchant orders error:', error);
-    res.status(500).render('merchant/views/error', {
+    merchantRespond(req, res, 'error', {
       pageName: 'Error',
       error: 'Failed to load orders',
       user: req.user,
@@ -136,7 +138,7 @@ export const viewOrder = async (req: Request, res: Response) => {
     );
 
     if (!orderCheck) {
-      return res.status(404).render('merchant/views/error', {
+      return merchantRespond(req, res, 'error', {
         pageName: 'Not Found',
         error: 'Order not found',
         user,
@@ -152,7 +154,7 @@ export const viewOrder = async (req: Request, res: Response) => {
       [orderId, user.merchantId]
     );
 
-    res.render('merchant/views/orders/view', {
+    merchantRespond(req, res, 'orders/view', {
       pageName: `Order ${orderCheck.orderNumber}`,
       user,
       order: orderCheck,
@@ -160,7 +162,7 @@ export const viewOrder = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('Merchant view order error:', error);
-    res.status(500).render('merchant/views/error', {
+    merchantRespond(req, res, 'error', {
       pageName: 'Error',
       error: 'Failed to load order',
       user: req.user,

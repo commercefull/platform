@@ -4,6 +4,7 @@
  */
 
 import { Request, Response } from 'express';
+import { merchantRespond } from '../../respond';
 import { query, queryOne } from '../../../libs/db';
 
 interface MerchantUser {
@@ -64,9 +65,8 @@ export const listProducts = async (req: Request, res: Response) => {
     const pages = Math.ceil(total / limit);
     const currentPage = parseInt(page as string);
 
-    res.render('merchant/views/products/index', {
+    merchantRespond(req, res, 'products/index', {
       pageName: 'My Products',
-      user,
       products: products || [],
       pagination: {
         total,
@@ -79,7 +79,7 @@ export const listProducts = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('Merchant products error:', error);
-    res.status(500).render('merchant/views/error', {
+    merchantRespond(req, res, 'error', {
       pageName: 'Error',
       error: 'Failed to load products',
       user: req.user,
@@ -110,21 +110,21 @@ export const viewProduct = async (req: Request, res: Response) => {
     );
 
     if (!product) {
-      return res.status(404).render('merchant/views/error', {
+      return merchantRespond(req, res, 'error', {
         pageName: 'Not Found',
         error: 'Product not found',
         user,
       });
     }
 
-    res.render('merchant/views/products/view', {
+    merchantRespond(req, res, 'products/view', {
       pageName: product.name,
       user,
       product,
     });
   } catch (error) {
     console.error('Merchant view product error:', error);
-    res.status(500).render('merchant/views/error', {
+    merchantRespond(req, res, 'error', {
       pageName: 'Error',
       error: 'Failed to load product',
       user: req.user,
@@ -147,14 +147,14 @@ export const createProductForm = async (req: Request, res: Response) => {
       `SELECT "categoryId", "name" FROM "category" WHERE "deletedAt" IS NULL ORDER BY "name"`
     );
 
-    res.render('merchant/views/products/create', {
+    merchantRespond(req, res, 'products/create', {
       pageName: 'Create Product',
       user,
       categories: categories || [],
     });
   } catch (error) {
     console.error('Merchant create product form error:', error);
-    res.status(500).render('merchant/views/error', {
+    merchantRespond(req, res, 'error', {
       pageName: 'Error',
       error: 'Failed to load form',
       user: req.user,
@@ -181,7 +181,7 @@ export const editProductForm = async (req: Request, res: Response) => {
     );
 
     if (!product) {
-      return res.status(404).render('merchant/views/error', {
+      return merchantRespond(req, res, 'error', {
         pageName: 'Not Found',
         error: 'Product not found',
         user,
@@ -192,7 +192,7 @@ export const editProductForm = async (req: Request, res: Response) => {
       `SELECT "categoryId", "name" FROM "category" WHERE "deletedAt" IS NULL ORDER BY "name"`
     );
 
-    res.render('merchant/views/products/edit', {
+    merchantRespond(req, res, 'products/edit', {
       pageName: `Edit: ${product.name}`,
       user,
       product,
@@ -200,7 +200,7 @@ export const editProductForm = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('Merchant edit product form error:', error);
-    res.status(500).render('merchant/views/error', {
+    merchantRespond(req, res, 'error', {
       pageName: 'Error',
       error: 'Failed to load product',
       user: req.user,

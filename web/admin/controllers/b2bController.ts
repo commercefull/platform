@@ -15,8 +15,6 @@ import {
   saveCompanyUser,
   deleteCompanyUser,
   getCompanyAddresses,
-  saveCompanyAddress,
-  deleteCompanyAddress
 } from '../../../modules/b2b/repos/companyRepo';
 
 import {
@@ -24,7 +22,6 @@ import {
   getQuotes,
   saveQuote,
   sendQuote,
-  markQuoteViewed,
   acceptQuote,
   rejectQuote,
   convertQuoteToOrder,
@@ -34,6 +31,7 @@ import {
   saveQuoteItem,
   deleteQuoteItem
 } from '../../../modules/b2b/repos/quoteRepo';
+import { adminRespond } from 'web/respond';
 
 // ============================================================================
 // B2B Company Management
@@ -53,37 +51,34 @@ export const listB2bCompanies = async (req: Request, res: Response): Promise<voi
       search
     }, { limit, offset });
 
-    res.render('admin/views/programs/b2b/companies/index', {
+    adminRespond(req, res, 'programs/b2b/companies/index', {
       pageName: 'B2B Companies',
       companies: result.data,
       total: result.total,
       filters: { status, tier, search },
       pagination: { limit, offset },
-      user: req.user,
+      
       success: req.query.success || null
     });
   } catch (error: any) {
     console.error('Error listing B2B companies:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load B2B companies',
-      user: req.user
     });
   }
 };
 
 export const createB2bCompanyForm = async (req: Request, res: Response): Promise<void> => {
   try {
-    res.render('admin/views/programs/b2b/companies/create', {
+    adminRespond(req, res, 'programs/b2b/companies/create', {
       pageName: 'Create B2B Company',
-      user: req.user
     });
   } catch (error: any) {
     console.error('Error loading create company form:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
-      user: req.user
     });
   }
 };
@@ -148,11 +143,10 @@ export const createB2bCompany = async (req: Request, res: Response): Promise<voi
   } catch (error: any) {
     console.error('Error creating B2B company:', error);
 
-    res.render('admin/views/programs/b2b/companies/create', {
+    adminRespond(req, res, 'programs/b2b/companies/create', {
       pageName: 'Create B2B Company',
       error: error.message || 'Failed to create B2B company',
       formData: req.body,
-      user: req.user
     });
   }
 };
@@ -164,10 +158,9 @@ export const viewB2bCompany = async (req: Request, res: Response): Promise<void>
     const company = await getCompany(companyId);
 
     if (!company) {
-      res.status(404).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Not Found',
         error: 'B2B company not found',
-        user: req.user
       });
       return;
     }
@@ -176,20 +169,19 @@ export const viewB2bCompany = async (req: Request, res: Response): Promise<void>
     const users = await getCompanyUsers(companyId);
     const addresses = await getCompanyAddresses(companyId);
 
-    res.render('admin/views/programs/b2b/companies/view', {
+    adminRespond(req, res, 'programs/b2b/companies/view', {
       pageName: `Company: ${company.name}`,
       company,
       users,
       addresses,
-      user: req.user,
+      
       success: req.query.success || null
     });
   } catch (error: any) {
     console.error('Error viewing B2B company:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load B2B company',
-      user: req.user
     });
   }
 };
@@ -201,25 +193,22 @@ export const editB2bCompanyForm = async (req: Request, res: Response): Promise<v
     const company = await getCompany(companyId);
 
     if (!company) {
-      res.status(404).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Not Found',
         error: 'B2B company not found',
-        user: req.user
       });
       return;
     }
 
-    res.render('admin/views/programs/b2b/companies/edit', {
+    adminRespond(req, res, 'programs/b2b/companies/edit', {
       pageName: `Edit: ${company.name}`,
       company,
-      user: req.user
     });
   } catch (error: any) {
     console.error('Error loading edit company form:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
-      user: req.user
     });
   }
 };
@@ -293,18 +282,16 @@ export const updateB2bCompany = async (req: Request, res: Response): Promise<voi
     try {
       const company = await getCompany(req.params.companyId);
 
-      res.render('admin/views/programs/b2b/companies/edit', {
+      adminRespond(req, res, 'programs/b2b/companies/edit', {
         pageName: `Edit: ${company?.name || 'Company'}`,
         company,
         error: error.message || 'Failed to update B2B company',
         formData: req.body,
-        user: req.user
       });
     } catch {
-      res.status(500).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Error',
         error: error.message || 'Failed to update B2B company',
-        user: req.user
       });
     }
   }
@@ -360,30 +347,28 @@ export const listB2bCompanyUsers = async (req: Request, res: Response): Promise<
 
     const company = await getCompany(companyId);
     if (!company) {
-      res.status(404).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Not Found',
         error: 'B2B company not found',
-        user: req.user
       });
       return;
     }
 
     const users = await getCompanyUsers(companyId, includeInactive);
 
-    res.render('admin/views/programs/b2b/users/index', {
+    adminRespond(req, res, 'programs/b2b/users/index', {
       pageName: `Users: ${company.name}`,
       company,
       users,
       filters: { includeInactive },
-      user: req.user,
+      
       success: req.query.success || null
     });
   } catch (error: any) {
     console.error('Error listing B2B company users:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load B2B company users',
-      user: req.user
     });
   }
 };
@@ -453,22 +438,21 @@ export const listB2bQuotes = async (req: Request, res: Response): Promise<void> 
     // Get companies for filtering
     const companies = await getCompanies();
 
-    res.render('admin/views/programs/b2b/quotes/index', {
+    adminRespond(req, res, 'programs/b2b/quotes/index', {
       pageName: 'B2B Quotes',
       quotes: result.data,
       total: result.total,
       companies,
       filters: { companyId, customerId, status },
       pagination: { limit, offset },
-      user: req.user,
+      
       success: req.query.success || null
     });
   } catch (error: any) {
     console.error('Error listing B2B quotes:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load B2B quotes',
-      user: req.user
     });
   }
 };
@@ -480,18 +464,16 @@ export const createB2bQuoteForm = async (req: Request, res: Response): Promise<v
     // Get companies for dropdown
     const companies = await getCompanies();
 
-    res.render('admin/views/programs/b2b/quotes/create', {
+    adminRespond(req, res, 'programs/b2b/quotes/create', {
       pageName: 'Create B2B Quote',
       companyId,
       companies,
-      user: req.user
     });
   } catch (error: any) {
     console.error('Error loading create quote form:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
-      user: req.user
     });
   }
 };
@@ -533,18 +515,16 @@ export const createB2bQuote = async (req: Request, res: Response): Promise<void>
     try {
       const companies = await getCompanies();
 
-      res.render('admin/views/programs/b2b/quotes/create', {
+      adminRespond(req, res, 'programs/b2b/quotes/create', {
         pageName: 'Create B2B Quote',
         error: error.message || 'Failed to create B2B quote',
         formData: req.body,
         companies,
-        user: req.user
       });
     } catch {
-      res.status(500).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Error',
         error: error.message || 'Failed to create B2B quote',
-        user: req.user
       });
     }
   }
@@ -557,10 +537,9 @@ export const viewB2bQuote = async (req: Request, res: Response): Promise<void> =
     const quote = await getQuote(quoteId);
 
     if (!quote) {
-      res.status(404).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Not Found',
         error: 'B2B quote not found',
-        user: req.user
       });
       return;
     }
@@ -574,20 +553,19 @@ export const viewB2bQuote = async (req: Request, res: Response): Promise<void> =
       company = await getCompany(quote.b2bCompanyId);
     }
 
-    res.render('admin/views/programs/b2b/quotes/view', {
+    adminRespond(req, res, 'programs/b2b/quotes/view', {
       pageName: `Quote: ${quote.quoteNumber}`,
       quote,
       items,
       company,
-      user: req.user,
+      
       success: req.query.success || null
     });
   } catch (error: any) {
     console.error('Error viewing B2B quote:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load B2B quote',
-      user: req.user
     });
   }
 };
@@ -599,10 +577,9 @@ export const editB2bQuoteForm = async (req: Request, res: Response): Promise<voi
     const quote = await getQuote(quoteId);
 
     if (!quote) {
-      res.status(404).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Not Found',
         error: 'B2B quote not found',
-        user: req.user
       });
       return;
     }
@@ -613,19 +590,17 @@ export const editB2bQuoteForm = async (req: Request, res: Response): Promise<voi
     // Get companies for dropdown
     const companies = await getCompanies();
 
-    res.render('admin/views/programs/b2b/quotes/edit', {
+    adminRespond(req, res, 'programs/b2b/quotes/edit', {
       pageName: `Edit Quote: ${quote.quoteNumber}`,
       quote,
       items,
       companies,
-      user: req.user
     });
   } catch (error: any) {
     console.error('Error loading edit quote form:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
-      user: req.user
     });
   }
 };
@@ -687,20 +662,18 @@ export const updateB2bQuote = async (req: Request, res: Response): Promise<void>
       const items = await getQuoteItems(req.params.quoteId);
       const companies = await getCompanies();
 
-      res.render('admin/views/programs/b2b/quotes/edit', {
+      adminRespond(req, res, 'programs/b2b/quotes/edit', {
         pageName: `Edit Quote: ${quote?.quoteNumber || 'Quote'}`,
         quote,
         items,
         companies,
         error: error.message || 'Failed to update B2B quote',
         formData: req.body,
-        user: req.user
       });
     } catch {
-      res.status(500).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Error',
         error: error.message || 'Failed to update B2B quote',
-        user: req.user
       });
     }
   }
@@ -920,17 +893,15 @@ export const b2bQuoteAnalytics = async (req: Request, res: Response): Promise<vo
       quoteApprovalTime: 0
     };
 
-    res.render('admin/views/programs/b2b/analytics/index', {
+    adminRespond(req, res, 'programs/b2b/analytics/index', {
       pageName: 'B2B Quote Analytics',
       stats,
-      user: req.user
     });
   } catch (error: any) {
     console.error('Error loading B2B quote analytics:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load B2B quote analytics',
-      user: req.user
     });
   }
 };

@@ -41,7 +41,7 @@ export const listProducts = async (req: Request, res: Response): Promise<void> =
     const page = Math.floor(result.offset / result.limit) + 1;
     const pages = Math.ceil(result.total / result.limit);
 
-    res.render('admin/views/products/index', {
+    adminRespond(req, res, 'products/index', {
       pageName: 'Products',
       products: result.products,
       pagination: {
@@ -60,15 +60,14 @@ export const listProducts = async (req: Request, res: Response): Promise<void> =
         orderBy: orderBy || 'createdAt',
         orderDirection: orderDirection || 'desc'
       },
-      user: req.user,
+      
       success: req.query.success || null
     });
   } catch (error: any) {
     console.error('Error listing products:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load products',
-      user: req.user
     });
   }
 };
@@ -86,26 +85,24 @@ export const viewProduct = async (req: Request, res: Response): Promise<void> =>
     const product = await useCase.execute(command);
 
     if (!product) {
-      res.status(404).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Not Found',
         error: 'Product not found',
-        user: req.user
       });
       return;
     }
 
-    res.render('admin/views/products/view', {
+    adminRespond(req, res, 'products/view', {
       pageName: `Product: ${product.name}`,
       product,
-      user: req.user,
+      
       success: req.query.success || null
     });
   } catch (error: any) {
     console.error('Error viewing product:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load product',
-      user: req.user
     });
   }
 };
@@ -118,20 +115,19 @@ export const createProductForm = async (req: Request, res: Response): Promise<vo
   try {
     // TODO: Fetch product types, categories, attributes using their respective use cases
     // For now, we'll pass empty arrays - these will be populated when we create the use cases
-    res.render('admin/views/products/create', {
+    adminRespond(req, res, 'products/create', {
       pageName: 'Create Product',
       productTypes: [],
       categories: [],
       attributes: [],
-      user: req.user,
+      
       formData: {}
     });
   } catch (error: any) {
     console.error('Error loading create product form:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
-      user: req.user
     });
   }
 };
@@ -151,14 +147,13 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
     } = req.body;
 
     if (!name?.trim()) {
-      res.render('admin/views/products/create', {
+      adminRespond(req, res, 'products/create', {
         pageName: 'Create Product',
         error: 'Product name is required',
         formData: req.body,
         productTypes: [],
         categories: [],
         attributes: [],
-        user: req.user
       });
       return;
     }
@@ -202,14 +197,13 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
     res.redirect(`/hub/products/${product.productId}?success=Product created successfully`);
   } catch (error: any) {
     console.error('Error creating product:', error);
-    res.render('admin/views/products/create', {
+    adminRespond(req, res, 'products/create', {
       pageName: 'Create Product',
       error: error.message || 'Failed to create product',
       formData: req.body,
       productTypes: [],
       categories: [],
       attributes: [],
-      user: req.user
     });
   }
 };
@@ -227,28 +221,25 @@ export const editProductForm = async (req: Request, res: Response): Promise<void
     const product = await useCase.execute(command);
 
     if (!product) {
-      res.status(404).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Not Found',
         error: 'Product not found',
-        user: req.user
       });
       return;
     }
 
-    res.render('admin/views/products/edit', {
+    adminRespond(req, res, 'products/edit', {
       pageName: `Edit: ${product.name}`,
       product,
       productTypes: [],
       categories: [],
       attributes: [],
-      user: req.user
     });
   } catch (error: any) {
     console.error('Error loading edit product form:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
-      user: req.user
     });
   }
 };
@@ -276,20 +267,18 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
       const getUseCase = new GetProductUseCase(ProductRepo);
       const product = await getUseCase.execute(getCommand);
 
-      res.render('admin/views/products/edit', {
+      adminRespond(req, res, 'products/edit', {
         pageName: `Edit: ${product?.name || 'Product'}`,
         product,
         error: error.message || 'Failed to update product',
         productTypes: [],
         categories: [],
         attributes: [],
-        user: req.user
       });
     } catch {
-      res.status(500).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Error',
         error: error.message || 'Failed to update product',
-        user: req.user
       });
     }
   }

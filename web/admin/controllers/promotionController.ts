@@ -37,7 +37,7 @@ export const listPromotions = async (req: Request, res: Response): Promise<void>
     const page = Math.floor((result.offset || 0) / (result.limit || 50)) + 1;
     const pages = Math.ceil(result.total / (result.limit || 50));
 
-    res.render('admin/views/promotions/index', {
+    adminRespond(req, res, 'promotions/index', {
       pageName: 'Promotions',
       promotions: result.data,
       pagination: {
@@ -53,15 +53,14 @@ export const listPromotions = async (req: Request, res: Response): Promise<void>
         type: type || '',
         search: search || ''
       },
-      user: req.user,
+      
       success: req.query.success || null
     });
   } catch (error: any) {
     console.error('Error listing promotions:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load promotions',
-      user: req.user
     });
   }
 };
@@ -72,16 +71,14 @@ export const listPromotions = async (req: Request, res: Response): Promise<void>
 
 export const createPromotionForm = async (req: Request, res: Response): Promise<void> => {
   try {
-    res.render('admin/views/promotions/create', {
+    adminRespond(req, res, 'promotions/create', {
       pageName: 'Create Promotion',
-      user: req.user
     });
   } catch (error: any) {
     console.error('Error loading create promotion form:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
-      user: req.user
     });
   }
 };
@@ -128,11 +125,10 @@ export const createPromotion = async (req: Request, res: Response): Promise<void
     console.error('Error creating promotion:', error);
 
     // Reload form with error
-    res.render('admin/views/promotions/create', {
+    adminRespond(req, res, 'promotions/create', {
       pageName: 'Create Promotion',
       error: error.message || 'Failed to create promotion',
       formData: req.body,
-      user: req.user
     });
   }
 };
@@ -149,26 +145,24 @@ export const viewPromotion = async (req: Request, res: Response): Promise<void> 
     const promotion = await PromotionRepo.findById(promotionId);
 
     if (!promotion) {
-      res.status(404).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Not Found',
         error: 'Promotion not found',
-        user: req.user
       });
       return;
     }
 
-    res.render('admin/views/promotions/view', {
+    adminRespond(req, res, 'promotions/view', {
       pageName: `Promotion: ${promotion.name}`,
       promotion,
-      user: req.user,
+      
       success: req.query.success || null
     });
   } catch (error: any) {
     console.error('Error viewing promotion:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load promotion',
-      user: req.user
     });
   }
 };
@@ -184,25 +178,22 @@ export const editPromotionForm = async (req: Request, res: Response): Promise<vo
     const promotion = await PromotionRepo.findById(promotionId);
 
     if (!promotion) {
-      res.status(404).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Not Found',
         error: 'Promotion not found',
-        user: req.user
       });
       return;
     }
 
-    res.render('admin/views/promotions/edit', {
+    adminRespond(req, res, 'promotions/edit', {
       pageName: `Edit: ${promotion.name}`,
       promotion,
-      user: req.user
     });
   } catch (error: any) {
     console.error('Error loading edit promotion form:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
-      user: req.user
     });
   }
 };
@@ -255,18 +246,16 @@ export const updatePromotion = async (req: Request, res: Response): Promise<void
     try {
       const promotion = await PromotionRepo.findById(req.params.promotionId);
 
-      res.render('admin/views/promotions/edit', {
+      adminRespond(req, res, 'promotions/edit', {
         pageName: `Edit: ${promotion?.name || 'Promotion'}`,
         promotion,
         error: error.message || 'Failed to update promotion',
         formData: req.body,
-        user: req.user
       });
     } catch {
-      res.status(500).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Error',
         error: error.message || 'Failed to update promotion',
-        user: req.user
       });
     }
   }

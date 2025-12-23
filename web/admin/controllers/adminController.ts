@@ -21,20 +21,18 @@ export const getAdminDashboard = async (req: Request, res: Response) => {
 
       const dashboardData = {
         pageName: "Dashboard",
-        user: req.user,
         stats,
         recentOrders,
         topProducts,
         revenueByDay
       };
 
-    res.render("admin/views/dashboard", dashboardData);
+    adminRespond(req, res, "dashboard", dashboardData);
   } catch (error) {
     console.error("Error loading admin dashboard:", error);
-    res.status(500).render("admin/views/error", {
+    adminRespond(req, res, "error", {
       pageName: "Error",
       error: "Failed to load dashboard",
-      user: req.user
     });
   }
 };
@@ -50,7 +48,7 @@ export const getAdminLogin = async (req: Request, res: Response) => {
     }
   }
 
-  res.render("admin/views/login", {
+  adminRespond(req, res, "login", {
     pageName: "Admin Login"
   });
 };
@@ -66,7 +64,7 @@ export const postAdminLogin = async (req: Request, res: Response) => {
 
     // Basic validation
     if (!email || !password) {
-      return res.render("admin/views/login", {
+      return adminRespond(req, res, "login", {
         pageName: "Admin Login",
         error: "Email and password are required"
       });
@@ -76,7 +74,7 @@ export const postAdminLogin = async (req: Request, res: Response) => {
     const admin = await AdminRepository.findByEmail(email);
 
     if (!admin) {
-      return res.render("admin/views/login", {
+      return adminRespond(req, res, "login", {
         pageName: "Admin Login",
         error: "Invalid email or password"
       });
@@ -85,7 +83,7 @@ export const postAdminLogin = async (req: Request, res: Response) => {
     // Verify password
     const isValidPassword = await bcrypt.compare(password, admin.passwordHash);
     if (!isValidPassword) {
-      return res.render("admin/views/login", {
+      return adminRespond(req, res, "login", {
         pageName: "Admin Login",
         error: "Invalid email or password"
       });
@@ -93,7 +91,7 @@ export const postAdminLogin = async (req: Request, res: Response) => {
 
     // Check admin status
     if (admin.status !== 'active') {
-      return res.render("admin/views/login", {
+      return adminRespond(req, res, "login", {
         pageName: "Admin Login",
         error: "Account is not active. Please contact super admin."
       });
@@ -128,7 +126,7 @@ export const postAdminLogin = async (req: Request, res: Response) => {
 
   } catch (error) {
     console.error("Error processing admin login:", error);
-    res.status(500).render("admin/views/login", {
+    adminRespond(req, res, "login", {
       pageName: "Admin Login",
       error: "An error occurred during login"
     });
@@ -161,13 +159,12 @@ export const postAdminLogout = async (req: Request, res: Response) => {
 // GET: admin profile
 export const getAdminProfile = async (req: Request, res: Response) => {
   try {
-    res.render("admin/views/profile", {
+    adminRespond(req, res, "profile", {
       pageName: "Admin Profile",
-      user: req.user
     });
   } catch (error) {
     console.error("Error loading admin profile:", error);
-    res.status(500).render("admin/views/error", {
+    adminRespond(req, res, "error", {
       pageName: "Error",
       error: "Failed to load profile"
     });

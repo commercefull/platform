@@ -5,6 +5,7 @@
 
 import { Request, Response } from 'express';
 import BasketRepo from '../../../modules/basket/infrastructure/repositories/BasketRepository';
+import { adminRespond } from 'web/respond';
 
 // ============================================================================
 // Abandoned Cart Management
@@ -33,22 +34,21 @@ export const listAbandonedCarts = async (req: Request, res: Response): Promise<v
       avgCartValue: abandonedBaskets.length > 0 ? recoveryPotential / abandonedBaskets.length : 0
     };
 
-    res.render('admin/views/operations/baskets/abandoned', {
+    adminRespond(req, res, 'operations/baskets/abandoned', {
       pageName: 'Abandoned Carts',
       abandonedBaskets,
       expiredBaskets,
       stats,
       filters: { olderThanDays },
       pagination: { limit, offset },
-      user: req.user,
+      
       success: req.query.success || null
     });
   } catch (error: any) {
     console.error('Error listing abandoned carts:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load abandoned carts',
-      user: req.user
     });
   }
 };
@@ -60,10 +60,9 @@ export const viewAbandonedCart = async (req: Request, res: Response): Promise<vo
     const basket = await BasketRepo.findById(basketId);
 
     if (!basket) {
-      res.status(404).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Not Found',
         error: 'Abandoned cart not found',
-        user: req.user
       });
       return;
     }
@@ -78,20 +77,19 @@ export const viewAbandonedCart = async (req: Request, res: Response): Promise<vo
       (Date.now() - basket.lastActivityAt.getTime()) / (1000 * 60 * 60 * 24)
     );
 
-    res.render('admin/views/operations/baskets/view', {
+    adminRespond(req, res, 'operations/baskets/view', {
       pageName: `Abandoned Cart: ${basket.basketId}`,
       basket,
       cartValue,
       daysSinceActivity,
-      user: req.user,
+      
       success: req.query.success || null
     });
   } catch (error: any) {
     console.error('Error viewing abandoned cart:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load abandoned cart',
-      user: req.user
     });
   }
 };
@@ -246,17 +244,15 @@ export const basketAnalytics = async (req: Request, res: Response): Promise<void
       topAbandonedProducts: [] // Would need product analytics
     };
 
-    res.render('admin/views/operations/baskets/analytics', {
+    adminRespond(req, res, 'operations/baskets/analytics', {
       pageName: 'Cart Analytics',
       stats,
-      user: req.user
     });
   } catch (error: any) {
     console.error('Error loading basket analytics:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load basket analytics',
-      user: req.user
     });
   }
 };

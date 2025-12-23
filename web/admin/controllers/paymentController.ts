@@ -5,6 +5,7 @@
 
 import { Request, Response } from 'express';
 import PaymentRepo from '../../../modules/payment/repos/paymentRepo';
+import { adminRespond } from 'web/respond';
 
 // ============================================================================
 // Payment Gateways
@@ -17,34 +18,31 @@ export const listPaymentGateways = async (req: Request, res: Response): Promise<
 
     const gateways = await PaymentRepo.findAllGateways(merchantId);
 
-    res.render('admin/views/payments/gateways/index', {
+    adminRespond(req, res, 'payments/gateways/index', {
       pageName: 'Payment Gateways',
       gateways,
-      user: req.user,
+      
       success: req.query.success || null
     });
   } catch (error: any) {
     console.error('Error listing payment gateways:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load payment gateways',
-      user: req.user
     });
   }
 };
 
 export const createPaymentGatewayForm = async (req: Request, res: Response): Promise<void> => {
   try {
-    res.render('admin/views/payments/gateways/create', {
+    adminRespond(req, res, 'payments/gateways/create', {
       pageName: 'Create Payment Gateway',
-      user: req.user
     });
   } catch (error: any) {
     console.error('Error loading create gateway form:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
-      user: req.user
     });
   }
 };
@@ -88,11 +86,10 @@ export const createPaymentGateway = async (req: Request, res: Response): Promise
   } catch (error: any) {
     console.error('Error creating payment gateway:', error);
 
-    res.render('admin/views/payments/gateways/create', {
+    adminRespond(req, res, 'payments/gateways/create', {
       pageName: 'Create Payment Gateway',
       error: error.message || 'Failed to create payment gateway',
       formData: req.body,
-      user: req.user
     });
   }
 };
@@ -104,26 +101,24 @@ export const viewPaymentGateway = async (req: Request, res: Response): Promise<v
     const gateway = await PaymentRepo.findGatewayById(gatewayId);
 
     if (!gateway) {
-      res.status(404).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Not Found',
         error: 'Payment gateway not found',
-        user: req.user
       });
       return;
     }
 
-    res.render('admin/views/payments/gateways/view', {
+    adminRespond(req, res, 'payments/gateways/view', {
       pageName: `Gateway: ${gateway.name}`,
       gateway,
-      user: req.user,
+      
       success: req.query.success || null
     });
   } catch (error: any) {
     console.error('Error viewing payment gateway:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load payment gateway',
-      user: req.user
     });
   }
 };
@@ -135,25 +130,22 @@ export const editPaymentGatewayForm = async (req: Request, res: Response): Promi
     const gateway = await PaymentRepo.findGatewayById(gatewayId);
 
     if (!gateway) {
-      res.status(404).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Not Found',
         error: 'Payment gateway not found',
-        user: req.user
       });
       return;
     }
 
-    res.render('admin/views/payments/gateways/edit', {
+    adminRespond(req, res, 'payments/gateways/edit', {
       pageName: `Edit: ${gateway.name}`,
       gateway,
-      user: req.user
     });
   } catch (error: any) {
     console.error('Error loading edit gateway form:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
-      user: req.user
     });
   }
 };
@@ -196,18 +188,16 @@ export const updatePaymentGateway = async (req: Request, res: Response): Promise
     try {
       const gateway = await PaymentRepo.findGatewayById(req.params.gatewayId);
 
-      res.render('admin/views/payments/gateways/edit', {
+      adminRespond(req, res, 'payments/gateways/edit', {
         pageName: `Edit: ${gateway?.name || 'Gateway'}`,
         gateway,
         error: error.message || 'Failed to update payment gateway',
         formData: req.body,
-        user: req.user
       });
     } catch {
-      res.status(500).render('admin/views/error', {
+      adminRespond(req, res, 'error', {
         pageName: 'Error',
         error: error.message || 'Failed to update payment gateway',
-        user: req.user
       });
     }
   }
@@ -240,18 +230,17 @@ export const listPaymentMethods = async (req: Request, res: Response): Promise<v
 
     const methods = await PaymentRepo.findAllMethodConfigs(merchantId);
 
-    res.render('admin/views/payments/methods/index', {
+    adminRespond(req, res, 'payments/methods/index', {
       pageName: 'Payment Methods',
       methods,
-      user: req.user,
+      
       success: req.query.success || null
     });
   } catch (error: any) {
     console.error('Error listing payment methods:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load payment methods',
-      user: req.user
     });
   }
 };
@@ -266,18 +255,17 @@ export const listPaymentTransactions = async (req: Request, res: Response): Prom
     // In a real app, you'd implement pagination and filtering
     const transactions: any[] = []; // Would fetch from repository
 
-    res.render('admin/views/payments/transactions/index', {
+    adminRespond(req, res, 'payments/transactions/index', {
       pageName: 'Payment Transactions',
       transactions,
-      user: req.user,
+      
       success: req.query.success || null
     });
   } catch (error: any) {
     console.error('Error listing payment transactions:', error);
-    res.status(500).render('admin/views/error', {
+    adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load payment transactions',
-      user: req.user
     });
   }
 };
