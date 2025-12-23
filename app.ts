@@ -1,7 +1,6 @@
 import express, { Request, Response, NextFunction } from "express";
 import path from "path";
 import cookieParser from "cookie-parser";
-import logger from "morgan";
 import flash from "connect-flash";
 import i18next from 'i18next';
 import Backend from 'i18next-fs-backend';
@@ -18,6 +17,7 @@ import { formCheckbox, formHidden, formInput, formLegend, formMultiSelect, formS
 import { createSessionStore } from './libs/session/sessionStoreFactory';
 import { initializeAnalyticsHandlers } from "./boot/analyticsEventHandler";
 import { configureRoutes } from "./boot/routes";
+import { expressHttpLogger } from "./libs/logger";
 
 // Initialize analytics event handlers
 initializeAnalyticsHandlers();
@@ -181,7 +181,7 @@ app.locals.t = function (key: string) {
   return i18next.t(key);
 };
 
-app.use(logger(isProduction ? "combined" : "short"));
+app.use(expressHttpLogger);
 app.use(express.json({ limit: '1mb' })); // Limit JSON body size
 app.use(express.urlencoded({ extended: false, limit: '1mb' }));
 app.use(cookieParser(process.env.COOKIE_SECRET));
