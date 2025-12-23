@@ -472,7 +472,7 @@ export const processSubscriptionBilling = async (req: Request, res: Response): P
 
     if (processPayment === 'true') {
       // Simulate payment processing
-      console.log(`Processing payment for subscription ${subscriptionId}, order ${order.subscriptionOrderId}`);
+      
 
       // In a real implementation, this would integrate with payment gateway
       await updateSubscriptionOrderStatus(order.subscriptionOrderId, 'paid');

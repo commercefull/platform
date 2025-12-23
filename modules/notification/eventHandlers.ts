@@ -7,7 +7,7 @@ export const registerOrderEventHandlers = () => {
   eventBus.registerHandler('order.created', async (payload: EventPayload) => {
     const { orderId, customerId, orderNumber, total } = payload.data;
 
-    console.log(`Order ${orderNumber} created for customer ${customerId}`);
+    
 
     // Send order confirmation notification
     await JobScheduler.scheduleNotification({
@@ -31,7 +31,7 @@ export const registerOrderEventHandlers = () => {
   eventBus.registerHandler('order.paid', async (payload: EventPayload) => {
     const { orderId, customerId, orderNumber, amount, transactionId } = payload.data;
 
-    console.log(`Order ${orderNumber} paid: $${amount}`);
+    
 
     // Send payment confirmation notification
     await JobScheduler.scheduleNotification({
@@ -47,7 +47,7 @@ export const registerOrderEventHandlers = () => {
   eventBus.registerHandler('order.shipped', async (payload: EventPayload) => {
     const { orderId, customerId, orderNumber, trackingNumber, carrier } = payload.data;
 
-    console.log(`Order ${orderNumber} shipped via ${carrier}`);
+    
 
     // Send shipping notification
     await JobScheduler.scheduleNotification({
@@ -64,7 +64,7 @@ export const registerOrderEventHandlers = () => {
   eventBus.registerHandler('order.completed', async (payload: EventPayload) => {
     const { orderId, customerId, orderNumber } = payload.data;
 
-    console.log(`Order ${orderNumber} completed`);
+    
 
     // Send order completion notification
     await JobScheduler.scheduleNotification({
@@ -80,7 +80,7 @@ export const registerOrderEventHandlers = () => {
   eventBus.registerHandler('order.cancelled', async (payload: EventPayload) => {
     const { orderId, customerId, orderNumber, reason } = payload.data;
 
-    console.log(`Order ${orderNumber} cancelled: ${reason}`);
+    
 
     // Send cancellation notification
     await JobScheduler.scheduleNotification({
@@ -96,7 +96,7 @@ export const registerOrderEventHandlers = () => {
   eventBus.registerHandler('order.refunded', async (payload: EventPayload) => {
     const { orderId, customerId, orderNumber, amount, reason } = payload.data;
 
-    console.log(`Order ${orderNumber} refunded: $${amount}`);
+    
 
     // Send refund notification
     await JobScheduler.scheduleNotification({
@@ -114,7 +114,7 @@ export const registerPaymentEventHandlers = () => {
   eventBus.registerHandler('payment.received', async (payload: EventPayload) => {
     const { orderId, amount, transactionId } = payload.data;
 
-    console.log(`Payment received: $${amount} for order ${orderId}`);
+    
 
     // Emit order paid event
     await eventBus.emit('order.paid', {
@@ -127,7 +127,7 @@ export const registerPaymentEventHandlers = () => {
   eventBus.registerHandler('payment.failed', async (payload: EventPayload) => {
     const { orderId, customerId, amount, reason } = payload.data;
 
-    console.log(`Payment failed for order ${orderId}: ${reason}`);
+    
 
     // Send payment failure notification
     await JobScheduler.scheduleNotification({
@@ -160,7 +160,7 @@ export const registerInventoryEventHandlers = () => {
   eventBus.registerHandler('inventory.out_of_stock', async (payload: EventPayload) => {
     const { productId, sku } = payload.data;
 
-    console.log(`Out of stock: ${sku}`);
+    
 
     // Send out of stock notification
     await JobScheduler.scheduleNotification({
@@ -175,7 +175,7 @@ export const registerInventoryEventHandlers = () => {
   eventBus.registerHandler('inventory.reserved', async (payload: EventPayload) => {
     const { productId, quantity, orderId, cartId } = payload.data;
 
-    console.log(`Inventory reserved: ${quantity} units of ${productId} for ${orderId || cartId}`);
+    
   });
 
   eventBus.registerHandler('inventory.released', async (payload: EventPayload) => {
@@ -190,7 +190,7 @@ export const registerCustomerEventHandlers = () => {
   eventBus.registerHandler('customer.registered', async (payload: EventPayload) => {
     const { customerId, email, firstName, lastName } = payload.data;
 
-    console.log(`New customer registered: ${email}`);
+    
 
     // Send welcome notification
     await JobScheduler.scheduleNotification({
@@ -213,7 +213,7 @@ export const registerCustomerEventHandlers = () => {
   eventBus.registerHandler('customer.updated', async (payload: EventPayload) => {
     const { customerId, changes } = payload.data;
 
-    console.log(`Customer ${customerId} profile updated`);
+    
 
     // Invalidate customer cache if needed
     // TODO: Implement customer caching
@@ -225,7 +225,7 @@ export const registerSupplierEventHandlers = () => {
   eventBus.registerHandler('supplier.created', async (payload: EventPayload) => {
     const { supplierId, name, email } = payload.data;
 
-    console.log(`New supplier created: ${name}`);
+    
 
     // Send supplier welcome email
     await JobScheduler.scheduleEmail({
@@ -239,7 +239,7 @@ export const registerSupplierEventHandlers = () => {
   eventBus.registerHandler('supplier.approved', async (payload: EventPayload) => {
     const { supplierId, name, email } = payload.data;
 
-    console.log(`Supplier approved: ${name}`);
+    
 
     // Send approval notification
     await JobScheduler.scheduleEmail({
@@ -253,7 +253,7 @@ export const registerSupplierEventHandlers = () => {
   eventBus.registerHandler('purchase_order.created', async (payload: EventPayload) => {
     const { purchaseOrderId, supplierId, poNumber, supplierEmail } = payload.data;
 
-    console.log(`Purchase order ${poNumber} created for supplier ${supplierId}`);
+    
 
     // Send PO to supplier
     await JobScheduler.scheduleEmail({
@@ -267,7 +267,7 @@ export const registerSupplierEventHandlers = () => {
   eventBus.registerHandler('purchase_order.approved', async (payload: EventPayload) => {
     const { purchaseOrderId, poNumber, supplierEmail } = payload.data;
 
-    console.log(`Purchase order ${poNumber} approved`);
+    
 
     // Notify supplier of approval
     await JobScheduler.scheduleEmail({
@@ -281,7 +281,7 @@ export const registerSupplierEventHandlers = () => {
   eventBus.registerHandler('receiving.completed', async (payload: EventPayload) => {
     const { receivingRecordId, purchaseOrderId, receiptNumber } = payload.data;
 
-    console.log(`Receiving completed: ${receiptNumber} for PO ${purchaseOrderId}`);
+    
 
     // Update inventory and send notifications
     // TODO: Trigger inventory updates
@@ -296,7 +296,7 @@ export const registerAllEventHandlers = () => {
   registerCustomerEventHandlers();
   registerSupplierEventHandlers();
 
-  console.log('All event handlers registered');
+  
 };
 
 // Initialize event handlers when the module is imported

@@ -77,7 +77,7 @@ describe('Customer Feature Tests', () => {
                 });
               }
             } catch (e) {
-              console.log('Customer group endpoint not available, skipping group tests');
+              
               testCustomerGroupId = null;
             }
             
@@ -93,14 +93,14 @@ describe('Customer Feature Tests', () => {
                 testWishlistId = wishlistResponse.data.data.customerWishlistId || wishlistResponse.data.data.id;
               }
             } catch (e) {
-              console.log('Wishlist endpoint not available, skipping wishlist tests');
+              
               testWishlistId = null;
             }
           }
         }
       }
     } catch (error) {
-      console.log('Warning: Customer test setup error:', error);
+      
     }
   });
 
@@ -118,7 +118,7 @@ describe('Customer Feature Tests', () => {
   describe('Customer API', () => {
     it('should get customer by ID with camelCase properties', async () => {
       if (!testCustomerId) {
-        console.log('Skipping test - customer not created');
+        
         return;
       }
       
@@ -151,7 +151,7 @@ describe('Customer Feature Tests', () => {
 
     it('should update a customer with camelCase properties', async () => {
       if (!testCustomerId) {
-        console.log('Skipping test - customer not created');
+        
         return;
       }
       
@@ -207,7 +207,7 @@ describe('Customer Feature Tests', () => {
 
     it('should search customers and return camelCase properties', async () => {
       if (!testCustomerId) {
-        console.log('Skipping test - customer not created');
+        
         return;
       }
       
@@ -235,7 +235,7 @@ describe('Customer Feature Tests', () => {
   describe('Customer Address API', () => {
     it('should list customer addresses with camelCase properties', async () => {
       if (!testCustomerId) {
-        console.log('Skipping test - customer not created');
+        
         return;
       }
       
@@ -271,7 +271,7 @@ describe('Customer Feature Tests', () => {
   describe('Customer Group API', () => {
     it('should get customer group by ID with camelCase properties', async () => {
       if (!testCustomerGroupId) {
-        console.log('Skipping test - customer group endpoint not available');
+        
         return;
       }
       
@@ -296,7 +296,7 @@ describe('Customer Feature Tests', () => {
 
     it('should get customers in group with camelCase properties', async () => {
       if (!testCustomerGroupId) {
-        console.log('Skipping test - customer group endpoint not available');
+        
         return;
       }
       

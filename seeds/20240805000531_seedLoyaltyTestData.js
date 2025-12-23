@@ -102,5 +102,5 @@ exports.seed = async function (knex) {
     }
   ]);
 
-  console.log('Loyalty test data seeded successfully');
+  
 };

@@ -30,7 +30,7 @@ describe('Merchant Tests', () => {
   describe('Merchant CRUD Operations', () => {
     it('should get a merchant by ID', async () => {
       if (!testMerchantId) {
-        console.log('Skipping test - no merchant ID from setup');
+        
         return;
       }
       
@@ -62,7 +62,7 @@ describe('Merchant Tests', () => {
 
     it('should update a merchant', async () => {
       if (!testMerchantId) {
-        console.log('Skipping test - no merchant ID from setup');
+        
         return;
       }
       
@@ -102,7 +102,7 @@ describe('Merchant Tests', () => {
   describe('Merchant Address Operations', () => {
     it('should get addresses for a merchant', async () => {
       if (!testMerchantId) {
-        console.log('Skipping test - no merchant ID from setup');
+        
         return;
       }
       
@@ -126,7 +126,7 @@ describe('Merchant Tests', () => {
 
     it('should update a merchant address', async () => {
       if (!testMerchantId || !testAddressId) {
-        console.log('Skipping test - missing merchant or address ID from setup');
+        
         return;
       }
       
@@ -153,7 +153,7 @@ describe('Merchant Tests', () => {
   describe('Merchant Payment Info Operations', () => {
     it('should get payment info for a merchant', async () => {
       if (!testMerchantId) {
-        console.log('Skipping test - no merchant ID from setup');
+        
         return;
       }
       
@@ -178,7 +178,7 @@ describe('Merchant Tests', () => {
 
     it('should update merchant payment info', async () => {
       if (!testMerchantId || !testPaymentInfoId) {
-        console.log('Skipping test - missing merchant or payment info ID from setup');
+        
         return;
       }
       
@@ -228,7 +228,7 @@ describe('Merchant Tests', () => {
 
     it('should get merchant information by ID via business API', async () => {
       if (!testMerchantId) {
-        console.log('Skipping test - no merchant ID from setup');
+        
         return;
       }
       

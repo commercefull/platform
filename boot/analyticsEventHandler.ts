@@ -57,7 +57,7 @@ export function initializeAnalyticsHandlers(): void {
   // Alert events
   eventBus.registerHandler('alert.stock.created', handleStockAlertCreated);
 
-  console.log('[Analytics] Event handlers initialized');
+  
 }
 
 // ============================================================================

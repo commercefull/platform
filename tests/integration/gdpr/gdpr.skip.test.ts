@@ -340,7 +340,7 @@ describe('GDPR Feature Tests', () => {
 
     it('UC-GDP-014: should process export request (admin)', async () => {
       if (!testRequestId) {
-        console.log('Skipping test - no test request ID');
+        
         return;
       }
       
@@ -371,7 +371,7 @@ describe('GDPR Feature Tests', () => {
       
       if (!pendingRequest) {
         // Skip if no pending request available
-        console.log('No pending request available to reject');
+        
         return;
       }
 

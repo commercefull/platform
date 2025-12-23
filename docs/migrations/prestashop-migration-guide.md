@@ -556,7 +556,7 @@ async function runPrestaShopMigration() {
   });
 
   try {
-    console.log('Starting PrestaShop to CommerceFull migration...');
+    
 
     // Phase 1: Foundation data
     await runner.migrateCategories();
@@ -574,7 +574,7 @@ async function runPrestaShopMigration() {
     // Phase 5: Content
     await runner.migrateContent();
 
-    console.log('Migration completed successfully!');
+    
     console.log(runner.monitor.generateReport());
 
   } catch (error) {
@@ -640,7 +640,7 @@ class BatchProcessor {
       await processor(batch);
 
       processed += batch.length;
-      console.log(`Processed ${processed}/${total} records`);
+      
 
       // Prevent memory issues
       if (global.gc) global.gc();

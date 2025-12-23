@@ -6,7 +6,7 @@ exports.seed = async function (knex) {
   // Check if roles already exist
   const existingRoles = await knex('role').where('isSystem', true).count('roleId as count').first();
   if (existingRoles && parseInt(existingRoles.count) > 0) {
-    console.log('System roles already exist, skipping seed');
+    
     return;
   }
 
@@ -70,5 +70,5 @@ exports.seed = async function (knex) {
     }
   ]);
 
-  console.log('Default system roles seeded successfully');
+  
 };

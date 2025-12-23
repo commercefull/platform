@@ -70,13 +70,13 @@ export async function setupSupportTests() {
     customerToken = customerLoginResponse.data?.accessToken || '';
 
     if (!adminToken) {
-      console.log('Warning: Failed to get admin token for Support tests');
+      
     }
     if (!customerToken) {
-      console.log('Warning: Failed to get customer token for Support tests');
+      
     }
   } catch (error) {
-    console.log('Warning: Login failed for Support tests:', error);
+    
   }
 
   return { client, adminToken, customerToken };

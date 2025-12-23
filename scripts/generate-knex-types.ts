@@ -33,7 +33,7 @@ async function main(): Promise<void> {
 
     await updateTypes(db, options);
     // eslint-disable-next-line no-console
-    console.log(`Knex types generated at ${OUTPUT_PATH}`);
+    
   } finally {
     await db.destroy();
   }

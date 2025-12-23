@@ -6,7 +6,7 @@ exports.up = async function (knex) {
   const notification = await knex('notification').first('notificationId');
 
   if (!notification) {
-    console.log('No notifications found, skipping seed for notificationDeliveryLog.');
+    
     return;
   }
 

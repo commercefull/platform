@@ -1930,7 +1930,7 @@ import { registerAnalyticsEventHandlers } from '../../modules/analytics/eventHan
  * Called from app initialization
  */
 export function registerAllEventHandlers(): void {
-  console.log('[EVENTS] Registering event handlers...');
+  
 
   // Order-related handlers (notifications, fulfillment trigger)
   registerOrderEventHandlers();
@@ -1947,7 +1947,7 @@ export function registerAllEventHandlers(): void {
   // Analytics handlers (tracking, reporting)
   registerAnalyticsEventHandlers();
 
-  console.log('[EVENTS] Event handlers registered');
+  
   console.log(`[EVENTS] Total registered event types: ${eventBus.getRegisteredTypes().length}`);
 }
 
@@ -1986,7 +1986,7 @@ async function bootstrap() {
 
   // Start server
   app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
+    
   });
 }
 

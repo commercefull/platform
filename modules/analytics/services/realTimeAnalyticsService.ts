@@ -26,7 +26,7 @@
  */
 export function initializeAnalyticsWebSocket(server: any) {
   // Placeholder - WebSocket implementation would go here
-  console.log('Analytics WebSocket server initialization - TODO');
+  
 }
 
 /**
@@ -34,7 +34,7 @@ export function initializeAnalyticsWebSocket(server: any) {
  */
 export function stopAnalyticsWebSocket() {
   // Placeholder - WebSocket cleanup would go here
-  console.log('Analytics WebSocket server stop - TODO');
+  
 }
 
 /**
@@ -43,7 +43,7 @@ export function stopAnalyticsWebSocket() {
  */
 export function broadcastAnalyticsEvent(eventType: string, data: any) {
   // Placeholder - WebSocket broadcasting would go here
-  console.log(`Broadcasting analytics event: ${eventType}`, data);
+  
 }
 
 /**
@@ -63,5 +63,5 @@ export function getWebSocketStatus() {
  */
 export async function forceBroadcast() {
   // Placeholder - force broadcast would go here
-  console.log('Force broadcast - TODO');
+  
 }

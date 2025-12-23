@@ -754,7 +754,7 @@ async function runWixMigration() {
   });
 
   try {
-    console.log('Starting Wix to CommerceFull migration...');
+    
 
     // Phase 1: Foundation data
     await runner.migrateCollections();
@@ -772,7 +772,7 @@ async function runWixMigration() {
     // Phase 5: Content
     await runner.migrateContent();
 
-    console.log('Migration completed successfully!');
+    
     console.log(runner.monitor.generateReport());
 
   } catch (error) {
@@ -820,7 +820,7 @@ class WixRateLimiter {
       const waitTime = 60000 - (now - oldestRequest);
 
       if (waitTime > 0) {
-        console.log(`Rate limit reached, waiting ${waitTime}ms...`);
+        
         await this.sleep(waitTime);
       }
     }

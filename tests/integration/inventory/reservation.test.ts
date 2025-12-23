@@ -71,7 +71,7 @@ describe('Inventory Reservation Tests', () => {
     it('should update inventory reserved quantity after reservation', async () => {
       // Skip if reservation wasn't created
       if (!testReservationId) {
-        console.log('Skipping test - no reservation created');
+        
         return;
       }
       
@@ -103,7 +103,7 @@ describe('Inventory Reservation Tests', () => {
 
     it('should update a reservation status', async () => {
       if (!testReservationId) {
-        console.log('Skipping test - no reservation created');
+        
         return;
       }
       
@@ -122,7 +122,7 @@ describe('Inventory Reservation Tests', () => {
     it('should release inventory when reservation is fulfilled', async () => {
       // Skip if reservation wasn't created
       if (!testReservationId) {
-        console.log('Skipping test - no reservation created');
+        
         return;
       }
       

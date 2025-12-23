@@ -86,19 +86,19 @@ export async function ensureAllProductsHaveMasterVariants(): Promise<{
 if (require.main === module) {
   (async () => {
     try {
-      console.log('Starting master variant integrity check...');
+      
       const result = await ensureAllProductsHaveMasterVariants();
-      console.log('Master variant integrity check completed:');
-      console.log(`Total products processed: ${result.total}`);
+      
+      
       console.log(`Products fixed (master variant created): ${result.fixed}`);
-      console.log(`Products failed: ${result.failed}`);
+      
       
       if (result.failed > 0) {
-        console.log('Failed products:');
+        
         result.details
           .filter(detail => detail.status.startsWith('ERROR') || detail.status === 'FAILED')
           .forEach(detail => {
-            console.log(`- Product ${detail.productId}: ${detail.status}`);
+            
           });
       }
     } catch (error) {

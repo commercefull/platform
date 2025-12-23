@@ -98,7 +98,7 @@ describe('B2B Companies API', () => {
   describe('GET /b2b/companies/:id', () => {
     it('should return a company by ID', async () => {
       if (!createdCompanyId) {
-        console.log('Skipping: company was not created in previous test');
+        
         return;
       }
 
@@ -120,7 +120,7 @@ describe('B2B Companies API', () => {
   describe('PUT /b2b/companies/:id', () => {
     it('should update a company', async () => {
       if (!createdCompanyId) {
-        console.log('Skipping: company was not created in previous test');
+        
         return;
       }
 
@@ -139,7 +139,7 @@ describe('B2B Companies API', () => {
   describe('POST /b2b/companies/:id/approve', () => {
     it('should approve a pending company', async () => {
       if (!createdCompanyId) {
-        console.log('Skipping: company was not created in previous test');
+        
         return;
       }
 
@@ -156,7 +156,7 @@ describe('B2B Companies API', () => {
   describe('POST /b2b/companies/:id/suspend', () => {
     it('should suspend an active company', async () => {
       if (!createdCompanyId) {
-        console.log('Skipping: company was not created in previous test');
+        
         return;
       }
 
@@ -171,7 +171,7 @@ describe('B2B Companies API', () => {
   describe('DELETE /b2b/companies/:id', () => {
     it('should delete a company', async () => {
       if (!createdCompanyId) {
-        console.log('Skipping: company was not created in previous test');
+        
         return;
       }
 

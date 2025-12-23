@@ -164,7 +164,7 @@ describe('Content Media API', () => {
 
         // Accept 201 (success) or 500 (server issues with media upload)
         if (response.status === 500) {
-          console.log('Media upload failed with 500 - may need to check media handler');
+          
           return;
         }
 

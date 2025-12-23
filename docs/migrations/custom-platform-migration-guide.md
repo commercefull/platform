@@ -476,7 +476,7 @@ class GenericMigrationFramework {
       continueOnError = false
     } = options;
 
-    console.log(`Starting migration of ${entityType}...`);
+    
 
     // Analyze source data
     const sourceSchema = await this.source.analyzeSchema(entityType);
@@ -924,7 +924,7 @@ async function runCustomMigration() {
   });
 
   try {
-    console.log('Starting custom platform migration...');
+    
 
     // Analyze source system
     await runner.analyzeSource();
@@ -948,7 +948,7 @@ async function runCustomMigration() {
     // Phase 5: Content
     await runner.migrate('content');
 
-    console.log('Migration completed successfully!');
+    
     console.log(runner.generateReport());
 
   } catch (error) {

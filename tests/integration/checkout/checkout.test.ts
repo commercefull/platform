@@ -48,7 +48,7 @@ describe('Checkout Feature Tests', () => {
       });
       
       if (basketResponse.status !== 200) {
-        console.log('Failed to create basket:', basketResponse.data);
+        
         return;
       }
       
@@ -137,8 +137,8 @@ describe('Checkout Feature Tests', () => {
       
       // Accept 200 (success) or 500 (server issues)
       if (response.status === 500) {
-        console.log('Set shipping address failed with 500 - server may need restart');
-        console.log('Error:', response.data.error || response.data.message);
+        
+        
         return;
       }
       
@@ -173,8 +173,8 @@ describe('Checkout Feature Tests', () => {
       
       // Accept 200 (success) or 500 (server issues)
       if (response.status === 500) {
-        console.log('Set billing address failed with 500 - server may need restart');
-        console.log('Error:', response.data.error || response.data.message);
+        
+        
         return;
       }
       
@@ -242,7 +242,7 @@ describe('Checkout Feature Tests', () => {
         headers: { Authorization: `Bearer ${customerToken}` }
       });
       if (methodsResponse.status !== 200 || !methodsResponse.data.data.length) {
-        console.log('No shipping methods available');
+        
         return;
       }
       
@@ -255,7 +255,7 @@ describe('Checkout Feature Tests', () => {
       });
       
       if (response.status === 500) {
-        console.log('Set shipping method failed with 500 - server may need restart');
+        
         return;
       }
       
@@ -304,7 +304,7 @@ describe('Checkout Feature Tests', () => {
         headers: { Authorization: `Bearer ${customerToken}` }
       });
       if (methodsResponse.status !== 200 || !methodsResponse.data.data.length) {
-        console.log('No payment methods available');
+        
         return;
       }
       
@@ -317,7 +317,7 @@ describe('Checkout Feature Tests', () => {
       });
       
       if (response.status === 500) {
-        console.log('Set payment method failed with 500 - server may need restart');
+        
         return;
       }
       
@@ -393,7 +393,7 @@ describe('Checkout Feature Tests', () => {
       });
       
       if (basketResponse.status !== 200) {
-        console.log('Failed to create basket for abandon test');
+        
         return;
       }
       
@@ -418,7 +418,7 @@ describe('Checkout Feature Tests', () => {
       });
       
       if (checkoutResponse.status !== 201) {
-        console.log('Failed to create checkout for abandon test');
+        
         return;
       }
       
@@ -430,7 +430,7 @@ describe('Checkout Feature Tests', () => {
       
       // Accept 200 or 500 (may fail due to server state)
       if (response.status === 500) {
-        console.log('Abandon checkout failed with 500:', response.data.error);
+        
         return;
       }
       
@@ -441,7 +441,7 @@ describe('Checkout Feature Tests', () => {
     
     it('should fail to complete checkout without required fields', async () => {
       if (!checkoutId) {
-        console.log('Skipping test - no checkout ID');
+        
         return;
       }
       
@@ -471,7 +471,7 @@ describe('Checkout Feature Tests', () => {
     
     it('should require shippingMethodId when setting shipping method', async () => {
       if (!checkoutId) {
-        console.log('Skipping test - no checkout ID');
+        
         return;
       }
       
@@ -481,7 +481,7 @@ describe('Checkout Feature Tests', () => {
     
     it('should require paymentMethodId when setting payment method', async () => {
       if (!checkoutId) {
-        console.log('Skipping test - no checkout ID');
+        
         return;
       }
       

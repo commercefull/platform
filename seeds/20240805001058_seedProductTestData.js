@@ -169,5 +169,5 @@ exports.seed = async function(knex) {
     }
   ]);
 
-  console.log('✓ Product test data seeded successfully');
+  
 };

@@ -99,7 +99,7 @@ describe('Notification Tests', () => {
 
     it('should create a new notification (admin)', async () => {
       if (!adminToken || !testUserId) {
-        console.log('Skipping test - missing admin token or user ID');
+        
         return;
       }
       
@@ -179,7 +179,7 @@ describe('Notification Tests', () => {
 
     it('should delete a notification (admin)', async () => {
       if (!adminToken || !testUserId) {
-        console.log('Skipping test - missing admin token or user ID');
+        
         return;
       }
       
@@ -198,7 +198,7 @@ describe('Notification Tests', () => {
       });
       
       if (createResponse.status !== 201 || !createResponse.data?.data?.notificationId) {
-        console.log('Skipping delete test - could not create notification');
+        
         return;
       }
       
@@ -217,7 +217,7 @@ describe('Notification Tests', () => {
   describe('Customer Notification Operations', () => {
     it('should get customer notifications', async () => {
       if (!customerToken) {
-        console.log('Skipping test - no customer token');
+        
         return;
       }
       
@@ -234,7 +234,7 @@ describe('Notification Tests', () => {
 
     it('should get unread customer notifications', async () => {
       if (!customerToken) {
-        console.log('Skipping test - no customer token');
+        
         return;
       }
       
@@ -250,7 +250,7 @@ describe('Notification Tests', () => {
 
     it('should mark a notification as read (customer)', async () => {
       if (!customerToken || !testNotificationId) {
-        console.log('Skipping test - no customer token or notification ID');
+        
         return;
       }
       
@@ -265,7 +265,7 @@ describe('Notification Tests', () => {
 
     it('should mark all notifications as read (customer)', async () => {
       if (!customerToken) {
-        console.log('Skipping test - no customer token');
+        
         return;
       }
       
@@ -281,7 +281,7 @@ describe('Notification Tests', () => {
 
     it('should prevent customers from accessing notifications that are not theirs', async () => {
       if (!testNotificationId) {
-        console.log('Skipping test - no notification ID');
+        
         return;
       }
       
@@ -289,7 +289,7 @@ describe('Notification Tests', () => {
       const secondCustomerToken = await loginTestUser(client, 'customer2@example.com', 'password123');
       
       if (!secondCustomerToken) {
-        console.log('Skipping test - could not login second customer');
+        
         return;
       }
       

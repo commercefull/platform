@@ -12,7 +12,7 @@ exports.seed = async function (knex) {
     .first('customerId');
 
   if (!testCustomer) {
-    console.log('Test customer not found, skipping GDPR seed');
+    
     return;
   }
 
@@ -112,5 +112,5 @@ exports.seed = async function (knex) {
 
   await knex('gdprCookieConsent').insert(cookieConsents);
 
-  console.log('GDPR seed data created successfully');
+  
 };

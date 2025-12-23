@@ -47,7 +47,7 @@ export const createTestMerchant = async (
   });
   
   if (response.status !== 201 || !response.data.success) {
-    console.log('Warning: Failed to create test merchant:', response.status, response.data);
+    
     return '';
   }
   
@@ -72,7 +72,7 @@ export const createTestMerchantAddress = async (
   });
   
   if (response.status !== 201 || !response.data.success) {
-    console.log('Warning: Failed to create test merchant address:', response.status, response.data);
+    
     return '';
   }
   
@@ -97,7 +97,7 @@ export const createTestMerchantPaymentInfo = async (
   });
   
   if (response.status !== 201 || !response.data.success) {
-    console.log('Warning: Failed to create test merchant payment info:', response.status, response.data);
+    
     return '';
   }
   

@@ -48,10 +48,10 @@ export const setupInventoryTests = async () => {
     });
     adminToken = adminLogin.data?.accessToken || '';
     if (!adminToken) {
-      console.log('Warning: Admin login failed, tests may be skipped');
+      
     }
   } catch (error: any) {
-    console.log('Warning: Could not connect to server for login:', error.message);
+    
   }
 
   // Create test product if needed
@@ -82,7 +82,7 @@ export const setupInventoryTests = async () => {
       } else if (newProduct.data?.data?.productId) {
         testProductId = newProduct.data.data.productId;
       } else {
-        console.log('Warning: Could not create test product:', newProduct.data);
+        
       }
     }
 
@@ -93,7 +93,7 @@ export const setupInventoryTests = async () => {
     if (locationResponse.data?.data?.id) {
       testLocationId = locationResponse.data.data.id;
     } else {
-      console.log('Warning: Could not create test location:', locationResponse.data);
+      
     }
 
     // Create a test inventory item (only if we have both product and location)
@@ -110,11 +110,11 @@ export const setupInventoryTests = async () => {
       if (itemResponse.data?.data?.id) {
         testInventoryItemId = itemResponse.data.data.id;
       } else {
-        console.log('Warning: Could not create test inventory item:', itemResponse.data);
+        
       }
     }
   } catch (error) {
-    console.log('Warning: Inventory setup error:', error);
+    
   }
 
   return {

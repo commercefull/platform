@@ -412,7 +412,7 @@ class SquarespaceProductMigrator {
           }
         }
 
-        console.log(`Migrated product: ${product.name}`);
+        
 
       } catch (error) {
         
@@ -509,7 +509,7 @@ class SquarespaceCustomerMigrator {
           updatedAt: customer.updatedAt.toISOString()
         });
 
-        console.log(`Migrated customer: ${customer.email}`);
+        
 
       } catch (error) {
         
@@ -647,7 +647,7 @@ class SquarespaceOrderMigrator {
           updatedAt: order.updatedAt.toISOString()
         });
 
-        console.log(`Migrated order: ${order.orderNumber}`);
+        
 
       } catch (error) {
         
@@ -683,7 +683,7 @@ async function runSquarespaceMigration() {
   for (const [type, path] of Object.entries(csvFiles)) {
     if (!fs.existsSync(path)) {
       
-      console.log(`Please export ${type} data from Squarespace and save as ${path}`);
+      
       return;
     }
   }
@@ -701,8 +701,8 @@ async function runSquarespaceMigration() {
   });
 
   try {
-    console.log('Starting Squarespace to CommerceFull migration...');
-    console.log('Note: This migration relies on manual CSV exports from Squarespace');
+    
+    
 
     // Phase 1: Setup foundation data
     await runner.setupAttributes();
@@ -719,8 +719,8 @@ async function runSquarespaceMigration() {
     // Phase 5: Migrate orders
     await runner.migrateOrders(customerMap, productMap);
 
-    console.log('Migration completed successfully!');
-    console.log('Note: Media assets and content pages need manual migration');
+    
+    
 
   } catch (error) {
     
@@ -797,7 +797,7 @@ class SquarespaceMediaMigrator {
     for (const localFile of localFiles) {
       try {
         const media = await cf.media.upload(localFile);
-        console.log(`Uploaded media: ${media.url}`);
+        
       } catch (error) {
         
       }

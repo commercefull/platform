@@ -20,7 +20,7 @@ describe('Generic Promotion API Tests', () => {
 
   it('should create a new promotion', async () => {
     if (!adminToken) {
-      console.log('Skipping test - no admin token');
+      
       return;
     }
     
@@ -42,7 +42,7 @@ describe('Generic Promotion API Tests', () => {
 
   it('should get a promotion by ID', async () => {
     if (!adminToken || !promotionId) {
-      console.log('Skipping test - no admin token or promotion ID');
+      
       return;
     }
     
@@ -62,7 +62,7 @@ describe('Generic Promotion API Tests', () => {
 
   it('should update a promotion', async () => {
     if (!adminToken || !promotionId) {
-      console.log('Skipping test - no admin token or promotion ID');
+      
       return;
     }
     
@@ -82,7 +82,7 @@ describe('Generic Promotion API Tests', () => {
 
   it('should apply a promotion to a cart', async () => {
     if (!adminToken || !promotionId || !testCartId) {
-      console.log('Skipping test - missing admin token, promotion ID, or cart ID');
+      
       return;
     }
     
@@ -109,7 +109,7 @@ describe('Generic Promotion API Tests', () => {
 
   it('should validate a promotion for a cart', async () => {
     if (!adminToken || !promotionId || !testCartId) {
-      console.log('Skipping test - missing admin token, promotion ID, or cart ID');
+      
       return;
     }
     

@@ -391,7 +391,7 @@ exports.seed = async function (knex) {
     }
   } catch (e) {
     // b2bQuote table may not exist
-    console.log('Skipping B2B quote seed - table may not exist');
+    
   }
 
   // =========================================================================
@@ -422,7 +422,7 @@ exports.seed = async function (knex) {
       }).onConflict('contentTypeId').ignore();
     }
   } catch (e) {
-    console.log('Skipping content type seed - table may not exist');
+    
   }
 
   // =========================================================================
@@ -453,7 +453,7 @@ exports.seed = async function (knex) {
       }).onConflict('contentBlockTypeId').ignore();
     }
   } catch (e) {
-    console.log('Skipping block type seed - table may not exist');
+    
   }
 
   // =========================================================================
@@ -486,7 +486,7 @@ exports.seed = async function (knex) {
       }).onConflict('contentTemplateId').ignore();
     }
   } catch (e) {
-    console.log('Skipping content template seed - table may not exist');
+    
   }
 
   // =========================================================================
@@ -532,7 +532,7 @@ exports.seed = async function (knex) {
       }).onConflict('contentPageId').ignore();
     }
   } catch (e) {
-    console.log('Skipping content page seed - table may not exist');
+    
   }
 
   // =========================================================================
@@ -564,7 +564,7 @@ exports.seed = async function (knex) {
       }).onConflict('contentBlockId').ignore();
     }
   } catch (e) {
-    console.log('Skipping content block seed - table may not exist');
+    
   }
 
   // =========================================================================
@@ -642,8 +642,8 @@ exports.seed = async function (knex) {
       }).onConflict('subscriptionPlanId').ignore();
     }
   } catch (e) {
-    console.log('Skipping subscription seed - test product does not exist');
-    console.log('Error:', e.message);
+    
+    
   }
 
   // =========================================================================
@@ -683,7 +683,7 @@ exports.seed = async function (knex) {
       }).onConflict('customerId').ignore();
     }
   } catch (e) {
-    console.log('Skipping customer seed - table may not exist');
+    
   }
 
   // =========================================================================
@@ -724,7 +724,7 @@ exports.seed = async function (knex) {
       }).onConflict('checkoutSessionId').ignore();
     }
   } catch (e) {
-    console.log('Skipping checkout seed - table may not exist');
+    
   }
 
   // Export test IDs for use in tests

@@ -102,10 +102,10 @@ export async function setupPromotionTests() {
     adminToken = loginResponse.data?.accessToken || '';
     
     if (!adminToken) {
-      console.log('Warning: Failed to get admin token for promotion tests');
+      
     }
   } catch (error) {
-    console.log('Warning: Login failed for promotion tests:', error);
+    
   }
   
   // Create test data: cart, category, product

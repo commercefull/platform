@@ -155,7 +155,7 @@ describe('Tax Rates API Integration Tests', () => {
       
       if (categoriesResponse.data.length === 0 || zonesResponse.data.length === 0) {
         // Skip setup if we don't have required data
-        console.log('Skipping setup: missing required tax categories or tax zones');
+        
         return;
       }
       
@@ -236,7 +236,7 @@ describe('Tax Rates API Integration Tests', () => {
       
       if (categoriesResponse.data.length === 0 || zonesResponse.data.length === 0) {
         // Skip setup if we don't have required data
-        console.log('Skipping setup: missing required tax categories or tax zones');
+        
         return;
       }
       

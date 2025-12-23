@@ -752,7 +752,7 @@ async function runWooCommerceMigration() {
   });
 
   try {
-    console.log('Starting WooCommerce to CommerceFull migration...');
+    
 
     // Phase 1: Foundation data
     await runner.migrateAttributes();
@@ -771,7 +771,7 @@ async function runWooCommerceMigration() {
     // Phase 5: Content
     await runner.migrateContent();
 
-    console.log('Migration completed successfully!');
+    
     console.log(runner.monitor.generateReport());
 
   } catch (error) {
@@ -866,7 +866,7 @@ class MemoryEfficientMigrator {
         global.gc();
       }
 
-      console.log(`Processed ${this.processedCount} records...`);
+      
     }
   }
 }

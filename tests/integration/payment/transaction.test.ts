@@ -40,7 +40,7 @@ describe('Payment Transaction Tests', () => {
 
     it('should create a new transaction', async () => {
       if (!testMethodConfigId) {
-        console.log('Skipping - no test method config created');
+        
         return;
       }
       

@@ -490,7 +490,7 @@ export const updateReportSchedule = async (req: Request, res: Response): Promise
     const updates = req.body;
 
     // Placeholder - would update schedule in database
-    console.log(`Updating report schedule ${scheduleId}:`, updates);
+    
 
     res.json({
       success: true,
@@ -511,7 +511,7 @@ export const deleteReportSchedule = async (req: Request, res: Response): Promise
     const { scheduleId } = req.params;
 
     // Placeholder - would delete schedule from database
-    console.log(`Deleting report schedule ${scheduleId}`);
+    
 
     res.json({
       success: true,

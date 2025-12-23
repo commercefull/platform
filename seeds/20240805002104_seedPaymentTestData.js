@@ -9,7 +9,7 @@ exports.seed = async function(knex) {
     .first('merchantId');
 
   if (!testMerchant) {
-    console.log('Skipping payment seed - test merchant not found');
+    
     return;
   }
 
@@ -67,5 +67,5 @@ exports.seed = async function(knex) {
     }
   ]);
 
-  console.log('Payment test data seeded successfully');
+  
 };

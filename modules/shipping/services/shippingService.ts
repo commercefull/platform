@@ -451,7 +451,7 @@ export class ShippingService {
   async updateShipmentStatus(shipmentId: string, status: string, trackingInfo?: TrackingInfo): Promise<void> {
     try {
       // TODO: Update shipment status in database
-      console.log(`Updated shipment ${shipmentId} status to ${status}`);
+      
     } catch (error) {
       
       throw error;

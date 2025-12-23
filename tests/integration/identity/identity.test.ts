@@ -130,7 +130,7 @@ describe('Identity Feature Tests', () => {
         const refreshToken = tokenResponse.data.refreshToken;
 
         if (!refreshToken) {
-          console.log('Skipping - no refresh token available');
+          
           return;
         }
 
@@ -273,7 +273,7 @@ describe('Identity Feature Tests', () => {
         const refreshToken = tokenResponse.data.refreshToken;
 
         if (!refreshToken) {
-          console.log('Skipping - no refresh token available');
+          
           return;
         }
 

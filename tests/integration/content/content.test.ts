@@ -46,11 +46,11 @@ describe('Content Feature Tests', () => {
       const loginResponse = await client.post('/business/auth/login', ADMIN_CREDENTIALS, { headers: { 'X-Test-Request': 'true' } });
       adminToken = loginResponse.data?.accessToken || '';
       if (!adminToken) {
-        console.log('Warning: Failed to get admin token for content tests');
+        
         return;
       }
     } catch (error) {
-      console.log('Warning: Login failed for content tests:', error);
+      
       adminToken = '';
       return;
     }
@@ -78,7 +78,7 @@ describe('Content Feature Tests', () => {
         testContentTypeId = createTypeResponse.data.data.contentTypeId || createTypeResponse.data.data.id;
         testContentTypeSlug = createTypeResponse.data.data.slug;
       } else {
-        console.log('Failed to create content type:', createTypeResponse.data);
+        
       }
     }
     
@@ -105,7 +105,7 @@ describe('Content Feature Tests', () => {
         // DB returns contentTemplateId, not id
         testContentTemplateId = createTemplateResponse.data.data.contentTemplateId || createTemplateResponse.data.data.id;
       } else {
-        console.log('Failed to create template:', createTemplateResponse.data);
+        
       }
     }
     
@@ -137,7 +137,7 @@ describe('Content Feature Tests', () => {
         testContentPageId = createPageResponse.data.data.contentPageId || createPageResponse.data.data.id;
         testContentPageSlug = createPageResponse.data.data.slug;
       } else {
-        console.log('Failed to create page:', createPageResponse.data);
+        
       }
     }
     
@@ -163,7 +163,7 @@ describe('Content Feature Tests', () => {
         // DB returns contentBlockId, not id
         testContentBlockId = createBlockResponse.data.data.contentBlockId || createBlockResponse.data.data.id;
       } else {
-        console.log('Failed to create block:', createBlockResponse.data);
+        
       }
     }
   });

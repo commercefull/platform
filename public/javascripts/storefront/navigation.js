@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', function() {
   if (mobileBtn) {
     mobileBtn.addEventListener('click', function() {
       // Mobile menu functionality can be added here if needed
-      console.log('Mobile menu button clicked');
+      
     });
   }
 });

@@ -56,10 +56,10 @@ export async function setupSubscriptionTests() {
     customerToken = customerLoginResponse.data?.accessToken || '';
 
     if (!adminToken) {
-      console.log('Warning: Failed to get admin token for Subscription tests');
+      
     }
   } catch (error) {
-    console.log('Warning: Login failed for Subscription tests:', error);
+    
   }
 
   return { client, adminToken, customerToken };

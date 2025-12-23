@@ -263,7 +263,7 @@ class BigCommerceAttributeMigrator {
   async migrateOptionValues(cf, attributeId, optionValues) {
     // This would typically be handled by CommerceFull's attribute option system
     // Implementation depends on CF's API structure
-    console.log(`Migrating ${optionValues.length} values for attribute ${attributeId}`);
+    
   }
 }
 ```
@@ -296,7 +296,7 @@ class BigCommerceProductExtractor {
 
       } catch (error) {
         if (error.status === 429) {
-          console.log('Rate limited, waiting...');
+          
           await this.sleep(60000); // Wait 1 minute
           continue;
         }
@@ -631,7 +631,7 @@ async function runBigCommerceMigration() {
   });
 
   try {
-    console.log('Starting BigCommerce to CommerceFull migration...');
+    
 
     // Phase 1: Foundation data
     await runner.migrateCategories();
@@ -649,7 +649,7 @@ async function runBigCommerceMigration() {
     // Phase 5: Content
     await runner.migrateContent();
 
-    console.log('Migration completed successfully!');
+    
     console.log(runner.monitor.generateReport());
 
   } catch (error) {
@@ -735,7 +735,7 @@ class ExponentialBackoff {
       } catch (error) {
         if (error.status === 429) {
           const delay = Math.min(this.baseDelay * Math.pow(2, attempt), this.maxDelay);
-          console.log(`Rate limited, waiting ${delay}ms...`);
+          
           await this.sleep(delay);
           attempt++;
         } else {

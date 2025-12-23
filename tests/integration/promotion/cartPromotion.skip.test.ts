@@ -27,18 +27,18 @@ describe('Cart Promotion Tests', () => {
       if (promotionResponse.data?.data?.id) {
         promotionId = promotionResponse.data.data.id;
       } else {
-        console.log('Warning: Could not create test promotion:', promotionResponse.data);
+        
         promotionId = '';
       }
     } catch (error) {
-      console.log('Warning: Promotion setup failed:', error);
+      
       promotionId = '';
     }
   });
 
   it('should apply a cart promotion', async () => {
     if (!adminToken || !testCartId || !promotionId) {
-      console.log('Skipping test - missing admin token, cart ID, or promotion ID');
+      
       return;
     }
     
@@ -62,7 +62,7 @@ describe('Cart Promotion Tests', () => {
 
   it('should get cart promotions by cart ID', async () => {
     if (!adminToken || !testCartId) {
-      console.log('Skipping test - missing admin token or cart ID');
+      
       return;
     }
     
@@ -85,7 +85,7 @@ describe('Cart Promotion Tests', () => {
 
   it('should remove a promotion from a cart', async () => {
     if (!adminToken || !cartPromotionId) {
-      console.log('Skipping test - missing admin token or cart promotion ID');
+      
       return;
     }
     

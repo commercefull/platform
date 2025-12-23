@@ -10,14 +10,14 @@ exports.seed = async function (knex) {
   // Get a sample warehouse
   const warehouse = await knex('distributionWarehouse').first();
   if (!warehouse) {
-    console.log('No warehouse found, skipping inventory seed');
+    
     return;
   }
 
   // Get a sample product
   const product = await knex('product').first();
   if (!product) {
-    console.log('No product found, skipping inventory seed');
+    
     return;
   }
 
@@ -63,5 +63,5 @@ exports.seed = async function (knex) {
     }
   ]);
 
-  console.log('Inventory test data seeded successfully');
+  
 };

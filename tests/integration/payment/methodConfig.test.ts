@@ -39,7 +39,7 @@ describe('Payment Method Configuration Tests', () => {
 
     it('should get a method configuration by ID', async () => {
       if (!testMethodConfigId) {
-        console.log('Skipping - no test method config created');
+        
         return;
       }
       
@@ -55,7 +55,7 @@ describe('Payment Method Configuration Tests', () => {
 
     it('should create a new method configuration', async () => {
       if (!testGatewayId) {
-        console.log('Skipping - no test gateway created');
+        
         return;
       }
       
@@ -86,7 +86,7 @@ describe('Payment Method Configuration Tests', () => {
 
     it('should update an existing method configuration', async () => {
       if (!testMethodConfigId) {
-        console.log('Skipping - no test method config created');
+        
         return;
       }
       

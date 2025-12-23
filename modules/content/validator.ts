@@ -46,7 +46,7 @@ export const validateContactUs = (req: Request, res: Response, next: NextFunctio
     errors.array().forEach((error: any) => {
       messages.push(error.msg);
     });
-    console.log(messages);
+    
     req.flash("error", messages);
     return res.redirect("/pages/contact-us");
   }
@@ -60,7 +60,7 @@ export const validateContactForm = (req: Request, res: Response, next: NextFunct
     errors.array().forEach((error: any) => {
       messages.push(error.msg);
     });
-    console.log(messages);
+    
     req.flash("error", messages);
     return res.redirect("/contact-form");
   }

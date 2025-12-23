@@ -34,13 +34,13 @@ export const setupPaymentTests = async () => {
   try {
     adminToken = await loginTestAdmin(client);
   } catch (error: any) {
-    console.log('Warning: Admin login failed for payment tests:', error.message);
+    
   }
   
   try {
     customerToken = await loginTestUser(client);
   } catch (error: any) {
-    console.log('Warning: Customer login failed for payment tests:', error.message);
+    
   }
   
   let testGatewayId = '';
@@ -56,7 +56,7 @@ export const setupPaymentTests = async () => {
       testGatewayId = gatewayResponse.data.data.paymentGatewayId || gatewayResponse.data.data.id || '';
     }
   } catch (error: any) {
-    console.log('Gateway creation skipped:', error.message);
+    
   }
   
   // Try to create test method config
@@ -73,7 +73,7 @@ export const setupPaymentTests = async () => {
         testMethodConfigId = methodConfigResponse.data.data.paymentMethodConfigId || methodConfigResponse.data.data.id || '';
       }
     } catch (error: any) {
-      console.log('Method config creation skipped:', error.message);
+      
     }
   }
   

@@ -519,7 +519,7 @@ export const membershipUpgradeDowngrade = async (req: Request, res: Response): P
       // Handle prorating if requested
       if (prorate && isUpgrade) {
         // Calculate proration (would need billing integration)
-        console.log(`Prorating upgrade from ${currentTier?.name} to ${newTier.name}`);
+        
       }
     } else {
       // Schedule the change (would need job scheduling system)

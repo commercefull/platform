@@ -373,7 +373,7 @@ exports.seed = async function(knex) {
       await knex('customerSubscription').insert(subscriptionsToInsert);
     }
 
-    console.log('Subscription test data seeded successfully');
+    
   } else {
     console.log('Subscription products and plans seeded (no customer subscriptions - test customer not found)');
   }

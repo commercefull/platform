@@ -95,7 +95,7 @@ function createRedisStore(config?: SessionStoreConfig['redis']): SessionStoreRes
 
   // Handle Redis connection events
   client.on('connect', () => {
-    console.log('Redis session store connected');
+    
   });
 
   client.on('error', (err) => {
@@ -103,7 +103,7 @@ function createRedisStore(config?: SessionStoreConfig['redis']): SessionStoreRes
   });
 
   client.on('ready', () => {
-    console.log('Redis session store ready');
+    
   });
 
   const store = new RedisStore({
@@ -134,7 +134,7 @@ function createPostgresStore(config?: SessionStoreConfig['postgres']): SessionSt
     createTableIfMissing: true,
   });
 
-  console.log('PostgreSQL session store initialized');
+  
 
   return {
     store,
@@ -148,7 +148,7 @@ function createPostgresStore(config?: SessionStoreConfig['postgres']): SessionSt
 export async function closeSessionStore(result: SessionStoreResult): Promise<void> {
   if (result.type === 'redis' && result.client) {
     await result.client.quit();
-    console.log('Redis session store connection closed');
+    
   }
   // PostgreSQL pool is managed externally
 }

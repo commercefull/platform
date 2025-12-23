@@ -17,7 +17,7 @@ describe('Product Search Tests', () => {
     try {
       adminToken = await loginTestAdmin(client);
     } catch (error) {
-      console.log('Warning: Admin login failed for product search tests');
+      
       adminToken = '';
     }
   });

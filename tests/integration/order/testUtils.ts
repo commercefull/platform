@@ -15,7 +15,7 @@ export const loginTestUser = async (
     
     return response.data?.accessToken || '';
   } catch (error) {
-    console.log('Warning: Customer login failed:', error);
+    
     return '';
   }
 };
@@ -34,7 +34,7 @@ export const loginTestMerchant = async (
     
     return response.data?.accessToken || '';
   } catch (error) {
-    console.log('Warning: Merchant login failed:', error);
+    
     return '';
   }
 };
@@ -118,13 +118,13 @@ export const setupOrderTests = async () => {
   try {
     adminToken = await loginTestAdmin(client);
   } catch (error) {
-    console.log('Warning: Admin login failed for order tests');
+    
   }
   
   try {
     customerToken = await loginTestUser(client);
   } catch (error) {
-    console.log('Warning: Customer login failed for order tests');
+    
   }
   
   if (customerToken) {
@@ -144,10 +144,10 @@ export const setupOrderTests = async () => {
         const orderItems = createOrderResponse.data.data.items || [];
         testOrderItemId = orderItems.length > 0 ? orderItems[0].orderItemId : '';
       } else {
-        console.log('Warning: Failed to create test order:', createOrderResponse.data);
+        
       }
     } catch (error) {
-      console.log('Warning: Order test setup error:', error);
+      
     }
   }
   

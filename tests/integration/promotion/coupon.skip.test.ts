@@ -20,7 +20,7 @@ describe('Coupon API Tests', () => {
 
   it('should create a new coupon', async () => {
     if (!adminToken) {
-      console.log('Skipping test - no admin token');
+      
       return;
     }
     
@@ -42,7 +42,7 @@ describe('Coupon API Tests', () => {
 
   it('should get a coupon by ID', async () => {
     if (!adminToken || !couponId) {
-      console.log('Skipping test - no admin token or coupon ID');
+      
       return;
     }
     
@@ -57,7 +57,7 @@ describe('Coupon API Tests', () => {
 
   it('should get a coupon by code', async () => {
     if (!adminToken || !couponId) {
-      console.log('Skipping test - no admin token or coupon ID');
+      
       return;
     }
     
@@ -72,7 +72,7 @@ describe('Coupon API Tests', () => {
 
   it('should validate a coupon', async () => {
     if (!adminToken || !couponId) {
-      console.log('Skipping test - no admin token or coupon ID');
+      
       return;
     }
     
@@ -92,7 +92,7 @@ describe('Coupon API Tests', () => {
 
   it('should calculate a coupon discount', async () => {
     if (!adminToken || !couponId) {
-      console.log('Skipping test - no admin token or coupon ID');
+      
       return;
     }
     
@@ -114,7 +114,7 @@ describe('Coupon API Tests', () => {
 
   it('should update a coupon', async () => {
     if (!adminToken || !couponId) {
-      console.log('Skipping test - no admin token or coupon ID');
+      
       return;
     }
     
@@ -134,7 +134,7 @@ describe('Coupon API Tests', () => {
   
   it('should delete a coupon', async () => {
     if (!adminToken || !couponId) {
-      console.log('Skipping test - no admin token or coupon ID');
+      
       return;
     }
     

@@ -54,7 +54,7 @@ describe('Basket Feature Tests', () => {
       customerToken = customerLoginResponse.data.accessToken;
       customerId = customerLoginResponse.data.customer?.id;
     } catch (error) {
-      console.log('Using guest checkout flow');
+      
     }
 
     // Use pre-seeded basket or create one
@@ -82,7 +82,7 @@ describe('Basket Feature Tests', () => {
   describe('Basket Creation API', () => {
     it('should get or create a basket with session', async () => {
       if (!customerToken) {
-        console.log('Skipping test - no customer token');
+        
         return;
       }
 
@@ -111,7 +111,7 @@ describe('Basket Feature Tests', () => {
 
     it('should create a customer basket with proper association', async () => {
       if (!customerToken || !customerId) {
-        console.log('Skipping customer basket test - no customer credentials');
+        
         return;
       }
 
@@ -137,7 +137,7 @@ describe('Basket Feature Tests', () => {
   describe('Basket Retrieval API', () => {
     it('should get a basket by ID with camelCase properties', async () => {
       if (!customerToken || guestBasketId === 'test-basket-unavailable') {
-        console.log('Skipping test - no customer token or basket');
+        
         return;
       }
 
@@ -164,7 +164,7 @@ describe('Basket Feature Tests', () => {
 
     it('should get basket summary', async () => {
       if (!customerToken || guestBasketId === 'test-basket-unavailable') {
-        console.log('Skipping test - no customer token or basket');
+        
         return;
       }
 
@@ -182,7 +182,7 @@ describe('Basket Feature Tests', () => {
 
     it('should get current user basket via /me endpoint', async () => {
       if (!customerToken) {
-        console.log('Skipping test - no customer token');
+        
         return;
       }
 
@@ -197,7 +197,7 @@ describe('Basket Feature Tests', () => {
 
     it('should return 404 for non-existent basket', async () => {
       if (!customerToken) {
-        console.log('Skipping test - no customer token');
+        
         return;
       }
 
@@ -488,7 +488,7 @@ describe('Basket Feature Tests', () => {
 
       it('should reject adding item without required fields', async () => {
         if (!customerToken || guestBasketId === 'test-basket-unavailable') {
-          console.log('Skipping test - no customer token or basket');
+          
           return;
         }
 
@@ -504,7 +504,7 @@ describe('Basket Feature Tests', () => {
 
       it('should handle non-existent basket gracefully', async () => {
         if (!customerToken) {
-          console.log('Skipping test - no customer token');
+          
           return;
         }
 
@@ -533,7 +533,7 @@ describe('Basket Feature Tests', () => {
     describe('Basket Delete API', () => {
       it('should delete a basket', async () => {
         if (!customerToken) {
-          console.log('Skipping test - no customer token');
+          
           return;
         }
 
@@ -545,7 +545,7 @@ describe('Basket Feature Tests', () => {
         });
 
         if (createResponse.status !== 200 || !createResponse.data?.data?.basketId) {
-          console.log('Skipping - could not create basket');
+          
           return;
         }
         const deleteBasketId = createResponse.data.data.basketId;
@@ -557,8 +557,8 @@ describe('Basket Feature Tests', () => {
         // Delete may fail due to foreign key constraints in analytics tables
         // or server may need restart for code changes
         if (response.status === 500) {
-          console.log('Delete failed with 500 - may be FK constraint or server needs restart');
-          console.log('Error:', response.data.error || response.data.message);
+          
+          
           // This is acceptable - the test documents the expected behavior
           expect(response.status).toBe(500);
         } else {

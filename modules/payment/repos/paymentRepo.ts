@@ -504,7 +504,7 @@ export class PaymentRepo {
     paymentGatewayId?: string;
   }): Promise<{ success: boolean; transactionId?: string; error?: string }> {
     try {
-      console.log(`Processing payment for order ${paymentData.orderId}: ${paymentData.amount} ${paymentData.currency}`);
+      
 
       const transaction = await this.createTransaction({
         orderPaymentId: paymentData.orderPaymentId,
@@ -535,7 +535,7 @@ export class PaymentRepo {
     reason?: string;
   }): Promise<{ success: boolean; refundId?: string; error?: string }> {
     try {
-      console.log(`Processing refund for transaction ${refundData.paymentTransactionId}: ${refundData.amount}`);
+      
 
       const refund = await this.createRefund({
         orderPaymentId: refundData.orderPaymentId,

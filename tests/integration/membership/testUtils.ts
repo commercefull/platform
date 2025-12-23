@@ -110,7 +110,7 @@ export const setupMembershipTests = async () => {
     adminToken = await loginTestAdmin(client);
     userToken = await loginTestUser(client, 'customer@example.com', 'password123');
   } catch (error) {
-    console.log('Warning: Login failed for membership tests');
+    
   }
   
   if (adminToken) {
@@ -148,7 +148,7 @@ export const setupMembershipTests = async () => {
         }
       }
     } catch (error) {
-      console.log('Warning: Membership test data setup failed:', error);
+      
     }
   }
   

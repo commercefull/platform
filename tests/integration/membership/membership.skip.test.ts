@@ -138,7 +138,7 @@ describe('Membership Tests', () => {
 
     it('should update a benefit', async () => {
       if (!testBenefitId) {
-        console.log('Skipping test - no benefit ID');
+        
         return;
       }
       
@@ -160,7 +160,7 @@ describe('Membership Tests', () => {
 
     it('should get benefits for a specific tier', async () => {
       if (!testTierId) {
-        console.log('Skipping test - no tier ID');
+        
         return;
       }
       
@@ -178,7 +178,7 @@ describe('Membership Tests', () => {
   describe('User Membership Management', () => {
     it('should get a user membership by ID', async () => {
       if (!testUserMembershipId) {
-        console.log('Skipping test - no user membership ID');
+        
         return;
       }
       
@@ -196,7 +196,7 @@ describe('Membership Tests', () => {
 
     it('should get user membership with tier details', async () => {
       if (!testUserMembershipId) {
-        console.log('Skipping test - no user membership ID');
+        
         return;
       }
       
@@ -214,7 +214,7 @@ describe('Membership Tests', () => {
 
     it('should update a user membership', async () => {
       if (!testUserMembershipId) {
-        console.log('Skipping test - no user membership ID');
+        
         return;
       }
       
@@ -234,7 +234,7 @@ describe('Membership Tests', () => {
 
     it('should cancel a user membership', async () => {
       if (!testUserMembershipId) {
-        console.log('Skipping test - no user membership ID');
+        
         return;
       }
       
@@ -261,7 +261,7 @@ describe('Membership Tests', () => {
 
     it('should get public benefit information for a tier', async () => {
       if (!testTierId) {
-        console.log('Skipping test - no tier ID');
+        
         return;
       }
       

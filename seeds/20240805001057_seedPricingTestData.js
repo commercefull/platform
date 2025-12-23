@@ -84,7 +84,7 @@ exports.seed = async function(knex) {
     isActive: true
   });
 
-  console.log('Pricing test data seeded successfully');
+  
 };
 
 exports.up = exports.seed;

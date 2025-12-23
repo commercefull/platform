@@ -225,7 +225,7 @@ describe('Social Login Feature Tests', () => {
       });
 
       if (loginResponse.status !== 200) {
-        console.log('Skipping - social login not available');
+        
         return;
       }
 

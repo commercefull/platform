@@ -33,7 +33,7 @@ export const loginTestUser = async (client: AxiosInstance, email: string = 'test
     return cachedCustomerToken;
   }
 
-  console.log(`🔐 Logging in customer: ${email}`);
+  
 
   try {
     const response = await client.post('/customer/identity/login', {
@@ -43,7 +43,7 @@ export const loginTestUser = async (client: AxiosInstance, email: string = 'test
       headers: { 'X-Test-Request': 'true' }
     });
 
-    console.log(`🔐 Customer login response: ${response.status}`);
+    
 
     if (response.status !== 200 || !response.data?.accessToken) {
       
@@ -53,7 +53,7 @@ export const loginTestUser = async (client: AxiosInstance, email: string = 'test
 
     cachedCustomerToken = response.data.accessToken;
     customerTokenCacheTime = Date.now();
-    console.log('✅ Customer login successful');
+    
     return response.data.accessToken;
   } catch (error: any) {
     console.error('❌ Customer login error (server may not be running):', error.message);
@@ -71,7 +71,7 @@ export const loginTestAdmin = async (client: AxiosInstance): Promise<string> => 
     return cachedAdminToken;
   }
 
-  console.log('🔐 Logging in merchant: merchant@example.com');
+  
 
   try {
     const response = await client.post('/business/auth/login', {
@@ -81,7 +81,7 @@ export const loginTestAdmin = async (client: AxiosInstance): Promise<string> => 
       headers: { 'X-Test-Request': 'true' }
     });
 
-    console.log(`🔐 Merchant login response: ${response.status}`);
+    
 
     if (response.status !== 200 || !response.data?.accessToken) {
       
@@ -90,7 +90,7 @@ export const loginTestAdmin = async (client: AxiosInstance): Promise<string> => 
 
     cachedAdminToken = response.data.accessToken;
     adminTokenCacheTime = Date.now();
-    console.log('✅ Merchant login successful');
+    
     return response.data.accessToken;
   } catch (error: any) {
     console.error('❌ Merchant login error (server may not be running):', error.message);
@@ -112,7 +112,7 @@ export const clearTokenCache = (): void => {
  * Debug helper to check current token status
  */
 export const debugTokens = (): void => {
-  console.log('🔍 Token Debug:');
+  
   console.log(`  Admin token: ${cachedAdminToken ? '✅ cached' : '❌ none'} (${cachedAdminToken ? new Date(adminTokenCacheTime).toISOString() : 'never'})`);
   console.log(`  Customer token: ${cachedCustomerToken ? '✅ cached' : '❌ none'} (${cachedCustomerToken ? new Date(customerTokenCacheTime).toISOString() : 'never'})`);
 };

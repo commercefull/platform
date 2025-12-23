@@ -20,7 +20,7 @@ describe('Discount Tests', () => {
 
   it('should create a discount', async () => {
     if (!adminToken) {
-      console.log('Skipping test - no admin token');
+      
       return;
     }
     
@@ -52,7 +52,7 @@ describe('Discount Tests', () => {
 
   it('should get active discounts', async () => {
     if (!adminToken) {
-      console.log('Skipping test - no admin token');
+      
       return;
     }
     
@@ -73,7 +73,7 @@ describe('Discount Tests', () => {
 
   it('should get discounts by product ID', async () => {
     if (!adminToken || !testProductId) {
-      console.log('Skipping test - no admin token or product ID');
+      
       return;
     }
     
@@ -88,7 +88,7 @@ describe('Discount Tests', () => {
 
   it('should get discounts by category ID', async () => {
     if (!adminToken || !testCategoryId) {
-      console.log('Skipping test - no admin token or category ID');
+      
       return;
     }
     
@@ -103,7 +103,7 @@ describe('Discount Tests', () => {
 
   it('should update a discount', async () => {
     if (!adminToken || !discountId) {
-      console.log('Skipping test - no admin token or discount ID');
+      
       return;
     }
     
@@ -124,7 +124,7 @@ describe('Discount Tests', () => {
 
   it('should delete a discount', async () => {
     if (!adminToken || !discountId) {
-      console.log('Skipping test - no admin token or discount ID');
+      
       return;
     }
     

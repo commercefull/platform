@@ -24,7 +24,7 @@ class EmailDeliveryProvider implements NotificationDeliveryProvider {
   async send(notification: Notification): Promise<boolean> {
     try {
       // This would be replaced with actual email service integration
-      console.log(`Sending email notification: ${notification.title} to user ${notification.userId}`);
+      
       // Example: await emailClient.send({
       //  to: getUserEmail(notification.userId),
       //  subject: notification.title,
@@ -50,7 +50,7 @@ class SmsDeliveryProvider implements NotificationDeliveryProvider {
   async send(notification: Notification): Promise<boolean> {
     try {
       // This would be replaced with actual SMS service integration
-      console.log(`Sending SMS notification to user ${notification.userId}`);
+      
       // Example: await smsClient.send({
       //  to: getUserPhone(notification.userId),
       //  message: `${notification.title}: ${notification.content.substring(0, 160)}`
@@ -75,7 +75,7 @@ class PushDeliveryProvider implements NotificationDeliveryProvider {
   async send(notification: Notification): Promise<boolean> {
     try {
       // This would be replaced with actual push notification service integration
-      console.log(`Sending push notification to user ${notification.userId}`);
+      
       // Example: await pushClient.send({
       //  userId: notification.userId,
       //  title: notification.title,
@@ -103,7 +103,7 @@ class InAppDeliveryProvider implements NotificationDeliveryProvider {
     try {
       // In-app notifications are already stored in the database
       // This method would just mark them as available for in-app display
-      console.log(`In-app notification ready for user ${notification.userId}`);
+      
       return true;
     } catch (error) {
       

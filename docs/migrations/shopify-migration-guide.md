@@ -63,7 +63,7 @@ const assessment = {
   pages: await shopify.page.count()
 };
 
-console.log('Migration Assessment:', assessment);
+
 ```
 
 ## Migration Execution
@@ -83,7 +83,7 @@ const migrateProductTypes = async () => {
   };
 
   // These are typically pre-seeded in CommerceFull
-  console.log('Product types mapping:', productTypeMapping);
+  
 };
 ```
 
@@ -614,7 +614,7 @@ class ShopifyAPIManager {
       } catch (error) {
         if (error.status === 429) {
           const retryAfter = error.headers['retry-after'] || 60;
-          console.log(`Rate limited. Waiting ${retryAfter} seconds...`);
+          
           await this.sleep(retryAfter * 1000);
           attempt++;
         } else if (error.status >= 500) {
@@ -770,7 +770,7 @@ async function runShopifyMigration() {
   });
 
   try {
-    console.log('Starting Shopify to CommerceFull migration...');
+    
 
     // Phase 1: Foundation data
     await runner.migrateProductTypes();
@@ -788,7 +788,7 @@ async function runShopifyMigration() {
     // Phase 5: Content
     await runner.migrateContent();
 
-    console.log('Migration completed successfully!');
+    
     console.log(runner.monitor.generateReport());
 
   } catch (error) {

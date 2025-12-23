@@ -118,7 +118,7 @@ describe('Auth Feature Tests', () => {
     it('should refresh an access token with camelCase properties', async () => {
       // Skip if we don't have a refresh token
       if (!refreshToken) {
-        console.log('Skipping token refresh test - no refresh token available');
+        
         return;
       }
       
@@ -141,7 +141,7 @@ describe('Auth Feature Tests', () => {
     it('should validate an access token', async () => {
       // Skip if we don't have an access token
       if (!accessToken) {
-        console.log('Skipping token validation test - no access token available');
+        
         return;
       }
       
@@ -157,7 +157,7 @@ describe('Auth Feature Tests', () => {
     it('should blacklist a token on logout', async () => {
       // Skip if we don't have refresh token
       if (!refreshToken) {
-        console.log('Skipping logout test - no refresh token available');
+        
         return;
       }
       
@@ -194,7 +194,7 @@ describe('Auth Feature Tests', () => {
     it('should verify a password reset token', async () => {
       // Skip if we don't have a reset token
       if (!customerResetToken) {
-        console.log('Skipping reset token verification test - no reset token available');
+        
         return;
       }
       
@@ -208,7 +208,7 @@ describe('Auth Feature Tests', () => {
     it('should reset a password with a valid token', async () => {
       // Skip if we don't have a reset token
       if (!customerResetToken) {
-        console.log('Skipping password reset test - no reset token available');
+        
         return;
       }
       
@@ -250,7 +250,7 @@ describe('Auth Feature Tests', () => {
           verificationToken = response.data.data.accessToken;
         }
       } catch (error) {
-        console.log('Unable to generate verification token through API');
+        
         // For testing, we'll simulate a token
         verificationToken = 'simulated-verification-token';
       }
@@ -271,7 +271,7 @@ describe('Auth Feature Tests', () => {
     it('should verify an email with a valid token', async () => {
       // Skip if we don't have a verification token
       if (!verificationToken) {
-        console.log('Skipping email verification test - no verification token available');
+        
         return;
       }
       

@@ -45,17 +45,17 @@ describe('Product Variant Tests', () => {
           
           if (response.status === 201) {
             testVariantId = response.data.data.productVariantId || response.data.data.id;
-            console.log('Created test variant:', testVariantId);
+            
           }
         } catch (error) {
-          console.log('Could not create test variant, tests will be skipped');
+          
         }
       }
     });
 
     it('should get a variant by ID', async () => {
       if (!testVariantId) {
-        console.log('Skipping - no test variant available');
+        
         return;
       }
 
@@ -126,7 +126,7 @@ describe('Product Variant Tests', () => {
 
     it('should update a variant', async () => {
       if (!testVariantId) {
-        console.log('Skipping - no test variant available');
+        
         return;
       }
 
@@ -149,7 +149,7 @@ describe('Product Variant Tests', () => {
 
     it('should update variant inventory', async () => {
       if (!testVariantId) {
-        console.log('Skipping - no test variant available');
+        
         return;
       }
 

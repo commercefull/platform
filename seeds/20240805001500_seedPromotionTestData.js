@@ -341,7 +341,7 @@ exports.seed = async function(knex) {
     }
   ]);
 
-  console.log('Promotion test data seeded successfully');
+  
 };
 
 // Export IDs for use in tests

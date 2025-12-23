@@ -46,7 +46,7 @@ beforeAll(async () => {
     const merchantLogin = await client.post('/business/auth/login', TEST_MERCHANT, { headers: { 'X-Test-Request': 'true' } });
     merchantToken = merchantLogin.data?.accessToken || '';
     if (!merchantToken) {
-      console.log('Warning: Failed to get merchant token for loyalty tests');
+      
     }
 
     // Login as customer
@@ -54,10 +54,10 @@ beforeAll(async () => {
     customerToken = customerLogin.data?.accessToken || '';
     customerId = customerLogin.data?.customer?.customerId || customerLogin.data?.customer?.id || customerLogin.data?.customerId || '';
     if (!customerToken) {
-      console.log('Warning: Failed to get customer token for loyalty tests');
+      
     }
   } catch (error) {
-    console.log('Warning: Login failed for loyalty tests:', error);
+    
     merchantToken = '';
     customerToken = '';
     customerId = '';

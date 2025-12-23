@@ -27,18 +27,18 @@ describe('Category Promotion Tests', () => {
       if (promotionResponse.data?.data?.id) {
         promotionId = promotionResponse.data.data.id;
       } else {
-        console.log('Warning: Could not create test promotion:', promotionResponse.data);
+        
         promotionId = '';
       }
     } catch (error) {
-      console.log('Warning: Promotion setup failed:', error);
+      
       promotionId = '';
     }
   });
 
   it('should create a category promotion', async () => {
     if (!adminToken || !testCategoryId || !promotionId) {
-      console.log('Skipping test - missing admin token, category ID, or promotion ID');
+      
       return;
     }
     
@@ -66,7 +66,7 @@ describe('Category Promotion Tests', () => {
 
   it('should get promotions by category ID', async () => {
     if (!adminToken || !testCategoryId) {
-      console.log('Skipping test - missing admin token or category ID');
+      
       return;
     }
     
@@ -89,7 +89,7 @@ describe('Category Promotion Tests', () => {
 
   it('should get active category promotions', async () => {
     if (!adminToken) {
-      console.log('Skipping test - no admin token');
+      
       return;
     }
     
@@ -109,7 +109,7 @@ describe('Category Promotion Tests', () => {
 
   it('should delete a category promotion', async () => {
     if (!adminToken || !categoryPromotionId) {
-      console.log('Skipping test - missing admin token or category promotion ID');
+      
       return;
     }
     

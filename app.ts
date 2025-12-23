@@ -207,7 +207,7 @@ const sessionStoreResult = createSessionStore({
     keyPrefix: 'sess:',
   },
 });
-console.log(`Session store: ${sessionStoreResult.type}`);
+
 
 app.use(
   session({
@@ -292,7 +292,7 @@ app.locals.formSubmit = formSubmit;
 const port = process.env.PORT || 10000;
 app.set("port", port);
 app.listen(port, () => {
-  console.log("Server running at port " + port);
+  
 });
 
 module.exports = app;

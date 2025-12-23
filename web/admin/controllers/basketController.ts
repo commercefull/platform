@@ -181,7 +181,7 @@ export const markCartRecovered = async (req: Request, res: Response): Promise<vo
     const { basketId } = req.params;
 
     // In a real implementation, this would be called when a customer completes purchase from recovered cart
-    console.log('Marking cart as recovered:', basketId);
+    
 
     res.json({ success: true, message: 'Cart marked as recovered' });
   } catch (error: any) {

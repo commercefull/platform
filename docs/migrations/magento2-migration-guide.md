@@ -739,7 +739,7 @@ async function runMagentoMigration() {
   });
 
   try {
-    console.log('Starting Magento 2 to CommerceFull migration...');
+    
 
     // Phase 1: Foundation data
     await runner.migrateAttributes();
@@ -758,7 +758,7 @@ async function runMagentoMigration() {
     // Phase 5: Content
     await runner.migrateContent();
 
-    console.log('Migration completed successfully!');
+    
     console.log(runner.monitor.generateReport());
 
   } catch (error) {

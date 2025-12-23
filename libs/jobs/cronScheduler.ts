@@ -34,7 +34,7 @@ class CronScheduler {
   private maxHistorySize: number = 100;
 
   constructor() {
-    console.log('Cron scheduler initialized');
+    
   }
 
   /**
@@ -106,7 +106,7 @@ class CronScheduler {
       job.lastRun = new Date();
       job.nextRun = new Date(Date.now() + job.intervalMs);
 
-      console.log(`Job ${job.name} completed in ${result.duration}ms`);
+      
     } catch (error: any) {
       const result: JobResult = {
         jobId: id,
@@ -153,7 +153,7 @@ class CronScheduler {
     const job = this.jobs.get(id);
     if (job) {
       job.enabled = enabled;
-      console.log(`Job ${job.name} ${enabled ? 'enabled' : 'disabled'}`);
+      
     }
   }
 
@@ -167,7 +167,7 @@ class CronScheduler {
       this.intervals.delete(id);
     }
     this.jobs.delete(id);
-    console.log(`Job ${id} removed`);
+    
   }
 
   /**
@@ -219,14 +219,14 @@ class CronScheduler {
    * Stop all jobs and shutdown scheduler
    */
   shutdown(): void {
-    console.log('Shutting down cron scheduler...');
+    
     Array.from(this.intervals.entries()).forEach(([id, interval]) => {
       clearInterval(interval);
-      console.log(`Stopped job: ${id}`);
+      
     });
     this.intervals.clear();
     this.jobs.clear();
-    console.log('Cron scheduler shutdown complete');
+    
   }
 
   private addToHistory(result: JobResult): void {
@@ -255,7 +255,7 @@ const HOURS = 60 * MINUTES;
  * Call this from your app.ts or main entry point
  */
 export const initializeScheduledJobs = (): void => {
-  console.log('Initializing scheduled jobs...');
+  
 
   // Cleanup expired reservations every 5 minutes
   cronScheduler.registerJob(
@@ -263,7 +263,7 @@ export const initializeScheduledJobs = (): void => {
     'Cleanup Expired Reservations',
     async () => {
       // TODO: Import and call inventory service
-      console.log('Running: Cleanup expired inventory reservations');
+      
       // await inventoryService.releaseExpiredReservations();
     },
     5 * MINUTES
@@ -274,7 +274,7 @@ export const initializeScheduledJobs = (): void => {
     'inventory-sync',
     'Inventory Sync',
     async () => {
-      console.log('Running: Inventory sync with external systems');
+      
       // TODO: Implement inventory sync logic
     },
     6 * HOURS
@@ -285,7 +285,7 @@ export const initializeScheduledJobs = (): void => {
     'low-stock-check',
     'Low Stock Check',
     async () => {
-      console.log('Running: Low stock check');
+      
       // TODO: Check inventory levels and send alerts
     },
     1 * HOURS
@@ -296,7 +296,7 @@ export const initializeScheduledJobs = (): void => {
     'session-cleanup',
     'Session Cleanup',
     async () => {
-      console.log('Running: Session cleanup');
+      
       // TODO: Remove expired sessions from database
     },
     30 * MINUTES
@@ -307,7 +307,7 @@ export const initializeScheduledJobs = (): void => {
     'daily-sales-report',
     'Daily Sales Report',
     async () => {
-      console.log('Running: Generate daily sales report');
+      
       // TODO: Generate and email daily sales report
     },
     24 * HOURS
@@ -318,7 +318,7 @@ export const initializeScheduledJobs = (): void => {
     'cleanup-job-history',
     'Cleanup Job History',
     async () => {
-      console.log('Running: Cleanup old notifications and logs');
+      
       // TODO: Remove old logs and notifications
     },
     24 * HOURS
@@ -329,13 +329,13 @@ export const initializeScheduledJobs = (): void => {
     'cart-abandonment',
     'Cart Abandonment Reminders',
     async () => {
-      console.log('Running: Send cart abandonment reminders');
+      
       // TODO: Find abandoned carts and send reminder emails
     },
     1 * HOURS
   );
 
-  console.log('Scheduled jobs initialized');
+  
 };
 
 /**
@@ -432,28 +432,28 @@ export const asyncJobQueue = new AsyncJobQueue();
 export class JobScheduler {
   static async scheduleEmail(data: EmailJobData, _delay?: number): Promise<void> {
     await asyncJobQueue.add(async () => {
-      console.log(`Sending email to ${data.to}: ${data.subject}`);
+      
       // TODO: Integrate with actual email service (SendGrid, SES, etc.)
     });
   }
 
   static async scheduleInventorySync(data: InventorySyncJobData, _priority: 'low' | 'normal' | 'high' = 'normal'): Promise<void> {
     await asyncJobQueue.add(async () => {
-      console.log(`Processing inventory ${data.type} job`);
+      
       // TODO: Implement inventory sync logic
     });
   }
 
   static async scheduleReport(data: ReportJobData): Promise<void> {
     await asyncJobQueue.add(async () => {
-      console.log(`Generating ${data.reportType} report for ${data.recipientEmail}`);
+      
       // TODO: Generate and send report
     });
   }
 
   static async scheduleNotification(data: NotificationJobData): Promise<void> {
     await asyncJobQueue.add(async () => {
-      console.log(`Sending notification to ${data.userId}: ${data.title}`);
+      
       // TODO: Send notification via appropriate channels
     });
   }

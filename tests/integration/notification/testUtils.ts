@@ -17,10 +17,10 @@ export const loginTestUser = async (
       return response.data.accessToken;
     }
     
-    console.log('Warning: Customer login failed:', response.status, response.data?.error || 'Unknown error');
+    
     return '';
   } catch (error) {
-    console.log('Warning: Customer login error:', error);
+    
     return '';
   }
 };
@@ -99,13 +99,13 @@ export const setupNotificationTests = async () => {
   try {
     adminToken = await loginTestAdmin(client);
   } catch (error) {
-    console.log('Warning: Failed to get admin token for notification tests');
+    
   }
   
   try {
     customerToken = await loginTestUser(client);
   } catch (error) {
-    console.log('Warning: Failed to get customer token for notification tests');
+    
   }
   
   if (adminToken) {
@@ -124,7 +124,7 @@ export const setupNotificationTests = async () => {
       if (createNotificationResponse.data?.data?.notificationId) {
         testNotificationId = createNotificationResponse.data.data.notificationId;
       } else {
-        console.log('Warning: Failed to create test notification:', createNotificationResponse.data);
+        
       }
       
       // Create test template
@@ -135,10 +135,10 @@ export const setupNotificationTests = async () => {
       if (createTemplateResponse.data?.data?.notificationTemplateId) {
         testTemplateId = createTemplateResponse.data.data.notificationTemplateId;
       } else {
-        console.log('Warning: Failed to create test template:', createTemplateResponse.data);
+        
       }
     } catch (error) {
-      console.log('Warning: Notification test setup error:', error);
+      
     }
   }
   

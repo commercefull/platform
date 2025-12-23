@@ -378,7 +378,7 @@ export class PricingService {
         }
       } catch (error) {
         // Membership module might not be available or error occurred
-        console.log('Membership benefits not applied:', error);
+        
       }
     }
     
@@ -417,7 +417,7 @@ export class PricingService {
         }
       } catch (error) {
         // Loyalty module might not be available or error occurred
-        console.log('Loyalty discount not applied:', error);
+        
       }
     }
     

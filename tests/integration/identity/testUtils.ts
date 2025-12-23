@@ -55,10 +55,10 @@ export async function setupIdentityTests() {
     
     adminToken = adminLoginResponse.data?.accessToken || '';
     if (!adminToken) {
-      console.log('Warning: Admin login failed for identity tests:', adminLoginResponse.status, adminLoginResponse.data);
+      
     }
   } catch (error) {
-    console.log('Warning: Admin login error for identity tests:', error);
+    
   }
 
   _client = client;

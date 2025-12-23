@@ -43,7 +43,7 @@ exports.seed = async function(knex) {
   // Check if required tables exist
   const hasCarrierTable = await knex.schema.hasTable('shippingCarrier');
   if (!hasCarrierTable) {
-    console.log('Shipping tables not found, skipping shipping test data seed');
+    
     return;
   }
 
@@ -367,5 +367,5 @@ exports.seed = async function(knex) {
     }
   ]).onConflict('shippingPackagingTypeId').ignore();
 
-  console.log('Shipping test data seeded successfully');
+  
 };

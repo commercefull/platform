@@ -39,7 +39,7 @@ describe('Payment Gateway Tests', () => {
 
     it('should get a gateway by ID', async () => {
       if (!testGatewayId) {
-        console.log('Skipping - no test gateway created');
+        
         return;
       }
       
@@ -81,7 +81,7 @@ describe('Payment Gateway Tests', () => {
 
     it('should update an existing gateway', async () => {
       if (!testGatewayId) {
-        console.log('Skipping - no test gateway created');
+        
         return;
       }
       

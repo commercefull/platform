@@ -70,11 +70,11 @@ export async function setupCustomerTests() {
     adminToken = loginResponse.data?.accessToken || '';
 
     if (!adminToken) {
-      console.log('Warning: Failed to get admin token for customer tests');
+      
       return { client, adminToken, testCustomerId, testCustomerAddressId, testCustomerGroupId, testWishlistId };
     }
   } catch (error) {
-    console.log('Warning: Login failed for customer tests:', error);
+    
     return { client, adminToken, testCustomerId, testCustomerAddressId, testCustomerGroupId, testWishlistId };
   }
 
@@ -88,7 +88,7 @@ export async function setupCustomerTests() {
     if (customerResponse.data?.success && customerResponse.data?.data) {
       testCustomerId = customerResponse.data.data.customerId || customerResponse.data.data.id || '';
     } else {
-      console.log('Warning: Customer creation failed:', customerResponse.data);
+      
     }
 
     // 2. Create Customer Address (only if customer was created)
@@ -100,7 +100,7 @@ export async function setupCustomerTests() {
       if (addressResponse.data?.success && addressResponse.data?.data) {
         testCustomerAddressId = addressResponse.data.data.customerAddressId || addressResponse.data.data.addressId || addressResponse.data.data.id || '';
       } else {
-        console.log('Warning: Address creation failed:', addressResponse.data);
+        
       }
 
       // 3. Create Customer Group (optional - endpoint may not exist)
@@ -118,7 +118,7 @@ export async function setupCustomerTests() {
           });
         }
       } catch (e) {
-        console.log('Customer group endpoint not available, skipping group tests');
+        
       }
 
       // 5. Create Wishlist (optional - endpoint may not exist)
@@ -133,11 +133,11 @@ export async function setupCustomerTests() {
           testWishlistId = wishlistResponse.data.data.customerWishlistId || wishlistResponse.data.data.id;
         }
       } catch (e) {
-        console.log('Wishlist endpoint not available, skipping wishlist tests');
+        
       }
     }
   } catch (error) {
-    console.log('Warning: Customer test setup error:', error);
+    
   }
 
   // Return all test data and helper objects

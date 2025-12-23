@@ -280,7 +280,7 @@ export const processDeletionRequest: AsyncHandler = async (req, res, next) => {
       exportCustomerData: async () => ({ customer: {}, orders: [], addresses: [], consents: [], activities: [] }),
       anonymizeCustomerData: async (customerId: string) => {
         // TODO: Implement actual data anonymization
-        console.log(`Anonymizing data for customer ${customerId}`);
+        
       },
       deleteCustomerData: async () => {}
     };

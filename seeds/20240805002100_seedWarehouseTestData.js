@@ -29,7 +29,7 @@ exports.seed = async function(knex) {
   // Check if required tables exist
   const hasWarehouseTable = await knex.schema.hasTable('distributionWarehouse');
   if (!hasWarehouseTable) {
-    console.log('Warehouse tables not found, skipping warehouse test data seed');
+    
     return;
   }
 
@@ -268,5 +268,5 @@ exports.seed = async function(knex) {
     }
   ]);
 
-  console.log('Warehouse test data seeded successfully');
+  
 };

@@ -207,7 +207,7 @@ export async function setupProductTests() {
     // Use merchant login for business routes
     adminToken = await loginTestAdmin(client);
   } catch (error) {
-    console.log('Warning: Admin login failed for product tests');
+    
   }
   
   // Use seeded product data - these products are created by the seed file

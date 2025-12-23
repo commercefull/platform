@@ -130,7 +130,7 @@ describe('Inventory Feature Tests', () => {
     describe('POST /business/inventory/locations/:id/adjust', () => {
       it('should adjust stock quantity', async () => {
         if (!testLocationId) {
-          console.log('Skipping - no test location available');
+          
           return;
         }
 
@@ -147,7 +147,7 @@ describe('Inventory Feature Tests', () => {
 
       it('should require quantityChange', async () => {
         if (!testLocationId) {
-          console.log('Skipping - no test location available');
+          
           return;
         }
 
@@ -165,7 +165,7 @@ describe('Inventory Feature Tests', () => {
     describe('POST /business/inventory/locations/:id/reserve', () => {
       it('should reserve stock', async () => {
         if (!testLocationId) {
-          console.log('Skipping - no test location available');
+          
           return;
         }
 
@@ -182,7 +182,7 @@ describe('Inventory Feature Tests', () => {
 
       it('should require positive quantity', async () => {
         if (!testLocationId) {
-          console.log('Skipping - no test location available');
+          
           return;
         }
 
@@ -200,7 +200,7 @@ describe('Inventory Feature Tests', () => {
     describe('POST /business/inventory/locations/:id/release', () => {
       it('should release reserved stock', async () => {
         if (!testLocationId) {
-          console.log('Skipping - no test location available');
+          
           return;
         }
 

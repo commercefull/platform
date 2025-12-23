@@ -74,7 +74,7 @@ export class ProcessWebhookUseCase {
 
       default:
         // Log unknown event types but don't fail
-        console.log(`Unhandled webhook event: ${input.eventType}`);
+        
     }
 
     return {
