@@ -3,6 +3,7 @@
  * HTTP interface for business/admin product operations
  */
 
+import { logger } from '../../../../libs/logger';
 import { Request, Response } from 'express';
 import ProductRepo from '../../infrastructure/repositories/ProductRepository';
 import { CreateProductCommand, CreateProductUseCase } from '../../application/useCases/CreateProduct';
@@ -67,7 +68,8 @@ export const listProducts = async (req: Request, res: Response): Promise<void> =
 
     respond(req, res, result, 200, 'admin/product/list');
   } catch (error: any) {
-    console.error('Error listing products:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to list products', 500, 'admin/product/error');
   }
 };
@@ -91,7 +93,8 @@ export const getProduct = async (req: Request, res: Response): Promise<void> => 
 
     respond(req, res, product, 200, 'admin/product/detail');
   } catch (error: any) {
-    console.error('Error getting product:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to get product', 500, 'admin/product/error');
   }
 };
@@ -131,7 +134,8 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
 
     respond(req, res, product, 201, 'admin/product/created');
   } catch (error: any) {
-    console.error('Error creating product:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to create product', 500, 'admin/product/error');
   }
 };
@@ -151,7 +155,8 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
 
     respond(req, res, result, 200, 'admin/product/updated');
   } catch (error: any) {
-    console.error('Error updating product:', error);
+    logger.error('Error:', error);
+    
     if (error.message.includes('not found')) {
       respondError(req, res, error.message, 404, 'admin/product/error');
       return;
@@ -186,7 +191,8 @@ export const updateProductStatus = async (req: Request, res: Response): Promise<
 
     respond(req, res, { productId, status: product.status, updatedAt: product.updatedAt.toISOString() }, 200, 'admin/product/updated');
   } catch (error: any) {
-    console.error('Error updating product status:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to update product status', 500, 'admin/product/error');
   }
 };
@@ -217,7 +223,8 @@ export const updateProductVisibility = async (req: Request, res: Response): Prom
 
     respond(req, res, { productId, visibility: product.visibility, updatedAt: product.updatedAt.toISOString() }, 200, 'admin/product/updated');
   } catch (error: any) {
-    console.error('Error updating product visibility:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to update product visibility', 500, 'admin/product/error');
   }
 };
@@ -245,7 +252,8 @@ export const deleteProduct = async (req: Request, res: Response): Promise<void> 
 
     respond(req, res, { productId, deleted: true, permanent: permanent === 'true' }, 200, 'admin/product/deleted');
   } catch (error: any) {
-    console.error('Error deleting product:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to delete product', 500, 'admin/product/error');
   }
 };
@@ -269,7 +277,8 @@ export const publishProduct = async (req: Request, res: Response): Promise<void>
 
     respond(req, res, { productId, status: product.status, visibility: product.visibility, publishedAt: product.publishedAt?.toISOString() }, 200, 'admin/product/published');
   } catch (error: any) {
-    console.error('Error publishing product:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to publish product', 500, 'admin/product/error');
   }
 };
@@ -293,7 +302,8 @@ export const unpublishProduct = async (req: Request, res: Response): Promise<voi
 
     respond(req, res, { productId, visibility: product.visibility, updatedAt: product.updatedAt.toISOString() }, 200, 'admin/product/unpublished');
   } catch (error: any) {
-    console.error('Error unpublishing product:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to unpublish product', 500, 'admin/product/error');
   }
 };

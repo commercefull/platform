@@ -138,7 +138,7 @@ describe('Category Promotion Tests', () => {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
     } catch (error) {
-      console.error('Error cleaning up promotion:', error);
+      
     }
 
     await cleanupPromotionTests(client, adminToken, testCartId, testProductId, testCategoryId);

@@ -1,3 +1,4 @@
+import { logger } from '../../../libs/logger';
 import { Request, Response } from "express";
 import { CategoryPromotionRepo } from "../repos/categoryRepo";
 
@@ -8,6 +9,7 @@ export const getActiveCategoryPromotions = async (req: Request, res: Response): 
     const promotions = await categoryPromotionRepo.getActivePromotions();
     res.status(200).json({ success: true, data: promotions || [] });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -19,6 +21,7 @@ export const getPromotionsByCategoryId = async (req: Request, res: Response): Pr
     const promotions = await categoryPromotionRepo.getByCategoryId(categoryId);
     res.status(200).json({ success: true, data: promotions || [] });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -36,6 +39,7 @@ export const getCategoryPromotionById = async (req: Request, res: Response): Pro
 
     res.status(200).json({ success: true, data: promotion });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -52,6 +56,7 @@ export const createCategoryPromotion = async (req: Request, res: Response): Prom
     const promotion = await categoryPromotionRepo.create(promotionData);
     res.status(201).json({ success: true, data: promotion });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -65,6 +70,7 @@ export const updateCategoryPromotion = async (req: Request, res: Response): Prom
     const promotion = await categoryPromotionRepo.update(id, promotionData);
     res.status(200).json({ success: true, data: promotion });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -76,6 +82,7 @@ export const deleteCategoryPromotion = async (req: Request, res: Response): Prom
     await categoryPromotionRepo.delete(id);
     res.status(200).json({ success: true, message: "Category promotion deleted successfully" });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };

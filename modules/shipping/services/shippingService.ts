@@ -130,7 +130,7 @@ export class ShippingService {
             });
           }
         } catch (error) {
-          console.error(`Error calculating rate for method ${method.code}:`, error);
+          
           // Continue with other methods
         }
       }
@@ -138,7 +138,7 @@ export class ShippingService {
       // 4. Sort by rate
       return quotes.sort((a, b) => a.rate - b.rate);
     } catch (error) {
-      console.error('Error calculating shipping rates:', error);
+      
       throw error;
     }
   }
@@ -165,7 +165,7 @@ export class ShippingService {
         messages
       };
     } catch (error) {
-      console.error('Error validating address:', error);
+      
       return {
         valid: false,
         messages: ['Address validation failed']
@@ -221,7 +221,7 @@ export class ShippingService {
 
       return shipment;
     } catch (error) {
-      console.error('Error creating shipment:', error);
+      
       throw error;
     }
   }
@@ -264,7 +264,7 @@ export class ShippingService {
         ]
       };
     } catch (error) {
-      console.error('Error getting tracking info:', error);
+      
       throw error;
     }
   }
@@ -286,7 +286,7 @@ export class ShippingService {
         trackingNumber: `TRK${Date.now()}`
       };
     } catch (error) {
-      console.error('Error generating shipping label:', error);
+      
       throw error;
     }
   }
@@ -299,7 +299,7 @@ export class ShippingService {
       // Return all active shipping methods (simplified implementation)
       return await this.methodRepo.findAll(true);
     } catch (error) {
-      console.error('Error getting shipping methods:', error);
+      
       return [];
     }
   }
@@ -343,7 +343,7 @@ export class ShippingService {
 
       return { total, baseRate, insurance };
     } catch (error) {
-      console.error('Error calculating method rate:', error);
+      
       return null;
     }
   }
@@ -440,7 +440,7 @@ export class ShippingService {
         requiresContract: carrier.requiresContract
       } : {};
     } catch (error) {
-      console.error('Error getting carrier capabilities:', error);
+      
       return {};
     }
   }
@@ -453,7 +453,7 @@ export class ShippingService {
       // TODO: Update shipment status in database
       console.log(`Updated shipment ${shipmentId} status to ${status}`);
     } catch (error) {
-      console.error('Error updating shipment status:', error);
+      
       throw error;
     }
   }

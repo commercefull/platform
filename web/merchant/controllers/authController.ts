@@ -3,6 +3,7 @@
  * Handles merchant login/logout with session management
  */
 
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import { SessionService } from '../../../libs/session';
@@ -88,7 +89,8 @@ export const postLogin = async (req: Request, res: Response) => {
 
     return res.redirect('/merchant');
   } catch (error) {
-    console.error('Merchant login error:', error);
+    logger.error('Error:', error);
+    
     merchantRespond(req, res, 'login', {
       pageName: 'Merchant Login',
       error: 'An error occurred during login',
@@ -108,7 +110,8 @@ export const postLogout = async (req: Request, res: Response) => {
     res.clearCookie(SESSION_COOKIE_NAME);
     res.redirect('/merchant/login');
   } catch (error) {
-    console.error('Merchant logout error:', error);
+    logger.error('Error:', error);
+    
     res.clearCookie(SESSION_COOKIE_NAME);
     res.redirect('/merchant/login');
   }

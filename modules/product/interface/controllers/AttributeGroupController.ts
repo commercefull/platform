@@ -1,3 +1,4 @@
+import { logger } from '../../../../libs/logger';
 import { Request, Response } from 'express';
 import { AttributeGroupRepo } from '../../repos/attributeGroupRepo';
 
@@ -17,6 +18,7 @@ export class AttributeGroupController {
         data: groups || []
       });
     } catch (error) {
+      logger.error('Error:', error);
       res.status(500).json({
         success: false,
         error: `Failed to list attribute groups: ${(error as Error).message}`
@@ -46,6 +48,7 @@ export class AttributeGroupController {
         data: group
       });
     } catch (error) {
+      logger.error('Error:', error);
       res.status(500).json({
         success: false,
         error: `Failed to get attribute group: ${(error as Error).message}`
@@ -75,6 +78,7 @@ export class AttributeGroupController {
         data: group
       });
     } catch (error) {
+      logger.error('Error:', error);
       res.status(500).json({
         success: false,
         error: `Failed to get attribute group: ${(error as Error).message}`
@@ -121,6 +125,7 @@ export class AttributeGroupController {
         data: group
       });
     } catch (error) {
+      logger.error('Error:', error);
       res.status(500).json({
         success: false,
         error: `Failed to create attribute group: ${(error as Error).message}`
@@ -158,6 +163,7 @@ export class AttributeGroupController {
         data: group
       });
     } catch (error) {
+      logger.error('Error:', error);
       res.status(500).json({
         success: false,
         error: `Failed to update attribute group: ${(error as Error).message}`
@@ -190,6 +196,7 @@ export class AttributeGroupController {
         message: 'Attribute group deleted successfully'
       });
     } catch (error) {
+      logger.error('Error:', error);
       res.status(500).json({
         success: false,
         error: `Failed to delete attribute group: ${(error as Error).message}`

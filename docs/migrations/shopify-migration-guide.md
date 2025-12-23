@@ -287,7 +287,7 @@ class CommerceFullProductLoader {
 
       return createdProduct;
     } catch (error) {
-      console.error(`Failed to load product ${product.name}:`, error);
+      
       throw error;
     }
   }
@@ -792,7 +792,7 @@ async function runShopifyMigration() {
     console.log(runner.monitor.generateReport());
 
   } catch (error) {
-    console.error('Migration failed:', error);
+    
     console.log('Partial results:', runner.monitor.generateReport());
   }
 }

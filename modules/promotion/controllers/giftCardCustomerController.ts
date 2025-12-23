@@ -3,6 +3,7 @@
  * Handles customer-facing gift card operations
  */
 
+import { logger } from '../../../libs/logger';
 import { Request, Response, NextFunction } from 'express';
 import * as giftCardRepo from '../repos/giftCardRepo';
 
@@ -38,7 +39,8 @@ export const checkGiftCardBalance: AsyncHandler = async (req, res, next) => {
       }
     });
   } catch (error: any) {
-    console.error('Check gift card balance error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -63,7 +65,8 @@ export const redeemGiftCard: AsyncHandler = async (req, res, next) => {
 
     res.json({ success: true, data: transaction });
   } catch (error: any) {
-    console.error('Redeem gift card error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -80,7 +83,8 @@ export const getMyGiftCards: AsyncHandler = async (req, res, next) => {
 
     res.json({ success: true, ...result });
   } catch (error: any) {
-    console.error('Get my gift cards error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -110,7 +114,8 @@ export const reloadGiftCard: AsyncHandler = async (req, res, next) => {
 
     res.json({ success: true, data: transaction });
   } catch (error: any) {
-    console.error('Reload gift card error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };

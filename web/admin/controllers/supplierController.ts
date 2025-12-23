@@ -3,6 +3,7 @@
  * Handles supplier management for the Admin Hub
  */
 
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import supplierRepo from '../../../modules/supplier/repos/supplierRepo';
 import { adminRespond } from 'web/respond';
@@ -40,7 +41,8 @@ export const listSuppliers = async (req: Request, res: Response): Promise<void> 
       success: req.query.success || null
     });
   } catch (error: any) {
-    console.error('Error listing suppliers:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load suppliers',
@@ -54,7 +56,8 @@ export const createSupplierForm = async (req: Request, res: Response): Promise<v
       pageName: 'Create Supplier',
     });
   } catch (error: any) {
-    console.error('Error loading create supplier form:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -106,7 +109,8 @@ export const createSupplier = async (req: Request, res: Response): Promise<void>
 
     res.redirect(`/hub/suppliers/${supplier.supplierId}?success=Supplier created successfully`);
   } catch (error: any) {
-    console.error('Error creating supplier:', error);
+    logger.error('Error:', error);
+    
 
     adminRespond(req, res, 'operations/suppliers/create', {
       pageName: 'Create Supplier',
@@ -137,7 +141,8 @@ export const viewSupplier = async (req: Request, res: Response): Promise<void> =
       success: req.query.success || null
     });
   } catch (error: any) {
-    console.error('Error viewing supplier:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load supplier',
@@ -164,7 +169,8 @@ export const editSupplierForm = async (req: Request, res: Response): Promise<voi
       supplier,
     });
   } catch (error: any) {
-    console.error('Error loading edit supplier form:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -221,7 +227,8 @@ export const updateSupplier = async (req: Request, res: Response): Promise<void>
 
     res.redirect(`/hub/suppliers/${supplierId}?success=Supplier updated successfully`);
   } catch (error: any) {
-    console.error('Error updating supplier:', error);
+    logger.error('Error:', error);
+    
 
     try {
       const supplier = await supplierRepo.findById(req.params.supplierId);
@@ -253,7 +260,8 @@ export const approveSupplier = async (req: Request, res: Response): Promise<void
 
     res.json({ success: true, message: 'Supplier approved successfully' });
   } catch (error: any) {
-    console.error('Error approving supplier:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message || 'Failed to approve supplier' });
   }
 };
@@ -270,7 +278,8 @@ export const suspendSupplier = async (req: Request, res: Response): Promise<void
 
     res.json({ success: true, message: 'Supplier suspended successfully' });
   } catch (error: any) {
-    console.error('Error suspending supplier:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message || 'Failed to suspend supplier' });
   }
 };
@@ -287,7 +296,8 @@ export const activateSupplier = async (req: Request, res: Response): Promise<voi
 
     res.json({ success: true, message: 'Supplier activated successfully' });
   } catch (error: any) {
-    console.error('Error activating supplier:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message || 'Failed to activate supplier' });
   }
 };
@@ -304,7 +314,8 @@ export const deactivateSupplier = async (req: Request, res: Response): Promise<v
 
     res.json({ success: true, message: 'Supplier deactivated successfully' });
   } catch (error: any) {
-    console.error('Error deactivating supplier:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message || 'Failed to deactivate supplier' });
   }
 };
@@ -321,7 +332,8 @@ export const deleteSupplier = async (req: Request, res: Response): Promise<void>
 
     res.json({ success: true, message: 'Supplier deleted successfully' });
   } catch (error: any) {
-    console.error('Error deleting supplier:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message || 'Failed to delete supplier' });
   }
 };

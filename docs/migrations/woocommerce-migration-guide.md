@@ -775,7 +775,7 @@ async function runWooCommerceMigration() {
     console.log(runner.monitor.generateReport());
 
   } catch (error) {
-    console.error('Migration failed:', error);
+    
     console.log('Partial results:', runner.monitor.generateReport());
   }
 }

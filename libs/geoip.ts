@@ -47,7 +47,7 @@ export async function detectCountry(ip: string): Promise<string | null> {
       return country;
     }
   } catch (error) {
-    console.error('Error detecting country with ipapi.co:', error);
+    
     // Continue to fallback
   }
   
@@ -67,7 +67,7 @@ export async function detectCountry(ip: string): Promise<string | null> {
       return country;
     }
   } catch (error) {
-    console.error('Error detecting country with ipinfo.io:', error);
+    
   }
   
   // Set null result in cache too, but only for 1 hour

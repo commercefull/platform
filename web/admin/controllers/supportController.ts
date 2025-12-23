@@ -3,6 +3,7 @@
  * Handles support tickets and FAQ management
  */
 
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import { query, queryOne } from '../../../libs/db';
 import { v4 as uuidv4 } from 'uuid';
@@ -62,7 +63,8 @@ export const supportDashboard = async (req: Request, res: Response): Promise<voi
       faqs: faqs || [],
     });
   } catch (error: any) {
-    console.error('Error loading support dashboard:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load support dashboard',
@@ -118,7 +120,8 @@ export const listSupportTickets = async (req: Request, res: Response): Promise<v
       pagination: { limit: parseInt(limit as string) || 50, offset: parseInt(offset as string) || 0 },
     });
   } catch (error: any) {
-    console.error('Error listing support tickets:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load support tickets',
@@ -162,7 +165,8 @@ export const viewSupportTicket = async (req: Request, res: Response): Promise<vo
       messages: messages || [],
     });
   } catch (error: any) {
-    console.error('Error viewing support ticket:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load support ticket',
@@ -199,7 +203,8 @@ export const updateTicketStatus = async (req: Request, res: Response): Promise<v
 
     res.json({ success: true });
   } catch (error: any) {
-    console.error('Error updating ticket status:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -221,7 +226,8 @@ export const listFaqs = async (req: Request, res: Response): Promise<void> => {
       faqs: faqs || [],
     });
   } catch (error: any) {
-    console.error('Error listing FAQs:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load FAQs',
@@ -241,7 +247,8 @@ export const createFaq = async (req: Request, res: Response): Promise<void> => {
 
     res.redirect('/hub/support?success=FAQ created');
   } catch (error: any) {
-    console.error('Error creating FAQ:', error);
+    logger.error('Error:', error);
+    
     res.redirect('/hub/support?error=' + encodeURIComponent(error.message));
   }
 };
@@ -259,7 +266,8 @@ export const updateFaq = async (req: Request, res: Response): Promise<void> => {
 
     res.redirect('/hub/support?success=FAQ updated');
   } catch (error: any) {
-    console.error('Error updating FAQ:', error);
+    logger.error('Error:', error);
+    
     res.redirect('/hub/support?error=' + encodeURIComponent(error.message));
   }
 };
@@ -270,7 +278,8 @@ export const deleteFaq = async (req: Request, res: Response): Promise<void> => {
     await query(`UPDATE "faq" SET "deletedAt" = NOW() WHERE "faqId" = $1`, [faqId]);
     res.json({ success: true });
   } catch (error: any) {
-    console.error('Error deleting FAQ:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };

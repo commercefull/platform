@@ -3,6 +3,7 @@
  * Dashboard for operations management
  */
 
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import { query, queryOne } from '../../../libs/db';
 import { adminRespond } from 'web/respond';
@@ -81,7 +82,8 @@ export const operationsDashboard = async (req: Request, res: Response): Promise<
       warehouses: warehouses || [],
     });
   } catch (error: any) {
-    console.error('Error loading operations dashboard:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load operations dashboard',

@@ -3,6 +3,7 @@
  * Handles business-related HTTP requests
  */
 
+import { logger } from '../../../../libs/logger';
 import { Request, Response } from 'express';
 import { CreateBusinessUseCase, CreateBusinessCommand } from '../../application/useCases/CreateBusiness';
 import { BusinessRepo } from '../../infrastructure/repositories/BusinessRepo';
@@ -49,7 +50,8 @@ export class BusinessController {
         data: result
       });
     } catch (error) {
-      console.error('Create business error:', error);
+      logger.error('Error:', error);
+      
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       res.status(400).json({
         success: false,
@@ -80,7 +82,8 @@ export class BusinessController {
         data: business.toJSON()
       });
     } catch (error) {
-      console.error('Get business error:', error);
+      logger.error('Error:', error);
+      
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       res.status(500).json({
         success: false,
@@ -111,7 +114,8 @@ export class BusinessController {
         data: business.toJSON()
       });
     } catch (error) {
-      console.error('Get business by slug error:', error);
+      logger.error('Error:', error);
+      
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       res.status(500).json({
         success: false,
@@ -136,7 +140,8 @@ export class BusinessController {
         count: businesses.length
       });
     } catch (error) {
-      console.error('List businesses error:', error);
+      logger.error('Error:', error);
+      
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       res.status(500).json({
         success: false,

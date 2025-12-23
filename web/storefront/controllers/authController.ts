@@ -3,6 +3,7 @@
  * Handles login, signup, profile, and logout for customers
  */
 
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import { storefrontRespond } from '../../respond';
 import CustomerRepo from '../../../modules/customer/infrastructure/repositories/CustomerRepository';
@@ -80,7 +81,8 @@ export const signIn = async (req: Request, res: Response): Promise<void> => {
     res.redirect(redirectTo as string);
 
   } catch (error: any) {
-    console.error('Error signing in:', error);
+    logger.error('Error:', error);
+    
     req.flash('error', error.message || 'Failed to sign in');
     res.redirect('/signin');
   }
@@ -141,7 +143,8 @@ export const signUp = async (req: Request, res: Response): Promise<void> => {
     res.redirect('/profile');
 
   } catch (error: any) {
-    console.error('Error signing up:', error);
+    logger.error('Error:', error);
+    
     req.flash('error', error.message || 'Failed to create account');
     res.redirect('/signup');
   }
@@ -172,7 +175,8 @@ export const profile = async (req: Request, res: Response): Promise<void> => {
       customer
     });
   } catch (error: any) {
-    console.error('Error loading profile:', error);
+    logger.error('Error:', error);
+    
     storefrontRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load profile'
@@ -211,7 +215,8 @@ export const updateProfile = async (req: Request, res: Response): Promise<void> 
     res.redirect('/profile');
 
   } catch (error: any) {
-    console.error('Error updating profile:', error);
+    logger.error('Error:', error);
+    
     req.flash('error', error.message || 'Failed to update profile');
     res.redirect('/profile');
   }
@@ -232,7 +237,8 @@ export const signOut = async (req: Request, res: Response): Promise<void> => {
     req.flash('success', 'You have been signed out successfully');
     res.redirect('/');
   } catch (error: any) {
-    console.error('Error signing out:', error);
+    logger.error('Error:', error);
+    
     res.redirect('/');
   }
 };
@@ -278,7 +284,8 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
     res.redirect('/profile');
 
   } catch (error: any) {
-    console.error('Error changing password:', error);
+    logger.error('Error:', error);
+    
     req.flash('error', error.message || 'Failed to change password');
     res.redirect('/profile');
   }

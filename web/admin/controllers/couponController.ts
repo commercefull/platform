@@ -3,6 +3,7 @@
  * Handles coupon management for the Admin Hub
  */
 
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import { couponRepo } from '../../../modules/promotion/repos/couponRepo';
 import { adminRespond } from 'web/respond';
@@ -37,7 +38,8 @@ export const listCoupons = async (req: Request, res: Response): Promise<void> =>
       success: req.query.success || null
     });
   } catch (error: any) {
-    console.error('Error listing coupons:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load coupons',
@@ -51,7 +53,8 @@ export const createCouponForm = async (req: Request, res: Response): Promise<voi
       pageName: 'Create Coupon',
     });
   } catch (error: any) {
-    console.error('Error loading create coupon form:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -98,7 +101,8 @@ export const createCoupon = async (req: Request, res: Response): Promise<void> =
 
     res.redirect(`/hub/promotions/coupons/${coupon.promotionCouponId}?success=Coupon created successfully`);
   } catch (error: any) {
-    console.error('Error creating coupon:', error);
+    logger.error('Error:', error);
+    
 
     adminRespond(req, res, 'promotions/coupons/create', {
       pageName: 'Create Coupon',
@@ -133,7 +137,8 @@ export const viewCoupon = async (req: Request, res: Response): Promise<void> => 
       success: req.query.success || null
     });
   } catch (error: any) {
-    console.error('Error viewing coupon:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load coupon',
@@ -160,7 +165,8 @@ export const editCouponForm = async (req: Request, res: Response): Promise<void>
       coupon,
     });
   } catch (error: any) {
-    console.error('Error loading edit coupon form:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -207,7 +213,8 @@ export const updateCoupon = async (req: Request, res: Response): Promise<void> =
 
     res.redirect(`/hub/promotions/coupons/${couponId}?success=Coupon updated successfully`);
   } catch (error: any) {
-    console.error('Error updating coupon:', error);
+    logger.error('Error:', error);
+    
 
     try {
       const coupon = await couponRepo.findById(req.params.couponId);
@@ -239,7 +246,8 @@ export const deleteCoupon = async (req: Request, res: Response): Promise<void> =
 
     res.json({ success: true, message: 'Coupon deleted successfully' });
   } catch (error: any) {
-    console.error('Error deleting coupon:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message || 'Failed to delete coupon' });
   }
 };
@@ -257,7 +265,8 @@ export const validateCoupon = async (req: Request, res: Response): Promise<void>
       discountAmount: result.coupon ? couponRepo.calculateDiscount(result.coupon, orderTotal) : 0
     });
   } catch (error: any) {
-    console.error('Error validating coupon:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ valid: false, message: error.message || 'Failed to validate coupon' });
   }
 };

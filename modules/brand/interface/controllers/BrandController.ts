@@ -4,6 +4,7 @@
  * HTTP interface for brand management.
  */
 
+import { logger } from '../../../../libs/logger';
 import { Request, Response } from 'express';
 import { brandRepository } from '../../infrastructure/repositories/BrandRepository';
 import {
@@ -31,6 +32,7 @@ export const createBrand = async (req: Request, res: Response): Promise<void> =>
     });
     res.status(201).json({ success: true, data: result.brand });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
@@ -48,6 +50,7 @@ export const getBrand = async (req: Request, res: Response): Promise<void> => {
     }
     res.json({ success: true, data: result.brand });
   } catch (error: any) {
+    logger.error('Error:', error);
     const status = error.message.includes('not found') ? 404 : 400;
     res.status(status).json({ success: false, error: error.message });
   }
@@ -71,6 +74,7 @@ export const updateBrand = async (req: Request, res: Response): Promise<void> =>
     });
     res.json({ success: true, data: result.brand });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
@@ -81,6 +85,7 @@ export const deleteBrand = async (req: Request, res: Response): Promise<void> =>
     await useCase.execute({ brandId: req.params.brandId });
     res.json({ success: true, message: 'Brand deleted' });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
@@ -97,6 +102,7 @@ export const listBrands = async (req: Request, res: Response): Promise<void> => 
     });
     res.json({ success: true, data: result });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(400).json({ success: false, error: error.message });
   }
 };

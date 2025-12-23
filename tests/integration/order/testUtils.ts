@@ -175,6 +175,6 @@ export const cleanupOrderTests = async (
       headers: { Authorization: `Bearer ${adminToken}` }
     });
   } catch (error) {
-    console.error('Error cleaning up order test data:', error);
+    
   }
 };

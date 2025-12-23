@@ -534,7 +534,7 @@ class GenericMigrationFramework {
           await this.target.load(entityType, transformed);
           return { success: true };
         } catch (error) {
-          console.error(`Error processing ${entityType}:`, error);
+          
           return { success: false, error };
         }
       });
@@ -623,7 +623,7 @@ class MigrationErrorHandler {
         return recoveredData;
       } catch (recoveryError) {
         // Recovery failed, log and continue
-        console.error('Recovery failed:', recoveryError);
+        
       }
     }
 
@@ -846,7 +846,7 @@ class MemoryEfficientMigrator {
           transformedData.push(transformed);
         } catch (error) {
           results.errors++;
-          console.error('Transformation error:', error);
+          
         }
       }
 
@@ -952,7 +952,7 @@ async function runCustomMigration() {
     console.log(runner.generateReport());
 
   } catch (error) {
-    console.error('Migration failed:', error);
+    
     console.log('Partial results:', runner.generateReport());
     console.log('Error details:', runner.errorHandler.generateErrorReport());
   }

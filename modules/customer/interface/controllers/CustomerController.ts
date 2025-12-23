@@ -3,6 +3,7 @@
  * HTTP interface for customer operations
  */
 
+import { logger } from '../../../../libs/logger';
 import { Request, Response } from 'express';
 import CustomerRepo from '../../infrastructure/repositories/CustomerRepository';
 import { RegisterCustomerCommand, RegisterCustomerUseCase } from '../../useCases/RegisterCustomer';
@@ -46,7 +47,8 @@ export const registerCustomer = async (req: Request, res: Response): Promise<voi
 
     respond(req, res, result, 201);
   } catch (error: any) {
-    console.error('Error registering customer:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to register', error.message.includes('exists') ? 409 : 500);
   }
 };
@@ -65,7 +67,8 @@ export const getCustomer = async (req: Request, res: Response): Promise<void> =>
 
     respond(req, res, customer);
   } catch (error: any) {
-    console.error('Error getting customer:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to get customer', 500);
   }
 };
@@ -89,7 +92,8 @@ export const getMyProfile = async (req: Request, res: Response): Promise<void> =
 
     respond(req, res, customer);
   } catch (error: any) {
-    console.error('Error getting profile:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to get profile', 500);
   }
 };
@@ -108,7 +112,8 @@ export const updateMyProfile = async (req: Request, res: Response): Promise<void
 
     respond(req, res, result);
   } catch (error: any) {
-    console.error('Error updating profile:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to update profile', 500);
   }
 };
@@ -130,7 +135,8 @@ export const getAddresses = async (req: Request, res: Response): Promise<void> =
 
     respond(req, res, { addresses });
   } catch (error: any) {
-    console.error('Error getting addresses:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to get addresses', 500);
   }
 };
@@ -155,7 +161,8 @@ export const addAddress = async (req: Request, res: Response): Promise<void> => 
 
     respond(req, res, address, 201);
   } catch (error: any) {
-    console.error('Error adding address:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to add address', 500);
   }
 };
@@ -176,7 +183,8 @@ export const updateAddress = async (req: Request, res: Response): Promise<void> 
 
     respond(req, res, address);
   } catch (error: any) {
-    console.error('Error updating address:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to update address', 500);
   }
 };
@@ -197,7 +205,8 @@ export const deleteAddress = async (req: Request, res: Response): Promise<void> 
 
     respond(req, res, { deleted: true });
   } catch (error: any) {
-    console.error('Error deleting address:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to delete address', 500);
   }
 };
@@ -224,7 +233,8 @@ export const setDefaultAddress = async (req: Request, res: Response): Promise<vo
 
     respond(req, res, { success: true });
   } catch (error: any) {
-    console.error('Error setting default address:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to set default address', 500);
   }
 };
@@ -249,7 +259,8 @@ export const listCustomers = async (req: Request, res: Response): Promise<void> 
 
     respond(req, res, customers);
   } catch (error: any) {
-    console.error('Error listing customers:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to list customers', 500);
   }
 };
@@ -269,7 +280,8 @@ export const createCustomer = async (req: Request, res: Response): Promise<void>
 
     respond(req, res, result, 201);
   } catch (error: any) {
-    console.error('Error creating customer:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to create customer', error.message?.includes('exists') ? 409 : 500);
   }
 };
@@ -283,7 +295,8 @@ export const updateCustomer = async (req: Request, res: Response): Promise<void>
 
     respond(req, res, result);
   } catch (error: any) {
-    console.error('Error updating customer:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to update customer', 500);
   }
 };
@@ -299,7 +312,8 @@ export const deleteCustomer = async (req: Request, res: Response): Promise<void>
 
     respond(req, res, result);
   } catch (error: any) {
-    console.error('Error deleting customer:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to delete customer', error.message?.includes('not found') ? 404 : 500);
   }
 };
@@ -315,7 +329,8 @@ export const verifyCustomer = async (req: Request, res: Response): Promise<void>
 
     respond(req, res, result);
   } catch (error: any) {
-    console.error('Error verifying customer:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to verify customer', error.message?.includes('not found') ? 404 : 500);
   }
 };
@@ -331,7 +346,8 @@ export const deactivateCustomer = async (req: Request, res: Response): Promise<v
 
     respond(req, res, result);
   } catch (error: any) {
-    console.error('Error deactivating customer:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to deactivate customer', error.message?.includes('not found') ? 404 : 500);
   }
 };
@@ -346,7 +362,8 @@ export const reactivateCustomer = async (req: Request, res: Response): Promise<v
 
     respond(req, res, result);
   } catch (error: any) {
-    console.error('Error reactivating customer:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to reactivate customer', error.message?.includes('not found') ? 404 : 500);
   }
 };
@@ -366,7 +383,8 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
 
     respond(req, res, result);
   } catch (error: any) {
-    console.error('Error changing password:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to change password', error.message?.includes('incorrect') ? 401 : 500);
   }
 };
@@ -383,7 +401,8 @@ export const getCustomerAddresses = async (req: Request, res: Response): Promise
 
     respond(req, res, { addresses });
   } catch (error: any) {
-    console.error('Error getting customer addresses:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to get addresses', 500);
   }
 };
@@ -403,7 +422,8 @@ export const addCustomerAddress = async (req: Request, res: Response): Promise<v
 
     respond(req, res, address, 201);
   } catch (error: any) {
-    console.error('Error adding customer address:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to add address', 500);
   }
 };

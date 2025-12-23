@@ -1,3 +1,4 @@
+import { logger } from '../../../libs/logger';
 import { Request, Response } from "express";
 import promotionRepo, {
   CreatePromotionInput,
@@ -33,6 +34,7 @@ export const getActivePromotions = async (req: Request, res: Response): Promise<
       data: promotions
     });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(500).json({
       success: false,
       message: error.message || 'An error occurred while fetching active promotions'
@@ -103,6 +105,7 @@ export const getPromotions = async (req: Request, res: Response): Promise<void> 
       }
     });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(500).json({
       success: false,
       message: error.message || 'An error occurred while fetching promotions'
@@ -132,6 +135,7 @@ export const getPromotionById = async (req: Request, res: Response): Promise<voi
       data: promotionData
     });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(500).json({
       success: false,
       message: error.message || 'An error occurred while fetching the promotion'
@@ -173,6 +177,7 @@ export const createPromotion = async (req: Request, res: Response): Promise<void
       message: 'Promotion created successfully'
     });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(500).json({
       success: false,
       message: error.message || 'An error occurred while creating the promotion'
@@ -208,6 +213,7 @@ export const updatePromotion = async (req: Request, res: Response): Promise<void
       message: 'Promotion updated successfully'
     });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(500).json({
       success: false,
       message: error.message || 'An error occurred while updating the promotion'
@@ -249,6 +255,7 @@ export const deletePromotion = async (req: Request, res: Response): Promise<void
       message: 'Promotion deleted successfully'
     });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(500).json({
       success: false,
       message: error.message || 'An error occurred while deleting the promotion'
@@ -301,6 +308,7 @@ export const applyPromotionToCart = async (req: Request, res: Response): Promise
       }
     });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(500).json({
       success: false,
       message: error.message || 'An error occurred while applying the promotion'
@@ -339,6 +347,7 @@ export const removePromotionFromCart = async (req: Request, res: Response): Prom
       }
     });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(500).json({
       success: false,
       message: error.message || 'An error occurred while removing the promotion'
@@ -389,6 +398,7 @@ export const validatePromotionForCart = async (req: Request, res: Response): Pro
       });
     }
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(500).json({
       success: false,
       message: error.message || 'An error occurred while validating the promotion'
@@ -417,6 +427,7 @@ export const activatePromotion = async (req: Request, res: Response): Promise<vo
       message: 'Promotion activated successfully'
     });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(500).json({
       success: false,
       message: error.message || 'An error occurred while activating the promotion'
@@ -445,6 +456,7 @@ export const pausePromotion = async (req: Request, res: Response): Promise<void>
       message: 'Promotion paused successfully'
     });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(500).json({
       success: false,
       message: error.message || 'An error occurred while pausing the promotion'

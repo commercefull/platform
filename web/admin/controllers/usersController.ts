@@ -4,6 +4,7 @@
  * for the Commercefull Admin Hub - Phase 8
  */
 
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import { query, queryOne } from '../../../libs/db';
 import { v4 as uuidv4 } from 'uuid';
@@ -93,7 +94,8 @@ export const listUsers = async (req: Request, res: Response): Promise<void> => {
       filters: { status, role },
     });
   } catch (error: any) {
-    console.error('Error listing users:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load users',
@@ -144,7 +146,8 @@ export const viewUser = async (req: Request, res: Response): Promise<void> => {
       roles: roles || [],
     });
   } catch (error: any) {
-    console.error('Error viewing user:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load user',
@@ -163,7 +166,8 @@ export const createUserForm = async (req: Request, res: Response): Promise<void>
       roles: roles || [],
     });
   } catch (error: any) {
-    console.error('Error loading create user form:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -230,7 +234,8 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
 
     res.json({ success: true, userId });
   } catch (error: any) {
-    console.error('Error creating user:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -265,7 +270,8 @@ export const updateUser = async (req: Request, res: Response): Promise<void> => 
 
     res.json({ success: true });
   } catch (error: any) {
-    console.error('Error updating user:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -285,7 +291,8 @@ export const deleteUser = async (req: Request, res: Response): Promise<void> => 
 
     res.json({ success: true });
   } catch (error: any) {
-    console.error('Error deleting user:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -309,7 +316,8 @@ export const listRoles = async (req: Request, res: Response): Promise<void> => {
       availablePermissions: AVAILABLE_PERMISSIONS,
     });
   } catch (error: any) {
-    console.error('Error listing roles:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load roles',
@@ -345,7 +353,8 @@ export const createRole = async (req: Request, res: Response): Promise<void> => 
 
     res.json({ success: true, roleId });
   } catch (error: any) {
-    console.error('Error creating role:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -379,7 +388,8 @@ export const updateRole = async (req: Request, res: Response): Promise<void> => 
 
     res.json({ success: true });
   } catch (error: any) {
-    console.error('Error updating role:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -414,7 +424,8 @@ export const deleteRole = async (req: Request, res: Response): Promise<void> => 
 
     res.json({ success: true });
   } catch (error: any) {
-    console.error('Error deleting role:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };

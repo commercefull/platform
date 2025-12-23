@@ -521,7 +521,7 @@ export class PaymentRepo {
 
       return { success: true, transactionId: transaction.paymentTransactionId };
     } catch (error: any) {
-      console.error('Payment processing failed:', error);
+      
       return { success: false, error: error.message };
     }
   }
@@ -550,7 +550,7 @@ export class PaymentRepo {
 
       return { success: true, refundId: refund.paymentRefundId };
     } catch (error: any) {
-      console.error('Refund processing failed:', error);
+      
       return { success: false, error: error.message };
     }
   }

@@ -1,3 +1,4 @@
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import currencyRepo from '../repos/currencyRepo';
 import currencyPriceRuleRepo from '../repos/currencyPriceRuleRepo';
@@ -22,7 +23,8 @@ export const getAllCurrencies = async (req: Request, res: Response): Promise<voi
       data: currencies
     });
   } catch (error) {
-    console.error('Error fetching currencies:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: 'Failed to fetch currencies',
@@ -51,7 +53,8 @@ export const getDefaultCurrency = async (req: Request, res: Response): Promise<v
       data: currency
     });
   } catch (error) {
-    console.error('Error fetching default currency:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: 'Failed to fetch default currency',
@@ -82,7 +85,8 @@ export const getCurrencyByCode = async (req: Request, res: Response): Promise<vo
       data: currency
     });
   } catch (error) {
-    console.error('Error fetching currency:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: 'Failed to fetch currency',
@@ -116,7 +120,8 @@ export const saveCurrency = async (req: Request, res: Response): Promise<void> =
       message: existingCurrency ? 'Currency updated successfully' : 'Currency created successfully'
     });
   } catch (error) {
-    console.error('Error saving currency:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: 'Failed to save currency',
@@ -158,7 +163,8 @@ export const deleteCurrency = async (req: Request, res: Response): Promise<void>
       message: 'Currency deleted successfully'
     });
   } catch (error) {
-    console.error('Error deleting currency:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: 'Failed to delete currency',
@@ -183,7 +189,8 @@ export const updateExchangeRates = async (req: Request, res: Response): Promise<
       message: 'Exchange rates updated successfully'
     });
   } catch (error) {
-    console.error('Error updating exchange rates:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: 'Failed to update exchange rates',
@@ -209,7 +216,8 @@ export const getAllCurrencyRegions = async (req: Request, res: Response): Promis
       data: regions
     });
   } catch (error) {
-    console.error('Error fetching currency regions:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: 'Failed to fetch currency regions',
@@ -240,7 +248,8 @@ export const getCurrencyRegionById = async (req: Request, res: Response): Promis
       data: region
     });
   } catch (error) {
-    console.error('Error fetching currency region:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: 'Failed to fetch currency region',
@@ -284,7 +293,8 @@ export const createCurrencyRegion = async (req: Request, res: Response): Promise
       message: 'Currency region created successfully'
     });
   } catch (error) {
-    console.error('Error creating currency region:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: 'Failed to create currency region',
@@ -333,7 +343,8 @@ export const updateCurrencyRegion = async (req: Request, res: Response): Promise
       message: 'Currency region updated successfully'
     });
   } catch (error) {
-    console.error('Error updating currency region:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: 'Failed to update currency region',
@@ -367,7 +378,8 @@ export const deleteCurrencyRegion = async (req: Request, res: Response): Promise
       message: 'Currency region deleted successfully'
     });
   } catch (error) {
-    console.error('Error deleting currency region:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: 'Failed to delete currency region',
@@ -420,7 +432,8 @@ export const getAllPriceRules = async (req: Request, res: Response): Promise<voi
       data: rules
     });
   } catch (error) {
-    console.error('Error fetching price rules:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: 'Failed to fetch price rules',
@@ -451,7 +464,8 @@ export const getPriceRuleById = async (req: Request, res: Response): Promise<voi
       data: rule
     });
   } catch (error) {
-    console.error('Error fetching price rule:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: 'Failed to fetch price rule',
@@ -508,7 +522,8 @@ export const createPriceRule = async (req: Request, res: Response): Promise<void
       message: 'Price rule created successfully'
     });
   } catch (error) {
-    console.error('Error creating price rule:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: 'Failed to create price rule',
@@ -570,7 +585,8 @@ export const updatePriceRule = async (req: Request, res: Response): Promise<void
       message: 'Price rule updated successfully'
     });
   } catch (error) {
-    console.error('Error updating price rule:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: 'Failed to update price rule',
@@ -604,7 +620,8 @@ export const deletePriceRule = async (req: Request, res: Response): Promise<void
       message: 'Price rule deleted successfully'
     });
   } catch (error) {
-    console.error('Error deleting price rule:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: 'Failed to delete price rule',

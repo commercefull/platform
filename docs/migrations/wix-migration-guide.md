@@ -105,7 +105,7 @@ const assessWixData = async (wixApi) => {
     return assessment;
 
   } catch (error) {
-    console.error('Wix assessment failed:', error);
+    
     throw error;
   }
 };
@@ -776,7 +776,7 @@ async function runWixMigration() {
     console.log(runner.monitor.generateReport());
 
   } catch (error) {
-    console.error('Migration failed:', error);
+    
     console.log('Partial results:', runner.monitor.generateReport());
   }
 }

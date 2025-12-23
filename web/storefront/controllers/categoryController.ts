@@ -3,6 +3,7 @@
  * Handles category navigation and category pages for customers
  */
 
+import { logger } from '../../../libs/logger';
 import { Request, Response, NextFunction } from 'express';
 import CategoryRepo from '../../../modules/product/repos/categoryRepo';
 import { storefrontRespond } from '../../respond';
@@ -16,6 +17,7 @@ export const loadCategoriesForNavigation = async (req: Request, res: Response, n
     const categories = await CategoryRepo.findForMenu();
     res.locals.categories = categories;
   } catch (error) {
+    logger.error('Error:', error);
     console.warn('Failed to load categories for navigation:', error);
     res.locals.categories = [];
   }
@@ -34,7 +36,8 @@ export const getCategoriesForNavigation = async (req: Request, res: Response): P
       categories
     });
   } catch (error: any) {
-    console.error('Error loading categories:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: error.message || 'Failed to load categories'
@@ -54,7 +57,8 @@ export const getAllCategories = async (req: Request, res: Response): Promise<voi
       categories
     });
   } catch (error: any) {
-    console.error('Error loading categories:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: error.message || 'Failed to load categories'
@@ -88,7 +92,8 @@ export const getCategoryDetails = async (req: Request, res: Response): Promise<v
       subcategories
     });
   } catch (error: any) {
-    console.error('Error loading category details:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: error.message || 'Failed to load category details'
@@ -124,7 +129,8 @@ export const getCategoryPage = async (req: Request, res: Response): Promise<void
       featuredProducts
     });
   } catch (error: any) {
-    console.error('Error loading category page:', error);
+    logger.error('Error:', error);
+    
     storefrontRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load category'

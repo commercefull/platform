@@ -1,12 +1,12 @@
 /**
-import { b2bRespond } from '../../respond';
  * B2B Quote Controller
  * Manages quotes with company isolation
  */
 
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import { query, queryOne } from '../../../libs/db';
-import { b2bRespond } from 'web/respond';
+import { b2bRespond } from '../../respond';
 
 interface B2BUser {
   id: string;
@@ -73,7 +73,8 @@ export const listQuotes = async (req: Request, res: Response) => {
       filters: { status },
     });
   } catch (error) {
-    console.error('B2B quotes error:', error);
+    logger.error('Error:', error);
+    
     b2bRespond(req, res, 'error', {
       pageName: 'Error',
       error: 'Failed to load quotes',
@@ -125,7 +126,8 @@ export const viewQuote = async (req: Request, res: Response) => {
       items: items || [],
     });
   } catch (error) {
-    console.error('B2B view quote error:', error);
+    logger.error('Error:', error);
+    
     b2bRespond(req, res, 'error', {
       pageName: 'Error',
       error: 'Failed to load quote',
@@ -149,7 +151,8 @@ export const createQuoteForm = async (req: Request, res: Response) => {
       user,
     });
   } catch (error) {
-    console.error('B2B create quote form error:', error);
+    logger.error('Error:', error);
+    
     b2bRespond(req, res, 'error', {
       pageName: 'Error',
       error: 'Failed to load form',

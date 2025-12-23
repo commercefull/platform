@@ -3,6 +3,7 @@
  * HTTP interface for business/admin order operations with content negotiation
  */
 
+import { logger } from '../../../../libs/logger';
 import { Request, Response } from 'express';
 import OrderRepo from '../../infrastructure/repositories/OrderRepository';
 import { GetOrderCommand, GetOrderUseCase } from '../../application/useCases/GetOrder';
@@ -102,7 +103,8 @@ export const listOrders = async (req: Request, res: Response): Promise<void> => 
 
     respond(req, res, result, 200, 'admin/order/list');
   } catch (error: any) {
-    console.error('Error listing orders:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to list orders', 500, 'admin/order/error');
   }
 };
@@ -126,7 +128,8 @@ export const getOrder = async (req: Request, res: Response): Promise<void> => {
 
     respond(req, res, order, 200, 'admin/order/detail');
   } catch (error: any) {
-    console.error('Error getting order:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to get order', 500, 'admin/order/error');
   }
 };
@@ -153,7 +156,8 @@ export const updateOrderStatus = async (req: Request, res: Response): Promise<vo
 
     respond(req, res, result, 200, 'admin/order/detail');
   } catch (error: any) {
-    console.error('Error updating order status:', error);
+    logger.error('Error:', error);
+    
     
     if (error.message.includes('Cannot transition')) {
       respondError(req, res, error.message, 400, 'admin/order/error');
@@ -189,7 +193,8 @@ export const cancelOrder = async (req: Request, res: Response): Promise<void> =>
 
     respond(req, res, result, 200, 'admin/order/cancelled');
   } catch (error: any) {
-    console.error('Error cancelling order:', error);
+    logger.error('Error:', error);
+    
     
     if (error.message.includes('cannot be cancelled')) {
       respondError(req, res, error.message, 400, 'admin/order/error');
@@ -230,7 +235,8 @@ export const processRefund = async (req: Request, res: Response): Promise<void> 
 
     respond(req, res, result, 200, 'admin/order/refund');
   } catch (error: any) {
-    console.error('Error processing refund:', error);
+    logger.error('Error:', error);
+    
     
     if (error.message.includes('cannot be refunded') || error.message.includes('cannot exceed')) {
       respondError(req, res, error.message, 400, 'admin/order/error');
@@ -263,7 +269,8 @@ export const getOrderStats = async (req: Request, res: Response): Promise<void> 
 
     respond(req, res, stats, 200, 'admin/order/stats');
   } catch (error: any) {
-    console.error('Error getting order stats:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to get order statistics', 500, 'admin/order/error');
   }
 };
@@ -280,7 +287,8 @@ export const getOrderHistory = async (req: Request, res: Response): Promise<void
 
     respond(req, res, { orderId, history }, 200, 'admin/order/history');
   } catch (error: any) {
-    console.error('Error getting order history:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to get order history', 500, 'admin/order/error');
   }
 };

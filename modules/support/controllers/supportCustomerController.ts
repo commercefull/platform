@@ -3,6 +3,7 @@
  * Handles customer-facing support operations
  */
 
+import { logger } from '../../../libs/logger';
 import { Request, Response, NextFunction } from 'express';
 import * as supportRepo from '../repos/supportRepo';
 import * as faqRepo from '../repos/faqRepo';
@@ -45,7 +46,8 @@ export const createTicket: AsyncHandler = async (req, res, next) => {
 
     res.status(201).json({ success: true, data: ticket });
   } catch (error: any) {
-    console.error('Create ticket error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -61,7 +63,8 @@ export const getMyTickets: AsyncHandler = async (req, res, next) => {
     );
     res.json({ success: true, ...result });
   } catch (error: any) {
-    console.error('Get my tickets error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -84,7 +87,8 @@ export const getMyTicket: AsyncHandler = async (req, res, next) => {
     
     res.json({ success: true, data: { ...ticket, messages, attachments } });
   } catch (error: any) {
-    console.error('Get my ticket error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -115,7 +119,8 @@ export const addCustomerMessage: AsyncHandler = async (req, res, next) => {
 
     res.status(201).json({ success: true, data: message });
   } catch (error: any) {
-    console.error('Add customer message error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -144,7 +149,8 @@ export const submitTicketFeedback: AsyncHandler = async (req, res, next) => {
     await supportRepo.submitFeedback(req.params.id, satisfaction, feedback);
     res.json({ success: true, message: 'Feedback submitted' });
   } catch (error: any) {
-    console.error('Submit ticket feedback error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -158,7 +164,8 @@ export const getFaqCategories: AsyncHandler = async (req, res, next) => {
     const categories = await faqRepo.getCategories(true);
     res.json({ success: true, data: categories });
   } catch (error: any) {
-    console.error('Get FAQ categories error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -168,7 +175,8 @@ export const getFeaturedFaqCategories: AsyncHandler = async (req, res, next) => 
     const categories = await faqRepo.getFeaturedCategories();
     res.json({ success: true, data: categories });
   } catch (error: any) {
-    console.error('Get featured FAQ categories error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -188,7 +196,8 @@ export const getFaqCategoryBySlug: AsyncHandler = async (req, res, next) => {
     
     res.json({ success: true, data: { ...category, articles: articles.data } });
   } catch (error: any) {
-    console.error('Get FAQ category error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -214,7 +223,8 @@ export const getFaqArticleBySlug: AsyncHandler = async (req, res, next) => {
     
     res.json({ success: true, data: { ...article, relatedArticles } });
   } catch (error: any) {
-    console.error('Get FAQ article error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -230,7 +240,8 @@ export const searchFaq: AsyncHandler = async (req, res, next) => {
     const articles = await faqRepo.searchArticles(q as string, parseInt(limit as string) || 10);
     res.json({ success: true, data: articles });
   } catch (error: any) {
-    console.error('Search FAQ error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -241,7 +252,8 @@ export const getPopularFaqArticles: AsyncHandler = async (req, res, next) => {
     const articles = await faqRepo.getPopularArticles(parseInt(limit as string) || 10);
     res.json({ success: true, data: articles });
   } catch (error: any) {
-    console.error('Get popular FAQ articles error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -252,7 +264,8 @@ export const submitFaqFeedback: AsyncHandler = async (req, res, next) => {
     await faqRepo.submitHelpfulVote(req.params.id, isHelpful);
     res.json({ success: true, message: 'Feedback submitted' });
   } catch (error: any) {
-    console.error('Submit FAQ feedback error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -280,7 +293,8 @@ export const createStockAlert: AsyncHandler = async (req, res, next) => {
 
     res.status(201).json({ success: true, data: alert });
   } catch (error: any) {
-    console.error('Create stock alert error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -296,7 +310,8 @@ export const getMyStockAlerts: AsyncHandler = async (req, res, next) => {
     );
     res.json({ success: true, ...result });
   } catch (error: any) {
-    console.error('Get my stock alerts error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -314,7 +329,8 @@ export const cancelMyStockAlert: AsyncHandler = async (req, res, next) => {
     await alertRepo.cancelStockAlert(req.params.id);
     res.json({ success: true, message: 'Alert cancelled' });
   } catch (error: any) {
-    console.error('Cancel stock alert error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -347,7 +363,8 @@ export const createPriceAlert: AsyncHandler = async (req, res, next) => {
 
     res.status(201).json({ success: true, data: alert });
   } catch (error: any) {
-    console.error('Create price alert error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -363,7 +380,8 @@ export const getMyPriceAlerts: AsyncHandler = async (req, res, next) => {
     );
     res.json({ success: true, ...result });
   } catch (error: any) {
-    console.error('Get my price alerts error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -381,7 +399,8 @@ export const cancelMyPriceAlert: AsyncHandler = async (req, res, next) => {
     await alertRepo.cancelPriceAlert(req.params.id);
     res.json({ success: true, message: 'Alert cancelled' });
   } catch (error: any) {
-    console.error('Cancel price alert error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };

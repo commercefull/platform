@@ -3,6 +3,7 @@
  * Handles content block management for the Admin Hub
  */
 
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import ContentRepo from '../../../modules/content/repos/contentRepo';
 import { adminRespond } from 'web/respond';
@@ -42,7 +43,8 @@ export const listContentBlocks = async (req: Request, res: Response): Promise<vo
       success: req.query.success || null
     });
   } catch (error: any) {
-    console.error('Error listing content blocks:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load content blocks',
@@ -82,7 +84,8 @@ export const createContentBlockForm = async (req: Request, res: Response): Promi
       nextOrder,
     });
   } catch (error: any) {
-    console.error('Error loading create block form:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -111,7 +114,8 @@ export const createContentBlock = async (req: Request, res: Response): Promise<v
 
     res.redirect(`/hub/content/pages/${pageId}?success=Content block created successfully`);
   } catch (error: any) {
-    console.error('Error creating content block:', error);
+    logger.error('Error:', error);
+    
 
     try {
       const page = await ContentRepo.findPageById(req.body.pageId);
@@ -160,7 +164,8 @@ export const editContentBlockForm = async (req: Request, res: Response): Promise
       contentType,
     });
   } catch (error: any) {
-    console.error('Error loading edit block form:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -189,7 +194,8 @@ export const updateContentBlock = async (req: Request, res: Response): Promise<v
 
     res.redirect(`/hub/content/pages/${block.pageId}?success=Content block updated successfully`);
   } catch (error: any) {
-    console.error('Error updating content block:', error);
+    logger.error('Error:', error);
+    
 
     try {
       const block = await ContentRepo.findBlockById(req.params.blockId);
@@ -233,7 +239,8 @@ export const deleteContentBlock = async (req: Request, res: Response): Promise<v
 
     res.json({ success: true, message: 'Content block deleted successfully' });
   } catch (error: any) {
-    console.error('Error deleting content block:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message || 'Failed to delete content block' });
   }
 };
@@ -255,7 +262,8 @@ export const reorderContentBlocks = async (req: Request, res: Response): Promise
 
     res.json({ success: true, message: 'Content blocks reordered successfully' });
   } catch (error: any) {
-    console.error('Error reordering content blocks:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message || 'Failed to reorder content blocks' });
   }
 };

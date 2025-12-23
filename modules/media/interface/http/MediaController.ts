@@ -3,6 +3,7 @@
  * Handles media upload and processing requests
  */
 
+import { logger } from '../../../../libs/logger';
 import { Request, Response } from 'express';
 import multer from 'multer';
 
@@ -91,7 +92,8 @@ export class MediaController {
         }
       });
     } catch (error) {
-      console.error('Image upload error:', error);
+      logger.error('Error:', error);
+      
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       res.status(500).json({
         success: false,
@@ -139,7 +141,8 @@ export class MediaController {
         }))
       });
     } catch (error) {
-      console.error('Multiple image upload error:', error);
+      logger.error('Error:', error);
+      
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       res.status(500).json({
         success: false,

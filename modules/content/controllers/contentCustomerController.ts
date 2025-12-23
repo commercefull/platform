@@ -1,3 +1,4 @@
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import { ContentRepo } from '../repos/contentRepo';
 
@@ -36,7 +37,8 @@ const contentRepo = new ContentRepo();
         }
       });
     } catch (error) {
-      console.error('Error fetching published pages:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({
         success: false,
         message: 'Failed to fetch pages',
@@ -140,6 +142,7 @@ const contentRepo = new ContentRepo();
         });
         
       } catch (error: any) {
+        logger.error('Error:', error);
         if (error.message.includes('not found')) {
           res.status(404).json({
             success: false,
@@ -150,7 +153,8 @@ const contentRepo = new ContentRepo();
         throw error;
       }
     } catch (error: any) {
-      console.error('Error fetching published page:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({
         success: false,
         message: 'Failed to fetch page content',
@@ -179,7 +183,8 @@ const contentRepo = new ContentRepo();
         data: sanitizedContentTypes
       });
     } catch (error: any) {
-      console.error('Error fetching content types:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({
         success: false,
         message: 'Failed to fetch content types',

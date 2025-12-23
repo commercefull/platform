@@ -16,7 +16,7 @@ async function run() {
         // const category = await queryOne('SELECT COUNT(*) FROM "public"."category"', []);
         // const item = await queryOne('SELECT COUNT(*) FROM "public"."item"', []);
     } catch (e) {
-        console.error(e);
+        
     } finally {
         console.log("Business Done.");
     }

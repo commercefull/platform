@@ -1,3 +1,4 @@
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import ReceivingRecordRepo from '../repos/receivingRecordRepo';
 import ReceivingItemRepo from '../repos/receivingItemRepo';
@@ -35,7 +36,8 @@ export const getReceivingRecords = async (req: Request, res: Response): Promise<
 
     successResponse(res, receivingRecords);
   } catch (error: any) {
-    console.error('Error fetching receiving records:', error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to fetch receiving records');
   }
 };
@@ -52,7 +54,8 @@ export const getReceivingRecordById = async (req: Request, res: Response): Promi
 
     successResponse(res, receivingRecord);
   } catch (error: any) {
-    console.error(`Error fetching receiving record ${req.params.id}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to fetch receiving record');
   }
 };
@@ -63,7 +66,8 @@ export const getReceivingByPurchaseOrder = async (req: Request, res: Response): 
     const receivingRecords = await receivingRecordRepo.findByPurchaseOrderId(id);
     successResponse(res, receivingRecords);
   } catch (error: any) {
-    console.error(`Error fetching receiving records for purchase order ${req.params.id}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to fetch receiving records');
   }
 };
@@ -129,7 +133,8 @@ export const createReceivingRecord = async (req: Request, res: Response): Promis
       items: createdItems
     }, 201);
   } catch (error: any) {
-    console.error('Error creating receiving record:', error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to create receiving record');
   }
 };
@@ -148,7 +153,8 @@ export const updateReceivingRecord = async (req: Request, res: Response): Promis
 
     successResponse(res, receivingRecord);
   } catch (error: any) {
-    console.error(`Error updating receiving record ${req.params.id}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to update receiving record');
   }
 };
@@ -165,7 +171,8 @@ export const completeReceiving = async (req: Request, res: Response): Promise<vo
 
     successResponse(res, receivingRecord);
   } catch (error: any) {
-    console.error(`Error completing receiving record ${req.params.id}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to complete receiving record');
   }
 };
@@ -178,7 +185,8 @@ export const getReceivingItems = async (req: Request, res: Response): Promise<vo
     const items = await receivingItemRepo.findByReceivingRecordId(id);
     successResponse(res, items);
   } catch (error: any) {
-    console.error(`Error fetching receiving items ${req.params.id}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to fetch receiving items');
   }
 };
@@ -206,7 +214,8 @@ export const createReceivingItem = async (req: Request, res: Response): Promise<
     const item = await receivingItemRepo.create(itemParams);
     successResponse(res, item, 201);
   } catch (error: any) {
-    console.error(`Error creating receiving item ${req.params.id}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to create receiving item');
   }
 };
@@ -225,7 +234,8 @@ export const updateReceivingItem = async (req: Request, res: Response): Promise<
 
     successResponse(res, item);
   } catch (error: any) {
-    console.error(`Error updating receiving item ${req.params.id}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to update receiving item');
   }
 };
@@ -244,7 +254,8 @@ export const acceptReceivingItem = async (req: Request, res: Response): Promise<
 
     successResponse(res, item);
   } catch (error: any) {
-    console.error(`Error accepting receiving item ${req.params.id}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to accept receiving item');
   }
 };
@@ -268,7 +279,8 @@ export const rejectReceivingItem = async (req: Request, res: Response): Promise<
 
     successResponse(res, item);
   } catch (error: any) {
-    console.error(`Error rejecting receiving item ${req.params.id}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to reject receiving item');
   }
 };

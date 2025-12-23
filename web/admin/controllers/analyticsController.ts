@@ -4,6 +4,7 @@
  * for the Commercefull Admin Hub - Phase 7
  */
 
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import { query, queryOne } from '../../../libs/db';
 import {
@@ -104,7 +105,8 @@ export const analyticsDashboard = async (req: Request, res: Response): Promise<v
       filters: { period, segment, category },
     });
   } catch (error: any) {
-    console.error('Error loading analytics dashboard:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load analytics dashboard',
@@ -164,6 +166,7 @@ export const predictiveAnalytics = async (req: Request, res: Response): Promise<
           ...analysis
         };
       } catch (error) {
+        logger.error('Error:', error);
         return {
           customerId: customer.customer_id,
           churnProbability: 0,
@@ -183,7 +186,8 @@ export const predictiveAnalytics = async (req: Request, res: Response): Promise<
       customerChurnRisk,
     });
   } catch (error: any) {
-    console.error('Error loading predictive analytics:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load predictive analytics',
@@ -236,7 +240,8 @@ export const customerAnalytics = async (req: Request, res: Response): Promise<vo
       segmentationAnalysis,
     });
   } catch (error: any) {
-    console.error('Error loading customer analytics:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load customer analytics',
@@ -307,7 +312,8 @@ export const aiRecommendations = async (req: Request, res: Response): Promise<vo
       crossSellOpportunities,
     });
   } catch (error: any) {
-    console.error('Error loading AI recommendations:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load AI recommendations',
@@ -382,7 +388,8 @@ export const executiveDashboard = async (req: Request, res: Response): Promise<v
       trends,
     });
   } catch (error: any) {
-    console.error('Error loading executive dashboard:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load executive dashboard',
@@ -405,7 +412,8 @@ export const realTimeMetrics = async (req: Request, res: Response): Promise<void
       timestamp: new Date().toISOString()
     });
   } catch (error: any) {
-    console.error('Error fetching real-time metrics:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: error.message || 'Failed to fetch real-time metrics'
@@ -428,7 +436,8 @@ export const automatedReports = async (req: Request, res: Response): Promise<voi
       reportHistory,
     });
   } catch (error: any) {
-    console.error('Error loading automated reports:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load automated reports',
@@ -466,7 +475,8 @@ export const createReportSchedule = async (req: Request, res: Response): Promise
       schedule
     });
   } catch (error: any) {
-    console.error('Error creating report schedule:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: error.message || 'Failed to create report schedule'
@@ -487,7 +497,8 @@ export const updateReportSchedule = async (req: Request, res: Response): Promise
       message: 'Report schedule updated successfully'
     });
   } catch (error: any) {
-    console.error('Error updating report schedule:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: error.message || 'Failed to update report schedule'
@@ -507,7 +518,8 @@ export const deleteReportSchedule = async (req: Request, res: Response): Promise
       message: 'Report schedule deleted successfully'
     });
   } catch (error: any) {
-    console.error('Error deleting report schedule:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: error.message || 'Failed to delete report schedule'
@@ -535,7 +547,8 @@ export const runReportNow = async (req: Request, res: Response): Promise<void> =
       report: reportData
     });
   } catch (error: any) {
-    console.error('Error running report:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: error.message || 'Failed to run report'

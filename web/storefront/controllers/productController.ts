@@ -3,6 +3,7 @@
  * Handles product listing, detail, and search for customers
  */
 
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import { storefrontRespond } from '../../respond';
 import ProductRepo from '../../../modules/product/infrastructure/repositories/ProductRepository';
@@ -60,7 +61,8 @@ export const listProducts = async (req: Request, res: Response): Promise<void> =
       filters: { category, search, sort, order }
     });
   } catch (error: any) {
-    console.error('Error listing products:', error);
+    logger.error('Error:', error);
+    
     storefrontRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load products'
@@ -107,7 +109,8 @@ export const getProduct = async (req: Request, res: Response): Promise<void> => 
       relatedProducts
     });
   } catch (error: any) {
-    console.error('Error getting product:', error);
+    logger.error('Error:', error);
+    
     storefrontRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load product'
@@ -150,7 +153,8 @@ export const getCategoryProducts = async (req: Request, res: Response): Promise<
       filters: { category: categorySlug, sort, order }
     });
   } catch (error: any) {
-    console.error('Error getting category products:', error);
+    logger.error('Error:', error);
+    
     storefrontRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load category products'
@@ -195,7 +199,8 @@ export const searchProducts = async (req: Request, res: Response): Promise<void>
       searchQuery: search
     });
   } catch (error: any) {
-    console.error('Error searching products:', error);
+    logger.error('Error:', error);
+    
     storefrontRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to search products'

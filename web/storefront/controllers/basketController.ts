@@ -3,6 +3,7 @@
  * Handles shopping cart operations for customers
  */
 
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import { storefrontRespond } from '../../respond';
 import BasketRepo from '../../../modules/basket/infrastructure/repositories/BasketRepository';
@@ -36,7 +37,8 @@ export const viewBasket = async (req: Request, res: Response): Promise<void> => 
       basket: { ...basket, totals }
     });
   } catch (error: any) {
-    console.error('Error viewing basket:', error);
+    logger.error('Error:', error);
+    
     storefrontRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load shopping cart'
@@ -90,7 +92,8 @@ export const addToBasket = async (req: Request, res: Response): Promise<void> =>
     res.redirect(redirectTo + '?success=' + encodeURIComponent('Item added to cart'));
 
   } catch (error: any) {
-    console.error('Error adding to basket:', error);
+    logger.error('Error:', error);
+    
     res.redirect('/?error=' + encodeURIComponent(error.message || 'Failed to add item to cart'));
   }
 };
@@ -125,7 +128,8 @@ export const updateBasketItem = async (req: Request, res: Response): Promise<voi
       res.redirect('/basket?success=' + encodeURIComponent('Cart updated'));
     }
   } catch (error: any) {
-    console.error('Error updating basket item:', error);
+    logger.error('Error:', error);
+    
     if (req.xhr || req.headers.accept?.includes('application/json')) {
       res.status(500).json({ success: false, message: error.message });
     } else {
@@ -158,7 +162,8 @@ export const removeFromBasket = async (req: Request, res: Response): Promise<voi
       res.redirect('/basket?success=' + encodeURIComponent('Item removed from cart'));
     }
   } catch (error: any) {
-    console.error('Error removing from basket:', error);
+    logger.error('Error:', error);
+    
     if (req.xhr || req.headers.accept?.includes('application/json')) {
       res.status(500).json({ success: false, message: error.message });
     } else {
@@ -190,7 +195,8 @@ export const clearBasket = async (req: Request, res: Response): Promise<void> =>
       res.redirect('/basket?success=' + encodeURIComponent('Cart cleared'));
     }
   } catch (error: any) {
-    console.error('Error clearing basket:', error);
+    logger.error('Error:', error);
+    
     if (req.xhr || req.headers.accept?.includes('application/json')) {
       res.status(500).json({ success: false, message: error.message });
     } else {

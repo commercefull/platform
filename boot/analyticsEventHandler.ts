@@ -127,7 +127,7 @@ async function handleOrderCreated(payload: any): Promise<void> {
       }
     }
   } catch (error) {
-    console.error('[Analytics] Error handling order.created:', error);
+    
   }
 }
 
@@ -142,7 +142,7 @@ async function handleOrderCompleted(payload: any): Promise<void> {
       eventValue: payload.data.grandTotal
     });
   } catch (error) {
-    console.error('[Analytics] Error handling order.completed:', error);
+    
   }
 }
 
@@ -158,7 +158,7 @@ async function handleOrderCancelled(payload: any): Promise<void> {
       eventData: { reason: payload.data.reason }
     });
   } catch (error) {
-    console.error('[Analytics] Error handling order.cancelled:', error);
+    
   }
 }
 
@@ -183,7 +183,7 @@ async function handleOrderRefunded(payload: any): Promise<void> {
       refundTotal: data.refundAmount || 0
     });
   } catch (error) {
-    console.error('[Analytics] Error handling order.refunded:', error);
+    
   }
 }
 
@@ -212,7 +212,7 @@ async function handleCartCreated(payload: any): Promise<void> {
       cartCreated: 1
     });
   } catch (error) {
-    console.error('[Analytics] Error handling cart.created:', error);
+    
   }
 }
 
@@ -240,7 +240,7 @@ async function handleCartItemAdded(payload: any): Promise<void> {
       addToCarts: 1
     });
   } catch (error) {
-    console.error('[Analytics] Error handling cart.item.added:', error);
+    
   }
 }
 
@@ -267,7 +267,7 @@ async function handleCartItemRemoved(payload: any): Promise<void> {
       removeFromCarts: 1
     });
   } catch (error) {
-    console.error('[Analytics] Error handling cart.item.removed:', error);
+    
   }
 }
 
@@ -291,7 +291,7 @@ async function handleCartAbandoned(payload: any): Promise<void> {
       cartAbandoned: 1
     });
   } catch (error) {
-    console.error('[Analytics] Error handling cart.abandoned:', error);
+    
   }
 }
 
@@ -319,7 +319,7 @@ async function handleCheckoutStarted(payload: any): Promise<void> {
       checkoutStarted: 1
     });
   } catch (error) {
-    console.error('[Analytics] Error handling checkout.started:', error);
+    
   }
 }
 
@@ -334,7 +334,7 @@ async function handleCheckoutCompleted(payload: any): Promise<void> {
       eventValue: payload.data.orderTotal
     });
   } catch (error) {
-    console.error('[Analytics] Error handling checkout.completed:', error);
+    
   }
 }
 
@@ -363,7 +363,7 @@ async function handlePaymentSuccess(payload: any): Promise<void> {
       paymentSuccessCount: 1
     });
   } catch (error) {
-    console.error('[Analytics] Error handling payment.success:', error);
+    
   }
 }
 
@@ -388,7 +388,7 @@ async function handlePaymentFailed(payload: any): Promise<void> {
       paymentFailedCount: 1
     });
   } catch (error) {
-    console.error('[Analytics] Error handling payment.failed:', error);
+    
   }
 }
 
@@ -422,7 +422,7 @@ async function handleProductViewed(payload: any): Promise<void> {
       outOfStockViews: data.isOutOfStock ? 1 : 0
     });
   } catch (error) {
-    console.error('[Analytics] Error handling product.viewed:', error);
+    
   }
 }
 
@@ -436,7 +436,7 @@ async function handleProductCreated(payload: any): Promise<void> {
       eventData: { name: payload.data.name, sku: payload.data.sku }
     });
   } catch (error) {
-    console.error('[Analytics] Error handling product.created:', error);
+    
   }
 }
 
@@ -455,7 +455,7 @@ async function handleCustomerCreated(payload: any): Promise<void> {
       eventData: { source: payload.data.source }
     });
   } catch (error) {
-    console.error('[Analytics] Error handling customer.created:', error);
+    
   }
 }
 
@@ -468,7 +468,7 @@ async function handleCustomerUpdated(payload: any): Promise<void> {
       customerId: payload.data.customerId
     });
   } catch (error) {
-    console.error('[Analytics] Error handling customer.updated:', error);
+    
   }
 }
 
@@ -487,7 +487,7 @@ async function handleSubscriptionCreated(payload: any): Promise<void> {
       eventData: { planId: payload.data.planId }
     });
   } catch (error) {
-    console.error('[Analytics] Error handling subscription.created:', error);
+    
   }
 }
 
@@ -501,7 +501,7 @@ async function handleSubscriptionCancelled(payload: any): Promise<void> {
       eventData: { reason: payload.data.reason }
     });
   } catch (error) {
-    console.error('[Analytics] Error handling subscription.cancelled:', error);
+    
   }
 }
 
@@ -520,7 +520,7 @@ async function handleTicketCreated(payload: any): Promise<void> {
       eventData: { category: payload.data.category, priority: payload.data.priority }
     });
   } catch (error) {
-    console.error('[Analytics] Error handling ticket.created:', error);
+    
   }
 }
 
@@ -534,7 +534,7 @@ async function handleTicketResolved(payload: any): Promise<void> {
       eventData: { resolutionTime: payload.data.resolutionTimeMinutes }
     });
   } catch (error) {
-    console.error('[Analytics] Error handling ticket.resolved:', error);
+    
   }
 }
 
@@ -564,7 +564,7 @@ async function handleReviewCreated(payload: any): Promise<void> {
       averageRating: data.rating
     });
   } catch (error) {
-    console.error('[Analytics] Error handling review.created:', error);
+    
   }
 }
 
@@ -592,6 +592,6 @@ async function handleStockAlertCreated(payload: any): Promise<void> {
       stockAlerts: 1
     });
   } catch (error) {
-    console.error('[Analytics] Error handling alert.stock.created:', error);
+    
   }
 }

@@ -3,6 +3,7 @@
  * Handles checkout process, payment, and order creation
  */
 
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import { storefrontRespond } from '../../respond';
 import BasketRepo from '../../../modules/basket/infrastructure/repositories/BasketRepository';
@@ -61,7 +62,8 @@ export const checkout = async (req: Request, res: Response): Promise<void> => {
       user: req.user
     });
   } catch (error: any) {
-    console.error('Error loading checkout:', error);
+    logger.error('Error:', error);
+    
     storefrontRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load checkout',
@@ -172,7 +174,8 @@ export const processCheckout = async (req: Request, res: Response): Promise<void
       res.redirect(`/order-confirmation/${order.orderId}`);
     }
   } catch (error: any) {
-    console.error('Error processing checkout:', error);
+    logger.error('Error:', error);
+    
     if (req.xhr || req.headers.accept?.includes('application/json')) {
       res.status(500).json({ success: false, message: error.message });
     } else {
@@ -224,7 +227,8 @@ export const orderConfirmation = async (req: Request, res: Response): Promise<vo
       user: req.user
     });
   } catch (error: any) {
-    console.error('Error loading order confirmation:', error);
+    logger.error('Error:', error);
+    
     storefrontRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load order confirmation',

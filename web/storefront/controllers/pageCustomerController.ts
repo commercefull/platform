@@ -1,3 +1,4 @@
+import { logger } from '../../../libs/logger';
 import { Request, Response } from "express";
 import { storefrontRespond } from "../../respond";
 import ProductRepo from "../../../modules/product/infrastructure/repositories/ProductRepository";
@@ -23,7 +24,8 @@ export const getHomePage = async (req: Request, res: Response): Promise<void> =>
       user: req.user
     });
   } catch (error: any) {
-    console.error("Error loading home page:", error);
+    logger.error('Error:', error);
+    
     storefrontRespond(req, res, "error", {
       pageName: "Error",
       error: error.message || "Failed to load home page",

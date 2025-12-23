@@ -151,7 +151,7 @@ export class CalculateOrderTaxUseCase {
         message: isExempt ? 'Customer is tax exempt' : undefined
       };
     } catch (error: any) {
-      console.error('Error calculating order tax:', error);
+      
       
       // Return a safe fallback with zero tax
       const subtotal = command.items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);

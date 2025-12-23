@@ -3,6 +3,7 @@
  * Dashboard views for Membership, Subscription, Loyalty, and B2B programs
  */
 
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import { query, queryOne } from '../../../libs/db';
 import { adminRespond } from 'web/respond';
@@ -54,7 +55,8 @@ export const membershipDashboard = async (req: Request, res: Response): Promise<
       members: members || [],
     });
   } catch (error: any) {
-    console.error('Error loading membership dashboard:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load membership dashboard',
@@ -117,7 +119,8 @@ export const subscriptionDashboard = async (req: Request, res: Response): Promis
       subscriptions: subscriptions || [],
     });
   } catch (error: any) {
-    console.error('Error loading subscription dashboard:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load subscription dashboard',
@@ -179,7 +182,8 @@ export const loyaltyDashboard = async (req: Request, res: Response): Promise<voi
       settings,
     });
   } catch (error: any) {
-    console.error('Error loading loyalty dashboard:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load loyalty dashboard',
@@ -248,7 +252,8 @@ export const b2bDashboard = async (req: Request, res: Response): Promise<void> =
       quotes: quotes || [],
     });
   } catch (error: any) {
-    console.error('Error loading B2B dashboard:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load B2B dashboard',

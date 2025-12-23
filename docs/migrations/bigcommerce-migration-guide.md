@@ -82,7 +82,7 @@ const assessBigCommerceData = async (bcApi) => {
       estimatedTime: Math.ceil((products + customers + orders) / 1000) // Rough estimate
     };
   } catch (error) {
-    console.error('Assessment failed:', error);
+    
     throw error;
   }
 };
@@ -653,7 +653,7 @@ async function runBigCommerceMigration() {
     console.log(runner.monitor.generateReport());
 
   } catch (error) {
-    console.error('Migration failed:', error);
+    
     console.log('Partial results:', runner.monitor.generateReport());
   }
 }

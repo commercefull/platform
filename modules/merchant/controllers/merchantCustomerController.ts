@@ -1,3 +1,4 @@
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import { MerchantRepo } from '../repos/merchantRepo';
 import { storefrontRespond } from '../../../web/respond';
@@ -45,7 +46,8 @@ export const getActiveMerchants = async (req: Request, res: Response): Promise<v
       merchantCount: merchants.length
     });
   } catch (error) {
-    console.error('Error fetching merchants:', error);
+    logger.error('Error:', error);
+    
     
     if (req.headers.accept?.includes('application/json')) {
       res.status(500).json({
@@ -132,7 +134,8 @@ export const getMerchantById = async (req: Request, res: Response): Promise<void
       primaryAddress
     });
   } catch (error) {
-    console.error('Error fetching merchant details:', error);
+    logger.error('Error:', error);
+    
     
     if (req.headers.accept?.includes('application/json')) {
       res.status(500).json({
@@ -205,7 +208,8 @@ export const getMerchantProducts = async (req: Request, res: Response): Promise<
       productCount: products.length
     });
   } catch (error) {
-    console.error('Error fetching merchant products:', error);
+    logger.error('Error:', error);
+    
     
     if (req.headers.accept?.includes('application/json')) {
       res.status(500).json({

@@ -3,6 +3,7 @@
  * Public store locator endpoints for customers
  */
 
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import warehouseRepo from '../repos/warehouseRepo';
 import { successResponse, errorResponse } from '../../../libs/apiResponse';
@@ -72,7 +73,8 @@ export const findNearestStores = async (req: Request, res: Response): Promise<vo
 
     successResponse(res, publicStores);
   } catch (error: any) {
-    console.error('Error finding nearest stores:', error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to find nearby stores');
   }
 };
@@ -130,7 +132,8 @@ export const getStoreById = async (req: Request, res: Response): Promise<void> =
 
     successResponse(res, publicStore);
   } catch (error: any) {
-    console.error(`Error fetching store ${req.params.id}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to fetch store');
   }
 };
@@ -179,7 +182,8 @@ export const getStoresByCity = async (req: Request, res: Response): Promise<void
 
     successResponse(res, publicStores);
   } catch (error: any) {
-    console.error(`Error fetching stores for city ${req.params.city}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to fetch stores');
   }
 };
@@ -217,7 +221,8 @@ export const getStoresByCountry = async (req: Request, res: Response): Promise<v
 
     successResponse(res, publicStores);
   } catch (error: any) {
-    console.error(`Error fetching stores for country ${req.params.country}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to fetch stores');
   }
 };
@@ -263,7 +268,8 @@ export const checkStoreAvailability = async (req: Request, res: Response): Promi
 
     successResponse(res, availability);
   } catch (error: any) {
-    console.error('Error checking store availability:', error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to check availability');
   }
 };

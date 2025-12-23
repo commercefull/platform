@@ -1,14 +1,14 @@
 /**
-import { b2bRespond } from '../../respond';
  * B2B Auth Controller
  * Handles B2B user login/logout with session management
  */
 
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import { SessionService } from '../../../libs/session';
 import { query, queryOne } from '../../../libs/db';
-import { b2bRespond } from 'web/respond';
+import { b2bRespond } from '../../respond';
 
 const SESSION_COOKIE_NAME = 'cf_session';
 
@@ -117,7 +117,8 @@ export const postLogin = async (req: Request, res: Response) => {
 
     return res.redirect('/b2b');
   } catch (error) {
-    console.error('B2B login error:', error);
+    logger.error('Error:', error);
+    
     b2bRespond(req, res, 'login', {
       pageName: 'B2B Portal Login',
       error: 'An error occurred during login',
@@ -137,7 +138,8 @@ export const postLogout = async (req: Request, res: Response) => {
     res.clearCookie(SESSION_COOKIE_NAME);
     res.redirect('/b2b/login');
   } catch (error) {
-    console.error('B2B logout error:', error);
+    logger.error('Error:', error);
+    
     res.clearCookie(SESSION_COOKIE_NAME);
     res.redirect('/b2b/login');
   }

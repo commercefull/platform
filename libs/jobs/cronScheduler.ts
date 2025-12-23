@@ -121,7 +121,7 @@ class CronScheduler {
       job.lastRun = new Date();
       job.nextRun = new Date(Date.now() + job.intervalMs);
 
-      console.error(`Job ${job.name} failed:`, error.message);
+      
     } finally {
       job.isRunning = false;
     }
@@ -133,7 +133,7 @@ class CronScheduler {
   async runJobNow(id: string): Promise<JobResult | null> {
     const job = this.jobs.get(id);
     if (!job) {
-      console.error(`Job ${id} not found`);
+      
       return null;
     }
 

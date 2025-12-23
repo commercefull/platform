@@ -3,6 +3,7 @@
  * Handles warehouse management and fulfillment tracking for the Admin Hub
  */
 
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import warehouseRepo from '../../../modules/warehouse/repos/warehouseRepo';
 import { adminRespond } from 'web/respond';
@@ -30,7 +31,8 @@ export const listWarehouses = async (req: Request, res: Response): Promise<void>
       success: req.query.success || null
     });
   } catch (error: any) {
-    console.error('Error listing warehouses:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load warehouses',
@@ -44,7 +46,8 @@ export const createWarehouseForm = async (req: Request, res: Response): Promise<
       pageName: 'Create Warehouse',
     });
   } catch (error: any) {
-    console.error('Error loading create warehouse form:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -106,7 +109,8 @@ export const createWarehouse = async (req: Request, res: Response): Promise<void
 
     res.redirect(`/hub/warehouses/${warehouse.distributionWarehouseId}?success=Warehouse created successfully`);
   } catch (error: any) {
-    console.error('Error creating warehouse:', error);
+    logger.error('Error:', error);
+    
 
     adminRespond(req, res, 'operations/warehouses/create', {
       pageName: 'Create Warehouse',
@@ -137,7 +141,8 @@ export const viewWarehouse = async (req: Request, res: Response): Promise<void> 
       success: req.query.success || null
     });
   } catch (error: any) {
-    console.error('Error viewing warehouse:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load warehouse',
@@ -164,7 +169,8 @@ export const editWarehouseForm = async (req: Request, res: Response): Promise<vo
       warehouse,
     });
   } catch (error: any) {
-    console.error('Error loading edit warehouse form:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -231,7 +237,8 @@ export const updateWarehouse = async (req: Request, res: Response): Promise<void
 
     res.redirect(`/hub/warehouses/${warehouseId}?success=Warehouse updated successfully`);
   } catch (error: any) {
-    console.error('Error updating warehouse:', error);
+    logger.error('Error:', error);
+    
 
     try {
       const warehouse = await warehouseRepo.findById(req.params.warehouseId);
@@ -263,7 +270,8 @@ export const activateWarehouse = async (req: Request, res: Response): Promise<vo
 
     res.json({ success: true, message: 'Warehouse activated successfully' });
   } catch (error: any) {
-    console.error('Error activating warehouse:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message || 'Failed to activate warehouse' });
   }
 };
@@ -280,7 +288,8 @@ export const deactivateWarehouse = async (req: Request, res: Response): Promise<
 
     res.json({ success: true, message: 'Warehouse deactivated successfully' });
   } catch (error: any) {
-    console.error('Error deactivating warehouse:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message || 'Failed to deactivate warehouse' });
   }
 };
@@ -297,7 +306,8 @@ export const deleteWarehouse = async (req: Request, res: Response): Promise<void
 
     res.json({ success: true, message: 'Warehouse deleted successfully' });
   } catch (error: any) {
-    console.error('Error deleting warehouse:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message || 'Failed to delete warehouse' });
   }
 };

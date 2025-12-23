@@ -4,6 +4,7 @@
  * HTTP interface for fulfillment management.
  */
 
+import { logger } from '../../../../libs/logger';
 import { Request, Response } from 'express';
 import { fulfillmentRepository } from '../../infrastructure/repositories/FulfillmentRepository';
 import {
@@ -38,6 +39,7 @@ export const createFulfillment = async (req: Request, res: Response): Promise<vo
     });
     res.status(201).json({ success: true, data: result });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
@@ -55,6 +57,7 @@ export const getFulfillment = async (req: Request, res: Response): Promise<void>
     }
     res.json({ success: true, data: result });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
@@ -69,6 +72,7 @@ export const processPicking = async (req: Request, res: Response): Promise<void>
     });
     res.json({ success: true, data: result });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
@@ -86,6 +90,7 @@ export const shipOrder = async (req: Request, res: Response): Promise<void> => {
     });
     res.json({ success: true, data: result.fulfillment });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
@@ -98,6 +103,7 @@ export const markDelivered = async (req: Request, res: Response): Promise<void> 
     });
     res.json({ success: true, data: result.fulfillment });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
@@ -107,6 +113,7 @@ export const listFulfillmentsByOrder = async (req: Request, res: Response): Prom
     const fulfillments = await fulfillmentRepository.findByOrderId(req.params.orderId);
     res.json({ success: true, data: fulfillments });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
@@ -128,6 +135,7 @@ export const listFulfillments = async (req: Request, res: Response): Promise<voi
     );
     res.json({ success: true, data: result });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(400).json({ success: false, error: error.message });
   }
 };

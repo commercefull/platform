@@ -1,12 +1,12 @@
 /**
-import { b2bRespond } from '../../respond';
  * B2B Approval Controller
  * Manages approval workflows with company isolation
  */
 
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import { query, queryOne } from '../../../libs/db';
-import { b2bRespond } from 'web/respond';
+import { b2bRespond } from '../../respond';
 
 interface B2BUser {
   id: string;
@@ -72,7 +72,8 @@ export const listPendingApprovals = async (req: Request, res: Response) => {
       },
     });
   } catch (error) {
-    console.error('B2B pending approvals error:', error);
+    logger.error('Error:', error);
+    
     b2bRespond(req, res, 'error', {
       pageName: 'Error',
       error: 'Failed to load approvals',
@@ -131,7 +132,8 @@ export const listApprovalHistory = async (req: Request, res: Response) => {
       },
     });
   } catch (error) {
-    console.error('B2B approval history error:', error);
+    logger.error('Error:', error);
+    
     b2bRespond(req, res, 'error', {
       pageName: 'Error',
       error: 'Failed to load approval history',
@@ -175,7 +177,8 @@ export const viewApproval = async (req: Request, res: Response) => {
       canApprove: (user.role === 'approver' || user.role === 'admin') && approval.status === 'pending',
     });
   } catch (error) {
-    console.error('B2B view approval error:', error);
+    logger.error('Error:', error);
+    
     b2bRespond(req, res, 'error', {
       pageName: 'Error',
       error: 'Failed to load approval',

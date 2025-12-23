@@ -3,6 +3,7 @@
  * Uses order use cases directly from modules - no HTTP API calls
  */
 
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import OrderRepo from '../../../modules/order/infrastructure/repositories/OrderRepository';
 import { ListOrdersCommand, ListOrdersUseCase } from '../../../modules/order/application/useCases/ListOrders';
@@ -77,7 +78,8 @@ export const listOrders = async (req: Request, res: Response): Promise<void> => 
       success: req.query.success || null
     });
   } catch (error: any) {
-    console.error('Error listing orders:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load orders',
@@ -115,7 +117,8 @@ export const viewOrder = async (req: Request, res: Response): Promise<void> => {
       success: req.query.success || null
     });
   } catch (error: any) {
-    console.error('Error viewing order:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load order',
@@ -150,7 +153,8 @@ export const updateOrderStatus = async (req: Request, res: Response): Promise<vo
       res.redirect(`/hub/orders/${orderId}?success=Order status updated`);
     }
   } catch (error: any) {
-    console.error('Error updating order status:', error);
+    logger.error('Error:', error);
+    
     if (req.xhr || req.headers.accept?.includes('application/json')) {
       res.status(500).json({ success: false, message: error.message || 'Failed to update status' });
     } else {
@@ -179,7 +183,8 @@ export const cancelOrder = async (req: Request, res: Response): Promise<void> =>
       res.redirect(`/hub/orders/${orderId}?success=Order cancelled`);
     }
   } catch (error: any) {
-    console.error('Error cancelling order:', error);
+    logger.error('Error:', error);
+    
     if (req.xhr || req.headers.accept?.includes('application/json')) {
       res.status(500).json({ success: false, message: error.message || 'Failed to cancel order' });
     } else {
@@ -213,7 +218,8 @@ export const refundForm = async (req: Request, res: Response): Promise<void> => 
       order,
     });
   } catch (error: any) {
-    console.error('Error loading refund form:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load refund form',
@@ -246,7 +252,8 @@ export const processRefund = async (req: Request, res: Response): Promise<void> 
       res.redirect(`/hub/orders/${orderId}?success=Refund processed successfully`);
     }
   } catch (error: any) {
-    console.error('Error processing refund:', error);
+    logger.error('Error:', error);
+    
     if (req.xhr || req.headers.accept?.includes('application/json')) {
       res.status(500).json({ success: false, message: error.message || 'Failed to process refund' });
     } else {

@@ -32,7 +32,7 @@ describe('Auth Feature Tests', () => {
       merchantResetToken = setup.merchantResetToken;
       customerRefreshToken = setup.customerRefreshToken;
     } catch (error) {
-      console.error('Setup failed:', error);
+      
       throw error;
     }
   });

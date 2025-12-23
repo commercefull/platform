@@ -2,6 +2,7 @@
  * Organization Controller
  */
 
+import { logger } from '../../../../libs/logger';
 import { Request, Response } from 'express';
 import {
   CreateOrganizationUseCase,
@@ -27,6 +28,7 @@ export const createOrganization = async (req: Request, res: Response): Promise<v
     });
     res.status(201).json({ success: true, data: result });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
@@ -42,6 +44,7 @@ export const updateOrganization = async (req: Request, res: Response): Promise<v
     });
     res.json({ success: true, data: result });
   } catch (error: any) {
+    logger.error('Error:', error);
     const status = error.message.includes('not found') ? 404 : 400;
     res.status(status).json({ success: false, error: error.message });
   }
@@ -54,6 +57,7 @@ export const getOrganization = async (req: Request, res: Response): Promise<void
     });
     res.json({ success: true, data: result });
   } catch (error: any) {
+    logger.error('Error:', error);
     const status = error.message.includes('not found') ? 404 : 400;
     res.status(status).json({ success: false, error: error.message });
   }
@@ -66,6 +70,7 @@ export const getOrganizationBySlug = async (req: Request, res: Response): Promis
     });
     res.json({ success: true, data: result });
   } catch (error: any) {
+    logger.error('Error:', error);
     const status = error.message.includes('not found') ? 404 : 400;
     res.status(status).json({ success: false, error: error.message });
   }
@@ -83,6 +88,7 @@ export const listOrganizations = async (req: Request, res: Response): Promise<vo
       meta: { total: result.total, limit, offset },
     });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
@@ -103,6 +109,7 @@ export const getOrganizationStores = async (req: Request, res: Response): Promis
       meta: { total: result.total, limit, offset },
     });
   } catch (error: any) {
+    logger.error('Error:', error);
     const status = error.message.includes('not found') ? 404 : 400;
     res.status(status).json({ success: false, error: error.message });
   }

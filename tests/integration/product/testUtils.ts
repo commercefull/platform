@@ -117,7 +117,7 @@ export async function createTestProduct(client: AxiosInstance, adminToken: strin
   if (response.data?.id) return response.data.id;
   if (response.data?.productId) return response.data.productId;
   
-  console.error('Failed to create product:', response.data);
+  
   return null;
 }
 
@@ -156,7 +156,7 @@ export async function createTestCategory(client: AxiosInstance, adminToken: stri
   if (response.data?.id) return response.data.id;
   if (response.data?.categoryId) return response.data.categoryId;
   
-  console.error('Failed to create category:', response.data);
+  
   return null;
 }
 
@@ -248,6 +248,6 @@ export async function cleanupProductTests(
       headers: { Authorization: `Bearer ${adminToken}` }
     });
   } catch (error) {
-    console.error('Error cleaning up test resources:', error);
+    
   }
 }

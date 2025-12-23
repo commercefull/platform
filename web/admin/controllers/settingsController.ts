@@ -4,6 +4,7 @@
  * for the Commercefull Admin Hub - Phase 8
  */
 
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import { query, queryOne } from '../../../libs/db';
 import { v4 as uuidv4 } from 'uuid';
@@ -68,7 +69,8 @@ export const storeSettings = async (req: Request, res: Response): Promise<void> 
       locales,
     });
   } catch (error: any) {
-    console.error('Error loading store settings:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load settings',
@@ -138,7 +140,8 @@ export const updateStoreSettings = async (req: Request, res: Response): Promise<
 
     res.json({ success: true });
   } catch (error: any) {
-    console.error('Error updating store settings:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -161,7 +164,8 @@ export const businessInfo = async (req: Request, res: Response): Promise<void> =
       settings: settings || getDefaultSettings(merchantId),
     });
   } catch (error: any) {
-    console.error('Error loading business info:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load business info',
@@ -187,7 +191,8 @@ export const updateBusinessInfo = async (req: Request, res: Response): Promise<v
 
     res.json({ success: true });
   } catch (error: any) {
-    console.error('Error updating business info:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -220,7 +225,8 @@ export const localizationSettings = async (req: Request, res: Response): Promise
       countries: countries || [],
     });
   } catch (error: any) {
-    console.error('Error loading localization settings:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load localization settings',
@@ -257,7 +263,8 @@ export const createLanguage = async (req: Request, res: Response): Promise<void>
 
     res.json({ success: true, languageId });
   } catch (error: any) {
-    console.error('Error creating language:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -286,7 +293,8 @@ export const updateLanguage = async (req: Request, res: Response): Promise<void>
 
     res.json({ success: true });
   } catch (error: any) {
-    console.error('Error updating language:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -310,7 +318,8 @@ export const deleteLanguage = async (req: Request, res: Response): Promise<void>
 
     res.json({ success: true });
   } catch (error: any) {
-    console.error('Error deleting language:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -344,7 +353,8 @@ export const createCurrency = async (req: Request, res: Response): Promise<void>
 
     res.json({ success: true, currencyId });
   } catch (error: any) {
-    console.error('Error creating currency:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -374,7 +384,8 @@ export const updateCurrency = async (req: Request, res: Response): Promise<void>
 
     res.json({ success: true });
   } catch (error: any) {
-    console.error('Error updating currency:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -398,7 +409,8 @@ export const deleteCurrency = async (req: Request, res: Response): Promise<void>
 
     res.json({ success: true });
   } catch (error: any) {
-    console.error('Error deleting currency:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };

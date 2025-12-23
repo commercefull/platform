@@ -1,3 +1,4 @@
+import { logger } from '../../../libs/logger';
 import { Request, Response } from "express";
 import pricingRuleRepo from "../repos/pricingRuleRepo";
 import tierPriceRepo from "../repos/tierPriceRepo";
@@ -57,7 +58,8 @@ export const getPricingRules = async (req: Request, res: Response): Promise<void
       },
     });
   } catch (error) {
-    console.error("Error getting pricing rules:", error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: "Failed to get pricing rules",
@@ -87,7 +89,8 @@ export const getPricingRule = async (req: Request, res: Response): Promise<void>
       data: rule,
     });
   } catch (error) {
-    console.error("Error getting pricing rule:", error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: "Failed to get pricing rule",
@@ -128,7 +131,8 @@ export const createPricingRule = async (req: Request, res: Response): Promise<vo
       data: newRule,
     });
   } catch (error) {
-    console.error("Error creating pricing rule:", error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: "Failed to create pricing rule",
@@ -161,7 +165,8 @@ export const updatePricingRule = async (req: Request, res: Response): Promise<vo
       data: updatedRule,
     });
   } catch (error) {
-    console.error("Error updating pricing rule:", error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: "Failed to update pricing rule",
@@ -193,7 +198,8 @@ export const deletePricingRule = async (req: Request, res: Response): Promise<vo
       message: "Pricing rule deleted successfully",
     });
   } catch (error) {
-    console.error("Error deleting pricing rule:", error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: "Failed to delete pricing rule",
@@ -237,7 +243,8 @@ export const getTierPrices = async (req: Request, res: Response): Promise<void> 
       },
     });
   } catch (error) {
-    console.error("Error getting tier prices:", error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: "Failed to get tier prices",
@@ -267,7 +274,8 @@ export const getTierPrice = async (req: Request, res: Response): Promise<void> =
       data: tierPrice,
     });
   } catch (error) {
-    console.error("Error getting tier price:", error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: "Failed to get tier price",
@@ -299,7 +307,8 @@ export const createTierPrice = async (req: Request, res: Response): Promise<void
       data: newTierPrice,
     });
   } catch (error) {
-    console.error("Error creating tier price:", error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: "Failed to create tier price",
@@ -332,7 +341,8 @@ export const updateTierPrice = async (req: Request, res: Response): Promise<void
       data: updatedTierPrice,
     });
   } catch (error) {
-    console.error("Error updating tier price:", error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: "Failed to update tier price",
@@ -364,7 +374,8 @@ export const deleteTierPrice = async (req: Request, res: Response): Promise<void
       message: "Tier price deleted successfully",
     });
   } catch (error) {
-    console.error("Error deleting tier price:", error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: "Failed to delete tier price",
@@ -415,7 +426,8 @@ export const getPriceLists = async (req: Request, res: Response): Promise<void> 
       },
     });
   } catch (error) {
-    console.error("Error getting price lists:", error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: "Failed to get price lists",
@@ -451,7 +463,8 @@ export const getPriceList = async (req: Request, res: Response): Promise<void> =
       },
     });
   } catch (error) {
-    console.error("Error getting price list:", error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: "Failed to get price list",
@@ -483,7 +496,8 @@ export const createPriceList = async (req: Request, res: Response): Promise<void
       data: newPriceList,
     });
   } catch (error) {
-    console.error("Error creating price list:", error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: "Failed to create price list",
@@ -516,7 +530,8 @@ export const updatePriceList = async (req: Request, res: Response): Promise<void
       data: updatedPriceList,
     });
   } catch (error) {
-    console.error("Error updating price list:", error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: "Failed to update price list",
@@ -548,7 +563,8 @@ export const deletePriceList = async (req: Request, res: Response): Promise<void
       message: "Price list deleted successfully",
     });
   } catch (error) {
-    console.error("Error deleting price list:", error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: "Failed to delete price list",
@@ -594,7 +610,8 @@ export const addPriceToList = async (req: Request, res: Response): Promise<void>
       data: newPrice,
     });
   } catch (error) {
-    console.error("Error adding price to list:", error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: "Failed to add price to list",

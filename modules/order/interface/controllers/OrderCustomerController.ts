@@ -3,6 +3,7 @@
  * HTTP interface for customer-facing order operations with content negotiation
  */
 
+import { logger } from '../../../../libs/logger';
 import { Request, Response } from 'express';
 import OrderRepo from '../../infrastructure/repositories/OrderRepository';
 import { 
@@ -85,7 +86,8 @@ export const getMyOrders = async (req: Request, res: Response): Promise<void> =>
 
     respond(req, res, result, 200, 'order/list');
   } catch (error: any) {
-    console.error('Error getting customer orders:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to get orders', 500, 'order/error');
   }
 };
@@ -110,7 +112,8 @@ export const getOrder = async (req: Request, res: Response): Promise<void> => {
 
     respond(req, res, order, 200, 'order/detail');
   } catch (error: any) {
-    console.error('Error getting order:', error);
+    logger.error('Error:', error);
+    
     
     if (error.message.includes('permission')) {
       respondError(req, res, error.message, 403, 'order/error');
@@ -141,7 +144,8 @@ export const getOrderByNumber = async (req: Request, res: Response): Promise<voi
 
     respond(req, res, order, 200, 'order/detail');
   } catch (error: any) {
-    console.error('Error getting order by number:', error);
+    logger.error('Error:', error);
+    
     
     if (error.message.includes('permission')) {
       respondError(req, res, error.message, 403, 'order/error');
@@ -216,7 +220,8 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
 
     respond(req, res, order, 201, 'order/confirmation');
   } catch (error: any) {
-    console.error('Error creating order:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to create order', 500, 'order/error');
   }
 };
@@ -244,7 +249,8 @@ export const cancelOrder = async (req: Request, res: Response): Promise<void> =>
 
     respond(req, res, result, 200, 'order/cancelled');
   } catch (error: any) {
-    console.error('Error cancelling order:', error);
+    logger.error('Error:', error);
+    
     
     if (error.message.includes('permission')) {
       respondError(req, res, error.message, 403, 'order/error');

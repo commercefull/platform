@@ -3,6 +3,7 @@
  * Handles admin/merchant analytics and reporting operations
  */
 
+import { logger } from '../../../libs/logger';
 import { Request, Response, NextFunction } from 'express';
 import * as analyticsRepo from '../repos/analyticsRepo';
 import * as reportingRepo from '../repos/reportingRepo';
@@ -35,7 +36,8 @@ export const getSalesDashboard: AsyncHandler = async (req, res, next) => {
       }
     });
   } catch (error: any) {
-    console.error('Get sales dashboard error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -56,7 +58,8 @@ export const getSalesDaily: AsyncHandler = async (req, res, next) => {
 
     res.json({ success: true, ...result });
   } catch (error: any) {
-    console.error('Get sales daily error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -80,7 +83,8 @@ export const getProductPerformance: AsyncHandler = async (req, res, next) => {
 
     res.json({ success: true, ...result });
   } catch (error: any) {
-    console.error('Get product performance error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -101,7 +105,8 @@ export const getTopProducts: AsyncHandler = async (req, res, next) => {
 
     res.json({ success: true, data: products });
   } catch (error: any) {
-    console.error('Get top products error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -126,7 +131,8 @@ export const getSearchAnalytics: AsyncHandler = async (req, res, next) => {
 
     res.json({ success: true, ...result });
   } catch (error: any) {
-    console.error('Get search analytics error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -146,7 +152,8 @@ export const getZeroResultSearches: AsyncHandler = async (req, res, next) => {
 
     res.json({ success: true, data: result.data });
   } catch (error: any) {
-    console.error('Get zero result searches error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -166,7 +173,8 @@ export const getCustomerCohorts: AsyncHandler = async (req, res, next) => {
 
     res.json({ success: true, data: cohorts });
   } catch (error: any) {
-    console.error('Get customer cohorts error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -194,7 +202,8 @@ export const getEvents: AsyncHandler = async (req, res, next) => {
 
     res.json({ success: true, ...result });
   } catch (error: any) {
-    console.error('Get events error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -214,7 +223,8 @@ export const getEventCounts: AsyncHandler = async (req, res, next) => {
 
     res.json({ success: true, data: counts });
   } catch (error: any) {
-    console.error('Get event counts error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -239,7 +249,8 @@ export const getSnapshots: AsyncHandler = async (req, res, next) => {
 
     res.json({ success: true, data: snapshots });
   } catch (error: any) {
-    console.error('Get snapshots error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -255,7 +266,8 @@ export const getLatestSnapshot: AsyncHandler = async (req, res, next) => {
 
     res.json({ success: true, data: snapshot });
   } catch (error: any) {
-    console.error('Get latest snapshot error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -275,7 +287,8 @@ export const getRealTimeMetrics: AsyncHandler = async (req, res, next) => {
 
     res.json({ success: true, data: metrics });
   } catch (error: any) {
-    console.error('Get real-time metrics error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -290,7 +303,8 @@ export const getDashboards: AsyncHandler = async (req, res, next) => {
     const dashboards = await reportingRepo.getDashboards(merchantId);
     res.json({ success: true, data: dashboards });
   } catch (error: any) {
-    console.error('Get dashboards error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -304,7 +318,8 @@ export const getDashboard: AsyncHandler = async (req, res, next) => {
     }
     res.json({ success: true, data: dashboard });
   } catch (error: any) {
-    console.error('Get dashboard error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -322,7 +337,8 @@ export const createDashboard: AsyncHandler = async (req, res, next) => {
 
     res.status(201).json({ success: true, data: dashboard });
   } catch (error: any) {
-    console.error('Create dashboard error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -336,7 +352,8 @@ export const updateDashboard: AsyncHandler = async (req, res, next) => {
 
     res.json({ success: true, data: dashboard });
   } catch (error: any) {
-    console.error('Update dashboard error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -346,7 +363,8 @@ export const deleteDashboard: AsyncHandler = async (req, res, next) => {
     await reportingRepo.deleteDashboard(req.params.id);
     res.json({ success: true, message: 'Dashboard deleted' });
   } catch (error: any) {
-    console.error('Delete dashboard error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };

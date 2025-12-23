@@ -46,7 +46,7 @@ export const loginTestUser = async (client: AxiosInstance, email: string = 'test
     console.log(`🔐 Customer login response: ${response.status}`);
 
     if (response.status !== 200 || !response.data?.accessToken) {
-      console.error('❌ Customer login failed:', response.status, response.data);
+      
       // Return empty string instead of throwing to prevent cascade failures
       return '';
     }
@@ -84,7 +84,7 @@ export const loginTestAdmin = async (client: AxiosInstance): Promise<string> => 
     console.log(`🔐 Merchant login response: ${response.status}`);
 
     if (response.status !== 200 || !response.data?.accessToken) {
-      console.error('❌ Merchant login failed:', response.status, response.data);
+      
       return '';
     }
 

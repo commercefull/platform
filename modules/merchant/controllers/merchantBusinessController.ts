@@ -1,3 +1,4 @@
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import { MerchantRepo, Merchant } from '../repos/merchantRepo';
 
@@ -31,7 +32,8 @@ export const getMerchants = async (req: Request, res: Response): Promise<void> =
         }
       });
     } catch (error) {
-      console.error('Error fetching merchants:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({
         success: false,
         message: 'Failed to fetch merchants',
@@ -61,7 +63,8 @@ export const getMerchantById = async (req: Request, res: Response): Promise<void
         data: merchant
       });
     } catch (error) {
-      console.error('Error fetching merchant:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({
         success: false,
         message: 'Failed to fetch merchant',
@@ -123,7 +126,8 @@ export const createMerchant = async (req: Request, res: Response): Promise<void>
         message: 'Merchant created successfully'
       });
     } catch (error) {
-      console.error('Error creating merchant:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({
         success: false,
         message: 'Failed to create merchant',
@@ -186,7 +190,8 @@ export const updateMerchant = async (req: Request, res: Response): Promise<void>
         message: 'Merchant updated successfully'
       });
     } catch (error) {
-      console.error('Error updating merchant:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({
         success: false,
         message: 'Failed to update merchant',
@@ -226,7 +231,8 @@ export const deleteMerchant = async (req: Request, res: Response): Promise<void>
         });
       }
     } catch (error) {
-      console.error('Error deleting merchant:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({
         success: false,
         message: 'Failed to delete merchant',
@@ -259,7 +265,8 @@ export const getMerchantAddresses = async (req: Request, res: Response): Promise
         data: addresses
       });
     } catch (error) {
-      console.error('Error fetching merchant addresses:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({
         success: false,
         message: 'Failed to fetch merchant addresses',
@@ -320,7 +327,8 @@ export const addMerchantAddress = async (req: Request, res: Response): Promise<v
         message: 'Merchant address added successfully'
       });
     } catch (error) {
-      console.error('Error adding merchant address:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({
         success: false,
         message: 'Failed to add merchant address',
@@ -354,7 +362,8 @@ export const getMerchantPaymentInfo = async (req: Request, res: Response): Promi
         data: paymentInfo || []
       });
     } catch (error) {
-      console.error('Error fetching merchant payment info:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({
         success: false,
         message: 'Failed to fetch merchant payment info',
@@ -425,7 +434,8 @@ export const addMerchantPaymentInfo = async (req: Request, res: Response): Promi
         message: 'Merchant payment information added successfully'
       });
     } catch (error) {
-      console.error('Error adding merchant payment info:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({
         success: false,
         message: 'Failed to add merchant payment info',
@@ -487,7 +497,8 @@ export const updateMerchantAddress = async (req: Request, res: Response): Promis
         message: 'Merchant address updated successfully'
       });
     } catch (error) {
-      console.error('Error updating merchant address:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({
         success: false,
         message: 'Failed to update merchant address',
@@ -546,7 +557,8 @@ export const updateMerchantPaymentInfo = async (req: Request, res: Response): Pr
         message: 'Merchant payment information updated successfully'
       });
     } catch (error) {
-      console.error('Error updating merchant payment info:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({
         success: false,
         message: 'Failed to update merchant payment info',

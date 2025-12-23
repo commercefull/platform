@@ -1,3 +1,4 @@
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import taxQueryRepo from '../repos/taxQueryRepo';
 import { AddressInput } from '../taxTypes';
@@ -110,7 +111,8 @@ export const calculateTaxForLineItem = async (req: Request, res: Response) => {
 
     res.json(taxResult);
   } catch (error) {
-    console.error(error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ error: 'Internal Server Error' });
   }
 }
@@ -214,11 +216,13 @@ export const calculateTaxForBasket = async (req: Request, res: Response) => {
 
       res.json(taxResult);
     } catch (error) {
-      console.error('Error importing basketRepo or calculating tax:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({ error: 'Internal Server Error' });
     }
   } catch (error) {
-    console.error(error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ error: 'Internal Server Error' });
   }
 }
@@ -243,7 +247,8 @@ export const getTaxCategoryByCode = async (req: Request, res: Response) => {
 
     res.json(taxCategory);
   } catch (error) {
-    console.error(error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ error: 'Internal Server Error' });
   }
 }
@@ -264,7 +269,8 @@ export const getTaxRates = async (req: Request, res: Response) => {
 
     res.json(taxRates);
   } catch (error) {
-    console.error(error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ error: 'Internal Server Error' });
   }
 }
@@ -289,7 +295,8 @@ export const checkCustomerTaxExemption = async (req: Request, res: Response) => 
       exemptions
     });
   } catch (error) {
-    console.error(error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ error: 'Internal Server Error' });
   }
 }
@@ -333,11 +340,12 @@ export const findTaxZoneForAddress = async (req: Request, res: Response) => {
         isDefault: true
       });
     } catch (err) {
-      console.error('Tax zone lookup error:', err);
+      
       res.status(404).json({ error: 'No matching tax zone found' });
     }
   } catch (error) {
-    console.error(error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ error: 'Internal Server Error' });
   }
 }
@@ -364,7 +372,8 @@ export const getCustomerTaxSettings = async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error(error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ error: 'Internal Server Error' });
   }
 }

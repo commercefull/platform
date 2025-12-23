@@ -1,3 +1,4 @@
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import { 
   MembershipRepo 
@@ -18,7 +19,8 @@ export const getMembershipTiers = async (req: Request, res: Response): Promise<v
       data: tiers
     });
   } catch (error) {
-    console.error('Error fetching membership tiers:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: 'Failed to fetch membership tiers',
@@ -46,7 +48,8 @@ export const getMembershipTierById = async (req: Request, res: Response): Promis
       data: tier
     });
   } catch (error) {
-    console.error('Error fetching membership tier:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: 'Failed to fetch membership tier details',
@@ -76,7 +79,8 @@ export const getTierBenefits = async (req: Request, res: Response): Promise<void
       data: benefits
     });
   } catch (error) {
-    console.error('Error fetching membership tier benefits:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: 'Failed to fetch membership tier benefits',
@@ -119,7 +123,8 @@ export const getUserMembershipByUserId = async (req: Request, res: Response): Pr
       }
     });
   } catch (error) {
-    console.error('Error fetching user membership by user ID:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: 'Failed to fetch user membership',
@@ -149,7 +154,8 @@ export const getUserMembershipBenefits = async (req: Request, res: Response): Pr
       data: benefits
     });
   } catch (error) {
-    console.error('Error fetching user membership benefits:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: 'Failed to fetch user membership benefits',

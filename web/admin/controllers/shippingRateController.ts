@@ -3,6 +3,7 @@
  * Handles shipping rate management for the Admin Hub
  */
 
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import shippingRateRepo from '../../../modules/shipping/repos/shippingRateRepo';
 import shippingZoneRepo from '../../../modules/shipping/repos/shippingZoneRepo';
@@ -37,7 +38,8 @@ export const listShippingRates = async (req: Request, res: Response): Promise<vo
       success: req.query.success || null
     });
   } catch (error: any) {
-    console.error('Error listing shipping rates:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load shipping rates',
@@ -56,7 +58,8 @@ export const createShippingRateForm = async (req: Request, res: Response): Promi
       methods,
     });
   } catch (error: any) {
-    console.error('Error loading create rate form:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -108,7 +111,8 @@ export const createShippingRate = async (req: Request, res: Response): Promise<v
 
     res.redirect(`/hub/shipping/rates/${rate.shippingRateId}?success=Shipping rate created successfully`);
   } catch (error: any) {
-    console.error('Error creating shipping rate:', error);
+    logger.error('Error:', error);
+    
 
     try {
       const zones = await shippingZoneRepo.findAll();
@@ -157,7 +161,8 @@ export const viewShippingRate = async (req: Request, res: Response): Promise<voi
       success: req.query.success || null
     });
   } catch (error: any) {
-    console.error('Error viewing shipping rate:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load shipping rate',
@@ -189,7 +194,8 @@ export const editShippingRateForm = async (req: Request, res: Response): Promise
       methods,
     });
   } catch (error: any) {
-    console.error('Error loading edit rate form:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -242,7 +248,8 @@ export const updateShippingRate = async (req: Request, res: Response): Promise<v
 
     res.redirect(`/hub/shipping/rates/${rateId}?success=Shipping rate updated successfully`);
   } catch (error: any) {
-    console.error('Error updating shipping rate:', error);
+    logger.error('Error:', error);
+    
 
     try {
       const rate = await shippingRateRepo.findById(req.params.rateId);
@@ -278,7 +285,8 @@ export const activateShippingRate = async (req: Request, res: Response): Promise
 
     res.json({ success: true, message: 'Shipping rate activated successfully' });
   } catch (error: any) {
-    console.error('Error activating shipping rate:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message || 'Failed to activate shipping rate' });
   }
 };
@@ -295,7 +303,8 @@ export const deactivateShippingRate = async (req: Request, res: Response): Promi
 
     res.json({ success: true, message: 'Shipping rate deactivated successfully' });
   } catch (error: any) {
-    console.error('Error deactivating shipping rate:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message || 'Failed to deactivate shipping rate' });
   }
 };
@@ -312,7 +321,8 @@ export const deleteShippingRate = async (req: Request, res: Response): Promise<v
 
     res.json({ success: true, message: 'Shipping rate deleted successfully' });
   } catch (error: any) {
-    console.error('Error deleting shipping rate:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message || 'Failed to delete shipping rate' });
   }
 };
@@ -342,7 +352,8 @@ export const calculateShippingRate = async (req: Request, res: Response): Promis
       currency: rate.currency
     });
   } catch (error: any) {
-    console.error('Error calculating shipping rate:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ error: error.message || 'Failed to calculate shipping rate' });
   }
 };

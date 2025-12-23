@@ -1,3 +1,4 @@
+import { logger } from '../../../libs/logger';
 import { Request, Response } from "express";
 import discountRepo, { CreateProductDiscountInput, UpdateProductDiscountInput } from "../repos/discountRepo";
 
@@ -8,6 +9,7 @@ export const getActiveDiscounts = async (req: Request, res: Response): Promise<v
     const discounts = await discountRepo.findActive(merchantId as string | undefined);
     res.status(200).json({ success: true, data: discounts || [] });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -20,6 +22,7 @@ export const getDiscountsByProductId = async (req: Request, res: Response): Prom
     const discounts = await discountRepo.findDiscountsForProduct(productId, merchantId as string | undefined);
     res.status(200).json({ success: true, data: discounts || [] });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -32,6 +35,7 @@ export const getDiscountsByCategoryId = async (req: Request, res: Response): Pro
     const discounts = await discountRepo.findDiscountsForCategory(categoryId, merchantId as string | undefined);
     res.status(200).json({ success: true, data: discounts || [] });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -49,6 +53,7 @@ export const getDiscountById = async (req: Request, res: Response): Promise<void
     
     res.status(200).json({ success: true, data: discount });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -67,6 +72,7 @@ export const createDiscount = async (req: Request, res: Response): Promise<void>
     const discount = await discountRepo.create(discountData);
     res.status(201).json({ success: true, data: discount });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -80,6 +86,7 @@ export const updateDiscount = async (req: Request, res: Response): Promise<void>
     const discount = await discountRepo.update(id, discountData);
     res.status(200).json({ success: true, data: discount });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -97,6 +104,7 @@ export const deleteDiscount = async (req: Request, res: Response): Promise<void>
     
     res.status(200).json({ success: true, message: "Discount deleted successfully" });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };

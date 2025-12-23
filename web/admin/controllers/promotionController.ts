@@ -3,6 +3,7 @@
  * Handles promotion management for the Admin Hub
  */
 
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import PromotionRepo from '../../../modules/promotion/repos/promotionRepo';
 import { ListPromotionsUseCase, ListPromotionsCommand } from '../../../modules/promotion/application/useCases/ListPromotions';
@@ -58,7 +59,8 @@ export const listPromotions = async (req: Request, res: Response): Promise<void>
       success: req.query.success || null
     });
   } catch (error: any) {
-    console.error('Error listing promotions:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load promotions',
@@ -76,7 +78,8 @@ export const createPromotionForm = async (req: Request, res: Response): Promise<
       pageName: 'Create Promotion',
     });
   } catch (error: any) {
-    console.error('Error loading create promotion form:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -123,7 +126,8 @@ export const createPromotion = async (req: Request, res: Response): Promise<void
 
     res.redirect(`/hub/promotions/${result.promotionId}?success=Promotion created successfully`);
   } catch (error: any) {
-    console.error('Error creating promotion:', error);
+    logger.error('Error:', error);
+    
 
     // Reload form with error
     adminRespond(req, res, 'promotions/create', {
@@ -160,7 +164,8 @@ export const viewPromotion = async (req: Request, res: Response): Promise<void> 
       success: req.query.success || null
     });
   } catch (error: any) {
-    console.error('Error viewing promotion:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load promotion',
@@ -191,7 +196,8 @@ export const editPromotionForm = async (req: Request, res: Response): Promise<vo
       promotion,
     });
   } catch (error: any) {
-    console.error('Error loading edit promotion form:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -241,7 +247,8 @@ export const updatePromotion = async (req: Request, res: Response): Promise<void
 
     res.redirect(`/hub/promotions/${promotionId}?success=Promotion updated successfully`);
   } catch (error: any) {
-    console.error('Error updating promotion:', error);
+    logger.error('Error:', error);
+    
 
     // Reload form with error
     try {
@@ -276,7 +283,8 @@ export const deletePromotion = async (req: Request, res: Response): Promise<void
 
     res.json({ success: true, message: 'Promotion deleted successfully' });
   } catch (error: any) {
-    console.error('Error deleting promotion:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message || 'Failed to delete promotion' });
   }
 };

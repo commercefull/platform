@@ -77,7 +77,7 @@ export class RegisterCustomerUseCase {
         firstName: input.firstName,
       });
     } catch (error) {
-      console.error('Failed to send verification email:', error);
+      
     }
 
     // Emit event

@@ -67,7 +67,7 @@ export class ResetCustomerPasswordUseCase {
         firstName: customer.firstName,
       });
     } catch (error) {
-      console.error('Failed to send password reset email:', error);
+      
     }
 
     // Emit event

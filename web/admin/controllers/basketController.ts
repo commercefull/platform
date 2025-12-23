@@ -3,6 +3,7 @@
  * Handles abandoned cart recovery and basket analytics for the Admin Hub
  */
 
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import BasketRepo from '../../../modules/basket/infrastructure/repositories/BasketRepository';
 import { adminRespond } from 'web/respond';
@@ -45,7 +46,8 @@ export const listAbandonedCarts = async (req: Request, res: Response): Promise<v
       success: req.query.success || null
     });
   } catch (error: any) {
-    console.error('Error listing abandoned carts:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load abandoned carts',
@@ -86,7 +88,8 @@ export const viewAbandonedCart = async (req: Request, res: Response): Promise<vo
       success: req.query.success || null
     });
   } catch (error: any) {
-    console.error('Error viewing abandoned cart:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load abandoned cart',
@@ -128,7 +131,8 @@ export const recoverAbandonedCart = async (req: Request, res: Response): Promise
       basketId
     });
   } catch (error: any) {
-    console.error('Error recovering abandoned cart:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message || 'Failed to recover abandoned cart' });
   }
 };
@@ -166,7 +170,8 @@ export const sendRecoveryEmail = async (req: Request, res: Response): Promise<vo
       customerId: basket.customerId
     });
   } catch (error: any) {
-    console.error('Error sending recovery email:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message || 'Failed to send recovery email' });
   }
 };
@@ -180,7 +185,8 @@ export const markCartRecovered = async (req: Request, res: Response): Promise<vo
 
     res.json({ success: true, message: 'Cart marked as recovered' });
   } catch (error: any) {
-    console.error('Error marking cart as recovered:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message || 'Failed to mark cart as recovered' });
   }
 };
@@ -249,7 +255,8 @@ export const basketAnalytics = async (req: Request, res: Response): Promise<void
       stats,
     });
   } catch (error: any) {
-    console.error('Error loading basket analytics:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load basket analytics',
@@ -273,7 +280,8 @@ export const cleanupExpiredBaskets = async (req: Request, res: Response): Promis
       deletedCount
     });
   } catch (error: any) {
-    console.error('Error cleaning up expired baskets:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message || 'Failed to cleanup expired baskets' });
   }
 };

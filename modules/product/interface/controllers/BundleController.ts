@@ -3,6 +3,7 @@
  * Handles product bundle operations
  */
 
+import { logger } from '../../../../libs/logger';
 import { Request, Response, NextFunction } from 'express';
 import * as bundleRepo from '../../repos/bundleRepo';
 
@@ -21,7 +22,8 @@ export const getBundles: AsyncHandler = async (req, res, next) => {
     );
     res.json({ success: true, ...result });
   } catch (error: any) {
-    console.error('Get bundles error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -36,7 +38,8 @@ export const getBundle: AsyncHandler = async (req, res, next) => {
     const items = await bundleRepo.getBundleItems(req.params.id);
     res.json({ success: true, data: { ...bundle, items } });
   } catch (error: any) {
-    console.error('Get bundle error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -46,7 +49,8 @@ export const createBundle: AsyncHandler = async (req, res, next) => {
     const bundle = await bundleRepo.saveBundle(req.body);
     res.status(201).json({ success: true, data: bundle });
   } catch (error: any) {
-    console.error('Create bundle error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -59,7 +63,8 @@ export const updateBundle: AsyncHandler = async (req, res, next) => {
     });
     res.json({ success: true, data: bundle });
   } catch (error: any) {
-    console.error('Update bundle error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -69,7 +74,8 @@ export const deleteBundle: AsyncHandler = async (req, res, next) => {
     await bundleRepo.deleteBundle(req.params.id);
     res.json({ success: true, message: 'Bundle deleted' });
   } catch (error: any) {
-    console.error('Delete bundle error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -82,7 +88,8 @@ export const addBundleItem: AsyncHandler = async (req, res, next) => {
     });
     res.status(201).json({ success: true, data: item });
   } catch (error: any) {
-    console.error('Add bundle item error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -96,7 +103,8 @@ export const updateBundleItem: AsyncHandler = async (req, res, next) => {
     });
     res.json({ success: true, data: item });
   } catch (error: any) {
-    console.error('Update bundle item error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -106,7 +114,8 @@ export const deleteBundleItem: AsyncHandler = async (req, res, next) => {
     await bundleRepo.deleteBundleItem(req.params.itemId);
     res.json({ success: true, message: 'Bundle item deleted' });
   } catch (error: any) {
-    console.error('Delete bundle item error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -120,7 +129,8 @@ export const getActiveBundles: AsyncHandler = async (req, res, next) => {
     const bundles = await bundleRepo.getActiveBundles();
     res.json({ success: true, data: bundles });
   } catch (error: any) {
-    console.error('Get active bundles error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -138,7 +148,8 @@ export const getBundleDetails: AsyncHandler = async (req, res, next) => {
 
     res.json({ success: true, data: { ...bundle, items, pricing } });
   } catch (error: any) {
-    console.error('Get bundle details error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -156,7 +167,8 @@ export const getBundleByProduct: AsyncHandler = async (req, res, next) => {
 
     res.json({ success: true, data: { ...bundle, items, pricing } });
   } catch (error: any) {
-    console.error('Get bundle by product error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -167,7 +179,8 @@ export const calculateBundlePrice: AsyncHandler = async (req, res, next) => {
     const pricing = await bundleRepo.calculateBundlePrice(req.params.id, selectedItems);
     res.json({ success: true, data: pricing });
   } catch (error: any) {
-    console.error('Calculate bundle price error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };

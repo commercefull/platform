@@ -3,6 +3,7 @@
  * Uses customer use cases directly from modules - no HTTP API calls
  */
 
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import CustomerRepo from '../../../modules/customer/infrastructure/repositories/CustomerRepository';
 import { GetCustomerCommand, GetCustomerUseCase } from '../../../modules/customer/useCases/GetCustomer';
@@ -60,7 +61,8 @@ export const listCustomers = async (req: Request, res: Response): Promise<void> 
       success: req.query.success || null
     });
   } catch (error: any) {
-    console.error('Error listing customers:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load customers',
@@ -99,7 +101,8 @@ export const viewCustomer = async (req: Request, res: Response): Promise<void> =
       success: req.query.success || null
     });
   } catch (error: any) {
-    console.error('Error viewing customer:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load customer',
@@ -131,7 +134,8 @@ export const editCustomerForm = async (req: Request, res: Response): Promise<voi
       customer,
     });
   } catch (error: any) {
-    console.error('Error loading edit customer form:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -153,7 +157,8 @@ export const updateCustomer = async (req: Request, res: Response): Promise<void>
 
     res.redirect(`/hub/customers/${customerId}?success=Customer updated successfully`);
   } catch (error: any) {
-    console.error('Error updating customer:', error);
+    logger.error('Error:', error);
+    
     
     // Reload form with error
     try {
@@ -189,7 +194,8 @@ export const deactivateCustomer = async (req: Request, res: Response): Promise<v
 
     res.json({ success: true, message: 'Customer deactivated' });
   } catch (error: any) {
-    console.error('Error deactivating customer:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message || 'Failed to deactivate customer' });
   }
 };
@@ -207,7 +213,8 @@ export const reactivateCustomer = async (req: Request, res: Response): Promise<v
 
     res.json({ success: true, message: 'Customer reactivated' });
   } catch (error: any) {
-    console.error('Error reactivating customer:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message || 'Failed to reactivate customer' });
   }
 };
@@ -227,7 +234,8 @@ export const verifyCustomer = async (req: Request, res: Response): Promise<void>
 
     res.json({ success: true, message: 'Customer verified' });
   } catch (error: any) {
-    console.error('Error verifying customer:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message || 'Failed to verify customer' });
   }
 };
@@ -262,7 +270,8 @@ export const customerAddresses = async (req: Request, res: Response): Promise<vo
       success: req.query.success || null
     });
   } catch (error: any) {
-    console.error('Error loading customer addresses:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load addresses',
@@ -304,7 +313,8 @@ export const addCustomerAddress = async (req: Request, res: Response): Promise<v
       res.redirect(`/hub/customers/${customerId}/addresses?success=Address added`);
     }
   } catch (error: any) {
-    console.error('Error adding customer address:', error);
+    logger.error('Error:', error);
+    
     if (req.xhr || req.headers.accept?.includes('application/json')) {
       res.status(500).json({ success: false, message: error.message || 'Failed to add address' });
     } else {

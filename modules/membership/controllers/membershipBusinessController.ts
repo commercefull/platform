@@ -1,3 +1,4 @@
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import { 
   MembershipRepo, 
@@ -20,7 +21,8 @@ export const getMembershipTiers = async (req: Request, res: Response): Promise<v
       data: tiers
     });
   } catch (error) {
-    console.error('Error fetching membership tiers:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: 'Failed to fetch membership tiers',
@@ -47,7 +49,8 @@ export const getMembershipTierById = async (req: Request, res: Response): Promis
       data: tier
     });
   } catch (error) {
-    console.error('Error fetching membership tier:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: 'Failed to fetch membership tier',
@@ -91,7 +94,8 @@ export const createMembershipTier = async (req: Request, res: Response): Promise
       message: 'Membership tier created successfully'
     });
   } catch (error) {
-    console.error('Error creating membership tier:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: 'Failed to create membership tier',
@@ -137,7 +141,8 @@ export const updateMembershipTier = async (req: Request, res: Response): Promise
       message: 'Membership tier updated successfully'
     });
   } catch (error) {
-    console.error('Error updating membership tier:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: 'Failed to update membership tier',
@@ -177,7 +182,8 @@ export const deleteMembershipTier = async (req: Request, res: Response): Promise
       message: 'Membership tier deleted successfully'
     });
   } catch (error) {
-    console.error('Error deleting membership tier:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: 'Failed to delete membership tier',
@@ -203,7 +209,8 @@ export const getMembershipBenefits = async (req: Request, res: Response): Promis
       data: benefits
     });
   } catch (error) {
-    console.error('Error fetching membership benefits:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: 'Failed to fetch membership benefits',
@@ -230,7 +237,8 @@ export const getMembershipBenefitById = async (req: Request, res: Response): Pro
       data: benefit
     });
   } catch (error) {
-    console.error('Error fetching membership benefit:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: 'Failed to fetch membership benefit',
@@ -286,7 +294,8 @@ export const createMembershipBenefit = async (req: Request, res: Response): Prom
       message: 'Membership benefit created successfully'
     });
   } catch (error) {
-    console.error('Error creating membership benefit:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: 'Failed to create membership benefit',
@@ -346,7 +355,8 @@ export const updateMembershipBenefit = async (req: Request, res: Response): Prom
       message: 'Membership benefit updated successfully'
     });
   } catch (error) {
-    console.error('Error updating membership benefit:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: 'Failed to update membership benefit',
@@ -376,7 +386,8 @@ export const deleteMembershipBenefit = async (req: Request, res: Response): Prom
       message: 'Membership benefit deleted successfully'
     });
   } catch (error) {
-    console.error('Error deleting membership benefit:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: 'Failed to delete membership benefit',
@@ -405,7 +416,8 @@ export const getUserMemberships = async (req: Request, res: Response): Promise<v
       data: memberships
     });
   } catch (error) {
-    console.error('Error fetching user memberships:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: 'Failed to fetch user memberships',
@@ -432,7 +444,8 @@ export const getUserMembershipById = async (req: Request, res: Response): Promis
       data: membership
     });
   } catch (error) {
-    console.error('Error fetching user membership:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: 'Failed to fetch user membership',
@@ -459,7 +472,8 @@ export const getUserMembershipByUserId = async (req: Request, res: Response): Pr
       data: membership
     });
   } catch (error) {
-    console.error('Error fetching user membership by user ID:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: 'Failed to fetch user membership',
@@ -531,7 +545,8 @@ export const createUserMembership = async (req: Request, res: Response): Promise
       message: 'User membership created successfully'
     });
   } catch (error) {
-    console.error('Error creating user membership:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: 'Failed to create user membership',
@@ -595,7 +610,8 @@ export const updateUserMembership = async (req: Request, res: Response): Promise
       message: 'User membership updated successfully'
     });
   } catch (error) {
-    console.error('Error updating user membership:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: 'Failed to update user membership',
@@ -626,7 +642,8 @@ export const cancelUserMembership = async (req: Request, res: Response): Promise
       message: 'User membership cancelled successfully'
     });
   } catch (error) {
-    console.error('Error cancelling user membership:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: 'Failed to cancel user membership',
@@ -646,7 +663,8 @@ export const getUserMembershipBenefits = async (req: Request, res: Response): Pr
       data: benefits
     });
   } catch (error) {
-    console.error('Error fetching user membership benefits:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: 'Failed to fetch user membership benefits',

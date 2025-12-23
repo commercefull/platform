@@ -3,6 +3,7 @@
  * Manages tax rates, zones, and classes
  */
 
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import { query, queryOne } from '../../../libs/db';
 import { v4 as uuidv4 } from 'uuid';
@@ -40,7 +41,8 @@ export const listTaxSettings = async (req: Request, res: Response): Promise<void
       success: req.query.success || null
     });
   } catch (error: any) {
-    console.error('Error listing tax settings:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load tax settings',
@@ -64,7 +66,8 @@ export const createTaxRate = async (req: Request, res: Response): Promise<void> 
 
     res.redirect('/hub/tax?success=Tax rate created');
   } catch (error: any) {
-    console.error('Error creating tax rate:', error);
+    logger.error('Error:', error);
+    
     res.redirect('/hub/tax?error=' + encodeURIComponent(error.message));
   }
 };
@@ -82,7 +85,8 @@ export const updateTaxRate = async (req: Request, res: Response): Promise<void> 
 
     res.redirect('/hub/tax?success=Tax rate updated');
   } catch (error: any) {
-    console.error('Error updating tax rate:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -93,7 +97,8 @@ export const deleteTaxRate = async (req: Request, res: Response): Promise<void> 
     await query(`UPDATE "taxRate" SET "deletedAt" = NOW() WHERE "taxRateId" = $1`, [taxRateId]);
     res.json({ success: true });
   } catch (error: any) {
-    console.error('Error deleting tax rate:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -115,7 +120,8 @@ export const createTaxZone = async (req: Request, res: Response): Promise<void> 
 
     res.redirect('/hub/tax?success=Tax zone created');
   } catch (error: any) {
-    console.error('Error creating tax zone:', error);
+    logger.error('Error:', error);
+    
     res.redirect('/hub/tax?error=' + encodeURIComponent(error.message));
   }
 };
@@ -134,7 +140,8 @@ export const updateTaxZone = async (req: Request, res: Response): Promise<void> 
 
     res.redirect('/hub/tax?success=Tax zone updated');
   } catch (error: any) {
-    console.error('Error updating tax zone:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -145,7 +152,8 @@ export const deleteTaxZone = async (req: Request, res: Response): Promise<void> 
     await query(`UPDATE "taxZone" SET "deletedAt" = NOW() WHERE "taxZoneId" = $1`, [taxZoneId]);
     res.json({ success: true });
   } catch (error: any) {
-    console.error('Error deleting tax zone:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -166,7 +174,8 @@ export const createTaxClass = async (req: Request, res: Response): Promise<void>
 
     res.redirect('/hub/tax?success=Tax class created');
   } catch (error: any) {
-    console.error('Error creating tax class:', error);
+    logger.error('Error:', error);
+    
     res.redirect('/hub/tax?error=' + encodeURIComponent(error.message));
   }
 };
@@ -183,7 +192,8 @@ export const updateTaxClass = async (req: Request, res: Response): Promise<void>
 
     res.redirect('/hub/tax?success=Tax class updated');
   } catch (error: any) {
-    console.error('Error updating tax class:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -194,7 +204,8 @@ export const deleteTaxClass = async (req: Request, res: Response): Promise<void>
     await query(`UPDATE "taxClass" SET "deletedAt" = NOW() WHERE "taxClassId" = $1`, [taxClassId]);
     res.json({ success: true });
   } catch (error: any) {
-    console.error('Error deleting tax class:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };

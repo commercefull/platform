@@ -1,3 +1,4 @@
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import taxQueryRepo from '../repos/taxQueryRepo';
 import { TaxCommandRepo } from '../repos/taxCommandRepo';
@@ -23,7 +24,8 @@ export const getTaxRate = async (req: Request, res: Response) => {
 
     res.json({ success: true, data: taxRate });
   } catch (error) {
-    console.error(error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ error: 'Internal Server Error' });
   }
 }
@@ -52,7 +54,8 @@ export const getAllTaxRates = async (req: Request, res: Response) => {
 
     res.json({ success: true, data: taxRates });
   } catch (error) {
-    console.error(error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
 }
@@ -100,7 +103,8 @@ export const createTaxRate = async (req: Request, res: Response) => {
 
     res.status(201).json({ success: true, data: createdTaxRate });
   } catch (error) {
-    console.error(error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
 }
@@ -138,7 +142,8 @@ export const updateTaxRate = async (req: Request, res: Response) => {
 
     res.json({ success: true, data: result });
   } catch (error) {
-    console.error(error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
 }
@@ -157,7 +162,8 @@ export const deleteTaxRate = async (req: Request, res: Response) => {
 
     res.json({ success: true, message: 'Tax rate deleted successfully' });
   } catch (error) {
-    console.error(error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
 }
@@ -179,7 +185,8 @@ export const getAllTaxCategories = async (req: Request, res: Response) => {
 
     res.json({ success: true, data: taxCategories });
   } catch (error) {
-    console.error(error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
 }
@@ -195,7 +202,8 @@ export const getTaxCategory = async (req: Request, res: Response) => {
 
     res.json({ success: true, data: taxCategory });
   } catch (error) {
-    console.error(error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
 }
@@ -228,7 +236,8 @@ export const createTaxCategory = async (req: Request, res: Response) => {
 
     res.status(201).json({ success: true, data: createdCategory });
   } catch (error) {
-    console.error(error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
 }
@@ -264,7 +273,8 @@ export const updateTaxCategory = async (req: Request, res: Response) => {
 
     res.json({ success: true, data: result });
   } catch (error) {
-    console.error(error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
 }
@@ -283,7 +293,8 @@ export const deleteTaxCategory = async (req: Request, res: Response) => {
 
     res.json({ success: true, message: 'Tax category deleted successfully' });
   } catch (error) {
-    console.error(error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
 }
@@ -306,7 +317,8 @@ export const getAllTaxZones = async (req: Request, res: Response) => {
 
     res.json({ success: true, data: taxZones });
   } catch (error) {
-    console.error(error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
 }
@@ -327,7 +339,8 @@ export const getTaxZoneById = async (req: Request, res: Response) => {
 
     res.json({ success: true, data: taxZone });
   } catch (error) {
-    console.error(error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
 }
@@ -366,7 +379,8 @@ export const createTaxZone = async (req: Request, res: Response) => {
 
     res.status(201).json({ success: true, data: createdTaxZone });
   } catch (error) {
-    console.error(error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
 }
@@ -413,7 +427,8 @@ export const updateTaxZone = async (req: Request, res: Response) => {
 
     res.json({ success: true, data: result });
   } catch (error) {
-    console.error(error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
 }
@@ -432,7 +447,8 @@ export const deleteTaxZone = async (req: Request, res: Response) => {
 
     res.json({ success: true, message: 'Tax zone deleted successfully' });
   } catch (error) {
-    console.error(error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
 }

@@ -32,7 +32,7 @@ class EmailDeliveryProvider implements NotificationDeliveryProvider {
       // });
       return true;
     } catch (error) {
-      console.error('Failed to send email notification:', error);
+      
       return false;
     }
   }
@@ -57,7 +57,7 @@ class SmsDeliveryProvider implements NotificationDeliveryProvider {
       // });
       return true;
     } catch (error) {
-      console.error('Failed to send SMS notification:', error);
+      
       return false;
     }
   }
@@ -84,7 +84,7 @@ class PushDeliveryProvider implements NotificationDeliveryProvider {
       // });
       return true;
     } catch (error) {
-      console.error('Failed to send push notification:', error);
+      
       return false;
     }
   }
@@ -106,7 +106,7 @@ class InAppDeliveryProvider implements NotificationDeliveryProvider {
       console.log(`In-app notification ready for user ${notification.userId}`);
       return true;
     } catch (error) {
-      console.error('Failed to prepare in-app notification:', error);
+      
       return false;
     }
   }
@@ -180,7 +180,7 @@ export class NotificationService {
         const notification = await this.sendNotification(builder);
         results.push(notification);
       } catch (error) {
-        console.error('Failed to send notification in batch:', error);
+        
       }
     }
     
@@ -246,7 +246,7 @@ export class NotificationService {
     const provider = this.deliveryProviders.find(p => p.supportsChannel(channel));
     
     if (!provider) {
-      console.error(`No provider found for channel: ${channel}`);
+      
       return false;
     }
     

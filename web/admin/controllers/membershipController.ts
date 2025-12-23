@@ -3,6 +3,7 @@
  * Handles membership plans, tiers, and benefits management for the Admin Hub
  */
 
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import * as membershipPlanRepo from '../../../modules/membership/repos/membershipPlanRepo';
 import { MembershipBenefitRepo } from '../../../modules/membership/repos/membershipBenefitRepo';
@@ -33,7 +34,8 @@ export const listMembershipPlans = async (req: Request, res: Response): Promise<
       success: req.query.success || null
     });
   } catch (error: any) {
-    console.error('Error listing membership plans:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load membership plans',
@@ -47,7 +49,8 @@ export const createMembershipPlanForm = async (req: Request, res: Response): Pro
       pageName: 'Create Membership Plan',
     });
   } catch (error: any) {
-    console.error('Error loading create membership plan form:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -114,7 +117,8 @@ export const createMembershipPlan = async (req: Request, res: Response): Promise
 
     res.redirect(`/hub/membership/plans/${plan.membershipPlanId}?success=Membership plan created successfully`);
   } catch (error: any) {
-    console.error('Error creating membership plan:', error);
+    logger.error('Error:', error);
+    
 
     adminRespond(req, res, 'programs/membership/plans/create', {
       pageName: 'Create Membership Plan',
@@ -167,7 +171,8 @@ export const viewMembershipPlan = async (req: Request, res: Response): Promise<v
       success: req.query.success || null
     });
   } catch (error: any) {
-    console.error('Error viewing membership plan:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load membership plan',
@@ -194,7 +199,8 @@ export const editMembershipPlanForm = async (req: Request, res: Response): Promi
       plan,
     });
   } catch (error: any) {
-    console.error('Error loading edit membership plan form:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -259,7 +265,8 @@ export const updateMembershipPlan = async (req: Request, res: Response): Promise
 
     res.redirect(`/hub/membership/plans/${planId}?success=Membership plan updated successfully`);
   } catch (error: any) {
-    console.error('Error updating membership plan:', error);
+    logger.error('Error:', error);
+    
 
     try {
       const plan = await membershipPlanRepo.findById(req.params.planId);
@@ -291,7 +298,8 @@ export const activateMembershipPlan = async (req: Request, res: Response): Promi
 
     res.json({ success: true, message: 'Membership plan activated successfully' });
   } catch (error: any) {
-    console.error('Error activating membership plan:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message || 'Failed to activate membership plan' });
   }
 };
@@ -308,7 +316,8 @@ export const deactivateMembershipPlan = async (req: Request, res: Response): Pro
 
     res.json({ success: true, message: 'Membership plan deactivated successfully' });
   } catch (error: any) {
-    console.error('Error deactivating membership plan:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message || 'Failed to deactivate membership plan' });
   }
 };
@@ -325,7 +334,8 @@ export const deleteMembershipPlan = async (req: Request, res: Response): Promise
 
     res.json({ success: true, message: 'Membership plan deleted successfully' });
   } catch (error: any) {
-    console.error('Error deleting membership plan:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message || 'Failed to delete membership plan' });
   }
 };
@@ -362,7 +372,8 @@ export const listMembershipBenefits = async (req: Request, res: Response): Promi
       success: req.query.success || null
     });
   } catch (error: any) {
-    console.error('Error listing membership benefits:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load membership benefits',
@@ -397,7 +408,8 @@ export const listMemberships = async (req: Request, res: Response): Promise<void
       success: req.query.success || null
     });
   } catch (error: any) {
-    console.error('Error listing memberships:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load memberships',
@@ -453,6 +465,7 @@ export const bulkMembershipOperations = async (req: Request, res: Response): Pro
             throw new Error(`Unknown operation: ${operation}`);
         }
       } catch (error: any) {
+        logger.error('Error:', error);
         results.push({ id: membershipId, status: 'error', error: error.message });
         failureCount++;
       }
@@ -464,7 +477,8 @@ export const bulkMembershipOperations = async (req: Request, res: Response): Pro
       results
     });
   } catch (error: any) {
-    console.error('Error performing bulk membership operations:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message || 'Failed to perform bulk operations' });
   }
 };
@@ -523,7 +537,8 @@ export const membershipUpgradeDowngrade = async (req: Request, res: Response): P
       }
     });
   } catch (error: any) {
-    console.error('Error upgrading/downgrading membership:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message || 'Failed to change membership tier' });
   }
 };
@@ -566,7 +581,8 @@ export const membershipAnalytics = async (req: Request, res: Response): Promise<
       tiers,
     });
   } catch (error: any) {
-    console.error('Error loading membership analytics:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load membership analytics',

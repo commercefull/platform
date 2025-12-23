@@ -3,6 +3,7 @@
  * Uses product use cases directly from modules - no HTTP API calls
  */
 
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import ProductRepo from '../../../modules/product/infrastructure/repositories/ProductRepository';
 import { ListProductsCommand, ListProductsUseCase } from '../../../modules/product/application/useCases/ListProducts';
@@ -65,7 +66,8 @@ export const listProducts = async (req: Request, res: Response): Promise<void> =
       success: req.query.success || null
     });
   } catch (error: any) {
-    console.error('Error listing products:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load products',
@@ -100,7 +102,8 @@ export const viewProduct = async (req: Request, res: Response): Promise<void> =>
       success: req.query.success || null
     });
   } catch (error: any) {
-    console.error('Error viewing product:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load product',
@@ -125,7 +128,8 @@ export const createProductForm = async (req: Request, res: Response): Promise<vo
       formData: {}
     });
   } catch (error: any) {
-    console.error('Error loading create product form:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -197,7 +201,8 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
 
     res.redirect(`/hub/products/${product.productId}?success=Product created successfully`);
   } catch (error: any) {
-    console.error('Error creating product:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'products/create', {
       pageName: 'Create Product',
       error: error.message || 'Failed to create product',
@@ -237,7 +242,8 @@ export const editProductForm = async (req: Request, res: Response): Promise<void
       attributes: [],
     });
   } catch (error: any) {
-    console.error('Error loading edit product form:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -260,7 +266,8 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
 
     res.redirect(`/hub/products/${productId}?success=Product updated successfully`);
   } catch (error: any) {
-    console.error('Error updating product:', error);
+    logger.error('Error:', error);
+    
     
     // Reload product and show error
     try {
@@ -308,7 +315,8 @@ export const deleteProduct = async (req: Request, res: Response): Promise<void> 
 
     res.json({ success: true, message: 'Product deleted successfully' });
   } catch (error: any) {
-    console.error('Error deleting product:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message || 'Failed to delete product' });
   }
 };
@@ -339,7 +347,8 @@ export const updateProductStatus = async (req: Request, res: Response): Promise<
 
     res.json({ success: true, message: 'Status updated', data: { status: product.status } });
   } catch (error: any) {
-    console.error('Error updating product status:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message || 'Failed to update status' });
   }
 };
@@ -363,7 +372,8 @@ export const publishProduct = async (req: Request, res: Response): Promise<void>
 
     res.json({ success: true, message: 'Product published' });
   } catch (error: any) {
-    console.error('Error publishing product:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message || 'Failed to publish product' });
   }
 };
@@ -387,7 +397,8 @@ export const unpublishProduct = async (req: Request, res: Response): Promise<voi
 
     res.json({ success: true, message: 'Product unpublished' });
   } catch (error: any) {
-    console.error('Error unpublishing product:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message || 'Failed to unpublish product' });
   }
 };

@@ -3,6 +3,7 @@
  * Handles shipping zone management for the Admin Hub
  */
 
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import shippingZoneRepo from '../../../modules/shipping/repos/shippingZoneRepo';
 import shippingMethodRepo from '../../../modules/shipping/repos/shippingMethodRepo';
@@ -25,7 +26,8 @@ export const listShippingZones = async (req: Request, res: Response): Promise<vo
       success: req.query.success || null
     });
   } catch (error: any) {
-    console.error('Error listing shipping zones:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load shipping zones',
@@ -39,7 +41,8 @@ export const createShippingZoneForm = async (req: Request, res: Response): Promi
       pageName: 'Create Shipping Zone',
     });
   } catch (error: any) {
-    console.error('Error loading create zone form:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -72,7 +75,8 @@ export const createShippingZone = async (req: Request, res: Response): Promise<v
 
     res.redirect(`/hub/shipping/zones/${zone.shippingZoneId}?success=Shipping zone created successfully`);
   } catch (error: any) {
-    console.error('Error creating shipping zone:', error);
+    logger.error('Error:', error);
+    
 
     adminRespond(req, res, 'shipping/zones/create', {
       pageName: 'Create Shipping Zone',
@@ -107,7 +111,8 @@ export const viewShippingZone = async (req: Request, res: Response): Promise<voi
       success: req.query.success || null
     });
   } catch (error: any) {
-    console.error('Error viewing shipping zone:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load shipping zone',
@@ -134,7 +139,8 @@ export const editShippingZoneForm = async (req: Request, res: Response): Promise
       zone,
     });
   } catch (error: any) {
-    console.error('Error loading edit zone form:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -173,7 +179,8 @@ export const updateShippingZone = async (req: Request, res: Response): Promise<v
 
     res.redirect(`/hub/shipping/zones/${zoneId}?success=Shipping zone updated successfully`);
   } catch (error: any) {
-    console.error('Error updating shipping zone:', error);
+    logger.error('Error:', error);
+    
 
     try {
       const zone = await shippingZoneRepo.findById(req.params.zoneId);
@@ -205,7 +212,8 @@ export const activateShippingZone = async (req: Request, res: Response): Promise
 
     res.json({ success: true, message: 'Shipping zone activated successfully' });
   } catch (error: any) {
-    console.error('Error activating shipping zone:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message || 'Failed to activate shipping zone' });
   }
 };
@@ -222,7 +230,8 @@ export const deactivateShippingZone = async (req: Request, res: Response): Promi
 
     res.json({ success: true, message: 'Shipping zone deactivated successfully' });
   } catch (error: any) {
-    console.error('Error deactivating shipping zone:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message || 'Failed to deactivate shipping zone' });
   }
 };
@@ -239,7 +248,8 @@ export const deleteShippingZone = async (req: Request, res: Response): Promise<v
 
     res.json({ success: true, message: 'Shipping zone deleted successfully' });
   } catch (error: any) {
-    console.error('Error deleting shipping zone:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message || 'Failed to delete shipping zone' });
   }
 };

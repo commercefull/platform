@@ -4,6 +4,7 @@
  * Handles OAuth/social login authentication endpoints.
  */
 
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import { CustomerRepo } from '../../customer/repos/customerRepo';
 import { MerchantRepo } from '../../merchant/repos/merchantRepo';
@@ -101,7 +102,8 @@ export async function getOAuthConfig(req: Request, res: Response): Promise<void>
       config: config[provider]
     });
   } catch (error) {
-    console.error('Get OAuth config error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: 'Failed to get OAuth configuration'
@@ -230,7 +232,8 @@ export async function customerSocialLogin(req: Request, res: Response): Promise<
       provider: result.provider
     });
   } catch (error) {
-    console.error('Customer social login error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: error instanceof Error ? error.message : 'Social login failed'
@@ -355,7 +358,8 @@ export async function merchantSocialLogin(req: Request, res: Response): Promise<
       provider: result.provider
     });
   } catch (error) {
-    console.error('Merchant social login error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: error instanceof Error ? error.message : 'Social login failed'
@@ -435,7 +439,8 @@ export async function linkCustomerSocialAccount(req: Request, res: Response): Pr
       linkedAccount
     });
   } catch (error) {
-    console.error('Link social account error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: error instanceof Error ? error.message : 'Failed to link social account'
@@ -487,7 +492,8 @@ export async function unlinkCustomerSocialAccount(req: Request, res: Response): 
       message: `${provider} account unlinked successfully`
     });
   } catch (error) {
-    console.error('Unlink social account error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: error instanceof Error ? error.message : 'Failed to unlink social account'
@@ -519,7 +525,8 @@ export async function getCustomerLinkedAccounts(req: Request, res: Response): Pr
       supportedProviders: SUPPORTED_PROVIDERS
     });
   } catch (error) {
-    console.error('Get linked accounts error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: 'Failed to get linked accounts'
@@ -551,7 +558,8 @@ export async function getMerchantLinkedAccounts(req: Request, res: Response): Pr
       supportedProviders: SUPPORTED_PROVIDERS
     });
   } catch (error) {
-    console.error('Get linked accounts error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({
       success: false,
       message: 'Failed to get linked accounts'

@@ -137,7 +137,7 @@ export class ProductSearchService {
         facets
       };
     } catch (error) {
-      console.error('Product search error:', error);
+      
       return {
         products: [],
         total: 0,

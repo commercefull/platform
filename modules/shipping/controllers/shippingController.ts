@@ -3,6 +3,7 @@
  * Handles shipping-related HTTP requests
  */
 
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import shippingCarrierRepo from '../repos/shippingCarrierRepo';
 import shippingMethodRepo from '../repos/shippingMethodRepo';
@@ -28,6 +29,7 @@ export const getCarriers = async (req: Request, res: Response): Promise<void> =>
     const carriers = await shippingCarrierRepo.findAll(activeOnly === 'true');
     res.status(200).json({ success: true, data: carriers });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -44,6 +46,7 @@ export const getCarrierById = async (req: Request, res: Response): Promise<void>
     
     res.status(200).json({ success: true, data: carrier });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -53,6 +56,7 @@ export const createCarrier = async (req: Request, res: Response): Promise<void> 
     const carrier = await shippingCarrierRepo.create(req.body);
     res.status(201).json({ success: true, data: carrier });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -69,6 +73,7 @@ export const updateCarrier = async (req: Request, res: Response): Promise<void> 
     
     res.status(200).json({ success: true, data: carrier });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -85,6 +90,7 @@ export const deleteCarrier = async (req: Request, res: Response): Promise<void> 
     
     res.status(200).json({ success: true, message: 'Carrier deleted successfully' });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -106,6 +112,7 @@ export const getMethods = async (req: Request, res: Response): Promise<void> => 
     const result = await getShippingMethodsUseCase.execute(query);
     res.status(200).json({ success: result.success, data: result.methods, total: result.total });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -122,6 +129,7 @@ export const getMethodById = async (req: Request, res: Response): Promise<void> 
     
     res.status(200).json({ success: true, data: method });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -131,6 +139,7 @@ export const createMethod = async (req: Request, res: Response): Promise<void> =
     const method = await shippingMethodRepo.create(req.body);
     res.status(201).json({ success: true, data: method });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -147,6 +156,7 @@ export const updateMethod = async (req: Request, res: Response): Promise<void> =
     
     res.status(200).json({ success: true, data: method });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -163,6 +173,7 @@ export const deleteMethod = async (req: Request, res: Response): Promise<void> =
     
     res.status(200).json({ success: true, message: 'Method deleted successfully' });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -177,6 +188,7 @@ export const getZones = async (req: Request, res: Response): Promise<void> => {
     const zones = await shippingZoneRepo.findAll(activeOnly === 'true');
     res.status(200).json({ success: true, data: zones });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -193,6 +205,7 @@ export const getZoneById = async (req: Request, res: Response): Promise<void> =>
     
     res.status(200).json({ success: true, data: zone });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -202,6 +215,7 @@ export const createZone = async (req: Request, res: Response): Promise<void> => 
     const zone = await shippingZoneRepo.create(req.body);
     res.status(201).json({ success: true, data: zone });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -218,6 +232,7 @@ export const updateZone = async (req: Request, res: Response): Promise<void> => 
     
     res.status(200).json({ success: true, data: zone });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -234,6 +249,7 @@ export const deleteZone = async (req: Request, res: Response): Promise<void> => 
     
     res.status(200).json({ success: true, message: 'Zone deleted successfully' });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -251,6 +267,7 @@ export const getRates = async (req: Request, res: Response): Promise<void> => {
     );
     res.status(200).json({ success: true, data: rates });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -267,6 +284,7 @@ export const getRateById = async (req: Request, res: Response): Promise<void> =>
     
     res.status(200).json({ success: true, data: rate });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -276,6 +294,7 @@ export const createRate = async (req: Request, res: Response): Promise<void> => 
     const rate = await shippingRateRepo.create(req.body);
     res.status(201).json({ success: true, data: rate });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -292,6 +311,7 @@ export const updateRate = async (req: Request, res: Response): Promise<void> => 
     
     res.status(200).json({ success: true, data: rate });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -308,6 +328,7 @@ export const deleteRate = async (req: Request, res: Response): Promise<void> => 
     
     res.status(200).json({ success: true, message: 'Rate deleted successfully' });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -322,6 +343,7 @@ export const getPackagingTypes = async (req: Request, res: Response): Promise<vo
     const types = await packagingTypeRepo.findAll(activeOnly === 'true');
     res.status(200).json({ success: true, data: types });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -338,6 +360,7 @@ export const getPackagingTypeById = async (req: Request, res: Response): Promise
     
     res.status(200).json({ success: true, data: type });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -347,6 +370,7 @@ export const createPackagingType = async (req: Request, res: Response): Promise<
     const type = await packagingTypeRepo.create(req.body);
     res.status(201).json({ success: true, data: type });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -363,6 +387,7 @@ export const updatePackagingType = async (req: Request, res: Response): Promise<
     
     res.status(200).json({ success: true, data: type });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -379,6 +404,7 @@ export const deletePackagingType = async (req: Request, res: Response): Promise<
     
     res.status(200).json({ success: true, message: 'Packaging type deleted successfully' });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -409,6 +435,7 @@ export const calculateRates = async (req: Request, res: Response): Promise<void>
       message: result.message
     });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };

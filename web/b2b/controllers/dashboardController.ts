@@ -3,6 +3,7 @@
  * Shows company-specific dashboard with isolated data
  */
 
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import { b2bRespond } from '../../respond';
 import { query, queryOne } from '../../../libs/db';
@@ -110,7 +111,8 @@ export const getDashboard = async (req: Request, res: Response) => {
       pendingApprovals,
     });
   } catch (error) {
-    console.error('B2B dashboard error:', error);
+    logger.error('Error:', error);
+    
     b2bRespond(req, res, 'error', {
       pageName: 'Error',
       error: 'Failed to load dashboard',

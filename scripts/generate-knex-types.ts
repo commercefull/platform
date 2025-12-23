@@ -41,6 +41,6 @@ async function main(): Promise<void> {
 
 main().catch(error => {
   // eslint-disable-next-line no-console
-  console.error('Failed to generate knex types:', error);
+  
   process.exit(1);
 });

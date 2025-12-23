@@ -289,7 +289,7 @@ export class ProductVariantRepo {
       
       return await this.create(masterVariant);
     } catch (error) {
-      console.error(`Failed to create master variant for product ${product.id}:`, error);
+      
       return null;
     }
   }

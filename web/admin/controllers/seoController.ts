@@ -3,6 +3,7 @@
  * Handles SEO settings management for the Admin Hub
  */
 
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import { adminRespond } from 'web/respond';
 
@@ -37,7 +38,8 @@ export const listSEOSettings = async (req: Request, res: Response): Promise<void
       success: req.query.success || null
     });
   } catch (error: any) {
-    console.error('Error loading SEO settings:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load SEO settings',
@@ -80,7 +82,8 @@ export const updateSEOSettings = async (req: Request, res: Response): Promise<vo
 
     res.redirect('/hub/marketing/seo?success=SEO settings updated successfully');
   } catch (error: any) {
-    console.error('Error updating SEO settings:', error);
+    logger.error('Error:', error);
+    
 
     adminRespond(req, res, 'marketing/seo/index', {
       pageName: 'SEO Settings',
@@ -111,7 +114,8 @@ Sitemap: https://commercefull.com/sitemap.xml`;
     res.setHeader('Content-Disposition', 'attachment; filename="robots.txt"');
     res.send(robotsTxt);
   } catch (error: any) {
-    console.error('Error generating robots.txt:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ error: 'Failed to generate robots.txt' });
   }
 };
@@ -157,7 +161,8 @@ export const generateSitemap = async (req: Request, res: Response): Promise<void
     res.setHeader('Content-Disposition', 'attachment; filename="sitemap.xml"');
     res.send(sitemapXml);
   } catch (error: any) {
-    console.error('Error generating sitemap:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ error: 'Failed to generate sitemap' });
   }
 };

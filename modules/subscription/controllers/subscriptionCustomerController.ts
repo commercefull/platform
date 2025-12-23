@@ -3,6 +3,7 @@
  * Handles customer-facing subscription operations
  */
 
+import { logger } from '../../../libs/logger';
 import { Request, Response, NextFunction } from 'express';
 import * as subscriptionRepo from '../repos/subscriptionRepo';
 
@@ -17,7 +18,8 @@ export const getAvailableSubscriptionProducts: AsyncHandler = async (req, res, n
     const products = await subscriptionRepo.getSubscriptionProducts(true);
     res.json({ success: true, data: products });
   } catch (error: any) {
-    console.error('Get available subscription products error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -39,7 +41,8 @@ export const getSubscriptionProductDetails: AsyncHandler = async (req, res, next
     const plans = await subscriptionRepo.getSubscriptionPlans(product.subscriptionProductId, true);
     res.json({ success: true, data: { ...product, plans } });
   } catch (error: any) {
-    console.error('Get subscription product details error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -53,7 +56,8 @@ export const getSubscriptionPlanDetails: AsyncHandler = async (req, res, next) =
     }
     res.json({ success: true, data: plan });
   } catch (error: any) {
-    console.error('Get subscription plan details error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -73,7 +77,8 @@ export const getMySubscriptions: AsyncHandler = async (req, res, next) => {
     );
     res.json({ success: true, ...result });
   } catch (error: any) {
-    console.error('Get my subscriptions error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -93,7 +98,8 @@ export const getMySubscription: AsyncHandler = async (req, res, next) => {
     
     res.json({ success: true, data: { ...subscription, plan, orders } });
   } catch (error: any) {
-    console.error('Get my subscription error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -136,7 +142,8 @@ export const createSubscription: AsyncHandler = async (req, res, next) => {
 
     res.status(201).json({ success: true, data: subscription });
   } catch (error: any) {
-    console.error('Create subscription error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -161,7 +168,8 @@ export const updateMySubscription: AsyncHandler = async (req, res, next) => {
     // For now, we'll just return success - full update logic would need more implementation
     res.json({ success: true, message: 'Subscription updated' });
   } catch (error: any) {
-    console.error('Update my subscription error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -192,7 +200,8 @@ export const changePlan: AsyncHandler = async (req, res, next) => {
     // Plan change logic would go here - proration, etc.
     res.json({ success: true, message: 'Plan change scheduled' });
   } catch (error: any) {
-    console.error('Change plan error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -250,7 +259,8 @@ export const pauseMySubscription: AsyncHandler = async (req, res, next) => {
 
     res.json({ success: true, data: pause });
   } catch (error: any) {
-    console.error('Pause my subscription error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -273,7 +283,8 @@ export const resumeMySubscription: AsyncHandler = async (req, res, next) => {
     await subscriptionRepo.resumeSubscription(req.params.id, 'customer');
     res.json({ success: true, message: 'Subscription resumed' });
   } catch (error: any) {
-    console.error('Resume my subscription error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -326,7 +337,8 @@ export const cancelMySubscription: AsyncHandler = async (req, res, next) => {
         : 'Subscription cancelled immediately'
     });
   } catch (error: any) {
-    console.error('Cancel my subscription error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -355,7 +367,8 @@ export const reactivateMySubscription: AsyncHandler = async (req, res, next) => 
 
     res.json({ success: true, message: 'Subscription reactivated' });
   } catch (error: any) {
-    console.error('Reactivate my subscription error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -377,7 +390,8 @@ export const getMySubscriptionOrders: AsyncHandler = async (req, res, next) => {
     const orders = await subscriptionRepo.getSubscriptionOrders(req.params.id);
     res.json({ success: true, data: orders });
   } catch (error: any) {
-    console.error('Get my subscription orders error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -416,7 +430,8 @@ export const skipNextDelivery: AsyncHandler = async (req, res, next) => {
     
     res.json({ success: true, message: 'Next delivery skipped' });
   } catch (error: any) {
-    console.error('Skip next delivery error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };

@@ -3,6 +3,7 @@
  * Manages stock levels, adjustments, and inventory locations
  */
 
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import { query, queryOne } from '../../../libs/db';
 import { v4 as uuidv4 } from 'uuid';
@@ -139,7 +140,8 @@ export const listInventory = async (req: Request, res: Response): Promise<void> 
       filters: { search, stockStatus, locationId },
     });
   } catch (error: any) {
-    console.error('Error listing inventory:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load inventory',
@@ -222,7 +224,8 @@ export const adjustStock = async (req: Request, res: Response): Promise<void> =>
 
     res.json({ success: true, message: 'Stock adjusted successfully', newQuantity });
   } catch (error: any) {
-    console.error('Error adjusting stock:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message || 'Failed to adjust stock' });
   }
 };
@@ -281,7 +284,8 @@ export const viewInventoryHistory = async (req: Request, res: Response): Promise
       },
     });
   } catch (error: any) {
-    console.error('Error viewing inventory history:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load inventory history',
@@ -311,7 +315,8 @@ export const listLocations = async (req: Request, res: Response): Promise<void> 
       locations: locations || [],
     });
   } catch (error: any) {
-    console.error('Error listing locations:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load locations',
@@ -344,7 +349,8 @@ export const lowStockReport = async (req: Request, res: Response): Promise<void>
       items: lowStockItems || [],
     });
   } catch (error: any) {
-    console.error('Error generating low stock report:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to generate report',

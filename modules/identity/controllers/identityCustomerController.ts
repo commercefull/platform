@@ -1,3 +1,4 @@
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import { CustomerRepo } from '../../customer/repos/customerRepo';
 import { AuthRefreshTokenRepo } from '../repos/identityRefreshTokenRepo';
@@ -78,7 +79,8 @@ export const loginCustomer = async (req: Request, res: Response): Promise<void> 
       }
     });
   } catch (error) {
-    console.error('Customer login error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ 
       success: false, 
       message: 'Login failed. Please try again.' 
@@ -151,7 +153,8 @@ export const registerCustomer = async (req: Request, res: Response): Promise<voi
       }
     });
   } catch (error) {
-    console.error('Customer registration error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ 
       success: false, 
       message: 'Registration failed. Please try again.' 
@@ -228,7 +231,8 @@ export const issueTokenPair = async (req: Request, res: Response): Promise<void>
       }
     });
   } catch (error) {
-    console.error('Token pair generation error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ 
       success: false, 
       message: 'Token generation failed. Please try again.' 
@@ -306,7 +310,8 @@ export const renewAccessToken = async (req: Request, res: Response): Promise<voi
       expiresIn: ACCESS_TOKEN_DURATION
     });
   } catch (error) {
-    console.error('Token renewal error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ 
       success: false, 
       message: 'Token renewal failed. Please log in again.' 
@@ -351,7 +356,8 @@ export const checkTokenValidity = async (req: Request, res: Response): Promise<v
       }
     });
   } catch (error) {
-    console.error('Token validation error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ 
       success: false, 
       message: 'Token validation failed.' 
@@ -398,7 +404,8 @@ export const requestPasswordReset = async (req: Request, res: Response): Promise
       resetToken
     });
   } catch (error) {
-    console.error('Password reset request error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ 
       success: false, 
       message: 'Password reset request failed. Please try again.' 
@@ -439,7 +446,8 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
       message: 'Your password has been successfully reset'
     });
   } catch (error) {
-    console.error('Password reset error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ 
       success: false, 
       message: 'Password reset failed. Please request a new reset link.' 

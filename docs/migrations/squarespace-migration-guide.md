@@ -415,7 +415,7 @@ class SquarespaceProductMigrator {
         console.log(`Migrated product: ${product.name}`);
 
       } catch (error) {
-        console.error(`Failed to migrate product ${product.name}:`, error);
+        
       }
     }
   }
@@ -512,7 +512,7 @@ class SquarespaceCustomerMigrator {
         console.log(`Migrated customer: ${customer.email}`);
 
       } catch (error) {
-        console.error(`Failed to migrate customer ${customer.email}:`, error);
+        
       }
     }
   }
@@ -650,7 +650,7 @@ class SquarespaceOrderMigrator {
         console.log(`Migrated order: ${order.orderNumber}`);
 
       } catch (error) {
-        console.error(`Failed to migrate order ${order.orderNumber}:`, error);
+        
       }
     }
   }
@@ -682,7 +682,7 @@ async function runSquarespaceMigration() {
   // Check if files exist
   for (const [type, path] of Object.entries(csvFiles)) {
     if (!fs.existsSync(path)) {
-      console.error(`Required CSV file not found: ${path}`);
+      
       console.log(`Please export ${type} data from Squarespace and save as ${path}`);
       return;
     }
@@ -723,7 +723,7 @@ async function runSquarespaceMigration() {
     console.log('Note: Media assets and content pages need manual migration');
 
   } catch (error) {
-    console.error('Migration failed:', error);
+    
   }
 }
 
@@ -755,7 +755,7 @@ class SquarespaceMediaMigrator {
         await this.downloadMedia(url, this.outputDir);
         this.downloaded.add(url);
       } catch (error) {
-        console.error(`Failed to download ${url}:`, error);
+        
       }
     }
 
@@ -799,7 +799,7 @@ class SquarespaceMediaMigrator {
         const media = await cf.media.upload(localFile);
         console.log(`Uploaded media: ${media.url}`);
       } catch (error) {
-        console.error(`Failed to upload ${localFile}:`, error);
+        
       }
     }
   }

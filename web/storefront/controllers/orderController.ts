@@ -3,6 +3,7 @@
  * Handles order history and order details for customers
  */
 
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import { storefrontRespond } from '../../respond';
 import OrderRepo from '../../../modules/order/infrastructure/repositories/OrderRepository';
@@ -50,7 +51,8 @@ export const orderHistory = async (req: Request, res: Response): Promise<void> =
       user: req.user
     });
   } catch (error: any) {
-    console.error('Error loading order history:', error);
+    logger.error('Error:', error);
+    
     storefrontRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load order history',
@@ -98,7 +100,8 @@ export const orderDetails = async (req: Request, res: Response): Promise<void> =
       user: req.user
     });
   } catch (error: any) {
-    console.error('Error loading order details:', error);
+    logger.error('Error:', error);
+    
     storefrontRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load order details',
@@ -142,7 +145,8 @@ export const orderTracking = async (req: Request, res: Response): Promise<void> 
       user: req.user
     });
   } catch (error: any) {
-    console.error('Error loading order tracking:', error);
+    logger.error('Error:', error);
+    
     storefrontRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load order tracking',

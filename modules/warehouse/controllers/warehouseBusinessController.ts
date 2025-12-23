@@ -1,3 +1,4 @@
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import WarehouseRepo from '../repos/warehouseRepo';
 import { successResponse, errorResponse, validationErrorResponse } from '../../../libs/apiResponse';
@@ -41,7 +42,8 @@ export const getWarehouses = async (req: Request, res: Response): Promise<void> 
 
     successResponse(res, warehouses);
   } catch (error: any) {
-    console.error('Error fetching warehouses:', error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to fetch warehouses');
   }
 };
@@ -58,7 +60,8 @@ export const getWarehouseById = async (req: Request, res: Response): Promise<voi
 
     successResponse(res, warehouse);
   } catch (error: any) {
-    console.error(`Error fetching warehouse ${req.params.id}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to fetch warehouse');
   }
 };
@@ -75,7 +78,8 @@ export const getWarehouseByCode = async (req: Request, res: Response): Promise<v
 
     successResponse(res, warehouse);
   } catch (error: any) {
-    console.error(`Error fetching warehouse by code ${req.params.code}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to fetch warehouse');
   }
 };
@@ -91,7 +95,8 @@ export const getDefaultWarehouse = async (req: Request, res: Response): Promise<
 
     successResponse(res, warehouse);
   } catch (error: any) {
-    console.error('Error fetching default warehouse:', error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to fetch default warehouse');
   }
 };
@@ -101,7 +106,8 @@ export const getFulfillmentCenters = async (req: Request, res: Response): Promis
     const warehouses = await warehouseRepo.findFulfillmentCenters();
     successResponse(res, warehouses);
   } catch (error: any) {
-    console.error('Error fetching fulfillment centers:', error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to fetch fulfillment centers');
   }
 };
@@ -111,7 +117,8 @@ export const getReturnCenters = async (req: Request, res: Response): Promise<voi
     const warehouses = await warehouseRepo.findReturnCenters();
     successResponse(res, warehouses);
   } catch (error: any) {
-    console.error('Error fetching return centers:', error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to fetch return centers');
   }
 };
@@ -121,7 +128,8 @@ export const getWarehouseStatistics = async (req: Request, res: Response): Promi
     const statistics = await warehouseRepo.getStatistics();
     successResponse(res, statistics);
   } catch (error: any) {
-    console.error('Error fetching warehouse statistics:', error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to fetch warehouse statistics');
   }
 };
@@ -149,7 +157,8 @@ export const findNearestWarehouses = async (req: Request, res: Response): Promis
 
     successResponse(res, warehouses);
   } catch (error: any) {
-    console.error('Error finding nearest warehouses:', error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to find nearest warehouses');
   }
 };
@@ -160,7 +169,8 @@ export const getWarehousesByCountry = async (req: Request, res: Response): Promi
     const warehouses = await warehouseRepo.findByCountry(country);
     successResponse(res, warehouses);
   } catch (error: any) {
-    console.error(`Error fetching warehouses for country ${req.params.country}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to fetch warehouses');
   }
 };
@@ -171,7 +181,8 @@ export const getWarehousesByMerchant = async (req: Request, res: Response): Prom
     const warehouses = await warehouseRepo.findByMerchantId(merchantId);
     successResponse(res, warehouses);
   } catch (error: any) {
-    console.error(`Error fetching warehouses for merchant ${req.params.merchantId}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to fetch warehouses');
   }
 };
@@ -256,7 +267,8 @@ export const createWarehouse = async (req: Request, res: Response): Promise<void
     const warehouse = await warehouseRepo.create(warehouseParams);
     successResponse(res, warehouse, 201);
   } catch (error: any) {
-    console.error('Error creating warehouse:', error);
+    logger.error('Error:', error);
+    
     if (error.message.includes('already exists')) {
       errorResponse(res, error.message, 409);
     } else {
@@ -279,7 +291,8 @@ export const updateWarehouse = async (req: Request, res: Response): Promise<void
 
     successResponse(res, warehouse);
   } catch (error: any) {
-    console.error(`Error updating warehouse ${req.params.id}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to update warehouse');
   }
 };
@@ -296,7 +309,8 @@ export const deleteWarehouse = async (req: Request, res: Response): Promise<void
 
     successResponse(res, { message: 'Warehouse deleted successfully' });
   } catch (error: any) {
-    console.error(`Error deleting warehouse ${req.params.id}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to delete warehouse');
   }
 };
@@ -313,7 +327,8 @@ export const setDefaultWarehouse = async (req: Request, res: Response): Promise<
 
     successResponse(res, warehouse);
   } catch (error: any) {
-    console.error(`Error setting default warehouse ${req.params.id}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to set default warehouse');
   }
 };
@@ -330,7 +345,8 @@ export const activateWarehouse = async (req: Request, res: Response): Promise<vo
 
     successResponse(res, warehouse);
   } catch (error: any) {
-    console.error(`Error activating warehouse ${req.params.id}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to activate warehouse');
   }
 };
@@ -347,7 +363,8 @@ export const deactivateWarehouse = async (req: Request, res: Response): Promise<
 
     successResponse(res, warehouse);
   } catch (error: any) {
-    console.error(`Error deactivating warehouse ${req.params.id}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to deactivate warehouse');
   }
 };
@@ -371,7 +388,8 @@ export const addShippingMethod = async (req: Request, res: Response): Promise<vo
 
     successResponse(res, warehouse);
   } catch (error: any) {
-    console.error(`Error adding shipping method to warehouse ${req.params.id}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to add shipping method');
   }
 };
@@ -389,7 +407,8 @@ export const removeShippingMethod = async (req: Request, res: Response): Promise
 
     successResponse(res, warehouse);
   } catch (error: any) {
-    console.error(`Error removing shipping method from warehouse ${req.params.id}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to remove shipping method');
   }
 };

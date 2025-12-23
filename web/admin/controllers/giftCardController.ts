@@ -3,6 +3,7 @@
  * Handles gift card management for the Admin Hub
  */
 
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import * as giftCardRepo from '../../../modules/promotion/repos/giftCardRepo';
 import { adminRespond } from 'web/respond';
@@ -41,7 +42,8 @@ export const listGiftCards = async (req: Request, res: Response): Promise<void> 
       success: req.query.success || null
     });
   } catch (error: any) {
-    console.error('Error listing gift cards:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load gift cards',
@@ -55,7 +57,8 @@ export const createGiftCardForm = async (req: Request, res: Response): Promise<v
       pageName: 'Create Gift Card',
     });
   } catch (error: any) {
-    console.error('Error loading create gift card form:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -101,7 +104,8 @@ export const createGiftCard = async (req: Request, res: Response): Promise<void>
 
     res.redirect(`/hub/promotions/gift-cards/${giftCard.promotionGiftCardId}?success=Gift card created successfully`);
   } catch (error: any) {
-    console.error('Error creating gift card:', error);
+    logger.error('Error:', error);
+    
 
     adminRespond(req, res, 'promotions/gift-cards/create', {
       pageName: 'Create Gift Card',
@@ -136,7 +140,8 @@ export const viewGiftCard = async (req: Request, res: Response): Promise<void> =
       success: req.query.success || null
     });
   } catch (error: any) {
-    console.error('Error viewing gift card:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load gift card',
@@ -163,7 +168,8 @@ export const editGiftCardForm = async (req: Request, res: Response): Promise<voi
       giftCard,
     });
   } catch (error: any) {
-    console.error('Error loading edit gift card form:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -179,7 +185,8 @@ export const activateGiftCardAction = async (req: Request, res: Response): Promi
 
     res.json({ success: true, message: 'Gift card activated successfully' });
   } catch (error: any) {
-    console.error('Error activating gift card:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message || 'Failed to activate gift card' });
   }
 };
@@ -193,7 +200,8 @@ export const assignGiftCardAction = async (req: Request, res: Response): Promise
 
     res.json({ success: true, message: 'Gift card assigned successfully' });
   } catch (error: any) {
-    console.error('Error assigning gift card:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message || 'Failed to assign gift card' });
   }
 };
@@ -211,7 +219,8 @@ export const reloadGiftCardAction = async (req: Request, res: Response): Promise
       transaction
     });
   } catch (error: any) {
-    console.error('Error reloading gift card:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message || 'Failed to reload gift card' });
   }
 };
@@ -229,7 +238,8 @@ export const refundToGiftCardAction = async (req: Request, res: Response): Promi
       transaction
     });
   } catch (error: any) {
-    console.error('Error refunding to gift card:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message || 'Failed to refund to gift card' });
   }
 };
@@ -242,7 +252,8 @@ export const cancelGiftCardAction = async (req: Request, res: Response): Promise
 
     res.json({ success: true, message: 'Gift card cancelled successfully' });
   } catch (error: any) {
-    console.error('Error cancelling gift card:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message || 'Failed to cancel gift card' });
   }
 };
@@ -266,7 +277,8 @@ export const checkGiftCardBalance = async (req: Request, res: Response): Promise
       expiresAt: giftCard.expiresAt
     });
   } catch (error: any) {
-    console.error('Error checking gift card balance:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ valid: false, message: 'Failed to check gift card balance' });
   }
 };

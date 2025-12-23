@@ -1,12 +1,12 @@
 /**
-import { merchantRespond } from '../../respond';
  * Merchant Order Controller
  * Manages orders with merchant isolation
  */
 
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import { query, queryOne } from '../../../libs/db';
-import { merchantRespond } from 'web/respond';
+import { merchantRespond } from '../../respond';
 
 interface MerchantUser {
   id: string;
@@ -100,7 +100,8 @@ export const listOrders = async (req: Request, res: Response) => {
       filters: { status, paymentStatus, search },
     });
   } catch (error) {
-    console.error('Merchant orders error:', error);
+    logger.error('Error:', error);
+    
     merchantRespond(req, res, 'error', {
       pageName: 'Error',
       error: 'Failed to load orders',
@@ -161,7 +162,8 @@ export const viewOrder = async (req: Request, res: Response) => {
       items: items || [],
     });
   } catch (error) {
-    console.error('Merchant view order error:', error);
+    logger.error('Error:', error);
+    
     merchantRespond(req, res, 'error', {
       pageName: 'Error',
       error: 'Failed to load order',

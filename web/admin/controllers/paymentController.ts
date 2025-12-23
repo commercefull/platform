@@ -3,6 +3,7 @@
  * Handles payment management for the Admin Hub
  */
 
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import PaymentRepo from '../../../modules/payment/repos/paymentRepo';
 import { adminRespond } from 'web/respond';
@@ -25,7 +26,8 @@ export const listPaymentGateways = async (req: Request, res: Response): Promise<
       success: req.query.success || null
     });
   } catch (error: any) {
-    console.error('Error listing payment gateways:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load payment gateways',
@@ -39,7 +41,8 @@ export const createPaymentGatewayForm = async (req: Request, res: Response): Pro
       pageName: 'Create Payment Gateway',
     });
   } catch (error: any) {
-    console.error('Error loading create gateway form:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -84,7 +87,8 @@ export const createPaymentGateway = async (req: Request, res: Response): Promise
 
     res.redirect(`/hub/payments/gateways/${gateway.paymentGatewayId}?success=Payment gateway created successfully`);
   } catch (error: any) {
-    console.error('Error creating payment gateway:', error);
+    logger.error('Error:', error);
+    
 
     adminRespond(req, res, 'payments/gateways/create', {
       pageName: 'Create Payment Gateway',
@@ -115,7 +119,8 @@ export const viewPaymentGateway = async (req: Request, res: Response): Promise<v
       success: req.query.success || null
     });
   } catch (error: any) {
-    console.error('Error viewing payment gateway:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load payment gateway',
@@ -142,7 +147,8 @@ export const editPaymentGatewayForm = async (req: Request, res: Response): Promi
       gateway,
     });
   } catch (error: any) {
-    console.error('Error loading edit gateway form:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -183,7 +189,8 @@ export const updatePaymentGateway = async (req: Request, res: Response): Promise
 
     res.redirect(`/hub/payments/gateways/${gatewayId}?success=Payment gateway updated successfully`);
   } catch (error: any) {
-    console.error('Error updating payment gateway:', error);
+    logger.error('Error:', error);
+    
 
     try {
       const gateway = await PaymentRepo.findGatewayById(req.params.gatewayId);
@@ -215,7 +222,8 @@ export const deletePaymentGateway = async (req: Request, res: Response): Promise
 
     res.json({ success: true, message: 'Payment gateway deleted successfully' });
   } catch (error: any) {
-    console.error('Error deleting payment gateway:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message || 'Failed to delete payment gateway' });
   }
 };
@@ -237,7 +245,8 @@ export const listPaymentMethods = async (req: Request, res: Response): Promise<v
       success: req.query.success || null
     });
   } catch (error: any) {
-    console.error('Error listing payment methods:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load payment methods',
@@ -262,7 +271,8 @@ export const listPaymentTransactions = async (req: Request, res: Response): Prom
       success: req.query.success || null
     });
   } catch (error: any) {
-    console.error('Error listing payment transactions:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load payment transactions',

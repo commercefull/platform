@@ -3,6 +3,7 @@
  * Handles system configuration-related HTTP requests
  */
 
+import { logger } from '../../../../libs/logger';
 import { Request, Response } from 'express';
 import { SystemConfiguration } from '../../domain/entities/SystemConfiguration';
 import { UpdateSystemConfigurationUseCase, UpdateSystemConfigurationCommand } from '../../application/useCases/UpdateSystemConfiguration';
@@ -42,7 +43,8 @@ export class SystemConfigurationController {
         data: config.toJSON()
       });
     } catch (error) {
-      console.error('Create system configuration error:', error);
+      logger.error('Error:', error);
+      
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       res.status(400).json({
         success: false,
@@ -85,7 +87,8 @@ export class SystemConfigurationController {
         data: result
       });
     } catch (error) {
-      console.error('Update system configuration error:', error);
+      logger.error('Error:', error);
+      
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       res.status(400).json({
         success: false,
@@ -116,7 +119,8 @@ export class SystemConfigurationController {
         data: config.toJSON()
       });
     } catch (error) {
-      console.error('Get system configuration error:', error);
+      logger.error('Error:', error);
+      
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       res.status(500).json({
         success: false,
@@ -147,7 +151,8 @@ export class SystemConfigurationController {
         data: config.toJSON()
       });
     } catch (error) {
-      console.error('Get active system configuration error:', error);
+      logger.error('Error:', error);
+      
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       res.status(500).json({
         success: false,
@@ -172,7 +177,8 @@ export class SystemConfigurationController {
         count: configs.length
       });
     } catch (error) {
-      console.error('List system configurations error:', error);
+      logger.error('Error:', error);
+      
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       res.status(500).json({
         success: false,

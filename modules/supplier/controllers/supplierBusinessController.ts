@@ -1,3 +1,4 @@
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import SupplierRepo from '../repos/supplierRepo';
 import { successResponse, errorResponse, validationErrorResponse } from '../../../libs/apiResponse';
@@ -44,7 +45,8 @@ export const getSuppliers = async (req: Request, res: Response): Promise<void> =
 
     successResponse(res, suppliers);
   } catch (error: any) {
-    console.error('Error fetching suppliers:', error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to fetch suppliers');
   }
 };
@@ -61,7 +63,8 @@ export const getSupplierById = async (req: Request, res: Response): Promise<void
 
     successResponse(res, supplier);
   } catch (error: any) {
-    console.error(`Error fetching supplier ${req.params.id}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to fetch supplier');
   }
 };
@@ -78,7 +81,8 @@ export const getSupplierByCode = async (req: Request, res: Response): Promise<vo
 
     successResponse(res, supplier);
   } catch (error: any) {
-    console.error(`Error fetching supplier by code ${req.params.code}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to fetch supplier');
   }
 };
@@ -144,7 +148,8 @@ export const createSupplier = async (req: Request, res: Response): Promise<void>
     const supplier = await supplierRepo.create(supplierParams);
     successResponse(res, supplier, 201);
   } catch (error: any) {
-    console.error('Error creating supplier:', error);
+    logger.error('Error:', error);
+    
     if (error.message.includes('already exists')) {
       errorResponse(res, error.message, 409);
     } else {
@@ -167,7 +172,8 @@ export const updateSupplier = async (req: Request, res: Response): Promise<void>
 
     successResponse(res, supplier);
   } catch (error: any) {
-    console.error(`Error updating supplier ${req.params.id}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to update supplier');
   }
 };
@@ -184,7 +190,8 @@ export const deleteSupplier = async (req: Request, res: Response): Promise<void>
 
     successResponse(res, { message: 'Supplier deleted successfully' });
   } catch (error: any) {
-    console.error(`Error deleting supplier ${req.params.id}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to delete supplier');
   }
 };
@@ -208,7 +215,8 @@ export const updateSupplierStatus = async (req: Request, res: Response): Promise
 
     successResponse(res, supplier);
   } catch (error: any) {
-    console.error(`Error updating supplier status ${req.params.id}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to update supplier status');
   }
 };
@@ -232,7 +240,8 @@ export const updateSupplierVisibility = async (req: Request, res: Response): Pro
 
     successResponse(res, supplier);
   } catch (error: any) {
-    console.error(`Error updating supplier visibility ${req.params.id}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to update supplier visibility');
   }
 };
@@ -249,7 +258,8 @@ export const approveSupplier = async (req: Request, res: Response): Promise<void
 
     successResponse(res, supplier);
   } catch (error: any) {
-    console.error(`Error approving supplier ${req.params.id}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to approve supplier');
   }
 };
@@ -266,7 +276,8 @@ export const suspendSupplier = async (req: Request, res: Response): Promise<void
 
     successResponse(res, supplier);
   } catch (error: any) {
-    console.error(`Error suspending supplier ${req.params.id}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to suspend supplier');
   }
 };
@@ -276,7 +287,8 @@ export const getSupplierStatistics = async (req: Request, res: Response): Promis
     const statistics = await supplierRepo.getStatistics();
     successResponse(res, statistics);
   } catch (error: any) {
-    console.error('Error fetching supplier statistics:', error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to fetch supplier statistics');
   }
 };
@@ -289,7 +301,8 @@ export const getSupplierAddresses = async (req: Request, res: Response): Promise
     // TODO: Implement when supplier address repo is available
     successResponse(res, []);
   } catch (error: any) {
-    console.error(`Error fetching supplier addresses ${req.params.id}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to fetch supplier addresses');
   }
 };
@@ -300,7 +313,8 @@ export const createSupplierAddress = async (req: Request, res: Response): Promis
     // TODO: Implement when supplier address repo is available
     successResponse(res, {}, 201);
   } catch (error: any) {
-    console.error(`Error creating supplier address ${req.params.id}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to create supplier address');
   }
 };
@@ -311,7 +325,8 @@ export const updateSupplierAddress = async (req: Request, res: Response): Promis
     // TODO: Implement when supplier address repo is available
     successResponse(res, {});
   } catch (error: any) {
-    console.error(`Error updating supplier address ${req.params.id}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to update supplier address');
   }
 };
@@ -322,7 +337,8 @@ export const deleteSupplierAddress = async (req: Request, res: Response): Promis
     // TODO: Implement when supplier address repo is available
     successResponse(res, { message: 'Supplier address deleted successfully' });
   } catch (error: any) {
-    console.error(`Error deleting supplier address ${req.params.id}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to delete supplier address');
   }
 };
@@ -335,7 +351,8 @@ export const getSupplierProducts = async (req: Request, res: Response): Promise<
     // TODO: Implement when supplier product repo is available
     successResponse(res, []);
   } catch (error: any) {
-    console.error(`Error fetching supplier products ${req.params.id}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to fetch supplier products');
   }
 };
@@ -346,7 +363,8 @@ export const addProductToSupplier = async (req: Request, res: Response): Promise
     // TODO: Implement when supplier product repo is available
     successResponse(res, {}, 201);
   } catch (error: any) {
-    console.error(`Error adding product to supplier ${req.params.id}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to add product to supplier');
   }
 };
@@ -357,7 +375,8 @@ export const updateSupplierProduct = async (req: Request, res: Response): Promis
     // TODO: Implement when supplier product repo is available
     successResponse(res, {});
   } catch (error: any) {
-    console.error(`Error updating supplier product ${req.params.id}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to update supplier product');
   }
 };
@@ -368,7 +387,8 @@ export const removeProductFromSupplier = async (req: Request, res: Response): Pr
     // TODO: Implement when supplier product repo is available
     successResponse(res, { message: 'Product removed from supplier successfully' });
   } catch (error: any) {
-    console.error(`Error removing product from supplier ${req.params.id}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to remove product from supplier');
   }
 };

@@ -3,6 +3,7 @@
  * Handles admin/merchant fraud prevention operations
  */
 
+import { logger } from '../../../../libs/logger';
 import { Request, Response, NextFunction } from 'express';
 import * as fraudRepo from '../../repos/fraudRepo';
 
@@ -18,7 +19,8 @@ export const getFraudRules: AsyncHandler = async (req, res, next) => {
     const rules = await fraudRepo.getRules(activeOnly !== 'false');
     res.json({ success: true, data: rules });
   } catch (error: any) {
-    console.error('Get fraud rules error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -32,7 +34,8 @@ export const getFraudRule: AsyncHandler = async (req, res, next) => {
     }
     res.json({ success: true, data: rule });
   } catch (error: any) {
-    console.error('Get fraud rule error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -42,7 +45,8 @@ export const createFraudRule: AsyncHandler = async (req, res, next) => {
     const rule = await fraudRepo.saveRule(req.body);
     res.status(201).json({ success: true, data: rule });
   } catch (error: any) {
-    console.error('Create fraud rule error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -55,7 +59,8 @@ export const updateFraudRule: AsyncHandler = async (req, res, next) => {
     });
     res.json({ success: true, data: rule });
   } catch (error: any) {
-    console.error('Update fraud rule error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -65,7 +70,8 @@ export const deleteFraudRule: AsyncHandler = async (req, res, next) => {
     await fraudRepo.deleteRule(req.params.id);
     res.json({ success: true, message: 'Rule deactivated' });
   } catch (error: any) {
-    console.error('Delete fraud rule error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -83,7 +89,8 @@ export const getFraudChecks: AsyncHandler = async (req, res, next) => {
     );
     res.json({ success: true, ...result });
   } catch (error: any) {
-    console.error('Get fraud checks error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -97,7 +104,8 @@ export const getFraudCheck: AsyncHandler = async (req, res, next) => {
     }
     res.json({ success: true, data: check });
   } catch (error: any) {
-    console.error('Get fraud check error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -107,7 +115,8 @@ export const getPendingReviews: AsyncHandler = async (req, res, next) => {
     const checks = await fraudRepo.getPendingReviews();
     res.json({ success: true, data: checks });
   } catch (error: any) {
-    console.error('Get pending reviews error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -118,7 +127,8 @@ export const reviewFraudCheck: AsyncHandler = async (req, res, next) => {
     await fraudRepo.reviewCheck(req.params.id, req.body.decision, reviewedBy, req.body.notes);
     res.json({ success: true, message: 'Review submitted' });
   } catch (error: any) {
-    console.error('Review fraud check error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -136,7 +146,8 @@ export const getBlacklist: AsyncHandler = async (req, res, next) => {
     );
     res.json({ success: true, ...result });
   } catch (error: any) {
-    console.error('Get blacklist error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -147,7 +158,8 @@ export const addToBlacklist: AsyncHandler = async (req, res, next) => {
     const entry = await fraudRepo.addToBlacklist({ ...req.body, addedBy });
     res.status(201).json({ success: true, data: entry });
   } catch (error: any) {
-    console.error('Add to blacklist error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -157,7 +169,8 @@ export const removeFromBlacklist: AsyncHandler = async (req, res, next) => {
     await fraudRepo.removeFromBlacklist(req.params.id);
     res.json({ success: true, message: 'Entry removed from blacklist' });
   } catch (error: any) {
-    console.error('Remove from blacklist error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };

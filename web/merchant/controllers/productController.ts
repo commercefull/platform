@@ -3,6 +3,7 @@
  * Manages products with merchant isolation
  */
 
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import { merchantRespond } from '../../respond';
 import { query, queryOne } from '../../../libs/db';
@@ -78,7 +79,8 @@ export const listProducts = async (req: Request, res: Response) => {
       filters: { status, search },
     });
   } catch (error) {
-    console.error('Merchant products error:', error);
+    logger.error('Error:', error);
+    
     merchantRespond(req, res, 'error', {
       pageName: 'Error',
       error: 'Failed to load products',
@@ -123,7 +125,8 @@ export const viewProduct = async (req: Request, res: Response) => {
       product,
     });
   } catch (error) {
-    console.error('Merchant view product error:', error);
+    logger.error('Error:', error);
+    
     merchantRespond(req, res, 'error', {
       pageName: 'Error',
       error: 'Failed to load product',
@@ -153,7 +156,8 @@ export const createProductForm = async (req: Request, res: Response) => {
       categories: categories || [],
     });
   } catch (error) {
-    console.error('Merchant create product form error:', error);
+    logger.error('Error:', error);
+    
     merchantRespond(req, res, 'error', {
       pageName: 'Error',
       error: 'Failed to load form',
@@ -199,7 +203,8 @@ export const editProductForm = async (req: Request, res: Response) => {
       categories: categories || [],
     });
   } catch (error) {
-    console.error('Merchant edit product form error:', error);
+    logger.error('Error:', error);
+    
     merchantRespond(req, res, 'error', {
       pageName: 'Error',
       error: 'Failed to load product',

@@ -102,7 +102,7 @@ if (require.main === module) {
           });
       }
     } catch (error) {
-      console.error('Error running master variant integrity check:', error);
+      
       process.exit(1);
     }
     process.exit(0);

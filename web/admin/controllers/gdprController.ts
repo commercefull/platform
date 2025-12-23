@@ -3,6 +3,7 @@
  * Handles GDPR compliance features
  */
 
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import { query, queryOne } from '../../../libs/db';
 import { v4 as uuidv4 } from 'uuid';
@@ -54,7 +55,8 @@ export const gdprDashboard = async (req: Request, res: Response): Promise<void> 
       requests: requests || [],
     });
   } catch (error: any) {
-    console.error('Error loading GDPR dashboard:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load GDPR dashboard',
@@ -94,7 +96,8 @@ export const createGdprRequest = async (req: Request, res: Response): Promise<vo
 
     res.redirect('/hub/gdpr?success=GDPR request created');
   } catch (error: any) {
-    console.error('Error creating GDPR request:', error);
+    logger.error('Error:', error);
+    
     res.redirect('/hub/gdpr?error=' + encodeURIComponent(error.message));
   }
 };
@@ -124,7 +127,8 @@ export const viewGdprRequest = async (req: Request, res: Response): Promise<void
       request,
     });
   } catch (error: any) {
-    console.error('Error viewing GDPR request:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load GDPR request',
@@ -143,7 +147,8 @@ export const processGdprRequest = async (req: Request, res: Response): Promise<v
 
     res.json({ success: true });
   } catch (error: any) {
-    console.error('Error processing GDPR request:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -160,7 +165,8 @@ export const completeGdprRequest = async (req: Request, res: Response): Promise<
 
     res.json({ success: true });
   } catch (error: any) {
-    console.error('Error completing GDPR request:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -183,7 +189,8 @@ export const consentManagement = async (req: Request, res: Response): Promise<vo
       consentSettings,
     });
   } catch (error: any) {
-    console.error('Error loading consent management:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load consent management',

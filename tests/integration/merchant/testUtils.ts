@@ -142,6 +142,6 @@ export const cleanupMerchantTests = async (
       headers: { Authorization: `Bearer ${adminToken}` }
     });
   } catch (error) {
-    console.error('Error during merchant test cleanup:', error);
+    
   }
 };

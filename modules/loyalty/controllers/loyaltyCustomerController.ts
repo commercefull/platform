@@ -4,6 +4,7 @@
  * Handles public and customer-facing loyalty endpoints.
  */
 
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import loyaltyRepo from '../repos/loyaltyRepo';
 
@@ -60,7 +61,8 @@ export const getPublicTiers = async (req: Request, res: Response): Promise<void>
 
     respond(res, publicTiers);
   } catch (error) {
-    console.error('Error fetching public loyalty tiers:', error);
+    logger.error('Error:', error);
+    
     respondError(res, 'Failed to fetch loyalty tiers');
   }
 };
@@ -84,7 +86,8 @@ export const getPublicRewards = async (req: Request, res: Response): Promise<voi
 
     respond(res, publicRewards);
   } catch (error) {
-    console.error('Error fetching public loyalty rewards:', error);
+    logger.error('Error:', error);
+    
     respondError(res, 'Failed to fetch loyalty rewards');
   }
 };
@@ -136,7 +139,8 @@ export const getMyLoyaltyStatus = async (req: UserRequest, res: Response): Promi
       }
     });
   } catch (error) {
-    console.error('Error fetching customer loyalty status:', error);
+    logger.error('Error:', error);
+    
     respondError(res, 'Failed to fetch loyalty status');
   }
 };
@@ -171,7 +175,8 @@ export const getMyTransactions = async (req: UserRequest, res: Response): Promis
       pagination: { limit }
     });
   } catch (error) {
-    console.error('Error fetching customer transactions:', error);
+    logger.error('Error:', error);
+    
     respondError(res, 'Failed to fetch loyalty transactions');
   }
 };
@@ -203,7 +208,8 @@ export const redeemReward = async (req: UserRequest, res: Response): Promise<voi
       expiresAt: redemption.expiresAt
     }, 'Reward redeemed successfully');
   } catch (error) {
-    console.error('Error redeeming reward:', error);
+    logger.error('Error:', error);
+    
     const errorMessage = (error as Error).message;
 
     if (errorMessage.includes('Insufficient points')) {
@@ -252,7 +258,8 @@ export const getMyRedemptions = async (req: UserRequest, res: Response): Promise
 
     respond(res, detailedRedemptions);
   } catch (error) {
-    console.error('Error fetching customer redemptions:', error);
+    logger.error('Error:', error);
+    
     respondError(res, 'Failed to fetch redemptions');
   }
 };

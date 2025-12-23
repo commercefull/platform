@@ -1,3 +1,4 @@
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import LocaleRepo from '../repos/localeRepo';
 import { successResponse, errorResponse, validationErrorResponse } from '../../../libs/apiResponse';
@@ -22,7 +23,8 @@ export const getLocales = async (req: Request, res: Response): Promise<void> => 
 
     successResponse(res, locales);
   } catch (error: any) {
-    console.error('Error fetching locales:', error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to fetch locales');
   }
 };
@@ -39,7 +41,8 @@ export const getLocaleById = async (req: Request, res: Response): Promise<void> 
 
     successResponse(res, locale);
   } catch (error: any) {
-    console.error(`Error fetching locale ${req.params.id}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to fetch locale');
   }
 };
@@ -56,7 +59,8 @@ export const getLocaleByCode = async (req: Request, res: Response): Promise<void
 
     successResponse(res, locale);
   } catch (error: any) {
-    console.error(`Error fetching locale by code ${req.params.code}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to fetch locale');
   }
 };
@@ -72,7 +76,8 @@ export const getDefaultLocale = async (req: Request, res: Response): Promise<voi
 
     successResponse(res, locale);
   } catch (error: any) {
-    console.error('Error fetching default locale:', error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to fetch default locale');
   }
 };
@@ -83,7 +88,8 @@ export const getLocalesByLanguage = async (req: Request, res: Response): Promise
     const locales = await localeRepo.findByLanguage(language);
     successResponse(res, locales);
   } catch (error: any) {
-    console.error(`Error fetching locales for language ${req.params.language}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to fetch locales');
   }
 };
@@ -94,7 +100,8 @@ export const getLocalesByCountry = async (req: Request, res: Response): Promise<
     const locales = await localeRepo.findByCountryCode(countryCode);
     successResponse(res, locales);
   } catch (error: any) {
-    console.error(`Error fetching locales for country ${req.params.countryCode}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to fetch locales');
   }
 };
@@ -104,7 +111,8 @@ export const getLocaleStatistics = async (req: Request, res: Response): Promise<
     const statistics = await localeRepo.getStatistics();
     successResponse(res, statistics);
   } catch (error: any) {
-    console.error('Error fetching locale statistics:', error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to fetch locale statistics');
   }
 };
@@ -157,7 +165,8 @@ export const createLocale = async (req: Request, res: Response): Promise<void> =
     const locale = await localeRepo.create(localeParams);
     successResponse(res, locale, 201);
   } catch (error: any) {
-    console.error('Error creating locale:', error);
+    logger.error('Error:', error);
+    
     if (error.message.includes('already exists')) {
       errorResponse(res, error.message, 409);
     } else {
@@ -180,7 +189,8 @@ export const updateLocale = async (req: Request, res: Response): Promise<void> =
 
     successResponse(res, locale);
   } catch (error: any) {
-    console.error(`Error updating locale ${req.params.id}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to update locale');
   }
 };
@@ -197,7 +207,8 @@ export const deleteLocale = async (req: Request, res: Response): Promise<void> =
 
     successResponse(res, { message: 'Locale deleted successfully' });
   } catch (error: any) {
-    console.error(`Error deleting locale ${req.params.id}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to delete locale');
   }
 };
@@ -214,7 +225,8 @@ export const setDefaultLocale = async (req: Request, res: Response): Promise<voi
 
     successResponse(res, locale);
   } catch (error: any) {
-    console.error(`Error setting default locale ${req.params.id}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to set default locale');
   }
 };
@@ -231,7 +243,8 @@ export const activateLocale = async (req: Request, res: Response): Promise<void>
 
     successResponse(res, locale);
   } catch (error: any) {
-    console.error(`Error activating locale ${req.params.id}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to activate locale');
   }
 };
@@ -248,7 +261,8 @@ export const deactivateLocale = async (req: Request, res: Response): Promise<voi
 
     successResponse(res, locale);
   } catch (error: any) {
-    console.error(`Error deactivating locale ${req.params.id}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to deactivate locale');
   }
 };
@@ -260,7 +274,8 @@ export const getCountries = async (req: Request, res: Response): Promise<void> =
     // TODO: Implement when country repo is available
     successResponse(res, []);
   } catch (error: any) {
-    console.error('Error fetching countries:', error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to fetch countries');
   }
 };
@@ -271,7 +286,8 @@ export const getCountryById = async (req: Request, res: Response): Promise<void>
     // TODO: Implement when country repo is available
     successResponse(res, {});
   } catch (error: any) {
-    console.error(`Error fetching country ${req.params.id}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to fetch country');
   }
 };
@@ -282,7 +298,8 @@ export const getCountryByCode = async (req: Request, res: Response): Promise<voi
     // TODO: Implement when country repo is available
     successResponse(res, {});
   } catch (error: any) {
-    console.error(`Error fetching country by code ${req.params.code}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to fetch country');
   }
 };
@@ -293,7 +310,8 @@ export const getCountriesByRegion = async (req: Request, res: Response): Promise
     // TODO: Implement when country repo is available
     successResponse(res, []);
   } catch (error: any) {
-    console.error(`Error fetching countries for region ${req.params.region}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to fetch countries');
   }
 };
@@ -303,7 +321,8 @@ export const createCountry = async (req: Request, res: Response): Promise<void> 
     // TODO: Implement when country repo is available
     successResponse(res, {}, 201);
   } catch (error: any) {
-    console.error('Error creating country:', error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to create country');
   }
 };
@@ -314,7 +333,8 @@ export const updateCountry = async (req: Request, res: Response): Promise<void> 
     // TODO: Implement when country repo is available
     successResponse(res, {});
   } catch (error: any) {
-    console.error(`Error updating country ${req.params.id}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to update country');
   }
 };
@@ -325,7 +345,8 @@ export const deleteCountry = async (req: Request, res: Response): Promise<void> 
     // TODO: Implement when country repo is available
     successResponse(res, { message: 'Country deleted successfully' });
   } catch (error: any) {
-    console.error(`Error deleting country ${req.params.id}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to delete country');
   }
 };
@@ -336,7 +357,8 @@ export const activateCountry = async (req: Request, res: Response): Promise<void
     // TODO: Implement when country repo is available
     successResponse(res, {});
   } catch (error: any) {
-    console.error(`Error activating country ${req.params.id}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to activate country');
   }
 };
@@ -347,7 +369,8 @@ export const deactivateCountry = async (req: Request, res: Response): Promise<vo
     // TODO: Implement when country repo is available
     successResponse(res, {});
   } catch (error: any) {
-    console.error(`Error deactivating country ${req.params.id}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to deactivate country');
   }
 };

@@ -2,6 +2,7 @@
  * Payment Controller
  */
 
+import { logger } from '../../../../libs/logger';
 import { Request, Response } from 'express';
 import PaymentRepo from '../../infrastructure/repositories/PaymentRepository';
 import { InitiatePaymentCommand, InitiatePaymentUseCase } from '../../application/useCases/InitiatePayment';
@@ -38,7 +39,8 @@ export const getMyTransactions = async (req: Request, res: Response): Promise<vo
 
     respond(req, res, result);
   } catch (error: any) {
-    console.error('Error getting transactions:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to get transactions', 500);
   }
 };
@@ -49,7 +51,8 @@ export const getTransactionByOrder = async (req: Request, res: Response): Promis
     const transactions = await PaymentRepo.findTransactionsByOrderId(orderId);
     respond(req, res, { transactions: transactions.map(t => t.toJSON()) });
   } catch (error: any) {
-    console.error('Error getting transactions:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to get transactions', 500);
   }
 };
@@ -60,7 +63,8 @@ export const getPaymentMethods = async (req: Request, res: Response): Promise<vo
     const methods = await PaymentRepo.getEnabledPaymentMethods('default', currency as string);
     respond(req, res, { paymentMethods: methods });
   } catch (error: any) {
-    console.error('Error getting payment methods:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to get payment methods', 500);
   }
 };
@@ -94,7 +98,8 @@ export const listTransactions = async (req: Request, res: Response): Promise<voi
 
     respond(req, res, result);
   } catch (error: any) {
-    console.error('Error listing transactions:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to list transactions', 500);
   }
 };
@@ -113,7 +118,8 @@ export const getTransaction = async (req: Request, res: Response): Promise<void>
 
     respond(req, res, transaction);
   } catch (error: any) {
-    console.error('Error getting transaction:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to get transaction', 500);
   }
 };
@@ -137,7 +143,8 @@ export const initiatePayment = async (req: Request, res: Response): Promise<void
 
     respond(req, res, result, 201);
   } catch (error: any) {
-    console.error('Error initiating payment:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to initiate payment', 500);
   }
 };
@@ -158,7 +165,8 @@ export const processRefund = async (req: Request, res: Response): Promise<void> 
 
     respond(req, res, result, 201);
   } catch (error: any) {
-    console.error('Error processing refund:', error);
+    logger.error('Error:', error);
+    
     if (error.message.includes('not found')) {
       respondError(req, res, error.message, 404);
       return;
@@ -177,7 +185,8 @@ export const getRefunds = async (req: Request, res: Response): Promise<void> => 
     const refunds = await PaymentRepo.findRefundsByTransactionId(transactionId);
     respond(req, res, { refunds: refunds.map(r => r.toJSON()) });
   } catch (error: any) {
-    console.error('Error getting refunds:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to get refunds', 500);
   }
 };
@@ -200,7 +209,8 @@ export const listGateways = async (req: Request, res: Response): Promise<void> =
     );
     respond(req, res, rows || []);
   } catch (error: any) {
-    console.error('Error listing gateways:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to list gateways', 500);
   }
 };
@@ -219,7 +229,8 @@ export const getGateway = async (req: Request, res: Response): Promise<void> => 
     }
     respond(req, res, gateway);
   } catch (error: any) {
-    console.error('Error getting gateway:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to get gateway', 500);
   }
 };
@@ -257,7 +268,8 @@ export const createGateway = async (req: Request, res: Response): Promise<void> 
 
     respond(req, res, result, 201);
   } catch (error: any) {
-    console.error('Error creating gateway:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to create gateway', 500);
   }
 };
@@ -295,7 +307,8 @@ export const updateGateway = async (req: Request, res: Response): Promise<void> 
     }
     respond(req, res, result);
   } catch (error: any) {
-    console.error('Error updating gateway:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to update gateway', 500);
   }
 };
@@ -312,7 +325,8 @@ export const deleteGateway = async (req: Request, res: Response): Promise<void> 
 
     respond(req, res, { success: true });
   } catch (error: any) {
-    console.error('Error deleting gateway:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to delete gateway', 500);
   }
 };
@@ -335,7 +349,8 @@ export const listMethodConfigs = async (req: Request, res: Response): Promise<vo
     );
     respond(req, res, rows || []);
   } catch (error: any) {
-    console.error('Error listing method configs:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to list method configs', 500);
   }
 };
@@ -354,7 +369,8 @@ export const getMethodConfig = async (req: Request, res: Response): Promise<void
     }
     respond(req, res, config);
   } catch (error: any) {
-    console.error('Error getting method config:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to get method config', 500);
   }
 };
@@ -392,7 +408,8 @@ export const createMethodConfig = async (req: Request, res: Response): Promise<v
 
     respond(req, res, result, 201);
   } catch (error: any) {
-    console.error('Error creating method config:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to create method config', 500);
   }
 };
@@ -430,7 +447,8 @@ export const updateMethodConfig = async (req: Request, res: Response): Promise<v
     }
     respond(req, res, result);
   } catch (error: any) {
-    console.error('Error updating method config:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to update method config', 500);
   }
 };
@@ -447,7 +465,8 @@ export const deleteMethodConfig = async (req: Request, res: Response): Promise<v
 
     respond(req, res, { success: true });
   } catch (error: any) {
-    console.error('Error deleting method config:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to delete method config', 500);
   }
 };
@@ -464,7 +483,8 @@ export const deleteTransaction = async (req: Request, res: Response): Promise<vo
 
     respond(req, res, { success: true });
   } catch (error: any) {
-    console.error('Error deleting transaction:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to delete transaction', 500);
   }
 };

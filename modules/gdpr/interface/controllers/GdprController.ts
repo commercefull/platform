@@ -3,6 +3,7 @@
  * Handles HTTP requests for GDPR-related operations
  */
 
+import { logger } from '../../../../libs/logger';
 import { Request, Response, NextFunction } from 'express';
 
 // Type for async route handlers
@@ -54,7 +55,8 @@ export const createDataRequest: AsyncHandler = async (req, res, next) => {
     const result = await createDataRequestUseCase.execute(command);
     res.status(201).json({ success: true, data: result });
   } catch (error: any) {
-    console.error('Create data request error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, error: error.message });
   }
 };
@@ -73,7 +75,8 @@ export const getMyDataRequests: AsyncHandler = async (req, res, next) => {
     const requests = await gdprDataRequestRepo.findByCustomerId(customerId);
     res.json({ success: true, data: requests.map(r => r.toJSON()) });
   } catch (error: any) {
-    console.error('Get data requests error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ error: error.message });
   }
 };
@@ -102,7 +105,8 @@ export const cancelDataRequest: AsyncHandler = async (req, res, next) => {
 
     res.json({ success: true, data: { status: request.status }, message: 'Request cancelled' });
   } catch (error: any) {
-    console.error('Cancel request error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ error: error.message });
   }
 };
@@ -137,7 +141,8 @@ export const listDataRequests: AsyncHandler = async (req, res, next) => {
       data: result.data.map(r => r.toJSON())
     });
   } catch (error: any) {
-    console.error('List data requests error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ error: error.message });
   }
 };
@@ -154,7 +159,8 @@ export const getDataRequest: AsyncHandler = async (req, res, next) => {
     }
     res.json({ success: true, data: request.toJSON() });
   } catch (error: any) {
-    console.error('Get data request error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ error: error.message });
   }
 };
@@ -167,7 +173,8 @@ export const getOverdueRequests: AsyncHandler = async (req, res, next) => {
     const requests = await gdprDataRequestRepo.findOverdueRequests();
     res.json({ success: true, data: requests.map(r => r.toJSON()), total: requests.length });
   } catch (error: any) {
-    console.error('Get overdue requests error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ error: error.message });
   }
 };
@@ -194,7 +201,8 @@ export const getGdprStatistics: AsyncHandler = async (req, res, next) => {
       }
     });
   } catch (error: any) {
-    console.error('Get statistics error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ error: error.message });
   }
 };
@@ -221,7 +229,8 @@ export const verifyIdentity: AsyncHandler = async (req, res, next) => {
     const result = await useCase.verifyIdentity(command);
     res.json({ success: true, data: { isVerified: true, ...result } });
   } catch (error: any) {
-    console.error('Verify identity error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ error: error.message });
   }
 };
@@ -253,7 +262,8 @@ export const processExportRequest: AsyncHandler = async (req, res, next) => {
     const result = await useCase.processExport(command);
     res.json({ success: true, data: result });
   } catch (error: any) {
-    console.error('Process export error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ error: error.message });
   }
 };
@@ -285,7 +295,8 @@ export const processDeletionRequest: AsyncHandler = async (req, res, next) => {
     const result = await useCase.processDeletion(command);
     res.json({ success: true, data: result });
   } catch (error: any) {
-    console.error('Process deletion error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ error: error.message });
   }
 };
@@ -314,7 +325,8 @@ export const rejectRequest: AsyncHandler = async (req, res, next) => {
     const result = await useCase.reject(command);
     res.json({ success: true, data: result });
   } catch (error: any) {
-    console.error('Reject request error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ error: error.message });
   }
 };
@@ -344,7 +356,8 @@ export const recordCookieConsent: AsyncHandler = async (req, res, next) => {
     const result = await manageCookieConsentUseCase.recordConsent(command);
     res.status(200).json({ success: true, data: { cookieConsentId: result.gdprCookieConsentId, ...result.preferences } });
   } catch (error: any) {
-    console.error('Record consent error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ error: error.message });
   }
 };
@@ -363,7 +376,8 @@ export const getCookieConsent: AsyncHandler = async (req, res, next) => {
     }
     res.json({ success: true, data: { cookieConsentId: result.gdprCookieConsentId, ...result.preferences } });
   } catch (error: any) {
-    console.error('Get consent error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ error: error.message });
   }
 };
@@ -377,7 +391,8 @@ export const acceptAllCookies: AsyncHandler = async (req, res, next) => {
     const result = await manageCookieConsentUseCase.acceptAll(sessionId);
     res.json({ success: true, data: { cookieConsentId: result.gdprCookieConsentId, necessaryCookies: true, analyticsCookies: true, marketingCookies: true, preferenceCookies: true } });
   } catch (error: any) {
-    console.error('Accept all error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ error: error.message });
   }
 };
@@ -391,7 +406,8 @@ export const rejectAllCookies: AsyncHandler = async (req, res, next) => {
     const result = await manageCookieConsentUseCase.rejectAll(sessionId);
     res.json({ success: true, data: { cookieConsentId: result.gdprCookieConsentId, necessaryCookies: true, analyticsCookies: false, marketingCookies: false, preferenceCookies: false } });
   } catch (error: any) {
-    console.error('Reject all error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ error: error.message });
   }
 };
@@ -409,7 +425,8 @@ export const updateCookieConsent: AsyncHandler = async (req, res, next) => {
     const result = await manageCookieConsentUseCase.updateConsent(command);
     res.json({ success: true, data: { cookieConsentId: result.gdprCookieConsentId, ...result.preferences } });
   } catch (error: any) {
-    console.error('Update consent error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ error: error.message });
   }
 };
@@ -426,7 +443,8 @@ export const getCookieConsentStatistics: AsyncHandler = async (req, res, next) =
 
     res.json({ success: true, data: { totalConsents: stats.total, ...stats, byCountry } });
   } catch (error: any) {
-    console.error('Get consent statistics error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ error: error.message });
   }
 };

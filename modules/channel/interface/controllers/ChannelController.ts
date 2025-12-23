@@ -4,6 +4,7 @@
  * HTTP interface for channel management.
  */
 
+import { logger } from '../../../../libs/logger';
 import { Request, Response } from 'express';
 import { channelRepository } from '../../infrastructure/repositories/ChannelRepository';
 import {
@@ -43,6 +44,7 @@ export const createChannel = async (req: Request, res: Response): Promise<void> 
     });
     res.status(201).json({ success: true, data: result.channel });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
@@ -60,6 +62,7 @@ export const getChannel = async (req: Request, res: Response): Promise<void> => 
     }
     res.json({ success: true, data: result.channel });
   } catch (error: any) {
+    logger.error('Error:', error);
     const status = error.message.includes('not found') ? 404 : 400;
     res.status(status).json({ success: false, error: error.message });
   }
@@ -85,6 +88,7 @@ export const updateChannel = async (req: Request, res: Response): Promise<void> 
     });
     res.json({ success: true, data: result.channel });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
@@ -102,6 +106,7 @@ export const listChannels = async (req: Request, res: Response): Promise<void> =
     });
     res.json({ success: true, data: result.channels });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
@@ -117,6 +122,7 @@ export const assignProducts = async (req: Request, res: Response): Promise<void>
     });
     res.json({ success: true, data: result });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
@@ -130,6 +136,7 @@ export const assignWarehouse = async (req: Request, res: Response): Promise<void
     });
     res.json({ success: true, data: result.channel });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(400).json({ success: false, error: error.message });
   }
 };

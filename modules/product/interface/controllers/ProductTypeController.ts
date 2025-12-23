@@ -1,3 +1,4 @@
+import { logger } from '../../../../libs/logger';
 import { Request, Response } from 'express';
 import productTypeRepository from '../../infrastructure/repositories/ProductTypeRepository';
 import productAttributeSetRepository from '../../infrastructure/repositories/ProductAttributeSetRepository';
@@ -23,6 +24,7 @@ export class ProductTypeController {
         data: productTypes
       });
     } catch (error) {
+      logger.error('Error:', error);
       res.status(500).json({
         success: false,
         error: `Failed to list product types: ${(error as Error).message}`
@@ -58,6 +60,7 @@ export class ProductTypeController {
         }
       });
     } catch (error) {
+      logger.error('Error:', error);
       res.status(500).json({
         success: false,
         error: `Failed to get product type: ${(error as Error).message}`
@@ -87,6 +90,7 @@ export class ProductTypeController {
         data: productType
       });
     } catch (error) {
+      logger.error('Error:', error);
       res.status(500).json({
         success: false,
         error: `Failed to get product type: ${(error as Error).message}`
@@ -131,6 +135,7 @@ export class ProductTypeController {
         data: productType
       });
     } catch (error) {
+      logger.error('Error:', error);
       res.status(500).json({
         success: false,
         error: `Failed to create product type: ${(error as Error).message}`
@@ -178,6 +183,7 @@ export class ProductTypeController {
         data: updated
       });
     } catch (error) {
+      logger.error('Error:', error);
       res.status(500).json({
         success: false,
         error: `Failed to update product type: ${(error as Error).message}`
@@ -209,6 +215,7 @@ export class ProductTypeController {
         message: 'Product type deleted successfully'
       });
     } catch (error) {
+      logger.error('Error:', error);
       res.status(500).json({
         success: false,
         error: `Failed to delete product type: ${(error as Error).message}`
@@ -240,6 +247,7 @@ export class ProductTypeController {
         data: attributes
       });
     } catch (error) {
+      logger.error('Error:', error);
       res.status(500).json({
         success: false,
         error: `Failed to get product type attributes: ${(error as Error).message}`

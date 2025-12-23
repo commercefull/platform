@@ -3,6 +3,7 @@
  * Handles store-related HTTP requests
  */
 
+import { logger } from '../../../../libs/logger';
 import { Request, Response } from 'express';
 import { CreateStoreUseCase, CreateStoreCommand } from '../../application/useCases/CreateStore';
 import { StoreRepo } from '../../infrastructure/repositories/StoreRepo';
@@ -69,7 +70,8 @@ export class StoreController {
         data: result
       });
     } catch (error) {
-      console.error('Create store error:', error);
+      logger.error('Error:', error);
+      
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       res.status(400).json({
         success: false,
@@ -100,7 +102,8 @@ export class StoreController {
         data: store.toJSON()
       });
     } catch (error) {
-      console.error('Get store error:', error);
+      logger.error('Error:', error);
+      
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       res.status(500).json({
         success: false,
@@ -131,7 +134,8 @@ export class StoreController {
         data: store.toJSON()
       });
     } catch (error) {
-      console.error('Get store by slug error:', error);
+      logger.error('Error:', error);
+      
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       res.status(500).json({
         success: false,
@@ -156,7 +160,8 @@ export class StoreController {
         count: stores.length
       });
     } catch (error) {
-      console.error('Get stores by business error:', error);
+      logger.error('Error:', error);
+      
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       res.status(500).json({
         success: false,
@@ -181,7 +186,8 @@ export class StoreController {
         count: stores.length
       });
     } catch (error) {
-      console.error('Get active stores error:', error);
+      logger.error('Error:', error);
+      
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       res.status(500).json({
         success: false,

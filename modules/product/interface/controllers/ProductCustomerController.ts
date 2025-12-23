@@ -3,6 +3,7 @@
  * HTTP interface for customer-facing product operations
  */
 
+import { logger } from '../../../../libs/logger';
 import { Request, Response } from 'express';
 import ProductRepo from '../../infrastructure/repositories/ProductRepository';
 import { GetProductCommand, GetProductUseCase } from '../../application/useCases/GetProduct';
@@ -69,7 +70,8 @@ export const listProducts = async (req: Request, res: Response): Promise<void> =
 
     respond(req, res, result, 200, 'product/list');
   } catch (error: any) {
-    console.error('Error listing products:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to list products', 500, 'product/error');
   }
 };
@@ -110,7 +112,8 @@ export const getProduct = async (req: Request, res: Response): Promise<void> => 
 
     respond(req, res, product, 200, 'product/detail');
   } catch (error: any) {
-    console.error('Error getting product:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to get product', 500, 'product/error');
   }
 };
@@ -147,7 +150,8 @@ export const searchProducts = async (req: Request, res: Response): Promise<void>
 
     respond(req, res, result, 200, 'product/search');
   } catch (error: any) {
-    console.error('Error searching products:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to search products', 500, 'product/error');
   }
 };
@@ -177,7 +181,8 @@ export const getFeaturedProducts = async (req: Request, res: Response): Promise<
 
     respond(req, res, result, 200, 'product/featured');
   } catch (error: any) {
-    console.error('Error getting featured products:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to get featured products', 500, 'product/error');
   }
 };
@@ -208,7 +213,8 @@ export const getProductsByCategory = async (req: Request, res: Response): Promis
 
     respond(req, res, result, 200, 'product/category');
   } catch (error: any) {
-    console.error('Error getting products by category:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to get products', 500, 'product/error');
   }
 };
@@ -226,7 +232,8 @@ export const getRelatedProducts = async (req: Request, res: Response): Promise<v
 
     respond(req, res, { products }, 200, 'product/related');
   } catch (error: any) {
-    console.error('Error getting related products:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to get related products', 500, 'product/error');
   }
 };

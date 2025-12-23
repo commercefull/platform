@@ -1,3 +1,4 @@
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import { ContentRepo } from '../repos/contentRepo';
 import { ContentCategoryRepo } from '../repos/contentCategoryRepo';
@@ -44,7 +45,8 @@ export class ContentController {
         }
       });
     } catch (error) {
-      console.error('Error fetching content types:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({
         success: false,
         message: 'Failed to fetch content types',
@@ -74,7 +76,8 @@ export class ContentController {
         data: contentType
       });
     } catch (error) {
-      console.error('Error fetching content type:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({
         success: false,
         message: 'Failed to fetch content type',
@@ -104,7 +107,8 @@ export class ContentController {
         data: contentType
       });
     } catch (error) {
-      console.error('Error fetching content type:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({
         success: false,
         message: 'Failed to fetch content type',
@@ -159,7 +163,7 @@ export class ContentController {
         message: 'Content type created successfully'
       });
     } catch (error:any) {
-      console.error('Error creating content type:', error);
+      
       res.status(error.message.includes('already exists') ? 409 : 500).json({
         success: false,
         message: 'Failed to create content type',
@@ -210,7 +214,7 @@ export class ContentController {
         message: 'Content type updated successfully'
       });
     } catch (error:any) {
-      console.error('Error updating content type:', error);
+      
       res.status(error.message.includes('already exists') ? 409 : 500).json({
         success: false,
         message: 'Failed to update content type',
@@ -243,7 +247,7 @@ export class ContentController {
         message: 'Content type deleted successfully'
       });
     } catch (error:any) {
-      console.error('Error deleting content type:', error);
+      
       
       // Handle case where content type is in use
       if (error.message.includes('being used')) {
@@ -286,7 +290,7 @@ export class ContentController {
         }
       });
     } catch (error:any) {
-      console.error('Error fetching pages:', error);
+      
       res.status(500).json({
         success: false,
         message: 'Failed to fetch pages',
@@ -316,7 +320,7 @@ export class ContentController {
         data: page
       });
     } catch (error:any) {
-      console.error('Error fetching page:', error);
+      
       res.status(500).json({
         success: false,
         message: 'Failed to fetch page',
@@ -370,7 +374,7 @@ export class ContentController {
         data: fullPage
       });
     } catch (error:any) {
-      console.error('Error fetching full page:', error);
+      
       
       if (error.message.includes('not found')) {
         res.status(404).json({
@@ -446,7 +450,7 @@ export class ContentController {
         message: 'Page created successfully'
       });
     } catch (error:any) {
-      console.error('Error creating page:', error);
+      
       res.status(error.message.includes('already exists') ? 409 : 500).json({
         success: false,
         message: 'Failed to create page',
@@ -511,7 +515,7 @@ export class ContentController {
         message: 'Page updated successfully'
       });
     } catch (error:any) {
-      console.error('Error updating page:', error);
+      
       res.status(error.message.includes('already exists') ? 409 : 500).json({
         success: false,
         message: 'Failed to update page',
@@ -544,7 +548,7 @@ export class ContentController {
         message: 'Page deleted successfully'
       });
     } catch (error:any) {
-      console.error('Error deleting page:', error);
+      
       res.status(500).json({
         success: false,
         message: 'Failed to delete page',
@@ -579,7 +583,7 @@ export class ContentController {
         data: blocks
       });
     } catch (error:any) {
-      console.error('Error fetching page blocks:', error);
+      
       res.status(500).json({
         success: false,
         message: 'Failed to fetch page blocks',
@@ -609,7 +613,7 @@ export class ContentController {
         data: block
       });
     } catch (error:any) {
-      console.error('Error fetching content block:', error);
+      
       res.status(500).json({
         success: false,
         message: 'Failed to fetch content block',
@@ -656,7 +660,7 @@ export class ContentController {
         message: 'Content block created successfully'
       });
     } catch (error:any) {
-      console.error('Error creating content block:', error);
+      
       
       if (error.message.includes('not found')) {
         res.status(404).json({
@@ -712,7 +716,7 @@ export class ContentController {
         message: 'Content block updated successfully'
       });
     } catch (error:any) {
-      console.error('Error updating content block:', error);
+      
       
       if (error.message.includes('not found')) {
         res.status(404).json({
@@ -754,7 +758,7 @@ export class ContentController {
         message: 'Content block deleted successfully'
       });
     } catch (error:any) {
-      console.error('Error deleting content block:', error);
+      
       res.status(500).json({
         success: false,
         message: 'Failed to delete content block',
@@ -807,7 +811,7 @@ export class ContentController {
         message: 'Content blocks reordered successfully'
       });
     } catch (error:any) {
-      console.error('Error reordering content blocks:', error);
+      
       
       if (error.message.includes('not found')) {
         res.status(404).json({
@@ -846,7 +850,7 @@ export class ContentController {
         }
       });
     } catch (error:any) {
-      console.error('Error fetching templates:', error);
+      
       res.status(500).json({
         success: false,
         message: 'Failed to fetch templates',
@@ -876,7 +880,7 @@ export class ContentController {
         data: template
       });
     } catch (error:any) {
-      console.error('Error fetching template:', error);
+      
       res.status(500).json({
         success: false,
         message: 'Failed to fetch template',
@@ -935,7 +939,7 @@ export class ContentController {
         message: 'Template created successfully'
       });
     } catch (error:any) {
-      console.error('Error creating template:', error);
+      
       res.status(500).json({
         success: false,
         message: 'Failed to create template',
@@ -984,7 +988,7 @@ export class ContentController {
         message: 'Template updated successfully'
       });
     } catch (error:any) {
-      console.error('Error updating template:', error);
+      
       res.status(500).json({
         success: false,
         message: 'Failed to update template',
@@ -1017,7 +1021,7 @@ export class ContentController {
         message: 'Template deleted successfully'
       });
     } catch (error:any) {
-      console.error('Error deleting template:', error);
+      
       
       // Handle case where template is in use
       if (error.message.includes('being used')) {
@@ -1074,7 +1078,8 @@ export class ContentController {
       eventBus.emit('content.template.created', { templateId: duplicate.id, name: duplicate.name, slug: duplicate.slug });
       res.status(201).json({ success: true, data: duplicate, message: 'Template duplicated successfully' });
     } catch (error: any) {
-      console.error('Error duplicating template:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({ success: false, message: 'Failed to duplicate template', error: error.message });
     }
   };
@@ -1101,7 +1106,8 @@ export class ContentController {
       eventBus.emit('content.page.published', { pageId: id, title: updatedPage.title, slug: updatedPage.slug });
       res.status(200).json({ success: true, data: updatedPage, message: 'Page published successfully' });
     } catch (error: any) {
-      console.error('Error publishing page:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({ success: false, message: 'Failed to publish page', error: error.message });
     }
   };
@@ -1122,7 +1128,8 @@ export class ContentController {
       eventBus.emit('content.page.unpublished', { pageId: id, title: updatedPage.title, slug: updatedPage.slug });
       res.status(200).json({ success: true, data: updatedPage, message: 'Page unpublished successfully' });
     } catch (error: any) {
-      console.error('Error unpublishing page:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({ success: false, message: 'Failed to unpublish page', error: error.message });
     }
   };
@@ -1149,7 +1156,8 @@ export class ContentController {
       const updatedPage = await this.contentRepo.updatePage(id, { status: 'scheduled', scheduledAt });
       res.status(200).json({ success: true, data: updatedPage, message: 'Page scheduled successfully' });
     } catch (error: any) {
-      console.error('Error scheduling page:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({ success: false, message: 'Failed to schedule page', error: error.message });
     }
   };
@@ -1205,7 +1213,8 @@ export class ContentController {
       eventBus.emit('content.page.created', { pageId: duplicatePage.id, title: duplicatePage.title, slug: duplicatePage.slug });
       res.status(201).json({ success: true, data: duplicatePage, message: 'Page duplicated successfully' });
     } catch (error: any) {
-      console.error('Error duplicating page:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({ success: false, message: 'Failed to duplicate page', error: error.message });
     }
   };
@@ -1222,7 +1231,8 @@ export class ContentController {
       const categories = await this.categoryRepo.findAllCategories(parentId, isActive, limit, offset);
       res.status(200).json({ success: true, data: categories });
     } catch (error: any) {
-      console.error('Error fetching categories:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({ success: false, message: 'Failed to fetch categories', error: error.message });
     }
   };
@@ -1233,7 +1243,8 @@ export class ContentController {
       const categories = await this.categoryRepo.getCategoryTree(isActive);
       res.status(200).json({ success: true, data: categories });
     } catch (error: any) {
-      console.error('Error fetching category tree:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({ success: false, message: 'Failed to fetch category tree', error: error.message });
     }
   };
@@ -1255,7 +1266,8 @@ export class ContentController {
       eventBus.emit('content.category.created', { categoryId: category.contentCategoryId, name: category.name, slug: category.slug, parentId: category.parentId });
       res.status(201).json({ success: true, data: category, message: 'Category created successfully' });
     } catch (error: any) {
-      console.error('Error creating category:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({ success: false, message: 'Failed to create category', error: error.message });
     }
   };
@@ -1270,7 +1282,8 @@ export class ContentController {
       }
       res.status(200).json({ success: true, data: category });
     } catch (error: any) {
-      console.error('Error fetching category:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({ success: false, message: 'Failed to fetch category', error: error.message });
     }
   };
@@ -1290,7 +1303,8 @@ export class ContentController {
       eventBus.emit('content.category.updated', { categoryId: id, name: updated.name, slug: updated.slug });
       res.status(200).json({ success: true, data: updated, message: 'Category updated successfully' });
     } catch (error: any) {
-      console.error('Error updating category:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({ success: false, message: 'Failed to update category', error: error.message });
     }
   };
@@ -1308,7 +1322,8 @@ export class ContentController {
       eventBus.emit('content.category.deleted', { categoryId: id, name: existing.name });
       res.status(200).json({ success: true, message: 'Category deleted successfully' });
     } catch (error: any) {
-      console.error('Error deleting category:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({ success: false, message: 'Failed to delete category', error: error.message });
     }
   };
@@ -1321,7 +1336,8 @@ export class ContentController {
       const updated = await this.categoryRepo.moveCategory(id, newParentId);
       res.status(200).json({ success: true, data: updated, message: 'Category moved successfully' });
     } catch (error: any) {
-      console.error('Error moving category:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({ success: false, message: 'Failed to move category', error: error.message });
     }
   };
@@ -1334,7 +1350,8 @@ export class ContentController {
       const navigations = await this.navigationRepo.findAllNavigations(isActive);
       res.status(200).json({ success: true, data: navigations });
     } catch (error: any) {
-      console.error('Error fetching navigations:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({ success: false, message: 'Failed to fetch navigations', error: error.message });
     }
   };
@@ -1352,7 +1369,8 @@ export class ContentController {
       eventBus.emit('content.navigation.created', { navigationId: navigation.contentNavigationId, name: navigation.name, slug: navigation.slug, location: navigation.location });
       res.status(201).json({ success: true, data: navigation, message: 'Navigation created successfully' });
     } catch (error: any) {
-      console.error('Error creating navigation:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({ success: false, message: 'Failed to create navigation', error: error.message });
     }
   };
@@ -1367,7 +1385,8 @@ export class ContentController {
       }
       res.status(200).json({ success: true, data: navigation });
     } catch (error: any) {
-      console.error('Error fetching navigation:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({ success: false, message: 'Failed to fetch navigation', error: error.message });
     }
   };
@@ -1384,7 +1403,8 @@ export class ContentController {
       const items = await this.navigationRepo.findAllNavigationItems(id);
       res.status(200).json({ success: true, data: { navigation, items } });
     } catch (error: any) {
-      console.error('Error fetching navigation with items:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({ success: false, message: 'Failed to fetch navigation with items', error: error.message });
     }
   };
@@ -1404,7 +1424,8 @@ export class ContentController {
       eventBus.emit('content.navigation.updated', { navigationId: id, name: updated.name });
       res.status(200).json({ success: true, data: updated, message: 'Navigation updated successfully' });
     } catch (error: any) {
-      console.error('Error updating navigation:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({ success: false, message: 'Failed to update navigation', error: error.message });
     }
   };
@@ -1415,7 +1436,8 @@ export class ContentController {
       await this.navigationRepo.deleteNavigation(id);
       res.status(200).json({ success: true, message: 'Navigation deleted successfully' });
     } catch (error: any) {
-      console.error('Error deleting navigation:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({ success: false, message: 'Failed to delete navigation', error: error.message });
     }
   };
@@ -1438,7 +1460,8 @@ export class ContentController {
       eventBus.emit('content.navigation.item_added', { navigationId, itemId: item.contentNavigationItemId, title: item.title, type: item.type });
       res.status(201).json({ success: true, data: item, message: 'Navigation item added successfully' });
     } catch (error: any) {
-      console.error('Error adding navigation item:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({ success: false, message: 'Failed to add navigation item', error: error.message });
     }
   };
@@ -1451,7 +1474,8 @@ export class ContentController {
       const updated = await this.navigationRepo.updateNavigationItem(id, { title, type, url, contentPageId, icon, openInNewTab, isActive, sortOrder });
       res.status(200).json({ success: true, data: updated, message: 'Navigation item updated successfully' });
     } catch (error: any) {
-      console.error('Error updating navigation item:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({ success: false, message: 'Failed to update navigation item', error: error.message });
     }
   };
@@ -1462,7 +1486,8 @@ export class ContentController {
       await this.navigationRepo.deleteNavigationItem(id);
       res.status(200).json({ success: true, message: 'Navigation item deleted successfully' });
     } catch (error: any) {
-      console.error('Error deleting navigation item:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({ success: false, message: 'Failed to delete navigation item', error: error.message });
     }
   };
@@ -1480,7 +1505,8 @@ export class ContentController {
       await this.navigationRepo.reorderNavigationItems(navigationId, itemOrders);
       res.status(200).json({ success: true, message: 'Navigation items reordered successfully' });
     } catch (error: any) {
-      console.error('Error reordering navigation items:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({ success: false, message: 'Failed to reorder navigation items', error: error.message });
     }
   };
@@ -1497,7 +1523,8 @@ export class ContentController {
       const media = await this.mediaRepo.findAllMedia(folderId, fileType, limit, offset);
       res.status(200).json({ success: true, data: media });
     } catch (error: any) {
-      console.error('Error fetching media:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({ success: false, message: 'Failed to fetch media', error: error.message });
     }
   };
@@ -1520,7 +1547,8 @@ export class ContentController {
       eventBus.emit('content.media.uploaded', { mediaId: media.contentMediaId, title: media.title, fileName: media.fileName, fileType: media.fileType, fileSize: media.fileSize });
       res.status(201).json({ success: true, data: media, message: 'Media uploaded successfully' });
     } catch (error: any) {
-      console.error('Error uploading media:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({ success: false, message: 'Failed to upload media', error: error.message });
     }
   };
@@ -1535,7 +1563,8 @@ export class ContentController {
       }
       res.status(200).json({ success: true, data: media });
     } catch (error: any) {
-      console.error('Error fetching media:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({ success: false, message: 'Failed to fetch media', error: error.message });
     }
   };
@@ -1548,7 +1577,8 @@ export class ContentController {
       const updated = await this.mediaRepo.updateMedia(id, { title, altText, caption, description, contentMediaFolderId: folderId, tags, sortOrder });
       res.status(200).json({ success: true, data: updated, message: 'Media updated successfully' });
     } catch (error: any) {
-      console.error('Error updating media:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({ success: false, message: 'Failed to update media', error: error.message });
     }
   };
@@ -1566,7 +1596,8 @@ export class ContentController {
       eventBus.emit('content.media.deleted', { mediaId: id, fileName: media.fileName });
       res.status(200).json({ success: true, message: 'Media deleted successfully' });
     } catch (error: any) {
-      console.error('Error deleting media:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({ success: false, message: 'Failed to delete media', error: error.message });
     }
   };
@@ -1590,7 +1621,8 @@ export class ContentController {
 
       res.status(200).json({ success: true, data: { movedCount }, message: `${movedCount} media items moved successfully` });
     } catch (error: any) {
-      console.error('Error moving media:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({ success: false, message: 'Failed to move media', error: error.message });
     }
   };
@@ -1603,7 +1635,8 @@ export class ContentController {
       const folders = await this.mediaRepo.findAllFolders(parentId);
       res.status(200).json({ success: true, data: folders });
     } catch (error: any) {
-      console.error('Error fetching media folders:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({ success: false, message: 'Failed to fetch media folders', error: error.message });
     }
   };
@@ -1613,7 +1646,8 @@ export class ContentController {
       const folders = await this.mediaRepo.findAllFolders();
       res.status(200).json({ success: true, data: folders });
     } catch (error: any) {
-      console.error('Error fetching media folder tree:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({ success: false, message: 'Failed to fetch media folder tree', error: error.message });
     }
   };
@@ -1630,7 +1664,8 @@ export class ContentController {
       const folder = await this.mediaRepo.createFolder({ name, parentId, path: null, depth: 0, sortOrder: 0, createdBy: null, updatedBy: null });
       res.status(201).json({ success: true, data: folder, message: 'Folder created successfully' });
     } catch (error: any) {
-      console.error('Error creating media folder:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({ success: false, message: 'Failed to create media folder', error: error.message });
     }
   };
@@ -1643,7 +1678,8 @@ export class ContentController {
       const updated = await this.mediaRepo.updateFolder(id, { name, parentId, sortOrder });
       res.status(200).json({ success: true, data: updated, message: 'Folder updated successfully' });
     } catch (error: any) {
-      console.error('Error updating media folder:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({ success: false, message: 'Failed to update media folder', error: error.message });
     }
   };
@@ -1654,7 +1690,8 @@ export class ContentController {
       await this.mediaRepo.deleteFolder(id);
       res.status(200).json({ success: true, message: 'Folder deleted successfully' });
     } catch (error: any) {
-      console.error('Error deleting media folder:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({ success: false, message: 'Failed to delete media folder', error: error.message });
     }
   };
@@ -1670,7 +1707,8 @@ export class ContentController {
       const redirects = await this.redirectRepo.findAllRedirects(isActive, limit, offset);
       res.status(200).json({ success: true, data: redirects });
     } catch (error: any) {
-      console.error('Error fetching redirects:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({ success: false, message: 'Failed to fetch redirects', error: error.message });
     }
   };
@@ -1691,7 +1729,8 @@ export class ContentController {
       eventBus.emit('content.redirect.created', { redirectId: redirect.contentRedirectId, sourceUrl: redirect.sourceUrl, targetUrl: redirect.targetUrl, statusCode: redirect.statusCode });
       res.status(201).json({ success: true, data: redirect, message: 'Redirect created successfully' });
     } catch (error: any) {
-      console.error('Error creating redirect:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({ success: false, message: 'Failed to create redirect', error: error.message });
     }
   };
@@ -1706,7 +1745,8 @@ export class ContentController {
       }
       res.status(200).json({ success: true, data: redirect });
     } catch (error: any) {
-      console.error('Error fetching redirect:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({ success: false, message: 'Failed to fetch redirect', error: error.message });
     }
   };
@@ -1720,7 +1760,8 @@ export class ContentController {
       eventBus.emit('content.redirect.updated', { redirectId: id, sourceUrl: updated.sourceUrl, targetUrl: updated.targetUrl });
       res.status(200).json({ success: true, data: updated, message: 'Redirect updated successfully' });
     } catch (error: any) {
-      console.error('Error updating redirect:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({ success: false, message: 'Failed to update redirect', error: error.message });
     }
   };
@@ -1738,7 +1779,8 @@ export class ContentController {
       eventBus.emit('content.redirect.deleted', { redirectId: id, sourceUrl: redirect.sourceUrl });
       res.status(200).json({ success: true, message: 'Redirect deleted successfully' });
     } catch (error: any) {
-      console.error('Error deleting redirect:', error);
+      logger.error('Error:', error);
+      
       res.status(500).json({ success: false, message: 'Failed to delete redirect', error: error.message });
     }
   };

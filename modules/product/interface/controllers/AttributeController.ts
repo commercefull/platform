@@ -1,3 +1,4 @@
+import { logger } from '../../../../libs/logger';
 import { Request, Response } from 'express';
 import dynamicAttributeRepository from '../../infrastructure/repositories/DynamicAttributeRepository';
 import createAttributeUseCase from '../../application/useCases/attribute/CreateAttribute';
@@ -44,6 +45,7 @@ export class AttributeController {
         data: attributes
       });
     } catch (error) {
+      logger.error('Error:', error);
       res.status(500).json({
         success: false,
         error: `Failed to list attributes: ${(error as Error).message}`
@@ -83,6 +85,7 @@ export class AttributeController {
         }
       });
     } catch (error) {
+      logger.error('Error:', error);
       res.status(500).json({
         success: false,
         error: `Failed to get attribute: ${(error as Error).message}`
@@ -112,6 +115,7 @@ export class AttributeController {
         data: attribute
       });
     } catch (error) {
+      logger.error('Error:', error);
       res.status(500).json({
         success: false,
         error: `Failed to get attribute: ${(error as Error).message}`
@@ -134,6 +138,7 @@ export class AttributeController {
 
       res.status(201).json(result);
     } catch (error) {
+      logger.error('Error:', error);
       res.status(500).json({
         success: false,
         error: `Failed to create attribute: ${(error as Error).message}`
@@ -160,6 +165,7 @@ export class AttributeController {
 
       res.json(result);
     } catch (error) {
+      logger.error('Error:', error);
       res.status(500).json({
         success: false,
         error: `Failed to update attribute: ${(error as Error).message}`
@@ -201,6 +207,7 @@ export class AttributeController {
         message: 'Attribute deleted successfully'
       });
     } catch (error) {
+      logger.error('Error:', error);
       res.status(500).json({
         success: false,
         error: `Failed to delete attribute: ${(error as Error).message}`
@@ -226,6 +233,7 @@ export class AttributeController {
 
       res.json(result);
     } catch (error) {
+      logger.error('Error:', error);
       res.status(500).json({
         success: false,
         error: `Failed to get attribute values: ${(error as Error).message}`
@@ -252,6 +260,7 @@ export class AttributeController {
 
       res.status(201).json(result);
     } catch (error) {
+      logger.error('Error:', error);
       res.status(500).json({
         success: false,
         error: `Failed to add attribute value: ${(error as Error).message}`
@@ -280,6 +289,7 @@ export class AttributeController {
         message: 'Attribute value removed successfully'
       });
     } catch (error) {
+      logger.error('Error:', error);
       res.status(500).json({
         success: false,
         error: `Failed to remove attribute value: ${(error as Error).message}`
@@ -305,6 +315,7 @@ export class AttributeController {
 
       res.json(result);
     } catch (error) {
+      logger.error('Error:', error);
       res.status(500).json({
         success: false,
         error: `Failed to get product attributes: ${(error as Error).message}`
@@ -331,6 +342,7 @@ export class AttributeController {
 
       res.json(result);
     } catch (error) {
+      logger.error('Error:', error);
       res.status(500).json({
         success: false,
         error: `Failed to set product attribute: ${(error as Error).message}`
@@ -360,6 +372,7 @@ export class AttributeController {
 
       res.json(result);
     } catch (error) {
+      logger.error('Error:', error);
       res.status(500).json({
         success: false,
         error: `Failed to set product attributes: ${(error as Error).message}`
@@ -389,6 +402,7 @@ export class AttributeController {
         message: 'Product attribute removed successfully'
       });
     } catch (error) {
+      logger.error('Error:', error);
       res.status(500).json({
         success: false,
         error: `Failed to remove product attribute: ${(error as Error).message}`

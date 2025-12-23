@@ -4,6 +4,7 @@
  * HTTP interface for coupon management.
  */
 
+import { logger } from '../../../../libs/logger';
 import { Request, Response } from 'express';
 import couponRepository from '../../infrastructure/repositories/CouponRepository';
 import {
@@ -43,6 +44,7 @@ export const createCoupon = async (req: Request, res: Response): Promise<void> =
     const coupon = await useCase.execute(command);
     res.status(201).json({ success: true, data: coupon });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
@@ -59,6 +61,7 @@ export const validateCoupon = async (req: Request, res: Response): Promise<void>
     const result = await useCase.execute(command);
     res.json({ success: true, data: result });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
@@ -75,6 +78,7 @@ export const applyCoupon = async (req: Request, res: Response): Promise<void> =>
     });
     res.json({ success: true, data: result });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
@@ -90,6 +94,7 @@ export const redeemCoupon = async (req: Request, res: Response): Promise<void> =
     });
     res.json({ success: true, data: result });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
@@ -103,6 +108,7 @@ export const getCoupon = async (req: Request, res: Response): Promise<void> => {
     }
     res.json({ success: true, data: coupon });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
@@ -122,6 +128,7 @@ export const listCoupons = async (req: Request, res: Response): Promise<void> =>
     );
     res.json({ success: true, data: result });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
@@ -131,6 +138,7 @@ export const deleteCoupon = async (req: Request, res: Response): Promise<void> =
     await couponRepository.delete(req.params.couponId);
     res.json({ success: true, message: 'Coupon deleted' });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(400).json({ success: false, error: error.message });
   }
 };

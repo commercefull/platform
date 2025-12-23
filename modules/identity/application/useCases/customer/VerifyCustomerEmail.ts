@@ -109,7 +109,7 @@ export class VerifyCustomerEmailUseCase {
         firstName: customer.firstName,
       });
     } catch (error) {
-      console.error('Failed to send verification email:', error);
+      
     }
 
     return {

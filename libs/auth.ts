@@ -30,7 +30,7 @@ const authenticateToken = (req: Request, res: Response, next: NextFunction, secr
     req.user = decoded;
     return next();
   } catch (error) {
-    console.error('Token validation error:', error);
+    
     // Return 401 for invalid/expired tokens (not 403 which is for authorization failures)
     res.status(401).json({ success: false, message: 'Invalid or expired token' });
   }
@@ -84,7 +84,7 @@ const authenticateSession = async (
 
     return next();
   } catch (error) {
-    console.error('Session validation error:', error);
+    
     res.clearCookie(SESSION_COOKIE_NAME);
     return res.redirect(loginPath);
   }

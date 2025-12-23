@@ -3,6 +3,7 @@
  * Handles admin/merchant B2B operations
  */
 
+import { logger } from '../../../libs/logger';
 import { Request, Response, NextFunction } from 'express';
 import * as companyRepo from '../repos/companyRepo';
 import * as quoteRepo from '../repos/quoteRepo';
@@ -23,7 +24,8 @@ export const getCompanies: AsyncHandler = async (req, res, next) => {
     );
     res.json({ success: true, ...result });
   } catch (error: any) {
-    console.error('Get companies error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -41,7 +43,8 @@ export const getCompany: AsyncHandler = async (req, res, next) => {
     
     res.json({ success: true, data: { ...company, users, addresses } });
   } catch (error: any) {
-    console.error('Get company error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -51,7 +54,8 @@ export const createCompany: AsyncHandler = async (req, res, next) => {
     const company = await companyRepo.saveCompany(req.body);
     res.status(201).json({ success: true, data: company });
   } catch (error: any) {
-    console.error('Create company error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -64,7 +68,8 @@ export const updateCompany: AsyncHandler = async (req, res, next) => {
     });
     res.json({ success: true, data: company });
   } catch (error: any) {
-    console.error('Update company error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -77,7 +82,8 @@ export const approveCompany: AsyncHandler = async (req, res, next) => {
     const company = await companyRepo.getCompany(req.params.id);
     res.json({ success: true, data: company, message: 'Company approved' });
   } catch (error: any) {
-    console.error('Approve company error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -89,7 +95,8 @@ export const suspendCompany: AsyncHandler = async (req, res, next) => {
     const company = await companyRepo.getCompany(req.params.id);
     res.json({ success: true, data: company, message: 'Company suspended' });
   } catch (error: any) {
-    console.error('Suspend company error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -99,7 +106,8 @@ export const deleteCompany: AsyncHandler = async (req, res, next) => {
     await companyRepo.deleteCompany(req.params.id);
     res.json({ success: true, message: 'Company deleted' });
   } catch (error: any) {
-    console.error('Delete company error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -113,7 +121,8 @@ export const getCompanyUsers: AsyncHandler = async (req, res, next) => {
     const users = await companyRepo.getCompanyUsers(req.params.companyId, true);
     res.json({ success: true, data: users });
   } catch (error: any) {
-    console.error('Get company users error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -126,7 +135,8 @@ export const createCompanyUser: AsyncHandler = async (req, res, next) => {
     });
     res.status(201).json({ success: true, data: user });
   } catch (error: any) {
-    console.error('Create company user error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -140,7 +150,8 @@ export const updateCompanyUser: AsyncHandler = async (req, res, next) => {
     });
     res.json({ success: true, data: user });
   } catch (error: any) {
-    console.error('Update company user error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -150,7 +161,8 @@ export const deleteCompanyUser: AsyncHandler = async (req, res, next) => {
     await companyRepo.deleteCompanyUser(req.params.userId);
     res.json({ success: true, message: 'User deleted' });
   } catch (error: any) {
-    console.error('Delete company user error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -164,7 +176,8 @@ export const getCompanyAddresses: AsyncHandler = async (req, res, next) => {
     const addresses = await companyRepo.getCompanyAddresses(req.params.companyId);
     res.json({ success: true, data: addresses });
   } catch (error: any) {
-    console.error('Get company addresses error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -177,7 +190,8 @@ export const createCompanyAddress: AsyncHandler = async (req, res, next) => {
     });
     res.status(201).json({ success: true, data: address });
   } catch (error: any) {
-    console.error('Create company address error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -191,7 +205,8 @@ export const updateCompanyAddress: AsyncHandler = async (req, res, next) => {
     });
     res.json({ success: true, data: address });
   } catch (error: any) {
-    console.error('Update company address error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -201,7 +216,8 @@ export const deleteCompanyAddress: AsyncHandler = async (req, res, next) => {
     await companyRepo.deleteCompanyAddress(req.params.addressId);
     res.json({ success: true, message: 'Address deleted' });
   } catch (error: any) {
-    console.error('Delete company address error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -224,7 +240,8 @@ export const getQuotes: AsyncHandler = async (req, res, next) => {
     );
     res.json({ success: true, ...result });
   } catch (error: any) {
-    console.error('Get quotes error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -240,7 +257,8 @@ export const getQuote: AsyncHandler = async (req, res, next) => {
     const items = await quoteRepo.getQuoteItems(req.params.id);
     res.json({ success: true, data: { ...quote, items } });
   } catch (error: any) {
-    console.error('Get quote error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -261,7 +279,8 @@ export const createQuote: AsyncHandler = async (req, res, next) => {
     });
     res.status(201).json({ success: true, data: quote });
   } catch (error: any) {
-    console.error('Create quote error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -274,7 +293,8 @@ export const updateQuote: AsyncHandler = async (req, res, next) => {
     });
     res.json({ success: true, data: quote });
   } catch (error: any) {
-    console.error('Update quote error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -286,7 +306,8 @@ export const sendQuote: AsyncHandler = async (req, res, next) => {
     const quote = await quoteRepo.getQuote(req.params.id);
     res.json({ success: true, data: quote, message: 'Quote sent' });
   } catch (error: any) {
-    console.error('Send quote error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -296,7 +317,8 @@ export const deleteQuote: AsyncHandler = async (req, res, next) => {
     await quoteRepo.deleteQuote(req.params.id);
     res.json({ success: true, message: 'Quote deleted' });
   } catch (error: any) {
-    console.error('Delete quote error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -313,7 +335,8 @@ export const addQuoteItem: AsyncHandler = async (req, res, next) => {
     });
     res.status(201).json({ success: true, data: item });
   } catch (error: any) {
-    console.error('Add quote item error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -327,7 +350,8 @@ export const updateQuoteItem: AsyncHandler = async (req, res, next) => {
     });
     res.json({ success: true, data: item });
   } catch (error: any) {
-    console.error('Update quote item error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -337,7 +361,8 @@ export const deleteQuoteItem: AsyncHandler = async (req, res, next) => {
     await quoteRepo.deleteQuoteItem(req.params.itemId);
     res.json({ success: true, message: 'Item deleted' });
   } catch (error: any) {
-    console.error('Delete quote item error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -352,7 +377,8 @@ export const getWorkflows: AsyncHandler = async (req, res, next) => {
     const workflows = await approvalRepo.getWorkflows(companyId as string, workflowType as any);
     res.json({ success: true, data: workflows });
   } catch (error: any) {
-    console.error('Get workflows error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -368,7 +394,8 @@ export const getWorkflow: AsyncHandler = async (req, res, next) => {
     const steps = await approvalRepo.getWorkflowSteps(req.params.id);
     res.json({ success: true, data: { ...workflow, steps } });
   } catch (error: any) {
-    console.error('Get workflow error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -378,7 +405,8 @@ export const createWorkflow: AsyncHandler = async (req, res, next) => {
     const workflow = await approvalRepo.saveWorkflow(req.body);
     res.status(201).json({ success: true, data: workflow });
   } catch (error: any) {
-    console.error('Create workflow error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -391,7 +419,8 @@ export const updateWorkflow: AsyncHandler = async (req, res, next) => {
     });
     res.json({ success: true, data: workflow });
   } catch (error: any) {
-    console.error('Update workflow error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -401,7 +430,8 @@ export const deleteWorkflow: AsyncHandler = async (req, res, next) => {
     await approvalRepo.deleteWorkflow(req.params.id);
     res.json({ success: true, message: 'Workflow deleted' });
   } catch (error: any) {
-    console.error('Delete workflow error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -424,7 +454,8 @@ export const getApprovalRequests: AsyncHandler = async (req, res, next) => {
     );
     res.json({ success: true, ...result });
   } catch (error: any) {
-    console.error('Get approval requests error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -440,7 +471,8 @@ export const getApprovalRequest: AsyncHandler = async (req, res, next) => {
     const actions = await approvalRepo.getApprovalActions(req.params.id);
     res.json({ success: true, data: { ...request, actions } });
   } catch (error: any) {
-    console.error('Get approval request error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -455,7 +487,8 @@ export const processApprovalAction: AsyncHandler = async (req, res, next) => {
     });
     res.json({ success: true, data: request });
   } catch (error: any) {
-    console.error('Process approval action error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };

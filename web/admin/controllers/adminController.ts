@@ -1,3 +1,4 @@
+import { logger } from '../../../libs/logger';
 import { Request, Response } from "express";
 import bcrypt from 'bcryptjs';
 import { isAdminLoggedIn } from "../../../libs/auth";
@@ -30,7 +31,8 @@ export const getAdminDashboard = async (req: Request, res: Response) => {
 
     adminRespond(req, res, "dashboard", dashboardData);
   } catch (error) {
-    console.error("Error loading admin dashboard:", error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, "error", {
       pageName: "Error",
       error: "Failed to load dashboard",
@@ -126,7 +128,8 @@ export const postAdminLogin = async (req: Request, res: Response) => {
     return res.redirect("/admin");
 
   } catch (error) {
-    console.error("Error processing admin login:", error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, "login", {
       pageName: "Admin Login",
       error: "An error occurred during login"
@@ -151,7 +154,8 @@ export const postAdminLogout = async (req: Request, res: Response) => {
     // Redirect to login page
     res.redirect("/admin/login");
   } catch (error) {
-    console.error("Error processing admin logout:", error);
+    logger.error('Error:', error);
+    
     res.clearCookie(SESSION_COOKIE_NAME);
     res.redirect("/admin/login");
   }
@@ -164,7 +168,8 @@ export const getAdminProfile = async (req: Request, res: Response) => {
       pageName: "Admin Profile",
     });
   } catch (error) {
-    console.error("Error loading admin profile:", error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, "error", {
       pageName: "Error",
       error: "Failed to load profile"

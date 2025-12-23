@@ -1,3 +1,4 @@
+import { logger } from '../../../libs/logger';
 import { Request, Response } from "express";
 import couponRepo, { 
   CreateCouponInput, 
@@ -31,6 +32,7 @@ export const getActiveCoupons = async (req: Request, res: Response): Promise<voi
       }
     });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -50,6 +52,7 @@ export const getCouponById = async (req: Request, res: Response): Promise<void> 
 
     res.status(200).json({ success: true, data: coupon });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -71,6 +74,7 @@ export const getCouponByCode = async (req: Request, res: Response): Promise<void
 
     res.status(200).json({ success: true, data: coupon });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -111,6 +115,7 @@ export const createCoupon = async (req: Request, res: Response): Promise<void> =
       message: 'Coupon created successfully'
     });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -143,6 +148,7 @@ export const updateCoupon = async (req: Request, res: Response): Promise<void> =
       message: 'Coupon updated successfully'
     });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -171,6 +177,7 @@ export const deleteCoupon = async (req: Request, res: Response): Promise<void> =
       message: "Coupon deleted successfully" 
     });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -204,6 +211,7 @@ export const validateCoupon = async (req: Request, res: Response): Promise<void>
       data: result
     });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -239,6 +247,7 @@ export const getCouponUsage = async (req: Request, res: Response): Promise<void>
       }
     });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -285,6 +294,7 @@ export const calculateCouponDiscount = async (req: Request, res: Response): Prom
       }
     });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };

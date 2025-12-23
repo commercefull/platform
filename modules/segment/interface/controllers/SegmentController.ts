@@ -4,6 +4,7 @@
  * HTTP interface for segment management.
  */
 
+import { logger } from '../../../../libs/logger';
 import { Request, Response } from 'express';
 import { segmentRepository } from '../../infrastructure/repositories/SegmentRepository';
 import {
@@ -26,6 +27,7 @@ export const createSegment = async (req: Request, res: Response): Promise<void> 
     });
     res.status(201).json({ success: true, data: result.segment });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
@@ -39,6 +41,7 @@ export const getSegment = async (req: Request, res: Response): Promise<void> => 
     }
     res.json({ success: true, data: segment });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
@@ -64,6 +67,7 @@ export const updateSegment = async (req: Request, res: Response): Promise<void> 
     const saved = await segmentRepository.save(segment);
     res.json({ success: true, data: saved });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
@@ -83,6 +87,7 @@ export const listSegments = async (req: Request, res: Response): Promise<void> =
     );
     res.json({ success: true, data: result });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
@@ -101,6 +106,7 @@ export const evaluateSegment = async (req: Request, res: Response): Promise<void
       } 
     });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
@@ -111,6 +117,7 @@ export const getCustomerSegments = async (req: Request, res: Response): Promise<
     const result = await useCase.execute({ customerId: req.params.customerId });
     res.json({ success: true, data: result.segments });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
@@ -124,6 +131,7 @@ export const deleteSegment = async (req: Request, res: Response): Promise<void> 
     }
     res.json({ success: true, message: 'Segment deleted' });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(400).json({ success: false, error: error.message });
   }
 };

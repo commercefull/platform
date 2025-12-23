@@ -1,3 +1,4 @@
+import { logger } from '../../../../libs/logger';
 import { Request, Response } from 'express';
 import {
   searchProductsUseCase,
@@ -81,6 +82,7 @@ export class ProductSearchController {
 
       res.json(result);
     } catch (error) {
+      logger.error('Error:', error);
       res.status(500).json({
         success: false,
         error: `Search failed: ${(error as Error).message}`
@@ -103,6 +105,7 @@ export class ProductSearchController {
 
       res.json(result);
     } catch (error) {
+      logger.error('Error:', error);
       res.status(500).json({
         success: false,
         error: `Search failed: ${(error as Error).message}`
@@ -130,6 +133,7 @@ export class ProductSearchController {
 
       res.json(result);
     } catch (error) {
+      logger.error('Error:', error);
       res.status(500).json({
         success: false,
         error: `Failed to get suggestions: ${(error as Error).message}`
@@ -158,6 +162,7 @@ export class ProductSearchController {
 
       res.json(result);
     } catch (error) {
+      logger.error('Error:', error);
       res.status(500).json({
         success: false,
         error: `Failed to find similar products: ${(error as Error).message}`
@@ -185,6 +190,7 @@ export class ProductSearchController {
 
       res.json(result);
     } catch (error) {
+      logger.error('Error:', error);
       res.status(500).json({
         success: false,
         error: `Failed to find products: ${(error as Error).message}`

@@ -3,6 +3,7 @@
  * Handles content management for the Admin Hub
  */
 
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import ContentRepo from '../../../modules/content/repos/contentRepo';
 import { CreatePageUseCase, CreatePageCommand } from '../../../modules/content/application/useCases/CreatePage';
@@ -36,7 +37,8 @@ export const listContentPages = async (req: Request, res: Response): Promise<voi
       success: req.query.success || null
     });
   } catch (error: any) {
-    console.error('Error listing content pages:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load content pages',
@@ -55,7 +57,8 @@ export const createContentPageForm = async (req: Request, res: Response): Promis
       templates,
     });
   } catch (error: any) {
-    console.error('Error loading create page form:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -106,7 +109,8 @@ export const createContentPage = async (req: Request, res: Response): Promise<vo
 
     res.redirect(`/hub/content/pages/${result.id}?success=Content page created successfully`);
   } catch (error: any) {
-    console.error('Error creating content page:', error);
+    logger.error('Error:', error);
+    
 
     try {
       const contentTypes = await ContentRepo.findAllContentTypes(true);
@@ -153,7 +157,8 @@ export const viewContentPage = async (req: Request, res: Response): Promise<void
       success: req.query.success || null
     });
   } catch (error: any) {
-    console.error('Error viewing content page:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load content page',
@@ -185,7 +190,8 @@ export const editContentPageForm = async (req: Request, res: Response): Promise<
       templates,
     });
   } catch (error: any) {
-    console.error('Error loading edit page form:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
@@ -234,7 +240,8 @@ export const updateContentPage = async (req: Request, res: Response): Promise<vo
 
     res.redirect(`/hub/content/pages/${pageId}?success=Content page updated successfully`);
   } catch (error: any) {
-    console.error('Error updating content page:', error);
+    logger.error('Error:', error);
+    
 
     try {
       const page = await ContentRepo.findPageById(req.params.pageId);
@@ -268,7 +275,8 @@ export const publishContentPage = async (req: Request, res: Response): Promise<v
 
     res.json({ success: true, message: 'Content page published successfully' });
   } catch (error: any) {
-    console.error('Error publishing content page:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message || 'Failed to publish content page' });
   }
 };
@@ -285,7 +293,8 @@ export const deleteContentPage = async (req: Request, res: Response): Promise<vo
 
     res.json({ success: true, message: 'Content page deleted successfully' });
   } catch (error: any) {
-    console.error('Error deleting content page:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message || 'Failed to delete content page' });
   }
 };
@@ -305,7 +314,8 @@ export const listContentTemplates = async (req: Request, res: Response): Promise
       success: req.query.success || null
     });
   } catch (error: any) {
-    console.error('Error listing content templates:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load content templates',
@@ -329,7 +339,8 @@ export const listContentMedia = async (req: Request, res: Response): Promise<voi
       success: req.query.success || null
     });
   } catch (error: any) {
-    console.error('Error listing content media:', error);
+    logger.error('Error:', error);
+    
     adminRespond(req, res, 'error', {
       pageName: 'Error',
       error: error.message || 'Failed to load media library',

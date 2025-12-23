@@ -35,7 +35,7 @@ export async function setupGdprTests() {
   const adminToken = adminLoginResponse.data?.accessToken || adminLoginResponse.data?.data?.accessToken;
 
   if (adminLoginResponse.status !== 200 || !adminToken) {
-    console.error('Admin login failed:', adminLoginResponse.status, adminLoginResponse.data);
+    
     throw new Error('Failed to get admin token for GDPR tests');
   }
 
@@ -46,7 +46,7 @@ export async function setupGdprTests() {
   const customerToken = customerLoginResponse.data?.accessToken || customerLoginResponse.data?.data?.accessToken;
 
   if (customerLoginResponse.status !== 200 || !customerToken) {
-    console.error('Customer login failed:', customerLoginResponse.status, customerLoginResponse.data);
+    
     throw new Error('Failed to get customer token for GDPR tests');
   }
 

@@ -3,6 +3,7 @@
  * Handles admin/merchant gift card operations
  */
 
+import { logger } from '../../../libs/logger';
 import { Request, Response, NextFunction } from 'express';
 import * as giftCardRepo from '../repos/giftCardRepo';
 
@@ -17,7 +18,8 @@ export const getGiftCards: AsyncHandler = async (req, res, next) => {
     );
     res.json({ success: true, ...result });
   } catch (error: any) {
-    console.error('Get gift cards error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -32,7 +34,8 @@ export const getGiftCard: AsyncHandler = async (req, res, next) => {
     const transactions = await giftCardRepo.getTransactions(req.params.id);
     res.json({ success: true, data: { ...giftCard, transactions } });
   } catch (error: any) {
-    console.error('Get gift card error:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -42,7 +45,8 @@ export const createGiftCard: AsyncHandler = async (req, res, next) => {
     const giftCard = await giftCardRepo.createGiftCard(req.body);
     res.status(201).json({ success: true, data: giftCard });
   } catch (error: any) {
-    console.error('Create gift card error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -52,7 +56,8 @@ export const activateGiftCard: AsyncHandler = async (req, res, next) => {
     await giftCardRepo.activateGiftCard(req.params.id);
     res.json({ success: true, message: 'Gift card activated' });
   } catch (error: any) {
-    console.error('Activate gift card error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -69,7 +74,8 @@ export const refundToGiftCard: AsyncHandler = async (req, res, next) => {
     );
     res.json({ success: true, data: transaction });
   } catch (error: any) {
-    console.error('Refund to gift card error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -79,7 +85,8 @@ export const cancelGiftCard: AsyncHandler = async (req, res, next) => {
     await giftCardRepo.cancelGiftCard(req.params.id);
     res.json({ success: true, message: 'Gift card cancelled' });
   } catch (error: any) {
-    console.error('Cancel gift card error:', error);
+    logger.error('Error:', error);
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };

@@ -1,3 +1,4 @@
+import { logger } from '../../../libs/logger';
 import { Request, Response } from "express";
 import { NotificationRepo, Notification } from "../repos/notificationRepo";
 
@@ -34,7 +35,8 @@ export const getAllNotifications = async (req: Request, res: Response): Promise<
       pagination: { limit, offset, total: notifications.length }
     });
   } catch (error) {
-    console.error('Error fetching notifications:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: 'Failed to fetch notifications' });
   }
 };
@@ -54,7 +56,8 @@ export const getNotificationById = async (req: Request, res: Response): Promise<
     
     res.status(200).json({ success: true, data: notification });
   } catch (error) {
-    console.error('Error fetching notification:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: 'Failed to fetch notification' });
   }
 };
@@ -86,7 +89,8 @@ export const createNotification = async (req: Request, res: Response): Promise<v
     
     res.status(201).json({ success: true, data: notification });
   } catch (error) {
-    console.error('Error creating notification:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: 'Failed to create notification' });
   }
 };
@@ -109,7 +113,8 @@ export const updateNotification = async (req: Request, res: Response): Promise<v
     
     res.status(200).json({ success: true, data: updated });
   } catch (error) {
-    console.error('Error updating notification:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: 'Failed to update notification' });
   }
 };
@@ -130,7 +135,8 @@ export const markNotificationAsSent = async (req: Request, res: Response): Promi
     
     res.status(200).json({ success: true, data: notification });
   } catch (error) {
-    console.error('Error marking notification as sent:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: 'Failed to mark notification as sent' });
   }
 };
@@ -150,7 +156,8 @@ export const getUnreadNotifications = async (req: UserRequest, res: Response): P
     const notifications = await notificationRepo.findUnreadByUser(userId);
     res.json({ success: true, data: notifications });
   } catch (error) {
-    console.error('Error fetching unread notifications:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: 'Failed to fetch notifications' });
   }
 };
@@ -172,7 +179,8 @@ export const getRecentNotifications = async (req: UserRequest, res: Response): P
     const notifications = await notificationRepo.findByUser(userId, limit);
     res.json({ success: true, data: notifications });
   } catch (error) {
-    console.error('Error fetching recent notifications:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: 'Failed to fetch notifications' });
   }
 };
@@ -205,7 +213,8 @@ export const markNotificationAsRead = async (req: UserRequest, res: Response): P
     
     res.json({ success: true, data: updatedNotification });
   } catch (error) {
-    console.error('Error marking notification as read:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: 'Failed to update notification' });
   }
 };
@@ -225,7 +234,8 @@ export const markAllNotificationsAsRead = async (req: UserRequest, res: Response
     const updatedCount = await notificationRepo.markAllAsRead(userId);
     res.json({ success: true, data: { count: updatedCount } });
   } catch (error) {
-    console.error('Error marking all notifications as read:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: 'Failed to update notifications' });
   }
 };
@@ -265,7 +275,8 @@ export const deleteNotification = async (req: UserRequest, res: Response): Promi
     
     res.json({ success: true, data: { id } });
   } catch (error) {
-    console.error('Error deleting notification:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: 'Failed to delete notification' });
   }
 };
@@ -285,7 +296,8 @@ export const getUnreadCount = async (req: UserRequest, res: Response): Promise<v
     const count = await notificationRepo.countUnread(userId);
     res.json({ success: true, data: { count } });
   } catch (error) {
-    console.error('Error getting unread notification count:', error);
+    logger.error('Error:', error);
+    
     res.status(500).json({ success: false, message: 'Failed to get notification count' });
   }
 };

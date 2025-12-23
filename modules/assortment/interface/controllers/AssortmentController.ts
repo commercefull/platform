@@ -2,6 +2,7 @@
  * Assortment Controller
  */
 
+import { logger } from '../../../../libs/logger';
 import { Request, Response } from 'express';
 import {
   CreateAssortmentUseCase,
@@ -25,6 +26,7 @@ export const createAssortment = async (req: Request, res: Response): Promise<voi
     });
     res.status(201).json({ success: true, data: result });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
@@ -37,6 +39,7 @@ export const getAssortment = async (req: Request, res: Response): Promise<void> 
     });
     res.json({ success: true, data: result });
   } catch (error: any) {
+    logger.error('Error:', error);
     const status = error.message.includes('not found') ? 404 : 400;
     res.status(status).json({ success: false, error: error.message });
   }
@@ -50,6 +53,7 @@ export const listAssortments = async (req: Request, res: Response): Promise<void
     });
     res.json({ success: true, data: result });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
@@ -67,6 +71,7 @@ export const addItem = async (req: Request, res: Response): Promise<void> => {
     });
     res.status(201).json({ success: true, data: result });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
@@ -80,6 +85,7 @@ export const removeItem = async (req: Request, res: Response): Promise<void> => 
     });
     res.json({ success: true, data: result });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
@@ -96,6 +102,7 @@ export const setScope = async (req: Request, res: Response): Promise<void> => {
     });
     res.status(201).json({ success: true, data: result });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
@@ -110,6 +117,7 @@ export const getVisibleProducts = async (req: Request, res: Response): Promise<v
     });
     res.json({ success: true, data: result });
   } catch (error: any) {
+    logger.error('Error:', error);
     res.status(400).json({ success: false, error: error.message });
   }
 };

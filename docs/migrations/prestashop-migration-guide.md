@@ -578,7 +578,7 @@ async function runPrestaShopMigration() {
     console.log(runner.monitor.generateReport());
 
   } catch (error) {
-    console.error('Migration failed:', error);
+    
     console.log('Partial results:', runner.monitor.generateReport());
   }
 }

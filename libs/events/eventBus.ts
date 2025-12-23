@@ -409,7 +409,7 @@ class EventBus {
       try {
         await handler(payload);
       } catch (error) {
-        console.error(`[EVENT ERROR] Handler failed for ${type}:`, error);
+        
       }
     }
   }

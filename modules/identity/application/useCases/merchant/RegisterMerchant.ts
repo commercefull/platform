@@ -79,7 +79,7 @@ export class RegisterMerchantUseCase {
         firstName: input.firstName,
       });
     } catch (error) {
-      console.error('Failed to send welcome email:', error);
+      
     }
 
     // Emit event

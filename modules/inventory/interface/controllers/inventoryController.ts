@@ -4,6 +4,7 @@
  * Handles HTTP requests for inventory management.
  */
 
+import { logger } from '../../../../libs/logger';
 import { Request, Response } from 'express';
 import inventoryRepo from '../../repos/inventoryRepo';
 import { saveLocation as saveStoreLocation, getLocation as getStoreLocation, getLocations as listStoreLocations, deleteLocation as deleteStoreLocation } from '../../../store/repos/pickupLocationRepo';
@@ -60,7 +61,7 @@ export const getInventoryLocation = async (req: Request, res: Response): Promise
 
     respond(res, location);
   } catch (error: unknown) {
-    console.error('Get inventory location error:', error);
+    
     respondError(res, error instanceof Error ? error.message : 'Failed to get inventory location');
   }
 };
@@ -80,7 +81,7 @@ export const listInventoryLocations = async (req: Request, res: Response): Promi
     const data = result.map((loc: any) => ({ ...loc, id: loc.pickupLocationId }));
     respondWithPagination(res, data, limit, offset);
   } catch (error: unknown) {
-    console.error('List inventory locations error:', error);
+    
     respondError(res, error instanceof Error ? error.message : 'Failed to list inventory locations');
   }
 };
@@ -147,7 +148,7 @@ export const createInventoryLocation = async (req: Request, res: Response): Prom
 
     respond(res, location, 201);
   } catch (error: unknown) {
-    console.error('Create inventory location error:', error);
+    
     respondError(res, error instanceof Error ? error.message : 'Failed to create inventory location');
   }
 };
@@ -191,7 +192,7 @@ export const updateInventoryLocation = async (req: Request, res: Response): Prom
 
     respond(res, location);
   } catch (error: unknown) {
-    console.error('Update inventory location error:', error);
+    
     respondError(res, error instanceof Error ? error.message : 'Failed to update inventory location');
   }
 };
@@ -212,7 +213,7 @@ export const deleteInventoryLocation = async (req: Request, res: Response): Prom
     await inventoryRepo.deleteLocation(inventoryLocationId);
     respond(res, { message: 'Inventory location deleted successfully' });
   } catch (error: unknown) {
-    console.error('Delete inventory location error:', error);
+    
     respondError(res, error instanceof Error ? error.message : 'Failed to delete inventory location');
   }
 };
@@ -280,7 +281,7 @@ export const adjustStock = async (req: Request, res: Response): Promise<void> =>
 
     respond(res, updatedLocation);
   } catch (error: unknown) {
-    console.error('Adjust stock error:', error);
+    
     respondError(res, error instanceof Error ? error.message : 'Failed to adjust stock');
   }
 };
@@ -310,7 +311,7 @@ export const reserveStock = async (req: Request, res: Response): Promise<void> =
 
     respond(res, updatedLocation);
   } catch (error: unknown) {
-    console.error('Reserve stock error:', error);
+    
     respondError(res, error instanceof Error ? error.message : 'Failed to reserve stock');
   }
 };
@@ -338,7 +339,7 @@ export const releaseReservation = async (req: Request, res: Response): Promise<v
 
     respond(res, updatedLocation);
   } catch (error: unknown) {
-    console.error('Release reservation error:', error);
+    
     respondError(res, error instanceof Error ? error.message : 'Failed to release reservation');
   }
 };
@@ -374,7 +375,7 @@ export const checkAvailability = async (req: Request, res: Response): Promise<vo
       requestedQuantity: quantity
     });
   } catch (error: unknown) {
-    console.error('Check availability error:', error);
+    
     respondError(res, error instanceof Error ? error.message : 'Failed to check availability');
   }
 };
@@ -387,7 +388,7 @@ export const getLowStock = async (req: Request, res: Response): Promise<void> =>
     const locations = await inventoryRepo.findLowStockLocations();
     respond(res, locations);
   } catch (error: unknown) {
-    console.error('Get low stock error:', error);
+    
     respondError(res, error instanceof Error ? error.message : 'Failed to get low stock items');
   }
 };
@@ -400,7 +401,7 @@ export const getOutOfStock = async (req: Request, res: Response): Promise<void> 
     const locations = await inventoryRepo.findOutOfStockLocations();
     respond(res, locations);
   } catch (error: unknown) {
-    console.error('Get out of stock error:', error);
+    
     respondError(res, error instanceof Error ? error.message : 'Failed to get out of stock items');
   }
 };
@@ -420,7 +421,7 @@ export const getTransactionHistory = async (req: Request, res: Response): Promis
     const transactions = await inventoryRepo.findTransactionsByProductId(productId, limit);
     respond(res, transactions);
   } catch (error: unknown) {
-    console.error('Get transaction history error:', error);
+    
     respondError(res, error instanceof Error ? error.message : 'Failed to get transaction history');
   }
 };
@@ -433,7 +434,7 @@ export const getTransactionTypes = async (req: Request, res: Response): Promise<
     const types = await inventoryRepo.findAllTransactionTypes();
     respond(res, types);
   } catch (error: unknown) {
-    console.error('Get transaction types error:', error);
+    
     respondError(res, error instanceof Error ? error.message : 'Failed to get transaction types');
   }
 };

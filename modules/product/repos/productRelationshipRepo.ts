@@ -163,7 +163,7 @@ export class ProductRelationshipRepo {
         created.push(result);
       } catch (error) {
         // Skip if already exists or other error, continue with next
-        console.error(`Failed to create relationship: ${error}`);
+        
       }
     }
     

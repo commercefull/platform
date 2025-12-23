@@ -3,6 +3,7 @@
  * Public endpoints for customers to get locale and country information
  */
 
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import localeRepo from '../repos/localeRepo';
 import countryRepo from '../repos/countryRepo';
@@ -31,7 +32,8 @@ export const getActiveLocales = async (_req: Request, res: Response): Promise<vo
 
     successResponse(res, publicLocales);
   } catch (error: any) {
-    console.error('Error fetching active locales:', error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to fetch locales');
   }
 };
@@ -55,7 +57,8 @@ export const getActiveCountries = async (_req: Request, res: Response): Promise<
 
     successResponse(res, publicCountries);
   } catch (error: any) {
-    console.error('Error fetching active countries:', error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to fetch countries');
   }
 };
@@ -128,7 +131,8 @@ export const detectLocale = async (req: Request, res: Response): Promise<void> =
       source: preferredLanguages.length > 0 ? 'accept-language' : 'default'
     });
   } catch (error: any) {
-    console.error('Error detecting locale:', error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to detect locale');
   }
 };
@@ -165,7 +169,8 @@ export const getLocaleByCode = async (req: Request, res: Response): Promise<void
       timeZone: locale.timeZone
     });
   } catch (error: any) {
-    console.error(`Error fetching locale ${req.params.code}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to fetch locale');
   }
 };
@@ -199,7 +204,8 @@ export const getCountryByCode = async (req: Request, res: Response): Promise<voi
       region: country.region
     });
   } catch (error: any) {
-    console.error(`Error fetching country ${req.params.code}:`, error);
+    logger.error('Error:', error);
+    
     errorResponse(res, 'Failed to fetch country');
   }
 };

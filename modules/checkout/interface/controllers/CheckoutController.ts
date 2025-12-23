@@ -3,6 +3,7 @@
  * HTTP interface for checkout operations with content negotiation (JSON/HTML)
  */
 
+import { logger } from '../../../../libs/logger';
 import { Request, Response } from 'express';
 import CheckoutRepo from '../../infrastructure/repositories/CheckoutRepository';
 import BasketRepo from '../../../basket/infrastructure/repositories/BasketRepository';
@@ -97,7 +98,8 @@ export const initiateCheckout = async (req: Request, res: Response): Promise<voi
 
     respond(req, res, checkout, 201, 'checkout/view');
   } catch (error: any) {
-    console.error('Error initiating checkout:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to initiate checkout', 500, 'checkout/error');
   }
 };
@@ -119,7 +121,8 @@ export const getCheckout = async (req: Request, res: Response): Promise<void> =>
 
     respond(req, res, mapCheckoutToResponse(session), 200, 'checkout/view');
   } catch (error: any) {
-    console.error('Error getting checkout:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to get checkout', 500, 'checkout/error');
   }
 };
@@ -152,7 +155,8 @@ export const setShippingAddress = async (req: Request, res: Response): Promise<v
 
     respond(req, res, checkout, 200, 'checkout/shipping');
   } catch (error: any) {
-    console.error('Error setting shipping address:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to set shipping address', 500, 'checkout/error');
   }
 };
@@ -183,7 +187,8 @@ export const getShippingMethods = async (req: Request, res: Response): Promise<v
 
     respond(req, res, methods, 200, 'checkout/shipping-methods');
   } catch (error: any) {
-    console.error('Error getting shipping methods:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to get shipping methods', 500, 'checkout/error');
   }
 };
@@ -208,7 +213,8 @@ export const setShippingMethod = async (req: Request, res: Response): Promise<vo
 
     respond(req, res, checkout, 200, 'checkout/view');
   } catch (error: any) {
-    console.error('Error setting shipping method:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to set shipping method', 500, 'checkout/error');
   }
 };
@@ -222,7 +228,8 @@ export const getPaymentMethods = async (req: Request, res: Response): Promise<vo
     const methods = await CheckoutRepo.getAvailablePaymentMethods();
     respond(req, res, methods, 200, 'checkout/payment-methods');
   } catch (error: any) {
-    console.error('Error getting payment methods:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to get payment methods', 500, 'checkout/error');
   }
 };
@@ -247,7 +254,8 @@ export const setPaymentMethod = async (req: Request, res: Response): Promise<voi
 
     respond(req, res, checkout, 200, 'checkout/view');
   } catch (error: any) {
-    console.error('Error setting payment method:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to set payment method', 500, 'checkout/error');
   }
 };
@@ -272,7 +280,8 @@ export const applyCoupon = async (req: Request, res: Response): Promise<void> =>
 
     respond(req, res, checkout, 200, 'checkout/view');
   } catch (error: any) {
-    console.error('Error applying coupon:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to apply coupon', 500, 'checkout/error');
   }
 };
@@ -291,7 +300,8 @@ export const removeCoupon = async (req: Request, res: Response): Promise<void> =
 
     respond(req, res, checkout, 200, 'checkout/view');
   } catch (error: any) {
-    console.error('Error removing coupon:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to remove coupon', 500, 'checkout/error');
   }
 };
@@ -310,7 +320,8 @@ export const completeCheckout = async (req: Request, res: Response): Promise<voi
 
     respond(req, res, result, 201, 'checkout/complete');
   } catch (error: any) {
-    console.error('Error completing checkout:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to complete checkout', 500, 'checkout/error');
   }
 };
@@ -329,7 +340,8 @@ export const abandonCheckout = async (req: Request, res: Response): Promise<void
 
     respond(req, res, result, 200, 'checkout/abandoned');
   } catch (error: any) {
-    console.error('Error abandoning checkout:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to abandon checkout', 500, 'checkout/error');
   }
 };
@@ -363,7 +375,8 @@ export const setBillingAddress = async (req: Request, res: Response): Promise<vo
 
     respond(req, res, checkout, 200, 'checkout/billing');
   } catch (error: any) {
-    console.error('Error setting billing address:', error);
+    logger.error('Error:', error);
+    
     respondError(req, res, error.message || 'Failed to set billing address', 500, 'checkout/error');
   }
 };

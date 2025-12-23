@@ -51,7 +51,7 @@ export function registerAllEventHandlers(): void {
     console.log('[EVENTS] Event handlers registered successfully');
     console.log(`[EVENTS] Total registered event types: ${eventBus.getRegisteredTypes().length}`);
   } catch (error) {
-    console.error('[EVENTS] Failed to register event handlers:', error);
+    
     throw error;
   }
 }

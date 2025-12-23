@@ -99,7 +99,7 @@ function createRedisStore(config?: SessionStoreConfig['redis']): SessionStoreRes
   });
 
   client.on('error', (err) => {
-    console.error('Redis session store error:', err.message);
+    
   });
 
   client.on('ready', () => {

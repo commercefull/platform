@@ -3,6 +3,7 @@
  * Shows merchant-specific dashboard with isolated data
  */
 
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import { merchantRespond } from '../../respond';
 import DashboardQueryRepository from '../../../modules/analytics/infrastructure/repositories/DashboardQueryRepository';
@@ -37,7 +38,8 @@ export const getDashboard = async (req: Request, res: Response) => {
       topProducts,
     });
   } catch (error) {
-    console.error('Merchant dashboard error:', error);
+    logger.error('Error:', error);
+    
     merchantRespond(req, res, 'error', {
       pageName: 'Error',
       error: 'Failed to load dashboard',

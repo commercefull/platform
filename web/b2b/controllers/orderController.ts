@@ -1,12 +1,12 @@
 /**
-import { b2bRespond } from '../../respond';
  * B2B Order Controller
  * Manages orders with company isolation
  */
 
+import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import { query, queryOne } from '../../../libs/db';
-import { b2bRespond } from 'web/respond';
+import { b2bRespond } from '../../respond';
 
 interface B2BUser {
   id: string;
@@ -73,7 +73,8 @@ export const listOrders = async (req: Request, res: Response) => {
       filters: { status },
     });
   } catch (error) {
-    console.error('B2B orders error:', error);
+    logger.error('Error:', error);
+    
     b2bRespond(req, res, 'error', {
       pageName: 'Error',
       error: 'Failed to load orders',
@@ -123,7 +124,8 @@ export const viewOrder = async (req: Request, res: Response) => {
       items: items || [],
     });
   } catch (error) {
-    console.error('B2B view order error:', error);
+    logger.error('Error:', error);
+    
     b2bRespond(req, res, 'error', {
       pageName: 'Error',
       error: 'Failed to load order',
@@ -173,7 +175,8 @@ export const reorderForm = async (req: Request, res: Response) => {
       items: items || [],
     });
   } catch (error) {
-    console.error('B2B reorder error:', error);
+    logger.error('Error:', error);
+    
     b2bRespond(req, res, 'error', {
       pageName: 'Error',
       error: 'Failed to load reorder form',
