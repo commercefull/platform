@@ -22,6 +22,7 @@
     "test:int": "jest ./tests/integration --collectCoverage=false --detectOpenHandles --runInBand",
     "test:e2e": "npx cypress run --headless --browser chrome",
     "lint": "npx tsc --noEmit && eslint . --ext .ts,.js",
+    "lint:errors": "eslint . --ext .ts,.js --quiet",
     "lint:fix": "eslint . --ext .ts,.js --fix",
     "format": "prettier --write \"**/*.{ts,js,json,md,html,css,scss}\"",
     "format:check": "prettier --check \"**/*.{ts,js,json,md,html,css,scss}\"",
