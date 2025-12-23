@@ -30,7 +30,7 @@ export const listTaxSettings = async (req: Request, res: Response): Promise<void
        ORDER BY tc."name"`
     );
 
-    res.render('hub/views/tax/index', {
+    res.render('admin/views/tax/index', {
       pageName: 'Tax Management',
       taxRates: taxRates || [],
       taxZones: taxZones || [],
@@ -40,7 +40,7 @@ export const listTaxSettings = async (req: Request, res: Response): Promise<void
     });
   } catch (error: any) {
     console.error('Error listing tax settings:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load tax settings',
       user: req.user

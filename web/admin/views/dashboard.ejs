@@ -15,7 +15,7 @@
         </div><!-- /.col -->
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-right">
-            <li class="breadcrumb-item"><a href="/hub">Home</a></li>
+            <li class="breadcrumb-item"><a href="/admin">Home</a></li>
             <li class="breadcrumb-item active"><%= pageName %></li>
           </ol>
         </div><!-- /.col -->
@@ -36,7 +36,7 @@
               <p>Total Orders</p>
             </div>
             <div class="icon"><i class="fas fa-shopping-cart"></i></div>
-            <a href="/hub/orders" class="small-box-footer">View Orders <i class="fas fa-arrow-circle-right"></i></a>
+            <a href="/admin/orders" class="small-box-footer">View Orders <i class="fas fa-arrow-circle-right"></i></a>
           </div>
         </div>
         <div class="col-lg-3 col-6">
@@ -46,7 +46,7 @@
               <p>Total Revenue</p>
             </div>
             <div class="icon"><i class="fas fa-dollar-sign"></i></div>
-            <a href="/hub/analytics" class="small-box-footer">View Analytics <i class="fas fa-arrow-circle-right"></i></a>
+            <a href="/admin/analytics" class="small-box-footer">View Analytics <i class="fas fa-arrow-circle-right"></i></a>
           </div>
         </div>
         <div class="col-lg-3 col-6">
@@ -56,7 +56,7 @@
               <p>Total Customers</p>
             </div>
             <div class="icon"><i class="fas fa-users"></i></div>
-            <a href="/hub/customers" class="small-box-footer">View Customers <i class="fas fa-arrow-circle-right"></i></a>
+            <a href="/admin/customers" class="small-box-footer">View Customers <i class="fas fa-arrow-circle-right"></i></a>
           </div>
         </div>
         <div class="col-lg-3 col-6">
@@ -66,7 +66,7 @@
               <p>Total Products</p>
             </div>
             <div class="icon"><i class="fas fa-box"></i></div>
-            <a href="/hub/products" class="small-box-footer">View Products <i class="fas fa-arrow-circle-right"></i></a>
+            <a href="/admin/products" class="small-box-footer">View Products <i class="fas fa-arrow-circle-right"></i></a>
           </div>
         </div>
       </div>
@@ -172,7 +172,7 @@
                   <tbody>
                     <% (recentOrders || []).forEach(function(order) { %>
                     <tr>
-                      <td><a href="/hub/orders/<%= order.orderId %>">#<%= order.orderNumber %></a></td>
+                      <td><a href="/admin/orders/<%= order.orderId %>">#<%= order.orderNumber %></a></td>
                       <td><%= order.customerName %></td>
                       <td>
                         <span class="badge badge-<%= order.status === 'completed' ? 'success' : order.status === 'pending' ? 'warning' : order.status === 'cancelled' ? 'danger' : 'info' %>">
@@ -193,7 +193,7 @@
               </div>
             </div>
             <div class="card-footer text-center">
-              <a href="/hub/orders" class="uppercase">View All Orders</a>
+              <a href="/admin/orders" class="uppercase">View All Orders</a>
             </div>
           </div>
 
@@ -217,7 +217,7 @@
                     </div>
                   </div>
                   <div class="product-info">
-                    <a href="/hub/products/<%= product.productId %>" class="product-title">
+                    <a href="/admin/products/<%= product.productId %>" class="product-title">
                       <%= product.name %>
                       <span class="badge badge-success float-right">$<%= (product.revenue || 0).toFixed(2) %></span>
                     </a>
@@ -233,7 +233,7 @@
               </ul>
             </div>
             <div class="card-footer text-center">
-              <a href="/hub/products" class="uppercase">View All Products</a>
+              <a href="/admin/products" class="uppercase">View All Products</a>
             </div>
           </div>
         </section>

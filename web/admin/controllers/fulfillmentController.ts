@@ -35,7 +35,7 @@ export const listFulfillments = async (req: Request, res: Response): Promise<voi
     // Get warehouses for filtering
     const warehouses = await warehouseRepo.findAll(true);
 
-    res.render('hub/views/operations/fulfillments/index', {
+    res.render('admin/views/operations/fulfillments/index', {
       pageName: 'Order Fulfillments',
       fulfillments,
       stats,
@@ -47,7 +47,7 @@ export const listFulfillments = async (req: Request, res: Response): Promise<voi
     });
   } catch (error: any) {
     console.error('Error listing fulfillments:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load fulfillments',
       user: req.user
@@ -62,7 +62,7 @@ export const viewFulfillment = async (req: Request, res: Response): Promise<void
     const fulfillment = await orderFulfillmentRepo.findById(fulfillmentId);
 
     if (!fulfillment) {
-      res.status(404).render('hub/views/error', {
+      res.status(404).render('admin/views/error', {
         pageName: 'Not Found',
         error: 'Fulfillment not found',
         user: req.user
@@ -73,7 +73,7 @@ export const viewFulfillment = async (req: Request, res: Response): Promise<void
     // Get associated order details
     const order = await orderRepo.findById(fulfillment.orderId);
 
-    res.render('hub/views/operations/fulfillments/view', {
+    res.render('admin/views/operations/fulfillments/view', {
       pageName: `Fulfillment: ${fulfillment.fulfillmentNumber}`,
       fulfillment,
       order,
@@ -82,7 +82,7 @@ export const viewFulfillment = async (req: Request, res: Response): Promise<void
     });
   } catch (error: any) {
     console.error('Error viewing fulfillment:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load fulfillment',
       user: req.user
@@ -235,7 +235,7 @@ export const warehouseDashboard = async (req: Request, res: Response): Promise<v
     // Get pending fulfillments
     const pendingFulfillments = await orderFulfillmentRepo.findByStatus('pending', 10);
 
-    res.render('hub/views/operations/dashboard', {
+    res.render('admin/views/operations/dashboard', {
       pageName: 'Warehouse Operations',
       warehouseStats,
       fulfillmentStats,
@@ -247,7 +247,7 @@ export const warehouseDashboard = async (req: Request, res: Response): Promise<v
     });
   } catch (error: any) {
     console.error('Error loading warehouse dashboard:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load warehouse dashboard',
       user: req.user

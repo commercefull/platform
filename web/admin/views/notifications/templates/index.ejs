@@ -11,7 +11,7 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-right">
-            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
             <li class="breadcrumb-item active">Notifications</li>
           </ol>
         </div>
@@ -33,7 +33,7 @@
       <!-- Action Bar -->
       <div class="row mb-3">
         <div class="col-12">
-          <a href="/hub/notifications/templates/create" class="btn btn-primary">
+          <a href="/admin/notifications/templates/create" class="btn btn-primary">
             <i class="fas fa-plus"></i> Create Template
           </a>
           <div class="float-right">
@@ -70,7 +70,7 @@
                 <button type="submit" class="btn btn-secondary mr-2">
                   <i class="fas fa-filter"></i> Filter
                 </button>
-                <a href="/hub/notifications/templates" class="btn btn-outline-secondary">
+                <a href="/admin/notifications/templates" class="btn btn-outline-secondary">
                   <i class="fas fa-times"></i> Clear
                 </a>
               </form>
@@ -100,7 +100,7 @@
               <% if (templates.length === 0) { %>
                 <tr>
                   <td colspan="6" class="text-center py-4">
-                    <em>No notification templates found. <a href="/hub/notifications/templates/create">Create your first template</a>.</em>
+                    <em>No notification templates found. <a href="/admin/notifications/templates/create">Create your first template</a>.</em>
                   </td>
                 </tr>
               <% } else { %>
@@ -136,10 +136,10 @@
                       <% } %>
                     </td>
                     <td>
-                      <a href="/hub/notifications/templates/<%= template.notificationTemplateId %>" class="btn btn-sm btn-info">
+                      <a href="/admin/notifications/templates/<%= template.notificationTemplateId %>" class="btn btn-sm btn-info">
                         <i class="fas fa-eye"></i>
                       </a>
-                      <a href="/hub/notifications/templates/<%= template.notificationTemplateId %>/edit" class="btn btn-sm btn-primary">
+                      <a href="/admin/notifications/templates/<%= template.notificationTemplateId %>/edit" class="btn btn-sm btn-primary">
                         <i class="fas fa-edit"></i>
                       </a>
                       <% if (template.isActive) { %>
@@ -190,7 +190,7 @@
 
 <script>
 function activateTemplate(templateId) {
-  fetch(`/hub/notifications/templates/${templateId}/activate`, {
+  fetch(`/admin/notifications/templates/${templateId}/activate`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -211,7 +211,7 @@ function activateTemplate(templateId) {
 }
 
 function deactivateTemplate(templateId) {
-  fetch(`/hub/notifications/templates/${templateId}/deactivate`, {
+  fetch(`/admin/notifications/templates/${templateId}/deactivate`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -234,7 +234,7 @@ function deactivateTemplate(templateId) {
 function deleteTemplate(templateId, templateName) {
   document.getElementById('deleteTemplateName').textContent = templateName;
   document.getElementById('confirmDeleteBtn').onclick = function() {
-    fetch(`/hub/notifications/templates/${templateId}`, {
+    fetch(`/admin/notifications/templates/${templateId}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',

@@ -20,4 +20,5 @@ router.put('/:brandId', updateBrand);
 router.patch('/:brandId', updateBrand);
 router.delete('/:brandId', deleteBrand);
 
+export const brandBusinessRouter = router;
 export default router;

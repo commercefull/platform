@@ -1,0 +1,103 @@
+<!-- Toolbar -->
+<div class="row mb-3">
+  <div class="col-12">
+    <a href="/b2b/quotes/create" class="btn btn-primary">
+      <i class="fas fa-plus"></i> Request Quote
+    </a>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="card collapsed-card">
+  <div class="card-header">
+    <h3 class="card-title">Filters</h3>
+    <div class="card-tools">
+      <button type="button" class="btn btn-tool" data-card-widget="collapse">
+        <i class="fas fa-plus"></i>
+      </button>
+    </div>
+  </div>
+  <div class="card-body">
+    <form method="GET" class="row">
+      <div class="col-md-4">
+        <div class="form-group">
+          <label>Status</label>
+          <select name="status" class="form-control">
+            <option value="">All Status</option>
+            <option value="draft" <%= filters?.status === 'draft' ? 'selected' : '' %>>Draft</option>
+            <option value="sent" <%= filters?.status === 'sent' ? 'selected' : '' %>>Sent</option>
+            <option value="negotiating" <%= filters?.status === 'negotiating' ? 'selected' : '' %>>Negotiating</option>
+            <option value="accepted" <%= filters?.status === 'accepted' ? 'selected' : '' %>>Accepted</option>
+            <option value="rejected" <%= filters?.status === 'rejected' ? 'selected' : '' %>>Rejected</option>
+          </select>
+        </div>
+      </div>
+      <div class="col-md-2">
+        <div class="form-group">
+          <label>&nbsp;</label>
+          <button type="submit" class="btn btn-primary btn-block">Filter</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Quotes Table -->
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">Quotes</h3>
+  </div>
+  <div class="card-body p-0">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Quote #</th>
+          <th>Created By</th>
+          <th>Items</th>
+          <th>Total</th>
+          <th>Status</th>
+          <th>Created</th>
+          <th>Expires</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (quotes && quotes.length > 0) { %>
+          <% quotes.forEach(quote => { %>
+            <tr>
+              <td><a href="/b2b/quotes/<%= quote.quoteId %>"><%= quote.quoteNumber || quote.quoteId.slice(0,8) %></a></td>
+              <td><%= quote.createdByName %></td>
+              <td><%= quote.itemCount || 0 %></td>
+              <td>$<%= (quote.totalAmount || 0).toFixed(2) %></td>
+              <td><span class="badge badge-<%= quote.status === 'accepted' ? 'success' : quote.status === 'rejected' ? 'danger' : 'secondary' %>"><%= quote.status %></span></td>
+              <td><%= new Date(quote.createdAt).toLocaleDateString() %></td>
+              <td><%= quote.expiresAt ? new Date(quote.expiresAt).toLocaleDateString() : '-' %></td>
+              <td>
+                <a href="/b2b/quotes/<%= quote.quoteId %>" class="btn btn-sm btn-info">
+                  <i class="fas fa-eye"></i>
+                </a>
+              </td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr><td colspan="8" class="text-center text-muted py-4">No quotes found</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+  <% if (pagination && pagination.pages > 1) { %>
+  <div class="card-footer clearfix">
+    <ul class="pagination pagination-sm m-0 float-right">
+      <li class="page-item <%= pagination.hasPrev ? '' : 'disabled' %>">
+        <a class="page-link" href="?page=<%= pagination.page - 1 %>">&laquo;</a>
+      </li>
+      <li class="page-item active">
+        <span class="page-link"><%= pagination.page %> / <%= pagination.pages %></span>
+      </li>
+      <li class="page-item <%= pagination.hasNext ? '' : 'disabled' %>">
+        <a class="page-link" href="?page=<%= pagination.page + 1 %>">&raquo;</a>
+      </li>
+    </ul>
+  </div>
+  <% } %>
+</div>

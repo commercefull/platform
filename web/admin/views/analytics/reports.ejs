@@ -9,7 +9,7 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-end">
-            <li class="breadcrumb-item"><a href="/hub/analytics">Analytics</a></li>
+            <li class="breadcrumb-item"><a href="/admin/analytics">Analytics</a></li>
             <li class="breadcrumb-item active">Reports</li>
           </ol>
         </div>
@@ -306,7 +306,7 @@
     const data = Object.fromEntries(formData);
     
     try {
-      const response = await fetch('/hub/analytics/reports/run-now', {
+      const response = await fetch('/admin/analytics/reports/run-now', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -330,7 +330,7 @@
     data.recipients = data.recipients.split(',').map(e => e.trim()).filter(e => e);
     
     try {
-      const response = await fetch('/hub/analytics/reports/schedules', {
+      const response = await fetch('/admin/analytics/reports/schedules', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)

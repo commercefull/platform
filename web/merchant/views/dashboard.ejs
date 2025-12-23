@@ -1,0 +1,123 @@
+<!-- Stats Row -->
+<div class="row">
+  <div class="col-lg-3 col-6">
+    <div class="small-box bg-info">
+      <div class="inner">
+        <h3><%= stats?.totalOrders || 0 %></h3>
+        <p>Total Orders</p>
+      </div>
+      <div class="icon">
+        <i class="fas fa-shopping-cart"></i>
+      </div>
+      <a href="/merchant/orders" class="small-box-footer">View orders <i class="fas fa-arrow-circle-right"></i></a>
+    </div>
+  </div>
+  <div class="col-lg-3 col-6">
+    <div class="small-box bg-success">
+      <div class="inner">
+        <h3>$<%= (stats?.totalRevenue || 0).toFixed(0) %></h3>
+        <p>Total Revenue</p>
+      </div>
+      <div class="icon">
+        <i class="fas fa-dollar-sign"></i>
+      </div>
+      <a href="/merchant/finances" class="small-box-footer">View finances <i class="fas fa-arrow-circle-right"></i></a>
+    </div>
+  </div>
+  <div class="col-lg-3 col-6">
+    <div class="small-box bg-warning">
+      <div class="inner">
+        <h3><%= stats?.pendingOrders || 0 %></h3>
+        <p>Pending Orders</p>
+      </div>
+      <div class="icon">
+        <i class="fas fa-clock"></i>
+      </div>
+      <a href="/merchant/orders?status=pending" class="small-box-footer">View pending <i class="fas fa-arrow-circle-right"></i></a>
+    </div>
+  </div>
+  <div class="col-lg-3 col-6">
+    <div class="small-box bg-danger">
+      <div class="inner">
+        <h3><%= stats?.lowStockProducts || 0 %></h3>
+        <p>Low Stock Items</p>
+      </div>
+      <div class="icon">
+        <i class="fas fa-exclamation-triangle"></i>
+      </div>
+      <a href="/merchant/inventory?filter=low" class="small-box-footer">View inventory <i class="fas fa-arrow-circle-right"></i></a>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <!-- Recent Orders -->
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Recent Orders</h3>
+        <div class="card-tools">
+          <a href="/merchant/orders" class="btn btn-tool btn-sm"><i class="fas fa-arrow-right"></i></a>
+        </div>
+      </div>
+      <div class="card-body p-0">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Order #</th>
+              <th>Customer</th>
+              <th>Amount</th>
+              <th>Status</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (recentOrders && recentOrders.length > 0) { %>
+              <% recentOrders.forEach(order => { %>
+                <tr>
+                  <td><a href="/merchant/orders/<%= order.orderId %>"><%= order.orderNumber %></a></td>
+                  <td><%= order.customerName %></td>
+                  <td>$<%= (order.totalAmount || 0).toFixed(2) %></td>
+                  <td><span class="badge badge-secondary"><%= order.status %></span></td>
+                  <td><%= new Date(order.createdAt).toLocaleDateString() %></td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr><td colspan="5" class="text-center text-muted">No orders yet</td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top Products -->
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Top Products</h3>
+      </div>
+      <div class="card-body p-0">
+        <ul class="products-list product-list-in-card pl-2 pr-2">
+          <% if (topProducts && topProducts.length > 0) { %>
+            <% topProducts.forEach(product => { %>
+              <li class="item">
+                <div class="product-info">
+                  <span class="product-title">
+                    <%= product.name %>
+                    <span class="badge badge-info float-right"><%= product.totalSold %> sold</span>
+                  </span>
+                  <span class="product-description">
+                    Revenue: $<%= (product.revenue || 0).toFixed(2) %>
+                  </span>
+                </div>
+              </li>
+            <% }) %>
+          <% } else { %>
+            <li class="item text-center text-muted py-3">No sales yet</li>
+          <% } %>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

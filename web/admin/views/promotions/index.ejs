@@ -11,7 +11,7 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-right">
-            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
             <li class="breadcrumb-item active">Promotions</li>
           </ol>
         </div>
@@ -33,7 +33,7 @@
       <!-- Action Bar -->
       <div class="row mb-3">
         <div class="col-12">
-          <a href="/hub/promotions/create" class="btn btn-primary">
+          <a href="/admin/promotions/create" class="btn btn-primary">
             <i class="fas fa-plus"></i> Create Promotion
           </a>
         </div>
@@ -72,7 +72,7 @@
             <button type="submit" class="btn btn-secondary mr-2">
               <i class="fas fa-search"></i> Filter
             </button>
-            <a href="/hub/promotions" class="btn btn-outline-secondary">
+            <a href="/admin/promotions" class="btn btn-outline-secondary">
               <i class="fas fa-times"></i> Clear
             </a>
           </form>
@@ -102,7 +102,7 @@
               <% if (promotions.length === 0) { %>
                 <tr>
                   <td colspan="8" class="text-center py-4">
-                    <em>No promotions found. <a href="/hub/promotions/create">Create your first promotion</a>.</em>
+                    <em>No promotions found. <a href="/admin/promotions/create">Create your first promotion</a>.</em>
                   </td>
                 </tr>
               <% } else { %>
@@ -148,10 +148,10 @@
                       </span>
                     </td>
                     <td>
-                      <a href="/hub/promotions/<%= promotion.promotionId %>" class="btn btn-sm btn-info">
+                      <a href="/admin/promotions/<%= promotion.promotionId %>" class="btn btn-sm btn-info">
                         <i class="fas fa-eye"></i>
                       </a>
-                      <a href="/hub/promotions/<%= promotion.promotionId %>/edit" class="btn btn-sm btn-primary">
+                      <a href="/admin/promotions/<%= promotion.promotionId %>/edit" class="btn btn-sm btn-primary">
                         <i class="fas fa-edit"></i>
                       </a>
                       <button class="btn btn-sm btn-danger" onclick="deletePromotion('<%= promotion.promotionId %>', '<%= promotion.name %>')">
@@ -168,7 +168,7 @@
         <!-- Pagination -->
         <% if (pagination.pages > 1) { %>
           <div class="card-footer">
-            <%- include('../partials/pagination', { pagination, baseUrl: '/hub/promotions' }) %>
+            <%- include('../partials/pagination', { pagination, baseUrl: '/admin/promotions' }) %>
           </div>
         <% } %>
       </div>
@@ -202,7 +202,7 @@
 function deletePromotion(promotionId, promotionName) {
   document.getElementById('deletePromotionName').textContent = promotionName;
   document.getElementById('confirmDeleteBtn').onclick = function() {
-    fetch(`/hub/promotions/${promotionId}`, {
+    fetch(`/admin/promotions/${promotionId}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',

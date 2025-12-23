@@ -9,8 +9,8 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-end">
-            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="/hub/content/pages">Content</a></li>
+            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/admin/content/pages">Content</a></li>
             <li class="breadcrumb-item active">Media Library</li>
           </ol>
         </div>
@@ -26,7 +26,7 @@
           <h3 class="card-title"><i class="fas fa-upload me-2"></i>Upload Media</h3>
         </div>
         <div class="card-body">
-          <form method="POST" action="/hub/content/media" enctype="multipart/form-data" id="uploadForm">
+          <form method="POST" action="/admin/content/media" enctype="multipart/form-data" id="uploadForm">
             <div class="upload-area border border-dashed rounded p-5 text-center" id="dropZone">
               <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
               <p class="mb-2">Drag and drop files here or click to browse</p>
@@ -145,7 +145,7 @@
 
   async function deleteMedia(id) {
     if (!confirm('Delete this media file?')) return;
-    const res = await fetch(`/hub/content/media/${id}`, { method: 'DELETE' });
+    const res = await fetch(`/admin/content/media/${id}`, { method: 'DELETE' });
     if ((await res.json()).success) location.reload();
   }
 </script>

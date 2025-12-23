@@ -15,8 +15,8 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-right">
-            <li class="breadcrumb-item"><a href="/hub">Home</a></li>
-            <li class="breadcrumb-item"><a href="/hub/orders">Orders</a></li>
+            <li class="breadcrumb-item"><a href="/admin">Home</a></li>
+            <li class="breadcrumb-item"><a href="/admin/orders">Orders</a></li>
             <li class="breadcrumb-item active">#<%= order.orderNumber %></li>
           </ol>
         </div>
@@ -193,7 +193,7 @@
             </div>
             <div class="card-body">
               <!-- Update Status -->
-              <form action="/hub/orders/<%= order.orderId %>/status" method="POST" class="mb-3">
+              <form action="/admin/orders/<%= order.orderId %>/status" method="POST" class="mb-3">
                 <div class="form-group">
                   <label>Update Status</label>
                   <select name="status" class="form-control" required>
@@ -213,7 +213,7 @@
 
               <!-- Quick Actions -->
               <% if (order.status !== 'cancelled' && order.status !== 'refunded') { %>
-                <form action="/hub/orders/<%= order.orderId %>/cancel" method="POST" class="mb-2">
+                <form action="/admin/orders/<%= order.orderId %>/cancel" method="POST" class="mb-2">
                   <input type="hidden" name="reason" value="Cancelled by admin">
                   <button type="submit" class="btn btn-danger btn-block" onclick="return confirm('Cancel this order?')">
                     <i class="fas fa-times mr-1"></i>Cancel Order
@@ -222,12 +222,12 @@
               <% } %>
 
               <% if (order.paymentStatus === 'paid' && order.status !== 'refunded') { %>
-                <a href="/hub/orders/<%= order.orderId %>/refund" class="btn btn-warning btn-block">
+                <a href="/admin/orders/<%= order.orderId %>/refund" class="btn btn-warning btn-block">
                   <i class="fas fa-undo mr-1"></i>Process Refund
                 </a>
               <% } %>
 
-              <a href="/hub/orders" class="btn btn-secondary btn-block mt-3">
+              <a href="/admin/orders" class="btn btn-secondary btn-block mt-3">
                 <i class="fas fa-arrow-left mr-1"></i>Back to Orders
               </a>
             </div>

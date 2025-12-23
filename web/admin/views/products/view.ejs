@@ -15,8 +15,8 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-right">
-            <li class="breadcrumb-item"><a href="/hub">Home</a></li>
-            <li class="breadcrumb-item"><a href="/hub/products">Products</a></li>
+            <li class="breadcrumb-item"><a href="/admin">Home</a></li>
+            <li class="breadcrumb-item"><a href="/admin/products">Products</a></li>
             <li class="breadcrumb-item active"><%= product.name %></li>
           </ol>
         </div>
@@ -151,7 +151,7 @@
               <h3 class="card-title">Actions</h3>
             </div>
             <div class="card-body">
-              <a href="/hub/products/<%= product.productId %>/edit" class="btn btn-primary btn-block mb-2">
+              <a href="/admin/products/<%= product.productId %>/edit" class="btn btn-primary btn-block mb-2">
                 <i class="fas fa-edit"></i> Edit Product
               </a>
 
@@ -171,7 +171,7 @@
 
               <hr>
 
-              <a href="/hub/products" class="btn btn-secondary btn-block">
+              <a href="/admin/products" class="btn btn-secondary btn-block">
                 <i class="fas fa-arrow-left"></i> Back to Products
               </a>
             </div>
@@ -218,7 +218,7 @@
 <script>
 function publishProduct(productId) {
   if (confirm('Publish this product?')) {
-    fetch(`/hub/products/${productId}/publish`, { method: 'POST' })
+    fetch(`/admin/products/${productId}/publish`, { method: 'POST' })
       .then(r => r.json())
       .then(data => {
         if (data.success) location.reload();
@@ -229,7 +229,7 @@ function publishProduct(productId) {
 
 function unpublishProduct(productId) {
   if (confirm('Unpublish this product?')) {
-    fetch(`/hub/products/${productId}/unpublish`, { method: 'POST' })
+    fetch(`/admin/products/${productId}/unpublish`, { method: 'POST' })
       .then(r => r.json())
       .then(data => {
         if (data.success) location.reload();
@@ -245,10 +245,10 @@ function deleteProduct(productId, productName) {
 
   message.textContent = `Are you sure you want to delete "${productName}"?`;
   confirmBtn.onclick = () => {
-    fetch(`/hub/products/${productId}`, { method: 'DELETE' })
+    fetch(`/admin/products/${productId}`, { method: 'DELETE' })
       .then(r => r.json())
       .then(data => {
-        if (data.success) window.location.href = '/hub/products?success=Product deleted';
+        if (data.success) window.location.href = '/admin/products?success=Product deleted';
         else alert('Error: ' + data.message);
       });
   };

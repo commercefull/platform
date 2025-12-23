@@ -65,7 +65,7 @@ export const operationsDashboard = async (req: Request, res: Response): Promise<
        ORDER BY w."name"`
     );
 
-    res.render('hub/views/operations/dashboard/index', {
+    res.render('admin/views/operations/dashboard/index', {
       pageName: 'Operations Dashboard',
       stats: {
         pendingFulfillments: parseInt(fulfillmentStats?.pendingFulfillments || '0'),
@@ -82,7 +82,7 @@ export const operationsDashboard = async (req: Request, res: Response): Promise<
     });
   } catch (error: any) {
     console.error('Error loading operations dashboard:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load operations dashboard',
       user: req.user

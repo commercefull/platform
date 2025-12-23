@@ -9,7 +9,7 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-end">
-            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
             <li class="breadcrumb-item active">Payment Methods</li>
           </ol>
         </div>
@@ -60,7 +60,7 @@
                   <button class="btn btn-sm btn-outline-<%= method.isActive ? 'warning' : 'success' %>" onclick="toggleMethod('<%= method.paymentMethodId %>')">
                     <i class="fas fa-<%= method.isActive ? 'pause' : 'play' %>"></i>
                   </button>
-                  <a href="/hub/payments/methods/<%= method.paymentMethodId %>/edit" class="btn btn-sm btn-outline-primary">
+                  <a href="/admin/payments/methods/<%= method.paymentMethodId %>/edit" class="btn btn-sm btn-outline-primary">
                     <i class="fas fa-edit"></i>
                   </a>
                 </td>
@@ -83,7 +83,7 @@
 
 <script>
   async function toggleMethod(id) {
-    const res = await fetch(`/hub/payments/methods/${id}/toggle`, { method: 'POST' });
+    const res = await fetch(`/admin/payments/methods/${id}/toggle`, { method: 'POST' });
     if ((await res.json()).success) location.reload();
   }
 </script>

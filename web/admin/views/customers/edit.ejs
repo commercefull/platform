@@ -9,8 +9,8 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-end">
-            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="/hub/customers">Customers</a></li>
+            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/admin/customers">Customers</a></li>
             <li class="breadcrumb-item active">Edit</li>
           </ol>
         </div>
@@ -27,7 +27,7 @@
       </div>
       <% } %>
 
-      <form method="POST" action="/hub/customers/<%= customer.customerId %>">
+      <form method="POST" action="/admin/customers/<%= customer.customerId %>">
         <div class="row">
           <!-- Main Content -->
           <div class="col-lg-8">
@@ -153,7 +153,7 @@
                 <button type="submit" class="btn btn-primary btn-lg w-100 mb-2">
                   <i class="fas fa-save me-2"></i>Save Changes
                 </button>
-                <a href="/hub/customers/<%= customer.customerId %>" class="btn btn-secondary w-100">
+                <a href="/admin/customers/<%= customer.customerId %>" class="btn btn-secondary w-100">
                   <i class="fas fa-times me-2"></i>Cancel
                 </a>
               </div>

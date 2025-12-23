@@ -15,7 +15,7 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-right">
-            <li class="breadcrumb-item"><a href="/hub">Home</a></li>
+            <li class="breadcrumb-item"><a href="/admin">Home</a></li>
             <li class="breadcrumb-item active"><%= pageName %></li>
           </ol>
         </div>
@@ -72,7 +72,7 @@
                 <label>&nbsp;</label>
                 <div>
                   <button type="submit" class="btn btn-primary">Filter</button>
-                  <a href="/hub/customers" class="btn btn-secondary">Clear</a>
+                  <a href="/admin/customers" class="btn btn-secondary">Clear</a>
                 </div>
               </div>
             </div>
@@ -103,7 +103,7 @@
               <% customers.forEach(customer => { %>
               <tr>
                 <td>
-                  <a href="/hub/customers/<%= customer.customerId %>">
+                  <a href="/admin/customers/<%= customer.customerId %>">
                     <strong><%= customer.firstName %> <%= customer.lastName %></strong>
                   </a>
                 </td>
@@ -131,10 +131,10 @@
                 </td>
                 <td>
                   <div class="btn-group">
-                    <a href="/hub/customers/<%= customer.customerId %>" class="btn btn-sm btn-info" title="View">
+                    <a href="/admin/customers/<%= customer.customerId %>" class="btn btn-sm btn-info" title="View">
                       <i class="fas fa-eye"></i>
                     </a>
-                    <a href="/hub/customers/<%= customer.customerId %>/edit" class="btn btn-sm btn-primary" title="Edit">
+                    <a href="/admin/customers/<%= customer.customerId %>/edit" class="btn btn-sm btn-primary" title="Edit">
                       <i class="fas fa-edit"></i>
                     </a>
                     <% if (customer.isActive) { %>
@@ -177,7 +177,7 @@
 <script>
 function deactivateCustomer(customerId) {
   if (confirm('Deactivate this customer?')) {
-    fetch(`/hub/customers/${customerId}/deactivate`, { method: 'POST' })
+    fetch(`/admin/customers/${customerId}/deactivate`, { method: 'POST' })
       .then(r => r.json())
       .then(data => {
         if (data.success) location.reload();
@@ -188,7 +188,7 @@ function deactivateCustomer(customerId) {
 
 function reactivateCustomer(customerId) {
   if (confirm('Reactivate this customer?')) {
-    fetch(`/hub/customers/${customerId}/reactivate`, { method: 'POST' })
+    fetch(`/admin/customers/${customerId}/reactivate`, { method: 'POST' })
       .then(r => r.json())
       .then(data => {
         if (data.success) location.reload();

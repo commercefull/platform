@@ -11,8 +11,8 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-right">
-            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="/hub/promotions">Promotions</a></li>
+            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/admin/promotions">Promotions</a></li>
             <li class="breadcrumb-item active"><%= promotion.code %></li>
           </ol>
         </div>
@@ -34,13 +34,13 @@
       <!-- Action Bar -->
       <div class="row mb-3">
         <div class="col-12">
-          <a href="<%= `/hub/promotions/${promotion.promotionId}/edit` %>" class="btn btn-primary">
+          <a href="<%= `/admin/promotions/${promotion.promotionId}/edit` %>" class="btn btn-primary">
             <i class="fas fa-edit"></i> Edit Promotion
           </a>
           <button class="btn btn-danger ml-2" onclick="deletePromotion('<%= promotion.promotionId %>', '<%= promotion.name %>')">
             <i class="fas fa-trash"></i> Delete Promotion
           </button>
-          <a href="/hub/promotions" class="btn btn-secondary ml-2">
+          <a href="/admin/promotions" class="btn btn-secondary ml-2">
             <i class="fas fa-arrow-left"></i> Back to Promotions
           </a>
         </div>
@@ -216,7 +216,7 @@
 function deletePromotion(promotionId, promotionName) {
   document.getElementById('deletePromotionName').textContent = promotionName;
   document.getElementById('confirmDeleteBtn').onclick = function() {
-    fetch(`/hub/promotions/${promotionId}`, {
+    fetch(`/admin/promotions/${promotionId}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
@@ -225,7 +225,7 @@ function deletePromotion(promotionId, promotionName) {
     .then(response => response.json())
     .then(data => {
       if (data.success) {
-        window.location.href = '/hub/promotions?success=Promotion deleted successfully';
+        window.location.href = '/admin/promotions?success=Promotion deleted successfully';
       } else {
         alert('Error: ' + data.message);
       }

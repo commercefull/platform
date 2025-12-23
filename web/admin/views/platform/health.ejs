@@ -9,7 +9,7 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-end">
-            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
             <li class="breadcrumb-item active">System Health</li>
           </ol>
         </div>
@@ -239,7 +239,7 @@
 <script>
   async function acknowledgeAlert(alertId) {
     try {
-      const response = await fetch(`/hub/platform/alerts/${alertId}/acknowledge`, { method: 'POST' });
+      const response = await fetch(`/admin/platform/alerts/${alertId}/acknowledge`, { method: 'POST' });
       const result = await response.json();
       if (result.success) {
         location.reload();

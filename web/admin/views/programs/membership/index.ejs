@@ -9,7 +9,7 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-end">
-            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
             <li class="breadcrumb-item active">Memberships</li>
           </ol>
         </div>
@@ -116,7 +116,7 @@
       <div class="card">
         <div class="card-header">
           <h3 class="card-title"><i class="fas fa-users me-2"></i>Recent Members</h3>
-          <a href="/hub/programs/membership/members" class="btn btn-sm btn-primary float-end">View All</a>
+          <a href="/admin/programs/membership/members" class="btn btn-sm btn-primary float-end">View All</a>
         </div>
         <div class="card-body table-responsive p-0">
           <table class="table table-hover">
@@ -146,7 +146,7 @@
                 <td><%= new Date(member.startDate).toLocaleDateString() %></td>
                 <td><%= member.endDate ? new Date(member.endDate).toLocaleDateString() : 'Never' %></td>
                 <td>
-                  <a href="/hub/programs/membership/members/<%= member.userMembershipId %>" class="btn btn-sm btn-outline-info">
+                  <a href="/admin/programs/membership/members/<%= member.userMembershipId %>" class="btn btn-sm btn-outline-info">
                     <i class="fas fa-eye"></i>
                   </a>
                 </td>
@@ -173,7 +173,7 @@
         <h5 class="modal-title">Add Membership Tier</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <form method="POST" action="/hub/programs/membership/tiers">
+      <form method="POST" action="/admin/programs/membership/tiers">
         <div class="modal-body">
           <div class="row">
             <div class="col-md-6">
@@ -233,10 +233,10 @@
 </div>
 
 <script>
-  function editTier(id) { window.location.href = `/hub/programs/membership/tiers/${id}/edit`; }
+  function editTier(id) { window.location.href = `/admin/programs/membership/tiers/${id}/edit`; }
   async function deleteTier(id) {
     if (!confirm('Delete this tier?')) return;
-    const res = await fetch(`/hub/programs/membership/tiers/${id}`, { method: 'DELETE' });
+    const res = await fetch(`/admin/programs/membership/tiers/${id}`, { method: 'DELETE' });
     if ((await res.json()).success) location.reload();
   }
 </script>

@@ -9,7 +9,7 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-end">
-            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
             <li class="breadcrumb-item active">Inventory</li>
           </ol>
         </div>
@@ -62,7 +62,7 @@
       <!-- Filters -->
       <div class="card mb-3">
         <div class="card-body">
-          <form method="GET" action="/hub/inventory" class="row g-3">
+          <form method="GET" action="/admin/inventory" class="row g-3">
             <div class="col-md-3">
               <label class="form-label">Search</label>
               <input type="text" class="form-control" name="search" value="<%= filters.search || '' %>" placeholder="Search by product name or SKU...">
@@ -89,7 +89,7 @@
               <button type="submit" class="btn btn-primary me-2">
                 <i class="fas fa-search me-1"></i>Filter
               </button>
-              <a href="/hub/inventory" class="btn btn-secondary me-2">
+              <a href="/admin/inventory" class="btn btn-secondary me-2">
                 <i class="fas fa-times me-1"></i>Clear
               </a>
               <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#adjustStockModal">
@@ -125,7 +125,7 @@
               <% (inventory || []).forEach(function(item) { %>
               <tr>
                 <td>
-                  <a href="/hub/products/<%= item.productId %>" class="text-decoration-none">
+                  <a href="/admin/products/<%= item.productId %>" class="text-decoration-none">
                     <%= item.productName || 'Unknown Product' %>
                   </a>
                 </td>
@@ -158,7 +158,7 @@
                   <button class="btn btn-sm btn-outline-primary" onclick="openAdjustModal('<%= item.inventoryLevelId %>', '<%= item.productName %>', <%= item.quantity %>)" title="Adjust">
                     <i class="fas fa-edit"></i>
                   </button>
-                  <a href="/hub/inventory/<%= item.inventoryLevelId %>/history" class="btn btn-sm btn-outline-info" title="History">
+                  <a href="/admin/inventory/<%= item.inventoryLevelId %>/history" class="btn btn-sm btn-outline-info" title="History">
                     <i class="fas fa-history"></i>
                   </a>
                 </td>
@@ -286,7 +286,7 @@
     const data = Object.fromEntries(formData);
 
     try {
-      const response = await fetch('/hub/inventory/adjust', {
+      const response = await fetch('/admin/inventory/adjust', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)

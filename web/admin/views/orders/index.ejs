@@ -15,7 +15,7 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-right">
-            <li class="breadcrumb-item"><a href="/hub">Home</a></li>
+            <li class="breadcrumb-item"><a href="/admin">Home</a></li>
             <li class="breadcrumb-item active"><%= pageName %></li>
           </ol>
         </div>
@@ -85,7 +85,7 @@
                 <label>&nbsp;</label>
                 <div>
                   <button type="submit" class="btn btn-primary">Filter</button>
-                  <a href="/hub/orders" class="btn btn-secondary">Clear</a>
+                  <a href="/admin/orders" class="btn btn-secondary">Clear</a>
                 </div>
               </div>
             </div>
@@ -117,7 +117,7 @@
               <% orders.forEach(order => { %>
               <tr>
                 <td>
-                  <a href="/hub/orders/<%= order.orderId %>">
+                  <a href="/admin/orders/<%= order.orderId %>">
                     <strong>#<%= order.orderNumber %></strong>
                   </a>
                 </td>
@@ -155,11 +155,11 @@
                 <td><strong>$<%= order.totalAmount.toFixed(2) %></strong></td>
                 <td>
                   <div class="btn-group">
-                    <a href="/hub/orders/<%= order.orderId %>" class="btn btn-sm btn-info" title="View">
+                    <a href="/admin/orders/<%= order.orderId %>" class="btn btn-sm btn-info" title="View">
                       <i class="fas fa-eye"></i>
                     </a>
                     <% if (order.paymentStatus === 'paid' && order.status !== 'refunded') { %>
-                    <a href="/hub/orders/<%= order.orderId %>/refund" class="btn btn-sm btn-warning" title="Refund">
+                    <a href="/admin/orders/<%= order.orderId %>/refund" class="btn btn-sm btn-warning" title="Refund">
                       <i class="fas fa-undo"></i>
                     </a>
                     <% } %>

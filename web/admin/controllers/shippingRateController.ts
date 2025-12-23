@@ -25,7 +25,7 @@ export const listShippingRates = async (req: Request, res: Response): Promise<vo
     const zones = await shippingZoneRepo.findAll();
     const methods = await shippingMethodRepo.findAll();
 
-    res.render('hub/views/shipping/rates/index', {
+    res.render('admin/views/shipping/rates/index', {
       pageName: 'Shipping Rates',
       rates,
       zones,
@@ -37,7 +37,7 @@ export const listShippingRates = async (req: Request, res: Response): Promise<vo
     });
   } catch (error: any) {
     console.error('Error listing shipping rates:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load shipping rates',
       user: req.user
@@ -50,7 +50,7 @@ export const createShippingRateForm = async (req: Request, res: Response): Promi
     const zones = await shippingZoneRepo.findAll();
     const methods = await shippingMethodRepo.findAll();
 
-    res.render('hub/views/shipping/rates/create', {
+    res.render('admin/views/shipping/rates/create', {
       pageName: 'Create Shipping Rate',
       zones,
       methods,
@@ -58,7 +58,7 @@ export const createShippingRateForm = async (req: Request, res: Response): Promi
     });
   } catch (error: any) {
     console.error('Error loading create rate form:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
       user: req.user
@@ -116,7 +116,7 @@ export const createShippingRate = async (req: Request, res: Response): Promise<v
       const zones = await shippingZoneRepo.findAll();
       const methods = await shippingMethodRepo.findAll();
 
-      res.render('hub/views/shipping/rates/create', {
+      res.render('admin/views/shipping/rates/create', {
         pageName: 'Create Shipping Rate',
         zones,
         methods,
@@ -125,7 +125,7 @@ export const createShippingRate = async (req: Request, res: Response): Promise<v
         user: req.user
       });
     } catch {
-      res.status(500).render('hub/views/error', {
+      res.status(500).render('admin/views/error', {
         pageName: 'Error',
         error: error.message || 'Failed to create shipping rate',
         user: req.user
@@ -141,7 +141,7 @@ export const viewShippingRate = async (req: Request, res: Response): Promise<voi
     const rate = await shippingRateRepo.findById(rateId);
 
     if (!rate) {
-      res.status(404).render('hub/views/error', {
+      res.status(404).render('admin/views/error', {
         pageName: 'Not Found',
         error: 'Shipping rate not found',
         user: req.user
@@ -153,7 +153,7 @@ export const viewShippingRate = async (req: Request, res: Response): Promise<voi
     const zone = await shippingZoneRepo.findById(rate.shippingZoneId);
     const method = await shippingMethodRepo.findById(rate.shippingMethodId);
 
-    res.render('hub/views/shipping/rates/view', {
+    res.render('admin/views/shipping/rates/view', {
       pageName: `Rate: ${rate.name || `${zone?.name} - ${method?.name}`}`,
       rate,
       zone,
@@ -163,7 +163,7 @@ export const viewShippingRate = async (req: Request, res: Response): Promise<voi
     });
   } catch (error: any) {
     console.error('Error viewing shipping rate:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load shipping rate',
       user: req.user
@@ -178,7 +178,7 @@ export const editShippingRateForm = async (req: Request, res: Response): Promise
     const rate = await shippingRateRepo.findById(rateId);
 
     if (!rate) {
-      res.status(404).render('hub/views/error', {
+      res.status(404).render('admin/views/error', {
         pageName: 'Not Found',
         error: 'Shipping rate not found',
         user: req.user
@@ -189,7 +189,7 @@ export const editShippingRateForm = async (req: Request, res: Response): Promise
     const zones = await shippingZoneRepo.findAll();
     const methods = await shippingMethodRepo.findAll();
 
-    res.render('hub/views/shipping/rates/edit', {
+    res.render('admin/views/shipping/rates/edit', {
       pageName: `Edit: ${rate.name || 'Shipping Rate'}`,
       rate,
       zones,
@@ -198,7 +198,7 @@ export const editShippingRateForm = async (req: Request, res: Response): Promise
     });
   } catch (error: any) {
     console.error('Error loading edit rate form:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
       user: req.user
@@ -258,7 +258,7 @@ export const updateShippingRate = async (req: Request, res: Response): Promise<v
       const zones = await shippingZoneRepo.findAll();
       const methods = await shippingMethodRepo.findAll();
 
-      res.render('hub/views/shipping/rates/edit', {
+      res.render('admin/views/shipping/rates/edit', {
         pageName: `Edit: ${rate?.name || 'Shipping Rate'}`,
         rate,
         zones,
@@ -268,7 +268,7 @@ export const updateShippingRate = async (req: Request, res: Response): Promise<v
         user: req.user
       });
     } catch {
-      res.status(500).render('hub/views/error', {
+      res.status(500).render('admin/views/error', {
         pageName: 'Error',
         error: error.message || 'Failed to update shipping rate',
         user: req.user

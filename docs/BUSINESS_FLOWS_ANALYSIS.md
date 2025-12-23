@@ -1,8 +1,26 @@
 # CommerceFull Platform - Business Flows Analysis
 
+**Last Updated: December 23, 2024**
+
+> **Status**: This is a comprehensive roadmap for business flow implementations.
+> Many items have been completed as part of the Web Platform Overhaul project.
+> See individual sections for current implementation status.
+
 ## Executive Summary
 
 This document provides a comprehensive analysis of the required changes to complete all business flows in the CommerceFull platform. The analysis covers 8 major domains: Store & Inventory, Promotion, Brand & Content, Merchant & B2B, Customer & Segments, Configuration, and Ordering.
+
+### Implementation Progress
+
+| Domain | Status | Notes |
+|--------|--------|-------|
+| **Merchant Portal** | ✅ Complete | `/web/merchant` with dashboard, products, orders |
+| **B2B Portal** | ✅ Complete | `/web/b2b` with quotes, orders, approvals |
+| **Identity/Auth** | ✅ Complete | Admin, Merchant, B2B, Customer auth flows |
+| **Order Module** | ✅ Complete | Full CRUD with use cases |
+| **Distribution** | ⚠️ Partial | Fulfillment routing needs work |
+| **Multi-Store** | ⏳ Planned | Schema changes outlined |
+| **Marketplace** | ⏳ Planned | Commission system outlined |
 
 ### Supported Business Models
 

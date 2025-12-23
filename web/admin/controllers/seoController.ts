@@ -29,7 +29,7 @@ export const listSEOSettings = async (req: Request, res: Response): Promise<void
       lastUpdated: new Date()
     };
 
-    res.render('hub/views/marketing/seo/index', {
+    res.render('admin/views/marketing/seo/index', {
       pageName: 'SEO Settings',
       seoSettings,
       user: req.user,
@@ -37,7 +37,7 @@ export const listSEOSettings = async (req: Request, res: Response): Promise<void
     });
   } catch (error: any) {
     console.error('Error loading SEO settings:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load SEO settings',
       user: req.user
@@ -82,7 +82,7 @@ export const updateSEOSettings = async (req: Request, res: Response): Promise<vo
   } catch (error: any) {
     console.error('Error updating SEO settings:', error);
 
-    res.render('hub/views/marketing/seo/index', {
+    res.render('admin/views/marketing/seo/index', {
       pageName: 'SEO Settings',
       error: error.message || 'Failed to update SEO settings',
       formData: req.body,

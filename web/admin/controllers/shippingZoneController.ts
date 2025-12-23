@@ -16,7 +16,7 @@ export const listShippingZones = async (req: Request, res: Response): Promise<vo
     const zones = await shippingZoneRepo.findAll();
     const activeCount = zones.filter(z => z.isActive).length;
 
-    res.render('hub/views/shipping/zones/index', {
+    res.render('admin/views/shipping/zones/index', {
       pageName: 'Shipping Zones',
       zones,
       stats: { total: zones.length, active: activeCount },
@@ -25,7 +25,7 @@ export const listShippingZones = async (req: Request, res: Response): Promise<vo
     });
   } catch (error: any) {
     console.error('Error listing shipping zones:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load shipping zones',
       user: req.user
@@ -35,13 +35,13 @@ export const listShippingZones = async (req: Request, res: Response): Promise<vo
 
 export const createShippingZoneForm = async (req: Request, res: Response): Promise<void> => {
   try {
-    res.render('hub/views/shipping/zones/create', {
+    res.render('admin/views/shipping/zones/create', {
       pageName: 'Create Shipping Zone',
       user: req.user
     });
   } catch (error: any) {
     console.error('Error loading create zone form:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
       user: req.user
@@ -76,7 +76,7 @@ export const createShippingZone = async (req: Request, res: Response): Promise<v
   } catch (error: any) {
     console.error('Error creating shipping zone:', error);
 
-    res.render('hub/views/shipping/zones/create', {
+    res.render('admin/views/shipping/zones/create', {
       pageName: 'Create Shipping Zone',
       error: error.message || 'Failed to create shipping zone',
       formData: req.body,
@@ -92,7 +92,7 @@ export const viewShippingZone = async (req: Request, res: Response): Promise<voi
     const zone = await shippingZoneRepo.findById(zoneId);
 
     if (!zone) {
-      res.status(404).render('hub/views/error', {
+      res.status(404).render('admin/views/error', {
         pageName: 'Not Found',
         error: 'Shipping zone not found',
         user: req.user
@@ -103,7 +103,7 @@ export const viewShippingZone = async (req: Request, res: Response): Promise<voi
     // Get associated rates
     const rates = await shippingZoneRepo.findById(zoneId) ? [] : []; // Placeholder - would need to get rates for this zone
 
-    res.render('hub/views/shipping/zones/view', {
+    res.render('admin/views/shipping/zones/view', {
       pageName: `Zone: ${zone.name}`,
       zone,
       rates,
@@ -112,7 +112,7 @@ export const viewShippingZone = async (req: Request, res: Response): Promise<voi
     });
   } catch (error: any) {
     console.error('Error viewing shipping zone:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load shipping zone',
       user: req.user
@@ -127,7 +127,7 @@ export const editShippingZoneForm = async (req: Request, res: Response): Promise
     const zone = await shippingZoneRepo.findById(zoneId);
 
     if (!zone) {
-      res.status(404).render('hub/views/error', {
+      res.status(404).render('admin/views/error', {
         pageName: 'Not Found',
         error: 'Shipping zone not found',
         user: req.user
@@ -135,14 +135,14 @@ export const editShippingZoneForm = async (req: Request, res: Response): Promise
       return;
     }
 
-    res.render('hub/views/shipping/zones/edit', {
+    res.render('admin/views/shipping/zones/edit', {
       pageName: `Edit: ${zone.name}`,
       zone,
       user: req.user
     });
   } catch (error: any) {
     console.error('Error loading edit zone form:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
       user: req.user
@@ -186,7 +186,7 @@ export const updateShippingZone = async (req: Request, res: Response): Promise<v
     try {
       const zone = await shippingZoneRepo.findById(req.params.zoneId);
 
-      res.render('hub/views/shipping/zones/edit', {
+      res.render('admin/views/shipping/zones/edit', {
         pageName: `Edit: ${zone?.name || 'Zone'}`,
         zone,
         error: error.message || 'Failed to update shipping zone',
@@ -194,7 +194,7 @@ export const updateShippingZone = async (req: Request, res: Response): Promise<v
         user: req.user
       });
     } catch {
-      res.status(500).render('hub/views/error', {
+      res.status(500).render('admin/views/error', {
         pageName: 'Error',
         error: error.message || 'Failed to update shipping zone',
         user: req.user

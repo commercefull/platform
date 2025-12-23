@@ -1,0 +1,113 @@
+<!-- Toolbar -->
+<div class="row mb-3">
+  <div class="col-12">
+    <a href="/merchant/products/create" class="btn btn-primary">
+      <i class="fas fa-plus"></i> Add Product
+    </a>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="card collapsed-card">
+  <div class="card-header">
+    <h3 class="card-title">Filters</h3>
+    <div class="card-tools">
+      <button type="button" class="btn btn-tool" data-card-widget="collapse">
+        <i class="fas fa-plus"></i>
+      </button>
+    </div>
+  </div>
+  <div class="card-body">
+    <form method="GET" class="row">
+      <div class="col-md-3">
+        <div class="form-group">
+          <label>Status</label>
+          <select name="status" class="form-control">
+            <option value="">All Status</option>
+            <option value="active" <%= filters?.status === 'active' ? 'selected' : '' %>>Active</option>
+            <option value="draft" <%= filters?.status === 'draft' ? 'selected' : '' %>>Draft</option>
+            <option value="archived" <%= filters?.status === 'archived' ? 'selected' : '' %>>Archived</option>
+          </select>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="form-group">
+          <label>Search</label>
+          <input type="text" name="search" class="form-control" placeholder="Search products..." value="<%= filters?.search || '' %>">
+        </div>
+      </div>
+      <div class="col-md-2">
+        <div class="form-group">
+          <label>&nbsp;</label>
+          <button type="submit" class="btn btn-primary btn-block">Filter</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Products Table -->
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">Products</h3>
+  </div>
+  <div class="card-body p-0">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>SKU</th>
+          <th>Price</th>
+          <th>Stock</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (products && products.length > 0) { %>
+          <% products.forEach(product => { %>
+            <tr>
+              <td>
+                <a href="/merchant/products/<%= product.productId %>"><%= product.name %></a>
+              </td>
+              <td><code><%= product.sku %></code></td>
+              <td>$<%= (product.price || 0).toFixed(2) %></td>
+              <td>
+                <% if (product.stockQuantity <= 0) { %>
+                  <span class="badge badge-danger">Out of Stock</span>
+                <% } else if (product.stockQuantity < 10) { %>
+                  <span class="badge badge-warning"><%= product.stockQuantity %></span>
+                <% } else { %>
+                  <span class="badge badge-success"><%= product.stockQuantity %></span>
+                <% } %>
+              </td>
+              <td><span class="badge badge-secondary"><%= product.status %></span></td>
+              <td>
+                <a href="/merchant/products/<%= product.productId %>/edit" class="btn btn-sm btn-info">
+                  <i class="fas fa-edit"></i>
+                </a>
+              </td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr><td colspan="6" class="text-center text-muted py-4">No products found</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+  <% if (pagination && pagination.pages > 1) { %>
+  <div class="card-footer clearfix">
+    <ul class="pagination pagination-sm m-0 float-right">
+      <li class="page-item <%= pagination.hasPrev ? '' : 'disabled' %>">
+        <a class="page-link" href="?page=<%= pagination.page - 1 %>">&laquo;</a>
+      </li>
+      <li class="page-item active">
+        <span class="page-link"><%= pagination.page %> / <%= pagination.pages %></span>
+      </li>
+      <li class="page-item <%= pagination.hasNext ? '' : 'disabled' %>">
+        <a class="page-link" href="?page=<%= pagination.page + 1 %>">&raquo;</a>
+      </li>
+    </ul>
+  </div>
+  <% } %>
+</div>

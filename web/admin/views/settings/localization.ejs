@@ -9,7 +9,7 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-end">
-            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
             <li class="breadcrumb-item active">Localization</li>
           </ol>
         </div>
@@ -281,7 +281,7 @@
     };
 
     try {
-      const response = await fetch('/hub/settings/languages', {
+      const response = await fetch('/admin/settings/languages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -301,7 +301,7 @@
     if (!confirm('Are you sure you want to delete this language?')) return;
 
     try {
-      const response = await fetch(`/hub/settings/languages/${languageId}`, { method: 'DELETE' });
+      const response = await fetch(`/admin/settings/languages/${languageId}`, { method: 'DELETE' });
       const result = await response.json();
       if (result.success) {
         location.reload();
@@ -326,7 +326,7 @@
     };
 
     try {
-      const response = await fetch('/hub/settings/currencies', {
+      const response = await fetch('/admin/settings/currencies', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -346,7 +346,7 @@
     if (!confirm('Are you sure you want to delete this currency?')) return;
 
     try {
-      const response = await fetch(`/hub/settings/currencies/${currencyId}`, { method: 'DELETE' });
+      const response = await fetch(`/admin/settings/currencies/${currencyId}`, { method: 'DELETE' });
       const result = await response.json();
       if (result.success) {
         location.reload();

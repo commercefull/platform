@@ -66,7 +66,7 @@ export const listSubscriptionPlans = async (req: Request, res: Response): Promis
     // For now, get all plans (would need to filter by product in a real implementation)
     const plans = await getSubscriptionPlans(productId || 'any', activeOnly);
 
-    res.render('hub/views/programs/subscription/plans/index', {
+    res.render('admin/views/programs/subscription/plans/index', {
       pageName: 'Subscription Plans',
       plans,
       filters: { productId, activeOnly },
@@ -76,7 +76,7 @@ export const listSubscriptionPlans = async (req: Request, res: Response): Promis
     });
   } catch (error: any) {
     console.error('Error listing subscription plans:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load subscription plans',
       user: req.user
@@ -88,14 +88,14 @@ export const createSubscriptionPlanForm = async (req: Request, res: Response): P
   try {
     const productId = req.query.productId as string;
 
-    res.render('hub/views/programs/subscription/plans/create', {
+    res.render('admin/views/programs/subscription/plans/create', {
       pageName: 'Create Subscription Plan',
       productId,
       user: req.user
     });
   } catch (error: any) {
     console.error('Error loading create subscription plan form:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
       user: req.user
@@ -155,7 +155,7 @@ export const createSubscriptionPlan = async (req: Request, res: Response): Promi
   } catch (error: any) {
     console.error('Error creating subscription plan:', error);
 
-    res.render('hub/views/programs/subscription/plans/create', {
+    res.render('admin/views/programs/subscription/plans/create', {
       pageName: 'Create Subscription Plan',
       error: error.message || 'Failed to create subscription plan',
       formData: req.body,
@@ -171,7 +171,7 @@ export const viewSubscriptionPlan = async (req: Request, res: Response): Promise
     const plan = await getSubscriptionPlan(planId);
 
     if (!plan) {
-      res.status(404).render('hub/views/error', {
+      res.status(404).render('admin/views/error', {
         pageName: 'Not Found',
         error: 'Subscription plan not found',
         user: req.user
@@ -179,7 +179,7 @@ export const viewSubscriptionPlan = async (req: Request, res: Response): Promise
       return;
     }
 
-    res.render('hub/views/programs/subscription/plans/view', {
+    res.render('admin/views/programs/subscription/plans/view', {
       pageName: `Plan: ${plan.name}`,
       plan,
       user: req.user,
@@ -187,7 +187,7 @@ export const viewSubscriptionPlan = async (req: Request, res: Response): Promise
     });
   } catch (error: any) {
     console.error('Error viewing subscription plan:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load subscription plan',
       user: req.user
@@ -202,7 +202,7 @@ export const editSubscriptionPlanForm = async (req: Request, res: Response): Pro
     const plan = await getSubscriptionPlan(planId);
 
     if (!plan) {
-      res.status(404).render('hub/views/error', {
+      res.status(404).render('admin/views/error', {
         pageName: 'Not Found',
         error: 'Subscription plan not found',
         user: req.user
@@ -210,14 +210,14 @@ export const editSubscriptionPlanForm = async (req: Request, res: Response): Pro
       return;
     }
 
-    res.render('hub/views/programs/subscription/plans/edit', {
+    res.render('admin/views/programs/subscription/plans/edit', {
       pageName: `Edit: ${plan.name}`,
       plan,
       user: req.user
     });
   } catch (error: any) {
     console.error('Error loading edit subscription plan form:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
       user: req.user
@@ -286,7 +286,7 @@ export const updateSubscriptionPlan = async (req: Request, res: Response): Promi
     try {
       const plan = await getSubscriptionPlan(req.params.planId);
 
-      res.render('hub/views/programs/subscription/plans/edit', {
+      res.render('admin/views/programs/subscription/plans/edit', {
         pageName: `Edit: ${plan?.name || 'Plan'}`,
         plan,
         error: error.message || 'Failed to update subscription plan',
@@ -294,7 +294,7 @@ export const updateSubscriptionPlan = async (req: Request, res: Response): Promi
         user: req.user
       });
     } catch {
-      res.status(500).render('hub/views/error', {
+      res.status(500).render('admin/views/error', {
         pageName: 'Error',
         error: error.message || 'Failed to update subscription plan',
         user: req.user
@@ -332,7 +332,7 @@ export const listCustomerSubscriptions = async (req: Request, res: Response): Pr
       status: status as any
     }, { limit, offset });
 
-    res.render('hub/views/programs/subscription/subscriptions/index', {
+    res.render('admin/views/programs/subscription/subscriptions/index', {
       pageName: 'Customer Subscriptions',
       subscriptions: result.data,
       total: result.total,
@@ -343,7 +343,7 @@ export const listCustomerSubscriptions = async (req: Request, res: Response): Pr
     });
   } catch (error: any) {
     console.error('Error listing customer subscriptions:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load customer subscriptions',
       user: req.user
@@ -361,7 +361,7 @@ export const viewCustomerSubscription = async (req: Request, res: Response): Pro
     // Get orders for this subscription
     const orders = await getSubscriptionOrders(subscriptionId);
 
-    res.render('hub/views/programs/subscription/subscriptions/view', {
+    res.render('admin/views/programs/subscription/subscriptions/view', {
       pageName: `Subscription: ${subscriptionId}`,
       subscription,
       orders,
@@ -370,7 +370,7 @@ export const viewCustomerSubscription = async (req: Request, res: Response): Pro
     });
   } catch (error: any) {
     console.error('Error viewing customer subscription:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load customer subscription',
       user: req.user
@@ -420,7 +420,7 @@ export const subscriptionBilling = async (req: Request, res: Response): Promise<
     const pendingOrders = await getSubscriptionOrdersPending();
     const failedPayments = await getFailedSubscriptionPayments();
 
-    res.render('hub/views/programs/subscription/billing/index', {
+    res.render('admin/views/programs/subscription/billing/index', {
       pageName: 'Subscription Billing',
       subscriptionsDue,
       pendingOrders,
@@ -434,7 +434,7 @@ export const subscriptionBilling = async (req: Request, res: Response): Promise<
     });
   } catch (error: any) {
     console.error('Error loading subscription billing:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load subscription billing',
       user: req.user

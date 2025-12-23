@@ -11,7 +11,7 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-right">
-            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
             <li class="breadcrumb-item">Operations</li>
             <li class="breadcrumb-item active">Abandoned Carts</li>
           </ol>
@@ -98,7 +98,7 @@
                 <button type="submit" class="btn btn-secondary mr-2">
                   <i class="fas fa-filter"></i> Filter
                 </button>
-                <a href="/hub/baskets/abandoned" class="btn btn-outline-secondary">
+                <a href="/admin/baskets/abandoned" class="btn btn-outline-secondary">
                   <i class="fas fa-times"></i> Clear
                 </a>
               </form>
@@ -170,7 +170,7 @@
                       <% } %>
                     </td>
                     <td>
-                      <a href="/hub/baskets/abandoned/<%= basket.basketId %>" class="btn btn-sm btn-info">
+                      <a href="/admin/baskets/abandoned/<%= basket.basketId %>" class="btn btn-sm btn-info">
                         <i class="fas fa-eye"></i> View
                       </a>
                       <button class="btn btn-sm btn-primary" onclick="recoverCart('<%= basket.basketId %>')">
@@ -278,7 +278,7 @@ document.getElementById('confirmRecoveryBtn').onclick = function() {
   const form = document.getElementById('recoveryForm');
   const formData = new FormData(form);
 
-  fetch(`/hub/baskets/abandoned/${currentCartId}/recover`, {
+  fetch(`/admin/baskets/abandoned/${currentCartId}/recover`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -303,7 +303,7 @@ document.getElementById('confirmRecoveryBtn').onclick = function() {
 
 function cleanupExpired() {
   if (confirm('This will permanently delete all expired carts. Continue?')) {
-    fetch('/hub/baskets/cleanup-expired', {
+    fetch('/admin/baskets/cleanup-expired', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

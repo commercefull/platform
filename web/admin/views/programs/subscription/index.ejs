@@ -9,7 +9,7 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-end">
-            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
             <li class="breadcrumb-item active">Subscriptions</li>
           </ol>
         </div>
@@ -118,7 +118,7 @@
       <div class="card">
         <div class="card-header">
           <h3 class="card-title"><i class="fas fa-users me-2"></i>Active Subscriptions</h3>
-          <a href="/hub/programs/subscription/all" class="btn btn-sm btn-primary float-end">View All</a>
+          <a href="/admin/programs/subscription/all" class="btn btn-sm btn-primary float-end">View All</a>
         </div>
         <div class="card-body table-responsive p-0">
           <table class="table table-hover">
@@ -148,7 +148,7 @@
                 <td><%= new Date(sub.startDate).toLocaleDateString() %></td>
                 <td><%= sub.nextBillingDate ? new Date(sub.nextBillingDate).toLocaleDateString() : '-' %></td>
                 <td>
-                  <a href="/hub/programs/subscription/<%= sub.subscriptionId %>" class="btn btn-sm btn-outline-info">
+                  <a href="/admin/programs/subscription/<%= sub.subscriptionId %>" class="btn btn-sm btn-outline-info">
                     <i class="fas fa-eye"></i>
                   </a>
                 </td>
@@ -175,7 +175,7 @@
         <h5 class="modal-title">Add Subscription Plan</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <form method="POST" action="/hub/programs/subscription/plans">
+      <form method="POST" action="/admin/programs/subscription/plans">
         <div class="modal-body">
           <div class="mb-3">
             <label class="form-label">Plan Name <span class="text-danger">*</span></label>
@@ -226,10 +226,10 @@
 </div>
 
 <script>
-  function editPlan(id) { window.location.href = `/hub/programs/subscription/plans/${id}/edit`; }
+  function editPlan(id) { window.location.href = `/admin/programs/subscription/plans/${id}/edit`; }
   async function deletePlan(id) {
     if (!confirm('Delete this plan?')) return;
-    const res = await fetch(`/hub/programs/subscription/plans/${id}`, { method: 'DELETE' });
+    const res = await fetch(`/admin/programs/subscription/plans/${id}`, { method: 'DELETE' });
     if ((await res.json()).success) location.reload();
   }
 </script>

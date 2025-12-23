@@ -46,7 +46,7 @@ export const listOrders = async (req: Request, res: Response): Promise<void> => 
     const page = Math.floor(result.offset / result.limit) + 1;
     const pages = Math.ceil(result.total / result.limit);
 
-    res.render('hub/views/orders/index', {
+    res.render('admin/views/orders/index', {
       pageName: 'Orders',
       orders: result.orders,
       pagination: {
@@ -77,7 +77,7 @@ export const listOrders = async (req: Request, res: Response): Promise<void> => 
     });
   } catch (error: any) {
     console.error('Error listing orders:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load orders',
       user: req.user
@@ -98,7 +98,7 @@ export const viewOrder = async (req: Request, res: Response): Promise<void> => {
     const order = await useCase.execute(command);
 
     if (!order) {
-      res.status(404).render('hub/views/error', {
+      res.status(404).render('admin/views/error', {
         pageName: 'Not Found',
         error: 'Order not found',
         user: req.user
@@ -106,7 +106,7 @@ export const viewOrder = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    res.render('hub/views/orders/view', {
+    res.render('admin/views/orders/view', {
       pageName: `Order #${order.orderNumber}`,
       order,
       orderStatuses: Object.values(OrderStatus),
@@ -117,7 +117,7 @@ export const viewOrder = async (req: Request, res: Response): Promise<void> => {
     });
   } catch (error: any) {
     console.error('Error viewing order:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load order',
       user: req.user
@@ -203,7 +203,7 @@ export const refundForm = async (req: Request, res: Response): Promise<void> => 
     const order = await useCase.execute(command);
 
     if (!order) {
-      res.status(404).render('hub/views/error', {
+      res.status(404).render('admin/views/error', {
         pageName: 'Not Found',
         error: 'Order not found',
         user: req.user
@@ -211,14 +211,14 @@ export const refundForm = async (req: Request, res: Response): Promise<void> => 
       return;
     }
 
-    res.render('hub/views/orders/refund', {
+    res.render('admin/views/orders/refund', {
       pageName: `Refund Order #${order.orderNumber}`,
       order,
       user: req.user
     });
   } catch (error: any) {
     console.error('Error loading refund form:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load refund form',
       user: req.user
@@ -261,7 +261,7 @@ export const processRefund = async (req: Request, res: Response): Promise<void> 
         const useCase = new GetOrderUseCase(OrderRepo);
         const order = await useCase.execute(command);
 
-        res.render('hub/views/orders/refund', {
+        res.render('admin/views/orders/refund', {
           pageName: `Refund Order #${order?.orderNumber || 'Unknown'}`,
           order,
           error: error.message || 'Failed to process refund',

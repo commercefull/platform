@@ -9,8 +9,8 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-end">
-            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="/hub/content/pages">Content</a></li>
+            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/admin/content/pages">Content</a></li>
             <li class="breadcrumb-item active">Blocks</li>
           </ol>
         </div>
@@ -59,7 +59,7 @@
                 </td>
                 <td><%= new Date(block.updatedAt).toLocaleDateString() %></td>
                 <td>
-                  <a href="/hub/content/blocks/<%= block.contentBlockId %>/edit" class="btn btn-sm btn-outline-primary">
+                  <a href="/admin/content/blocks/<%= block.contentBlockId %>/edit" class="btn btn-sm btn-outline-primary">
                     <i class="fas fa-edit"></i>
                   </a>
                   <button class="btn btn-sm btn-outline-danger" onclick="deleteBlock('<%= block.contentBlockId %>')">
@@ -92,7 +92,7 @@
         <h5 class="modal-title">Add Content Block</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <form method="POST" action="/hub/content/blocks">
+      <form method="POST" action="/admin/content/blocks">
         <div class="modal-body">
           <div class="row">
             <div class="col-md-6">
@@ -139,7 +139,7 @@
 <script>
   async function deleteBlock(id) {
     if (!confirm('Delete this content block?')) return;
-    const res = await fetch(`/hub/content/blocks/${id}`, { method: 'DELETE' });
+    const res = await fetch(`/admin/content/blocks/${id}`, { method: 'DELETE' });
     if ((await res.json()).success) location.reload();
   }
 </script>

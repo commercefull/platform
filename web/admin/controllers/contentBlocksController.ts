@@ -31,7 +31,7 @@ export const listContentBlocks = async (req: Request, res: Response): Promise<vo
     // Get content types for filtering
     const contentTypes = await ContentRepo.findAllContentTypes(true);
 
-    res.render('hub/views/content/blocks/index', {
+    res.render('admin/views/content/blocks/index', {
       pageName: 'Content Blocks',
       blocks,
       contentTypes,
@@ -42,7 +42,7 @@ export const listContentBlocks = async (req: Request, res: Response): Promise<vo
     });
   } catch (error: any) {
     console.error('Error listing content blocks:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load content blocks',
       user: req.user
@@ -61,7 +61,7 @@ export const createContentBlockForm = async (req: Request, res: Response): Promi
     // Get the page details
     const page = await ContentRepo.findPageById(pageId);
     if (!page) {
-      res.status(404).render('hub/views/error', {
+      res.status(404).render('admin/views/error', {
         pageName: 'Not Found',
         error: 'Content page not found',
         user: req.user
@@ -76,7 +76,7 @@ export const createContentBlockForm = async (req: Request, res: Response): Promi
     const existingBlocks = await ContentRepo.findBlocksByPageId(pageId);
     const nextOrder = existingBlocks.length + 1;
 
-    res.render('hub/views/content/blocks/create', {
+    res.render('admin/views/content/blocks/create', {
       pageName: 'Create Content Block',
       page,
       contentTypes,
@@ -85,7 +85,7 @@ export const createContentBlockForm = async (req: Request, res: Response): Promi
     });
   } catch (error: any) {
     console.error('Error loading create block form:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
       user: req.user
@@ -120,7 +120,7 @@ export const createContentBlock = async (req: Request, res: Response): Promise<v
       const page = await ContentRepo.findPageById(req.body.pageId);
       const contentTypes = await ContentRepo.findAllContentTypes(true);
 
-      res.render('hub/views/content/blocks/create', {
+      res.render('admin/views/content/blocks/create', {
         pageName: 'Create Content Block',
         page,
         contentTypes,
@@ -129,7 +129,7 @@ export const createContentBlock = async (req: Request, res: Response): Promise<v
         user: req.user
       });
     } catch {
-      res.status(500).render('hub/views/error', {
+      res.status(500).render('admin/views/error', {
         pageName: 'Error',
         error: error.message || 'Failed to create content block',
         user: req.user
@@ -145,7 +145,7 @@ export const editContentBlockForm = async (req: Request, res: Response): Promise
     const block = await ContentRepo.findBlockById(blockId);
 
     if (!block) {
-      res.status(404).render('hub/views/error', {
+      res.status(404).render('admin/views/error', {
         pageName: 'Not Found',
         error: 'Content block not found',
         user: req.user
@@ -159,7 +159,7 @@ export const editContentBlockForm = async (req: Request, res: Response): Promise
     // Get content type details
     const contentType = await ContentRepo.findContentTypeById(block.contentTypeId);
 
-    res.render('hub/views/content/blocks/edit', {
+    res.render('admin/views/content/blocks/edit', {
       pageName: `Edit: ${block.name}`,
       block,
       page,
@@ -168,7 +168,7 @@ export const editContentBlockForm = async (req: Request, res: Response): Promise
     });
   } catch (error: any) {
     console.error('Error loading edit block form:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
       user: req.user
@@ -204,7 +204,7 @@ export const updateContentBlock = async (req: Request, res: Response): Promise<v
       const page = block ? await ContentRepo.findPageById(block.pageId) : null;
       const contentType = block ? await ContentRepo.findContentTypeById(block.contentTypeId) : null;
 
-      res.render('hub/views/content/blocks/edit', {
+      res.render('admin/views/content/blocks/edit', {
         pageName: `Edit: ${block?.name || 'Block'}`,
         block,
         page,
@@ -214,7 +214,7 @@ export const updateContentBlock = async (req: Request, res: Response): Promise<v
         user: req.user
       });
     } catch {
-      res.status(500).render('hub/views/error', {
+      res.status(500).render('admin/views/error', {
         pageName: 'Error',
         error: error.message || 'Failed to update content block',
         user: req.user

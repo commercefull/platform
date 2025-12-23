@@ -33,4 +33,5 @@ router.patch('/:organizationId', updateOrganization);
 // Get stores for organization
 router.get('/:organizationId/stores', getOrganizationStores);
 
+export const organizationBusinessRouter = router;
 export default router;

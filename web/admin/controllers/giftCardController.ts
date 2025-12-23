@@ -26,7 +26,7 @@ export const listGiftCards = async (req: Request, res: Response): Promise<void> 
     const totalValue = totalResult.data.reduce((sum: number, card: any) => sum + card.currentBalance, 0);
     const activeCards = totalResult.data.filter((card: any) => card.status === 'active').length;
 
-    res.render('hub/views/promotions/gift-cards/index', {
+    res.render('admin/views/promotions/gift-cards/index', {
       pageName: 'Gift Cards',
       giftCards: result.data,
       filters: { status },
@@ -41,7 +41,7 @@ export const listGiftCards = async (req: Request, res: Response): Promise<void> 
     });
   } catch (error: any) {
     console.error('Error listing gift cards:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load gift cards',
       user: req.user
@@ -51,13 +51,13 @@ export const listGiftCards = async (req: Request, res: Response): Promise<void> 
 
 export const createGiftCardForm = async (req: Request, res: Response): Promise<void> => {
   try {
-    res.render('hub/views/promotions/gift-cards/create', {
+    res.render('admin/views/promotions/gift-cards/create', {
       pageName: 'Create Gift Card',
       user: req.user
     });
   } catch (error: any) {
     console.error('Error loading create gift card form:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
       user: req.user
@@ -105,7 +105,7 @@ export const createGiftCard = async (req: Request, res: Response): Promise<void>
   } catch (error: any) {
     console.error('Error creating gift card:', error);
 
-    res.render('hub/views/promotions/gift-cards/create', {
+    res.render('admin/views/promotions/gift-cards/create', {
       pageName: 'Create Gift Card',
       error: error.message || 'Failed to create gift card',
       formData: req.body,
@@ -121,7 +121,7 @@ export const viewGiftCard = async (req: Request, res: Response): Promise<void> =
     const giftCard = await giftCardRepo.getGiftCard(giftCardId);
 
     if (!giftCard) {
-      res.status(404).render('hub/views/error', {
+      res.status(404).render('admin/views/error', {
         pageName: 'Not Found',
         error: 'Gift card not found',
         user: req.user
@@ -132,7 +132,7 @@ export const viewGiftCard = async (req: Request, res: Response): Promise<void> =
     // Get transaction history
     const transactions = await giftCardRepo.getTransactions(giftCardId);
 
-    res.render('hub/views/promotions/gift-cards/view', {
+    res.render('admin/views/promotions/gift-cards/view', {
       pageName: `Gift Card: ${giftCard.code}`,
       giftCard,
       transactions,
@@ -141,7 +141,7 @@ export const viewGiftCard = async (req: Request, res: Response): Promise<void> =
     });
   } catch (error: any) {
     console.error('Error viewing gift card:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load gift card',
       user: req.user
@@ -156,7 +156,7 @@ export const editGiftCardForm = async (req: Request, res: Response): Promise<voi
     const giftCard = await giftCardRepo.getGiftCard(giftCardId);
 
     if (!giftCard) {
-      res.status(404).render('hub/views/error', {
+      res.status(404).render('admin/views/error', {
         pageName: 'Not Found',
         error: 'Gift card not found',
         user: req.user
@@ -164,14 +164,14 @@ export const editGiftCardForm = async (req: Request, res: Response): Promise<voi
       return;
     }
 
-    res.render('hub/views/promotions/gift-cards/edit', {
+    res.render('admin/views/promotions/gift-cards/edit', {
       pageName: `Edit: ${giftCard.code}`,
       giftCard,
       user: req.user
     });
   } catch (error: any) {
     console.error('Error loading edit gift card form:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
       user: req.user

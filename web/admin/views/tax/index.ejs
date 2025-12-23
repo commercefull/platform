@@ -9,7 +9,7 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-end">
-            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
             <li class="breadcrumb-item active">Tax Management</li>
           </ol>
         </div>
@@ -183,7 +183,7 @@
         <h5 class="modal-title">Add Tax Rate</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <form method="POST" action="/hub/tax/rates">
+      <form method="POST" action="/admin/tax/rates">
         <div class="modal-body">
           <div class="mb-3">
             <label class="form-label">Name <span class="text-danger">*</span></label>
@@ -237,7 +237,7 @@
         <h5 class="modal-title">Add Tax Zone</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <form method="POST" action="/hub/tax/zones">
+      <form method="POST" action="/admin/tax/zones">
         <div class="modal-body">
           <div class="mb-3">
             <label class="form-label">Zone Name <span class="text-danger">*</span></label>
@@ -273,7 +273,7 @@
         <h5 class="modal-title">Add Tax Class</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <form method="POST" action="/hub/tax/classes">
+      <form method="POST" action="/admin/tax/classes">
         <div class="modal-body">
           <div class="mb-3">
             <label class="form-label">Name <span class="text-danger">*</span></label>
@@ -294,23 +294,23 @@
 </div>
 
 <script>
-  function editTaxRate(id) { window.location.href = `/hub/tax/rates/${id}/edit`; }
-  function editTaxZone(id) { window.location.href = `/hub/tax/zones/${id}/edit`; }
-  function editTaxClass(id) { window.location.href = `/hub/tax/classes/${id}/edit`; }
+  function editTaxRate(id) { window.location.href = `/admin/tax/rates/${id}/edit`; }
+  function editTaxZone(id) { window.location.href = `/admin/tax/zones/${id}/edit`; }
+  function editTaxClass(id) { window.location.href = `/admin/tax/classes/${id}/edit`; }
   
   async function deleteTaxRate(id) {
     if (!confirm('Delete this tax rate?')) return;
-    const res = await fetch(`/hub/tax/rates/${id}`, { method: 'DELETE' });
+    const res = await fetch(`/admin/tax/rates/${id}`, { method: 'DELETE' });
     if ((await res.json()).success) location.reload();
   }
   async function deleteTaxZone(id) {
     if (!confirm('Delete this tax zone?')) return;
-    const res = await fetch(`/hub/tax/zones/${id}`, { method: 'DELETE' });
+    const res = await fetch(`/admin/tax/zones/${id}`, { method: 'DELETE' });
     if ((await res.json()).success) location.reload();
   }
   async function deleteTaxClass(id) {
     if (!confirm('Delete this tax class?')) return;
-    const res = await fetch(`/hub/tax/classes/${id}`, { method: 'DELETE' });
+    const res = await fetch(`/admin/tax/classes/${id}`, { method: 'DELETE' });
     if ((await res.json()).success) location.reload();
   }
 </script>

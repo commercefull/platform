@@ -36,4 +36,5 @@ router.post('/:assortmentId/scope', setScope);
 // Get visible products for a store
 router.get('/store/:storeId/products', getVisibleProducts);
 
+export const assortmentBusinessRouter = router;
 export default router;

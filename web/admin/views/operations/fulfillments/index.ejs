@@ -11,7 +11,7 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-right">
-            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
             <li class="breadcrumb-item">Operations</li>
             <li class="breadcrumb-item active">Fulfillments</li>
           </ol>
@@ -100,7 +100,7 @@
                 <button type="submit" class="btn btn-secondary mr-2">
                   <i class="fas fa-filter"></i> Filter
                 </button>
-                <a href="/hub/fulfillments" class="btn btn-outline-secondary">
+                <a href="/admin/fulfillments" class="btn btn-outline-secondary">
                   <i class="fas fa-times"></i> Clear
                 </a>
               </form>
@@ -142,7 +142,7 @@
                       <strong><code><%= fulfillment.fulfillmentNumber %></code></strong>
                     </td>
                     <td>
-                      <a href="/hub/orders/<%= fulfillment.orderId %>">
+                      <a href="/admin/orders/<%= fulfillment.orderId %>">
                         <%= fulfillment.orderId.substring(0, 8) %>...
                       </a>
                     </td>
@@ -184,7 +184,7 @@
                       <%= new Date(fulfillment.createdAt).toLocaleDateString() %>
                     </td>
                     <td>
-                      <a href="/hub/fulfillments/<%= fulfillment.orderFulfillmentId %>" class="btn btn-sm btn-info">
+                      <a href="/admin/fulfillments/<%= fulfillment.orderFulfillmentId %>" class="btn btn-sm btn-info">
                         <i class="fas fa-eye"></i>
                       </a>
                       <% if (fulfillment.status === 'pending') { %>
@@ -256,7 +256,7 @@
 let currentFulfillmentId = null;
 
 function updateStatus(fulfillmentId, status) {
-  fetch(`/hub/fulfillments/${fulfillmentId}/status`, {
+  fetch(`/admin/fulfillments/${fulfillmentId}/status`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -286,7 +286,7 @@ document.getElementById('confirmShippingBtn').onclick = function() {
   const form = document.getElementById('shippingForm');
   const formData = new FormData(form);
 
-  fetch(`/hub/fulfillments/${currentFulfillmentId}/shipped`, {
+  fetch(`/admin/fulfillments/${currentFulfillmentId}/shipped`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',

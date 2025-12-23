@@ -9,7 +9,7 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-end">
-            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
             <li class="breadcrumb-item active">GDPR Compliance</li>
           </ol>
         </div>
@@ -101,7 +101,7 @@
                 <td><%= new Date(request.createdAt).toLocaleDateString() %></td>
                 <td><%= request.dueDate ? new Date(request.dueDate).toLocaleDateString() : '-' %></td>
                 <td>
-                  <a href="/hub/gdpr/requests/<%= request.requestId %>" class="btn btn-sm btn-outline-info">
+                  <a href="/admin/gdpr/requests/<%= request.requestId %>" class="btn btn-sm btn-outline-info">
                     <i class="fas fa-eye"></i>
                   </a>
                   <% if (request.status === 'pending') { %>
@@ -155,7 +155,7 @@
             </div>
           </div>
           <div class="mt-3">
-            <a href="/hub/gdpr/consent" class="btn btn-outline-primary">
+            <a href="/admin/gdpr/consent" class="btn btn-outline-primary">
               <i class="fas fa-cog me-1"></i>Manage Consent Settings
             </a>
           </div>
@@ -173,7 +173,7 @@
         <h5 class="modal-title">Create GDPR Request</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <form method="POST" action="/hub/gdpr/requests">
+      <form method="POST" action="/admin/gdpr/requests">
         <div class="modal-body">
           <div class="mb-3">
             <label class="form-label">Request Type <span class="text-danger">*</span></label>
@@ -208,7 +208,7 @@
 <script>
   async function processRequest(requestId) {
     if (!confirm('Mark this request as processing?')) return;
-    const res = await fetch(`/hub/gdpr/requests/${requestId}/process`, { method: 'POST' });
+    const res = await fetch(`/admin/gdpr/requests/${requestId}/process`, { method: 'POST' });
     if ((await res.json()).success) location.reload();
   }
 </script>

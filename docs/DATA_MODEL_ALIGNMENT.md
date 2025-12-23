@@ -1,5 +1,11 @@
 # CommerceFull Data Model Alignment Analysis
 
+**Last Updated: December 23, 2024**
+
+> **Status**: This document outlines database schema enhancements for multi-store, marketplace, and B2B scenarios.
+> The recommended changes are **additive** and do not break existing functionality.
+> Implementation should use migrations with default values for backward compatibility.
+
 This document provides an in-depth comparison between the CommerceFull platform's current data model and the reference commerce data model that supports multi-store, marketplace, and B2B scenarios.
 
 ## Executive Summary

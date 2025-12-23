@@ -1,0 +1,64 @@
+<!-- Toolbar -->
+<div class="row mb-3">
+  <div class="col-12">
+    <a href="/b2b/approvals/history" class="btn btn-outline-secondary">
+      <i class="fas fa-history"></i> View History
+    </a>
+  </div>
+</div>
+
+<!-- Approvals Table -->
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">Pending Approvals</h3>
+  </div>
+  <div class="card-body p-0">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Requested By</th>
+          <th>Type</th>
+          <th>Amount</th>
+          <th>Description</th>
+          <th>Submitted</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (approvals && approvals.length > 0) { %>
+          <% approvals.forEach(approval => { %>
+            <tr>
+              <td><%= approval.requestedByName %></td>
+              <td><span class="badge badge-info"><%= approval.type || 'purchase' %></span></td>
+              <td>$<%= (approval.amount || 0).toFixed(2) %></td>
+              <td><%= approval.description || '-' %></td>
+              <td><%= new Date(approval.createdAt).toLocaleDateString() %></td>
+              <td>
+                <a href="/b2b/approvals/<%= approval.approvalRequestId %>" class="btn btn-sm btn-primary">
+                  <i class="fas fa-check-circle"></i> Review
+                </a>
+              </td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr><td colspan="6" class="text-center text-muted py-4">No pending approvals</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+  <% if (pagination && pagination.pages > 1) { %>
+  <div class="card-footer clearfix">
+    <ul class="pagination pagination-sm m-0 float-right">
+      <li class="page-item <%= pagination.hasPrev ? '' : 'disabled' %>">
+        <a class="page-link" href="?page=<%= pagination.page - 1 %>">&laquo;</a>
+      </li>
+      <li class="page-item active">
+        <span class="page-link"><%= pagination.page %> / <%= pagination.pages %></span>
+      </li>
+      <li class="page-item <%= pagination.hasNext ? '' : 'disabled' %>">
+        <a class="page-link" href="?page=<%= pagination.page + 1 %>">&raquo;</a>
+      </li>
+    </ul>
+  </div>
+  <% } %>
+</div>

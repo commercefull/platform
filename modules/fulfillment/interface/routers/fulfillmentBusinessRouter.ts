@@ -32,4 +32,5 @@ router.post('/:fulfillmentId/deliver', markDelivered);
 // List by order
 router.get('/order/:orderId', listFulfillmentsByOrder);
 
+export const fulfillmentBusinessRouter = router;
 export default router;

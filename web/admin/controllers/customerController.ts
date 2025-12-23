@@ -38,7 +38,7 @@ export const listCustomers = async (req: Request, res: Response): Promise<void> 
     const page = Math.floor(queryOptions.offset / queryOptions.limit) + 1;
     const pages = Math.ceil((result.total || 0) / queryOptions.limit);
 
-    res.render('hub/views/customers/index', {
+    res.render('admin/views/customers/index', {
       pageName: 'Customers',
       customers: result.data || result,
       pagination: {
@@ -60,7 +60,7 @@ export const listCustomers = async (req: Request, res: Response): Promise<void> 
     });
   } catch (error: any) {
     console.error('Error listing customers:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load customers',
       user: req.user
@@ -80,7 +80,7 @@ export const viewCustomer = async (req: Request, res: Response): Promise<void> =
     const customer = await useCase.execute({ customerId });
 
     if (!customer) {
-      res.status(404).render('hub/views/error', {
+      res.status(404).render('admin/views/error', {
         pageName: 'Not Found',
         error: 'Customer not found',
         user: req.user
@@ -92,7 +92,7 @@ export const viewCustomer = async (req: Request, res: Response): Promise<void> =
     const addressUseCase = new ManageAddressesUseCase(CustomerRepo);
     const addresses = await addressUseCase.getAddresses(customerId);
 
-    res.render('hub/views/customers/view', {
+    res.render('admin/views/customers/view', {
       pageName: `Customer: ${customer.firstName} ${customer.lastName}`,
       customer,
       addresses,
@@ -101,7 +101,7 @@ export const viewCustomer = async (req: Request, res: Response): Promise<void> =
     });
   } catch (error: any) {
     console.error('Error viewing customer:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load customer',
       user: req.user
@@ -121,7 +121,7 @@ export const editCustomerForm = async (req: Request, res: Response): Promise<voi
     const customer = await useCase.execute({ customerId });
 
     if (!customer) {
-      res.status(404).render('hub/views/error', {
+      res.status(404).render('admin/views/error', {
         pageName: 'Not Found',
         error: 'Customer not found',
         user: req.user
@@ -129,14 +129,14 @@ export const editCustomerForm = async (req: Request, res: Response): Promise<voi
       return;
     }
 
-    res.render('hub/views/customers/edit', {
+    res.render('admin/views/customers/edit', {
       pageName: `Edit: ${customer.firstName} ${customer.lastName}`,
       customer,
       user: req.user
     });
   } catch (error: any) {
     console.error('Error loading edit customer form:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
       user: req.user
@@ -165,7 +165,7 @@ export const updateCustomer = async (req: Request, res: Response): Promise<void>
       const getUseCase = new GetCustomerUseCase(CustomerRepo);
       const customer = await getUseCase.execute({ customerId: req.params.customerId });
 
-      res.render('hub/views/customers/edit', {
+      res.render('admin/views/customers/edit', {
         pageName: `Edit: ${customer?.firstName || ''} ${customer?.lastName || ''}`,
         customer,
         error: error.message || 'Failed to update customer',
@@ -173,7 +173,7 @@ export const updateCustomer = async (req: Request, res: Response): Promise<void>
         user: req.user
       });
     } catch {
-      res.status(500).render('hub/views/error', {
+      res.status(500).render('admin/views/error', {
         pageName: 'Error',
         error: error.message || 'Failed to update customer',
         user: req.user
@@ -251,7 +251,7 @@ export const customerAddresses = async (req: Request, res: Response): Promise<vo
     const customer = await getUseCase.execute({ customerId });
 
     if (!customer) {
-      res.status(404).render('hub/views/error', {
+      res.status(404).render('admin/views/error', {
         pageName: 'Not Found',
         error: 'Customer not found',
         user: req.user
@@ -262,7 +262,7 @@ export const customerAddresses = async (req: Request, res: Response): Promise<vo
     const addressUseCase = new ManageAddressesUseCase(CustomerRepo);
     const addresses = await addressUseCase.getAddresses(customerId);
 
-    res.render('hub/views/customers/addresses', {
+    res.render('admin/views/customers/addresses', {
       pageName: `Addresses: ${customer.firstName} ${customer.lastName}`,
       customer,
       addresses,
@@ -271,7 +271,7 @@ export const customerAddresses = async (req: Request, res: Response): Promise<vo
     });
   } catch (error: any) {
     console.error('Error loading customer addresses:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load addresses',
       user: req.user

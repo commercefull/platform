@@ -33,7 +33,7 @@ export const listAbandonedCarts = async (req: Request, res: Response): Promise<v
       avgCartValue: abandonedBaskets.length > 0 ? recoveryPotential / abandonedBaskets.length : 0
     };
 
-    res.render('hub/views/operations/baskets/abandoned', {
+    res.render('admin/views/operations/baskets/abandoned', {
       pageName: 'Abandoned Carts',
       abandonedBaskets,
       expiredBaskets,
@@ -45,7 +45,7 @@ export const listAbandonedCarts = async (req: Request, res: Response): Promise<v
     });
   } catch (error: any) {
     console.error('Error listing abandoned carts:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load abandoned carts',
       user: req.user
@@ -60,7 +60,7 @@ export const viewAbandonedCart = async (req: Request, res: Response): Promise<vo
     const basket = await BasketRepo.findById(basketId);
 
     if (!basket) {
-      res.status(404).render('hub/views/error', {
+      res.status(404).render('admin/views/error', {
         pageName: 'Not Found',
         error: 'Abandoned cart not found',
         user: req.user
@@ -78,7 +78,7 @@ export const viewAbandonedCart = async (req: Request, res: Response): Promise<vo
       (Date.now() - basket.lastActivityAt.getTime()) / (1000 * 60 * 60 * 24)
     );
 
-    res.render('hub/views/operations/baskets/view', {
+    res.render('admin/views/operations/baskets/view', {
       pageName: `Abandoned Cart: ${basket.basketId}`,
       basket,
       cartValue,
@@ -88,7 +88,7 @@ export const viewAbandonedCart = async (req: Request, res: Response): Promise<vo
     });
   } catch (error: any) {
     console.error('Error viewing abandoned cart:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load abandoned cart',
       user: req.user
@@ -246,14 +246,14 @@ export const basketAnalytics = async (req: Request, res: Response): Promise<void
       topAbandonedProducts: [] // Would need product analytics
     };
 
-    res.render('hub/views/operations/baskets/analytics', {
+    res.render('admin/views/operations/baskets/analytics', {
       pageName: 'Cart Analytics',
       stats,
       user: req.user
     });
   } catch (error: any) {
     console.error('Error loading basket analytics:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load basket analytics',
       user: req.user

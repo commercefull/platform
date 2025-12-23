@@ -9,8 +9,8 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-end">
-            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="/hub/content/pages">Content</a></li>
+            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/admin/content/pages">Content</a></li>
             <li class="breadcrumb-item active">Templates</li>
           </ol>
         </div>
@@ -44,7 +44,7 @@
                   <code class="small"><%= template.identifier %></code>
                 </div>
                 <div class="card-footer">
-                  <a href="/hub/content/templates/<%= template.contentTemplateId %>/edit" class="btn btn-sm btn-outline-primary">
+                  <a href="/admin/content/templates/<%= template.contentTemplateId %>/edit" class="btn btn-sm btn-outline-primary">
                     <i class="fas fa-edit"></i> Edit
                   </a>
                   <button class="btn btn-sm btn-outline-info" onclick="previewTemplate('<%= template.contentTemplateId %>')">
@@ -78,7 +78,7 @@
         <h5 class="modal-title">Add Page Template</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <form method="POST" action="/hub/content/templates">
+      <form method="POST" action="/admin/content/templates">
         <div class="modal-body">
           <div class="row">
             <div class="col-md-6">
@@ -124,11 +124,11 @@
 
 <script>
   function previewTemplate(id) {
-    window.open(`/hub/content/templates/${id}/preview`, '_blank');
+    window.open(`/admin/content/templates/${id}/preview`, '_blank');
   }
   async function deleteTemplate(id) {
     if (!confirm('Delete this template?')) return;
-    const res = await fetch(`/hub/content/templates/${id}`, { method: 'DELETE' });
+    const res = await fetch(`/admin/content/templates/${id}`, { method: 'DELETE' });
     if ((await res.json()).success) location.reload();
   }
 </script>

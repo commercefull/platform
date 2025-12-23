@@ -11,8 +11,8 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-right">
-            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="/hub/marketing">Marketing</a></li>
+            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/admin/marketing">Marketing</a></li>
             <li class="breadcrumb-item active">SEO</li>
           </ol>
         </div>
@@ -72,7 +72,7 @@
       </div>
 
       <!-- SEO Settings Form -->
-      <form method="POST" action="/hub/marketing/seo">
+      <form method="POST" action="/admin/marketing/seo">
         <div class="card">
           <div class="card-header">
             <h3 class="card-title">Global SEO Settings</h3>
@@ -204,13 +204,13 @@ Sitemap: https://yourdomain.com/sitemap.xml"><%= seoSettings.robotsTxt %></texta
 <script>
 function generateRobotsTxt() {
   if (confirm('This will download a robots.txt file. Continue?')) {
-    window.open('/hub/marketing/seo/robots.txt', '_blank');
+    window.open('/admin/marketing/seo/robots.txt', '_blank');
   }
 }
 
 function generateSitemap() {
   if (confirm('This will download a sitemap.xml file. Continue?')) {
-    window.open('/hub/marketing/seo/sitemap.xml', '_blank');
+    window.open('/admin/marketing/seo/sitemap.xml', '_blank');
   }
 }
 </script>

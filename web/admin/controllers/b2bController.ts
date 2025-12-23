@@ -53,7 +53,7 @@ export const listB2bCompanies = async (req: Request, res: Response): Promise<voi
       search
     }, { limit, offset });
 
-    res.render('hub/views/programs/b2b/companies/index', {
+    res.render('admin/views/programs/b2b/companies/index', {
       pageName: 'B2B Companies',
       companies: result.data,
       total: result.total,
@@ -64,7 +64,7 @@ export const listB2bCompanies = async (req: Request, res: Response): Promise<voi
     });
   } catch (error: any) {
     console.error('Error listing B2B companies:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load B2B companies',
       user: req.user
@@ -74,13 +74,13 @@ export const listB2bCompanies = async (req: Request, res: Response): Promise<voi
 
 export const createB2bCompanyForm = async (req: Request, res: Response): Promise<void> => {
   try {
-    res.render('hub/views/programs/b2b/companies/create', {
+    res.render('admin/views/programs/b2b/companies/create', {
       pageName: 'Create B2B Company',
       user: req.user
     });
   } catch (error: any) {
     console.error('Error loading create company form:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
       user: req.user
@@ -148,7 +148,7 @@ export const createB2bCompany = async (req: Request, res: Response): Promise<voi
   } catch (error: any) {
     console.error('Error creating B2B company:', error);
 
-    res.render('hub/views/programs/b2b/companies/create', {
+    res.render('admin/views/programs/b2b/companies/create', {
       pageName: 'Create B2B Company',
       error: error.message || 'Failed to create B2B company',
       formData: req.body,
@@ -164,7 +164,7 @@ export const viewB2bCompany = async (req: Request, res: Response): Promise<void>
     const company = await getCompany(companyId);
 
     if (!company) {
-      res.status(404).render('hub/views/error', {
+      res.status(404).render('admin/views/error', {
         pageName: 'Not Found',
         error: 'B2B company not found',
         user: req.user
@@ -176,7 +176,7 @@ export const viewB2bCompany = async (req: Request, res: Response): Promise<void>
     const users = await getCompanyUsers(companyId);
     const addresses = await getCompanyAddresses(companyId);
 
-    res.render('hub/views/programs/b2b/companies/view', {
+    res.render('admin/views/programs/b2b/companies/view', {
       pageName: `Company: ${company.name}`,
       company,
       users,
@@ -186,7 +186,7 @@ export const viewB2bCompany = async (req: Request, res: Response): Promise<void>
     });
   } catch (error: any) {
     console.error('Error viewing B2B company:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load B2B company',
       user: req.user
@@ -201,7 +201,7 @@ export const editB2bCompanyForm = async (req: Request, res: Response): Promise<v
     const company = await getCompany(companyId);
 
     if (!company) {
-      res.status(404).render('hub/views/error', {
+      res.status(404).render('admin/views/error', {
         pageName: 'Not Found',
         error: 'B2B company not found',
         user: req.user
@@ -209,14 +209,14 @@ export const editB2bCompanyForm = async (req: Request, res: Response): Promise<v
       return;
     }
 
-    res.render('hub/views/programs/b2b/companies/edit', {
+    res.render('admin/views/programs/b2b/companies/edit', {
       pageName: `Edit: ${company.name}`,
       company,
       user: req.user
     });
   } catch (error: any) {
     console.error('Error loading edit company form:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
       user: req.user
@@ -293,7 +293,7 @@ export const updateB2bCompany = async (req: Request, res: Response): Promise<voi
     try {
       const company = await getCompany(req.params.companyId);
 
-      res.render('hub/views/programs/b2b/companies/edit', {
+      res.render('admin/views/programs/b2b/companies/edit', {
         pageName: `Edit: ${company?.name || 'Company'}`,
         company,
         error: error.message || 'Failed to update B2B company',
@@ -301,7 +301,7 @@ export const updateB2bCompany = async (req: Request, res: Response): Promise<voi
         user: req.user
       });
     } catch {
-      res.status(500).render('hub/views/error', {
+      res.status(500).render('admin/views/error', {
         pageName: 'Error',
         error: error.message || 'Failed to update B2B company',
         user: req.user
@@ -360,7 +360,7 @@ export const listB2bCompanyUsers = async (req: Request, res: Response): Promise<
 
     const company = await getCompany(companyId);
     if (!company) {
-      res.status(404).render('hub/views/error', {
+      res.status(404).render('admin/views/error', {
         pageName: 'Not Found',
         error: 'B2B company not found',
         user: req.user
@@ -370,7 +370,7 @@ export const listB2bCompanyUsers = async (req: Request, res: Response): Promise<
 
     const users = await getCompanyUsers(companyId, includeInactive);
 
-    res.render('hub/views/programs/b2b/users/index', {
+    res.render('admin/views/programs/b2b/users/index', {
       pageName: `Users: ${company.name}`,
       company,
       users,
@@ -380,7 +380,7 @@ export const listB2bCompanyUsers = async (req: Request, res: Response): Promise<
     });
   } catch (error: any) {
     console.error('Error listing B2B company users:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load B2B company users',
       user: req.user
@@ -453,7 +453,7 @@ export const listB2bQuotes = async (req: Request, res: Response): Promise<void> 
     // Get companies for filtering
     const companies = await getCompanies();
 
-    res.render('hub/views/programs/b2b/quotes/index', {
+    res.render('admin/views/programs/b2b/quotes/index', {
       pageName: 'B2B Quotes',
       quotes: result.data,
       total: result.total,
@@ -465,7 +465,7 @@ export const listB2bQuotes = async (req: Request, res: Response): Promise<void> 
     });
   } catch (error: any) {
     console.error('Error listing B2B quotes:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load B2B quotes',
       user: req.user
@@ -480,7 +480,7 @@ export const createB2bQuoteForm = async (req: Request, res: Response): Promise<v
     // Get companies for dropdown
     const companies = await getCompanies();
 
-    res.render('hub/views/programs/b2b/quotes/create', {
+    res.render('admin/views/programs/b2b/quotes/create', {
       pageName: 'Create B2B Quote',
       companyId,
       companies,
@@ -488,7 +488,7 @@ export const createB2bQuoteForm = async (req: Request, res: Response): Promise<v
     });
   } catch (error: any) {
     console.error('Error loading create quote form:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
       user: req.user
@@ -533,7 +533,7 @@ export const createB2bQuote = async (req: Request, res: Response): Promise<void>
     try {
       const companies = await getCompanies();
 
-      res.render('hub/views/programs/b2b/quotes/create', {
+      res.render('admin/views/programs/b2b/quotes/create', {
         pageName: 'Create B2B Quote',
         error: error.message || 'Failed to create B2B quote',
         formData: req.body,
@@ -541,7 +541,7 @@ export const createB2bQuote = async (req: Request, res: Response): Promise<void>
         user: req.user
       });
     } catch {
-      res.status(500).render('hub/views/error', {
+      res.status(500).render('admin/views/error', {
         pageName: 'Error',
         error: error.message || 'Failed to create B2B quote',
         user: req.user
@@ -557,7 +557,7 @@ export const viewB2bQuote = async (req: Request, res: Response): Promise<void> =
     const quote = await getQuote(quoteId);
 
     if (!quote) {
-      res.status(404).render('hub/views/error', {
+      res.status(404).render('admin/views/error', {
         pageName: 'Not Found',
         error: 'B2B quote not found',
         user: req.user
@@ -574,7 +574,7 @@ export const viewB2bQuote = async (req: Request, res: Response): Promise<void> =
       company = await getCompany(quote.b2bCompanyId);
     }
 
-    res.render('hub/views/programs/b2b/quotes/view', {
+    res.render('admin/views/programs/b2b/quotes/view', {
       pageName: `Quote: ${quote.quoteNumber}`,
       quote,
       items,
@@ -584,7 +584,7 @@ export const viewB2bQuote = async (req: Request, res: Response): Promise<void> =
     });
   } catch (error: any) {
     console.error('Error viewing B2B quote:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load B2B quote',
       user: req.user
@@ -599,7 +599,7 @@ export const editB2bQuoteForm = async (req: Request, res: Response): Promise<voi
     const quote = await getQuote(quoteId);
 
     if (!quote) {
-      res.status(404).render('hub/views/error', {
+      res.status(404).render('admin/views/error', {
         pageName: 'Not Found',
         error: 'B2B quote not found',
         user: req.user
@@ -613,7 +613,7 @@ export const editB2bQuoteForm = async (req: Request, res: Response): Promise<voi
     // Get companies for dropdown
     const companies = await getCompanies();
 
-    res.render('hub/views/programs/b2b/quotes/edit', {
+    res.render('admin/views/programs/b2b/quotes/edit', {
       pageName: `Edit Quote: ${quote.quoteNumber}`,
       quote,
       items,
@@ -622,7 +622,7 @@ export const editB2bQuoteForm = async (req: Request, res: Response): Promise<voi
     });
   } catch (error: any) {
     console.error('Error loading edit quote form:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
       user: req.user
@@ -687,7 +687,7 @@ export const updateB2bQuote = async (req: Request, res: Response): Promise<void>
       const items = await getQuoteItems(req.params.quoteId);
       const companies = await getCompanies();
 
-      res.render('hub/views/programs/b2b/quotes/edit', {
+      res.render('admin/views/programs/b2b/quotes/edit', {
         pageName: `Edit Quote: ${quote?.quoteNumber || 'Quote'}`,
         quote,
         items,
@@ -697,7 +697,7 @@ export const updateB2bQuote = async (req: Request, res: Response): Promise<void>
         user: req.user
       });
     } catch {
-      res.status(500).render('hub/views/error', {
+      res.status(500).render('admin/views/error', {
         pageName: 'Error',
         error: error.message || 'Failed to update B2B quote',
         user: req.user
@@ -920,14 +920,14 @@ export const b2bQuoteAnalytics = async (req: Request, res: Response): Promise<vo
       quoteApprovalTime: 0
     };
 
-    res.render('hub/views/programs/b2b/analytics/index', {
+    res.render('admin/views/programs/b2b/analytics/index', {
       pageName: 'B2B Quote Analytics',
       stats,
       user: req.user
     });
   } catch (error: any) {
     console.error('Error loading B2B quote analytics:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load B2B quote analytics',
       user: req.user

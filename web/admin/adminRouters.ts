@@ -1,5 +1,5 @@
 import express from "express";
-import { isMerchantLoggedIn } from "../../libs/auth";
+import { isAdminLoggedIn } from "../../libs/auth";
 import {
   getAdminDashboard,
   getAdminLogin,
@@ -57,11 +57,11 @@ router.post("/login", postAdminLogin);
 router.post("/logout", postAdminLogout);
 
 // ============================================================================
-// Protected Routes (merchant auth required)
+// Protected Routes (admin auth required)
 // ============================================================================
 
 // Apply authentication middleware to all routes below
-router.use(isMerchantLoggedIn);
+router.use(isAdminLoggedIn);
 
 // GET: admin dashboard (home)
 router.get("/", getAdminDashboard);

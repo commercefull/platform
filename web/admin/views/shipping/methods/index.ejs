@@ -11,8 +11,8 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-right">
-            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="/hub/shipping">Shipping</a></li>
+            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/admin/shipping">Shipping</a></li>
             <li class="breadcrumb-item active">Methods</li>
           </ol>
         </div>
@@ -34,7 +34,7 @@
       <!-- Action Bar -->
       <div class="row mb-3">
         <div class="col-12">
-          <a href="/hub/shipping/methods/create" class="btn btn-primary">
+          <a href="/admin/shipping/methods/create" class="btn btn-primary">
             <i class="fas fa-plus"></i> Add Shipping Method
           </a>
           <div class="float-right">
@@ -67,7 +67,7 @@
               <% if (methods.length === 0) { %>
                 <tr>
                   <td colspan="9" class="text-center py-4">
-                    <em>No shipping methods configured. <a href="/hub/shipping/methods/create">Add your first method</a>.</em>
+                    <em>No shipping methods configured. <a href="/admin/shipping/methods/create">Add your first method</a>.</em>
                   </td>
                 </tr>
               <% } else { %>
@@ -113,10 +113,10 @@
                       <% } %>
                     </td>
                     <td>
-                      <a href="/hub/shipping/methods/<%= method.shippingMethodId %>" class="btn btn-sm btn-info">
+                      <a href="/admin/shipping/methods/<%= method.shippingMethodId %>" class="btn btn-sm btn-info">
                         <i class="fas fa-eye"></i>
                       </a>
-                      <a href="/hub/shipping/methods/<%= method.shippingMethodId %>/edit" class="btn btn-sm btn-primary">
+                      <a href="/admin/shipping/methods/<%= method.shippingMethodId %>/edit" class="btn btn-sm btn-primary">
                         <i class="fas fa-edit"></i>
                       </a>
                       <% if (method.isActive) { %>
@@ -169,7 +169,7 @@
 function deleteMethod(methodId, methodName) {
   document.getElementById('deleteMethodName').textContent = methodName;
   document.getElementById('confirmDeleteBtn').onclick = function() {
-    fetch(`/hub/shipping/methods/${methodId}`, {
+    fetch(`/admin/shipping/methods/${methodId}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
@@ -192,7 +192,7 @@ function deleteMethod(methodId, methodName) {
 }
 
 function activateMethod(methodId, methodName) {
-  fetch(`/hub/shipping/methods/${methodId}/activate`, {
+  fetch(`/admin/shipping/methods/${methodId}/activate`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -213,7 +213,7 @@ function activateMethod(methodId, methodName) {
 }
 
 function deactivateMethod(methodId, methodName) {
-  fetch(`/hub/shipping/methods/${methodId}/deactivate`, {
+  fetch(`/admin/shipping/methods/${methodId}/deactivate`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

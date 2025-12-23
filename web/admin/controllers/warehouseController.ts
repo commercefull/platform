@@ -19,7 +19,7 @@ export const listWarehouses = async (req: Request, res: Response): Promise<void>
     const warehouses = await warehouseRepo.findAll(activeOnly);
     const stats = await warehouseRepo.getStatistics();
 
-    res.render('hub/views/operations/warehouses/index', {
+    res.render('admin/views/operations/warehouses/index', {
       pageName: 'Warehouses',
       warehouses,
       stats,
@@ -30,7 +30,7 @@ export const listWarehouses = async (req: Request, res: Response): Promise<void>
     });
   } catch (error: any) {
     console.error('Error listing warehouses:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load warehouses',
       user: req.user
@@ -40,13 +40,13 @@ export const listWarehouses = async (req: Request, res: Response): Promise<void>
 
 export const createWarehouseForm = async (req: Request, res: Response): Promise<void> => {
   try {
-    res.render('hub/views/operations/warehouses/create', {
+    res.render('admin/views/operations/warehouses/create', {
       pageName: 'Create Warehouse',
       user: req.user
     });
   } catch (error: any) {
     console.error('Error loading create warehouse form:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
       user: req.user
@@ -110,7 +110,7 @@ export const createWarehouse = async (req: Request, res: Response): Promise<void
   } catch (error: any) {
     console.error('Error creating warehouse:', error);
 
-    res.render('hub/views/operations/warehouses/create', {
+    res.render('admin/views/operations/warehouses/create', {
       pageName: 'Create Warehouse',
       error: error.message || 'Failed to create warehouse',
       formData: req.body,
@@ -126,7 +126,7 @@ export const viewWarehouse = async (req: Request, res: Response): Promise<void> 
     const warehouse = await warehouseRepo.findById(warehouseId);
 
     if (!warehouse) {
-      res.status(404).render('hub/views/error', {
+      res.status(404).render('admin/views/error', {
         pageName: 'Not Found',
         error: 'Warehouse not found',
         user: req.user
@@ -134,7 +134,7 @@ export const viewWarehouse = async (req: Request, res: Response): Promise<void> 
       return;
     }
 
-    res.render('hub/views/operations/warehouses/view', {
+    res.render('admin/views/operations/warehouses/view', {
       pageName: `Warehouse: ${warehouse.name}`,
       warehouse,
       user: req.user,
@@ -142,7 +142,7 @@ export const viewWarehouse = async (req: Request, res: Response): Promise<void> 
     });
   } catch (error: any) {
     console.error('Error viewing warehouse:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load warehouse',
       user: req.user
@@ -157,7 +157,7 @@ export const editWarehouseForm = async (req: Request, res: Response): Promise<vo
     const warehouse = await warehouseRepo.findById(warehouseId);
 
     if (!warehouse) {
-      res.status(404).render('hub/views/error', {
+      res.status(404).render('admin/views/error', {
         pageName: 'Not Found',
         error: 'Warehouse not found',
         user: req.user
@@ -165,14 +165,14 @@ export const editWarehouseForm = async (req: Request, res: Response): Promise<vo
       return;
     }
 
-    res.render('hub/views/operations/warehouses/edit', {
+    res.render('admin/views/operations/warehouses/edit', {
       pageName: `Edit: ${warehouse.name}`,
       warehouse,
       user: req.user
     });
   } catch (error: any) {
     console.error('Error loading edit warehouse form:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
       user: req.user
@@ -244,7 +244,7 @@ export const updateWarehouse = async (req: Request, res: Response): Promise<void
     try {
       const warehouse = await warehouseRepo.findById(req.params.warehouseId);
 
-      res.render('hub/views/operations/warehouses/edit', {
+      res.render('admin/views/operations/warehouses/edit', {
         pageName: `Edit: ${warehouse?.name || 'Warehouse'}`,
         warehouse,
         error: error.message || 'Failed to update warehouse',
@@ -252,7 +252,7 @@ export const updateWarehouse = async (req: Request, res: Response): Promise<void
         user: req.user
       });
     } catch {
-      res.status(500).render('hub/views/error', {
+      res.status(500).render('admin/views/error', {
         pageName: 'Error',
         error: error.message || 'Failed to update warehouse',
         user: req.user

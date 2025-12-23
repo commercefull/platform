@@ -9,9 +9,9 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-end">
-            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="/hub/orders">Orders</a></li>
-            <li class="breadcrumb-item"><a href="/hub/orders/<%= order.orderId %>">Order #<%= order.orderNumber %></a></li>
+            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/admin/orders">Orders</a></li>
+            <li class="breadcrumb-item"><a href="/admin/orders/<%= order.orderId %>">Order #<%= order.orderNumber %></a></li>
             <li class="breadcrumb-item active">Refund</li>
           </ol>
         </div>
@@ -35,7 +35,7 @@
             <div class="card-header">
               <h3 class="card-title"><i class="fas fa-money-bill-wave me-2"></i>Process Refund</h3>
             </div>
-            <form method="POST" action="/hub/orders/<%= order.orderId %>/refund">
+            <form method="POST" action="/admin/orders/<%= order.orderId %>/refund">
               <div class="card-body">
                 <!-- Order Items -->
                 <h5 class="mb-3">Order Items</h5>
@@ -142,7 +142,7 @@
                 <button type="submit" class="btn btn-danger">
                   <i class="fas fa-undo me-2"></i>Process Refund
                 </button>
-                <a href="/hub/orders/<%= order.orderId %>" class="btn btn-secondary">
+                <a href="/admin/orders/<%= order.orderId %>" class="btn btn-secondary">
                   <i class="fas fa-times me-2"></i>Cancel
                 </a>
               </div>

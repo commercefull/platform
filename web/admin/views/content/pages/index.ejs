@@ -11,8 +11,8 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-right">
-            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="/hub/content">Content</a></li>
+            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/admin/content">Content</a></li>
             <li class="breadcrumb-item active">Pages</li>
           </ol>
         </div>
@@ -34,7 +34,7 @@
       <!-- Action Bar -->
       <div class="row mb-3">
         <div class="col-12">
-          <a href="/hub/content/pages/create" class="btn btn-primary">
+          <a href="/admin/content/pages/create" class="btn btn-primary">
             <i class="fas fa-plus"></i> Create Page
           </a>
           <div class="float-right">
@@ -73,7 +73,7 @@
                 <button type="submit" class="btn btn-secondary mr-2">
                   <i class="fas fa-filter"></i> Filter
                 </button>
-                <a href="/hub/content/pages" class="btn btn-outline-secondary">
+                <a href="/admin/content/pages" class="btn btn-outline-secondary">
                   <i class="fas fa-times"></i> Clear
                 </a>
               </form>
@@ -105,7 +105,7 @@
               <% if (pages.length === 0) { %>
                 <tr>
                   <td colspan="8" class="text-center py-4">
-                    <em>No content pages found. <a href="/hub/content/pages/create">Create your first page</a>.</em>
+                    <em>No content pages found. <a href="/admin/content/pages/create">Create your first page</a>.</em>
                   </td>
                 </tr>
               <% } else { %>
@@ -149,10 +149,10 @@
                       <% } %>
                     </td>
                     <td>
-                      <a href="/hub/content/pages/<%= page.id %>" class="btn btn-sm btn-info">
+                      <a href="/admin/content/pages/<%= page.id %>" class="btn btn-sm btn-info">
                         <i class="fas fa-eye"></i>
                       </a>
-                      <a href="/hub/content/pages/<%= page.id %>/edit" class="btn btn-sm btn-primary">
+                      <a href="/admin/content/pages/<%= page.id %>/edit" class="btn btn-sm btn-primary">
                         <i class="fas fa-edit"></i>
                       </a>
                       <% if (page.status === 'draft') { %>
@@ -201,7 +201,7 @@
 function deletePage(pageId, pageTitle) {
   document.getElementById('deletePageTitle').textContent = pageTitle;
   document.getElementById('confirmDeleteBtn').onclick = function() {
-    fetch(`/hub/content/pages/${pageId}`, {
+    fetch(`/admin/content/pages/${pageId}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
@@ -225,7 +225,7 @@ function deletePage(pageId, pageTitle) {
 
 function publishPage(pageId, pageTitle) {
   if (confirm(`Are you sure you want to publish "${pageTitle}"?`)) {
-    fetch(`/hub/content/pages/${pageId}/publish`, {
+    fetch(`/admin/content/pages/${pageId}/publish`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

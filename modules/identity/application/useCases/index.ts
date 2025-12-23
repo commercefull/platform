@@ -15,6 +15,9 @@ export * from './customer/VerifyCustomerEmail';
 export * from './merchant/LoginMerchant';
 export * from './merchant/RegisterMerchant';
 
+// Admin authentication
+export * from './admin';
+
 // Token management
 export * from './token/RefreshToken';
 export * from './token/RevokeToken';

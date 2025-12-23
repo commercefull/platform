@@ -42,7 +42,7 @@ export const gdprDashboard = async (req: Request, res: Response): Promise<void> 
        LIMIT 20`
     );
 
-    res.render('hub/views/gdpr/index', {
+    res.render('admin/views/gdpr/index', {
       pageName: 'GDPR Compliance',
       stats: {
         pendingRequests: parseInt(statsResult?.pendingRequests || '0'),
@@ -55,7 +55,7 @@ export const gdprDashboard = async (req: Request, res: Response): Promise<void> 
     });
   } catch (error: any) {
     console.error('Error loading GDPR dashboard:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load GDPR dashboard',
       user: req.user
@@ -113,7 +113,7 @@ export const viewGdprRequest = async (req: Request, res: Response): Promise<void
     );
 
     if (!request) {
-      res.status(404).render('hub/views/error', {
+      res.status(404).render('admin/views/error', {
         pageName: 'Not Found',
         error: 'GDPR request not found',
         user: req.user
@@ -121,14 +121,14 @@ export const viewGdprRequest = async (req: Request, res: Response): Promise<void
       return;
     }
 
-    res.render('hub/views/gdpr/view', {
+    res.render('admin/views/gdpr/view', {
       pageName: `GDPR Request: ${request.requestType}`,
       request,
       user: req.user
     });
   } catch (error: any) {
     console.error('Error viewing GDPR request:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load GDPR request',
       user: req.user
@@ -182,14 +182,14 @@ export const consentManagement = async (req: Request, res: Response): Promise<vo
       consentRetentionDays: 365
     };
 
-    res.render('hub/views/gdpr/consent', {
+    res.render('admin/views/gdpr/consent', {
       pageName: 'Consent Management',
       consentSettings,
       user: req.user
     });
   } catch (error: any) {
     console.error('Error loading consent management:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load consent management',
       user: req.user

@@ -9,7 +9,7 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-end">
-            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
             <li class="breadcrumb-item active">Business Information</li>
           </ol>
         </div>
@@ -58,16 +58,16 @@
               <h3 class="card-title"><i class="fas fa-link me-2"></i>Settings</h3>
             </div>
             <div class="list-group list-group-flush">
-              <a href="/hub/settings/store" class="list-group-item list-group-item-action">
+              <a href="/admin/settings/store" class="list-group-item list-group-item-action">
                 <i class="fas fa-store me-2"></i>Store Settings
               </a>
-              <a href="/hub/settings/business" class="list-group-item list-group-item-action active">
+              <a href="/admin/settings/business" class="list-group-item list-group-item-action active">
                 <i class="fas fa-building me-2"></i>Business Information
               </a>
-              <a href="/hub/settings/localization" class="list-group-item list-group-item-action">
+              <a href="/admin/settings/localization" class="list-group-item list-group-item-action">
                 <i class="fas fa-language me-2"></i>Localization
               </a>
-              <a href="/hub/platform/configuration" class="list-group-item list-group-item-action">
+              <a href="/admin/platform/configuration" class="list-group-item list-group-item-action">
                 <i class="fas fa-cog me-2"></i>Platform Configuration
               </a>
             </div>
@@ -102,7 +102,7 @@
     const data = Object.fromEntries(formData);
 
     try {
-      const response = await fetch('/hub/settings/business', {
+      const response = await fetch('/admin/settings/business', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)

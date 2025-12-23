@@ -11,8 +11,8 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-right">
-            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="/hub/payments">Payments</a></li>
+            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/admin/payments">Payments</a></li>
             <li class="breadcrumb-item active">Gateways</li>
           </ol>
         </div>
@@ -34,7 +34,7 @@
       <!-- Action Bar -->
       <div class="row mb-3">
         <div class="col-12">
-          <a href="/hub/payments/gateways/create" class="btn btn-primary">
+          <a href="/admin/payments/gateways/create" class="btn btn-primary">
             <i class="fas fa-plus"></i> Add Payment Gateway
           </a>
           <div class="float-right">
@@ -66,7 +66,7 @@
               <% if (gateways.length === 0) { %>
                 <tr>
                   <td colspan="8" class="text-center py-4">
-                    <em>No payment gateways configured. <a href="/hub/payments/gateways/create">Add your first gateway</a>.</em>
+                    <em>No payment gateways configured. <a href="/admin/payments/gateways/create">Add your first gateway</a>.</em>
                   </td>
                 </tr>
               <% } else { %>
@@ -115,10 +115,10 @@
                       <% } %>
                     </td>
                     <td>
-                      <a href="/hub/payments/gateways/<%= gateway.paymentGatewayId %>" class="btn btn-sm btn-info">
+                      <a href="/admin/payments/gateways/<%= gateway.paymentGatewayId %>" class="btn btn-sm btn-info">
                         <i class="fas fa-eye"></i>
                       </a>
-                      <a href="/hub/payments/gateways/<%= gateway.paymentGatewayId %>/edit" class="btn btn-sm btn-primary">
+                      <a href="/admin/payments/gateways/<%= gateway.paymentGatewayId %>/edit" class="btn btn-sm btn-primary">
                         <i class="fas fa-edit"></i>
                       </a>
                       <button class="btn btn-sm btn-danger" onclick="deleteGateway('<%= gateway.paymentGatewayId %>', '<%= gateway.name %>')">
@@ -162,7 +162,7 @@
 function deleteGateway(gatewayId, gatewayName) {
   document.getElementById('deleteGatewayName').textContent = gatewayName;
   document.getElementById('confirmDeleteBtn').onclick = function() {
-    fetch(`/hub/payments/gateways/${gatewayId}`, {
+    fetch(`/admin/payments/gateways/${gatewayId}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',

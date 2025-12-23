@@ -22,4 +22,5 @@ router.patch('/:channelId', updateChannel);
 router.post('/:channelId/products', assignProducts);
 router.post('/:channelId/warehouse', assignWarehouse);
 
+export const channelBusinessRouter = router;
 export default router;

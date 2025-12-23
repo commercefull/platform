@@ -11,8 +11,8 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-right">
-            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="/hub/promotions">Promotions</a></li>
+            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/admin/promotions">Promotions</a></li>
             <li class="breadcrumb-item active">Coupons</li>
           </ol>
         </div>
@@ -34,7 +34,7 @@
       <!-- Action Bar -->
       <div class="row mb-3">
         <div class="col-12">
-          <a href="/hub/promotions/coupons/create" class="btn btn-primary">
+          <a href="/admin/promotions/coupons/create" class="btn btn-primary">
             <i class="fas fa-plus"></i> Create Coupon
           </a>
           <div class="float-right">
@@ -61,7 +61,7 @@
                 <button type="submit" class="btn btn-secondary mr-2">
                   <i class="fas fa-filter"></i> Filter
                 </button>
-                <a href="/hub/promotions/coupons" class="btn btn-outline-secondary">
+                <a href="/admin/promotions/coupons" class="btn btn-outline-secondary">
                   <i class="fas fa-times"></i> Clear
                 </a>
               </form>
@@ -93,7 +93,7 @@
               <% if (coupons.length === 0) { %>
                 <tr>
                   <td colspan="8" class="text-center py-4">
-                    <em>No coupons found. <a href="/hub/promotions/coupons/create">Create your first coupon</a>.</em>
+                    <em>No coupons found. <a href="/admin/promotions/coupons/create">Create your first coupon</a>.</em>
                   </td>
                 </tr>
               <% } else { %>
@@ -143,10 +143,10 @@
                       <% } %>
                     </td>
                     <td>
-                      <a href="/hub/promotions/coupons/<%= coupon.promotionCouponId %>" class="btn btn-sm btn-info">
+                      <a href="/admin/promotions/coupons/<%= coupon.promotionCouponId %>" class="btn btn-sm btn-info">
                         <i class="fas fa-eye"></i>
                       </a>
-                      <a href="/hub/promotions/coupons/<%= coupon.promotionCouponId %>/edit" class="btn btn-sm btn-primary">
+                      <a href="/admin/promotions/coupons/<%= coupon.promotionCouponId %>/edit" class="btn btn-sm btn-primary">
                         <i class="fas fa-edit"></i>
                       </a>
                       <button class="btn btn-sm btn-danger" onclick="deleteCoupon('<%= coupon.promotionCouponId %>', '<%= coupon.name %>')">
@@ -190,7 +190,7 @@
 function deleteCoupon(couponId, couponName) {
   document.getElementById('deleteCouponName').textContent = couponName;
   document.getElementById('confirmDeleteBtn').onclick = function() {
-    fetch(`/hub/promotions/coupons/${couponId}`, {
+    fetch(`/admin/promotions/coupons/${couponId}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',

@@ -9,8 +9,8 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-end">
-            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="/hub/marketing/campaigns">Marketing</a></li>
+            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/admin/marketing/campaigns">Marketing</a></li>
             <li class="breadcrumb-item active">Email Templates</li>
           </ol>
         </div>
@@ -46,7 +46,7 @@
                   <small class="text-muted">Subject: <%= template.subject || '-' %></small>
                 </div>
                 <div class="card-footer">
-                  <a href="/hub/marketing/templates/<%= template.emailTemplateId %>/edit" class="btn btn-sm btn-outline-primary">
+                  <a href="/admin/marketing/templates/<%= template.emailTemplateId %>/edit" class="btn btn-sm btn-outline-primary">
                     <i class="fas fa-edit"></i> Edit
                   </a>
                   <button class="btn btn-sm btn-outline-info" onclick="previewTemplate('<%= template.emailTemplateId %>')">
@@ -98,7 +98,7 @@
                 <td><span class="badge bg-secondary"><%= st.trigger %></span></td>
                 <td>-</td>
                 <td>
-                  <a href="/hub/marketing/templates/system/<%= st.id %>/edit" class="btn btn-sm btn-outline-primary">
+                  <a href="/admin/marketing/templates/system/<%= st.id %>/edit" class="btn btn-sm btn-outline-primary">
                     <i class="fas fa-edit"></i> Customize
                   </a>
                 </td>
@@ -120,7 +120,7 @@
         <h5 class="modal-title">Create Email Template</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <form method="POST" action="/hub/marketing/templates">
+      <form method="POST" action="/admin/marketing/templates">
         <div class="modal-body">
           <div class="row">
             <div class="col-md-6">
@@ -165,10 +165,10 @@
 
 <script>
   function previewTemplate(id) {
-    window.open(`/hub/marketing/templates/${id}/preview`, '_blank');
+    window.open(`/admin/marketing/templates/${id}/preview`, '_blank');
   }
   async function duplicateTemplate(id) {
-    const res = await fetch(`/hub/marketing/templates/${id}/duplicate`, { method: 'POST' });
+    const res = await fetch(`/admin/marketing/templates/${id}/duplicate`, { method: 'POST' });
     if ((await res.json()).success) location.reload();
   }
 </script>

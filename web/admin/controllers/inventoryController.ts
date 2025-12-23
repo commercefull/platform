@@ -123,7 +123,7 @@ export const listInventory = async (req: Request, res: Response): Promise<void> 
 
     const total = parseInt(countResult?.count || '0');
 
-    res.render('hub/views/inventory/index', {
+    res.render('admin/views/inventory/index', {
       pageName: 'Inventory',
       inventory: inventory || [],
       stats,
@@ -140,7 +140,7 @@ export const listInventory = async (req: Request, res: Response): Promise<void> 
     });
   } catch (error: any) {
     console.error('Error listing inventory:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load inventory',
       user: req.user
@@ -248,7 +248,7 @@ export const viewInventoryHistory = async (req: Request, res: Response): Promise
     );
 
     if (!inventoryLevel) {
-      res.status(404).render('hub/views/error', {
+      res.status(404).render('admin/views/error', {
         pageName: 'Not Found',
         error: 'Inventory level not found',
         user: req.user
@@ -271,7 +271,7 @@ export const viewInventoryHistory = async (req: Request, res: Response): Promise
 
     const total = parseInt(countResult?.count || '0');
 
-    res.render('hub/views/inventory/history', {
+    res.render('admin/views/inventory/history', {
       pageName: `Inventory History: ${inventoryLevel.productName}`,
       inventoryLevel,
       transactions: transactions || [],
@@ -285,7 +285,7 @@ export const viewInventoryHistory = async (req: Request, res: Response): Promise
     });
   } catch (error: any) {
     console.error('Error viewing inventory history:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load inventory history',
       user: req.user
@@ -310,14 +310,14 @@ export const listLocations = async (req: Request, res: Response): Promise<void> 
        ORDER BY loc."name"`
     );
 
-    res.render('hub/views/inventory/locations', {
+    res.render('admin/views/inventory/locations', {
       pageName: 'Inventory Locations',
       locations: locations || [],
       user: req.user
     });
   } catch (error: any) {
     console.error('Error listing locations:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load locations',
       user: req.user
@@ -345,14 +345,14 @@ export const lowStockReport = async (req: Request, res: Response): Promise<void>
        ORDER BY (il."quantity" - il."reserved") ASC`
     );
 
-    res.render('hub/views/inventory/low-stock', {
+    res.render('admin/views/inventory/low-stock', {
       pageName: 'Low Stock Report',
       items: lowStockItems || [],
       user: req.user
     });
   } catch (error: any) {
     console.error('Error generating low stock report:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to generate report',
       user: req.user

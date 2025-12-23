@@ -9,7 +9,7 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-end">
-            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
             <li class="breadcrumb-item active">Loyalty Program</li>
           </ol>
         </div>
@@ -65,7 +65,7 @@
           <h3 class="card-title"><i class="fas fa-cog me-2"></i>Program Settings</h3>
         </div>
         <div class="card-body">
-          <form method="POST" action="/hub/programs/loyalty/settings">
+          <form method="POST" action="/admin/programs/loyalty/settings">
             <div class="row">
               <div class="col-md-4">
                 <div class="mb-3">
@@ -150,7 +150,7 @@
       <div class="card">
         <div class="card-header">
           <h3 class="card-title"><i class="fas fa-history me-2"></i>Recent Transactions</h3>
-          <a href="/hub/programs/loyalty/transactions" class="btn btn-sm btn-primary float-end">View All</a>
+          <a href="/admin/programs/loyalty/transactions" class="btn btn-sm btn-primary float-end">View All</a>
         </div>
         <div class="card-body table-responsive p-0">
           <table class="table table-hover">
@@ -200,7 +200,7 @@
         <h5 class="modal-title">Add Reward</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <form method="POST" action="/hub/programs/loyalty/rewards">
+      <form method="POST" action="/admin/programs/loyalty/rewards">
         <div class="modal-body">
           <div class="mb-3">
             <label class="form-label">Reward Name <span class="text-danger">*</span></label>
@@ -251,10 +251,10 @@
 </div>
 
 <script>
-  function editReward(id) { window.location.href = `/hub/programs/loyalty/rewards/${id}/edit`; }
+  function editReward(id) { window.location.href = `/admin/programs/loyalty/rewards/${id}/edit`; }
   async function deleteReward(id) {
     if (!confirm('Delete this reward?')) return;
-    const res = await fetch(`/hub/programs/loyalty/rewards/${id}`, { method: 'DELETE' });
+    const res = await fetch(`/admin/programs/loyalty/rewards/${id}`, { method: 'DELETE' });
     if ((await res.json()).success) location.reload();
   }
 </script>

@@ -11,8 +11,8 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-right">
-            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="/hub/shipping">Shipping</a></li>
+            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/admin/shipping">Shipping</a></li>
             <li class="breadcrumb-item active">Zones</li>
           </ol>
         </div>
@@ -34,7 +34,7 @@
       <!-- Action Bar -->
       <div class="row mb-3">
         <div class="col-12">
-          <a href="/hub/shipping/zones/create" class="btn btn-primary">
+          <a href="/admin/shipping/zones/create" class="btn btn-primary">
             <i class="fas fa-plus"></i> Create Zone
           </a>
           <div class="float-right">
@@ -65,7 +65,7 @@
               <% if (zones.length === 0) { %>
                 <tr>
                   <td colspan="6" class="text-center py-4">
-                    <em>No shipping zones found. <a href="/hub/shipping/zones/create">Create your first zone</a>.</em>
+                    <em>No shipping zones found. <a href="/admin/shipping/zones/create">Create your first zone</a>.</em>
                   </td>
                 </tr>
               <% } else { %>
@@ -99,10 +99,10 @@
                       <% } %>
                     </td>
                     <td>
-                      <a href="/hub/shipping/zones/<%= zone.shippingZoneId %>" class="btn btn-sm btn-info">
+                      <a href="/admin/shipping/zones/<%= zone.shippingZoneId %>" class="btn btn-sm btn-info">
                         <i class="fas fa-eye"></i>
                       </a>
-                      <a href="/hub/shipping/zones/<%= zone.shippingZoneId %>/edit" class="btn btn-sm btn-primary">
+                      <a href="/admin/shipping/zones/<%= zone.shippingZoneId %>/edit" class="btn btn-sm btn-primary">
                         <i class="fas fa-edit"></i>
                       </a>
                       <% if (zone.isActive) { %>
@@ -153,7 +153,7 @@
 
 <script>
 function activateZone(zoneId) {
-  fetch(`/hub/shipping/zones/${zoneId}/activate`, {
+  fetch(`/admin/shipping/zones/${zoneId}/activate`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -174,7 +174,7 @@ function activateZone(zoneId) {
 }
 
 function deactivateZone(zoneId) {
-  fetch(`/hub/shipping/zones/${zoneId}/deactivate`, {
+  fetch(`/admin/shipping/zones/${zoneId}/deactivate`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -197,7 +197,7 @@ function deactivateZone(zoneId) {
 function deleteZone(zoneId, zoneName) {
   document.getElementById('deleteZoneName').textContent = zoneName;
   document.getElementById('confirmDeleteBtn').onclick = function() {
-    fetch(`/hub/shipping/zones/${zoneId}`, {
+    fetch(`/admin/shipping/zones/${zoneId}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',

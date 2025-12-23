@@ -23,7 +23,7 @@ export const listMembershipPlans = async (req: Request, res: Response): Promise<
     const plans = await membershipPlanRepo.findAll(activeOnly);
     const stats = await membershipPlanRepo.getStatistics();
 
-    res.render('hub/views/programs/membership/plans/index', {
+    res.render('admin/views/programs/membership/plans/index', {
       pageName: 'Membership Plans',
       plans,
       stats,
@@ -34,7 +34,7 @@ export const listMembershipPlans = async (req: Request, res: Response): Promise<
     });
   } catch (error: any) {
     console.error('Error listing membership plans:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load membership plans',
       user: req.user
@@ -44,13 +44,13 @@ export const listMembershipPlans = async (req: Request, res: Response): Promise<
 
 export const createMembershipPlanForm = async (req: Request, res: Response): Promise<void> => {
   try {
-    res.render('hub/views/programs/membership/plans/create', {
+    res.render('admin/views/programs/membership/plans/create', {
       pageName: 'Create Membership Plan',
       user: req.user
     });
   } catch (error: any) {
     console.error('Error loading create membership plan form:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
       user: req.user
@@ -119,7 +119,7 @@ export const createMembershipPlan = async (req: Request, res: Response): Promise
   } catch (error: any) {
     console.error('Error creating membership plan:', error);
 
-    res.render('hub/views/programs/membership/plans/create', {
+    res.render('admin/views/programs/membership/plans/create', {
       pageName: 'Create Membership Plan',
       error: error.message || 'Failed to create membership plan',
       formData: req.body,
@@ -135,7 +135,7 @@ export const viewMembershipPlan = async (req: Request, res: Response): Promise<v
     const plan = await membershipPlanRepo.findById(planId);
 
     if (!plan) {
-      res.status(404).render('hub/views/error', {
+      res.status(404).render('admin/views/error', {
         pageName: 'Not Found',
         error: 'Membership plan not found',
         user: req.user
@@ -164,7 +164,7 @@ export const viewMembershipPlan = async (req: Request, res: Response): Promise<v
       }
     }
 
-    res.render('hub/views/programs/membership/plans/view', {
+    res.render('admin/views/programs/membership/plans/view', {
       pageName: `Plan: ${plan.name}`,
       plan,
       benefits,
@@ -173,7 +173,7 @@ export const viewMembershipPlan = async (req: Request, res: Response): Promise<v
     });
   } catch (error: any) {
     console.error('Error viewing membership plan:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load membership plan',
       user: req.user
@@ -188,7 +188,7 @@ export const editMembershipPlanForm = async (req: Request, res: Response): Promi
     const plan = await membershipPlanRepo.findById(planId);
 
     if (!plan) {
-      res.status(404).render('hub/views/error', {
+      res.status(404).render('admin/views/error', {
         pageName: 'Not Found',
         error: 'Membership plan not found',
         user: req.user
@@ -196,14 +196,14 @@ export const editMembershipPlanForm = async (req: Request, res: Response): Promi
       return;
     }
 
-    res.render('hub/views/programs/membership/plans/edit', {
+    res.render('admin/views/programs/membership/plans/edit', {
       pageName: `Edit: ${plan.name}`,
       plan,
       user: req.user
     });
   } catch (error: any) {
     console.error('Error loading edit membership plan form:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
       user: req.user
@@ -273,7 +273,7 @@ export const updateMembershipPlan = async (req: Request, res: Response): Promise
     try {
       const plan = await membershipPlanRepo.findById(req.params.planId);
 
-      res.render('hub/views/programs/membership/plans/edit', {
+      res.render('admin/views/programs/membership/plans/edit', {
         pageName: `Edit: ${plan?.name || 'Plan'}`,
         plan,
         error: error.message || 'Failed to update membership plan',
@@ -281,7 +281,7 @@ export const updateMembershipPlan = async (req: Request, res: Response): Promise
         user: req.user
       });
     } catch {
-      res.status(500).render('hub/views/error', {
+      res.status(500).render('admin/views/error', {
         pageName: 'Error',
         error: error.message || 'Failed to update membership plan',
         user: req.user
@@ -363,7 +363,7 @@ export const listMembershipBenefits = async (req: Request, res: Response): Promi
     // Get plans for filtering
     const plans = await membershipPlanRepo.findAll(true);
 
-    res.render('hub/views/programs/membership/benefits/index', {
+    res.render('admin/views/programs/membership/benefits/index', {
       pageName: 'Membership Benefits',
       benefits,
       plans,
@@ -374,7 +374,7 @@ export const listMembershipBenefits = async (req: Request, res: Response): Promi
     });
   } catch (error: any) {
     console.error('Error listing membership benefits:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load membership benefits',
       user: req.user
@@ -399,7 +399,7 @@ export const listMemberships = async (req: Request, res: Response): Promise<void
     // Get plans for filtering
     const plans = await membershipPlanRepo.findAll(true);
 
-    res.render('hub/views/programs/membership/memberships/index', {
+    res.render('admin/views/programs/membership/memberships/index', {
       pageName: 'User Memberships',
       memberships,
       plans,
@@ -410,7 +410,7 @@ export const listMemberships = async (req: Request, res: Response): Promise<void
     });
   } catch (error: any) {
     console.error('Error listing memberships:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load memberships',
       user: req.user
@@ -573,7 +573,7 @@ export const membershipAnalytics = async (req: Request, res: Response): Promise<
 
     stats.membershipsByTier = tierStats;
 
-    res.render('hub/views/programs/membership/analytics/index', {
+    res.render('admin/views/programs/membership/analytics/index', {
       pageName: 'Membership Analytics',
       stats,
       tiers,
@@ -581,7 +581,7 @@ export const membershipAnalytics = async (req: Request, res: Response): Promise<
     });
   } catch (error: any) {
     console.error('Error loading membership analytics:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load membership analytics',
       user: req.user

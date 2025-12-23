@@ -15,8 +15,8 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-right">
-            <li class="breadcrumb-item"><a href="/hub">Home</a></li>
-            <li class="breadcrumb-item"><a href="/hub/customers">Customers</a></li>
+            <li class="breadcrumb-item"><a href="/admin">Home</a></li>
+            <li class="breadcrumb-item"><a href="/admin/customers">Customers</a></li>
             <li class="breadcrumb-item active"><%= customer.firstName %> <%= customer.lastName %></li>
           </ol>
         </div>
@@ -80,7 +80,7 @@
                 <% } %>
               </ul>
 
-              <a href="/hub/customers/<%= customer.customerId %>/edit" class="btn btn-primary btn-block">
+              <a href="/admin/customers/<%= customer.customerId %>/edit" class="btn btn-primary btn-block">
                 <i class="fas fa-edit"></i> Edit Profile
               </a>
             </div>
@@ -108,11 +108,11 @@
                 </button>
               <% } %>
 
-              <a href="/hub/customers/<%= customer.customerId %>/addresses" class="btn btn-info btn-block mb-2">
+              <a href="/admin/customers/<%= customer.customerId %>/addresses" class="btn btn-info btn-block mb-2">
                 <i class="fas fa-map-marker-alt"></i> Manage Addresses
               </a>
 
-              <a href="/hub/customers" class="btn btn-secondary btn-block">
+              <a href="/admin/customers" class="btn btn-secondary btn-block">
                 <i class="fas fa-arrow-left"></i> Back to Customers
               </a>
             </div>
@@ -126,7 +126,7 @@
             <div class="card-header">
               <h3 class="card-title"><i class="fas fa-map-marker-alt mr-2"></i>Addresses</h3>
               <div class="card-tools">
-                <a href="/hub/customers/<%= customer.customerId %>/addresses" class="btn btn-sm btn-primary">
+                <a href="/admin/customers/<%= customer.customerId %>/addresses" class="btn btn-sm btn-primary">
                   <i class="fas fa-plus"></i> Add
                 </a>
               </div>
@@ -189,7 +189,7 @@
             <div class="card-header">
               <h3 class="card-title"><i class="fas fa-shopping-cart mr-2"></i>Recent Orders</h3>
               <div class="card-tools">
-                <a href="/hub/orders?customerId=<%= customer.customerId %>" class="btn btn-sm btn-primary">
+                <a href="/admin/orders?customerId=<%= customer.customerId %>" class="btn btn-sm btn-primary">
                   View All
                 </a>
               </div>
@@ -209,7 +209,7 @@
 <script>
 function verifyCustomer(customerId) {
   if (confirm('Verify this customer?')) {
-    fetch(`/hub/customers/${customerId}/verify`, { method: 'POST' })
+    fetch(`/admin/customers/${customerId}/verify`, { method: 'POST' })
       .then(r => r.json())
       .then(data => {
         if (data.success) location.reload();
@@ -220,7 +220,7 @@ function verifyCustomer(customerId) {
 
 function deactivateCustomer(customerId) {
   if (confirm('Deactivate this customer?')) {
-    fetch(`/hub/customers/${customerId}/deactivate`, { method: 'POST' })
+    fetch(`/admin/customers/${customerId}/deactivate`, { method: 'POST' })
       .then(r => r.json())
       .then(data => {
         if (data.success) location.reload();
@@ -231,7 +231,7 @@ function deactivateCustomer(customerId) {
 
 function reactivateCustomer(customerId) {
   if (confirm('Reactivate this customer?')) {
-    fetch(`/hub/customers/${customerId}/reactivate`, { method: 'POST' })
+    fetch(`/admin/customers/${customerId}/reactivate`, { method: 'POST' })
       .then(r => r.json())
       .then(data => {
         if (data.success) location.reload();

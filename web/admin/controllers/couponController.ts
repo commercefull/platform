@@ -26,7 +26,7 @@ export const listCoupons = async (req: Request, res: Response): Promise<void> =>
     // Get active coupons count for stats
     const activeCoupons = await couponRepo.findActiveCoupons('default-merchant');
 
-    res.render('hub/views/promotions/coupons/index', {
+    res.render('admin/views/promotions/coupons/index', {
       pageName: 'Coupon Management',
       coupons,
       activeCoupons: activeCoupons.length,
@@ -37,7 +37,7 @@ export const listCoupons = async (req: Request, res: Response): Promise<void> =>
     });
   } catch (error: any) {
     console.error('Error listing coupons:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load coupons',
       user: req.user
@@ -47,13 +47,13 @@ export const listCoupons = async (req: Request, res: Response): Promise<void> =>
 
 export const createCouponForm = async (req: Request, res: Response): Promise<void> => {
   try {
-    res.render('hub/views/promotions/coupons/create', {
+    res.render('admin/views/promotions/coupons/create', {
       pageName: 'Create Coupon',
       user: req.user
     });
   } catch (error: any) {
     console.error('Error loading create coupon form:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
       user: req.user
@@ -102,7 +102,7 @@ export const createCoupon = async (req: Request, res: Response): Promise<void> =
   } catch (error: any) {
     console.error('Error creating coupon:', error);
 
-    res.render('hub/views/promotions/coupons/create', {
+    res.render('admin/views/promotions/coupons/create', {
       pageName: 'Create Coupon',
       error: error.message || 'Failed to create coupon',
       formData: req.body,
@@ -118,7 +118,7 @@ export const viewCoupon = async (req: Request, res: Response): Promise<void> => 
     const coupon = await couponRepo.findById(couponId);
 
     if (!coupon) {
-      res.status(404).render('hub/views/error', {
+      res.status(404).render('admin/views/error', {
         pageName: 'Not Found',
         error: 'Coupon not found',
         user: req.user
@@ -129,7 +129,7 @@ export const viewCoupon = async (req: Request, res: Response): Promise<void> => 
     // Get usage records
     const usage = await couponRepo.getUsage(couponId);
 
-    res.render('hub/views/promotions/coupons/view', {
+    res.render('admin/views/promotions/coupons/view', {
       pageName: `Coupon: ${coupon.name}`,
       coupon,
       usage,
@@ -138,7 +138,7 @@ export const viewCoupon = async (req: Request, res: Response): Promise<void> => 
     });
   } catch (error: any) {
     console.error('Error viewing coupon:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load coupon',
       user: req.user
@@ -153,7 +153,7 @@ export const editCouponForm = async (req: Request, res: Response): Promise<void>
     const coupon = await couponRepo.findById(couponId);
 
     if (!coupon) {
-      res.status(404).render('hub/views/error', {
+      res.status(404).render('admin/views/error', {
         pageName: 'Not Found',
         error: 'Coupon not found',
         user: req.user
@@ -161,14 +161,14 @@ export const editCouponForm = async (req: Request, res: Response): Promise<void>
       return;
     }
 
-    res.render('hub/views/promotions/coupons/edit', {
+    res.render('admin/views/promotions/coupons/edit', {
       pageName: `Edit: ${coupon.name}`,
       coupon,
       user: req.user
     });
   } catch (error: any) {
     console.error('Error loading edit coupon form:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
       user: req.user
@@ -220,7 +220,7 @@ export const updateCoupon = async (req: Request, res: Response): Promise<void> =
     try {
       const coupon = await couponRepo.findById(req.params.couponId);
 
-      res.render('hub/views/promotions/coupons/edit', {
+      res.render('admin/views/promotions/coupons/edit', {
         pageName: `Edit: ${coupon?.name || 'Coupon'}`,
         coupon,
         error: error.message || 'Failed to update coupon',
@@ -228,7 +228,7 @@ export const updateCoupon = async (req: Request, res: Response): Promise<void> =
         user: req.user
       });
     } catch {
-      res.status(500).render('hub/views/error', {
+      res.status(500).render('admin/views/error', {
         pageName: 'Error',
         error: error.message || 'Failed to update coupon',
         user: req.user

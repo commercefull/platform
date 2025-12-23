@@ -113,6 +113,21 @@ export type EventType =
   | 'merchant.logged_in'
   | 'merchant.registered'
   | 'merchant.all_tokens_revoked'
+  // Admin events
+  | 'admin.login_failed'
+  | 'admin.logged_in'
+  | 'admin.logged_out'
+  | 'admin.registered'
+  | 'admin.password_reset'
+  | 'admin.session_created'
+  | 'admin.session_invalidated'
+  // B2B user events
+  | 'b2b_user.login_failed'
+  | 'b2b_user.logged_in'
+  | 'b2b_user.logged_out'
+  | 'b2b_user.registered'
+  | 'b2b_user.invited'
+  | 'b2b_user.activated'
   // Supplier events
   | 'supplier.created'
   | 'supplier.approved'

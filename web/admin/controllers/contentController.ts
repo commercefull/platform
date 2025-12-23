@@ -25,7 +25,7 @@ export const listContentPages = async (req: Request, res: Response): Promise<voi
     // Get content types for filtering
     const contentTypes = await ContentRepo.findAllContentTypes(true);
 
-    res.render('hub/views/content/pages/index', {
+    res.render('admin/views/content/pages/index', {
       pageName: 'Content Pages',
       pages,
       contentTypes,
@@ -36,7 +36,7 @@ export const listContentPages = async (req: Request, res: Response): Promise<voi
     });
   } catch (error: any) {
     console.error('Error listing content pages:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load content pages',
       user: req.user
@@ -49,7 +49,7 @@ export const createContentPageForm = async (req: Request, res: Response): Promis
     const contentTypes = await ContentRepo.findAllContentTypes(true);
     const templates = await ContentRepo.findAllTemplates(true);
 
-    res.render('hub/views/content/pages/create', {
+    res.render('admin/views/content/pages/create', {
       pageName: 'Create Content Page',
       contentTypes,
       templates,
@@ -57,7 +57,7 @@ export const createContentPageForm = async (req: Request, res: Response): Promis
     });
   } catch (error: any) {
     console.error('Error loading create page form:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
       user: req.user
@@ -114,7 +114,7 @@ export const createContentPage = async (req: Request, res: Response): Promise<vo
       const contentTypes = await ContentRepo.findAllContentTypes(true);
       const templates = await ContentRepo.findAllTemplates(true);
 
-      res.render('hub/views/content/pages/create', {
+      res.render('admin/views/content/pages/create', {
         pageName: 'Create Content Page',
         contentTypes,
         templates,
@@ -123,7 +123,7 @@ export const createContentPage = async (req: Request, res: Response): Promise<vo
         user: req.user
       });
     } catch {
-      res.status(500).render('hub/views/error', {
+      res.status(500).render('admin/views/error', {
         pageName: 'Error',
         error: error.message || 'Failed to create content page',
         user: req.user
@@ -139,7 +139,7 @@ export const viewContentPage = async (req: Request, res: Response): Promise<void
     const page = await ContentRepo.findPageById(pageId);
 
     if (!page) {
-      res.status(404).render('hub/views/error', {
+      res.status(404).render('admin/views/error', {
         pageName: 'Not Found',
         error: 'Content page not found',
         user: req.user
@@ -150,7 +150,7 @@ export const viewContentPage = async (req: Request, res: Response): Promise<void
     // Get content blocks for this page
     const blocks = await ContentRepo.findBlocksByPageId(pageId);
 
-    res.render('hub/views/content/pages/view', {
+    res.render('admin/views/content/pages/view', {
       pageName: `Page: ${page.title}`,
       page,
       blocks,
@@ -159,7 +159,7 @@ export const viewContentPage = async (req: Request, res: Response): Promise<void
     });
   } catch (error: any) {
     console.error('Error viewing content page:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load content page',
       user: req.user
@@ -174,7 +174,7 @@ export const editContentPageForm = async (req: Request, res: Response): Promise<
     const page = await ContentRepo.findPageById(pageId);
 
     if (!page) {
-      res.status(404).render('hub/views/error', {
+      res.status(404).render('admin/views/error', {
         pageName: 'Not Found',
         error: 'Content page not found',
         user: req.user
@@ -185,7 +185,7 @@ export const editContentPageForm = async (req: Request, res: Response): Promise<
     const contentTypes = await ContentRepo.findAllContentTypes(true);
     const templates = await ContentRepo.findAllTemplates(true);
 
-    res.render('hub/views/content/pages/edit', {
+    res.render('admin/views/content/pages/edit', {
       pageName: `Edit: ${page.title}`,
       page,
       contentTypes,
@@ -194,7 +194,7 @@ export const editContentPageForm = async (req: Request, res: Response): Promise<
     });
   } catch (error: any) {
     console.error('Error loading edit page form:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
       user: req.user
@@ -250,7 +250,7 @@ export const updateContentPage = async (req: Request, res: Response): Promise<vo
       const contentTypes = await ContentRepo.findAllContentTypes(true);
       const templates = await ContentRepo.findAllTemplates(true);
 
-      res.render('hub/views/content/pages/edit', {
+      res.render('admin/views/content/pages/edit', {
         pageName: `Edit: ${page?.title || 'Page'}`,
         page,
         contentTypes,
@@ -260,7 +260,7 @@ export const updateContentPage = async (req: Request, res: Response): Promise<vo
         user: req.user
       });
     } catch {
-      res.status(500).render('hub/views/error', {
+      res.status(500).render('admin/views/error', {
         pageName: 'Error',
         error: error.message || 'Failed to update content page',
         user: req.user
@@ -309,7 +309,7 @@ export const listContentTemplates = async (req: Request, res: Response): Promise
   try {
     const templates = await ContentRepo.findAllTemplates();
 
-    res.render('hub/views/content/templates/index', {
+    res.render('admin/views/content/templates/index', {
       pageName: 'Content Templates',
       templates,
       user: req.user,
@@ -317,7 +317,7 @@ export const listContentTemplates = async (req: Request, res: Response): Promise
     });
   } catch (error: any) {
     console.error('Error listing content templates:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load content templates',
       user: req.user
@@ -334,7 +334,7 @@ export const listContentMedia = async (req: Request, res: Response): Promise<voi
     // For now, show basic media interface - can be expanded later
     const mediaItems: any[] = [];
 
-    res.render('hub/views/content/media/index', {
+    res.render('admin/views/content/media/index', {
       pageName: 'Media Library',
       mediaItems,
       user: req.user,
@@ -342,7 +342,7 @@ export const listContentMedia = async (req: Request, res: Response): Promise<voi
     });
   } catch (error: any) {
     console.error('Error listing content media:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load media library',
       user: req.user

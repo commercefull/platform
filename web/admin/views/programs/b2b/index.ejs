@@ -9,7 +9,7 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-end">
-            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
             <li class="breadcrumb-item active">B2B</li>
           </ol>
         </div>
@@ -98,7 +98,7 @@
                   </span>
                 </td>
                 <td>
-                  <a href="/hub/programs/b2b/companies/<%= company.b2bCompanyId %>" class="btn btn-sm btn-outline-info">
+                  <a href="/admin/programs/b2b/companies/<%= company.b2bCompanyId %>" class="btn btn-sm btn-outline-info">
                     <i class="fas fa-eye"></i>
                   </a>
                   <button class="btn btn-sm btn-outline-primary" onclick="editCompany('<%= company.b2bCompanyId %>')">
@@ -126,7 +126,7 @@
       <div class="card">
         <div class="card-header">
           <h3 class="card-title"><i class="fas fa-file-invoice me-2"></i>Recent Quotes</h3>
-          <a href="/hub/programs/b2b/quotes" class="btn btn-sm btn-primary float-end">View All</a>
+          <a href="/admin/programs/b2b/quotes" class="btn btn-sm btn-primary float-end">View All</a>
         </div>
         <div class="card-body table-responsive p-0">
           <table class="table table-hover">
@@ -144,7 +144,7 @@
             <tbody>
               <% (quotes || []).slice(0, 10).forEach(function(quote) { %>
               <tr>
-                <td><a href="/hub/programs/b2b/quotes/<%= quote.quoteId %>">#<%= quote.quoteNumber %></a></td>
+                <td><a href="/admin/programs/b2b/quotes/<%= quote.quoteId %>">#<%= quote.quoteNumber %></a></td>
                 <td><%= quote.companyName %></td>
                 <td><%= quote.itemCount || 0 %></td>
                 <td>$<%= (quote.totalAmount || 0).toFixed(2) %></td>
@@ -155,7 +155,7 @@
                 </td>
                 <td><%= quote.expiresAt ? new Date(quote.expiresAt).toLocaleDateString() : '-' %></td>
                 <td>
-                  <a href="/hub/programs/b2b/quotes/<%= quote.quoteId %>" class="btn btn-sm btn-outline-info">
+                  <a href="/admin/programs/b2b/quotes/<%= quote.quoteId %>" class="btn btn-sm btn-outline-info">
                     <i class="fas fa-eye"></i>
                   </a>
                 </td>
@@ -182,7 +182,7 @@
         <h5 class="modal-title">Add B2B Company</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <form method="POST" action="/hub/programs/b2b/companies">
+      <form method="POST" action="/admin/programs/b2b/companies">
         <div class="modal-body">
           <div class="row">
             <div class="col-md-6">
@@ -248,10 +248,10 @@
 </div>
 
 <script>
-  function editCompany(id) { window.location.href = `/hub/programs/b2b/companies/${id}/edit`; }
+  function editCompany(id) { window.location.href = `/admin/programs/b2b/companies/${id}/edit`; }
   async function approveCompany(id) {
     if (!confirm('Approve this company?')) return;
-    const res = await fetch(`/hub/programs/b2b/companies/${id}/approve`, { method: 'POST' });
+    const res = await fetch(`/admin/programs/b2b/companies/${id}/approve`, { method: 'POST' });
     if ((await res.json()).success) location.reload();
   }
 </script>

@@ -9,7 +9,7 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-end">
-            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
             <li class="breadcrumb-item active">Operations</li>
           </ol>
         </div>
@@ -28,7 +28,7 @@
               <p>Pending Fulfillments</p>
             </div>
             <div class="icon"><i class="fas fa-box-open"></i></div>
-            <a href="/hub/operations/fulfillments" class="small-box-footer">View <i class="fas fa-arrow-circle-right"></i></a>
+            <a href="/admin/operations/fulfillments" class="small-box-footer">View <i class="fas fa-arrow-circle-right"></i></a>
           </div>
         </div>
         <div class="col-lg-3 col-6">
@@ -38,7 +38,7 @@
               <p>Active Warehouses</p>
             </div>
             <div class="icon"><i class="fas fa-warehouse"></i></div>
-            <a href="/hub/operations/warehouses" class="small-box-footer">View <i class="fas fa-arrow-circle-right"></i></a>
+            <a href="/admin/operations/warehouses" class="small-box-footer">View <i class="fas fa-arrow-circle-right"></i></a>
           </div>
         </div>
         <div class="col-lg-3 col-6">
@@ -48,7 +48,7 @@
               <p>Abandoned Carts</p>
             </div>
             <div class="icon"><i class="fas fa-shopping-cart"></i></div>
-            <a href="/hub/operations/baskets/abandoned" class="small-box-footer">View <i class="fas fa-arrow-circle-right"></i></a>
+            <a href="/admin/operations/baskets/abandoned" class="small-box-footer">View <i class="fas fa-arrow-circle-right"></i></a>
           </div>
         </div>
         <div class="col-lg-3 col-6">
@@ -58,7 +58,7 @@
               <p>Low Stock Items</p>
             </div>
             <div class="icon"><i class="fas fa-exclamation-triangle"></i></div>
-            <a href="/hub/inventory/low-stock" class="small-box-footer">View <i class="fas fa-arrow-circle-right"></i></a>
+            <a href="/admin/inventory/low-stock" class="small-box-footer">View <i class="fas fa-arrow-circle-right"></i></a>
           </div>
         </div>
       </div>
@@ -69,7 +69,7 @@
           <div class="card">
             <div class="card-header">
               <h3 class="card-title"><i class="fas fa-truck me-2"></i>Recent Fulfillments</h3>
-              <a href="/hub/operations/fulfillments" class="btn btn-sm btn-primary float-end">View All</a>
+              <a href="/admin/operations/fulfillments" class="btn btn-sm btn-primary float-end">View All</a>
             </div>
             <div class="card-body table-responsive p-0">
               <table class="table table-sm">
@@ -84,7 +84,7 @@
                 <tbody>
                   <% (recentFulfillments || []).slice(0, 5).forEach(function(f) { %>
                   <tr>
-                    <td><a href="/hub/orders/<%= f.orderId %>">#<%= f.orderNumber %></a></td>
+                    <td><a href="/admin/orders/<%= f.orderId %>">#<%= f.orderNumber %></a></td>
                     <td>
                       <span class="badge bg-<%= f.status === 'delivered' ? 'success' : f.status === 'shipped' ? 'info' : 'warning' %>">
                         <%= f.status %>
@@ -108,7 +108,7 @@
           <div class="card">
             <div class="card-header">
               <h3 class="card-title"><i class="fas fa-warehouse me-2"></i>Warehouse Status</h3>
-              <a href="/hub/operations/warehouses" class="btn btn-sm btn-primary float-end">Manage</a>
+              <a href="/admin/operations/warehouses" class="btn btn-sm btn-primary float-end">Manage</a>
             </div>
             <div class="card-body table-responsive p-0">
               <table class="table table-sm">
@@ -154,7 +154,7 @@
           <div class="card">
             <div class="card-header">
               <h3 class="card-title"><i class="fas fa-truck-loading me-2"></i>Suppliers</h3>
-              <a href="/hub/operations/suppliers" class="btn btn-sm btn-primary float-end">Manage</a>
+              <a href="/admin/operations/suppliers" class="btn btn-sm btn-primary float-end">Manage</a>
             </div>
             <div class="card-body">
               <div class="row text-center">
@@ -184,22 +184,22 @@
             <div class="card-body">
               <div class="row">
                 <div class="col-6 mb-2">
-                  <a href="/hub/operations/fulfillments?status=pending" class="btn btn-outline-primary w-100">
+                  <a href="/admin/operations/fulfillments?status=pending" class="btn btn-outline-primary w-100">
                     <i class="fas fa-box me-1"></i>Process Orders
                   </a>
                 </div>
                 <div class="col-6 mb-2">
-                  <a href="/hub/inventory" class="btn btn-outline-info w-100">
+                  <a href="/admin/inventory" class="btn btn-outline-info w-100">
                     <i class="fas fa-boxes me-1"></i>Check Inventory
                   </a>
                 </div>
                 <div class="col-6 mb-2">
-                  <a href="/hub/operations/baskets/abandoned" class="btn btn-outline-warning w-100">
+                  <a href="/admin/operations/baskets/abandoned" class="btn btn-outline-warning w-100">
                     <i class="fas fa-cart-arrow-down me-1"></i>Abandoned Carts
                   </a>
                 </div>
                 <div class="col-6 mb-2">
-                  <a href="/hub/operations/suppliers" class="btn btn-outline-success w-100">
+                  <a href="/admin/operations/suppliers" class="btn btn-outline-success w-100">
                     <i class="fas fa-plus me-1"></i>New PO
                   </a>
                 </div>

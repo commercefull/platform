@@ -9,9 +9,9 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-end">
-            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="/hub/customers">Customers</a></li>
-            <li class="breadcrumb-item"><a href="/hub/customers/<%= customer.customerId %>"><%= customer.firstName %></a></li>
+            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/admin/customers">Customers</a></li>
+            <li class="breadcrumb-item"><a href="/admin/customers/<%= customer.customerId %>"><%= customer.firstName %></a></li>
             <li class="breadcrumb-item active">Addresses</li>
           </ol>
         </div>
@@ -111,7 +111,7 @@
               <% } %>
             </div>
             <div class="card-footer">
-              <a href="/hub/customers/<%= customer.customerId %>" class="btn btn-sm btn-outline-primary">
+              <a href="/admin/customers/<%= customer.customerId %>" class="btn btn-sm btn-outline-primary">
                 <i class="fas fa-arrow-left me-1"></i>Back to Customer
               </a>
             </div>
@@ -130,7 +130,7 @@
         <h5 class="modal-title"><i class="fas fa-plus me-2"></i>Add New Address</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <form method="POST" action="/hub/customers/<%= customer.customerId %>/addresses">
+      <form method="POST" action="/admin/customers/<%= customer.customerId %>/addresses">
         <div class="modal-body">
           <div class="row">
             <div class="col-md-6">
@@ -228,7 +228,7 @@
 
   async function setDefaultAddress(addressId) {
     try {
-      const response = await fetch(`/hub/customers/<%= customer.customerId %>/addresses/${addressId}/default`, {
+      const response = await fetch(`/admin/customers/<%= customer.customerId %>/addresses/${addressId}/default`, {
         method: 'POST'
       });
       const result = await response.json();
@@ -246,7 +246,7 @@
     if (!confirm('Are you sure you want to delete this address?')) return;
 
     try {
-      const response = await fetch(`/hub/customers/<%= customer.customerId %>/addresses/${addressId}`, {
+      const response = await fetch(`/admin/customers/<%= customer.customerId %>/addresses/${addressId}`, {
         method: 'DELETE'
       });
       const result = await response.json();

@@ -14,7 +14,7 @@ export const listShippingMethods = async (req: Request, res: Response): Promise<
   try {
     const methods = await shippingMethodRepo.findAll();
 
-    res.render('hub/views/shipping/methods/index', {
+    res.render('admin/views/shipping/methods/index', {
       pageName: 'Shipping Methods',
       methods,
       user: req.user,
@@ -22,7 +22,7 @@ export const listShippingMethods = async (req: Request, res: Response): Promise<
     });
   } catch (error: any) {
     console.error('Error listing shipping methods:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load shipping methods',
       user: req.user
@@ -32,13 +32,13 @@ export const listShippingMethods = async (req: Request, res: Response): Promise<
 
 export const createShippingMethodForm = async (req: Request, res: Response): Promise<void> => {
   try {
-    res.render('hub/views/shipping/methods/create', {
+    res.render('admin/views/shipping/methods/create', {
       pageName: 'Create Shipping Method',
       user: req.user
     });
   } catch (error: any) {
     console.error('Error loading create method form:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
       user: req.user
@@ -96,7 +96,7 @@ export const createShippingMethod = async (req: Request, res: Response): Promise
   } catch (error: any) {
     console.error('Error creating shipping method:', error);
 
-    res.render('hub/views/shipping/methods/create', {
+    res.render('admin/views/shipping/methods/create', {
       pageName: 'Create Shipping Method',
       error: error.message || 'Failed to create shipping method',
       formData: req.body,
@@ -112,7 +112,7 @@ export const viewShippingMethod = async (req: Request, res: Response): Promise<v
     const method = await shippingMethodRepo.findById(methodId);
 
     if (!method) {
-      res.status(404).render('hub/views/error', {
+      res.status(404).render('admin/views/error', {
         pageName: 'Not Found',
         error: 'Shipping method not found',
         user: req.user
@@ -120,7 +120,7 @@ export const viewShippingMethod = async (req: Request, res: Response): Promise<v
       return;
     }
 
-    res.render('hub/views/shipping/methods/view', {
+    res.render('admin/views/shipping/methods/view', {
       pageName: `Method: ${method.name}`,
       method,
       user: req.user,
@@ -128,7 +128,7 @@ export const viewShippingMethod = async (req: Request, res: Response): Promise<v
     });
   } catch (error: any) {
     console.error('Error viewing shipping method:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load shipping method',
       user: req.user
@@ -143,7 +143,7 @@ export const editShippingMethodForm = async (req: Request, res: Response): Promi
     const method = await shippingMethodRepo.findById(methodId);
 
     if (!method) {
-      res.status(404).render('hub/views/error', {
+      res.status(404).render('admin/views/error', {
         pageName: 'Not Found',
         error: 'Shipping method not found',
         user: req.user
@@ -151,14 +151,14 @@ export const editShippingMethodForm = async (req: Request, res: Response): Promi
       return;
     }
 
-    res.render('hub/views/shipping/methods/edit', {
+    res.render('admin/views/shipping/methods/edit', {
       pageName: `Edit: ${method.name}`,
       method,
       user: req.user
     });
   } catch (error: any) {
     console.error('Error loading edit method form:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load form',
       user: req.user
@@ -222,7 +222,7 @@ export const updateShippingMethod = async (req: Request, res: Response): Promise
     try {
       const method = await shippingMethodRepo.findById(req.params.methodId);
 
-      res.render('hub/views/shipping/methods/edit', {
+      res.render('admin/views/shipping/methods/edit', {
         pageName: `Edit: ${method?.name || 'Method'}`,
         method,
         error: error.message || 'Failed to update shipping method',
@@ -230,7 +230,7 @@ export const updateShippingMethod = async (req: Request, res: Response): Promise
         user: req.user
       });
     } catch {
-      res.status(500).render('hub/views/error', {
+      res.status(500).render('admin/views/error', {
         pageName: 'Error',
         error: error.message || 'Failed to update shipping method',
         user: req.user

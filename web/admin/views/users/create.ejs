@@ -9,8 +9,8 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-end">
-            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="/hub/users">Admin Users</a></li>
+            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/admin/users">Admin Users</a></li>
             <li class="breadcrumb-item active">Create</li>
           </ol>
         </div>
@@ -68,7 +68,7 @@
                 <button type="submit" class="btn btn-primary">
                   <i class="fas fa-save me-2"></i>Create User
                 </button>
-                <a href="/hub/users" class="btn btn-secondary ms-2">Cancel</a>
+                <a href="/admin/users" class="btn btn-secondary ms-2">Cancel</a>
               </div>
             </form>
           </div>
@@ -108,14 +108,14 @@
     delete data.confirmPassword;
 
     try {
-      const response = await fetch('/hub/users', {
+      const response = await fetch('/admin/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       });
       const result = await response.json();
       if (result.success) {
-        window.location.href = '/hub/users/' + result.userId;
+        window.location.href = '/admin/users/' + result.userId;
       } else {
         alert('Error: ' + result.message);
       }

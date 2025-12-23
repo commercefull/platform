@@ -23,6 +23,7 @@ import { membershipCustomerRouter } from "../modules/membership/membershipCustom
 import { subscriptionCustomerRouter } from "../modules/subscription/subscriptionCustomerRouter";
 import { localizationCustomerRouter } from "../modules/localization/localizationCustomerRouter";
 import { shippingCustomerRouter } from "../modules/shipping/shippingCustomerRouter";
+import { notificationCustomerRouter } from "../modules/notification/notificationCustomerRouter";
 
 // Feature routes - Business/Merchant facing
 import { identityBusinessRouter } from "../modules/identity/interface/routers/identityBusinessRouter";
@@ -53,6 +54,17 @@ import { storeRouter } from "../modules/store/interface/http/StoreRouter";
 import { systemConfigurationRouter } from "../modules/configuration/interface/http/SystemConfigurationRouter";
 import { mediaRouter } from "../modules/media/interface/http/MediaRouter";
 import { adminRouter } from "../web/admin/adminRouters";
+import { merchantRouter } from "../web/merchant/merchantRouters";
+import { b2bPortalRouter } from "../web/b2b/b2bRouters";
+
+// New module routers
+import { brandBusinessRouter } from "../modules/brand/interface/routers/brandRouter";
+import { channelBusinessRouter } from "../modules/channel/interface/routers/channelRouter";
+import { segmentBusinessRouter } from "../modules/segment/interface/routers/segmentRouter";
+import { couponBusinessRouter } from "../modules/coupon/interface/routers/couponRouter";
+import { fulfillmentBusinessRouter } from "../modules/fulfillment/interface/routers/fulfillmentBusinessRouter";
+import { organizationBusinessRouter } from "../modules/organization/interface/routers/organizationRouter";
+import { assortmentBusinessRouter } from "../modules/assortment/interface/routers/assortmentRouter";
 
 /**
  * Configure all application routes
@@ -62,6 +74,8 @@ export function configureRoutes(app: Express): void {
   app.use("/", storefrontCustomerRouter);
 
   app.use("/admin", adminRouter);
+  app.use("/merchant", merchantRouter);
+  app.use("/b2b", b2bPortalRouter);
 
   app.use("/customer", [
     identityCustomerRouter,  // Must be first - public auth routes
@@ -83,6 +97,7 @@ export function configureRoutes(app: Express): void {
     subscriptionCustomerRouter,
     localizationCustomerRouter,
     shippingCustomerRouter,
+    notificationCustomerRouter,
   ]);
 
   // Business/Merchant API routes
@@ -114,6 +129,13 @@ export function configureRoutes(app: Express): void {
     businessRouter,
     storeRouter,
     systemConfigurationRouter,
+    brandBusinessRouter,
+    channelBusinessRouter,
+    segmentBusinessRouter,
+    couponBusinessRouter,
+    fulfillmentBusinessRouter,
+    organizationBusinessRouter,
+    assortmentBusinessRouter,
   ]);
 
   // Health check endpoint (before other routes for load balancers)

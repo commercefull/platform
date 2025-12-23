@@ -42,7 +42,7 @@ export const membershipDashboard = async (req: Request, res: Response): Promise<
        LIMIT 20`
     );
 
-    res.render('hub/views/programs/membership/index', {
+    res.render('admin/views/programs/membership/index', {
       pageName: 'Membership Program',
       stats: {
         totalMembers: parseInt(statsResult?.totalMembers || '0'),
@@ -55,7 +55,7 @@ export const membershipDashboard = async (req: Request, res: Response): Promise<
     });
   } catch (error: any) {
     console.error('Error loading membership dashboard:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load membership dashboard',
       user: req.user
@@ -106,7 +106,7 @@ export const subscriptionDashboard = async (req: Request, res: Response): Promis
        LIMIT 20`
     );
 
-    res.render('hub/views/programs/subscription/index', {
+    res.render('admin/views/programs/subscription/index', {
       pageName: 'Subscription Management',
       stats: {
         totalSubscriptions: parseInt(statsResult?.totalSubscriptions || '0'),
@@ -120,7 +120,7 @@ export const subscriptionDashboard = async (req: Request, res: Response): Promis
     });
   } catch (error: any) {
     console.error('Error loading subscription dashboard:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load subscription dashboard',
       user: req.user
@@ -170,7 +170,7 @@ export const loyaltyDashboard = async (req: Request, res: Response): Promise<voi
       minRedemption: 100
     };
 
-    res.render('hub/views/programs/loyalty/index', {
+    res.render('admin/views/programs/loyalty/index', {
       pageName: 'Loyalty Program',
       stats: {
         totalMembers: parseInt(statsResult?.totalMembers || '0'),
@@ -184,7 +184,7 @@ export const loyaltyDashboard = async (req: Request, res: Response): Promise<voi
     });
   } catch (error: any) {
     console.error('Error loading loyalty dashboard:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load loyalty dashboard',
       user: req.user
@@ -241,7 +241,7 @@ export const b2bDashboard = async (req: Request, res: Response): Promise<void> =
        LIMIT 20`
     );
 
-    res.render('hub/views/programs/b2b/index', {
+    res.render('admin/views/programs/b2b/index', {
       pageName: 'B2B Management',
       stats: {
         totalCompanies: parseInt(statsResult?.totalCompanies || '0'),
@@ -255,7 +255,7 @@ export const b2bDashboard = async (req: Request, res: Response): Promise<void> =
     });
   } catch (error: any) {
     console.error('Error loading B2B dashboard:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load B2B dashboard',
       user: req.user

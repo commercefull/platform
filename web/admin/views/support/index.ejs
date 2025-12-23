@@ -9,7 +9,7 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-end">
-            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
             <li class="breadcrumb-item active">Support</li>
           </ol>
         </div>
@@ -106,7 +106,7 @@
                 <td><%= new Date(ticket.createdAt).toLocaleDateString() %></td>
                 <td><%= ticket.updatedAt ? new Date(ticket.updatedAt).toLocaleDateString() : '-' %></td>
                 <td>
-                  <a href="/hub/support/tickets/<%= ticket.ticketId %>" class="btn btn-sm btn-outline-info">
+                  <a href="/admin/support/tickets/<%= ticket.ticketId %>" class="btn btn-sm btn-outline-info">
                     <i class="fas fa-eye"></i>
                   </a>
                   <% if (ticket.status !== 'resolved') { %>
@@ -185,7 +185,7 @@
         <h5 class="modal-title">Add FAQ</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <form method="POST" action="/hub/support/faqs">
+      <form method="POST" action="/admin/support/faqs">
         <div class="modal-body">
           <div class="mb-3">
             <label class="form-label">Question <span class="text-danger">*</span></label>
@@ -233,7 +233,7 @@
 <script>
   async function updateStatus(ticketId, status) {
     if (!confirm('Update ticket status?')) return;
-    const res = await fetch(`/hub/support/tickets/${ticketId}/status`, {
+    const res = await fetch(`/admin/support/tickets/${ticketId}/status`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status })
@@ -241,7 +241,7 @@
     if ((await res.json()).success) location.reload();
   }
 
-  function editFaq(faqId) { window.location.href = `/hub/support/faqs/${faqId}/edit`; }
+  function editFaq(faqId) { window.location.href = `/admin/support/faqs/${faqId}/edit`; }
 </script>
 
 <%- include('../partials/footer') %>

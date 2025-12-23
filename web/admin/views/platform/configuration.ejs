@@ -9,7 +9,7 @@
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-end">
-            <li class="breadcrumb-item"><a href="/hub">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
             <li class="breadcrumb-item active">Configuration</li>
           </ol>
         </div>
@@ -195,7 +195,7 @@
 <script>
   async function toggleFeature(featureKey, enabled) {
     try {
-      const response = await fetch(`/hub/platform/features/${featureKey}/toggle`, {
+      const response = await fetch(`/admin/platform/features/${featureKey}/toggle`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ enabled })
@@ -225,7 +225,7 @@
     const data = Object.fromEntries(formData);
 
     try {
-      const response = await fetch('/hub/platform/configuration', {
+      const response = await fetch('/admin/platform/configuration', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -247,7 +247,7 @@
     const data = Object.fromEntries(formData);
 
     try {
-      const response = await fetch('/hub/platform/configuration', {
+      const response = await fetch('/admin/platform/configuration', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)

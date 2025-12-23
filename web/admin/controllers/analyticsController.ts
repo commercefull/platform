@@ -97,7 +97,7 @@ export const analyticsDashboard = async (req: Request, res: Response): Promise<v
       }
     };
 
-    res.render('hub/views/analytics/dashboard', {
+    res.render('admin/views/analytics/dashboard', {
       pageName: 'Advanced Analytics Dashboard',
       dashboardData,
       filters: { period, segment, category },
@@ -105,7 +105,7 @@ export const analyticsDashboard = async (req: Request, res: Response): Promise<v
     });
   } catch (error: any) {
     console.error('Error loading analytics dashboard:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load analytics dashboard',
       user: req.user
@@ -177,7 +177,7 @@ export const predictiveAnalytics = async (req: Request, res: Response): Promise<
 
     const customerChurnRisk = await Promise.all(customerChurnPromises);
 
-    res.render('hub/views/analytics/predictive', {
+    res.render('admin/views/analytics/predictive', {
       pageName: 'Predictive Analytics',
       forecasts,
       inventoryPredictions,
@@ -186,7 +186,7 @@ export const predictiveAnalytics = async (req: Request, res: Response): Promise<
     });
   } catch (error: any) {
     console.error('Error loading predictive analytics:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load predictive analytics',
       user: req.user
@@ -232,7 +232,7 @@ export const customerAnalytics = async (req: Request, res: Response): Promise<vo
       loyaltyTrends: []
     };
 
-    res.render('hub/views/analytics/customers', {
+    res.render('admin/views/analytics/customers', {
       pageName: 'Customer Analytics & Segmentation',
       customerInsights,
       lifetimeValue,
@@ -241,7 +241,7 @@ export const customerAnalytics = async (req: Request, res: Response): Promise<vo
     });
   } catch (error: any) {
     console.error('Error loading customer analytics:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load customer analytics',
       user: req.user
@@ -305,7 +305,7 @@ export const aiRecommendations = async (req: Request, res: Response): Promise<vo
       serviceAddons: []
     };
 
-    res.render('hub/views/analytics/ai-recommendations', {
+    res.render('admin/views/analytics/ai-recommendations', {
       pageName: 'AI-Powered Recommendations',
       productRecommendations,
       personalizedCampaigns,
@@ -314,7 +314,7 @@ export const aiRecommendations = async (req: Request, res: Response): Promise<vo
     });
   } catch (error: any) {
     console.error('Error loading AI recommendations:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load AI recommendations',
       user: req.user
@@ -382,7 +382,7 @@ export const executiveDashboard = async (req: Request, res: Response): Promise<v
     // Get business trends
     const trends = await analyzeBusinessTrends(kpis, previousKPIs);
 
-    res.render('hub/views/analytics/executive', {
+    res.render('admin/views/analytics/executive', {
       pageName: 'Executive Dashboard',
       kpis,
       alerts,
@@ -391,7 +391,7 @@ export const executiveDashboard = async (req: Request, res: Response): Promise<v
     });
   } catch (error: any) {
     console.error('Error loading executive dashboard:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load executive dashboard',
       user: req.user
@@ -431,7 +431,7 @@ export const automatedReports = async (req: Request, res: Response): Promise<voi
     const reports = await getScheduledReports();
     const reportHistory = await getReportExecutionHistory();
 
-    res.render('hub/views/analytics/reports', {
+    res.render('admin/views/analytics/reports', {
       pageName: 'Automated Reporting',
       reports,
       reportHistory,
@@ -439,7 +439,7 @@ export const automatedReports = async (req: Request, res: Response): Promise<voi
     });
   } catch (error: any) {
     console.error('Error loading automated reports:', error);
-    res.status(500).render('hub/views/error', {
+    res.status(500).render('admin/views/error', {
       pageName: 'Error',
       error: error.message || 'Failed to load automated reports',
       user: req.user

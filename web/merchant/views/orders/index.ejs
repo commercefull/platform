@@ -1,0 +1,110 @@
+<!-- Filters -->
+<div class="card collapsed-card">
+  <div class="card-header">
+    <h3 class="card-title">Filters</h3>
+    <div class="card-tools">
+      <button type="button" class="btn btn-tool" data-card-widget="collapse">
+        <i class="fas fa-plus"></i>
+      </button>
+    </div>
+  </div>
+  <div class="card-body">
+    <form method="GET" class="row">
+      <div class="col-md-3">
+        <div class="form-group">
+          <label>Status</label>
+          <select name="status" class="form-control">
+            <option value="">All Status</option>
+            <option value="pending" <%= filters?.status === 'pending' ? 'selected' : '' %>>Pending</option>
+            <option value="processing" <%= filters?.status === 'processing' ? 'selected' : '' %>>Processing</option>
+            <option value="shipped" <%= filters?.status === 'shipped' ? 'selected' : '' %>>Shipped</option>
+            <option value="delivered" <%= filters?.status === 'delivered' ? 'selected' : '' %>>Delivered</option>
+          </select>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="form-group">
+          <label>Payment</label>
+          <select name="paymentStatus" class="form-control">
+            <option value="">All Payment</option>
+            <option value="paid" <%= filters?.paymentStatus === 'paid' ? 'selected' : '' %>>Paid</option>
+            <option value="pending" <%= filters?.paymentStatus === 'pending' ? 'selected' : '' %>>Pending</option>
+            <option value="failed" <%= filters?.paymentStatus === 'failed' ? 'selected' : '' %>>Failed</option>
+          </select>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="form-group">
+          <label>Search</label>
+          <input type="text" name="search" class="form-control" placeholder="Search order #..." value="<%= filters?.search || '' %>">
+        </div>
+      </div>
+      <div class="col-md-2">
+        <div class="form-group">
+          <label>&nbsp;</label>
+          <button type="submit" class="btn btn-primary btn-block">Filter</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Orders Table -->
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">Orders</h3>
+  </div>
+  <div class="card-body p-0">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Order #</th>
+          <th>Customer</th>
+          <th>Items</th>
+          <th>Your Amount</th>
+          <th>Status</th>
+          <th>Payment</th>
+          <th>Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (orders && orders.length > 0) { %>
+          <% orders.forEach(order => { %>
+            <tr>
+              <td><a href="/merchant/orders/<%= order.orderId %>"><%= order.orderNumber %></a></td>
+              <td><%= order.customerName %></td>
+              <td><%= order.itemCount %></td>
+              <td>$<%= (order.merchantTotal || 0).toFixed(2) %></td>
+              <td><span class="badge badge-secondary"><%= order.status %></span></td>
+              <td><span class="badge badge-<%= order.paymentStatus === 'paid' ? 'success' : 'warning' %>"><%= order.paymentStatus %></span></td>
+              <td><%= new Date(order.createdAt).toLocaleDateString() %></td>
+              <td>
+                <a href="/merchant/orders/<%= order.orderId %>" class="btn btn-sm btn-info">
+                  <i class="fas fa-eye"></i>
+                </a>
+              </td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr><td colspan="8" class="text-center text-muted py-4">No orders found</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+  <% if (pagination && pagination.pages > 1) { %>
+  <div class="card-footer clearfix">
+    <ul class="pagination pagination-sm m-0 float-right">
+      <li class="page-item <%= pagination.hasPrev ? '' : 'disabled' %>">
+        <a class="page-link" href="?page=<%= pagination.page - 1 %>">&laquo;</a>
+      </li>
+      <li class="page-item active">
+        <span class="page-link"><%= pagination.page %> / <%= pagination.pages %></span>
+      </li>
+      <li class="page-item <%= pagination.hasNext ? '' : 'disabled' %>">
+        <a class="page-link" href="?page=<%= pagination.page + 1 %>">&raquo;</a>
+      </li>
+    </ul>
+  </div>
+  <% } %>
+</div>
