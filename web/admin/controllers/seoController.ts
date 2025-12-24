@@ -22,7 +22,7 @@ export const listSEOSettings = async (req: Request, res: Response): Promise<void
       defaultMetaDescription:
         'Shop the best products with our comprehensive e-commerce platform featuring advanced product management, secure payments, and fast shipping.',
       defaultKeywords: 'ecommerce, online shopping, products, store',
-      robotsTxt: 'User-agent: *\nAllow: /\n\nSitemap: https://commercefull.com/sitemap.xml',
+      robotsTxt: 'User-agent: *\nAllow: /\n\nSitemap: https://Commercefull.com/sitemap.xml',
       googleAnalyticsId: '',
       facebookPixelId: '',
       twitterCardType: 'summary_large_image',
@@ -108,7 +108,7 @@ Disallow: /api/
 Allow: /products/
 Allow: /categories/
 
-Sitemap: https://commercefull.com/sitemap.xml`;
+Sitemap: https://Commercefull.com/sitemap.xml`;
 
     res.setHeader('Content-Type', 'text/plain');
     res.setHeader('Content-Disposition', 'attachment; filename="robots.txt"');
@@ -126,31 +126,31 @@ export const generateSitemap = async (req: Request, res: Response): Promise<void
     const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://commercefull.com/</loc>
+    <loc>https://Commercefull.com/</loc>
     <lastmod>${new Date().toISOString()}</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://commercefull.com/products</loc>
+    <loc>https://Commercefull.com/products</loc>
     <lastmod>${new Date().toISOString()}</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://commercefull.com/categories</loc>
+    <loc>https://Commercefull.com/categories</loc>
     <lastmod>${new Date().toISOString()}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://commercefull.com/about</loc>
+    <loc>https://Commercefull.com/about</loc>
     <lastmod>${new Date().toISOString()}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://commercefull.com/contact</loc>
+    <loc>https://Commercefull.com/contact</loc>
     <lastmod>${new Date().toISOString()}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
