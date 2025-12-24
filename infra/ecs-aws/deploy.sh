@@ -187,23 +187,15 @@ run_cdk_command() {
 
 # Build and push Docker image
 build_and_push_image() {
-    log_info "Building and pushing Docker image..."
+    log_info "Building and pushing Docker image using infra/docker setup..."
 
-    # Get account ID
-    local account_id
-    account_id=$(aws sts get-caller-identity --query Account --output text)
-
-    local region="${AWS_REGION:-us-east-1}"
-    local ecr_uri="$account_id.dkr.ecr.$region.amazonaws.com/commercefull"
-
-    # Authenticate with ECR
-    aws ecr get-login-password --region "$region" | docker login --username AWS --password-stdin "$ecr_uri"
-
-    # Build image
-    docker build -t "$ecr_uri:latest" "$PROJECT_ROOT"
-
-    # Push image
-    docker push "$ecr_uri:latest"
+    # Use the infra/docker build script
+    if [[ -f "$PROJECT_ROOT/infra/docker/build-for-ecs.sh" ]]; then
+        "$PROJECT_ROOT/infra/docker/build-for-ecs.sh"
+    else
+        log_error "infra/docker/build-for-ecs.sh not found. Please ensure the Docker setup is complete."
+        exit 1
+    fi
 
     log_info "Docker image built and pushed successfully."
 }
