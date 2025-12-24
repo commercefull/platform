@@ -66,6 +66,7 @@ export const postAdminLogin = async (req: Request, res: Response) => {
 
     // Basic validation
     if (!email || !password) {
+      res.status(500);
       return adminRespond(req, res, 'login', {
         pageName: 'Admin Login',
         error: 'Email and password are required',
@@ -76,15 +77,18 @@ export const postAdminLogin = async (req: Request, res: Response) => {
     const admin = await AdminRepository.findByEmail(email);
 
     if (!admin) {
+      res.status(500);
       return adminRespond(req, res, 'login', {
         pageName: 'Admin Login',
         error: 'Invalid email or password',
       });
     }
 
+    console.log(admin);
     // Verify password
     const isValidPassword = await bcrypt.compare(password, admin.passwordHash);
     if (!isValidPassword) {
+      res.status(500);
       return adminRespond(req, res, 'login', {
         pageName: 'Admin Login',
         error: 'Invalid email or password',
@@ -93,6 +97,7 @@ export const postAdminLogin = async (req: Request, res: Response) => {
 
     // Check admin status
     if (admin.status !== 'active') {
+      res.status(500);
       return adminRespond(req, res, 'login', {
         pageName: 'Admin Login',
         error: 'Account is not active. Please contact super admin.',

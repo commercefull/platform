@@ -13,69 +13,69 @@
 <div class="row row-deck row-cards">
   <div class="col-sm-6 col-lg-3">
     <div class="card">
-          <div class="card-body">
-            <div class="d-flex align-items-center">
-              <div class="subheader">Total Orders</div>
-              <div class="ms-auto lh-1">
-                <div class="text-muted small">This month</div>
-              </div>
-            </div>
-            <div class="h1 mb-3"><%= stats.totalOrders %></div>
-            <div class="d-flex">
-              <a href="/admin/orders" class="btn btn-primary btn-sm">View Orders</a>
-            </div>
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="subheader">Total Orders</div>
+          <div class="ms-auto lh-1">
+            <div class="text-muted small">This month</div>
           </div>
         </div>
-      </div>
-      <div class="col-sm-6 col-lg-3">
-        <div class="card">
-          <div class="card-body">
-            <div class="d-flex align-items-center">
-              <div class="subheader">Total Revenue</div>
-              <div class="ms-auto lh-1">
-                <div class="text-muted small">This month</div>
-              </div>
-            </div>
-            <div class="h1 mb-3">$<%= (stats.totalRevenue || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></div>
-            <div class="d-flex">
-              <a href="/admin/analytics" class="btn btn-success btn-sm">View Analytics</a>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="col-sm-6 col-lg-3">
-        <div class="card">
-          <div class="card-body">
-            <div class="d-flex align-items-center">
-              <div class="subheader">Total Customers</div>
-              <div class="ms-auto lh-1">
-                <div class="text-muted small">Registered</div>
-              </div>
-            </div>
-            <div class="h1 mb-3"><%= stats.totalCustomers %></div>
-            <div class="d-flex">
-              <a href="/admin/customers" class="btn btn-warning btn-sm">View Customers</a>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="col-sm-6 col-lg-3">
-        <div class="card">
-          <div class="card-body">
-            <div class="d-flex align-items-center">
-              <div class="subheader">Total Products</div>
-              <div class="ms-auto lh-1">
-                <div class="text-muted small">Active</div>
-              </div>
-            </div>
-            <div class="h1 mb-3"><%= stats.totalProducts %></div>
-            <div class="d-flex">
-              <a href="/admin/products" class="btn btn-danger btn-sm">View Products</a>
-            </div>
-          </div>
+        <div class="h1 mb-3"><%= stats.totalOrders %></div>
+        <div class="d-flex">
+          <a href="/admin/orders" class="btn btn-primary btn-sm">View Orders</a>
         </div>
       </div>
     </div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="subheader">Total Revenue</div>
+          <div class="ms-auto lh-1">
+            <div class="text-muted small">This month</div>
+          </div>
+        </div>
+        <div class="h1 mb-3">$<%= (stats.totalRevenue || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></div>
+        <div class="d-flex">
+          <a href="/admin/analytics" class="btn btn-success btn-sm">View Analytics</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="subheader">Total Customers</div>
+          <div class="ms-auto lh-1">
+            <div class="text-muted small">Registered</div>
+          </div>
+        </div>
+        <div class="h1 mb-3"><%= stats.totalCustomers %></div>
+        <div class="d-flex">
+          <a href="/admin/customers" class="btn btn-warning btn-sm">View Customers</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="subheader">Total Products</div>
+          <div class="ms-auto lh-1">
+            <div class="text-muted small">Active</div>
+          </div>
+        </div>
+        <div class="h1 mb-3"><%= stats.totalProducts %></div>
+        <div class="d-flex">
+          <a href="/admin/products" class="btn btn-danger btn-sm">View Products</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
     <!-- Secondary Stats Row -->
     <div class="row row-deck row-cards mt-3">
@@ -170,7 +170,7 @@
 
     <!-- Charts and Tables Row -->
     <div class="row row-deck row-cards mt-3">
-      <!-- Charts Section -->
+      <!-- Revenue Overview and Top Products -->
       <div class="col-lg-8">
         <!-- Revenue Chart -->
         <div class="card">
@@ -181,9 +181,49 @@
             <canvas id="revenueChart" height="200"></canvas>
           </div>
         </div>
+      </div>
 
+      <!-- Top Products Section -->
+      <div class="col-lg-4">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Top Products</h3>
+          </div>
+          <div class="card-body">
+            <% (topProducts || []).forEach(function(product) { %>
+            <div class="d-flex align-items-center mb-3">
+              <div class="me-3">
+                <span class="bg-secondary text-white avatar">
+                  <svg class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                    <path d="M12 3l8 4.5v9l-8 4.5l-8 -4.5v-9l8 -4.5"></path>
+                    <path d="M12 12l8 -4.5"></path>
+                    <path d="M12 12v9"></path>
+                    <path d="M12 12l-8 -4.5"></path>
+                  </svg>
+                </span>
+              </div>
+              <div class="flex-fill">
+                <div class="font-weight-medium">
+                  <a href="/admin/products/<%= product.productId %>"><%= product.name %></a>
+                </div>
+                <div class="text-muted"><%= product.totalSold %> sold • $<%= (product.revenue || 0).toFixed(2) %></div>
+              </div>
+            </div>
+            <% }); %>
+            <% if ((topProducts || []).length === 0) { %>
+            <div class="text-center text-muted">No product sales yet</div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Orders Row -->
+    <div class="row row-deck row-cards mt-3">
+      <div class="col-12">
         <!-- Recent Orders -->
-        <div class="card mt-3">
+        <div class="card">
           <div class="card-header">
             <h3 class="card-title">Recent Orders</h3>
           </div>
@@ -227,84 +267,8 @@
           </div>
         </div>
       </div>
-
-      <!-- Top Products Section -->
-      <div class="col-lg-4">
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">Top Products</h3>
-          </div>
-          <div class="card-body">
-            <% (topProducts || []).forEach(function(product) { %>
-            <div class="d-flex align-items-center mb-3">
-              <div class="me-3">
-                <span class="bg-secondary text-white avatar">
-                  <svg class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                    <path d="M12 3l8 4.5v9l-8 4.5l-8 -4.5v-9l8 -4.5"></path>
-                    <path d="M12 12l8 -4.5"></path>
-                    <path d="M12 12v9"></path>
-                    <path d="M12 12l-8 -4.5"></path>
-                  </svg>
-                </span>
-              </div>
-              <div class="flex-fill">
-                <div class="font-weight-medium">
-                  <a href="/admin/products/<%= product.productId %>"><%= product.name %></a>
-                </div>
-                <div class="text-muted"><%= product.totalSold %> sold • $<%= (product.revenue || 0).toFixed(2) %></div>
-              </div>
-            </div>
-            <% }); %>
-            <% if ((topProducts || []).length === 0) { %>
-            <div class="text-center text-muted">No product sales yet</div>
-            <% } %>
-          </div>
-        </div>
-      </div>
     </div>
 
 <!-- Chart.js and Dashboard Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  // Revenue Chart
-  const revenueChartCanvas = document.getElementById('revenueChart');
-  if (revenueChartCanvas && typeof revenueByDay !== 'undefined') {
-    const ctx = revenueChartCanvas.getContext('2d');
-    new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: revenueByDay.map(d => new Date(d.date).toLocaleDateString()),
-        datasets: [{
-          label: 'Revenue',
-          data: revenueByDay.map(d => d.revenue),
-          borderColor: '#0054a6',
-          backgroundColor: 'rgba(0, 84, 166, 0.1)',
-          tension: 0.4,
-          fill: true
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            display: false
-          }
-        },
-        scales: {
-          y: {
-            beginAtZero: true,
-            ticks: {
-              callback: function(value) {
-                return '$' + value.toLocaleString();
-              }
-            }
-          }
-        }
-      }
-    });
-  }
-});
-</script>
+<script src="/javascripts/admin/dashboard.js"></script>

@@ -1,0 +1,81 @@
+<div class="container-xl">
+  <div class="page-header d-print-none">
+    <div class="row align-items-center">
+      <div class="col-auto">
+        <a href="/admin/catalog/categories" class="btn btn-outline-secondary btn-sm mb-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><polyline points="15 6 9 12 15 18" /></svg>
+          Back to Categories
+        </a>
+        <h2 class="page-title"><%= pageName %></h2>
+      </div>
+      <div class="col-auto ms-auto">
+        <% if (category) { %>
+        <a href="/admin/catalog/categories/<%= category.productCategoryId %>/edit" class="btn btn-primary">
+          Edit Category
+        </a>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <% if (typeof success !== 'undefined' && success) { %>
+  <div class="alert alert-success alert-dismissible" role="alert">
+    <div class="d-flex">
+      <div><%= success %></div>
+    </div>
+    <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+  </div>
+  <% } %>
+
+  <% if (category) { %>
+  <div class="row">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Category Details</h3>
+        </div>
+        <div class="card-body">
+          <dl class="row">
+            <dt class="col-sm-3">Name</dt>
+            <dd class="col-sm-9"><%= category.name %></dd>
+            <dt class="col-sm-3">Slug</dt>
+            <dd class="col-sm-9"><%= category.slug %></dd>
+            <dt class="col-sm-3">Description</dt>
+            <dd class="col-sm-9"><%= category.description || '-' %></dd>
+            <dt class="col-sm-3">Status</dt>
+            <dd class="col-sm-9">
+              <% if (category.isActive) { %>
+              <span class="badge bg-success">Active</span>
+              <% } else { %>
+              <span class="badge bg-secondary">Inactive</span>
+              <% } %>
+            </dd>
+            <dt class="col-sm-3">Products</dt>
+            <dd class="col-sm-9"><%= category.productCount || 0 %></dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Child Categories</h3>
+        </div>
+        <div class="list-group list-group-flush">
+          <% if (typeof childCategories !== 'undefined' && childCategories && childCategories.length > 0) { %>
+            <% childCategories.forEach(function(child) { %>
+            <a href="/admin/catalog/categories/<%= child.productCategoryId %>" class="list-group-item list-group-item-action">
+              <%= child.name %>
+            </a>
+            <% }); %>
+          <% } else { %>
+            <div class="list-group-item text-muted">No child categories</div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+  <% } else { %>
+  <div class="alert alert-warning">Category not found</div>
+  <% } %>
+</div>

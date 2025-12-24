@@ -11,6 +11,8 @@ export async function adminRespond(req: Request, res: Response, view: string, da
   const successMsg = (req as any).flash ? (req as any).flash('success')[0] : null;
   const errorMsg = (req as any).flash ? (req as any).flash('error')[0] : null;
 
+  const noAdminLayoutViews = ['login', 'register', 'forgot-password', 'reset-password'];
+
   // Render the specific view content first
   const viewData = {
     // Common variables needed by admin portal
@@ -35,7 +37,11 @@ export async function adminRespond(req: Request, res: Response, view: string, da
       body: bodyContent,
     };
 
-    res.render('admin/views/layout', layoutData);
+    if (noAdminLayoutViews.includes(view)) {
+      res.render('admin/views/layout-public', layoutData);
+    } else {
+      res.render('admin/views/layout', layoutData);
+    }
   });
 }
 
@@ -47,6 +53,8 @@ export async function merchantRespond(req: Request, res: Response, view: string,
   // Get flash messages from middleware
   const successMsg = (req as any).flash ? (req as any).flash('success')[0] : null;
   const errorMsg = (req as any).flash ? (req as any).flash('error')[0] : null;
+
+  const noMerchantLayoutViews = ['login', 'register', 'forgot-password', 'reset-password'];
 
   // Render the specific view content first
   const viewData = {
@@ -73,7 +81,11 @@ export async function merchantRespond(req: Request, res: Response, view: string,
       body: bodyContent,
     };
 
-    res.render('merchant/views/layout', layoutData);
+    if (noMerchantLayoutViews.includes(view)) {
+      res.render('merchant/views/layout-public', layoutData);
+    } else {
+      res.render('merchant/views/layout', layoutData);
+    }
   });
 }
 
@@ -85,6 +97,8 @@ export async function b2bRespond(req: Request, res: Response, view: string, data
   // Get flash messages from middleware
   const successMsg = (req as any).flash ? (req as any).flash('success')[0] : null;
   const errorMsg = (req as any).flash ? (req as any).flash('error')[0] : null;
+
+  const noB2BLayoutViews = ['login', 'register', 'forgot-password', 'reset-password'];
 
   // Render the specific view content first
   const viewData = {
@@ -112,7 +126,11 @@ export async function b2bRespond(req: Request, res: Response, view: string, data
       body: bodyContent,
     };
 
-    res.render('b2b/views/layout', layoutData);
+    if (noB2BLayoutViews.includes(view)) {
+      res.render('b2b/views/layout-public', layoutData);
+    } else {
+      res.render('b2b/views/layout', layoutData);
+    }
   });
 }
 

@@ -34,6 +34,15 @@ import * as programsController from './controllers/programsController';
 import * as operationsController from './controllers/operationsController';
 import * as gdprController from './controllers/gdprController';
 import * as supportController from './controllers/supportController';
+import * as assortmentController from './controllers/assortmentController';
+import * as brandController from './controllers/brandController';
+import * as pricingController from './controllers/pricingController';
+import * as channelController from './controllers/channelController';
+import * as localizationController from './controllers/localizationController';
+import * as segmentController from './controllers/segmentController';
+import * as merchantController from './controllers/merchantController';
+import * as mediaController from './controllers/mediaController';
+import * as checkoutController from './controllers/checkoutController';
 
 const router = express.Router();
 
@@ -62,6 +71,68 @@ router.get('/', getAdminDashboard);
 
 // GET: admin profile
 router.get('/profile', getAdminProfile);
+
+// ============================================================================
+// Catalog - Categories Routes
+// ============================================================================
+
+router.get('/catalog/categories', assortmentController.listCategories);
+router.get('/catalog/categories/create', assortmentController.createCategoryForm);
+router.post('/catalog/categories', assortmentController.createCategory);
+router.get('/catalog/categories/:categoryId', assortmentController.viewCategory);
+router.get('/catalog/categories/:categoryId/edit', assortmentController.editCategoryForm);
+router.post('/catalog/categories/:categoryId', assortmentController.updateCategory);
+router.put('/catalog/categories/:categoryId', assortmentController.updateCategory);
+router.delete('/catalog/categories/:categoryId', assortmentController.deleteCategory);
+router.post('/catalog/categories/reorder', assortmentController.reorderCategories);
+
+// ============================================================================
+// Catalog - Collections Routes
+// ============================================================================
+
+router.get('/catalog/collections', assortmentController.listCollections);
+router.get('/catalog/collections/create', assortmentController.createCollectionForm);
+router.post('/catalog/collections', assortmentController.createCollection);
+router.get('/catalog/collections/:collectionId', assortmentController.viewCollection);
+router.get('/catalog/collections/:collectionId/edit', assortmentController.editCollectionForm);
+router.post('/catalog/collections/:collectionId', assortmentController.updateCollection);
+router.put('/catalog/collections/:collectionId', assortmentController.updateCollection);
+router.delete('/catalog/collections/:collectionId', assortmentController.deleteCollection);
+
+// ============================================================================
+// Catalog - Brands Routes
+// ============================================================================
+
+router.get('/catalog/brands', brandController.listBrands);
+router.get('/catalog/brands/create', brandController.createBrandForm);
+router.post('/catalog/brands', brandController.createBrand);
+router.get('/catalog/brands/:brandId', brandController.viewBrand);
+router.get('/catalog/brands/:brandId/edit', brandController.editBrandForm);
+router.post('/catalog/brands/:brandId', brandController.updateBrand);
+router.put('/catalog/brands/:brandId', brandController.updateBrand);
+router.delete('/catalog/brands/:brandId', brandController.deleteBrand);
+
+// ============================================================================
+// Catalog - Pricing Routes
+// ============================================================================
+
+router.get('/catalog/pricing', pricingController.listPriceLists);
+router.get('/catalog/pricing/lists/create', pricingController.createPriceListForm);
+router.post('/catalog/pricing/lists', pricingController.createPriceList);
+router.get('/catalog/pricing/lists/:listId', pricingController.viewPriceList);
+router.get('/catalog/pricing/lists/:listId/edit', pricingController.editPriceListForm);
+router.post('/catalog/pricing/lists/:listId', pricingController.updatePriceList);
+router.put('/catalog/pricing/lists/:listId', pricingController.updatePriceList);
+router.delete('/catalog/pricing/lists/:listId', pricingController.deletePriceList);
+
+router.get('/catalog/pricing/rules', pricingController.listPriceRules);
+router.get('/catalog/pricing/rules/create', pricingController.createPriceRuleForm);
+router.post('/catalog/pricing/rules', pricingController.createPriceRule);
+router.get('/catalog/pricing/rules/:ruleId', pricingController.viewPriceRule);
+router.get('/catalog/pricing/rules/:ruleId/edit', pricingController.editPriceRuleForm);
+router.post('/catalog/pricing/rules/:ruleId', pricingController.updatePriceRule);
+router.put('/catalog/pricing/rules/:ruleId', pricingController.updatePriceRule);
+router.delete('/catalog/pricing/rules/:ruleId', pricingController.deletePriceRule);
 
 // ============================================================================
 // Product Routes
@@ -230,7 +301,8 @@ router.get('/payments/transactions', paymentController.listPaymentTransactions);
 // Shipping Routes
 // ============================================================================
 
-router.get('/shipping/methods', shippingController.listShippingMethods);
+// Shipping overview - redirect to methods
+router.get('/shipping', shippingController.listShippingMethods);
 router.get('/shipping/methods/create', shippingController.createShippingMethodForm);
 router.post('/shipping/methods', shippingController.createShippingMethod);
 router.get('/shipping/methods/:methodId', shippingController.viewShippingMethod);
@@ -270,8 +342,24 @@ router.delete('/shipping/rates/:rateId', shippingRateController.deleteShippingRa
 router.post('/shipping/rates/calculate', shippingRateController.calculateShippingRate);
 
 // ============================================================================
-// Content Routes
+// Payment Routes
 // ============================================================================
+
+// Payment overview - redirect to gateways
+router.get('/payments', paymentController.listPaymentGateways);
+router.get('/payments/gateways', paymentController.listPaymentGateways);
+router.get('/payments/gateways/create', paymentController.createPaymentGatewayForm);
+router.post('/payments/gateways', paymentController.createPaymentGateway);
+router.get('/payments/gateways/:gatewayId', paymentController.viewPaymentGateway);
+router.get('/payments/gateways/:gatewayId/edit', paymentController.editPaymentGatewayForm);
+router.post('/payments/gateways/:gatewayId', paymentController.updatePaymentGateway);
+router.delete('/payments/gateways/:gatewayId', paymentController.deletePaymentGateway);
+
+// Payment Methods
+router.get('/payments/methods', paymentController.listPaymentMethods);
+
+// Payment Transactions
+router.get('/payments/transactions', paymentController.listPaymentTransactions);
 
 router.get('/content/pages', contentController.listContentPages);
 router.get('/content/pages/create', contentController.createContentPageForm);
@@ -536,16 +624,104 @@ router.get('/settings/business', settingsController.businessInfo);
 router.post('/settings/business', settingsController.updateBusinessInfo);
 
 // Localization
-router.get('/settings/localization', settingsController.localizationSettings);
+router.get('/settings/localization', localizationController.localizationDashboard);
+router.get('/settings/localization/languages', localizationController.listLanguages);
+router.get('/settings/localization/languages/create', localizationController.createLanguageForm);
+router.post('/settings/localization/languages', localizationController.createLanguage);
+router.get('/settings/localization/languages/:languageId/edit', localizationController.editLanguageForm);
+router.post('/settings/localization/languages/:languageId', localizationController.updateLanguage);
+router.delete('/settings/localization/languages/:languageId', localizationController.deleteLanguage);
 
-// Languages
+router.get('/settings/localization/currencies', localizationController.listCurrencies);
+router.get('/settings/localization/currencies/create', localizationController.createCurrencyForm);
+router.post('/settings/localization/currencies', localizationController.createCurrency);
+router.get('/settings/localization/currencies/:currencyId/edit', localizationController.editCurrencyForm);
+router.post('/settings/localization/currencies/:currencyId', localizationController.updateCurrency);
+router.delete('/settings/localization/currencies/:currencyId', localizationController.deleteCurrency);
+
+router.get('/settings/localization/regions', localizationController.listRegions);
+router.get('/settings/localization/regions/create', localizationController.createRegionForm);
+router.post('/settings/localization/regions', localizationController.createRegion);
+router.get('/settings/localization/regions/:regionId/edit', localizationController.editRegionForm);
+router.post('/settings/localization/regions/:regionId', localizationController.updateRegion);
+router.delete('/settings/localization/regions/:regionId', localizationController.deleteRegion);
+
+// Legacy settings routes (keep for backward compatibility)
 router.post('/settings/languages', settingsController.createLanguage);
 router.put('/settings/languages/:languageId', settingsController.updateLanguage);
 router.delete('/settings/languages/:languageId', settingsController.deleteLanguage);
-
-// Currencies
 router.post('/settings/currencies', settingsController.createCurrency);
 router.put('/settings/currencies/:currencyId', settingsController.updateCurrency);
 router.delete('/settings/currencies/:currencyId', settingsController.deleteCurrency);
+
+// ============================================================================
+// Sales Channels Routes
+// ============================================================================
+
+router.get('/settings/channels', channelController.listChannels);
+router.get('/settings/channels/create', channelController.createChannelForm);
+router.post('/settings/channels', channelController.createChannel);
+router.get('/settings/channels/:channelId', channelController.viewChannel);
+router.get('/settings/channels/:channelId/edit', channelController.editChannelForm);
+router.post('/settings/channels/:channelId', channelController.updateChannel);
+router.put('/settings/channels/:channelId', channelController.updateChannel);
+router.delete('/settings/channels/:channelId', channelController.deleteChannel);
+router.post('/settings/channels/:channelId/activate', channelController.activateChannel);
+router.post('/settings/channels/:channelId/deactivate', channelController.deactivateChannel);
+
+// ============================================================================
+// Checkout Settings Routes
+// ============================================================================
+
+router.get('/settings/checkout', checkoutController.checkoutSettings);
+router.post('/settings/checkout', checkoutController.updateCheckoutSettings);
+router.get('/settings/checkout/payment-methods', checkoutController.listPaymentMethods);
+router.post('/settings/checkout/payment-methods/order', checkoutController.updatePaymentMethodOrder);
+router.get('/settings/checkout/shipping-options', checkoutController.listShippingOptions);
+router.post('/settings/checkout/shipping-options/order', checkoutController.updateShippingOptionOrder);
+
+// ============================================================================
+// Customer Segments Routes
+// ============================================================================
+
+router.get('/sales/segments', segmentController.listSegments);
+router.get('/sales/segments/create', segmentController.createSegmentForm);
+router.post('/sales/segments', segmentController.createSegment);
+router.get('/sales/segments/:segmentId', segmentController.viewSegment);
+router.get('/sales/segments/:segmentId/edit', segmentController.editSegmentForm);
+router.post('/sales/segments/:segmentId', segmentController.updateSegment);
+router.put('/sales/segments/:segmentId', segmentController.updateSegment);
+router.delete('/sales/segments/:segmentId', segmentController.deleteSegment);
+router.get('/sales/segments/:segmentId/customers', segmentController.viewSegmentCustomers);
+router.post('/sales/segments/:segmentId/refresh', segmentController.refreshSegment);
+
+// ============================================================================
+// Merchants Routes
+// ============================================================================
+
+router.get('/operations/merchants', merchantController.listMerchants);
+router.get('/operations/merchants/create', merchantController.createMerchantForm);
+router.post('/operations/merchants', merchantController.createMerchant);
+router.get('/operations/merchants/:merchantId', merchantController.viewMerchant);
+router.get('/operations/merchants/:merchantId/edit', merchantController.editMerchantForm);
+router.post('/operations/merchants/:merchantId', merchantController.updateMerchant);
+router.put('/operations/merchants/:merchantId', merchantController.updateMerchant);
+router.delete('/operations/merchants/:merchantId', merchantController.deleteMerchant);
+router.post('/operations/merchants/:merchantId/approve', merchantController.approveMerchant);
+router.post('/operations/merchants/:merchantId/suspend', merchantController.suspendMerchant);
+
+// ============================================================================
+// Media Library Routes
+// ============================================================================
+
+router.get('/content/media', mediaController.listMedia);
+router.get('/content/media/upload', mediaController.uploadMediaForm);
+router.post('/content/media/upload', mediaController.uploadMedia);
+router.get('/content/media/:mediaId', mediaController.viewMedia);
+router.get('/content/media/:mediaId/edit', mediaController.editMediaForm);
+router.post('/content/media/:mediaId', mediaController.updateMedia);
+router.delete('/content/media/:mediaId', mediaController.deleteMedia);
+router.post('/content/media/bulk-delete', mediaController.bulkDeleteMedia);
+router.post('/content/media/folders', mediaController.createFolder);
 
 export const adminRouter = router;

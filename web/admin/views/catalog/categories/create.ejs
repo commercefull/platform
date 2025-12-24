@@ -1,0 +1,82 @@
+<div class="container-xl">
+  <div class="page-header d-print-none">
+    <div class="row align-items-center">
+      <div class="col-auto">
+        <a href="/admin/catalog/categories" class="btn btn-outline-secondary btn-sm mb-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><polyline points="15 6 9 12 15 18" /></svg>
+          Back to Categories
+        </a>
+        <h2 class="page-title"><%= pageName %></h2>
+      </div>
+    </div>
+  </div>
+
+  <% if (typeof error !== 'undefined' && error) { %>
+  <div class="alert alert-danger alert-dismissible" role="alert">
+    <div class="d-flex">
+      <div><%= error %></div>
+    </div>
+    <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+  </div>
+  <% } %>
+
+  <form action="/admin/catalog/categories" method="POST">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Category Details</h3>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label class="form-label required">Name</label>
+              <input type="text" class="form-control" name="name" required value="<%= typeof formData !== 'undefined' ? formData.name || '' : '' %>">
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label class="form-label">Slug</label>
+              <input type="text" class="form-control" name="slug" value="<%= typeof formData !== 'undefined' ? formData.slug || '' : '' %>">
+              <small class="form-hint">Leave empty to auto-generate from name</small>
+            </div>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Description</label>
+          <textarea class="form-control" name="description" rows="3"><%= typeof formData !== 'undefined' ? formData.description || '' : '' %></textarea>
+        </div>
+        <div class="row">
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label class="form-label">Parent Category</label>
+              <select class="form-select" name="parentId">
+                <option value="">None (Root Category)</option>
+                <% if (typeof parentCategories !== 'undefined' && parentCategories) { %>
+                  <% parentCategories.forEach(function(cat) { %>
+                  <option value="<%= cat.productCategoryId %>"><%= cat.name %></option>
+                  <% }); %>
+                <% } %>
+              </select>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label class="form-label">Position</label>
+              <input type="number" class="form-control" name="position" value="<%= typeof formData !== 'undefined' ? formData.position || 0 : 0 %>">
+            </div>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-check">
+            <input type="checkbox" class="form-check-input" name="isActive" value="true" checked>
+            <span class="form-check-label">Active</span>
+          </label>
+        </div>
+      </div>
+      <div class="card-footer text-end">
+        <a href="/admin/catalog/categories" class="btn btn-link">Cancel</a>
+        <button type="submit" class="btn btn-primary">Create Category</button>
+      </div>
+    </div>
+  </form>
+</div>
