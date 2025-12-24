@@ -1,11 +1,10 @@
 import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
-import { isAdminLoggedIn } from '../../../libs/auth';
 import { SessionService } from '../../../libs/session';
 import AdminRepository from '../../../modules/identity/infrastructure/repositories/AdminRepository';
 import DashboardQueryRepository from '../../../modules/analytics/infrastructure/repositories/DashboardQueryRepository';
-import { adminRespond } from 'web/respond';
+import { adminRespond } from '../../respond';
 
 // Session cookie name
 const SESSION_COOKIE_NAME = 'cf_session';

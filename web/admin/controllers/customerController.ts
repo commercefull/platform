@@ -12,7 +12,7 @@ import { DeactivateCustomerCommand, DeactivateCustomerUseCase } from '../../../m
 import { ReactivateCustomerCommand, ReactivateCustomerUseCase } from '../../../modules/customer/useCases/ReactivateCustomer';
 import { VerifyCustomerCommand, VerifyCustomerUseCase } from '../../../modules/customer/useCases/VerifyCustomer';
 import { AddAddressCommand, ManageAddressesUseCase } from '../../../modules/customer/useCases/ManageAddresses';
-import { adminRespond } from 'web/respond';
+import { adminRespond } from '../../respond';
 
 // ============================================================================
 // List Customers

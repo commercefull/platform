@@ -6,7 +6,7 @@
 import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import ContentRepo from '../../../modules/content/repos/contentRepo';
-import { adminRespond } from 'web/respond';
+import { adminRespond } from '../../respond';
 
 // ============================================================================
 // Content Blocks Management

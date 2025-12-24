@@ -53,9 +53,9 @@ const isDevelopment = process.env.NODE_ENV !== 'production';
 // Define log levels similar to Monolog
 const levels = {
   error: 0, // Error conditions
-  info: 1, // Informational messages
-  debug: 2, // Debug-level messages
-  http: 3, // HTTP requests
+  http: 1, // HTTP requests (moved up for higher priority)
+  info: 2, // Informational messages
+  debug: 3, // Debug-level messages
 };
 
 // Unified JSON formatter

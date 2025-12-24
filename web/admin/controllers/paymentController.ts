@@ -6,7 +6,7 @@
 import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import PaymentRepo from '../../../modules/payment/repos/paymentRepo';
-import { adminRespond } from 'web/respond';
+import { adminRespond } from '../../respond';
 
 // ============================================================================
 // Payment Gateways

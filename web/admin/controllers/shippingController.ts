@@ -6,7 +6,7 @@
 import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import shippingMethodRepo from '../../../modules/shipping/repos/shippingMethodRepo';
-import { adminRespond } from 'web/respond';
+import { adminRespond } from '../../respond';
 
 // ============================================================================
 // Shipping Methods

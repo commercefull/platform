@@ -9,7 +9,7 @@ import * as membershipPlanRepo from '../../../modules/membership/repos/membershi
 import { MembershipBenefitRepo } from '../../../modules/membership/repos/membershipBenefitRepo';
 import { MembershipPlanBenefitRepo } from '../../../modules/membership/repos/membershipPlanBenefitRepo';
 import membershipSubscriptionRepo, { MembershipSubscription } from '../../../modules/membership/repos/membershipSubscriptionRepo';
-import { adminRespond } from 'web/respond';
+import { adminRespond } from '../../respond';
 
 // ============================================================================
 // Membership Plans Management

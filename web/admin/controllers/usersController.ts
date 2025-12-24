@@ -9,7 +9,7 @@ import { Request, Response } from 'express';
 import { query, queryOne } from '../../../libs/db';
 import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcryptjs';
-import { adminRespond } from 'web/respond';
+import { adminRespond } from '../../respond';
 
 // ============================================================================
 // Types

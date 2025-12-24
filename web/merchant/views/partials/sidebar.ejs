@@ -1,116 +1,116 @@
-<!-- Main Sidebar Container -->
-<aside class="main-sidebar sidebar-dark-primary elevation-4">
-  <!-- Brand Logo -->
-  <a href="/merchant" class="brand-link">
-    <img src="https://cdn.jsdelivr.net/npm/admin-lte@4.0.0-beta3/dist/img/AdminLTELogo.png" alt="Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
-    <span class="brand-text font-weight-light">Merchant Hub</span>
-  </a>
-
-  <!-- Sidebar -->
-  <div class="sidebar">
-    <!-- Sidebar user panel -->
-    <div class="user-panel mt-3 pb-3 mb-3 d-flex">
-      <div class="image">
-        <img src="https://cdn.jsdelivr.net/npm/admin-lte@4.0.0-beta3/dist/img/user2-160x160.jpg" class="img-circle elevation-2" alt="User Image">
-      </div>
-      <div class="info">
-        <a href="#" class="d-block">
-          <% if (typeof user !== 'undefined' && user) { %>
-            <%= user.name || user.email || 'Merchant' %>
-          <% } else { %>
-            Merchant
-          <% } %>
-        </a>
-      </div>
-    </div>
-
-    <!-- Sidebar Menu -->
-    <nav class="mt-2">
-      <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-        
+<!-- Sidebar -->
+<aside class="navbar navbar-vertical" data-bs-theme="dark">
+  <div class="container-fluid">
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sidebar-menu" aria-controls="sidebar-menu" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <h1 class="navbar-brand navbar-brand-autodark">
+      <a href="/merchant">
+        <img src="https://preview.tabler.io/static/logo-white.svg" width="110" height="32" alt="Merchant Hub" class="navbar-brand-image">
+      </a>
+    </h1>
+    <div class="collapse navbar-collapse show" id="sidebar-menu">
+      <ul class="navbar-nav pt-lg-3">
         <!-- Dashboard -->
         <li class="nav-item">
-          <a href="/merchant" class="nav-link <% if (pageName === 'Dashboard') { %>active<% } %>">
-            <i class="nav-icon fas fa-tachometer-alt"></i>
-            <p>Dashboard</p>
+          <a class="nav-link" href="/merchant">
+            <span class="nav-link-icon d-md-none d-lg-inline-block">
+              <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M5 12l-2 0l9 -9l9 9l-2 0"/>
+                <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7"/>
+                <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6"/>
+              </svg>
+            </span>
+            <span class="nav-link-title">Dashboard</span>
           </a>
         </li>
-
+        
         <!-- Products -->
-        <li class="nav-item <% if (pageName.includes('Product')) { %>menu-open<% } %>">
-          <a href="#" class="nav-link <% if (pageName.includes('Product')) { %>active<% } %>">
-            <i class="nav-icon fas fa-box"></i>
-            <p>
-              Products
-              <i class="right fas fa-angle-left"></i>
-            </p>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#navbar-products" data-bs-toggle="dropdown" data-bs-auto-close="false" role="button" aria-expanded="false">
+            <span class="nav-link-icon d-md-none d-lg-inline-block">
+              <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M12 3l8 4.5l0 9l-8 4.5l-8 -4.5l0 -9l8 -4.5"/>
+                <path d="M12 12l8 -4.5"/>
+                <path d="M12 12l0 9"/>
+                <path d="M12 12l-8 -4.5"/>
+              </svg>
+            </span>
+            <span class="nav-link-title">Products</span>
           </a>
-          <ul class="nav nav-treeview">
-            <li class="nav-item">
-              <a href="/merchant/products" class="nav-link">
-                <i class="far fa-circle nav-icon"></i>
-                <p>All Products</p>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="/merchant/products/create" class="nav-link">
-                <i class="far fa-circle nav-icon"></i>
-                <p>Add Product</p>
-              </a>
-            </li>
-          </ul>
+          <div class="dropdown-menu">
+            <a class="dropdown-item" href="/merchant/products">All Products</a>
+            <a class="dropdown-item" href="/merchant/products/create">Add Product</a>
+          </div>
         </li>
-
+        
         <!-- Orders -->
-        <li class="nav-item <% if (pageName.includes('Order')) { %>menu-open<% } %>">
-          <a href="#" class="nav-link <% if (pageName.includes('Order')) { %>active<% } %>">
-            <i class="nav-icon fas fa-shopping-cart"></i>
-            <p>
-              Orders
-              <i class="right fas fa-angle-left"></i>
-            </p>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#navbar-orders" data-bs-toggle="dropdown" data-bs-auto-close="false" role="button" aria-expanded="false">
+            <span class="nav-link-icon d-md-none d-lg-inline-block">
+              <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M6 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/>
+                <path d="M17 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/>
+                <path d="M17 17h-11v-14h-2"/>
+                <path d="M6 5l14 1l-1 7h-13"/>
+              </svg>
+            </span>
+            <span class="nav-link-title">Orders</span>
           </a>
-          <ul class="nav nav-treeview">
-            <li class="nav-item">
-              <a href="/merchant/orders" class="nav-link">
-                <i class="far fa-circle nav-icon"></i>
-                <p>All Orders</p>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="/merchant/orders?status=pending" class="nav-link">
-                <i class="far fa-circle nav-icon"></i>
-                <p>Pending</p>
-              </a>
-            </li>
-          </ul>
+          <div class="dropdown-menu">
+            <a class="dropdown-item" href="/merchant/orders">All Orders</a>
+            <a class="dropdown-item" href="/merchant/orders?status=pending">Pending</a>
+          </div>
         </li>
-
+        
         <!-- Inventory -->
         <li class="nav-item">
-          <a href="/merchant/inventory" class="nav-link <% if (pageName.includes('Inventory')) { %>active<% } %>">
-            <i class="nav-icon fas fa-boxes"></i>
-            <p>Inventory</p>
+          <a class="nav-link" href="/merchant/inventory">
+            <span class="nav-link-icon d-md-none d-lg-inline-block">
+              <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M12 3l8 4.5v9l-8 4.5l-8 -4.5v-9l8 -4.5"/>
+                <path d="M12 12l8 -4.5"/>
+                <path d="M8.2 9.8l7.6 -4.6"/>
+                <path d="M12 12v9"/>
+                <path d="M12 12l-8 -4.5"/>
+              </svg>
+            </span>
+            <span class="nav-link-title">Inventory</span>
           </a>
         </li>
-
+        
         <!-- Finances -->
         <li class="nav-item">
-          <a href="/merchant/finances" class="nav-link <% if (pageName.includes('Finance')) { %>active<% } %>">
-            <i class="nav-icon fas fa-wallet"></i>
-            <p>Finances</p>
+          <a class="nav-link" href="/merchant/finances">
+            <span class="nav-link-icon d-md-none d-lg-inline-block">
+              <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M17 8v-3a1 1 0 0 0 -1 -1h-10a2 2 0 0 0 0 4h12a1 1 0 0 1 1 1v3m0 4v3a1 1 0 0 1 -1 1h-12a2 2 0 0 1 -2 -2v-12"/>
+                <path d="M20 12v4h-4a2 2 0 0 1 0 -4h4"/>
+              </svg>
+            </span>
+            <span class="nav-link-title">Finances</span>
           </a>
         </li>
-
+        
         <!-- Settings -->
         <li class="nav-item">
-          <a href="/merchant/settings" class="nav-link <% if (pageName.includes('Setting')) { %>active<% } %>">
-            <i class="nav-icon fas fa-cog"></i>
-            <p>Settings</p>
+          <a class="nav-link" href="/merchant/settings">
+            <span class="nav-link-icon d-md-none d-lg-inline-block">
+              <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z"/>
+                <path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/>
+              </svg>
+            </span>
+            <span class="nav-link-title">Settings</span>
           </a>
         </li>
-
       </ul>
-    </nav>
+    </div>
   </div>
 </aside>

@@ -11,7 +11,8 @@ export async function adminRespond(req: Request, res: Response, view: string, da
   const successMsg = (req as any).flash ? (req as any).flash('success')[0] : null;
   const errorMsg = (req as any).flash ? (req as any).flash('error')[0] : null;
 
-  res.render(`admin/views/${view}`, {
+  // Render the specific view content first
+  const viewData = {
     // Common variables needed by admin portal
     user: (req as any).user,
     session: req.session,
@@ -19,6 +20,22 @@ export async function adminRespond(req: Request, res: Response, view: string, da
     errorMsg,
     // User-provided data
     ...data,
+  };
+
+  // Render the view content
+  res.render(`admin/views/${view}`, viewData, (err, bodyContent) => {
+    if (err) {
+      console.error('Error rendering view:', err);
+      return res.status(500).send('Internal Server Error');
+    }
+
+    // Now render the layout with the body content
+    const layoutData = {
+      ...viewData,
+      body: bodyContent,
+    };
+
+    res.render('admin/views/layout', layoutData);
   });
 }
 
@@ -31,16 +48,32 @@ export async function merchantRespond(req: Request, res: Response, view: string,
   const successMsg = (req as any).flash ? (req as any).flash('success')[0] : null;
   const errorMsg = (req as any).flash ? (req as any).flash('error')[0] : null;
 
-  res.render(`merchant/views/${view}`, {
+  // Render the specific view content first
+  const viewData = {
     // Common variables needed by merchant portal
     user: (req as any).user,
     session: req.session,
     successMsg,
     errorMsg,
-    // Merchant-specific data
     merchantId: (req as any).user?.merchantId,
     // User-provided data
     ...data,
+  };
+
+  // Render the view content
+  res.render(`merchant/views/${view}`, viewData, (err, bodyContent) => {
+    if (err) {
+      console.error('Error rendering merchant view:', err);
+      return res.status(500).send('Internal Server Error');
+    }
+
+    // Now render the layout with the body content
+    const layoutData = {
+      ...viewData,
+      body: bodyContent,
+    };
+
+    res.render('merchant/views/layout', layoutData);
   });
 }
 
@@ -53,17 +86,33 @@ export async function b2bRespond(req: Request, res: Response, view: string, data
   const successMsg = (req as any).flash ? (req as any).flash('success')[0] : null;
   const errorMsg = (req as any).flash ? (req as any).flash('error')[0] : null;
 
-  res.render(`b2b/views/${view}`, {
+  // Render the specific view content first
+  const viewData = {
     // Common variables needed by B2B portal
     user: (req as any).user,
     session: req.session,
     successMsg,
     errorMsg,
-    // B2B-specific data
     companyId: (req as any).user?.companyId,
     userRole: (req as any).user?.role,
     // User-provided data
     ...data,
+  };
+
+  // Render the view content
+  res.render(`b2b/views/${view}`, viewData, (err, bodyContent) => {
+    if (err) {
+      console.error('Error rendering B2B view:', err);
+      return res.status(500).send('Internal Server Error');
+    }
+
+    // Now render the layout with the body content
+    const layoutData = {
+      ...viewData,
+      body: bodyContent,
+    };
+
+    res.render('b2b/views/layout', layoutData);
   });
 }
 

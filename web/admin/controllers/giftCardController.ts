@@ -6,7 +6,7 @@
 import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import * as giftCardRepo from '../../../modules/promotion/repos/giftCardRepo';
-import { adminRespond } from 'web/respond';
+import { adminRespond } from '../../respond';
 
 // ============================================================================
 // Gift Card Management

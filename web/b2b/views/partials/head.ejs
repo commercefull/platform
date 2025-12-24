@@ -2,18 +2,60 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title><%= pageName %> | B2B Portal</title>
 
-<!-- AdminLTE v4 CDN -->
-<!-- Google Font: Source Sans Pro -->
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
-<!-- Font Awesome -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<!-- Theme style -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@4.0.0-beta3/dist/css/adminlte.min.css">
-<!-- overlayScrollbars -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/overlayscrollbars/2.3.0/styles/overlayscrollbars.min.css">
-<!-- Custom Portal Styles -->
+<!-- Tabler Admin Template (Bootstrap 5) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/css/tabler.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons@1.119.0/iconfont/tabler-icons.min.css">
+
+<!-- Custom styles for horizontal navbar layout -->
 <style>
-  .main-sidebar { background: #0f3460 !important; }
-  .sidebar-dark-primary .nav-sidebar>.nav-item>.nav-link.active { background-color: #1a508b !important; }
-  .brand-link { background: #0a2647 !important; }
+  body {
+    overflow-x: hidden;
+  }
+  .page {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  .navbar-vertical {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 15rem;
+    z-index: 1030;
+    overflow-y: auto;
+    border-right: 1px solid var(--tblr-border-color);
+    background-color: var(--tblr-dark);
+  }
+  .navbar-vertical .container-fluid {
+    padding: 1rem;
+  }
+  .navbar-vertical .navbar-brand {
+    margin: 0;
+    padding: 0;
+  }
+  .page-wrapper {
+    flex: 1;
+    margin-left: 15rem;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  .page-body {
+    flex: 1;
+  }
+
+  /* Mobile responsive - hide sidebar on small screens */
+  @media (max-width: 991.98px) {
+    .navbar-vertical {
+      position: relative;
+      width: 100%;
+      height: auto;
+      border-right: none;
+      border-bottom: 1px solid var(--tblr-border-color);
+    }
+    .page-wrapper {
+      margin-left: 0;
+    }
+  }
 </style>

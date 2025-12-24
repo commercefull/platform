@@ -4,7 +4,7 @@
  */
 exports.up = function (knex) {
   return knex.schema.createTable('media', t => {
-    t.string('mediaId').primary().defaultTo(knex.raw('uuidv7()'));
+    t.uuid('mediaId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     t.string('originalName', 255).notNullable();

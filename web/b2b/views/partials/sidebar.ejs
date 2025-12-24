@@ -1,143 +1,142 @@
-<!-- Main Sidebar Container -->
-<aside class="main-sidebar sidebar-dark-primary elevation-4">
-  <!-- Brand Logo -->
-  <a href="/b2b" class="brand-link">
-    <img src="https://cdn.jsdelivr.net/npm/admin-lte@4.0.0-beta3/dist/img/AdminLTELogo.png" alt="Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
-    <span class="brand-text font-weight-light">B2B Portal</span>
-  </a>
-
-  <!-- Sidebar -->
-  <div class="sidebar">
-    <!-- Sidebar user panel -->
-    <div class="user-panel mt-3 pb-3 mb-3 d-flex">
-      <div class="image">
-        <img src="https://cdn.jsdelivr.net/npm/admin-lte@4.0.0-beta3/dist/img/user2-160x160.jpg" class="img-circle elevation-2" alt="User Image">
-      </div>
-      <div class="info">
-        <a href="#" class="d-block">
-          <% if (typeof user !== 'undefined' && user) { %>
-            <%= user.name || user.email || 'User' %>
-            <% if (user.role) { %>
-              <small class="d-block text-muted"><%= user.role %></small>
-            <% } %>
-          <% } else { %>
-            B2B User
-          <% } %>
-        </a>
-      </div>
-    </div>
-
-    <!-- Sidebar Menu -->
-    <nav class="mt-2">
-      <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-        
+<!-- Sidebar -->
+<aside class="navbar navbar-vertical" data-bs-theme="dark">
+  <div class="container-fluid">
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sidebar-menu" aria-controls="sidebar-menu" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <h1 class="navbar-brand navbar-brand-autodark">
+      <a href="/b2b">
+        <img src="https://preview.tabler.io/static/logo-white.svg" width="110" height="32" alt="B2B Portal" class="navbar-brand-image">
+      </a>
+    </h1>
+    <div class="collapse navbar-collapse show" id="sidebar-menu">
+      <ul class="navbar-nav pt-lg-3">
         <!-- Dashboard -->
         <li class="nav-item">
-          <a href="/b2b" class="nav-link <% if (pageName === 'Dashboard') { %>active<% } %>">
-            <i class="nav-icon fas fa-tachometer-alt"></i>
-            <p>Dashboard</p>
+          <a class="nav-link" href="/b2b">
+            <span class="nav-link-icon d-md-none d-lg-inline-block">
+              <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M5 12l-2 0l9 -9l9 9l-2 0"/>
+                <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7"/>
+                <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6"/>
+              </svg>
+            </span>
+            <span class="nav-link-title">Dashboard</span>
           </a>
         </li>
-
+        
         <!-- Catalog -->
         <li class="nav-item">
-          <a href="/b2b/catalog" class="nav-link <% if (pageName.includes('Catalog')) { %>active<% } %>">
-            <i class="nav-icon fas fa-th-large"></i>
-            <p>Catalog</p>
+          <a class="nav-link" href="/b2b/catalog">
+            <span class="nav-link-icon d-md-none d-lg-inline-block">
+              <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M4 4h6v6h-6z"/>
+                <path d="M14 4h6v6h-6z"/>
+                <path d="M4 14h6v6h-6z"/>
+                <path d="M14 14h6v6h-6z"/>
+              </svg>
+            </span>
+            <span class="nav-link-title">Catalog</span>
           </a>
         </li>
-
+        
         <!-- Quotes -->
-        <li class="nav-item <% if (pageName.includes('Quote')) { %>menu-open<% } %>">
-          <a href="#" class="nav-link <% if (pageName.includes('Quote')) { %>active<% } %>">
-            <i class="nav-icon fas fa-file-invoice"></i>
-            <p>
-              Quotes
-              <i class="right fas fa-angle-left"></i>
-            </p>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#navbar-quotes" data-bs-toggle="dropdown" data-bs-auto-close="false" role="button" aria-expanded="false">
+            <span class="nav-link-icon d-md-none d-lg-inline-block">
+              <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M14 3v4a1 1 0 0 0 1 1h4"/>
+                <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z"/>
+                <path d="M9 7l1 0"/>
+                <path d="M9 13l6 0"/>
+                <path d="M13 17l2 0"/>
+              </svg>
+            </span>
+            <span class="nav-link-title">Quotes</span>
           </a>
-          <ul class="nav nav-treeview">
-            <li class="nav-item">
-              <a href="/b2b/quotes" class="nav-link">
-                <i class="far fa-circle nav-icon"></i>
-                <p>All Quotes</p>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="/b2b/quotes/create" class="nav-link">
-                <i class="far fa-circle nav-icon"></i>
-                <p>Request Quote</p>
-              </a>
-            </li>
-          </ul>
+          <div class="dropdown-menu">
+            <a class="dropdown-item" href="/b2b/quotes">All Quotes</a>
+            <a class="dropdown-item" href="/b2b/quotes/create">Request Quote</a>
+          </div>
         </li>
-
+        
         <!-- Orders -->
-        <li class="nav-item <% if (pageName.includes('Order')) { %>menu-open<% } %>">
-          <a href="#" class="nav-link <% if (pageName.includes('Order')) { %>active<% } %>">
-            <i class="nav-icon fas fa-shopping-cart"></i>
-            <p>
-              Orders
-              <i class="right fas fa-angle-left"></i>
-            </p>
+        <li class="nav-item">
+          <a class="nav-link" href="/b2b/orders">
+            <span class="nav-link-icon d-md-none d-lg-inline-block">
+              <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M6 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/>
+                <path d="M17 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/>
+                <path d="M17 17h-11v-14h-2"/>
+                <path d="M6 5l14 1l-1 7h-13"/>
+              </svg>
+            </span>
+            <span class="nav-link-title">Orders</span>
           </a>
-          <ul class="nav nav-treeview">
-            <li class="nav-item">
-              <a href="/b2b/orders" class="nav-link">
-                <i class="far fa-circle nav-icon"></i>
-                <p>Order History</p>
-              </a>
-            </li>
-          </ul>
         </li>
-
+        
         <!-- Approvals (Only for approvers/admins) -->
         <% if (typeof user !== 'undefined' && user && (user.role === 'approver' || user.role === 'admin')) { %>
-        <li class="nav-item <% if (pageName.includes('Approval')) { %>menu-open<% } %>">
-          <a href="#" class="nav-link <% if (pageName.includes('Approval')) { %>active<% } %>">
-            <i class="nav-icon fas fa-check-circle"></i>
-            <p>
-              Approvals
-              <span class="badge badge-warning right">!</span>
-              <i class="right fas fa-angle-left"></i>
-            </p>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#navbar-approvals" data-bs-toggle="dropdown" data-bs-auto-close="false" role="button" aria-expanded="false">
+            <span class="nav-link-icon d-md-none d-lg-inline-block">
+              <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/>
+                <path d="M9 12l2 2l4 -4"/>
+              </svg>
+            </span>
+            <span class="nav-link-title">Approvals</span>
           </a>
-          <ul class="nav nav-treeview">
-            <li class="nav-item">
-              <a href="/b2b/approvals" class="nav-link">
-                <i class="far fa-circle nav-icon"></i>
-                <p>Pending</p>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="/b2b/approvals/history" class="nav-link">
-                <i class="far fa-circle nav-icon"></i>
-                <p>History</p>
-              </a>
-            </li>
-          </ul>
+          <div class="dropdown-menu">
+            <a class="dropdown-item" href="/b2b/approvals">Pending</a>
+            <a class="dropdown-item" href="/b2b/approvals/history">History</a>
+          </div>
         </li>
         <% } %>
-
+        
         <!-- Users (Only for company admins) -->
         <% if (typeof user !== 'undefined' && user && user.role === 'admin') { %>
         <li class="nav-item">
-          <a href="/b2b/users" class="nav-link <% if (pageName.includes('User')) { %>active<% } %>">
-            <i class="nav-icon fas fa-users"></i>
-            <p>Users</p>
+          <a class="nav-link" href="/b2b/users">
+            <span class="nav-link-icon d-md-none d-lg-inline-block">
+              <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M9 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"/>
+                <path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                <path d="M21 21v-2a4 4 0 0 0 -3 -3.85"/>
+              </svg>
+            </span>
+            <span class="nav-link-title">Users</span>
           </a>
         </li>
         <% } %>
-
+        
         <!-- Account -->
         <li class="nav-item">
-          <a href="/b2b/account" class="nav-link <% if (pageName.includes('Account')) { %>active<% } %>">
-            <i class="nav-icon fas fa-building"></i>
-            <p>Account</p>
+          <a class="nav-link" href="/b2b/account">
+            <span class="nav-link-icon d-md-none d-lg-inline-block">
+              <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M3 21l18 0"/>
+                <path d="M9 8l1 0"/>
+                <path d="M9 12l1 0"/>
+                <path d="M9 16l1 0"/>
+                <path d="M14 8l1 0"/>
+                <path d="M14 12l1 0"/>
+                <path d="M14 16l1 0"/>
+                <path d="M5 21v-16a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v16"/>
+              </svg>
+            </span>
+            <span class="nav-link-title">Account</span>
           </a>
         </li>
-
       </ul>
-    </nav>
+    </div>
   </div>
 </aside>

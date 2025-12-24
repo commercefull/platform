@@ -8,7 +8,7 @@ import { Request, Response } from 'express';
 import shippingRateRepo from '../../../modules/shipping/repos/shippingRateRepo';
 import shippingZoneRepo from '../../../modules/shipping/repos/shippingZoneRepo';
 import shippingMethodRepo from '../../../modules/shipping/repos/shippingMethodRepo';
-import { adminRespond } from 'web/respond';
+import { adminRespond } from '../../respond';
 
 // ============================================================================
 // Shipping Rates Management

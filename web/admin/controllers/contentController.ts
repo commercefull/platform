@@ -9,7 +9,7 @@ import ContentRepo from '../../../modules/content/repos/contentRepo';
 import { CreatePageUseCase, CreatePageCommand } from '../../../modules/content/application/useCases/CreatePage';
 import { UpdatePageUseCase, UpdatePageCommand } from '../../../modules/content/application/useCases/UpdatePage';
 import { PublishPageUseCase, PublishPageCommand } from '../../../modules/content/application/useCases/PublishPage';
-import { adminRespond } from 'web/respond';
+import { adminRespond } from '../../respond';
 
 // ============================================================================
 // Content Pages

@@ -1,192 +1,253 @@
-<%- include("../layout") %>
-
-<%- include("../partials/navbar") %>
-
-<%- include("../partials/sidebar") %>
-
-<!-- Content Wrapper -->
-<div class="content-wrapper">
-  <!-- Content Header -->
-  <div class="content-header">
-    <div class="container-fluid">
-      <div class="row mb-2">
-        <div class="col-sm-6">
-          <h1 class="m-0"><%= pageName %></h1>
-        </div>
-        <div class="col-sm-6">
-          <ol class="breadcrumb float-sm-right">
-            <li class="breadcrumb-item"><a href="/admin">Home</a></li>
-            <li class="breadcrumb-item active"><%= pageName %></li>
-          </ol>
-        </div>
-      </div>
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <h2 class="page-title">
+        <%= pageName %>
+      </h2>
     </div>
   </div>
+</div>
 
-  <!-- Main content -->
-  <section class="content">
-    <div class="container-fluid">
-      <%- include("../partials/alerts") %>
+<!-- Main content -->
+<section class="content">
+  <div class="container-fluid">
+    <%- include("../partials/alerts") %>
 
-      <!-- Filters -->
-      <div class="card collapsed-card">
-        <div class="card-header">
-          <h3 class="card-title">Filters</h3>
-          <div class="card-tools">
-            <button type="button" class="btn btn-tool" data-card-widget="collapse">
-              <i class="fas fa-plus"></i>
+    <!-- Filters -->
+    <div class="card">
+      <div class="card-header">
+        <div class="row align-items-center">
+          <div class="col">
+            <h3 class="card-title mb-0">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon me-2">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M4 6h16"/>
+                <path d="M4 12h16"/>
+                <path d="M4 18h12"/>
+              </svg>
+              Filters
+            </h3>
+          </div>
+          <div class="col-auto">
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="toggleFilters">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon me-1">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"/>
+              </svg>
+              Show Filters
             </button>
           </div>
         </div>
-        <div class="card-body">
-          <form method="GET" class="row">
-            <div class="col-md-2">
-              <div class="form-group">
-                <label for="status">Order Status</label>
-                <select class="form-control" id="status" name="status">
-                  <option value="">All Status</option>
-                  <% orderStatuses.forEach(s => { %>
-                    <option value="<%= s %>" <%= filters.status === s ? 'selected' : '' %>><%= s %></option>
-                  <% }); %>
-                </select>
-              </div>
-            </div>
-            <div class="col-md-2">
-              <div class="form-group">
-                <label for="paymentStatus">Payment</label>
-                <select class="form-control" id="paymentStatus" name="paymentStatus">
-                  <option value="">All</option>
-                  <% paymentStatuses.forEach(s => { %>
-                    <option value="<%= s %>" <%= filters.paymentStatus === s ? 'selected' : '' %>><%= s %></option>
-                  <% }); %>
-                </select>
-              </div>
-            </div>
-            <div class="col-md-2">
-              <div class="form-group">
-                <label for="startDate">From Date</label>
-                <input type="date" class="form-control" id="startDate" name="startDate" value="<%= filters.startDate %>">
-              </div>
-            </div>
-            <div class="col-md-2">
-              <div class="form-group">
-                <label for="endDate">To Date</label>
-                <input type="date" class="form-control" id="endDate" name="endDate" value="<%= filters.endDate %>">
-              </div>
-            </div>
-            <div class="col-md-2">
-              <div class="form-group">
-                <label for="search">Search</label>
-                <input type="text" class="form-control" id="search" name="search" value="<%= filters.search %>" placeholder="Order #, Email...">
-              </div>
-            </div>
-            <div class="col-md-2">
-              <div class="form-group">
-                <label>&nbsp;</label>
-                <div>
-                  <button type="submit" class="btn btn-primary">Filter</button>
-                  <a href="/admin/orders" class="btn btn-secondary">Clear</a>
-                </div>
-              </div>
-            </div>
-          </form>
-        </div>
       </div>
-
-      <!-- Orders Table -->
-      <div class="card">
-        <div class="card-header">
-          <h3 class="card-title">Orders (<%= pagination.total %>)</h3>
-        </div>
-        <div class="card-body table-responsive p-0">
-          <table class="table table-hover text-nowrap">
-            <thead>
-              <tr>
-                <th>Order #</th>
-                <th>Customer</th>
-                <th>Date</th>
-                <th>Status</th>
-                <th>Payment</th>
-                <th>Fulfillment</th>
-                <th>Items</th>
-                <th>Total</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% orders.forEach(order => { %>
-              <tr>
-                <td>
-                  <a href="/admin/orders/<%= order.orderId %>">
-                    <strong>#<%= order.orderNumber %></strong>
-                  </a>
-                </td>
-                <td>
-                  <%= order.customerName || 'Guest' %><br>
-                  <small class="text-muted"><%= order.customerEmail %></small>
-                </td>
-                <td><%= new Date(order.orderDate).toLocaleDateString() %></td>
-                <td>
-                  <span class="badge badge-<%= 
-                    order.status === 'completed' ? 'success' :
-                    order.status === 'cancelled' ? 'danger' :
-                    order.status === 'pending' ? 'warning' :
-                    order.status === 'processing' ? 'info' : 'secondary' %>">
-                    <%= order.status %>
-                  </span>
-                </td>
-                <td>
-                  <span class="badge badge-<%= 
-                    order.paymentStatus === 'paid' ? 'success' :
-                    order.paymentStatus === 'refunded' ? 'danger' :
-                    order.paymentStatus === 'pending' ? 'warning' : 'secondary' %>">
-                    <%= order.paymentStatus %>
-                  </span>
-                </td>
-                <td>
-                  <span class="badge badge-<%= 
-                    order.fulfillmentStatus === 'fulfilled' ? 'success' :
-                    order.fulfillmentStatus === 'shipped' ? 'info' :
-                    order.fulfillmentStatus === 'pending' ? 'warning' : 'secondary' %>">
-                    <%= order.fulfillmentStatus %>
-                  </span>
-                </td>
-                <td><%= order.totalItems %></td>
-                <td><strong>$<%= order.totalAmount.toFixed(2) %></strong></td>
-                <td>
-                  <div class="btn-group">
-                    <a href="/admin/orders/<%= order.orderId %>" class="btn btn-sm btn-info" title="View">
-                      <i class="fas fa-eye"></i>
-                    </a>
-                    <% if (order.paymentStatus === 'paid' && order.status !== 'refunded') { %>
-                    <a href="/admin/orders/<%= order.orderId %>/refund" class="btn btn-sm btn-warning" title="Refund">
-                      <i class="fas fa-undo"></i>
-                    </a>
-                    <% } %>
-                  </div>
-                </td>
-              </tr>
+      <div class="card-body" id="filtersBody" style="display: none;">
+        <form method="GET" class="row g-3">
+          <!-- Order Status -->
+          <div class="col-md-6 col-lg-3">
+            <label class="form-label" for="status">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon me-1">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M9 12l2 2l4 -4"/>
+              </svg>
+              Order Status
+            </label>
+            <select class="form-select" id="status" name="status">
+              <option value="">All Status</option>
+              <% orderStatuses.forEach(s => { %>
+                <option value="<%= s %>" <%= filters.status === s ? 'selected' : '' %>><%= s %></option>
               <% }); %>
-            </tbody>
-          </table>
-        </div>
-        <!-- Pagination -->
-        <% if (pagination.pages > 1) { %>
-        <div class="card-footer">
-          <nav>
-            <ul class="pagination pagination-sm m-0">
-              <% for (let i = 1; i <= pagination.pages; i++) { %>
-                <li class="page-item <%= i === pagination.page ? 'active' : '' %>">
-                  <a class="page-link" href="?page=<%= i %>&status=<%= filters.status %>&paymentStatus=<%= filters.paymentStatus %>"><%= i %></a>
-                </li>
+            </select>
+          </div>
+
+          <!-- Payment Status -->
+          <div class="col-md-6 col-lg-3">
+            <label class="form-label" for="paymentStatus">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon me-1">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M17 8v-3a1 1 0 0 0 -1 -1h-10a2 2 0 0 0 0 4h12a1 1 0 0 1 1 1v3m0 4v3a1 1 0 0 1 -1 1h-12a2 2 0 0 1 -2 -2v-12"/>
+                <path d="M20 12v4h-4a2 2 0 0 1 0 -4h4"/>
+              </svg>
+              Payment Status
+            </label>
+            <select class="form-select" id="paymentStatus" name="paymentStatus">
+              <option value="">All</option>
+              <% paymentStatuses.forEach(s => { %>
+                <option value="<%= s %>" <%= filters.paymentStatus === s ? 'selected' : '' %>><%= s %></option>
+              <% }); %>
+            </select>
+          </div>
+
+          <!-- Date Range -->
+          <div class="col-md-6 col-lg-3">
+            <label class="form-label" for="startDate">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon me-1">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z"/>
+                <path d="M16 3v4"/>
+                <path d="M8 3v4"/>
+                <path d="M4 11h16"/>
+                <path d="M11 15h1"/>
+                <path d="M12 15v3"/>
+              </svg>
+              From Date
+            </label>
+            <input type="date" class="form-control" id="startDate" name="startDate" value="<%= filters.startDate %>">
+          </div>
+
+          <div class="col-md-6 col-lg-3">
+            <label class="form-label" for="endDate">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon me-1">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z"/>
+                <path d="M16 3v4"/>
+                <path d="M8 3v4"/>
+                <path d="M4 11h16"/>
+                <path d="M11 15h1"/>
+                <path d="M12 15v3"/>
+              </svg>
+              To Date
+            </label>
+            <input type="date" class="form-control" id="endDate" name="endDate" value="<%= filters.endDate %>">
+          </div>
+
+          <!-- Search -->
+          <div class="col-md-6 col-lg-4">
+            <label class="form-label" for="search">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon me-1">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/>
+                <path d="M21 21l-6 -6"/>
+              </svg>
+              Search
+            </label>
+            <input type="text" class="form-control" id="search" name="search" value="<%= filters.search %>" placeholder="Order #, Email...">
+          </div>
+
+          <!-- Actions -->
+          <div class="col-12">
+            <div class="d-flex gap-2">
+              <button type="submit" class="btn btn-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon me-1">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                  <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/>
+                  <path d="M21 21l-6 -6"/>
+                </svg>
+                Apply Filters
+              </button>
+              <a href="/admin/orders" class="btn btn-outline-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon me-1">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                  <path d="M19 19h-11l-4 -4a2 2 0 0 1 0 -2.828l4 -4h11a2 2 0 0 0 2 -2v-3a2 2 0 0 0 -2 -2h-3l-3 -3"/>
+                  <path d="M3 3l18 18"/>
+                </svg>
+                Clear All
+              </a>
+              <% if (filters.search || filters.status || filters.paymentStatus || filters.startDate || filters.endDate) { %>
+                <div class="ms-auto">
+                  <span class="badge bg-info">
+                    <%= [filters.search && 'Search', filters.status && 'Status', filters.paymentStatus && 'Payment', (filters.startDate || filters.endDate) && 'Date'].filter(Boolean).join(' + ') %> filters active
+                  </span>
+                </div>
               <% } %>
-            </ul>
-          </nav>
-        </div>
-        <% } %>
+            </div>
+          </div>
+        </form>
       </div>
     </div>
-  </section>
-</div>
 
-<%- include("../partials/footer") %>
+    <!-- Orders Table -->
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Orders (<%= pagination.total %>)</h3>
+      </div>
+      <div class="card-body table-responsive p-0">
+        <table class="table table-hover text-nowrap">
+          <thead>
+            <tr>
+              <th>Order #</th>
+              <th>Customer</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th>Payment</th>
+              <th>Fulfillment</th>
+              <th>Items</th>
+              <th>Total</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% orders.forEach(order => { %>
+            <tr>
+              <td>
+                <a href="/admin/orders/<%= order.orderId %>">
+                  <strong>#<%= order.orderNumber %></strong>
+                </a>
+              </td>
+              <td>
+                <%= order.customerName || 'Guest' %><br>
+                <small class="text-muted"><%= order.customerEmail %></small>
+              </td>
+              <td><%= new Date(order.orderDate).toLocaleDateString() %></td>
+              <td>
+                <span class="badge badge-<%=
+                  order.status === 'completed' ? 'success' :
+                  order.status === 'cancelled' ? 'danger' :
+                  order.status === 'pending' ? 'warning' :
+                  order.status === 'processing' ? 'info' : 'secondary' %>">
+                  <%= order.status %>
+                </span>
+              </td>
+              <td>
+                <span class="badge badge-<%=
+                  order.paymentStatus === 'paid' ? 'success' :
+                  order.paymentStatus === 'refunded' ? 'danger' :
+                  order.paymentStatus === 'pending' ? 'warning' : 'secondary' %>">
+                  <%= order.paymentStatus %>
+                </span>
+              </td>
+              <td>
+                <span class="badge badge-<%=
+                  order.fulfillmentStatus === 'fulfilled' ? 'success' :
+                  order.fulfillmentStatus === 'shipped' ? 'info' :
+                  order.fulfillmentStatus === 'pending' ? 'warning' : 'secondary' %>">
+                  <%= order.fulfillmentStatus %>
+                </span>
+              </td>
+              <td><%= order.totalItems %></td>
+              <td><strong>$<%= order.totalAmount.toFixed(2) %></strong></td>
+              <td>
+                <div class="btn-group">
+                  <a href="/admin/orders/<%= order.orderId %>" class="btn btn-sm btn-info" title="View">
+                    <i class="fas fa-eye"></i>
+                  </a>
+                  <% if (order.paymentStatus === 'paid' && order.status !== 'refunded') { %>
+                  <a href="/admin/orders/<%= order.orderId %>/refund" class="btn btn-sm btn-warning" title="Refund">
+                    <i class="fas fa-undo"></i>
+                  </a>
+                  <% } %>
+                </div>
+              </td>
+            </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+      <!-- Pagination -->
+      <% if (pagination.pages > 1) { %>
+      <div class="card-footer">
+        <nav>
+          <ul class="pagination pagination-sm m-0">
+            <% for (let i = 1; i <= pagination.pages; i++) { %>
+              <li class="page-item <%= i === pagination.page ? 'active' : '' %>">
+                <a class="page-link" href="?page=<%= i %>&status=<%= filters.status %>&paymentStatus=<%= filters.paymentStatus %>"><%= i %></a>
+              </li>
+            <% } %>
+          </ul>
+        </nav>
+      </div>
+      <% } %>
+    </div>
+  </div>
+</section>
+
+<script src="/javascripts/admin/orders.js"></script>

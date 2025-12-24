@@ -25,7 +25,7 @@ import {
   createSubscriptionOrder,
   updateSubscriptionOrderStatus,
 } from '../../../modules/subscription/repos/subscriptionRepo';
-import { adminRespond } from 'web/respond';
+import { adminRespond } from '../../respond';
 
 // ============================================================================
 // Helper Functions

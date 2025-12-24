@@ -10,7 +10,7 @@ import { ListPromotionsUseCase, ListPromotionsCommand } from '../../../modules/p
 import { CreatePromotionUseCase, CreatePromotionCommand } from '../../../modules/promotion/application/useCases/CreatePromotion';
 import { UpdatePromotionUseCase, UpdatePromotionCommand } from '../../../modules/promotion/application/useCases/UpdatePromotion';
 import { DeletePromotionUseCase, DeletePromotionCommand } from '../../../modules/promotion/application/useCases/DeletePromotion';
-import { adminRespond } from 'web/respond';
+import { adminRespond } from '../../respond';
 
 // ============================================================================
 // List Promotions

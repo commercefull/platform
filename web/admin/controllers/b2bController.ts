@@ -32,7 +32,7 @@ import {
   saveQuoteItem,
   deleteQuoteItem,
 } from '../../../modules/b2b/repos/quoteRepo';
-import { adminRespond } from 'web/respond';
+import { adminRespond } from '../../respond';
 
 // ============================================================================
 // B2B Company Management

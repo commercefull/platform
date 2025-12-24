@@ -8,7 +8,7 @@ import { Request, Response } from 'express';
 import orderFulfillmentRepo from '../../../modules/order/repos/orderFulfillmentRepo';
 import orderRepo from '../../../modules/order/repos/orderRepo';
 import warehouseRepo from '../../../modules/warehouse/repos/warehouseRepo';
-import { adminRespond } from 'web/respond';
+import { adminRespond } from '../../respond';
 
 // ============================================================================
 // Fulfillment Tracking & Management

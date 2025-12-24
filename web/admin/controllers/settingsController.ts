@@ -8,7 +8,7 @@ import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import { query, queryOne } from '../../../libs/db';
 import { v4 as uuidv4 } from 'uuid';
-import { adminRespond } from 'web/respond';
+import { adminRespond } from '../../respond';
 
 // ============================================================================
 // Types

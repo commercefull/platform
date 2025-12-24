@@ -1,354 +1,310 @@
-<%- include("./layout") %>
-
-<%- include("./partials/navbar") %>
-
-<%- include("./partials/sidebar") %>
-
-<!-- Content Wrapper. Contains page content -->
-<div class="content-wrapper">
-  <!-- Content Header (Page header) -->
-  <div class="content-header">
-    <div class="container-fluid">
-      <div class="row mb-2">
-        <div class="col-sm-6">
-          <h1 class="m-0"><%= pageName %></h1>
-        </div><!-- /.col -->
-        <div class="col-sm-6">
-          <ol class="breadcrumb float-sm-right">
-            <li class="breadcrumb-item"><a href="/admin">Home</a></li>
-            <li class="breadcrumb-item active"><%= pageName %></li>
-          </ol>
-        </div><!-- /.col -->
-      </div><!-- /.row -->
-    </div><!-- /.container-fluid -->
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <h2 class="page-title">
+        <%= pageName %>
+      </h2>
+    </div>
   </div>
-  <!-- /.content-header -->
-
-  <!-- Main content -->
-  <section class="content">
-    <div class="container-fluid">
-      <!-- Primary Stats Row -->
-      <div class="row">
-        <div class="col-lg-3 col-6">
-          <div class="small-box bg-info">
-            <div class="inner">
-              <h3><%= stats.totalOrders %></h3>
-              <p>Total Orders</p>
-            </div>
-            <div class="icon"><i class="fas fa-shopping-cart"></i></div>
-            <a href="/admin/orders" class="small-box-footer">View Orders <i class="fas fa-arrow-circle-right"></i></a>
-          </div>
-        </div>
-        <div class="col-lg-3 col-6">
-          <div class="small-box bg-success">
-            <div class="inner">
-              <h3>$<%= (stats.totalRevenue || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></h3>
-              <p>Total Revenue</p>
-            </div>
-            <div class="icon"><i class="fas fa-dollar-sign"></i></div>
-            <a href="/admin/analytics" class="small-box-footer">View Analytics <i class="fas fa-arrow-circle-right"></i></a>
-          </div>
-        </div>
-        <div class="col-lg-3 col-6">
-          <div class="small-box bg-warning">
-            <div class="inner">
-              <h3><%= stats.totalCustomers %></h3>
-              <p>Total Customers</p>
-            </div>
-            <div class="icon"><i class="fas fa-users"></i></div>
-            <a href="/admin/customers" class="small-box-footer">View Customers <i class="fas fa-arrow-circle-right"></i></a>
-          </div>
-        </div>
-        <div class="col-lg-3 col-6">
-          <div class="small-box bg-danger">
-            <div class="inner">
-              <h3><%= stats.totalProducts %></h3>
-              <p>Total Products</p>
-            </div>
-            <div class="icon"><i class="fas fa-box"></i></div>
-            <a href="/admin/products" class="small-box-footer">View Products <i class="fas fa-arrow-circle-right"></i></a>
-          </div>
-        </div>
-      </div>
-
-      <!-- Secondary Stats Row -->
-      <div class="row">
-        <div class="col-lg-3 col-6">
-          <div class="info-box">
-            <span class="info-box-icon bg-primary"><i class="fas fa-clock"></i></span>
-            <div class="info-box-content">
-              <span class="info-box-text">Pending Orders</span>
-              <span class="info-box-number"><%= stats.pendingOrders %></span>
-            </div>
-          </div>
-        </div>
-        <div class="col-lg-3 col-6">
-          <div class="info-box">
-            <span class="info-box-icon bg-warning"><i class="fas fa-exclamation-triangle"></i></span>
-            <div class="info-box-content">
-              <span class="info-box-text">Low Stock Items</span>
-              <span class="info-box-number"><%= stats.lowStockProducts %></span>
-            </div>
-          </div>
-        </div>
-        <div class="col-lg-3 col-6">
-          <div class="info-box">
-            <span class="info-box-icon bg-info"><i class="fas fa-shopping-bag"></i></span>
-            <div class="info-box-content">
-              <span class="info-box-text">Today's Orders</span>
-              <span class="info-box-number"><%= stats.todayOrders %></span>
-            </div>
-          </div>
-        </div>
-        <div class="col-lg-3 col-6">
-          <div class="info-box">
-            <span class="info-box-icon bg-success"><i class="fas fa-money-bill-wave"></i></span>
-            <div class="info-box-content">
-              <span class="info-box-text">Today's Revenue</span>
-              <span class="info-box-number">$<%= (stats.todayRevenue || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Main row -->
-      <div class="row">
-        <!-- Left col -->
-        <section class="col-lg-7 connectedSortable">
-          <!-- Custom tabs (Charts with tabs)-->
-          <div class="card">
-            <div class="card-header">
-              <h3 class="card-title">
-                <i class="fas fa-chart-pie mr-1"></i>
-                Sales
-              </h3>
-              <div class="card-tools">
-                <ul class="nav nav-pills ml-auto">
-                  <li class="nav-item">
-                    <a class="nav-link active" href="#revenue-chart" data-toggle="tab">Area</a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link" href="#sales-chart" data-toggle="tab">Donut</a>
-                  </li>
-                </ul>
-              </div>
-            </div><!-- /.card-header -->
-            <div class="card-body">
-              <div class="tab-content p-0">
-                <!-- Morris chart - Sales -->
-                <div class="chart tab-pane active" id="revenue-chart" style="position: relative; height: 300px;">
-                  <canvas id="revenueChart" height="300" style="height: 300px;"></canvas>
-                </div>
-                <div class="chart tab-pane" id="sales-chart" style="position: relative; height: 300px;">
-                  <canvas id="salesChart" height="300" style="height: 300px;"></canvas>
-                </div>
-              </div>
-            </div><!-- /.card-body -->
-          </div>
-          <!-- /.card -->
-
-          <!-- Recent Orders -->
-          <div class="card">
-            <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-shopping-cart mr-1"></i>Recent Orders</h3>
-              <div class="card-tools">
-                <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                  <i class="fas fa-minus"></i>
-                </button>
-              </div>
-            </div>
-            <div class="card-body p-0">
-              <div class="table-responsive">
-                <table class="table m-0">
-                  <thead>
-                    <tr>
-                      <th>Order #</th>
-                      <th>Customer</th>
-                      <th>Status</th>
-                      <th>Amount</th>
-                      <th>Date</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <% (recentOrders || []).forEach(function(order) { %>
-                    <tr>
-                      <td><a href="/admin/orders/<%= order.orderId %>">#<%= order.orderNumber %></a></td>
-                      <td><%= order.customerName %></td>
-                      <td>
-                        <span class="badge badge-<%= order.status === 'completed' ? 'success' : order.status === 'pending' ? 'warning' : order.status === 'cancelled' ? 'danger' : 'info' %>">
-                          <%= order.status %>
-                        </span>
-                      </td>
-                      <td>$<%= (order.totalAmount || 0).toFixed(2) %></td>
-                      <td><%= new Date(order.createdAt).toLocaleDateString() %></td>
-                    </tr>
-                    <% }); %>
-                    <% if ((recentOrders || []).length === 0) { %>
-                    <tr>
-                      <td colspan="5" class="text-center text-muted py-3">No orders yet</td>
-                    </tr>
-                    <% } %>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            <div class="card-footer text-center">
-              <a href="/admin/orders" class="uppercase">View All Orders</a>
-            </div>
-          </div>
-
-          <!-- Top Products -->
-          <div class="card">
-            <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-star mr-1"></i>Top Products</h3>
-              <div class="card-tools">
-                <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                  <i class="fas fa-minus"></i>
-                </button>
-              </div>
-            </div>
-            <div class="card-body p-0">
-              <ul class="products-list product-list-in-card pl-2 pr-2">
-                <% (topProducts || []).forEach(function(product) { %>
-                <li class="item">
-                  <div class="product-img">
-                    <div class="bg-secondary d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; border-radius: 4px;">
-                      <i class="fas fa-box text-white"></i>
-                    </div>
-                  </div>
-                  <div class="product-info">
-                    <a href="/admin/products/<%= product.productId %>" class="product-title">
-                      <%= product.name %>
-                      <span class="badge badge-success float-right">$<%= (product.revenue || 0).toFixed(2) %></span>
-                    </a>
-                    <span class="product-description">
-                      <%= product.totalSold %> sold
-                    </span>
-                  </div>
-                </li>
-                <% }); %>
-                <% if ((topProducts || []).length === 0) { %>
-                <li class="item text-center text-muted py-3">No product sales yet</li>
-                <% } %>
-              </ul>
-            </div>
-            <div class="card-footer text-center">
-              <a href="/admin/products" class="uppercase">View All Products</a>
-            </div>
-          </div>
-        </section>
-        <!-- /.Left col -->
-
-        <!-- right col (We are only adding the ID to make the widgets sortable)-->
-        <section class="col-lg-5 connectedSortable">
-          <!-- Map card -->
-          <div class="card bg-gradient-primary">
-            <div class="card-header border-0">
-              <h3 class="card-title">
-                <i class="fas fa-map-marker-alt mr-1"></i>
-                Visitors
-              </h3>
-              <!-- card tools -->
-              <div class="card-tools">
-                <button type="button" class="btn btn-primary btn-sm daterange" title="Date range">
-                  <i class="far fa-calendar-alt"></i>
-                </button>
-                <button type="button" class="btn btn-primary btn-sm" data-card-widget="collapse" title="Collapse">
-                  <i class="fas fa-minus"></i>
-                </button>
-              </div>
-              <!-- /.card-tools -->
-            </div>
-            <div class="card-body">
-              <div id="world-map" style="height: 250px; width: 100%;"></div>
-            </div>
-            <!-- /.card-body-->
-            <div class="card-footer bg-transparent">
-              <div class="row">
-                <div class="col-4 text-center">
-                  <div id="sparkline-1"></div>
-                  <div class="text-white">Visitors</div>
-                </div>
-                <!-- ./col -->
-                <div class="col-4 text-center">
-                  <div id="sparkline-2"></div>
-                  <div class="text-white">Online</div>
-                </div>
-                <!-- ./col -->
-                <div class="col-4 text-center">
-                  <div id="sparkline-3"></div>
-                  <div class="text-white">Sales</div>
-                </div>
-                <!-- ./col -->
-              </div>
-              <!-- /.row -->
-            </div>
-          </div>
-          <!-- /.card -->
-
-          <!-- solid sales graph -->
-          <div class="card bg-gradient-info">
-            <div class="card-header border-0">
-              <h3 class="card-title">
-                <i class="fas fa-th mr-1"></i>
-                Sales Graph
-              </h3>
-
-              <div class="card-tools">
-                <button type="button" class="btn bg-info btn-sm" data-card-widget="collapse">
-                  <i class="fas fa-minus"></i>
-                </button>
-                <button type="button" class="btn bg-info btn-sm" data-card-widget="remove">
-                  <i class="fas fa-times"></i>
-                </button>
-              </div>
-            </div>
-            <div class="card-body">
-              <canvas class="chart" id="line-chart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
-            </div>
-            <!-- /.card-body -->
-            <div class="card-footer bg-transparent">
-              <div class="row">
-                <div class="col-4 text-center">
-                  <input type="text" class="knob" data-readonly="true" value="20" data-width="60" data-height="60" data-fgColor="#39CCCC">
-
-                  <div class="text-white">Mail-Orders</div>
-                </div>
-                <!-- ./col -->
-                <div class="col-4 text-center">
-                  <input type="text" class="knob" data-readonly="true" value="50" data-width="60" data-height="60" data-fgColor="#39CCCC">
-
-                  <div class="text-white">Online</div>
-                </div>
-                <!-- ./col -->
-                <div class="col-4 text-center">
-                  <input type="text" class="knob" data-readonly="true" value="30" data-width="60" data-height="60" data-fgColor="#39CCCC">
-
-                  <div class="text-white">In-Store</div>
-                </div>
-                <!-- ./col -->
-              </div>
-              <!-- /.row -->
-            </div>
-            <!-- /.card-footer -->
-          </div>
-          <!-- /.card -->
-        </section>
-        <!-- right col -->
-      </div>
-      <!-- /.row (main row) -->
-    </div><!-- /.container-fluid -->
-  </section>
-  <!-- /.content -->
 </div>
-<!-- /.content-wrapper -->
 
-<%- include("./partials/footer") %>
+<!-- Primary Stats Row -->
+<div class="row row-deck row-cards">
+  <div class="col-sm-6 col-lg-3">
+    <div class="card">
+          <div class="card-body">
+            <div class="d-flex align-items-center">
+              <div class="subheader">Total Orders</div>
+              <div class="ms-auto lh-1">
+                <div class="text-muted small">This month</div>
+              </div>
+            </div>
+            <div class="h1 mb-3"><%= stats.totalOrders %></div>
+            <div class="d-flex">
+              <a href="/admin/orders" class="btn btn-primary btn-sm">View Orders</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="card">
+          <div class="card-body">
+            <div class="d-flex align-items-center">
+              <div class="subheader">Total Revenue</div>
+              <div class="ms-auto lh-1">
+                <div class="text-muted small">This month</div>
+              </div>
+            </div>
+            <div class="h1 mb-3">$<%= (stats.totalRevenue || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></div>
+            <div class="d-flex">
+              <a href="/admin/analytics" class="btn btn-success btn-sm">View Analytics</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="card">
+          <div class="card-body">
+            <div class="d-flex align-items-center">
+              <div class="subheader">Total Customers</div>
+              <div class="ms-auto lh-1">
+                <div class="text-muted small">Registered</div>
+              </div>
+            </div>
+            <div class="h1 mb-3"><%= stats.totalCustomers %></div>
+            <div class="d-flex">
+              <a href="/admin/customers" class="btn btn-warning btn-sm">View Customers</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="card">
+          <div class="card-body">
+            <div class="d-flex align-items-center">
+              <div class="subheader">Total Products</div>
+              <div class="ms-auto lh-1">
+                <div class="text-muted small">Active</div>
+              </div>
+            </div>
+            <div class="h1 mb-3"><%= stats.totalProducts %></div>
+            <div class="d-flex">
+              <a href="/admin/products" class="btn btn-danger btn-sm">View Products</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-<!-- Control Sidebar -->
-<aside class="control-sidebar control-sidebar-dark">
-  <!-- Control sidebar content goes here -->
-</aside>
-<!-- /.control-sidebar -->
-</div>
-<!-- ./wrapper -->
+    <!-- Secondary Stats Row -->
+    <div class="row row-deck row-cards mt-3">
+      <div class="col-sm-6 col-lg-3">
+        <div class="card">
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-auto">
+                <span class="bg-primary text-white avatar">
+                  <svg class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                    <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"></path>
+                    <path d="M12 7v5l3 3"></path>
+                  </svg>
+                </span>
+              </div>
+              <div class="col">
+                <div class="font-weight-medium"><%= stats.pendingOrders %></div>
+                <div class="text-muted">Pending Orders</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="card">
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-auto">
+                <span class="bg-warning text-white avatar">
+                  <svg class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                    <path d="M12 9v2m0 4v.01"></path>
+                    <path d="M5 19h14a2 2 0 0 0 1.84 -2.75l-7.1 -12.25a2 2 0 0 0 -3.5 0l-7.1 12.25a2 2 0 0 0 1.75 2.75"></path>
+                  </svg>
+                </span>
+              </div>
+              <div class="col">
+                <div class="font-weight-medium"><%= stats.lowStockProducts %></div>
+                <div class="text-muted">Low Stock Items</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="card">
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-auto">
+                <span class="bg-info text-white avatar">
+                  <svg class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                    <path d="M6 19m-2 0a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"></path>
+                    <path d="M17 19m-2 0a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"></path>
+                    <path d="M17 17h-11v-14h-2"></path>
+                    <path d="M6 5l14 1l-1 7h-13"></path>
+                  </svg>
+                </span>
+              </div>
+              <div class="col">
+                <div class="font-weight-medium"><%= stats.todayOrders %></div>
+                <div class="text-muted">Today's Orders</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="card">
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-auto">
+                <span class="bg-success text-white avatar">
+                  <svg class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                    <path d="M9 5h-2a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10a2 2 0 0 0 -2 -2h-2"></path>
+                    <path d="M9 5a2 2 0 0 2 2v2a2 2 0 0 1 -2 2a2 2 0 0 0 -2 -2v-2a2 2 0 0 2 -2"></path>
+                    <path d="M9 12l2 2l4 -4"></path>
+                  </svg>
+                </span>
+              </div>
+              <div class="col">
+                <div class="font-weight-medium">$<%= (stats.todayRevenue || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></div>
+                <div class="text-muted">Today's Revenue</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts and Tables Row -->
+    <div class="row row-deck row-cards mt-3">
+      <!-- Charts Section -->
+      <div class="col-lg-8">
+        <!-- Revenue Chart -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Revenue Overview</h3>
+          </div>
+          <div class="card-body">
+            <canvas id="revenueChart" height="200"></canvas>
+          </div>
+        </div>
+
+        <!-- Recent Orders -->
+        <div class="card mt-3">
+          <div class="card-header">
+            <h3 class="card-title">Recent Orders</h3>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-vcenter">
+                <thead>
+                  <tr>
+                    <th>Order #</th>
+                    <th>Customer</th>
+                    <th>Status</th>
+                    <th>Amount</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% (recentOrders || []).forEach(function(order) { %>
+                  <tr>
+                    <td><a href="/admin/orders/<%= order.orderId %>">#<%= order.orderNumber %></a></td>
+                    <td><%= order.customerName %></td>
+                    <td>
+                      <span class="badge bg-<%= order.status === 'completed' ? 'success' : order.status === 'pending' ? 'warning' : order.status === 'cancelled' ? 'danger' : 'info' %>">
+                        <%= order.status %>
+                      </span>
+                    </td>
+                    <td>$<%= (order.totalAmount || 0).toFixed(2) %></td>
+                    <td><%= new Date(order.createdAt).toLocaleDateString() %></td>
+                  </tr>
+                  <% }); %>
+                  <% if ((recentOrders || []).length === 0) { %>
+                  <tr>
+                    <td colspan="5" class="text-center text-muted">No orders yet</td>
+                  </tr>
+                  <% } %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card-footer">
+            <a href="/admin/orders" class="btn btn-primary">View All Orders</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top Products Section -->
+      <div class="col-lg-4">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Top Products</h3>
+          </div>
+          <div class="card-body">
+            <% (topProducts || []).forEach(function(product) { %>
+            <div class="d-flex align-items-center mb-3">
+              <div class="me-3">
+                <span class="bg-secondary text-white avatar">
+                  <svg class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                    <path d="M12 3l8 4.5v9l-8 4.5l-8 -4.5v-9l8 -4.5"></path>
+                    <path d="M12 12l8 -4.5"></path>
+                    <path d="M12 12v9"></path>
+                    <path d="M12 12l-8 -4.5"></path>
+                  </svg>
+                </span>
+              </div>
+              <div class="flex-fill">
+                <div class="font-weight-medium">
+                  <a href="/admin/products/<%= product.productId %>"><%= product.name %></a>
+                </div>
+                <div class="text-muted"><%= product.totalSold %> sold • $<%= (product.revenue || 0).toFixed(2) %></div>
+              </div>
+            </div>
+            <% }); %>
+            <% if ((topProducts || []).length === 0) { %>
+            <div class="text-center text-muted">No product sales yet</div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+<!-- Chart.js and Dashboard Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Revenue Chart
+  const revenueChartCanvas = document.getElementById('revenueChart');
+  if (revenueChartCanvas && typeof revenueByDay !== 'undefined') {
+    const ctx = revenueChartCanvas.getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: revenueByDay.map(d => new Date(d.date).toLocaleDateString()),
+        datasets: [{
+          label: 'Revenue',
+          data: revenueByDay.map(d => d.revenue),
+          borderColor: '#0054a6',
+          backgroundColor: 'rgba(0, 84, 166, 0.1)',
+          tension: 0.4,
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              callback: function(value) {
+                return '$' + value.toLocaleString();
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+});
+</script>

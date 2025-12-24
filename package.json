@@ -32,8 +32,9 @@
     "sec:check": "yarn audit --groups dependencies --level high",
     "css:build": "npx tailwindcss -i ./public/stylesheets/storefront/main.css -o ./public/stylesheets/storefront/compiled.css --minify",
     "css:watch": "npx tailwindcss -i ./public/stylesheets/storefront/main.css -o ./public/stylesheets/storefront/compiled.css --watch",
-    "job:new:merchant": "NODE_ENV=development node -r ts-node/register ./modules/merchant/interface/jobs/new-merchant.ts",
-    "job:new:business": "NODE_ENV=development node -r ts-node/register ./modules/business/interface/jobs/new-business.ts"
+    "job:new:merchant": "NODE_ENV=development node --env-file=.env -r ts-node/register ./modules/merchant/interface/jobs/new-merchant.ts",
+    "job:new:business": "NODE_ENV=development node --env-file=.env -r ts-node/register ./modules/business/interface/jobs/new-business.ts",
+    "job:new:admin": "NODE_ENV=development node --env-file=.env -r ts-node/register ./modules/identity/interface/jobs/new-admin.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.400.0",

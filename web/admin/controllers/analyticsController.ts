@@ -21,7 +21,7 @@ import {
   generateProductRecommendations,
   performCustomerSegmentation,
 } from '../../../modules/analytics/services/machineLearningService';
-import { adminRespond } from 'web/respond';
+import { adminRespond } from '../../respond';
 
 // ============================================================================
 // Advanced Analytics Dashboard

@@ -3,48 +3,20 @@
 <head>
   <%- include('./partials/head') %>
 </head>
-<body class="hold-transition sidebar-mini layout-fixed">
-<div class="wrapper">
+<body class="d-flex flex-column">
+  <div class="page">
+    <%- include('./partials/navbar') %>
 
-  <!-- Navbar -->
-  <%- include('./partials/navbar') %>
-
-  <!-- Main Sidebar Container -->
-  <%- include('./partials/sidebar') %>
-
-  <!-- Content Wrapper. Contains page content -->
-  <div class="content-wrapper">
-    <!-- Content Header (Page header) -->
-    <div class="content-header">
-      <div class="container-fluid">
-        <div class="row mb-2">
-          <div class="col-sm-6">
-            <h1 class="m-0"><%= pageName %></h1>
-          </div>
-          <div class="col-sm-6">
-            <ol class="breadcrumb float-sm-right">
-              <li class="breadcrumb-item"><a href="/b2b">Home</a></li>
-              <li class="breadcrumb-item active"><%= pageName %></li>
-            </ol>
-          </div>
-        </div>
+    <!-- Page Content -->
+    <div class="page-body">
+      <div class="container-xl">
+        <%- body %>
       </div>
     </div>
 
-    <!-- Main content -->
-    <section class="content">
-      <div class="container-fluid">
-        <%- body %>
-      </div>
-    </section>
+    <!-- Footer -->
+    <%- include('./partials/footer') %>
   </div>
-
-  <!-- Footer -->
-  <%- include('./partials/footer') %>
-
-  <!-- Control Sidebar -->
-  <aside class="control-sidebar control-sidebar-dark"></aside>
-</div>
 
 <%- include('./partials/scripts') %>
 </body>

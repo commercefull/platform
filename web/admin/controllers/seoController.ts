@@ -5,7 +5,7 @@
 
 import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
-import { adminRespond } from 'web/respond';
+import { adminRespond } from '../../respond';
 
 // ============================================================================
 // SEO Settings Management

@@ -17,7 +17,7 @@ import { formCheckbox, formHidden, formInput, formLegend, formMultiSelect, formS
 import { createSessionStore } from './libs/session/sessionStoreFactory';
 import { initializeAnalyticsHandlers } from './boot/analyticsEventHandler';
 import { configureRoutes } from './boot/routes';
-import { expressHttpLogger } from './libs/logger';
+import { expressHttpLogger, logger } from './libs/logger';
 
 // Initialize analytics event handlers
 initializeAnalyticsHandlers();
@@ -76,17 +76,19 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         'default-src': ["'self'"],
-        'style-src': ["'self'", 'https://fonts.googleapis.com', "'unsafe-inline'"],
+        'style-src': ["'self'", 'https://fonts.googleapis.com', 'https://cdnjs.cloudflare.com', 'https://cdn.jsdelivr.net', 'https://code.ionicframework.com', "'unsafe-inline'"],
         'script-src': [
           "'self'",
           'https://www.google-analytics.com',
           'https://ssl.google-analytics.com',
           'https://www.googletagmanager.com',
           'https://unpkg.com',
+          'https://cdnjs.cloudflare.com',
+          'https://cdn.jsdelivr.net',
         ],
-        'img-src': ["'self'", 'data:', 'https:', 'https://www.google-analytics.com', 'https://www.googletagmanager.com'],
-        'connect-src': ["'self'", 'https://www.google-analytics.com', 'https://api.stripe.com'],
-        'font-src': ["'self'", 'https://fonts.gstatic.com'],
+        'img-src': ["'self'", 'data:', 'https:', 'https://www.google-analytics.com', 'https://www.googletagmanager.com', 'https://preview.tabler.io'],
+        'connect-src': ["'self'", 'https://www.google-analytics.com', 'https://api.stripe.com', 'https://cdnjs.cloudflare.com', 'https://cdn.jsdelivr.net', 'https://code.ionicframework.com'],
+        'font-src': ["'self'", 'https://fonts.gstatic.com', 'https://cdnjs.cloudflare.com', 'https://cdn.jsdelivr.net', 'https://code.ionicframework.com', 'data:'],
         'base-uri': ["'self'"],
         'form-action': ["'self'"],
         'frame-ancestors': ["'self'"],
@@ -311,6 +313,8 @@ app.locals.formSubmit = formSubmit;
 
 const port = process.env.PORT || 10000;
 app.set('port', port);
-app.listen(port, () => {});
+app.listen(port, () => {
+  logger.info(`CommerceFull service started on port ${port}`);
+});
 
 module.exports = app;
