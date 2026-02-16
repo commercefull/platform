@@ -5,7 +5,7 @@
 
 import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
-import notificationTemplateRepo from '../../../modules/notification/repos/notificationTemplateRepo';
+import notificationTemplateRepo from '../../../modules/notification/infrastructure/repositories/notificationTemplateRepo';
 import { adminRespond } from '../../respond';
 
 // ============================================================================

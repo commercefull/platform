@@ -1,7 +1,7 @@
-import ShippingCarrierRepo from '../repos/shippingCarrierRepo';
-import ShippingMethodRepo from '../repos/shippingMethodRepo';
-import ShippingRateRepo from '../repos/shippingRateRepo';
-import ShippingZoneRepo from '../repos/shippingZoneRepo';
+import ShippingCarrierRepo from '../infrastructure/repositories/shippingCarrierRepo';
+import ShippingMethodRepo from '../infrastructure/repositories/shippingMethodRepo';
+import ShippingRateRepo from '../infrastructure/repositories/shippingRateRepo';
+import ShippingZoneRepo from '../infrastructure/repositories/shippingZoneRepo';
 import { generateUUID } from '../../../libs/uuid';
 
 export interface Address {

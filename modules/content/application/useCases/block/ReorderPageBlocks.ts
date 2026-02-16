@@ -3,7 +3,7 @@
  * Reorders content blocks within a page
  */
 
-import { ContentRepo } from '../../../repos/contentRepo';
+import { ContentRepo } from '../../../infrastructure/repositories/contentRepo';
 import { eventBus } from '../../../../../libs/events/eventBus';
 
 export class ReorderPageBlocksCommand {

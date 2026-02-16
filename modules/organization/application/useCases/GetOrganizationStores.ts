@@ -2,7 +2,7 @@
  * GetOrganizationStores Use Case
  */
 
-import organizationRepo from '../../repos/organizationRepo';
+import organizationRepo from '../../infrastructure/repositories/organizationRepo';
 
 export interface GetOrganizationStoresInput {
   organizationId: string;

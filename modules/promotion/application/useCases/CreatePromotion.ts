@@ -3,7 +3,7 @@
  * Creates a new promotion
  */
 
-import { PromotionRepo } from '../../repos/promotionRepo';
+import { PromotionRepo } from '../../infrastructure/repositories/promotionRepo';
 
 // Command
 export class CreatePromotionCommand {

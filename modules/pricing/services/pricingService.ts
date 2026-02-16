@@ -1,10 +1,10 @@
-import productRepo from '../../product/repos/productRepo';
-import productVariantRepo from '../../product/repos/productVariantRepo';
-import pricingRuleRepo from '../repos/pricingRuleRepo';
-import tierPriceRepo from '../repos/tierPriceRepo';
-import customerPriceRepo from '../repos/customerPriceRepo';
-import currencyRepo from '../repos/currencyRepo';
-import currencyPriceRuleRepo from '../repos/currencyPriceRuleRepo';
+import productRepo from '../../product/infrastructure/repositories/productRepo';
+import productVariantRepo from '../../product/infrastructure/repositories/productVariantRepo';
+import pricingRuleRepo from '../infrastructure/repositories/pricingRuleRepo';
+import tierPriceRepo from '../infrastructure/repositories/tierPriceRepo';
+import customerPriceRepo from '../infrastructure/repositories/customerPriceRepo';
+import currencyRepo from '../infrastructure/repositories/currencyRepo';
+import currencyPriceRuleRepo from '../infrastructure/repositories/currencyPriceRuleRepo';
 import {
   PriceContext,
   PricingAdjustmentType,
@@ -15,8 +15,8 @@ import {
   CurrencyPriceRule,
 } from '../domain/pricingRule';
 import { Currency, convertCurrency, formatCurrency } from '../domain/currency';
-import { MembershipRepo } from '../../membership/repos/membershipRepo';
-import { LoyaltyRepo } from '../../loyalty/repos/loyaltyRepo';
+import { MembershipRepo } from '../../membership/infrastructure/repositories/membershipRepo';
+import { LoyaltyRepo } from '../../loyalty/infrastructure/repositories/loyaltyRepo';
 
 // Interface for pricing rule impact calculations
 export interface PricingRuleImpact {

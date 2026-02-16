@@ -1,5 +1,5 @@
-import productRepo from '../repos/productRepo';
-import productVariantRepo from '../repos/productVariantRepo';
+import productRepo from '../infrastructure/repositories/productRepo';
+import productVariantRepo from '../infrastructure/repositories/productVariantRepo';
 
 /**
  * Utility to ensure all products have a master variant

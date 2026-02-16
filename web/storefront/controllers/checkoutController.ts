@@ -12,10 +12,10 @@ import CustomerRepo from '../../../modules/customer/infrastructure/repositories/
 import { GetShippingMethodsQuery, GetShippingMethodsUseCase } from '../../../modules/shipping/application/useCases/GetShippingMethods';
 import { GetOrCreateBasketCommand, GetOrCreateBasketUseCase } from '../../../modules/basket/application/useCases/GetOrCreateBasket';
 import { CreateOrderCommand, CreateOrderUseCase } from '../../../modules/order/application/useCases/CreateOrder';
-import { GetCustomerCommand, GetCustomerUseCase } from '../../../modules/customer/useCases/GetCustomer';
+import { GetCustomerCommand, GetCustomerUseCase } from '../../../modules/customer/application/useCases/GetCustomer';
 import { GetOrderCommand, GetOrderUseCase } from '../../../modules/order/application/useCases/GetOrder';
-import * as shippingMethodRepo from '../../../modules/shipping/repos/shippingMethodRepo';
-import * as shippingRateRepo from '../../../modules/shipping/repos/shippingRateRepo';
+import * as shippingMethodRepo from '../../../modules/shipping/infrastructure/repositories/shippingMethodRepo';
+import * as shippingRateRepo from '../../../modules/shipping/infrastructure/repositories/shippingRateRepo';
 import { CalculateOrderTaxCommand, CalculateOrderTaxUseCase } from '../../../modules/tax/application/useCases/CalculateOrderTax';
 // ============================================================================
 // Checkout Page

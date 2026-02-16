@@ -286,6 +286,7 @@ router.get('/promotions/gift-cards/balance/:code', giftCardController.checkGiftC
 // Payment Routes
 // ============================================================================
 
+router.get('/payments', paymentController.listPaymentGateways);
 router.get('/payments/gateways', paymentController.listPaymentGateways);
 router.get('/payments/gateways/create', paymentController.createPaymentGatewayForm);
 router.post('/payments/gateways', paymentController.createPaymentGateway);
@@ -340,26 +341,6 @@ router.post('/shipping/rates/:rateId/activate', shippingRateController.activateS
 router.post('/shipping/rates/:rateId/deactivate', shippingRateController.deactivateShippingRate);
 router.delete('/shipping/rates/:rateId', shippingRateController.deleteShippingRate);
 router.post('/shipping/rates/calculate', shippingRateController.calculateShippingRate);
-
-// ============================================================================
-// Payment Routes
-// ============================================================================
-
-// Payment overview - redirect to gateways
-router.get('/payments', paymentController.listPaymentGateways);
-router.get('/payments/gateways', paymentController.listPaymentGateways);
-router.get('/payments/gateways/create', paymentController.createPaymentGatewayForm);
-router.post('/payments/gateways', paymentController.createPaymentGateway);
-router.get('/payments/gateways/:gatewayId', paymentController.viewPaymentGateway);
-router.get('/payments/gateways/:gatewayId/edit', paymentController.editPaymentGatewayForm);
-router.post('/payments/gateways/:gatewayId', paymentController.updatePaymentGateway);
-router.delete('/payments/gateways/:gatewayId', paymentController.deletePaymentGateway);
-
-// Payment Methods
-router.get('/payments/methods', paymentController.listPaymentMethods);
-
-// Payment Transactions
-router.get('/payments/transactions', paymentController.listPaymentTransactions);
 
 router.get('/content/pages', contentController.listContentPages);
 router.get('/content/pages/create', contentController.createContentPageForm);

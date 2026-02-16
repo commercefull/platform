@@ -6,12 +6,12 @@
 import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import CustomerRepo from '../../../modules/customer/infrastructure/repositories/CustomerRepository';
-import { GetCustomerCommand, GetCustomerUseCase } from '../../../modules/customer/useCases/GetCustomer';
-import { UpdateCustomerCommand, UpdateCustomerUseCase } from '../../../modules/customer/useCases/UpdateCustomer';
-import { DeactivateCustomerCommand, DeactivateCustomerUseCase } from '../../../modules/customer/useCases/DeactivateCustomer';
-import { ReactivateCustomerCommand, ReactivateCustomerUseCase } from '../../../modules/customer/useCases/ReactivateCustomer';
-import { VerifyCustomerCommand, VerifyCustomerUseCase } from '../../../modules/customer/useCases/VerifyCustomer';
-import { AddAddressCommand, ManageAddressesUseCase } from '../../../modules/customer/useCases/ManageAddresses';
+import { GetCustomerCommand, GetCustomerUseCase } from '../../../modules/customer/application/useCases/GetCustomer';
+import { UpdateCustomerCommand, UpdateCustomerUseCase } from '../../../modules/customer/application/useCases/UpdateCustomer';
+import { DeactivateCustomerCommand, DeactivateCustomerUseCase } from '../../../modules/customer/application/useCases/DeactivateCustomer';
+import { ReactivateCustomerCommand, ReactivateCustomerUseCase } from '../../../modules/customer/application/useCases/ReactivateCustomer';
+import { VerifyCustomerCommand, VerifyCustomerUseCase } from '../../../modules/customer/application/useCases/VerifyCustomer';
+import { AddAddressCommand, ManageAddressesUseCase } from '../../../modules/customer/application/useCases/ManageAddresses';
 import { adminRespond } from '../../respond';
 
 // ============================================================================

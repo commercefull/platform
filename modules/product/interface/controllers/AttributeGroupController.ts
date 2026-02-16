@@ -1,6 +1,6 @@
 import { logger } from '../../../../libs/logger';
 import { Request, Response } from 'express';
-import { AttributeGroupRepo } from '../../repos/attributeGroupRepo';
+import { AttributeGroupRepo } from '../../infrastructure/repositories/attributeGroupRepo';
 
 const attributeGroupRepo = new AttributeGroupRepo();
 

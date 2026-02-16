@@ -5,7 +5,7 @@
 
 import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
-import CategoryRepo from '../../../modules/product/repos/categoryRepo';
+import CategoryRepo from '../../../modules/product/infrastructure/repositories/categoryRepo';
 import { adminRespond } from '../../respond';
 
 // ============================================================================

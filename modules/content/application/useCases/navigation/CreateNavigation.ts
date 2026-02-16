@@ -3,7 +3,7 @@
  * Creates a new navigation menu
  */
 
-import { ContentNavigationRepo } from '../../../repos/contentNavigationRepo';
+import { ContentNavigationRepo } from '../../../infrastructure/repositories/contentNavigationRepo';
 import { eventBus } from '../../../../../libs/events/eventBus';
 
 export class CreateNavigationCommand {

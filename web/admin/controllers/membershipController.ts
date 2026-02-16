@@ -5,10 +5,10 @@
 
 import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
-import * as membershipPlanRepo from '../../../modules/membership/repos/membershipPlanRepo';
-import { MembershipBenefitRepo } from '../../../modules/membership/repos/membershipBenefitRepo';
-import { MembershipPlanBenefitRepo } from '../../../modules/membership/repos/membershipPlanBenefitRepo';
-import membershipSubscriptionRepo, { MembershipSubscription } from '../../../modules/membership/repos/membershipSubscriptionRepo';
+import * as membershipPlanRepo from '../../../modules/membership/infrastructure/repositories/membershipPlanRepo';
+import { MembershipBenefitRepo } from '../../../modules/membership/infrastructure/repositories/membershipBenefitRepo';
+import { MembershipPlanBenefitRepo } from '../../../modules/membership/infrastructure/repositories/membershipPlanBenefitRepo';
+import membershipSubscriptionRepo, { MembershipSubscription } from '../../../modules/membership/infrastructure/repositories/membershipSubscriptionRepo';
 import { adminRespond } from '../../respond';
 
 // ============================================================================

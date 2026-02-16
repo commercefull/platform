@@ -3,7 +3,7 @@
  * Retrieves a navigation menu with all its items in tree structure
  */
 
-import { ContentNavigationRepo } from '../../../repos/contentNavigationRepo';
+import { ContentNavigationRepo } from '../../../infrastructure/repositories/contentNavigationRepo';
 import { ContentNavigationItem } from '../../../../../libs/db/types';
 
 export class GetNavigationWithItemsQuery {

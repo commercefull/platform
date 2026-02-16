@@ -5,7 +5,7 @@
 
 import { logger } from '../../../libs/logger';
 import { Request, Response, NextFunction } from 'express';
-import CategoryRepo from '../../../modules/product/repos/categoryRepo';
+import CategoryRepo from '../../../modules/product/infrastructure/repositories/categoryRepo';
 import { storefrontRespond } from '../../respond';
 
 // ============================================================================

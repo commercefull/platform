@@ -32,9 +32,9 @@ jest.mock('../../repos/discountRepo', () => ({
   },
 }));
 
-import couponRepo from '../../repos/couponRepo';
-import * as giftCardRepo from '../../repos/giftCardRepo';
-import discountRepo from '../../repos/discountRepo';
+import couponRepo from '../../infrastructure/repositories/couponRepo';
+import * as giftCardRepo from '../../infrastructure/repositories/giftCardRepo';
+import discountRepo from '../../infrastructure/repositories/discountRepo';
 
 describe('ValidateCouponUseCase', () => {
   const useCase = new ValidateCouponUseCase();

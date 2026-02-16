@@ -7,7 +7,7 @@
 import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import { query, queryOne } from '../../../libs/db';
-import { getSalesSummary, getTopProducts, getCustomerCohorts } from '../../../modules/analytics/repos/analyticsRepo';
+import { getSalesSummary, getTopProducts, getCustomerCohorts } from '../../../modules/analytics/infrastructure/repositories/analyticsRepo';
 import {
   getScheduledReports,
   getReportExecutionHistory,

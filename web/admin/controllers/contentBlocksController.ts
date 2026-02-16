@@ -5,7 +5,7 @@
 
 import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
-import ContentRepo from '../../../modules/content/repos/contentRepo';
+import ContentRepo from '../../../modules/content/infrastructure/repositories/contentRepo';
 import { adminRespond } from '../../respond';
 
 // ============================================================================

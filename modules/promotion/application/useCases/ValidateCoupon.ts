@@ -3,7 +3,7 @@
  * Validates a coupon code for a given order
  */
 
-import couponRepo, { PromotionCoupon } from '../../repos/couponRepo';
+import couponRepo, { PromotionCoupon } from '../../infrastructure/repositories/couponRepo';
 
 // ============================================================================
 // Command

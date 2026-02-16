@@ -3,8 +3,8 @@
  * Creates a new B2B quote for a company
  */
 
-import * as quoteRepo from '../../../repos/quoteRepo';
-import * as companyRepo from '../../../repos/companyRepo';
+import * as quoteRepo from '../../../infrastructure/repositories/quoteRepo';
+import * as companyRepo from '../../../infrastructure/repositories/companyRepo';
 import { eventBus } from '../../../../../libs/events/eventBus';
 
 export interface CreateQuoteCommand {

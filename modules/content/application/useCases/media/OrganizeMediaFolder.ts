@@ -3,7 +3,7 @@
  * Creates and manages media folders for organization
  */
 
-import { ContentMediaRepo } from '../../../repos/contentMediaRepo';
+import { ContentMediaRepo } from '../../../infrastructure/repositories/contentMediaRepo';
 
 export class CreateFolderCommand {
   constructor(

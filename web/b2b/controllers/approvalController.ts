@@ -186,3 +186,85 @@ export const viewApproval = async (req: Request, res: Response) => {
     });
   }
 };
+
+/**
+ * POST: Approve a request
+ */
+export const approveRequest = async (req: Request, res: Response) => {
+  try {
+    const user = req.user as B2BUser;
+    if (!user?.companyId) {
+      return res.redirect('/b2b/login');
+    }
+
+    if (user.role !== 'approver' && user.role !== 'admin') {
+      return b2bRespond(req, res, 'error', {
+        pageName: 'Access Denied',
+        error: 'You do not have permission to approve requests',
+        user,
+      });
+    }
+
+    const { approvalId } = req.params;
+    const { comments } = req.body;
+
+    await queryOne<any>(
+      `UPDATE "b2bApprovalRequest" 
+       SET "status" = 'approved', "processedBy" = $1, "processedAt" = NOW(), "comments" = $2, "updatedAt" = NOW()
+       WHERE "approvalRequestId" = $3 AND "b2bCompanyId" = $4 AND "status" = 'pending'
+       RETURNING "approvalRequestId"`,
+      [user.id, comments || null, approvalId, user.companyId],
+    );
+
+    return res.redirect(`/b2b/approvals/${approvalId}`);
+  } catch (error) {
+    logger.error('Error approving request:', error);
+
+    b2bRespond(req, res, 'error', {
+      pageName: 'Error',
+      error: 'Failed to approve request',
+      user: req.user,
+    });
+  }
+};
+
+/**
+ * POST: Reject a request
+ */
+export const rejectRequest = async (req: Request, res: Response) => {
+  try {
+    const user = req.user as B2BUser;
+    if (!user?.companyId) {
+      return res.redirect('/b2b/login');
+    }
+
+    if (user.role !== 'approver' && user.role !== 'admin') {
+      return b2bRespond(req, res, 'error', {
+        pageName: 'Access Denied',
+        error: 'You do not have permission to reject requests',
+        user,
+      });
+    }
+
+    const { approvalId } = req.params;
+    const { comments } = req.body;
+
+    await queryOne<any>(
+      `UPDATE "b2bApprovalRequest" 
+       SET "status" = 'rejected', "processedBy" = $1, "processedAt" = NOW(), "comments" = $2, "updatedAt" = NOW()
+       WHERE "approvalRequestId" = $3 AND "b2bCompanyId" = $4 AND "status" = 'pending'
+       RETURNING "approvalRequestId"`,
+      [user.id, comments || null, approvalId, user.companyId],
+    );
+
+    return res.redirect(`/b2b/approvals/${approvalId}`);
+  } catch (error) {
+    logger.error('Error rejecting request:', error);
+
+    b2bRespond(req, res, 'error', {
+      pageName: 'Error',
+      error: 'Failed to reject request',
+      user: req.user,
+    });
+  }
+};

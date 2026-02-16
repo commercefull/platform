@@ -3,7 +3,7 @@
  * Generates a sales report for a given date range
  */
 
-import * as analyticsRepo from '../../repos/analyticsRepo';
+import * as analyticsRepo from '../../infrastructure/repositories/analyticsRepo';
 import { eventBus } from '../../../../libs/events/eventBus';
 
 export interface GenerateSalesReportCommand {

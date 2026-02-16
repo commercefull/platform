@@ -3,7 +3,7 @@
  * Creates a new content category with hierarchy support
  */
 
-import { ContentCategoryRepo } from '../../../repos/contentCategoryRepo';
+import { ContentCategoryRepo } from '../../../infrastructure/repositories/contentCategoryRepo';
 import { eventBus } from '../../../../../libs/events/eventBus';
 
 export class CreateCategoryCommand {

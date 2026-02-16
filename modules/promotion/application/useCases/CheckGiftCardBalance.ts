@@ -3,7 +3,7 @@
  * Retrieves gift card balance and status
  */
 
-import * as giftCardRepo from '../../repos/giftCardRepo';
+import * as giftCardRepo from '../../infrastructure/repositories/giftCardRepo';
 
 // ============================================================================
 // Query

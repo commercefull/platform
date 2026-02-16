@@ -5,7 +5,7 @@
 
 import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
-import supplierRepo from '../../../modules/supplier/repos/supplierRepo';
+import supplierRepo from '../../../modules/supplier/infrastructure/repositories/supplierRepo';
 import { adminRespond } from '../../respond';
 
 // ============================================================================

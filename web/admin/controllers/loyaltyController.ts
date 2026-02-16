@@ -5,7 +5,7 @@
 
 import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
-import loyaltyRepo from '../../../modules/loyalty/repos/loyaltyRepo';
+import loyaltyRepo from '../../../modules/loyalty/infrastructure/repositories/loyaltyRepo';
 import { adminRespond } from '../../respond';
 
 // ============================================================================

@@ -5,9 +5,9 @@
 
 import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
-import orderFulfillmentRepo from '../../../modules/order/repos/orderFulfillmentRepo';
-import orderRepo from '../../../modules/order/repos/orderRepo';
-import warehouseRepo from '../../../modules/warehouse/repos/warehouseRepo';
+import orderFulfillmentRepo from '../../../modules/order/infrastructure/repositories/orderFulfillmentRepo';
+import orderRepo from '../../../modules/order/infrastructure/repositories/orderRepo';
+import warehouseRepo from '../../../modules/warehouse/infrastructure/repositories/warehouseRepo';
 import { adminRespond } from '../../respond';
 
 // ============================================================================

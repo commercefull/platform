@@ -5,7 +5,7 @@
 
 import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
-import warehouseRepo from '../../../modules/warehouse/repos/warehouseRepo';
+import warehouseRepo from '../../../modules/warehouse/infrastructure/repositories/warehouseRepo';
 import { adminRespond } from '../../respond';
 
 // ============================================================================

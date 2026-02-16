@@ -3,7 +3,7 @@
  */
 
 import express from 'express';
-import * as giftCardController from '../../controllers/giftCardCustomerController';
+import * as giftCardController from '../controllers/giftCardCustomerController';
 
 const router = express.Router();
 

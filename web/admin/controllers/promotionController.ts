@@ -5,7 +5,7 @@
 
 import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
-import PromotionRepo from '../../../modules/promotion/repos/promotionRepo';
+import PromotionRepo from '../../../modules/promotion/infrastructure/repositories/promotionRepo';
 import { ListPromotionsUseCase, ListPromotionsCommand } from '../../../modules/promotion/application/useCases/ListPromotions';
 import { CreatePromotionUseCase, CreatePromotionCommand } from '../../../modules/promotion/application/useCases/CreatePromotion';
 import { UpdatePromotionUseCase, UpdatePromotionCommand } from '../../../modules/promotion/application/useCases/UpdatePromotion';

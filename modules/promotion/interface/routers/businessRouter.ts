@@ -3,12 +3,12 @@
  */
 
 import express from 'express';
-import * as giftCardController from '../../controllers/giftCardBusinessController';
-import * as discountController from '../../controllers/discountController';
-import * as couponController from '../../controllers/couponController';
-import * as promotionController from '../../controllers/promotionController';
-import * as cartPromotionController from '../../controllers/cartPromotionController';
-import * as categoryPromotionController from '../../controllers/categoryPromotionController';
+import * as giftCardController from '../controllers/giftCardBusinessController';
+import * as discountController from '../controllers/discountController';
+import * as couponController from '../controllers/couponController';
+import * as promotionController from '../controllers/promotionController';
+import * as cartPromotionController from '../controllers/cartPromotionController';
+import * as categoryPromotionController from '../controllers/categoryPromotionController';
 import { isMerchantLoggedIn } from '../../../../libs/auth';
 
 const router = express.Router();

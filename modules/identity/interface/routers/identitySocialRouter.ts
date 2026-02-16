@@ -13,7 +13,7 @@ import {
   unlinkCustomerSocialAccount,
   getCustomerLinkedAccounts,
   getMerchantLinkedAccounts,
-} from '../../controllers/identitySocialController';
+} from '../controllers/identitySocialController';
 
 const router = Router();
 

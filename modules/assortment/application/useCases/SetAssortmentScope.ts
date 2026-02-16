@@ -2,7 +2,7 @@
  * SetAssortmentScope Use Case
  */
 
-import assortmentRepo from '../../repos/assortmentRepo';
+import assortmentRepo from '../../infrastructure/repositories/assortmentRepo';
 
 export interface SetAssortmentScopeInput {
   assortmentId: string;

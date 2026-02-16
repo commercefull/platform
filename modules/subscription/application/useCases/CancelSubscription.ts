@@ -3,8 +3,8 @@
  * Cancels a customer subscription
  */
 
-import * as subscriptionRepo from '../../repos/subscriptionRepo';
-import { CustomerSubscription } from '../../repos/subscriptionRepo';
+import * as subscriptionRepo from '../../infrastructure/repositories/subscriptionRepo';
+import { CustomerSubscription } from '../../infrastructure/repositories/subscriptionRepo';
 
 // ============================================================================
 // Command

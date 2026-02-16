@@ -8,7 +8,7 @@ import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import { SessionService } from '../../../libs/session';
 import { merchantRespond } from '../../respond';
-import MerchantRepo from '../../../modules/merchant/repos/merchantRepo';
+import MerchantRepo from '../../../modules/merchant/infrastructure/repositories/merchantRepo';
 
 const SESSION_COOKIE_NAME = 'cf_session';
 

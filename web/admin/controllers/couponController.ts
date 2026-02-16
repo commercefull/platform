@@ -5,7 +5,7 @@
 
 import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
-import { couponRepo } from '../../../modules/promotion/repos/couponRepo';
+import { couponRepo } from '../../../modules/promotion/infrastructure/repositories/couponRepo';
 import { adminRespond } from '../../respond';
 
 // ============================================================================

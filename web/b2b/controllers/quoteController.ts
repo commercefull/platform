@@ -157,3 +157,86 @@ export const createQuoteForm = async (req: Request, res: Response) => {
     });
   }
 };
+
+/**
+ * POST: Create/submit a new quote request
+ */
+export const createQuote = async (req: Request, res: Response) => {
+  try {
+    const user = req.user as B2BUser;
+    if (!user?.companyId) {
+      return res.redirect('/b2b/login');
+    }
+
+    const { notes } = req.body;
+
+    const result = await queryOne<any>(
+      `INSERT INTO "b2bQuote" ("b2bCompanyId", "createdBy", "status", "notes", "createdAt", "updatedAt")
+       VALUES ($1, $2, 'draft', $3, NOW(), NOW())
+       RETURNING "quoteId"`,
+      [user.companyId, user.id, notes || null],
+    );
+
+    if (result) {
+      return res.redirect(`/b2b/quotes/${result.quoteId}`);
+    }
+
+    return res.redirect('/b2b/quotes');
+  } catch (error) {
+    logger.error('Error creating quote:', error);
+
+    b2bRespond(req, res, 'error', {
+      pageName: 'Error',
+      error: 'Failed to create quote',
+      user: req.user,
+    });
+  }
+};
+
+/**
+ * POST: Update quote (add notes, change status)
+ */
+export const updateQuote = async (req: Request, res: Response) => {
+  try {
+    const user = req.user as B2BUser;
+    if (!user?.companyId) {
+      return res.redirect('/b2b/login');
+    }
+
+    const { quoteId } = req.params;
+    const { notes, status } = req.body;
+
+    const updateFields: string[] = ['"updatedAt" = NOW()'];
+    const params: any[] = [];
+    let paramIndex = 1;
+
+    if (notes !== undefined) {
+      updateFields.push(`"notes" = $${paramIndex++}`);
+      params.push(notes);
+    }
+
+    if (status && ['draft', 'submitted'].includes(status)) {
+      updateFields.push(`"status" = $${paramIndex++}`);
+      params.push(status);
+    }
+
+    params.push(quoteId, user.companyId);
+
+    await queryOne<any>(
+      `UPDATE "b2bQuote" SET ${updateFields.join(', ')}
+       WHERE "quoteId" = $${paramIndex++} AND "b2bCompanyId" = $${paramIndex}
+       RETURNING "quoteId"`,
+      params,
+    );
+
+    return res.redirect(`/b2b/quotes/${quoteId}`);
+  } catch (error) {
+    logger.error('Error updating quote:', error);
+
+    b2bRespond(req, res, 'error', {
+      pageName: 'Error',
+      error: 'Failed to update quote',
+      user: req.user,
+    });
+  }
+};

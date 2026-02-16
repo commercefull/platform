@@ -5,7 +5,7 @@
 
 import { logger } from '../../../../libs/logger';
 import { Request, Response, NextFunction } from 'express';
-import * as bundleRepo from '../../repos/bundleRepo';
+import * as bundleRepo from '../../infrastructure/repositories/bundleRepo';
 
 type AsyncHandler = (req: Request, res: Response, next: NextFunction) => Promise<void>;
 

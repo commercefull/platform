@@ -5,7 +5,7 @@
 
 import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
-import * as giftCardRepo from '../../../modules/promotion/repos/giftCardRepo';
+import * as giftCardRepo from '../../../modules/promotion/infrastructure/repositories/giftCardRepo';
 import { adminRespond } from '../../respond';
 
 // ============================================================================

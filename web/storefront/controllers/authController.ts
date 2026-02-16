@@ -7,11 +7,11 @@ import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
 import { storefrontRespond } from '../../respond';
 import CustomerRepo from '../../../modules/customer/infrastructure/repositories/CustomerRepository';
-import { AuthenticateCustomerCommand, AuthenticateCustomerUseCase } from '../../../modules/customer/useCases/AuthenticateCustomer';
-import { RegisterCustomerCommand, RegisterCustomerUseCase } from '../../../modules/customer/useCases/RegisterCustomer';
-import { GetCustomerCommand, GetCustomerUseCase } from '../../../modules/customer/useCases/GetCustomer';
-import { UpdateCustomerCommand, UpdateCustomerUseCase } from '../../../modules/customer/useCases/UpdateCustomer';
-import { ChangePasswordCommand, ChangePasswordUseCase } from '../../../modules/customer/useCases/ChangePassword';
+import { AuthenticateCustomerCommand, AuthenticateCustomerUseCase } from '../../../modules/customer/application/useCases/AuthenticateCustomer';
+import { RegisterCustomerCommand, RegisterCustomerUseCase } from '../../../modules/customer/application/useCases/RegisterCustomer';
+import { GetCustomerCommand, GetCustomerUseCase } from '../../../modules/customer/application/useCases/GetCustomer';
+import { UpdateCustomerCommand, UpdateCustomerUseCase } from '../../../modules/customer/application/useCases/UpdateCustomer';
+import { ChangePasswordCommand, ChangePasswordUseCase } from '../../../modules/customer/application/useCases/ChangePassword';
 
 // ============================================================================
 // Sign In Form

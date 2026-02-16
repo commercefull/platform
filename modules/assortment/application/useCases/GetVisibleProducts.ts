@@ -2,7 +2,7 @@
  * GetVisibleProducts Use Case
  */
 
-import assortmentRepo from '../../repos/assortmentRepo';
+import assortmentRepo from '../../infrastructure/repositories/assortmentRepo';
 
 export interface GetVisibleProductsInput {
   storeId: string;

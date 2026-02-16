@@ -3,8 +3,8 @@
  * Creates a new customer subscription
  */
 
-import * as subscriptionRepo from '../../repos/subscriptionRepo';
-import { CustomerSubscription, SubscriptionPlan, SubscriptionProduct } from '../../repos/subscriptionRepo';
+import * as subscriptionRepo from '../../infrastructure/repositories/subscriptionRepo';
+import { CustomerSubscription, SubscriptionPlan, SubscriptionProduct } from '../../infrastructure/repositories/subscriptionRepo';
 
 // ============================================================================
 // Command

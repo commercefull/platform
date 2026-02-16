@@ -24,7 +24,7 @@ import {
   createDunningAttempt,
   createSubscriptionOrder,
   updateSubscriptionOrderStatus,
-} from '../../../modules/subscription/repos/subscriptionRepo';
+} from '../../../modules/subscription/infrastructure/repositories/subscriptionRepo';
 import { adminRespond } from '../../respond';
 
 // ============================================================================

@@ -5,9 +5,9 @@
 
 import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
-import shippingRateRepo from '../../../modules/shipping/repos/shippingRateRepo';
-import shippingZoneRepo from '../../../modules/shipping/repos/shippingZoneRepo';
-import shippingMethodRepo from '../../../modules/shipping/repos/shippingMethodRepo';
+import shippingRateRepo from '../../../modules/shipping/infrastructure/repositories/shippingRateRepo';
+import shippingZoneRepo from '../../../modules/shipping/infrastructure/repositories/shippingZoneRepo';
+import shippingMethodRepo from '../../../modules/shipping/infrastructure/repositories/shippingMethodRepo';
 import { adminRespond } from '../../respond';
 
 // ============================================================================

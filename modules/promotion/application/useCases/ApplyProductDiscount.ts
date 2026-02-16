@@ -3,7 +3,7 @@
  * Calculates applicable discounts for products
  */
 
-import discountRepo from '../../repos/discountRepo';
+import discountRepo from '../../infrastructure/repositories/discountRepo';
 
 // ============================================================================
 // Command

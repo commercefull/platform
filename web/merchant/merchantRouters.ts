@@ -34,16 +34,14 @@ router.get('/', dashboardController.getDashboard);
 // Products - Merchant can only see their own products
 router.get('/products', productController.listProducts);
 router.get('/products/create', productController.createProductForm);
+router.post('/products', productController.createProduct);
 router.get('/products/:productId', productController.viewProduct);
 router.get('/products/:productId/edit', productController.editProductForm);
+router.post('/products/:productId', productController.updateProduct);
+router.post('/products/:productId/delete', productController.deleteProduct);
 
 // Orders - Merchant can only see orders containing their products
 router.get('/orders', orderController.listOrders);
 router.get('/orders/:orderId', orderController.viewOrder);
-
-// TODO: Add more routes as needed
-// - /inventory - Stock management
-// - /finances - Settlements and payouts
-// - /settings - Merchant profile settings
 
 export const merchantRouter = router;

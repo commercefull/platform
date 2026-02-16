@@ -6,7 +6,7 @@
  */
 import { PricingService } from '../services/pricingService';
 import { Basket } from '../../basket/domain/entities/Basket';
-import { Order } from '../../order/repos/orderRepo';
+import { Order } from '../../order/infrastructure/repositories/orderRepo';
 
 const pricingService = new PricingService();
 

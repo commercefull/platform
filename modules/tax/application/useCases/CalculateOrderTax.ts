@@ -3,7 +3,7 @@
  * Calculates tax for an order based on items, shipping address, and customer exemptions
  */
 
-import taxQueryRepo from '../../repos/taxQueryRepo';
+import taxQueryRepo from '../../infrastructure/repositories/taxQueryRepo';
 
 // ============================================================================
 // Command

@@ -22,7 +22,7 @@ import {
   getActiveContentTypes,
   getPublishedPageBySlug,
   getPublishedPages,
-} from '../../modules/content/controllers/contentCustomerController';
+} from '../../modules/content/interface/controllers/contentCustomerController';
 
 // Import new controllers
 import * as productController from './controllers/productController';
@@ -31,6 +31,11 @@ import * as authController from './controllers/authController';
 import * as checkoutController from './controllers/checkoutController';
 import * as orderController from './controllers/orderController';
 import * as categoryController from './controllers/categoryController';
+import * as wishlistController from './controllers/wishlistController';
+import * as reviewController from './controllers/reviewController';
+import * as addressController from './controllers/addressController';
+import * as returnController from './controllers/returnController';
+import * as loyaltyController from './controllers/loyaltyController';
 
 const router = express.Router();
 
@@ -182,6 +187,83 @@ router.get('/orders/:orderId', orderController.orderDetails);
 
 // GET: order tracking (public)
 router.get('/track/:orderNumber', orderController.orderTracking);
+
+// ============================================================================
+// Wishlist Routes
+// ============================================================================
+
+// GET: view wishlist
+router.get('/wishlist', wishlistController.viewWishlist);
+
+// POST: add to wishlist
+router.post('/wishlist/add/:productId', wishlistController.addToWishlist);
+
+// POST: remove from wishlist
+router.post('/wishlist/remove/:productId', wishlistController.removeFromWishlist);
+
+// ============================================================================
+// Review Routes
+// ============================================================================
+
+// GET: product reviews (API)
+router.get('/api/reviews/:productId', reviewController.getProductReviews);
+
+// POST: submit review
+router.post('/reviews/:productId', reviewController.submitReview);
+
+// POST: mark review helpful
+router.post('/reviews/:reviewId/helpful', reviewController.markReviewHelpful);
+
+// ============================================================================
+// Address Routes
+// ============================================================================
+
+// GET: list addresses
+router.get('/addresses', addressController.listAddresses);
+
+// GET: add address form
+router.get('/addresses/add', addressController.addAddressForm);
+
+// POST: add address
+router.post('/addresses', addressController.addAddress);
+
+// GET: edit address form
+router.get('/addresses/:addressId/edit', addressController.editAddressForm);
+
+// POST: update address
+router.post('/addresses/:addressId', addressController.updateAddress);
+
+// POST: delete address
+router.post('/addresses/:addressId/delete', addressController.deleteAddress);
+
+// ============================================================================
+// Return Routes
+// ============================================================================
+
+// GET: list returns
+router.get('/returns', returnController.listReturns);
+
+// GET: return request form
+router.get('/orders/:orderId/return', returnController.returnRequestForm);
+
+// POST: submit return request
+router.post('/orders/:orderId/return', returnController.submitReturnRequest);
+
+// GET: view return details
+router.get('/returns/:returnId', returnController.viewReturn);
+
+// ============================================================================
+// Loyalty Routes
+// ============================================================================
+
+// GET: loyalty dashboard
+router.get('/loyalty', loyaltyController.loyaltyDashboard);
+
+// GET: points history
+router.get('/loyalty/history', loyaltyController.pointsHistory);
+
+// POST: redeem reward
+router.post('/loyalty/redeem/:rewardId', loyaltyController.redeemReward);
 
 // ============================================================================
 // Content Routes

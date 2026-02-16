@@ -3,7 +3,7 @@
  * Creates a new B2B company account
  */
 
-import * as companyRepo from '../../../repos/companyRepo';
+import * as companyRepo from '../../../infrastructure/repositories/companyRepo';
 import { eventBus } from '../../../../../libs/events/eventBus';
 
 export interface CreateCompanyCommand {

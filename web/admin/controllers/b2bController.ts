@@ -16,7 +16,7 @@ import {
   saveCompanyUser,
   deleteCompanyUser,
   getCompanyAddresses,
-} from '../../../modules/b2b/repos/companyRepo';
+} from '../../../modules/b2b/infrastructure/repositories/companyRepo';
 
 import {
   getQuote,
@@ -31,7 +31,7 @@ import {
   getQuoteItems,
   saveQuoteItem,
   deleteQuoteItem,
-} from '../../../modules/b2b/repos/quoteRepo';
+} from '../../../modules/b2b/infrastructure/repositories/quoteRepo';
 import { adminRespond } from '../../respond';
 
 // ============================================================================

@@ -3,8 +3,8 @@
  * Retrieves available shipping methods with optional filtering
  */
 
-import shippingMethodRepo, { ShippingMethod } from '../../repos/shippingMethodRepo';
-import shippingCarrierRepo, { ShippingCarrier } from '../../repos/shippingCarrierRepo';
+import shippingMethodRepo, { ShippingMethod } from '../../infrastructure/repositories/shippingMethodRepo';
+import shippingCarrierRepo, { ShippingCarrier } from '../../infrastructure/repositories/shippingCarrierRepo';
 
 // ============================================================================
 // Query

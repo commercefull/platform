@@ -36,10 +36,10 @@ jest.mock('../../repos/shippingCarrierRepo', () => ({
   },
 }));
 
-import shippingZoneRepo from '../../repos/shippingZoneRepo';
-import shippingMethodRepo from '../../repos/shippingMethodRepo';
-import shippingRateRepo from '../../repos/shippingRateRepo';
-import shippingCarrierRepo from '../../repos/shippingCarrierRepo';
+import shippingZoneRepo from '../../infrastructure/repositories/shippingZoneRepo';
+import shippingMethodRepo from '../../infrastructure/repositories/shippingMethodRepo';
+import shippingRateRepo from '../../infrastructure/repositories/shippingRateRepo';
+import shippingCarrierRepo from '../../infrastructure/repositories/shippingCarrierRepo';
 
 describe('CalculateShippingRatesUseCase', () => {
   const useCase = new CalculateShippingRatesUseCase();

@@ -3,7 +3,7 @@
  * Retrieves a complete page with all its content blocks and related data
  */
 
-import { ContentRepo } from '../../../repos/contentRepo';
+import { ContentRepo } from '../../../infrastructure/repositories/contentRepo';
 
 export class GetPageWithBlocksQuery {
   constructor(

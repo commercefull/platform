@@ -12,7 +12,7 @@ import {
   checkTokenValidity,
   requestPasswordReset,
   resetPassword,
-} from '../../controllers/identityBusinessController';
+} from '../controllers/identityBusinessController';
 
 const router = Router();
 

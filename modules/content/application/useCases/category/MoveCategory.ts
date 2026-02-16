@@ -3,7 +3,7 @@
  * Moves a category to a new parent in the hierarchy
  */
 
-import { ContentCategoryRepo } from '../../../repos/contentCategoryRepo';
+import { ContentCategoryRepo } from '../../../infrastructure/repositories/contentCategoryRepo';
 import { eventBus } from '../../../../../libs/events/eventBus';
 
 export class MoveCategoryCommand {

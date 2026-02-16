@@ -1,17 +1,14 @@
 /**
  * Customer Use Cases - Barrel Export
- *
- * Re-exports from legacy location for backward compatibility.
- * TODO: Migrate useCases/ to application/useCases/ in future refactoring.
  */
 
-export * from '../../useCases/AuthenticateCustomer';
-export * from '../../useCases/ChangePassword';
-export * from '../../useCases/DeactivateCustomer';
-export * from '../../useCases/DeleteCustomer';
-export * from '../../useCases/GetCustomer';
-export * from '../../useCases/ManageAddresses';
-export * from '../../useCases/ReactivateCustomer';
-export * from '../../useCases/RegisterCustomer';
-export * from '../../useCases/UpdateCustomer';
-export * from '../../useCases/VerifyCustomer';
+export * from './AuthenticateCustomer';
+export * from './ChangePassword';
+export * from './DeactivateCustomer';
+export * from './DeleteCustomer';
+export * from './GetCustomer';
+export * from './ManageAddresses';
+export * from './ReactivateCustomer';
+export * from './RegisterCustomer';
+export * from './UpdateCustomer';
+export * from './VerifyCustomer';

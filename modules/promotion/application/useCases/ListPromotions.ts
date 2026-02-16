@@ -3,7 +3,7 @@
  * Lists promotions with filtering and pagination
  */
 
-import { PromotionRepo } from '../../repos/promotionRepo';
+import { PromotionRepo } from '../../infrastructure/repositories/promotionRepo';
 
 // Command
 export class ListPromotionsCommand {

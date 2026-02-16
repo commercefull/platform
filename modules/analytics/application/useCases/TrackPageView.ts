@@ -3,7 +3,7 @@
  * Records a page view event for analytics
  */
 
-import * as analyticsRepo from '../../repos/analyticsRepo';
+import * as analyticsRepo from '../../infrastructure/repositories/analyticsRepo';
 import { eventBus } from '../../../../libs/events/eventBus';
 
 export interface TrackPageViewCommand {

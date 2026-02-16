@@ -3,7 +3,7 @@
  * Creates a new content template for page layouts
  */
 
-import { ContentRepo } from '../../../repos/contentRepo';
+import { ContentRepo } from '../../../infrastructure/repositories/contentRepo';
 import { eventBus } from '../../../../../libs/events/eventBus';
 
 export class CreateTemplateCommand {

@@ -6,15 +6,15 @@
 
 import { logger } from '../../../../libs/logger';
 import { Request, Response } from 'express';
-import inventoryRepo from '../../repos/inventoryRepo';
+import inventoryRepo from '../../infrastructure/repositories/inventoryRepo';
 import {
   saveLocation as saveStoreLocation,
   getLocation as getStoreLocation,
   getLocations as listStoreLocations,
   deleteLocation as deleteStoreLocation,
-} from '../../../store/repos/pickupLocationRepo';
+} from '../../../store/infrastructure/repositories/pickupLocationRepo';
 import { eventBus } from '../../../../libs/events/eventBus';
-import { updateLocation } from '../../../store/repos/pickupLocationRepo';
+import { updateLocation } from '../../../store/infrastructure/repositories/pickupLocationRepo';
 // ============================================================================
 // Helper Functions
 // ============================================================================

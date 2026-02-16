@@ -7,23 +7,23 @@ import { storefrontCustomerRouter } from '../web/storefront/storefrontRouter';
 import { identityCustomerRouter } from '../modules/identity/interface/routers/identityCustomerRouter';
 import { identitySocialRouter } from '../modules/identity/interface/routers/identitySocialRouter';
 import { customerRouter } from '../modules/customer/interface/routers/customerRouter';
-import { taxCustomerRouter } from '../modules/tax/taxCustomerRouter';
-import { b2bCustomerRouter } from '../modules/b2b/b2bCustomerRouter';
-import { gdprCustomerRouter } from '../modules/gdpr/gdprCustomerRouter';
+import { taxCustomerRouter } from '../modules/tax/interface/routers/taxCustomerRouter';
+import { b2bCustomerRouter } from '../modules/b2b/interface/routers/b2bCustomerRouter';
+import { gdprCustomerRouter } from '../modules/gdpr/interface/routers/gdprCustomerRouter';
 import { orderCustomerRouter } from '../modules/order/interface/routers/customerRouter';
 import { basketCustomerRouter } from '../modules/basket/interface/routers/basketRouter';
 import { productCustomerRouter } from '../modules/product/interface/routers/productCustomerRouter';
-import { loyaltyCustomerRouter } from '../modules/loyalty/loyaltyCustomerRouter';
+import { loyaltyCustomerRouter } from '../modules/loyalty/interface/routers/loyaltyCustomerRouter';
 import { paymentCustomerRouter } from '../modules/payment/interface/routers/paymentCustomerRouter';
-import { supportCustomerRouter } from '../modules/support/supportCustomerRouter';
+import { supportCustomerRouter } from '../modules/support/interface/routers/supportCustomerRouter';
 import { checkoutCustomerRouter } from '../modules/checkout/interface/routers/checkoutRouter';
 import { inventoryCustomerRouter } from '../modules/inventory/interface/routers/customerRouter';
-import { warehouseCustomerRouter } from '../modules/warehouse/warehouseCustomerRouter';
-import { membershipCustomerRouter } from '../modules/membership/membershipCustomerRouter';
-import { subscriptionCustomerRouter } from '../modules/subscription/subscriptionCustomerRouter';
-import { localizationCustomerRouter } from '../modules/localization/localizationCustomerRouter';
-import { shippingCustomerRouter } from '../modules/shipping/shippingCustomerRouter';
-import { notificationCustomerRouter } from '../modules/notification/notificationCustomerRouter';
+import { warehouseCustomerRouter } from '../modules/warehouse/interface/routers/warehouseCustomerRouter';
+import { membershipCustomerRouter } from '../modules/membership/interface/routers/membershipCustomerRouter';
+import { subscriptionCustomerRouter } from '../modules/subscription/interface/routers/subscriptionCustomerRouter';
+import { localizationCustomerRouter } from '../modules/localization/interface/routers/localizationCustomerRouter';
+import { shippingCustomerRouter } from '../modules/shipping/interface/routers/shippingCustomerRouter';
+import { notificationCustomerRouter } from '../modules/notification/interface/routers/notificationCustomerRouter';
 
 // Feature routes - Business/Merchant facing
 import { identityBusinessRouter } from '../modules/identity/interface/routers/identityBusinessRouter';
@@ -31,22 +31,22 @@ import { merchantMerchantRouter } from '../modules/merchant/interface/http/merch
 import { promotionBusinessRouter } from '../modules/promotion/interface/routers/businessRouter';
 import { productBusinessRouter } from '../modules/product/interface/routers/productBusinessRouter';
 import { orderBusinessRouter } from '../modules/order/interface/routers/businessRouter';
-import { taxBusinessRouter } from '../modules/tax/taxBusinessRouter';
+import { taxBusinessRouter } from '../modules/tax/interface/routers/taxBusinessRouter';
 import { customerBusinessRouter } from '../modules/customer/interface/routers/businessRouter';
-import { gdprBusinessRouter } from '../modules/gdpr/gdprBusinessRouter';
-import { b2bBusinessRouter } from '../modules/b2b/b2bBusinessRouter';
-import { subscriptionBusinessRouter } from '../modules/subscription/subscriptionBusinessRouter';
-import { supportBusinessRouter } from '../modules/support/supportBusinessRouter';
-import { analyticsBusinessRouter } from '../modules/analytics/analyticsBusinessRouter';
-import { warehouseMerchantRouter } from '../modules/warehouse/warehouseBusinessRouter';
-import { supplierMerchantRouter } from '../modules/supplier/supplierBusinessRouter';
-import { localizationMerchantRouter } from '../modules/localization/localizationBusinessRouter';
-import { pricingMerchantRouter } from '../modules/pricing/pricingBusinessRouter';
-import { loyaltyMerchantRouter } from '../modules/loyalty/loyaltyBusinessRouter';
-import { notificationMerchantRouter } from '../modules/notification/notificationBusinessRouter';
-import { contentRouterAdmin } from '../modules/content/contentBusinessRouter';
-import { membershipBusinessRouter } from '../modules/membership/membershipBusinessRouter';
-import { shippingBusinessRouter } from '../modules/shipping/shippingBusinessRouter';
+import { gdprBusinessRouter } from '../modules/gdpr/interface/routers/gdprBusinessRouter';
+import { b2bBusinessRouter } from '../modules/b2b/interface/routers/b2bBusinessRouter';
+import { subscriptionBusinessRouter } from '../modules/subscription/interface/routers/subscriptionBusinessRouter';
+import { supportBusinessRouter } from '../modules/support/interface/routers/supportBusinessRouter';
+import { analyticsBusinessRouter } from '../modules/analytics/interface/routers/analyticsBusinessRouter';
+import { warehouseMerchantRouter } from '../modules/warehouse/interface/routers/warehouseBusinessRouter';
+import { supplierMerchantRouter } from '../modules/supplier/interface/routers/supplierBusinessRouter';
+import { localizationMerchantRouter } from '../modules/localization/interface/routers/localizationBusinessRouter';
+import { pricingMerchantRouter } from '../modules/pricing/interface/routers/pricingBusinessRouter';
+import { loyaltyMerchantRouter } from '../modules/loyalty/interface/routers/loyaltyBusinessRouter';
+import { notificationMerchantRouter } from '../modules/notification/interface/routers/notificationBusinessRouter';
+import { contentRouterAdmin } from '../modules/content/interface/routers/contentBusinessRouter';
+import { membershipBusinessRouter } from '../modules/membership/interface/routers/membershipBusinessRouter';
+import { shippingBusinessRouter } from '../modules/shipping/interface/routers/shippingBusinessRouter';
 import { inventoryBusinessRouter } from '../modules/inventory/interface/routers/businessRouter';
 import { paymentBusinessRouter } from '../modules/payment/interface/routers/paymentBusinessRouter';
 import { businessRouter } from '../modules/business/interface/http/BusinessRouter';
@@ -63,7 +63,11 @@ import { channelBusinessRouter } from '../modules/channel/interface/routers/chan
 import { segmentBusinessRouter } from '../modules/segment/interface/routers/segmentRouter';
 import { couponBusinessRouter } from '../modules/coupon/interface/routers/couponRouter';
 import { fulfillmentBusinessRouter } from '../modules/fulfillment/interface/routers/fulfillmentBusinessRouter';
+import fulfillmentCustomerRouter from '../modules/fulfillment/interface/routers/fulfillmentCustomerRouter';
 import { organizationBusinessRouter } from '../modules/organization/interface/routers/organizationRouter';
+import { brandCustomerRouter } from '../modules/brand/interface/routers/brandCustomerRouter';
+import { couponCustomerRouter } from '../modules/coupon/interface/routers/couponCustomerRouter';
+import { storeCustomerRouter } from '../modules/store/interface/routers/storeCustomerRouter';
 import { assortmentBusinessRouter } from '../modules/assortment/interface/routers/assortmentRouter';
 
 /**
@@ -98,6 +102,10 @@ export function configureRoutes(app: Express): void {
     localizationCustomerRouter,
     shippingCustomerRouter,
     notificationCustomerRouter,
+    brandCustomerRouter,
+    couponCustomerRouter,
+    storeCustomerRouter,
+    fulfillmentCustomerRouter,
   ]);
 
   // Business/Merchant API routes

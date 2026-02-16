@@ -5,7 +5,7 @@
 
 import { logger } from '../../../../libs/logger';
 import { Request, Response, NextFunction } from 'express';
-import * as fraudRepo from '../../repos/fraudRepo';
+import * as fraudRepo from '../../infrastructure/repositories/fraudRepo';
 
 type AsyncHandler = (req: Request, res: Response, next: NextFunction) => Promise<void>;
 

@@ -164,6 +164,108 @@ export const createProductForm = async (req: Request, res: Response) => {
 /**
  * GET: Edit product form
  */
+/**
+ * POST: Create product
+ */
+export const createProduct = async (req: Request, res: Response) => {
+  try {
+    const user = req.user as MerchantUser;
+    if (!user?.merchantId) {
+      return res.redirect('/merchant/login');
+    }
+
+    const { name, sku, description, price, status, categoryId } = req.body;
+
+    const result = await queryOne<any>(
+      `INSERT INTO "product" ("name", "sku", "description", "price", "status", "categoryId", "merchantId", "createdAt", "updatedAt")
+       VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())
+       RETURNING "productId"`,
+      [name, sku || null, description || null, price || 0, status || 'draft', categoryId || null, user.merchantId],
+    );
+
+    if (result) {
+      return res.redirect(`/merchant/products/${result.productId}`);
+    }
+
+    return res.redirect('/merchant/products');
+  } catch (error) {
+    logger.error('Error creating product:', error);
+
+    merchantRespond(req, res, 'error', {
+      pageName: 'Error',
+      error: 'Failed to create product',
+      user: req.user,
+    });
+  }
+};
+
+/**
+ * POST: Update product
+ */
+export const updateProduct = async (req: Request, res: Response) => {
+  try {
+    const user = req.user as MerchantUser;
+    if (!user?.merchantId) {
+      return res.redirect('/merchant/login');
+    }
+
+    const { productId } = req.params;
+    const { name, sku, description, price, status, categoryId } = req.body;
+
+    await queryOne<any>(
+      `UPDATE "product" 
+       SET "name" = $1, "sku" = $2, "description" = $3, "price" = $4, "status" = $5, "categoryId" = $6, "updatedAt" = NOW()
+       WHERE "productId" = $7 AND "merchantId" = $8 AND "deletedAt" IS NULL
+       RETURNING "productId"`,
+      [name, sku || null, description || null, price || 0, status || 'draft', categoryId || null, productId, user.merchantId],
+    );
+
+    return res.redirect(`/merchant/products/${productId}`);
+  } catch (error) {
+    logger.error('Error updating product:', error);
+
+    merchantRespond(req, res, 'error', {
+      pageName: 'Error',
+      error: 'Failed to update product',
+      user: req.user,
+    });
+  }
+};
+
+/**
+ * POST: Delete product (soft delete)
+ */
+export const deleteProduct = async (req: Request, res: Response) => {
+  try {
+    const user = req.user as MerchantUser;
+    if (!user?.merchantId) {
+      return res.redirect('/merchant/login');
+    }
+
+    const { productId } = req.params;
+
+    await queryOne<any>(
+      `UPDATE "product" SET "deletedAt" = NOW(), "updatedAt" = NOW()
+       WHERE "productId" = $1 AND "merchantId" = $2 AND "deletedAt" IS NULL
+       RETURNING "productId"`,
+      [productId, user.merchantId],
+    );
+
+    return res.redirect('/merchant/products');
+  } catch (error) {
+    logger.error('Error deleting product:', error);
+
+    merchantRespond(req, res, 'error', {
+      pageName: 'Error',
+      error: 'Failed to delete product',
+      user: req.user,
+    });
+  }
+};
+
+/**
+ * GET: Edit product form
+ */
 export const editProductForm = async (req: Request, res: Response) => {
   try {
     const user = req.user as MerchantUser;

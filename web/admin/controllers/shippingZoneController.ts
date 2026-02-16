@@ -5,8 +5,8 @@
 
 import { logger } from '../../../libs/logger';
 import { Request, Response } from 'express';
-import shippingZoneRepo from '../../../modules/shipping/repos/shippingZoneRepo';
-import shippingMethodRepo from '../../../modules/shipping/repos/shippingMethodRepo';
+import shippingZoneRepo from '../../../modules/shipping/infrastructure/repositories/shippingZoneRepo';
+import shippingMethodRepo from '../../../modules/shipping/infrastructure/repositories/shippingMethodRepo';
 import { adminRespond } from '../../respond';
 
 // ============================================================================

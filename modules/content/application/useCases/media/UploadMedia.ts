@@ -3,7 +3,7 @@
  * Handles media file upload and registration
  */
 
-import { ContentMediaRepo } from '../../../repos/contentMediaRepo';
+import { ContentMediaRepo } from '../../../infrastructure/repositories/contentMediaRepo';
 import { eventBus } from '../../../../../libs/events/eventBus';
 
 export class UploadMediaCommand {

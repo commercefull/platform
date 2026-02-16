@@ -1,4 +1,4 @@
-import { NotificationRepo, Notification, NotificationCreateParams } from '../repos/notificationRepo';
+import { NotificationRepo, Notification, NotificationCreateParams } from '../infrastructure/repositories/notificationRepo';
 import { NotificationBuilder, NotificationChannel } from '../domain/notification';
 
 /**

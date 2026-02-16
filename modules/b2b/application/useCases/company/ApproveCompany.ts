@@ -3,7 +3,7 @@
  * Approves a pending B2B company application
  */
 
-import * as companyRepo from '../../../repos/companyRepo';
+import * as companyRepo from '../../../infrastructure/repositories/companyRepo';
 import { eventBus } from '../../../../../libs/events/eventBus';
 
 export interface ApproveCompanyCommand {

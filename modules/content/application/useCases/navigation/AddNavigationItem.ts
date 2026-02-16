@@ -3,8 +3,8 @@
  * Adds a new item to a navigation menu
  */
 
-import { ContentNavigationRepo } from '../../../repos/contentNavigationRepo';
-import { ContentRepo } from '../../../repos/contentRepo';
+import { ContentNavigationRepo } from '../../../infrastructure/repositories/contentNavigationRepo';
+import { ContentRepo } from '../../../infrastructure/repositories/contentRepo';
 import { eventBus } from '../../../../../libs/events/eventBus';
 
 export class AddNavigationItemCommand {

@@ -6,21 +6,21 @@
 import { logger } from '../../../../libs/logger';
 import { Request, Response } from 'express';
 import CustomerRepo from '../../infrastructure/repositories/CustomerRepository';
-import { RegisterCustomerCommand, RegisterCustomerUseCase } from '../../useCases/RegisterCustomer';
-import { GetCustomerCommand, GetCustomerUseCase } from '../../useCases/GetCustomer';
-import { UpdateCustomerCommand, UpdateCustomerUseCase } from '../../useCases/UpdateCustomer';
-import { DeleteCustomerCommand, DeleteCustomerUseCase } from '../../useCases/DeleteCustomer';
-import { VerifyCustomerCommand, VerifyCustomerUseCase } from '../../useCases/VerifyCustomer';
-import { DeactivateCustomerCommand, DeactivateCustomerUseCase } from '../../useCases/DeactivateCustomer';
-import { ReactivateCustomerCommand, ReactivateCustomerUseCase } from '../../useCases/ReactivateCustomer';
-import { ChangePasswordCommand, ChangePasswordUseCase } from '../../useCases/ChangePassword';
+import { RegisterCustomerCommand, RegisterCustomerUseCase } from '../../application/useCases/RegisterCustomer';
+import { GetCustomerCommand, GetCustomerUseCase } from '../../application/useCases/GetCustomer';
+import { UpdateCustomerCommand, UpdateCustomerUseCase } from '../../application/useCases/UpdateCustomer';
+import { DeleteCustomerCommand, DeleteCustomerUseCase } from '../../application/useCases/DeleteCustomer';
+import { VerifyCustomerCommand, VerifyCustomerUseCase } from '../../application/useCases/VerifyCustomer';
+import { DeactivateCustomerCommand, DeactivateCustomerUseCase } from '../../application/useCases/DeactivateCustomer';
+import { ReactivateCustomerCommand, ReactivateCustomerUseCase } from '../../application/useCases/ReactivateCustomer';
+import { ChangePasswordCommand, ChangePasswordUseCase } from '../../application/useCases/ChangePassword';
 import {
   AddAddressCommand,
   UpdateAddressCommand,
   DeleteAddressCommand,
   SetDefaultAddressCommand,
   ManageAddressesUseCase,
-} from '../../useCases/ManageAddresses';
+} from '../../application/useCases/ManageAddresses';
 
 // ============================================================================
 // Helpers

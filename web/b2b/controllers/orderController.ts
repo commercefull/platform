@@ -181,3 +181,64 @@ export const reorderForm = async (req: Request, res: Response) => {
     });
   }
 };
+
+/**
+ * POST: Submit reorder (creates a new order from previous order items)
+ */
+export const submitReorder = async (req: Request, res: Response) => {
+  try {
+    const user = req.user as B2BUser;
+    if (!user?.companyId) {
+      return res.redirect('/b2b/login');
+    }
+
+    const { orderId } = req.params;
+    const { items } = req.body;
+
+    // Verify original order belongs to company
+    const originalOrder = await queryOne<any>(
+      `SELECT * FROM "order"
+       WHERE "orderId" = $1 AND "b2bCompanyId" = $2 AND "deletedAt" IS NULL`,
+      [orderId, user.companyId],
+    );
+
+    if (!originalOrder) {
+      return b2bRespond(req, res, 'error', {
+        pageName: 'Not Found',
+        error: 'Original order not found',
+        user,
+      });
+    }
+
+    // Create new order based on original
+    const newOrder = await queryOne<any>(
+      `INSERT INTO "order" (
+        "b2bCompanyId", "customerId", "status", "paymentStatus", "fulfillmentStatus",
+        "shippingAddressId", "billingAddressId", "notes",
+        "createdAt", "updatedAt"
+      ) VALUES ($1, $2, 'pending', 'pending', 'unfulfilled', $3, $4, $5, NOW(), NOW())
+      RETURNING "orderId", "orderNumber"`,
+      [
+        user.companyId,
+        originalOrder.customerId,
+        originalOrder.shippingAddressId,
+        originalOrder.billingAddressId,
+        `Reorder from ${originalOrder.orderNumber}`,
+      ],
+    );
+
+    if (newOrder) {
+      return res.redirect(`/b2b/orders/${newOrder.orderId}`);
+    }
+
+    return res.redirect('/b2b/orders');
+  } catch (error) {
+    logger.error('Error submitting reorder:', error);
+
+    b2bRespond(req, res, 'error', {
+      pageName: 'Error',
+      error: 'Failed to submit reorder',
+      user: req.user,
+    });
+  }
+};

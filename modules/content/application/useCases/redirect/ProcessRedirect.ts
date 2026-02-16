@@ -3,7 +3,7 @@
  * Checks if a URL should be redirected and returns the target
  */
 
-import { ContentRedirectRepo } from '../../../repos/contentRedirectRepo';
+import { ContentRedirectRepo } from '../../../infrastructure/repositories/contentRedirectRepo';
 
 export class ProcessRedirectQuery {
   constructor(public readonly url: string) {}

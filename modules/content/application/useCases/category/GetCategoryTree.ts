@@ -3,7 +3,7 @@
  * Retrieves the full category hierarchy as a tree structure
  */
 
-import { ContentCategoryRepo } from '../../../repos/contentCategoryRepo';
+import { ContentCategoryRepo } from '../../../infrastructure/repositories/contentCategoryRepo';
 import { ContentCategory } from '../../../../../libs/db/types';
 
 export class GetCategoryTreeQuery {

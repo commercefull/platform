@@ -3,7 +3,7 @@
  * Creates a new URL redirect rule
  */
 
-import { ContentRedirectRepo } from '../../../repos/contentRedirectRepo';
+import { ContentRedirectRepo } from '../../../infrastructure/repositories/contentRedirectRepo';
 import { eventBus } from '../../../../../libs/events/eventBus';
 
 export class CreateRedirectCommand {

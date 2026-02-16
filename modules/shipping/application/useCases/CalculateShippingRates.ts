@@ -3,9 +3,9 @@
  * Calculates available shipping rates for a given destination and order
  */
 
-import shippingZoneRepo, { ShippingZone } from '../../repos/shippingZoneRepo';
-import shippingMethodRepo, { ShippingMethod } from '../../repos/shippingMethodRepo';
-import shippingRateRepo, { ShippingRate } from '../../repos/shippingRateRepo';
+import shippingZoneRepo, { ShippingZone } from '../../infrastructure/repositories/shippingZoneRepo';
+import shippingMethodRepo, { ShippingMethod } from '../../infrastructure/repositories/shippingMethodRepo';
+import shippingRateRepo, { ShippingRate } from '../../infrastructure/repositories/shippingRateRepo';
 
 // ============================================================================
 // Command
