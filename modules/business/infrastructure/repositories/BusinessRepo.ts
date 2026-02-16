@@ -4,7 +4,6 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
-import { Table } from '../../../../libs/db/types';
 import { BusinessRepository as IBusinessRepository, BusinessFilters } from '../../domain/repositories/BusinessRepository';
 import { Business } from '../../domain/entities/Business';
 
@@ -134,7 +133,7 @@ export class BusinessRepo implements IBusinessRepository {
       params.push(filters.businessType);
     }
     if (filters?.isActive !== undefined) {
-      conditions.push(`"isActive" = $${paramIndex++}`);
+      conditions.push(`"isActive" = $${paramIndex}`);
       params.push(filters.isActive);
     }
 

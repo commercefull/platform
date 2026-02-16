@@ -1,0 +1,90 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row align-items-center">
+    <div class="col-auto">
+      <h2 class="page-title">Store Settings</h2>
+    </div>
+    <div class="col-auto ms-auto">
+      <div class="btn-group">
+        <a href="/merchant/settings" class="btn btn-outline-primary">Profile</a>
+        <a href="/merchant/settings/notifications" class="btn btn-outline-primary">Notifications</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <!-- Shipping Methods -->
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title"><i class="fas fa-shipping-fast"></i> Shipping Methods</h3>
+      </div>
+      <div class="card-body p-0">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>Rate</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (shippingMethods && shippingMethods.length > 0) { %>
+              <% shippingMethods.forEach(method => { %>
+                <tr>
+                  <td><%= method.name %></td>
+                  <td>$<%= ((method.baseRate || 0) / 100).toFixed(2) %></td>
+                  <td>
+                    <span class="badge bg-<%= method.isActive ? 'success' : 'secondary' %>">
+                      <%= method.isActive ? 'Active' : 'Inactive' %>
+                    </span>
+                  </td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr><td colspan="3" class="text-center text-muted py-3">No shipping methods configured</td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Payment Methods -->
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title"><i class="fas fa-credit-card"></i> Payment Methods</h3>
+      </div>
+      <div class="card-body p-0">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>Provider</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (paymentMethods && paymentMethods.length > 0) { %>
+              <% paymentMethods.forEach(method => { %>
+                <tr>
+                  <td><%= method.name %></td>
+                  <td><%= method.provider || '-' %></td>
+                  <td>
+                    <span class="badge bg-<%= method.isActive ? 'success' : 'secondary' %>">
+                      <%= method.isActive ? 'Active' : 'Inactive' %>
+                    </span>
+                  </td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr><td colspan="3" class="text-center text-muted py-3">No payment methods configured</td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

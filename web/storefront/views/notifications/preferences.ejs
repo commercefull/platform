@@ -1,0 +1,110 @@
+<%- include("../partials/header") %>
+
+<main class="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-2xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+      <a href="/notifications" class="text-blue-600 hover:text-blue-800 text-sm">&larr; Back to Notifications</a>
+      <h1 class="text-3xl font-bold text-gray-900 mt-2">Notification Preferences</h1>
+      <p class="mt-2 text-sm text-gray-600">Choose which notifications you'd like to receive</p>
+    </div>
+
+    <div class="bg-white shadow-lg rounded-xl overflow-hidden">
+      <form method="POST" action="/notifications/preferences">
+        <div class="divide-y divide-gray-200">
+          <!-- Order Notifications -->
+          <div class="px-6 py-5">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="text-sm font-semibold text-gray-900">Order Updates</h3>
+                <p class="text-sm text-gray-500 mt-1">Get notified about order status changes, shipping updates, and delivery confirmations</p>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" name="orderUpdates" class="sr-only peer" <%= preferences?.orderUpdates !== false ? 'checked' : '' %>>
+                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Promotional Notifications -->
+          <div class="px-6 py-5">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="text-sm font-semibold text-gray-900">Promotions & Deals</h3>
+                <p class="text-sm text-gray-500 mt-1">Receive alerts about sales, special offers, and exclusive discounts</p>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" name="promotions" class="sr-only peer" <%= preferences?.promotions ? 'checked' : '' %>>
+                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Product Updates -->
+          <div class="px-6 py-5">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="text-sm font-semibold text-gray-900">Product Updates</h3>
+                <p class="text-sm text-gray-500 mt-1">Get notified when items on your wishlist go on sale or come back in stock</p>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" name="productUpdates" class="sr-only peer" <%= preferences?.productUpdates ? 'checked' : '' %>>
+                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Review Reminders -->
+          <div class="px-6 py-5">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="text-sm font-semibold text-gray-900">Review Reminders</h3>
+                <p class="text-sm text-gray-500 mt-1">Reminders to leave reviews for products you've purchased</p>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" name="reviewReminders" class="sr-only peer" <%= preferences?.reviewReminders ? 'checked' : '' %>>
+                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Membership & Loyalty -->
+          <div class="px-6 py-5">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="text-sm font-semibold text-gray-900">Membership & Loyalty</h3>
+                <p class="text-sm text-gray-500 mt-1">Updates about your membership status, points balance, and tier changes</p>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" name="membershipUpdates" class="sr-only peer" <%= preferences?.membershipUpdates !== false ? 'checked' : '' %>>
+                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Email Notifications -->
+          <div class="px-6 py-5">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="text-sm font-semibold text-gray-900">Email Notifications</h3>
+                <p class="text-sm text-gray-500 mt-1">Also receive notifications via email</p>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" name="emailNotifications" class="sr-only peer" <%= preferences?.emailNotifications !== false ? 'checked' : '' %>>
+                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="px-6 py-4 bg-gray-50 border-t border-gray-200">
+          <button type="submit" class="inline-flex items-center px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors">
+            Save Preferences
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</main>
+
+<%- include("../partials/footer") %>

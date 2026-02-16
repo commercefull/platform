@@ -1,0 +1,14 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col"><h2 class="page-title"><%= pageName %></h2></div>
+  </div>
+</div>
+<section class="content">
+  <div class="container-fluid">
+    <%- include("../partials/alerts") %>
+    <div class="row">
+      <div class="col-12"><div class="card"><div class="card-header"><h3 class="card-title">Warehouse Locations</h3></div><div class="card-body p-0"><table class="table table-striped"><thead><tr><th>Name</th><th>Code</th><th>Status</th></tr></thead><tbody><% if (locations && locations.length > 0) { %><% locations.forEach(l => { %><tr><td><%= l.name %></td><td><%= l.code || "-" %></td><td><span class="badge bg-<%= l.isActive ? "success" : "secondary" %>"><%= l.isActive ? "Active" : "Inactive" %></span></td></tr><% }) %><% } else { %><tr><td colspan="3" class="text-center text-muted py-4">No locations</td></tr><% } %></tbody></table></div></div></div>
+    </div>
+  </div>
+</section>

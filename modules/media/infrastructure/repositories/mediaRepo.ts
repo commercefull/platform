@@ -136,7 +136,6 @@ export class PostgreSQLMediaRepository implements MediaRepository {
     if (filters.offset) {
       query += ` OFFSET $${paramIndex}`;
       params.push(filters.offset);
-      paramIndex++;
     }
 
     const result = await pool.query(query, params);
@@ -191,7 +190,6 @@ export class PostgreSQLMediaRepository implements MediaRepository {
     if (filters.size?.max) {
       query += ` AND size <= $${paramIndex}`;
       params.push(filters.size.max);
-      paramIndex++;
     }
 
     const result = await pool.query(query, params);

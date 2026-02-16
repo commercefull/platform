@@ -1,0 +1,140 @@
+<%- include("../partials/header") %>
+
+<main class="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-4xl mx-auto">
+    <div class="mb-8">
+      <a href="/returns" class="text-blue-600 hover:text-blue-800 text-sm">&larr; Back to Returns</a>
+      <h1 class="text-3xl font-bold text-gray-900 mt-2">Return #<%= returnRequest.returnNumber || returnRequest.returnId?.substring(0, 8) %></h1>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div class="lg:col-span-2 space-y-6">
+        <!-- Return Info -->
+        <div class="bg-white shadow-lg rounded-xl overflow-hidden">
+          <div class="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4">
+            <h2 class="text-xl font-semibold text-white">Return Details</h2>
+          </div>
+          <div class="px-6 py-6">
+            <div class="grid grid-cols-2 gap-6">
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Status</dt>
+                <dd class="mt-1">
+                  <%
+                    let statusColor = 'gray';
+                    if (returnRequest.status === 'approved') statusColor = 'green';
+                    else if (returnRequest.status === 'pending') statusColor = 'yellow';
+                    else if (returnRequest.status === 'rejected') statusColor = 'red';
+                    else if (returnRequest.status === 'processing') statusColor = 'blue';
+                    else if (returnRequest.status === 'completed') statusColor = 'green';
+                  %>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-<%= statusColor %>-100 text-<%= statusColor %>-800">
+                    <%= returnRequest.status %>
+                  </span>
+                </dd>
+              </div>
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Order</dt>
+                <dd class="mt-1 text-sm text-gray-900"><a href="/orders/<%= returnRequest.orderId %>" class="text-blue-600 hover:text-blue-800">#<%= returnRequest.orderNumber || returnRequest.orderId %></a></dd>
+              </div>
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Submitted</dt>
+                <dd class="mt-1 text-sm text-gray-900"><%= returnRequest.createdAt ? new Date(returnRequest.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '-' %></dd>
+              </div>
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Resolution</dt>
+                <dd class="mt-1 text-sm text-gray-900"><%= returnRequest.resolution || 'Refund' %></dd>
+              </div>
+              <div class="col-span-2">
+                <dt class="text-sm font-medium text-gray-500">Reason</dt>
+                <dd class="mt-1 text-sm text-gray-900"><%= returnRequest.reason || '-' %></dd>
+              </div>
+              <% if (returnRequest.details) { %>
+              <div class="col-span-2">
+                <dt class="text-sm font-medium text-gray-500">Additional Details</dt>
+                <dd class="mt-1 text-sm text-gray-900"><%= returnRequest.details %></dd>
+              </div>
+              <% } %>
+            </div>
+          </div>
+        </div>
+
+        <!-- Return Items -->
+        <% if (items && items.length > 0) { %>
+        <div class="bg-white shadow-lg rounded-xl overflow-hidden">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-900">Return Items</h3>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Quantity</th>
+                  <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Refund Amount</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <% items.forEach(item => { %>
+                  <tr>
+                    <td class="px-6 py-4 text-sm text-gray-900"><%= item.productName || item.name %></td>
+                    <td class="px-6 py-4 text-sm text-gray-900"><%= item.quantity %></td>
+                    <td class="px-6 py-4 text-sm text-gray-900 text-right">$<%= ((item.refundAmount || item.price || 0) / 100).toFixed(2) %></td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <% } %>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="space-y-6">
+        <div class="bg-white shadow-lg rounded-xl p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">Return Status</h3>
+          <div class="space-y-4">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+                <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+              </div>
+              <div>
+                <p class="text-sm font-medium text-gray-900">Request Submitted</p>
+                <p class="text-xs text-gray-500"><%= returnRequest.createdAt ? new Date(returnRequest.createdAt).toLocaleDateString() : '' %></p>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full bg-<%= ['approved', 'processing', 'completed'].includes(returnRequest.status) ? 'green' : 'gray' %>-100 flex items-center justify-center">
+                <svg class="w-4 h-4 text-<%= ['approved', 'processing', 'completed'].includes(returnRequest.status) ? 'green' : 'gray' %>-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+              </div>
+              <div>
+                <p class="text-sm font-medium text-gray-900">Approved</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full bg-<%= returnRequest.status === 'completed' ? 'green' : 'gray' %>-100 flex items-center justify-center">
+                <svg class="w-4 h-4 text-<%= returnRequest.status === 'completed' ? 'green' : 'gray' %>-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+              </div>
+              <div>
+                <p class="text-sm font-medium text-gray-900">Refund Processed</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <% if (returnRequest.status === 'approved') { %>
+        <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+          <p class="text-sm text-yellow-800">Please ship the items back using the provided return label. Your refund will be processed once we receive the items.</p>
+        </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</main>
+
+<%- include("../partials/footer") %>

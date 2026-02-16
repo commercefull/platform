@@ -107,7 +107,7 @@ export interface ProductAttributeCreateInput {
   isGlobal?: boolean;
 }
 
-export interface ProductAttributeUpdateInput extends Partial<ProductAttributeCreateInput> {}
+export type ProductAttributeUpdateInput = Partial<ProductAttributeCreateInput>;
 
 export interface AttributeValueCreateInput {
   attributeId: string;

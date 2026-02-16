@@ -1,0 +1,110 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row align-items-center">
+    <div class="col-auto">
+      <h2 class="page-title">Product Catalog</h2>
+    </div>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="card collapsed-card">
+  <div class="card-header">
+    <h3 class="card-title">Filters</h3>
+    <div class="card-tools">
+      <button type="button" class="btn btn-tool" data-card-widget="collapse">
+        <i class="fas fa-plus"></i>
+      </button>
+    </div>
+  </div>
+  <div class="card-body">
+    <form method="GET" class="row">
+      <div class="col-md-4">
+        <div class="form-group">
+          <label>Search</label>
+          <input type="text" name="search" class="form-control" placeholder="Search products..." value="<%= filters?.search || '' %>">
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="form-group">
+          <label>Category</label>
+          <select name="categoryId" class="form-control">
+            <option value="">All Categories</option>
+            <% if (categories && categories.length > 0) { %>
+              <% categories.forEach(cat => { %>
+                <option value="<%= cat.categoryId %>" <%= filters?.categoryId === cat.categoryId ? 'selected' : '' %>><%= cat.name %></option>
+              <% }) %>
+            <% } %>
+          </select>
+        </div>
+      </div>
+      <div class="col-md-2">
+        <div class="form-group">
+          <label>&nbsp;</label>
+          <button type="submit" class="btn btn-primary btn-block">Filter</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Products Grid -->
+<div class="row">
+  <% if (products && products.length > 0) { %>
+    <% products.forEach(product => { %>
+      <div class="col-md-4 col-lg-3">
+        <div class="card">
+          <% if (product.imageUrl) { %>
+            <img src="<%= product.imageUrl %>" class="card-img-top" alt="<%= product.name %>" style="height: 200px; object-fit: cover;">
+          <% } else { %>
+            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+              <i class="fas fa-image fa-3x text-muted"></i>
+            </div>
+          <% } %>
+          <div class="card-body">
+            <h5 class="card-title"><%= product.name %></h5>
+            <p class="text-muted mb-1"><code><%= product.sku || '-' %></code></p>
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <% if (product.b2bPrice) { %>
+                  <span class="h5 text-primary">$<%= ((product.b2bPrice || 0) / 100).toFixed(2) %></span>
+                  <% if (product.retailPrice && product.retailPrice > product.b2bPrice) { %>
+                    <br><small class="text-muted text-decoration-line-through">$<%= ((product.retailPrice || 0) / 100).toFixed(2) %></small>
+                  <% } %>
+                <% } else { %>
+                  <span class="h5">$<%= ((product.basePrice || 0) / 100).toFixed(2) %></span>
+                <% } %>
+              </div>
+              <a href="/b2b/catalog/<%= product.productId %>" class="btn btn-sm btn-primary">View</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% }) %>
+  <% } else { %>
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body text-center text-muted py-5">
+          <i class="fas fa-search fa-3x mb-3"></i>
+          <p>No products found matching your criteria</p>
+        </div>
+      </div>
+    </div>
+  <% } %>
+</div>
+
+<% if (pagination && pagination.totalPages > 1) { %>
+<nav>
+  <ul class="pagination justify-content-center">
+    <li class="page-item <%= pagination.page > 1 ? '' : 'disabled' %>">
+      <a class="page-link" href="?page=<%= pagination.page - 1 %>">&laquo;</a>
+    </li>
+    <li class="page-item active">
+      <span class="page-link"><%= pagination.page %> / <%= pagination.totalPages %></span>
+    </li>
+    <li class="page-item <%= pagination.page < pagination.totalPages ? '' : 'disabled' %>">
+      <a class="page-link" href="?page=<%= pagination.page + 1 %>">&raquo;</a>
+    </li>
+  </ul>
+</nav>
+<% } %>

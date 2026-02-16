@@ -12,7 +12,6 @@ import {
   PaginatedResult,
 } from '../../domain/repositories/CustomerRepository';
 import { Customer, CustomerAddress } from '../../domain/entities/Customer';
-import type { CustomerStatus } from '../../domain/entities/Customer';
 
 export class CustomerRepo implements ICustomerRepository {
   async findById(customerId: string): Promise<Customer | null> {
@@ -448,7 +447,7 @@ export class CustomerRepo implements ICustomerRepository {
       paramIndex++;
     }
     if (filters?.groupId) {
-      conditions.push(`"customerId" IN (SELECT "customerId" FROM "customerGroupMembership" WHERE "customerGroupId" = $${paramIndex++})`);
+      conditions.push(`"customerId" IN (SELECT "customerId" FROM "customerGroupMembership" WHERE "customerGroupId" = $${paramIndex})`);
       params.push(filters.groupId);
     }
 

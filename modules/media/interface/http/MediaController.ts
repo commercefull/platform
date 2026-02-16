@@ -10,6 +10,7 @@ import multer from 'multer';
 
 // Extend Express Request to include multer file properties
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Express {
     interface Request {
       file?: Express.Multer.File;

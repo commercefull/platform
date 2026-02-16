@@ -1,0 +1,73 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row align-items-center">
+    <div class="col-auto">
+      <h2 class="page-title">Customer Insights</h2>
+    </div>
+    <div class="col-auto ms-auto">
+      <div class="btn-group">
+        <a href="/merchant/analytics" class="btn btn-outline-primary">Sales Analytics</a>
+        <a href="/merchant/analytics/products" class="btn btn-outline-primary">Product Performance</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Summary -->
+<div class="row">
+  <div class="col-lg-4 col-6">
+    <div class="small-box bg-info">
+      <div class="inner">
+        <h3><%= newCustomers?.count || 0 %></h3>
+        <p>New Customers (30 days)</p>
+      </div>
+      <div class="icon"><i class="fas fa-user-plus"></i></div>
+    </div>
+  </div>
+  <div class="col-lg-4 col-6">
+    <div class="small-box bg-success">
+      <div class="inner">
+        <h3><%= returningCustomers?.count || 0 %></h3>
+        <p>Returning Customers</p>
+      </div>
+      <div class="icon"><i class="fas fa-redo"></i></div>
+    </div>
+  </div>
+</div>
+
+<!-- Top Customers -->
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">Top Customers by Revenue</h3>
+  </div>
+  <div class="card-body p-0">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Customer</th>
+          <th>Email</th>
+          <th>Orders</th>
+          <th>Total Spent</th>
+          <th>Last Order</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (topCustomers && topCustomers.length > 0) { %>
+          <% topCustomers.forEach((customer, index) => { %>
+            <tr>
+              <td><%= index + 1 %></td>
+              <td><%= customer.firstName %> <%= customer.lastName %></td>
+              <td><%= customer.email %></td>
+              <td><%= customer.orderCount || 0 %></td>
+              <td>$<%= ((customer.totalSpent || 0) / 100).toFixed(2) %></td>
+              <td><%= customer.lastOrderDate ? new Date(customer.lastOrderDate).toLocaleDateString() : '-' %></td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr><td colspan="6" class="text-center text-muted py-4">No customer data available</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>

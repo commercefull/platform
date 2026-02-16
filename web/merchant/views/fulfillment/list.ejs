@@ -1,0 +1,111 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row align-items-center">
+    <div class="col-auto">
+      <h2 class="page-title">Fulfillments</h2>
+    </div>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="card collapsed-card">
+  <div class="card-header">
+    <h3 class="card-title">Filters</h3>
+    <div class="card-tools">
+      <button type="button" class="btn btn-tool" data-card-widget="collapse">
+        <i class="fas fa-plus"></i>
+      </button>
+    </div>
+  </div>
+  <div class="card-body">
+    <form method="GET" class="row">
+      <div class="col-md-3">
+        <div class="form-group">
+          <label>Status</label>
+          <select name="status" class="form-control">
+            <option value="">All</option>
+            <option value="pending" <%= filters?.status === 'pending' ? 'selected' : '' %>>Pending</option>
+            <option value="processing" <%= filters?.status === 'processing' ? 'selected' : '' %>>Processing</option>
+            <option value="shipped" <%= filters?.status === 'shipped' ? 'selected' : '' %>>Shipped</option>
+            <option value="delivered" <%= filters?.status === 'delivered' ? 'selected' : '' %>>Delivered</option>
+          </select>
+        </div>
+      </div>
+      <div class="col-md-2">
+        <div class="form-group">
+          <label>&nbsp;</label>
+          <button type="submit" class="btn btn-primary btn-block">Filter</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Fulfillments Table -->
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">Fulfillment Orders</h3>
+  </div>
+  <div class="card-body p-0">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Fulfillment #</th>
+          <th>Order #</th>
+          <th>Customer</th>
+          <th>Items</th>
+          <th>Status</th>
+          <th>Tracking</th>
+          <th>Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (fulfillments && fulfillments.length > 0) { %>
+          <% fulfillments.forEach(f => { %>
+            <tr>
+              <td><a href="/merchant/fulfillment/<%= f.fulfillmentId %>"><%= f.fulfillmentNumber || f.fulfillmentId?.substring(0, 8) %></a></td>
+              <td><a href="/merchant/orders/<%= f.orderId %>"><%= f.orderNumber || '-' %></a></td>
+              <td><%= f.customerName || '-' %></td>
+              <td><%= f.itemCount || 0 %></td>
+              <td>
+                <% const statusColors = { pending: 'secondary', processing: 'info', shipped: 'primary', delivered: 'success', cancelled: 'danger' }; %>
+                <span class="badge bg-<%= statusColors[f.status] || 'secondary' %>"><%= f.status %></span>
+              </td>
+              <td>
+                <% if (f.trackingNumber) { %>
+                  <code><%= f.trackingNumber %></code>
+                <% } else { %>
+                  <span class="text-muted">-</span>
+                <% } %>
+              </td>
+              <td><%= f.createdAt ? new Date(f.createdAt).toLocaleDateString() : '-' %></td>
+              <td>
+                <a href="/merchant/fulfillment/<%= f.fulfillmentId %>" class="btn btn-sm btn-info">
+                  <i class="fas fa-eye"></i>
+                </a>
+              </td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr><td colspan="8" class="text-center text-muted py-4">No fulfillments found</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+  <% if (pagination && pagination.totalPages > 1) { %>
+  <div class="card-footer clearfix">
+    <ul class="pagination pagination-sm m-0 float-right">
+      <li class="page-item <%= pagination.page > 1 ? '' : 'disabled' %>">
+        <a class="page-link" href="?page=<%= pagination.page - 1 %>">&laquo;</a>
+      </li>
+      <li class="page-item active">
+        <span class="page-link"><%= pagination.page %> / <%= pagination.totalPages %></span>
+      </li>
+      <li class="page-item <%= pagination.page < pagination.totalPages ? '' : 'disabled' %>">
+        <a class="page-link" href="?page=<%= pagination.page + 1 %>">&raquo;</a>
+      </li>
+    </ul>
+  </div>
+  <% } %>
+</div>

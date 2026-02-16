@@ -1,0 +1,49 @@
+<%- include("../partials/header") %>
+
+<main class="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-4xl mx-auto">
+    <div class="mb-8">
+      <a href="/loyalty" class="text-blue-600 hover:text-blue-800 text-sm">&larr; Back to Loyalty</a>
+      <h1 class="text-3xl font-bold text-gray-900 mt-2">Points History</h1>
+    </div>
+
+    <div class="bg-white shadow-lg rounded-xl overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
+              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Points</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <% if (history && history.length > 0) { %>
+              <% history.forEach(entry => { %>
+                <tr>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><%= entry.createdAt ? new Date(entry.createdAt).toLocaleDateString() : '-' %></td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-<%= entry.type === 'earn' ? 'green' : entry.type === 'redeem' ? 'blue' : 'gray' %>-100 text-<%= entry.type === 'earn' ? 'green' : entry.type === 'redeem' ? 'blue' : 'gray' %>-800">
+                      <%= entry.type %>
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 text-sm text-gray-600"><%= entry.description || entry.reason || '-' %></td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-medium <%= entry.points > 0 ? 'text-green-600' : 'text-red-600' %>">
+                    <%= entry.points > 0 ? '+' : '' %><%= entry.points %>
+                  </td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr>
+                <td colspan="4" class="px-6 py-8 text-center text-sm text-gray-500">No points history yet. Start earning by making purchases!</td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+
+<%- include("../partials/footer") %>

@@ -1,0 +1,14 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col"><h2 class="page-title"><%= pageName %></h2></div>
+  </div>
+</div>
+<section class="content">
+  <div class="container-fluid">
+    <%- include("../partials/alerts") %>
+    <div class="row">
+      <div class="col-md-4"><div class="card"><div class="card-body"><h3 class="card-title">Warehouses</h3><a href="/admin/warehouses" class="btn btn-outline-primary btn-sm">Manage</a></div></div></div><div class="col-md-4"><div class="card"><div class="card-body"><h3 class="card-title">Fulfillments</h3><a href="/admin/fulfillments" class="btn btn-outline-primary btn-sm">Manage</a></div></div></div><div class="col-md-4"><div class="card"><div class="card-body"><h3 class="card-title">Suppliers</h3><a href="/admin/suppliers" class="btn btn-outline-primary btn-sm">Manage</a></div></div></div>
+    </div>
+  </div>
+</section>

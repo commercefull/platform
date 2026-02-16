@@ -556,7 +556,7 @@ export async function getCustomerCohorts(startMonth?: Date, endMonth?: Date): Pr
     params.push(startMonth);
   }
   if (endMonth) {
-    whereClause += ` AND "cohortMonth" <= $${paramIndex++}`;
+    whereClause += ` AND "cohortMonth" <= $${paramIndex}`;
     params.push(endMonth);
   }
 

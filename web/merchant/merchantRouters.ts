@@ -11,6 +11,10 @@ import * as authController from './controllers/authController';
 import * as dashboardController from './controllers/dashboardController';
 import * as productController from './controllers/productController';
 import * as orderController from './controllers/orderController';
+import * as inventoryController from './controllers/inventoryController';
+import * as fulfillmentController from './controllers/fulfillmentController';
+import * as analyticsController from './controllers/analyticsController';
+import * as settingsController from './controllers/settingsController';
 
 const router = express.Router();
 
@@ -31,7 +35,10 @@ router.use(isMerchantLoggedIn);
 // Dashboard
 router.get('/', dashboardController.getDashboard);
 
-// Products - Merchant can only see their own products
+// ============================================================================
+// Products
+// ============================================================================
+
 router.get('/products', productController.listProducts);
 router.get('/products/create', productController.createProductForm);
 router.post('/products', productController.createProduct);
@@ -40,8 +47,48 @@ router.get('/products/:productId/edit', productController.editProductForm);
 router.post('/products/:productId', productController.updateProduct);
 router.post('/products/:productId/delete', productController.deleteProduct);
 
-// Orders - Merchant can only see orders containing their products
+// ============================================================================
+// Orders
+// ============================================================================
+
 router.get('/orders', orderController.listOrders);
 router.get('/orders/:orderId', orderController.viewOrder);
+
+// ============================================================================
+// Inventory
+// ============================================================================
+
+router.get('/inventory', inventoryController.listInventory);
+router.post('/inventory/adjust', inventoryController.adjustStock);
+router.get('/inventory/low-stock', inventoryController.lowStockAlerts);
+
+// ============================================================================
+// Fulfillments
+// ============================================================================
+
+router.get('/fulfillments', fulfillmentController.listFulfillments);
+router.get('/fulfillments/:fulfillmentId', fulfillmentController.viewFulfillment);
+router.post('/fulfillments/:fulfillmentId/tracking', fulfillmentController.updateTracking);
+router.post('/fulfillments/:fulfillmentId/shipped', fulfillmentController.markAsShipped);
+router.post('/fulfillments/:fulfillmentId/delivered', fulfillmentController.markAsDelivered);
+
+// ============================================================================
+// Analytics
+// ============================================================================
+
+router.get('/analytics', analyticsController.salesAnalytics);
+router.get('/analytics/sales', analyticsController.salesAnalytics);
+router.get('/analytics/products', analyticsController.productPerformance);
+router.get('/analytics/customers', analyticsController.customerInsights);
+
+// ============================================================================
+// Settings
+// ============================================================================
+
+router.get('/settings/profile', settingsController.getProfile);
+router.post('/settings/profile', settingsController.updateProfile);
+router.get('/settings/store', settingsController.getStoreSettings);
+router.get('/settings/notifications', settingsController.getNotificationSettings);
+router.post('/settings/notifications', settingsController.updateNotificationSettings);
 
 export const merchantRouter = router;

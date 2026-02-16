@@ -168,7 +168,7 @@ export class CurrencyRepo {
       throw new Error('No default currency found to use as base for exchange rate updates');
     }
 
-    let currencies: Currency[] = [];
+    let currencies: Currency[];
 
     if (source === 'api') {
       // Placeholder for API implementation

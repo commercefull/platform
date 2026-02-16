@@ -487,7 +487,7 @@ export class DiscountRepo {
       return 0;
     }
 
-    let discountAmount = 0;
+    let discountAmount: number;
 
     if (discount.discountType === 'percentage') {
       discountAmount = (totalPrice * Number(discount.discountValue)) / 100;

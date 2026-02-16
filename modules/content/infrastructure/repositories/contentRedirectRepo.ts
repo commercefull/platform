@@ -65,7 +65,7 @@ export class ContentRedirectRepo {
       params.push(isActive);
     }
 
-    sql += ` ORDER BY "hits" DESC, "createdAt" DESC LIMIT $${paramIndex++} OFFSET $${paramIndex++}`;
+    sql += ` ORDER BY "hits" DESC, "createdAt" DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`;
     params.push(limit, offset);
 
     const results = await query<ContentRedirect[]>(sql, params);

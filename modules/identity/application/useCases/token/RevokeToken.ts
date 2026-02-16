@@ -54,13 +54,9 @@ export class RevokeTokenUseCase {
       throw new Error('User ID is required');
     }
 
-    let revokedCount = 0;
-
-    if (input.userType === 'customer') {
-      revokedCount = await this.refreshTokenRepo.revokeAllForCustomer(input.userId);
-    } else {
-      revokedCount = await this.refreshTokenRepo.revokeAllForMerchant(input.userId);
-    }
+    const revokedCount = input.userType === 'customer'
+      ? await this.refreshTokenRepo.revokeAllForCustomer(input.userId)
+      : await this.refreshTokenRepo.revokeAllForMerchant(input.userId);
 
     eventBus.emit(`${input.userType}.all_tokens_revoked`, {
       userId: input.userId,

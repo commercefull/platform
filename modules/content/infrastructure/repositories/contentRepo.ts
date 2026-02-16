@@ -317,7 +317,7 @@ export class ContentRepo {
       sql += ' WHERE ' + whereConditions.join(' AND ');
     }
 
-    sql += ' ORDER BY "title" ASC LIMIT $' + paramIndex++ + ' OFFSET $' + paramIndex++;
+    sql += ' ORDER BY "title" ASC LIMIT $' + paramIndex++ + ' OFFSET $' + paramIndex;
     params.push(limit, offset);
 
     const results = await query<any[]>(sql, params);
@@ -615,7 +615,7 @@ export class ContentRepo {
       sql += ' WHERE ' + whereConditions.join(' AND ');
     }
 
-    sql += ' ORDER BY "name" ASC LIMIT $' + paramIndex++ + ' OFFSET $' + paramIndex++;
+    sql += ' ORDER BY "name" ASC LIMIT $' + paramIndex++ + ' OFFSET $' + paramIndex;
     params.push(limit, offset);
 
     const results = await query<any[]>(sql, params);

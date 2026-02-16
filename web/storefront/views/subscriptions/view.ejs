@@ -1,0 +1,139 @@
+<%- include("../partials/header") %>
+
+<main class="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">Subscription Details</h1>
+        <p class="mt-1 text-sm text-gray-600">
+          <a href="/subscriptions" class="text-blue-600 hover:text-blue-800">&larr; Back to My Subscriptions</a>
+        </p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- Main Info -->
+      <div class="lg:col-span-2 space-y-6">
+        <div class="bg-white shadow-lg rounded-xl overflow-hidden">
+          <div class="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4">
+            <h2 class="text-xl font-semibold text-white"><%= subscription.planName || subscription.name || 'Subscription' %></h2>
+          </div>
+          <div class="px-6 py-6">
+            <div class="grid grid-cols-2 gap-6">
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Status</dt>
+                <dd class="mt-1">
+                  <%
+                    let statusColor = 'gray';
+                    if (subscription.status === 'active') statusColor = 'green';
+                    else if (subscription.status === 'past_due') statusColor = 'yellow';
+                    else if (subscription.status === 'cancelled') statusColor = 'red';
+                    else if (subscription.status === 'paused') statusColor = 'blue';
+                  %>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-<%= statusColor %>-100 text-<%= statusColor %>-800">
+                    <%= subscription.status %>
+                  </span>
+                </dd>
+              </div>
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Price</dt>
+                <dd class="mt-1 text-lg font-semibold text-gray-900">$<%= ((subscription.price || 0) / 100).toFixed(2) %>/<%= subscription.billingInterval || 'month' %></dd>
+              </div>
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Start Date</dt>
+                <dd class="mt-1 text-sm text-gray-900"><%= subscription.startDate ? new Date(subscription.startDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '-' %></dd>
+              </div>
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Current Period</dt>
+                <dd class="mt-1 text-sm text-gray-900">
+                  <%= subscription.currentPeriodStart ? new Date(subscription.currentPeriodStart).toLocaleDateString() : '-' %>
+                  &mdash;
+                  <%= subscription.currentPeriodEnd ? new Date(subscription.currentPeriodEnd).toLocaleDateString() : '-' %>
+                </dd>
+              </div>
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Next Billing Date</dt>
+                <dd class="mt-1 text-sm text-gray-900"><%= subscription.nextBillingDate ? new Date(subscription.nextBillingDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A' %></dd>
+              </div>
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Auto-Renew</dt>
+                <dd class="mt-1 text-sm text-gray-900"><%= subscription.autoRenew !== false ? 'Yes' : 'No' %></dd>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Billing History -->
+        <div class="bg-white shadow-lg rounded-xl overflow-hidden">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-900">Billing History</h3>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <% if (billingHistory && billingHistory.length > 0) { %>
+                  <% billingHistory.forEach(entry => { %>
+                    <tr>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><%= entry.date ? new Date(entry.date).toLocaleDateString() : '-' %></td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$<%= ((entry.amount || 0) / 100).toFixed(2) %></td>
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-<%= entry.status === 'paid' || entry.status === 'completed' ? 'green' : 'yellow' %>-100 text-<%= entry.status === 'paid' || entry.status === 'completed' ? 'green' : 'yellow' %>-800">
+                          <%= entry.status %>
+                        </span>
+                      </td>
+                    </tr>
+                  <% }) %>
+                <% } else { %>
+                  <tr>
+                    <td colspan="3" class="px-6 py-8 text-center text-sm text-gray-500">No billing history yet</td>
+                  </tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="space-y-6">
+        <% if (subscription.status === 'active') { %>
+          <div class="bg-white shadow-lg rounded-xl p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Actions</h3>
+            <div class="space-y-3">
+              <form method="POST" action="/subscriptions/<%= subscription.subscriptionId %>/pause">
+                <button type="submit" class="w-full px-4 py-2 border border-yellow-300 text-yellow-700 rounded-lg hover:bg-yellow-50 transition-colors text-sm font-medium">
+                  Pause Subscription
+                </button>
+              </form>
+              <form method="POST" action="/subscriptions/<%= subscription.subscriptionId %>/cancel" onsubmit="return confirm('Are you sure you want to cancel? You will retain access until the end of your current billing period.')">
+                <button type="submit" class="w-full px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition-colors text-sm font-medium">
+                  Cancel Subscription
+                </button>
+              </form>
+            </div>
+          </div>
+        <% } %>
+        <% if (subscription.status === 'paused') { %>
+          <div class="bg-white shadow-lg rounded-xl p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Resume</h3>
+            <form method="POST" action="/subscriptions/<%= subscription.subscriptionId %>/resume">
+              <button type="submit" class="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium">
+                Resume Subscription
+              </button>
+            </form>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</main>
+
+<%- include("../partials/footer") %>

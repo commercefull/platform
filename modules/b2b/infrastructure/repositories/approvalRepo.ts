@@ -134,7 +134,7 @@ export async function getWorkflows(companyId?: string, workflowType?: WorkflowTy
     params.push(companyId);
   }
   if (workflowType) {
-    whereClause += ` AND "workflowType" = $${paramIndex++}`;
+    whereClause += ` AND "workflowType" = $${paramIndex}`;
     params.push(workflowType);
   }
 
@@ -176,7 +176,6 @@ export async function findMatchingWorkflow(
     whereClause += ` AND ("minAmount" IS NULL OR "minAmount" <= $${paramIndex})`;
     whereClause += ` AND ("maxAmount" IS NULL OR "maxAmount" >= $${paramIndex})`;
     params.push(amount);
-    paramIndex++;
   }
 
   const row = await queryOne<Record<string, any>>(

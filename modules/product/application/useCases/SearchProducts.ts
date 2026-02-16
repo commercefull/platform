@@ -87,8 +87,8 @@ export class SearchProductsUseCase {
     };
 
     // Map orderBy to pagination options
-    let orderBy = 'createdAt';
-    let orderDirection: 'asc' | 'desc' = 'desc';
+    let orderBy: string;
+    let orderDirection: 'asc' | 'desc';
 
     switch (command.orderBy) {
       case 'price_asc':

@@ -419,7 +419,7 @@ export class SupplierRepo {
         params.push(filters.isActive);
       }
       if (filters.isApproved !== undefined) {
-        conditions.push(`"isApproved" = $${paramIndex++}`);
+        conditions.push(`"isApproved" = $${paramIndex}`);
         params.push(filters.isApproved);
       }
     }

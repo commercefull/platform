@@ -51,7 +51,7 @@ export class ContentCategoryRepo {
       sql += ' WHERE ' + conditions.join(' AND ');
     }
 
-    sql += ` ORDER BY "sortOrder" ASC, "name" ASC LIMIT $${paramIndex++} OFFSET $${paramIndex++}`;
+    sql += ` ORDER BY "sortOrder" ASC, "name" ASC LIMIT $${paramIndex++} OFFSET $${paramIndex}`;
     params.push(limit, offset);
 
     const results = await query<ContentCategory[]>(sql, params);

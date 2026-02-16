@@ -13,8 +13,8 @@ export function generateSlug(text: string): string {
     .toLowerCase()
     .trim()
     .replace(/[\s_]+/g, '-') // Replace spaces and underscores with hyphens
-    .replace(/[^\w\-]+/g, '') // Remove all non-word characters except hyphens
-    .replace(/\-\-+/g, '-') // Replace multiple hyphens with single hyphen
+    .replace(/[^\w-]+/g, '') // Remove all non-word characters except hyphens
+    .replace(/--+/g, '-') // Replace multiple hyphens with single hyphen
     .replace(/^-+/, '') // Trim hyphens from start
     .replace(/-+$/, ''); // Trim hyphens from end
 }

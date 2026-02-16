@@ -36,6 +36,9 @@ import * as reviewController from './controllers/reviewController';
 import * as addressController from './controllers/addressController';
 import * as returnController from './controllers/returnController';
 import * as loyaltyController from './controllers/loyaltyController';
+import * as subscriptionController from './controllers/subscriptionController';
+import * as membershipController from './controllers/membershipController';
+import * as notificationController from './controllers/notificationController';
 
 const router = express.Router();
 
@@ -264,6 +267,57 @@ router.get('/loyalty/history', loyaltyController.pointsHistory);
 
 // POST: redeem reward
 router.post('/loyalty/redeem/:rewardId', loyaltyController.redeemReward);
+
+// ============================================================================
+// Subscription Routes
+// ============================================================================
+
+// GET: list subscription plans (public)
+router.get('/subscriptions', subscriptionController.listPlans);
+
+// GET: my subscriptions (auth required)
+router.get('/subscriptions/my', subscriptionController.mySubscriptions);
+
+// GET: view subscription detail
+router.get('/subscriptions/:subscriptionId', subscriptionController.viewSubscription);
+
+// POST: cancel subscription
+router.post('/subscriptions/:subscriptionId/cancel', subscriptionController.cancelSubscription);
+
+// ============================================================================
+// Membership Routes
+// ============================================================================
+
+// GET: list membership plans (public)
+router.get('/membership', membershipController.listPlans);
+
+// GET: view plan detail
+router.get('/membership/plans/:planId', membershipController.viewPlan);
+
+// GET: my membership
+router.get('/membership/my', membershipController.myMembership);
+
+// POST: join a membership plan
+router.post('/membership/join/:planId', membershipController.joinPlan);
+
+// ============================================================================
+// Notification Routes
+// ============================================================================
+
+// GET: list notifications
+router.get('/notifications', notificationController.listNotifications);
+
+// POST: mark notification as read
+router.post('/notifications/:notificationId/read', notificationController.markAsRead);
+
+// POST: mark all notifications as read
+router.post('/notifications/read-all', notificationController.markAllAsRead);
+
+// GET: notification preferences
+router.get('/notifications/preferences', notificationController.getPreferences);
+
+// POST: update notification preferences
+router.post('/notifications/preferences', notificationController.updatePreferences);
 
 // ============================================================================
 // Content Routes

@@ -3,6 +3,7 @@ import path from 'path';
 import { knex, Knex } from 'knex';
 import { updateTypes, Options } from 'knex-types';
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const knexConfig = require('../knexfile');
 
 const OUTPUT_PATH = path.resolve(__dirname, '../libs/db/types.ts');

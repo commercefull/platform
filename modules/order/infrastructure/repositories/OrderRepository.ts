@@ -532,43 +532,42 @@ export class OrderRepo implements IOrderRepository {
     let paramIndex = 1;
 
     if (filters?.customerId) {
-      conditions.push(`"customerId" = \$${paramIndex++}`);
+      conditions.push(`"customerId" = $${paramIndex++}`);
       params.push(filters.customerId);
     }
     if (filters?.status) {
-      conditions.push(`"status" = \$${paramIndex++}`);
+      conditions.push(`"status" = $${paramIndex++}`);
       params.push(filters.status);
     }
     if (filters?.paymentStatus) {
-      conditions.push(`"paymentStatus" = \$${paramIndex++}`);
+      conditions.push(`"paymentStatus" = $${paramIndex++}`);
       params.push(filters.paymentStatus);
     }
     if (filters?.fulfillmentStatus) {
-      conditions.push(`"fulfillmentStatus" = \$${paramIndex++}`);
+      conditions.push(`"fulfillmentStatus" = $${paramIndex++}`);
       params.push(filters.fulfillmentStatus);
     }
     if (filters?.startDate) {
-      conditions.push(`"createdAt" >= \$${paramIndex++}`);
+      conditions.push(`"createdAt" >= $${paramIndex++}`);
       params.push(filters.startDate.toISOString());
     }
     if (filters?.endDate) {
-      conditions.push(`"createdAt" <= \$${paramIndex++}`);
+      conditions.push(`"createdAt" <= $${paramIndex++}`);
       params.push(filters.endDate.toISOString());
     }
     if (filters?.minAmount !== undefined) {
-      conditions.push(`"totalAmount" >= \$${paramIndex++}`);
+      conditions.push(`"totalAmount" >= $${paramIndex++}`);
       params.push(filters.minAmount);
     }
     if (filters?.maxAmount !== undefined) {
-      conditions.push(`"totalAmount" <= \$${paramIndex++}`);
+      conditions.push(`"totalAmount" <= $${paramIndex++}`);
       params.push(filters.maxAmount);
     }
     if (filters?.search) {
       conditions.push(
-        `("orderNumber" ILIKE \$${paramIndex} OR "customerEmail" ILIKE \$${paramIndex} OR "customerName" ILIKE \$${paramIndex})`,
+        `("orderNumber" ILIKE $${paramIndex} OR "customerEmail" ILIKE $${paramIndex} OR "customerName" ILIKE $${paramIndex})`,
       );
       params.push(`%${filters.search}%`);
-      paramIndex++;
     }
 
     return {

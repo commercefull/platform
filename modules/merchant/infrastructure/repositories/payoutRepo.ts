@@ -76,7 +76,7 @@ export async function findBySeller(sellerId: string, options?: { status?: string
     params.push(options.limit);
   }
   if (options?.offset) {
-    sql += ` OFFSET $${paramIndex++}`;
+    sql += ` OFFSET $${paramIndex}`;
     params.push(options.offset);
   }
 

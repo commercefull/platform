@@ -128,7 +128,7 @@ export class ProcessDataRequestUseCase {
       };
     } catch (error) {
       // Handle failure
-      throw new Error(`Failed to export data: ${error}`);
+      throw new Error(`Failed to export data: ${error}`, { cause: error });
     }
   }
 
@@ -168,7 +168,7 @@ export class ProcessDataRequestUseCase {
         message: 'Data deletion completed successfully',
       };
     } catch (error) {
-      throw new Error(`Failed to delete data: ${error}`);
+      throw new Error(`Failed to delete data: ${error}`, { cause: error });
     }
   }
 

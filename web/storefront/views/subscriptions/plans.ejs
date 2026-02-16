@@ -1,0 +1,59 @@
+<%- include("../partials/header") %>
+
+<main class="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="text-center mb-12">
+      <h1 class="text-3xl font-bold text-gray-900">Subscription Plans</h1>
+      <p class="mt-2 text-lg text-gray-600">Choose a plan that fits your needs</p>
+    </div>
+
+    <% if (plans && plans.length > 0) { %>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <% plans.forEach(plan => { %>
+          <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+            <div class="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-6 text-center">
+              <h3 class="text-xl font-bold text-white"><%= plan.name %></h3>
+              <div class="mt-2">
+                <span class="text-4xl font-extrabold text-white">$<%= ((plan.price || 0) / 100).toFixed(2) %></span>
+                <span class="text-blue-200">/<%= plan.billingInterval || 'month' %></span>
+              </div>
+            </div>
+            <div class="px-6 py-6">
+              <% if (plan.description) { %>
+                <p class="text-gray-600 mb-4"><%= plan.description %></p>
+              <% } %>
+              <ul class="space-y-3 mb-6">
+                <% if (plan.features) { %>
+                  <% (Array.isArray(plan.features) ? plan.features : []).forEach(feature => { %>
+                    <li class="flex items-center text-sm text-gray-700">
+                      <svg class="w-5 h-5 text-green-500 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                      </svg>
+                      <%= feature %>
+                    </li>
+                  <% }) %>
+                <% } %>
+              </ul>
+              <a href="/subscriptions/subscribe/<%= plan.subscriptionPlanId || plan.id %>" class="block w-full text-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                Subscribe Now
+              </a>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <div class="bg-white rounded-xl shadow-lg p-12 text-center">
+        <div class="mx-auto h-24 w-24 bg-gray-100 rounded-full flex items-center justify-content-center mb-6">
+          <svg class="h-12 w-12 text-gray-400 mx-auto mt-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+          </svg>
+        </div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">No subscription plans available</h3>
+        <p class="text-gray-600">Check back later for new subscription options.</p>
+      </div>
+    <% } %>
+  </div>
+</main>
+
+<%- include("../partials/footer") %>

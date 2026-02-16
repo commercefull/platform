@@ -178,7 +178,7 @@ export class PricingService {
       throw new Error(`Product not found with ID: ${productId}`);
     }
 
-    let variant = null;
+    let variant;
 
     // If a specific variant is requested, use it
     if (variantId) {
@@ -453,7 +453,7 @@ export class PricingService {
   ): Promise<PricingRuleImpact> {
     let rule: PricingRule;
     let productId: string;
-    let context: PriceContext = {};
+    let context: PriceContext;
     let beforeRule: PricingResult;
 
     // Handle different parameter patterns

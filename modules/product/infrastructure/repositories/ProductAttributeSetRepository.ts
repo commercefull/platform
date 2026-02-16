@@ -188,7 +188,7 @@ export class ProductAttributeSetRepository {
       values.push(input.productTypeId);
     }
     if (input.isActive !== undefined) {
-      setStatements.push(`"isActive" = $${paramIndex++}`);
+      setStatements.push(`"isActive" = $${paramIndex}`);
       values.push(input.isActive);
     }
 

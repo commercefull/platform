@@ -76,7 +76,7 @@ export class ProcessRenewalUseCase {
         amount: subscription.price,
       });
 
-      throw new Error('Payment failed for subscription renewal');
+      throw new Error('Payment failed for subscription renewal', { cause: error });
     }
 
     // Calculate new period

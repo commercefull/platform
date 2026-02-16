@@ -46,7 +46,7 @@ export class ContentMediaRepo {
       sql += ' WHERE ' + conditions.join(' AND ');
     }
 
-    sql += ` ORDER BY "sortOrder" ASC, "createdAt" DESC LIMIT $${paramIndex++} OFFSET $${paramIndex++}`;
+    sql += ` ORDER BY "sortOrder" ASC, "createdAt" DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`;
     params.push(limit, offset);
 
     const results = await query<ContentMedia[]>(sql, params);

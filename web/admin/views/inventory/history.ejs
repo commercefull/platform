@@ -1,0 +1,14 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col"><h2 class="page-title"><%= pageName %></h2></div>
+  </div>
+</div>
+<section class="content">
+  <div class="container-fluid">
+    <%- include("../partials/alerts") %>
+    <div class="row">
+      <div class="col-12"><div class="card"><div class="card-header"><h3 class="card-title">Stock Movement History</h3></div><div class="card-body p-0"><table class="table table-striped"><thead><tr><th>Date</th><th>SKU</th><th>Type</th><th>Quantity</th><th>Reason</th></tr></thead><tbody><% if (history && history.length > 0) { %><% history.forEach(h => { %><tr><td><%= h.createdAt ? new Date(h.createdAt).toLocaleString() : "-" %></td><td><%= h.sku || "-" %></td><td><%= h.type || "-" %></td><td><%= h.quantity || 0 %></td><td><%= h.reason || "-" %></td></tr><% }) %><% } else { %><tr><td colspan="5" class="text-center text-muted py-4">No history</td></tr><% } %></tbody></table></div></div></div>
+    </div>
+  </div>
+</section>

@@ -251,7 +251,7 @@ export class StoreRepo implements IStoreRepository {
       params.push(filters.isVerified);
     }
     if (filters?.isFeatured !== undefined) {
-      conditions.push(`"isFeatured" = $${paramIndex++}`);
+      conditions.push(`"isFeatured" = $${paramIndex}`);
       params.push(filters.isFeatured);
     }
 

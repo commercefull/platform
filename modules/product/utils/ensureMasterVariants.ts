@@ -75,7 +75,7 @@ export async function ensureAllProductsHaveMasterVariants(): Promise<{
 
     return result;
   } catch (error) {
-    throw new Error(`Failed to ensure master variants: ${(error as Error).message}`);
+    throw new Error(`Failed to ensure master variants: ${(error as Error).message}`, { cause: error });
   }
 }
 

@@ -13,6 +13,7 @@ import { Roles } from 'libs/roles';
 import { Request as ExpressRequest } from 'express';
 
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Express {
     interface User {
       userId?: string;

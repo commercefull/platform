@@ -70,7 +70,7 @@ export class ProductTypeRepository {
       values.push(input.name);
     }
     if (input.slug !== undefined) {
-      setStatements.push(`"slug" = $${paramIndex++}`);
+      setStatements.push(`"slug" = $${paramIndex}`);
       values.push(input.slug);
     }
 

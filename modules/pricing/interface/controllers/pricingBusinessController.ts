@@ -474,7 +474,7 @@ export const createPriceRule = async (req: TypedRequest, res: Response): Promise
     const ruleData: CurrencyPriceRule = req.body;
 
     // Validate required fields
-    if (!ruleData.currencyCode || !ruleData.priority === undefined || !ruleData.adjustments || ruleData.adjustments.length === 0) {
+    if (!ruleData.currencyCode || ruleData.priority === undefined || !ruleData.adjustments || ruleData.adjustments.length === 0) {
       res.status(400).json({
         success: false,
         message: 'Missing required fields: currencyCode, priority, and at least one adjustment are required',

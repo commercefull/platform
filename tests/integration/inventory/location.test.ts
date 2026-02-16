@@ -112,7 +112,7 @@ describe('Inventory Location Tests', () => {
 
       // All returned locations should be active (if isActive property exists)
       response.data.data.forEach((location: any) => {
-        if (location.hasOwnProperty('isActive')) {
+        if (Object.prototype.hasOwnProperty.call(location, 'isActive')) {
           expect(location.isActive).toBe(true);
         }
       });

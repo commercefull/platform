@@ -1,0 +1,41 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col"><h2 class="page-title"><%= pageName %></h2></div>
+    <div class="col-auto ms-auto">
+      <a href="/admin/subscription/plans" class="btn btn-secondary me-2"><i class="ti ti-arrow-left"></i> Back</a>
+
+    </div>
+  </div>
+</div>
+<section class="content">
+  <div class="container-fluid">
+    <%- include("../../../partials/alerts") %>
+    <div class="row">
+      <div class="col-md-8">
+        <div class="card">
+          <div class="card-header"><h3 class="card-title">Details</h3></div>
+          <div class="card-body">
+            <dl class="row">
+              <dt class="col-sm-4">Name</dt><dd class="col-sm-8"><%= item?.name || '-' %></dd>
+              <dt class="col-sm-4">Status</dt><dd class="col-sm-8"><span class="badge bg-<%= item?.status === 'active' || item?.isActive ? 'success' : 'secondary' %>"><%= item?.status || '-' %></span></dd>
+              <dt class="col-sm-4">Description</dt><dd class="col-sm-8"><%= item?.description || '-' %></dd>
+              <dt class="col-sm-4">Created</dt><dd class="col-sm-8"><%= item?.createdAt ? new Date(item.createdAt).toLocaleString() : '-' %></dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card">
+          <div class="card-header"><h3 class="card-title">Actions</h3></div>
+          <div class="card-body">
+            <div class="d-grid gap-2">
+
+              <a href="/admin/subscription/plans" class="btn btn-outline-secondary">Back to List</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

@@ -174,7 +174,7 @@ export class TaxCommandRepo {
     }
 
     // Always update the updatedAt timestamp
-    sets.push(`"updatedAt" = $${paramIndex++}`);
+    sets.push(`"updatedAt" = $${paramIndex}`);
     params.push(now);
 
     if (sets.length === 0) {
@@ -263,7 +263,7 @@ export class TaxCommandRepo {
     }
 
     // Always update the updatedAt timestamp
-    sets.push(`"updatedAt" = $${paramIndex++}`);
+    sets.push(`"updatedAt" = $${paramIndex}`);
     params.push(now);
 
     if (sets.length === 0) {
@@ -382,7 +382,7 @@ export class TaxCommandRepo {
     }
 
     // Always update the updatedAt timestamp
-    sets.push(`"updatedAt" = $${paramIndex++}`);
+    sets.push(`"updatedAt" = $${paramIndex}`);
     params.push(now);
 
     if (sets.length === 0) {
@@ -535,7 +535,7 @@ export class TaxCommandRepo {
     }
 
     // Always update the updatedAt timestamp
-    sets.push(`"updatedAt" = $${paramIndex++}`);
+    sets.push(`"updatedAt" = $${paramIndex}`);
     params.push(now);
 
     if (sets.length === 0) {
@@ -694,7 +694,7 @@ export class TaxCommandRepo {
     }
 
     // Always update the updatedAt timestamp
-    sets.push(`"updatedAt" = $${paramIndex++}`);
+    sets.push(`"updatedAt" = $${paramIndex}`);
     params.push(now);
 
     if (sets.length === 0) {

@@ -1,0 +1,90 @@
+<%- include("../partials/header") %>
+
+<main class="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">My Subscriptions</h1>
+        <p class="mt-2 text-sm text-gray-600">Manage your active subscriptions</p>
+      </div>
+      <a href="/subscriptions/plans" class="mt-4 sm:mt-0 inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+        </svg>
+        Browse Plans
+      </a>
+    </div>
+
+    <% if (subscriptions && subscriptions.length > 0) { %>
+      <div class="space-y-6">
+        <% subscriptions.forEach(sub => { %>
+          <div class="bg-white shadow-lg rounded-xl overflow-hidden hover:shadow-xl transition-shadow">
+            <div class="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100">
+              <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                  <h3 class="text-lg font-semibold text-gray-900"><%= sub.planName || sub.name || 'Subscription' %></h3>
+                  <p class="text-sm text-gray-600">Started <%= sub.startDate ? new Date(sub.startDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '-' %></p>
+                </div>
+                <div class="flex items-center space-x-3">
+                  <%
+                    let statusColor = 'gray';
+                    if (sub.status === 'active') statusColor = 'green';
+                    else if (sub.status === 'past_due') statusColor = 'yellow';
+                    else if (sub.status === 'cancelled') statusColor = 'red';
+                    else if (sub.status === 'paused') statusColor = 'blue';
+                  %>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-<%= statusColor %>-100 text-<%= statusColor %>-800">
+                    <%= sub.status %>
+                  </span>
+                  <span class="text-lg font-bold text-gray-900">$<%= ((sub.price || 0) / 100).toFixed(2) %>/<%= sub.billingInterval || 'mo' %></span>
+                </div>
+              </div>
+            </div>
+            <div class="px-6 py-4">
+              <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div class="flex items-center space-x-6 text-sm text-gray-600">
+                  <div>
+                    <span class="font-medium">Next billing:</span>
+                    <%= sub.nextBillingDate ? new Date(sub.nextBillingDate).toLocaleDateString() : 'N/A' %>
+                  </div>
+                  <div>
+                    <span class="font-medium">Period ends:</span>
+                    <%= sub.currentPeriodEnd ? new Date(sub.currentPeriodEnd).toLocaleDateString() : 'N/A' %>
+                  </div>
+                </div>
+                <div class="flex gap-3">
+                  <a href="/subscriptions/<%= sub.subscriptionId %>" class="inline-flex items-center px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors text-sm">
+                    View Details
+                  </a>
+                  <% if (sub.status === 'active') { %>
+                    <form method="POST" action="/subscriptions/<%= sub.subscriptionId %>/cancel" onsubmit="return confirm('Are you sure you want to cancel this subscription?')">
+                      <button type="submit" class="inline-flex items-center px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition-colors text-sm">
+                        Cancel
+                      </button>
+                    </form>
+                  <% } %>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <div class="bg-white shadow-lg rounded-xl p-12 text-center">
+        <div class="mx-auto h-24 w-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+          <svg class="h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+          </svg>
+        </div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">No active subscriptions</h3>
+        <p class="text-gray-600 mb-6">You don't have any subscriptions yet. Browse our plans to get started.</p>
+        <a href="/subscriptions/plans" class="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors">
+          Browse Plans
+        </a>
+      </div>
+    <% } %>
+  </div>
+</main>
+
+<%- include("../partials/footer") %>

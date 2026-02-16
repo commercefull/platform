@@ -96,7 +96,7 @@ export async function findByOrganization(
     params.push(options.type);
   }
   if (options?.isActive !== undefined) {
-    sql += ` AND "isActive" = $${paramIndex++}`;
+    sql += ` AND "isActive" = $${paramIndex}`;
     params.push(options.isActive);
   }
 

@@ -1,7 +1,7 @@
 import { AxiosInstance } from 'axios';
 
-// Create axios client for tests
 const createClient = () =>
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   require('axios').create({
     baseURL: process.env.API_URL || 'http://localhost:3000',
     validateStatus: () => true,

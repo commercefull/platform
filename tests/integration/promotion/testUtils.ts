@@ -72,20 +72,13 @@ export async function createTestCart(client: AxiosInstance, adminToken: string) 
 }
 
 // Helper function to create a test category and product
-export async function createTestCategoryAndProduct(client: AxiosInstance, adminToken: string) {
-  try {
-    // Use seeded product IDs instead of creating new ones
-    // This avoids dependency on category/product creation endpoints
-    return {
-      categoryId: '00000000-0000-0000-0000-000000000001',
-      productId: '00000000-0000-0000-0000-000000000001',
-    };
-  } catch (error) {
-    return {
-      categoryId: `test-category-${uuidv4()}`,
-      productId: `test-product-${uuidv4()}`,
-    };
-  }
+export async function createTestCategoryAndProduct(_client: AxiosInstance, _adminToken: string) {
+  // Use seeded product IDs instead of creating new ones
+  // This avoids dependency on category/product creation endpoints
+  return {
+    categoryId: '00000000-0000-0000-0000-000000000001',
+    productId: '00000000-0000-0000-0000-000000000001',
+  };
 }
 
 // Setup function to initialize client and test data

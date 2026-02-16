@@ -1,0 +1,14 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col"><h2 class="page-title"><%= pageName %></h2></div>
+  </div>
+</div>
+<section class="content">
+  <div class="container-fluid">
+    <%- include("../partials/alerts") %>
+    <div class="row">
+      <div class="col-12"><div class="card"><div class="card-header"><h3 class="card-title">Frequently Asked Questions</h3><div class="card-actions"><button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#createFaqModal"><i class="ti ti-plus"></i> Add FAQ</button></div></div><div class="card-body p-0"><table class="table table-striped"><thead><tr><th>Question</th><th>Category</th><th>Status</th></tr></thead><tbody><% if (faqs && faqs.length > 0) { %><% faqs.forEach(faq => { %><tr><td><%= faq.question %></td><td><%= faq.category || "-" %></td><td><span class="badge bg-<%= faq.isPublished ? "success" : "secondary" %>"><%= faq.isPublished ? "Published" : "Draft" %></span></td></tr><% }) %><% } else { %><tr><td colspan="3" class="text-center text-muted py-4">No FAQs yet</td></tr><% } %></tbody></table></div></div></div>
+    </div>
+  </div>
+</section>

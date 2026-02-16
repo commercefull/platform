@@ -26,6 +26,7 @@ describe('Auth Feature Tests', () => {
       merchantResetToken = setup.merchantResetToken;
       customerRefreshToken = setup.customerRefreshToken;
     } catch (error) {
+      console.error('Auth test setup failed:', error);
       throw error;
     }
   });

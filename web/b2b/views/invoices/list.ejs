@@ -1,0 +1,102 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row align-items-center">
+    <div class="col-auto">
+      <h2 class="page-title">Invoices</h2>
+    </div>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="card collapsed-card">
+  <div class="card-header">
+    <h3 class="card-title">Filters</h3>
+    <div class="card-tools">
+      <button type="button" class="btn btn-tool" data-card-widget="collapse">
+        <i class="fas fa-plus"></i>
+      </button>
+    </div>
+  </div>
+  <div class="card-body">
+    <form method="GET" class="row">
+      <div class="col-md-3">
+        <div class="form-group">
+          <label>Status</label>
+          <select name="status" class="form-control">
+            <option value="">All</option>
+            <option value="pending" <%= filters?.status === 'pending' ? 'selected' : '' %>>Pending</option>
+            <option value="paid" <%= filters?.status === 'paid' ? 'selected' : '' %>>Paid</option>
+            <option value="overdue" <%= filters?.status === 'overdue' ? 'selected' : '' %>>Overdue</option>
+          </select>
+        </div>
+      </div>
+      <div class="col-md-2">
+        <div class="form-group">
+          <label>&nbsp;</label>
+          <button type="submit" class="btn btn-primary btn-block">Filter</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Invoices Table -->
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">Invoice History</h3>
+  </div>
+  <div class="card-body p-0">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Invoice #</th>
+          <th>Order #</th>
+          <th>Date</th>
+          <th>Due Date</th>
+          <th>Amount</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (invoices && invoices.length > 0) { %>
+          <% invoices.forEach(invoice => { %>
+            <tr>
+              <td><a href="/b2b/invoices/<%= invoice.orderId %>"><%= invoice.invoiceNumber || invoice.orderNumber %></a></td>
+              <td><a href="/b2b/orders/<%= invoice.orderId %>"><%= invoice.orderNumber %></a></td>
+              <td><%= invoice.createdAt ? new Date(invoice.createdAt).toLocaleDateString() : '-' %></td>
+              <td><%= invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString() : '-' %></td>
+              <td>$<%= ((invoice.totalAmount || 0) / 100).toFixed(2) %></td>
+              <td>
+                <% const statusColors = { pending: 'warning', paid: 'success', overdue: 'danger', cancelled: 'secondary' }; %>
+                <span class="badge bg-<%= statusColors[invoice.paymentStatus] || 'secondary' %>"><%= invoice.paymentStatus %></span>
+              </td>
+              <td>
+                <a href="/b2b/invoices/<%= invoice.orderId %>" class="btn btn-sm btn-info">
+                  <i class="fas fa-eye"></i> View
+                </a>
+              </td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr><td colspan="7" class="text-center text-muted py-4">No invoices found</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+  <% if (pagination && pagination.totalPages > 1) { %>
+  <div class="card-footer clearfix">
+    <ul class="pagination pagination-sm m-0 float-right">
+      <li class="page-item <%= pagination.page > 1 ? '' : 'disabled' %>">
+        <a class="page-link" href="?page=<%= pagination.page - 1 %>">&laquo;</a>
+      </li>
+      <li class="page-item active">
+        <span class="page-link"><%= pagination.page %> / <%= pagination.totalPages %></span>
+      </li>
+      <li class="page-item <%= pagination.page < pagination.totalPages ? '' : 'disabled' %>">
+        <a class="page-link" href="?page=<%= pagination.page + 1 %>">&raquo;</a>
+      </li>
+    </ul>
+  </div>
+  <% } %>
+</div>

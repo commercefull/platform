@@ -1,0 +1,76 @@
+<%- include("../partials/header") %>
+
+<main class="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-4xl mx-auto">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">My Addresses</h1>
+        <p class="mt-2 text-sm text-gray-600">Manage your shipping and billing addresses</p>
+      </div>
+      <a href="/addresses/create" class="mt-4 sm:mt-0 inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+        </svg>
+        Add Address
+      </a>
+    </div>
+
+    <% if (addresses && addresses.length > 0) { %>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <% addresses.forEach(addr => { %>
+          <div class="bg-white shadow-lg rounded-xl p-6 hover:shadow-xl transition-shadow relative">
+            <% if (addr.isDefault) { %>
+              <span class="absolute top-4 right-4 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Default</span>
+            <% } %>
+            <div class="flex items-start gap-3">
+              <div class="flex-shrink-0 w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+                <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+              </div>
+              <div class="flex-1">
+                <h3 class="font-semibold text-gray-900"><%= addr.label || addr.type || 'Address' %></h3>
+                <p class="text-sm text-gray-600 mt-1">
+                  <% if (addr.firstName) { %><%= addr.firstName %> <%= addr.lastName %><br><% } %>
+                  <%= addr.street1 %><br>
+                  <% if (addr.street2) { %><%= addr.street2 %><br><% } %>
+                  <%= addr.city %>, <%= addr.state %> <%= addr.postalCode %><br>
+                  <%= addr.country %>
+                </p>
+                <% if (addr.phone) { %>
+                  <p class="text-sm text-gray-500 mt-1"><%= addr.phone %></p>
+                <% } %>
+                <div class="flex gap-3 mt-4">
+                  <a href="/addresses/<%= addr.addressId %>/edit" class="text-sm text-blue-600 hover:text-blue-800">Edit</a>
+                  <% if (!addr.isDefault) { %>
+                    <form method="POST" action="/addresses/<%= addr.addressId %>/default" class="inline">
+                      <button type="submit" class="text-sm text-gray-600 hover:text-gray-800">Set as Default</button>
+                    </form>
+                  <% } %>
+                  <form method="POST" action="/addresses/<%= addr.addressId %>/delete" onsubmit="return confirm('Delete this address?')" class="inline">
+                    <button type="submit" class="text-sm text-red-600 hover:text-red-800">Delete</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <div class="bg-white shadow-lg rounded-xl p-12 text-center">
+        <div class="mx-auto h-24 w-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+          <svg class="h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+          </svg>
+        </div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">No addresses saved</h3>
+        <p class="text-gray-600 mb-6">Add a shipping address to speed up your checkout.</p>
+        <a href="/addresses/create" class="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors">Add Address</a>
+      </div>
+    <% } %>
+  </div>
+</main>
+
+<%- include("../partials/footer") %>

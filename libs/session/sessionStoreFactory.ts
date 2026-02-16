@@ -3,6 +3,7 @@ import { Pool } from 'pg';
 import Redis from 'ioredis';
 import { RedisStore } from 'connect-redis';
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const pgSession = require('connect-pg-simple')(session);
 
 export interface SessionStoreConfig {

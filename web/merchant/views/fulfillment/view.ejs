@@ -1,0 +1,137 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row align-items-center">
+    <div class="col-auto">
+      <h2 class="page-title">Fulfillment Details</h2>
+    </div>
+    <div class="col-auto ms-auto">
+      <a href="/merchant/fulfillment" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Fulfillments
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <!-- Fulfillment Info -->
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Fulfillment Information</h3>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <dl>
+              <dt>Fulfillment ID</dt>
+              <dd><code><%= fulfillment.fulfillmentId %></code></dd>
+              <dt>Order</dt>
+              <dd><a href="/merchant/orders/<%= fulfillment.orderId %>"><%= fulfillment.orderNumber || fulfillment.orderId %></a></dd>
+              <dt>Status</dt>
+              <dd>
+                <% const statusColors = { pending: 'secondary', processing: 'info', shipped: 'primary', delivered: 'success', cancelled: 'danger' }; %>
+                <span class="badge bg-<%= statusColors[fulfillment.status] || 'secondary' %>"><%= fulfillment.status %></span>
+              </dd>
+            </dl>
+          </div>
+          <div class="col-md-6">
+            <dl>
+              <dt>Tracking Number</dt>
+              <dd><%= fulfillment.trackingNumber || 'Not assigned' %></dd>
+              <dt>Carrier</dt>
+              <dd><%= fulfillment.carrier || '-' %></dd>
+              <dt>Created</dt>
+              <dd><%= fulfillment.createdAt ? new Date(fulfillment.createdAt).toLocaleString() : '-' %></dd>
+              <dt>Shipped</dt>
+              <dd><%= fulfillment.shippedAt ? new Date(fulfillment.shippedAt).toLocaleString() : 'Not yet shipped' %></dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Items -->
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Items</h3>
+      </div>
+      <div class="card-body p-0">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>SKU</th>
+              <th>Quantity</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (items && items.length > 0) { %>
+              <% items.forEach(item => { %>
+                <tr>
+                  <td><%= item.productName || item.sku %></td>
+                  <td><code><%= item.sku %></code></td>
+                  <td><%= item.quantity %></td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr><td colspan="3" class="text-center text-muted py-3">No items</td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Actions Sidebar -->
+  <div class="col-md-4">
+    <% if (fulfillment.status === 'pending' || fulfillment.status === 'processing') { %>
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Update Tracking</h3>
+      </div>
+      <div class="card-body">
+        <form method="POST" action="/merchant/fulfillment/<%= fulfillment.fulfillmentId %>/tracking">
+          <div class="form-group mb-3">
+            <label>Tracking Number</label>
+            <input type="text" name="trackingNumber" class="form-control" value="<%= fulfillment.trackingNumber || '' %>" placeholder="Enter tracking number">
+          </div>
+          <div class="form-group mb-3">
+            <label>Carrier</label>
+            <select name="carrier" class="form-control">
+              <option value="">Select carrier</option>
+              <option value="ups" <%= fulfillment.carrier === 'ups' ? 'selected' : '' %>>UPS</option>
+              <option value="fedex" <%= fulfillment.carrier === 'fedex' ? 'selected' : '' %>>FedEx</option>
+              <option value="usps" <%= fulfillment.carrier === 'usps' ? 'selected' : '' %>>USPS</option>
+              <option value="dhl" <%= fulfillment.carrier === 'dhl' ? 'selected' : '' %>>DHL</option>
+              <option value="other" <%= fulfillment.carrier === 'other' ? 'selected' : '' %>>Other</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">Update Tracking</button>
+        </form>
+      </div>
+    </div>
+    <% } %>
+
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Actions</h3>
+      </div>
+      <div class="card-body">
+        <% if (fulfillment.status === 'pending' || fulfillment.status === 'processing') { %>
+          <form method="POST" action="/merchant/fulfillment/<%= fulfillment.fulfillmentId %>/ship" class="mb-2">
+            <button type="submit" class="btn btn-success btn-block">
+              <i class="fas fa-shipping-fast"></i> Mark as Shipped
+            </button>
+          </form>
+        <% } %>
+        <% if (fulfillment.status === 'shipped') { %>
+          <form method="POST" action="/merchant/fulfillment/<%= fulfillment.fulfillmentId %>/deliver">
+            <button type="submit" class="btn btn-success btn-block">
+              <i class="fas fa-check-circle"></i> Mark as Delivered
+            </button>
+          </form>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>

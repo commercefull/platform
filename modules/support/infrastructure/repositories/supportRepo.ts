@@ -167,7 +167,7 @@ export async function getAgents(filters?: { isActive?: boolean; isAvailable?: bo
     params.push(filters.isAvailable);
   }
   if (filters?.department) {
-    whereClause += ` AND "department" = $${paramIndex++}`;
+    whereClause += ` AND "department" = $${paramIndex}`;
     params.push(filters.department);
   }
 

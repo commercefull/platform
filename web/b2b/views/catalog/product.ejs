@@ -1,0 +1,143 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row align-items-center">
+    <div class="col-auto">
+      <h2 class="page-title"><%= product.name %></h2>
+    </div>
+    <div class="col-auto ms-auto">
+      <a href="/b2b/catalog" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Catalog
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <!-- Product Details -->
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-5">
+            <% if (product.imageUrl) { %>
+              <img src="<%= product.imageUrl %>" class="img-fluid rounded" alt="<%= product.name %>">
+            <% } else { %>
+              <div class="bg-light d-flex align-items-center justify-content-center rounded" style="height: 300px;">
+                <i class="fas fa-image fa-4x text-muted"></i>
+              </div>
+            <% } %>
+          </div>
+          <div class="col-md-7">
+            <h3><%= product.name %></h3>
+            <p class="text-muted">SKU: <code><%= product.sku || '-' %></code></p>
+            <% if (product.description) { %>
+              <p><%= product.description %></p>
+            <% } %>
+            <hr>
+            <div class="mb-3">
+              <% if (b2bPrice) { %>
+                <span class="h3 text-primary">$<%= ((b2bPrice.price || 0) / 100).toFixed(2) %></span>
+                <span class="text-muted ms-2">B2B Price</span>
+                <% if (product.basePrice && product.basePrice > b2bPrice.price) { %>
+                  <br><small class="text-muted">Retail: <span class="text-decoration-line-through">$<%= ((product.basePrice || 0) / 100).toFixed(2) %></span></small>
+                  <span class="badge bg-success ms-1">Save <%= Math.round((1 - b2bPrice.price / product.basePrice) * 100) %>%</span>
+                <% } %>
+              <% } else { %>
+                <span class="h3">$<%= ((product.basePrice || 0) / 100).toFixed(2) %></span>
+              <% } %>
+            </div>
+            <div class="mb-3">
+              <span class="badge bg-<%= product.status === 'active' ? 'success' : 'secondary' %>"><%= product.status %></span>
+              <% if (product.stockQuantity !== undefined) { %>
+                <span class="badge bg-<%= product.stockQuantity > 0 ? 'info' : 'danger' %>">
+                  <%= product.stockQuantity > 0 ? product.stockQuantity + ' in stock' : 'Out of stock' %>
+                </span>
+              <% } %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Variants -->
+    <% if (variants && variants.length > 0) { %>
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Variants</h3>
+      </div>
+      <div class="card-body p-0">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>SKU</th>
+              <th>Name</th>
+              <th>Price</th>
+              <th>Stock</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% variants.forEach(variant => { %>
+              <tr>
+                <td><code><%= variant.sku %></code></td>
+                <td><%= variant.name || variant.sku %></td>
+                <td>$<%= ((variant.price || product.basePrice || 0) / 100).toFixed(2) %></td>
+                <td>
+                  <span class="badge bg-<%= (variant.stockQuantity || 0) > 0 ? 'success' : 'danger' %>">
+                    <%= (variant.stockQuantity || 0) > 0 ? variant.stockQuantity + ' available' : 'Out of stock' %>
+                  </span>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <% } %>
+  </div>
+
+  <!-- Order Sidebar -->
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Add to Order</h3>
+      </div>
+      <div class="card-body">
+        <form method="POST" action="/b2b/basket/add">
+          <input type="hidden" name="productId" value="<%= product.productId %>">
+          <div class="form-group mb-3">
+            <label>Quantity</label>
+            <input type="number" name="quantity" class="form-control" value="1" min="1">
+            <% if (product.minOrderQuantity) { %>
+              <small class="text-muted">Minimum order: <%= product.minOrderQuantity %> units</small>
+            <% } %>
+          </div>
+          <% if (variants && variants.length > 0) { %>
+          <div class="form-group mb-3">
+            <label>Variant</label>
+            <select name="variantId" class="form-control">
+              <% variants.forEach(variant => { %>
+                <option value="<%= variant.productVariantId %>"><%= variant.name || variant.sku %> - $<%= ((variant.price || product.basePrice || 0) / 100).toFixed(2) %></option>
+              <% }) %>
+            </select>
+          </div>
+          <% } %>
+          <button type="submit" class="btn btn-primary btn-block">
+            <i class="fas fa-cart-plus"></i> Add to Cart
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Request Quote</h3>
+      </div>
+      <div class="card-body">
+        <p class="text-muted">Need a custom quote for bulk orders?</p>
+        <a href="/b2b/quotes/request?productId=<%= product.productId %>" class="btn btn-outline-primary btn-block">
+          <i class="fas fa-file-invoice"></i> Request Quote
+        </a>
+      </div>
+    </div>
+  </div>
+</div>

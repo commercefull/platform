@@ -1,0 +1,113 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row align-items-center">
+    <div class="col-auto">
+      <h2 class="page-title">Sales Analytics</h2>
+    </div>
+    <div class="col-auto ms-auto">
+      <div class="btn-group">
+        <a href="/merchant/analytics/products" class="btn btn-outline-primary">Product Performance</a>
+        <a href="/merchant/analytics/customers" class="btn btn-outline-primary">Customer Insights</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Summary Cards -->
+<div class="row">
+  <div class="col-lg-3 col-6">
+    <div class="small-box bg-info">
+      <div class="inner">
+        <h3>$<%= ((salesSummary?.totalRevenue || 0) / 100).toFixed(0) %></h3>
+        <p>Total Revenue</p>
+      </div>
+      <div class="icon"><i class="fas fa-dollar-sign"></i></div>
+    </div>
+  </div>
+  <div class="col-lg-3 col-6">
+    <div class="small-box bg-success">
+      <div class="inner">
+        <h3><%= salesSummary?.totalOrders || 0 %></h3>
+        <p>Total Orders</p>
+      </div>
+      <div class="icon"><i class="fas fa-shopping-cart"></i></div>
+    </div>
+  </div>
+  <div class="col-lg-3 col-6">
+    <div class="small-box bg-warning">
+      <div class="inner">
+        <h3>$<%= ((salesSummary?.avgOrderValue || 0) / 100).toFixed(2) %></h3>
+        <p>Avg Order Value</p>
+      </div>
+      <div class="icon"><i class="fas fa-chart-line"></i></div>
+    </div>
+  </div>
+  <div class="col-lg-3 col-6">
+    <div class="small-box bg-danger">
+      <div class="inner">
+        <h3><%= salesSummary?.totalItemsSold || 0 %></h3>
+        <p>Items Sold</p>
+      </div>
+      <div class="icon"><i class="fas fa-box"></i></div>
+    </div>
+  </div>
+</div>
+
+<!-- Date Filter -->
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">Filter Period</h3>
+  </div>
+  <div class="card-body">
+    <form method="GET" class="row align-items-end">
+      <div class="col-md-3">
+        <div class="form-group">
+          <label>Start Date</label>
+          <input type="date" name="startDate" class="form-control" value="<%= startDate || '' %>">
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="form-group">
+          <label>End Date</label>
+          <input type="date" name="endDate" class="form-control" value="<%= endDate || '' %>">
+        </div>
+      </div>
+      <div class="col-md-2">
+        <button type="submit" class="btn btn-primary">Apply</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Daily Sales Table -->
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">Daily Sales</h3>
+  </div>
+  <div class="card-body p-0">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Orders</th>
+          <th>Revenue</th>
+          <th>Avg Order Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (dailySales && dailySales.length > 0) { %>
+          <% dailySales.forEach(day => { %>
+            <tr>
+              <td><%= new Date(day.date).toLocaleDateString() %></td>
+              <td><%= day.orderCount || 0 %></td>
+              <td>$<%= ((day.revenue || 0) / 100).toFixed(2) %></td>
+              <td>$<%= day.orderCount > 0 ? ((day.revenue / day.orderCount) / 100).toFixed(2) : '0.00' %></td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr><td colspan="4" class="text-center text-muted py-4">No sales data for this period</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>

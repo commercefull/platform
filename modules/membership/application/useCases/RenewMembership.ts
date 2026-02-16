@@ -76,7 +76,7 @@ export class RenewMembershipUseCase {
     }
 
     // Process payment
-    let paymentStatus = 'pending';
+    let paymentStatus: string;
     try {
       const payment = await this.processRenewalPayment(membership, tier.price, paymentMethodId || membership.defaultPaymentMethodId);
       paymentStatus = payment.status;

@@ -1,0 +1,57 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row align-items-center">
+    <div class="col-auto">
+      <h2 class="page-title">Company Addresses</h2>
+    </div>
+    <div class="col-auto ms-auto">
+      <div class="btn-group">
+        <a href="/b2b/company" class="btn btn-outline-primary">Profile</a>
+        <a href="/b2b/company/users" class="btn btn-outline-primary">Users</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">Saved Addresses</h3>
+  </div>
+  <div class="card-body">
+    <div class="row">
+      <% if (addresses && addresses.length > 0) { %>
+        <% addresses.forEach(addr => { %>
+          <div class="col-md-6 mb-3">
+            <div class="card border">
+              <div class="card-body">
+                <div class="d-flex justify-content-between mb-2">
+                  <strong><%= addr.label || addr.type || 'Address' %></strong>
+                  <div>
+                    <% if (addr.isDefault) { %>
+                      <span class="badge bg-primary">Default</span>
+                    <% } %>
+                    <span class="badge bg-secondary"><%= addr.type || 'shipping' %></span>
+                  </div>
+                </div>
+                <p class="mb-0">
+                  <%= addr.street1 %><br>
+                  <% if (addr.street2) { %><%= addr.street2 %><br><% } %>
+                  <%= addr.city %>, <%= addr.state %> <%= addr.postalCode %><br>
+                  <%= addr.country %>
+                </p>
+                <% if (addr.phone) { %>
+                  <p class="text-muted mb-0 mt-1"><i class="fas fa-phone"></i> <%= addr.phone %></p>
+                <% } %>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      <% } else { %>
+        <div class="col-12 text-center text-muted py-4">
+          <i class="fas fa-map-marker-alt fa-3x mb-3"></i>
+          <p>No addresses saved yet</p>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</div>

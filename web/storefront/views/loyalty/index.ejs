@@ -1,0 +1,76 @@
+<%- include("../partials/header") %>
+
+<main class="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-4xl mx-auto">
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900">Loyalty Rewards</h1>
+      <p class="mt-2 text-sm text-gray-600">Earn and redeem points with every purchase</p>
+    </div>
+
+    <!-- Points Summary -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+      <div class="bg-white shadow-lg rounded-xl p-6 text-center">
+        <div class="text-3xl font-extrabold text-blue-600"><%= loyalty?.pointsBalance || 0 %></div>
+        <div class="text-sm text-gray-500 mt-1">Available Points</div>
+      </div>
+      <div class="bg-white shadow-lg rounded-xl p-6 text-center">
+        <div class="text-3xl font-extrabold text-green-600"><%= loyalty?.totalEarned || 0 %></div>
+        <div class="text-sm text-gray-500 mt-1">Total Earned</div>
+      </div>
+      <div class="bg-white shadow-lg rounded-xl p-6 text-center">
+        <div class="text-3xl font-extrabold text-purple-600"><%= loyalty?.totalRedeemed || 0 %></div>
+        <div class="text-sm text-gray-500 mt-1">Total Redeemed</div>
+      </div>
+    </div>
+
+    <!-- Current Tier -->
+    <% if (loyalty?.tier) { %>
+    <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-6 text-white mb-8">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-xl font-bold"><%= loyalty.tier.name %> Member</h2>
+          <p class="text-blue-100 mt-1"><%= loyalty.tier.pointsMultiplier || 1 %>x points on all purchases</p>
+        </div>
+        <% if (loyalty.nextTier) { %>
+        <div class="text-right">
+          <p class="text-blue-100 text-sm">Next tier: <strong><%= loyalty.nextTier.name %></strong></p>
+          <p class="text-blue-200 text-xs"><%= loyalty.pointsToNextTier || 0 %> points to go</p>
+        </div>
+        <% } %>
+      </div>
+    </div>
+    <% } %>
+
+    <!-- Available Rewards -->
+    <% if (rewards && rewards.length > 0) { %>
+    <div class="mb-8">
+      <h2 class="text-xl font-bold text-gray-900 mb-4">Available Rewards</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <% rewards.forEach(reward => { %>
+          <div class="bg-white shadow-lg rounded-xl p-6 hover:shadow-xl transition-shadow">
+            <h3 class="font-semibold text-gray-900"><%= reward.name %></h3>
+            <p class="text-sm text-gray-600 mt-1"><%= reward.description || '' %></p>
+            <div class="flex items-center justify-between mt-4">
+              <span class="text-lg font-bold text-blue-600"><%= reward.pointsCost %> pts</span>
+              <% if ((loyalty?.pointsBalance || 0) >= reward.pointsCost) { %>
+                <form method="POST" action="/loyalty/redeem">
+                  <input type="hidden" name="rewardId" value="<%= reward.rewardId %>">
+                  <button type="submit" class="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors">Redeem</button>
+                </form>
+              <% } else { %>
+                <span class="text-sm text-gray-400">Not enough points</span>
+              <% } %>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+    <% } %>
+
+    <div class="text-center">
+      <a href="/loyalty/history" class="text-blue-600 hover:text-blue-800 text-sm font-medium">View Points History &rarr;</a>
+    </div>
+  </div>
+</main>
+
+<%- include("../partials/footer") %>

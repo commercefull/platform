@@ -191,7 +191,7 @@ export class Promotion {
   calculateDiscount(subtotal: number): number {
     if (!this.isApplicable(subtotal)) return 0;
 
-    let discount = 0;
+    let discount: number;
     switch (this.props.type) {
       case 'percentage':
         discount = subtotal * (this.props.value / 100);

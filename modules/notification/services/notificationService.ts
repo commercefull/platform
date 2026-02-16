@@ -18,19 +18,10 @@ class EmailDeliveryProvider implements NotificationDeliveryProvider {
     return channel === 'email';
   }
 
-  async send(notification: Notification): Promise<boolean> {
-    try {
-      // This would be replaced with actual email service integration
-
-      // Example: await emailClient.send({
-      //  to: getUserEmail(notification.userId),
-      //  subject: notification.title,
-      //  body: notification.content
-      // });
-      return true;
-    } catch (error) {
-      return false;
-    }
+  async send(_notification: Notification): Promise<boolean> {
+    // This would be replaced with actual email service integration
+    // Example: await emailClient.send({ to: getUserEmail(notification.userId), ... });
+    return true;
   }
 }
 
@@ -43,18 +34,10 @@ class SmsDeliveryProvider implements NotificationDeliveryProvider {
     return channel === 'sms';
   }
 
-  async send(notification: Notification): Promise<boolean> {
-    try {
-      // This would be replaced with actual SMS service integration
-
-      // Example: await smsClient.send({
-      //  to: getUserPhone(notification.userId),
-      //  message: `${notification.title}: ${notification.content.substring(0, 160)}`
-      // });
-      return true;
-    } catch (error) {
-      return false;
-    }
+  async send(_notification: Notification): Promise<boolean> {
+    // This would be replaced with actual SMS service integration
+    // Example: await smsClient.send({ to: getUserPhone(notification.userId), ... });
+    return true;
   }
 }
 
@@ -67,20 +50,10 @@ class PushDeliveryProvider implements NotificationDeliveryProvider {
     return channel === 'push';
   }
 
-  async send(notification: Notification): Promise<boolean> {
-    try {
-      // This would be replaced with actual push notification service integration
-
-      // Example: await pushClient.send({
-      //  userId: notification.userId,
-      //  title: notification.title,
-      //  body: notification.content.substring(0, 200),
-      //  data: notification.metadata
-      // });
-      return true;
-    } catch (error) {
-      return false;
-    }
+  async send(_notification: Notification): Promise<boolean> {
+    // This would be replaced with actual push notification service integration
+    // Example: await pushClient.send({ userId: notification.userId, ... });
+    return true;
   }
 }
 
@@ -93,15 +66,10 @@ class InAppDeliveryProvider implements NotificationDeliveryProvider {
     return channel === 'in_app';
   }
 
-  async send(notification: Notification): Promise<boolean> {
-    try {
-      // In-app notifications are already stored in the database
-      // This method would just mark them as available for in-app display
-
-      return true;
-    } catch (error) {
-      return false;
-    }
+  async send(_notification: Notification): Promise<boolean> {
+    // In-app notifications are already stored in the database
+    // This method would just mark them as available for in-app display
+    return true;
   }
 }
 

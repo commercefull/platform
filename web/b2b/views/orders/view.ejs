@@ -1,0 +1,138 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row align-items-center">
+    <div class="col-auto">
+      <h2 class="page-title">Order <%= order.orderNumber %></h2>
+    </div>
+    <div class="col-auto ms-auto">
+      <a href="/b2b/orders" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Orders
+      </a>
+      <a href="/b2b/orders/<%= order.orderId %>/reorder" class="btn btn-primary">
+        <i class="fas fa-redo"></i> Reorder
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-8">
+    <!-- Order Info -->
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Order Information</h3>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <dl>
+              <dt>Order Number</dt>
+              <dd><%= order.orderNumber %></dd>
+              <dt>Date</dt>
+              <dd><%= order.createdAt ? new Date(order.createdAt).toLocaleString() : '-' %></dd>
+              <dt>Status</dt>
+              <dd>
+                <% const statusColors = { pending: 'warning', processing: 'info', shipped: 'primary', delivered: 'success', cancelled: 'danger' }; %>
+                <span class="badge bg-<%= statusColors[order.status] || 'secondary' %>"><%= order.status %></span>
+              </dd>
+            </dl>
+          </div>
+          <div class="col-md-6">
+            <dl>
+              <dt>Payment Status</dt>
+              <dd>
+                <span class="badge bg-<%= order.paymentStatus === 'paid' ? 'success' : 'warning' %>"><%= order.paymentStatus %></span>
+              </dd>
+              <dt>Shipping Method</dt>
+              <dd><%= order.shippingMethod || '-' %></dd>
+              <dt>Tracking Number</dt>
+              <dd><%= order.trackingNumber || 'Not available' %></dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order Items -->
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Items</h3>
+      </div>
+      <div class="card-body p-0">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>SKU</th>
+              <th>Qty</th>
+              <th>Unit Price</th>
+              <th class="text-end">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (items && items.length > 0) { %>
+              <% items.forEach(item => { %>
+                <tr>
+                  <td><%= item.productName || item.name %></td>
+                  <td><code><%= item.sku || '-' %></code></td>
+                  <td><%= item.quantity %></td>
+                  <td>$<%= ((item.unitPrice || item.price || 0) / 100).toFixed(2) %></td>
+                  <td class="text-end">$<%= (((item.unitPrice || item.price || 0) * item.quantity) / 100).toFixed(2) %></td>
+                </tr>
+              <% }) %>
+            <% } %>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="4" class="text-end"><strong>Total</strong></td>
+              <td class="text-end"><strong>$<%= ((order.totalAmount || 0) / 100).toFixed(2) %></strong></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sidebar -->
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Order Summary</h3>
+      </div>
+      <div class="card-body">
+        <dl>
+          <dt>Subtotal</dt>
+          <dd>$<%= ((order.subtotal || order.totalAmount || 0) / 100).toFixed(2) %></dd>
+          <% if (order.taxAmount) { %>
+          <dt>Tax</dt>
+          <dd>$<%= ((order.taxAmount || 0) / 100).toFixed(2) %></dd>
+          <% } %>
+          <% if (order.shippingAmount) { %>
+          <dt>Shipping</dt>
+          <dd>$<%= ((order.shippingAmount || 0) / 100).toFixed(2) %></dd>
+          <% } %>
+          <% if (order.discountAmount) { %>
+          <dt>Discount</dt>
+          <dd class="text-success">-$<%= ((order.discountAmount || 0) / 100).toFixed(2) %></dd>
+          <% } %>
+          <dt class="h5 mt-2">Total</dt>
+          <dd class="h5">$<%= ((order.totalAmount || 0) / 100).toFixed(2) %></dd>
+        </dl>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Actions</h3>
+      </div>
+      <div class="card-body">
+        <a href="/b2b/invoices/<%= order.orderId %>" class="btn btn-outline-primary btn-block mb-2">
+          <i class="fas fa-file-invoice"></i> View Invoice
+        </a>
+        <a href="/b2b/orders/<%= order.orderId %>/reorder" class="btn btn-outline-success btn-block">
+          <i class="fas fa-redo"></i> Reorder
+        </a>
+      </div>
+    </div>
+  </div>
+</div>

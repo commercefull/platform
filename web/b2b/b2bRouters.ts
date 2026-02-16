@@ -12,6 +12,9 @@ import * as dashboardController from './controllers/dashboardController';
 import * as quoteController from './controllers/quoteController';
 import * as orderController from './controllers/orderController';
 import * as approvalController from './controllers/approvalController';
+import * as catalogController from './controllers/catalogController';
+import * as companyController from './controllers/companyController';
+import * as invoiceController from './controllers/invoiceController';
 
 const router = express.Router();
 
@@ -32,24 +35,58 @@ router.use(isB2BLoggedIn);
 // Dashboard
 router.get('/', dashboardController.getDashboard);
 
+// ============================================================================
+// Catalog - Browse products with B2B pricing
+// ============================================================================
+
+router.get('/catalog', catalogController.listProducts);
+router.get('/catalog/:productId', catalogController.viewProduct);
+
+// ============================================================================
 // Quotes - Company-scoped
+// ============================================================================
+
 router.get('/quotes', quoteController.listQuotes);
 router.get('/quotes/create', quoteController.createQuoteForm);
 router.post('/quotes', quoteController.createQuote);
 router.get('/quotes/:quoteId', quoteController.viewQuote);
 router.post('/quotes/:quoteId', quoteController.updateQuote);
 
+// ============================================================================
 // Orders - Company-scoped
+// ============================================================================
+
 router.get('/orders', orderController.listOrders);
 router.get('/orders/:orderId', orderController.viewOrder);
 router.get('/orders/:orderId/reorder', orderController.reorderForm);
 router.post('/orders/:orderId/reorder', orderController.submitReorder);
 
+// ============================================================================
+// Invoices - Company-scoped
+// ============================================================================
+
+router.get('/invoices', invoiceController.listInvoices);
+router.get('/invoices/:orderId', invoiceController.viewInvoice);
+
+// ============================================================================
 // Approvals - Company-scoped, role-restricted
+// ============================================================================
+
 router.get('/approvals', approvalController.listPendingApprovals);
 router.get('/approvals/history', approvalController.listApprovalHistory);
 router.get('/approvals/:approvalId', approvalController.viewApproval);
 router.post('/approvals/:approvalId/approve', approvalController.approveRequest);
 router.post('/approvals/:approvalId/reject', approvalController.rejectRequest);
+
+// ============================================================================
+// Company Management
+// ============================================================================
+
+router.get('/company', companyController.getCompanyProfile);
+router.post('/company', companyController.updateCompanyProfile);
+router.get('/company/users', companyController.listUsers);
+router.post('/company/users/invite', companyController.inviteUser);
+router.get('/company/addresses', companyController.listAddresses);
+router.post('/company/addresses', companyController.addAddress);
 
 export const b2bPortalRouter = router;

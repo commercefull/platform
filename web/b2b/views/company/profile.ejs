@@ -1,0 +1,97 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row align-items-center">
+    <div class="col-auto">
+      <h2 class="page-title">Company Profile</h2>
+    </div>
+    <div class="col-auto ms-auto">
+      <div class="btn-group">
+        <a href="/b2b/company/users" class="btn btn-outline-primary">Users</a>
+        <a href="/b2b/company/addresses" class="btn btn-outline-primary">Addresses</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Company Information</h3>
+      </div>
+      <div class="card-body">
+        <form method="POST" action="/b2b/company/profile">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group mb-3">
+                <label>Company Name</label>
+                <input type="text" name="name" class="form-control" value="<%= company?.name || '' %>">
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group mb-3">
+                <label>Tax ID / VAT Number</label>
+                <input type="text" name="taxId" class="form-control" value="<%= company?.taxId || '' %>">
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group mb-3">
+                <label>Industry</label>
+                <input type="text" name="industry" class="form-control" value="<%= company?.industry || '' %>">
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group mb-3">
+                <label>Website</label>
+                <input type="url" name="website" class="form-control" value="<%= company?.website || '' %>">
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group mb-3">
+                <label>Phone</label>
+                <input type="tel" name="phone" class="form-control" value="<%= company?.phone || '' %>">
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group mb-3">
+                <label>Email</label>
+                <input type="email" name="email" class="form-control" value="<%= company?.email || '' %>">
+              </div>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Account Details</h3>
+      </div>
+      <div class="card-body">
+        <dl>
+          <dt>Status</dt>
+          <dd>
+            <span class="badge bg-<%= company?.status === 'active' ? 'success' : 'warning' %>">
+              <%= company?.status || 'unknown' %>
+            </span>
+          </dd>
+          <dt>Credit Limit</dt>
+          <dd>$<%= ((company?.creditLimit || 0) / 100).toFixed(2) %></dd>
+          <dt>Available Credit</dt>
+          <dd>$<%= ((company?.availableCredit || 0) / 100).toFixed(2) %></dd>
+          <dt>Payment Terms</dt>
+          <dd><%= company?.paymentTerms || 'Net 30' %></dd>
+          <dt>Member Since</dt>
+          <dd><%= company?.createdAt ? new Date(company.createdAt).toLocaleDateString() : '-' %></dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+</div>

@@ -19,7 +19,7 @@ export const query = async <T>(text: string, params?: Array<unknown>): Promise<T
       res = await client.query(text);
     }
   } catch (e) {
-    throw new Error('Query failed');
+    throw new Error('Query failed', { cause: e });
   } finally {
     client.end();
   }
@@ -37,7 +37,7 @@ export const queryOne = async <T>(text: string, params: Array<unknown>): Promise
   try {
     res = await client.query(text, params);
   } catch (e) {
-    throw new Error('Query failed');
+    throw new Error('Query failed', { cause: e });
   } finally {
     client.end();
   }

@@ -1,0 +1,60 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row align-items-center">
+    <div class="col-auto">
+      <h2 class="page-title">Notification Settings</h2>
+    </div>
+    <div class="col-auto ms-auto">
+      <div class="btn-group">
+        <a href="/merchant/settings" class="btn btn-outline-primary">Profile</a>
+        <a href="/merchant/settings/store" class="btn btn-outline-primary">Store Settings</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">Email Notifications</h3>
+  </div>
+  <div class="card-body">
+    <form method="POST" action="/merchant/settings/notifications">
+      <div class="form-group mb-3">
+        <div class="custom-control custom-switch">
+          <input type="checkbox" class="custom-control-input" id="orderNotifications" name="orderNotifications" <%= preferences?.orderNotifications ? 'checked' : '' %>>
+          <label class="custom-control-label" for="orderNotifications">New Order Notifications</label>
+          <small class="form-text text-muted">Receive an email when a new order is placed</small>
+        </div>
+      </div>
+      <div class="form-group mb-3">
+        <div class="custom-control custom-switch">
+          <input type="checkbox" class="custom-control-input" id="lowStockNotifications" name="lowStockNotifications" <%= preferences?.lowStockNotifications ? 'checked' : '' %>>
+          <label class="custom-control-label" for="lowStockNotifications">Low Stock Alerts</label>
+          <small class="form-text text-muted">Get notified when inventory falls below reorder point</small>
+        </div>
+      </div>
+      <div class="form-group mb-3">
+        <div class="custom-control custom-switch">
+          <input type="checkbox" class="custom-control-input" id="reviewNotifications" name="reviewNotifications" <%= preferences?.reviewNotifications ? 'checked' : '' %>>
+          <label class="custom-control-label" for="reviewNotifications">Product Review Notifications</label>
+          <small class="form-text text-muted">Receive alerts when customers leave product reviews</small>
+        </div>
+      </div>
+      <div class="form-group mb-3">
+        <div class="custom-control custom-switch">
+          <input type="checkbox" class="custom-control-input" id="payoutNotifications" name="payoutNotifications" <%= preferences?.payoutNotifications ? 'checked' : '' %>>
+          <label class="custom-control-label" for="payoutNotifications">Payout Notifications</label>
+          <small class="form-text text-muted">Get notified about payout status changes</small>
+        </div>
+      </div>
+      <div class="form-group mb-3">
+        <div class="custom-control custom-switch">
+          <input type="checkbox" class="custom-control-input" id="marketingEmails" name="marketingEmails" <%= preferences?.marketingEmails ? 'checked' : '' %>>
+          <label class="custom-control-label" for="marketingEmails">Marketing & Tips</label>
+          <small class="form-text text-muted">Receive tips and best practices for your store</small>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary">Save Preferences</button>
+    </form>
+  </div>
+</div>

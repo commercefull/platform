@@ -1,0 +1,62 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row align-items-center">
+    <div class="col-auto">
+      <h2 class="page-title">Low Stock Alerts</h2>
+    </div>
+    <div class="col-auto ms-auto">
+      <a href="/merchant/inventory" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Inventory
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Low Stock Items -->
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title"><i class="fas fa-exclamation-triangle text-warning"></i> Items Below Reorder Point</h3>
+  </div>
+  <div class="card-body p-0">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>SKU</th>
+          <th>Product</th>
+          <th>Current Stock</th>
+          <th>Reorder Point</th>
+          <th>Reorder Quantity</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (items && items.length > 0) { %>
+          <% items.forEach(item => { %>
+            <tr>
+              <td><code><%= item.sku %></code></td>
+              <td><%= item.productName || item.sku %></td>
+              <td>
+                <span class="<%= (item.quantity || 0) === 0 ? 'text-danger fw-bold' : 'text-warning fw-bold' %>">
+                  <%= item.quantity || 0 %>
+                </span>
+              </td>
+              <td><%= item.reorderPoint || 0 %></td>
+              <td><%= item.reorderQuantity || '-' %></td>
+              <td>
+                <% if ((item.quantity || 0) === 0) { %>
+                  <span class="badge bg-danger">Out of Stock</span>
+                <% } else { %>
+                  <span class="badge bg-warning">Low Stock</span>
+                <% } %>
+              </td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr><td colspan="6" class="text-center text-muted py-4">
+            <i class="fas fa-check-circle text-success"></i> All items are well stocked
+          </td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>

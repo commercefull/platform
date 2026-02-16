@@ -234,8 +234,8 @@ export class CheckoutRepo implements CheckoutRepository {
   private mapToCheckoutSession(row: Record<string, any>): CheckoutSession {
     const currency = 'USD';
 
-    let shippingAddress: Address | undefined;
-    let billingAddress: Address | undefined;
+    const shippingAddress: Address | undefined = undefined;
+    const billingAddress: Address | undefined = undefined;
 
     return CheckoutSession.reconstitute({
       id: row.checkoutSessionId,

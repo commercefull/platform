@@ -38,7 +38,7 @@ export class GetInventoryItemUseCase {
   constructor(private readonly inventoryRepository: any) {}
 
   async execute(input: GetInventoryItemInput): Promise<GetInventoryItemOutput> {
-    let item: any = null;
+    let item: any;
 
     if (input.inventoryItemId) {
       item = await this.inventoryRepository.findById(input.inventoryItemId);

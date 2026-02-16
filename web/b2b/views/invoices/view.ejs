@@ -1,0 +1,106 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row align-items-center">
+    <div class="col-auto">
+      <h2 class="page-title">Invoice #<%= order.orderNumber %></h2>
+    </div>
+    <div class="col-auto ms-auto">
+      <a href="/b2b/invoices" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Invoices
+      </a>
+      <button onclick="window.print()" class="btn btn-outline-primary">
+        <i class="fas fa-print"></i> Print
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <!-- Invoice Header -->
+    <div class="row mb-4">
+      <div class="col-md-6">
+        <h4>Invoice Details</h4>
+        <dl>
+          <dt>Invoice Number</dt>
+          <dd><%= order.invoiceNumber || order.orderNumber %></dd>
+          <dt>Order Number</dt>
+          <dd><a href="/b2b/orders/<%= order.orderId %>"><%= order.orderNumber %></a></dd>
+          <dt>Date</dt>
+          <dd><%= order.createdAt ? new Date(order.createdAt).toLocaleDateString() : '-' %></dd>
+          <dt>Due Date</dt>
+          <dd><%= order.dueDate ? new Date(order.dueDate).toLocaleDateString() : '-' %></dd>
+        </dl>
+      </div>
+      <div class="col-md-6 text-end">
+        <h4>Payment Status</h4>
+        <% const statusColors = { pending: 'warning', paid: 'success', overdue: 'danger', cancelled: 'secondary' }; %>
+        <span class="badge bg-<%= statusColors[order.paymentStatus] || 'secondary' %> fs-5"><%= order.paymentStatus %></span>
+        <div class="mt-3">
+          <h2>$<%= ((order.totalAmount || 0) / 100).toFixed(2) %></h2>
+        </div>
+      </div>
+    </div>
+
+    <hr>
+
+    <!-- Line Items -->
+    <h5 class="mb-3">Line Items</h5>
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>SKU</th>
+          <th>Quantity</th>
+          <th>Unit Price</th>
+          <th class="text-end">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (items && items.length > 0) { %>
+          <% items.forEach(item => { %>
+            <tr>
+              <td><%= item.productName || item.name %></td>
+              <td><code><%= item.sku || '-' %></code></td>
+              <td><%= item.quantity %></td>
+              <td>$<%= ((item.unitPrice || item.price || 0) / 100).toFixed(2) %></td>
+              <td class="text-end">$<%= (((item.unitPrice || item.price || 0) * item.quantity) / 100).toFixed(2) %></td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr><td colspan="5" class="text-center text-muted py-3">No items</td></tr>
+        <% } %>
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="4" class="text-end"><strong>Subtotal</strong></td>
+          <td class="text-end">$<%= ((order.subtotal || order.totalAmount || 0) / 100).toFixed(2) %></td>
+        </tr>
+        <% if (order.taxAmount) { %>
+        <tr>
+          <td colspan="4" class="text-end">Tax</td>
+          <td class="text-end">$<%= ((order.taxAmount || 0) / 100).toFixed(2) %></td>
+        </tr>
+        <% } %>
+        <% if (order.shippingAmount) { %>
+        <tr>
+          <td colspan="4" class="text-end">Shipping</td>
+          <td class="text-end">$<%= ((order.shippingAmount || 0) / 100).toFixed(2) %></td>
+        </tr>
+        <% } %>
+        <tr>
+          <td colspan="4" class="text-end"><strong>Total</strong></td>
+          <td class="text-end"><strong>$<%= ((order.totalAmount || 0) / 100).toFixed(2) %></strong></td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <!-- Payment Info -->
+    <% if (order.paymentStatus !== 'paid') { %>
+    <div class="alert alert-warning mt-3">
+      <i class="fas fa-exclamation-triangle"></i>
+      Payment is <%= order.paymentStatus %>. Please remit payment by the due date.
+    </div>
+    <% } %>
+  </div>
+</div>
