@@ -1,4 +1,5 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 
 type ResponseData = Record<string, any>;
 
@@ -6,7 +7,7 @@ type ResponseData = Record<string, any>;
  * Admin Portal Response Helper
  * Renders admin portal views with common admin data
  */
-export async function adminRespond(req: Request, res: Response, view: string, data: ResponseData) {
+export async function adminRespond(req: TypedRequest, res: Response, view: string, data: ResponseData) {
   // Get flash messages from middleware
   const successMsg = (req as any).flash ? (req as any).flash('success')[0] : null;
   const errorMsg = (req as any).flash ? (req as any).flash('error')[0] : null;
@@ -49,7 +50,7 @@ export async function adminRespond(req: Request, res: Response, view: string, da
  * Merchant Hub Response Helper
  * Renders merchant portal views with merchant-scoped data
  */
-export async function merchantRespond(req: Request, res: Response, view: string, data: ResponseData) {
+export async function merchantRespond(req: TypedRequest, res: Response, view: string, data: ResponseData) {
   // Get flash messages from middleware
   const successMsg = (req as any).flash ? (req as any).flash('success')[0] : null;
   const errorMsg = (req as any).flash ? (req as any).flash('error')[0] : null;
@@ -93,7 +94,7 @@ export async function merchantRespond(req: Request, res: Response, view: string,
  * B2B Portal Response Helper
  * Renders B2B portal views with company-scoped data
  */
-export async function b2bRespond(req: Request, res: Response, view: string, data: ResponseData) {
+export async function b2bRespond(req: TypedRequest, res: Response, view: string, data: ResponseData) {
   // Get flash messages from middleware
   const successMsg = (req as any).flash ? (req as any).flash('success')[0] : null;
   const errorMsg = (req as any).flash ? (req as any).flash('error')[0] : null;
@@ -138,7 +139,7 @@ export async function b2bRespond(req: Request, res: Response, view: string, data
  * Storefront Response Helper (existing)
  * Renders customer-facing storefront views
  */
-export async function storefrontRespond(req: Request, res: Response, view: string, data: ResponseData) {
+export async function storefrontRespond(req: TypedRequest, res: Response, view: string, data: ResponseData) {
   // Get flash messages from middleware
   const successMsg = (req as any).flash ? (req as any).flash('success')[0] : null;
   const errorMsg = (req as any).flash ? (req as any).flash('error')[0] : null;

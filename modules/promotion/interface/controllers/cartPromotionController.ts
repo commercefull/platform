@@ -1,11 +1,12 @@
 import { logger } from '../../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import { CartPromotionRepo } from '../../infrastructure/repositories/cartRepo';
 
 const cartPromotionRepo = new CartPromotionRepo();
 
 // Get cart promotions by basket ID
-export const getPromotionsByCartId = async (req: Request, res: Response): Promise<void> => {
+export const getPromotionsByCartId = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { cartId } = req.params;
     const promotions = await cartPromotionRepo.getByBasketId(cartId);
@@ -17,7 +18,7 @@ export const getPromotionsByCartId = async (req: Request, res: Response): Promis
 };
 
 // Get promotion by ID
-export const getCartPromotionById = async (req: Request, res: Response): Promise<void> => {
+export const getCartPromotionById = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const promotion = await cartPromotionRepo.getById(id);
@@ -35,13 +36,13 @@ export const getCartPromotionById = async (req: Request, res: Response): Promise
 };
 
 // Apply a promotion to a cart
-export const applyPromotion = async (req: Request, res: Response): Promise<void> => {
+export const applyPromotion = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const promotionData = req.body;
 
     // Add audit fields
-    promotionData.createdBy = (req.user as any)?.id || 'system';
-    promotionData.updatedBy = (req.user as any)?.id || 'system';
+    promotionData.createdBy = req.user?.id || 'system';
+    promotionData.updatedBy = req.user?.id || 'system';
 
     const promotion = await cartPromotionRepo.create(promotionData);
     res.status(201).json({ success: true, data: promotion });
@@ -52,7 +53,7 @@ export const applyPromotion = async (req: Request, res: Response): Promise<void>
 };
 
 // Update a cart promotion
-export const updateCartPromotion = async (req: Request, res: Response): Promise<void> => {
+export const updateCartPromotion = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const promotionData = req.body;
@@ -66,7 +67,7 @@ export const updateCartPromotion = async (req: Request, res: Response): Promise<
 };
 
 // Remove a promotion from a cart
-export const removePromotion = async (req: Request, res: Response): Promise<void> => {
+export const removePromotion = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     await cartPromotionRepo.delete(id);

@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import { query, queryOne } from '../../../libs/db';
 import { storefrontRespond } from '../../respond';
 
@@ -17,7 +18,7 @@ interface CustomerUser {
 /**
  * GET: View loyalty dashboard
  */
-export const loyaltyDashboard = async (req: Request, res: Response) => {
+export const loyaltyDashboard = async (req: TypedRequest, res: Response) => {
   try {
     const user = req.user as CustomerUser;
     if (!user?.customerId) {
@@ -65,7 +66,7 @@ export const loyaltyDashboard = async (req: Request, res: Response) => {
 /**
  * GET: View loyalty points history
  */
-export const pointsHistory = async (req: Request, res: Response) => {
+export const pointsHistory = async (req: TypedRequest, res: Response) => {
   try {
     const user = req.user as CustomerUser;
     if (!user?.customerId) {
@@ -116,7 +117,7 @@ export const pointsHistory = async (req: Request, res: Response) => {
 /**
  * POST: Redeem loyalty reward
  */
-export const redeemReward = async (req: Request, res: Response) => {
+export const redeemReward = async (req: TypedRequest, res: Response) => {
   try {
     const user = req.user as CustomerUser;
     if (!user?.customerId) {

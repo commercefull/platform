@@ -3,7 +3,8 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import PaymentRepo from '../../infrastructure/repositories/PaymentRepository';
 import { InitiatePaymentCommand, InitiatePaymentUseCase } from '../../application/useCases/InitiatePayment';
 import { ProcessPaymentRefundCommand, ProcessPaymentRefundUseCase } from '../../application/useCases/ProcessRefund';
@@ -16,11 +17,11 @@ import {
 import { TransactionStatus } from '../../domain/valueObjects/PaymentStatus';
 import { query, queryOne } from '../../../../libs/db';
 
-function respond(req: Request, res: Response, data: any, statusCode: number = 200): void {
+function respond(req: TypedRequest, res: Response, data: any, statusCode: number = 200): void {
   res.status(statusCode).json({ success: true, data });
 }
 
-function respondError(req: Request, res: Response, message: string, statusCode: number = 500): void {
+function respondError(req: TypedRequest, res: Response, message: string, statusCode: number = 500): void {
   res.status(statusCode).json({ success: false, error: message });
 }
 
@@ -28,9 +29,9 @@ function respondError(req: Request, res: Response, message: string, statusCode: 
 // Customer Endpoints
 // ============================================================================
 
-export const getMyTransactions = async (req: Request, res: Response): Promise<void> => {
+export const getMyTransactions = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const customerId = (req as any).user?.customerId || (req as any).user?._id;
+    const customerId = req.user?.customerId || req.user?._id;
     if (!customerId) {
       respondError(req, res, 'Authentication required', 401);
       return;
@@ -50,7 +51,7 @@ export const getMyTransactions = async (req: Request, res: Response): Promise<vo
   }
 };
 
-export const getTransactionByOrder = async (req: Request, res: Response): Promise<void> => {
+export const getTransactionByOrder = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { orderId } = req.params;
     const transactions = await PaymentRepo.findTransactionsByOrderId(orderId);
@@ -62,7 +63,7 @@ export const getTransactionByOrder = async (req: Request, res: Response): Promis
   }
 };
 
-export const getPaymentMethods = async (req: Request, res: Response): Promise<void> => {
+export const getPaymentMethods = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { currency } = req.query;
     const methods = await PaymentRepo.getEnabledPaymentMethods('default', currency as string);
@@ -78,7 +79,7 @@ export const getPaymentMethods = async (req: Request, res: Response): Promise<vo
 // Business Endpoints
 // ============================================================================
 
-export const listTransactions = async (req: Request, res: Response): Promise<void> => {
+export const listTransactions = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { orderId, customerId, status, gatewayId, startDate, endDate, limit, offset, orderBy, orderDirection } = req.query;
 
@@ -109,7 +110,7 @@ export const listTransactions = async (req: Request, res: Response): Promise<voi
   }
 };
 
-export const getTransaction = async (req: Request, res: Response): Promise<void> => {
+export const getTransaction = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { transactionId } = req.params;
     const command = new GetTransactionCommand(transactionId);
@@ -129,7 +130,7 @@ export const getTransaction = async (req: Request, res: Response): Promise<void>
   }
 };
 
-export const initiatePayment = async (req: Request, res: Response): Promise<void> => {
+export const initiatePayment = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { orderId, amount, currency, paymentMethodConfigId, customerId } = req.body;
 
@@ -151,7 +152,7 @@ export const initiatePayment = async (req: Request, res: Response): Promise<void
   }
 };
 
-export const processRefund = async (req: Request, res: Response): Promise<void> => {
+export const processRefund = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { transactionId } = req.params;
     const { amount, reason } = req.body;
@@ -181,7 +182,7 @@ export const processRefund = async (req: Request, res: Response): Promise<void> 
   }
 };
 
-export const getRefunds = async (req: Request, res: Response): Promise<void> => {
+export const getRefunds = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { transactionId } = req.params;
     const refunds = await PaymentRepo.findRefundsByTransactionId(transactionId);
@@ -197,9 +198,9 @@ export const getRefunds = async (req: Request, res: Response): Promise<void> => 
 // Gateway Management Endpoints
 // ============================================================================
 
-export const listGateways = async (req: Request, res: Response): Promise<void> => {
+export const listGateways = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const merchantId = (req as any).user?.merchantId || (req as any).user?._id;
+    const merchantId = req.user?.merchantId || req.user?._id;
     if (!merchantId) {
       respondError(req, res, 'Authentication required', 401);
       return;
@@ -217,7 +218,7 @@ export const listGateways = async (req: Request, res: Response): Promise<void> =
   }
 };
 
-export const getGateway = async (req: Request, res: Response): Promise<void> => {
+export const getGateway = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { gatewayId } = req.params;
     const gateway = await queryOne<Record<string, any>>(
@@ -237,9 +238,9 @@ export const getGateway = async (req: Request, res: Response): Promise<void> => 
   }
 };
 
-export const createGateway = async (req: Request, res: Response): Promise<void> => {
+export const createGateway = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const merchantId = (req as any).user?.merchantId || (req as any).user?._id;
+    const merchantId = req.user?.merchantId || req.user?._id;
     if (!merchantId) {
       respondError(req, res, 'Authentication required', 401);
       return;
@@ -299,7 +300,7 @@ export const createGateway = async (req: Request, res: Response): Promise<void> 
   }
 };
 
-export const updateGateway = async (req: Request, res: Response): Promise<void> => {
+export const updateGateway = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { gatewayId } = req.params;
     const updates = req.body;
@@ -350,7 +351,7 @@ export const updateGateway = async (req: Request, res: Response): Promise<void> 
   }
 };
 
-export const deleteGateway = async (req: Request, res: Response): Promise<void> => {
+export const deleteGateway = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { gatewayId } = req.params;
     const now = new Date().toISOString();
@@ -369,9 +370,9 @@ export const deleteGateway = async (req: Request, res: Response): Promise<void> 
 // Method Config Management Endpoints
 // ============================================================================
 
-export const listMethodConfigs = async (req: Request, res: Response): Promise<void> => {
+export const listMethodConfigs = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const merchantId = (req as any).user?.merchantId || (req as any).user?._id;
+    const merchantId = req.user?.merchantId || req.user?._id;
     if (!merchantId) {
       respondError(req, res, 'Authentication required', 401);
       return;
@@ -389,7 +390,7 @@ export const listMethodConfigs = async (req: Request, res: Response): Promise<vo
   }
 };
 
-export const getMethodConfig = async (req: Request, res: Response): Promise<void> => {
+export const getMethodConfig = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { methodConfigId } = req.params;
     const config = await queryOne<Record<string, any>>(
@@ -409,9 +410,9 @@ export const getMethodConfig = async (req: Request, res: Response): Promise<void
   }
 };
 
-export const createMethodConfig = async (req: Request, res: Response): Promise<void> => {
+export const createMethodConfig = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const merchantId = (req as any).user?.merchantId || (req as any).user?._id;
+    const merchantId = req.user?.merchantId || req.user?._id;
     if (!merchantId) {
       respondError(req, res, 'Authentication required', 401);
       return;
@@ -475,7 +476,7 @@ export const createMethodConfig = async (req: Request, res: Response): Promise<v
   }
 };
 
-export const updateMethodConfig = async (req: Request, res: Response): Promise<void> => {
+export const updateMethodConfig = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { methodConfigId } = req.params;
     const updates = req.body;
@@ -528,7 +529,7 @@ export const updateMethodConfig = async (req: Request, res: Response): Promise<v
   }
 };
 
-export const deleteMethodConfig = async (req: Request, res: Response): Promise<void> => {
+export const deleteMethodConfig = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { methodConfigId } = req.params;
     const now = new Date().toISOString();
@@ -543,7 +544,7 @@ export const deleteMethodConfig = async (req: Request, res: Response): Promise<v
   }
 };
 
-export const deleteTransaction = async (req: Request, res: Response): Promise<void> => {
+export const deleteTransaction = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { transactionId } = req.params;
     const now = new Date().toISOString();

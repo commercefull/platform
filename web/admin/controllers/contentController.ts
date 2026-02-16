@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';;
 import ContentRepo from '../../../modules/content/infrastructure/repositories/contentRepo';
 import { CreatePageUseCase, CreatePageCommand } from '../../../modules/content/application/useCases/CreatePage';
 import { UpdatePageUseCase, UpdatePageCommand } from '../../../modules/content/application/useCases/UpdatePage';
@@ -15,7 +16,7 @@ import { adminRespond } from '../../respond';
 // Content Pages
 // ============================================================================
 
-export const listContentPages = async (req: Request, res: Response): Promise<void> => {
+export const listContentPages = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const status = req.query.status as string | undefined;
     const contentTypeId = req.query.contentTypeId as string | undefined;
@@ -46,7 +47,7 @@ export const listContentPages = async (req: Request, res: Response): Promise<voi
   }
 };
 
-export const createContentPageForm = async (req: Request, res: Response): Promise<void> => {
+export const createContentPageForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const contentTypes = await ContentRepo.findAllContentTypes(true);
     const templates = await ContentRepo.findAllTemplates(true);
@@ -66,7 +67,7 @@ export const createContentPageForm = async (req: Request, res: Response): Promis
   }
 };
 
-export const createContentPage = async (req: Request, res: Response): Promise<void> => {
+export const createContentPage = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const {
       title,
@@ -131,7 +132,7 @@ export const createContentPage = async (req: Request, res: Response): Promise<vo
   }
 };
 
-export const viewContentPage = async (req: Request, res: Response): Promise<void> => {
+export const viewContentPage = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { pageId } = req.params;
 
@@ -165,7 +166,7 @@ export const viewContentPage = async (req: Request, res: Response): Promise<void
   }
 };
 
-export const editContentPageForm = async (req: Request, res: Response): Promise<void> => {
+export const editContentPageForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { pageId } = req.params;
 
@@ -198,7 +199,7 @@ export const editContentPageForm = async (req: Request, res: Response): Promise<
   }
 };
 
-export const updateContentPage = async (req: Request, res: Response): Promise<void> => {
+export const updateContentPage = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { pageId } = req.params;
     const updates: any = {};
@@ -263,7 +264,7 @@ export const updateContentPage = async (req: Request, res: Response): Promise<vo
   }
 };
 
-export const publishContentPage = async (req: Request, res: Response): Promise<void> => {
+export const publishContentPage = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { pageId } = req.params;
 
@@ -279,7 +280,7 @@ export const publishContentPage = async (req: Request, res: Response): Promise<v
   }
 };
 
-export const deleteContentPage = async (req: Request, res: Response): Promise<void> => {
+export const deleteContentPage = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { pageId } = req.params;
 
@@ -301,7 +302,7 @@ export const deleteContentPage = async (req: Request, res: Response): Promise<vo
 // Content Templates
 // ============================================================================
 
-export const listContentTemplates = async (req: Request, res: Response): Promise<void> => {
+export const listContentTemplates = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const templates = await ContentRepo.findAllTemplates();
 
@@ -325,7 +326,7 @@ export const listContentTemplates = async (req: Request, res: Response): Promise
 // Content Media
 // ============================================================================
 
-export const listContentMedia = async (req: Request, res: Response): Promise<void> => {
+export const listContentMedia = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     // For now, show basic media interface - can be expanded later
     const mediaItems: any[] = [];

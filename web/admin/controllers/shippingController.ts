@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';;
 import shippingMethodRepo from '../../../modules/shipping/infrastructure/repositories/shippingMethodRepo';
 import { adminRespond } from '../../respond';
 
@@ -12,7 +13,7 @@ import { adminRespond } from '../../respond';
 // Shipping Methods
 // ============================================================================
 
-export const listShippingMethods = async (req: Request, res: Response): Promise<void> => {
+export const listShippingMethods = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const methods = await shippingMethodRepo.findAll();
 
@@ -32,7 +33,7 @@ export const listShippingMethods = async (req: Request, res: Response): Promise<
   }
 };
 
-export const createShippingMethodForm = async (req: Request, res: Response): Promise<void> => {
+export const createShippingMethodForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     adminRespond(req, res, 'shipping/methods/create', {
       pageName: 'Create Shipping Method',
@@ -47,7 +48,7 @@ export const createShippingMethodForm = async (req: Request, res: Response): Pro
   }
 };
 
-export const createShippingMethod = async (req: Request, res: Response): Promise<void> => {
+export const createShippingMethod = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const {
       name,
@@ -105,7 +106,7 @@ export const createShippingMethod = async (req: Request, res: Response): Promise
   }
 };
 
-export const viewShippingMethod = async (req: Request, res: Response): Promise<void> => {
+export const viewShippingMethod = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { methodId } = req.params;
 
@@ -135,7 +136,7 @@ export const viewShippingMethod = async (req: Request, res: Response): Promise<v
   }
 };
 
-export const editShippingMethodForm = async (req: Request, res: Response): Promise<void> => {
+export const editShippingMethodForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { methodId } = req.params;
 
@@ -163,7 +164,7 @@ export const editShippingMethodForm = async (req: Request, res: Response): Promi
   }
 };
 
-export const updateShippingMethod = async (req: Request, res: Response): Promise<void> => {
+export const updateShippingMethod = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { methodId } = req.params;
     const updates: any = {};
@@ -235,7 +236,7 @@ export const updateShippingMethod = async (req: Request, res: Response): Promise
   }
 };
 
-export const deleteShippingMethod = async (req: Request, res: Response): Promise<void> => {
+export const deleteShippingMethod = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { methodId } = req.params;
 
@@ -253,7 +254,7 @@ export const deleteShippingMethod = async (req: Request, res: Response): Promise
   }
 };
 
-export const activateShippingMethod = async (req: Request, res: Response): Promise<void> => {
+export const activateShippingMethod = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { methodId } = req.params;
 
@@ -271,7 +272,7 @@ export const activateShippingMethod = async (req: Request, res: Response): Promi
   }
 };
 
-export const deactivateShippingMethod = async (req: Request, res: Response): Promise<void> => {
+export const deactivateShippingMethod = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { methodId } = req.params;
 

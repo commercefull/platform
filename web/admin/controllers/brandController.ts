@@ -4,12 +4,13 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';;
 import { adminRespond } from '../../respond';
 
 // Note: Brand repository would need to be created or imported from modules/brand
 
-export const listBrands = async (req: Request, res: Response): Promise<void> => {
+export const listBrands = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     adminRespond(req, res, 'catalog/brands/index', {
       pageName: 'Brands',
@@ -26,7 +27,7 @@ export const listBrands = async (req: Request, res: Response): Promise<void> => 
   }
 };
 
-export const createBrandForm = async (req: Request, res: Response): Promise<void> => {
+export const createBrandForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     adminRespond(req, res, 'catalog/brands/create', {
       pageName: 'Create Brand',
@@ -40,7 +41,7 @@ export const createBrandForm = async (req: Request, res: Response): Promise<void
   }
 };
 
-export const createBrand = async (req: Request, res: Response): Promise<void> => {
+export const createBrand = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     res.redirect('/admin/catalog/brands?success=Brand created successfully');
   } catch (error: any) {
@@ -53,7 +54,7 @@ export const createBrand = async (req: Request, res: Response): Promise<void> =>
   }
 };
 
-export const viewBrand = async (req: Request, res: Response): Promise<void> => {
+export const viewBrand = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     adminRespond(req, res, 'catalog/brands/view', {
       pageName: 'Brand Details',
@@ -69,7 +70,7 @@ export const viewBrand = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export const editBrandForm = async (req: Request, res: Response): Promise<void> => {
+export const editBrandForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     adminRespond(req, res, 'catalog/brands/edit', {
       pageName: 'Edit Brand',
@@ -84,7 +85,7 @@ export const editBrandForm = async (req: Request, res: Response): Promise<void> 
   }
 };
 
-export const updateBrand = async (req: Request, res: Response): Promise<void> => {
+export const updateBrand = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { brandId } = req.params;
     res.redirect(`/admin/catalog/brands/${brandId}?success=Brand updated successfully`);
@@ -99,7 +100,7 @@ export const updateBrand = async (req: Request, res: Response): Promise<void> =>
   }
 };
 
-export const deleteBrand = async (req: Request, res: Response): Promise<void> => {
+export const deleteBrand = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     res.json({ success: true, message: 'Brand deleted successfully' });
   } catch (error: any) {

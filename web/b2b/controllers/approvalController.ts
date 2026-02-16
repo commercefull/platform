@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import { query, queryOne } from '../../../libs/db';
 import { b2bRespond } from '../../respond';
 
@@ -19,7 +20,7 @@ interface B2BUser {
 /**
  * GET: List pending approvals
  */
-export const listPendingApprovals = async (req: Request, res: Response) => {
+export const listPendingApprovals = async (req: TypedRequest, res: Response) => {
   try {
     const user = req.user as B2BUser;
     if (!user?.companyId) {
@@ -85,7 +86,7 @@ export const listPendingApprovals = async (req: Request, res: Response) => {
 /**
  * GET: Approval history
  */
-export const listApprovalHistory = async (req: Request, res: Response) => {
+export const listApprovalHistory = async (req: TypedRequest, res: Response) => {
   try {
     const user = req.user as B2BUser;
     if (!user?.companyId) {
@@ -145,7 +146,7 @@ export const listApprovalHistory = async (req: Request, res: Response) => {
 /**
  * GET: View approval request
  */
-export const viewApproval = async (req: Request, res: Response) => {
+export const viewApproval = async (req: TypedRequest, res: Response) => {
   try {
     const user = req.user as B2BUser;
     if (!user?.companyId) {
@@ -190,7 +191,7 @@ export const viewApproval = async (req: Request, res: Response) => {
 /**
  * POST: Approve a request
  */
-export const approveRequest = async (req: Request, res: Response) => {
+export const approveRequest = async (req: TypedRequest, res: Response) => {
   try {
     const user = req.user as B2BUser;
     if (!user?.companyId) {
@@ -231,7 +232,7 @@ export const approveRequest = async (req: Request, res: Response) => {
 /**
  * POST: Reject a request
  */
-export const rejectRequest = async (req: Request, res: Response) => {
+export const rejectRequest = async (req: TypedRequest, res: Response) => {
   try {
     const user = req.user as B2BUser;
     if (!user?.companyId) {

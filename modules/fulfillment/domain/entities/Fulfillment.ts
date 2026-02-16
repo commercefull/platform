@@ -352,6 +352,15 @@ export class Fulfillment {
   }
 
   /**
+   * Mark as returned
+   */
+  markReturned(): void {
+    this.validateTransition('returned');
+    this.props.status = 'returned';
+    this.props.updatedAt = new Date();
+  }
+
+  /**
    * Cancel fulfillment
    */
   cancel(): void {

@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';;
 import bcrypt from 'bcryptjs';
 import { SessionService } from '../../../libs/session';
 import { query, queryOne } from '../../../libs/db';
@@ -26,7 +27,7 @@ interface B2BUser {
 /**
  * GET: B2B login page
  */
-export const getLogin = async (req: Request, res: Response) => {
+export const getLogin = async (req: TypedRequest, res: Response) => {
   const sessionId = req.cookies?.[SESSION_COOKIE_NAME];
   if (sessionId) {
     const session = await SessionService.getSession(sessionId);
@@ -44,7 +45,7 @@ export const getLogin = async (req: Request, res: Response) => {
 /**
  * POST: B2B login form submission
  */
-export const postLogin = async (req: Request, res: Response) => {
+export const postLogin = async (req: TypedRequest, res: Response) => {
   try {
     const { email, password, rememberMe } = req.body;
 
@@ -126,7 +127,7 @@ export const postLogin = async (req: Request, res: Response) => {
 /**
  * POST: B2B logout
  */
-export const postLogout = async (req: Request, res: Response) => {
+export const postLogout = async (req: TypedRequest, res: Response) => {
   try {
     const sessionId = req.cookies?.[SESSION_COOKIE_NAME];
     if (sessionId) {

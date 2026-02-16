@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import { query, queryOne } from '../../../libs/db';
 import { storefrontRespond } from '../../respond';
 
@@ -17,7 +18,7 @@ interface CustomerUser {
 /**
  * GET: List customer addresses
  */
-export const listAddresses = async (req: Request, res: Response) => {
+export const listAddresses = async (req: TypedRequest, res: Response) => {
   try {
     const user = req.user as CustomerUser;
     if (!user?.customerId) {
@@ -47,7 +48,7 @@ export const listAddresses = async (req: Request, res: Response) => {
 /**
  * GET: Add address form
  */
-export const addAddressForm = async (req: Request, res: Response) => {
+export const addAddressForm = async (req: TypedRequest, res: Response) => {
   try {
     const user = req.user as CustomerUser;
     if (!user?.customerId) {
@@ -69,7 +70,7 @@ export const addAddressForm = async (req: Request, res: Response) => {
 /**
  * POST: Add new address
  */
-export const addAddress = async (req: Request, res: Response) => {
+export const addAddress = async (req: TypedRequest, res: Response) => {
   try {
     const user = req.user as CustomerUser;
     if (!user?.customerId) {
@@ -110,7 +111,7 @@ export const addAddress = async (req: Request, res: Response) => {
 /**
  * GET: Edit address form
  */
-export const editAddressForm = async (req: Request, res: Response) => {
+export const editAddressForm = async (req: TypedRequest, res: Response) => {
   try {
     const user = req.user as CustomerUser;
     if (!user?.customerId) {
@@ -148,7 +149,7 @@ export const editAddressForm = async (req: Request, res: Response) => {
 /**
  * POST: Update address
  */
-export const updateAddress = async (req: Request, res: Response) => {
+export const updateAddress = async (req: TypedRequest, res: Response) => {
   try {
     const user = req.user as CustomerUser;
     if (!user?.customerId) {
@@ -189,7 +190,7 @@ export const updateAddress = async (req: Request, res: Response) => {
 /**
  * POST: Delete address (soft delete)
  */
-export const deleteAddress = async (req: Request, res: Response) => {
+export const deleteAddress = async (req: TypedRequest, res: Response) => {
   try {
     const user = req.user as CustomerUser;
     if (!user?.customerId) {

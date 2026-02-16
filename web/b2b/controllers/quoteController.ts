@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import { query, queryOne } from '../../../libs/db';
 import { b2bRespond } from '../../respond';
 
@@ -19,7 +20,7 @@ interface B2BUser {
 /**
  * GET: List company's quotes
  */
-export const listQuotes = async (req: Request, res: Response) => {
+export const listQuotes = async (req: TypedRequest, res: Response) => {
   try {
     const user = req.user as B2BUser;
     if (!user?.companyId) {
@@ -83,7 +84,7 @@ export const listQuotes = async (req: Request, res: Response) => {
 /**
  * GET: View single quote
  */
-export const viewQuote = async (req: Request, res: Response) => {
+export const viewQuote = async (req: TypedRequest, res: Response) => {
   try {
     const user = req.user as B2BUser;
     if (!user?.companyId) {
@@ -136,7 +137,7 @@ export const viewQuote = async (req: Request, res: Response) => {
 /**
  * GET: Request new quote form
  */
-export const createQuoteForm = async (req: Request, res: Response) => {
+export const createQuoteForm = async (req: TypedRequest, res: Response) => {
   try {
     const user = req.user as B2BUser;
     if (!user?.companyId) {
@@ -161,7 +162,7 @@ export const createQuoteForm = async (req: Request, res: Response) => {
 /**
  * POST: Create/submit a new quote request
  */
-export const createQuote = async (req: Request, res: Response) => {
+export const createQuote = async (req: TypedRequest, res: Response) => {
   try {
     const user = req.user as B2BUser;
     if (!user?.companyId) {
@@ -196,7 +197,7 @@ export const createQuote = async (req: Request, res: Response) => {
 /**
  * POST: Update quote (add notes, change status)
  */
-export const updateQuote = async (req: Request, res: Response) => {
+export const updateQuote = async (req: TypedRequest, res: Response) => {
   try {
     const user = req.user as B2BUser;
     if (!user?.companyId) {

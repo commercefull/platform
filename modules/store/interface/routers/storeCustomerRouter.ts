@@ -4,13 +4,14 @@
  * Public-facing routes for browsing stores and pickup locations.
  */
 
-import { Router, Request, Response } from 'express';
+import { Router, Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import { StoreRepo } from '../../infrastructure/repositories/StoreRepo';
 
 const storeRepo = new StoreRepo();
 const router = Router();
 
-router.get('/stores', async (req: Request, res: Response) => {
+router.get('/stores', async (req: TypedRequest, res: Response) => {
   try {
     const stores = await storeRepo.findAll();
     res.json({ data: stores });
@@ -19,7 +20,7 @@ router.get('/stores', async (req: Request, res: Response) => {
   }
 });
 
-router.get('/stores/:storeId', async (req: Request, res: Response) => {
+router.get('/stores/:storeId', async (req: TypedRequest, res: Response) => {
   try {
     const store = await storeRepo.findById(req.params.storeId);
     if (!store) {

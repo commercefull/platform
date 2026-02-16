@@ -4,10 +4,11 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import * as giftCardRepo from '../../infrastructure/repositories/giftCardRepo';
 
-type AsyncHandler = (req: Request, res: Response, next: NextFunction) => Promise<void>;
+type AsyncHandler = (req: TypedRequest, res: Response, next: NextFunction) => Promise<void>;
 
 export const getGiftCards: AsyncHandler = async (req, res, next) => {
   try {
@@ -64,7 +65,7 @@ export const activateGiftCard: AsyncHandler = async (req, res, next) => {
 
 export const refundToGiftCard: AsyncHandler = async (req, res, next) => {
   try {
-    const adminId = (req as any).userId || (req as any).merchantId;
+    const adminId = req.user?.userId || req.user?.merchantId;
     const transaction = await giftCardRepo.refundToGiftCard(req.params.id, req.body.amount, req.body.orderId, adminId, req.body.notes);
     res.json({ success: true, data: transaction });
   } catch (error: any) {

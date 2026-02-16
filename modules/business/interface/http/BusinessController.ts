@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import { CreateBusinessUseCase, CreateBusinessCommand } from '../../application/useCases/CreateBusiness';
 import { BusinessRepo } from '../../infrastructure/repositories/BusinessRepo';
 import { SystemConfigurationRepo } from '../../../configuration/infrastructure/repositories/SystemConfigurationRepo';
@@ -22,7 +23,7 @@ export class BusinessController {
    * Create a new business
    * POST /business/businesses
    */
-  async createBusiness(req: Request, res: Response) {
+  async createBusiness(req: TypedRequest, res: Response) {
     try {
       const command = new CreateBusinessCommand({
         name: req.body.name,
@@ -62,7 +63,7 @@ export class BusinessController {
    * Get business by ID
    * GET /business/businesses/:businessId
    */
-  async getBusiness(req: Request, res: Response) {
+  async getBusiness(req: TypedRequest, res: Response) {
     try {
       const businessRepository = new BusinessRepo();
       const business = await businessRepository.findById(req.params.businessId);
@@ -94,7 +95,7 @@ export class BusinessController {
    * Get business by slug
    * GET /business/businesses/slug/:slug
    */
-  async getBusinessBySlug(req: Request, res: Response) {
+  async getBusinessBySlug(req: TypedRequest, res: Response) {
     try {
       const businessRepository = new BusinessRepo();
       const business = await businessRepository.findBySlug(req.params.slug);
@@ -126,7 +127,7 @@ export class BusinessController {
    * List businesses
    * GET /business/businesses
    */
-  async listBusinesses(req: Request, res: Response) {
+  async listBusinesses(req: TypedRequest, res: Response) {
     try {
       const businessRepository = new BusinessRepo();
       const businesses = await businessRepository.findAll();

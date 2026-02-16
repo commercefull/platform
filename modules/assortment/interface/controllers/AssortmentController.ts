@@ -3,7 +3,8 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import {
   CreateAssortmentUseCase,
   GetAssortmentUseCase,
@@ -14,7 +15,7 @@ import {
   GetVisibleProductsUseCase,
 } from '../../application/useCases';
 
-export const createAssortment = async (req: Request, res: Response): Promise<void> => {
+export const createAssortment = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const useCase = new CreateAssortmentUseCase();
     const result = await useCase.execute({
@@ -31,7 +32,7 @@ export const createAssortment = async (req: Request, res: Response): Promise<voi
   }
 };
 
-export const getAssortment = async (req: Request, res: Response): Promise<void> => {
+export const getAssortment = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const useCase = new GetAssortmentUseCase();
     const result = await useCase.execute({
@@ -45,7 +46,7 @@ export const getAssortment = async (req: Request, res: Response): Promise<void> 
   }
 };
 
-export const listAssortments = async (req: Request, res: Response): Promise<void> => {
+export const listAssortments = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const useCase = new ListAssortmentsUseCase();
     const result = await useCase.execute({
@@ -58,7 +59,7 @@ export const listAssortments = async (req: Request, res: Response): Promise<void
   }
 };
 
-export const addItem = async (req: Request, res: Response): Promise<void> => {
+export const addItem = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const useCase = new AddItemToAssortmentUseCase();
     const result = await useCase.execute({
@@ -76,7 +77,7 @@ export const addItem = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export const removeItem = async (req: Request, res: Response): Promise<void> => {
+export const removeItem = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const useCase = new RemoveItemFromAssortmentUseCase();
     const result = await useCase.execute({
@@ -90,7 +91,7 @@ export const removeItem = async (req: Request, res: Response): Promise<void> => 
   }
 };
 
-export const setScope = async (req: Request, res: Response): Promise<void> => {
+export const setScope = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const useCase = new SetAssortmentScopeUseCase();
     const result = await useCase.execute({
@@ -107,7 +108,7 @@ export const setScope = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export const getVisibleProducts = async (req: Request, res: Response): Promise<void> => {
+export const getVisibleProducts = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const useCase = new GetVisibleProductsUseCase();
     const result = await useCase.execute({

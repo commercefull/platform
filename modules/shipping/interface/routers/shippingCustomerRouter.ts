@@ -17,4 +17,7 @@ router.post('/calculate-rates', shippingController.calculateRates);
 // Get packaging types (for reference)
 router.get('/packaging-types', shippingController.getPackagingTypes);
 
+// Estimate delivery time for a shipping method
+router.post('/estimate-delivery', shippingController.estimateDelivery);
+
 export const shippingCustomerRouter = router;

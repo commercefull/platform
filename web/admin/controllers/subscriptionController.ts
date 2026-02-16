@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';;
 import {
   getSubscriptionPlan,
   getSubscriptionPlans,
@@ -58,7 +59,7 @@ function calculateNextBillingDate(fromDate: Date, interval: string, count: numbe
 // Subscription Plans Management
 // ============================================================================
 
-export const listSubscriptionPlans = async (req: Request, res: Response): Promise<void> => {
+export const listSubscriptionPlans = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const productId = req.query.productId as string;
     const activeOnly = req.query.activeOnly !== 'false';
@@ -86,7 +87,7 @@ export const listSubscriptionPlans = async (req: Request, res: Response): Promis
   }
 };
 
-export const createSubscriptionPlanForm = async (req: Request, res: Response): Promise<void> => {
+export const createSubscriptionPlanForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const productId = req.query.productId as string;
 
@@ -104,7 +105,7 @@ export const createSubscriptionPlanForm = async (req: Request, res: Response): P
   }
 };
 
-export const createSubscriptionPlan = async (req: Request, res: Response): Promise<void> => {
+export const createSubscriptionPlan = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const {
       subscriptionProductId,
@@ -164,7 +165,7 @@ export const createSubscriptionPlan = async (req: Request, res: Response): Promi
   }
 };
 
-export const viewSubscriptionPlan = async (req: Request, res: Response): Promise<void> => {
+export const viewSubscriptionPlan = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { planId } = req.params;
 
@@ -194,7 +195,7 @@ export const viewSubscriptionPlan = async (req: Request, res: Response): Promise
   }
 };
 
-export const editSubscriptionPlanForm = async (req: Request, res: Response): Promise<void> => {
+export const editSubscriptionPlanForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { planId } = req.params;
 
@@ -222,7 +223,7 @@ export const editSubscriptionPlanForm = async (req: Request, res: Response): Pro
   }
 };
 
-export const updateSubscriptionPlan = async (req: Request, res: Response): Promise<void> => {
+export const updateSubscriptionPlan = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { planId } = req.params;
     const updates: any = {};
@@ -299,7 +300,7 @@ export const updateSubscriptionPlan = async (req: Request, res: Response): Promi
   }
 };
 
-export const deleteSubscriptionPlan = async (req: Request, res: Response): Promise<void> => {
+export const deleteSubscriptionPlan = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { planId } = req.params;
 
@@ -317,7 +318,7 @@ export const deleteSubscriptionPlan = async (req: Request, res: Response): Promi
 // Customer Subscriptions Management
 // ============================================================================
 
-export const listCustomerSubscriptions = async (req: Request, res: Response): Promise<void> => {
+export const listCustomerSubscriptions = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const customerId = req.query.customerId as string;
     const status = req.query.status as string;
@@ -351,7 +352,7 @@ export const listCustomerSubscriptions = async (req: Request, res: Response): Pr
   }
 };
 
-export const viewCustomerSubscription = async (req: Request, res: Response): Promise<void> => {
+export const viewCustomerSubscription = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { subscriptionId } = req.params;
 
@@ -378,7 +379,7 @@ export const viewCustomerSubscription = async (req: Request, res: Response): Pro
   }
 };
 
-export const updateSubscriptionStatus = async (req: Request, res: Response): Promise<void> => {
+export const updateSubscriptionStatus = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { subscriptionId } = req.params;
     const { status } = req.body;
@@ -393,7 +394,7 @@ export const updateSubscriptionStatus = async (req: Request, res: Response): Pro
   }
 };
 
-export const cancelCustomerSubscription = async (req: Request, res: Response): Promise<void> => {
+export const cancelCustomerSubscription = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { subscriptionId } = req.params;
     const { reason, cancelAtPeriodEnd } = req.body;
@@ -412,7 +413,7 @@ export const cancelCustomerSubscription = async (req: Request, res: Response): P
 // Billing Management
 // ============================================================================
 
-export const subscriptionBilling = async (req: Request, res: Response): Promise<void> => {
+export const subscriptionBilling = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     // Get subscriptions due for billing (next billing date <= today + 1 day)
     const tomorrow = new Date();
@@ -443,7 +444,7 @@ export const subscriptionBilling = async (req: Request, res: Response): Promise<
   }
 };
 
-export const processSubscriptionBilling = async (req: Request, res: Response): Promise<void> => {
+export const processSubscriptionBilling = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { subscriptionId } = req.params;
     const { processPayment, billingCycle } = req.body;
@@ -497,7 +498,7 @@ export const processSubscriptionBilling = async (req: Request, res: Response): P
   }
 };
 
-export const manageFailedPayments = async (req: Request, res: Response): Promise<void> => {
+export const manageFailedPayments = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { subscriptionId } = req.params;
     const { action, retryDate } = req.body;

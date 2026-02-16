@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';;
 import CustomerRepo from '../../../modules/customer/infrastructure/repositories/CustomerRepository';
 import { GetCustomerCommand, GetCustomerUseCase } from '../../../modules/customer/application/useCases/GetCustomer';
 import { UpdateCustomerCommand, UpdateCustomerUseCase } from '../../../modules/customer/application/useCases/UpdateCustomer';
@@ -18,7 +19,7 @@ import { adminRespond } from '../../respond';
 // List Customers
 // ============================================================================
 
-export const listCustomers = async (req: Request, res: Response): Promise<void> => {
+export const listCustomers = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { search, status, limit, offset, orderBy, orderDirection } = req.query;
 
@@ -74,7 +75,7 @@ export const listCustomers = async (req: Request, res: Response): Promise<void> 
 // View Customer
 // ============================================================================
 
-export const viewCustomer = async (req: Request, res: Response): Promise<void> => {
+export const viewCustomer = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { customerId } = req.params;
 
@@ -114,7 +115,7 @@ export const viewCustomer = async (req: Request, res: Response): Promise<void> =
 // Edit Customer Form
 // ============================================================================
 
-export const editCustomerForm = async (req: Request, res: Response): Promise<void> => {
+export const editCustomerForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { customerId } = req.params;
 
@@ -147,7 +148,7 @@ export const editCustomerForm = async (req: Request, res: Response): Promise<voi
 // Update Customer
 // ============================================================================
 
-export const updateCustomer = async (req: Request, res: Response): Promise<void> => {
+export const updateCustomer = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { customerId } = req.params;
     const updates = req.body;
@@ -183,7 +184,7 @@ export const updateCustomer = async (req: Request, res: Response): Promise<void>
 // Deactivate Customer (AJAX)
 // ============================================================================
 
-export const deactivateCustomer = async (req: Request, res: Response): Promise<void> => {
+export const deactivateCustomer = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { customerId } = req.params;
     const { reason } = req.body;
@@ -203,7 +204,7 @@ export const deactivateCustomer = async (req: Request, res: Response): Promise<v
 // Reactivate Customer (AJAX)
 // ============================================================================
 
-export const reactivateCustomer = async (req: Request, res: Response): Promise<void> => {
+export const reactivateCustomer = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { customerId } = req.params;
 
@@ -222,7 +223,7 @@ export const reactivateCustomer = async (req: Request, res: Response): Promise<v
 // Verify Customer (AJAX)
 // ============================================================================
 
-export const verifyCustomer = async (req: Request, res: Response): Promise<void> => {
+export const verifyCustomer = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { customerId } = req.params;
     const verificationType = (req.body.verificationType as 'email' | 'phone') || 'email';
@@ -243,7 +244,7 @@ export const verifyCustomer = async (req: Request, res: Response): Promise<void>
 // Customer Addresses
 // ============================================================================
 
-export const customerAddresses = async (req: Request, res: Response): Promise<void> => {
+export const customerAddresses = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { customerId } = req.params;
 
@@ -282,7 +283,7 @@ export const customerAddresses = async (req: Request, res: Response): Promise<vo
 // Add Customer Address
 // ============================================================================
 
-export const addCustomerAddress = async (req: Request, res: Response): Promise<void> => {
+export const addCustomerAddress = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { customerId } = req.params;
     const addressData = req.body;

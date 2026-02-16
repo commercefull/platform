@@ -68,6 +68,15 @@ router.get('/products', productController.listProducts);
  */
 router.get('/products/:productId/related', productController.getRelatedProducts);
 
+// ============================================================================
+// Review Routes (Customer)
+// ============================================================================
+
+router.get('/products/:productId/reviews', productController.getProductReviews);
+router.post('/products/:productId/reviews', productController.createReview);
+router.post('/reviews/:reviewId/helpful', productController.markReviewHelpful);
+router.post('/reviews/:reviewId/report', productController.reportReview);
+
 /**
  * Get product by ID or slug
  * GET /products/:identifier

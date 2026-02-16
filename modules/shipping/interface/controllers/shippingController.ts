@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import shippingCarrierRepo from '../../infrastructure/repositories/shippingCarrierRepo';
 import shippingMethodRepo from '../../infrastructure/repositories/shippingMethodRepo';
 import shippingZoneRepo from '../../infrastructure/repositories/shippingZoneRepo';
@@ -17,7 +18,7 @@ import { GetShippingMethodsQuery, getShippingMethodsUseCase } from '../../applic
 // Carriers
 // ============================================================================
 
-export const getCarriers = async (req: Request, res: Response): Promise<void> => {
+export const getCarriers = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { activeOnly } = req.query;
     const carriers = await shippingCarrierRepo.findAll(activeOnly === 'true');
@@ -28,7 +29,7 @@ export const getCarriers = async (req: Request, res: Response): Promise<void> =>
   }
 };
 
-export const getCarrierById = async (req: Request, res: Response): Promise<void> => {
+export const getCarrierById = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const carrier = await shippingCarrierRepo.findById(id);
@@ -45,7 +46,7 @@ export const getCarrierById = async (req: Request, res: Response): Promise<void>
   }
 };
 
-export const createCarrier = async (req: Request, res: Response): Promise<void> => {
+export const createCarrier = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const carrier = await shippingCarrierRepo.create(req.body);
     res.status(201).json({ success: true, data: carrier });
@@ -55,7 +56,7 @@ export const createCarrier = async (req: Request, res: Response): Promise<void> 
   }
 };
 
-export const updateCarrier = async (req: Request, res: Response): Promise<void> => {
+export const updateCarrier = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const carrier = await shippingCarrierRepo.update(id, req.body);
@@ -72,7 +73,7 @@ export const updateCarrier = async (req: Request, res: Response): Promise<void> 
   }
 };
 
-export const deleteCarrier = async (req: Request, res: Response): Promise<void> => {
+export const deleteCarrier = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const deleted = await shippingCarrierRepo.delete(id);
@@ -93,7 +94,7 @@ export const deleteCarrier = async (req: Request, res: Response): Promise<void> 
 // Methods
 // ============================================================================
 
-export const getMethods = async (req: Request, res: Response): Promise<void> => {
+export const getMethods = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { activeOnly, displayOnFrontend, carrierId } = req.query;
 
@@ -107,7 +108,7 @@ export const getMethods = async (req: Request, res: Response): Promise<void> => 
   }
 };
 
-export const getMethodById = async (req: Request, res: Response): Promise<void> => {
+export const getMethodById = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const method = await shippingMethodRepo.findById(id);
@@ -124,7 +125,7 @@ export const getMethodById = async (req: Request, res: Response): Promise<void> 
   }
 };
 
-export const createMethod = async (req: Request, res: Response): Promise<void> => {
+export const createMethod = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const method = await shippingMethodRepo.create(req.body);
     res.status(201).json({ success: true, data: method });
@@ -134,7 +135,7 @@ export const createMethod = async (req: Request, res: Response): Promise<void> =
   }
 };
 
-export const updateMethod = async (req: Request, res: Response): Promise<void> => {
+export const updateMethod = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const method = await shippingMethodRepo.update(id, req.body);
@@ -151,7 +152,7 @@ export const updateMethod = async (req: Request, res: Response): Promise<void> =
   }
 };
 
-export const deleteMethod = async (req: Request, res: Response): Promise<void> => {
+export const deleteMethod = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const deleted = await shippingMethodRepo.delete(id);
@@ -172,7 +173,7 @@ export const deleteMethod = async (req: Request, res: Response): Promise<void> =
 // Zones
 // ============================================================================
 
-export const getZones = async (req: Request, res: Response): Promise<void> => {
+export const getZones = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { activeOnly } = req.query;
     const zones = await shippingZoneRepo.findAll(activeOnly === 'true');
@@ -183,7 +184,7 @@ export const getZones = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export const getZoneById = async (req: Request, res: Response): Promise<void> => {
+export const getZoneById = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const zone = await shippingZoneRepo.findById(id);
@@ -200,7 +201,7 @@ export const getZoneById = async (req: Request, res: Response): Promise<void> =>
   }
 };
 
-export const createZone = async (req: Request, res: Response): Promise<void> => {
+export const createZone = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const zone = await shippingZoneRepo.create(req.body);
     res.status(201).json({ success: true, data: zone });
@@ -210,7 +211,7 @@ export const createZone = async (req: Request, res: Response): Promise<void> => 
   }
 };
 
-export const updateZone = async (req: Request, res: Response): Promise<void> => {
+export const updateZone = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const zone = await shippingZoneRepo.update(id, req.body);
@@ -227,7 +228,7 @@ export const updateZone = async (req: Request, res: Response): Promise<void> => 
   }
 };
 
-export const deleteZone = async (req: Request, res: Response): Promise<void> => {
+export const deleteZone = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const deleted = await shippingZoneRepo.delete(id);
@@ -248,7 +249,7 @@ export const deleteZone = async (req: Request, res: Response): Promise<void> => 
 // Rates
 // ============================================================================
 
-export const getRates = async (req: Request, res: Response): Promise<void> => {
+export const getRates = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { zoneId, methodId } = req.query;
     const rates = await shippingRateRepo.findActive(zoneId as string | undefined, methodId as string | undefined);
@@ -259,7 +260,7 @@ export const getRates = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export const getRateById = async (req: Request, res: Response): Promise<void> => {
+export const getRateById = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const rate = await shippingRateRepo.findById(id);
@@ -276,7 +277,7 @@ export const getRateById = async (req: Request, res: Response): Promise<void> =>
   }
 };
 
-export const createRate = async (req: Request, res: Response): Promise<void> => {
+export const createRate = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const rate = await shippingRateRepo.create(req.body);
     res.status(201).json({ success: true, data: rate });
@@ -286,7 +287,7 @@ export const createRate = async (req: Request, res: Response): Promise<void> => 
   }
 };
 
-export const updateRate = async (req: Request, res: Response): Promise<void> => {
+export const updateRate = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const rate = await shippingRateRepo.update(id, req.body);
@@ -303,7 +304,7 @@ export const updateRate = async (req: Request, res: Response): Promise<void> => 
   }
 };
 
-export const deleteRate = async (req: Request, res: Response): Promise<void> => {
+export const deleteRate = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const deleted = await shippingRateRepo.delete(id);
@@ -324,7 +325,7 @@ export const deleteRate = async (req: Request, res: Response): Promise<void> => 
 // Packaging Types
 // ============================================================================
 
-export const getPackagingTypes = async (req: Request, res: Response): Promise<void> => {
+export const getPackagingTypes = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { activeOnly } = req.query;
     const types = await packagingTypeRepo.findAll(activeOnly === 'true');
@@ -335,7 +336,7 @@ export const getPackagingTypes = async (req: Request, res: Response): Promise<vo
   }
 };
 
-export const getPackagingTypeById = async (req: Request, res: Response): Promise<void> => {
+export const getPackagingTypeById = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const type = await packagingTypeRepo.findById(id);
@@ -352,7 +353,7 @@ export const getPackagingTypeById = async (req: Request, res: Response): Promise
   }
 };
 
-export const createPackagingType = async (req: Request, res: Response): Promise<void> => {
+export const createPackagingType = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const type = await packagingTypeRepo.create(req.body);
     res.status(201).json({ success: true, data: type });
@@ -362,7 +363,7 @@ export const createPackagingType = async (req: Request, res: Response): Promise<
   }
 };
 
-export const updatePackagingType = async (req: Request, res: Response): Promise<void> => {
+export const updatePackagingType = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const type = await packagingTypeRepo.update(id, req.body);
@@ -379,7 +380,7 @@ export const updatePackagingType = async (req: Request, res: Response): Promise<
   }
 };
 
-export const deletePackagingType = async (req: Request, res: Response): Promise<void> => {
+export const deletePackagingType = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const deleted = await packagingTypeRepo.delete(id);
@@ -400,7 +401,62 @@ export const deletePackagingType = async (req: Request, res: Response): Promise<
 // Rate Calculation
 // ============================================================================
 
-export const calculateRates = async (req: Request, res: Response): Promise<void> => {
+export const estimateDelivery = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { methodId, destinationAddress } = req.body;
+
+    if (!methodId) {
+      res.status(400).json({ success: false, message: 'methodId is required' });
+      return;
+    }
+
+    const method = await shippingMethodRepo.findById(methodId);
+    if (!method) {
+      res.status(404).json({ success: false, message: 'Shipping method not found' });
+      return;
+    }
+
+    // estimatedDeliveryDays may be stored as JSON { min, max } or a number
+    const deliveryDays = method.estimatedDeliveryDays as { min?: number; max?: number } | number | null;
+    const handlingDays = method.handlingDays || 0;
+
+    let daysMin = handlingDays;
+    let daysMax = handlingDays;
+
+    if (typeof deliveryDays === 'number') {
+      daysMin += deliveryDays;
+      daysMax += deliveryDays;
+    } else if (deliveryDays && typeof deliveryDays === 'object') {
+      daysMin += deliveryDays.min || 0;
+      daysMax += deliveryDays.max || deliveryDays.min || 0;
+    }
+
+    const now = new Date();
+    const minDate = new Date(now);
+    const maxDate = new Date(now);
+    minDate.setDate(minDate.getDate() + daysMin);
+    maxDate.setDate(maxDate.getDate() + daysMax);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        methodId: method.shippingMethodId,
+        methodName: method.name,
+        estimatedDaysMin: daysMin,
+        estimatedDaysMax: daysMax,
+        estimatedDeliveryMin: minDate.toISOString(),
+        estimatedDeliveryMax: maxDate.toISOString(),
+        handlingDays,
+        destinationAddress,
+      },
+    });
+  } catch (error: any) {
+    logger.error('Error:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const calculateRates = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { destinationAddress, orderDetails } = req.body;
 

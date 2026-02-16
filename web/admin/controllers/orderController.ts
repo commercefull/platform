@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';;
 import OrderRepo from '../../../modules/order/infrastructure/repositories/OrderRepository';
 import { ListOrdersCommand, ListOrdersUseCase } from '../../../modules/order/application/useCases/ListOrders';
 import { GetOrderCommand, GetOrderUseCase } from '../../../modules/order/application/useCases/GetOrder';
@@ -20,7 +21,7 @@ import { adminRespond } from '../../respond';
 // List Orders
 // ============================================================================
 
-export const listOrders = async (req: Request, res: Response): Promise<void> => {
+export const listOrders = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { status, paymentStatus, fulfillmentStatus, customerId, search, startDate, endDate, limit, offset, orderBy, orderDirection } =
       req.query;
@@ -92,7 +93,7 @@ export const listOrders = async (req: Request, res: Response): Promise<void> => 
 // View Order
 // ============================================================================
 
-export const viewOrder = async (req: Request, res: Response): Promise<void> => {
+export const viewOrder = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { orderId } = req.params;
 
@@ -131,7 +132,7 @@ export const viewOrder = async (req: Request, res: Response): Promise<void> => {
 // Update Order Status
 // ============================================================================
 
-export const updateOrderStatus = async (req: Request, res: Response): Promise<void> => {
+export const updateOrderStatus = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { orderId } = req.params;
     const { status, note } = req.body;
@@ -168,7 +169,7 @@ export const updateOrderStatus = async (req: Request, res: Response): Promise<vo
 // Cancel Order
 // ============================================================================
 
-export const cancelOrder = async (req: Request, res: Response): Promise<void> => {
+export const cancelOrder = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { orderId } = req.params;
     const { reason } = req.body;
@@ -198,7 +199,7 @@ export const cancelOrder = async (req: Request, res: Response): Promise<void> =>
 // Process Refund Form
 // ============================================================================
 
-export const refundForm = async (req: Request, res: Response): Promise<void> => {
+export const refundForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { orderId } = req.params;
 
@@ -232,7 +233,7 @@ export const refundForm = async (req: Request, res: Response): Promise<void> => 
 // Process Refund
 // ============================================================================
 
-export const processRefund = async (req: Request, res: Response): Promise<void> => {
+export const processRefund = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { orderId } = req.params;
     const { amount, reason, refundItems } = req.body;

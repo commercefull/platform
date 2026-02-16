@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';;
 import ProductRepo from '../../../modules/product/infrastructure/repositories/ProductRepository';
 import { ListProductsCommand, ListProductsUseCase } from '../../../modules/product/application/useCases/ListProducts';
 import { CreateProductCommand, CreateProductUseCase } from '../../../modules/product/application/useCases/CreateProduct';
@@ -18,7 +19,7 @@ import { adminRespond } from '../../respond';
 // List Products
 // ============================================================================
 
-export const listProducts = async (req: Request, res: Response): Promise<void> => {
+export const listProducts = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { status, visibility, categoryId, search, limit, offset, orderBy, orderDirection } = req.query;
 
@@ -79,7 +80,7 @@ export const listProducts = async (req: Request, res: Response): Promise<void> =
 // View Product
 // ============================================================================
 
-export const viewProduct = async (req: Request, res: Response): Promise<void> => {
+export const viewProduct = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { productId } = req.params;
 
@@ -115,7 +116,7 @@ export const viewProduct = async (req: Request, res: Response): Promise<void> =>
 // Create Product Form
 // ============================================================================
 
-export const createProductForm = async (req: Request, res: Response): Promise<void> => {
+export const createProductForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     // TODO: Fetch product types, categories, attributes using their respective use cases
     // For now, we'll pass empty arrays - these will be populated when we create the use cases
@@ -141,7 +142,7 @@ export const createProductForm = async (req: Request, res: Response): Promise<vo
 // Create Product
 // ============================================================================
 
-export const createProduct = async (req: Request, res: Response): Promise<void> => {
+export const createProduct = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const merchantId = (req as any).user?.merchantId;
     const {
@@ -243,7 +244,7 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
 // Edit Product Form
 // ============================================================================
 
-export const editProductForm = async (req: Request, res: Response): Promise<void> => {
+export const editProductForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { productId } = req.params;
 
@@ -280,7 +281,7 @@ export const editProductForm = async (req: Request, res: Response): Promise<void
 // Update Product
 // ============================================================================
 
-export const updateProduct = async (req: Request, res: Response): Promise<void> => {
+export const updateProduct = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { productId } = req.params;
     const updates = req.body;
@@ -320,7 +321,7 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
 // Delete Product (AJAX)
 // ============================================================================
 
-export const deleteProduct = async (req: Request, res: Response): Promise<void> => {
+export const deleteProduct = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { productId } = req.params;
     const { permanent } = req.query;
@@ -349,7 +350,7 @@ export const deleteProduct = async (req: Request, res: Response): Promise<void> 
 // Update Product Status (AJAX)
 // ============================================================================
 
-export const updateProductStatus = async (req: Request, res: Response): Promise<void> => {
+export const updateProductStatus = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { productId } = req.params;
     const { status } = req.body;
@@ -381,7 +382,7 @@ export const updateProductStatus = async (req: Request, res: Response): Promise<
 // Publish Product (AJAX)
 // ============================================================================
 
-export const publishProduct = async (req: Request, res: Response): Promise<void> => {
+export const publishProduct = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { productId } = req.params;
 
@@ -406,7 +407,7 @@ export const publishProduct = async (req: Request, res: Response): Promise<void>
 // Unpublish Product (AJAX)
 // ============================================================================
 
-export const unpublishProduct = async (req: Request, res: Response): Promise<void> => {
+export const unpublishProduct = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { productId } = req.params;
 

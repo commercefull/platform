@@ -4,14 +4,15 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';;
 import { adminRespond } from '../../respond';
 
 // ============================================================================
 // Price Lists
 // ============================================================================
 
-export const listPriceLists = async (req: Request, res: Response): Promise<void> => {
+export const listPriceLists = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     adminRespond(req, res, 'catalog/pricing/index', {
       pageName: 'Pricing',
@@ -29,7 +30,7 @@ export const listPriceLists = async (req: Request, res: Response): Promise<void>
   }
 };
 
-export const createPriceListForm = async (req: Request, res: Response): Promise<void> => {
+export const createPriceListForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     adminRespond(req, res, 'catalog/pricing/lists/create', {
       pageName: 'Create Price List',
@@ -43,7 +44,7 @@ export const createPriceListForm = async (req: Request, res: Response): Promise<
   }
 };
 
-export const createPriceList = async (req: Request, res: Response): Promise<void> => {
+export const createPriceList = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     res.redirect('/admin/catalog/pricing?success=Price list created successfully');
   } catch (error: any) {
@@ -56,7 +57,7 @@ export const createPriceList = async (req: Request, res: Response): Promise<void
   }
 };
 
-export const viewPriceList = async (req: Request, res: Response): Promise<void> => {
+export const viewPriceList = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     adminRespond(req, res, 'catalog/pricing/lists/view', {
       pageName: 'Price List Details',
@@ -72,7 +73,7 @@ export const viewPriceList = async (req: Request, res: Response): Promise<void> 
   }
 };
 
-export const editPriceListForm = async (req: Request, res: Response): Promise<void> => {
+export const editPriceListForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     adminRespond(req, res, 'catalog/pricing/lists/edit', {
       pageName: 'Edit Price List',
@@ -87,7 +88,7 @@ export const editPriceListForm = async (req: Request, res: Response): Promise<vo
   }
 };
 
-export const updatePriceList = async (req: Request, res: Response): Promise<void> => {
+export const updatePriceList = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { listId } = req.params;
     res.redirect(`/admin/catalog/pricing/lists/${listId}?success=Price list updated successfully`);
@@ -102,7 +103,7 @@ export const updatePriceList = async (req: Request, res: Response): Promise<void
   }
 };
 
-export const deletePriceList = async (req: Request, res: Response): Promise<void> => {
+export const deletePriceList = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     res.json({ success: true, message: 'Price list deleted successfully' });
   } catch (error: any) {
@@ -115,7 +116,7 @@ export const deletePriceList = async (req: Request, res: Response): Promise<void
 // Price Rules
 // ============================================================================
 
-export const listPriceRules = async (req: Request, res: Response): Promise<void> => {
+export const listPriceRules = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     adminRespond(req, res, 'catalog/pricing/rules/index', {
       pageName: 'Price Rules',
@@ -132,7 +133,7 @@ export const listPriceRules = async (req: Request, res: Response): Promise<void>
   }
 };
 
-export const createPriceRuleForm = async (req: Request, res: Response): Promise<void> => {
+export const createPriceRuleForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     adminRespond(req, res, 'catalog/pricing/rules/create', {
       pageName: 'Create Price Rule',
@@ -146,7 +147,7 @@ export const createPriceRuleForm = async (req: Request, res: Response): Promise<
   }
 };
 
-export const createPriceRule = async (req: Request, res: Response): Promise<void> => {
+export const createPriceRule = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     res.redirect('/admin/catalog/pricing/rules?success=Price rule created successfully');
   } catch (error: any) {
@@ -159,7 +160,7 @@ export const createPriceRule = async (req: Request, res: Response): Promise<void
   }
 };
 
-export const viewPriceRule = async (req: Request, res: Response): Promise<void> => {
+export const viewPriceRule = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     adminRespond(req, res, 'catalog/pricing/rules/view', {
       pageName: 'Price Rule Details',
@@ -175,7 +176,7 @@ export const viewPriceRule = async (req: Request, res: Response): Promise<void> 
   }
 };
 
-export const editPriceRuleForm = async (req: Request, res: Response): Promise<void> => {
+export const editPriceRuleForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     adminRespond(req, res, 'catalog/pricing/rules/edit', {
       pageName: 'Edit Price Rule',
@@ -190,7 +191,7 @@ export const editPriceRuleForm = async (req: Request, res: Response): Promise<vo
   }
 };
 
-export const updatePriceRule = async (req: Request, res: Response): Promise<void> => {
+export const updatePriceRule = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { ruleId } = req.params;
     res.redirect(`/admin/catalog/pricing/rules/${ruleId}?success=Price rule updated successfully`);
@@ -205,7 +206,7 @@ export const updatePriceRule = async (req: Request, res: Response): Promise<void
   }
 };
 
-export const deletePriceRule = async (req: Request, res: Response): Promise<void> => {
+export const deletePriceRule = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     res.json({ success: true, message: 'Price rule deleted successfully' });
   } catch (error: any) {

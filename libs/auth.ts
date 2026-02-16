@@ -27,7 +27,7 @@ const authenticateToken = (req: Request, res: Response, next: NextFunction, secr
   try {
     // Verify token
     const decoded = jwt.verify(token, String(secret));
-    req.user = decoded;
+    req.user = decoded as Express.User;
     return next();
   } catch (error) {
     // Return 401 for invalid/expired tokens (not 403 which is for authorization failures)
@@ -71,6 +71,7 @@ const authenticateSession = async (
 
     // Attach user to request
     req.user = {
+      userId: session.userId,
       id: session.userId,
       email: session.email,
       name: session.name,

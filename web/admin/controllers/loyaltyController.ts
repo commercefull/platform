@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';;
 import loyaltyRepo from '../../../modules/loyalty/infrastructure/repositories/loyaltyRepo';
 import { adminRespond } from '../../respond';
 
@@ -12,7 +13,7 @@ import { adminRespond } from '../../respond';
 // Loyalty Tiers Management
 // ============================================================================
 
-export const listLoyaltyTiers = async (req: Request, res: Response): Promise<void> => {
+export const listLoyaltyTiers = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const includeInactive = req.query.includeInactive === 'true';
 
@@ -34,7 +35,7 @@ export const listLoyaltyTiers = async (req: Request, res: Response): Promise<voi
   }
 };
 
-export const createLoyaltyTierForm = async (req: Request, res: Response): Promise<void> => {
+export const createLoyaltyTierForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     adminRespond(req, res, 'programs/loyalty/tiers/create', {
       pageName: 'Create Loyalty Tier',
@@ -49,7 +50,7 @@ export const createLoyaltyTierForm = async (req: Request, res: Response): Promis
   }
 };
 
-export const createLoyaltyTier = async (req: Request, res: Response): Promise<void> => {
+export const createLoyaltyTier = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { name, description, type, pointsThreshold, multiplier, benefits } = req.body;
 
@@ -74,7 +75,7 @@ export const createLoyaltyTier = async (req: Request, res: Response): Promise<vo
   }
 };
 
-export const viewLoyaltyTier = async (req: Request, res: Response): Promise<void> => {
+export const viewLoyaltyTier = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { tierId } = req.params;
 
@@ -103,7 +104,7 @@ export const viewLoyaltyTier = async (req: Request, res: Response): Promise<void
   }
 };
 
-export const editLoyaltyTierForm = async (req: Request, res: Response): Promise<void> => {
+export const editLoyaltyTierForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { tierId } = req.params;
 
@@ -131,7 +132,7 @@ export const editLoyaltyTierForm = async (req: Request, res: Response): Promise<
   }
 };
 
-export const updateLoyaltyTier = async (req: Request, res: Response): Promise<void> => {
+export const updateLoyaltyTier = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { tierId } = req.params;
     const updates: any = {};
@@ -170,7 +171,7 @@ export const updateLoyaltyTier = async (req: Request, res: Response): Promise<vo
   }
 };
 
-export const deleteLoyaltyTier = async (req: Request, res: Response): Promise<void> => {
+export const deleteLoyaltyTier = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { tierId } = req.params;
 
@@ -188,7 +189,7 @@ export const deleteLoyaltyTier = async (req: Request, res: Response): Promise<vo
 // Loyalty Rewards Management
 // ============================================================================
 
-export const listLoyaltyRewards = async (req: Request, res: Response): Promise<void> => {
+export const listLoyaltyRewards = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const includeInactive = req.query.includeInactive === 'true';
 
@@ -211,7 +212,7 @@ export const listLoyaltyRewards = async (req: Request, res: Response): Promise<v
   }
 };
 
-export const createLoyaltyRewardForm = async (req: Request, res: Response): Promise<void> => {
+export const createLoyaltyRewardForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     adminRespond(req, res, 'programs/loyalty/rewards/create', {
       pageName: 'Create Loyalty Reward',
@@ -226,7 +227,7 @@ export const createLoyaltyRewardForm = async (req: Request, res: Response): Prom
   }
 };
 
-export const createLoyaltyReward = async (req: Request, res: Response): Promise<void> => {
+export const createLoyaltyReward = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { name, description, pointsCost, discountAmount, discountPercent, discountCode, freeShipping, productIds, expiresAt } = req.body;
 
@@ -254,7 +255,7 @@ export const createLoyaltyReward = async (req: Request, res: Response): Promise<
   }
 };
 
-export const viewLoyaltyReward = async (req: Request, res: Response): Promise<void> => {
+export const viewLoyaltyReward = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { rewardId } = req.params;
 
@@ -284,7 +285,7 @@ export const viewLoyaltyReward = async (req: Request, res: Response): Promise<vo
   }
 };
 
-export const editLoyaltyRewardForm = async (req: Request, res: Response): Promise<void> => {
+export const editLoyaltyRewardForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { rewardId } = req.params;
 
@@ -312,7 +313,7 @@ export const editLoyaltyRewardForm = async (req: Request, res: Response): Promis
   }
 };
 
-export const updateLoyaltyReward = async (req: Request, res: Response): Promise<void> => {
+export const updateLoyaltyReward = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { rewardId } = req.params;
     const updates: any = {};
@@ -355,7 +356,7 @@ export const updateLoyaltyReward = async (req: Request, res: Response): Promise<
   }
 };
 
-export const deleteLoyaltyReward = async (req: Request, res: Response): Promise<void> => {
+export const deleteLoyaltyReward = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { rewardId } = req.params;
 
@@ -373,7 +374,7 @@ export const deleteLoyaltyReward = async (req: Request, res: Response): Promise<
 // Customer Loyalty Management
 // ============================================================================
 
-export const listCustomerLoyalty = async (req: Request, res: Response): Promise<void> => {
+export const listCustomerLoyalty = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const customerId = req.query.customerId as string;
     const limit = parseInt(req.query.limit as string) || 50;
@@ -400,7 +401,7 @@ export const listCustomerLoyalty = async (req: Request, res: Response): Promise<
   }
 };
 
-export const viewCustomerLoyalty = async (req: Request, res: Response): Promise<void> => {
+export const viewCustomerLoyalty = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { customerId } = req.params;
 
@@ -438,7 +439,7 @@ export const viewCustomerLoyalty = async (req: Request, res: Response): Promise<
 // Loyalty Analytics
 // ============================================================================
 
-export const loyaltyAnalytics = async (req: Request, res: Response): Promise<void> => {
+export const loyaltyAnalytics = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     // Get basic analytics (would need to implement proper analytics queries)
     const stats = {

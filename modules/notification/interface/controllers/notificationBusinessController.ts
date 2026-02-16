@@ -1,9 +1,10 @@
 import { logger } from '../../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import { NotificationRepo, Notification } from '../../infrastructure/repositories/notificationRepo';
 
 // Extend Express Request with User
-interface UserRequest extends Request {
+interface UserRequest extends TypedRequest {
   user?: {
     _id?: string;
     id?: string;
@@ -22,7 +23,7 @@ const notificationRepo = new NotificationRepo();
 /**
  * Get all notifications (admin)
  */
-export const getAllNotifications = async (req: Request, res: Response): Promise<void> => {
+export const getAllNotifications = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const limit = parseInt(req.query.limit as string) || 50;
     const offset = parseInt(req.query.offset as string) || 0;
@@ -44,7 +45,7 @@ export const getAllNotifications = async (req: Request, res: Response): Promise<
 /**
  * Get notification by ID (admin)
  */
-export const getNotificationById = async (req: Request, res: Response): Promise<void> => {
+export const getNotificationById = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const notification = await notificationRepo.findById(id);
@@ -65,7 +66,7 @@ export const getNotificationById = async (req: Request, res: Response): Promise<
 /**
  * Create a new notification (admin)
  */
-export const createNotification = async (req: Request, res: Response): Promise<void> => {
+export const createNotification = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { userId, userType, type, title, content, channel, priority, category, data, metadata } = req.body;
 
@@ -98,7 +99,7 @@ export const createNotification = async (req: Request, res: Response): Promise<v
 /**
  * Update a notification (admin)
  */
-export const updateNotification = async (req: Request, res: Response): Promise<void> => {
+export const updateNotification = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { title, content, priority, category, data, metadata } = req.body;
@@ -122,7 +123,7 @@ export const updateNotification = async (req: Request, res: Response): Promise<v
 /**
  * Mark notification as sent (admin)
  */
-export const markNotificationAsSent = async (req: Request, res: Response): Promise<void> => {
+export const markNotificationAsSent = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
 

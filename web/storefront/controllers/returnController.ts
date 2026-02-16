@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';;
 import { query, queryOne } from '../../../libs/db';
 import { storefrontRespond } from '../../respond';
 
@@ -17,7 +18,7 @@ interface CustomerUser {
 /**
  * GET: List customer returns
  */
-export const listReturns = async (req: Request, res: Response) => {
+export const listReturns = async (req: TypedRequest, res: Response) => {
   try {
     const user = req.user as CustomerUser;
     if (!user?.customerId) {
@@ -49,7 +50,7 @@ export const listReturns = async (req: Request, res: Response) => {
 /**
  * GET: Return request form
  */
-export const returnRequestForm = async (req: Request, res: Response) => {
+export const returnRequestForm = async (req: TypedRequest, res: Response) => {
   try {
     const user = req.user as CustomerUser;
     if (!user?.customerId) {
@@ -96,7 +97,7 @@ export const returnRequestForm = async (req: Request, res: Response) => {
 /**
  * POST: Submit return request
  */
-export const submitReturnRequest = async (req: Request, res: Response) => {
+export const submitReturnRequest = async (req: TypedRequest, res: Response) => {
   try {
     const user = req.user as CustomerUser;
     if (!user?.customerId) {
@@ -145,7 +146,7 @@ export const submitReturnRequest = async (req: Request, res: Response) => {
 /**
  * GET: View return details
  */
-export const viewReturn = async (req: Request, res: Response) => {
+export const viewReturn = async (req: TypedRequest, res: Response) => {
   try {
     const user = req.user as CustomerUser;
     if (!user?.customerId) {

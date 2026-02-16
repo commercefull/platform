@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';;
 import shippingZoneRepo from '../../../modules/shipping/infrastructure/repositories/shippingZoneRepo';
 import shippingMethodRepo from '../../../modules/shipping/infrastructure/repositories/shippingMethodRepo';
 import { adminRespond } from '../../respond';
@@ -13,7 +14,7 @@ import { adminRespond } from '../../respond';
 // Shipping Zones Management
 // ============================================================================
 
-export const listShippingZones = async (req: Request, res: Response): Promise<void> => {
+export const listShippingZones = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const zones = await shippingZoneRepo.findAll();
     const activeCount = zones.filter(z => z.isActive).length;
@@ -35,7 +36,7 @@ export const listShippingZones = async (req: Request, res: Response): Promise<vo
   }
 };
 
-export const createShippingZoneForm = async (req: Request, res: Response): Promise<void> => {
+export const createShippingZoneForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     adminRespond(req, res, 'shipping/zones/create', {
       pageName: 'Create Shipping Zone',
@@ -50,7 +51,7 @@ export const createShippingZoneForm = async (req: Request, res: Response): Promi
   }
 };
 
-export const createShippingZone = async (req: Request, res: Response): Promise<void> => {
+export const createShippingZone = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { name, description, locationType, locations, excludedLocations, priority, isActive } = req.body;
 
@@ -77,7 +78,7 @@ export const createShippingZone = async (req: Request, res: Response): Promise<v
   }
 };
 
-export const viewShippingZone = async (req: Request, res: Response): Promise<void> => {
+export const viewShippingZone = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { zoneId } = req.params;
 
@@ -111,7 +112,7 @@ export const viewShippingZone = async (req: Request, res: Response): Promise<voi
   }
 };
 
-export const editShippingZoneForm = async (req: Request, res: Response): Promise<void> => {
+export const editShippingZoneForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { zoneId } = req.params;
 
@@ -139,7 +140,7 @@ export const editShippingZoneForm = async (req: Request, res: Response): Promise
   }
 };
 
-export const updateShippingZone = async (req: Request, res: Response): Promise<void> => {
+export const updateShippingZone = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { zoneId } = req.params;
     const updates: any = {};
@@ -182,7 +183,7 @@ export const updateShippingZone = async (req: Request, res: Response): Promise<v
   }
 };
 
-export const activateShippingZone = async (req: Request, res: Response): Promise<void> => {
+export const activateShippingZone = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { zoneId } = req.params;
 
@@ -200,7 +201,7 @@ export const activateShippingZone = async (req: Request, res: Response): Promise
   }
 };
 
-export const deactivateShippingZone = async (req: Request, res: Response): Promise<void> => {
+export const deactivateShippingZone = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { zoneId } = req.params;
 
@@ -218,7 +219,7 @@ export const deactivateShippingZone = async (req: Request, res: Response): Promi
   }
 };
 
-export const deleteShippingZone = async (req: Request, res: Response): Promise<void> => {
+export const deleteShippingZone = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { zoneId } = req.params;
 

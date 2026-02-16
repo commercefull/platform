@@ -5,7 +5,8 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import { CustomerRepo } from '../../../customer/infrastructure/repositories/customerRepo';
 import { MerchantRepo } from '../../../merchant/infrastructure/repositories/merchantRepo';
 import { SocialAccountRepo } from '../../infrastructure/repositories/socialAccountRepo';
@@ -42,7 +43,7 @@ function isValidProvider(provider: string): provider is SocialProvider {
 /**
  * Get OAuth configuration for a provider
  */
-export async function getOAuthConfig(req: Request, res: Response): Promise<void> {
+export async function getOAuthConfig(req: TypedRequest, res: Response): Promise<void> {
   try {
     const { provider } = req.params;
 
@@ -111,7 +112,7 @@ export async function getOAuthConfig(req: Request, res: Response): Promise<void>
 /**
  * Handle social login callback for customers
  */
-export async function customerSocialLogin(req: Request, res: Response): Promise<void> {
+export async function customerSocialLogin(req: TypedRequest, res: Response): Promise<void> {
   try {
     const { provider } = req.params;
     const { accessToken, idToken, profile: clientProfile } = req.body;
@@ -232,7 +233,7 @@ export async function customerSocialLogin(req: Request, res: Response): Promise<
 /**
  * Handle social login callback for merchants
  */
-export async function merchantSocialLogin(req: Request, res: Response): Promise<void> {
+export async function merchantSocialLogin(req: TypedRequest, res: Response): Promise<void> {
   try {
     const { provider } = req.params;
     const { accessToken, idToken, profile: clientProfile } = req.body;
@@ -349,10 +350,10 @@ export async function merchantSocialLogin(req: Request, res: Response): Promise<
 /**
  * Link a social account to an existing customer
  */
-export async function linkCustomerSocialAccount(req: Request, res: Response): Promise<void> {
+export async function linkCustomerSocialAccount(req: TypedRequest, res: Response): Promise<void> {
   try {
     const { provider } = req.params;
-    const customerId = (req as any).user?.id;
+    const customerId = req.user?.id;
 
     if (!customerId) {
       res.status(401).json({
@@ -430,10 +431,10 @@ export async function linkCustomerSocialAccount(req: Request, res: Response): Pr
 /**
  * Unlink a social account from a customer
  */
-export async function unlinkCustomerSocialAccount(req: Request, res: Response): Promise<void> {
+export async function unlinkCustomerSocialAccount(req: TypedRequest, res: Response): Promise<void> {
   try {
     const { provider } = req.params;
-    const customerId = (req as any).user?.id;
+    const customerId = req.user?.id;
 
     if (!customerId) {
       res.status(401).json({
@@ -483,9 +484,9 @@ export async function unlinkCustomerSocialAccount(req: Request, res: Response): 
 /**
  * Get linked social accounts for a customer
  */
-export async function getCustomerLinkedAccounts(req: Request, res: Response): Promise<void> {
+export async function getCustomerLinkedAccounts(req: TypedRequest, res: Response): Promise<void> {
   try {
-    const customerId = (req as any).user?.id;
+    const customerId = req.user?.id;
 
     if (!customerId) {
       res.status(401).json({
@@ -516,9 +517,9 @@ export async function getCustomerLinkedAccounts(req: Request, res: Response): Pr
 /**
  * Get linked social accounts for a merchant
  */
-export async function getMerchantLinkedAccounts(req: Request, res: Response): Promise<void> {
+export async function getMerchantLinkedAccounts(req: TypedRequest, res: Response): Promise<void> {
   try {
-    const merchantId = (req as any).user?.id;
+    const merchantId = req.user?.id;
 
     if (!merchantId) {
       res.status(401).json({

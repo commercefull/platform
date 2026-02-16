@@ -5,7 +5,8 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import inventoryRepo from '../../infrastructure/repositories/inventoryRepo';
 import {
   saveLocation as saveStoreLocation,
@@ -42,7 +43,7 @@ function respondError(res: Response, message: string, statusCode: number = 500):
 /**
  * Get inventory location by ID
  */
-export const getInventoryLocation = async (req: Request, res: Response): Promise<void> => {
+export const getInventoryLocation = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { inventoryLocationId } = req.params;
     // Try store location first
@@ -68,7 +69,7 @@ export const getInventoryLocation = async (req: Request, res: Response): Promise
 /**
  * List inventory locations with filtering and pagination
  */
-export const listInventoryLocations = async (req: Request, res: Response): Promise<void> => {
+export const listInventoryLocations = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     // If called without product/sku filters, return store locations for admin UI/tests
     const includeInactive = (req.query.includeInactive as string) === 'true';
@@ -87,7 +88,7 @@ export const listInventoryLocations = async (req: Request, res: Response): Promi
 /**
  * Create a new inventory location
  */
-export const createInventoryLocation = async (req: Request, res: Response): Promise<void> => {
+export const createInventoryLocation = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     // Support creating store locations (name/type/address...)
     const { name, type, address, address1, city, state, country, postalCode, isActive } = req.body as any;
@@ -153,7 +154,7 @@ export const createInventoryLocation = async (req: Request, res: Response): Prom
 /**
  * Update an inventory location
  */
-export const updateInventoryLocation = async (req: Request, res: Response): Promise<void> => {
+export const updateInventoryLocation = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { inventoryLocationId } = req.params;
     const { name, isActive, type, address, address1, city, state, country, postalCode } = req.body as any;
@@ -196,7 +197,7 @@ export const updateInventoryLocation = async (req: Request, res: Response): Prom
 /**
  * Delete an inventory location
  */
-export const deleteInventoryLocation = async (req: Request, res: Response): Promise<void> => {
+export const deleteInventoryLocation = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { inventoryLocationId } = req.params;
     // Prefer soft-delete store locations
@@ -220,7 +221,7 @@ export const deleteInventoryLocation = async (req: Request, res: Response): Prom
 /**
  * Adjust stock quantity (restock, adjustment, etc.)
  */
-export const adjustStock = async (req: Request, res: Response): Promise<void> => {
+export const adjustStock = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { inventoryLocationId } = req.params;
     const { quantityChange, reason, transactionTypeCode } = req.body;
@@ -279,7 +280,7 @@ export const adjustStock = async (req: Request, res: Response): Promise<void> =>
 /**
  * Reserve stock for an order or basket
  */
-export const reserveStock = async (req: Request, res: Response): Promise<void> => {
+export const reserveStock = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { inventoryLocationId } = req.params;
     const { quantity, orderId, basketId } = req.body;
@@ -308,7 +309,7 @@ export const reserveStock = async (req: Request, res: Response): Promise<void> =
 /**
  * Release reserved stock
  */
-export const releaseReservation = async (req: Request, res: Response): Promise<void> => {
+export const releaseReservation = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { inventoryLocationId } = req.params;
     const { quantity } = req.body;
@@ -339,7 +340,7 @@ export const releaseReservation = async (req: Request, res: Response): Promise<v
 /**
  * Check product availability
  */
-export const checkAvailability = async (req: Request, res: Response): Promise<void> => {
+export const checkAvailability = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { sku } = req.params;
     const quantity = parseInt(req.query.quantity as string) || 1;
@@ -370,7 +371,7 @@ export const checkAvailability = async (req: Request, res: Response): Promise<vo
 /**
  * Get low stock items
  */
-export const getLowStock = async (req: Request, res: Response): Promise<void> => {
+export const getLowStock = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const locations = await inventoryRepo.findLowStockLocations();
     respond(res, locations);
@@ -382,7 +383,7 @@ export const getLowStock = async (req: Request, res: Response): Promise<void> =>
 /**
  * Get out of stock items
  */
-export const getOutOfStock = async (req: Request, res: Response): Promise<void> => {
+export const getOutOfStock = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const locations = await inventoryRepo.findOutOfStockLocations();
     respond(res, locations);
@@ -398,7 +399,7 @@ export const getOutOfStock = async (req: Request, res: Response): Promise<void> 
 /**
  * Get transaction history for a product
  */
-export const getTransactionHistory = async (req: Request, res: Response): Promise<void> => {
+export const getTransactionHistory = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { productId } = req.params;
     const limit = parseInt(req.query.limit as string) || 50;
@@ -413,7 +414,7 @@ export const getTransactionHistory = async (req: Request, res: Response): Promis
 /**
  * Get transaction types
  */
-export const getTransactionTypes = async (req: Request, res: Response): Promise<void> => {
+export const getTransactionTypes = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const types = await inventoryRepo.findAllTransactionTypes();
     respond(res, types);

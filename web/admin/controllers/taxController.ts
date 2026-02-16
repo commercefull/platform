@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';;
 import { query, queryOne } from '../../../libs/db';
 import { v4 as uuidv4 } from 'uuid';
 import { adminRespond } from '../../respond';
@@ -13,7 +14,7 @@ import { adminRespond } from '../../respond';
 // List Tax Settings
 // ============================================================================
 
-export const listTaxSettings = async (req: Request, res: Response): Promise<void> => {
+export const listTaxSettings = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const taxRates = await query<Array<any>>(`SELECT * FROM "taxRate" WHERE "deletedAt" IS NULL ORDER BY "name"`);
 
@@ -50,7 +51,7 @@ export const listTaxSettings = async (req: Request, res: Response): Promise<void
 // Tax Rates CRUD
 // ============================================================================
 
-export const createTaxRate = async (req: Request, res: Response): Promise<void> => {
+export const createTaxRate = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { name, rate, country, state, taxClass, isActive } = req.body;
 
@@ -68,7 +69,7 @@ export const createTaxRate = async (req: Request, res: Response): Promise<void> 
   }
 };
 
-export const updateTaxRate = async (req: Request, res: Response): Promise<void> => {
+export const updateTaxRate = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { taxRateId } = req.params;
     const { name, rate, country, state, taxClass, isActive } = req.body;
@@ -87,7 +88,7 @@ export const updateTaxRate = async (req: Request, res: Response): Promise<void> 
   }
 };
 
-export const deleteTaxRate = async (req: Request, res: Response): Promise<void> => {
+export const deleteTaxRate = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { taxRateId } = req.params;
     await query(`UPDATE "taxRate" SET "deletedAt" = NOW() WHERE "taxRateId" = $1`, [taxRateId]);
@@ -103,7 +104,7 @@ export const deleteTaxRate = async (req: Request, res: Response): Promise<void> 
 // Tax Zones CRUD
 // ============================================================================
 
-export const createTaxZone = async (req: Request, res: Response): Promise<void> => {
+export const createTaxZone = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { name, description, countries, isActive } = req.body;
     const countriesArray = countries ? countries.split(',').map((c: string) => c.trim()) : [];
@@ -122,7 +123,7 @@ export const createTaxZone = async (req: Request, res: Response): Promise<void> 
   }
 };
 
-export const updateTaxZone = async (req: Request, res: Response): Promise<void> => {
+export const updateTaxZone = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { taxZoneId } = req.params;
     const { name, description, countries, isActive } = req.body;
@@ -142,7 +143,7 @@ export const updateTaxZone = async (req: Request, res: Response): Promise<void> 
   }
 };
 
-export const deleteTaxZone = async (req: Request, res: Response): Promise<void> => {
+export const deleteTaxZone = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { taxZoneId } = req.params;
     await query(`UPDATE "taxZone" SET "deletedAt" = NOW() WHERE "taxZoneId" = $1`, [taxZoneId]);
@@ -158,7 +159,7 @@ export const deleteTaxZone = async (req: Request, res: Response): Promise<void> 
 // Tax Classes CRUD
 // ============================================================================
 
-export const createTaxClass = async (req: Request, res: Response): Promise<void> => {
+export const createTaxClass = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { name, description } = req.body;
 
@@ -176,7 +177,7 @@ export const createTaxClass = async (req: Request, res: Response): Promise<void>
   }
 };
 
-export const updateTaxClass = async (req: Request, res: Response): Promise<void> => {
+export const updateTaxClass = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { taxClassId } = req.params;
     const { name, description } = req.body;
@@ -195,7 +196,7 @@ export const updateTaxClass = async (req: Request, res: Response): Promise<void>
   }
 };
 
-export const deleteTaxClass = async (req: Request, res: Response): Promise<void> => {
+export const deleteTaxClass = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { taxClassId } = req.params;
     await query(`UPDATE "taxClass" SET "deletedAt" = NOW() WHERE "taxClassId" = $1`, [taxClassId]);

@@ -1,10 +1,11 @@
 import { logger } from '../../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import taxQueryRepo from '../../infrastructure/repositories/taxQueryRepo';
 import { TaxCommandRepo } from '../../infrastructure/repositories/taxCommandRepo';
 import { TaxRate, TaxCategory, TaxZone } from '../../taxTypes';
 
-export const getTaxRate = async (req: Request, res: Response) => {
+export const getTaxRate = async (req: TypedRequest, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -26,7 +27,7 @@ export const getTaxRate = async (req: Request, res: Response) => {
   }
 };
 
-export const getAllTaxRates = async (req: Request, res: Response) => {
+export const getAllTaxRates = async (req: TypedRequest, res: Response) => {
   try {
     const { country, region, status, limit, offset } = req.query;
     const limitNum = limit ? parseInt(limit as string) : undefined;
@@ -50,7 +51,7 @@ export const getAllTaxRates = async (req: Request, res: Response) => {
   }
 };
 
-export const createTaxRate = async (req: Request, res: Response) => {
+export const createTaxRate = async (req: TypedRequest, res: Response) => {
   try {
     const {
       name,
@@ -99,7 +100,7 @@ export const createTaxRate = async (req: Request, res: Response) => {
   }
 };
 
-export const updateTaxRate = async (req: Request, res: Response) => {
+export const updateTaxRate = async (req: TypedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const { name, description, rate, taxCategoryId, taxZoneId, priority, isActive } = req.body;
@@ -130,7 +131,7 @@ export const updateTaxRate = async (req: Request, res: Response) => {
   }
 };
 
-export const deleteTaxRate = async (req: Request, res: Response) => {
+export const deleteTaxRate = async (req: TypedRequest, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -151,7 +152,7 @@ export const deleteTaxRate = async (req: Request, res: Response) => {
 };
 
 // Tax Category Methods
-export const getAllTaxCategories = async (req: Request, res: Response) => {
+export const getAllTaxCategories = async (req: TypedRequest, res: Response) => {
   try {
     const { status } = req.query;
 
@@ -173,7 +174,7 @@ export const getAllTaxCategories = async (req: Request, res: Response) => {
   }
 };
 
-export const getTaxCategory = async (req: Request, res: Response) => {
+export const getTaxCategory = async (req: TypedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const taxCategory = await taxQueryRepo.findTaxCategoryById(id);
@@ -190,7 +191,7 @@ export const getTaxCategory = async (req: Request, res: Response) => {
   }
 };
 
-export const createTaxCategory = async (req: Request, res: Response) => {
+export const createTaxCategory = async (req: TypedRequest, res: Response) => {
   try {
     const { name, code, description, isDefault, sortOrder, isActive } = req.body;
 
@@ -217,7 +218,7 @@ export const createTaxCategory = async (req: Request, res: Response) => {
   }
 };
 
-export const updateTaxCategory = async (req: Request, res: Response) => {
+export const updateTaxCategory = async (req: TypedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const { name, code, description, isDefault, sortOrder, isActive } = req.body;
@@ -247,7 +248,7 @@ export const updateTaxCategory = async (req: Request, res: Response) => {
   }
 };
 
-export const deleteTaxCategory = async (req: Request, res: Response) => {
+export const deleteTaxCategory = async (req: TypedRequest, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -268,7 +269,7 @@ export const deleteTaxCategory = async (req: Request, res: Response) => {
 };
 
 // Tax Zone Methods
-export const getAllTaxZones = async (req: Request, res: Response) => {
+export const getAllTaxZones = async (req: TypedRequest, res: Response) => {
   try {
     const { status, limit, offset } = req.query;
     const limitNum = limit ? parseInt(limit as string) : undefined;
@@ -291,7 +292,7 @@ export const getAllTaxZones = async (req: Request, res: Response) => {
   }
 };
 
-export const getTaxZoneById = async (req: Request, res: Response) => {
+export const getTaxZoneById = async (req: TypedRequest, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -313,7 +314,7 @@ export const getTaxZoneById = async (req: Request, res: Response) => {
   }
 };
 
-export const createTaxZone = async (req: Request, res: Response) => {
+export const createTaxZone = async (req: TypedRequest, res: Response) => {
   try {
     const { name, code, description, isDefault, countries, states, postcodes, cities, isActive } = req.body;
 
@@ -343,7 +344,7 @@ export const createTaxZone = async (req: Request, res: Response) => {
   }
 };
 
-export const updateTaxZone = async (req: Request, res: Response) => {
+export const updateTaxZone = async (req: TypedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const { name, code, description, isDefault, countries, states, postcodes, cities, isActive } = req.body;
@@ -381,7 +382,7 @@ export const updateTaxZone = async (req: Request, res: Response) => {
   }
 };
 
-export const deleteTaxZone = async (req: Request, res: Response) => {
+export const deleteTaxZone = async (req: TypedRequest, res: Response) => {
   try {
     const { id } = req.params;
 

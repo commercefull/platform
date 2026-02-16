@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';;
 import PromotionRepo from '../../../modules/promotion/infrastructure/repositories/promotionRepo';
 import { ListPromotionsUseCase, ListPromotionsCommand } from '../../../modules/promotion/application/useCases/ListPromotions';
 import { CreatePromotionUseCase, CreatePromotionCommand } from '../../../modules/promotion/application/useCases/CreatePromotion';
@@ -16,7 +17,7 @@ import { adminRespond } from '../../respond';
 // List Promotions
 // ============================================================================
 
-export const listPromotions = async (req: Request, res: Response): Promise<void> => {
+export const listPromotions = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { status, type, search, limit, offset, orderBy, orderDirection } = req.query;
 
@@ -72,7 +73,7 @@ export const listPromotions = async (req: Request, res: Response): Promise<void>
 // Create Promotion Form
 // ============================================================================
 
-export const createPromotionForm = async (req: Request, res: Response): Promise<void> => {
+export const createPromotionForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     adminRespond(req, res, 'promotions/create', {
       pageName: 'Create Promotion',
@@ -91,7 +92,7 @@ export const createPromotionForm = async (req: Request, res: Response): Promise<
 // Create Promotion
 // ============================================================================
 
-export const createPromotion = async (req: Request, res: Response): Promise<void> => {
+export const createPromotion = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { code, name, description, type, value, minOrderAmount, maxDiscountAmount, usageLimit, usageLimitPerCustomer, startsAt, endsAt } =
       req.body;
@@ -130,7 +131,7 @@ export const createPromotion = async (req: Request, res: Response): Promise<void
 // View Promotion
 // ============================================================================
 
-export const viewPromotion = async (req: Request, res: Response): Promise<void> => {
+export const viewPromotion = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { promotionId } = req.params;
 
@@ -165,7 +166,7 @@ export const viewPromotion = async (req: Request, res: Response): Promise<void> 
 // Edit Promotion Form
 // ============================================================================
 
-export const editPromotionForm = async (req: Request, res: Response): Promise<void> => {
+export const editPromotionForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { promotionId } = req.params;
 
@@ -197,7 +198,7 @@ export const editPromotionForm = async (req: Request, res: Response): Promise<vo
 // Update Promotion
 // ============================================================================
 
-export const updatePromotion = async (req: Request, res: Response): Promise<void> => {
+export const updatePromotion = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { promotionId } = req.params;
     const updates: any = {};
@@ -261,7 +262,7 @@ export const updatePromotion = async (req: Request, res: Response): Promise<void
 // Delete Promotion (AJAX)
 // ============================================================================
 
-export const deletePromotion = async (req: Request, res: Response): Promise<void> => {
+export const deletePromotion = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { promotionId } = req.params;
 

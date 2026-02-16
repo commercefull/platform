@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';;
 import { storefrontRespond } from '../../respond';
 import ProductRepo from '../../../modules/product/infrastructure/repositories/ProductRepository';
 import { ListProductsCommand, ListProductsUseCase } from '../../../modules/product/application/useCases/ListProducts';
@@ -14,7 +15,7 @@ import { GetProductCommand, GetProductUseCase } from '../../../modules/product/a
 // Product Listing (PLP)
 // ============================================================================
 
-export const listProducts = async (req: Request, res: Response): Promise<void> => {
+export const listProducts = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { category, search, page = '1', limit = '12', sort = 'name', order = 'asc' } = req.query;
 
@@ -63,7 +64,7 @@ export const listProducts = async (req: Request, res: Response): Promise<void> =
 // Product Detail (PDP)
 // ============================================================================
 
-export const getProduct = async (req: Request, res: Response): Promise<void> => {
+export const getProduct = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { categorySlug, productId } = req.params;
 
@@ -105,7 +106,7 @@ export const getProduct = async (req: Request, res: Response): Promise<void> => 
 // Category Products
 // ============================================================================
 
-export const getCategoryProducts = async (req: Request, res: Response): Promise<void> => {
+export const getCategoryProducts = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { categorySlug } = req.params;
     const { page = '1', limit = '12', sort = 'name', order = 'asc' } = req.query;
@@ -149,7 +150,7 @@ export const getCategoryProducts = async (req: Request, res: Response): Promise<
 // Search Products
 // ============================================================================
 
-export const searchProducts = async (req: Request, res: Response): Promise<void> => {
+export const searchProducts = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { q: search, page = '1', limit = '12' } = req.query;
 

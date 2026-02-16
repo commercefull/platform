@@ -79,6 +79,18 @@ router.post('/basket/:basketId/items/:basketItemId/gift', basketController.setIt
 router.post('/basket/:basketId/assign', basketController.assignToCustomer);
 
 /**
+ * Apply coupon to basket
+ * POST /basket/:basketId/coupon
+ */
+router.post('/basket/:basketId/coupon', basketController.applyCoupon);
+
+/**
+ * Remove coupon from basket
+ * DELETE /basket/:basketId/coupon
+ */
+router.delete('/basket/:basketId/coupon', basketController.removeCoupon);
+
+/**
  * Extend basket expiration
  * PUT /basket/:basketId/expiration
  */

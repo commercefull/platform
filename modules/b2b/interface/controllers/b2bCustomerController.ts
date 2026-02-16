@@ -4,12 +4,13 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import * as companyRepo from '../../infrastructure/repositories/companyRepo';
 import * as quoteRepo from '../../infrastructure/repositories/quoteRepo';
 import * as approvalRepo from '../../infrastructure/repositories/approvalRepo';
 
-type AsyncHandler = (req: Request, res: Response, next: NextFunction) => Promise<void>;
+type AsyncHandler = (req: TypedRequest, res: Response, next: NextFunction) => Promise<void>;
 
 // ============================================================================
 // Company Registration
@@ -17,7 +18,7 @@ type AsyncHandler = (req: Request, res: Response, next: NextFunction) => Promise
 
 export const registerCompany: AsyncHandler = async (req, res, next) => {
   try {
-    const customerId = (req as any).customerId;
+    const customerId = req.user?.customerId;
 
     const company = await companyRepo.saveCompany({
       name: req.body.name,
@@ -66,7 +67,7 @@ export const registerCompany: AsyncHandler = async (req, res, next) => {
 
 export const getMyCompany: AsyncHandler = async (req, res, next) => {
   try {
-    const companyId = (req as any).companyId;
+    const companyId = req.user?.companyId;
     if (!companyId) {
       res.status(404).json({ success: false, message: 'No company associated with this account' });
       return;
@@ -88,8 +89,8 @@ export const getMyCompany: AsyncHandler = async (req, res, next) => {
 
 export const updateMyCompany: AsyncHandler = async (req, res, next) => {
   try {
-    const companyId = (req as any).companyId;
-    const companyUser = (req as any).companyUser;
+    const companyId = req.user?.companyId;
+    const companyUser = req.companyUser;
 
     if (!companyUser?.canManageCompany) {
       res.status(403).json({ success: false, message: 'Not authorized to manage company' });
@@ -114,7 +115,7 @@ export const updateMyCompany: AsyncHandler = async (req, res, next) => {
 
 export const getMyCompanyUsers: AsyncHandler = async (req, res, next) => {
   try {
-    const companyId = (req as any).companyId;
+    const companyId = req.user?.companyId || '';
     const users = await companyRepo.getCompanyUsers(companyId);
     res.json({ success: true, data: users });
   } catch (error: any) {
@@ -126,8 +127,8 @@ export const getMyCompanyUsers: AsyncHandler = async (req, res, next) => {
 
 export const inviteCompanyUser: AsyncHandler = async (req, res, next) => {
   try {
-    const companyId = (req as any).companyId;
-    const companyUser = (req as any).companyUser;
+    const companyId = req.user?.companyId;
+    const companyUser = req.companyUser;
 
     if (!companyUser?.canManageUsers) {
       res.status(403).json({ success: false, message: 'Not authorized to manage users' });
@@ -135,14 +136,14 @@ export const inviteCompanyUser: AsyncHandler = async (req, res, next) => {
     }
 
     // Check if user already exists
-    const existing = await companyRepo.getCompanyUserByEmail(companyId, req.body.email);
+    const existing = await companyRepo.getCompanyUserByEmail(companyId || '', req.body.email);
     if (existing) {
       res.status(409).json({ success: false, message: 'User with this email already exists' });
       return;
     }
 
     const user = await companyRepo.saveCompanyUser({
-      b2bCompanyId: companyId,
+      b2bCompanyId: companyId || '',
       email: req.body.email,
       firstName: req.body.firstName,
       lastName: req.body.lastName,
@@ -175,10 +176,10 @@ export const inviteCompanyUser: AsyncHandler = async (req, res, next) => {
 
 export const acceptInvite: AsyncHandler = async (req, res, next) => {
   try {
-    const customerId = (req as any).customerId;
+    const customerId = req.user?.customerId;
     const { inviteToken } = req.body;
 
-    const user = await companyRepo.acceptInvite(inviteToken, customerId);
+    const user = await companyRepo.acceptInvite(inviteToken, customerId || '');
     if (!user) {
       res.status(400).json({ success: false, message: 'Invalid or expired invitation' });
       return;
@@ -194,8 +195,8 @@ export const acceptInvite: AsyncHandler = async (req, res, next) => {
 
 export const updateCompanyUser: AsyncHandler = async (req, res, next) => {
   try {
-    const companyId = (req as any).companyId;
-    const companyUser = (req as any).companyUser;
+    const companyId = req.user?.companyId;
+    const companyUser = req.companyUser;
 
     if (!companyUser?.canManageUsers) {
       res.status(403).json({ success: false, message: 'Not authorized to manage users' });
@@ -217,7 +218,7 @@ export const updateCompanyUser: AsyncHandler = async (req, res, next) => {
 
 export const removeCompanyUser: AsyncHandler = async (req, res, next) => {
   try {
-    const companyUser = (req as any).companyUser;
+    const companyUser = req.companyUser;
 
     if (!companyUser?.canManageUsers) {
       res.status(403).json({ success: false, message: 'Not authorized to manage users' });
@@ -239,9 +240,9 @@ export const removeCompanyUser: AsyncHandler = async (req, res, next) => {
 
 export const getMyCompanyAddresses: AsyncHandler = async (req, res, next) => {
   try {
-    const companyId = (req as any).companyId;
+    const companyId = req.user?.companyId;
     const { type } = req.query;
-    const addresses = await companyRepo.getCompanyAddresses(companyId, type as any);
+    const addresses = await companyRepo.getCompanyAddresses(companyId || '', type as any);
     res.json({ success: true, data: addresses });
   } catch (error: any) {
     logger.error('Error:', error);
@@ -252,7 +253,7 @@ export const getMyCompanyAddresses: AsyncHandler = async (req, res, next) => {
 
 export const addCompanyAddress: AsyncHandler = async (req, res, next) => {
   try {
-    const companyId = (req as any).companyId;
+    const companyId = req.user?.companyId;
     const address = await companyRepo.saveCompanyAddress({
       companyId,
       ...req.body,
@@ -267,7 +268,7 @@ export const addCompanyAddress: AsyncHandler = async (req, res, next) => {
 
 export const updateCompanyAddress: AsyncHandler = async (req, res, next) => {
   try {
-    const companyId = (req as any).companyId;
+    const companyId = req.user?.companyId;
     const address = await companyRepo.saveCompanyAddress({
       companyAddressId: req.params.addressId,
       companyId,
@@ -298,8 +299,8 @@ export const deleteCompanyAddress: AsyncHandler = async (req, res, next) => {
 
 export const getMyQuotes: AsyncHandler = async (req, res, next) => {
   try {
-    const companyId = (req as any).companyId;
-    const customerId = (req as any).customerId;
+    const companyId = req.user?.companyId;
+    const customerId = req.user?.customerId;
     const { status, limit, offset } = req.query;
 
     const result = await quoteRepo.getQuotes(
@@ -338,9 +339,9 @@ export const getQuote: AsyncHandler = async (req, res, next) => {
 
 export const requestQuote: AsyncHandler = async (req, res, next) => {
   try {
-    const companyId = (req as any).companyId;
-    const customerId = (req as any).customerId;
-    const b2bCompanyUserId = (req as any).b2bCompanyUserId;
+    const companyId = req.user?.companyId;
+    const customerId = req.user?.customerId;
+    const b2bCompanyUserId = req.b2bCompanyUserId;
 
     const quote = await quoteRepo.saveQuote({
       b2bCompanyId: companyId,
@@ -383,12 +384,12 @@ export const acceptQuote: AsyncHandler = async (req, res, next) => {
     }
 
     // Check if approval is required
-    const companyId = (req as any).companyId;
-    const companyUser = (req as any).companyUser;
+    const companyId = req.user?.companyId;
+    const companyUser = req.companyUser;
 
     if (companyUser?.requiresApproval || (companyUser?.orderLimit && quote.grandTotal > companyUser.orderLimit)) {
       // Create approval request
-      const workflow = await approvalRepo.findMatchingWorkflow(companyId, 'quote', quote.grandTotal);
+      const workflow = await approvalRepo.findMatchingWorkflow(companyId || '', 'quote', quote.grandTotal);
       if (workflow) {
         await approvalRepo.createApprovalRequest({
           approvalWorkflowId: workflow.b2bApprovalWorkflowId,
@@ -433,8 +434,8 @@ export const rejectQuote: AsyncHandler = async (req, res, next) => {
 
 export const getMyApprovalRequests: AsyncHandler = async (req, res, next) => {
   try {
-    const companyId = (req as any).companyId;
-    const b2bCompanyUserId = (req as any).b2bCompanyUserId;
+    const companyId = req.user?.companyId;
+    const b2bCompanyUserId = req.b2bCompanyUserId;
     const { status, limit, offset } = req.query;
 
     const result = await approvalRepo.getApprovalRequests(
@@ -451,14 +452,14 @@ export const getMyApprovalRequests: AsyncHandler = async (req, res, next) => {
 
 export const getPendingApprovals: AsyncHandler = async (req, res, next) => {
   try {
-    const companyUser = (req as any).companyUser;
+    const companyUser = req.companyUser;
 
     if (!companyUser?.canApproveOrders) {
       res.status(403).json({ success: false, message: 'Not authorized to approve requests' });
       return;
     }
 
-    const companyId = (req as any).companyId;
+    const companyId = req.user?.companyId;
     const result = await approvalRepo.getApprovalRequests({ companyId, status: 'pending' }, { limit: 50, offset: 0 });
     res.json({ success: true, ...result });
   } catch (error: any) {
@@ -470,7 +471,7 @@ export const getPendingApprovals: AsyncHandler = async (req, res, next) => {
 
 export const processApproval: AsyncHandler = async (req, res, next) => {
   try {
-    const companyUser = (req as any).companyUser;
+    const companyUser = req.companyUser;
 
     if (!companyUser?.canApproveOrders) {
       res.status(403).json({ success: false, message: 'Not authorized to approve requests' });

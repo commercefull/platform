@@ -4,14 +4,15 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';;
 import { adminRespond } from '../../respond';
 
 // ============================================================================
 // Dashboard
 // ============================================================================
 
-export const localizationDashboard = async (req: Request, res: Response): Promise<void> => {
+export const localizationDashboard = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     adminRespond(req, res, 'settings/localization/index', {
       pageName: 'Localization',
@@ -33,7 +34,7 @@ export const localizationDashboard = async (req: Request, res: Response): Promis
 // Languages
 // ============================================================================
 
-export const listLanguages = async (req: Request, res: Response): Promise<void> => {
+export const listLanguages = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     adminRespond(req, res, 'settings/localization/languages/index', {
       pageName: 'Languages',
@@ -50,7 +51,7 @@ export const listLanguages = async (req: Request, res: Response): Promise<void> 
   }
 };
 
-export const createLanguageForm = async (req: Request, res: Response): Promise<void> => {
+export const createLanguageForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     adminRespond(req, res, 'settings/localization/languages/create', {
       pageName: 'Add Language',
@@ -64,7 +65,7 @@ export const createLanguageForm = async (req: Request, res: Response): Promise<v
   }
 };
 
-export const createLanguage = async (req: Request, res: Response): Promise<void> => {
+export const createLanguage = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     res.redirect('/admin/settings/localization/languages?success=Language added successfully');
   } catch (error: any) {
@@ -77,7 +78,7 @@ export const createLanguage = async (req: Request, res: Response): Promise<void>
   }
 };
 
-export const editLanguageForm = async (req: Request, res: Response): Promise<void> => {
+export const editLanguageForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     adminRespond(req, res, 'settings/localization/languages/edit', {
       pageName: 'Edit Language',
@@ -92,7 +93,7 @@ export const editLanguageForm = async (req: Request, res: Response): Promise<voi
   }
 };
 
-export const updateLanguage = async (req: Request, res: Response): Promise<void> => {
+export const updateLanguage = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     res.redirect('/admin/settings/localization/languages?success=Language updated successfully');
   } catch (error: any) {
@@ -106,7 +107,7 @@ export const updateLanguage = async (req: Request, res: Response): Promise<void>
   }
 };
 
-export const deleteLanguage = async (req: Request, res: Response): Promise<void> => {
+export const deleteLanguage = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     res.json({ success: true, message: 'Language deleted successfully' });
   } catch (error: any) {
@@ -119,7 +120,7 @@ export const deleteLanguage = async (req: Request, res: Response): Promise<void>
 // Currencies
 // ============================================================================
 
-export const listCurrencies = async (req: Request, res: Response): Promise<void> => {
+export const listCurrencies = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     adminRespond(req, res, 'settings/localization/currencies/index', {
       pageName: 'Currencies',
@@ -136,7 +137,7 @@ export const listCurrencies = async (req: Request, res: Response): Promise<void>
   }
 };
 
-export const createCurrencyForm = async (req: Request, res: Response): Promise<void> => {
+export const createCurrencyForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     adminRespond(req, res, 'settings/localization/currencies/create', {
       pageName: 'Add Currency',
@@ -150,7 +151,7 @@ export const createCurrencyForm = async (req: Request, res: Response): Promise<v
   }
 };
 
-export const createCurrency = async (req: Request, res: Response): Promise<void> => {
+export const createCurrency = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     res.redirect('/admin/settings/localization/currencies?success=Currency added successfully');
   } catch (error: any) {
@@ -163,7 +164,7 @@ export const createCurrency = async (req: Request, res: Response): Promise<void>
   }
 };
 
-export const editCurrencyForm = async (req: Request, res: Response): Promise<void> => {
+export const editCurrencyForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     adminRespond(req, res, 'settings/localization/currencies/edit', {
       pageName: 'Edit Currency',
@@ -178,7 +179,7 @@ export const editCurrencyForm = async (req: Request, res: Response): Promise<voi
   }
 };
 
-export const updateCurrency = async (req: Request, res: Response): Promise<void> => {
+export const updateCurrency = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     res.redirect('/admin/settings/localization/currencies?success=Currency updated successfully');
   } catch (error: any) {
@@ -192,7 +193,7 @@ export const updateCurrency = async (req: Request, res: Response): Promise<void>
   }
 };
 
-export const deleteCurrency = async (req: Request, res: Response): Promise<void> => {
+export const deleteCurrency = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     res.json({ success: true, message: 'Currency deleted successfully' });
   } catch (error: any) {
@@ -205,7 +206,7 @@ export const deleteCurrency = async (req: Request, res: Response): Promise<void>
 // Regions
 // ============================================================================
 
-export const listRegions = async (req: Request, res: Response): Promise<void> => {
+export const listRegions = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     adminRespond(req, res, 'settings/localization/regions/index', {
       pageName: 'Regions',
@@ -222,7 +223,7 @@ export const listRegions = async (req: Request, res: Response): Promise<void> =>
   }
 };
 
-export const createRegionForm = async (req: Request, res: Response): Promise<void> => {
+export const createRegionForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     adminRespond(req, res, 'settings/localization/regions/create', {
       pageName: 'Add Region',
@@ -236,7 +237,7 @@ export const createRegionForm = async (req: Request, res: Response): Promise<voi
   }
 };
 
-export const createRegion = async (req: Request, res: Response): Promise<void> => {
+export const createRegion = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     res.redirect('/admin/settings/localization/regions?success=Region added successfully');
   } catch (error: any) {
@@ -249,7 +250,7 @@ export const createRegion = async (req: Request, res: Response): Promise<void> =
   }
 };
 
-export const editRegionForm = async (req: Request, res: Response): Promise<void> => {
+export const editRegionForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     adminRespond(req, res, 'settings/localization/regions/edit', {
       pageName: 'Edit Region',
@@ -264,7 +265,7 @@ export const editRegionForm = async (req: Request, res: Response): Promise<void>
   }
 };
 
-export const updateRegion = async (req: Request, res: Response): Promise<void> => {
+export const updateRegion = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     res.redirect('/admin/settings/localization/regions?success=Region updated successfully');
   } catch (error: any) {
@@ -278,7 +279,7 @@ export const updateRegion = async (req: Request, res: Response): Promise<void> =
   }
 };
 
-export const deleteRegion = async (req: Request, res: Response): Promise<void> => {
+export const deleteRegion = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     res.json({ success: true, message: 'Region deleted successfully' });
   } catch (error: any) {

@@ -4,10 +4,11 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';;
 import { adminRespond } from '../../respond';
 
-export const listSegments = async (req: Request, res: Response): Promise<void> => {
+export const listSegments = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     adminRespond(req, res, 'sales/segments/index', {
       pageName: 'Customer Segments',
@@ -24,7 +25,7 @@ export const listSegments = async (req: Request, res: Response): Promise<void> =
   }
 };
 
-export const createSegmentForm = async (req: Request, res: Response): Promise<void> => {
+export const createSegmentForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     adminRespond(req, res, 'sales/segments/create', {
       pageName: 'Create Segment',
@@ -38,7 +39,7 @@ export const createSegmentForm = async (req: Request, res: Response): Promise<vo
   }
 };
 
-export const createSegment = async (req: Request, res: Response): Promise<void> => {
+export const createSegment = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     res.redirect('/admin/sales/segments?success=Segment created successfully');
   } catch (error: any) {
@@ -51,7 +52,7 @@ export const createSegment = async (req: Request, res: Response): Promise<void> 
   }
 };
 
-export const viewSegment = async (req: Request, res: Response): Promise<void> => {
+export const viewSegment = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     adminRespond(req, res, 'sales/segments/view', {
       pageName: 'Segment Details',
@@ -68,7 +69,7 @@ export const viewSegment = async (req: Request, res: Response): Promise<void> =>
   }
 };
 
-export const editSegmentForm = async (req: Request, res: Response): Promise<void> => {
+export const editSegmentForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     adminRespond(req, res, 'sales/segments/edit', {
       pageName: 'Edit Segment',
@@ -83,7 +84,7 @@ export const editSegmentForm = async (req: Request, res: Response): Promise<void
   }
 };
 
-export const updateSegment = async (req: Request, res: Response): Promise<void> => {
+export const updateSegment = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { segmentId } = req.params;
     res.redirect(`/admin/sales/segments/${segmentId}?success=Segment updated successfully`);
@@ -98,7 +99,7 @@ export const updateSegment = async (req: Request, res: Response): Promise<void> 
   }
 };
 
-export const deleteSegment = async (req: Request, res: Response): Promise<void> => {
+export const deleteSegment = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     res.json({ success: true, message: 'Segment deleted successfully' });
   } catch (error: any) {
@@ -107,7 +108,7 @@ export const deleteSegment = async (req: Request, res: Response): Promise<void> 
   }
 };
 
-export const viewSegmentCustomers = async (req: Request, res: Response): Promise<void> => {
+export const viewSegmentCustomers = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     adminRespond(req, res, 'sales/segments/customers', {
       pageName: 'Segment Customers',
@@ -124,7 +125,7 @@ export const viewSegmentCustomers = async (req: Request, res: Response): Promise
   }
 };
 
-export const refreshSegment = async (req: Request, res: Response): Promise<void> => {
+export const refreshSegment = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { segmentId } = req.params;
     res.redirect(`/admin/sales/segments/${segmentId}?success=Segment refreshed successfully`);

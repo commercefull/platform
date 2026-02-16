@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import CustomerRepo from '../../infrastructure/repositories/CustomerRepository';
 import { RegisterCustomerCommand, RegisterCustomerUseCase } from '../../application/useCases/RegisterCustomer';
 import { GetCustomerCommand, GetCustomerUseCase } from '../../application/useCases/GetCustomer';
@@ -26,11 +27,11 @@ import {
 // Helpers
 // ============================================================================
 
-function respond(req: Request, res: Response, data: any, statusCode: number = 200): void {
+function respond(req: TypedRequest, res: Response, data: any, statusCode: number = 200): void {
   res.status(statusCode).json({ success: true, data });
 }
 
-function respondError(req: Request, res: Response, message: string, statusCode: number = 500): void {
+function respondError(req: TypedRequest, res: Response, message: string, statusCode: number = 500): void {
   res.status(statusCode).json({ success: false, error: message });
 }
 
@@ -38,7 +39,7 @@ function respondError(req: Request, res: Response, message: string, statusCode: 
 // Customer Routes
 // ============================================================================
 
-export const registerCustomer = async (req: Request, res: Response): Promise<void> => {
+export const registerCustomer = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { email, firstName, lastName, password, phone, dateOfBirth, preferredCurrency, preferredLanguage } = req.body;
 
@@ -64,7 +65,7 @@ export const registerCustomer = async (req: Request, res: Response): Promise<voi
   }
 };
 
-export const getCustomer = async (req: Request, res: Response): Promise<void> => {
+export const getCustomer = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { customerId } = req.params;
     const command = new GetCustomerCommand(customerId);
@@ -84,9 +85,9 @@ export const getCustomer = async (req: Request, res: Response): Promise<void> =>
   }
 };
 
-export const getMyProfile = async (req: Request, res: Response): Promise<void> => {
+export const getMyProfile = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const customerId = (req as any).user?.customerId || (req as any).user?._id;
+    const customerId = req.user?.customerId || req.user?._id;
     if (!customerId) {
       respondError(req, res, 'Authentication required', 401);
       return;
@@ -109,9 +110,9 @@ export const getMyProfile = async (req: Request, res: Response): Promise<void> =
   }
 };
 
-export const updateMyProfile = async (req: Request, res: Response): Promise<void> => {
+export const updateMyProfile = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const customerId = (req as any).user?.customerId || (req as any).user?._id;
+    const customerId = req.user?.customerId || req.user?._id;
     if (!customerId) {
       respondError(req, res, 'Authentication required', 401);
       return;
@@ -133,9 +134,9 @@ export const updateMyProfile = async (req: Request, res: Response): Promise<void
 // Address Routes
 // ============================================================================
 
-export const getAddresses = async (req: Request, res: Response): Promise<void> => {
+export const getAddresses = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const customerId = (req as any).user?.customerId || (req as any).user?._id;
+    const customerId = req.user?.customerId || req.user?._id;
     if (!customerId) {
       respondError(req, res, 'Authentication required', 401);
       return;
@@ -152,9 +153,9 @@ export const getAddresses = async (req: Request, res: Response): Promise<void> =
   }
 };
 
-export const addAddress = async (req: Request, res: Response): Promise<void> => {
+export const addAddress = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const customerId = (req as any).user?.customerId || (req as any).user?._id;
+    const customerId = req.user?.customerId || req.user?._id;
     if (!customerId) {
       respondError(req, res, 'Authentication required', 401);
       return;
@@ -204,9 +205,9 @@ export const addAddress = async (req: Request, res: Response): Promise<void> => 
   }
 };
 
-export const updateAddress = async (req: Request, res: Response): Promise<void> => {
+export const updateAddress = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const customerId = (req as any).user?.customerId || (req as any).user?._id;
+    const customerId = req.user?.customerId || req.user?._id;
     const { addressId } = req.params;
 
     if (!customerId) {
@@ -226,9 +227,9 @@ export const updateAddress = async (req: Request, res: Response): Promise<void> 
   }
 };
 
-export const deleteAddress = async (req: Request, res: Response): Promise<void> => {
+export const deleteAddress = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const customerId = (req as any).user?.customerId || (req as any).user?._id;
+    const customerId = req.user?.customerId || req.user?._id;
     const { addressId } = req.params;
 
     if (!customerId) {
@@ -248,9 +249,9 @@ export const deleteAddress = async (req: Request, res: Response): Promise<void> 
   }
 };
 
-export const setDefaultAddress = async (req: Request, res: Response): Promise<void> => {
+export const setDefaultAddress = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const customerId = (req as any).user?.customerId || (req as any).user?._id;
+    const customerId = req.user?.customerId || req.user?._id;
     const { addressId } = req.params;
     const { addressType } = req.body;
 
@@ -280,7 +281,7 @@ export const setDefaultAddress = async (req: Request, res: Response): Promise<vo
 // Business/Admin Customer Routes
 // ============================================================================
 
-export const listCustomers = async (req: Request, res: Response): Promise<void> => {
+export const listCustomers = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { limit = 20, offset = 0, search, status, isVerified } = req.query;
 
@@ -302,7 +303,7 @@ export const listCustomers = async (req: Request, res: Response): Promise<void> 
   }
 };
 
-export const createCustomer = async (req: Request, res: Response): Promise<void> => {
+export const createCustomer = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { email, firstName, lastName, password, phone, dateOfBirth, preferredCurrency, preferredLanguage } = req.body;
 
@@ -328,7 +329,7 @@ export const createCustomer = async (req: Request, res: Response): Promise<void>
   }
 };
 
-export const updateCustomer = async (req: Request, res: Response): Promise<void> => {
+export const updateCustomer = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { customerId } = req.params;
     const command = new UpdateCustomerCommand(customerId, req.body);
@@ -343,7 +344,7 @@ export const updateCustomer = async (req: Request, res: Response): Promise<void>
   }
 };
 
-export const deleteCustomer = async (req: Request, res: Response): Promise<void> => {
+export const deleteCustomer = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { customerId } = req.params;
     const { reason } = req.body;
@@ -360,7 +361,7 @@ export const deleteCustomer = async (req: Request, res: Response): Promise<void>
   }
 };
 
-export const verifyCustomer = async (req: Request, res: Response): Promise<void> => {
+export const verifyCustomer = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { customerId } = req.params;
     const { verificationType = 'email' } = req.body;
@@ -377,7 +378,7 @@ export const verifyCustomer = async (req: Request, res: Response): Promise<void>
   }
 };
 
-export const deactivateCustomer = async (req: Request, res: Response): Promise<void> => {
+export const deactivateCustomer = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { customerId } = req.params;
     const { reason } = req.body;
@@ -394,7 +395,7 @@ export const deactivateCustomer = async (req: Request, res: Response): Promise<v
   }
 };
 
-export const reactivateCustomer = async (req: Request, res: Response): Promise<void> => {
+export const reactivateCustomer = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { customerId } = req.params;
 
@@ -410,9 +411,9 @@ export const reactivateCustomer = async (req: Request, res: Response): Promise<v
   }
 };
 
-export const changePassword = async (req: Request, res: Response): Promise<void> => {
+export const changePassword = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const customerId = (req as any).user?.customerId || (req as any).user?._id;
+    const customerId = req.user?.customerId || req.user?._id;
     if (!customerId) {
       respondError(req, res, 'Authentication required', 401);
       return;
@@ -435,7 +436,7 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
 // Customer Address Routes (Business)
 // ============================================================================
 
-export const getCustomerAddresses = async (req: Request, res: Response): Promise<void> => {
+export const getCustomerAddresses = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { customerId } = req.params;
     const useCase = new ManageAddressesUseCase(CustomerRepo);
@@ -449,7 +450,7 @@ export const getCustomerAddresses = async (req: Request, res: Response): Promise
   }
 };
 
-export const addCustomerAddress = async (req: Request, res: Response): Promise<void> => {
+export const addCustomerAddress = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { customerId } = req.params;
     const {

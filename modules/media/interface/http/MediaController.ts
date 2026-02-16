@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import multer from 'multer';
 
 // Extend Express Request to include multer file properties
@@ -27,7 +28,7 @@ const upload = multer({
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB limit
   },
-  fileFilter: (req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+  fileFilter: (req: TypedRequest, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
     // Only allow image files
     if (file.mimetype.startsWith('image/')) {
       cb(null, true);
@@ -57,7 +58,7 @@ export class MediaController {
   /**
    * Upload and process a single image
    */
-  uploadImage = async (req: Request, res: Response) => {
+  uploadImage = async (req: TypedRequest, res: Response) => {
     try {
       if (!req.file) {
         return res.status(400).json({
@@ -102,7 +103,7 @@ export class MediaController {
   /**
    * Upload and process multiple images
    */
-  uploadImages = async (req: Request, res: Response) => {
+  uploadImages = async (req: TypedRequest, res: Response) => {
     try {
       if (!req.files || !Array.isArray(req.files)) {
         return res.status(400).json({

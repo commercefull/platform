@@ -5,7 +5,8 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import couponRepository from '../../infrastructure/repositories/CouponRepository';
 import {
   CreateCouponUseCase,
@@ -16,7 +17,7 @@ import {
   RedeemCouponUseCase,
 } from '../../application/useCases';
 
-export const createCoupon = async (req: Request, res: Response): Promise<void> => {
+export const createCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const useCase = new CreateCouponUseCase(couponRepository);
     const command = new CreateCouponCommand(
@@ -49,7 +50,7 @@ export const createCoupon = async (req: Request, res: Response): Promise<void> =
   }
 };
 
-export const validateCoupon = async (req: Request, res: Response): Promise<void> => {
+export const validateCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const useCase = new ValidateCouponUseCase(couponRepository);
     const command = new ValidateCouponCommand(req.body.code || req.params.code, req.body.orderValue, req.body.customerId, req.body.items);
@@ -61,7 +62,7 @@ export const validateCoupon = async (req: Request, res: Response): Promise<void>
   }
 };
 
-export const applyCoupon = async (req: Request, res: Response): Promise<void> => {
+export const applyCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const useCase = new ApplyCouponUseCase(couponRepository);
     const result = await useCase.execute({
@@ -78,7 +79,7 @@ export const applyCoupon = async (req: Request, res: Response): Promise<void> =>
   }
 };
 
-export const redeemCoupon = async (req: Request, res: Response): Promise<void> => {
+export const redeemCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const useCase = new RedeemCouponUseCase(couponRepository);
     const result = await useCase.execute({
@@ -94,7 +95,7 @@ export const redeemCoupon = async (req: Request, res: Response): Promise<void> =
   }
 };
 
-export const getCoupon = async (req: Request, res: Response): Promise<void> => {
+export const getCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const coupon = await couponRepository.findById(req.params.couponId);
     if (!coupon) {
@@ -108,7 +109,7 @@ export const getCoupon = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export const listCoupons = async (req: Request, res: Response): Promise<void> => {
+export const listCoupons = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const result = await couponRepository.findAll(
       {
@@ -128,7 +129,7 @@ export const listCoupons = async (req: Request, res: Response): Promise<void> =>
   }
 };
 
-export const deleteCoupon = async (req: Request, res: Response): Promise<void> => {
+export const deleteCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     await couponRepository.delete(req.params.couponId);
     res.json({ success: true, message: 'Coupon deleted' });

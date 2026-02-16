@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';;
 import { storefrontRespond } from '../../respond';
 import CustomerRepo from '../../../modules/customer/infrastructure/repositories/CustomerRepository';
 import { AuthenticateCustomerCommand, AuthenticateCustomerUseCase } from '../../../modules/customer/application/useCases/AuthenticateCustomer';
@@ -17,7 +18,7 @@ import { ChangePasswordCommand, ChangePasswordUseCase } from '../../../modules/c
 // Sign In Form
 // ============================================================================
 
-export const signInForm = async (req: Request, res: Response): Promise<void> => {
+export const signInForm = async (req: TypedRequest, res: Response): Promise<void> => {
   // If already logged in, redirect to profile
   if (req.user) {
     res.redirect('/profile');
@@ -34,7 +35,7 @@ export const signInForm = async (req: Request, res: Response): Promise<void> => 
 // Sign Up Form
 // ============================================================================
 
-export const signUpForm = async (req: Request, res: Response): Promise<void> => {
+export const signUpForm = async (req: TypedRequest, res: Response): Promise<void> => {
   // If already logged in, redirect to profile
   if (req.user) {
     res.redirect('/profile');
@@ -50,7 +51,7 @@ export const signUpForm = async (req: Request, res: Response): Promise<void> => 
 // Sign In Process
 // ============================================================================
 
-export const signIn = async (req: Request, res: Response): Promise<void> => {
+export const signIn = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { email, password, redirectTo = '/' } = req.body;
 
@@ -91,7 +92,7 @@ export const signIn = async (req: Request, res: Response): Promise<void> => {
 // Sign Up Process
 // ============================================================================
 
-export const signUp = async (req: Request, res: Response): Promise<void> => {
+export const signUp = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { firstName, lastName, email, password, confirmPassword, acceptsMarketing = false, acceptsAnalytics = false } = req.body;
 
@@ -139,7 +140,7 @@ export const signUp = async (req: Request, res: Response): Promise<void> => {
 // Profile View
 // ============================================================================
 
-export const profile = async (req: Request, res: Response): Promise<void> => {
+export const profile = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     if (!req.user) {
       return res.redirect('/signin?redirect=/profile');
@@ -173,7 +174,7 @@ export const profile = async (req: Request, res: Response): Promise<void> => {
 // Update Profile
 // ============================================================================
 
-export const updateProfile = async (req: Request, res: Response): Promise<void> => {
+export const updateProfile = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     if (!req.user) {
       return res.redirect('/signin');
@@ -204,7 +205,7 @@ export const updateProfile = async (req: Request, res: Response): Promise<void> 
 // Sign Out
 // ============================================================================
 
-export const signOut = async (req: Request, res: Response): Promise<void> => {
+export const signOut = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     // Clear user session
     (req as any).user = null;
@@ -225,7 +226,7 @@ export const signOut = async (req: Request, res: Response): Promise<void> => {
 // Change Password
 // ============================================================================
 
-export const changePassword = async (req: Request, res: Response): Promise<void> => {
+export const changePassword = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     if (!req.user) {
       return res.redirect('/signin');

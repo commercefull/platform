@@ -4,12 +4,13 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import * as supportRepo from '../../infrastructure/repositories/supportRepo';
 import * as faqRepo from '../../infrastructure/repositories/faqRepo';
 import * as alertRepo from '../../infrastructure/repositories/alertRepo';
 
-type AsyncHandler = (req: Request, res: Response, next: NextFunction) => Promise<void>;
+type AsyncHandler = (req: TypedRequest, res: Response, next: NextFunction) => Promise<void>;
 
 // ============================================================================
 // Support Agents
@@ -176,7 +177,7 @@ export const escalateTicket: AsyncHandler = async (req, res, next) => {
 
 export const addAgentMessage: AsyncHandler = async (req, res, next) => {
   try {
-    const agentId = (req as any).userId || (req as any).merchantId;
+    const agentId = req.user?.userId || req.user?.merchantId || '';
     const agent = await supportRepo.getAgent(agentId);
 
     const message = await supportRepo.addMessage({
@@ -305,7 +306,7 @@ export const getFaqArticle: AsyncHandler = async (req, res, next) => {
 
 export const createFaqArticle: AsyncHandler = async (req, res, next) => {
   try {
-    const authorId = (req as any).userId || (req as any).merchantId;
+    const authorId = req.user?.userId || req.user?.merchantId;
     const article = await faqRepo.saveArticle({
       authorId,
       ...req.body,
@@ -320,7 +321,7 @@ export const createFaqArticle: AsyncHandler = async (req, res, next) => {
 
 export const updateFaqArticle: AsyncHandler = async (req, res, next) => {
   try {
-    const lastEditedBy = (req as any).userId || (req as any).merchantId;
+    const lastEditedBy = req.user?.userId || req.user?.merchantId;
     const article = await faqRepo.saveArticle({
       faqArticleId: req.params.id,
       lastEditedBy,

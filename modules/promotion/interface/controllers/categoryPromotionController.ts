@@ -1,10 +1,11 @@
 import { logger } from '../../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import { CategoryPromotionRepo } from '../../infrastructure/repositories/categoryRepo';
 
 const categoryPromotionRepo = new CategoryPromotionRepo();
 
-export const getActiveCategoryPromotions = async (req: Request, res: Response): Promise<void> => {
+export const getActiveCategoryPromotions = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const promotions = await categoryPromotionRepo.getActivePromotions();
     res.status(200).json({ success: true, data: promotions || [] });
@@ -15,7 +16,7 @@ export const getActiveCategoryPromotions = async (req: Request, res: Response): 
 };
 
 // Get promotions by category ID
-export const getPromotionsByCategoryId = async (req: Request, res: Response): Promise<void> => {
+export const getPromotionsByCategoryId = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { categoryId } = req.params;
     const promotions = await categoryPromotionRepo.getByCategoryId(categoryId);
@@ -27,7 +28,7 @@ export const getPromotionsByCategoryId = async (req: Request, res: Response): Pr
 };
 
 // Get promotion by ID
-export const getCategoryPromotionById = async (req: Request, res: Response): Promise<void> => {
+export const getCategoryPromotionById = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const promotion = await categoryPromotionRepo.getById(id);
@@ -45,13 +46,13 @@ export const getCategoryPromotionById = async (req: Request, res: Response): Pro
 };
 
 // Create a new category promotion
-export const createCategoryPromotion = async (req: Request, res: Response): Promise<void> => {
+export const createCategoryPromotion = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const promotionData = req.body;
 
     // Add audit fields
-    promotionData.createdBy = (req.user as any)?.id || 'system';
-    promotionData.updatedBy = (req.user as any)?.id || 'system';
+    promotionData.createdBy = req.user?.id || 'system';
+    promotionData.updatedBy = req.user?.id || 'system';
 
     const promotion = await categoryPromotionRepo.create(promotionData);
     res.status(201).json({ success: true, data: promotion });
@@ -62,7 +63,7 @@ export const createCategoryPromotion = async (req: Request, res: Response): Prom
 };
 
 // Update an existing category promotion
-export const updateCategoryPromotion = async (req: Request, res: Response): Promise<void> => {
+export const updateCategoryPromotion = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const promotionData = req.body;
@@ -76,7 +77,7 @@ export const updateCategoryPromotion = async (req: Request, res: Response): Prom
 };
 
 // Delete a category promotion
-export const deleteCategoryPromotion = async (req: Request, res: Response): Promise<void> => {
+export const deleteCategoryPromotion = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     await categoryPromotionRepo.delete(id);

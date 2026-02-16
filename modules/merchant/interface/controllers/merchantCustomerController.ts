@@ -1,5 +1,6 @@
 import { logger } from '../../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import { MerchantRepo } from '../../infrastructure/repositories/merchantRepo';
 import { storefrontRespond } from '../../../../web/respond';
 
@@ -18,7 +19,7 @@ const merchantRepo = new MerchantRepo();
 /**
  * Get active merchants for public storefront
  */
-export const getActiveMerchants = async (req: Request, res: Response): Promise<void> => {
+export const getActiveMerchants = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const limit = parseInt(req.query.limit as string) || 20;
     const offset = parseInt(req.query.offset as string) || 0;
@@ -56,7 +57,7 @@ export const getActiveMerchants = async (req: Request, res: Response): Promise<v
     } else {
       // Use req.flash if available
       if ('flash' in req) {
-        (req as any).flash('error', 'Failed to load merchants. Please try again later.');
+        req.flash('error', 'Failed to load merchants. Please try again later.');
       }
       res.redirect('/');
     }
@@ -66,7 +67,7 @@ export const getActiveMerchants = async (req: Request, res: Response): Promise<v
 /**
  * Get merchant details by ID for public storefront
  */
-export const getMerchantById = async (req: Request, res: Response): Promise<void> => {
+export const getMerchantById = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const merchant = await merchantRepo.findById(id);
@@ -80,7 +81,7 @@ export const getMerchantById = async (req: Request, res: Response): Promise<void
       } else {
         // Use req.flash if available
         if ('flash' in req) {
-          (req as any).flash('error', 'Merchant not found');
+          req.flash('error', 'Merchant not found');
         }
         res.redirect('/merchants');
       }
@@ -97,7 +98,7 @@ export const getMerchantById = async (req: Request, res: Response): Promise<void
       } else {
         // Use req.flash if available
         if ('flash' in req) {
-          (req as any).flash('error', 'Merchant not found');
+          req.flash('error', 'Merchant not found');
         }
         res.redirect('/merchants');
       }
@@ -143,7 +144,7 @@ export const getMerchantById = async (req: Request, res: Response): Promise<void
     } else {
       // Use req.flash if available
       if ('flash' in req) {
-        (req as any).flash('error', 'Failed to load merchant details. Please try again later.');
+        req.flash('error', 'Failed to load merchant details. Please try again later.');
       }
       res.redirect('/merchants');
     }
@@ -153,7 +154,7 @@ export const getMerchantById = async (req: Request, res: Response): Promise<void
 /**
  * Get merchant products
  */
-export const getMerchantProducts = async (req: Request, res: Response): Promise<void> => {
+export const getMerchantProducts = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const limit = parseInt(req.query.limit as string) || 20;
@@ -170,7 +171,7 @@ export const getMerchantProducts = async (req: Request, res: Response): Promise<
       } else {
         // Use req.flash if available
         if ('flash' in req) {
-          (req as any).flash('error', 'Merchant not found');
+          req.flash('error', 'Merchant not found');
         }
         res.redirect('/merchants');
       }
@@ -216,7 +217,7 @@ export const getMerchantProducts = async (req: Request, res: Response): Promise<
     } else {
       // Use req.flash if available
       if ('flash' in req) {
-        (req as any).flash('error', 'Failed to load merchant products. Please try again later.');
+        req.flash('error', 'Failed to load merchant products. Please try again later.');
       }
       res.redirect('/merchants');
     }

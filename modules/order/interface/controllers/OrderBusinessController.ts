@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import OrderRepo from '../../infrastructure/repositories/OrderRepository';
 import { GetOrderCommand, GetOrderUseCase } from '../../application/useCases/GetOrder';
 import { ListOrdersCommand, ListOrdersUseCase } from '../../application/useCases/ListOrders';
@@ -21,7 +22,7 @@ import { FulfillmentStatus } from '../../domain/valueObjects/FulfillmentStatus';
 
 type ResponseData = Record<string, any>;
 
-function respond(req: Request, res: Response, data: ResponseData, statusCode: number = 200, htmlTemplate?: string): void {
+function respond(req: TypedRequest, res: Response, data: ResponseData, statusCode: number = 200, htmlTemplate?: string): void {
   const acceptHeader = req.get('Accept') || 'application/json';
 
   if (acceptHeader.includes('text/html') && htmlTemplate) {
@@ -31,7 +32,7 @@ function respond(req: Request, res: Response, data: ResponseData, statusCode: nu
   }
 }
 
-function respondError(req: Request, res: Response, message: string, statusCode: number = 500, htmlTemplate?: string): void {
+function respondError(req: TypedRequest, res: Response, message: string, statusCode: number = 500, htmlTemplate?: string): void {
   const acceptHeader = req.get('Accept') || 'application/json';
 
   if (acceptHeader.includes('text/html') && htmlTemplate) {
@@ -49,7 +50,7 @@ function respondError(req: Request, res: Response, message: string, statusCode: 
  * List all orders with filters
  * GET /orders
  */
-export const listOrders = async (req: Request, res: Response): Promise<void> => {
+export const listOrders = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const {
       customerId,
@@ -101,7 +102,7 @@ export const listOrders = async (req: Request, res: Response): Promise<void> => 
  * Get order details
  * GET /orders/:orderId
  */
-export const getOrder = async (req: Request, res: Response): Promise<void> => {
+export const getOrder = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { orderId } = req.params;
 
@@ -126,7 +127,7 @@ export const getOrder = async (req: Request, res: Response): Promise<void> => {
  * Update order status
  * PUT /orders/:orderId/status
  */
-export const updateOrderStatus = async (req: Request, res: Response): Promise<void> => {
+export const updateOrderStatus = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { orderId } = req.params;
     const { status, reason } = req.body;
@@ -164,7 +165,7 @@ export const updateOrderStatus = async (req: Request, res: Response): Promise<vo
  * Cancel an order (admin)
  * POST /orders/:orderId/cancel
  */
-export const cancelOrder = async (req: Request, res: Response): Promise<void> => {
+export const cancelOrder = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { orderId } = req.params;
     const { reason } = req.body;
@@ -200,7 +201,7 @@ export const cancelOrder = async (req: Request, res: Response): Promise<void> =>
  * Process refund
  * POST /orders/:orderId/refund
  */
-export const processRefund = async (req: Request, res: Response): Promise<void> => {
+export const processRefund = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { orderId } = req.params;
     const { amount, reason, transactionId } = req.body;
@@ -241,7 +242,7 @@ export const processRefund = async (req: Request, res: Response): Promise<void> 
  * Get order statistics
  * GET /orders/stats
  */
-export const getOrderStats = async (req: Request, res: Response): Promise<void> => {
+export const getOrderStats = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { startDate, endDate, customerId } = req.query;
 
@@ -264,7 +265,7 @@ export const getOrderStats = async (req: Request, res: Response): Promise<void> 
  * Get order status history
  * GET /orders/:orderId/history
  */
-export const getOrderHistory = async (req: Request, res: Response): Promise<void> => {
+export const getOrderHistory = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { orderId } = req.params;
 

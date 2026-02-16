@@ -5,7 +5,8 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';;
 import { query, queryOne } from '../../../libs/db';
 import { v4 as uuidv4 } from 'uuid';
 import { adminRespond } from '../../respond';
@@ -47,7 +48,7 @@ interface StoreSettings {
 // Store Settings
 // ============================================================================
 
-export const storeSettings = async (req: Request, res: Response): Promise<void> => {
+export const storeSettings = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const merchantId = (req as any).merchantId || 'default';
 
@@ -75,7 +76,7 @@ export const storeSettings = async (req: Request, res: Response): Promise<void> 
   }
 };
 
-export const updateStoreSettings = async (req: Request, res: Response): Promise<void> => {
+export const updateStoreSettings = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const merchantId = (req as any).merchantId || 'default';
     const {
@@ -146,7 +147,7 @@ export const updateStoreSettings = async (req: Request, res: Response): Promise<
 // Business Information
 // ============================================================================
 
-export const businessInfo = async (req: Request, res: Response): Promise<void> => {
+export const businessInfo = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const merchantId = (req as any).merchantId || 'default';
 
@@ -166,7 +167,7 @@ export const businessInfo = async (req: Request, res: Response): Promise<void> =
   }
 };
 
-export const updateBusinessInfo = async (req: Request, res: Response): Promise<void> => {
+export const updateBusinessInfo = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const merchantId = (req as any).merchantId || 'default';
     const { legalName, taxId, registrationNumber } = req.body;
@@ -194,7 +195,7 @@ export const updateBusinessInfo = async (req: Request, res: Response): Promise<v
 // Localization Settings
 // ============================================================================
 
-export const localizationSettings = async (req: Request, res: Response): Promise<void> => {
+export const localizationSettings = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     // Get languages
     const languages = await query<Array<any>>(`SELECT * FROM "language" ORDER BY "name"`);
@@ -225,7 +226,7 @@ export const localizationSettings = async (req: Request, res: Response): Promise
 // Language Management
 // ============================================================================
 
-export const createLanguage = async (req: Request, res: Response): Promise<void> => {
+export const createLanguage = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { code, name, nativeName, isDefault, isActive } = req.body;
 
@@ -256,7 +257,7 @@ export const createLanguage = async (req: Request, res: Response): Promise<void>
   }
 };
 
-export const updateLanguage = async (req: Request, res: Response): Promise<void> => {
+export const updateLanguage = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { languageId } = req.params;
     const { name, nativeName, isDefault, isActive } = req.body;
@@ -286,7 +287,7 @@ export const updateLanguage = async (req: Request, res: Response): Promise<void>
   }
 };
 
-export const deleteLanguage = async (req: Request, res: Response): Promise<void> => {
+export const deleteLanguage = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { languageId } = req.params;
 
@@ -312,7 +313,7 @@ export const deleteLanguage = async (req: Request, res: Response): Promise<void>
 // Currency Management
 // ============================================================================
 
-export const createCurrency = async (req: Request, res: Response): Promise<void> => {
+export const createCurrency = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { code, name, symbol, exchangeRate, isDefault, isActive } = req.body;
 
@@ -343,7 +344,7 @@ export const createCurrency = async (req: Request, res: Response): Promise<void>
   }
 };
 
-export const updateCurrency = async (req: Request, res: Response): Promise<void> => {
+export const updateCurrency = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { currencyId } = req.params;
     const { name, symbol, exchangeRate, isDefault, isActive } = req.body;
@@ -374,7 +375,7 @@ export const updateCurrency = async (req: Request, res: Response): Promise<void>
   }
 };
 
-export const deleteCurrency = async (req: Request, res: Response): Promise<void> => {
+export const deleteCurrency = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { currencyId } = req.params;
 

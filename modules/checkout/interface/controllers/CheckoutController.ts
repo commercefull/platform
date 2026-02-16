@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import CheckoutRepo from '../../infrastructure/repositories/CheckoutRepository';
 import BasketRepo from '../../../basket/infrastructure/repositories/BasketRepository';
 import { Money } from '../../../basket/domain/valueObjects/Money';
@@ -39,7 +40,7 @@ type ResponseData = Record<string, any>;
 /**
  * Respond with JSON or HTML based on Accept header
  */
-function respond(req: Request, res: Response, data: ResponseData, statusCode: number = 200, htmlTemplate?: string): void {
+function respond(req: TypedRequest, res: Response, data: ResponseData, statusCode: number = 200, htmlTemplate?: string): void {
   const acceptHeader = req.get('Accept') || 'application/json';
 
   if (acceptHeader.includes('text/html') && htmlTemplate) {
@@ -52,7 +53,7 @@ function respond(req: Request, res: Response, data: ResponseData, statusCode: nu
 /**
  * Respond with error in JSON or HTML based on Accept header
  */
-function respondError(req: Request, res: Response, message: string, statusCode: number = 500, htmlTemplate?: string): void {
+function respondError(req: TypedRequest, res: Response, message: string, statusCode: number = 500, htmlTemplate?: string): void {
   const acceptHeader = req.get('Accept') || 'application/json';
 
   if (acceptHeader.includes('text/html') && htmlTemplate) {
@@ -70,10 +71,10 @@ function respondError(req: Request, res: Response, message: string, statusCode: 
  * Initiate checkout
  * POST /checkout
  */
-export const initiateCheckout = async (req: Request, res: Response): Promise<void> => {
+export const initiateCheckout = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { basketId, guestEmail } = req.body;
-    const customerId = (req as any).user?.customerId;
+    const customerId = req.user?.customerId;
 
     if (!basketId) {
       respondError(req, res, 'Basket ID is required', 400, 'checkout/error');
@@ -96,7 +97,7 @@ export const initiateCheckout = async (req: Request, res: Response): Promise<voi
  * Get checkout session
  * GET /checkout/:checkoutId
  */
-export const getCheckout = async (req: Request, res: Response): Promise<void> => {
+export const getCheckout = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { checkoutId } = req.params;
 
@@ -119,7 +120,7 @@ export const getCheckout = async (req: Request, res: Response): Promise<void> =>
  * Set shipping address
  * PUT /checkout/:checkoutId/shipping-address
  */
-export const setShippingAddress = async (req: Request, res: Response): Promise<void> => {
+export const setShippingAddress = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { checkoutId } = req.params;
     const { firstName, lastName, company, addressLine1, addressLine2, city, region, postalCode, country, phone } = req.body;
@@ -153,7 +154,7 @@ export const setShippingAddress = async (req: Request, res: Response): Promise<v
  * Get available shipping methods
  * GET /checkout/:checkoutId/shipping-methods
  */
-export const getShippingMethods = async (req: Request, res: Response): Promise<void> => {
+export const getShippingMethods = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { checkoutId } = req.params;
 
@@ -182,7 +183,7 @@ export const getShippingMethods = async (req: Request, res: Response): Promise<v
  * Set shipping method
  * PUT /checkout/:checkoutId/shipping-method
  */
-export const setShippingMethod = async (req: Request, res: Response): Promise<void> => {
+export const setShippingMethod = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { checkoutId } = req.params;
     const { shippingMethodId } = req.body;
@@ -208,7 +209,7 @@ export const setShippingMethod = async (req: Request, res: Response): Promise<vo
  * Get available payment methods
  * GET /checkout/payment-methods
  */
-export const getPaymentMethods = async (req: Request, res: Response): Promise<void> => {
+export const getPaymentMethods = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const methods = await CheckoutRepo.getAvailablePaymentMethods();
     respond(req, res, methods, 200, 'checkout/payment-methods');
@@ -223,7 +224,7 @@ export const getPaymentMethods = async (req: Request, res: Response): Promise<vo
  * Set payment method
  * PUT /checkout/:checkoutId/payment-method
  */
-export const setPaymentMethod = async (req: Request, res: Response): Promise<void> => {
+export const setPaymentMethod = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { checkoutId } = req.params;
     const { paymentMethodId } = req.body;
@@ -249,7 +250,7 @@ export const setPaymentMethod = async (req: Request, res: Response): Promise<voi
  * Apply coupon code
  * POST /checkout/:checkoutId/coupon
  */
-export const applyCoupon = async (req: Request, res: Response): Promise<void> => {
+export const applyCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { checkoutId } = req.params;
     const { couponCode } = req.body;
@@ -275,7 +276,7 @@ export const applyCoupon = async (req: Request, res: Response): Promise<void> =>
  * Remove coupon code
  * DELETE /checkout/:checkoutId/coupon
  */
-export const removeCoupon = async (req: Request, res: Response): Promise<void> => {
+export const removeCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { checkoutId } = req.params;
 
@@ -295,7 +296,7 @@ export const removeCoupon = async (req: Request, res: Response): Promise<void> =
  * Complete checkout and create order
  * POST /checkout/:checkoutId/complete
  */
-export const completeCheckout = async (req: Request, res: Response): Promise<void> => {
+export const completeCheckout = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { checkoutId } = req.params;
 
@@ -315,7 +316,7 @@ export const completeCheckout = async (req: Request, res: Response): Promise<voi
  * Abandon checkout
  * POST /checkout/:checkoutId/abandon
  */
-export const abandonCheckout = async (req: Request, res: Response): Promise<void> => {
+export const abandonCheckout = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { checkoutId } = req.params;
 
@@ -335,7 +336,7 @@ export const abandonCheckout = async (req: Request, res: Response): Promise<void
  * Set billing address
  * PUT /checkout/:checkoutId/billing-address
  */
-export const setBillingAddress = async (req: Request, res: Response): Promise<void> => {
+export const setBillingAddress = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { checkoutId } = req.params;
     const { firstName, lastName, company, addressLine1, addressLine2, city, region, postalCode, country, phone, sameAsShipping } = req.body;

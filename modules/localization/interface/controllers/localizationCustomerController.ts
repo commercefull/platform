@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import localeRepo from '../../infrastructure/repositories/localeRepo';
 import countryRepo from '../../infrastructure/repositories/countryRepo';
 import { successResponse, errorResponse } from '../../../../libs/apiResponse';
@@ -13,7 +14,7 @@ import { successResponse, errorResponse } from '../../../../libs/apiResponse';
  * Get all active locales
  * GET /locales
  */
-export const getActiveLocales = async (_req: Request, res: Response): Promise<void> => {
+export const getActiveLocales = async (_req: TypedRequest, res: Response): Promise<void> => {
   try {
     const locales = await localeRepo.findAll(true); // Only active locales
 
@@ -42,7 +43,7 @@ export const getActiveLocales = async (_req: Request, res: Response): Promise<vo
  * Get all active countries
  * GET /countries
  */
-export const getActiveCountries = async (_req: Request, res: Response): Promise<void> => {
+export const getActiveCountries = async (_req: TypedRequest, res: Response): Promise<void> => {
   try {
     const countries = await countryRepo.findAll(true); // Only active countries
 
@@ -67,7 +68,7 @@ export const getActiveCountries = async (_req: Request, res: Response): Promise<
  * Detect locale based on request headers or IP
  * GET /detect
  */
-export const detectLocale = async (req: Request, res: Response): Promise<void> => {
+export const detectLocale = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     // Get Accept-Language header
     const acceptLanguage = req.headers['accept-language'] || '';
@@ -141,7 +142,7 @@ export const detectLocale = async (req: Request, res: Response): Promise<void> =
  * Get locale by code
  * GET /locales/:code
  */
-export const getLocaleByCode = async (req: Request, res: Response): Promise<void> => {
+export const getLocaleByCode = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { code } = req.params;
 
@@ -179,7 +180,7 @@ export const getLocaleByCode = async (req: Request, res: Response): Promise<void
  * Get country by code
  * GET /countries/:code
  */
-export const getCountryByCode = async (req: Request, res: Response): Promise<void> => {
+export const getCountryByCode = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { code } = req.params;
 

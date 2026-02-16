@@ -3,7 +3,8 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import {
   CreateOrganizationUseCase,
   UpdateOrganizationUseCase,
@@ -18,7 +19,7 @@ const getOrganizationUseCase = new GetOrganizationUseCase();
 const listOrganizationsUseCase = new ListOrganizationsUseCase();
 const getOrganizationStoresUseCase = new GetOrganizationStoresUseCase();
 
-export const createOrganization = async (req: Request, res: Response): Promise<void> => {
+export const createOrganization = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const result = await createOrganizationUseCase.execute({
       name: req.body.name,
@@ -33,7 +34,7 @@ export const createOrganization = async (req: Request, res: Response): Promise<v
   }
 };
 
-export const updateOrganization = async (req: Request, res: Response): Promise<void> => {
+export const updateOrganization = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const result = await updateOrganizationUseCase.execute({
       organizationId: req.params.organizationId,
@@ -50,7 +51,7 @@ export const updateOrganization = async (req: Request, res: Response): Promise<v
   }
 };
 
-export const getOrganization = async (req: Request, res: Response): Promise<void> => {
+export const getOrganization = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const result = await getOrganizationUseCase.execute({
       organizationId: req.params.organizationId,
@@ -63,7 +64,7 @@ export const getOrganization = async (req: Request, res: Response): Promise<void
   }
 };
 
-export const getOrganizationBySlug = async (req: Request, res: Response): Promise<void> => {
+export const getOrganizationBySlug = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const result = await getOrganizationUseCase.execute({
       slug: req.params.slug,
@@ -76,7 +77,7 @@ export const getOrganizationBySlug = async (req: Request, res: Response): Promis
   }
 };
 
-export const listOrganizations = async (req: Request, res: Response): Promise<void> => {
+export const listOrganizations = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const limit = parseInt(req.query.limit as string) || 20;
     const offset = parseInt(req.query.offset as string) || 0;
@@ -93,7 +94,7 @@ export const listOrganizations = async (req: Request, res: Response): Promise<vo
   }
 };
 
-export const getOrganizationStores = async (req: Request, res: Response): Promise<void> => {
+export const getOrganizationStores = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const limit = parseInt(req.query.limit as string) || 20;
     const offset = parseInt(req.query.offset as string) || 0;

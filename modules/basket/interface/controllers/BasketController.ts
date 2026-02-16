@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import BasketRepo from '../../infrastructure/repositories/BasketRepository';
 import { Basket } from '../../domain/entities/Basket';
 import {
@@ -27,6 +28,10 @@ import {
   SetItemAsGiftUseCase,
   ExtendExpirationCommand,
   ExtendExpirationUseCase,
+  ApplyCouponCommand,
+  ApplyCouponUseCase,
+  RemoveCouponCommand,
+  RemoveCouponUseCase,
 } from '../../application/useCases';
 import {
   BasketNotFoundError,
@@ -84,7 +89,7 @@ type ResponseData = Record<string, any>;
 /**
  * Respond with JSON or HTML based on Accept header
  */
-function respond(req: Request, res: Response, data: ResponseData, statusCode: number = 200, htmlTemplate?: string): void {
+function respond(req: TypedRequest, res: Response, data: ResponseData, statusCode: number = 200, htmlTemplate?: string): void {
   const acceptHeader = req.get('Accept') || 'application/json';
 
   if (acceptHeader.includes('text/html') && htmlTemplate) {
@@ -99,7 +104,7 @@ function respond(req: Request, res: Response, data: ResponseData, statusCode: nu
 /**
  * Respond with error in JSON or HTML based on Accept header
  */
-function respondError(req: Request, res: Response, message: string, statusCode: number = 500, htmlTemplate?: string): void {
+function respondError(req: TypedRequest, res: Response, message: string, statusCode: number = 500, htmlTemplate?: string): void {
   const acceptHeader = req.get('Accept') || 'application/json';
 
   if (acceptHeader.includes('text/html') && htmlTemplate) {
@@ -117,9 +122,9 @@ function respondError(req: Request, res: Response, message: string, statusCode: 
  * Get or create basket
  * POST /baskets
  */
-export const getOrCreateBasket = async (req: Request, res: Response): Promise<void> => {
+export const getOrCreateBasket = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const customerId = (req as any).user?.customerId;
+    const customerId = req.user?.customerId;
     const sessionId = req.sessionID || req.body.sessionId;
     const currency = req.body.currency || 'USD';
 
@@ -144,7 +149,7 @@ export const getOrCreateBasket = async (req: Request, res: Response): Promise<vo
  * Get basket by ID
  * GET /baskets/:basketId
  */
-export const getBasket = async (req: Request, res: Response): Promise<void> => {
+export const getBasket = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { basketId } = req.params;
 
@@ -167,7 +172,7 @@ export const getBasket = async (req: Request, res: Response): Promise<void> => {
  * Get basket summary (lightweight)
  * GET /baskets/:basketId/summary
  */
-export const getBasketSummary = async (req: Request, res: Response): Promise<void> => {
+export const getBasketSummary = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { basketId } = req.params;
 
@@ -190,7 +195,7 @@ export const getBasketSummary = async (req: Request, res: Response): Promise<voi
  * Add item to basket
  * POST /baskets/:basketId/items
  */
-export const addItem = async (req: Request, res: Response): Promise<void> => {
+export const addItem = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { basketId } = req.params;
     const { productId, productVariantId, sku, name, quantity, unitPrice, imageUrl, attributes, itemType } = req.body;
@@ -234,7 +239,7 @@ export const addItem = async (req: Request, res: Response): Promise<void> => {
  * Update item quantity
  * PATCH /baskets/:basketId/items/:basketItemId
  */
-export const updateItemQuantity = async (req: Request, res: Response): Promise<void> => {
+export const updateItemQuantity = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { basketId, basketItemId } = req.params;
     const { quantity } = req.body;
@@ -260,7 +265,7 @@ export const updateItemQuantity = async (req: Request, res: Response): Promise<v
  * Remove item from basket
  * DELETE /baskets/:basketId/items/:basketItemId
  */
-export const removeItem = async (req: Request, res: Response): Promise<void> => {
+export const removeItem = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { basketId, basketItemId } = req.params;
 
@@ -284,7 +289,7 @@ export const removeItem = async (req: Request, res: Response): Promise<void> => 
  * Clear all items from basket
  * DELETE /baskets/:basketId/items
  */
-export const clearBasket = async (req: Request, res: Response): Promise<void> => {
+export const clearBasket = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { basketId } = req.params;
 
@@ -308,9 +313,9 @@ export const clearBasket = async (req: Request, res: Response): Promise<void> =>
  * Get current user's basket
  * GET /baskets/me
  */
-export const getMyBasket = async (req: Request, res: Response): Promise<void> => {
+export const getMyBasket = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const customerId = (req as any).user?.customerId;
+    const customerId = req.user?.customerId;
     const sessionId = req.sessionID;
 
     if (!customerId && !sessionId) {
@@ -334,7 +339,7 @@ export const getMyBasket = async (req: Request, res: Response): Promise<void> =>
  * Merge baskets (typically when guest logs in)
  * POST /baskets/merge
  */
-export const mergeBaskets = async (req: Request, res: Response): Promise<void> => {
+export const mergeBaskets = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { sourceBasketId, targetBasketId } = req.body;
 
@@ -363,7 +368,7 @@ export const mergeBaskets = async (req: Request, res: Response): Promise<void> =
  * Assign basket to customer
  * POST /baskets/:basketId/assign
  */
-export const assignToCustomer = async (req: Request, res: Response): Promise<void> => {
+export const assignToCustomer = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { basketId } = req.params;
     const { customerId } = req.body;
@@ -393,7 +398,7 @@ export const assignToCustomer = async (req: Request, res: Response): Promise<voi
  * Set item as gift
  * POST /baskets/:basketId/items/:basketItemId/gift
  */
-export const setItemAsGift = async (req: Request, res: Response): Promise<void> => {
+export const setItemAsGift = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { basketId, basketItemId } = req.params;
     const { giftMessage } = req.body;
@@ -418,7 +423,7 @@ export const setItemAsGift = async (req: Request, res: Response): Promise<void> 
  * Extend basket expiration
  * PUT /baskets/:basketId/expiration
  */
-export const extendExpiration = async (req: Request, res: Response): Promise<void> => {
+export const extendExpiration = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { basketId } = req.params;
     const { days } = req.body;
@@ -443,7 +448,7 @@ export const extendExpiration = async (req: Request, res: Response): Promise<voi
  * Delete basket
  * DELETE /baskets/:basketId
  */
-export const deleteBasket = async (req: Request, res: Response): Promise<void> => {
+export const deleteBasket = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { basketId } = req.params;
 
@@ -460,5 +465,45 @@ export const deleteBasket = async (req: Request, res: Response): Promise<void> =
     logger.error('Error:', error);
 
     respondError(req, res, error.message || 'Failed to delete basket', 500, 'basket/error');
+  }
+};
+
+// ============================================================================
+// Coupon Actions
+// ============================================================================
+
+export const applyCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { basketId } = req.params;
+    const { couponCode, discountType, discountValue } = req.body;
+
+    if (!couponCode || !discountType || discountValue === undefined) {
+      respondError(req, res, 'couponCode, discountType, and discountValue are required', 400, 'basket/error');
+      return;
+    }
+
+    const command = new ApplyCouponCommand(basketId, couponCode, discountType, discountValue);
+    const useCase = new ApplyCouponUseCase(BasketRepo);
+    const basket = await useCase.execute(command);
+
+    respond(req, res, basket, 200, 'basket/view');
+  } catch (error: any) {
+    logger.error('Error:', error);
+    respondError(req, res, error.message || 'Failed to apply coupon', 400, 'basket/error');
+  }
+};
+
+export const removeCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { basketId } = req.params;
+
+    const command = new RemoveCouponCommand(basketId);
+    const useCase = new RemoveCouponUseCase(BasketRepo);
+    const basket = await useCase.execute(command);
+
+    respond(req, res, basket, 200, 'basket/view');
+  } catch (error: any) {
+    logger.error('Error:', error);
+    respondError(req, res, error.message || 'Failed to remove coupon', 400, 'basket/error');
   }
 };

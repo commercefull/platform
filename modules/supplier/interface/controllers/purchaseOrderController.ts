@@ -1,5 +1,6 @@
 import { logger } from '../../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import PurchaseOrderRepo from '../../infrastructure/repositories/purchaseOrderRepo';
 import { successResponse, errorResponse, validationErrorResponse } from '../../../../libs/apiResponse';
 
@@ -7,7 +8,7 @@ import { successResponse, errorResponse, validationErrorResponse } from '../../.
 const purchaseOrderRepo = PurchaseOrderRepo;
 
 // ---------- Purchase Order CRUD Methods ----------
-export const getPurchaseOrders = async (req: Request, res: Response): Promise<void> => {
+export const getPurchaseOrders = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { status, supplierId, warehouseId, limit = '50', offset = '0' } = req.query;
 
@@ -41,7 +42,7 @@ export const getPurchaseOrders = async (req: Request, res: Response): Promise<vo
   }
 };
 
-export const getPurchaseOrderById = async (req: Request, res: Response): Promise<void> => {
+export const getPurchaseOrderById = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const purchaseOrder = await purchaseOrderRepo.findById(id);
@@ -59,7 +60,7 @@ export const getPurchaseOrderById = async (req: Request, res: Response): Promise
   }
 };
 
-export const getPurchaseOrdersBySupplierId = async (req: Request, res: Response): Promise<void> => {
+export const getPurchaseOrdersBySupplierId = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { limit = '50', offset = '0' } = req.query;
@@ -74,7 +75,7 @@ export const getPurchaseOrdersBySupplierId = async (req: Request, res: Response)
   }
 };
 
-export const createPurchaseOrder = async (req: Request, res: Response): Promise<void> => {
+export const createPurchaseOrder = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const {
       supplierId,
@@ -165,7 +166,7 @@ export const createPurchaseOrder = async (req: Request, res: Response): Promise<
   }
 };
 
-export const updatePurchaseOrder = async (req: Request, res: Response): Promise<void> => {
+export const updatePurchaseOrder = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const updateParams = req.body;
@@ -185,7 +186,7 @@ export const updatePurchaseOrder = async (req: Request, res: Response): Promise<
   }
 };
 
-export const deletePurchaseOrder = async (req: Request, res: Response): Promise<void> => {
+export const deletePurchaseOrder = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const deleted = await purchaseOrderRepo.delete(id);
@@ -203,7 +204,7 @@ export const deletePurchaseOrder = async (req: Request, res: Response): Promise<
   }
 };
 
-export const approvePurchaseOrder = async (req: Request, res: Response): Promise<void> => {
+export const approvePurchaseOrder = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const purchaseOrder = await purchaseOrderRepo.approve(id);
@@ -221,7 +222,7 @@ export const approvePurchaseOrder = async (req: Request, res: Response): Promise
   }
 };
 
-export const cancelPurchaseOrder = async (req: Request, res: Response): Promise<void> => {
+export const cancelPurchaseOrder = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const purchaseOrder = await purchaseOrderRepo.cancel(id);
@@ -239,7 +240,7 @@ export const cancelPurchaseOrder = async (req: Request, res: Response): Promise<
   }
 };
 
-export const sendPurchaseOrder = async (req: Request, res: Response): Promise<void> => {
+export const sendPurchaseOrder = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const purchaseOrder = await purchaseOrderRepo.send(id);
@@ -259,7 +260,7 @@ export const sendPurchaseOrder = async (req: Request, res: Response): Promise<vo
 
 // ---------- Purchase Order Items Methods ----------
 
-export const getPurchaseOrderItems = async (req: Request, res: Response): Promise<void> => {
+export const getPurchaseOrderItems = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const items = await purchaseOrderRepo.findItemsByOrderId(id);
@@ -271,7 +272,7 @@ export const getPurchaseOrderItems = async (req: Request, res: Response): Promis
   }
 };
 
-export const addPurchaseOrderItem = async (req: Request, res: Response): Promise<void> => {
+export const addPurchaseOrderItem = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const itemParams = {
@@ -301,7 +302,7 @@ export const addPurchaseOrderItem = async (req: Request, res: Response): Promise
   }
 };
 
-export const updatePurchaseOrderItem = async (req: Request, res: Response): Promise<void> => {
+export const updatePurchaseOrderItem = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const updateParams = req.body;
@@ -321,7 +322,7 @@ export const updatePurchaseOrderItem = async (req: Request, res: Response): Prom
   }
 };
 
-export const deletePurchaseOrderItem = async (req: Request, res: Response): Promise<void> => {
+export const deletePurchaseOrderItem = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const deleted = await purchaseOrderRepo.deleteItem(id);

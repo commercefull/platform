@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';;
 import CategoryRepo from '../../../modules/product/infrastructure/repositories/categoryRepo';
 import { adminRespond } from '../../respond';
 
@@ -12,7 +13,7 @@ import { adminRespond } from '../../respond';
 // Categories
 // ============================================================================
 
-export const listCategories = async (req: Request, res: Response): Promise<void> => {
+export const listCategories = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const categories = await CategoryRepo.findAll();
     const total = categories.length;
@@ -36,7 +37,7 @@ export const listCategories = async (req: Request, res: Response): Promise<void>
   }
 };
 
-export const createCategoryForm = async (req: Request, res: Response): Promise<void> => {
+export const createCategoryForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const parentCategories = await CategoryRepo.findAll();
 
@@ -53,7 +54,7 @@ export const createCategoryForm = async (req: Request, res: Response): Promise<v
   }
 };
 
-export const createCategory = async (req: Request, res: Response): Promise<void> => {
+export const createCategory = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { name, slug, description, parentId, isActive, position, metaTitle, metaDescription } = req.body;
 
@@ -81,7 +82,7 @@ export const createCategory = async (req: Request, res: Response): Promise<void>
   }
 };
 
-export const viewCategory = async (req: Request, res: Response): Promise<void> => {
+export const viewCategory = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { categoryId } = req.params;
     const category = await CategoryRepo.findOne(categoryId);
@@ -111,7 +112,7 @@ export const viewCategory = async (req: Request, res: Response): Promise<void> =
   }
 };
 
-export const editCategoryForm = async (req: Request, res: Response): Promise<void> => {
+export const editCategoryForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { categoryId } = req.params;
     const category = await CategoryRepo.findOne(categoryId);
@@ -140,7 +141,7 @@ export const editCategoryForm = async (req: Request, res: Response): Promise<voi
   }
 };
 
-export const updateCategory = async (req: Request, res: Response): Promise<void> => {
+export const updateCategory = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { categoryId } = req.params;
     const { name, slug, description, parentId, isActive, position, metaTitle, metaDescription } = req.body;
@@ -171,7 +172,7 @@ export const updateCategory = async (req: Request, res: Response): Promise<void>
   }
 };
 
-export const deleteCategory = async (req: Request, res: Response): Promise<void> => {
+export const deleteCategory = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { categoryId } = req.params;
     await CategoryRepo.delete(categoryId);
@@ -182,7 +183,7 @@ export const deleteCategory = async (req: Request, res: Response): Promise<void>
   }
 };
 
-export const reorderCategories = async (req: Request, res: Response): Promise<void> => {
+export const reorderCategories = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { categories } = req.body; // Array of { categoryId, position }
 
@@ -204,7 +205,7 @@ export const reorderCategories = async (req: Request, res: Response): Promise<vo
 // Note: Collections functionality would need a dedicated repository
 // For now, providing placeholder implementations
 
-export const listCollections = async (req: Request, res: Response): Promise<void> => {
+export const listCollections = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     adminRespond(req, res, 'catalog/collections/index', {
       pageName: 'Collections',
@@ -225,7 +226,7 @@ export const listCollections = async (req: Request, res: Response): Promise<void
   }
 };
 
-export const createCollectionForm = async (req: Request, res: Response): Promise<void> => {
+export const createCollectionForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     adminRespond(req, res, 'catalog/collections/create', {
       pageName: 'Create Collection',
@@ -239,7 +240,7 @@ export const createCollectionForm = async (req: Request, res: Response): Promise
   }
 };
 
-export const createCollection = async (req: Request, res: Response): Promise<void> => {
+export const createCollection = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     // Placeholder - would need collection repository
     res.redirect('/admin/catalog/collections?success=Collection created successfully');
@@ -253,7 +254,7 @@ export const createCollection = async (req: Request, res: Response): Promise<voi
   }
 };
 
-export const viewCollection = async (req: Request, res: Response): Promise<void> => {
+export const viewCollection = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     adminRespond(req, res, 'catalog/collections/view', {
       pageName: 'Collection Details',
@@ -269,7 +270,7 @@ export const viewCollection = async (req: Request, res: Response): Promise<void>
   }
 };
 
-export const editCollectionForm = async (req: Request, res: Response): Promise<void> => {
+export const editCollectionForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     adminRespond(req, res, 'catalog/collections/edit', {
       pageName: 'Edit Collection',
@@ -284,7 +285,7 @@ export const editCollectionForm = async (req: Request, res: Response): Promise<v
   }
 };
 
-export const updateCollection = async (req: Request, res: Response): Promise<void> => {
+export const updateCollection = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { collectionId } = req.params;
     res.redirect(`/admin/catalog/collections/${collectionId}?success=Collection updated successfully`);
@@ -299,7 +300,7 @@ export const updateCollection = async (req: Request, res: Response): Promise<voi
   }
 };
 
-export const deleteCollection = async (req: Request, res: Response): Promise<void> => {
+export const deleteCollection = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     res.json({ success: true, message: 'Collection deleted successfully' });
   } catch (error: any) {

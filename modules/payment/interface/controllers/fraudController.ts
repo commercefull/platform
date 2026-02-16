@@ -4,10 +4,11 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import * as fraudRepo from '../../infrastructure/repositories/fraudRepo';
 
-type AsyncHandler = (req: Request, res: Response, next: NextFunction) => Promise<void>;
+type AsyncHandler = (req: TypedRequest, res: Response, next: NextFunction) => Promise<void>;
 
 // ============================================================================
 // Fraud Rules
@@ -123,7 +124,7 @@ export const getPendingReviews: AsyncHandler = async (req, res, next) => {
 
 export const reviewFraudCheck: AsyncHandler = async (req, res, next) => {
   try {
-    const reviewedBy = (req as any).userId || (req as any).merchantId;
+    const reviewedBy = req.user?.userId || req.user?.merchantId || '';
     await fraudRepo.reviewCheck(req.params.id, req.body.decision, reviewedBy, req.body.notes);
     res.json({ success: true, message: 'Review submitted' });
   } catch (error: any) {
@@ -154,7 +155,7 @@ export const getBlacklist: AsyncHandler = async (req, res, next) => {
 
 export const addToBlacklist: AsyncHandler = async (req, res, next) => {
   try {
-    const addedBy = (req as any).userId || (req as any).merchantId;
+    const addedBy = req.user?.userId || req.user?.merchantId;
     const entry = await fraudRepo.addToBlacklist({ ...req.body, addedBy });
     res.status(201).json({ success: true, data: entry });
   } catch (error: any) {

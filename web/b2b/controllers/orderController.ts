@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import { query, queryOne } from '../../../libs/db';
 import { b2bRespond } from '../../respond';
 
@@ -19,7 +20,7 @@ interface B2BUser {
 /**
  * GET: List company's orders
  */
-export const listOrders = async (req: Request, res: Response) => {
+export const listOrders = async (req: TypedRequest, res: Response) => {
   try {
     const user = req.user as B2BUser;
     if (!user?.companyId) {
@@ -83,7 +84,7 @@ export const listOrders = async (req: Request, res: Response) => {
 /**
  * GET: View single order
  */
-export const viewOrder = async (req: Request, res: Response) => {
+export const viewOrder = async (req: TypedRequest, res: Response) => {
   try {
     const user = req.user as B2BUser;
     if (!user?.companyId) {
@@ -134,7 +135,7 @@ export const viewOrder = async (req: Request, res: Response) => {
 /**
  * GET: Reorder from previous order
  */
-export const reorderForm = async (req: Request, res: Response) => {
+export const reorderForm = async (req: TypedRequest, res: Response) => {
   try {
     const user = req.user as B2BUser;
     if (!user?.companyId) {
@@ -185,7 +186,7 @@ export const reorderForm = async (req: Request, res: Response) => {
 /**
  * POST: Submit reorder (creates a new order from previous order items)
  */
-export const submitReorder = async (req: Request, res: Response) => {
+export const submitReorder = async (req: TypedRequest, res: Response) => {
   try {
     const user = req.user as B2BUser;
     if (!user?.companyId) {

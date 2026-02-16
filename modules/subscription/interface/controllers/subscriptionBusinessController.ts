@@ -4,10 +4,11 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import * as subscriptionRepo from '../../infrastructure/repositories/subscriptionRepo';
 
-type AsyncHandler = (req: Request, res: Response, next: NextFunction) => Promise<void>;
+type AsyncHandler = (req: TypedRequest, res: Response, next: NextFunction) => Promise<void>;
 
 // ============================================================================
 // Subscription Products
@@ -190,7 +191,7 @@ export const getCustomerSubscription: AsyncHandler = async (req, res, next) => {
 export const cancelSubscriptionAdmin: AsyncHandler = async (req, res, next) => {
   try {
     const { reason, cancelAtPeriodEnd } = req.body;
-    const adminId = (req as any).userId || (req as any).merchantId;
+    const adminId = req.user?.userId || req.user?.merchantId;
 
     await subscriptionRepo.cancelSubscription(req.params.id, reason, `admin:${adminId}`, cancelAtPeriodEnd !== false);
 
@@ -205,7 +206,7 @@ export const cancelSubscriptionAdmin: AsyncHandler = async (req, res, next) => {
 export const pauseSubscriptionAdmin: AsyncHandler = async (req, res, next) => {
   try {
     const { resumeAt, reason } = req.body;
-    const adminId = (req as any).userId || (req as any).merchantId;
+    const adminId = req.user?.userId || req.user?.merchantId;
 
     const pause = await subscriptionRepo.pauseSubscription(
       req.params.id,
@@ -224,7 +225,7 @@ export const pauseSubscriptionAdmin: AsyncHandler = async (req, res, next) => {
 
 export const resumeSubscriptionAdmin: AsyncHandler = async (req, res, next) => {
   try {
-    const adminId = (req as any).userId || (req as any).merchantId;
+    const adminId = req.user?.userId || req.user?.merchantId;
     await subscriptionRepo.resumeSubscription(req.params.id, `admin:${adminId}`);
     res.json({ success: true, message: 'Subscription resumed' });
   } catch (error: any) {

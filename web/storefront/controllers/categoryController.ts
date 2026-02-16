@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
+import { TypedRequest } from 'libs/types/express';;
 import CategoryRepo from '../../../modules/product/infrastructure/repositories/categoryRepo';
 import { storefrontRespond } from '../../respond';
 
@@ -12,7 +13,7 @@ import { storefrontRespond } from '../../respond';
 // Load Categories for Navigation
 // ============================================================================
 
-export const loadCategoriesForNavigation = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const loadCategoriesForNavigation = async (req: TypedRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     const categories = await CategoryRepo.findForMenu();
     res.locals.categories = categories;
@@ -28,7 +29,7 @@ export const loadCategoriesForNavigation = async (req: Request, res: Response, n
 // Get Category Navigation Data
 // ============================================================================
 
-export const getCategoriesForNavigation = async (req: Request, res: Response): Promise<void> => {
+export const getCategoriesForNavigation = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const categories = await CategoryRepo.findForMenu();
     res.json({
@@ -49,7 +50,7 @@ export const getCategoriesForNavigation = async (req: Request, res: Response): P
 // Get All Categories
 // ============================================================================
 
-export const getAllCategories = async (req: Request, res: Response): Promise<void> => {
+export const getAllCategories = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const categories = await CategoryRepo.findActive();
     res.json({
@@ -70,7 +71,7 @@ export const getAllCategories = async (req: Request, res: Response): Promise<voi
 // Get Category Details
 // ============================================================================
 
-export const getCategoryDetails = async (req: Request, res: Response): Promise<void> => {
+export const getCategoryDetails = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { categoryId } = req.params;
 
@@ -105,7 +106,7 @@ export const getCategoryDetails = async (req: Request, res: Response): Promise<v
 // Category Landing Page
 // ============================================================================
 
-export const getCategoryPage = async (req: Request, res: Response): Promise<void> => {
+export const getCategoryPage = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { categorySlug } = req.params;
 

@@ -5,7 +5,8 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import loyaltyRepo, { LoyaltyPointsAction } from '../../infrastructure/repositories/loyaltyRepo';
 
 // ============================================================================
@@ -28,7 +29,7 @@ function respondError(res: Response, message: string, statusCode: number = 500):
 // Tier Management
 // ============================================================================
 
-export const getTiers = async (req: Request, res: Response): Promise<void> => {
+export const getTiers = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const includeInactive = req.query.includeInactive === 'true';
     const tiers = await loyaltyRepo.findAllTiers(includeInactive);
@@ -40,7 +41,7 @@ export const getTiers = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export const getTierById = async (req: Request, res: Response): Promise<void> => {
+export const getTierById = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const tier = await loyaltyRepo.findTierById(id);
@@ -58,7 +59,7 @@ export const getTierById = async (req: Request, res: Response): Promise<void> =>
   }
 };
 
-export const createTier = async (req: Request, res: Response): Promise<void> => {
+export const createTier = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { name, description, type, pointsThreshold, multiplier, benefits, isActive } = req.body;
 
@@ -85,7 +86,7 @@ export const createTier = async (req: Request, res: Response): Promise<void> => 
   }
 };
 
-export const updateTier = async (req: Request, res: Response): Promise<void> => {
+export const updateTier = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { name, description, type, pointsThreshold, multiplier, benefits, isActive } = req.body;
@@ -112,7 +113,7 @@ export const updateTier = async (req: Request, res: Response): Promise<void> => 
 // Reward Management
 // ============================================================================
 
-export const getRewards = async (req: Request, res: Response): Promise<void> => {
+export const getRewards = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const includeInactive = req.query.includeInactive === 'true';
     const rewards = await loyaltyRepo.findAllRewards(includeInactive);
@@ -124,7 +125,7 @@ export const getRewards = async (req: Request, res: Response): Promise<void> => 
   }
 };
 
-export const getRewardById = async (req: Request, res: Response): Promise<void> => {
+export const getRewardById = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const reward = await loyaltyRepo.findRewardById(id);
@@ -142,7 +143,7 @@ export const getRewardById = async (req: Request, res: Response): Promise<void> 
   }
 };
 
-export const createReward = async (req: Request, res: Response): Promise<void> => {
+export const createReward = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { name, description, pointsCost, discountAmount, discountPercent, discountCode, freeShipping, productIds, expiresAt, isActive } =
       req.body;
@@ -173,7 +174,7 @@ export const createReward = async (req: Request, res: Response): Promise<void> =
   }
 };
 
-export const updateReward = async (req: Request, res: Response): Promise<void> => {
+export const updateReward = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { name, description, pointsCost, discountAmount, discountPercent, discountCode, freeShipping, productIds, expiresAt, isActive } =
@@ -204,7 +205,7 @@ export const updateReward = async (req: Request, res: Response): Promise<void> =
 // Customer Points Management
 // ============================================================================
 
-export const getCustomerPoints = async (req: Request, res: Response): Promise<void> => {
+export const getCustomerPoints = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { customerId } = req.params;
     const pointsData = await loyaltyRepo.findCustomerPointsWithTier(customerId);
@@ -225,7 +226,7 @@ export const getCustomerPoints = async (req: Request, res: Response): Promise<vo
   }
 };
 
-export const getCustomerPointsTransactions = async (req: Request, res: Response): Promise<void> => {
+export const getCustomerPointsTransactions = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { customerId } = req.params;
     const limit = parseInt(req.query.limit as string) || 50;
@@ -244,7 +245,7 @@ export const getCustomerPointsTransactions = async (req: Request, res: Response)
   }
 };
 
-export const adjustCustomerPoints = async (req: Request, res: Response): Promise<void> => {
+export const adjustCustomerPoints = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { customerId } = req.params;
     const { points, reason, tierId } = req.body;
@@ -281,7 +282,7 @@ export const adjustCustomerPoints = async (req: Request, res: Response): Promise
 // Redemption Management
 // ============================================================================
 
-export const getCustomerRedemptions = async (req: Request, res: Response): Promise<void> => {
+export const getCustomerRedemptions = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { customerId } = req.params;
     const limit = parseInt(req.query.limit as string) || 50;
@@ -295,7 +296,7 @@ export const getCustomerRedemptions = async (req: Request, res: Response): Promi
   }
 };
 
-export const updateRedemptionStatus = async (req: Request, res: Response): Promise<void> => {
+export const updateRedemptionStatus = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { status } = req.body;
@@ -319,7 +320,7 @@ export const updateRedemptionStatus = async (req: Request, res: Response): Promi
 // Order Processing
 // ============================================================================
 
-export const processOrderPoints = async (req: Request, res: Response): Promise<void> => {
+export const processOrderPoints = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { orderId } = req.params;
     const { orderAmount, customerId } = req.body;

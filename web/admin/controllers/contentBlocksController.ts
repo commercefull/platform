@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';;
 import ContentRepo from '../../../modules/content/infrastructure/repositories/contentRepo';
 import { adminRespond } from '../../respond';
 
@@ -12,7 +13,7 @@ import { adminRespond } from '../../respond';
 // Content Blocks Management
 // ============================================================================
 
-export const listContentBlocks = async (req: Request, res: Response): Promise<void> => {
+export const listContentBlocks = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const pageId = req.query.pageId as string;
     const contentTypeId = req.query.contentTypeId as string;
@@ -52,7 +53,7 @@ export const listContentBlocks = async (req: Request, res: Response): Promise<vo
   }
 };
 
-export const createContentBlockForm = async (req: Request, res: Response): Promise<void> => {
+export const createContentBlockForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const pageId = req.query.pageId as string;
 
@@ -93,7 +94,7 @@ export const createContentBlockForm = async (req: Request, res: Response): Promi
   }
 };
 
-export const createContentBlock = async (req: Request, res: Response): Promise<void> => {
+export const createContentBlock = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { pageId, contentTypeId, name, order, content } = req.body;
 
@@ -130,7 +131,7 @@ export const createContentBlock = async (req: Request, res: Response): Promise<v
   }
 };
 
-export const editContentBlockForm = async (req: Request, res: Response): Promise<void> => {
+export const editContentBlockForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { blockId } = req.params;
 
@@ -166,7 +167,7 @@ export const editContentBlockForm = async (req: Request, res: Response): Promise
   }
 };
 
-export const updateContentBlock = async (req: Request, res: Response): Promise<void> => {
+export const updateContentBlock = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { blockId } = req.params;
     const updates: any = {};
@@ -206,7 +207,7 @@ export const updateContentBlock = async (req: Request, res: Response): Promise<v
   }
 };
 
-export const deleteContentBlock = async (req: Request, res: Response): Promise<void> => {
+export const deleteContentBlock = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { blockId } = req.params;
 
@@ -232,7 +233,7 @@ export const deleteContentBlock = async (req: Request, res: Response): Promise<v
   }
 };
 
-export const reorderContentBlocks = async (req: Request, res: Response): Promise<void> => {
+export const reorderContentBlocks = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { pageId } = req.params;
     const { blockOrders } = req.body;

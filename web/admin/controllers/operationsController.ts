@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';;
 import { query, queryOne } from '../../../libs/db';
 import { adminRespond } from '../../respond';
 
@@ -12,7 +13,7 @@ import { adminRespond } from '../../respond';
 // Operations Dashboard
 // ============================================================================
 
-export const operationsDashboard = async (req: Request, res: Response): Promise<void> => {
+export const operationsDashboard = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     // Get stats
     const fulfillmentStats = await queryOne<any>(

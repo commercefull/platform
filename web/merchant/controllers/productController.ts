@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import { merchantRespond } from '../../respond';
 import { query, queryOne } from '../../../libs/db';
 
@@ -18,7 +19,7 @@ interface MerchantUser {
 /**
  * GET: List merchant's products
  */
-export const listProducts = async (req: Request, res: Response) => {
+export const listProducts = async (req: TypedRequest, res: Response) => {
   try {
     const user = req.user as MerchantUser;
     if (!user?.merchantId) {
@@ -89,7 +90,7 @@ export const listProducts = async (req: Request, res: Response) => {
 /**
  * GET: View single product
  */
-export const viewProduct = async (req: Request, res: Response) => {
+export const viewProduct = async (req: TypedRequest, res: Response) => {
   try {
     const user = req.user as MerchantUser;
     if (!user?.merchantId) {
@@ -135,7 +136,7 @@ export const viewProduct = async (req: Request, res: Response) => {
 /**
  * GET: Create product form
  */
-export const createProductForm = async (req: Request, res: Response) => {
+export const createProductForm = async (req: TypedRequest, res: Response) => {
   try {
     const user = req.user as MerchantUser;
     if (!user?.merchantId) {
@@ -167,7 +168,7 @@ export const createProductForm = async (req: Request, res: Response) => {
 /**
  * POST: Create product
  */
-export const createProduct = async (req: Request, res: Response) => {
+export const createProduct = async (req: TypedRequest, res: Response) => {
   try {
     const user = req.user as MerchantUser;
     if (!user?.merchantId) {
@@ -202,7 +203,7 @@ export const createProduct = async (req: Request, res: Response) => {
 /**
  * POST: Update product
  */
-export const updateProduct = async (req: Request, res: Response) => {
+export const updateProduct = async (req: TypedRequest, res: Response) => {
   try {
     const user = req.user as MerchantUser;
     if (!user?.merchantId) {
@@ -235,7 +236,7 @@ export const updateProduct = async (req: Request, res: Response) => {
 /**
  * POST: Delete product (soft delete)
  */
-export const deleteProduct = async (req: Request, res: Response) => {
+export const deleteProduct = async (req: TypedRequest, res: Response) => {
   try {
     const user = req.user as MerchantUser;
     if (!user?.merchantId) {
@@ -266,7 +267,7 @@ export const deleteProduct = async (req: Request, res: Response) => {
 /**
  * GET: Edit product form
  */
-export const editProductForm = async (req: Request, res: Response) => {
+export const editProductForm = async (req: TypedRequest, res: Response) => {
   try {
     const user = req.user as MerchantUser;
     if (!user?.merchantId) {

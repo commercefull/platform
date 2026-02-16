@@ -4,10 +4,11 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
+import { TypedRequest } from 'libs/types/express';
 
 // Type for async route handlers
-type AsyncHandler = (req: Request, res: Response, next: NextFunction) => Promise<void>;
+type AsyncHandler = (req: TypedRequest, res: Response, next: NextFunction) => Promise<void>;
 import { GdprDataRequestRepo, GdprCookieConsentRepo } from '../../infrastructure/repositories/GdprRepository';
 import { CreateDataRequestUseCase, CreateDataRequestCommand } from '../../application/useCases/CreateDataRequest';
 import {
@@ -41,7 +42,7 @@ const manageCookieConsentUseCase = new ManageCookieConsentUseCase(gdprCookieCons
  */
 export const createDataRequest: AsyncHandler = async (req, res, next) => {
   try {
-    const customerId = (req.user as any)?.id || (req.user as any)?.customerId || (req as any).customerId || req.body.customerId;
+    const customerId = req.user?.id || req.user?.customerId || req.user?.customerId || req.body.customerId;
     if (!customerId) {
       res.status(401).json({ success: false, error: 'Authentication required' });
       return;
@@ -77,7 +78,7 @@ export const createDataRequest: AsyncHandler = async (req, res, next) => {
  */
 export const getMyDataRequests: AsyncHandler = async (req, res, next) => {
   try {
-    const customerId = (req.user as any)?.id || (req.user as any)?.customerId || (req as any).customerId;
+    const customerId = req.user?.id || req.user?.customerId || req.user?.customerId;
     if (!customerId) {
       res.status(401).json({ error: 'Authentication required' });
       return;
@@ -97,7 +98,7 @@ export const getMyDataRequests: AsyncHandler = async (req, res, next) => {
  */
 export const cancelDataRequest: AsyncHandler = async (req, res, next) => {
   try {
-    const customerId = (req.user as any)?.id || (req.user as any)?.customerId || (req as any).customerId;
+    const customerId = req.user?.id || req.user?.customerId || req.user?.customerId;
     const { gdprDataRequestId } = req.params;
 
     const request = await gdprDataRequestRepo.findById(gdprDataRequestId);
@@ -248,7 +249,7 @@ export const verifyIdentity: AsyncHandler = async (req, res, next) => {
  */
 export const processExportRequest: AsyncHandler = async (req, res, next) => {
   try {
-    const adminId = (req as any).adminId || (req as any).userId;
+    const adminId = req.user?.userId || req.user?.userId;
     const gdprService = {
       dataRequests: gdprDataRequestRepo,
       cookieConsents: gdprCookieConsentRepo,
@@ -261,7 +262,7 @@ export const processExportRequest: AsyncHandler = async (req, res, next) => {
     };
 
     const useCase = new ProcessDataRequestUseCase(gdprDataRequestRepo, gdprService);
-    const command = new ProcessExportRequestCommand(req.params.gdprDataRequestId, adminId, req.body.format || 'json');
+    const command = new ProcessExportRequestCommand(req.params.gdprDataRequestId, adminId || '', req.body.format || 'json');
 
     const result = await useCase.processExport(command);
     res.json({ success: true, data: result });
@@ -277,7 +278,7 @@ export const processExportRequest: AsyncHandler = async (req, res, next) => {
  */
 export const processDeletionRequest: AsyncHandler = async (req, res, next) => {
   try {
-    const adminId = (req as any).adminId || (req as any).userId;
+    const adminId = req.user?.userId || req.user?.userId;
     const gdprService = {
       dataRequests: gdprDataRequestRepo,
       cookieConsents: gdprCookieConsentRepo,
@@ -289,7 +290,7 @@ export const processDeletionRequest: AsyncHandler = async (req, res, next) => {
     };
 
     const useCase = new ProcessDataRequestUseCase(gdprDataRequestRepo, gdprService);
-    const command = new ProcessDeletionRequestCommand(req.params.gdprDataRequestId, adminId, req.body.notes);
+    const command = new ProcessDeletionRequestCommand(req.params.gdprDataRequestId, adminId || '', req.body.notes);
 
     const result = await useCase.processDeletion(command);
     res.json({ success: true, data: result });
@@ -305,7 +306,7 @@ export const processDeletionRequest: AsyncHandler = async (req, res, next) => {
  */
 export const rejectRequest: AsyncHandler = async (req, res, next) => {
   try {
-    const adminId = (req as any).adminId || (req as any).userId;
+    const adminId = req.user?.userId || req.user?.userId;
     const gdprService = {
       dataRequests: gdprDataRequestRepo,
       cookieConsents: gdprCookieConsentRepo,
@@ -315,7 +316,7 @@ export const rejectRequest: AsyncHandler = async (req, res, next) => {
     };
 
     const useCase = new ProcessDataRequestUseCase(gdprDataRequestRepo, gdprService);
-    const command = new RejectRequestCommand(req.params.gdprDataRequestId, adminId, req.body.reason);
+    const command = new RejectRequestCommand(req.params.gdprDataRequestId, adminId || '', req.body.reason);
 
     const result = await useCase.reject(command);
     res.json({ success: true, data: result });
@@ -338,7 +339,7 @@ export const recordCookieConsent: AsyncHandler = async (req, res, next) => {
     const command = new RecordCookieConsentCommand(
       req.body.sessionId || req.sessionID,
       req.body.preferences,
-      (req as any).customerId,
+      req.user?.customerId,
       req.body.browserFingerprint,
       req.ip,
       req.get('User-Agent'),

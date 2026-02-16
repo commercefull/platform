@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';;
 import { storefrontRespond } from '../../respond';
 import BasketRepo from '../../../modules/basket/infrastructure/repositories/BasketRepository';
 import OrderRepo from '../../../modules/order/infrastructure/repositories/OrderRepository';
@@ -21,7 +22,7 @@ import { CalculateOrderTaxCommand, CalculateOrderTaxUseCase } from '../../../mod
 // Checkout Page
 // ============================================================================
 
-export const checkout = async (req: Request, res: Response): Promise<void> => {
+export const checkout = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     if (!req.user) {
       return res.redirect('/signin?redirect=/checkout');
@@ -74,7 +75,7 @@ export const checkout = async (req: Request, res: Response): Promise<void> => {
 // Process Checkout
 // ============================================================================
 
-export const processCheckout = async (req: Request, res: Response): Promise<void> => {
+export const processCheckout = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     if (!req.user) {
       res.status(401).json({ success: false, message: 'Not authenticated' });
@@ -186,7 +187,7 @@ export const processCheckout = async (req: Request, res: Response): Promise<void
 // Order Confirmation
 // ============================================================================
 
-export const orderConfirmation = async (req: Request, res: Response): Promise<void> => {
+export const orderConfirmation = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     if (!req.user) {
       return res.redirect('/signin');

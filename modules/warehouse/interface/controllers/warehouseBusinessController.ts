@@ -1,11 +1,12 @@
 import { logger } from '../../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import WarehouseRepo from '../../infrastructure/repositories/warehouseRepo';
 import { successResponse, errorResponse, validationErrorResponse } from '../../../../libs/apiResponse';
 
 const warehouseRepo = WarehouseRepo;
 
-export const getWarehouses = async (req: Request, res: Response): Promise<void> => {
+export const getWarehouses = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { activeOnly = 'true', fulfillmentCenters, returnCenters, merchantId, country, search, limit = '50', offset = '0' } = req.query;
 
@@ -39,7 +40,7 @@ export const getWarehouses = async (req: Request, res: Response): Promise<void> 
   }
 };
 
-export const getWarehouseById = async (req: Request, res: Response): Promise<void> => {
+export const getWarehouseById = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const warehouse = await warehouseRepo.findById(id);
@@ -57,7 +58,7 @@ export const getWarehouseById = async (req: Request, res: Response): Promise<voi
   }
 };
 
-export const getWarehouseByCode = async (req: Request, res: Response): Promise<void> => {
+export const getWarehouseByCode = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { code } = req.params;
     const warehouse = await warehouseRepo.findByCode(code);
@@ -75,7 +76,7 @@ export const getWarehouseByCode = async (req: Request, res: Response): Promise<v
   }
 };
 
-export const getDefaultWarehouse = async (req: Request, res: Response): Promise<void> => {
+export const getDefaultWarehouse = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const warehouse = await warehouseRepo.findDefault();
 
@@ -92,7 +93,7 @@ export const getDefaultWarehouse = async (req: Request, res: Response): Promise<
   }
 };
 
-export const getFulfillmentCenters = async (req: Request, res: Response): Promise<void> => {
+export const getFulfillmentCenters = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const warehouses = await warehouseRepo.findFulfillmentCenters();
     successResponse(res, warehouses);
@@ -103,7 +104,7 @@ export const getFulfillmentCenters = async (req: Request, res: Response): Promis
   }
 };
 
-export const getReturnCenters = async (req: Request, res: Response): Promise<void> => {
+export const getReturnCenters = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const warehouses = await warehouseRepo.findReturnCenters();
     successResponse(res, warehouses);
@@ -114,7 +115,7 @@ export const getReturnCenters = async (req: Request, res: Response): Promise<voi
   }
 };
 
-export const getWarehouseStatistics = async (req: Request, res: Response): Promise<void> => {
+export const getWarehouseStatistics = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const statistics = await warehouseRepo.getStatistics();
     successResponse(res, statistics);
@@ -125,7 +126,7 @@ export const getWarehouseStatistics = async (req: Request, res: Response): Promi
   }
 };
 
-export const findNearestWarehouses = async (req: Request, res: Response): Promise<void> => {
+export const findNearestWarehouses = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { latitude, longitude, radiusKm = '100', limit = '10' } = req.query;
 
@@ -149,7 +150,7 @@ export const findNearestWarehouses = async (req: Request, res: Response): Promis
   }
 };
 
-export const getWarehousesByCountry = async (req: Request, res: Response): Promise<void> => {
+export const getWarehousesByCountry = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { country } = req.params;
     const warehouses = await warehouseRepo.findByCountry(country);
@@ -161,7 +162,7 @@ export const getWarehousesByCountry = async (req: Request, res: Response): Promi
   }
 };
 
-export const getWarehousesByMerchant = async (req: Request, res: Response): Promise<void> => {
+export const getWarehousesByMerchant = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { merchantId } = req.params;
     const warehouses = await warehouseRepo.findByMerchantId(merchantId);
@@ -173,7 +174,7 @@ export const getWarehousesByMerchant = async (req: Request, res: Response): Prom
   }
 };
 
-export const createWarehouse = async (req: Request, res: Response): Promise<void> => {
+export const createWarehouse = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const {
       name,
@@ -263,7 +264,7 @@ export const createWarehouse = async (req: Request, res: Response): Promise<void
   }
 };
 
-export const updateWarehouse = async (req: Request, res: Response): Promise<void> => {
+export const updateWarehouse = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const updateParams = req.body;
@@ -283,7 +284,7 @@ export const updateWarehouse = async (req: Request, res: Response): Promise<void
   }
 };
 
-export const deleteWarehouse = async (req: Request, res: Response): Promise<void> => {
+export const deleteWarehouse = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const deleted = await warehouseRepo.delete(id);
@@ -301,7 +302,7 @@ export const deleteWarehouse = async (req: Request, res: Response): Promise<void
   }
 };
 
-export const setDefaultWarehouse = async (req: Request, res: Response): Promise<void> => {
+export const setDefaultWarehouse = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const warehouse = await warehouseRepo.setAsDefault(id);
@@ -319,7 +320,7 @@ export const setDefaultWarehouse = async (req: Request, res: Response): Promise<
   }
 };
 
-export const activateWarehouse = async (req: Request, res: Response): Promise<void> => {
+export const activateWarehouse = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const warehouse = await warehouseRepo.activate(id);
@@ -337,7 +338,7 @@ export const activateWarehouse = async (req: Request, res: Response): Promise<vo
   }
 };
 
-export const deactivateWarehouse = async (req: Request, res: Response): Promise<void> => {
+export const deactivateWarehouse = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const warehouse = await warehouseRepo.deactivate(id);
@@ -355,7 +356,7 @@ export const deactivateWarehouse = async (req: Request, res: Response): Promise<
   }
 };
 
-export const addShippingMethod = async (req: Request, res: Response): Promise<void> => {
+export const addShippingMethod = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { method } = req.body;
@@ -380,7 +381,7 @@ export const addShippingMethod = async (req: Request, res: Response): Promise<vo
   }
 };
 
-export const removeShippingMethod = async (req: Request, res: Response): Promise<void> => {
+export const removeShippingMethod = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id, method } = req.params;
 

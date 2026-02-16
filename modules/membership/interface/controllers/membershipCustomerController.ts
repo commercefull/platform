@@ -1,12 +1,13 @@
 import { logger } from '../../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import { MembershipRepo } from '../../infrastructure/repositories/membershipRepo';
 
 // Create a single instance of the repository to be shared across handlers
 const membershipRepo = new MembershipRepo();
 
 // Public Membership Tier Endpoints
-export const getMembershipTiers = async (req: Request, res: Response): Promise<void> => {
+export const getMembershipTiers = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     // For storefront, we only want to show active tiers
     const includeInactive = false;
@@ -27,7 +28,7 @@ export const getMembershipTiers = async (req: Request, res: Response): Promise<v
   }
 };
 
-export const getMembershipTierById = async (req: Request, res: Response): Promise<void> => {
+export const getMembershipTierById = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const tier = await membershipRepo.findTierById(id);
@@ -56,7 +57,7 @@ export const getMembershipTierById = async (req: Request, res: Response): Promis
   }
 };
 
-export const getTierBenefits = async (req: Request, res: Response): Promise<void> => {
+export const getTierBenefits = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { tierId } = req.params;
 
@@ -88,7 +89,7 @@ export const getTierBenefits = async (req: Request, res: Response): Promise<void
 };
 
 // User Membership Public Endpoints
-export const getUserMembershipByUserId = async (req: Request, res: Response): Promise<void> => {
+export const getUserMembershipByUserId = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { userId } = req.params;
     const membership = await membershipRepo.findMembershipByUserId(userId);
@@ -131,7 +132,7 @@ export const getUserMembershipByUserId = async (req: Request, res: Response): Pr
   }
 };
 
-export const getUserMembershipBenefits = async (req: Request, res: Response): Promise<void> => {
+export const getUserMembershipBenefits = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { userId } = req.params;
 

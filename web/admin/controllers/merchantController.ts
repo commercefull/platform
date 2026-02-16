@@ -4,10 +4,11 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';;
 import { adminRespond } from '../../respond';
 
-export const listMerchants = async (req: Request, res: Response): Promise<void> => {
+export const listMerchants = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     adminRespond(req, res, 'operations/merchants/index', {
       pageName: 'Merchants',
@@ -24,7 +25,7 @@ export const listMerchants = async (req: Request, res: Response): Promise<void> 
   }
 };
 
-export const createMerchantForm = async (req: Request, res: Response): Promise<void> => {
+export const createMerchantForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     adminRespond(req, res, 'operations/merchants/create', {
       pageName: 'Add Merchant',
@@ -38,7 +39,7 @@ export const createMerchantForm = async (req: Request, res: Response): Promise<v
   }
 };
 
-export const createMerchant = async (req: Request, res: Response): Promise<void> => {
+export const createMerchant = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     res.redirect('/admin/operations/merchants?success=Merchant created successfully');
   } catch (error: any) {
@@ -51,7 +52,7 @@ export const createMerchant = async (req: Request, res: Response): Promise<void>
   }
 };
 
-export const viewMerchant = async (req: Request, res: Response): Promise<void> => {
+export const viewMerchant = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     adminRespond(req, res, 'operations/merchants/view', {
       pageName: 'Merchant Details',
@@ -67,7 +68,7 @@ export const viewMerchant = async (req: Request, res: Response): Promise<void> =
   }
 };
 
-export const editMerchantForm = async (req: Request, res: Response): Promise<void> => {
+export const editMerchantForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     adminRespond(req, res, 'operations/merchants/edit', {
       pageName: 'Edit Merchant',
@@ -82,7 +83,7 @@ export const editMerchantForm = async (req: Request, res: Response): Promise<voi
   }
 };
 
-export const updateMerchant = async (req: Request, res: Response): Promise<void> => {
+export const updateMerchant = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { merchantId } = req.params;
     res.redirect(`/admin/operations/merchants/${merchantId}?success=Merchant updated successfully`);
@@ -97,7 +98,7 @@ export const updateMerchant = async (req: Request, res: Response): Promise<void>
   }
 };
 
-export const deleteMerchant = async (req: Request, res: Response): Promise<void> => {
+export const deleteMerchant = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     res.json({ success: true, message: 'Merchant deleted successfully' });
   } catch (error: any) {
@@ -106,7 +107,7 @@ export const deleteMerchant = async (req: Request, res: Response): Promise<void>
   }
 };
 
-export const approveMerchant = async (req: Request, res: Response): Promise<void> => {
+export const approveMerchant = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { merchantId } = req.params;
     res.redirect(`/admin/operations/merchants/${merchantId}?success=Merchant approved successfully`);
@@ -116,7 +117,7 @@ export const approveMerchant = async (req: Request, res: Response): Promise<void
   }
 };
 
-export const suspendMerchant = async (req: Request, res: Response): Promise<void> => {
+export const suspendMerchant = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { merchantId } = req.params;
     res.redirect(`/admin/operations/merchants/${merchantId}?success=Merchant suspended successfully`);

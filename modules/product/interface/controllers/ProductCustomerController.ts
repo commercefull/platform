@@ -4,19 +4,21 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import ProductRepo from '../../infrastructure/repositories/ProductRepository';
 import { GetProductCommand, GetProductUseCase } from '../../application/useCases/GetProduct';
 import { ListProductsCommand, ListProductsUseCase } from '../../application/useCases/ListProducts';
 import { SearchProductsCommand, SearchProductsUseCase } from '../../application/useCases/SearchProducts';
 import { ProductStatus } from '../../domain/valueObjects/ProductStatus';
 import { ProductVisibility } from '../../domain/valueObjects/ProductVisibility';
+import productReviewRepo from '../../infrastructure/repositories/productReviewRepo';
 
 // ============================================================================
 // Content Negotiation Helpers
 // ============================================================================
 
-function respond(req: Request, res: Response, data: any, statusCode: number = 200, htmlTemplate?: string): void {
+function respond(req: TypedRequest, res: Response, data: any, statusCode: number = 200, htmlTemplate?: string): void {
   const acceptHeader = req.get('Accept') || 'application/json';
   if (acceptHeader.includes('text/html') && htmlTemplate) {
     res.status(statusCode).render(htmlTemplate, { data, success: true });
@@ -25,7 +27,7 @@ function respond(req: Request, res: Response, data: any, statusCode: number = 20
   }
 }
 
-function respondError(req: Request, res: Response, message: string, statusCode: number = 500, htmlTemplate?: string): void {
+function respondError(req: TypedRequest, res: Response, message: string, statusCode: number = 500, htmlTemplate?: string): void {
   const acceptHeader = req.get('Accept') || 'application/json';
   if (acceptHeader.includes('text/html') && htmlTemplate) {
     res.status(statusCode).render(htmlTemplate, { error: message, success: false });
@@ -42,7 +44,7 @@ function respondError(req: Request, res: Response, message: string, statusCode: 
  * List products (storefront)
  * GET /products
  */
-export const listProducts = async (req: Request, res: Response): Promise<void> => {
+export const listProducts = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { categoryId, brandId, priceMin, priceMax, isFeatured, tags, limit, offset, orderBy, orderDirection } = req.query;
 
@@ -80,7 +82,7 @@ export const listProducts = async (req: Request, res: Response): Promise<void> =
  * Get product by ID or slug
  * GET /products/:identifier
  */
-export const getProduct = async (req: Request, res: Response): Promise<void> => {
+export const getProduct = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { identifier } = req.params;
 
@@ -115,7 +117,7 @@ export const getProduct = async (req: Request, res: Response): Promise<void> => 
  * Search products
  * GET /products/search
  */
-export const searchProducts = async (req: Request, res: Response): Promise<void> => {
+export const searchProducts = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { q, categoryId, brandId, priceMin, priceMax, limit, offset, orderBy } = req.query;
 
@@ -153,7 +155,7 @@ export const searchProducts = async (req: Request, res: Response): Promise<void>
  * Get featured products
  * GET /products/featured
  */
-export const getFeaturedProducts = async (req: Request, res: Response): Promise<void> => {
+export const getFeaturedProducts = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { limit, offset } = req.query;
 
@@ -184,7 +186,7 @@ export const getFeaturedProducts = async (req: Request, res: Response): Promise<
  * Get products by category
  * GET /products/category/:categoryId
  */
-export const getProductsByCategory = async (req: Request, res: Response): Promise<void> => {
+export const getProductsByCategory = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { categoryId } = req.params;
     const { limit, offset, orderBy, orderDirection } = req.query;
@@ -216,7 +218,7 @@ export const getProductsByCategory = async (req: Request, res: Response): Promis
  * Get related products
  * GET /products/:productId/related
  */
-export const getRelatedProducts = async (req: Request, res: Response): Promise<void> => {
+export const getRelatedProducts = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { productId } = req.params;
     const { limit } = req.query;
@@ -228,5 +230,90 @@ export const getRelatedProducts = async (req: Request, res: Response): Promise<v
     logger.error('Error:', error);
 
     respondError(req, res, error.message || 'Failed to get related products', 500, 'product/error');
+  }
+};
+
+// ============================================================================
+// Customer Review Endpoints
+// ============================================================================
+
+export const getProductReviews = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { productId } = req.params;
+    const { limit, offset } = req.query;
+    const reviews = await productReviewRepo.findByProductId(
+      productId,
+      'approved',
+      parseInt(limit as string) || 20,
+      parseInt(offset as string) || 0,
+    );
+    const averageRating = await productReviewRepo.getAverageRating(productId);
+    const ratingDistribution = await productReviewRepo.getRatingDistribution(productId);
+    const totalCount = await productReviewRepo.countByProductId(productId, 'approved');
+    respond(req, res, { reviews, averageRating, ratingDistribution, totalCount });
+  } catch (error: any) {
+    logger.error('Error:', error);
+    respondError(req, res, error.message || 'Failed to get reviews');
+  }
+};
+
+export const createReview = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { productId } = req.params;
+    const customerId = req.user?.customerId;
+    const { rating, title, content, reviewerName, reviewerEmail } = req.body;
+
+    if (!rating || rating < 1 || rating > 5) {
+      respondError(req, res, 'Rating must be between 1 and 5', 400);
+      return;
+    }
+    if (!reviewerName?.trim()) {
+      respondError(req, res, 'Reviewer name is required', 400);
+      return;
+    }
+
+    const review = await productReviewRepo.create({
+      productId,
+      customerId,
+      rating,
+      title,
+      content,
+      reviewerName,
+      reviewerEmail,
+      isVerifiedPurchase: !!customerId,
+      status: 'pending',
+    });
+    respond(req, res, review, 201);
+  } catch (error: any) {
+    logger.error('Error:', error);
+    respondError(req, res, error.message || 'Failed to create review', 400);
+  }
+};
+
+export const markReviewHelpful = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const review = await productReviewRepo.incrementHelpful(req.params.reviewId);
+    if (!review) {
+      respondError(req, res, 'Review not found', 404);
+      return;
+    }
+    respond(req, res, review);
+  } catch (error: any) {
+    logger.error('Error:', error);
+    respondError(req, res, error.message || 'Failed to mark review helpful');
+  }
+};
+
+export const reportReview = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const review = await productReviewRepo.incrementReport(req.params.reviewId);
+    if (!review) {
+      respondError(req, res, 'Review not found', 404);
+      return;
+    }
+    respond(req, res, { reported: true });
+  } catch (error: any) {
+    logger.error('Error:', error);
+    respondError(req, res, error.message || 'Failed to report review');
   }
 };

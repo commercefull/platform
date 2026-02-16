@@ -4,14 +4,15 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';;
 import { adminRespond } from '../../respond';
 
 // ============================================================================
 // SEO Settings Management
 // ============================================================================
 
-export const listSEOSettings = async (req: Request, res: Response): Promise<void> => {
+export const listSEOSettings = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     // For now, show basic SEO settings interface
     // In a real implementation, this would load from a database
@@ -48,7 +49,7 @@ export const listSEOSettings = async (req: Request, res: Response): Promise<void
   }
 };
 
-export const updateSEOSettings = async (req: Request, res: Response): Promise<void> => {
+export const updateSEOSettings = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const {
       siteName,
@@ -93,7 +94,7 @@ export const updateSEOSettings = async (req: Request, res: Response): Promise<vo
   }
 };
 
-export const generateRobotsTxt = async (req: Request, res: Response): Promise<void> => {
+export const generateRobotsTxt = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     // Generate robots.txt content
     const robotsTxt = `User-agent: *
@@ -120,7 +121,7 @@ Sitemap: https://Commercefull.com/sitemap.xml`;
   }
 };
 
-export const generateSitemap = async (req: Request, res: Response): Promise<void> => {
+export const generateSitemap = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     // Generate basic sitemap XML
     const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>

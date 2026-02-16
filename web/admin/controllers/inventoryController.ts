@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';;
 import { query, queryOne } from '../../../libs/db';
 import { v4 as uuidv4 } from 'uuid';
 import { adminRespond } from '../../respond';
@@ -38,7 +39,7 @@ interface InventoryStats {
 // List Inventory
 // ============================================================================
 
-export const listInventory = async (req: Request, res: Response): Promise<void> => {
+export const listInventory = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { search, stockStatus, locationId, page = '1' } = req.query;
     const limit = 50;
@@ -153,7 +154,7 @@ export const listInventory = async (req: Request, res: Response): Promise<void> 
 // Adjust Stock
 // ============================================================================
 
-export const adjustStock = async (req: Request, res: Response): Promise<void> => {
+export const adjustStock = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { inventoryLevelId, adjustmentType, quantity, reason, notes } = req.body;
     const userId = (req as any).user?.userId;
@@ -234,7 +235,7 @@ export const adjustStock = async (req: Request, res: Response): Promise<void> =>
 // View Inventory History
 // ============================================================================
 
-export const viewInventoryHistory = async (req: Request, res: Response): Promise<void> => {
+export const viewInventoryHistory = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { inventoryLevelId } = req.params;
     const { page = '1' } = req.query;
@@ -297,7 +298,7 @@ export const viewInventoryHistory = async (req: Request, res: Response): Promise
 // List Locations
 // ============================================================================
 
-export const listLocations = async (req: Request, res: Response): Promise<void> => {
+export const listLocations = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const locations = await query<Array<any>>(
       `SELECT 
@@ -328,7 +329,7 @@ export const listLocations = async (req: Request, res: Response): Promise<void> 
 // Low Stock Report
 // ============================================================================
 
-export const lowStockReport = async (req: Request, res: Response): Promise<void> => {
+export const lowStockReport = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const lowStockItems = await query<Array<any>>(
       `SELECT 

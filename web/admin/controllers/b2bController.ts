@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';;
 import {
   getCompany,
   getCompanies,
@@ -38,7 +39,7 @@ import { adminRespond } from '../../respond';
 // B2B Company Management
 // ============================================================================
 
-export const listB2bCompanies = async (req: Request, res: Response): Promise<void> => {
+export const listB2bCompanies = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const status = req.query.status as string;
     const tier = req.query.tier as string;
@@ -74,7 +75,7 @@ export const listB2bCompanies = async (req: Request, res: Response): Promise<voi
   }
 };
 
-export const createB2bCompanyForm = async (req: Request, res: Response): Promise<void> => {
+export const createB2bCompanyForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     adminRespond(req, res, 'programs/b2b/companies/create', {
       pageName: 'Create B2B Company',
@@ -89,7 +90,7 @@ export const createB2bCompanyForm = async (req: Request, res: Response): Promise
   }
 };
 
-export const createB2bCompany = async (req: Request, res: Response): Promise<void> => {
+export const createB2bCompany = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const {
       name,
@@ -157,7 +158,7 @@ export const createB2bCompany = async (req: Request, res: Response): Promise<voi
   }
 };
 
-export const viewB2bCompany = async (req: Request, res: Response): Promise<void> => {
+export const viewB2bCompany = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { companyId } = req.params;
 
@@ -193,7 +194,7 @@ export const viewB2bCompany = async (req: Request, res: Response): Promise<void>
   }
 };
 
-export const editB2bCompanyForm = async (req: Request, res: Response): Promise<void> => {
+export const editB2bCompanyForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { companyId } = req.params;
 
@@ -221,7 +222,7 @@ export const editB2bCompanyForm = async (req: Request, res: Response): Promise<v
   }
 };
 
-export const updateB2bCompany = async (req: Request, res: Response): Promise<void> => {
+export const updateB2bCompany = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { companyId } = req.params;
     const updates: any = {};
@@ -305,7 +306,7 @@ export const updateB2bCompany = async (req: Request, res: Response): Promise<voi
   }
 };
 
-export const approveB2bCompany = async (req: Request, res: Response): Promise<void> => {
+export const approveB2bCompany = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { companyId } = req.params;
 
@@ -319,7 +320,7 @@ export const approveB2bCompany = async (req: Request, res: Response): Promise<vo
   }
 };
 
-export const suspendB2bCompany = async (req: Request, res: Response): Promise<void> => {
+export const suspendB2bCompany = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { companyId } = req.params;
 
@@ -333,7 +334,7 @@ export const suspendB2bCompany = async (req: Request, res: Response): Promise<vo
   }
 };
 
-export const deleteB2bCompany = async (req: Request, res: Response): Promise<void> => {
+export const deleteB2bCompany = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { companyId } = req.params;
 
@@ -351,7 +352,7 @@ export const deleteB2bCompany = async (req: Request, res: Response): Promise<voi
 // B2B Company Users Management
 // ============================================================================
 
-export const listB2bCompanyUsers = async (req: Request, res: Response): Promise<void> => {
+export const listB2bCompanyUsers = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { companyId } = req.params;
     const includeInactive = req.query.includeInactive === 'true';
@@ -385,7 +386,7 @@ export const listB2bCompanyUsers = async (req: Request, res: Response): Promise<
   }
 };
 
-export const createB2bCompanyUser = async (req: Request, res: Response): Promise<void> => {
+export const createB2bCompanyUser = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { companyId } = req.params;
     const { email, firstName, lastName, phone, jobTitle, department, role } = req.body;
@@ -409,7 +410,7 @@ export const createB2bCompanyUser = async (req: Request, res: Response): Promise
   }
 };
 
-export const deleteB2bCompanyUser = async (req: Request, res: Response): Promise<void> => {
+export const deleteB2bCompanyUser = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { companyId, userId } = req.params;
 
@@ -427,7 +428,7 @@ export const deleteB2bCompanyUser = async (req: Request, res: Response): Promise
 // B2B Quotes Management
 // ============================================================================
 
-export const listB2bQuotes = async (req: Request, res: Response): Promise<void> => {
+export const listB2bQuotes = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const companyId = req.query.companyId as string;
     const customerId = req.query.customerId as string;
@@ -467,7 +468,7 @@ export const listB2bQuotes = async (req: Request, res: Response): Promise<void> 
   }
 };
 
-export const createB2bQuoteForm = async (req: Request, res: Response): Promise<void> => {
+export const createB2bQuoteForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const companyId = req.query.companyId as string;
 
@@ -489,7 +490,7 @@ export const createB2bQuoteForm = async (req: Request, res: Response): Promise<v
   }
 };
 
-export const createB2bQuote = async (req: Request, res: Response): Promise<void> => {
+export const createB2bQuote = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const {
       b2bCompanyId,
@@ -541,7 +542,7 @@ export const createB2bQuote = async (req: Request, res: Response): Promise<void>
   }
 };
 
-export const viewB2bQuote = async (req: Request, res: Response): Promise<void> => {
+export const viewB2bQuote = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { quoteId } = req.params;
 
@@ -582,7 +583,7 @@ export const viewB2bQuote = async (req: Request, res: Response): Promise<void> =
   }
 };
 
-export const editB2bQuoteForm = async (req: Request, res: Response): Promise<void> => {
+export const editB2bQuoteForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { quoteId } = req.params;
 
@@ -618,7 +619,7 @@ export const editB2bQuoteForm = async (req: Request, res: Response): Promise<voi
   }
 };
 
-export const updateB2bQuote = async (req: Request, res: Response): Promise<void> => {
+export const updateB2bQuote = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { quoteId } = req.params;
     const updates: any = {};
@@ -692,7 +693,7 @@ export const updateB2bQuote = async (req: Request, res: Response): Promise<void>
   }
 };
 
-export const sendB2bQuote = async (req: Request, res: Response): Promise<void> => {
+export const sendB2bQuote = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { quoteId } = req.params;
 
@@ -706,7 +707,7 @@ export const sendB2bQuote = async (req: Request, res: Response): Promise<void> =
   }
 };
 
-export const acceptB2bQuote = async (req: Request, res: Response): Promise<void> => {
+export const acceptB2bQuote = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { quoteId } = req.params;
 
@@ -720,7 +721,7 @@ export const acceptB2bQuote = async (req: Request, res: Response): Promise<void>
   }
 };
 
-export const rejectB2bQuote = async (req: Request, res: Response): Promise<void> => {
+export const rejectB2bQuote = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { quoteId } = req.params;
     const { reason } = req.body;
@@ -735,7 +736,7 @@ export const rejectB2bQuote = async (req: Request, res: Response): Promise<void>
   }
 };
 
-export const convertB2bQuoteToOrder = async (req: Request, res: Response): Promise<void> => {
+export const convertB2bQuoteToOrder = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { quoteId } = req.params;
     const { orderId } = req.body;
@@ -750,7 +751,7 @@ export const convertB2bQuoteToOrder = async (req: Request, res: Response): Promi
   }
 };
 
-export const createB2bQuoteRevision = async (req: Request, res: Response): Promise<void> => {
+export const createB2bQuoteRevision = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { quoteId } = req.params;
 
@@ -764,7 +765,7 @@ export const createB2bQuoteRevision = async (req: Request, res: Response): Promi
   }
 };
 
-export const deleteB2bQuote = async (req: Request, res: Response): Promise<void> => {
+export const deleteB2bQuote = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { quoteId } = req.params;
 
@@ -782,7 +783,7 @@ export const deleteB2bQuote = async (req: Request, res: Response): Promise<void>
 // B2B Quote Items Management
 // ============================================================================
 
-export const addB2bQuoteItem = async (req: Request, res: Response): Promise<void> => {
+export const addB2bQuoteItem = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { quoteId } = req.params;
     const {
@@ -838,7 +839,7 @@ export const addB2bQuoteItem = async (req: Request, res: Response): Promise<void
   }
 };
 
-export const updateB2bQuoteItem = async (req: Request, res: Response): Promise<void> => {
+export const updateB2bQuoteItem = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { quoteId, itemId } = req.params;
     const updates: any = {};
@@ -871,7 +872,7 @@ export const updateB2bQuoteItem = async (req: Request, res: Response): Promise<v
   }
 };
 
-export const deleteB2bQuoteItem = async (req: Request, res: Response): Promise<void> => {
+export const deleteB2bQuoteItem = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { quoteId, itemId } = req.params;
 
@@ -889,7 +890,7 @@ export const deleteB2bQuoteItem = async (req: Request, res: Response): Promise<v
 // B2B Quote Analytics
 // ============================================================================
 
-export const b2bQuoteAnalytics = async (req: Request, res: Response): Promise<void> => {
+export const b2bQuoteAnalytics = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     // Get quote analytics (would need implementation for proper analytics queries)
     const stats = {

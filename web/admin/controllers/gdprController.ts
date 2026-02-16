@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';;
 import { query, queryOne } from '../../../libs/db';
 import { v4 as uuidv4 } from 'uuid';
 import { adminRespond } from '../../respond';
@@ -13,7 +14,7 @@ import { adminRespond } from '../../respond';
 // GDPR Dashboard
 // ============================================================================
 
-export const gdprDashboard = async (req: Request, res: Response): Promise<void> => {
+export const gdprDashboard = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     // Get GDPR stats
     const statsResult = await queryOne<any>(
@@ -68,7 +69,7 @@ export const gdprDashboard = async (req: Request, res: Response): Promise<void> 
 // GDPR Requests CRUD
 // ============================================================================
 
-export const createGdprRequest = async (req: Request, res: Response): Promise<void> => {
+export const createGdprRequest = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { requestType, customerEmail, customerName, description } = req.body;
 
@@ -102,7 +103,7 @@ export const createGdprRequest = async (req: Request, res: Response): Promise<vo
   }
 };
 
-export const viewGdprRequest = async (req: Request, res: Response): Promise<void> => {
+export const viewGdprRequest = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { requestId } = req.params;
 
@@ -136,7 +137,7 @@ export const viewGdprRequest = async (req: Request, res: Response): Promise<void
   }
 };
 
-export const processGdprRequest = async (req: Request, res: Response): Promise<void> => {
+export const processGdprRequest = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { requestId } = req.params;
 
@@ -150,7 +151,7 @@ export const processGdprRequest = async (req: Request, res: Response): Promise<v
   }
 };
 
-export const completeGdprRequest = async (req: Request, res: Response): Promise<void> => {
+export const completeGdprRequest = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { requestId } = req.params;
     const { notes } = req.body;
@@ -172,7 +173,7 @@ export const completeGdprRequest = async (req: Request, res: Response): Promise<
 // Consent Management
 // ============================================================================
 
-export const consentManagement = async (req: Request, res: Response): Promise<void> => {
+export const consentManagement = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const consentSettings = {
       cookieConsentRequired: true,

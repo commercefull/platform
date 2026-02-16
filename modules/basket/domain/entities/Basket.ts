@@ -8,6 +8,13 @@ import { Money } from '../valueObjects/Money';
 
 export type BasketStatus = 'active' | 'merged' | 'converted' | 'abandoned' | 'completed';
 
+export interface AppliedCoupon {
+  couponCode: string;
+  discountType: 'percentage' | 'fixed';
+  discountValue: number;
+  appliedAt: Date;
+}
+
 export interface BasketProps {
   basketId: string;
   customerId?: string;
@@ -15,6 +22,8 @@ export interface BasketProps {
   status: BasketStatus;
   currency: string;
   items: BasketItem[];
+  coupon?: AppliedCoupon;
+  discountAmount?: number;
   metadata?: Record<string, any>;
   expiresAt?: Date;
   convertedToOrderId?: string;
@@ -110,6 +119,20 @@ export class Basket {
 
   get subtotal(): Money {
     return this.props.items.reduce((sum, item) => sum.add(item.lineTotal), Money.zero(this.props.currency));
+  }
+
+  get coupon(): AppliedCoupon | undefined {
+    return this.props.coupon;
+  }
+
+  get discountAmount(): number {
+    return this.props.discountAmount || 0;
+  }
+
+  get total(): Money {
+    const sub = this.subtotal;
+    const discount = Money.create(this.discountAmount, this.props.currency);
+    return sub.subtract(discount);
   }
 
   get isEmpty(): boolean {
@@ -229,6 +252,43 @@ export class Basket {
     this.touch();
   }
 
+  applyCoupon(couponCode: string, discountType: 'percentage' | 'fixed', discountValue: number): void {
+    this.ensureActive();
+    if (this.props.coupon) {
+      throw new Error('A coupon is already applied. Remove it first before applying a new one.');
+    }
+    if (discountValue <= 0) {
+      throw new Error('Discount value must be positive');
+    }
+
+    this.props.coupon = {
+      couponCode,
+      discountType,
+      discountValue,
+      appliedAt: new Date(),
+    };
+
+    // Calculate discount amount
+    const subtotalAmount = this.subtotal.amount;
+    if (discountType === 'percentage') {
+      this.props.discountAmount = Math.round(subtotalAmount * (discountValue / 100) * 100) / 100;
+    } else {
+      this.props.discountAmount = Math.min(discountValue, subtotalAmount);
+    }
+
+    this.touch();
+  }
+
+  removeCoupon(): void {
+    this.ensureActive();
+    if (!this.props.coupon) {
+      throw new Error('No coupon applied to this basket');
+    }
+    this.props.coupon = undefined;
+    this.props.discountAmount = 0;
+    this.touch();
+  }
+
   extendExpiration(days: number = 7): void {
     this.props.expiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
     this.touch();
@@ -259,6 +319,9 @@ export class Basket {
       itemCount: this.itemCount,
       uniqueItemCount: this.uniqueItemCount,
       subtotal: this.subtotal.amount,
+      coupon: this.props.coupon,
+      discountAmount: this.discountAmount,
+      total: this.total.amount,
       metadata: this.props.metadata,
       expiresAt: this.props.expiresAt?.toISOString(),
       convertedToOrderId: this.props.convertedToOrderId,

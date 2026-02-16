@@ -5,14 +5,15 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import loyaltyRepo from '../../infrastructure/repositories/loyaltyRepo';
 
 // ============================================================================
 // Types
 // ============================================================================
 
-interface UserRequest extends Request {
+interface UserRequest extends TypedRequest {
   user?: {
     id?: string;
     customerId?: string;
@@ -46,7 +47,7 @@ function getCustomerId(req: UserRequest): string | null {
 /**
  * Get publicly available loyalty tiers
  */
-export const getPublicTiers = async (req: Request, res: Response): Promise<void> => {
+export const getPublicTiers = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const tiers = await loyaltyRepo.findAllTiers(false);
 
@@ -70,7 +71,7 @@ export const getPublicTiers = async (req: Request, res: Response): Promise<void>
 /**
  * Get publicly available loyalty rewards
  */
-export const getPublicRewards = async (req: Request, res: Response): Promise<void> => {
+export const getPublicRewards = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const rewards = await loyaltyRepo.findAllRewards(false);
 

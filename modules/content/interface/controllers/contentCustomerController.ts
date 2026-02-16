@@ -1,5 +1,6 @@
 import { logger } from '../../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import { ContentRepo } from '../../infrastructure/repositories/contentRepo';
 
 const contentRepo = new ContentRepo();
@@ -8,7 +9,7 @@ const contentRepo = new ContentRepo();
  * Get published pages with optional filtering
  * Only returns published pages, with limited information
  */
-export const getPublishedPages = async (req: Request, res: Response): Promise<void> => {
+export const getPublishedPages = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const limit = parseInt(req.query.limit as string) || 50;
     const offset = parseInt(req.query.offset as string) || 0;
@@ -50,7 +51,7 @@ export const getPublishedPages = async (req: Request, res: Response): Promise<vo
 /**
  * Get a published page by its slug with all content blocks
  */
-export const getPublishedPageBySlug = async (req: Request, res: Response): Promise<void> => {
+export const getPublishedPageBySlug = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { slug } = req.params;
 
@@ -167,7 +168,7 @@ export const getPublishedPageBySlug = async (req: Request, res: Response): Promi
 /**
  * Get active content types (sanitized for public use)
  */
-export const getActiveContentTypes = async (req: Request, res: Response): Promise<void> => {
+export const getActiveContentTypes = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const contentTypes = await contentRepo.findAllContentTypes(true);
 

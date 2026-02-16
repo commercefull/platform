@@ -4,12 +4,13 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import * as supportRepo from '../../infrastructure/repositories/supportRepo';
 import * as faqRepo from '../../infrastructure/repositories/faqRepo';
 import * as alertRepo from '../../infrastructure/repositories/alertRepo';
 
-type AsyncHandler = (req: Request, res: Response, next: NextFunction) => Promise<void>;
+type AsyncHandler = (req: TypedRequest, res: Response, next: NextFunction) => Promise<void>;
 
 // ============================================================================
 // Support Tickets (Customer)
@@ -17,7 +18,7 @@ type AsyncHandler = (req: Request, res: Response, next: NextFunction) => Promise
 
 export const createTicket: AsyncHandler = async (req, res, next) => {
   try {
-    const customerId = (req as any).customerId;
+    const customerId = req.user?.customerId;
 
     const ticket = await supportRepo.createTicket({
       customerId,
@@ -54,7 +55,7 @@ export const createTicket: AsyncHandler = async (req, res, next) => {
 
 export const getMyTickets: AsyncHandler = async (req, res, next) => {
   try {
-    const customerId = (req as any).customerId;
+    const customerId = req.user?.customerId;
     const { status, limit, offset } = req.query;
 
     const result = await supportRepo.getTickets(
@@ -71,7 +72,7 @@ export const getMyTickets: AsyncHandler = async (req, res, next) => {
 
 export const getMyTicket: AsyncHandler = async (req, res, next) => {
   try {
-    const customerId = (req as any).customerId;
+    const customerId = req.user?.customerId;
     const ticket = await supportRepo.getTicket(req.params.id);
 
     if (!ticket || ticket.customerId !== customerId) {
@@ -83,7 +84,7 @@ export const getMyTicket: AsyncHandler = async (req, res, next) => {
     const attachments = await supportRepo.getAttachments(req.params.id);
 
     // Mark messages as read
-    await supportRepo.markMessagesRead(req.params.id, customerId);
+    await supportRepo.markMessagesRead(req.params.id, customerId || '');
 
     res.json({ success: true, data: { ...ticket, messages, attachments } });
   } catch (error: any) {
@@ -95,7 +96,7 @@ export const getMyTicket: AsyncHandler = async (req, res, next) => {
 
 export const addCustomerMessage: AsyncHandler = async (req, res, next) => {
   try {
-    const customerId = (req as any).customerId;
+    const customerId = req.user?.customerId;
     const ticket = await supportRepo.getTicket(req.params.id);
 
     if (!ticket || ticket.customerId !== customerId) {
@@ -127,7 +128,7 @@ export const addCustomerMessage: AsyncHandler = async (req, res, next) => {
 
 export const submitTicketFeedback: AsyncHandler = async (req, res, next) => {
   try {
-    const customerId = (req as any).customerId;
+    const customerId = req.user?.customerId;
     const ticket = await supportRepo.getTicket(req.params.id);
 
     if (!ticket || ticket.customerId !== customerId) {
@@ -209,10 +210,10 @@ export const getFaqArticleBySlug: AsyncHandler = async (req, res, next) => {
 
     // Increment views
     const sessionKey = `faq_view_${article.faqArticleId}`;
-    const isUnique = !(req as any).session?.[sessionKey];
+    const isUnique = !(req.session as any)?.[sessionKey];
     await faqRepo.incrementViews(article.faqArticleId, isUnique);
-    if ((req as any).session) {
-      (req as any).session[sessionKey] = true;
+    if (req.session) {
+      (req.session as any)[sessionKey] = true;
     }
 
     // Get related articles
@@ -273,7 +274,7 @@ export const submitFaqFeedback: AsyncHandler = async (req, res, next) => {
 
 export const createStockAlert: AsyncHandler = async (req, res, next) => {
   try {
-    const customerId = (req as any).customerId;
+    const customerId = req.user?.customerId;
 
     const alert = await alertRepo.createStockAlert({
       customerId,
@@ -298,7 +299,7 @@ export const createStockAlert: AsyncHandler = async (req, res, next) => {
 
 export const getMyStockAlerts: AsyncHandler = async (req, res, next) => {
   try {
-    const customerId = (req as any).customerId;
+    const customerId = req.user?.customerId;
     const { status, limit, offset } = req.query;
 
     const result = await alertRepo.getStockAlerts(
@@ -315,7 +316,7 @@ export const getMyStockAlerts: AsyncHandler = async (req, res, next) => {
 
 export const cancelMyStockAlert: AsyncHandler = async (req, res, next) => {
   try {
-    const customerId = (req as any).customerId;
+    const customerId = req.user?.customerId;
     const alert = await alertRepo.getStockAlert(req.params.id);
 
     if (!alert || alert.customerId !== customerId) {
@@ -338,7 +339,7 @@ export const cancelMyStockAlert: AsyncHandler = async (req, res, next) => {
 
 export const createPriceAlert: AsyncHandler = async (req, res, next) => {
   try {
-    const customerId = (req as any).customerId;
+    const customerId = req.user?.customerId;
 
     const alert = await alertRepo.createPriceAlert({
       customerId,
@@ -368,7 +369,7 @@ export const createPriceAlert: AsyncHandler = async (req, res, next) => {
 
 export const getMyPriceAlerts: AsyncHandler = async (req, res, next) => {
   try {
-    const customerId = (req as any).customerId;
+    const customerId = req.user?.customerId;
     const { status, limit, offset } = req.query;
 
     const result = await alertRepo.getPriceAlerts(
@@ -385,7 +386,7 @@ export const getMyPriceAlerts: AsyncHandler = async (req, res, next) => {
 
 export const cancelMyPriceAlert: AsyncHandler = async (req, res, next) => {
   try {
-    const customerId = (req as any).customerId;
+    const customerId = req.user?.customerId;
     const alert = await alertRepo.getPriceAlert(req.params.id);
 
     if (!alert || alert.customerId !== customerId) {

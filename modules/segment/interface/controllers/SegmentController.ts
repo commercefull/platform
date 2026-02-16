@@ -5,11 +5,12 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import { segmentRepository } from '../../infrastructure/repositories/SegmentRepository';
 import { CreateSegmentUseCase, GetCustomerSegmentsUseCase } from '../../application/useCases';
 
-export const createSegment = async (req: Request, res: Response): Promise<void> => {
+export const createSegment = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const useCase = new CreateSegmentUseCase(segmentRepository);
     const result = await useCase.execute({
@@ -29,7 +30,7 @@ export const createSegment = async (req: Request, res: Response): Promise<void> 
   }
 };
 
-export const getSegment = async (req: Request, res: Response): Promise<void> => {
+export const getSegment = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const segment = await segmentRepository.findById(req.params.segmentId);
     if (!segment) {
@@ -43,7 +44,7 @@ export const getSegment = async (req: Request, res: Response): Promise<void> => 
   }
 };
 
-export const updateSegment = async (req: Request, res: Response): Promise<void> => {
+export const updateSegment = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const segment = await segmentRepository.findById(req.params.segmentId);
     if (!segment) {
@@ -69,7 +70,7 @@ export const updateSegment = async (req: Request, res: Response): Promise<void> 
   }
 };
 
-export const listSegments = async (req: Request, res: Response): Promise<void> => {
+export const listSegments = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const result = await segmentRepository.findAll(
       {
@@ -89,7 +90,7 @@ export const listSegments = async (req: Request, res: Response): Promise<void> =
   }
 };
 
-export const evaluateSegment = async (req: Request, res: Response): Promise<void> => {
+export const evaluateSegment = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     // For now, use repository directly for basic evaluation
     const memberIds = await segmentRepository.evaluateSegment(req.params.segmentId);
@@ -108,7 +109,7 @@ export const evaluateSegment = async (req: Request, res: Response): Promise<void
   }
 };
 
-export const getCustomerSegments = async (req: Request, res: Response): Promise<void> => {
+export const getCustomerSegments = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const useCase = new GetCustomerSegmentsUseCase(segmentRepository);
     const result = await useCase.execute({ customerId: req.params.customerId });
@@ -119,7 +120,7 @@ export const getCustomerSegments = async (req: Request, res: Response): Promise<
   }
 };
 
-export const deleteSegment = async (req: Request, res: Response): Promise<void> => {
+export const deleteSegment = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const deleted = await segmentRepository.delete(req.params.segmentId);
     if (!deleted) {

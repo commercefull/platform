@@ -75,6 +75,37 @@ router.post('/products/:productId/unpublish', productController.unpublishProduct
 router.delete('/products/:productId', productController.deleteProduct);
 
 // ============================================================================
+// Variant Routes
+// ============================================================================
+
+router.get('/products/:productId/variants', productController.getProductVariants);
+router.post('/products/:productId/variants', productController.createProductVariant);
+router.get('/products/:productId/variants/:variantId', productController.getProductVariant);
+router.put('/products/:productId/variants/:variantId', productController.updateProductVariant);
+router.delete('/products/:productId/variants/:variantId', productController.deleteProductVariant);
+
+// ============================================================================
+// Image/Media Routes
+// ============================================================================
+
+router.get('/products/:productId/images', productController.getProductImages);
+router.post('/products/:productId/images', productController.addProductImage);
+router.put('/products/:productId/images/:imageId', productController.updateProductImage);
+router.delete('/products/:productId/images/:imageId', productController.deleteProductImage);
+router.post('/products/:productId/images/reorder', productController.reorderProductImages);
+
+// ============================================================================
+// Review Management Routes (Admin)
+// ============================================================================
+
+router.get('/reviews', productController.listReviews);
+router.get('/reviews/:reviewId', productController.getReview);
+router.put('/reviews/:reviewId/approve', productController.approveReview);
+router.put('/reviews/:reviewId/reject', productController.rejectReview);
+router.post('/reviews/:reviewId/respond', productController.respondToReview);
+router.delete('/reviews/:reviewId', productController.deleteReview);
+
+// ============================================================================
 // Bundle Routes
 // ============================================================================
 

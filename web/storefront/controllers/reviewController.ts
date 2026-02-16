@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';;
 import { query, queryOne } from '../../../libs/db';
 import { storefrontRespond } from '../../respond';
 
@@ -18,7 +19,7 @@ interface CustomerUser {
 /**
  * GET: List reviews for a product
  */
-export const getProductReviews = async (req: Request, res: Response) => {
+export const getProductReviews = async (req: TypedRequest, res: Response) => {
   try {
     const { productId } = req.params;
     const { page = '1' } = req.query;
@@ -59,7 +60,7 @@ export const getProductReviews = async (req: Request, res: Response) => {
 /**
  * POST: Submit a product review
  */
-export const submitReview = async (req: Request, res: Response) => {
+export const submitReview = async (req: TypedRequest, res: Response) => {
   try {
     const user = req.user as CustomerUser;
     if (!user?.customerId) {
@@ -125,7 +126,7 @@ export const submitReview = async (req: Request, res: Response) => {
 /**
  * POST: Mark review as helpful
  */
-export const markReviewHelpful = async (req: Request, res: Response) => {
+export const markReviewHelpful = async (req: TypedRequest, res: Response) => {
   try {
     const { reviewId } = req.params;
 

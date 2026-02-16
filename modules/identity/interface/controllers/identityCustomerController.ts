@@ -1,5 +1,6 @@
 import { logger } from '../../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import { CustomerRepo } from '../../../customer/infrastructure/repositories/customerRepo';
 import { AuthRefreshTokenRepo } from '../../infrastructure/repositories/identityRefreshTokenRepo';
 import { generateAccessToken, verifyAccessToken, parseExpirationDate } from '../../utils/jwtHelpers';
@@ -23,7 +24,7 @@ const refreshTokenRepo = new AuthRefreshTokenRepo();
  * Authenticates a customer and returns a basic JWT token
  * Use this for simple session-based auth
  */
-export const loginCustomer = async (req: Request, res: Response): Promise<void> => {
+export const loginCustomer = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { email, password } = req.body;
 
@@ -81,7 +82,7 @@ export const loginCustomer = async (req: Request, res: Response): Promise<void> 
 /**
  * Registers a new customer account
  */
-export const registerCustomer = async (req: Request, res: Response): Promise<void> => {
+export const registerCustomer = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { email, password, firstName, lastName, phone } = req.body;
 
@@ -156,7 +157,7 @@ export const registerCustomer = async (req: Request, res: Response): Promise<voi
  * Issues both access and refresh tokens for headless/mobile clients
  * More secure than simple login as refresh tokens can be revoked
  */
-export const issueTokenPair = async (req: Request, res: Response): Promise<void> => {
+export const issueTokenPair = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { email, password } = req.body;
 
@@ -221,7 +222,7 @@ export const issueTokenPair = async (req: Request, res: Response): Promise<void>
 /**
  * Refreshes an expired access token using a valid refresh token
  */
-export const renewAccessToken = async (req: Request, res: Response): Promise<void> => {
+export const renewAccessToken = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { refreshToken } = req.body;
 
@@ -294,7 +295,7 @@ export const renewAccessToken = async (req: Request, res: Response): Promise<voi
 /**
  * Validates a customer access token
  */
-export const checkTokenValidity = async (req: Request, res: Response): Promise<void> => {
+export const checkTokenValidity = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { token } = req.body;
 
@@ -340,7 +341,7 @@ export const checkTokenValidity = async (req: Request, res: Response): Promise<v
 /**
  * Initiates password reset flow by generating a reset token
  */
-export const requestPasswordReset = async (req: Request, res: Response): Promise<void> => {
+export const requestPasswordReset = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { email } = req.body;
 
@@ -388,7 +389,7 @@ export const requestPasswordReset = async (req: Request, res: Response): Promise
 /**
  * Completes password reset using a valid reset token
  */
-export const resetPassword = async (req: Request, res: Response): Promise<void> => {
+export const resetPassword = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { token, newPassword } = req.body;
 

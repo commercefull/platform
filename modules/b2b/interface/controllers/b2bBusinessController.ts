@@ -4,12 +4,13 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import * as companyRepo from '../../infrastructure/repositories/companyRepo';
 import * as quoteRepo from '../../infrastructure/repositories/quoteRepo';
 import * as approvalRepo from '../../infrastructure/repositories/approvalRepo';
 
-type AsyncHandler = (req: Request, res: Response, next: NextFunction) => Promise<void>;
+type AsyncHandler = (req: TypedRequest, res: Response, next: NextFunction) => Promise<void>;
 
 // ============================================================================
 // Companies
@@ -76,7 +77,7 @@ export const updateCompany: AsyncHandler = async (req, res, next) => {
 
 export const approveCompany: AsyncHandler = async (req, res, next) => {
   try {
-    const adminId = (req as any).adminId || (req as any).userId;
+    const adminId = req.user?.userId || req.user?.id || '';
     await companyRepo.approveCompany(req.params.id, adminId);
     // Return the updated company data
     const company = await companyRepo.getCompany(req.params.id);
@@ -271,7 +272,7 @@ export const createQuote: AsyncHandler = async (req, res, next) => {
       return;
     }
 
-    const salesRepId = (req as any).userId || (req as any).merchantId;
+    const salesRepId = req.user?.userId || req.user?.merchantId;
     const quote = await quoteRepo.saveQuote({
       salesRepId,
       b2bCompanyId: req.body.b2bCompanyId || req.body.companyId,
@@ -479,7 +480,7 @@ export const getApprovalRequest: AsyncHandler = async (req, res, next) => {
 
 export const processApprovalAction: AsyncHandler = async (req, res, next) => {
   try {
-    const approverId = (req as any).userId || (req as any).merchantId;
+    const approverId = req.user?.userId || req.user?.merchantId;
     const request = await approvalRepo.processApprovalAction(req.params.id, {
       approverId,
       approverType: 'merchant',

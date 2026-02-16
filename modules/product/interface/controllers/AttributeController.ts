@@ -1,5 +1,6 @@
 import { logger } from '../../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import dynamicAttributeRepository from '../../infrastructure/repositories/DynamicAttributeRepository';
 import createAttributeUseCase from '../../application/useCases/attribute/CreateAttribute';
 import updateAttributeUseCase from '../../application/useCases/attribute/UpdateAttribute';
@@ -22,7 +23,7 @@ export class AttributeController {
    * GET /attributes
    * List all attributes
    */
-  async listAttributes(req: Request, res: Response): Promise<void> {
+  async listAttributes(req: TypedRequest, res: Response): Promise<void> {
     try {
       const { groupId, searchable, filterable, forVariants } = req.query;
 
@@ -57,7 +58,7 @@ export class AttributeController {
    * GET /attributes/:id
    * Get a single attribute by ID
    */
-  async getAttribute(req: Request, res: Response): Promise<void> {
+  async getAttribute(req: TypedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
       const attribute = await dynamicAttributeRepository.findAttributeById(id);
@@ -97,7 +98,7 @@ export class AttributeController {
    * GET /attributes/code/:code
    * Get a single attribute by code
    */
-  async getAttributeByCode(req: Request, res: Response): Promise<void> {
+  async getAttributeByCode(req: TypedRequest, res: Response): Promise<void> {
     try {
       const { code } = req.params;
       const attribute = await dynamicAttributeRepository.findAttributeByCode(code);
@@ -127,7 +128,7 @@ export class AttributeController {
    * POST /attributes
    * Create a new attribute
    */
-  async createAttribute(req: Request, res: Response): Promise<void> {
+  async createAttribute(req: TypedRequest, res: Response): Promise<void> {
     try {
       const result = await createAttributeUseCase.execute(req.body);
 
@@ -150,7 +151,7 @@ export class AttributeController {
    * PUT /attributes/:id
    * Update an attribute
    */
-  async updateAttribute(req: Request, res: Response): Promise<void> {
+  async updateAttribute(req: TypedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
       const result = await updateAttributeUseCase.execute({
@@ -177,7 +178,7 @@ export class AttributeController {
    * DELETE /attributes/:id
    * Delete an attribute
    */
-  async deleteAttribute(req: Request, res: Response): Promise<void> {
+  async deleteAttribute(req: TypedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
 
@@ -221,7 +222,7 @@ export class AttributeController {
    * GET /attributes/:id/values
    * Get all values for an attribute
    */
-  async getAttributeValues(req: Request, res: Response): Promise<void> {
+  async getAttributeValues(req: TypedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
       const result = await getAttributeValuesUseCase.execute({ attributeId: id });
@@ -245,7 +246,7 @@ export class AttributeController {
    * POST /attributes/:id/values
    * Add a value to an attribute
    */
-  async addAttributeValue(req: Request, res: Response): Promise<void> {
+  async addAttributeValue(req: TypedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
       const result = await addAttributeValueUseCase.execute({
@@ -272,7 +273,7 @@ export class AttributeController {
    * DELETE /attributes/:id/values/:valueId
    * Remove a value from an attribute
    */
-  async removeAttributeValue(req: Request, res: Response): Promise<void> {
+  async removeAttributeValue(req: TypedRequest, res: Response): Promise<void> {
     try {
       const { valueId } = req.params;
       const result = await removeAttributeValueUseCase.execute({
@@ -303,7 +304,7 @@ export class AttributeController {
    * GET /products/:productId/attributes
    * Get all attributes for a product
    */
-  async getProductAttributes(req: Request, res: Response): Promise<void> {
+  async getProductAttributes(req: TypedRequest, res: Response): Promise<void> {
     try {
       const { productId } = req.params;
       const result = await getProductAttributesUseCase.execute({ productId });
@@ -327,7 +328,7 @@ export class AttributeController {
    * POST /products/:productId/attributes
    * Set an attribute value for a product
    */
-  async setProductAttribute(req: Request, res: Response): Promise<void> {
+  async setProductAttribute(req: TypedRequest, res: Response): Promise<void> {
     try {
       const { productId } = req.params;
       const result = await setProductAttributeUseCase.execute({
@@ -354,7 +355,7 @@ export class AttributeController {
    * PUT /products/:productId/attributes
    * Set multiple attribute values for a product
    */
-  async setProductAttributes(req: Request, res: Response): Promise<void> {
+  async setProductAttributes(req: TypedRequest, res: Response): Promise<void> {
     try {
       const { productId } = req.params;
       const { attributes, clearExisting } = req.body;
@@ -384,7 +385,7 @@ export class AttributeController {
    * DELETE /products/:productId/attributes/:attributeId
    * Remove an attribute from a product
    */
-  async removeProductAttribute(req: Request, res: Response): Promise<void> {
+  async removeProductAttribute(req: TypedRequest, res: Response): Promise<void> {
     try {
       const { productId, attributeId } = req.params;
       const result = await removeProductAttributeUseCase.execute({

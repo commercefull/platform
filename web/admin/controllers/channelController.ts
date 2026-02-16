@@ -4,10 +4,11 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';;
 import { adminRespond } from '../../respond';
 
-export const listChannels = async (req: Request, res: Response): Promise<void> => {
+export const listChannels = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     adminRespond(req, res, 'settings/channels/index', {
       pageName: 'Sales Channels',
@@ -24,7 +25,7 @@ export const listChannels = async (req: Request, res: Response): Promise<void> =
   }
 };
 
-export const createChannelForm = async (req: Request, res: Response): Promise<void> => {
+export const createChannelForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     adminRespond(req, res, 'settings/channels/create', {
       pageName: 'Create Channel',
@@ -38,7 +39,7 @@ export const createChannelForm = async (req: Request, res: Response): Promise<vo
   }
 };
 
-export const createChannel = async (req: Request, res: Response): Promise<void> => {
+export const createChannel = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     res.redirect('/admin/settings/channels?success=Channel created successfully');
   } catch (error: any) {
@@ -51,7 +52,7 @@ export const createChannel = async (req: Request, res: Response): Promise<void> 
   }
 };
 
-export const viewChannel = async (req: Request, res: Response): Promise<void> => {
+export const viewChannel = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     adminRespond(req, res, 'settings/channels/view', {
       pageName: 'Channel Details',
@@ -67,7 +68,7 @@ export const viewChannel = async (req: Request, res: Response): Promise<void> =>
   }
 };
 
-export const editChannelForm = async (req: Request, res: Response): Promise<void> => {
+export const editChannelForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     adminRespond(req, res, 'settings/channels/edit', {
       pageName: 'Edit Channel',
@@ -82,7 +83,7 @@ export const editChannelForm = async (req: Request, res: Response): Promise<void
   }
 };
 
-export const updateChannel = async (req: Request, res: Response): Promise<void> => {
+export const updateChannel = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { channelId } = req.params;
     res.redirect(`/admin/settings/channels/${channelId}?success=Channel updated successfully`);
@@ -97,7 +98,7 @@ export const updateChannel = async (req: Request, res: Response): Promise<void> 
   }
 };
 
-export const deleteChannel = async (req: Request, res: Response): Promise<void> => {
+export const deleteChannel = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     res.json({ success: true, message: 'Channel deleted successfully' });
   } catch (error: any) {
@@ -106,7 +107,7 @@ export const deleteChannel = async (req: Request, res: Response): Promise<void> 
   }
 };
 
-export const activateChannel = async (req: Request, res: Response): Promise<void> => {
+export const activateChannel = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { channelId } = req.params;
     res.redirect(`/admin/settings/channels/${channelId}?success=Channel activated successfully`);
@@ -116,7 +117,7 @@ export const activateChannel = async (req: Request, res: Response): Promise<void
   }
 };
 
-export const deactivateChannel = async (req: Request, res: Response): Promise<void> => {
+export const deactivateChannel = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { channelId } = req.params;
     res.redirect(`/admin/settings/channels/${channelId}?success=Channel deactivated successfully`);

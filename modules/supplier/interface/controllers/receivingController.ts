@@ -1,5 +1,6 @@
 import { logger } from '../../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import ReceivingRecordRepo from '../../infrastructure/repositories/receivingRecordRepo';
 import ReceivingItemRepo from '../../infrastructure/repositories/receivingItemRepo';
 import PurchaseOrderRepo from '../../infrastructure/repositories/purchaseOrderRepo';
@@ -12,7 +13,7 @@ const purchaseOrderRepo = PurchaseOrderRepo;
 
 // ---------- Receiving Record Methods ----------
 
-export const getReceivingRecords = async (req: Request, res: Response): Promise<void> => {
+export const getReceivingRecords = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { status, warehouseId, supplierId, limit = '50' } = req.query;
 
@@ -37,7 +38,7 @@ export const getReceivingRecords = async (req: Request, res: Response): Promise<
   }
 };
 
-export const getReceivingRecordById = async (req: Request, res: Response): Promise<void> => {
+export const getReceivingRecordById = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const receivingRecord = await receivingRecordRepo.findById(id);
@@ -55,7 +56,7 @@ export const getReceivingRecordById = async (req: Request, res: Response): Promi
   }
 };
 
-export const getReceivingByPurchaseOrder = async (req: Request, res: Response): Promise<void> => {
+export const getReceivingByPurchaseOrder = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const receivingRecords = await receivingRecordRepo.findByPurchaseOrderId(id);
@@ -67,7 +68,7 @@ export const getReceivingByPurchaseOrder = async (req: Request, res: Response): 
   }
 };
 
-export const createReceivingRecord = async (req: Request, res: Response): Promise<void> => {
+export const createReceivingRecord = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const {
       purchaseOrderId,
@@ -138,7 +139,7 @@ export const createReceivingRecord = async (req: Request, res: Response): Promis
   }
 };
 
-export const updateReceivingRecord = async (req: Request, res: Response): Promise<void> => {
+export const updateReceivingRecord = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const updateParams = req.body;
@@ -158,7 +159,7 @@ export const updateReceivingRecord = async (req: Request, res: Response): Promis
   }
 };
 
-export const completeReceiving = async (req: Request, res: Response): Promise<void> => {
+export const completeReceiving = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const receivingRecord = await receivingRecordRepo.complete(id);
@@ -178,7 +179,7 @@ export const completeReceiving = async (req: Request, res: Response): Promise<vo
 
 // ---------- Receiving Item Methods ----------
 
-export const getReceivingItems = async (req: Request, res: Response): Promise<void> => {
+export const getReceivingItems = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const items = await receivingItemRepo.findByReceivingRecordId(id);
@@ -190,7 +191,7 @@ export const getReceivingItems = async (req: Request, res: Response): Promise<vo
   }
 };
 
-export const createReceivingItem = async (req: Request, res: Response): Promise<void> => {
+export const createReceivingItem = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const itemParams = {
@@ -219,7 +220,7 @@ export const createReceivingItem = async (req: Request, res: Response): Promise<
   }
 };
 
-export const updateReceivingItem = async (req: Request, res: Response): Promise<void> => {
+export const updateReceivingItem = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const updateParams = req.body;
@@ -239,7 +240,7 @@ export const updateReceivingItem = async (req: Request, res: Response): Promise<
   }
 };
 
-export const acceptReceivingItem = async (req: Request, res: Response): Promise<void> => {
+export const acceptReceivingItem = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { processedBy } = req.body;
@@ -259,7 +260,7 @@ export const acceptReceivingItem = async (req: Request, res: Response): Promise<
   }
 };
 
-export const rejectReceivingItem = async (req: Request, res: Response): Promise<void> => {
+export const rejectReceivingItem = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { reason, processedBy } = req.body;

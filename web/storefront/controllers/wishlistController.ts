@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';;
 import { query, queryOne } from '../../../libs/db';
 import { storefrontRespond } from '../../respond';
 
@@ -17,7 +18,7 @@ interface CustomerUser {
 /**
  * GET: View wishlist
  */
-export const viewWishlist = async (req: Request, res: Response) => {
+export const viewWishlist = async (req: TypedRequest, res: Response) => {
   try {
     const user = req.user as CustomerUser;
     if (!user?.customerId) {
@@ -51,7 +52,7 @@ export const viewWishlist = async (req: Request, res: Response) => {
 /**
  * POST: Add item to wishlist
  */
-export const addToWishlist = async (req: Request, res: Response) => {
+export const addToWishlist = async (req: TypedRequest, res: Response) => {
   try {
     const user = req.user as CustomerUser;
     if (!user?.customerId) {
@@ -87,7 +88,7 @@ export const addToWishlist = async (req: Request, res: Response) => {
 /**
  * POST: Remove item from wishlist
  */
-export const removeFromWishlist = async (req: Request, res: Response) => {
+export const removeFromWishlist = async (req: TypedRequest, res: Response) => {
   try {
     const user = req.user as CustomerUser;
     if (!user?.customerId) {

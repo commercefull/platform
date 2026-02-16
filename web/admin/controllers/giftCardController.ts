@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';;
 import * as giftCardRepo from '../../../modules/promotion/infrastructure/repositories/giftCardRepo';
 import { adminRespond } from '../../respond';
 
@@ -12,7 +13,7 @@ import { adminRespond } from '../../respond';
 // Gift Card Management
 // ============================================================================
 
-export const listGiftCards = async (req: Request, res: Response): Promise<void> => {
+export const listGiftCards = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const status = req.query.status as string;
     const limit = parseInt(req.query.limit as string) || 50;
@@ -48,7 +49,7 @@ export const listGiftCards = async (req: Request, res: Response): Promise<void> 
   }
 };
 
-export const createGiftCardForm = async (req: Request, res: Response): Promise<void> => {
+export const createGiftCardForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     adminRespond(req, res, 'promotions/gift-cards/create', {
       pageName: 'Create Gift Card',
@@ -63,7 +64,7 @@ export const createGiftCardForm = async (req: Request, res: Response): Promise<v
   }
 };
 
-export const createGiftCard = async (req: Request, res: Response): Promise<void> => {
+export const createGiftCard = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const {
       type,
@@ -114,7 +115,7 @@ export const createGiftCard = async (req: Request, res: Response): Promise<void>
   }
 };
 
-export const viewGiftCard = async (req: Request, res: Response): Promise<void> => {
+export const viewGiftCard = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { giftCardId } = req.params;
 
@@ -148,7 +149,7 @@ export const viewGiftCard = async (req: Request, res: Response): Promise<void> =
   }
 };
 
-export const editGiftCardForm = async (req: Request, res: Response): Promise<void> => {
+export const editGiftCardForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { giftCardId } = req.params;
 
@@ -176,7 +177,7 @@ export const editGiftCardForm = async (req: Request, res: Response): Promise<voi
   }
 };
 
-export const activateGiftCardAction = async (req: Request, res: Response): Promise<void> => {
+export const activateGiftCardAction = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { giftCardId } = req.params;
 
@@ -190,7 +191,7 @@ export const activateGiftCardAction = async (req: Request, res: Response): Promi
   }
 };
 
-export const assignGiftCardAction = async (req: Request, res: Response): Promise<void> => {
+export const assignGiftCardAction = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { giftCardId } = req.params;
     const { customerId } = req.body;
@@ -205,7 +206,7 @@ export const assignGiftCardAction = async (req: Request, res: Response): Promise
   }
 };
 
-export const reloadGiftCardAction = async (req: Request, res: Response): Promise<void> => {
+export const reloadGiftCardAction = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { giftCardId } = req.params;
     const { amount, orderId } = req.body;
@@ -224,7 +225,7 @@ export const reloadGiftCardAction = async (req: Request, res: Response): Promise
   }
 };
 
-export const refundToGiftCardAction = async (req: Request, res: Response): Promise<void> => {
+export const refundToGiftCardAction = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { giftCardId } = req.params;
     const { amount, orderId, notes } = req.body;
@@ -243,7 +244,7 @@ export const refundToGiftCardAction = async (req: Request, res: Response): Promi
   }
 };
 
-export const cancelGiftCardAction = async (req: Request, res: Response): Promise<void> => {
+export const cancelGiftCardAction = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { giftCardId } = req.params;
 
@@ -257,7 +258,7 @@ export const cancelGiftCardAction = async (req: Request, res: Response): Promise
   }
 };
 
-export const checkGiftCardBalance = async (req: Request, res: Response): Promise<void> => {
+export const checkGiftCardBalance = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { code } = req.params;
 

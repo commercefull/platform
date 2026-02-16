@@ -5,7 +5,8 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import { channelRepository } from '../../infrastructure/repositories/ChannelRepository';
 import {
   CreateChannelUseCase,
@@ -16,7 +17,7 @@ import {
   AssignWarehouseToChannelUseCase,
 } from '../../application/useCases';
 
-export const createChannel = async (req: Request, res: Response): Promise<void> => {
+export const createChannel = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const useCase = new CreateChannelUseCase(channelRepository);
     const result = await useCase.execute({
@@ -49,7 +50,7 @@ export const createChannel = async (req: Request, res: Response): Promise<void> 
   }
 };
 
-export const getChannel = async (req: Request, res: Response): Promise<void> => {
+export const getChannel = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const useCase = new GetChannelUseCase(channelRepository);
     const result = await useCase.execute({
@@ -68,7 +69,7 @@ export const getChannel = async (req: Request, res: Response): Promise<void> => 
   }
 };
 
-export const updateChannel = async (req: Request, res: Response): Promise<void> => {
+export const updateChannel = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const useCase = new UpdateChannelUseCase(channelRepository);
     const result = await useCase.execute({
@@ -93,7 +94,7 @@ export const updateChannel = async (req: Request, res: Response): Promise<void> 
   }
 };
 
-export const listChannels = async (req: Request, res: Response): Promise<void> => {
+export const listChannels = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const useCase = new ListChannelsUseCase(channelRepository);
     const result = await useCase.execute({
@@ -111,7 +112,7 @@ export const listChannels = async (req: Request, res: Response): Promise<void> =
   }
 };
 
-export const assignProducts = async (req: Request, res: Response): Promise<void> => {
+export const assignProducts = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const useCase = new AssignProductsToChannelUseCase(channelRepository);
     const result = await useCase.execute({
@@ -127,7 +128,7 @@ export const assignProducts = async (req: Request, res: Response): Promise<void>
   }
 };
 
-export const assignWarehouse = async (req: Request, res: Response): Promise<void> => {
+export const assignWarehouse = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const useCase = new AssignWarehouseToChannelUseCase(channelRepository);
     const result = await useCase.execute({

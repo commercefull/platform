@@ -1,5 +1,6 @@
 import { logger } from '../../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import productTypeRepository from '../../infrastructure/repositories/ProductTypeRepository';
 import productAttributeSetRepository from '../../infrastructure/repositories/ProductAttributeSetRepository';
 
@@ -8,7 +9,7 @@ export class ProductTypeController {
    * GET /product-types
    * List all product types
    */
-  async listProductTypes(req: Request, res: Response): Promise<void> {
+  async listProductTypes(req: TypedRequest, res: Response): Promise<void> {
     try {
       const { active } = req.query;
 
@@ -36,7 +37,7 @@ export class ProductTypeController {
    * GET /product-types/:id
    * Get a single product type by ID
    */
-  async getProductType(req: Request, res: Response): Promise<void> {
+  async getProductType(req: TypedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
       const productType = await productTypeRepository.findById(id);
@@ -72,7 +73,7 @@ export class ProductTypeController {
    * GET /product-types/slug/:slug
    * Get a single product type by slug
    */
-  async getProductTypeBySlug(req: Request, res: Response): Promise<void> {
+  async getProductTypeBySlug(req: TypedRequest, res: Response): Promise<void> {
     try {
       const { slug } = req.params;
       const productType = await productTypeRepository.findBySlug(slug);
@@ -102,7 +103,7 @@ export class ProductTypeController {
    * POST /product-types
    * Create a new product type
    */
-  async createProductType(req: Request, res: Response): Promise<void> {
+  async createProductType(req: TypedRequest, res: Response): Promise<void> {
     try {
       const { name, slug } = req.body;
 
@@ -147,7 +148,7 @@ export class ProductTypeController {
    * PUT /product-types/:id
    * Update a product type
    */
-  async updateProductType(req: Request, res: Response): Promise<void> {
+  async updateProductType(req: TypedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
       const { name, slug } = req.body;
@@ -195,7 +196,7 @@ export class ProductTypeController {
    * DELETE /product-types/:id
    * Delete a product type
    */
-  async deleteProductType(req: Request, res: Response): Promise<void> {
+  async deleteProductType(req: TypedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
 
@@ -227,7 +228,7 @@ export class ProductTypeController {
    * GET /product-types/:id/attributes
    * Get all attributes for a product type (via attribute sets)
    */
-  async getProductTypeAttributes(req: Request, res: Response): Promise<void> {
+  async getProductTypeAttributes(req: TypedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
 

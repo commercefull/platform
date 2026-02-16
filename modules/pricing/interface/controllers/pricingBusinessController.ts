@@ -1,5 +1,6 @@
 import { logger } from '../../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import currencyRepo from '../../infrastructure/repositories/currencyRepo';
 import currencyPriceRuleRepo from '../../infrastructure/repositories/currencyPriceRuleRepo';
 import { CurrencyPriceRule } from '../../domain/pricingRule';
@@ -8,7 +9,7 @@ import pricingService from '../../services/pricingService';
 /**
  * Get all currencies
  */
-export const getAllCurrencies = async (req: Request, res: Response): Promise<void> => {
+export const getAllCurrencies = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     // Get query params for filtering
     const { includeInactive } = req.query;
@@ -36,7 +37,7 @@ export const getAllCurrencies = async (req: Request, res: Response): Promise<voi
 /**
  * Get default currency
  */
-export const getDefaultCurrency = async (req: Request, res: Response): Promise<void> => {
+export const getDefaultCurrency = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const currency = await currencyRepo.getDefaultCurrency();
 
@@ -66,7 +67,7 @@ export const getDefaultCurrency = async (req: Request, res: Response): Promise<v
 /**
  * Get currency by code
  */
-export const getCurrencyByCode = async (req: Request, res: Response): Promise<void> => {
+export const getCurrencyByCode = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { code } = req.params;
 
@@ -98,7 +99,7 @@ export const getCurrencyByCode = async (req: Request, res: Response): Promise<vo
 /**
  * Save currency
  */
-export const saveCurrency = async (req: Request, res: Response): Promise<void> => {
+export const saveCurrency = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const currencyData = req.body;
 
@@ -133,7 +134,7 @@ export const saveCurrency = async (req: Request, res: Response): Promise<void> =
 /**
  * Delete currency
  */
-export const deleteCurrency = async (req: Request, res: Response): Promise<void> => {
+export const deleteCurrency = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { code } = req.params;
 
@@ -176,7 +177,7 @@ export const deleteCurrency = async (req: Request, res: Response): Promise<void>
 /**
  * Update exchange rates
  */
-export const updateExchangeRates = async (req: Request, res: Response): Promise<void> => {
+export const updateExchangeRates = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { source } = req.body;
 
@@ -202,7 +203,7 @@ export const updateExchangeRates = async (req: Request, res: Response): Promise<
 /**
  * Get all currency regions
  */
-export const getAllCurrencyRegions = async (req: Request, res: Response): Promise<void> => {
+export const getAllCurrencyRegions = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { includeInactive } = req.query;
 
@@ -229,7 +230,7 @@ export const getAllCurrencyRegions = async (req: Request, res: Response): Promis
 /**
  * Get currency region by ID
  */
-export const getCurrencyRegionById = async (req: Request, res: Response): Promise<void> => {
+export const getCurrencyRegionById = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
 
@@ -261,7 +262,7 @@ export const getCurrencyRegionById = async (req: Request, res: Response): Promis
 /**
  * Create currency region
  */
-export const createCurrencyRegion = async (req: Request, res: Response): Promise<void> => {
+export const createCurrencyRegion = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const regionData = req.body;
 
@@ -306,7 +307,7 @@ export const createCurrencyRegion = async (req: Request, res: Response): Promise
 /**
  * Update currency region
  */
-export const updateCurrencyRegion = async (req: Request, res: Response): Promise<void> => {
+export const updateCurrencyRegion = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const regionData = req.body;
@@ -356,7 +357,7 @@ export const updateCurrencyRegion = async (req: Request, res: Response): Promise
 /**
  * Delete currency region
  */
-export const deleteCurrencyRegion = async (req: Request, res: Response): Promise<void> => {
+export const deleteCurrencyRegion = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
 
@@ -391,7 +392,7 @@ export const deleteCurrencyRegion = async (req: Request, res: Response): Promise
 /**
  * Get all price rules for currency
  */
-export const getAllPriceRules = async (req: Request, res: Response): Promise<void> => {
+export const getAllPriceRules = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { currencyCode, regionCode, includeInactive } = req.query;
 
@@ -436,7 +437,7 @@ export const getAllPriceRules = async (req: Request, res: Response): Promise<voi
 /**
  * Get price rule by ID
  */
-export const getPriceRuleById = async (req: Request, res: Response): Promise<void> => {
+export const getPriceRuleById = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
 
@@ -468,7 +469,7 @@ export const getPriceRuleById = async (req: Request, res: Response): Promise<voi
 /**
  * Create price rule
  */
-export const createPriceRule = async (req: Request, res: Response): Promise<void> => {
+export const createPriceRule = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const ruleData: CurrencyPriceRule = req.body;
 
@@ -526,7 +527,7 @@ export const createPriceRule = async (req: Request, res: Response): Promise<void
 /**
  * Update price rule
  */
-export const updatePriceRule = async (req: Request, res: Response): Promise<void> => {
+export const updatePriceRule = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const ruleData = req.body;
@@ -589,7 +590,7 @@ export const updatePriceRule = async (req: Request, res: Response): Promise<void
 /**
  * Delete price rule
  */
-export const deletePriceRule = async (req: Request, res: Response): Promise<void> => {
+export const deletePriceRule = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
 

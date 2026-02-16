@@ -1,11 +1,12 @@
 import { logger } from '../../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import couponRepo, { CreateCouponInput, UpdateCouponInput, CouponType } from '../../infrastructure/repositories/couponRepo';
 
 /**
  * Get all active coupons
  */
-export const getActiveCoupons = async (req: Request, res: Response): Promise<void> => {
+export const getActiveCoupons = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { merchantId, limit, offset, orderBy, direction } = req.query;
 
@@ -33,7 +34,7 @@ export const getActiveCoupons = async (req: Request, res: Response): Promise<voi
 /**
  * Get coupon by ID
  */
-export const getCouponById = async (req: Request, res: Response): Promise<void> => {
+export const getCouponById = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const coupon = await couponRepo.findById(id);
@@ -53,7 +54,7 @@ export const getCouponById = async (req: Request, res: Response): Promise<void> 
 /**
  * Get coupon by code
  */
-export const getCouponByCode = async (req: Request, res: Response): Promise<void> => {
+export const getCouponByCode = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { code } = req.params;
     const { merchantId } = req.query;
@@ -75,7 +76,7 @@ export const getCouponByCode = async (req: Request, res: Response): Promise<void
 /**
  * Create a new coupon
  */
-export const createCoupon = async (req: Request, res: Response): Promise<void> => {
+export const createCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const couponData: CreateCouponInput = req.body;
 
@@ -116,7 +117,7 @@ export const createCoupon = async (req: Request, res: Response): Promise<void> =
 /**
  * Update an existing coupon
  */
-export const updateCoupon = async (req: Request, res: Response): Promise<void> => {
+export const updateCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const couponData: UpdateCouponInput = req.body;
@@ -149,7 +150,7 @@ export const updateCoupon = async (req: Request, res: Response): Promise<void> =
 /**
  * Delete a coupon
  */
-export const deleteCoupon = async (req: Request, res: Response): Promise<void> => {
+export const deleteCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
 
@@ -178,7 +179,7 @@ export const deleteCoupon = async (req: Request, res: Response): Promise<void> =
 /**
  * Validate a coupon for a cart
  */
-export const validateCoupon = async (req: Request, res: Response): Promise<void> => {
+export const validateCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { code, orderTotal, customerId, merchantId } = req.body;
 
@@ -207,7 +208,7 @@ export const validateCoupon = async (req: Request, res: Response): Promise<void>
 /**
  * Get coupon usage
  */
-export const getCouponUsage = async (req: Request, res: Response): Promise<void> => {
+export const getCouponUsage = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
 
@@ -241,7 +242,7 @@ export const getCouponUsage = async (req: Request, res: Response): Promise<void>
 /**
  * Calculate coupon discount for a cart
  */
-export const calculateCouponDiscount = async (req: Request, res: Response): Promise<void> => {
+export const calculateCouponDiscount = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { code, orderTotal, items, merchantId } = req.body;
 

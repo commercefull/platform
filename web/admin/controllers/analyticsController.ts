@@ -5,7 +5,8 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';;
 import { query, queryOne } from '../../../libs/db';
 import { getSalesSummary, getTopProducts, getCustomerCohorts } from '../../../modules/analytics/infrastructure/repositories/analyticsRepo';
 import {
@@ -27,7 +28,7 @@ import { adminRespond } from '../../respond';
 // Advanced Analytics Dashboard
 // ============================================================================
 
-export const analyticsDashboard = async (req: Request, res: Response): Promise<void> => {
+export const analyticsDashboard = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { period = '30d', segment = 'all', category = 'all' } = req.query;
 
@@ -114,7 +115,7 @@ export const analyticsDashboard = async (req: Request, res: Response): Promise<v
 // Predictive Analytics
 // ============================================================================
 
-export const predictiveAnalytics = async (req: Request, res: Response): Promise<void> => {
+export const predictiveAnalytics = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     // Get historical sales data for forecasting
     const [startDate] = parsePeriod('90d'); // Last 90 days for forecasting
@@ -197,7 +198,7 @@ export const predictiveAnalytics = async (req: Request, res: Response): Promise<
 // Customer Analytics
 // ============================================================================
 
-export const customerAnalytics = async (req: Request, res: Response): Promise<void> => {
+export const customerAnalytics = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { segmentId } = req.params;
 
@@ -251,7 +252,7 @@ export const customerAnalytics = async (req: Request, res: Response): Promise<vo
 // AI Recommendations
 // ============================================================================
 
-export const aiRecommendations = async (req: Request, res: Response): Promise<void> => {
+export const aiRecommendations = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     // Get a sample customer for demonstration
     const sampleCustomer = await queryOne<{ customer_id: string }>(
@@ -323,7 +324,7 @@ export const aiRecommendations = async (req: Request, res: Response): Promise<vo
 // Executive Dashboard
 // ============================================================================
 
-export const executiveDashboard = async (req: Request, res: Response): Promise<void> => {
+export const executiveDashboard = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     // Get current period KPIs
     const [startDate, endDate] = parsePeriod('30d');
@@ -399,7 +400,7 @@ export const executiveDashboard = async (req: Request, res: Response): Promise<v
 // Real-time Analytics API
 // ============================================================================
 
-export const realTimeMetrics = async (req: Request, res: Response): Promise<void> => {
+export const realTimeMetrics = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     // Get current real-time metrics
     const metrics = await getCurrentRealTimeMetrics();
@@ -423,7 +424,7 @@ export const realTimeMetrics = async (req: Request, res: Response): Promise<void
 // Automated Reporting
 // ============================================================================
 
-export const automatedReports = async (req: Request, res: Response): Promise<void> => {
+export const automatedReports = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const reports = await getScheduledReports();
     const reportHistory = await getReportExecutionHistory();
@@ -447,7 +448,7 @@ export const automatedReports = async (req: Request, res: Response): Promise<voi
 // Automated Reporting Management
 // ============================================================================
 
-export const createReportSchedule = async (req: Request, res: Response): Promise<void> => {
+export const createReportSchedule = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { name, type, reportType, recipients, format, parameters } = req.body;
 
@@ -482,7 +483,7 @@ export const createReportSchedule = async (req: Request, res: Response): Promise
   }
 };
 
-export const updateReportSchedule = async (req: Request, res: Response): Promise<void> => {
+export const updateReportSchedule = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { scheduleId } = req.params;
     const updates = req.body;
@@ -503,7 +504,7 @@ export const updateReportSchedule = async (req: Request, res: Response): Promise
   }
 };
 
-export const deleteReportSchedule = async (req: Request, res: Response): Promise<void> => {
+export const deleteReportSchedule = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { scheduleId } = req.params;
 
@@ -523,7 +524,7 @@ export const deleteReportSchedule = async (req: Request, res: Response): Promise
   }
 };
 
-export const runReportNow = async (req: Request, res: Response): Promise<void> => {
+export const runReportNow = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { reportType, period, parameters } = req.body;
 

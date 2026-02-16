@@ -4,10 +4,11 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import * as giftCardRepo from '../../infrastructure/repositories/giftCardRepo';
 
-type AsyncHandler = (req: Request, res: Response, next: NextFunction) => Promise<void>;
+type AsyncHandler = (req: TypedRequest, res: Response, next: NextFunction) => Promise<void>;
 
 export const checkGiftCardBalance: AsyncHandler = async (req, res, next) => {
   try {
@@ -47,7 +48,7 @@ export const checkGiftCardBalance: AsyncHandler = async (req, res, next) => {
 
 export const redeemGiftCard: AsyncHandler = async (req, res, next) => {
   try {
-    const customerId = (req as any).customerId;
+    const customerId = req.user?.customerId;
     const { code, amount, orderId } = req.body;
 
     const giftCard = await giftCardRepo.getGiftCardByCode(code);
@@ -68,7 +69,7 @@ export const redeemGiftCard: AsyncHandler = async (req, res, next) => {
 
 export const getMyGiftCards: AsyncHandler = async (req, res, next) => {
   try {
-    const customerId = (req as any).customerId;
+    const customerId = req.user?.customerId;
     const { limit, offset } = req.query;
 
     const result = await giftCardRepo.getGiftCards(
@@ -86,7 +87,7 @@ export const getMyGiftCards: AsyncHandler = async (req, res, next) => {
 
 export const reloadGiftCard: AsyncHandler = async (req, res, next) => {
   try {
-    const customerId = (req as any).customerId;
+    const customerId = req.user?.customerId;
     const { code, amount, orderId } = req.body;
 
     const giftCard = await giftCardRepo.getGiftCardByCode(code);

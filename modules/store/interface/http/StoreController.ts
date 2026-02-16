@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import { CreateStoreUseCase, CreateStoreCommand } from '../../application/useCases/CreateStore';
 import { StoreRepo } from '../../infrastructure/repositories/StoreRepo';
 import { BusinessRepo } from '../../../business/infrastructure/repositories/BusinessRepo';
@@ -24,7 +25,7 @@ export class StoreController {
    * Create a new store
    * POST /business/stores
    */
-  async createStore(req: Request, res: Response) {
+  async createStore(req: TypedRequest, res: Response) {
     try {
       const command = new CreateStoreCommand({
         name: req.body.name,
@@ -81,7 +82,7 @@ export class StoreController {
    * Get store by ID
    * GET /business/stores/:storeId
    */
-  async getStore(req: Request, res: Response) {
+  async getStore(req: TypedRequest, res: Response) {
     try {
       const storeRepository = new StoreRepo();
       const store = await storeRepository.findById(req.params.storeId);
@@ -113,7 +114,7 @@ export class StoreController {
    * Get store by slug
    * GET /business/stores/slug/:slug
    */
-  async getStoreBySlug(req: Request, res: Response) {
+  async getStoreBySlug(req: TypedRequest, res: Response) {
     try {
       const storeRepository = new StoreRepo();
       const store = await storeRepository.findBySlug(req.params.slug);
@@ -145,7 +146,7 @@ export class StoreController {
    * Get stores by business
    * GET /business/stores/business/:businessId
    */
-  async getStoresByBusiness(req: Request, res: Response) {
+  async getStoresByBusiness(req: TypedRequest, res: Response) {
     try {
       const storeRepository = new StoreRepo();
       const stores = await storeRepository.findByBusiness(req.params.businessId);
@@ -171,7 +172,7 @@ export class StoreController {
    * Get active stores
    * GET /business/stores/active
    */
-  async getActiveStores(req: Request, res: Response) {
+  async getActiveStores(req: TypedRequest, res: Response) {
     try {
       const storeRepository = new StoreRepo();
       const stores = await storeRepository.findActive();

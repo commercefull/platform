@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';;
 import { couponRepo } from '../../../modules/promotion/infrastructure/repositories/couponRepo';
 import { adminRespond } from '../../respond';
 
@@ -12,7 +13,7 @@ import { adminRespond } from '../../respond';
 // Coupon Management
 // ============================================================================
 
-export const listCoupons = async (req: Request, res: Response): Promise<void> => {
+export const listCoupons = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const status = req.query.status as string;
     const isActive = req.query.isActive ? req.query.isActive === 'true' : undefined;
@@ -47,7 +48,7 @@ export const listCoupons = async (req: Request, res: Response): Promise<void> =>
   }
 };
 
-export const createCouponForm = async (req: Request, res: Response): Promise<void> => {
+export const createCouponForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     adminRespond(req, res, 'promotions/coupons/create', {
       pageName: 'Create Coupon',
@@ -62,7 +63,7 @@ export const createCouponForm = async (req: Request, res: Response): Promise<voi
   }
 };
 
-export const createCoupon = async (req: Request, res: Response): Promise<void> => {
+export const createCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const {
       code,
@@ -111,7 +112,7 @@ export const createCoupon = async (req: Request, res: Response): Promise<void> =
   }
 };
 
-export const viewCoupon = async (req: Request, res: Response): Promise<void> => {
+export const viewCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { couponId } = req.params;
 
@@ -145,7 +146,7 @@ export const viewCoupon = async (req: Request, res: Response): Promise<void> => 
   }
 };
 
-export const editCouponForm = async (req: Request, res: Response): Promise<void> => {
+export const editCouponForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { couponId } = req.params;
 
@@ -173,7 +174,7 @@ export const editCouponForm = async (req: Request, res: Response): Promise<void>
   }
 };
 
-export const updateCoupon = async (req: Request, res: Response): Promise<void> => {
+export const updateCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { couponId } = req.params;
     const updates: any = {};
@@ -232,7 +233,7 @@ export const updateCoupon = async (req: Request, res: Response): Promise<void> =
   }
 };
 
-export const deleteCoupon = async (req: Request, res: Response): Promise<void> => {
+export const deleteCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { couponId } = req.params;
 
@@ -250,7 +251,7 @@ export const deleteCoupon = async (req: Request, res: Response): Promise<void> =
   }
 };
 
-export const validateCoupon = async (req: Request, res: Response): Promise<void> => {
+export const validateCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { code, orderTotal, customerId } = req.body;
 

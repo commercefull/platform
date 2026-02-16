@@ -3,27 +3,17 @@
  */
 
 import { Router } from 'express';
-import { getFulfillment } from '../controllers/FulfillmentController';
+import { getFulfillment, getTrackingInfo, listFulfillmentsByOrder } from '../controllers/FulfillmentController';
 
 const router = Router();
+
+// List fulfillments by order (customer view)
+router.get('/order/:orderId', listFulfillmentsByOrder);
 
 // Get fulfillment by ID (customer view)
 router.get('/:fulfillmentId', getFulfillment);
 
 // Track fulfillment
-router.get('/:fulfillmentId/track', async (req, res) => {
-  try {
-    // For now, return basic tracking info from fulfillment
-    res.json({
-      success: true,
-      data: {
-        fulfillmentId: req.params.fulfillmentId,
-        message: 'Tracking endpoint - use fulfillment get for details',
-      },
-    });
-  } catch (error: any) {
-    res.status(400).json({ success: false, error: error.message });
-  }
-});
+router.get('/:fulfillmentId/track', getTrackingInfo);
 
 export default router;

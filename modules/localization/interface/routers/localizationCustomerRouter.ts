@@ -4,15 +4,15 @@
  */
 
 import express from 'express';
-import * as localizationController from '../controllers/localizationCustomerController';
+import { getActiveLocales, getActiveCountries, getLocaleByCode, getCountryByCode, detectLocale } from '../controllers/localizationCustomerController';
 
 const router = express.Router();
 
 // Public routes (no auth required)
-router.get('/localization/locales', localizationController.getActiveLocales);
-router.get('/localization/locales/:code', localizationController.getLocaleByCode);
-router.get('/localization/countries', localizationController.getActiveCountries);
-router.get('/localization/countries/:code', localizationController.getCountryByCode);
-router.get('/localization/detect', localizationController.detectLocale);
+router.get('/localization/locales', getActiveLocales);
+router.get('/localization/locales/:code', getLocaleByCode);
+router.get('/localization/countries', getActiveCountries);
+router.get('/localization/countries/:code', getCountryByCode);
+router.get('/localization/detect', detectLocale);
 
 export const localizationCustomerRouter = router;

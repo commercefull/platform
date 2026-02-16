@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';;
 import PaymentRepo from '../../../modules/payment/infrastructure/repositories/paymentRepo';
 import { adminRespond } from '../../respond';
 
@@ -12,7 +13,7 @@ import { adminRespond } from '../../respond';
 // Payment Gateways
 // ============================================================================
 
-export const listPaymentGateways = async (req: Request, res: Response): Promise<void> => {
+export const listPaymentGateways = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     // For now, we'll use a default merchant ID. In a real app, this would come from the authenticated user
     const merchantId = 'default-merchant';
@@ -35,7 +36,7 @@ export const listPaymentGateways = async (req: Request, res: Response): Promise<
   }
 };
 
-export const createPaymentGatewayForm = async (req: Request, res: Response): Promise<void> => {
+export const createPaymentGatewayForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     adminRespond(req, res, 'payments/gateways/create', {
       pageName: 'Create Payment Gateway',
@@ -50,7 +51,7 @@ export const createPaymentGatewayForm = async (req: Request, res: Response): Pro
   }
 };
 
-export const createPaymentGateway = async (req: Request, res: Response): Promise<void> => {
+export const createPaymentGateway = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const merchantId = 'default-merchant';
     const { name, provider, isActive, isDefault, isTestMode, apiKey, apiSecret, publicKey, webhookSecret, apiEndpoint } = req.body;
@@ -86,7 +87,7 @@ export const createPaymentGateway = async (req: Request, res: Response): Promise
   }
 };
 
-export const viewPaymentGateway = async (req: Request, res: Response): Promise<void> => {
+export const viewPaymentGateway = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { gatewayId } = req.params;
 
@@ -116,7 +117,7 @@ export const viewPaymentGateway = async (req: Request, res: Response): Promise<v
   }
 };
 
-export const editPaymentGatewayForm = async (req: Request, res: Response): Promise<void> => {
+export const editPaymentGatewayForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { gatewayId } = req.params;
 
@@ -144,7 +145,7 @@ export const editPaymentGatewayForm = async (req: Request, res: Response): Promi
   }
 };
 
-export const updatePaymentGateway = async (req: Request, res: Response): Promise<void> => {
+export const updatePaymentGateway = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { gatewayId } = req.params;
     const updates: any = {};
@@ -186,7 +187,7 @@ export const updatePaymentGateway = async (req: Request, res: Response): Promise
   }
 };
 
-export const deletePaymentGateway = async (req: Request, res: Response): Promise<void> => {
+export const deletePaymentGateway = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { gatewayId } = req.params;
 
@@ -208,7 +209,7 @@ export const deletePaymentGateway = async (req: Request, res: Response): Promise
 // Payment Methods
 // ============================================================================
 
-export const listPaymentMethods = async (req: Request, res: Response): Promise<void> => {
+export const listPaymentMethods = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const merchantId = 'default-merchant';
 
@@ -234,7 +235,7 @@ export const listPaymentMethods = async (req: Request, res: Response): Promise<v
 // Payment Transactions
 // ============================================================================
 
-export const listPaymentTransactions = async (req: Request, res: Response): Promise<void> => {
+export const listPaymentTransactions = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     // For demonstration, we'll get recent transactions
     // In a real app, you'd implement pagination and filtering

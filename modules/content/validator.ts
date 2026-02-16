@@ -1,5 +1,6 @@
-import { NextFunction, Request, Response } from 'express';
+import { NextFunction, Response } from 'express';
 import { check, validationResult } from 'express-validator';
+import { TypedRequest } from 'libs/types/express';
 
 export const userContactUsValidationRules = () => {
   return [
@@ -19,7 +20,7 @@ export const userContactFormValidationRules = () => {
   ];
 };
 
-export const validateContactUs = (req: Request, res: Response, next: NextFunction) => {
+export const validateContactUs = (req: TypedRequest, res: Response, next: NextFunction) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     let messages: string[] = [];
@@ -33,7 +34,7 @@ export const validateContactUs = (req: Request, res: Response, next: NextFunctio
   next();
 };
 
-export const validateContactForm = (req: Request, res: Response, next: NextFunction) => {
+export const validateContactForm = (req: TypedRequest, res: Response, next: NextFunction) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     let messages: string[] = [];

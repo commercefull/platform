@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';;
 import { merchantRespond } from '../../respond';
 import DashboardQueryRepository from '../../../modules/analytics/infrastructure/repositories/DashboardQueryRepository';
 
@@ -18,7 +19,7 @@ interface MerchantUser {
 /**
  * GET: Merchant dashboard
  */
-export const getDashboard = async (req: Request, res: Response) => {
+export const getDashboard = async (req: TypedRequest, res: Response) => {
   try {
     const user = req.user as MerchantUser;
     if (!user?.merchantId) {

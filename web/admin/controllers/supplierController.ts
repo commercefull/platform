@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';;
 import supplierRepo from '../../../modules/supplier/infrastructure/repositories/supplierRepo';
 import { adminRespond } from '../../respond';
 
@@ -12,7 +13,7 @@ import { adminRespond } from '../../respond';
 // Supplier Management
 // ============================================================================
 
-export const listSuppliers = async (req: Request, res: Response): Promise<void> => {
+export const listSuppliers = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const status = req.query.status as string;
     const isActive = req.query.isActive !== 'false';
@@ -50,7 +51,7 @@ export const listSuppliers = async (req: Request, res: Response): Promise<void> 
   }
 };
 
-export const createSupplierForm = async (req: Request, res: Response): Promise<void> => {
+export const createSupplierForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     adminRespond(req, res, 'operations/suppliers/create', {
       pageName: 'Create Supplier',
@@ -65,7 +66,7 @@ export const createSupplierForm = async (req: Request, res: Response): Promise<v
   }
 };
 
-export const createSupplier = async (req: Request, res: Response): Promise<void> => {
+export const createSupplier = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const {
       name,
@@ -119,7 +120,7 @@ export const createSupplier = async (req: Request, res: Response): Promise<void>
   }
 };
 
-export const viewSupplier = async (req: Request, res: Response): Promise<void> => {
+export const viewSupplier = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { supplierId } = req.params;
 
@@ -149,7 +150,7 @@ export const viewSupplier = async (req: Request, res: Response): Promise<void> =
   }
 };
 
-export const editSupplierForm = async (req: Request, res: Response): Promise<void> => {
+export const editSupplierForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { supplierId } = req.params;
 
@@ -177,7 +178,7 @@ export const editSupplierForm = async (req: Request, res: Response): Promise<voi
   }
 };
 
-export const updateSupplier = async (req: Request, res: Response): Promise<void> => {
+export const updateSupplier = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { supplierId } = req.params;
     const updates: any = {};
@@ -246,7 +247,7 @@ export const updateSupplier = async (req: Request, res: Response): Promise<void>
   }
 };
 
-export const approveSupplier = async (req: Request, res: Response): Promise<void> => {
+export const approveSupplier = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { supplierId } = req.params;
 
@@ -264,7 +265,7 @@ export const approveSupplier = async (req: Request, res: Response): Promise<void
   }
 };
 
-export const suspendSupplier = async (req: Request, res: Response): Promise<void> => {
+export const suspendSupplier = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { supplierId } = req.params;
 
@@ -282,7 +283,7 @@ export const suspendSupplier = async (req: Request, res: Response): Promise<void
   }
 };
 
-export const activateSupplier = async (req: Request, res: Response): Promise<void> => {
+export const activateSupplier = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { supplierId } = req.params;
 
@@ -300,7 +301,7 @@ export const activateSupplier = async (req: Request, res: Response): Promise<voi
   }
 };
 
-export const deactivateSupplier = async (req: Request, res: Response): Promise<void> => {
+export const deactivateSupplier = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { supplierId } = req.params;
 
@@ -318,7 +319,7 @@ export const deactivateSupplier = async (req: Request, res: Response): Promise<v
   }
 };
 
-export const deleteSupplier = async (req: Request, res: Response): Promise<void> => {
+export const deleteSupplier = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { supplierId } = req.params;
 

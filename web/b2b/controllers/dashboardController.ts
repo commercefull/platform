@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';;
 import { b2bRespond } from '../../respond';
 import { query, queryOne } from '../../../libs/db';
 
@@ -91,7 +92,7 @@ async function getPendingApprovals(companyId: string, userId: string, role: stri
 /**
  * GET: B2B dashboard
  */
-export const getDashboard = async (req: Request, res: Response) => {
+export const getDashboard = async (req: TypedRequest, res: Response) => {
   try {
     const user = req.user as B2BUser;
     if (!user?.companyId) {

@@ -1,5 +1,6 @@
 import { logger } from '../../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import { ContentRepo } from '../../infrastructure/repositories/contentRepo';
 import { ContentCategoryRepo } from '../../infrastructure/repositories/contentCategoryRepo';
 import { ContentNavigationRepo } from '../../infrastructure/repositories/contentNavigationRepo';
@@ -27,7 +28,7 @@ export class ContentController {
   /**
    * Get all content types with optional filtering
    */
-  getContentTypes = async (req: Request, res: Response): Promise<void> => {
+  getContentTypes = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const limit = parseInt(req.query.limit as string) || 50;
       const offset = parseInt(req.query.offset as string) || 0;
@@ -58,7 +59,7 @@ export class ContentController {
   /**
    * Get content type by ID
    */
-  getContentTypeById = async (req: Request, res: Response): Promise<void> => {
+  getContentTypeById = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const contentType = await this.contentRepo.findContentTypeById(id);
@@ -89,7 +90,7 @@ export class ContentController {
   /**
    * Get content type by slug
    */
-  getContentTypeBySlug = async (req: Request, res: Response): Promise<void> => {
+  getContentTypeBySlug = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const { slug } = req.params;
       const contentType = await this.contentRepo.findContentTypeBySlug(slug);
@@ -120,7 +121,7 @@ export class ContentController {
   /**
    * Create a new content type
    */
-  createContentType = async (req: Request, res: Response): Promise<void> => {
+  createContentType = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const {
         name,
@@ -174,7 +175,7 @@ export class ContentController {
   /**
    * Update a content type
    */
-  updateContentType = async (req: Request, res: Response): Promise<void> => {
+  updateContentType = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const { name, slug, description, icon, requiredFields, metaFields, isActive } = req.body;
@@ -216,7 +217,7 @@ export class ContentController {
   /**
    * Delete a content type
    */
-  deleteContentType = async (req: Request, res: Response): Promise<void> => {
+  deleteContentType = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
 
@@ -260,7 +261,7 @@ export class ContentController {
   /**
    * Get all content pages with optional filtering
    */
-  getPages = async (req: Request, res: Response): Promise<void> => {
+  getPages = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const limit = parseInt(req.query.limit as string) || 50;
       const offset = parseInt(req.query.offset as string) || 0;
@@ -289,7 +290,7 @@ export class ContentController {
   /**
    * Get page by ID
    */
-  getPageById = async (req: Request, res: Response): Promise<void> => {
+  getPageById = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const page = await this.contentRepo.findPageById(id);
@@ -318,7 +319,7 @@ export class ContentController {
   /**
    * Get page with full content by ID
    */
-  getFullPageById = async (req: Request, res: Response): Promise<void> => {
+  getFullPageById = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
 
@@ -379,7 +380,7 @@ export class ContentController {
   /**
    * Create a new page
    */
-  createPage = async (req: Request, res: Response): Promise<void> => {
+  createPage = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const {
         title,
@@ -445,7 +446,7 @@ export class ContentController {
   /**
    * Update a page
    */
-  updatePage = async (req: Request, res: Response): Promise<void> => {
+  updatePage = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const { title, slug, description, metaTitle, metaDescription, status, publishedAt, layout } = req.body;
@@ -500,7 +501,7 @@ export class ContentController {
   /**
    * Delete a page
    */
-  deletePage = async (req: Request, res: Response): Promise<void> => {
+  deletePage = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
 
@@ -534,7 +535,7 @@ export class ContentController {
   /**
    * Get blocks for a page
    */
-  getPageBlocks = async (req: Request, res: Response): Promise<void> => {
+  getPageBlocks = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const { pageId } = req.params;
 
@@ -566,7 +567,7 @@ export class ContentController {
   /**
    * Get block by ID
    */
-  getBlockById = async (req: Request, res: Response): Promise<void> => {
+  getBlockById = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const block = await this.contentRepo.findBlockById(id);
@@ -595,7 +596,7 @@ export class ContentController {
   /**
    * Create a new content block
    */
-  createBlock = async (req: Request, res: Response): Promise<void> => {
+  createBlock = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const { pageId, contentTypeId, name, order, content, status = 'active' } = req.body;
 
@@ -642,7 +643,7 @@ export class ContentController {
   /**
    * Update a content block
    */
-  updateBlock = async (req: Request, res: Response): Promise<void> => {
+  updateBlock = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const { contentTypeId, name, order, content, status } = req.body;
@@ -690,7 +691,7 @@ export class ContentController {
   /**
    * Delete a content block
    */
-  deleteBlock = async (req: Request, res: Response): Promise<void> => {
+  deleteBlock = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
 
@@ -722,7 +723,7 @@ export class ContentController {
   /**
    * Reorder content blocks
    */
-  reorderBlocks = async (req: Request, res: Response): Promise<void> => {
+  reorderBlocks = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const { pageId } = req.params;
       const { blockOrders } = req.body;
@@ -782,7 +783,7 @@ export class ContentController {
   /**
    * Get all templates with optional filtering
    */
-  getTemplates = async (req: Request, res: Response): Promise<void> => {
+  getTemplates = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const limit = parseInt(req.query.limit as string) || 50;
       const offset = parseInt(req.query.offset as string) || 0;
@@ -811,7 +812,7 @@ export class ContentController {
   /**
    * Get template by ID
    */
-  getTemplateById = async (req: Request, res: Response): Promise<void> => {
+  getTemplateById = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const template = await this.contentRepo.findTemplateById(id);
@@ -840,7 +841,7 @@ export class ContentController {
   /**
    * Create a new template
    */
-  createTemplate = async (req: Request, res: Response): Promise<void> => {
+  createTemplate = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const {
         name,
@@ -898,7 +899,7 @@ export class ContentController {
   /**
    * Update a template
    */
-  updateTemplate = async (req: Request, res: Response): Promise<void> => {
+  updateTemplate = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const { name, slug, description, htmlStructure, areas, isActive } = req.body;
@@ -939,7 +940,7 @@ export class ContentController {
   /**
    * Delete a template
    */
-  deleteTemplate = async (req: Request, res: Response): Promise<void> => {
+  deleteTemplate = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
 
@@ -981,7 +982,7 @@ export class ContentController {
   /**
    * Duplicate a template
    */
-  duplicateTemplate = async (req: Request, res: Response): Promise<void> => {
+  duplicateTemplate = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const { name, slug } = req.body;
@@ -1026,7 +1027,7 @@ export class ContentController {
   /**
    * Publish a page
    */
-  publishPage = async (req: Request, res: Response): Promise<void> => {
+  publishPage = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const page = await this.contentRepo.findPageById(id);
@@ -1052,7 +1053,7 @@ export class ContentController {
   /**
    * Unpublish a page
    */
-  unpublishPage = async (req: Request, res: Response): Promise<void> => {
+  unpublishPage = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const page = await this.contentRepo.findPageById(id);
@@ -1074,7 +1075,7 @@ export class ContentController {
   /**
    * Schedule a page for future publication
    */
-  schedulePage = async (req: Request, res: Response): Promise<void> => {
+  schedulePage = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const { scheduledAt } = req.body;
@@ -1102,7 +1103,7 @@ export class ContentController {
   /**
    * Duplicate a page with all its blocks
    */
-  duplicatePage = async (req: Request, res: Response): Promise<void> => {
+  duplicatePage = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const { title, slug } = req.body;
@@ -1158,7 +1159,7 @@ export class ContentController {
 
   // Category Handlers
 
-  getCategories = async (req: Request, res: Response): Promise<void> => {
+  getCategories = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const limit = parseInt(req.query.limit as string) || 100;
       const offset = parseInt(req.query.offset as string) || 0;
@@ -1174,7 +1175,7 @@ export class ContentController {
     }
   };
 
-  getCategoryTree = async (req: Request, res: Response): Promise<void> => {
+  getCategoryTree = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const isActive = req.query.isActive === 'true' ? true : req.query.isActive === 'false' ? false : undefined;
       const categories = await this.categoryRepo.getCategoryTree(isActive);
@@ -1186,7 +1187,7 @@ export class ContentController {
     }
   };
 
-  createCategory = async (req: Request, res: Response): Promise<void> => {
+  createCategory = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const { name, slug, parentId, description, featuredImage, metaTitle, metaDescription, sortOrder, isActive } = req.body;
 
@@ -1223,7 +1224,7 @@ export class ContentController {
     }
   };
 
-  getCategoryById = async (req: Request, res: Response): Promise<void> => {
+  getCategoryById = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const category = await this.categoryRepo.findCategoryById(id);
@@ -1239,7 +1240,7 @@ export class ContentController {
     }
   };
 
-  updateCategory = async (req: Request, res: Response): Promise<void> => {
+  updateCategory = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const { name, slug, description, featuredImage, metaTitle, metaDescription, sortOrder, isActive } = req.body;
@@ -1269,7 +1270,7 @@ export class ContentController {
     }
   };
 
-  deleteCategory = async (req: Request, res: Response): Promise<void> => {
+  deleteCategory = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const existing = await this.categoryRepo.findCategoryById(id);
@@ -1288,7 +1289,7 @@ export class ContentController {
     }
   };
 
-  moveCategory = async (req: Request, res: Response): Promise<void> => {
+  moveCategory = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const { newParentId } = req.body;
@@ -1304,7 +1305,7 @@ export class ContentController {
 
   // Navigation Handlers
 
-  getNavigations = async (req: Request, res: Response): Promise<void> => {
+  getNavigations = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const isActive = req.query.isActive === 'true' ? true : req.query.isActive === 'false' ? false : undefined;
       const navigations = await this.navigationRepo.findAllNavigations(isActive);
@@ -1316,7 +1317,7 @@ export class ContentController {
     }
   };
 
-  createNavigation = async (req: Request, res: Response): Promise<void> => {
+  createNavigation = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const { name, slug, description, location, isActive } = req.body;
 
@@ -1348,7 +1349,7 @@ export class ContentController {
     }
   };
 
-  getNavigationById = async (req: Request, res: Response): Promise<void> => {
+  getNavigationById = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const navigation = await this.navigationRepo.findNavigationById(id);
@@ -1364,7 +1365,7 @@ export class ContentController {
     }
   };
 
-  getNavigationWithItems = async (req: Request, res: Response): Promise<void> => {
+  getNavigationWithItems = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const navigation = await this.navigationRepo.findNavigationById(id);
@@ -1382,7 +1383,7 @@ export class ContentController {
     }
   };
 
-  updateNavigation = async (req: Request, res: Response): Promise<void> => {
+  updateNavigation = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const { name, slug, description, location, isActive } = req.body;
@@ -1403,7 +1404,7 @@ export class ContentController {
     }
   };
 
-  deleteNavigation = async (req: Request, res: Response): Promise<void> => {
+  deleteNavigation = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       await this.navigationRepo.deleteNavigation(id);
@@ -1415,7 +1416,7 @@ export class ContentController {
     }
   };
 
-  addNavigationItem = async (req: Request, res: Response): Promise<void> => {
+  addNavigationItem = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const { navigationId } = req.params;
       const {
@@ -1471,7 +1472,7 @@ export class ContentController {
     }
   };
 
-  updateNavigationItem = async (req: Request, res: Response): Promise<void> => {
+  updateNavigationItem = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const { title, type, url, contentPageId, icon, openInNewTab, isActive, sortOrder } = req.body;
@@ -1494,7 +1495,7 @@ export class ContentController {
     }
   };
 
-  deleteNavigationItem = async (req: Request, res: Response): Promise<void> => {
+  deleteNavigationItem = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       await this.navigationRepo.deleteNavigationItem(id);
@@ -1506,7 +1507,7 @@ export class ContentController {
     }
   };
 
-  reorderNavigationItems = async (req: Request, res: Response): Promise<void> => {
+  reorderNavigationItems = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const { navigationId } = req.params;
       const { itemOrders } = req.body;
@@ -1527,7 +1528,7 @@ export class ContentController {
 
   // Media Handlers
 
-  getMedia = async (req: Request, res: Response): Promise<void> => {
+  getMedia = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const limit = parseInt(req.query.limit as string) || 50;
       const offset = parseInt(req.query.offset as string) || 0;
@@ -1543,7 +1544,7 @@ export class ContentController {
     }
   };
 
-  uploadMedia = async (req: Request, res: Response): Promise<void> => {
+  uploadMedia = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const {
         title,
@@ -1610,7 +1611,7 @@ export class ContentController {
     }
   };
 
-  getMediaById = async (req: Request, res: Response): Promise<void> => {
+  getMediaById = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const media = await this.mediaRepo.findMediaById(id);
@@ -1626,7 +1627,7 @@ export class ContentController {
     }
   };
 
-  updateMedia = async (req: Request, res: Response): Promise<void> => {
+  updateMedia = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const { title, altText, caption, description, folderId, tags, sortOrder } = req.body;
@@ -1648,7 +1649,7 @@ export class ContentController {
     }
   };
 
-  deleteMedia = async (req: Request, res: Response): Promise<void> => {
+  deleteMedia = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const media = await this.mediaRepo.findMediaById(id);
@@ -1667,7 +1668,7 @@ export class ContentController {
     }
   };
 
-  moveMediaToFolder = async (req: Request, res: Response): Promise<void> => {
+  moveMediaToFolder = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const { mediaIds, folderId } = req.body;
 
@@ -1696,7 +1697,7 @@ export class ContentController {
 
   // Media Folder Handlers
 
-  getMediaFolders = async (req: Request, res: Response): Promise<void> => {
+  getMediaFolders = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const parentId = req.query.parentId as string | undefined;
       const folders = await this.mediaRepo.findAllFolders(parentId);
@@ -1708,7 +1709,7 @@ export class ContentController {
     }
   };
 
-  getMediaFolderTree = async (req: Request, res: Response): Promise<void> => {
+  getMediaFolderTree = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const folders = await this.mediaRepo.findAllFolders();
       res.status(200).json({ success: true, data: folders });
@@ -1719,7 +1720,7 @@ export class ContentController {
     }
   };
 
-  createMediaFolder = async (req: Request, res: Response): Promise<void> => {
+  createMediaFolder = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const { name, parentId } = req.body;
 
@@ -1745,7 +1746,7 @@ export class ContentController {
     }
   };
 
-  updateMediaFolder = async (req: Request, res: Response): Promise<void> => {
+  updateMediaFolder = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const { name, parentId, sortOrder } = req.body;
@@ -1759,7 +1760,7 @@ export class ContentController {
     }
   };
 
-  deleteMediaFolder = async (req: Request, res: Response): Promise<void> => {
+  deleteMediaFolder = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       await this.mediaRepo.deleteFolder(id);
@@ -1773,7 +1774,7 @@ export class ContentController {
 
   // Redirect Handlers
 
-  getRedirects = async (req: Request, res: Response): Promise<void> => {
+  getRedirects = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const limit = parseInt(req.query.limit as string) || 100;
       const offset = parseInt(req.query.offset as string) || 0;
@@ -1788,7 +1789,7 @@ export class ContentController {
     }
   };
 
-  createRedirect = async (req: Request, res: Response): Promise<void> => {
+  createRedirect = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const { sourceUrl, targetUrl, statusCode, isRegex, isActive, notes } = req.body;
 
@@ -1822,7 +1823,7 @@ export class ContentController {
     }
   };
 
-  getRedirectById = async (req: Request, res: Response): Promise<void> => {
+  getRedirectById = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const redirect = await this.redirectRepo.findRedirectById(id);
@@ -1838,7 +1839,7 @@ export class ContentController {
     }
   };
 
-  updateRedirect = async (req: Request, res: Response): Promise<void> => {
+  updateRedirect = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const { sourceUrl, targetUrl, statusCode, isRegex, isActive, notes } = req.body;
@@ -1853,7 +1854,7 @@ export class ContentController {
     }
   };
 
-  deleteRedirect = async (req: Request, res: Response): Promise<void> => {
+  deleteRedirect = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
       const redirect = await this.redirectRepo.findRedirectById(id);

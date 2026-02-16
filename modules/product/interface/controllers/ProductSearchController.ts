@@ -1,5 +1,6 @@
 import { logger } from '../../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import {
   searchProductsUseCase,
   getSearchSuggestionsUseCase,
@@ -12,7 +13,7 @@ export class ProductSearchController {
    * GET /products/search
    * Search products with filters and facets
    */
-  async search(req: Request, res: Response): Promise<void> {
+  async search(req: TypedRequest, res: Response): Promise<void> {
     try {
       const {
         q,
@@ -92,7 +93,7 @@ export class ProductSearchController {
    * POST /products/search
    * Search products with filters (POST for complex queries)
    */
-  async searchPost(req: Request, res: Response): Promise<void> {
+  async searchPost(req: TypedRequest, res: Response): Promise<void> {
     try {
       const result = await searchProductsUseCase.execute(req.body);
 
@@ -115,7 +116,7 @@ export class ProductSearchController {
    * GET /products/search/suggestions
    * Get search suggestions for autocomplete
    */
-  async getSuggestions(req: Request, res: Response): Promise<void> {
+  async getSuggestions(req: TypedRequest, res: Response): Promise<void> {
     try {
       const { q, query, limit } = req.query;
 
@@ -143,7 +144,7 @@ export class ProductSearchController {
    * GET /products/:productId/similar
    * Get similar products based on attributes
    */
-  async findSimilar(req: Request, res: Response): Promise<void> {
+  async findSimilar(req: TypedRequest, res: Response): Promise<void> {
     try {
       const { productId } = req.params;
       const { limit } = req.query;
@@ -172,7 +173,7 @@ export class ProductSearchController {
    * GET /products/by-attribute/:code/:value
    * Find products by a specific attribute value
    */
-  async findByAttribute(req: Request, res: Response): Promise<void> {
+  async findByAttribute(req: TypedRequest, res: Response): Promise<void> {
     try {
       const { code, value } = req.params;
 

@@ -1,5 +1,6 @@
 import { logger } from '../../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import { MerchantRepo, Merchant } from '../../infrastructure/repositories/merchantRepo';
 
 // Create a single instance of the repository to be shared across handlers
@@ -8,7 +9,7 @@ const merchantRepo = new MerchantRepo();
 /**
  * Get all merchants with pagination
  */
-export const getMerchants = async (req: Request, res: Response): Promise<void> => {
+export const getMerchants = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const limit = parseInt(req.query.limit as string) || 50;
     const offset = parseInt(req.query.offset as string) || 0;
@@ -45,7 +46,7 @@ export const getMerchants = async (req: Request, res: Response): Promise<void> =
 /**
  * Get merchant by ID
  */
-export const getMerchantById = async (req: Request, res: Response): Promise<void> => {
+export const getMerchantById = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const merchant = await merchantRepo.findById(id);
@@ -76,7 +77,7 @@ export const getMerchantById = async (req: Request, res: Response): Promise<void
 /**
  * Create a new merchant
  */
-export const createMerchant = async (req: Request, res: Response): Promise<void> => {
+export const createMerchant = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const {
       name,
@@ -139,7 +140,7 @@ export const createMerchant = async (req: Request, res: Response): Promise<void>
 /**
  * Update a merchant
  */
-export const updateMerchant = async (req: Request, res: Response): Promise<void> => {
+export const updateMerchant = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { name, email, phone, website, logoUrl, description, status } = req.body;
@@ -195,7 +196,7 @@ export const updateMerchant = async (req: Request, res: Response): Promise<void>
 /**
  * Delete a merchant
  */
-export const deleteMerchant = async (req: Request, res: Response): Promise<void> => {
+export const deleteMerchant = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
 
@@ -236,7 +237,7 @@ export const deleteMerchant = async (req: Request, res: Response): Promise<void>
 /**
  * Get addresses for a merchant
  */
-export const getMerchantAddresses = async (req: Request, res: Response): Promise<void> => {
+export const getMerchantAddresses = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { merchantId } = req.params;
 
@@ -270,7 +271,7 @@ export const getMerchantAddresses = async (req: Request, res: Response): Promise
 /**
  * Add an address for a merchant
  */
-export const addMerchantAddress = async (req: Request, res: Response): Promise<void> => {
+export const addMerchantAddress = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { merchantId } = req.params;
     const { addressLine1, addressLine2, city, state, postalCode, country, isPrimary = false } = req.body;
@@ -324,7 +325,7 @@ export const addMerchantAddress = async (req: Request, res: Response): Promise<v
 /**
  * Get payment info for a merchant
  */
-export const getMerchantPaymentInfo = async (req: Request, res: Response): Promise<void> => {
+export const getMerchantPaymentInfo = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { merchantId } = req.params;
 
@@ -359,7 +360,7 @@ export const getMerchantPaymentInfo = async (req: Request, res: Response): Promi
 /**
  * Add payment info for a merchant
  */
-export const addMerchantPaymentInfo = async (req: Request, res: Response): Promise<void> => {
+export const addMerchantPaymentInfo = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { merchantId } = req.params;
     const {
@@ -431,7 +432,7 @@ export const addMerchantPaymentInfo = async (req: Request, res: Response): Promi
 /**
  * Update a merchant address
  */
-export const updateMerchantAddress = async (req: Request, res: Response): Promise<void> => {
+export const updateMerchantAddress = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { merchantId, addressId } = req.params;
     const { addressLine1, addressLine2, city, state, postalCode, country, isDefault } = req.body;
@@ -486,7 +487,7 @@ export const updateMerchantAddress = async (req: Request, res: Response): Promis
 /**
  * Update merchant payment info
  */
-export const updateMerchantPaymentInfo = async (req: Request, res: Response): Promise<void> => {
+export const updateMerchantPaymentInfo = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { merchantId, paymentInfoId } = req.params;
     const { accountHolderName, bankName, accountNumber, routingNumber, paymentProcessor, isVerified } = req.body;

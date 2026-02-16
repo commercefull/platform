@@ -1,11 +1,12 @@
 import { logger } from '../../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import SupplierRepo from '../../infrastructure/repositories/supplierRepo';
 import { successResponse, errorResponse, validationErrorResponse } from '../../../../libs/apiResponse';
 
 const supplierRepo = SupplierRepo;
 
-export const getSuppliers = async (req: Request, res: Response): Promise<void> => {
+export const getSuppliers = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { status, isActive, isApproved, minRating, category, tag, currency, search, limit = '50', offset = '0' } = req.query;
 
@@ -36,7 +37,7 @@ export const getSuppliers = async (req: Request, res: Response): Promise<void> =
   }
 };
 
-export const getSupplierById = async (req: Request, res: Response): Promise<void> => {
+export const getSupplierById = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const supplier = await supplierRepo.findById(id);
@@ -54,7 +55,7 @@ export const getSupplierById = async (req: Request, res: Response): Promise<void
   }
 };
 
-export const getSupplierByCode = async (req: Request, res: Response): Promise<void> => {
+export const getSupplierByCode = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { code } = req.params;
     const supplier = await supplierRepo.findByCode(code);
@@ -72,7 +73,7 @@ export const getSupplierByCode = async (req: Request, res: Response): Promise<vo
   }
 };
 
-export const createSupplier = async (req: Request, res: Response): Promise<void> => {
+export const createSupplier = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const {
       name,
@@ -143,7 +144,7 @@ export const createSupplier = async (req: Request, res: Response): Promise<void>
   }
 };
 
-export const updateSupplier = async (req: Request, res: Response): Promise<void> => {
+export const updateSupplier = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const updateParams = req.body;
@@ -163,7 +164,7 @@ export const updateSupplier = async (req: Request, res: Response): Promise<void>
   }
 };
 
-export const deleteSupplier = async (req: Request, res: Response): Promise<void> => {
+export const deleteSupplier = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const deleted = await supplierRepo.delete(id);
@@ -181,7 +182,7 @@ export const deleteSupplier = async (req: Request, res: Response): Promise<void>
   }
 };
 
-export const updateSupplierStatus = async (req: Request, res: Response): Promise<void> => {
+export const updateSupplierStatus = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { status } = req.body;
@@ -206,7 +207,7 @@ export const updateSupplierStatus = async (req: Request, res: Response): Promise
   }
 };
 
-export const updateSupplierVisibility = async (req: Request, res: Response): Promise<void> => {
+export const updateSupplierVisibility = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { isActive } = req.body;
@@ -231,7 +232,7 @@ export const updateSupplierVisibility = async (req: Request, res: Response): Pro
   }
 };
 
-export const approveSupplier = async (req: Request, res: Response): Promise<void> => {
+export const approveSupplier = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const supplier = await supplierRepo.approve(id);
@@ -249,7 +250,7 @@ export const approveSupplier = async (req: Request, res: Response): Promise<void
   }
 };
 
-export const suspendSupplier = async (req: Request, res: Response): Promise<void> => {
+export const suspendSupplier = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const supplier = await supplierRepo.suspend(id);
@@ -267,7 +268,7 @@ export const suspendSupplier = async (req: Request, res: Response): Promise<void
   }
 };
 
-export const getSupplierStatistics = async (req: Request, res: Response): Promise<void> => {
+export const getSupplierStatistics = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const statistics = await supplierRepo.getStatistics();
     successResponse(res, statistics);
@@ -280,7 +281,7 @@ export const getSupplierStatistics = async (req: Request, res: Response): Promis
 
 // ---------- Supplier Address Methods ----------
 
-export const getSupplierAddresses = async (req: Request, res: Response): Promise<void> => {
+export const getSupplierAddresses = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     // TODO: Implement when supplier address repo is available
@@ -292,7 +293,7 @@ export const getSupplierAddresses = async (req: Request, res: Response): Promise
   }
 };
 
-export const createSupplierAddress = async (req: Request, res: Response): Promise<void> => {
+export const createSupplierAddress = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     // TODO: Implement when supplier address repo is available
@@ -304,7 +305,7 @@ export const createSupplierAddress = async (req: Request, res: Response): Promis
   }
 };
 
-export const updateSupplierAddress = async (req: Request, res: Response): Promise<void> => {
+export const updateSupplierAddress = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     // TODO: Implement when supplier address repo is available
@@ -316,7 +317,7 @@ export const updateSupplierAddress = async (req: Request, res: Response): Promis
   }
 };
 
-export const deleteSupplierAddress = async (req: Request, res: Response): Promise<void> => {
+export const deleteSupplierAddress = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     // TODO: Implement when supplier address repo is available
@@ -330,7 +331,7 @@ export const deleteSupplierAddress = async (req: Request, res: Response): Promis
 
 // ---------- Supplier Product Methods ----------
 
-export const getSupplierProducts = async (req: Request, res: Response): Promise<void> => {
+export const getSupplierProducts = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     // TODO: Implement when supplier product repo is available
@@ -342,7 +343,7 @@ export const getSupplierProducts = async (req: Request, res: Response): Promise<
   }
 };
 
-export const addProductToSupplier = async (req: Request, res: Response): Promise<void> => {
+export const addProductToSupplier = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     // TODO: Implement when supplier product repo is available
@@ -354,7 +355,7 @@ export const addProductToSupplier = async (req: Request, res: Response): Promise
   }
 };
 
-export const updateSupplierProduct = async (req: Request, res: Response): Promise<void> => {
+export const updateSupplierProduct = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     // TODO: Implement when supplier product repo is available
@@ -366,7 +367,7 @@ export const updateSupplierProduct = async (req: Request, res: Response): Promis
   }
 };
 
-export const removeProductFromSupplier = async (req: Request, res: Response): Promise<void> => {
+export const removeProductFromSupplier = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     // TODO: Implement when supplier product repo is available

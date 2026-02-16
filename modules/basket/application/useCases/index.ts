@@ -12,3 +12,5 @@ export * from './MergeBaskets';
 export * from './AssignBasketToCustomer';
 export * from './SetItemAsGift';
 export * from './ExtendExpiration';
+export * from './ApplyCoupon';
+export * from './RemoveCoupon';

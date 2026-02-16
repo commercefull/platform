@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';;
 import { query, queryOne } from '../../../libs/db';
 import { adminRespond } from '../../respond';
 
@@ -12,7 +13,7 @@ import { adminRespond } from '../../respond';
 // Membership Dashboard
 // ============================================================================
 
-export const membershipDashboard = async (req: Request, res: Response): Promise<void> => {
+export const membershipDashboard = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     // Get membership stats
     const statsResult = await queryOne<any>(
@@ -68,7 +69,7 @@ export const membershipDashboard = async (req: Request, res: Response): Promise<
 // Subscription Dashboard
 // ============================================================================
 
-export const subscriptionDashboard = async (req: Request, res: Response): Promise<void> => {
+export const subscriptionDashboard = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     // Get subscription stats
     const statsResult = await queryOne<any>(
@@ -132,7 +133,7 @@ export const subscriptionDashboard = async (req: Request, res: Response): Promis
 // Loyalty Dashboard
 // ============================================================================
 
-export const loyaltyDashboard = async (req: Request, res: Response): Promise<void> => {
+export const loyaltyDashboard = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     // Get loyalty stats
     const statsResult = await queryOne<any>(
@@ -195,7 +196,7 @@ export const loyaltyDashboard = async (req: Request, res: Response): Promise<voi
 // B2B Dashboard
 // ============================================================================
 
-export const b2bDashboard = async (req: Request, res: Response): Promise<void> => {
+export const b2bDashboard = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     // Get B2B stats
     const statsResult = await queryOne<any>(

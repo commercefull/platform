@@ -20,7 +20,7 @@ router.use(isCustomerLoggedIn);
 router.get('/notifications', async (req, res) => {
   try {
     const useCase = new GetNotificationsUseCase(notificationRepo);
-    const customerId = (req as any).customer?.customerId;
+    const customerId = req.user?.customerId;
 
     if (!customerId) {
       return res.status(401).json({ success: false, error: 'Not authenticated' });
@@ -47,7 +47,7 @@ router.get('/notifications', async (req, res) => {
 router.get('/notifications/count', async (req, res) => {
   try {
     const useCase = new GetNotificationsUseCase(notificationRepo);
-    const customerId = (req as any).customer?.customerId;
+    const customerId = req.user?.customerId;
 
     if (!customerId) {
       return res.status(401).json({ success: false, error: 'Not authenticated' });
@@ -74,7 +74,7 @@ router.get('/notifications/count', async (req, res) => {
 router.put('/notifications/:notificationId/read', async (req, res) => {
   try {
     const useCase = new MarkAsReadUseCase(notificationRepo);
-    const customerId = (req as any).customer?.customerId;
+    const customerId = req.user?.customerId;
 
     if (!customerId) {
       return res.status(401).json({ success: false, error: 'Not authenticated' });
@@ -98,7 +98,7 @@ router.put('/notifications/:notificationId/read', async (req, res) => {
 router.put('/notifications/read', async (req, res) => {
   try {
     const useCase = new MarkAsReadUseCase(notificationRepo);
-    const customerId = (req as any).customer?.customerId;
+    const customerId = req.user?.customerId;
 
     if (!customerId) {
       return res.status(401).json({ success: false, error: 'Not authenticated' });

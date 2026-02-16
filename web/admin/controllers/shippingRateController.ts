@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';;
 import shippingRateRepo from '../../../modules/shipping/infrastructure/repositories/shippingRateRepo';
 import shippingZoneRepo from '../../../modules/shipping/infrastructure/repositories/shippingZoneRepo';
 import shippingMethodRepo from '../../../modules/shipping/infrastructure/repositories/shippingMethodRepo';
@@ -14,7 +15,7 @@ import { adminRespond } from '../../respond';
 // Shipping Rates Management
 // ============================================================================
 
-export const listShippingRates = async (req: Request, res: Response): Promise<void> => {
+export const listShippingRates = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const zoneId = req.query.zoneId as string;
     const methodId = req.query.methodId as string;
@@ -47,7 +48,7 @@ export const listShippingRates = async (req: Request, res: Response): Promise<vo
   }
 };
 
-export const createShippingRateForm = async (req: Request, res: Response): Promise<void> => {
+export const createShippingRateForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const zones = await shippingZoneRepo.findAll();
     const methods = await shippingMethodRepo.findAll();
@@ -67,7 +68,7 @@ export const createShippingRateForm = async (req: Request, res: Response): Promi
   }
 };
 
-export const createShippingRate = async (req: Request, res: Response): Promise<void> => {
+export const createShippingRate = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const {
       shippingZoneId,
@@ -133,7 +134,7 @@ export const createShippingRate = async (req: Request, res: Response): Promise<v
   }
 };
 
-export const viewShippingRate = async (req: Request, res: Response): Promise<void> => {
+export const viewShippingRate = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { rateId } = req.params;
 
@@ -169,7 +170,7 @@ export const viewShippingRate = async (req: Request, res: Response): Promise<voi
   }
 };
 
-export const editShippingRateForm = async (req: Request, res: Response): Promise<void> => {
+export const editShippingRateForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { rateId } = req.params;
 
@@ -202,7 +203,7 @@ export const editShippingRateForm = async (req: Request, res: Response): Promise
   }
 };
 
-export const updateShippingRate = async (req: Request, res: Response): Promise<void> => {
+export const updateShippingRate = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { rateId } = req.params;
     const updates: any = {};
@@ -271,7 +272,7 @@ export const updateShippingRate = async (req: Request, res: Response): Promise<v
   }
 };
 
-export const activateShippingRate = async (req: Request, res: Response): Promise<void> => {
+export const activateShippingRate = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { rateId } = req.params;
 
@@ -289,7 +290,7 @@ export const activateShippingRate = async (req: Request, res: Response): Promise
   }
 };
 
-export const deactivateShippingRate = async (req: Request, res: Response): Promise<void> => {
+export const deactivateShippingRate = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { rateId } = req.params;
 
@@ -307,7 +308,7 @@ export const deactivateShippingRate = async (req: Request, res: Response): Promi
   }
 };
 
-export const deleteShippingRate = async (req: Request, res: Response): Promise<void> => {
+export const deleteShippingRate = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { rateId } = req.params;
 
@@ -325,7 +326,7 @@ export const deleteShippingRate = async (req: Request, res: Response): Promise<v
   }
 };
 
-export const calculateShippingRate = async (req: Request, res: Response): Promise<void> => {
+export const calculateShippingRate = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { zoneId, methodId, orderTotal, itemCount, weight } = req.body;
 

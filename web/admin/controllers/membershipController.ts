@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';;
 import * as membershipPlanRepo from '../../../modules/membership/infrastructure/repositories/membershipPlanRepo';
 import { MembershipBenefitRepo } from '../../../modules/membership/infrastructure/repositories/membershipBenefitRepo';
 import { MembershipPlanBenefitRepo } from '../../../modules/membership/infrastructure/repositories/membershipPlanBenefitRepo';
@@ -15,7 +16,7 @@ import { adminRespond } from '../../respond';
 // Membership Plans Management
 // ============================================================================
 
-export const listMembershipPlans = async (req: Request, res: Response): Promise<void> => {
+export const listMembershipPlans = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const activeOnly = req.query.activeOnly !== 'false';
     const limit = parseInt(req.query.limit as string) || 50;
@@ -43,7 +44,7 @@ export const listMembershipPlans = async (req: Request, res: Response): Promise<
   }
 };
 
-export const createMembershipPlanForm = async (req: Request, res: Response): Promise<void> => {
+export const createMembershipPlanForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     adminRespond(req, res, 'programs/membership/plans/create', {
       pageName: 'Create Membership Plan',
@@ -58,7 +59,7 @@ export const createMembershipPlanForm = async (req: Request, res: Response): Pro
   }
 };
 
-export const createMembershipPlan = async (req: Request, res: Response): Promise<void> => {
+export const createMembershipPlan = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const {
       name,
@@ -127,7 +128,7 @@ export const createMembershipPlan = async (req: Request, res: Response): Promise
   }
 };
 
-export const viewMembershipPlan = async (req: Request, res: Response): Promise<void> => {
+export const viewMembershipPlan = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { planId } = req.params;
 
@@ -179,7 +180,7 @@ export const viewMembershipPlan = async (req: Request, res: Response): Promise<v
   }
 };
 
-export const editMembershipPlanForm = async (req: Request, res: Response): Promise<void> => {
+export const editMembershipPlanForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { planId } = req.params;
 
@@ -207,7 +208,7 @@ export const editMembershipPlanForm = async (req: Request, res: Response): Promi
   }
 };
 
-export const updateMembershipPlan = async (req: Request, res: Response): Promise<void> => {
+export const updateMembershipPlan = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { planId } = req.params;
     const updates: any = {};
@@ -284,7 +285,7 @@ export const updateMembershipPlan = async (req: Request, res: Response): Promise
   }
 };
 
-export const activateMembershipPlan = async (req: Request, res: Response): Promise<void> => {
+export const activateMembershipPlan = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { planId } = req.params;
 
@@ -302,7 +303,7 @@ export const activateMembershipPlan = async (req: Request, res: Response): Promi
   }
 };
 
-export const deactivateMembershipPlan = async (req: Request, res: Response): Promise<void> => {
+export const deactivateMembershipPlan = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { planId } = req.params;
 
@@ -320,7 +321,7 @@ export const deactivateMembershipPlan = async (req: Request, res: Response): Pro
   }
 };
 
-export const deleteMembershipPlan = async (req: Request, res: Response): Promise<void> => {
+export const deleteMembershipPlan = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { planId } = req.params;
 
@@ -342,7 +343,7 @@ export const deleteMembershipPlan = async (req: Request, res: Response): Promise
 // Membership Benefits Management
 // ============================================================================
 
-export const listMembershipBenefits = async (req: Request, res: Response): Promise<void> => {
+export const listMembershipBenefits = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const planId = req.query.planId as string;
     const limit = parseInt(req.query.limit as string) || 50;
@@ -383,7 +384,7 @@ export const listMembershipBenefits = async (req: Request, res: Response): Promi
 // Membership Management (User memberships)
 // ============================================================================
 
-export const listMemberships = async (req: Request, res: Response): Promise<void> => {
+export const listMemberships = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const status = req.query.status as string;
     const planId = req.query.planId as string;
@@ -419,7 +420,7 @@ export const listMemberships = async (req: Request, res: Response): Promise<void
 // Membership Advanced User Management
 // ============================================================================
 
-export const bulkMembershipOperations = async (req: Request, res: Response): Promise<void> => {
+export const bulkMembershipOperations = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { operation, membershipIds, newTierId, notes } = req.body;
 
@@ -481,7 +482,7 @@ export const bulkMembershipOperations = async (req: Request, res: Response): Pro
   }
 };
 
-export const membershipUpgradeDowngrade = async (req: Request, res: Response): Promise<void> => {
+export const membershipUpgradeDowngrade = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { membershipId } = req.params;
     const { newTierId, effectiveDate, prorate, notes } = req.body;
@@ -540,7 +541,7 @@ export const membershipUpgradeDowngrade = async (req: Request, res: Response): P
   }
 };
 
-export const membershipAnalytics = async (req: Request, res: Response): Promise<void> => {
+export const membershipAnalytics = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     // Get membership analytics (would need implementation for proper analytics queries)
     const stats = {

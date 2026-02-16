@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import OrderRepo from '../../infrastructure/repositories/OrderRepository';
 import { CreateOrderCommand, CreateOrderUseCase, OrderItemInput, AddressInput } from '../../application/useCases/CreateOrder';
 import { GetOrderCommand, GetOrderUseCase } from '../../application/useCases/GetOrder';
@@ -20,7 +21,7 @@ type ResponseData = Record<string, any>;
 /**
  * Respond with JSON or HTML based on Accept header
  */
-function respond(req: Request, res: Response, data: ResponseData, statusCode: number = 200, htmlTemplate?: string): void {
+function respond(req: TypedRequest, res: Response, data: ResponseData, statusCode: number = 200, htmlTemplate?: string): void {
   const acceptHeader = req.get('Accept') || 'application/json';
 
   if (acceptHeader.includes('text/html') && htmlTemplate) {
@@ -33,7 +34,7 @@ function respond(req: Request, res: Response, data: ResponseData, statusCode: nu
 /**
  * Respond with error in JSON or HTML based on Accept header
  */
-function respondError(req: Request, res: Response, message: string, statusCode: number = 500, htmlTemplate?: string): void {
+function respondError(req: TypedRequest, res: Response, message: string, statusCode: number = 500, htmlTemplate?: string): void {
   const acceptHeader = req.get('Accept') || 'application/json';
 
   if (acceptHeader.includes('text/html') && htmlTemplate) {
@@ -51,9 +52,9 @@ function respondError(req: Request, res: Response, message: string, statusCode: 
  * Get customer's orders
  * GET /orders
  */
-export const getMyOrders = async (req: Request, res: Response): Promise<void> => {
+export const getMyOrders = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const customerId = (req as any).user?.customerId || (req as any).user?._id || (req as any).user?.id;
+    const customerId = req.user?.customerId || req.user?._id || req.user?.id;
 
     if (!customerId) {
       respondError(req, res, 'Authentication required', 401, 'order/error');
@@ -79,10 +80,10 @@ export const getMyOrders = async (req: Request, res: Response): Promise<void> =>
  * Get order by ID
  * GET /orders/:orderId
  */
-export const getOrder = async (req: Request, res: Response): Promise<void> => {
+export const getOrder = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { orderId } = req.params;
-    const customerId = (req as any).user?.customerId || (req as any).user?._id || (req as any).user?.id;
+    const customerId = req.user?.customerId || req.user?._id || req.user?.id;
 
     const command = new GetOrderCommand(orderId, undefined, customerId);
     const useCase = new GetOrderUseCase(OrderRepo);
@@ -110,10 +111,10 @@ export const getOrder = async (req: Request, res: Response): Promise<void> => {
  * Get order by order number
  * GET /orders/number/:orderNumber
  */
-export const getOrderByNumber = async (req: Request, res: Response): Promise<void> => {
+export const getOrderByNumber = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { orderNumber } = req.params;
-    const customerId = (req as any).user?.customerId || (req as any).user?._id || (req as any).user?.id;
+    const customerId = req.user?.customerId || req.user?._id || req.user?.id;
 
     const command = new GetOrderCommand(undefined, orderNumber, customerId);
     const useCase = new GetOrderUseCase(OrderRepo);
@@ -141,9 +142,9 @@ export const getOrderByNumber = async (req: Request, res: Response): Promise<voi
  * Create a new order
  * POST /orders
  */
-export const createOrder = async (req: Request, res: Response): Promise<void> => {
+export const createOrder = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const customerId = (req as any).user?.customerId || (req as any).user?._id || (req as any).user?.id;
+    const customerId = req.user?.customerId || req.user?._id || req.user?.id;
     const {
       items,
       shippingAddress,
@@ -171,7 +172,7 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
       return;
     }
 
-    const email = customerEmail || (req as any).user?.email;
+    const email = customerEmail || req.user?.email;
     if (!email) {
       respondError(req, res, 'Customer email is required', 400, 'order/error');
       return;
@@ -211,11 +212,11 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
  * Cancel an order
  * POST /orders/:orderId/cancel
  */
-export const cancelOrder = async (req: Request, res: Response): Promise<void> => {
+export const cancelOrder = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { orderId } = req.params;
     const { reason } = req.body;
-    const customerId = (req as any).user?.customerId || (req as any).user?._id || (req as any).user?.id;
+    const customerId = req.user?.customerId || req.user?._id || req.user?.id;
 
     if (!customerId) {
       respondError(req, res, 'Authentication required', 401, 'order/error');

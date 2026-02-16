@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';;
 import notificationTemplateRepo from '../../../modules/notification/infrastructure/repositories/notificationTemplateRepo';
 import { adminRespond } from '../../respond';
 
@@ -12,7 +13,7 @@ import { adminRespond } from '../../respond';
 // Notification Templates Management
 // ============================================================================
 
-export const listNotificationTemplates = async (req: Request, res: Response): Promise<void> => {
+export const listNotificationTemplates = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const activeOnly = req.query.activeOnly !== 'false'; // Default to true
     const category = req.query.category as string;
@@ -53,7 +54,7 @@ export const listNotificationTemplates = async (req: Request, res: Response): Pr
   }
 };
 
-export const createNotificationTemplateForm = async (req: Request, res: Response): Promise<void> => {
+export const createNotificationTemplateForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     adminRespond(req, res, 'notifications/templates/create', {
       pageName: 'Create Notification Template',
@@ -68,7 +69,7 @@ export const createNotificationTemplateForm = async (req: Request, res: Response
   }
 };
 
-export const createNotificationTemplate = async (req: Request, res: Response): Promise<void> => {
+export const createNotificationTemplate = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const {
       code,
@@ -116,7 +117,7 @@ export const createNotificationTemplate = async (req: Request, res: Response): P
   }
 };
 
-export const viewNotificationTemplate = async (req: Request, res: Response): Promise<void> => {
+export const viewNotificationTemplate = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { templateId } = req.params;
 
@@ -150,7 +151,7 @@ export const viewNotificationTemplate = async (req: Request, res: Response): Pro
   }
 };
 
-export const editNotificationTemplateForm = async (req: Request, res: Response): Promise<void> => {
+export const editNotificationTemplateForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { templateId } = req.params;
 
@@ -178,7 +179,7 @@ export const editNotificationTemplateForm = async (req: Request, res: Response):
   }
 };
 
-export const updateNotificationTemplate = async (req: Request, res: Response): Promise<void> => {
+export const updateNotificationTemplate = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { templateId } = req.params;
     const updates: any = {};
@@ -239,7 +240,7 @@ export const updateNotificationTemplate = async (req: Request, res: Response): P
   }
 };
 
-export const activateNotificationTemplate = async (req: Request, res: Response): Promise<void> => {
+export const activateNotificationTemplate = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { templateId } = req.params;
 
@@ -257,7 +258,7 @@ export const activateNotificationTemplate = async (req: Request, res: Response):
   }
 };
 
-export const deactivateNotificationTemplate = async (req: Request, res: Response): Promise<void> => {
+export const deactivateNotificationTemplate = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { templateId } = req.params;
 
@@ -275,7 +276,7 @@ export const deactivateNotificationTemplate = async (req: Request, res: Response
   }
 };
 
-export const deleteNotificationTemplate = async (req: Request, res: Response): Promise<void> => {
+export const deleteNotificationTemplate = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { templateId } = req.params;
 
@@ -293,7 +294,7 @@ export const deleteNotificationTemplate = async (req: Request, res: Response): P
   }
 };
 
-export const cloneNotificationTemplate = async (req: Request, res: Response): Promise<void> => {
+export const cloneNotificationTemplate = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { templateId } = req.params;
     const { newCode, newName } = req.body;
@@ -312,7 +313,7 @@ export const cloneNotificationTemplate = async (req: Request, res: Response): Pr
   }
 };
 
-export const previewNotificationTemplate = async (req: Request, res: Response): Promise<void> => {
+export const previewNotificationTemplate = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { templateId } = req.params;
     const previewData = req.body.data ? JSON.parse(req.body.data) : undefined;

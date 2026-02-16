@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';;
 import { storefrontRespond } from '../../respond';
 import OrderRepo from '../../../modules/order/infrastructure/repositories/OrderRepository';
 import { ListOrdersCommand, ListOrdersUseCase } from '../../../modules/order/application/useCases/ListOrders';
@@ -14,7 +15,7 @@ import { GetOrderCommand, GetOrderUseCase } from '../../../modules/order/applica
 // Order History
 // ============================================================================
 
-export const orderHistory = async (req: Request, res: Response): Promise<void> => {
+export const orderHistory = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     if (!req.user) {
       return res.redirect('/signin?redirect=/orders');
@@ -61,7 +62,7 @@ export const orderHistory = async (req: Request, res: Response): Promise<void> =
 // Order Details
 // ============================================================================
 
-export const orderDetails = async (req: Request, res: Response): Promise<void> => {
+export const orderDetails = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     if (!req.user) {
       return res.redirect('/signin?redirect=/orders');
@@ -110,7 +111,7 @@ export const orderDetails = async (req: Request, res: Response): Promise<void> =
 // Order Tracking
 // ============================================================================
 
-export const orderTracking = async (req: Request, res: Response): Promise<void> => {
+export const orderTracking = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { orderNumber } = req.params;
 

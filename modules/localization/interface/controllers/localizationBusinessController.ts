@@ -1,11 +1,12 @@
 import { logger } from '../../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import LocaleRepo from '../../infrastructure/repositories/localeRepo';
 import { successResponse, errorResponse, validationErrorResponse } from '../../../../libs/apiResponse';
 
 const localeRepo = LocaleRepo;
 
-export const getLocales = async (req: Request, res: Response): Promise<void> => {
+export const getLocales = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { activeOnly = 'true', language, countryCode, currency } = req.query;
 
@@ -29,7 +30,7 @@ export const getLocales = async (req: Request, res: Response): Promise<void> => 
   }
 };
 
-export const getLocaleById = async (req: Request, res: Response): Promise<void> => {
+export const getLocaleById = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const locale = await localeRepo.findById(id);
@@ -47,7 +48,7 @@ export const getLocaleById = async (req: Request, res: Response): Promise<void> 
   }
 };
 
-export const getLocaleByCode = async (req: Request, res: Response): Promise<void> => {
+export const getLocaleByCode = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { code } = req.params;
     const locale = await localeRepo.findByCode(code);
@@ -65,7 +66,7 @@ export const getLocaleByCode = async (req: Request, res: Response): Promise<void
   }
 };
 
-export const getDefaultLocale = async (req: Request, res: Response): Promise<void> => {
+export const getDefaultLocale = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const locale = await localeRepo.findDefault();
 
@@ -82,7 +83,7 @@ export const getDefaultLocale = async (req: Request, res: Response): Promise<voi
   }
 };
 
-export const getLocalesByLanguage = async (req: Request, res: Response): Promise<void> => {
+export const getLocalesByLanguage = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { language } = req.params;
     const locales = await localeRepo.findByLanguage(language);
@@ -94,7 +95,7 @@ export const getLocalesByLanguage = async (req: Request, res: Response): Promise
   }
 };
 
-export const getLocalesByCountry = async (req: Request, res: Response): Promise<void> => {
+export const getLocalesByCountry = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { countryCode } = req.params;
     const locales = await localeRepo.findByCountryCode(countryCode);
@@ -106,7 +107,7 @@ export const getLocalesByCountry = async (req: Request, res: Response): Promise<
   }
 };
 
-export const getLocaleStatistics = async (req: Request, res: Response): Promise<void> => {
+export const getLocaleStatistics = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const statistics = await localeRepo.getStatistics();
     successResponse(res, statistics);
@@ -117,7 +118,7 @@ export const getLocaleStatistics = async (req: Request, res: Response): Promise<
   }
 };
 
-export const createLocale = async (req: Request, res: Response): Promise<void> => {
+export const createLocale = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { code, name, language, countryCode, isActive, isDefault, textDirection, dateFormat, timeFormat, timeZone, defaultCurrencyId } =
       req.body;
@@ -164,7 +165,7 @@ export const createLocale = async (req: Request, res: Response): Promise<void> =
   }
 };
 
-export const updateLocale = async (req: Request, res: Response): Promise<void> => {
+export const updateLocale = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const updateParams = req.body;
@@ -184,7 +185,7 @@ export const updateLocale = async (req: Request, res: Response): Promise<void> =
   }
 };
 
-export const deleteLocale = async (req: Request, res: Response): Promise<void> => {
+export const deleteLocale = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const deleted = await localeRepo.delete(id);
@@ -202,7 +203,7 @@ export const deleteLocale = async (req: Request, res: Response): Promise<void> =
   }
 };
 
-export const setDefaultLocale = async (req: Request, res: Response): Promise<void> => {
+export const setDefaultLocale = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const locale = await localeRepo.setAsDefault(id);
@@ -220,7 +221,7 @@ export const setDefaultLocale = async (req: Request, res: Response): Promise<voi
   }
 };
 
-export const activateLocale = async (req: Request, res: Response): Promise<void> => {
+export const activateLocale = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const locale = await localeRepo.activate(id);
@@ -238,7 +239,7 @@ export const activateLocale = async (req: Request, res: Response): Promise<void>
   }
 };
 
-export const deactivateLocale = async (req: Request, res: Response): Promise<void> => {
+export const deactivateLocale = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const locale = await localeRepo.deactivate(id);
@@ -258,7 +259,7 @@ export const deactivateLocale = async (req: Request, res: Response): Promise<voi
 
 // ---------- COUNTRY METHODS ----------
 
-export const getCountries = async (req: Request, res: Response): Promise<void> => {
+export const getCountries = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     // TODO: Implement when country repo is available
     successResponse(res, []);
@@ -269,7 +270,7 @@ export const getCountries = async (req: Request, res: Response): Promise<void> =
   }
 };
 
-export const getCountryById = async (req: Request, res: Response): Promise<void> => {
+export const getCountryById = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     // TODO: Implement when country repo is available
@@ -281,7 +282,7 @@ export const getCountryById = async (req: Request, res: Response): Promise<void>
   }
 };
 
-export const getCountryByCode = async (req: Request, res: Response): Promise<void> => {
+export const getCountryByCode = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { code } = req.params;
     // TODO: Implement when country repo is available
@@ -293,7 +294,7 @@ export const getCountryByCode = async (req: Request, res: Response): Promise<voi
   }
 };
 
-export const getCountriesByRegion = async (req: Request, res: Response): Promise<void> => {
+export const getCountriesByRegion = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { region } = req.params;
     // TODO: Implement when country repo is available
@@ -305,7 +306,7 @@ export const getCountriesByRegion = async (req: Request, res: Response): Promise
   }
 };
 
-export const createCountry = async (req: Request, res: Response): Promise<void> => {
+export const createCountry = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     // TODO: Implement when country repo is available
     successResponse(res, {}, 201);
@@ -316,7 +317,7 @@ export const createCountry = async (req: Request, res: Response): Promise<void> 
   }
 };
 
-export const updateCountry = async (req: Request, res: Response): Promise<void> => {
+export const updateCountry = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     // TODO: Implement when country repo is available
@@ -328,7 +329,7 @@ export const updateCountry = async (req: Request, res: Response): Promise<void> 
   }
 };
 
-export const deleteCountry = async (req: Request, res: Response): Promise<void> => {
+export const deleteCountry = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     // TODO: Implement when country repo is available
@@ -340,7 +341,7 @@ export const deleteCountry = async (req: Request, res: Response): Promise<void> 
   }
 };
 
-export const activateCountry = async (req: Request, res: Response): Promise<void> => {
+export const activateCountry = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     // TODO: Implement when country repo is available
@@ -352,7 +353,7 @@ export const activateCountry = async (req: Request, res: Response): Promise<void
   }
 };
 
-export const deactivateCountry = async (req: Request, res: Response): Promise<void> => {
+export const deactivateCountry = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     // TODO: Implement when country repo is available

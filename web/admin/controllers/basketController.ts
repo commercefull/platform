@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';;
 import BasketRepo from '../../../modules/basket/infrastructure/repositories/BasketRepository';
 import { adminRespond } from '../../respond';
 
@@ -12,7 +13,7 @@ import { adminRespond } from '../../respond';
 // Abandoned Cart Management
 // ============================================================================
 
-export const listAbandonedCarts = async (req: Request, res: Response): Promise<void> => {
+export const listAbandonedCarts = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const olderThanDays = parseInt(req.query.days as string) || 7;
     const limit = parseInt(req.query.limit as string) || 50;
@@ -58,7 +59,7 @@ export const listAbandonedCarts = async (req: Request, res: Response): Promise<v
   }
 };
 
-export const viewAbandonedCart = async (req: Request, res: Response): Promise<void> => {
+export const viewAbandonedCart = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { basketId } = req.params;
 
@@ -98,7 +99,7 @@ export const viewAbandonedCart = async (req: Request, res: Response): Promise<vo
   }
 };
 
-export const recoverAbandonedCart = async (req: Request, res: Response): Promise<void> => {
+export const recoverAbandonedCart = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { basketId } = req.params;
     const { recoveryMethod, message } = req.body;
@@ -138,7 +139,7 @@ export const recoverAbandonedCart = async (req: Request, res: Response): Promise
   }
 };
 
-export const sendRecoveryEmail = async (req: Request, res: Response): Promise<void> => {
+export const sendRecoveryEmail = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { basketId } = req.params;
     const { template, subject, discountCode } = req.body;
@@ -177,7 +178,7 @@ export const sendRecoveryEmail = async (req: Request, res: Response): Promise<vo
   }
 };
 
-export const markCartRecovered = async (req: Request, res: Response): Promise<void> => {
+export const markCartRecovered = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { basketId } = req.params;
 
@@ -195,7 +196,7 @@ export const markCartRecovered = async (req: Request, res: Response): Promise<vo
 // Basket Analytics
 // ============================================================================
 
-export const basketAnalytics = async (req: Request, res: Response): Promise<void> => {
+export const basketAnalytics = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     // Get basic cart statistics
     const abandonedBaskets = await BasketRepo.findAbandonedBaskets(30); // Last 30 days
@@ -273,7 +274,7 @@ export const basketAnalytics = async (req: Request, res: Response): Promise<void
   }
 };
 
-export const cleanupExpiredBaskets = async (req: Request, res: Response): Promise<void> => {
+export const cleanupExpiredBaskets = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const expiredBaskets = await BasketRepo.findExpiredBaskets();
 

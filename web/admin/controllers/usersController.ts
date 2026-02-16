@@ -5,7 +5,8 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';;
 import { query, queryOne } from '../../../libs/db';
 import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcryptjs';
@@ -44,7 +45,7 @@ interface Role {
 // Admin Users Management
 // ============================================================================
 
-export const listUsers = async (req: Request, res: Response): Promise<void> => {
+export const listUsers = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { status, role, page = '1' } = req.query;
     const limit = 20;
@@ -98,7 +99,7 @@ export const listUsers = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export const viewUser = async (req: Request, res: Response): Promise<void> => {
+export const viewUser = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { userId } = req.params;
 
@@ -145,7 +146,7 @@ export const viewUser = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export const createUserForm = async (req: Request, res: Response): Promise<void> => {
+export const createUserForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const roles = await query<Array<Role>>(`SELECT * FROM "role" ORDER BY "name"`);
 
@@ -163,7 +164,7 @@ export const createUserForm = async (req: Request, res: Response): Promise<void>
   }
 };
 
-export const createUser = async (req: Request, res: Response): Promise<void> => {
+export const createUser = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { email, password, firstName, lastName, roleId } = req.body;
 
@@ -225,7 +226,7 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
   }
 };
 
-export const updateUser = async (req: Request, res: Response): Promise<void> => {
+export const updateUser = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { userId } = req.params;
     const { firstName, lastName, status, roleId } = req.body;
@@ -261,7 +262,7 @@ export const updateUser = async (req: Request, res: Response): Promise<void> => 
   }
 };
 
-export const deleteUser = async (req: Request, res: Response): Promise<void> => {
+export const deleteUser = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { userId } = req.params;
 
@@ -286,7 +287,7 @@ export const deleteUser = async (req: Request, res: Response): Promise<void> => 
 // Roles Management
 // ============================================================================
 
-export const listRoles = async (req: Request, res: Response): Promise<void> => {
+export const listRoles = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const roles = await query<Array<any>>(
       `SELECT r.*, 
@@ -310,7 +311,7 @@ export const listRoles = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export const createRole = async (req: Request, res: Response): Promise<void> => {
+export const createRole = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { name, description, permissions } = req.body;
 
@@ -336,7 +337,7 @@ export const createRole = async (req: Request, res: Response): Promise<void> => 
   }
 };
 
-export const updateRole = async (req: Request, res: Response): Promise<void> => {
+export const updateRole = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { roleId } = req.params;
     const { name, description, permissions } = req.body;
@@ -368,7 +369,7 @@ export const updateRole = async (req: Request, res: Response): Promise<void> => 
   }
 };
 
-export const deleteRole = async (req: Request, res: Response): Promise<void> => {
+export const deleteRole = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { roleId } = req.params;
 

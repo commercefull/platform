@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import warehouseRepo from '../../infrastructure/repositories/warehouseRepo';
 import { successResponse, errorResponse } from '../../../../libs/apiResponse';
 
@@ -12,7 +13,7 @@ import { successResponse, errorResponse } from '../../../../libs/apiResponse';
  * Find nearest stores based on customer location
  * GET /stores/nearest?latitude=...&longitude=...&radiusKm=...&limit=...
  */
-export const findNearestStores = async (req: Request, res: Response): Promise<void> => {
+export const findNearestStores = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { latitude, longitude, radiusKm = '50', limit = '5' } = req.query;
 
@@ -73,7 +74,7 @@ export const findNearestStores = async (req: Request, res: Response): Promise<vo
  * Get store details by ID
  * GET /stores/:id
  */
-export const getStoreById = async (req: Request, res: Response): Promise<void> => {
+export const getStoreById = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
 
@@ -132,7 +133,7 @@ export const getStoreById = async (req: Request, res: Response): Promise<void> =
  * Get all stores in a specific city
  * GET /stores/city/:city
  */
-export const getStoresByCity = async (req: Request, res: Response): Promise<void> => {
+export const getStoresByCity = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { city } = req.params;
 
@@ -180,7 +181,7 @@ export const getStoresByCity = async (req: Request, res: Response): Promise<void
  * Get stores by country
  * GET /stores/country/:country
  */
-export const getStoresByCountry = async (req: Request, res: Response): Promise<void> => {
+export const getStoresByCountry = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { country } = req.params;
 
@@ -219,7 +220,7 @@ export const getStoresByCountry = async (req: Request, res: Response): Promise<v
  * Check if a product is available for pickup at a specific store
  * GET /stores/:id/availability/:productId
  */
-export const checkStoreAvailability = async (req: Request, res: Response): Promise<void> => {
+export const checkStoreAvailability = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id, productId } = req.params;
     const { variantId } = req.query;

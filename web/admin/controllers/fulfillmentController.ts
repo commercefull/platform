@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';;
 import orderFulfillmentRepo from '../../../modules/order/infrastructure/repositories/orderFulfillmentRepo';
 import orderRepo from '../../../modules/order/infrastructure/repositories/orderRepo';
 import warehouseRepo from '../../../modules/warehouse/infrastructure/repositories/warehouseRepo';
@@ -14,7 +15,7 @@ import { adminRespond } from '../../respond';
 // Fulfillment Tracking & Management
 // ============================================================================
 
-export const listFulfillments = async (req: Request, res: Response): Promise<void> => {
+export const listFulfillments = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const status = req.query.status as string;
     const warehouseId = req.query.warehouseId as string;
@@ -57,7 +58,7 @@ export const listFulfillments = async (req: Request, res: Response): Promise<voi
   }
 };
 
-export const viewFulfillment = async (req: Request, res: Response): Promise<void> => {
+export const viewFulfillment = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { fulfillmentId } = req.params;
 
@@ -91,7 +92,7 @@ export const viewFulfillment = async (req: Request, res: Response): Promise<void
   }
 };
 
-export const updateFulfillmentStatus = async (req: Request, res: Response): Promise<void> => {
+export const updateFulfillmentStatus = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { fulfillmentId } = req.params;
     const { status, trackingNumber, carrierCode, carrierName, trackingUrl, notes } = req.body;
@@ -125,7 +126,7 @@ export const updateFulfillmentStatus = async (req: Request, res: Response): Prom
   }
 };
 
-export const markAsShipped = async (req: Request, res: Response): Promise<void> => {
+export const markAsShipped = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { fulfillmentId } = req.params;
     const { trackingNumber, carrierCode, carrierName, trackingUrl } = req.body;
@@ -154,7 +155,7 @@ export const markAsShipped = async (req: Request, res: Response): Promise<void> 
   }
 };
 
-export const markAsDelivered = async (req: Request, res: Response): Promise<void> => {
+export const markAsDelivered = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { fulfillmentId } = req.params;
 
@@ -176,7 +177,7 @@ export const markAsDelivered = async (req: Request, res: Response): Promise<void
   }
 };
 
-export const cancelFulfillment = async (req: Request, res: Response): Promise<void> => {
+export const cancelFulfillment = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { fulfillmentId } = req.params;
     const { notes } = req.body;
@@ -199,7 +200,7 @@ export const cancelFulfillment = async (req: Request, res: Response): Promise<vo
   }
 };
 
-export const getFulfillmentStats = async (req: Request, res: Response): Promise<void> => {
+export const getFulfillmentStats = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const stats = await orderFulfillmentRepo.getStatusStatistics();
     const overdue = await orderFulfillmentRepo.findOverdue();
@@ -222,7 +223,7 @@ export const getFulfillmentStats = async (req: Request, res: Response): Promise<
 // Warehouse Operations Dashboard
 // ============================================================================
 
-export const warehouseDashboard = async (req: Request, res: Response): Promise<void> => {
+export const warehouseDashboard = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const warehouseId = req.query.warehouseId as string;
 

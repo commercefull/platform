@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';;
 import { query, queryOne } from '../../../libs/db';
 import { v4 as uuidv4 } from 'uuid';
 import { adminRespond } from '../../respond';
@@ -13,7 +14,7 @@ import { adminRespond } from '../../respond';
 // Support Dashboard
 // ============================================================================
 
-export const supportDashboard = async (req: Request, res: Response): Promise<void> => {
+export const supportDashboard = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     // Get support stats
     const statsResult = await queryOne<any>(
@@ -76,7 +77,7 @@ export const supportDashboard = async (req: Request, res: Response): Promise<voi
 // Support Tickets
 // ============================================================================
 
-export const listSupportTickets = async (req: Request, res: Response): Promise<void> => {
+export const listSupportTickets = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { status, priority, search, limit, offset } = req.query;
 
@@ -129,7 +130,7 @@ export const listSupportTickets = async (req: Request, res: Response): Promise<v
   }
 };
 
-export const viewSupportTicket = async (req: Request, res: Response): Promise<void> => {
+export const viewSupportTicket = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { ticketId } = req.params;
 
@@ -174,7 +175,7 @@ export const viewSupportTicket = async (req: Request, res: Response): Promise<vo
   }
 };
 
-export const updateTicketStatus = async (req: Request, res: Response): Promise<void> => {
+export const updateTicketStatus = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { ticketId } = req.params;
     const { status, response } = req.body;
@@ -210,7 +211,7 @@ export const updateTicketStatus = async (req: Request, res: Response): Promise<v
 // FAQ Management
 // ============================================================================
 
-export const listFaqs = async (req: Request, res: Response): Promise<void> => {
+export const listFaqs = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const faqs = await query<Array<any>>(
       `SELECT * FROM "faq"
@@ -232,7 +233,7 @@ export const listFaqs = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export const createFaq = async (req: Request, res: Response): Promise<void> => {
+export const createFaq = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { question, answer, category, sortOrder, isPublished } = req.body;
 
@@ -250,7 +251,7 @@ export const createFaq = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export const updateFaq = async (req: Request, res: Response): Promise<void> => {
+export const updateFaq = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { faqId } = req.params;
     const { question, answer, category, sortOrder, isPublished } = req.body;
@@ -269,7 +270,7 @@ export const updateFaq = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export const deleteFaq = async (req: Request, res: Response): Promise<void> => {
+export const deleteFaq = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { faqId } = req.params;
     await query(`UPDATE "faq" SET "deletedAt" = NOW() WHERE "faqId" = $1`, [faqId]);

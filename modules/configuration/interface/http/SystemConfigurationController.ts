@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import { SystemConfiguration } from '../../domain/entities/SystemConfiguration';
 import { UpdateSystemConfigurationUseCase, UpdateSystemConfigurationCommand } from '../../application/useCases/UpdateSystemConfiguration';
 import { SystemConfigurationRepo } from '../../infrastructure/repositories/SystemConfigurationRepo';
@@ -21,7 +22,7 @@ export class SystemConfigurationController {
    * Create system configuration
    * POST /business/configuration
    */
-  async createSystemConfiguration(req: Request, res: Response) {
+  async createSystemConfiguration(req: TypedRequest, res: Response) {
     try {
       const config = SystemConfiguration.create({
         configId: req.body.configId || `config_${Date.now()}`,
@@ -56,7 +57,7 @@ export class SystemConfigurationController {
    * Update system configuration
    * PUT /business/configuration/:configId
    */
-  async updateSystemConfiguration(req: Request, res: Response) {
+  async updateSystemConfiguration(req: TypedRequest, res: Response) {
     try {
       const command = new UpdateSystemConfigurationCommand(req.params.configId, {
         platformName: req.body.platformName,
@@ -97,7 +98,7 @@ export class SystemConfigurationController {
    * Get system configuration by ID
    * GET /business/configuration/:configId
    */
-  async getSystemConfiguration(req: Request, res: Response) {
+  async getSystemConfiguration(req: TypedRequest, res: Response) {
     try {
       const systemConfigRepository = new SystemConfigurationRepo();
       const config = await systemConfigRepository.findById(req.params.configId);
@@ -129,7 +130,7 @@ export class SystemConfigurationController {
    * Get active system configuration
    * GET /business/configuration/active
    */
-  async getActiveSystemConfiguration(req: Request, res: Response) {
+  async getActiveSystemConfiguration(req: TypedRequest, res: Response) {
     try {
       const systemConfigRepository = new SystemConfigurationRepo();
       const config = await systemConfigRepository.findActive();
@@ -161,7 +162,7 @@ export class SystemConfigurationController {
    * List all system configurations
    * GET /business/configuration
    */
-  async listSystemConfigurations(req: Request, res: Response) {
+  async listSystemConfigurations(req: TypedRequest, res: Response) {
     try {
       const systemConfigRepository = new SystemConfigurationRepo();
       const configs = await systemConfigRepository.findAll();

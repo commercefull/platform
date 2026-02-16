@@ -5,11 +5,12 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import { brandRepository } from '../../infrastructure/repositories/BrandRepository';
 import { CreateBrandUseCase, GetBrandUseCase, ListBrandsUseCase, UpdateBrandUseCase, DeleteBrandUseCase } from '../../application/useCases';
 
-export const createBrand = async (req: Request, res: Response): Promise<void> => {
+export const createBrand = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const useCase = new CreateBrandUseCase(brandRepository);
     const result = await useCase.execute({
@@ -31,7 +32,7 @@ export const createBrand = async (req: Request, res: Response): Promise<void> =>
   }
 };
 
-export const getBrand = async (req: Request, res: Response): Promise<void> => {
+export const getBrand = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const useCase = new GetBrandUseCase(brandRepository);
     const result = await useCase.execute({
@@ -50,7 +51,7 @@ export const getBrand = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export const updateBrand = async (req: Request, res: Response): Promise<void> => {
+export const updateBrand = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const useCase = new UpdateBrandUseCase(brandRepository);
     const result = await useCase.execute({
@@ -73,7 +74,7 @@ export const updateBrand = async (req: Request, res: Response): Promise<void> =>
   }
 };
 
-export const deleteBrand = async (req: Request, res: Response): Promise<void> => {
+export const deleteBrand = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const useCase = new DeleteBrandUseCase(brandRepository);
     await useCase.execute({ brandId: req.params.brandId });
@@ -84,7 +85,7 @@ export const deleteBrand = async (req: Request, res: Response): Promise<void> =>
   }
 };
 
-export const listBrands = async (req: Request, res: Response): Promise<void> => {
+export const listBrands = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const useCase = new ListBrandsUseCase(brandRepository);
     const result = await useCase.execute({

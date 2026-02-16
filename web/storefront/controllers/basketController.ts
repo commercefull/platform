@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';;
 import { storefrontRespond } from '../../respond';
 import BasketRepo from '../../../modules/basket/infrastructure/repositories/BasketRepository';
 import ProductRepo from '../../../modules/product/infrastructure/repositories/ProductRepository';
@@ -20,7 +21,7 @@ import { CalculateOrderTaxCommand, CalculateOrderTaxUseCase } from '../../../mod
 // View Basket/Cart
 // ============================================================================
 
-export const viewBasket = async (req: Request, res: Response): Promise<void> => {
+export const viewBasket = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const customerId = (req as any).user?.customerId;
     const sessionId = (req as any).session?.id;
@@ -50,7 +51,7 @@ export const viewBasket = async (req: Request, res: Response): Promise<void> => 
 // Add Item to Basket
 // ============================================================================
 
-export const addToBasket = async (req: Request, res: Response): Promise<void> => {
+export const addToBasket = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { productId } = req.params;
     const { quantity = 1, variantId } = req.body;
@@ -101,7 +102,7 @@ export const addToBasket = async (req: Request, res: Response): Promise<void> =>
 // Update Basket Item
 // ============================================================================
 
-export const updateBasketItem = async (req: Request, res: Response): Promise<void> => {
+export const updateBasketItem = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { basketItemId } = req.params;
     const { quantity } = req.body;
@@ -137,7 +138,7 @@ export const updateBasketItem = async (req: Request, res: Response): Promise<voi
 // Remove Item from Basket
 // ============================================================================
 
-export const removeFromBasket = async (req: Request, res: Response): Promise<void> => {
+export const removeFromBasket = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { basketItemId } = req.params;
     const customerId = (req as any).user?.customerId;
@@ -171,7 +172,7 @@ export const removeFromBasket = async (req: Request, res: Response): Promise<voi
 // Clear Basket
 // ============================================================================
 
-export const clearBasket = async (req: Request, res: Response): Promise<void> => {
+export const clearBasket = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const customerId = (req as any).user?.customerId;
     const sessionId = (req as any).session?.id;

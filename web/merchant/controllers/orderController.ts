@@ -4,7 +4,8 @@
  */
 
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';;
 import { query, queryOne } from '../../../libs/db';
 import { merchantRespond } from '../../respond';
 
@@ -18,7 +19,7 @@ interface MerchantUser {
 /**
  * GET: List merchant's orders
  */
-export const listOrders = async (req: Request, res: Response) => {
+export const listOrders = async (req: TypedRequest, res: Response) => {
   try {
     const user = req.user as MerchantUser;
     if (!user?.merchantId) {
@@ -113,7 +114,7 @@ export const listOrders = async (req: Request, res: Response) => {
 /**
  * GET: View single order
  */
-export const viewOrder = async (req: Request, res: Response) => {
+export const viewOrder = async (req: TypedRequest, res: Response) => {
   try {
     const user = req.user as MerchantUser;
     if (!user?.merchantId) {

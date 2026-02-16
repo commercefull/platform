@@ -1,12 +1,13 @@
 import { logger } from '../../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import { MembershipRepo, MembershipTier, LegacyMembershipBenefit as MembershipBenefit, UserMembership } from '../../infrastructure/repositories/membershipRepo';
 
 // Create a single instance of the repository to be shared across handlers
 const membershipRepo = new MembershipRepo();
 
 // Membership Tier Endpoints
-export const getMembershipTiers = async (req: Request, res: Response): Promise<void> => {
+export const getMembershipTiers = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const includeInactive = req.query.includeInactive === 'true';
     const tiers = await membershipRepo.findAllTiers(includeInactive);
@@ -26,7 +27,7 @@ export const getMembershipTiers = async (req: Request, res: Response): Promise<v
   }
 };
 
-export const getMembershipTierById = async (req: Request, res: Response): Promise<void> => {
+export const getMembershipTierById = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const tier = await membershipRepo.findTierById(id);
@@ -54,7 +55,7 @@ export const getMembershipTierById = async (req: Request, res: Response): Promis
   }
 };
 
-export const createMembershipTier = async (req: Request, res: Response): Promise<void> => {
+export const createMembershipTier = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { name, description, monthlyPrice, annualPrice, level, isActive = true } = req.body;
 
@@ -92,7 +93,7 @@ export const createMembershipTier = async (req: Request, res: Response): Promise
   }
 };
 
-export const updateMembershipTier = async (req: Request, res: Response): Promise<void> => {
+export const updateMembershipTier = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { name, description, monthlyPrice, annualPrice, level, isActive } = req.body;
@@ -132,7 +133,7 @@ export const updateMembershipTier = async (req: Request, res: Response): Promise
   }
 };
 
-export const deleteMembershipTier = async (req: Request, res: Response): Promise<void> => {
+export const deleteMembershipTier = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
 
@@ -174,7 +175,7 @@ export const deleteMembershipTier = async (req: Request, res: Response): Promise
 };
 
 // Membership Benefit Endpoints
-export const getMembershipBenefits = async (req: Request, res: Response): Promise<void> => {
+export const getMembershipBenefits = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { tierId } = req.query;
 
@@ -200,7 +201,7 @@ export const getMembershipBenefits = async (req: Request, res: Response): Promis
   }
 };
 
-export const getMembershipBenefitById = async (req: Request, res: Response): Promise<void> => {
+export const getMembershipBenefitById = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const benefit = await membershipRepo.findBenefitById(id);
@@ -228,7 +229,7 @@ export const getMembershipBenefitById = async (req: Request, res: Response): Pro
   }
 };
 
-export const createMembershipBenefit = async (req: Request, res: Response): Promise<void> => {
+export const createMembershipBenefit = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const {
       name,
@@ -285,7 +286,7 @@ export const createMembershipBenefit = async (req: Request, res: Response): Prom
   }
 };
 
-export const updateMembershipBenefit = async (req: Request, res: Response): Promise<void> => {
+export const updateMembershipBenefit = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const {
@@ -346,7 +347,7 @@ export const updateMembershipBenefit = async (req: Request, res: Response): Prom
   }
 };
 
-export const deleteMembershipBenefit = async (req: Request, res: Response): Promise<void> => {
+export const deleteMembershipBenefit = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
 
@@ -378,7 +379,7 @@ export const deleteMembershipBenefit = async (req: Request, res: Response): Prom
 };
 
 // User Membership Endpoints
-export const getUserMemberships = async (req: Request, res: Response): Promise<void> => {
+export const getUserMemberships = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { tierId, active } = req.query;
 
@@ -407,7 +408,7 @@ export const getUserMemberships = async (req: Request, res: Response): Promise<v
   }
 };
 
-export const getUserMembershipById = async (req: Request, res: Response): Promise<void> => {
+export const getUserMembershipById = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const membership = await membershipRepo.findUserMembershipById(id);
@@ -435,7 +436,7 @@ export const getUserMembershipById = async (req: Request, res: Response): Promis
   }
 };
 
-export const getUserMembershipByUserId = async (req: Request, res: Response): Promise<void> => {
+export const getUserMembershipByUserId = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { userId } = req.params;
     const membership = await membershipRepo.findMembershipByUserId(userId);
@@ -463,7 +464,7 @@ export const getUserMembershipByUserId = async (req: Request, res: Response): Pr
   }
 };
 
-export const createUserMembership = async (req: Request, res: Response): Promise<void> => {
+export const createUserMembership = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const {
       userId,
@@ -536,7 +537,7 @@ export const createUserMembership = async (req: Request, res: Response): Promise
   }
 };
 
-export const updateUserMembership = async (req: Request, res: Response): Promise<void> => {
+export const updateUserMembership = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { tierId, startDate, endDate, isActive, autoRenew, membershipType, lastRenewalDate, nextRenewalDate, paymentMethod } = req.body;
@@ -591,7 +592,7 @@ export const updateUserMembership = async (req: Request, res: Response): Promise
   }
 };
 
-export const cancelUserMembership = async (req: Request, res: Response): Promise<void> => {
+export const cancelUserMembership = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
 
@@ -623,7 +624,7 @@ export const cancelUserMembership = async (req: Request, res: Response): Promise
   }
 };
 
-export const getUserMembershipBenefits = async (req: Request, res: Response): Promise<void> => {
+export const getUserMembershipBenefits = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { userId } = req.params;
 

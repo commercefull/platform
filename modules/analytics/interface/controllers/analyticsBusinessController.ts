@@ -4,11 +4,12 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
+import { TypedRequest } from 'libs/types/express';
 import * as analyticsRepo from '../../infrastructure/repositories/analyticsRepo';
 import * as reportingRepo from '../../infrastructure/repositories/reportingRepo';
 
-type AsyncHandler = (req: Request, res: Response, next: NextFunction) => Promise<void>;
+type AsyncHandler = (req: TypedRequest, res: Response, next: NextFunction) => Promise<void>;
 
 // ============================================================================
 // Sales Analytics
@@ -292,7 +293,7 @@ export const getRealTimeMetrics: AsyncHandler = async (req, res, next) => {
 
 export const getDashboards: AsyncHandler = async (req, res, next) => {
   try {
-    const merchantId = (req as any).merchantId;
+    const merchantId = req.user?.merchantId;
     const dashboards = await reportingRepo.getDashboards(merchantId);
     res.json({ success: true, data: dashboards });
   } catch (error: any) {
@@ -319,8 +320,8 @@ export const getDashboard: AsyncHandler = async (req, res, next) => {
 
 export const createDashboard: AsyncHandler = async (req, res, next) => {
   try {
-    const merchantId = (req as any).merchantId;
-    const createdBy = (req as any).userId;
+    const merchantId = req.user?.merchantId;
+    const createdBy = req.user?.userId;
 
     const dashboard = await reportingRepo.saveDashboard({
       ...req.body,

@@ -1,5 +1,6 @@
 import { logger } from '../../../libs/logger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { TypedRequest } from 'libs/types/express';;
 import bcrypt from 'bcryptjs';
 import { SessionService } from '../../../libs/session';
 import AdminRepository from '../../../modules/identity/infrastructure/repositories/AdminRepository';
@@ -10,7 +11,7 @@ import { adminRespond } from '../../respond';
 const SESSION_COOKIE_NAME = 'cf_session';
 
 // GET: admin dashboard
-export const getAdminDashboard = async (req: Request, res: Response) => {
+export const getAdminDashboard = async (req: TypedRequest, res: Response) => {
   try {
     // Fetch real dashboard data using query repository
     const [stats, recentOrders, topProducts, revenueByDay] = await Promise.all([
@@ -40,7 +41,7 @@ export const getAdminDashboard = async (req: Request, res: Response) => {
 };
 
 // GET: admin login page
-export const getAdminLogin = async (req: Request, res: Response) => {
+export const getAdminLogin = async (req: TypedRequest, res: Response) => {
   // Check if already logged in via session
   const sessionId = req.cookies?.[SESSION_COOKIE_NAME];
   if (sessionId) {
@@ -60,7 +61,7 @@ export const getAdminLogin = async (req: Request, res: Response) => {
 // GET: admin logout (handled by auth routes)
 
 // POST: admin login form submission
-export const postAdminLogin = async (req: Request, res: Response) => {
+export const postAdminLogin = async (req: TypedRequest, res: Response) => {
   try {
     const { email, password, rememberMe } = req.body;
 
@@ -141,7 +142,7 @@ export const postAdminLogin = async (req: Request, res: Response) => {
 };
 
 // POST: admin logout
-export const postAdminLogout = async (req: Request, res: Response) => {
+export const postAdminLogout = async (req: TypedRequest, res: Response) => {
   try {
     // Get session ID from cookie
     const sessionId = req.cookies?.[SESSION_COOKIE_NAME];
@@ -165,7 +166,7 @@ export const postAdminLogout = async (req: Request, res: Response) => {
 };
 
 // GET: admin profile
-export const getAdminProfile = async (req: Request, res: Response) => {
+export const getAdminProfile = async (req: TypedRequest, res: Response) => {
   try {
     adminRespond(req, res, 'profile', {
       pageName: 'Admin Profile',
