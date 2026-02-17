@@ -118,6 +118,3 @@ postgres_data/
 redis_data/
 postgres_prod_data/
 redis_prod_data/
-
-# Docker build context
-.dockerignore
