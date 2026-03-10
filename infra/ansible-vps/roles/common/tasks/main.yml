@@ -1,98 +1,70 @@
 ---
-# Common system setup tasks
+# ===========================================
+# Common Role - Base System Setup
+# ===========================================
 
-- name: Set system timezone
-  timezone:
-    name: "{{ timezone }}"
-  tags: ['timezone']
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: yes
+    cache_valid_time: 3600
+  tags: [common, update]
 
-- name: Create swap file
-  include_tasks: swap.yml
-  when: swap_size is defined and swap_size != ""
-  tags: ['swap']
+- name: Upgrade all packages
+  ansible.builtin.apt:
+    upgrade: dist
+  when: upgrade_packages | default(false) | bool
+  tags: [common, upgrade]
 
-- name: Configure system limits
-  include_tasks: limits.yml
-  tags: ['limits']
-
-- name: Configure sysctl
-  include_tasks: sysctl.yml
-  tags: ['sysctl']
-
-- name: Install essential packages
-  package:
-    name:
-      - htop
-      - vim
-      - tree
-      - ncdu
-      - tmux
-      - curl
-      - wget
-      - git
-      - unzip
-      - software-properties-common
-      - apt-transport-https
-      - ca-certificates
-      - gnupg
-      - lsb-release
-      - ufw
-      - fail2ban
-      - logrotate
-      - cron
+- name: Install base dependencies
+  ansible.builtin.apt:
+    name: '{{ common_packages }}'
     state: present
-  tags: ['packages']
+  tags: [common, packages]
 
-- name: Configure UFW firewall
-  include_tasks: ufw.yml
-  when: ufw_enabled | default(true)
-  tags: ['firewall']
+- name: Set timezone
+  community.general.timezone:
+    name: "{{ timezone | default('UTC') }}"
+  tags: [common, timezone]
 
-- name: Configure fail2ban
-  include_tasks: fail2ban.yml
-  when: fail2ban_enabled | default(true)
-  tags: ['security']
+- name: Auto-remove unnecessary packages
+  ansible.builtin.apt:
+    autoremove: yes
+    purge: yes
+  tags: [common, cleanup]
 
-- name: Configure logrotate
-  include_tasks: logrotate.yml
-  when: logrotate_enabled | default(true)
-  tags: ['logging']
-
-- name: Create application user
-  user:
-    name: "{{ app_user }}"
-    group: "{{ app_group }}"
-    system: yes
-    shell: /bin/bash
-    home: "/home/{{ app_user }}"
-    create_home: yes
+# SECURITY: SSH hardening
+- name: Disable SSH password authentication
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^#?PasswordAuthentication"
+    line: "PasswordAuthentication no"
     state: present
-  tags: ['user']
+  notify: Restart SSH
+  tags: [common, ssh, security]
 
-- name: Create application directories
-  file:
-    path: "{{ item }}"
-    state: directory
-    owner: "{{ app_user }}"
-    group: "{{ app_group }}"
-    mode: '0755'
-  with_items:
-    - "{{ app_install_dir }}"
-    - "/var/log/{{ app_name }}"
-    - "/var/backups/{{ app_name }}"
-    - "/etc/{{ app_name }}"
-  tags: ['directories']
-
-- name: Install Python pip
-  package:
-    name: python3-pip
+- name: Disable SSH root login
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^#?PermitRootLogin"
+    line: "PermitRootLogin no"
     state: present
-  tags: ['python']
+  notify: Restart SSH
+  tags: [common, ssh, security]
 
-- name: Install Ansible dependencies
-  pip:
-    name:
-      - boto3
-      - botocore
+- name: Disable SSH empty passwords
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^#?PermitEmptyPasswords"
+    line: "PermitEmptyPasswords no"
     state: present
-  tags: ['python']
+  notify: Restart SSH
+  tags: [common, ssh, security]
+
+- name: Set SSH MaxAuthTries
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^#?MaxAuthTries"
+    line: "MaxAuthTries 3"
+    state: present
+  notify: Restart SSH
+  tags: [common, ssh, security]

@@ -1,0 +1,10 @@
+---
+# ===========================================
+# Firewall Role - Default Variables
+# ===========================================
+
+# Additional ports to allow (beyond SSH, HTTP, HTTPS)
+firewall_additional_ports: []
+# Example:
+# firewall_additional_ports:
+#   - { port: '5432', proto: 'tcp' }  # PostgreSQL

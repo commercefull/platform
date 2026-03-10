@@ -1,0 +1,36 @@
+---
+# ===========================================
+# Deploy Role - Git Clone
+# ===========================================
+
+- name: Clone repository to new release directory
+  ansible.builtin.git:
+    repo: '{{ repo_url }}'
+    dest: '{{ release_path }}'
+    version: '{{ repo_branch }}'
+    depth: 1
+    force: yes
+  become_user: '{{ app_user }}'
+
+- name: Get commit hash
+  ansible.builtin.command:
+    cmd: git rev-parse --short HEAD
+    chdir: '{{ release_path }}'
+  register: git_commit
+  changed_when: false
+  become_user: '{{ app_user }}'
+
+- name: Save release metadata
+  ansible.builtin.copy:
+    content: |
+      {
+        "release": "{{ release_timestamp }}",
+        "commit": "{{ git_commit.stdout }}",
+        "branch": "{{ repo_branch }}",
+        "deployed_at": "{{ ansible_date_time.iso8601 }}",
+        "deployed_by": "{{ lookup('env', 'USER') | default('ansible') }}"
+      }
+    dest: '{{ release_path }}/RELEASE.json'
+    owner: '{{ app_user }}'
+    group: '{{ app_group }}'
+    mode: '0644'

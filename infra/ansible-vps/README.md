@@ -1,366 +1,272 @@
-# Ansible VPS Deployment
+# CommerceFull — Ansible VPS Infrastructure
 
-Deploy CommerceFull platform to a VPS using Ansible for configuration management.
+Hardened Ansible infrastructure for deploying CommerceFull to a single VPS.
 
-## Overview
+## Stack
 
-This deployment strategy uses Ansible to provision and configure a VPS with:
+| Component    | Version | Notes                              |
+| ------------ | ------- | ---------------------------------- |
+| Ubuntu       | 22.04+  | Fresh VPS with SSH access          |
+| Node.js      | 22      | Via NodeSource repo                |
+| PostgreSQL   | 18      | Via PGDG repo, scram-sha-256 auth  |
+| Nginx        | Latest  | TLS 1.2/1.3, HSTS, rate limiting  |
+| PM2          | Latest  | Process manager, auto-restart      |
+| Yarn         | Latest  | Package manager                    |
+| UFW          | -       | Firewall: SSH + HTTP + HTTPS only  |
 
-- Ubuntu 22.04 LTS
-- Node.js 18+
-- PostgreSQL 18+
-- Nginx reverse proxy
-- SSL certificates (Let's Encrypt)
-- Systemd services
-- Log rotation
-- Firewall configuration
+## Architecture
 
-## Prerequisites
+```
+Internet → Nginx (443/SSL) → Node.js (:3000 via PM2) → PostgreSQL (localhost)
+                ↓
+         Static files served from /home/ubuntu/app/public/
+```
 
-### Local Machine
+### Directory Layout on VPS
 
-- Ansible 2.10+
-- Python 3.8+
-- SSH client
-- Git
-
-### VPS Requirements
-
-- Ubuntu 22.04 LTS (fresh install)
-- 2GB RAM minimum, 4GB recommended
-- 2 CPU cores minimum
-- 20GB storage minimum
-- Root or sudo access
-- SSH access enabled
-
-### DNS
-
-- Domain name pointing to VPS IP
-- Ability to modify DNS records
+```
+/home/ubuntu/
+├── app → deployments/releases/20250101_120000/  (symlink)
+├── deployments/
+│   ├── releases/
+│   │   ├── 20250101_120000/   ← release directories
+│   │   └── 20250101_140000/
+│   └── shared/
+│       ├── .env               ← persistent environment config
+│       ├── logs/              ← shared log directory
+│       └── uploads/           ← shared upload directory
+└── logs → deployments/shared/logs/  (symlink)
+```
 
 ## Quick Start
 
-### 1. Prepare VPS
+### Prerequisites
+
+- **Local**: Ansible 2.12+, SSH key pair
+- **VPS**: Ubuntu 22.04+, SSH access with sudo
+
+### 1. Configure
 
 ```bash
-# On your VPS (as root)
-apt update && apt upgrade -y
-apt install -y python3 python3-pip openssh-server
-# Create a non-root user
-adduser deploy
-usermod -aG sudo deploy
-# Configure SSH key authentication
-mkdir -p /home/deploy/.ssh
-# Copy your public key to /home/deploy/.ssh/authorized_keys
-chown -R deploy:deploy /home/deploy/.ssh
-chmod 600 /home/deploy/.ssh/authorized_keys
-chmod 700 /home/deploy/.ssh
+cd infra/ansible-vps
+
+# Create inventory with your server IP
+cp inventory.ini.example inventory.ini
+# Edit: replace YOUR_SERVER_IP and key path
+
+# Review variables
+vim group_vars/all.yml
+# Edit: domain_name, repo_url, repo_branch
 ```
 
-### 2. Clone and Configure
+### 2. Setup Server
 
 ```bash
-# On your local machine
-git clone <repository-url> commercefull
-cd commercefull/infra/ansible-vps
+# Full server setup (installs everything)
+./deploy.sh setup
 
-# Copy and edit inventory
-cp inventory.ini.example inventory.ini
-vim inventory.ini
+# Create database
+./deploy.sh db:setup -e "db_password=your-secure-password"
 
-# Copy and edit variables
-cp group_vars/all.yml.example group_vars/all.yml
-vim group_vars/all.yml
+# SSH to server and create the shared .env
+ssh ubuntu@your-server
+nano ~/deployments/shared/.env
+# Add: DATABASE_URL, NODE_ENV, SESSION_SECRET, etc.
 ```
 
 ### 3. Deploy
 
 ```bash
-# Run deployment
-ansible-playbook -i inventory.ini deploy.yml
+# Zero-downtime deploy
+./deploy.sh deploy
 
-# Or use the convenience script
-./deploy.sh
+# Deploy with migrations
+./deploy.sh deploy:migrate
 ```
 
-## Configuration
+## Commands
 
-### Inventory File (`inventory.ini`)
+All operations use `./deploy.sh` or direct `ansible-playbook` calls:
 
-```ini
-[commercefull]
-your-vps-hostname ansible_host=YOUR_VPS_IP
+| Command                | Description                                |
+| ---------------------- | ------------------------------------------ |
+| `./deploy.sh setup`   | Full server setup                          |
+| `./deploy.sh deploy`  | Zero-downtime deployment                   |
+| `./deploy.sh deploy:migrate` | Deploy + run DB migrations          |
+| `./deploy.sh rollback`| Rollback to previous release               |
+| `./deploy.sh backup`  | Backup DB + files to local machine         |
+| `./deploy.sh restore` | Restore DB and/or files from backup        |
+| `./deploy.sh update`  | System apt upgrade + reboot if needed      |
+| `./deploy.sh restart` | Restart PM2 + Nginx                        |
+| `./deploy.sh db:setup`| One-time database & user creation          |
 
-[commercefull:vars]
-ansible_user=deploy
-ansible_ssh_private_key_file=~/.ssh/your-key
-ansible_python_interpreter=/usr/bin/python3
-```
+### Direct Ansible Examples
 
-### Variables (`group_vars/all.yml`)
+```bash
+# Deploy a specific branch
+ansible-playbook playbooks/deploy.yml -e "repo_branch=develop"
 
-```yaml
-# Application
-app_name: commercefull
-app_domain: yourdomain.com
-app_port: 3000
+# Backup database only
+ansible-playbook playbooks/backup.yml --tags backup-db
 
-# Database
-db_name: commercefull_prod
-db_user: commercefull_user
-db_password: '{{ vault_db_password }}' # Use Ansible Vault
+# Rollback to a specific release
+ansible-playbook playbooks/rollback.yml -e "target_release=20250101_120000"
 
-# SSL
-ssl_email: admin@yourdomain.com
+# Restore from local backup file
+ansible-playbook playbooks/restore.yml \
+  -e "restore_db_file=backups/2025-01-01/commercefull-db_2025-01-01_1130.sql.gz" \
+  -e "restore_files=false"
 
-# Node.js
-node_version: 18
-
-# System
-timezone: UTC
-```
-
-## Architecture
-
-```
-Internet
-    ↓
-[Nginx (SSL Termination)]
-    ↓
-[Node.js App (Port 3000)]
-    ↓
-[PostgreSQL (Local)]
+# Skip reboot during update
+ansible-playbook playbooks/update.yml --skip-tags reboot
 ```
 
 ## File Structure
 
 ```
 ansible-vps/
-├── README.md
-├── deploy.sh                 # Convenience deployment script
-├── inventory.ini.example     # Inventory template
+├── ansible.cfg              # Ansible config (yaml output, fact caching)
+├── deploy.sh                # Convenience wrapper script
+├── inventory.ini.example    # Inventory template
 ├── group_vars/
-│   └── all.yml.example       # Variables template
-├── roles/
-│   ├── common/              # System setup
-│   ├── nodejs/              # Node.js installation
-│   ├── postgresql/           # Database setup
-│   ├── nginx/               # Web server config
-│   ├── ssl/                 # SSL certificate setup
-│   ├── app/                 # Application deployment
-│   └── monitoring/          # Monitoring setup
-├── templates/
-│   ├── nginx.conf.j2        # Nginx configuration
-│   ├── systemd.service.j2   # Systemd service
-│   └── environment.j2       # Environment variables
-├── deploy.yml               # Main playbook
-├── requirements.yml         # Ansible Galaxy requirements
-└── ansible.cfg              # Ansible configuration
+│   ├── all.yml              # Global variables (tracked)
+│   └── vps.yml              # Host-specific overrides
+├── playbooks/
+│   ├── site.yml             # Full server setup
+│   ├── deploy.yml           # Zero-downtime deployment
+│   ├── db-setup.yml         # Database creation
+│   ├── rollback.yml         # Release rollback
+│   ├── backup.yml           # DB + file backup
+│   ├── restore.yml          # DB + file restore
+│   ├── update.yml           # System update + reboot
+│   └── restart.yml          # Service restart
+└── roles/
+    ├── common/              # Base system, SSH hardening
+    ├── nodejs/              # Node.js 22, PM2, Yarn
+    ├── postgresql/          # PostgreSQL 18, security config
+    ├── nginx/               # Nginx, full config template, SSL
+    ├── firewall/            # UFW firewall rules
+    ├── db-setup/            # One-time DB + user creation
+    ├── deploy/              # Zero-downtime deploy pipeline
+    │   └── tasks/
+    │       ├── setup_dirs.yml
+    │       ├── clone.yml
+    │       ├── shared.yml
+    │       ├── build.yml
+    │       ├── migrate.yml
+    │       ├── swap.yml     # Atomic symlink swap
+    │       ├── restart.yml
+    │       ├── health.yml
+    │       └── cleanup.yml
+    ├── rollback/            # Release rollback with confirmation
+    ├── backup/              # DB dump + file archive + local fetch
+    └── restore/             # Upload + restore + restart
 ```
 
-## Detailed Setup
+## Security Hardening
 
-### 1. Domain Configuration
+### SSH
+- Password authentication **disabled**
+- Root login **disabled**
+- Empty passwords **disabled**
+- Max auth tries: **3**
 
-Before deployment, ensure your domain points to the VPS IP:
+### PostgreSQL
+- Listens on **127.0.0.1 only** (no external access)
+- Password encryption: **scram-sha-256**
+- Default trust rules **removed**
+- App user has minimal required privileges
+
+### Nginx
+- Security headers: `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`
+- HSTS with 2-year max-age, includeSubDomains, preload
+- TLS 1.2 + 1.3 only, modern cipher suite
+- Rate limiting on admin endpoints
+- Hidden files denied
+- `server_tokens off`
+
+### Firewall (UFW)
+- Default: **deny all incoming**, allow all outgoing
+- Allowed: SSH, HTTP (80), HTTPS (443)
+- Logging enabled
+
+## Deployment Flow
+
+The deploy role performs these steps in order:
+
+1. **setup_dirs** — Create `releases/`, `shared/` directories; generate timestamp
+2. **clone** — Shallow git clone into new release directory; save RELEASE.json
+3. **shared** — Copy `.env`, symlink `uploads/` and `logs/`
+4. **build** — `yarn install` + `yarn prd:build` + `yarn css:build`
+5. **migrate** — `yarn db:migrate` (only if `-e "run_migrations=true"`)
+6. **swap** — Atomic symlink swap: `~/app` → new release
+7. **restart** — PM2 restart with `--update-env`, save process list
+8. **health** — Wait for port + HTTP health check
+9. **cleanup** — Remove old releases (keep last 5)
+
+## Backup & Restore
+
+### Backup
+
+Backups are fetched to your **local machine** and cleaned from the server:
 
 ```bash
-# Example DNS records
-@     A     YOUR_VPS_IP
-www   CNAME @
+./deploy.sh backup                              # Full backup
+./deploy.sh backup --tags backup-db             # Database only
+./deploy.sh backup --tags backup-files          # Files only
 ```
 
-### 2. SSL Certificate Setup
+Local backups are stored in `backups/YYYY-MM-DD/` with 30-day retention.
 
-The playbook automatically configures Let's Encrypt SSL certificates:
+### Restore
 
-```yaml
-# In group_vars/all.yml
-ssl_email: admin@yourdomain.com
-ssl_domains:
-  - yourdomain.com
-  - www.yourdomain.com
-```
-
-### 3. Database Configuration
-
-PostgreSQL is configured with:
-
-- Dedicated database user
-- Password authentication
-- Connection pooling (PgBouncer)
-- Automated backups
-
-**Note:** PostgreSQL 18 requires PostgreSQL's official repository as it's not yet available in Ubuntu 22.04 default repositories.
-
-### 4. Application Deployment
-
-The Node.js application is deployed as a systemd service:
-
-- Automatic restarts on failure
-- Log rotation
-- Environment-specific configuration
-- Process monitoring
-
-## Maintenance
-
-### Updates
+Restores upload from your local machine to the server:
 
 ```bash
-# Update application
-ansible-playbook -i inventory.ini deploy.yml --tags app
+# Restore database
+./deploy.sh restore -e "restore_db_file=backups/2025-01-01/db.sql.gz" -e "restore_files=false"
 
-# Update system packages
-ansible-playbook -i inventory.ini deploy.yml --tags system
-
-# Renew SSL certificates
-ansible-playbook -i inventory.ini deploy.yml --tags ssl
+# Restore files
+./deploy.sh restore -e "restore_files_file=backups/2025-01-01/files.tar.gz" -e "restore_database=false"
 ```
 
-### Backups
+Restore stops the app, drops/recreates the DB, restores, re-grants permissions, and restarts.
+
+## Ansible Vault
+
+For sensitive values (db_password, API keys):
 
 ```bash
-# Manual database backup
-ansible-playbook -i inventory.ini deploy.yml --tags backup
+# Encrypt a password
+ansible-vault encrypt_string 'my-secret-password' --name 'db_password'
 
-# View logs
-ansible-playbook -i inventory.ini deploy.yml --tags logs
+# Add to group_vars/vault.yml (gitignored)
+# Reference in playbooks: {{ db_password }}
+
+# Run with vault
+ansible-playbook playbooks/deploy.yml --ask-vault-pass
+# Or with password file
+ansible-playbook playbooks/deploy.yml --vault-password-file .vault_pass
 ```
-
-### Monitoring
-
-```bash
-# Check service status
-ansible-playbook -i inventory.ini deploy.yml --tags status
-
-# Restart services
-ansible-playbook -i inventory.ini deploy.yml --tags restart
-```
-
-## Security
-
-### Firewall
-
-- UFW configured with minimal open ports
-- SSH restricted to key-based authentication
-- Fail2ban for brute force protection
-
-### SSL/TLS
-
-- A+ SSL rating with Let's Encrypt
-- Automatic certificate renewal
-- HSTS headers configured
-
-### Database
-
-- PostgreSQL running on local socket only
-- Strong passwords required
-- Connection encryption enabled
 
 ## Troubleshooting
 
-### Common Issues
-
-#### SSH Connection Failed
-
 ```bash
-# Check SSH key permissions
-chmod 600 ~/.ssh/your-key
-chmod 644 ~/.ssh/your-key.pub
+# Check PM2 status
+ssh ubuntu@server "pm2 list"
 
-# Test connection
-ssh -i ~/.ssh/your-key deploy@YOUR_VPS_IP
+# View app logs
+ssh ubuntu@server "pm2 logs"
+
+# Check nginx config
+ssh ubuntu@server "sudo nginx -t"
+
+# Check PostgreSQL
+ssh ubuntu@server "sudo -u postgres psql -l"
+
+# View current release
+ssh ubuntu@server "readlink ~/app"
+
+# List all releases
+ssh ubuntu@server "ls -la ~/deployments/releases/"
 ```
-
-#### SSL Certificate Issues
-
-```bash
-# Check certificate status
-ansible-playbook -i inventory.ini deploy.yml --tags ssl-check
-
-# Manual renewal
-certbot renew --dry-run
-```
-
-#### Database Connection Issues
-
-```bash
-# Check PostgreSQL status
-sudo systemctl status postgresql
-
-# Test connection
-sudo -u postgres psql -d commercefull_prod
-```
-
-#### Application Not Starting
-
-```bash
-# Check application logs
-sudo journalctl -u commercefull -f
-
-# Check Node.js process
-sudo systemctl status commercefull
-```
-
-## Scaling
-
-### Vertical Scaling
-
-- Increase VPS resources (CPU, RAM)
-- Update Ansible variables
-- Redeploy configuration
-
-### Horizontal Scaling
-
-For multiple servers, consider:
-
-- Load balancer (Nginx upstream)
-- Shared database
-- Session storage (Redis)
-- File storage (S3-compatible)
-
-## Cost Estimate
-
-### Monthly Costs (USD)
-
-- VPS: $12-24 (2GB RAM, 2 CPUs)
-- Domain: $10-15/year
-- SSL: Free (Let's Encrypt)
-- **Total: ~$12-24/month**
-
-### Scaling Costs
-
-- 4GB RAM VPS: $24-48/month
-- 8GB RAM VPS: $48-96/month
-- Multiple servers: 2x-4x base cost
-
-## Migration
-
-### From Development to Production
-
-```bash
-# 1. Update environment variables
-cp .env.production.example .env.production
-
-# 2. Run deployment
-cd infra/ansible-vps
-ansible-playbook -i inventory.ini deploy.yml
-
-# 3. Test application
-curl https://yourdomain.com/health
-
-# 4. Migrate database (if needed)
-pg_dump local_db | ssh deploy@server "pg_restore -d commercefull_prod"
-```
-
-### Rollback
-
-```bash
-# Rollback application
-ansible-playbook -i inventory.ini rollback.yml
-
-# Rollback database
-ansible-playbook -i inventory.ini deploy.yml --tags db-restore
-```
-
-This deployment strategy provides full control, cost-effectiveness, and is ideal for small to medium applications.

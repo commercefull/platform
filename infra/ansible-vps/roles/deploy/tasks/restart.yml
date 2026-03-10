@@ -1,0 +1,29 @@
+---
+# ===========================================
+# Deploy Role - Restart Application
+# ===========================================
+
+- name: Check if PM2 config exists
+  ansible.builtin.stat:
+    path: '{{ current_link }}/pm2.config.js'
+  register: pm2_config
+
+- name: Restart PM2 processes
+  ansible.builtin.shell: |
+    cd {{ current_link }} && pm2 restart pm2.config.js --update-env
+  args:
+    executable: /bin/bash
+  environment:
+    NODE_ENV: '{{ node_env }}'
+    PATH: '/usr/bin:/usr/local/bin:{{ ansible_env.PATH }}'
+    HOME: '/home/{{ app_user }}'
+  become_user: '{{ app_user }}'
+  when: pm2_config.stat.exists
+  register: pm2_restart
+
+- name: Save PM2 process list
+  ansible.builtin.shell: pm2 save
+  environment:
+    PATH: '/usr/bin:/usr/local/bin:{{ ansible_env.PATH }}'
+  become_user: '{{ app_user }}'
+  when: pm2_config.stat.exists

@@ -1,0 +1,7 @@
+---
+# ===========================================
+# Rollback Role - Default Variables
+# ===========================================
+
+target_release: ''
+auto_confirm: false

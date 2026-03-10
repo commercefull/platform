@@ -1,0 +1,8 @@
+---
+# ===========================================
+# Deploy Role - Default Variables
+# ===========================================
+
+keep_releases: 5
+run_migrations: false
+health_check_timeout: 60

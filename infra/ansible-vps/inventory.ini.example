@@ -1,18 +1,5 @@
-[commercefull]
-# Replace with your VPS IP address
-your-vps-hostname ansible_host=YOUR_VPS_IP
+[vps]
+YOUR_SERVER_IP ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/your-key
 
-[commercefull:vars]
-ansible_user=deploy
-ansible_ssh_private_key_file=~/.ssh/commercefull-deploy
+[all:vars]
 ansible_python_interpreter=/usr/bin/python3
-ansible_ssh_common_args='-o StrictHostKeyChecking=no'
-
-# Application variables
-app_name=commercefull
-app_domain=yourdomain.com
-app_port=3000
-
-# System variables
-timezone=UTC
-swap_size=1G

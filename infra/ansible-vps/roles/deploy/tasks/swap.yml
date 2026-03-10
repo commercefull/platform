@@ -1,0 +1,32 @@
+---
+# ===========================================
+# Deploy Role - Atomic Symlink Swap
+# ===========================================
+
+- name: Get current release (if exists)
+  ansible.builtin.stat:
+    path: '{{ current_link }}'
+  register: current_release
+
+- name: Save previous release path
+  ansible.builtin.set_fact:
+    previous_release: "{{ current_release.stat.lnk_source | default('none') }}"
+  when: current_release.stat.exists and current_release.stat.islnk
+
+- name: Create temporary symlink
+  ansible.builtin.file:
+    src: '{{ release_path }}'
+    dest: '{{ current_link }}.new'
+    state: link
+    owner: '{{ app_user }}'
+    group: '{{ app_group }}'
+
+- name: Atomic symlink swap
+  ansible.builtin.command:
+    cmd: mv -Tf {{ current_link }}.new {{ current_link }}
+
+- name: Verify symlink points to new release
+  ansible.builtin.stat:
+    path: '{{ current_link }}'
+  register: verify_link
+  failed_when: verify_link.stat.lnk_source != release_path

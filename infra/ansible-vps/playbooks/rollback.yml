@@ -1,0 +1,18 @@
+---
+# ===========================================
+# Rollback Playbook - Rollback to Previous Release
+# ===========================================
+# Usage:
+#   ansible-playbook playbooks/rollback.yml
+#   ansible-playbook playbooks/rollback.yml -e "auto_confirm=true"
+#   ansible-playbook playbooks/rollback.yml -e "target_release=20241222_070000"
+# ===========================================
+
+- name: Rollback Application
+  hosts: vps
+  become: true
+  gather_facts: true
+
+  roles:
+    - role: rollback
+      tags: [rollback]

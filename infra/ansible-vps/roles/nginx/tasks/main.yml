@@ -1,97 +1,67 @@
 ---
-# Nginx installation and configuration
+# ===========================================
+# Nginx Role - Install and Configure
+# ===========================================
 
 - name: Install Nginx
-  package:
+  ansible.builtin.apt:
     name: nginx
     state: present
-  tags: ['nginx', 'install']
+  tags: [nginx, setup]
 
-- name: Start and enable Nginx service
-  service:
-    name: nginx
-    state: started
-    enabled: yes
-  tags: ['nginx', 'service']
-
-- name: Configure Nginx worker settings
-  lineinfile:
-    path: /etc/nginx/nginx.conf
-    regexp: "^worker_processes"
-    line: "worker_processes {{ nginx_worker_processes }};"
-  notify: reload nginx
-  tags: ['nginx', 'config']
-
-- name: Configure Nginx worker connections
-  lineinfile:
-    path: /etc/nginx/nginx.conf
-    regexp: "^.*worker_connections"
-    line: "    worker_connections {{ nginx_worker_connections }};"
-  notify: reload nginx
-  tags: ['nginx', 'config']
-
-- name: Configure Nginx client max body size
-  lineinfile:
-    path: /etc/nginx/nginx.conf
-    regexp: "^.*client_max_body_size"
-    line: "    client_max_body_size {{ nginx_client_max_body_size }};"
-  notify: reload nginx
-  tags: ['nginx', 'config']
-
-- name: Configure Nginx keepalive timeout
-  lineinfile:
-    path: /etc/nginx/nginx.conf
-    regexp: "^.*keepalive_timeout"
-    line: "    keepalive_timeout {{ nginx_keepalive_timeout }};"
-  notify: reload nginx
-  tags: ['nginx', 'config']
-
-- name: Create Nginx sites directory
-  file:
-    path: "/etc/nginx/sites-{{ item }}"
+- name: Create SSL directory
+  ansible.builtin.file:
+    path: /etc/ssl
     state: directory
     owner: root
     group: root
     mode: '0755'
-  with_items:
-    - available
-    - enabled
-  tags: ['nginx', 'config']
+  tags: [nginx, ssl]
 
-- name: Configure CommerceFull Nginx site
-  template:
-    src: commercefull.nginx.j2
-    dest: "/etc/nginx/sites-available/{{ app_name }}"
+- name: Copy Nginx configuration
+  ansible.builtin.template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
     owner: root
     group: root
     mode: '0644'
-  notify: reload nginx
-  tags: ['nginx', 'config']
+    backup: yes
+    validate: nginx -t -c %s
+  notify: Reload Nginx
+  tags: [nginx, config]
 
-- name: Enable CommerceFull site
-  file:
-    src: "/etc/nginx/sites-available/{{ app_name }}"
-    dest: "/etc/nginx/sites-enabled/{{ app_name }}"
-    state: link
-  notify: reload nginx
-  tags: ['nginx', 'config']
+- name: Copy SSL certificate
+  ansible.builtin.copy:
+    src: "{{ ssl_cert_src | default('cert.pem') }}"
+    dest: '{{ ssl_cert_path }}'
+    owner: root
+    group: root
+    mode: '0644'
+    backup: yes
+  notify: Reload Nginx
+  tags: [nginx, ssl]
 
-- name: Remove default Nginx site
-  file:
-    path: /etc/nginx/sites-enabled/default
-    state: absent
-  notify: reload nginx
-  tags: ['nginx', 'config']
+- name: Copy SSL private key
+  ansible.builtin.copy:
+    src: "{{ ssl_key_src | default('key.pem') }}"
+    dest: '{{ ssl_key_path }}'
+    owner: root
+    group: root
+    mode: '0600'
+    backup: yes
+  notify: Reload Nginx
+  tags: [nginx, ssl]
 
-- name: Create web directories
-  file:
-    path: "{{ item }}"
-    state: directory
-    owner: "{{ app_user }}"
-    group: "{{ app_group }}"
-    mode: '0755'
-  with_items:
-    - "/var/www/{{ app_name }}"
-    - "/var/www/{{ app_name }}/static"
-    - "/var/www/{{ app_name }}/media"
-  tags: ['nginx', 'directories']
+- name: Test Nginx configuration
+  ansible.builtin.command: nginx -t
+  register: nginx_test
+  changed_when: false
+  failed_when: nginx_test.rc != 0
+  tags: [nginx, verify]
+
+- name: Ensure Nginx is running and enabled
+  ansible.builtin.service:
+    name: nginx
+    state: started
+    enabled: yes
+  tags: [nginx, service]

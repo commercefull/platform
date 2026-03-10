@@ -1,0 +1,16 @@
+---
+# ===========================================
+# Nginx Role - Default Variables
+# ===========================================
+
+domain_name: 'yourdomain.com'
+ssl_cert_path: '/etc/ssl/cert.pem'
+ssl_key_path: '/etc/ssl/key.pem'
+app_port: 3000
+
+# Rate limiting
+nginx_rate_limit: '10r/s'
+nginx_rate_limit_burst: 20
+
+# Client body size (for uploads)
+nginx_client_max_body_size: '50M'

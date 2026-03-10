@@ -1,0 +1,16 @@
+---
+# ===========================================
+# Restore Role - Default Variables
+# ===========================================
+
+# Path to the local backup file to restore (required)
+# Example: backups/2026-03-08/commercefull-db_2026-03-08_1130.sql.gz
+restore_db_file: ''
+restore_files_file: ''
+
+# What to restore
+restore_database: true
+restore_files: true
+
+# Safety: require confirmation before restoring
+auto_confirm_restore: false

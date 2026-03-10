@@ -1,0 +1,19 @@
+---
+# ===========================================
+# Deploy Role - Database Migrations
+# ===========================================
+
+- name: Run database migrations
+  ansible.builtin.command:
+    cmd: yarn db:migrate
+    chdir: '{{ release_path }}'
+  environment:
+    NODE_ENV: '{{ node_env }}'
+    PATH: '/usr/bin:/usr/local/bin:{{ ansible_env.PATH }}'
+    HOME: '/home/{{ app_user }}'
+  become_user: '{{ app_user }}'
+  register: migrations
+
+- name: Display migration result
+  ansible.builtin.debug:
+    msg: '{{ migrations.stdout_lines }}'

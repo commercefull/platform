@@ -1,0 +1,21 @@
+---
+# ===========================================
+# Common Role - Default Variables
+# ===========================================
+
+common_packages:
+  - curl
+  - gnupg
+  - ca-certificates
+  - lsb-release
+  - apt-transport-https
+  - software-properties-common
+  - acl
+  - git
+  - build-essential
+  - htop
+  - vim
+  - unzip
+
+timezone: 'UTC'
+upgrade_packages: false

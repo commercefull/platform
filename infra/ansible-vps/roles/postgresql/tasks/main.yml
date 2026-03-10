@@ -1,111 +1,134 @@
 ---
-# PostgreSQL installation and configuration
+# ===========================================
+# PostgreSQL Role - Install and Configure
+# ===========================================
 
-- name: Add PostgreSQL APT repository key
-  apt_key:
-    url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+- name: Create PostgreSQL keyring directory
+  ansible.builtin.file:
+    path: /usr/share/keyrings
+    state: directory
+    mode: '0755'
+  tags: [postgres, setup]
+
+- name: Add PostgreSQL GPG key (modern signed-by method)
+  ansible.builtin.shell: |
+    curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor -o /usr/share/keyrings/postgresql-archive-keyring.gpg
+  args:
+    creates: /usr/share/keyrings/postgresql-archive-keyring.gpg
+  tags: [postgres, setup]
+
+- name: Add PostgreSQL repository (signed-by)
+  ansible.builtin.apt_repository:
+    repo: 'deb [signed-by=/usr/share/keyrings/postgresql-archive-keyring.gpg] https://apt.postgresql.org/pub/repos/apt {{ ansible_distribution_release }}-pgdg main'
     state: present
-  tags: ['postgresql', 'repo']
+    filename: pgdg
+  tags: [postgres, setup]
 
-- name: Add PostgreSQL APT repository
-  apt_repository:
-    repo: "deb http://apt.postgresql.org/pub/repos/apt {{ ansible_distribution_release }}-pgdg main"
-    state: present
-    filename: postgresql
-  tags: ['postgresql', 'repo']
-
-- name: Update package cache after adding PostgreSQL repo
-  apt:
-    update_cache: yes
-  tags: ['postgresql', 'repo']
-
-- name: Install PostgreSQL
-  package:
+- name: Install PostgreSQL packages
+  ansible.builtin.apt:
     name:
-      - "postgresql-{{ postgres_version }}"
-      - "postgresql-contrib-{{ postgres_version }}"
-      - "postgresql-client-{{ postgres_version }}"
+      - 'postgresql-{{ postgres_version }}'
+      - 'postgresql-contrib-{{ postgres_version }}'
+      - 'postgresql-client-{{ postgres_version }}'
       - python3-psycopg2
     state: present
-  tags: ['postgresql', 'install']
+    update_cache: yes
+  tags: [postgres, setup]
 
-- name: Start and enable PostgreSQL service
-  service:
-    name: "postgresql"
+- name: Ensure PostgreSQL is running and enabled
+  ansible.builtin.service:
+    name: postgresql
     state: started
     enabled: yes
-  tags: ['postgresql', 'service']
+  tags: [postgres, service]
 
-- name: Create PostgreSQL database
-  postgresql_db:
-    name: "{{ db_name }}"
-    owner: "{{ db_user }}"
-    encoding: UTF-8
-    lc_collate: en_US.UTF-8
-    lc_ctype: en_US.UTF-8
-    template: template0
-  become_user: postgres
-  tags: ['postgresql', 'database']
+# SECURITY: Restrict PostgreSQL to localhost only
+- name: Configure listen_addresses to localhost only
+  ansible.builtin.lineinfile:
+    path: '/etc/postgresql/{{ postgres_version }}/main/postgresql.conf'
+    regexp: "^#?listen_addresses\\s*="
+    line: "listen_addresses = '127.0.0.1'"
+    state: present
+  notify: Restart PostgreSQL
+  tags: [postgres, security]
 
-- name: Create PostgreSQL user
-  postgresql_user:
-    db: "{{ db_name }}"
-    name: "{{ db_user }}"
-    password: "{{ db_password | default(omit) }}"
-    priv: "ALL"
-    role_attr_flags: CREATEDB,NOSUPERUSER
-  become_user: postgres
-  tags: ['postgresql', 'user']
+# SECURITY: Enforce scram-sha-256 password encryption
+- name: Set password_encryption to scram-sha-256
+  ansible.builtin.lineinfile:
+    path: '/etc/postgresql/{{ postgres_version }}/main/postgresql.conf'
+    regexp: "^#?password_encryption\\s*="
+    line: "password_encryption = 'scram-sha-256'"
+    state: present
+  notify: Restart PostgreSQL
+  tags: [postgres, security]
 
-- name: Configure PostgreSQL for local connections
-  postgresql_pg_hba:
-    dest: "/etc/postgresql/{{ postgres_version }}/main/pg_hba.conf"
+# SECURITY: Configure pg_hba.conf for secure local-only access
+- name: Configure pg_hba.conf - local socket for postgres superuser
+  community.postgresql.postgresql_pg_hba:
+    dest: '/etc/postgresql/{{ postgres_version }}/main/pg_hba.conf'
     contype: local
-    databases: "{{ db_name }}"
-    users: "{{ db_user }}"
+    databases: all
+    users: postgres
+    method: peer
+    state: present
+  notify: Reload PostgreSQL
+  tags: [postgres, security]
+
+- name: Configure pg_hba.conf - local socket for app user
+  community.postgresql.postgresql_pg_hba:
+    dest: '/etc/postgresql/{{ postgres_version }}/main/pg_hba.conf'
+    contype: local
+    databases: '{{ db_name }}'
+    users: '{{ db_user }}'
+    method: scram-sha-256
+    state: present
+  notify: Reload PostgreSQL
+  tags: [postgres, security]
+
+- name: Configure pg_hba.conf - localhost TCP for app user
+  community.postgresql.postgresql_pg_hba:
+    dest: '/etc/postgresql/{{ postgres_version }}/main/pg_hba.conf'
+    contype: host
+    databases: '{{ db_name }}'
+    users: '{{ db_user }}'
+    source: '127.0.0.1/32'
+    method: scram-sha-256
+    state: present
+  notify: Reload PostgreSQL
+  tags: [postgres, security]
+
+# SECURITY: Remove overly permissive default rules
+- name: Remove default trust rule for local connections
+  community.postgresql.postgresql_pg_hba:
+    dest: '/etc/postgresql/{{ postgres_version }}/main/pg_hba.conf'
+    contype: host
+    databases: all
+    users: all
+    source: '127.0.0.1/32'
     method: trust
-  notify: restart postgresql
-  tags: ['postgresql', 'config']
+    state: absent
+  notify: Reload PostgreSQL
+  tags: [postgres, security]
 
-- name: Configure PostgreSQL listen addresses
-  lineinfile:
-    path: "/etc/postgresql/{{ postgres_version }}/main/postgresql.conf"
-    regexp: "^#?listen_addresses"
-    line: "listen_addresses = '{{ postgres_listen_addresses }}'"
-  notify: restart postgresql
-  tags: ['postgresql', 'config']
+- name: Remove default trust rule for IPv6 local connections
+  community.postgresql.postgresql_pg_hba:
+    dest: '/etc/postgresql/{{ postgres_version }}/main/pg_hba.conf'
+    contype: host
+    databases: all
+    users: all
+    source: '::1/128'
+    method: trust
+    state: absent
+  notify: Reload PostgreSQL
+  tags: [postgres, security]
 
-- name: Configure PostgreSQL performance settings
-  blockinfile:
-    path: "/etc/postgresql/{{ postgres_version }}/main/postgresql.conf"
-    block: |
-      # CommerceFull optimized settings
-      max_connections = {{ postgres_max_connections }}
-      shared_buffers = {{ postgres_shared_buffers }}
-      effective_cache_size = {{ postgres_effective_cache_size }}
-      maintenance_work_mem = {{ postgres_maintenance_work_mem }}
-      checkpoint_completion_target = {{ postgres_checkpoint_completion_target }}
-      wal_buffers = {{ postgres_wal_buffers }}
-      default_statistics_target = {{ postgres_default_statistics_target }}
-    marker: "# {mark} COMMERCEFULL SETTINGS"
-  notify: restart postgresql
-  tags: ['postgresql', 'config']
+- name: Verify PostgreSQL version
+  ansible.builtin.command: psql --version
+  register: postgres_version_output
+  changed_when: false
+  tags: [postgres, verify]
 
-- name: Create PostgreSQL backup script
-  template:
-    src: postgresql_backup.sh.j2
-    dest: /usr/local/bin/postgresql-backup
-    mode: '0755'
-    owner: root
-    group: root
-  tags: ['postgresql', 'backup']
-
-- name: Schedule PostgreSQL backups
-  cron:
-    name: "PostgreSQL backup"
-    minute: "0"
-    hour: "2"
-    job: "/usr/local/bin/postgresql-backup"
-    user: postgres
-  when: backup_enabled | default(true)
-  tags: ['postgresql', 'backup']
+- name: Display PostgreSQL version
+  ansible.builtin.debug:
+    msg: 'PostgreSQL version: {{ postgres_version_output.stdout }}'
+  tags: [postgres, verify]

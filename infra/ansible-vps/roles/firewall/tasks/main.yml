@@ -1,0 +1,56 @@
+---
+# ===========================================
+# Firewall Role - UFW Configuration
+# ===========================================
+
+- name: Install UFW
+  ansible.builtin.apt:
+    name: ufw
+    state: present
+  tags: [firewall, setup]
+
+- name: Set UFW default policies
+  community.general.ufw:
+    direction: '{{ item.direction }}'
+    policy: '{{ item.policy }}'
+  loop:
+    - { direction: 'incoming', policy: 'deny' }
+    - { direction: 'outgoing', policy: 'allow' }
+  tags: [firewall, policy]
+
+- name: Allow SSH through UFW
+  community.general.ufw:
+    rule: allow
+    name: OpenSSH
+  tags: [firewall, rules]
+
+- name: Allow HTTP through UFW
+  community.general.ufw:
+    rule: allow
+    port: '80'
+    proto: tcp
+  tags: [firewall, rules]
+
+- name: Allow HTTPS through UFW
+  community.general.ufw:
+    rule: allow
+    port: '443'
+    proto: tcp
+  tags: [firewall, rules]
+
+- name: Enable UFW
+  community.general.ufw:
+    state: enabled
+    logging: 'on'
+  tags: [firewall, enable]
+
+- name: Show UFW status
+  ansible.builtin.command: ufw status verbose
+  register: ufw_status
+  changed_when: false
+  tags: [firewall, verify]
+
+- name: Display UFW status
+  ansible.builtin.debug:
+    msg: '{{ ufw_status.stdout_lines }}'
+  tags: [firewall, verify]

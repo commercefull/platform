@@ -1,0 +1,111 @@
+---
+# ===========================================
+# Restart Playbook - Restart Application Services
+# ===========================================
+# Usage:
+#   ansible-playbook playbooks/restart.yml
+#   ansible-playbook playbooks/restart.yml --tags pm2
+#   ansible-playbook playbooks/restart.yml --tags nginx
+# ===========================================
+
+- name: Restart Application Services
+  hosts: vps
+  become: true
+  gather_facts: true
+
+  vars:
+    restart_nginx: true
+    restart_pm2: true
+
+  tasks:
+    - name: Check PM2 status before restart
+      ansible.builtin.shell: pm2 list
+      environment:
+        PATH: '/usr/bin:/usr/local/bin:{{ ansible_env.PATH }}'
+      become_user: '{{ app_user }}'
+      register: pm2_before
+      changed_when: false
+      ignore_errors: yes
+      when: restart_pm2
+      tags: [pm2, status]
+
+    - name: Check if PM2 config exists
+      ansible.builtin.stat:
+        path: '{{ current_link }}/pm2.config.js'
+      register: pm2_config
+      when: restart_pm2
+      tags: [pm2]
+
+    - name: Restart PM2 processes
+      ansible.builtin.shell: |
+        cd {{ current_link }} && pm2 restart pm2.config.js --update-env
+      args:
+        executable: /bin/bash
+      environment:
+        PATH: '/usr/bin:/usr/local/bin:{{ ansible_env.PATH }}'
+        HOME: '/home/{{ app_user }}'
+        NODE_ENV: '{{ node_env }}'
+      become_user: '{{ app_user }}'
+      register: pm2_restart
+      when:
+        - restart_pm2
+        - pm2_config.stat.exists
+      tags: [pm2]
+
+    - name: Save PM2 process list
+      ansible.builtin.shell: pm2 save
+      environment:
+        PATH: '/usr/bin:/usr/local/bin:{{ ansible_env.PATH }}'
+      become_user: '{{ app_user }}'
+      when:
+        - restart_pm2
+        - pm2_config.stat.exists
+      tags: [pm2]
+
+    - name: Test Nginx configuration
+      ansible.builtin.command: nginx -t
+      register: nginx_test
+      changed_when: false
+      failed_when: nginx_test.rc != 0
+      when: restart_nginx
+      tags: [nginx]
+
+    - name: Restart Nginx
+      ansible.builtin.service:
+        name: nginx
+        state: restarted
+      when: restart_nginx
+      tags: [nginx]
+
+    - name: Wait for application to be ready
+      ansible.builtin.wait_for:
+        port: '{{ app_port }}'
+        host: 127.0.0.1
+        delay: 5
+        timeout: '{{ health_check_timeout }}'
+      when: restart_pm2
+      tags: [verify]
+
+    - name: Check PM2 status after restart
+      ansible.builtin.shell: pm2 list
+      environment:
+        PATH: '/usr/bin:/usr/local/bin:{{ ansible_env.PATH }}'
+      become_user: '{{ app_user }}'
+      register: pm2_after
+      changed_when: false
+      when: restart_pm2
+      tags: [pm2, status]
+
+    - name: Display PM2 status
+      ansible.builtin.debug:
+        msg: '{{ pm2_after.stdout_lines }}'
+      when: restart_pm2
+      tags: [pm2, status]
+
+    - name: Restart summary
+      ansible.builtin.debug:
+        msg: |
+          ✅ Services restarted!
+          - PM2: {{ 'restarted' if (restart_pm2 and pm2_config.stat.exists) else 'skipped' }}
+          - Nginx: {{ 'restarted' if restart_nginx else 'skipped' }}
+      tags: [info]

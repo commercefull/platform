@@ -1,0 +1,41 @@
+---
+# ===========================================
+# Deploy Role - Cleanup Old Releases
+# ===========================================
+
+- name: List all releases
+  ansible.builtin.find:
+    paths: '{{ releases_dir }}'
+    file_type: directory
+  register: all_releases
+
+- name: Sort releases by modification time
+  ansible.builtin.set_fact:
+    sorted_releases: "{{ all_releases.files | sort(attribute='mtime', reverse=true) }}"
+
+- name: Identify releases to remove
+  ansible.builtin.set_fact:
+    releases_to_remove: "{{ sorted_releases[keep_releases:] | map(attribute='path') | list }}"
+  when: sorted_releases | length > keep_releases
+
+- name: Remove old releases
+  ansible.builtin.file:
+    path: '{{ item }}'
+    state: absent
+  loop: '{{ releases_to_remove | default([]) }}'
+
+- name: Display cleanup result
+  ansible.builtin.debug:
+    msg: 'Removed {{ releases_to_remove | default([]) | length }} old release(s), keeping {{ keep_releases }}'
+
+- name: Deployment summary
+  ansible.builtin.debug:
+    msg: |
+      ✅ Deployment complete!
+
+      Release: {{ release_timestamp }}
+      Commit: {{ git_commit.stdout }}
+      Branch: {{ repo_branch }}
+      Path: {{ release_path }}
+
+      Previous: {{ previous_release | default('none') }}

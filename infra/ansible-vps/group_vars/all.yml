@@ -1,0 +1,50 @@
+---
+# ===========================================
+# Global Variables for All Hosts
+# ===========================================
+
+# Application
+app_name: 'commercefull'
+app_user: 'ubuntu'
+app_group: 'ubuntu'
+app_port: 3000
+node_env: 'production'
+
+# Paths
+app_base_dir: '/home/{{ app_user }}'
+deploy_base: '{{ app_base_dir }}/deployments'
+current_link: '{{ app_base_dir }}/app'
+shared_dir: '{{ deploy_base }}/shared'
+releases_dir: '{{ deploy_base }}/releases'
+
+# Node.js
+nodejs_version: '22'
+
+# PostgreSQL
+postgres_version: '18'
+db_name: 'commercefull-db'
+db_user: 'commercefull-user'
+# db_password should be in vault or passed via -e
+
+# Git
+repo_url: 'git@github.com:commercefull/platform.git'
+repo_branch: 'main'
+
+# Deployment
+keep_releases: 5
+run_migrations: false
+
+# Domain & SSL
+domain_name: 'yourdomain.com'
+ssl_cert_path: '/etc/ssl/cert.pem'
+ssl_key_path: '/etc/ssl/key.pem'
+
+# Backup
+backup_base_dir: '/var/lib/backups'
+local_backup_dir: 'backups'
+backup_retention_days: 30
+
+# Timeouts
+reboot_timeout: 600
+ssh_wait_timeout: 300
+health_check_timeout: 60

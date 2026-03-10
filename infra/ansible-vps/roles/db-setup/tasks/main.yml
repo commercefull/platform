@@ -1,0 +1,147 @@
+---
+# ===========================================
+# DB Setup Role - Create Database & User
+# ===========================================
+# Automates the one-time database setup:
+#   1. Create app database user
+#   2. Create app database
+#   3. Set user password
+#   4. Grant permissions
+#   5. Install extensions
+#
+# Usage:
+#   ansible-playbook playbooks/db-setup.yml -e "db_password=your-secure-password"
+#   ansible-playbook playbooks/db-setup.yml  # if db_password is in vault
+# ===========================================
+
+# --- Validation ---
+
+- name: Fail if db_password not provided
+  ansible.builtin.fail:
+    msg: |
+      db_password is required!
+      Usage: ansible-playbook playbooks/db-setup.yml -e "db_password=your-secure-password"
+      Or add db_password to Ansible Vault: ansible-vault encrypt_string 'password' --name 'db_password'
+  when: db_password == ''
+
+- name: Ensure PostgreSQL is running
+  ansible.builtin.service:
+    name: postgresql
+    state: started
+  tags: [db-setup]
+
+# --- Create User ---
+
+- name: Check if database user exists
+  ansible.builtin.shell: |
+    sudo -u postgres psql -tAc "SELECT 1 FROM pg_roles WHERE rolname='{{ db_user }}'"
+  register: user_exists
+  changed_when: false
+  tags: [db-setup]
+
+- name: Create database user
+  community.postgresql.postgresql_user:
+    name: '{{ db_user }}'
+    password: '{{ db_password }}'
+    encrypted: yes
+    state: present
+  become: yes
+  become_user: postgres
+  tags: [db-setup]
+
+- name: Display user status
+  ansible.builtin.debug:
+    msg: "{{ 'User already existed' if user_exists.stdout == '1' else 'User created' }}: {{ db_user }}"
+  tags: [db-setup]
+
+# --- Create Database ---
+
+- name: Create application database
+  community.postgresql.postgresql_db:
+    name: '{{ db_name }}'
+    owner: '{{ db_user }}'
+    encoding: UTF-8
+    lc_collate: en_US.UTF-8
+    lc_ctype: en_US.UTF-8
+    template: template0
+    state: present
+  become: yes
+  become_user: postgres
+  tags: [db-setup]
+
+# --- Grant Permissions ---
+
+- name: Grant database privileges to app user
+  community.postgresql.postgresql_privs:
+    db: '{{ db_name }}'
+    privs: ALL
+    type: database
+    role: '{{ db_user }}'
+  become: yes
+  become_user: postgres
+  tags: [db-setup]
+
+- name: Grant schema privileges to app user
+  community.postgresql.postgresql_privs:
+    db: '{{ db_name }}'
+    privs: ALL
+    type: schema
+    objs: public
+    role: '{{ db_user }}'
+  become: yes
+  become_user: postgres
+  tags: [db-setup]
+
+- name: Grant default table privileges
+  community.postgresql.postgresql_privs:
+    db: '{{ db_name }}'
+    privs: ALL
+    type: default_privs
+    objs: TABLES
+    role: '{{ db_user }}'
+    schema: public
+  become: yes
+  become_user: postgres
+  tags: [db-setup]
+
+- name: Grant default sequence privileges
+  community.postgresql.postgresql_privs:
+    db: '{{ db_name }}'
+    privs: ALL
+    type: default_privs
+    objs: SEQUENCES
+    role: '{{ db_user }}'
+    schema: public
+  become: yes
+  become_user: postgres
+  tags: [db-setup]
+
+# --- Install Extensions ---
+
+- name: Install PostgreSQL extensions
+  community.postgresql.postgresql_ext:
+    name: '{{ item }}'
+    db: '{{ db_name }}'
+    state: present
+  become: yes
+  become_user: postgres
+  loop: '{{ db_extensions }}'
+  tags: [db-setup]
+
+# --- Summary ---
+
+- name: DB setup summary
+  ansible.builtin.debug:
+    msg: |
+      ✅ Database setup complete!
+
+      Database: {{ db_name }}
+      User:     {{ db_user }}
+      Extensions: {{ db_extensions | join(', ') }}
+
+      Next steps:
+        1. Add the following to your shared .env on the VPS:
+           DATABASE_URL=postgresql://{{ db_user }}:<password>@127.0.0.1:5432/{{ db_name }}
+        2. Deploy the application:
+           ansible-playbook playbooks/deploy.yml -e "run_migrations=true"
+  tags: [db-setup]

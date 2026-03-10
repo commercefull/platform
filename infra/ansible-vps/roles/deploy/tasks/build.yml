@@ -1,0 +1,42 @@
+---
+# ===========================================
+# Deploy Role - Build Application
+# ===========================================
+
+- name: Install dependencies with Yarn
+  ansible.builtin.command:
+    cmd: yarn install --frozen-lockfile --production=false
+    chdir: '{{ release_path }}'
+  environment:
+    NODE_ENV: development
+    PATH: '/usr/bin:/usr/local/bin:{{ ansible_env.PATH }}'
+    HOME: '/home/{{ app_user }}'
+  become_user: '{{ app_user }}'
+  register: yarn_install
+
+- name: Build application
+  ansible.builtin.command:
+    cmd: yarn prd:build
+    chdir: '{{ release_path }}'
+  environment:
+    NODE_ENV: '{{ node_env }}'
+    PATH: '/usr/bin:/usr/local/bin:{{ ansible_env.PATH }}'
+    HOME: '/home/{{ app_user }}'
+  become_user: '{{ app_user }}'
+  register: yarn_build
+
+- name: Build Tailwind CSS
+  ansible.builtin.command:
+    cmd: yarn css:build
+    chdir: '{{ release_path }}'
+  environment:
+    NODE_ENV: '{{ node_env }}'
+    PATH: '/usr/bin:/usr/local/bin:{{ ansible_env.PATH }}'
+    HOME: '/home/{{ app_user }}'
+  become_user: '{{ app_user }}'
+  register: css_build
+
+- name: Display build result
+  ansible.builtin.debug:
+    msg: 'Build completed successfully'
+  when: yarn_build.rc == 0

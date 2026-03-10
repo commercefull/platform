@@ -1,0 +1,18 @@
+---
+# ===========================================
+# DB Setup Role - Default Variables
+# ===========================================
+
+# These come from group_vars/all.yml:
+#   db_name, db_user, postgres_version
+
+# db_password MUST be provided via:
+#   - Ansible Vault: ansible-vault encrypt_string 'your-password' --name 'db_password'
+#   - Extra var:     -e "db_password=your-password"
+#   - Environment:   export DB_PASSWORD=... (with lookup in group_vars)
+db_password: ''
+
+# PostgreSQL extensions to install
+# Note: uuid-ossp not needed — PG 18 has native UUIDv7
+db_extensions:
+  - pgcrypto

@@ -1,0 +1,41 @@
+---
+# ===========================================
+# Deploy Role - Zero-Downtime Deployment
+# ===========================================
+
+- name: Include directory setup tasks
+  ansible.builtin.include_tasks: setup_dirs.yml
+  tags: [deploy, setup]
+
+- name: Include git clone tasks
+  ansible.builtin.include_tasks: clone.yml
+  tags: [deploy, git]
+
+- name: Include shared resources tasks
+  ansible.builtin.include_tasks: shared.yml
+  tags: [deploy, shared]
+
+- name: Include build tasks
+  ansible.builtin.include_tasks: build.yml
+  tags: [deploy, build]
+
+- name: Include migration tasks
+  ansible.builtin.include_tasks: migrate.yml
+  when: run_migrations | default(false) | bool
+  tags: [deploy, migrate]
+
+- name: Include symlink swap tasks
+  ansible.builtin.include_tasks: swap.yml
+  tags: [deploy, swap]
+
+- name: Include restart tasks
+  ansible.builtin.include_tasks: restart.yml
+  tags: [deploy, restart]
+
+- name: Include health check tasks
+  ansible.builtin.include_tasks: health.yml
+  tags: [deploy, health]
+
+- name: Include cleanup tasks
+  ansible.builtin.include_tasks: cleanup.yml
+  tags: [deploy, cleanup]

@@ -1,0 +1,30 @@
+---
+# ===========================================
+# Deploy Role - Directory Setup
+# ===========================================
+
+- name: Create deployment directories
+  ansible.builtin.file:
+    path: '{{ item }}'
+    state: directory
+    owner: '{{ app_user }}'
+    group: '{{ app_group }}'
+    mode: '0755'
+  loop:
+    - '{{ deploy_base }}'
+    - '{{ releases_dir }}'
+    - '{{ shared_dir }}'
+    - '{{ shared_dir }}/logs'
+    - '{{ shared_dir }}/uploads'
+
+- name: Generate release timestamp
+  ansible.builtin.set_fact:
+    release_timestamp: '{{ ansible_date_time.year }}{{ ansible_date_time.month }}{{ ansible_date_time.day }}_{{ ansible_date_time.hour }}{{ ansible_date_time.minute }}{{ ansible_date_time.second }}'
+
+- name: Set release path
+  ansible.builtin.set_fact:
+    release_path: '{{ releases_dir }}/{{ release_timestamp }}'
+
+- name: Display release info
+  ansible.builtin.debug:
+    msg: 'Creating release: {{ release_timestamp }}'

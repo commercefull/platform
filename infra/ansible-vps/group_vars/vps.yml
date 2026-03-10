@@ -1,0 +1,9 @@
+---
+# ===========================================
+# VPS-Specific Variables
+# ===========================================
+
+# Override any global variables for VPS hosts here
+# Example:
+# node_env: "staging"
+# repo_branch: "develop"

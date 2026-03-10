@@ -1,0 +1,52 @@
+---
+# ===========================================
+# Site Playbook - Full Server Setup
+# ===========================================
+# Usage: ansible-playbook playbooks/site.yml
+#
+# This playbook sets up a complete server with:
+# - Base system packages + SSH hardening
+# - Node.js 22
+# - PostgreSQL 18
+# - Nginx with SSL
+# - UFW Firewall
+# ===========================================
+
+- name: Full Server Setup
+  hosts: vps
+  become: true
+  gather_facts: true
+
+  roles:
+    - role: common
+      tags: [common, setup]
+
+    - role: nodejs
+      tags: [nodejs, setup]
+
+    - role: postgresql
+      tags: [postgres, setup]
+
+    - role: nginx
+      tags: [nginx, setup]
+
+    - role: firewall
+      tags: [firewall, setup]
+
+  post_tasks:
+    - name: Setup summary
+      ansible.builtin.debug:
+        msg: |
+          ✅ Server setup complete!
+
+          Installed:
+          - Node.js {{ nodejs_version }}
+          - PostgreSQL {{ postgres_version }}
+          - Nginx
+          - UFW Firewall
+
+          Next steps:
+          1. Create database: ansible-playbook playbooks/db-setup.yml -e "db_password=your-password"
+          2. Create shared .env: ssh {{ app_user }}@server "nano {{ shared_dir }}/.env"
+          3. Deploy app: ansible-playbook playbooks/deploy.yml
+      tags: [info]

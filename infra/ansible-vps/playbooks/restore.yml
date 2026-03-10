@@ -1,0 +1,33 @@
+---
+# ===========================================
+# Restore Playbook - Database & File Restore
+# ===========================================
+# Usage:
+#   # Restore both DB and files
+#   ansible-playbook playbooks/restore.yml \
+#     -e "restore_db_file=backups/2026-03-08/commercefull-db_2026-03-08_1130.sql.gz" \
+#     -e "restore_files_file=backups/2026-03-08/commercefull_files_2026-03-08_1130.tar.gz"
+#
+#   # Restore DB only
+#   ansible-playbook playbooks/restore.yml \
+#     -e "restore_db_file=backups/2026-03-08/commercefull-db_2026-03-08_1130.sql.gz" \
+#     -e "restore_files=false"
+#
+#   # Restore files only
+#   ansible-playbook playbooks/restore.yml \
+#     -e "restore_files_file=backups/2026-03-08/commercefull_files_2026-03-08_1130.tar.gz" \
+#     -e "restore_database=false"
+#
+#   # Skip confirmation prompt
+#   ansible-playbook playbooks/restore.yml \
+#     -e "restore_db_file=... auto_confirm_restore=true"
+# ===========================================
+
+- name: Restore Database and Files
+  hosts: vps
+  become: true
+  gather_facts: true
+
+  roles:
+    - role: restore
+      tags: [restore]

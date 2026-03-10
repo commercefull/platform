@@ -1,0 +1,277 @@
+---
+# ===========================================
+# Restore Role - Database & File Restore
+# ===========================================
+# Tags:
+#   restore        - Run everything
+#   restore-db     - Database restore only
+#   restore-files  - File restore only
+# ===========================================
+
+# --- Validation ---
+
+- name: Fail if no DB backup file specified
+  ansible.builtin.fail:
+    msg: |
+      No database backup file specified!
+      Usage: ansible-playbook playbooks/restore.yml -e "restore_db_file=backups/2026-03-08/commercefull-db_2026-03-08_1130.sql.gz"
+  when: restore_database | bool and restore_db_file == ''
+  tags: [restore, restore-db]
+
+- name: Fail if no file backup specified
+  ansible.builtin.fail:
+    msg: |
+      No file backup specified!
+      Usage: ansible-playbook playbooks/restore.yml -e "restore_files_file=backups/2026-03-08/commercefull_files_2026-03-08_1130.tar.gz"
+  when: restore_files | bool and restore_files_file == ''
+  tags: [restore, restore-files]
+
+- name: Check local DB backup file exists
+  ansible.builtin.stat:
+    path: '{{ restore_db_file }}'
+  register: local_db_file
+  delegate_to: localhost
+  become: no
+  when: restore_database | bool and restore_db_file != ''
+  tags: [restore, restore-db]
+
+- name: Fail if local DB backup file not found
+  ansible.builtin.fail:
+    msg: 'DB backup file not found: {{ restore_db_file }}'
+  when: restore_database | bool and restore_db_file != '' and not local_db_file.stat.exists
+  tags: [restore, restore-db]
+
+- name: Check local file backup exists
+  ansible.builtin.stat:
+    path: '{{ restore_files_file }}'
+  register: local_files_file
+  delegate_to: localhost
+  become: no
+  when: restore_files | bool and restore_files_file != ''
+  tags: [restore, restore-files]
+
+- name: Fail if local file backup not found
+  ansible.builtin.fail:
+    msg: 'File backup not found: {{ restore_files_file }}'
+  when: restore_files | bool and restore_files_file != '' and not local_files_file.stat.exists
+  tags: [restore, restore-files]
+
+# --- Confirmation ---
+
+- name: Display restore plan
+  ansible.builtin.debug:
+    msg: |
+      ⚠️  RESTORE PLAN:
+
+      Database: {{ restore_db_file if (restore_database | bool and restore_db_file != '') else 'SKIP' }}
+      Files:    {{ restore_files_file if (restore_files | bool and restore_files_file != '') else 'SKIP' }}
+
+      WARNING: This will OVERWRITE existing data!
+  tags: [restore, info]
+
+- name: Confirm restore
+  ansible.builtin.pause:
+    prompt: 'This will OVERWRITE existing data. Type "yes" to proceed'
+  register: confirm_restore
+  when: not (auto_confirm_restore | default(false) | bool)
+  tags: [restore, confirm]
+
+- name: Abort if not confirmed
+  ansible.builtin.fail:
+    msg: 'Restore aborted by user'
+  when:
+    - not (auto_confirm_restore | default(false) | bool)
+    - confirm_restore.user_input | lower not in ['yes', 'y']
+  tags: [restore, confirm]
+
+# ===========================================
+# STOP APPLICATION (safety)
+# ===========================================
+
+- name: Check if PM2 config exists
+  ansible.builtin.stat:
+    path: '{{ current_link }}/pm2.config.js'
+  register: pm2_config
+  tags: [restore]
+
+- name: Stop PM2 processes before restore
+  ansible.builtin.shell: |
+    cd {{ current_link }} && pm2 stop all
+  args:
+    executable: /bin/bash
+  environment:
+    PATH: '/usr/bin:/usr/local/bin:{{ ansible_env.PATH }}'
+    HOME: '/home/{{ app_user }}'
+  become_user: '{{ app_user }}'
+  when: pm2_config.stat.exists
+  ignore_errors: yes
+  tags: [restore]
+
+# ===========================================
+# DATABASE RESTORE
+# ===========================================
+
+- name: Create remote restore directory
+  ansible.builtin.file:
+    path: '/tmp/commercefull-restore'
+    state: directory
+    owner: '{{ app_user }}'
+    group: '{{ app_group }}'
+    mode: '0750'
+  when: restore_database | bool and restore_db_file != ''
+  tags: [restore, restore-db]
+
+- name: Upload DB backup to server
+  ansible.builtin.copy:
+    src: '{{ restore_db_file }}'
+    dest: '/tmp/commercefull-restore/{{ restore_db_file | basename }}'
+    owner: postgres
+    group: postgres
+    mode: '0640'
+  when: restore_database | bool and restore_db_file != ''
+  tags: [restore, restore-db]
+
+- name: Drop and recreate database
+  community.postgresql.postgresql_db:
+    name: '{{ db_name }}'
+    state: absent
+  become: yes
+  become_user: postgres
+  when: restore_database | bool and restore_db_file != ''
+  tags: [restore, restore-db]
+
+- name: Create fresh database
+  community.postgresql.postgresql_db:
+    name: '{{ db_name }}'
+    owner: '{{ db_user }}'
+    state: present
+  become: yes
+  become_user: postgres
+  when: restore_database | bool and restore_db_file != ''
+  tags: [restore, restore-db]
+
+- name: Restore database from backup
+  ansible.builtin.shell: |
+    gunzip -c /tmp/commercefull-restore/{{ restore_db_file | basename }} | psql -U postgres -d {{ db_name }}
+  become: yes
+  become_user: postgres
+  register: db_restore_result
+  when: restore_database | bool and restore_db_file != ''
+  tags: [restore, restore-db]
+
+- name: Grant permissions after restore
+  community.postgresql.postgresql_privs:
+    db: '{{ db_name }}'
+    privs: ALL
+    type: schema
+    objs: public
+    role: '{{ db_user }}'
+  become: yes
+  become_user: postgres
+  when: restore_database | bool and restore_db_file != ''
+  tags: [restore, restore-db]
+
+- name: Grant table permissions after restore
+  ansible.builtin.shell: |
+    psql -d {{ db_name }} -c "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO \"{{ db_user }}\";"
+    psql -d {{ db_name }} -c "GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO \"{{ db_user }}\";"
+    psql -d {{ db_name }} -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO \"{{ db_user }}\";"
+    psql -d {{ db_name }} -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO \"{{ db_user }}\";"
+  become: yes
+  become_user: postgres
+  when: restore_database | bool and restore_db_file != ''
+  tags: [restore, restore-db]
+
+- name: Display DB restore result
+  ansible.builtin.debug:
+    msg: '✅ Database restored from {{ restore_db_file | basename }}'
+  when: restore_database | bool and restore_db_file != ''
+  tags: [restore, restore-db]
+
+# ===========================================
+# FILE RESTORE
+# ===========================================
+
+- name: Upload file backup to server
+  ansible.builtin.copy:
+    src: '{{ restore_files_file }}'
+    dest: '/tmp/commercefull-restore/{{ restore_files_file | basename }}'
+    owner: '{{ app_user }}'
+    group: '{{ app_group }}'
+    mode: '0640'
+  when: restore_files | bool and restore_files_file != ''
+  tags: [restore, restore-files]
+
+- name: Ensure shared directory exists
+  ansible.builtin.file:
+    path: '{{ shared_dir }}'
+    state: directory
+    owner: '{{ app_user }}'
+    group: '{{ app_group }}'
+    mode: '0750'
+  when: restore_files | bool and restore_files_file != ''
+  tags: [restore, restore-files]
+
+- name: Extract file backup to shared directory
+  ansible.builtin.unarchive:
+    src: '/tmp/commercefull-restore/{{ restore_files_file | basename }}'
+    dest: '{{ shared_dir }}'
+    remote_src: yes
+    owner: '{{ app_user }}'
+    group: '{{ app_group }}'
+    extra_opts:
+      - --strip-components=1
+  when: restore_files | bool and restore_files_file != ''
+  register: file_restore_result
+  tags: [restore, restore-files]
+
+- name: Display file restore result
+  ansible.builtin.debug:
+    msg: '✅ Files restored to {{ shared_dir }} from {{ restore_files_file | basename }}'
+  when: restore_files | bool and restore_files_file != ''
+  tags: [restore, restore-files]
+
+# ===========================================
+# RESTART APPLICATION
+# ===========================================
+
+- name: Restart PM2 processes after restore
+  ansible.builtin.shell: |
+    cd {{ current_link }} && pm2 restart pm2.config.js --update-env
+  args:
+    executable: /bin/bash
+  environment:
+    NODE_ENV: '{{ node_env }}'
+    PATH: '/usr/bin:/usr/local/bin:{{ ansible_env.PATH }}'
+    HOME: '/home/{{ app_user }}'
+  become_user: '{{ app_user }}'
+  when: pm2_config.stat.exists
+  tags: [restore]
+
+- name: Wait for application to be ready
+  ansible.builtin.wait_for:
+    port: '{{ app_port }}'
+    host: 127.0.0.1
+    delay: 5
+    timeout: '{{ health_check_timeout }}'
+  tags: [restore]
+
+# ===========================================
+# CLEANUP
+# ===========================================
+
+- name: Remove temporary restore files
+  ansible.builtin.file:
+    path: '/tmp/commercefull-restore'
+    state: absent
+  tags: [restore, cleanup]
+
+- name: Restore summary
+  ansible.builtin.debug:
+    msg: |
+      ✅ Restore complete!
+
+      Database: {{ 'RESTORED from ' + (restore_db_file | basename) if (restore_database | bool and restore_db_file != '') else 'Skipped' }}
+      Files:    {{ 'RESTORED from ' + (restore_files_file | basename) if (restore_files | bool and restore_files_file != '') else 'Skipped' }}
+      App:      {{ 'Restarted' if pm2_config.stat.exists else 'Not running' }}
+  tags: [restore, info]

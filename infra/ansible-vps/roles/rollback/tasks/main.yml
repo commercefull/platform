@@ -1,0 +1,137 @@
+---
+# ===========================================
+# Rollback Role - Rollback to Previous Release
+# ===========================================
+
+- name: Get current release info
+  ansible.builtin.stat:
+    path: '{{ current_link }}'
+  register: current_link_stat
+  tags: [rollback, info]
+
+- name: Set current release path
+  ansible.builtin.set_fact:
+    current_release_path: '{{ current_link_stat.stat.lnk_source }}'
+  when: current_link_stat.stat.exists and current_link_stat.stat.islnk
+  tags: [rollback, info]
+
+- name: Get current release name
+  ansible.builtin.set_fact:
+    current_release_name: '{{ current_release_path | basename }}'
+  when: current_release_path is defined
+  tags: [rollback, info]
+
+- name: List all available releases
+  ansible.builtin.find:
+    paths: '{{ releases_dir }}'
+    file_type: directory
+  register: all_releases
+  tags: [rollback, info]
+
+- name: Sort releases by modification time
+  ansible.builtin.set_fact:
+    sorted_releases: "{{ all_releases.files | sort(attribute='mtime', reverse=true) }}"
+  tags: [rollback, info]
+
+- name: Display available releases
+  ansible.builtin.debug:
+    msg: |
+      Available releases:
+      {% for release in sorted_releases %}
+      {{ '→ ' if release.path == current_release_path else '  ' }}{{ release.path | basename }}{{ ' (current)' if release.path == current_release_path else '' }}
+      {% endfor %}
+  tags: [rollback, info]
+
+- name: Find previous release (auto-detect)
+  ansible.builtin.set_fact:
+    rollback_target: '{{ sorted_releases[1].path }}'
+  when:
+    - target_release | default('') == ''
+    - sorted_releases | length > 1
+    - sorted_releases[0].path == current_release_path
+  tags: [rollback]
+
+- name: Find specific release (manual target)
+  ansible.builtin.set_fact:
+    rollback_target: '{{ releases_dir }}/{{ target_release }}'
+  when: target_release | default('') != ''
+  tags: [rollback]
+
+- name: Fail if no rollback target found
+  ansible.builtin.fail:
+    msg: 'No rollback target available!'
+  when: rollback_target is not defined
+  tags: [rollback]
+
+- name: Verify rollback target exists
+  ansible.builtin.stat:
+    path: '{{ rollback_target }}'
+  register: rollback_target_stat
+  tags: [rollback]
+
+- name: Fail if rollback target doesn't exist
+  ansible.builtin.fail:
+    msg: 'Rollback target does not exist: {{ rollback_target }}'
+  when: not rollback_target_stat.stat.exists
+  tags: [rollback]
+
+- name: Display rollback plan
+  ansible.builtin.debug:
+    msg: |
+      🔄 Rollback Plan:
+      Current: {{ current_release_name | default('unknown') }}
+      Target:  {{ rollback_target | basename }}
+  tags: [rollback, info]
+
+- name: Confirm rollback
+  ansible.builtin.pause:
+    prompt: 'Proceed with rollback to {{ rollback_target | basename }}? (yes/no)'
+  register: confirm_rollback
+  when: not (auto_confirm | default(false) | bool)
+  tags: [rollback, confirm]
+
+- name: Abort if not confirmed
+  ansible.builtin.fail:
+    msg: 'Rollback aborted by user'
+  when:
+    - not (auto_confirm | default(false) | bool)
+    - confirm_rollback.user_input | lower not in ['yes', 'y']
+  tags: [rollback, confirm]
+
+- name: Create temporary symlink to rollback target
+  ansible.builtin.file:
+    src: '{{ rollback_target }}'
+    dest: '{{ current_link }}.rollback'
+    state: link
+    owner: '{{ app_user }}'
+    group: '{{ app_group }}'
+  tags: [rollback, swap]
+
+- name: Atomic symlink swap (rollback)
+  ansible.builtin.command:
+    cmd: mv -Tf {{ current_link }}.rollback {{ current_link }}
+  tags: [rollback, swap]
+
+- name: Verify symlink points to rollback target
+  ansible.builtin.stat:
+    path: '{{ current_link }}'
+  register: verify_rollback
+  failed_when: verify_rollback.stat.lnk_source != rollback_target
+  tags: [rollback, swap]
+
+- name: Include restart tasks
+  ansible.builtin.include_tasks: '{{ role_path }}/../deploy/tasks/restart.yml'
+  tags: [rollback, restart]
+
+- name: Include health check tasks
+  ansible.builtin.include_tasks: '{{ role_path }}/../deploy/tasks/health.yml'
+  tags: [rollback, health]
+
+- name: Rollback summary
+  ansible.builtin.debug:
+    msg: |
+      ✅ Rollback complete!
+
+      Previous: {{ current_release_name | default('unknown') }}
+      Current:  {{ rollback_target | basename }}
+  tags: [rollback, info]

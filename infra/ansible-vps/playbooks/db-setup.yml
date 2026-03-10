@@ -1,0 +1,19 @@
+---
+# ===========================================
+# DB Setup Playbook - Create Database & User
+# ===========================================
+# Usage:
+#   ansible-playbook playbooks/db-setup.yml -e "db_password=your-secure-password"
+#   ansible-playbook playbooks/db-setup.yml  # if db_password is in Ansible Vault
+#
+# This is a one-time setup. Safe to re-run (idempotent).
+# ===========================================
+
+- name: Setup PostgreSQL Database
+  hosts: vps
+  become: true
+  gather_facts: true
+
+  roles:
+    - role: db-setup
+      tags: [db-setup]

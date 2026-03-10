@@ -1,0 +1,205 @@
+---
+# ===========================================
+# Backup Role - Database & File Backups
+# ===========================================
+# Tags:
+#   backup     - Run everything
+#   backup-db  - Database backup only
+#   backup-files - File/uploads backup only
+# ===========================================
+
+# --- Common Setup ---
+
+- name: Install required packages
+  ansible.builtin.apt:
+    name:
+      - acl
+      - python3-psycopg2
+    state: present
+  tags: [backup, backup-db, backup-files, setup]
+
+- name: Generate backup timestamp
+  ansible.builtin.set_fact:
+    backup_timestamp: '{{ ansible_date_time.date }}_{{ ansible_date_time.hour }}{{ ansible_date_time.minute }}'
+  tags: [backup, backup-db, backup-files]
+
+- name: Create remote backup directory
+  ansible.builtin.file:
+    path: '{{ backup_base_dir }}/{{ ansible_date_time.date }}'
+    state: directory
+    owner: '{{ app_user }}'
+    group: '{{ app_group }}'
+    mode: '0750'
+  tags: [backup, backup-db, backup-files]
+
+- name: Create local backup directory
+  ansible.builtin.file:
+    path: '{{ local_backup_dir }}/{{ ansible_date_time.date }}'
+    state: directory
+    mode: '0750'
+  delegate_to: localhost
+  become: no
+  tags: [backup, backup-db, backup-files]
+
+# ===========================================
+# DATABASE BACKUP
+# ===========================================
+
+- name: Generate DB backup filename
+  ansible.builtin.set_fact:
+    db_backup_filename: '{{ db_name }}_{{ backup_timestamp }}.sql.gz'
+  when: backup_database | bool
+  tags: [backup, backup-db]
+
+- name: Display DB backup info
+  ansible.builtin.debug:
+    msg: 'Creating database backup: {{ db_backup_filename }}'
+  when: backup_database | bool
+  tags: [backup, backup-db]
+
+- name: Backup PostgreSQL database
+  community.postgresql.postgresql_db:
+    name: '{{ db_name }}'
+    state: dump
+    target: '{{ backup_base_dir }}/{{ ansible_date_time.date }}/{{ db_backup_filename }}'
+  become: yes
+  become_user: postgres
+  register: db_backup_result
+  when: backup_database | bool
+  tags: [backup, backup-db]
+
+- name: Get DB backup file size
+  ansible.builtin.stat:
+    path: '{{ backup_base_dir }}/{{ ansible_date_time.date }}/{{ db_backup_filename }}'
+  register: db_backup_file
+  when: backup_database | bool
+  tags: [backup, backup-db]
+
+- name: Display DB backup size
+  ansible.builtin.debug:
+    msg: 'DB backup size: {{ (db_backup_file.stat.size / 1024 / 1024) | round(2) }} MB'
+  when: backup_database | bool and db_backup_file.stat.exists
+  tags: [backup, backup-db]
+
+- name: Fetch DB backup to local machine
+  ansible.builtin.fetch:
+    src: '{{ backup_base_dir }}/{{ ansible_date_time.date }}/{{ db_backup_filename }}'
+    dest: '{{ local_backup_dir }}/{{ ansible_date_time.date }}/{{ db_backup_filename }}'
+    flat: yes
+  when: backup_database | bool
+  tags: [backup, backup-db]
+
+# ===========================================
+# FILE BACKUP (uploads, .env, shared data)
+# ===========================================
+
+- name: Generate file backup filename
+  ansible.builtin.set_fact:
+    file_backup_filename: '{{ app_name }}_files_{{ backup_timestamp }}.tar.gz'
+  when: backup_files | bool
+  tags: [backup, backup-files]
+
+- name: Check shared directory exists
+  ansible.builtin.stat:
+    path: '{{ shared_dir }}'
+  register: shared_dir_stat
+  when: backup_files | bool
+  tags: [backup, backup-files]
+
+- name: Display file backup info
+  ansible.builtin.debug:
+    msg: 'Creating file backup: {{ file_backup_filename }} (from {{ shared_dir }})'
+  when: backup_files | bool and shared_dir_stat.stat.exists
+  tags: [backup, backup-files]
+
+- name: Create file backup archive
+  ansible.builtin.archive:
+    path: '{{ shared_dir }}'
+    dest: '{{ backup_base_dir }}/{{ ansible_date_time.date }}/{{ file_backup_filename }}'
+    format: gz
+    owner: '{{ app_user }}'
+    group: '{{ app_group }}'
+    mode: '0640'
+  when: backup_files | bool and shared_dir_stat.stat.exists
+  register: file_backup_result
+  tags: [backup, backup-files]
+
+- name: Get file backup size
+  ansible.builtin.stat:
+    path: '{{ backup_base_dir }}/{{ ansible_date_time.date }}/{{ file_backup_filename }}'
+  register: file_backup_file
+  when: backup_files | bool and shared_dir_stat.stat.exists
+  tags: [backup, backup-files]
+
+- name: Display file backup size
+  ansible.builtin.debug:
+    msg: 'File backup size: {{ (file_backup_file.stat.size / 1024 / 1024) | round(2) }} MB'
+  when: backup_files | bool and shared_dir_stat.stat.exists and file_backup_file.stat.exists
+  tags: [backup, backup-files]
+
+- name: Fetch file backup to local machine
+  ansible.builtin.fetch:
+    src: '{{ backup_base_dir }}/{{ ansible_date_time.date }}/{{ file_backup_filename }}'
+    dest: '{{ local_backup_dir }}/{{ ansible_date_time.date }}/{{ file_backup_filename }}'
+    flat: yes
+  when: backup_files | bool and shared_dir_stat.stat.exists
+  tags: [backup, backup-files]
+
+# ===========================================
+# CLEANUP
+# ===========================================
+
+- name: Remove today's remote backup directory
+  ansible.builtin.file:
+    path: '{{ backup_base_dir }}/{{ ansible_date_time.date }}'
+    state: absent
+  tags: [backup, cleanup]
+
+- name: Find old local backup directories
+  ansible.builtin.find:
+    paths: '{{ local_backup_dir }}'
+    file_type: directory
+    age: '{{ backup_retention_days }}d'
+  register: old_local_backups
+  delegate_to: localhost
+  become: no
+  tags: [backup, cleanup]
+
+- name: Remove old local backup directories
+  ansible.builtin.file:
+    path: '{{ item.path }}'
+    state: absent
+  loop: '{{ old_local_backups.files }}'
+  when: old_local_backups.matched > 0
+  delegate_to: localhost
+  become: no
+  tags: [backup, cleanup]
+
+# ===========================================
+# SUMMARY
+# ===========================================
+
+- name: Backup summary
+  ansible.builtin.debug:
+    msg: |
+      ✅ Backup complete!
+
+      Database:
+      {% if backup_database | bool and db_backup_file is defined and db_backup_file.stat is defined and db_backup_file.stat.exists %}
+        - File: {{ db_backup_filename }}
+        - Size: {{ (db_backup_file.stat.size / 1024 / 1024) | round(2) }} MB
+      {% else %}
+        - Skipped
+      {% endif %}
+
+      Files:
+      {% if backup_files | bool and file_backup_file is defined and file_backup_file.stat is defined and file_backup_file.stat.exists %}
+        - File: {{ file_backup_filename }}
+        - Size: {{ (file_backup_file.stat.size / 1024 / 1024) | round(2) }} MB
+      {% else %}
+        - Skipped
+      {% endif %}
+
+      Local path: {{ local_backup_dir }}/{{ ansible_date_time.date }}/
+      Retention: {{ backup_retention_days }} days
+  tags: [backup, info]

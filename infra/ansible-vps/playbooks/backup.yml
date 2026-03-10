@@ -1,0 +1,20 @@
+---
+# ===========================================
+# Backup Playbook - Database & File Backups
+# ===========================================
+# Usage:
+#   ansible-playbook playbooks/backup.yml                              # Full backup (DB + files)
+#   ansible-playbook playbooks/backup.yml --tags backup-db             # Database only
+#   ansible-playbook playbooks/backup.yml --tags backup-files          # Files only
+#   ansible-playbook playbooks/backup.yml -e "backup_database=false"   # Skip DB
+#   ansible-playbook playbooks/backup.yml -e "backup_files=false"      # Skip files
+# ===========================================
+
+- name: Backup Database and Files
+  hosts: vps
+  become: true
+  gather_facts: true
+
+  roles:
+    - role: backup
+      tags: [backup]

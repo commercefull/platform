@@ -1,0 +1,54 @@
+---
+# ===========================================
+# Deploy Role - Shared Resources
+# ===========================================
+# The app writes to these paths (relative to cwd):
+#   - Uploads: process.cwd()/public/uploads/
+#   - Logs:    ./../logs  (winston writes relative to cwd)
+#   - .env:    process.cwd()/.env
+# ===========================================
+
+- name: Check if shared .env exists
+  ansible.builtin.stat:
+    path: '{{ shared_dir }}/.env'
+  register: shared_env
+
+- name: Copy .env from shared
+  ansible.builtin.copy:
+    src: '{{ shared_dir }}/.env'
+    dest: '{{ release_path }}/.env'
+    remote_src: yes
+    owner: '{{ app_user }}'
+    group: '{{ app_group }}'
+    mode: '0600'
+  when: shared_env.stat.exists
+
+# Uploads: app writes to <cwd>/public/uploads/
+# Ensure public/ dir exists before creating symlink inside it
+- name: Ensure public directory exists in release
+  ansible.builtin.file:
+    path: '{{ release_path }}/public'
+    state: directory
+    owner: '{{ app_user }}'
+    group: '{{ app_group }}'
+
+- name: Link shared uploads to public/uploads
+  ansible.builtin.file:
+    src: '{{ shared_dir }}/uploads'
+    dest: '{{ release_path }}/public/uploads'
+    state: link
+    owner: '{{ app_user }}'
+    group: '{{ app_group }}'
+    force: yes
+
+# Logs: app writes to ../logs (one level above cwd)
+# cwd = /home/ubuntu/app (symlink) → logs go to /home/ubuntu/logs
+# We symlink shared/logs to ~/logs so all releases share the same log dir
+- name: Link shared logs to app home
+  ansible.builtin.file:
+    src: '{{ shared_dir }}/logs'
+    dest: '{{ app_base_dir }}/logs'
+    state: link
+    owner: '{{ app_user }}'
+    group: '{{ app_group }}'
+    force: yes
