@@ -67,11 +67,14 @@ import fulfillmentCustomerRouter from '../modules/fulfillment/interface/routers/
 import { organizationBusinessRouter } from '../modules/organization/interface/routers/organizationRouter';
 import { brandCustomerRouter } from '../modules/brand/interface/routers/brandCustomerRouter';
 import { couponCustomerRouter } from '../modules/coupon/interface/routers/couponCustomerRouter';
+import { promotionCustomerRouter } from '../modules/promotion/interface/routers/customerRouter';
 import { storeCustomerRouter } from '../modules/store/interface/routers/storeCustomerRouter';
 import { assortmentBusinessRouter } from '../modules/assortment/interface/routers/assortmentRouter';
 import { basketBusinessRouter } from '../modules/basket/interface/routers/basketBusinessRouter';
 import { merchantCustomerRouter } from '../modules/merchant/interface/http/merchantCustomerRouter';
 import { attributeBusinessRouter } from '../modules/product/interface/routers/attributeRouter';
+import { categoryCustomerRouter } from '../modules/product/interface/routers/categoryCustomerRouter';
+import { webhookBusinessRouter } from '../modules/webhook/interface/routers/webhookBusinessRouter';
 
 /**
  * Configure all application routes
@@ -107,6 +110,8 @@ export function configureRoutes(app: Express): void {
     notificationCustomerRouter,
     brandCustomerRouter,
     couponCustomerRouter,
+    promotionCustomerRouter,
+    categoryCustomerRouter,
     storeCustomerRouter,
     fulfillmentCustomerRouter,
     merchantCustomerRouter,
@@ -150,6 +155,7 @@ export function configureRoutes(app: Express): void {
     assortmentBusinessRouter,
     basketBusinessRouter,
     attributeBusinessRouter,
+    webhookBusinessRouter,
   ]);
 
   // Health check endpoint (before other routes for load balancers)

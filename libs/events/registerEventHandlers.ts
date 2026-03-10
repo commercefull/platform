@@ -6,9 +6,12 @@
  */
 
 import { eventBus } from './eventBus';
+import { WebhookDispatchService } from '../../modules/webhook/application/services/WebhookDispatchService';
+import WebhookRepo from '../../modules/webhook/infrastructure/repositories/WebhookRepository';
 
 // Track registration state
 let isRegistered = false;
+let webhookDispatchService: WebhookDispatchService | null = null;
 
 /**
  * Register all event handlers on application boot
@@ -44,6 +47,9 @@ export function registerAllEventHandlers(): void {
     // Analytics handlers (tracking, reporting)
     registerAnalyticsEventHandlers();
 
+    // Webhook dispatch (forwards eventBus events to registered webhook endpoints)
+    registerWebhookDispatch();
+
     isRegistered = true;
 
     console.log(`[EVENTS] Total registered event types: ${eventBus.getRegisteredTypes().length}`);
@@ -57,6 +63,10 @@ export function registerAllEventHandlers(): void {
  * Unregister all handlers (for testing/shutdown)
  */
 export function unregisterAllEventHandlers(): void {
+  if (webhookDispatchService) {
+    webhookDispatchService.stop();
+    webhookDispatchService = null;
+  }
   isRegistered = false;
   // EventBus doesn't have a clearAll method, so handlers persist
   // This is mainly for tracking registration state
@@ -154,4 +164,9 @@ function registerAnalyticsEventHandlers(): void {
   // Track all events for analytics (wildcard handler)
   // Note: The eventBus already emits to '*' for all events
   // This is where analytics tracking would be implemented
+}
+
+function registerWebhookDispatch(): void {
+  webhookDispatchService = new WebhookDispatchService(WebhookRepo);
+  webhookDispatchService.start();
 }
