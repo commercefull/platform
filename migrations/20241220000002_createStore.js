@@ -48,6 +48,10 @@ exports.up = function (knex) {
     t.jsonb('customPages');
     t.jsonb('customFields');
     t.jsonb('metadata');
+    t.string('organizationId', 50).nullable();
+    t.string('taxZoneId', 50).nullable();
+    t.jsonb('priceRoundingRules').defaultTo('{}');
+    t.string('defaultLanguage', 10).defaultTo('en');
 
     t.index('storeType');
     t.index('merchantId');
@@ -58,6 +62,8 @@ exports.up = function (knex) {
     t.index('isVerified');
     t.index('isFeatured');
     t.index('slug');
+    t.index('organizationId');
+    t.index('taxZoneId');
     t.index('storeUrl');
   });
 };

@@ -62,6 +62,8 @@ exports.up = function (knex) {
     t.boolean('emailVerified').notNullable().defaultTo(false);
     t.uuid('createdBy');
     t.uuid('updatedBy');
+    t.string('type', 20).defaultTo('external');
+    t.uuid('commissionPlanId').nullable();
     t.index('name');
     t.index('status');
     t.index('verificationStatus');
@@ -72,6 +74,7 @@ exports.up = function (knex) {
     t.index('lastLoginAt');
     t.index('createdAt');
     t.index('allowedCategories', null, 'gin');
+    t.index('commissionPlanId');
     t.index('vatNumber');
     t.index('ossRegistered');
     t.index('defaultTaxCountry');

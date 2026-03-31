@@ -18,6 +18,9 @@ exports.up = function (knex) {
     t.decimal('shippingAmount', 15, 2).notNullable().defaultTo(0);
     t.decimal('grandTotal', 15, 2).notNullable().defaultTo(0);
     t.jsonb('metadata');
+    t.uuid('storeId').nullable();
+    t.uuid('channelId').nullable();
+    t.uuid('accountId').nullable();
 
     t.timestamp('expiresAt');
     t.uuid('convertedToOrderId');
@@ -27,6 +30,9 @@ exports.up = function (knex) {
     t.index('status');
     t.index('lastActivityAt');
     t.index('expiresAt');
+    t.index('storeId');
+    t.index('channelId');
+    t.index('accountId');
     t.index('convertedToOrderId');
   });
 };

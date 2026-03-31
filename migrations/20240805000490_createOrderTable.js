@@ -88,6 +88,9 @@ exports.up = function (knex) {
     t.boolean('isGift').notNullable().defaultTo(false);
     t.boolean('isSubscriptionOrder').notNullable().defaultTo(false);
     t.uuid('parentOrderId').references('orderId').inTable('order');
+    t.uuid('accountId').nullable();
+    t.uuid('merchantId').nullable().references('merchantId').inTable('merchant');
+    t.string('purchaseOrderNumber', 100).nullable();
     t.specificType('tags', 'text[]');
     t.jsonb('metadata').defaultTo('{}');
     t.timestamp('deletedAt').nullable();
@@ -106,6 +109,8 @@ exports.up = function (knex) {
     t.index('shippingAddressId');
     t.index('billingAddressId');
     t.index('customerEmail');
+    t.index('accountId');
+    t.index('merchantId');
     t.index('isSubscriptionOrder');
     t.index('parentOrderId');
     t.index('tags', null, 'gin');

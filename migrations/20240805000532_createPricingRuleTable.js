@@ -18,6 +18,9 @@ exports.up = function (knex) {
     t.timestamp('endDate');
     t.integer('priority').defaultTo(0);
     t.boolean('isActive').notNullable().defaultTo(true);
+    t.jsonb('metadata').nullable();
+    t.string('currencyCode', 3).nullable();
+    t.string('regionCode', 10).nullable();
 
     t.index(['ruleType', 'scope']);
     t.index('isActive');

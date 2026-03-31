@@ -44,12 +44,14 @@ exports.up = function (knex) {
     t.integer('downloadLimit');
     t.jsonb('subscriptionInfo');
     t.jsonb('metadata');
+    t.uuid('sellerId').nullable();
 
     t.index('orderId');
     t.index('productId');
     t.index('productVariantId');
     t.index('basketItemId');
     t.index('sku');
+    t.index('sellerId');
     t.index('fulfillmentStatus');
     t.index('isDigital');
   });

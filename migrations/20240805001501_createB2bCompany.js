@@ -57,11 +57,15 @@ exports.up = function (knex) {
     table.timestamp('createdAt').defaultTo(knex.fn.now());
     table.timestamp('updatedAt').defaultTo(knex.fn.now());
     table.timestamp('deletedAt');
+    table.uuid('organizationId').nullable();
+    table.uuid('paymentTermsId').nullable();
 
     table.index('name');
     table.index('status');
     table.index('vatNumber');
     table.index('companyType');
+    table.index('organizationId');
+    table.index('paymentTermsId');
     table.index('tier');
     table.index('parentCompanyId');
   });

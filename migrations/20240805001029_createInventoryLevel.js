@@ -35,6 +35,9 @@ exports.up = function (knex) {
     t.boolean('expiryDateTracking').notNullable().defaultTo(false);
     t.timestamp('lastCountedAt');
     t.uuid('updatedBy');
+    t.integer('safetyStockQty').defaultTo(0);
+    t.integer('inboundQty').defaultTo(0);
+    t.string('locationId', 50).nullable();
     t.index('productId');
     t.index('productVariantId');
     t.index('distributionWarehouseId');

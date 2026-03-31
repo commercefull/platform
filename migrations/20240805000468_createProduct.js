@@ -73,8 +73,18 @@ exports.up = function (knex) {
     t.boolean('hasVariants').notNullable().defaultTo(false);
     t.jsonb('variantAttributes');
 
+    t.uuid('businessId').references('businessId').inTable('business');
+    t.uuid('storeId').references('storeId').inTable('store');
+    t.string('organizationId', 50).nullable();
+    t.string('approvalStatus', 20).defaultTo('approved');
+    t.boolean('platformVisible').defaultTo(true);
+
     t.uuid('createdBy');
     t.uuid('updatedBy');
+    t.index('businessId');
+    t.index('storeId');
+    t.index('organizationId');
+    t.index('approvalStatus');
     t.index('sku');
     t.index('name');
     t.index('slug');

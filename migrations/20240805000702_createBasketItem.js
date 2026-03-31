@@ -23,9 +23,11 @@ exports.up = function (knex) {
     t.string('itemType', 20).notNullable().defaultTo('standard');
     t.boolean('isGift').notNullable().defaultTo(false);
     t.text('giftMessage');
+    t.uuid('sellerId').nullable();
     t.index('basketId');
     t.index('productId');
     t.index('productVariantId');
+    t.index('sellerId');
     t.index('sku');
   });
 };

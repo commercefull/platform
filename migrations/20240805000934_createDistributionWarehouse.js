@@ -35,6 +35,8 @@ exports.up = function (knex) {
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     t.uuid('createdBy');
+    t.uuid('businessId').references('businessId').inTable('business');
+    t.uuid('storeId').references('storeId').inTable('store');
     t.index('code');
     t.index('isActive');
     t.index('isDefault');
@@ -42,6 +44,8 @@ exports.up = function (knex) {
     t.index('isReturnCenter');
     t.index('merchantId');
     t.index('country');
+    t.index('businessId');
+    t.index('storeId');
     t.index(['latitude', 'longitude']);
   });
 };

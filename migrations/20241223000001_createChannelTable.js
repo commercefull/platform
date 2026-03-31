@@ -29,13 +29,18 @@ exports.up = async function (knex) {
     table.boolean('isActive').defaultTo(true);
     table.boolean('isDefault').defaultTo(false);
     table.jsonb('settings');
+    table.string('organizationId', 50).nullable();
+    table.string('region', 50).nullable();
+    table.string('domain', 255).nullable();
+    table.string('appId', 100).nullable();
     table.timestamp('createdAt').defaultTo(knex.fn.now());
     table.timestamp('updatedAt').defaultTo(knex.fn.now());
 
     table.index(['ownerType', 'ownerId']);
-    table.index(['code']);
+    table.index(['code'], 'channel_code_unique_idx');
     table.index(['isActive']);
     table.index(['type']);
+    table.index(['organizationId']);
   });
 };
 

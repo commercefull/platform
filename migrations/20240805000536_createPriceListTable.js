@@ -9,9 +9,13 @@ exports.up = function (knex) {
     t.boolean('isActive').notNullable().defaultTo(true);
     t.timestamp('startDate');
     t.timestamp('endDate');
+    t.uuid('organizationId').nullable();
+    t.string('type', 20).defaultTo('retail');
 
     t.index('name');
     t.index('isActive');
+    t.index('organizationId');
+    t.index('type');
     t.index('createdAt');
   });
 };
