@@ -178,6 +178,41 @@
               </div>
             </div>
 
+            <!-- Order Limits & Policies -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-shield-alt me-2"></i>Order Limits & Policies</h3>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group mb-3">
+                      <label class="form-label">Min Order Quantity</label>
+                      <input type="number" class="form-control" name="minOrderQuantity" value="<%= formData.minOrderQuantity || 1 %>" min="1" step="1">
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group mb-3">
+                      <label class="form-label">Max Order Quantity</label>
+                      <input type="number" class="form-control" name="maxOrderQuantity" value="<%= formData.maxOrderQuantity || '' %>" min="1" step="1" placeholder="No limit">
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group mb-3">
+                  <label class="form-label">Warranty</label>
+                  <textarea class="form-control" name="warranty" rows="2" placeholder="e.g., 1 year manufacturer warranty"><%= formData.warranty || '' %></textarea>
+                </div>
+                <div class="form-group mb-3">
+                  <label class="form-label">Return Policy</label>
+                  <textarea class="form-control" name="returnPolicy" rows="2" placeholder="e.g., 30-day money-back guarantee"><%= formData.returnPolicy || '' %></textarea>
+                </div>
+                <div class="form-group mb-3">
+                  <label class="form-label">External ID</label>
+                  <input type="text" class="form-control" name="externalId" value="<%= formData.externalId || '' %>" placeholder="ID from external system (ERP, PIM, etc.)">
+                </div>
+              </div>
+            </div>
+
             <!-- SEO -->
             <div class="card">
               <div class="card-header">
@@ -239,7 +274,16 @@
                   <select class="form-select" name="categoryId">
                     <option value="">Select Category</option>
                     <% (categories || []).forEach(function(cat) { %>
-                    <option value="<%= cat.categoryId %>" <%= formData.categoryId === cat.categoryId ? 'selected' : '' %>><%= cat.name %></option>
+                    <option value="<%= cat.productCategoryId %>" <%= formData.categoryId === cat.productCategoryId ? 'selected' : '' %>><%= cat.name %></option>
+                    <% }); %>
+                  </select>
+                </div>
+                <div class="form-group mb-3">
+                  <label class="form-label">Brand</label>
+                  <select class="form-select" name="brandId">
+                    <option value="">Select Brand</option>
+                    <% (brands || []).forEach(function(brand) { %>
+                    <option value="<%= brand.brandId %>" <%= formData.brandId === brand.brandId ? 'selected' : '' %>><%= brand.name %></option>
                     <% }); %>
                   </select>
                 </div>

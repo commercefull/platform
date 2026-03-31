@@ -23,6 +23,12 @@ router.use(isMerchantLoggedIn);
 router.get('/orders/stats', orderController.getOrderStats);
 
 /**
+ * Get store sales summary
+ * GET /business/orders/store-summary
+ */
+router.get('/orders/store-summary', orderController.getStoreSalesSummary);
+
+/**
  * List all orders with filters
  * GET /business/orders
  */

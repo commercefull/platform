@@ -126,21 +126,26 @@ export class OrderRepo implements IOrderRepository {
     if (existing) {
       await query(
         `UPDATE "order" SET
-          "orderNumber" = $1, "customerId" = $2, "basketId" = $3, "status" = $4,
-          "paymentStatus" = $5, "fulfillmentStatus" = $6, "currencyCode" = $7,
-          "subtotal" = $8, "discountTotal" = $9, "taxTotal" = $10, "shippingTotal" = $11,
-          "handlingFee" = $12, "totalAmount" = $13, "totalItems" = $14, "totalQuantity" = $15,
-          "taxExempt" = $16, "completedAt" = $17, "cancelledAt" = $18, "returnedAt" = $19,
-          "customerEmail" = $20, "customerPhone" = $21, "customerName" = $22,
-          "customerNotes" = $23, "adminNotes" = $24, "estimatedDeliveryDate" = $25,
-          "hasGiftWrapping" = $26, "giftMessage" = $27, "isGift" = $28,
-          "isSubscriptionOrder" = $29, "parentOrderId" = $30, "tags" = $31,
-          "metadata" = $32, "updatedAt" = $33
-        WHERE "orderId" = $34`,
+          "orderNumber" = $1, "customerId" = $2, "basketId" = $3, "storeId" = $4,
+          "channelId" = $5, "createdByUserId" = $6, "orderSource" = $7, "status" = $8,
+          "paymentStatus" = $9, "fulfillmentStatus" = $10, "currencyCode" = $11,
+          "subtotal" = $12, "discountTotal" = $13, "taxTotal" = $14, "shippingTotal" = $15,
+          "handlingFee" = $16, "totalAmount" = $17, "totalItems" = $18, "totalQuantity" = $19,
+          "taxExempt" = $20, "completedAt" = $21, "cancelledAt" = $22, "returnedAt" = $23,
+          "customerEmail" = $24, "customerPhone" = $25, "customerName" = $26,
+          "customerNotes" = $27, "adminNotes" = $28, "estimatedDeliveryDate" = $29,
+          "hasGiftWrapping" = $30, "giftMessage" = $31, "isGift" = $32,
+          "isSubscriptionOrder" = $33, "parentOrderId" = $34, "tags" = $35,
+          "metadata" = $36, "updatedAt" = $37
+        WHERE "orderId" = $38`,
         [
           order.orderNumber,
           order.customerId || null,
           order.basketId || null,
+          order.storeId || null,
+          order.channelId || null,
+          order.createdByUserId || null,
+          order.orderSource,
           order.status,
           order.paymentStatus,
           order.fulfillmentStatus,
@@ -177,7 +182,7 @@ export class OrderRepo implements IOrderRepository {
     } else {
       await query(
         `INSERT INTO "order" (
-          "orderId", "orderNumber", "customerId", "basketId", "status", "paymentStatus",
+          "orderId", "orderNumber", "customerId", "basketId", "storeId", "channelId", "createdByUserId", "orderSource", "status", "paymentStatus",
           "fulfillmentStatus", "currencyCode", "subtotal", "discountTotal", "taxTotal",
           "shippingTotal", "handlingFee", "totalAmount", "totalItems", "totalQuantity",
           "taxExempt", "orderDate", "customerEmail", "customerPhone", "customerName",
@@ -187,13 +192,17 @@ export class OrderRepo implements IOrderRepository {
         ) VALUES (
           $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
           $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30,
-          $31, $32, $33, $34
+          $31, $32, $33, $34, $35, $36, $37, $38
         )`,
         [
           order.orderId,
           order.orderNumber,
           order.customerId || null,
           order.basketId || null,
+          order.storeId || null,
+          order.channelId || null,
+          order.createdByUserId || null,
+          order.orderSource,
           order.status,
           order.paymentStatus,
           order.fulfillmentStatus,
@@ -535,6 +544,22 @@ export class OrderRepo implements IOrderRepository {
       conditions.push(`"customerId" = $${paramIndex++}`);
       params.push(filters.customerId);
     }
+    if (filters?.storeId) {
+      conditions.push(`"storeId" = $${paramIndex++}`);
+      params.push(filters.storeId);
+    }
+    if (filters?.channelId) {
+      conditions.push(`"channelId" = $${paramIndex++}`);
+      params.push(filters.channelId);
+    }
+    if (filters?.createdByUserId) {
+      conditions.push(`"createdByUserId" = $${paramIndex++}`);
+      params.push(filters.createdByUserId);
+    }
+    if (filters?.orderSource) {
+      conditions.push(`"orderSource" = $${paramIndex++}`);
+      params.push(filters.orderSource);
+    }
     if (filters?.status) {
       conditions.push(`"status" = $${paramIndex++}`);
       params.push(filters.status);
@@ -589,6 +614,10 @@ export class OrderRepo implements IOrderRepository {
       orderNumber: row.orderNumber,
       customerId: row.customerId || undefined,
       basketId: row.basketId || undefined,
+      storeId: row.storeId || undefined,
+      channelId: row.channelId || undefined,
+      createdByUserId: row.createdByUserId || undefined,
+      orderSource: row.orderSource || 'web',
       status: row.status as OrderStatus,
       paymentStatus: row.paymentStatus as PaymentStatus,
       fulfillmentStatus: row.fulfillmentStatus as FulfillmentStatus,

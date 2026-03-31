@@ -68,6 +68,11 @@ export type EventType =
   | 'inventory.out_of_stock'
   | 'inventory.reserved'
   | 'inventory.released'
+  | 'inventory.dispatch.created'
+  | 'inventory.dispatch.approved'
+  | 'inventory.dispatch.shipped'
+  | 'inventory.dispatch.received'
+  | 'inventory.dispatch.cancelled'
   // Customer events
   | 'customer.registered'
   | 'customer.created'

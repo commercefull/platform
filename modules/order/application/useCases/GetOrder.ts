@@ -69,6 +69,10 @@ export interface OrderDetailResponse {
   orderNumber: string;
   customerId?: string;
   basketId?: string;
+  storeId?: string;
+  channelId?: string;
+  createdByUserId?: string;
+  orderSource: string;
   status: string;
   paymentStatus: string;
   fulfillmentStatus: string;
@@ -138,6 +142,10 @@ export class GetOrderUseCase {
       orderNumber: order.orderNumber,
       customerId: order.customerId,
       basketId: order.basketId,
+      storeId: order.storeId,
+      channelId: order.channelId,
+      createdByUserId: order.createdByUserId,
+      orderSource: order.orderSource,
       status: order.status,
       paymentStatus: order.paymentStatus,
       fulfillmentStatus: order.fulfillmentStatus,

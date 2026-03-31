@@ -21,6 +21,13 @@ export {
 export * from './CreateInventoryPool';
 export * from './AllocateFromPool';
 export * from './TransferBetweenStores';
+export * from './CreateStoreDispatch';
+export * from './ListStoreDispatches';
+export * from './GetStoreDispatch';
+export * from './ApproveStoreDispatch';
+export * from './DispatchFromStore';
+export * from './ReceiveStoreDispatch';
+export * from './CancelStoreDispatch';
 
 // Inventory item management
 export * from './CreateInventoryItem';

@@ -9,6 +9,7 @@ import { TypedRequest } from 'libs/types/express';
 import OrderRepo from '../../infrastructure/repositories/OrderRepository';
 import { GetOrderCommand, GetOrderUseCase } from '../../application/useCases/GetOrder';
 import { ListOrdersCommand, ListOrdersUseCase } from '../../application/useCases/ListOrders';
+import { GetStoreSalesSummaryUseCase } from '../../application/useCases/GetStoreSalesSummary';
 import { UpdateOrderStatusCommand, UpdateOrderStatusUseCase } from '../../application/useCases/UpdateOrderStatus';
 import { CancelOrderCommand, CancelOrderUseCase } from '../../application/useCases/CancelOrder';
 import { ProcessRefundCommand, ProcessRefundUseCase } from '../../application/useCases/ProcessRefund';
@@ -54,6 +55,10 @@ export const listOrders = async (req: TypedRequest, res: Response): Promise<void
   try {
     const {
       customerId,
+      storeId,
+      channelId,
+      createdByUserId,
+      orderSource,
       status,
       paymentStatus,
       fulfillmentStatus,
@@ -70,6 +75,10 @@ export const listOrders = async (req: TypedRequest, res: Response): Promise<void
 
     const filters: any = {};
     if (customerId) filters.customerId = customerId as string;
+    if (storeId) filters.storeId = storeId as string;
+    if (channelId) filters.channelId = channelId as string;
+    if (createdByUserId) filters.createdByUserId = createdByUserId as string;
+    if (orderSource) filters.orderSource = orderSource as string;
     if (status) filters.status = status as OrderStatus;
     if (paymentStatus) filters.paymentStatus = paymentStatus as PaymentStatus;
     if (fulfillmentStatus) filters.fulfillmentStatus = fulfillmentStatus as FulfillmentStatus;
@@ -244,12 +253,16 @@ export const processRefund = async (req: TypedRequest, res: Response): Promise<v
  */
 export const getOrderStats = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { startDate, endDate, customerId } = req.query;
+    const { startDate, endDate, customerId, storeId, channelId, createdByUserId, orderSource } = req.query;
 
     const filters: any = {};
     if (startDate) filters.startDate = new Date(startDate as string);
     if (endDate) filters.endDate = new Date(endDate as string);
     if (customerId) filters.customerId = customerId as string;
+    if (storeId) filters.storeId = storeId as string;
+    if (channelId) filters.channelId = channelId as string;
+    if (createdByUserId) filters.createdByUserId = createdByUserId as string;
+    if (orderSource) filters.orderSource = orderSource as string;
 
     const stats = await OrderRepo.getOrderStats(Object.keys(filters).length > 0 ? filters : undefined);
 
@@ -258,6 +271,25 @@ export const getOrderStats = async (req: TypedRequest, res: Response): Promise<v
     logger.error('Error:', error);
 
     respondError(req, res, error.message || 'Failed to get order statistics', 500, 'admin/order/error');
+  }
+};
+
+export const getStoreSalesSummary = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const dateFrom = req.query.dateFrom ? new Date(req.query.dateFrom as string) : new Date(new Date().setDate(new Date().getDate() - 30));
+    const dateTo = req.query.dateTo ? new Date(req.query.dateTo as string) : new Date();
+
+    const useCase = new GetStoreSalesSummaryUseCase();
+    const summary = await useCase.execute({
+      storeId: req.query.storeId as string | undefined,
+      dateFrom,
+      dateTo,
+    });
+
+    respond(req, res, summary, 200, 'admin/order/stats');
+  } catch (error: any) {
+    logger.error('Error:', error);
+    respondError(req, res, error.message || 'Failed to get store sales summary', 500, 'admin/order/error');
   }
 };
 

@@ -13,6 +13,7 @@ import {
   requestPasswordReset,
   resetPassword,
 } from '../controllers/identityBusinessController';
+import { userStoreRouter } from './userStoreRouter';
 
 const router = Router();
 
@@ -36,5 +37,7 @@ router.post('/auth/validate', checkTokenValidity);
 // Password reset flow
 router.post('/auth/forgot-password', requestPasswordReset);
 router.post('/auth/reset-password', resetPassword);
+
+router.use(userStoreRouter);
 
 export const identityBusinessRouter = router;

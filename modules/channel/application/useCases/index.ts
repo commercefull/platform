@@ -7,6 +7,7 @@
 export * from './CreateChannel';
 export * from './UpdateChannel';
 export * from './GetChannel';
+export * from './GetChannelByCode';
 export * from './ListChannels';
 export * from './AssignProductsToChannel';
 export * from './AssignWarehouseToChannel';

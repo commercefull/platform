@@ -152,6 +152,38 @@ export const searchProducts = async (req: TypedRequest, res: Response): Promise<
 };
 
 /**
+ * Get product by variant barcode
+ * GET /products/barcode/:barcode
+ */
+export const findByBarcode = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { barcode } = req.params;
+
+    if (!barcode?.trim()) {
+      respondError(req, res, 'Barcode is required', 400);
+      return;
+    }
+
+    const result = await ProductRepo.findByBarcode(barcode);
+    if (!result) {
+      respondError(req, res, 'Product not found', 404, 'product/error');
+      return;
+    }
+
+    // Only expose active and visible products to customers
+    if (result.product.status !== 'active' || !['visible', 'featured'].includes(result.product.visibility)) {
+      respondError(req, res, 'Product not found', 404, 'product/error');
+      return;
+    }
+
+    respond(req, res, result, 200, 'product/detail');
+  } catch (error: any) {
+    logger.error('Error:', error);
+    respondError(req, res, error.message || 'Failed to find product by barcode', 500, 'product/error');
+  }
+};
+
+/**
  * Get featured products
  * GET /products/featured
  */

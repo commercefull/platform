@@ -21,6 +21,8 @@ export class CreateStoreCommand {
       storeType: 'merchant_store' | 'business_store';
       merchantId?: string; // For marketplace mode
       businessId?: string; // For multi-store mode
+      isHeadquarters?: boolean;
+      parentStoreId?: string;
       storeUrl?: string;
       storeEmail?: string;
       storePhone?: string;
@@ -60,6 +62,8 @@ export interface CreateStoreResponse {
   storeType: string;
   merchantId?: string;
   businessId?: string;
+  isHeadquarters: boolean;
+  parentStoreId?: string;
   storeUrl?: string;
   isActive: boolean;
   isVerified: boolean;
@@ -112,6 +116,8 @@ export class CreateStoreUseCase {
       storeType: command.storeData.storeType,
       merchantId: command.storeData.merchantId,
       businessId: command.storeData.businessId,
+      isHeadquarters: command.storeData.isHeadquarters,
+      parentStoreId: command.storeData.parentStoreId,
       description: command.storeData.description,
       storeUrl: command.storeData.storeUrl,
       storeEmail: command.storeData.storeEmail,
@@ -138,6 +144,8 @@ export class CreateStoreUseCase {
       storeType: savedStore.storeType,
       merchantId: savedStore.merchantId,
       businessId: savedStore.businessId,
+      isHeadquarters: savedStore.isHeadquarters,
+      parentStoreId: savedStore.parentStoreId,
       storeUrl: savedStore.storeUrl,
       isActive: savedStore.isActive,
       isVerified: savedStore.isVerified,
@@ -146,7 +154,7 @@ export class CreateStoreUseCase {
   }
 
   private async validateStoreOwnership(command: CreateStoreCommand, systemConfig: any): Promise<void> {
-    const { storeType, merchantId, businessId } = command.storeData;
+    const { storeType, merchantId, businessId, isHeadquarters, parentStoreId } = command.storeData;
 
     if (storeType === 'merchant_store') {
       // Marketplace mode: store must belong to a merchant
@@ -184,6 +192,20 @@ export class CreateStoreUseCase {
       // Check if business is active
       if (!business.isActive) {
         throw new Error('Cannot create store for inactive business.');
+      }
+
+      if (isHeadquarters && parentStoreId) {
+        throw new Error('Headquarters store cannot have a parent store.');
+      }
+
+      if (parentStoreId) {
+        const parentStore = await this.storeRepository.findById(parentStoreId);
+        if (!parentStore) {
+          throw new Error('Parent store not found.');
+        }
+        if (parentStore.businessId !== businessId) {
+          throw new Error('Parent store must belong to the same business.');
+        }
       }
     } else {
       throw new Error('Invalid store type. Must be either "merchant_store" or "business_store".');

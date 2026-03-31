@@ -3,6 +3,7 @@
  */
 
 import { InventoryItem } from '../entities/InventoryItem';
+import { InventoryLocation } from '../entities/Inventory';
 
 export interface InventoryFilters {
   productId?: string;
@@ -30,6 +31,7 @@ export interface PaginatedResult<T> {
 export interface InventoryRepository {
   findById(inventoryId: string): Promise<InventoryItem | null>;
   findByProductId(productId: string): Promise<InventoryItem[]>;
+  findByStoreId(storeId: string): Promise<InventoryItem[]>;
   findBySku(sku: string, locationId?: string): Promise<InventoryItem | null>;
   findByLocation(locationId: string, pagination?: PaginationOptions): Promise<PaginatedResult<InventoryItem>>;
   findAll(filters?: InventoryFilters, pagination?: PaginationOptions): Promise<PaginatedResult<InventoryItem>>;
@@ -75,4 +77,8 @@ export interface InventoryRepository {
   releaseReservation(reservationId: string): Promise<void>;
   fulfillReservation(reservationId: string): Promise<void>;
   expireReservations(): Promise<number>;
+
+  getLocations(): Promise<InventoryLocation[]>;
+  getLocationById(locationId: string): Promise<InventoryLocation | null>;
+  getLocationByStoreId(storeId: string): Promise<InventoryLocation | null>;
 }

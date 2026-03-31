@@ -43,6 +43,7 @@ import * as segmentController from './controllers/segmentController';
 import * as merchantController from './controllers/merchantController';
 import * as mediaController from './controllers/mediaController';
 import * as checkoutController from './controllers/checkoutController';
+import * as storeController from './controllers/storeController';
 
 const router = express.Router();
 
@@ -162,6 +163,20 @@ router.get('/orders/:orderId/refund', orderController.refundForm);
 router.post('/orders/:orderId/refund', orderController.processRefund);
 
 // ============================================================================
+// Store Routes
+// ============================================================================
+
+router.get('/stores', storeController.listStores);
+router.get('/stores/create', storeController.createStoreForm);
+router.post('/stores', storeController.createStore);
+router.get('/stores/:storeId', storeController.viewStore);
+router.get('/stores/:storeId/edit', storeController.editStoreForm);
+router.post('/stores/:storeId', storeController.updateStore);
+router.get('/stores/:storeId/users', storeController.manageStoreUsers);
+router.post('/stores/:storeId/users', storeController.assignUserToStore);
+router.delete('/stores/:storeId/users/:userId', storeController.removeUserFromStore);
+
+// ============================================================================
 // Customer Routes
 // ============================================================================
 
@@ -185,6 +200,14 @@ router.post('/inventory/adjust', inventoryController.adjustStock);
 router.get('/inventory/locations', inventoryController.listLocations);
 router.get('/inventory/low-stock', inventoryController.lowStockReport);
 router.get('/inventory/:inventoryLevelId/history', inventoryController.viewInventoryHistory);
+router.get('/dispatches', inventoryController.listDispatches);
+router.get('/dispatches/create', inventoryController.createDispatchForm);
+router.post('/dispatches', inventoryController.createDispatch);
+router.get('/dispatches/:dispatchId', inventoryController.viewDispatch);
+router.post('/dispatches/:dispatchId/approve', inventoryController.approveDispatch);
+router.post('/dispatches/:dispatchId/dispatch', inventoryController.markDispatched);
+router.post('/dispatches/:dispatchId/receive', inventoryController.receiveDispatch);
+router.post('/dispatches/:dispatchId/cancel', inventoryController.cancelDispatch);
 
 // ============================================================================
 // Tax Routes
@@ -550,6 +573,7 @@ router.get('/b2b/analytics', b2bController.b2bQuoteAnalytics);
 // Analytics Dashboard
 router.get('/analytics', analyticsController.analyticsDashboard);
 router.get('/analytics/dashboard', analyticsController.analyticsDashboard);
+router.get('/analytics/store-sales', analyticsController.storeSalesDashboard);
 
 // Predictive Analytics
 router.get('/analytics/predictive', analyticsController.predictiveAnalytics);

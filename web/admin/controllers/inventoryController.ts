@@ -9,6 +9,16 @@ import { TypedRequest } from 'libs/types/express';;
 import { query, queryOne } from '../../../libs/db';
 import { v4 as uuidv4 } from 'uuid';
 import { adminRespond } from '../../respond';
+import inventoryRepository from '../../../modules/inventory/infrastructure/repositories/InventoryRepository';
+import storeDispatchRepository from '../../../modules/inventory/infrastructure/repositories/StoreDispatchRepository';
+import StoreRepo from '../../../modules/store/infrastructure/repositories/StoreRepo';
+import { ListStoreDispatchesUseCase } from '../../../modules/inventory/application/useCases/ListStoreDispatches';
+import { GetStoreDispatchUseCase } from '../../../modules/inventory/application/useCases/GetStoreDispatch';
+import { CreateStoreDispatchUseCase } from '../../../modules/inventory/application/useCases/CreateStoreDispatch';
+import { ApproveStoreDispatchUseCase } from '../../../modules/inventory/application/useCases/ApproveStoreDispatch';
+import { DispatchFromStoreUseCase } from '../../../modules/inventory/application/useCases/DispatchFromStore';
+import { ReceiveStoreDispatchUseCase } from '../../../modules/inventory/application/useCases/ReceiveStoreDispatch';
+import { CancelStoreDispatchUseCase } from '../../../modules/inventory/application/useCases/CancelStoreDispatch';
 
 // ============================================================================
 // Types
@@ -34,6 +44,14 @@ interface InventoryStats {
   lowStock: number;
   outOfStock: number;
 }
+
+const listStoreDispatchesUseCase = new ListStoreDispatchesUseCase(storeDispatchRepository);
+const getStoreDispatchUseCase = new GetStoreDispatchUseCase(storeDispatchRepository);
+const createStoreDispatchUseCase = new CreateStoreDispatchUseCase(storeDispatchRepository, inventoryRepository);
+const approveStoreDispatchUseCase = new ApproveStoreDispatchUseCase(storeDispatchRepository, inventoryRepository);
+const dispatchFromStoreUseCase = new DispatchFromStoreUseCase(storeDispatchRepository, inventoryRepository);
+const receiveStoreDispatchUseCase = new ReceiveStoreDispatchUseCase(storeDispatchRepository, inventoryRepository);
+const cancelStoreDispatchUseCase = new CancelStoreDispatchUseCase(storeDispatchRepository);
 
 // ============================================================================
 // List Inventory
@@ -356,6 +374,132 @@ export const lowStockReport = async (req: TypedRequest, res: Response): Promise<
       pageName: 'Error',
       error: error.message || 'Failed to generate report',
     });
+  }
+};
+
+export const listDispatches = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const requestedStatus = req.query.status as string | undefined;
+    const status =
+      requestedStatus && ['draft', 'approved', 'dispatched', 'in_transit', 'received', 'cancelled'].includes(requestedStatus)
+        ? (requestedStatus as 'draft' | 'approved' | 'dispatched' | 'in_transit' | 'received' | 'cancelled')
+        : undefined;
+
+    const result = await listStoreDispatchesUseCase.execute({
+      status,
+      fromStoreId: req.query.fromStoreId as string | undefined,
+      toStoreId: req.query.toStoreId as string | undefined,
+      limit: 50,
+      offset: 0,
+      orderBy: 'createdAt',
+      orderDirection: 'desc',
+    });
+    const stores = await StoreRepo.findActive();
+    adminRespond(req, res, 'inventory/dispatches/index', {
+      pageName: 'Dispatches',
+      dispatches: result.dispatches,
+      stores,
+      filters: req.query,
+    });
+  } catch (error: any) {
+    logger.error('Error:', error);
+    adminRespond(req, res, 'error', { pageName: 'Error', error: error.message || 'Failed to load dispatches' });
+  }
+};
+
+export const createDispatchForm = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const stores = await StoreRepo.findActive();
+    adminRespond(req, res, 'inventory/dispatches/create', { pageName: 'Create Dispatch', stores, formData: {} });
+  } catch (error: any) {
+    logger.error('Error:', error);
+    adminRespond(req, res, 'error', { pageName: 'Error', error: error.message || 'Failed to load dispatch form' });
+  }
+};
+
+export const createDispatch = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const items = Array.isArray(req.body.items)
+      ? req.body.items
+      : req.body.productId
+        ? [{ productId: req.body.productId, variantId: req.body.variantId || undefined, quantity: parseInt(req.body.quantity || '0', 10), sku: req.body.sku || undefined, productName: req.body.productName || undefined }]
+        : [];
+
+    const dispatch = await createStoreDispatchUseCase.execute({
+      fromStoreId: req.body.fromStoreId,
+      toStoreId: req.body.toStoreId,
+      items,
+      notes: req.body.notes || undefined,
+      requestedBy: (req as any).user?.userId || 'admin',
+    });
+    res.redirect(`/admin/dispatches/${dispatch.dispatchId}?success=Dispatch created successfully`);
+  } catch (error: any) {
+    logger.error('Error:', error);
+    const stores = await StoreRepo.findActive().catch(() => []);
+    adminRespond(req, res, 'inventory/dispatches/create', { pageName: 'Create Dispatch', stores, formData: req.body, error: error.message || 'Failed to create dispatch' });
+  }
+};
+
+export const viewDispatch = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const dispatch = await getStoreDispatchUseCase.execute(req.params.dispatchId);
+    if (!dispatch) {
+      adminRespond(req, res, 'error', { pageName: 'Not Found', error: 'Dispatch not found' });
+      return;
+    }
+    adminRespond(req, res, 'inventory/dispatches/view', { pageName: dispatch.dispatchNumber, dispatch });
+  } catch (error: any) {
+    logger.error('Error:', error);
+    adminRespond(req, res, 'error', { pageName: 'Error', error: error.message || 'Failed to load dispatch' });
+  }
+};
+
+export const approveDispatch = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    await approveStoreDispatchUseCase.execute(req.params.dispatchId, (req as any).user?.userId || 'admin');
+    res.redirect(`/admin/dispatches/${req.params.dispatchId}?success=Dispatch approved successfully`);
+  } catch (error: any) {
+    logger.error('Error:', error);
+    res.redirect(`/admin/dispatches/${req.params.dispatchId}?error=${encodeURIComponent(error.message || 'Failed to approve dispatch')}`);
+  }
+};
+
+export const markDispatched = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    await dispatchFromStoreUseCase.execute(req.params.dispatchId, (req as any).user?.userId || 'admin');
+    res.redirect(`/admin/dispatches/${req.params.dispatchId}?success=Dispatch marked as shipped`);
+  } catch (error: any) {
+    logger.error('Error:', error);
+    res.redirect(`/admin/dispatches/${req.params.dispatchId}?error=${encodeURIComponent(error.message || 'Failed to ship dispatch')}`);
+  }
+};
+
+export const receiveDispatch = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const dispatch = await getStoreDispatchUseCase.execute(req.params.dispatchId);
+    if (!dispatch) {
+      throw new Error('Dispatch not found');
+    }
+    await receiveStoreDispatchUseCase.execute({
+      dispatchId: req.params.dispatchId,
+      receivedBy: (req as any).user?.userId || 'admin',
+      notes: req.body.notes || undefined,
+      items: (dispatch.items || []).map((item: any) => ({ dispatchItemId: item.dispatchItemId, receivedQuantity: item.dispatchedQuantity || item.requestedQuantity })),
+    });
+    res.redirect(`/admin/dispatches/${req.params.dispatchId}?success=Dispatch received successfully`);
+  } catch (error: any) {
+    logger.error('Error:', error);
+    res.redirect(`/admin/dispatches/${req.params.dispatchId}?error=${encodeURIComponent(error.message || 'Failed to receive dispatch')}`);
+  }
+};
+
+export const cancelDispatch = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    await cancelStoreDispatchUseCase.execute(req.params.dispatchId, req.body.reason || undefined);
+    res.redirect(`/admin/dispatches/${req.params.dispatchId}?success=Dispatch cancelled successfully`);
+  } catch (error: any) {
+    logger.error('Error:', error);
+    res.redirect(`/admin/dispatches/${req.params.dispatchId}?error=${encodeURIComponent(error.message || 'Failed to cancel dispatch')}`);
   }
 };
 

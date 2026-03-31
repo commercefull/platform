@@ -156,6 +156,164 @@
               </div>
             </div>
 
+            <!-- Order Limits & Policies -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-shield-alt me-2"></i>Order Limits & Policies</h3>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group mb-3">
+                      <label class="form-label">Min Order Quantity</label>
+                      <input type="number" class="form-control" name="minOrderQuantity" value="<%= product.minOrderQuantity || 1 %>" min="1" step="1">
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group mb-3">
+                      <label class="form-label">Max Order Quantity</label>
+                      <input type="number" class="form-control" name="maxOrderQuantity" value="<%= product.maxOrderQuantity || '' %>" min="1" step="1" placeholder="No limit">
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group mb-3">
+                  <label class="form-label">Warranty</label>
+                  <textarea class="form-control" name="warranty" rows="2"><%= product.warranty || '' %></textarea>
+                </div>
+                <div class="form-group mb-3">
+                  <label class="form-label">Return Policy</label>
+                  <textarea class="form-control" name="returnPolicy" rows="2"><%= product.returnPolicy || '' %></textarea>
+                </div>
+                <div class="form-group mb-3">
+                  <label class="form-label">External ID</label>
+                  <input type="text" class="form-control" name="externalId" value="<%= product.externalId || '' %>" placeholder="ID from external system">
+                </div>
+              </div>
+            </div>
+
+            <!-- Product Attributes -->
+            <% if ((productAttributes && productAttributes.length > 0) || (allAttributes && allAttributes.length > 0)) { %>
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-sliders-h me-2"></i>Product Attributes</h3>
+              </div>
+              <div class="card-body">
+                <% if (productAttributes && productAttributes.length > 0) { %>
+                  <% productAttributes.forEach(function(pa) { %>
+                  <div class="form-group mb-3">
+                    <label class="form-label"><%= pa.attribute.name %> <small class="text-muted">(<%= pa.attribute.code %>)</small></label>
+                    <% if (pa.attribute.type === 'text') { %>
+                      <input type="text" class="form-control" name="attr_<%= pa.attributeId %>" value="<%= pa.value || pa.valueText || '' %>">
+                    <% } else if (pa.attribute.type === 'number') { %>
+                      <input type="number" class="form-control" name="attr_<%= pa.attributeId %>" value="<%= pa.valueNumeric || pa.value || '' %>" step="any">
+                    <% } else if (pa.attribute.type === 'checkbox') { %>
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="attr_<%= pa.attributeId %>" value="true" <%= pa.valueBoolean ? 'checked' : '' %>>
+                        <label class="form-check-label">Enabled</label>
+                      </div>
+                    <% } else { %>
+                      <input type="text" class="form-control" name="attr_<%= pa.attributeId %>" value="<%= pa.value || '' %>">
+                    <% } %>
+                  </div>
+                  <% }); %>
+                <% } else { %>
+                  <p class="text-muted mb-0">No attributes assigned to this product. Use the Attributes management to add attributes.</p>
+                <% } %>
+              </div>
+            </div>
+            <% } %>
+
+            <!-- Variants (read-only summary) -->
+            <% if (product.variants && product.variants.length > 0) { %>
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-layer-group me-2"></i>Variants (<%= product.variants.length %>)</h3>
+              </div>
+              <div class="card-body table-responsive p-0">
+                <table class="table table-sm table-hover mb-0">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>SKU</th>
+                      <th>Barcode</th>
+                      <th>Attributes</th>
+                      <th class="text-right">Price</th>
+                      <th class="text-center">Stock</th>
+                      <th class="text-center">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% product.variants.forEach(function(variant) { %>
+                    <tr>
+                      <td>
+                        <strong><%= variant.name %></strong>
+                        <% if (variant.isDefault) { %><span class="badge badge-primary ml-1">Default</span><% } %>
+                      </td>
+                      <td><code><%= variant.sku %></code></td>
+                      <td><code><%= variant.barcode || '-' %></code></td>
+                      <td>
+                        <% if (variant.attributes && variant.attributes.length > 0) { %>
+                          <% variant.attributes.forEach(function(attr) { %>
+                            <span class="badge badge-outline-secondary mr-1"><%= attr.attributeName %>: <%= attr.displayValue || attr.value %></span>
+                          <% }); %>
+                        <% } else { %>
+                          <span class="text-muted">-</span>
+                        <% } %>
+                      </td>
+                      <td class="text-right"><%= product.currency %> <%= variant.effectivePrice.toFixed(2) %></td>
+                      <td class="text-center">
+                        <% if (variant.isLowStock) { %>
+                          <span class="badge badge-warning"><%= variant.stockQuantity %></span>
+                        <% } else if (variant.isInStock) { %>
+                          <span class="badge badge-success"><%= variant.stockQuantity %></span>
+                        <% } else { %>
+                          <span class="badge badge-danger">0</span>
+                        <% } %>
+                      </td>
+                      <td class="text-center">
+                        <% if (variant.isActive) { %>
+                          <span class="badge badge-success">Active</span>
+                        <% } else { %>
+                          <span class="badge badge-secondary">Inactive</span>
+                        <% } %>
+                      </td>
+                    </tr>
+                    <% }); %>
+                  </tbody>
+                </table>
+              </div>
+              <div class="card-footer text-muted">
+                <small>Variants are managed via the Product API. Use the business API endpoints to add, update, or remove variants.</small>
+              </div>
+            </div>
+            <% } %>
+
+            <!-- Images (read-only summary) -->
+            <% if (product.images && product.images.length > 0) { %>
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-images me-2"></i>Images (<%= product.images.length %>)</h3>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <% product.images.forEach(function(img) { %>
+                  <div class="col-md-3 col-6 mb-3">
+                    <div class="position-relative">
+                      <img src="<%= img.url %>" alt="<%= img.altText || product.name %>" class="img-fluid rounded" style="border: 1px solid #ddd;">
+                      <% if (img.isPrimary) { %>
+                        <span class="badge badge-primary position-absolute" style="top: 5px; left: 20px;">Primary</span>
+                      <% } %>
+                    </div>
+                  </div>
+                  <% }); %>
+                </div>
+              </div>
+              <div class="card-footer text-muted">
+                <small>Images are managed via the Product API. Use the business API endpoints to add, remove, or reorder images.</small>
+              </div>
+            </div>
+            <% } %>
+
             <!-- SEO -->
             <div class="card">
               <div class="card-header">
@@ -165,10 +323,12 @@
                 <div class="form-group mb-3">
                   <label class="form-label">Meta Title</label>
                   <input type="text" class="form-control" name="metaTitle" value="<%= product.metaTitle || '' %>" maxlength="70">
+                  <small class="text-muted">Recommended: 50-60 characters</small>
                 </div>
                 <div class="form-group mb-3">
                   <label class="form-label">Meta Description</label>
                   <textarea class="form-control" name="metaDescription" rows="2" maxlength="160"><%= product.metaDescription || '' %></textarea>
+                  <small class="text-muted">Recommended: 150-160 characters</small>
                 </div>
                 <div class="form-group mb-3">
                   <label class="form-label">Meta Keywords</label>
@@ -243,9 +403,23 @@
                   <select class="form-select" name="categoryId">
                     <option value="">Select Category</option>
                     <% (categories || []).forEach(function(cat) { %>
-                    <option value="<%= cat.categoryId %>" <%= product.categoryId === cat.categoryId ? 'selected' : '' %>><%= cat.name %></option>
+                    <option value="<%= cat.productCategoryId %>" <%= product.categoryId === cat.productCategoryId ? 'selected' : '' %>><%= cat.name %></option>
                     <% }); %>
                   </select>
+                </div>
+                <div class="form-group mb-3">
+                  <label class="form-label">Brand</label>
+                  <select class="form-select" name="brandId">
+                    <option value="">Select Brand</option>
+                    <% (brands || []).forEach(function(brand) { %>
+                    <option value="<%= brand.brandId %>" <%= product.brandId === brand.brandId ? 'selected' : '' %>><%= brand.name %></option>
+                    <% }); %>
+                  </select>
+                </div>
+                <div class="form-group mb-3">
+                  <label class="form-label">Tags</label>
+                  <input type="text" class="form-control" name="tags" value="<%= (product.tags || []).join(', ') %>" placeholder="tag1, tag2, tag3">
+                  <small class="text-muted">Comma-separated</small>
                 </div>
               </div>
             </div>

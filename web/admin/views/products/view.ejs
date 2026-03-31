@@ -30,14 +30,19 @@
       <%- include("../partials/alerts") %>
 
       <div class="row">
-        <!-- Product Details -->
+        <!-- ==================== LEFT COLUMN ==================== -->
         <div class="col-md-8">
+
+          <!-- Product Header -->
           <div class="card">
             <div class="card-header">
               <h3 class="card-title">Product Details</h3>
               <div class="card-tools">
-                <span class="badge badge-<%= product.status === 'active' ? 'success' : product.status === 'draft' ? 'warning' : 'secondary' %>">
+                <span class="badge badge-<%= product.status === 'active' ? 'success' : product.status === 'draft' ? 'warning' : product.status === 'inactive' ? 'danger' : 'secondary' %>">
                   <%= product.status.toUpperCase() %>
+                </span>
+                <span class="badge badge-<%= product.visibility === 'visible' || product.visibility === 'featured' ? 'info' : 'secondary' %> ml-1">
+                  <%= product.visibility %>
                 </span>
               </div>
             </div>
@@ -45,11 +50,23 @@
               <div class="row">
                 <!-- Product Image -->
                 <div class="col-md-4">
-                  <% if (product.primaryImageUrl) { %>
-                    <img src="<%= product.primaryImageUrl %>" alt="<%= product.name %>" class="img-fluid rounded">
+                  <% if (product.primaryImage && product.primaryImage.url) { %>
+                    <img src="<%= product.primaryImage.url %>" alt="<%= product.primaryImage.altText || product.name %>" class="img-fluid rounded mb-2">
                   <% } else { %>
-                    <div class="bg-light d-flex align-items-center justify-content-center rounded" style="height: 200px;">
+                    <div class="bg-light d-flex align-items-center justify-content-center rounded mb-2" style="height: 200px;">
                       <i class="fas fa-image fa-4x text-muted"></i>
+                    </div>
+                  <% } %>
+                  <% if (product.images && product.images.length > 1) { %>
+                    <div class="d-flex flex-wrap gap-1">
+                      <% product.images.slice(0, 6).forEach(function(img) { %>
+                        <img src="<%= img.url %>" alt="<%= img.altText || '' %>" class="rounded" style="width: 48px; height: 48px; object-fit: cover; border: <%= img.isPrimary ? '2px solid #007bff' : '1px solid #ddd' %>;">
+                      <% }); %>
+                      <% if (product.images.length > 6) { %>
+                        <div class="rounded bg-light d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                          <small>+<%= product.images.length - 6 %></small>
+                        </div>
+                      <% } %>
                     </div>
                   <% } %>
                 </div>
@@ -57,34 +74,54 @@
                 <!-- Product Info -->
                 <div class="col-md-8">
                   <h3><%= product.name %></h3>
-                  <p class="text-muted">
-                    SKU: <code><%= product.sku || 'N/A' %></code> | 
+                  <p class="text-muted mb-1">
+                    SKU: <code><%= product.sku || 'N/A' %></code> |
                     Slug: <code><%= product.slug %></code>
+                  </p>
+                  <p class="text-muted mb-2">
+                    <% if (productTypeName) { %>Type: <span class="badge badge-outline-primary"><%= productTypeName %></span> | <% } %>
+                    <% if (categoryName) { %>Category: <span class="badge badge-outline-info"><%= categoryName %></span> | <% } %>
+                    <% if (brandName) { %>Brand: <span class="badge badge-outline-dark"><%= brandName %></span><% } %>
                   </p>
 
                   <hr>
 
+                  <!-- Pricing -->
                   <div class="row">
                     <div class="col-6">
-                      <h4 class="text-primary">$<%= product.effectivePrice.toFixed(2) %></h4>
+                      <h4 class="text-primary mb-0"><%= product.currency %> <%= product.effectivePrice.toFixed(2) %></h4>
                       <% if (product.isOnSale && product.salePrice) { %>
-                        <p><s class="text-muted">$<%= product.basePrice.toFixed(2) %></s></p>
+                        <small><s class="text-muted"><%= product.currency %> <%= product.basePrice.toFixed(2) %></s>
+                        <span class="text-danger">-<%= product.discountPercentage %>%</span></small>
+                      <% } %>
+                      <% if (product.cost !== null && product.cost !== undefined) { %>
+                        <br><small class="text-muted">Cost: <%= product.currency %> <%= product.cost.toFixed(2) %></small>
+                        <% if (product.profitMargin !== null) { %>
+                          <small class="text-<%= product.profitMargin > 0 ? 'success' : 'danger' %> ml-1">
+                            (Margin: <%= product.profitMarginPercentage %>%)
+                          </small>
+                        <% } %>
                       <% } %>
                     </div>
                     <div class="col-6 text-right">
-                      <p>
-                        <strong>Visibility:</strong>
-                        <span class="badge badge-<%= product.visibility === 'visible' ? 'success' : 'secondary' %>">
-                          <%= product.visibility %>
-                        </span>
-                      </p>
                       <% if (product.isFeatured) { %>
                         <span class="badge badge-warning"><i class="fas fa-star"></i> Featured</span>
                       <% } %>
                       <% if (product.isOnSale) { %>
                         <span class="badge badge-danger">On Sale</span>
                       <% } %>
+                      <% if (product.isPurchasable) { %>
+                        <span class="badge badge-success">Purchasable</span>
+                      <% } %>
                     </div>
+                  </div>
+
+                  <!-- Product Flags -->
+                  <div class="mt-2">
+                    <% if (product.isVirtual) { %><span class="badge badge-info mr-1">Virtual</span><% } %>
+                    <% if (product.isDownloadable) { %><span class="badge badge-info mr-1">Downloadable</span><% } %>
+                    <% if (product.isSubscription) { %><span class="badge badge-info mr-1">Subscription</span><% } %>
+                    <% if (product.isTaxable) { %><span class="badge badge-secondary mr-1">Taxable<%= product.taxClass ? ' (' + product.taxClass + ')' : '' %></span><% } %>
                   </div>
                 </div>
               </div>
@@ -97,41 +134,108 @@
               <h3 class="card-title">Description</h3>
             </div>
             <div class="card-body">
+              <% if (product.shortDescription) { %>
+                <p class="lead"><%= product.shortDescription %></p>
+                <hr>
+              <% } %>
               <% if (product.description) { %>
-                <p><%= product.description %></p>
+                <div><%- product.description %></div>
               <% } else { %>
                 <p class="text-muted">No description available.</p>
               <% } %>
             </div>
           </div>
 
-          <!-- Variants (if applicable) -->
-          <% if (product.hasVariants && product.variants && product.variants.length > 0) { %>
+          <!-- Product Attributes -->
+          <% if (productAttributes && productAttributes.length > 0) { %>
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title">Variants (<%= product.variants.length %>)</h3>
+              <h3 class="card-title"><i class="fas fa-sliders-h mr-1"></i>Attributes (<%= productAttributes.length %>)</h3>
             </div>
-            <div class="card-body table-responsive p-0">
-              <table class="table table-hover">
+            <div class="card-body p-0">
+              <table class="table table-striped mb-0">
                 <thead>
                   <tr>
-                    <th>Name</th>
-                    <th>SKU</th>
-                    <th>Price</th>
-                    <th>Stock</th>
-                    <th>Default</th>
+                    <th>Attribute</th>
+                    <th>Code</th>
+                    <th>Value</th>
+                    <th>Type</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <% product.variants.forEach(variant => { %>
+                  <% productAttributes.forEach(function(pa) { %>
                   <tr>
-                    <td><%= variant.name %></td>
-                    <td><code><%= variant.sku %></code></td>
-                    <td>$<%= variant.price.toFixed(2) %></td>
-                    <td><%= variant.stock %></td>
+                    <td><strong><%= pa.attribute.name %></strong></td>
+                    <td><code><%= pa.attribute.code %></code></td>
+                    <td><%= pa.value || pa.valueText || pa.valueNumeric || (pa.valueBoolean !== undefined ? (pa.valueBoolean ? 'Yes' : 'No') : '-') %></td>
+                    <td><span class="badge badge-light"><%= pa.attribute.type %></span></td>
+                  </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <% } %>
+
+          <!-- Variants -->
+          <% if (product.variants && product.variants.length > 0) { %>
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-layer-group mr-1"></i>Variants (<%= product.variants.length %>)</h3>
+            </div>
+            <div class="card-body table-responsive p-0">
+              <table class="table table-hover mb-0">
+                <thead>
+                  <tr>
+                    <th>Variant</th>
+                    <th>SKU</th>
+                    <th>Barcode</th>
+                    <th>Attributes</th>
+                    <th class="text-right">Price</th>
+                    <th class="text-center">Stock</th>
+                    <th class="text-center">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% product.variants.forEach(function(variant) { %>
+                  <tr>
                     <td>
+                      <strong><%= variant.name %></strong>
                       <% if (variant.isDefault) { %>
-                        <i class="fas fa-check text-success"></i>
+                        <span class="badge badge-primary ml-1">Default</span>
+                      <% } %>
+                    </td>
+                    <td><code><%= variant.sku %></code></td>
+                    <td><code><%= variant.barcode || '-' %></code></td>
+                    <td>
+                      <% if (variant.attributes && variant.attributes.length > 0) { %>
+                        <% variant.attributes.forEach(function(attr) { %>
+                          <span class="badge badge-outline-secondary mr-1"><%= attr.attributeName %>: <%= attr.displayValue || attr.value %></span>
+                        <% }); %>
+                      <% } else { %>
+                        <span class="text-muted">-</span>
+                      <% } %>
+                    </td>
+                    <td class="text-right">
+                      <%= product.currency %> <%= variant.effectivePrice.toFixed(2) %>
+                      <% if (variant.isOnSale && variant.salePrice) { %>
+                        <br><small><s class="text-muted"><%= product.currency %> <%= variant.basePrice.toFixed(2) %></s> <span class="text-danger">-<%= variant.discountPercentage %>%</span></small>
+                      <% } %>
+                    </td>
+                    <td class="text-center">
+                      <% if (variant.isLowStock) { %>
+                        <span class="badge badge-warning"><%= variant.stockQuantity %></span>
+                      <% } else if (variant.isInStock) { %>
+                        <span class="badge badge-success"><%= variant.stockQuantity %></span>
+                      <% } else { %>
+                        <span class="badge badge-danger">0</span>
+                      <% } %>
+                    </td>
+                    <td class="text-center">
+                      <% if (variant.isActive) { %>
+                        <span class="badge badge-success">Active</span>
+                      <% } else { %>
+                        <span class="badge badge-secondary">Inactive</span>
                       <% } %>
                     </td>
                   </tr>
@@ -141,10 +245,127 @@
             </div>
           </div>
           <% } %>
+
+          <!-- Images Gallery -->
+          <% if (product.images && product.images.length > 0) { %>
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-images mr-1"></i>Images (<%= product.images.length %>)</h3>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <% product.images.forEach(function(img) { %>
+                <div class="col-md-3 col-6 mb-3">
+                  <div class="position-relative">
+                    <img src="<%= img.url %>" alt="<%= img.altText || product.name %>" class="img-fluid rounded" style="border: <%= img.isPrimary ? '3px solid #007bff' : '1px solid #ddd' %>;">
+                    <% if (img.isPrimary) { %>
+                      <span class="badge badge-primary position-absolute" style="top: 5px; left: 5px;">Primary</span>
+                    <% } %>
+                  </div>
+                  <% if (img.altText) { %>
+                    <small class="text-muted d-block mt-1"><%= img.altText %></small>
+                  <% } %>
+                </div>
+                <% }); %>
+              </div>
+            </div>
+          </div>
+          <% } %>
+
+          <!-- Dimensions & Weight -->
+          <% if (product.weight || product.length || product.width || product.height) { %>
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-ruler-combined mr-1"></i>Dimensions & Weight</h3>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <% if (product.weight) { %>
+                <div class="col-md-3 col-6 mb-2">
+                  <small class="text-muted d-block">Weight</small>
+                  <strong><%= product.weight %> <%= product.weightUnit || 'kg' %></strong>
+                </div>
+                <% } %>
+                <% if (product.length) { %>
+                <div class="col-md-3 col-6 mb-2">
+                  <small class="text-muted d-block">Length</small>
+                  <strong><%= product.length %> <%= product.dimensionUnit || 'cm' %></strong>
+                </div>
+                <% } %>
+                <% if (product.width) { %>
+                <div class="col-md-3 col-6 mb-2">
+                  <small class="text-muted d-block">Width</small>
+                  <strong><%= product.width %> <%= product.dimensionUnit || 'cm' %></strong>
+                </div>
+                <% } %>
+                <% if (product.height) { %>
+                <div class="col-md-3 col-6 mb-2">
+                  <small class="text-muted d-block">Height</small>
+                  <strong><%= product.height %> <%= product.dimensionUnit || 'cm' %></strong>
+                </div>
+                <% } %>
+              </div>
+            </div>
+          </div>
+          <% } %>
+
+          <!-- SEO -->
+          <% if (product.metaTitle || product.metaDescription || product.metaKeywords) { %>
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-search mr-1"></i>SEO</h3>
+            </div>
+            <div class="card-body">
+              <% if (product.metaTitle) { %>
+              <div class="mb-2">
+                <small class="text-muted d-block">Meta Title</small>
+                <strong><%= product.metaTitle %></strong>
+              </div>
+              <% } %>
+              <% if (product.metaDescription) { %>
+              <div class="mb-2">
+                <small class="text-muted d-block">Meta Description</small>
+                <%= product.metaDescription %>
+              </div>
+              <% } %>
+              <% if (product.metaKeywords) { %>
+              <div class="mb-2">
+                <small class="text-muted d-block">Meta Keywords</small>
+                <%= product.metaKeywords %>
+              </div>
+              <% } %>
+            </div>
+          </div>
+          <% } %>
+
+          <!-- Policies -->
+          <% if (product.returnPolicy || product.warranty) { %>
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-shield-alt mr-1"></i>Policies</h3>
+            </div>
+            <div class="card-body">
+              <% if (product.warranty) { %>
+              <div class="mb-2">
+                <small class="text-muted d-block">Warranty</small>
+                <%= product.warranty %>
+              </div>
+              <% } %>
+              <% if (product.returnPolicy) { %>
+              <div class="mb-2">
+                <small class="text-muted d-block">Return Policy</small>
+                <%= product.returnPolicy %>
+              </div>
+              <% } %>
+            </div>
+          </div>
+          <% } %>
+
         </div>
 
-        <!-- Sidebar -->
+        <!-- ==================== RIGHT COLUMN (Sidebar) ==================== -->
         <div class="col-md-4">
+
           <!-- Actions -->
           <div class="card">
             <div class="card-header">
@@ -154,7 +375,6 @@
               <a href="/admin/products/<%= product.productId %>/edit" class="btn btn-primary btn-block mb-2">
                 <i class="fas fa-edit"></i> Edit Product
               </a>
-
               <% if (product.status === 'draft') { %>
                 <button onclick="publishProduct('<%= product.productId %>')" class="btn btn-success btn-block mb-2">
                   <i class="fas fa-globe"></i> Publish
@@ -164,13 +384,10 @@
                   <i class="fas fa-eye-slash"></i> Unpublish
                 </button>
               <% } %>
-
               <button onclick="deleteProduct('<%= product.productId %>', '<%= product.name %>')" class="btn btn-danger btn-block mb-2">
                 <i class="fas fa-trash"></i> Delete
               </button>
-
               <hr>
-
               <a href="/admin/products" class="btn btn-secondary btn-block">
                 <i class="fas fa-arrow-left"></i> Back to Products
               </a>
@@ -182,29 +399,153 @@
             <div class="card-header">
               <h3 class="card-title">Quick Info</h3>
             </div>
-            <div class="card-body">
+            <div class="card-body p-0">
               <ul class="list-group list-group-flush">
                 <li class="list-group-item d-flex justify-content-between">
-                  <span>ID</span>
-                  <code><%= product.productId.substring(0, 8) %>...</code>
+                  <span>Product ID</span>
+                  <code title="<%= product.productId %>"><%= product.productId.substring(0, 8) %>...</code>
                 </li>
                 <li class="list-group-item d-flex justify-content-between">
                   <span>Created</span>
                   <span><%= new Date(product.createdAt).toLocaleDateString() %></span>
                 </li>
-                <% if (product.categoryId) { %>
+                <li class="list-group-item d-flex justify-content-between">
+                  <span>Updated</span>
+                  <span><%= new Date(product.updatedAt).toLocaleDateString() %></span>
+                </li>
+                <% if (product.publishedAt) { %>
+                <li class="list-group-item d-flex justify-content-between">
+                  <span>Published</span>
+                  <span><%= new Date(product.publishedAt).toLocaleDateString() %></span>
+                </li>
+                <% } %>
+                <% if (productTypeName) { %>
+                <li class="list-group-item d-flex justify-content-between">
+                  <span>Product Type</span>
+                  <span><%= productTypeName %></span>
+                </li>
+                <% } %>
+                <% if (categoryName) { %>
                 <li class="list-group-item d-flex justify-content-between">
                   <span>Category</span>
-                  <span><%= product.categoryId %></span>
+                  <span><%= categoryName %></span>
+                </li>
+                <% } %>
+                <% if (brandName) { %>
+                <li class="list-group-item d-flex justify-content-between">
+                  <span>Brand</span>
+                  <span><%= brandName %></span>
                 </li>
                 <% } %>
                 <li class="list-group-item d-flex justify-content-between">
                   <span>Has Variants</span>
-                  <span><%= product.hasVariants ? 'Yes' : 'No' %></span>
+                  <span><%= product.hasVariants ? 'Yes (' + (product.variants ? product.variants.length : 0) + ')' : 'No' %></span>
                 </li>
+                <% if (product.externalId) { %>
+                <li class="list-group-item d-flex justify-content-between">
+                  <span>External ID</span>
+                  <code><%= product.externalId %></code>
+                </li>
+                <% } %>
+                <% if (product.merchantId) { %>
+                <li class="list-group-item d-flex justify-content-between">
+                  <span>Merchant</span>
+                  <code title="<%= product.merchantId %>"><%= product.merchantId.substring(0, 8) %>...</code>
+                </li>
+                <% } %>
               </ul>
             </div>
           </div>
+
+          <!-- Order Limits -->
+          <% if (product.minOrderQuantity > 1 || product.maxOrderQuantity) { %>
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Order Limits</h3>
+            </div>
+            <div class="card-body p-0">
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item d-flex justify-content-between">
+                  <span>Min Quantity</span>
+                  <span><%= product.minOrderQuantity %></span>
+                </li>
+                <% if (product.maxOrderQuantity) { %>
+                <li class="list-group-item d-flex justify-content-between">
+                  <span>Max Quantity</span>
+                  <span><%= product.maxOrderQuantity %></span>
+                </li>
+                <% } %>
+              </ul>
+            </div>
+          </div>
+          <% } %>
+
+          <!-- Tags -->
+          <% if (product.tags && product.tags.length > 0) { %>
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Tags</h3>
+            </div>
+            <div class="card-body">
+              <% product.tags.forEach(function(tag) { %>
+                <span class="badge badge-secondary mr-1 mb-1"><%= tag %></span>
+              <% }); %>
+            </div>
+          </div>
+          <% } %>
+
+          <!-- Reviews Summary -->
+          <% if (reviewStats && reviewStats.totalReviews > 0) { %>
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-star mr-1"></i>Reviews</h3>
+            </div>
+            <div class="card-body">
+              <div class="text-center mb-3">
+                <h2 class="mb-0"><%= reviewStats.averageRating.toFixed(1) %></h2>
+                <div>
+                  <% for (var i = 1; i <= 5; i++) { %>
+                    <i class="fas fa-star<%= i <= Math.round(reviewStats.averageRating) ? '' : '-o' %> text-warning"></i>
+                  <% } %>
+                </div>
+                <small class="text-muted"><%= reviewStats.totalReviews %> review<%= reviewStats.totalReviews !== 1 ? 's' : '' %></small>
+                <% if (reviewStats.verifiedPurchaseCount > 0) { %>
+                  <br><small class="text-success"><%= reviewStats.verifiedPurchaseCount %> verified</small>
+                <% } %>
+              </div>
+              <!-- Rating Distribution -->
+              <% [5, 4, 3, 2, 1].forEach(function(rating) { %>
+              <div class="d-flex align-items-center mb-1">
+                <small class="mr-2" style="width: 15px;"><%= rating %></small>
+                <div class="progress flex-grow-1" style="height: 8px;">
+                  <div class="progress-bar bg-warning" style="width: <%= reviewStats.totalReviews > 0 ? (reviewStats.distribution[rating] / reviewStats.totalReviews * 100) : 0 %>%;"></div>
+                </div>
+                <small class="ml-2" style="width: 20px;"><%= reviewStats.distribution[rating] %></small>
+              </div>
+              <% }); %>
+            </div>
+          </div>
+          <% } %>
+
+          <!-- Metadata -->
+          <% if (product.metadata && Object.keys(product.metadata).length > 0) { %>
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Metadata</h3>
+            </div>
+            <div class="card-body p-0">
+              <ul class="list-group list-group-flush">
+                <% Object.entries(product.metadata).forEach(function([key, value]) { %>
+                <li class="list-group-item d-flex justify-content-between">
+                  <span><%= key %></span>
+                  <code><%= typeof value === 'object' ? JSON.stringify(value) : value %></code>
+                </li>
+                <% }); %>
+              </ul>
+            </div>
+          </div>
+          <% } %>
+
         </div>
       </div>
     </div>

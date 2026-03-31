@@ -40,6 +40,26 @@ export class ProductRepo implements IProductRepository {
     return this.mapToProduct(row, images);
   }
 
+  async findByBarcode(barcode: string): Promise<{ product: Product; variant: ProductVariant } | null> {
+    const variantRow = await queryOne<Record<string, any>>(
+      'SELECT * FROM "productVariant" WHERE barcode = $1',
+      [barcode],
+    );
+    if (!variantRow) return null;
+
+    const productRow = await queryOne<Record<string, any>>(
+      'SELECT * FROM product WHERE "productId" = $1 AND "deletedAt" IS NULL',
+      [variantRow.productId],
+    );
+    if (!productRow) return null;
+
+    const images = await this.getProductImages(productRow.productId);
+    return {
+      product: this.mapToProduct(productRow, images),
+      variant: this.mapToVariant(variantRow),
+    };
+  }
+
   async findAll(filters?: ProductFilters, pagination?: PaginationOptions): Promise<PaginatedResult<Product>> {
     const limit = pagination?.limit || 20;
     const offset = pagination?.offset || 0;
@@ -458,7 +478,7 @@ export class ProductRepo implements IProductRepository {
       params.push(filters.priceMax);
     }
     if (filters?.search) {
-      conditions.push(`(name ILIKE $${paramIndex} OR description ILIKE $${paramIndex} OR sku ILIKE $${paramIndex})`);
+      conditions.push(`(name ILIKE $${paramIndex} OR description ILIKE $${paramIndex} OR sku ILIKE $${paramIndex} OR "productId" IN (SELECT pv."productId" FROM "productVariant" pv WHERE pv."sku" ILIKE $${paramIndex} OR pv."barcode" ILIKE $${paramIndex}))`);
       params.push(`%${filters.search}%`);
       paramIndex++;
     }

@@ -12,6 +12,10 @@ import { FulfillmentStatus } from '../valueObjects/FulfillmentStatus';
 
 export interface OrderFilters {
   customerId?: string;
+  storeId?: string;
+  channelId?: string;
+  createdByUserId?: string;
+  orderSource?: string;
   status?: OrderStatus;
   paymentStatus?: PaymentStatus;
   fulfillmentStatus?: FulfillmentStatus;

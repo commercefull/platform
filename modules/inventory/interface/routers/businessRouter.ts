@@ -7,6 +7,7 @@
 import express from 'express';
 import * as inventoryController from '../controllers/inventoryController';
 import { isMerchantLoggedIn } from '../../../../libs/auth';
+import { storeDispatchRouter } from './storeDispatchRouter';
 
 const router = express.Router();
 router.use(isMerchantLoggedIn);
@@ -48,5 +49,6 @@ router.get('/inventory/:inventoryId', inventoryController.getInventory);
 router.post('/inventory/:inventoryId/restock', inventoryController.restockInventory);
 router.post('/inventory/:inventoryId/adjust', inventoryController.adjustStock);
 router.post('/inventory/:inventoryId/reserve', inventoryController.reserveStock);
+router.use(storeDispatchRouter);
 
 export const inventoryBusinessRouter = router;

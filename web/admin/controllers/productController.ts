@@ -14,6 +14,12 @@ import { UpdateProductCommand, UpdateProductUseCase } from '../../../modules/pro
 import { ProductStatus } from '../../../modules/product/domain/valueObjects/ProductStatus';
 import { ProductVisibility } from '../../../modules/product/domain/valueObjects/ProductVisibility';
 import { adminRespond } from '../../respond';
+import productTypeRepo from '../../../modules/product/infrastructure/repositories/ProductTypeRepository';
+import categoryRepo from '../../../modules/product/infrastructure/repositories/categoryRepo';
+import brandRepository from '../../../modules/brand/infrastructure/repositories/BrandRepository';
+import dynamicAttributeRepo from '../../../modules/product/infrastructure/repositories/DynamicAttributeRepository';
+import productReviewRepo from '../../../modules/product/infrastructure/repositories/productReviewRepo';
+import productImageRepo from '../../../modules/product/infrastructure/repositories/productImageRepo';
 
 // ============================================================================
 // List Products
@@ -96,10 +102,23 @@ export const viewProduct = async (req: TypedRequest, res: Response): Promise<voi
       return;
     }
 
+    // Load additional rich data in parallel
+    const [productAttributes, reviewStats, productType, category, brand] = await Promise.all([
+      dynamicAttributeRepo.getProductAttributes(productId).catch(() => []),
+      productReviewRepo.getProductStatistics(productId).catch(() => ({ totalReviews: 0, averageRating: 0, distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }, verifiedPurchaseCount: 0 })),
+      product.productTypeId ? productTypeRepo.findById(product.productTypeId).catch(() => null) : Promise.resolve(null),
+      product.categoryId ? categoryRepo.findOne(product.categoryId).catch(() => null) : Promise.resolve(null),
+      product.brandId ? brandRepository.findById(product.brandId).catch(() => null) : Promise.resolve(null),
+    ]);
+
     adminRespond(req, res, 'products/view', {
       pageName: `Product: ${product.name}`,
       product,
-
+      productAttributes,
+      reviewStats,
+      productTypeName: productType?.name || null,
+      categoryName: category?.name || null,
+      brandName: brand ? brand.name : null,
       success: req.query.success || null,
     });
   } catch (error: any) {
@@ -118,12 +137,17 @@ export const viewProduct = async (req: TypedRequest, res: Response): Promise<voi
 
 export const createProductForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    // TODO: Fetch product types, categories, attributes using their respective use cases
-    // For now, we'll pass empty arrays - these will be populated when we create the use cases
+    const [productTypes, categories, brandsResult] = await Promise.all([
+      productTypeRepo.findAll(),
+      categoryRepo.findActive(),
+      brandRepository.findAll({ isActive: true }),
+    ]);
+
     adminRespond(req, res, 'products/create', {
       pageName: 'Create Product',
-      productTypes: [],
-      categories: [],
+      productTypes,
+      categories,
+      brands: brandsResult.data || [],
       attributes: [],
 
       formData: {},
@@ -178,12 +202,18 @@ export const createProduct = async (req: TypedRequest, res: Response): Promise<v
     } = req.body;
 
     if (!name?.trim()) {
+      const [productTypes, categories, brandsResult] = await Promise.all([
+        productTypeRepo.findAll(),
+        categoryRepo.findActive(),
+        brandRepository.findAll({ isActive: true }),
+      ]);
       adminRespond(req, res, 'products/create', {
         pageName: 'Create Product',
         error: 'Product name is required',
         formData: req.body,
-        productTypes: [],
-        categories: [],
+        productTypes,
+        categories,
+        brands: brandsResult.data || [],
         attributes: [],
       });
       return;
@@ -225,16 +255,22 @@ export const createProduct = async (req: TypedRequest, res: Response): Promise<v
     const useCase = new CreateProductUseCase(ProductRepo);
     const product = await useCase.execute(command);
 
-    res.redirect(`/hub/products/${product.productId}?success=Product created successfully`);
+    res.redirect(`/admin/products/${product.productId}?success=Product created successfully`);
   } catch (error: any) {
     logger.error('Error:', error);
 
+    const [productTypes, categories, brandsResult] = await Promise.all([
+      productTypeRepo.findAll().catch(() => []),
+      categoryRepo.findActive().catch(() => []),
+      brandRepository.findAll({ isActive: true }).catch(() => ({ data: [] })),
+    ]);
     adminRespond(req, res, 'products/create', {
       pageName: 'Create Product',
       error: error.message || 'Failed to create product',
       formData: req.body,
-      productTypes: [],
-      categories: [],
+      productTypes,
+      categories,
+      brands: (brandsResult as any).data || brandsResult || [],
       attributes: [],
     });
   }
@@ -260,12 +296,22 @@ export const editProductForm = async (req: TypedRequest, res: Response): Promise
       return;
     }
 
+    const [productTypes, categories, brandsResult, productAttributes, allAttributes] = await Promise.all([
+      productTypeRepo.findAll(),
+      categoryRepo.findActive(),
+      brandRepository.findAll({ isActive: true }),
+      dynamicAttributeRepo.getProductAttributes(productId).catch(() => []),
+      dynamicAttributeRepo.findAllAttributes().catch(() => []),
+    ]);
+
     adminRespond(req, res, 'products/edit', {
       pageName: `Edit: ${product.name}`,
       product,
-      productTypes: [],
-      categories: [],
-      attributes: [],
+      productTypes,
+      categories,
+      brands: brandsResult.data || [],
+      productAttributes,
+      allAttributes,
     });
   } catch (error: any) {
     logger.error('Error:', error);
@@ -290,7 +336,7 @@ export const updateProduct = async (req: TypedRequest, res: Response): Promise<v
     const useCase = new UpdateProductUseCase(ProductRepo);
     await useCase.execute(command);
 
-    res.redirect(`/hub/products/${productId}?success=Product updated successfully`);
+    res.redirect(`/admin/products/${productId}?success=Product updated successfully`);
   } catch (error: any) {
     logger.error('Error:', error);
 
@@ -300,12 +346,18 @@ export const updateProduct = async (req: TypedRequest, res: Response): Promise<v
       const getUseCase = new GetProductUseCase(ProductRepo);
       const product = await getUseCase.execute(getCommand);
 
+      const [productTypes, categories, brandsResult] = await Promise.all([
+        productTypeRepo.findAll().catch(() => []),
+        categoryRepo.findActive().catch(() => []),
+        brandRepository.findAll({ isActive: true }).catch(() => ({ data: [] })),
+      ]);
       adminRespond(req, res, 'products/edit', {
         pageName: `Edit: ${product?.name || 'Product'}`,
         product,
         error: error.message || 'Failed to update product',
-        productTypes: [],
-        categories: [],
+        productTypes,
+        categories,
+        brands: (brandsResult as any).data || brandsResult || [],
         attributes: [],
       });
     } catch {

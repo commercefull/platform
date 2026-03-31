@@ -160,15 +160,19 @@ export class ProductSearchService {
     let fromClause = `"${this.productTable}" p`;
     const joins: string[] = [];
 
-    // Text search across multiple fields
+    // Text search across multiple fields (including variant SKU and barcode)
     if (filters.query) {
       const searchTerm = `%${filters.query}%`;
+      // Join productVariant for barcode/variant SKU search
+      joins.push(`LEFT JOIN "productVariant" pv_search ON pv_search."productId" = p."productId"`);
       conditions.push(`(
         p."name" ILIKE $${paramIndex} OR
         p."description" ILIKE $${paramIndex} OR
         p."shortDescription" ILIKE $${paramIndex} OR
         p."sku" ILIKE $${paramIndex} OR
-        p."slug" ILIKE $${paramIndex}
+        p."slug" ILIKE $${paramIndex} OR
+        pv_search."sku" ILIKE $${paramIndex} OR
+        pv_search."barcode" ILIKE $${paramIndex}
       )`);
       params.push(searchTerm);
       paramIndex++;

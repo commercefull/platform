@@ -11,6 +11,7 @@ import { CreateOrderCommand, CreateOrderUseCase, OrderItemInput, AddressInput } 
 import { GetOrderCommand, GetOrderUseCase } from '../../application/useCases/GetOrder';
 import { GetCustomerOrdersCommand, GetCustomerOrdersUseCase } from '../../application/useCases/GetCustomerOrders';
 import { CancelOrderCommand, CancelOrderUseCase } from '../../application/useCases/CancelOrder';
+import { channelRepository } from '../../../channel/infrastructure/repositories/ChannelRepository';
 
 // ============================================================================
 // Content Negotiation Helpers
@@ -150,6 +151,10 @@ export const createOrder = async (req: TypedRequest, res: Response): Promise<voi
       shippingAddress,
       billingAddress,
       basketId,
+      storeId,
+      channelId,
+      createdByUserId,
+      orderSource,
       currencyCode,
       customerEmail,
       customerPhone,
@@ -160,6 +165,7 @@ export const createOrder = async (req: TypedRequest, res: Response): Promise<voi
       giftMessage,
       isGift,
     } = req.body;
+    const channelCodeHeader = req.get('x-channel-code');
 
     // Validation
     if (!items || !Array.isArray(items) || items.length === 0) {
@@ -178,6 +184,19 @@ export const createOrder = async (req: TypedRequest, res: Response): Promise<voi
       return;
     }
 
+    let resolvedStoreId = storeId || req.user?.storeId;
+    let resolvedChannelId = channelId;
+    let resolvedOrderSource = orderSource || 'web';
+
+    if (channelCodeHeader && !resolvedChannelId) {
+      const channel = await channelRepository.findByCode(channelCodeHeader);
+      if (channel) {
+        resolvedChannelId = channel.channelId;
+        resolvedStoreId = resolvedStoreId || channel.defaultStoreId || channel.storeIds[0];
+        resolvedOrderSource = orderSource || 'pos';
+      }
+    }
+
     const command = new CreateOrderCommand(
       customerId,
       email,
@@ -185,6 +204,10 @@ export const createOrder = async (req: TypedRequest, res: Response): Promise<voi
       shippingAddress as AddressInput,
       billingAddress as AddressInput,
       basketId,
+      resolvedStoreId,
+      resolvedChannelId,
+      createdByUserId || req.user?.userId || req.user?.id,
+      resolvedOrderSource,
       currencyCode,
       customerPhone,
       customerName,

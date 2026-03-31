@@ -4,6 +4,7 @@ import { TypedRequest } from 'libs/types/express';;
 import bcrypt from 'bcryptjs';
 import { SessionService } from '../../../libs/session';
 import AdminRepository from '../../../modules/identity/infrastructure/repositories/AdminRepository';
+import UserStoreRepository from '../../../modules/identity/infrastructure/repositories/UserStoreRepository';
 import DashboardQueryRepository from '../../../modules/analytics/infrastructure/repositories/DashboardQueryRepository';
 import { adminRespond } from '../../respond';
 
@@ -85,7 +86,6 @@ export const postAdminLogin = async (req: TypedRequest, res: Response) => {
       });
     }
 
-    console.log(admin);
     // Verify password
     const isValidPassword = await bcrypt.compare(password, admin.passwordHash);
     if (!isValidPassword) {
@@ -105,6 +105,9 @@ export const postAdminLogin = async (req: TypedRequest, res: Response) => {
       });
     }
 
+    const storeAssignments = await UserStoreRepository.findByUserId(admin.adminId);
+    const primaryStore = storeAssignments.find(assignment => assignment.isPrimary) || storeAssignments[0];
+
     // Create session
     const sessionId = await SessionService.createSession({
       userId: admin.adminId,
@@ -112,6 +115,9 @@ export const postAdminLogin = async (req: TypedRequest, res: Response) => {
       email: admin.email,
       name: admin.name,
       role: admin.role,
+      storeId: primaryStore?.storeId,
+      storeRole: primaryStore?.role,
+      storeIds: storeAssignments.map(assignment => assignment.storeId),
       permissions: admin.permissions,
       userAgent: req.headers['user-agent'],
       ipAddress: req.ip,

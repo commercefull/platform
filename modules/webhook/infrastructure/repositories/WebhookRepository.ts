@@ -74,18 +74,17 @@ class WebhookRepository implements WebhookRepositoryInterface {
   ): Promise<{ data: WebhookEndpointProps[]; total: number }> {
     const conditions: string[] = [];
     const values: any[] = [];
-    let paramIdx = 1;
 
     if (filters?.merchantId) {
-      conditions.push(`"merchantId" = $${paramIdx++}`);
+      conditions.push(`"merchantId" = $${values.length + 1}`);
       values.push(filters.merchantId);
     }
     if (filters?.isActive !== undefined) {
-      conditions.push(`"isActive" = $${paramIdx++}`);
+      conditions.push(`"isActive" = $${values.length + 1}`);
       values.push(filters.isActive);
     }
     if (filters?.eventType) {
-      conditions.push(`"events"::jsonb ? $${paramIdx++}`);
+      conditions.push(`"events"::jsonb ? $${values.length + 1}`);
       values.push(filters.eventType);
     }
 
@@ -194,22 +193,21 @@ class WebhookRepository implements WebhookRepositoryInterface {
   ): Promise<{ data: WebhookDeliveryProps[]; total: number }> {
     const conditions: string[] = [];
     const values: any[] = [];
-    let paramIdx = 1;
 
     if (filters?.webhookEndpointId) {
-      conditions.push(`"webhookEndpointId" = $${paramIdx++}`);
+      conditions.push(`"webhookEndpointId" = $${values.length + 1}`);
       values.push(filters.webhookEndpointId);
     }
     if (filters?.eventType) {
-      conditions.push(`"eventType" = $${paramIdx++}`);
+      conditions.push(`"eventType" = $${values.length + 1}`);
       values.push(filters.eventType);
     }
     if (filters?.status) {
-      conditions.push(`"status" = $${paramIdx++}`);
+      conditions.push(`"status" = $${values.length + 1}`);
       values.push(filters.status);
     }
     if (filters?.since) {
-      conditions.push(`"createdAt" >= $${paramIdx++}`);
+      conditions.push(`"createdAt" >= $${values.length + 1}`);
       values.push(filters.since);
     }
 

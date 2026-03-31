@@ -1,0 +1,71 @@
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col"><h2 class="page-title"><%= pageName %></h2></div>
+    <div class="col-auto ms-auto"><a href="/admin/stores/create" class="btn btn-primary">Create Store</a></div>
+  </div>
+</div>
+<section class="content">
+  <div class="container-fluid">
+    <%- include('../partials/alerts') %>
+    <div class="card mb-3">
+      <div class="card-body">
+        <form method="GET" class="row g-3">
+          <div class="col-md-3">
+            <label class="form-label">Status</label>
+            <select class="form-select" name="status">
+              <option value="">All</option>
+              <option value="active" <%= filters.status === 'active' ? 'selected' : '' %>>Active</option>
+              <option value="inactive" <%= filters.status === 'inactive' ? 'selected' : '' %>>Inactive</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Type</label>
+            <select class="form-select" name="type">
+              <option value="">All</option>
+              <option value="hq" <%= filters.type === 'hq' ? 'selected' : '' %>>HQ</option>
+              <option value="outlet" <%= filters.type === 'outlet' ? 'selected' : '' %>>Outlet</option>
+            </select>
+          </div>
+          <div class="col-md-3 d-flex align-items-end">
+            <button class="btn btn-primary me-2" type="submit">Filter</button>
+            <a href="/admin/stores" class="btn btn-outline-secondary">Clear</a>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body table-responsive p-0">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Type</th>
+              <th>Status</th>
+              <th>Products</th>
+              <th>Created</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% (stores || []).forEach(function(store) { %>
+              <tr>
+                <td><strong><%= store.name %></strong><br><small class="text-muted"><%= store.slug %></small></td>
+                <td><span class="badge bg-<%= store.isHeadquarters ? 'primary' : 'secondary' %>"><%= store.isHeadquarters ? 'HQ' : 'Outlet' %></span></td>
+                <td><span class="badge bg-<%= store.isActive ? 'success' : 'secondary' %>"><%= store.isActive ? 'Active' : 'Inactive' %></span></td>
+                <td><%= store.productCount || 0 %></td>
+                <td><%= new Date(store.createdAt).toLocaleDateString() %></td>
+                <td>
+                  <a class="btn btn-sm btn-outline-primary" href="/admin/stores/<%= store.storeId %>">View</a>
+                  <a class="btn btn-sm btn-outline-secondary" href="/admin/stores/<%= store.storeId %>/edit">Edit</a>
+                </td>
+              </tr>
+            <% }) %>
+            <% if (!stores || stores.length === 0) { %>
+              <tr><td colspan="6" class="text-center text-muted py-4">No stores found.</td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>

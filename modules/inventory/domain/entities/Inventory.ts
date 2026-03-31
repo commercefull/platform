@@ -7,6 +7,7 @@ export interface InventoryLocation {
   locationId: string;
   name: string;
   type: 'warehouse' | 'store' | 'supplier';
+  storeId?: string;
   address?: {
     street: string;
     city: string;

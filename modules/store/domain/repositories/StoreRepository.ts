@@ -9,6 +9,8 @@ export interface StoreFilters {
   storeType?: string;
   merchantId?: string;
   businessId?: string;
+  isHeadquarters?: boolean;
+  parentStoreId?: string;
   isActive?: boolean;
   isVerified?: boolean;
   isFeatured?: boolean;
@@ -27,6 +29,8 @@ export interface StoreRepository {
   // Store queries
   findByMerchant(merchantId: string): Promise<Store[]>;
   findByBusiness(businessId: string): Promise<Store[]>;
+  findHeadquarters(businessId: string): Promise<Store | null>;
+  findOutlets(parentStoreId: string): Promise<Store[]>;
   findActive(): Promise<Store[]>;
   findFeatured(): Promise<Store[]>;
   findByType(storeType: string): Promise<Store[]>;

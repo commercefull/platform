@@ -12,6 +12,7 @@ import {
   CreateChannelUseCase,
   UpdateChannelUseCase,
   GetChannelUseCase,
+  GetChannelByCodeUseCase,
   ListChannelsUseCase,
   AssignProductsToChannelUseCase,
   AssignWarehouseToChannelUseCase,
@@ -44,6 +45,23 @@ export const createChannel = async (req: TypedRequest, res: Response): Promise<v
       settings: req.body.settings,
     });
     res.status(201).json({ success: true, data: result.channel });
+  } catch (error: any) {
+    logger.error('Error:', error);
+    res.status(400).json({ success: false, error: error.message });
+  }
+};
+
+export const getChannelByCode = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const useCase = new GetChannelByCodeUseCase(channelRepository);
+    const result = await useCase.execute(req.params.code);
+
+    if (!result) {
+      res.status(404).json({ success: false, error: 'Channel not found' });
+      return;
+    }
+
+    res.json({ success: true, data: result });
   } catch (error: any) {
     logger.error('Error:', error);
     res.status(400).json({ success: false, error: error.message });
@@ -145,6 +163,7 @@ export const assignWarehouse = async (req: TypedRequest, res: Response): Promise
 export default {
   createChannel,
   getChannel,
+  getChannelByCode,
   updateChannel,
   listChannels,
   assignProducts,

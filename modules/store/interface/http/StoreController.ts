@@ -34,6 +34,8 @@ export class StoreController {
         storeType: req.body.storeType,
         merchantId: req.body.merchantId,
         businessId: req.body.businessId,
+        isHeadquarters: req.body.isHeadquarters,
+        parentStoreId: req.body.parentStoreId,
         storeUrl: req.body.storeUrl,
         storeEmail: req.body.storeEmail,
         storePhone: req.body.storePhone,

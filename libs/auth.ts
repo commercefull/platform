@@ -2,6 +2,16 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { SessionService } from './session';
 
+const isJsonRequest = (req: Request): boolean => {
+  return Boolean(req.xhr || req.headers.accept?.indexOf('json') !== -1);
+};
+
+const hasPermission = (user: Express.User | undefined, permission?: string): boolean => {
+  if (!permission) return true;
+  const permissions = user?.permissions || [];
+  return permissions.includes('*') || permissions.includes(permission);
+};
+
 // Environment variables should be properly loaded in your application
 const MERCHANT_JWT_SECRET = process.env.MERCHANT_JWT_SECRET || 'merchant-secret-key-should-be-in-env';
 const CUSTOMER_JWT_SECRET = process.env.CUSTOMER_JWT_SECRET || 'customer-secret-key-should-be-in-env';
@@ -79,6 +89,9 @@ const authenticateSession = async (
       type: session.userType,
       merchantId: session.merchantId,
       companyId: session.companyId,
+      storeId: session.storeId,
+      storeRole: session.storeRole,
+      storeIds: session.storeIds,
       permissions: session.permissions,
     };
 
@@ -95,7 +108,7 @@ const authenticateSession = async (
  */
 export const isAdminLoggedIn = async (req: Request, res: Response, next: NextFunction) => {
   // Check if it's an API call
-  if (req.xhr || req.headers.accept?.indexOf('json') !== -1) {
+  if (isJsonRequest(req)) {
     return authenticateToken(req, res, next, ADMIN_JWT_SECRET);
   }
 
@@ -109,7 +122,7 @@ export const isAdminLoggedIn = async (req: Request, res: Response, next: NextFun
  */
 export const isMerchantLoggedIn = async (req: Request, res: Response, next: NextFunction) => {
   // Check if it's an API call
-  if (req.xhr || req.headers.accept?.indexOf('json') !== -1) {
+  if (isJsonRequest(req)) {
     return authenticateToken(req, res, next, MERCHANT_JWT_SECRET);
   }
 
@@ -123,7 +136,7 @@ export const isMerchantLoggedIn = async (req: Request, res: Response, next: Next
  */
 export const isB2BLoggedIn = async (req: Request, res: Response, next: NextFunction) => {
   // Check if it's an API call
-  if (req.xhr || req.headers.accept?.indexOf('json') !== -1) {
+  if (isJsonRequest(req)) {
     return authenticateToken(req, res, next, B2B_JWT_SECRET);
   }
 
@@ -132,7 +145,7 @@ export const isB2BLoggedIn = async (req: Request, res: Response, next: NextFunct
 };
 
 export const isCustomerLoggedIn = (req: Request, res: Response, next: NextFunction) => {
-  if (req.xhr || req.headers.accept?.indexOf('json') !== -1) {
+  if (isJsonRequest(req)) {
     return authenticateToken(req, res, next, CUSTOMER_JWT_SECRET);
   }
 
@@ -152,4 +165,66 @@ export const isCustomerNotLoggedIn = (req: Request, res: Response, next: NextFun
     return res.redirect('/user/profile'); // Redirect to profile if already authenticated
   }
   next(); // Continue if not authenticated
+};
+
+export const requirePermission = (permission: string) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    if (hasPermission(req.user, permission)) {
+      return next();
+    }
+
+    if (isJsonRequest(req)) {
+      return res.status(403).json({ success: false, message: 'Insufficient permissions' });
+    }
+
+    return res.status(403).send('Forbidden');
+  };
+};
+
+export const requireStoreAccess = (requiredPermission?: string) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user;
+
+    if (!user) {
+      if (isJsonRequest(req)) {
+        return res.status(401).json({ success: false, message: 'Authentication required' });
+      }
+
+      return res.redirect('/admin/login');
+    }
+
+    if (user.role === 'ADMIN' || user.storeRole === 'manager') {
+      if (hasPermission(user, requiredPermission)) {
+        return next();
+      }
+
+      if (isJsonRequest(req)) {
+        return res.status(403).json({ success: false, message: 'Insufficient permissions' });
+      }
+
+      return res.status(403).send('Forbidden');
+    }
+
+    const targetStoreId = (req.params as Record<string, string | undefined>)?.storeId
+      || (req.body as Record<string, unknown> | undefined)?.storeId as string | undefined
+      || (req.query as Record<string, string | undefined>)?.storeId;
+
+    if (targetStoreId && user.storeId && targetStoreId !== user.storeId) {
+      if (isJsonRequest(req)) {
+        return res.status(403).json({ success: false, message: 'Access denied to this store' });
+      }
+
+      return res.status(403).send('Forbidden');
+    }
+
+    if (!hasPermission(user, requiredPermission)) {
+      if (isJsonRequest(req)) {
+        return res.status(403).json({ success: false, message: 'Insufficient permissions' });
+      }
+
+      return res.status(403).send('Forbidden');
+    }
+
+    return next();
+  };
 };

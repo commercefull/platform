@@ -13,6 +13,8 @@ exports.up = function (knex) {
     t.enum('storeType', ['merchant_store', 'business_store']).notNullable();
     t.uuid('merchantId').references('merchantId').inTable('merchant');
     t.uuid('businessId').references('businessId').inTable('business');
+    t.boolean('isHeadquarters').notNullable().defaultTo(false);
+    t.uuid('parentStoreId').nullable().references('storeId').inTable('store').onDelete('SET NULL');
     t.text('logo');
     t.text('banner');
     t.text('favicon');
@@ -50,6 +52,8 @@ exports.up = function (knex) {
     t.index('storeType');
     t.index('merchantId');
     t.index('businessId');
+    t.index('isHeadquarters');
+    t.index('parentStoreId');
     t.index('isActive');
     t.index('isVerified');
     t.index('isFeatured');

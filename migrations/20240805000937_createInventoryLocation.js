@@ -13,6 +13,7 @@ exports.up = function (knex) {
       .inTable('distributionWarehouse')
       .onDelete('CASCADE');
     t.uuid('distributionWarehouseBinId').references('distributionWarehouseBinId').inTable('distributionWarehouseBin').onDelete('SET NULL');
+    t.uuid('storeId').nullable().references('storeId').inTable('store').onDelete('SET NULL');
     t.uuid('productId').notNullable();
     t.uuid('productVariantId');
     t.string('sku', 100).notNullable();
@@ -29,6 +30,7 @@ exports.up = function (knex) {
     t.timestamp('lastCountDate');
     t.index('distributionWarehouseId');
     t.index('distributionWarehouseBinId');
+    t.index('storeId');
     t.index('productId');
     t.index('productVariantId');
     t.index('sku');

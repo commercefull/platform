@@ -46,6 +46,7 @@ export interface ProductRepository {
   findById(productId: string): Promise<Product | null>;
   findBySlug(slug: string): Promise<Product | null>;
   findBySku(sku: string): Promise<Product | null>;
+  findByBarcode(barcode: string): Promise<{ product: Product; variant: ProductVariant } | null>;
   findAll(filters?: ProductFilters, pagination?: PaginationOptions): Promise<PaginatedResult<Product>>;
   save(product: Product): Promise<Product>;
   delete(productId: string): Promise<void>;

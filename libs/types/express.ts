@@ -30,6 +30,9 @@ declare global {
       status?: boolean;
       merchantId?: string;
       companyId?: string;
+      storeId?: string;
+      storeRole?: string;
+      storeIds?: string[];
       facilityId?: string;
       providerId?: string;
       gender?: string;

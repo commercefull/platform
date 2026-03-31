@@ -6,6 +6,10 @@ exports.up = function (knex) {
     t.string('orderNumber', 50).notNullable().unique();
     t.uuid('customerId').references('customerId').inTable('customer');
     t.uuid('basketId').references('basketId').inTable('basket');
+    t.uuid('storeId').nullable().references('storeId').inTable('store').onDelete('SET NULL');
+    t.uuid('channelId').nullable().references('channelId').inTable('channel').onDelete('SET NULL');
+    t.uuid('createdByUserId').nullable();
+    t.string('orderSource', 50).notNullable().defaultTo('web');
     t.enum('status', [
       'pending',
       'processing',
@@ -91,9 +95,13 @@ exports.up = function (knex) {
     t.index('orderNumber');
     t.index('customerId');
     t.index('basketId');
+    t.index('storeId');
+    t.index('channelId');
+    t.index('createdByUserId');
     t.index('status');
     t.index('paymentStatus');
     t.index('fulfillmentStatus');
+    t.index('orderSource');
     t.index('orderDate');
     t.index('shippingAddressId');
     t.index('billingAddressId');

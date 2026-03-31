@@ -45,6 +45,12 @@ router.get('/products/by-attribute/:code/:value', productSearchController.findBy
 router.get('/products/:productId/similar', productSearchController.findSimilar.bind(productSearchController));
 
 /**
+ * Find product by variant barcode
+ * GET /customer/products/barcode/:barcode
+ */
+router.get('/products/barcode/:barcode', productController.findByBarcode);
+
+/**
  * Get featured products
  * GET /products/featured
  */

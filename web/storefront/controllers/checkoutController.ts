@@ -118,6 +118,9 @@ export const processCheckout = async (req: TypedRequest, res: Response): Promise
       name: item.name,
       quantity: item.quantity,
       unitPrice: item.unitPrice,
+      taxRate: item.taxRate,
+      taxAmount: item.taxAmount,
+      discountAmount: item.discountAmount,
     }));
 
     // Create order with proper constructor arguments
@@ -150,6 +153,10 @@ export const processCheckout = async (req: TypedRequest, res: Response): Promise
         phone: billingAddress.phone,
       },
       basket.basketId,
+      undefined,
+      undefined,
+      customerId,
+      'web',
       basket.currency || 'USD',
       shippingAddress.phone,
       `${shippingAddress.firstName} ${shippingAddress.lastName}`,

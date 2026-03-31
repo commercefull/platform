@@ -33,6 +33,12 @@ router.get('/products', productController.listProducts);
 router.post('/products', productController.createProduct);
 
 /**
+ * Get product store availability
+ * GET /business/products/:productId/store-availability
+ */
+router.get('/products/:productId/store-availability', productController.getProductStoreAvailability);
+
+/**
  * Get product details
  * GET /business/products/:productId
  */
@@ -67,6 +73,12 @@ router.post('/products/:productId/publish', productController.publishProduct);
  * POST /business/products/:productId/unpublish
  */
 router.post('/products/:productId/unpublish', productController.unpublishProduct);
+
+/**
+ * Find product by variant barcode
+ * GET /business/products/barcode/:barcode
+ */
+router.get('/products/barcode/:barcode', productController.findByBarcode);
 
 /**
  * Delete a product

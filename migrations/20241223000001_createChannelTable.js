@@ -33,6 +33,7 @@ exports.up = async function (knex) {
     table.timestamp('updatedAt').defaultTo(knex.fn.now());
 
     table.index(['ownerType', 'ownerId']);
+    table.index(['code']);
     table.index(['isActive']);
     table.index(['type']);
   });

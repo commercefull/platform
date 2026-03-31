@@ -15,6 +15,9 @@ export interface SessionData {
   role?: string;
   merchantId?: string;
   companyId?: string;
+  storeId?: string;
+  storeRole?: string;
+  storeIds?: string[];
   permissions: string[];
   expiresAt: Date;
   createdAt: Date;
@@ -31,6 +34,9 @@ export interface CreateSessionInput {
   role?: string;
   merchantId?: string;
   companyId?: string;
+  storeId?: string;
+  storeRole?: string;
+  storeIds?: string[];
   permissions?: string[];
   userAgent?: string;
   ipAddress?: string;
@@ -52,9 +58,9 @@ class SessionServiceClass {
     const sql = `
       INSERT INTO "${this.tableName}" 
         ("sessionId", "userId", "userType", "email", "name", "role", 
-         "merchantId", "companyId", "permissions", "expiresAt", 
+         "merchantId", "companyId", "storeId", "storeRole", "storeIds", "permissions", "expiresAt", 
          "createdAt", "lastActivityAt", "userAgent", "ipAddress")
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
       RETURNING "sessionId"
     `;
 
@@ -67,6 +73,9 @@ class SessionServiceClass {
       input.role || null,
       input.merchantId || null,
       input.companyId || null,
+      input.storeId || null,
+      input.storeRole || null,
+      JSON.stringify(input.storeIds || []),
       JSON.stringify(input.permissions || []),
       expiresAt,
       now,
@@ -84,7 +93,7 @@ class SessionServiceClass {
   async getSession(sessionId: string): Promise<SessionData | null> {
     const sql = `
       SELECT "sessionId", "userId", "userType", "email", "name", "role",
-             "merchantId", "companyId", "permissions", "expiresAt",
+             "merchantId", "companyId", "storeId", "storeRole", "storeIds", "permissions", "expiresAt",
              "createdAt", "lastActivityAt", "userAgent", "ipAddress"
       FROM "${this.tableName}"
       WHERE "sessionId" = $1 AND "expiresAt" > NOW()
@@ -92,6 +101,11 @@ class SessionServiceClass {
 
     const result = await queryOne<SessionData>(sql, [sessionId]);
     if (result) {
+      result.storeIds = Array.isArray(result.storeIds)
+        ? result.storeIds
+        : result.storeIds
+          ? JSON.parse(result.storeIds as unknown as string)
+          : [];
       result.permissions = result.permissions || [];
     }
     return result;
@@ -162,13 +176,22 @@ class SessionServiceClass {
   async getUserSessions(userId: string, userType: string): Promise<SessionData[]> {
     const sql = `
       SELECT "sessionId", "userId", "userType", "email", "name", "role",
-             "merchantId", "companyId", "permissions", "expiresAt",
+             "merchantId", "companyId", "storeId", "storeRole", "storeIds", "permissions", "expiresAt",
              "createdAt", "lastActivityAt", "userAgent", "ipAddress"
       FROM "${this.tableName}"
       WHERE "userId" = $1 AND "userType" = $2 AND "expiresAt" > NOW()
       ORDER BY "lastActivityAt" DESC
     `;
-    return (await query<SessionData[]>(sql, [userId, userType])) || [];
+    const sessions = (await query<SessionData[]>(sql, [userId, userType])) || [];
+    return sessions.map(session => ({
+      ...session,
+      storeIds: Array.isArray(session.storeIds)
+        ? session.storeIds
+        : session.storeIds
+          ? JSON.parse(session.storeIds as unknown as string)
+          : [],
+      permissions: session.permissions || [],
+    }));
   }
 }
 

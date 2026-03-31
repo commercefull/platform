@@ -42,6 +42,16 @@ export class InventoryRepository {
     return this.mapToInventory(row);
   }
 
+  async findByStoreId(storeId: string): Promise<Inventory[]> {
+    const location = await this.getLocationByStoreId(storeId);
+    if (!location) {
+      return [];
+    }
+
+    const result = await this.findAll({ locationId: location.locationId, isActive: true }, { limit: 1000, offset: 0 });
+    return result.data;
+  }
+
   async findByProductAndLocation(productId: string, locationId: string, variantId?: string): Promise<Inventory | null> {
     const row = await queryOne<Record<string, any>>(
       'SELECT * FROM inventory WHERE "productId" = $1 AND "locationId" = $2 AND "variantId" IS NOT DISTINCT FROM $3',
@@ -236,6 +246,7 @@ export class InventoryRepository {
       locationId: row.locationId,
       name: row.name,
       type: row.type,
+      storeId: row.storeId || undefined,
       address: row.address ? JSON.parse(row.address) : undefined,
       isActive: Boolean(row.isActive),
       priority: parseInt(row.priority || '0'),
@@ -252,6 +263,27 @@ export class InventoryRepository {
       locationId: row.locationId,
       name: row.name,
       type: row.type,
+      storeId: row.storeId || undefined,
+      address: row.address ? JSON.parse(row.address) : undefined,
+      isActive: Boolean(row.isActive),
+      priority: parseInt(row.priority || '0'),
+      metadata: row.metadata ? JSON.parse(row.metadata) : undefined,
+    };
+  }
+
+  async getLocationByStoreId(storeId: string): Promise<InventoryLocation | null> {
+    const row = await queryOne<Record<string, any>>(
+      'SELECT * FROM "inventoryLocation" WHERE "storeId" = $1 ORDER BY priority ASC LIMIT 1',
+      [storeId],
+    );
+
+    if (!row) return null;
+
+    return {
+      locationId: row.locationId,
+      name: row.name,
+      type: row.type,
+      storeId: row.storeId || undefined,
       address: row.address ? JSON.parse(row.address) : undefined,
       isActive: Boolean(row.isActive),
       priority: parseInt(row.priority || '0'),

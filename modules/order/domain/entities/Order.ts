@@ -15,6 +15,10 @@ export interface OrderProps {
   orderNumber: string;
   customerId?: string;
   basketId?: string;
+  storeId?: string;
+  channelId?: string;
+  createdByUserId?: string;
+  orderSource: string;
   status: OrderStatus;
   paymentStatus: PaymentStatus;
   fulfillmentStatus: FulfillmentStatus;
@@ -68,6 +72,10 @@ export class Order {
     orderNumber?: string;
     customerId?: string;
     basketId?: string;
+    storeId?: string;
+    channelId?: string;
+    createdByUserId?: string;
+    orderSource?: string;
     currencyCode?: string;
     customerEmail: string;
     customerPhone?: string;
@@ -92,6 +100,10 @@ export class Order {
       orderNumber: props.orderNumber || Order.generateOrderNumber(),
       customerId: props.customerId,
       basketId: props.basketId,
+      storeId: props.storeId,
+      channelId: props.channelId,
+      createdByUserId: props.createdByUserId,
+      orderSource: props.orderSource || 'web',
       status: OrderStatus.PENDING,
       paymentStatus: PaymentStatus.PENDING,
       fulfillmentStatus: FulfillmentStatus.UNFULFILLED,
@@ -142,6 +154,18 @@ export class Order {
   }
   get basketId(): string | undefined {
     return this.props.basketId;
+  }
+  get storeId(): string | undefined {
+    return this.props.storeId;
+  }
+  get channelId(): string | undefined {
+    return this.props.channelId;
+  }
+  get createdByUserId(): string | undefined {
+    return this.props.createdByUserId;
+  }
+  get orderSource(): string {
+    return this.props.orderSource;
   }
   get status(): OrderStatus {
     return this.props.status;
@@ -485,6 +509,10 @@ export class Order {
       orderNumber: this.props.orderNumber,
       customerId: this.props.customerId,
       basketId: this.props.basketId,
+      storeId: this.props.storeId,
+      channelId: this.props.channelId,
+      createdByUserId: this.props.createdByUserId,
+      orderSource: this.props.orderSource,
       status: this.props.status,
       paymentStatus: this.props.paymentStatus,
       fulfillmentStatus: this.props.fulfillmentStatus,

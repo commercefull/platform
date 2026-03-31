@@ -32,7 +32,7 @@
           <form method="GET" action="/admin/products" class="row g-3">
             <div class="col-md-3">
               <label class="form-label">Search</label>
-              <input type="text" class="form-control" name="search" value="<%= filters.search %>" placeholder="Search products...">
+              <input type="text" class="form-control" name="search" value="<%= filters.search %>" placeholder="Search by name, SKU, barcode...">
             </div>
             <div class="col-md-2">
               <label class="form-label">Status</label>
@@ -115,6 +115,15 @@
                   </a>
                   <% if (product.isFeatured) { %>
                     <span class="badge bg-warning ms-1"><i class="fas fa-star"></i></span>
+                  <% } %>
+                  <% if (product.hasVariants) { %>
+                    <span class="badge bg-light text-dark ms-1">Variants</span>
+                  <% } %>
+                  <% if (product.isVirtual) { %>
+                    <span class="badge bg-info ms-1">Virtual</span>
+                  <% } %>
+                  <% if (product.isSubscription) { %>
+                    <span class="badge bg-info ms-1">Subscription</span>
                   <% } %>
                 </td>
                 <td><code><%= product.sku || '-' %></code></td>

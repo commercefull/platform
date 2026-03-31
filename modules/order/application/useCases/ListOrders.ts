@@ -17,6 +17,10 @@ export class ListOrdersCommand {
   constructor(
     public readonly filters?: {
       customerId?: string;
+      storeId?: string;
+      channelId?: string;
+      createdByUserId?: string;
+      orderSource?: string;
       status?: OrderStatus;
       paymentStatus?: PaymentStatus;
       fulfillmentStatus?: FulfillmentStatus;
@@ -42,6 +46,10 @@ export interface OrderListItemResponse {
   orderId: string;
   orderNumber: string;
   customerId?: string;
+  storeId?: string;
+  channelId?: string;
+  createdByUserId?: string;
+  orderSource: string;
   customerEmail: string;
   customerName?: string;
   status: string;
@@ -96,6 +104,10 @@ export class ListOrdersUseCase {
       orderId: order.orderId,
       orderNumber: order.orderNumber,
       customerId: order.customerId,
+      storeId: order.storeId,
+      channelId: order.channelId,
+      createdByUserId: order.createdByUserId,
+      orderSource: order.orderSource,
       customerEmail: order.customerEmail,
       customerName: order.customerName,
       status: order.status,

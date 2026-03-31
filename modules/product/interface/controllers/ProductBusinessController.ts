@@ -9,6 +9,7 @@ import { TypedRequest } from 'libs/types/express';
 import ProductRepo from '../../infrastructure/repositories/ProductRepository';
 import { CreateProductCommand, CreateProductUseCase } from '../../application/useCases/CreateProduct';
 import { GetProductCommand, GetProductUseCase } from '../../application/useCases/GetProduct';
+import { GetProductStoreAvailabilityUseCase } from '../../application/useCases/GetProductStoreAvailability';
 import { ListProductsCommand, ListProductsUseCase } from '../../application/useCases/ListProducts';
 import { UpdateProductCommand, UpdateProductUseCase } from '../../application/useCases/UpdateProduct';
 import { ProductStatus } from '../../domain/valueObjects/ProductStatus';
@@ -100,6 +101,23 @@ export const getProduct = async (req: TypedRequest, res: Response): Promise<void
     logger.error('Error:', error);
 
     respondError(req, res, error.message || 'Failed to get product', 500, 'admin/product/error');
+  }
+};
+
+export const getProductStoreAvailability = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const useCase = new GetProductStoreAvailabilityUseCase(ProductRepo);
+    const result = await useCase.execute({
+      productId: req.params.productId,
+      variantId: req.query.variantId as string | undefined,
+      storeId: req.query.storeId as string | undefined,
+    });
+
+    respond(req, res, result, 200, 'admin/product/detail');
+  } catch (error: any) {
+    logger.error('Error:', error);
+    const status = error.message.includes('not found') ? 404 : 500;
+    respondError(req, res, error.message || 'Failed to get product store availability', status, 'admin/product/error');
   }
 };
 
@@ -378,6 +396,36 @@ export const unpublishProduct = async (req: TypedRequest, res: Response): Promis
     logger.error('Error:', error);
 
     respondError(req, res, error.message || 'Failed to unpublish product', 500, 'admin/product/error');
+  }
+};
+
+// ============================================================================
+// Barcode Lookup
+// ============================================================================
+
+/**
+ * Get product by variant barcode
+ * GET /products/barcode/:barcode
+ */
+export const findByBarcode = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { barcode } = req.params;
+
+    if (!barcode?.trim()) {
+      respondError(req, res, 'Barcode is required', 400);
+      return;
+    }
+
+    const result = await ProductRepo.findByBarcode(barcode);
+    if (!result) {
+      respondError(req, res, 'No product found for this barcode', 404);
+      return;
+    }
+
+    respond(req, res, result);
+  } catch (error: any) {
+    logger.error('Error:', error);
+    respondError(req, res, error.message || 'Failed to find product by barcode');
   }
 };
 

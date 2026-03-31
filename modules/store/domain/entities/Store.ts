@@ -15,6 +15,8 @@ export interface StoreProps {
   // Ownership - either merchant or business
   merchantId?: string; // For marketplace stores
   businessId?: string; // For business stores
+  isHeadquarters: boolean;
+  parentStoreId?: string;
 
   // Branding
   logo?: string;
@@ -104,6 +106,8 @@ export class Store {
     storeType: StoreType;
     merchantId?: string;
     businessId?: string;
+    isHeadquarters?: boolean;
+    parentStoreId?: string;
     description?: string;
     storeUrl?: string;
     storeEmail?: string;
@@ -137,6 +141,8 @@ export class Store {
       storeType: props.storeType,
       merchantId: props.merchantId,
       businessId: props.businessId,
+      isHeadquarters: props.isHeadquarters ?? false,
+      parentStoreId: props.parentStoreId,
       storeUrl: props.storeUrl,
       storeEmail: props.storeEmail,
       storePhone: props.storePhone,
@@ -192,6 +198,12 @@ export class Store {
   }
   get businessId(): string | undefined {
     return this.props.businessId;
+  }
+  get isHeadquarters(): boolean {
+    return this.props.isHeadquarters;
+  }
+  get parentStoreId(): string | undefined {
+    return this.props.parentStoreId;
   }
   get ownerId(): string {
     return this.props.merchantId || this.props.businessId!;
@@ -425,6 +437,20 @@ export class Store {
     this.touch();
   }
 
+  markAsHeadquarters(): void {
+    this.props.isHeadquarters = true;
+    this.props.parentStoreId = undefined;
+    this.touch();
+  }
+
+  setParentStore(parentStoreId?: string): void {
+    this.props.parentStoreId = parentStoreId;
+    if (parentStoreId) {
+      this.props.isHeadquarters = false;
+    }
+    this.touch();
+  }
+
   // Status methods
   activate(): void {
     this.props.isActive = true;
@@ -487,6 +513,8 @@ export class Store {
       storeType: this.props.storeType,
       merchantId: this.props.merchantId,
       businessId: this.props.businessId,
+      isHeadquarters: this.props.isHeadquarters,
+      parentStoreId: this.props.parentStoreId,
       ownerId: this.ownerId,
       isMerchantStore: this.isMerchantStore,
       isBusinessStore: this.isBusinessStore,

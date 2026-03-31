@@ -22,6 +22,8 @@ import {
   generateProductRecommendations,
   performCustomerSegmentation,
 } from '../../../modules/analytics/services/machineLearningService';
+import { GetStoreSalesSummaryUseCase } from '../../../modules/order/application/useCases/GetStoreSalesSummary';
+import StoreRepo from '../../../modules/store/infrastructure/repositories/StoreRepo';
 import { adminRespond } from '../../respond';
 
 // ============================================================================
@@ -108,6 +110,33 @@ export const analyticsDashboard = async (req: TypedRequest, res: Response): Prom
       pageName: 'Error',
       error: error.message || 'Failed to load analytics dashboard',
     });
+  }
+};
+
+export const storeSalesDashboard = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const dateFrom = req.query.dateFrom ? new Date(req.query.dateFrom as string) : new Date(new Date().setDate(new Date().getDate() - 30));
+    const dateTo = req.query.dateTo ? new Date(req.query.dateTo as string) : new Date();
+    const summary = await new GetStoreSalesSummaryUseCase().execute({
+      storeId: req.query.storeId as string | undefined,
+      dateFrom,
+      dateTo,
+    });
+    const stores = await StoreRepo.findActive();
+
+    adminRespond(req, res, 'analytics/store-sales', {
+      pageName: 'Store Sales',
+      summary,
+      stores,
+      filters: {
+        storeId: req.query.storeId || '',
+        dateFrom: dateFrom.toISOString().slice(0, 10),
+        dateTo: dateTo.toISOString().slice(0, 10),
+      },
+    });
+  } catch (error: any) {
+    logger.error('Error:', error);
+    adminRespond(req, res, 'error', { pageName: 'Error', error: error.message || 'Failed to load store sales dashboard' });
   }
 };
 

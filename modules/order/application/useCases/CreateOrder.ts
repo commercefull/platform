@@ -53,6 +53,10 @@ export class CreateOrderCommand {
     public readonly shippingAddress: AddressInput,
     public readonly billingAddress?: AddressInput,
     public readonly basketId?: string,
+    public readonly storeId?: string,
+    public readonly channelId?: string,
+    public readonly createdByUserId?: string,
+    public readonly orderSource?: string,
     public readonly currencyCode?: string,
     public readonly customerPhone?: string,
     public readonly customerName?: string,
@@ -76,6 +80,10 @@ export interface OrderResponse {
   orderId: string;
   orderNumber: string;
   customerId?: string;
+  storeId?: string;
+  channelId?: string;
+  createdByUserId?: string;
+  orderSource: string;
   status: string;
   paymentStatus: string;
   fulfillmentStatus: string;
@@ -120,6 +128,10 @@ export class CreateOrderUseCase {
       orderId,
       customerId: command.customerId,
       basketId: command.basketId,
+      storeId: command.storeId,
+      channelId: command.channelId,
+      createdByUserId: command.createdByUserId,
+      orderSource: command.orderSource,
       currencyCode: currency,
       customerEmail: command.customerEmail,
       customerPhone: command.customerPhone,
@@ -199,6 +211,10 @@ export class CreateOrderUseCase {
       orderId: order.orderId,
       orderNumber: order.orderNumber,
       customerId: order.customerId,
+      storeId: order.storeId,
+      channelId: order.channelId,
+      createdByUserId: order.createdByUserId,
+      orderSource: order.orderSource,
       status: order.status,
       paymentStatus: order.paymentStatus,
       fulfillmentStatus: order.fulfillmentStatus,

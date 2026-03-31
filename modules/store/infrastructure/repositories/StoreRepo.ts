@@ -179,6 +179,19 @@ export class StoreRepo implements IStoreRepository {
     return this.findAll({ businessId });
   }
 
+  async findHeadquarters(businessId: string): Promise<Store | null> {
+    const row = await queryOne<Record<string, any>>(
+      'SELECT * FROM store WHERE "businessId" = $1 AND "isHeadquarters" = true ORDER BY "createdAt" ASC LIMIT 1',
+      [businessId],
+    );
+
+    return row ? this.mapToStore(row) : null;
+  }
+
+  async findOutlets(parentStoreId: string): Promise<Store[]> {
+    return this.findAll({ parentStoreId, isHeadquarters: false });
+  }
+
   async findActive(): Promise<Store[]> {
     return this.findAll({ isActive: true });
   }
@@ -242,6 +255,14 @@ export class StoreRepo implements IStoreRepository {
       conditions.push(`"businessId" = $${paramIndex++}`);
       params.push(filters.businessId);
     }
+    if (filters?.isHeadquarters !== undefined) {
+      conditions.push(`"isHeadquarters" = $${paramIndex++}`);
+      params.push(filters.isHeadquarters);
+    }
+    if (filters?.parentStoreId) {
+      conditions.push(`"parentStoreId" = $${paramIndex++}`);
+      params.push(filters.parentStoreId);
+    }
     if (filters?.isActive !== undefined) {
       conditions.push(`"isActive" = $${paramIndex++}`);
       params.push(filters.isActive);
@@ -270,6 +291,8 @@ export class StoreRepo implements IStoreRepository {
       storeType: row.storeType,
       merchantId: row.merchantId,
       businessId: row.businessId,
+      isHeadquarters: Boolean(row.isHeadquarters),
+      parentStoreId: row.parentStoreId || undefined,
       storeUrl: row.storeUrl,
       storeEmail: row.storeEmail,
       storePhone: row.storePhone,

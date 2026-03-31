@@ -15,6 +15,8 @@ export class ListStoresQuery {
       storeType?: 'merchant_store' | 'business_store';
       merchantId?: string;
       businessId?: string;
+      isHeadquarters?: boolean;
+      parentStoreId?: string;
       isActive?: boolean;
       isVerified?: boolean;
       isFeatured?: boolean;
@@ -43,6 +45,8 @@ export interface ListStoresResponse {
     storeType: string;
     merchantId?: string;
     businessId?: string;
+    isHeadquarters: boolean;
+    parentStoreId?: string;
     storeUrl?: string;
     logo?: string;
     isActive: boolean;
@@ -74,6 +78,8 @@ export class ListStoresUseCase {
       storeType: query.filters?.storeType,
       merchantId: query.filters?.merchantId,
       businessId: query.filters?.businessId,
+      isHeadquarters: query.filters?.isHeadquarters,
+      parentStoreId: query.filters?.parentStoreId,
       isActive: query.filters?.isActive,
       isVerified: query.filters?.isVerified,
       isFeatured: query.filters?.isFeatured,
@@ -94,6 +100,8 @@ export class ListStoresUseCase {
       storeType: store.storeType,
       merchantId: store.merchantId,
       businessId: store.businessId,
+      isHeadquarters: store.isHeadquarters,
+      parentStoreId: store.parentStoreId,
       storeUrl: store.storeUrl,
       logo: store.logo,
       isActive: store.isActive,

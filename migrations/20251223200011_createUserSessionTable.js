@@ -15,6 +15,9 @@ exports.up = async function (knex) {
     table.string('role', 50).nullable();
     table.string('merchantId', 50).nullable();
     table.string('companyId', 50).nullable();
+    table.uuid('storeId').nullable().references('storeId').inTable('store').onDelete('SET NULL');
+    table.string('storeRole', 50).nullable();
+    table.jsonb('storeIds').notNullable().defaultTo('[]');
     table.jsonb('permissions').defaultTo('[]');
     table.timestamp('expiresAt').notNullable();
     table.timestamp('createdAt').defaultTo(knex.fn.now());
@@ -24,6 +27,7 @@ exports.up = async function (knex) {
 
     table.index('userId');
     table.index('userType');
+    table.index('storeId');
     table.index('expiresAt');
     table.index(['userId', 'userType']);
   });
