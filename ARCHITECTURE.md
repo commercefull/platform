@@ -17,6 +17,7 @@ This document provides a deep-dive into the CommerceFull platform architecture f
 - [Shared Libraries](#shared-libraries)
 - [Error Handling](#error-handling)
 - [Internationalization](#internationalization)
+- [Import Style](#import-style)
 
 ---
 
@@ -567,8 +568,36 @@ Usage in EJS views:
 
 ---
 
+## Import Style
+
+All TypeScript files in this project must follow these rules:
+
+- **Use ES module `import` syntax exclusively** — `require()` is never allowed in `.ts` files.
+- **All imports must appear at the top of the file**, before any other code (no inline or conditional imports).
+
+```typescript
+// ✅ CORRECT — top-level ES imports
+import { query, queryOne } from '../../libs/db';
+import { logger } from '../../libs/logger';
+import { successResponse, errorResponse } from '../../libs/apiResponse';
+
+export const myHandler = async (req, res) => { ... };
+
+// ❌ WRONG — require() anywhere
+const { query } = require('../../libs/db');
+
+// ❌ WRONG — import inside a function body
+export const myHandler = async (req, res) => {
+  const { query } = await import('../../libs/db'); // not allowed
+};
+```
+
+> Note: Migration and seed files are plain JavaScript (`.js`) and use `exports.up` / `exports.seed` — `require()` is acceptable only in those `.js` files.
+
+---
+
 ## Further Reading
 
-- [AGENTS.md](./AGENTS.md) — AI coding agent guidelines (comprehensive coding standards)
+- [AGENTS.md](./AGENTS.md) — AI coding agent guidelines (comprehensive coding standards, including import rules)
 - [CONTRIBUTING.md](./CONTRIBUTING.md) — How to contribute
 - [README.md](./README.md) — Project overview and quick start

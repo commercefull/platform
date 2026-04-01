@@ -1002,6 +1002,29 @@ yarn test:e2e                                # Cypress E2E
 - **DDD layers**: camelCase (`application/`, `domain/`, `infrastructure/`, `interface/`)
 - **Sub-directories**: camelCase (`useCases/`, `valueObjects/`, `entities/`)
 
+### Import Style
+
+- **Always use ES module `import` syntax** — never use `require()` in any TypeScript file.
+- **All imports must be at the top of the file**, before any other code.
+- Dynamic `import()` expressions inside function bodies are forbidden; move them to the top-level imports.
+
+```typescript
+// ✅ CORRECT — top-level ES imports
+import { query, queryOne } from '../../../../libs/db';
+import { logger } from '../../../../libs/logger';
+import { successResponse, errorResponse } from '../../../../libs/apiResponse';
+
+export const myHandler = async (req, res) => { ... };
+
+// ❌ WRONG — require() anywhere
+const { query } = require('../../../../libs/db');
+
+// ❌ WRONG — dynamic require inside a function
+export const myHandler = async (req, res) => {
+  const { query } = await import('../../../../libs/db'); // not allowed
+};
+```
+
 ---
 
 ## Security Standards
@@ -1193,6 +1216,8 @@ export const listProducts = async (req: Request, res: Response) => {
 - Keep migrations as JavaScript files (not TypeScript)
 - Use `knex.fn.now()` for default timestamps
 - Follow the master variant architecture for products
+- Use ES module `import` syntax for all imports in TypeScript files
+- Place all imports at the top of the file, before any other code
 
 ### ❌ DON'T
 
@@ -1210,6 +1235,8 @@ export const listProducts = async (req: Request, res: Response) => {
 - Use inline SQL string interpolation (SQL injection risk)
 - Import from `web/` into `modules/` (dependency flows: web → modules → libs)
 - Create circular dependencies between modules
+- Use `require()` in any TypeScript file — always use `import` instead
+- Place imports inside functions or conditionally — all imports must be top-level
 
 ---
 
