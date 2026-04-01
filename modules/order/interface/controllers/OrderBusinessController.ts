@@ -16,6 +16,12 @@ import { ProcessRefundCommand, ProcessRefundUseCase } from '../../application/us
 import { OrderStatus } from '../../domain/valueObjects/OrderStatus';
 import { PaymentStatus } from '../../domain/valueObjects/PaymentStatus';
 import { FulfillmentStatus } from '../../domain/valueObjects/FulfillmentStatus';
+import orderNoteRepo from '../../infrastructure/repositories/orderNoteRepo';
+import orderPaymentRefundRepo from '../../infrastructure/repositories/orderPaymentRefundRepo';
+import orderFulfillmentPackageRepo from '../../infrastructure/repositories/orderFulfillmentPackageRepo';
+import { AddOrderNoteCommand, AddOrderNoteUseCase } from '../../application/useCases/AddOrderNote';
+import { CreateOrderRefundCommand, CreateOrderRefundUseCase } from '../../application/useCases/CreateOrderRefund';
+import { TrackFulfillmentPackageCommand, TrackFulfillmentPackageUseCase } from '../../application/useCases/TrackFulfillmentPackage';
 
 // ============================================================================
 // Content Negotiation Helpers
@@ -308,5 +314,208 @@ export const getOrderHistory = async (req: TypedRequest, res: Response): Promise
     logger.error('Error:', error);
 
     respondError(req, res, error.message || 'Failed to get order history', 500, 'admin/order/error');
+  }
+};
+
+// ============================================================================
+// Order Notes
+// ============================================================================
+
+/**
+ * List notes for an order
+ * GET /business/orders/:orderId/notes
+ */
+export const listOrderNotes = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { orderId } = req.params;
+    const notes = await orderNoteRepo.findByOrder(orderId);
+    respond(req, res, { orderId, notes });
+  } catch (error: any) {
+    logger.error('Error listing order notes:', error);
+    respondError(req, res, error.message || 'Failed to list order notes', 500);
+  }
+};
+
+/**
+ * Add a note to an order
+ * POST /business/orders/:orderId/notes
+ */
+export const addOrderNote = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { orderId } = req.params;
+    const { content, isCustomerVisible } = req.body;
+
+    const command = new AddOrderNoteCommand(orderId, content, isCustomerVisible ?? false, (req as any).user?.userId);
+    const useCase = new AddOrderNoteUseCase();
+    const result = await useCase.execute(command);
+
+    respond(req, res, result, 201);
+  } catch (error: any) {
+    logger.error('Error adding order note:', error);
+    if (error.message.includes('not found')) {
+      respondError(req, res, error.message, 404);
+      return;
+    }
+    respondError(req, res, error.message || 'Failed to add order note', 500);
+  }
+};
+
+/**
+ * Soft-delete a note from an order
+ * DELETE /business/orders/:orderId/notes/:noteId
+ */
+export const deleteOrderNote = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { noteId } = req.params;
+    const deleted = await orderNoteRepo.softDelete(noteId);
+    if (!deleted) {
+      respondError(req, res, 'Order note not found', 404);
+      return;
+    }
+    respond(req, res, { deleted: true });
+  } catch (error: any) {
+    logger.error('Error deleting order note:', error);
+    respondError(req, res, error.message || 'Failed to delete order note', 500);
+  }
+};
+
+// ============================================================================
+// Order Refunds
+// ============================================================================
+
+/**
+ * List refunds for an order
+ * GET /business/orders/:orderId/refunds
+ */
+export const listOrderRefunds = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { orderId } = req.params;
+    const refunds = await orderPaymentRefundRepo.findByOrder(orderId);
+    respond(req, res, { orderId, refunds });
+  } catch (error: any) {
+    logger.error('Error listing order refunds:', error);
+    respondError(req, res, error.message || 'Failed to list order refunds', 500);
+  }
+};
+
+/**
+ * Create a refund for an order payment
+ * POST /business/orders/:orderId/refunds
+ */
+export const createOrderRefund = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { orderPaymentId, amount, reason, notes, transactionId } = req.body;
+
+    const command = new CreateOrderRefundCommand(
+      orderPaymentId,
+      parseFloat(amount),
+      reason,
+      notes,
+      transactionId,
+      (req as any).user?.userId,
+    );
+    const useCase = new CreateOrderRefundUseCase();
+    const result = await useCase.execute(command);
+
+    respond(req, res, result, 201);
+  } catch (error: any) {
+    logger.error('Error creating order refund:', error);
+    if (error.message.includes('not found')) {
+      respondError(req, res, error.message, 404);
+      return;
+    }
+    if (error.message.includes('exceeds') || error.message.includes('greater than zero')) {
+      respondError(req, res, error.message, 400);
+      return;
+    }
+    respondError(req, res, error.message || 'Failed to create order refund', 500);
+  }
+};
+
+// ============================================================================
+// Fulfillment Packages
+// ============================================================================
+
+/**
+ * List packages for a fulfillment
+ * GET /business/orders/:orderId/packages
+ */
+export const listFulfillmentPackages = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { fulfillmentId } = req.query;
+    if (!fulfillmentId) {
+      respondError(req, res, 'fulfillmentId query parameter is required', 400);
+      return;
+    }
+    const packages = await orderFulfillmentPackageRepo.findByFulfillment(fulfillmentId as string);
+    respond(req, res, { fulfillmentId, packages });
+  } catch (error: any) {
+    logger.error('Error listing fulfillment packages:', error);
+    respondError(req, res, error.message || 'Failed to list fulfillment packages', 500);
+  }
+};
+
+/**
+ * Create a fulfillment package
+ * POST /business/orders/:orderId/packages
+ */
+export const createFulfillmentPackage = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { orderFulfillmentId, packageNumber, trackingNumber, weight, dimensions, packageType, shippingLabelUrl, commercialInvoiceUrl, customsInfo } =
+      req.body;
+
+    const command = new TrackFulfillmentPackageCommand(
+      orderFulfillmentId,
+      packageNumber,
+      trackingNumber,
+      shippingLabelUrl,
+      commercialInvoiceUrl,
+      weight ? parseFloat(weight) : undefined,
+      dimensions,
+      packageType,
+      customsInfo,
+    );
+    const useCase = new TrackFulfillmentPackageUseCase();
+    const result = await useCase.execute(command);
+
+    respond(req, res, result, 201);
+  } catch (error: any) {
+    logger.error('Error creating fulfillment package:', error);
+    respondError(req, res, error.message || 'Failed to create fulfillment package', 500);
+  }
+};
+
+/**
+ * Update tracking on a fulfillment package
+ * POST /business/orders/:orderId/packages/:packageId/tracking
+ */
+export const trackFulfillmentPackage = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { packageId } = req.params;
+    const { orderFulfillmentId, packageNumber, trackingNumber, shippingLabelUrl, commercialInvoiceUrl } = req.body;
+
+    const command = new TrackFulfillmentPackageCommand(
+      orderFulfillmentId || '',
+      packageNumber || '',
+      trackingNumber,
+      shippingLabelUrl,
+      commercialInvoiceUrl,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      packageId,
+    );
+    const useCase = new TrackFulfillmentPackageUseCase();
+    const result = await useCase.execute(command);
+
+    respond(req, res, result);
+  } catch (error: any) {
+    logger.error('Error tracking fulfillment package:', error);
+    if (error.message.includes('not found')) {
+      respondError(req, res, error.message, 404);
+      return;
+    }
+    respondError(req, res, error.message || 'Failed to update package tracking', 500);
   }
 };

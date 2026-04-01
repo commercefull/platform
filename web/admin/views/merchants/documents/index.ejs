@@ -1,0 +1,64 @@
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <h2 class="page-title">Verification Documents</h2>
+    </div>
+  </div>
+</div>
+
+<section class="content">
+  <div class="container-fluid">
+    <%- include('../../../partials/alerts') %>
+
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Documents</h3>
+        <span class="float-end text-muted"><%= (documents || []).length %> records</span>
+      </div>
+      <div class="card-body table-responsive p-0">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>File</th>
+              <th>Status</th>
+              <th>Reviewed At</th>
+              <th>Review Note</th>
+              <th>Submitted</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% (documents || []).forEach(function(d) { %>
+            <tr>
+              <td><%= d.documentType %></td>
+              <td><a href="<%= d.fileUrl %>" target="_blank">View File</a></td>
+              <td>
+                <span class="badge bg-<%= d.status === 'approved' ? 'success' : d.status === 'rejected' ? 'danger' : 'warning' %>">
+                  <%= d.status %>
+                </span>
+              </td>
+              <td><%= d.reviewedAt ? new Date(d.reviewedAt).toLocaleDateString() : '-' %></td>
+              <td><%= d.reviewNote || '-' %></td>
+              <td><%= new Date(d.createdAt).toLocaleDateString() %></td>
+              <td>
+                <form method="POST" action="/admin/operations/merchants/<%= merchantId %>/documents/<%= d.merchantVerificationDocumentId %>/status" class="d-inline">
+                  <select name="status" class="form-select form-select-sm d-inline w-auto">
+                    <option value="pending" <%= d.status === 'pending' ? 'selected' : '' %>>Pending</option>
+                    <option value="approved" <%= d.status === 'approved' ? 'selected' : '' %>>Approved</option>
+                    <option value="rejected" <%= d.status === 'rejected' ? 'selected' : '' %>>Rejected</option>
+                  </select>
+                  <button type="submit" class="btn btn-sm btn-outline-primary ms-1">Update</button>
+                </form>
+              </td>
+            </tr>
+            <% }); %>
+            <% if ((documents || []).length === 0) { %>
+            <tr><td colspan="7" class="text-center text-muted py-4">No documents found.</td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>

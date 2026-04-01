@@ -44,6 +44,7 @@ import * as merchantController from './controllers/merchantController';
 import * as mediaController from './controllers/mediaController';
 import * as checkoutController from './controllers/checkoutController';
 import * as storeController from './controllers/storeController';
+import * as marketingController from './controllers/marketingController';
 
 const router = express.Router();
 
@@ -142,6 +143,28 @@ router.delete('/catalog/pricing/rules/:ruleId', pricingController.deletePriceRul
 router.get('/products', productController.listProducts);
 router.get('/products/create', productController.createProductForm);
 router.post('/products', productController.createProduct);
+
+// Product Categories (standalone productCategory records)
+router.get('/products/categories', productController.listProductCategories);
+router.get('/products/categories/create', productController.createProductCategoryForm);
+router.post('/products/categories', productController.createProductCategory);
+router.get('/products/categories/:categoryId/edit', productController.editProductCategoryForm);
+router.post('/products/categories/:categoryId', productController.updateProductCategory);
+router.delete('/products/categories/:categoryId', productController.deleteProductCategory);
+
+// Product Tags
+router.get('/products/tags', productController.listProductTags);
+router.post('/products/tags', productController.createProductTag);
+router.delete('/products/tags/:tagId', productController.deleteProductTag);
+
+// Product Collections
+router.get('/products/collections', productController.listProductCollections);
+router.get('/products/collections/create', productController.createProductCollectionForm);
+router.post('/products/collections', productController.createProductCollection);
+router.get('/products/collections/:collectionId/edit', productController.editProductCollectionForm);
+router.post('/products/collections/:collectionId', productController.updateProductCollection);
+router.delete('/products/collections/:collectionId', productController.deleteProductCollection);
+
 router.get('/products/:productId', productController.viewProduct);
 router.get('/products/:productId/edit', productController.editProductForm);
 router.post('/products/:productId', productController.updateProduct); // Form POST (method override)
@@ -150,6 +173,18 @@ router.delete('/products/:productId', productController.deleteProduct);
 router.post('/products/:productId/status', productController.updateProductStatus);
 router.post('/products/:productId/publish', productController.publishProduct);
 router.post('/products/:productId/unpublish', productController.unpublishProduct);
+
+// Product Q&A
+router.get('/products/:productId/qa', productController.listProductQa);
+router.post('/products/:productId/qa/:qaId/status', productController.updateQaStatus);
+
+// Product Review Media
+router.get('/products/:productId/reviews/media', productController.listReviewMedia);
+router.delete('/products/:productId/reviews/media/:mediaId', productController.deleteReviewMedia);
+
+// Product Prices
+router.get('/products/:productId/prices', productController.listProductPrices);
+router.post('/products/:productId/prices', productController.upsertProductPrice);
 
 // ============================================================================
 // Order Routes
@@ -161,6 +196,14 @@ router.post('/orders/:orderId/status', orderController.updateOrderStatus);
 router.post('/orders/:orderId/cancel', orderController.cancelOrder);
 router.get('/orders/:orderId/refund', orderController.refundForm);
 router.post('/orders/:orderId/refund', orderController.processRefund);
+
+// Order sub-sections (notes, refunds, packages)
+router.get('/orders/:orderId/notes', orderController.listOrderNotes);
+router.post('/orders/:orderId/notes', orderController.addOrderNote);
+router.post('/orders/:orderId/notes/:noteId/delete', orderController.deleteOrderNote);
+router.get('/orders/:orderId/refunds', orderController.listOrderRefunds);
+router.get('/orders/:orderId/packages', orderController.listFulfillmentPackages);
+router.post('/orders/:orderId/packages/:packageId/tracking', orderController.updatePackageTracking);
 
 // ============================================================================
 // Store Routes
@@ -321,6 +364,25 @@ router.delete('/payments/gateways/:gatewayId', paymentController.deletePaymentGa
 router.get('/payments/methods', paymentController.listPaymentMethods);
 router.get('/payments/transactions', paymentController.listPaymentTransactions);
 
+// Payment Disputes
+router.get('/payments/disputes', paymentController.listDisputes);
+router.get('/payments/disputes/:disputeId', paymentController.viewDispute);
+router.post('/payments/disputes/:disputeId/status', paymentController.updateDisputeStatus);
+
+// Payment Fees
+router.get('/payments/fees', paymentController.listPaymentFees);
+
+// Payment Settings
+router.get('/payments/settings', paymentController.listPaymentSettings);
+router.post('/payments/settings/:merchantId', paymentController.updatePaymentSettings);
+
+// Payment Balance
+router.get('/payments/balance', paymentController.viewPaymentBalance);
+
+// Payment Reports
+router.get('/payments/reports', paymentController.listPaymentReports);
+router.get('/payments/reports/:reportId', paymentController.viewPaymentReport);
+
 // ============================================================================
 // Shipping Routes
 // ============================================================================
@@ -387,6 +449,31 @@ router.get('/marketing/seo/robots.txt', seoController.generateRobotsTxt);
 router.get('/marketing/seo/sitemap.xml', seoController.generateSitemap);
 
 // ============================================================================
+// Marketing - Campaigns Routes
+// ============================================================================
+
+router.get('/marketing/campaigns', marketingController.listCampaigns);
+router.get('/marketing/campaigns/create', marketingController.createCampaignForm);
+router.post('/marketing/campaigns', marketingController.createCampaign);
+router.get('/marketing/campaigns/:campaignId', marketingController.viewCampaign);
+router.post('/marketing/campaigns/:campaignId/send', marketingController.sendCampaign);
+
+// ============================================================================
+// Marketing - Affiliates Routes
+// ============================================================================
+
+router.get('/marketing/affiliates', marketingController.listAffiliates);
+router.get('/marketing/affiliates/create', marketingController.createAffiliateForm);
+router.post('/marketing/affiliates', marketingController.createAffiliate);
+router.get('/marketing/affiliates/:affiliateId', marketingController.viewAffiliate);
+
+// ============================================================================
+// Marketing - Referrals Routes
+// ============================================================================
+
+router.get('/marketing/referrals', marketingController.listReferrals);
+
+// ============================================================================
 // Notification Routes
 // ============================================================================
 
@@ -401,6 +488,13 @@ router.post('/notifications/templates/:templateId/deactivate', notificationContr
 router.delete('/notifications/templates/:templateId', notificationController.deleteNotificationTemplate);
 router.post('/notifications/templates/:templateId/clone', notificationController.cloneNotificationTemplate);
 router.post('/notifications/templates/:templateId/preview', notificationController.previewNotificationTemplate);
+router.get('/notifications/templates/:templateId/translations', notificationController.listTemplateTranslations);
+router.get('/notifications/batches', notificationController.listBatches);
+router.get('/notifications/batches/:batchId', notificationController.viewBatch);
+router.get('/notifications/webhooks', notificationController.listWebhooks);
+router.get('/notifications/webhooks/create', notificationController.createWebhookForm);
+router.post('/notifications/webhooks', notificationController.createWebhook);
+router.post('/notifications/webhooks/:webhookId/deactivate', notificationController.deactivateWebhook);
 
 // ============================================================================
 // Content Blocks Routes
@@ -566,6 +660,19 @@ router.delete('/b2b/quotes/:quoteId/items/:itemId', b2bController.deleteB2bQuote
 // B2B Analytics
 router.get('/b2b/analytics', b2bController.b2bQuoteAnalytics);
 
+// B2B Credit Management
+router.get('/b2b/companies/:companyId/credit', b2bController.viewCompanyCreditLimit);
+router.post('/b2b/companies/:companyId/credit', b2bController.updateCompanyCreditLimit);
+router.get('/b2b/companies/:companyId/credit/transactions', b2bController.listCompanyCreditTransactions);
+
+// B2B Price Lists
+router.get('/b2b/price-lists', b2bController.listB2bPriceLists);
+router.get('/b2b/price-lists/create', b2bController.createB2bPriceListForm);
+router.post('/b2b/price-lists', b2bController.createB2bPriceList);
+router.get('/b2b/price-lists/:priceListId', b2bController.viewB2bPriceList);
+router.get('/b2b/price-lists/:priceListId/edit', b2bController.editB2bPriceListForm);
+router.post('/b2b/price-lists/:priceListId', b2bController.updateB2bPriceList);
+
 // ============================================================================
 // Advanced Analytics & Intelligence (Phase 7)
 // ============================================================================
@@ -707,6 +814,14 @@ router.post('/sales/segments/:segmentId/refresh', segmentController.refreshSegme
 router.get('/operations/merchants', merchantController.listMerchants);
 router.get('/operations/merchants/create', merchantController.createMerchantForm);
 router.post('/operations/merchants', merchantController.createMerchant);
+
+// Commission Profiles (static routes must come before :merchantId to avoid param capture)
+router.get('/operations/merchants/commission-profiles', merchantController.listCommissionProfiles);
+router.get('/operations/merchants/commission-profiles/create', merchantController.createCommissionProfileForm);
+router.post('/operations/merchants/commission-profiles', merchantController.createCommissionProfile);
+router.get('/operations/merchants/commission-profiles/:profileId/edit', merchantController.editCommissionProfileForm);
+router.post('/operations/merchants/commission-profiles/:profileId', merchantController.updateCommissionProfile);
+
 router.get('/operations/merchants/:merchantId', merchantController.viewMerchant);
 router.get('/operations/merchants/:merchantId/edit', merchantController.editMerchantForm);
 router.post('/operations/merchants/:merchantId', merchantController.updateMerchant);
@@ -714,6 +829,29 @@ router.put('/operations/merchants/:merchantId', merchantController.updateMerchan
 router.delete('/operations/merchants/:merchantId', merchantController.deleteMerchant);
 router.post('/operations/merchants/:merchantId/approve', merchantController.approveMerchant);
 router.post('/operations/merchants/:merchantId/suspend', merchantController.suspendMerchant);
+
+// Merchant Contacts
+router.get('/operations/merchants/:merchantId/contacts', merchantController.listMerchantContacts);
+router.post('/operations/merchants/:merchantId/contacts', merchantController.addMerchantContact);
+
+// Merchant Verification Documents
+router.get('/operations/merchants/:merchantId/documents', merchantController.listVerificationDocs);
+router.post('/operations/merchants/:merchantId/documents/:docId/status', merchantController.updateDocumentStatus);
+
+// Merchant Reviews
+router.get('/operations/merchants/:merchantId/reviews', merchantController.listMerchantReviews);
+router.post('/operations/merchants/:merchantId/reviews/:reviewId/status', merchantController.updateReviewStatus);
+
+// Merchant Payouts
+router.get('/operations/merchants/:merchantId/payouts', merchantController.listMerchantPayouts);
+router.get('/operations/merchants/:merchantId/payouts/:payoutId', merchantController.viewMerchantPayout);
+
+// Merchant Invoices
+router.get('/operations/merchants/:merchantId/invoices', merchantController.listMerchantInvoices);
+
+// Seller Policies
+router.get('/operations/merchants/:merchantId/policies', merchantController.listSellerPolicies);
+router.post('/operations/merchants/:merchantId/policies', merchantController.upsertSellerPolicy);
 
 // ============================================================================
 // Media Library Routes

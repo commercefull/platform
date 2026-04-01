@@ -1,0 +1,58 @@
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <h2 class="page-title">Commission Profiles</h2>
+    </div>
+    <div class="col-auto ms-auto">
+      <a href="/admin/operations/merchants/commission-profiles/create" class="btn btn-primary">New Profile</a>
+    </div>
+  </div>
+</div>
+
+<section class="content">
+  <div class="container-fluid">
+    <%- include('../../../partials/alerts') %>
+
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Profiles</h3>
+        <span class="float-end text-muted"><%= (profiles || []).length %> records</span>
+      </div>
+      <div class="card-body table-responsive p-0">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Description</th>
+              <th>Default Rate</th>
+              <th>Active</th>
+              <th>Created</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% (profiles || []).forEach(function(p) { %>
+            <tr>
+              <td><strong><%= p.name %></strong></td>
+              <td><%= p.description || '-' %></td>
+              <td><%= (p.defaultRate || 0).toFixed(2) %>%</td>
+              <td>
+                <span class="badge bg-<%= p.isActive ? 'success' : 'secondary' %>">
+                  <%= p.isActive ? 'Active' : 'Inactive' %>
+                </span>
+              </td>
+              <td><%= new Date(p.createdAt).toLocaleDateString() %></td>
+              <td>
+                <a href="/admin/operations/merchants/commission-profiles/<%= p.commissionProfileId %>/edit" class="btn btn-sm btn-outline-secondary">Edit</a>
+              </td>
+            </tr>
+            <% }); %>
+            <% if ((profiles || []).length === 0) { %>
+            <tr><td colspan="6" class="text-center text-muted py-4">No commission profiles found.</td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>

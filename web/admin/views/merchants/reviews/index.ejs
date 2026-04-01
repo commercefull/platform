@@ -1,0 +1,66 @@
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <h2 class="page-title">Merchant Reviews</h2>
+    </div>
+  </div>
+</div>
+
+<section class="content">
+  <div class="container-fluid">
+    <%- include('../../../partials/alerts') %>
+
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Reviews</h3>
+        <span class="float-end text-muted"><%= (reviews || []).length %> records</span>
+      </div>
+      <div class="card-body table-responsive p-0">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Customer</th>
+              <th>Rating</th>
+              <th>Title</th>
+              <th>Status</th>
+              <th>Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% (reviews || []).forEach(function(r) { %>
+            <tr>
+              <td><code><%= r.customerId.substring(0, 8) %>...</code></td>
+              <td>
+                <% for (var i = 1; i <= 5; i++) { %>
+                  <span class="<%= i <= r.rating ? 'text-warning' : 'text-muted' %>">★</span>
+                <% } %>
+              </td>
+              <td><%= r.title || '-' %></td>
+              <td>
+                <span class="badge bg-<%= r.status === 'approved' ? 'success' : r.status === 'rejected' ? 'danger' : 'warning' %>">
+                  <%= r.status %>
+                </span>
+              </td>
+              <td><%= new Date(r.createdAt).toLocaleDateString() %></td>
+              <td>
+                <form method="POST" action="/admin/operations/merchants/<%= merchantId %>/reviews/<%= r.merchantReviewId %>/status" class="d-inline">
+                  <select name="status" class="form-select form-select-sm d-inline w-auto">
+                    <option value="pending" <%= r.status === 'pending' ? 'selected' : '' %>>Pending</option>
+                    <option value="approved" <%= r.status === 'approved' ? 'selected' : '' %>>Approved</option>
+                    <option value="rejected" <%= r.status === 'rejected' ? 'selected' : '' %>>Rejected</option>
+                  </select>
+                  <button type="submit" class="btn btn-sm btn-outline-primary ms-1">Update</button>
+                </form>
+              </td>
+            </tr>
+            <% }); %>
+            <% if ((reviews || []).length === 0) { %>
+            <tr><td colspan="6" class="text-center text-muted py-4">No reviews found.</td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>

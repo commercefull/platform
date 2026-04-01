@@ -15,6 +15,9 @@ import * as approvalController from './controllers/approvalController';
 import * as catalogController from './controllers/catalogController';
 import * as companyController from './controllers/companyController';
 import * as invoiceController from './controllers/invoiceController';
+import * as creditController from './controllers/creditController';
+import * as priceListController from './controllers/priceListController';
+import * as purchaseOrderController from './controllers/purchaseOrderController';
 
 const router = express.Router();
 
@@ -77,6 +80,29 @@ router.get('/approvals/history', approvalController.listApprovalHistory);
 router.get('/approvals/:approvalId', approvalController.viewApproval);
 router.post('/approvals/:approvalId/approve', approvalController.approveRequest);
 router.post('/approvals/:approvalId/reject', approvalController.rejectRequest);
+
+// ============================================================================
+// Credit
+// ============================================================================
+
+router.get('/credit', creditController.getCreditDashboard);
+router.get('/credit/transactions', creditController.getCreditTransactions);
+
+// ============================================================================
+// Price Lists
+// ============================================================================
+
+router.get('/price-lists', priceListController.listPriceLists);
+router.get('/price-lists/:priceListId', priceListController.viewPriceList);
+
+// ============================================================================
+// Purchase Orders
+// ============================================================================
+
+router.get('/purchase-orders', purchaseOrderController.listPurchaseOrders);
+router.get('/purchase-orders/create', purchaseOrderController.createPurchaseOrderForm);
+router.post('/purchase-orders', purchaseOrderController.createPurchaseOrder);
+router.get('/purchase-orders/:purchaseOrderId', purchaseOrderController.viewPurchaseOrder);
 
 // ============================================================================
 // Company Management

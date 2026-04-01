@@ -64,4 +64,27 @@ router.post('/orders/:orderId/cancel', orderController.cancelOrder);
  */
 router.post('/orders/:orderId/refund', orderController.processRefund);
 
+// ============================================================================
+// Order Notes
+// ============================================================================
+
+router.get('/orders/:orderId/notes', orderController.listOrderNotes);
+router.post('/orders/:orderId/notes', orderController.addOrderNote);
+router.delete('/orders/:orderId/notes/:noteId', orderController.deleteOrderNote);
+
+// ============================================================================
+// Order Refunds
+// ============================================================================
+
+router.get('/orders/:orderId/refunds', orderController.listOrderRefunds);
+router.post('/orders/:orderId/refunds', orderController.createOrderRefund);
+
+// ============================================================================
+// Fulfillment Packages
+// ============================================================================
+
+router.get('/orders/:orderId/packages', orderController.listFulfillmentPackages);
+router.post('/orders/:orderId/packages', orderController.createFulfillmentPackage);
+router.post('/orders/:orderId/packages/:packageId/tracking', orderController.trackFulfillmentPackage);
+
 export const orderBusinessRouter = router;

@@ -1,0 +1,63 @@
+<!-- Price List Detail -->
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title"><%= priceList.name %></h3>
+    <div class="card-tools">
+      <a href="/b2b/price-lists" class="btn btn-sm btn-default"><i class="fas fa-arrow-left"></i> Back</a>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="row mb-3">
+      <div class="col-md-3">
+        <strong>Currency:</strong> <%= priceList.currency %>
+      </div>
+      <div class="col-md-3">
+        <strong>Status:</strong>
+        <span class="badge badge-<%= priceList.isActive ? 'success' : 'secondary' %>">
+          <%= priceList.isActive ? 'Active' : 'Inactive' %>
+        </span>
+      </div>
+      <div class="col-md-3">
+        <strong>Created:</strong> <%= new Date(priceList.createdAt).toLocaleDateString() %>
+      </div>
+      <% if (priceList.notes) { %>
+      <div class="col-md-12 mt-2">
+        <strong>Notes:</strong> <%= priceList.notes %>
+      </div>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<!-- Price List Items -->
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">Items (<%= items ? items.length : 0 %>)</h3>
+  </div>
+  <div class="card-body p-0">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Product ID</th>
+          <th>Variant</th>
+          <th>Price</th>
+          <th>Currency</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (items && items.length > 0) { %>
+          <% items.forEach(item => { %>
+            <tr>
+              <td><code><%= item.productId %></code></td>
+              <td><%= item.productVariantId || '—' %></td>
+              <td><strong><%= item.price.toFixed(2) %></strong></td>
+              <td><%= item.currency %></td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr><td colspan="4" class="text-center text-muted py-4">No items in this price list</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>

@@ -330,3 +330,170 @@ export const previewNotificationTemplate = async (req: TypedRequest, res: Respon
     res.status(500).json({ success: false, message: error.message || 'Failed to preview notification template' });
   }
 };
+
+// ============================================================================
+// Notification Batches Management
+// ============================================================================
+
+import { query, queryOne } from '../../../libs/db';
+import notificationWebhookRepo from '../../../modules/notification/infrastructure/repositories/notificationWebhookRepo';
+import notificationDeliveryLogRepo from '../../../modules/notification/infrastructure/repositories/notificationDeliveryLogRepo';
+import notificationTemplateTranslationRepo from '../../../modules/notification/infrastructure/repositories/notificationTemplateTranslationRepo';
+
+export const listBatches = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const limit = parseInt(req.query.limit as string) || 50;
+    const offset = parseInt(req.query.offset as string) || 0;
+
+    const batches = await query<any[]>(
+      `SELECT * FROM "notificationBatch" ORDER BY "createdAt" DESC LIMIT $1 OFFSET $2`,
+      [limit, offset],
+    ) || [];
+
+    const totalResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "notificationBatch"`);
+    const total = totalResult ? parseInt(totalResult.count, 10) : 0;
+
+    adminRespond(req, res, 'notifications/batches/index', {
+      pageName: 'Notification Batches',
+      batches,
+      total,
+      limit,
+      offset,
+    });
+  } catch (error: any) {
+    logger.error('Error:', error);
+    adminRespond(req, res, 'error', { pageName: 'Error', error: error.message || 'Failed to load batches' });
+  }
+};
+
+export const viewBatch = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { batchId } = req.params;
+
+    const batch = await queryOne<any>(
+      `SELECT * FROM "notificationBatch" WHERE "notificationBatchId" = $1`,
+      [batchId],
+    );
+
+    if (!batch) {
+      adminRespond(req, res, 'error', { pageName: 'Not Found', error: 'Batch not found' });
+      return;
+    }
+
+    const deliveryLogs = await query<any[]>(
+      `SELECT * FROM "notificationDeliveryLog" WHERE "notificationId" IN (
+        SELECT "notificationId" FROM "notification" WHERE "notificationBatchId" = $1
+      ) ORDER BY "createdAt" DESC LIMIT 100`,
+      [batchId],
+    ) || [];
+
+    adminRespond(req, res, 'notifications/batches/detail', {
+      pageName: `Batch: ${batch.name}`,
+      batch,
+      deliveryLogs,
+    });
+  } catch (error: any) {
+    logger.error('Error:', error);
+    adminRespond(req, res, 'error', { pageName: 'Error', error: error.message || 'Failed to load batch' });
+  }
+};
+
+// ============================================================================
+// Notification Webhooks Management
+// ============================================================================
+
+export const listWebhooks = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const webhooks = await query<any[]>(
+      `SELECT * FROM "notificationWebhook" ORDER BY "createdAt" DESC`,
+    ) || [];
+
+    adminRespond(req, res, 'notifications/webhooks/index', {
+      pageName: 'Notification Webhooks',
+      webhooks,
+      success: req.query.success || null,
+    });
+  } catch (error: any) {
+    logger.error('Error:', error);
+    adminRespond(req, res, 'error', { pageName: 'Error', error: error.message || 'Failed to load webhooks' });
+  }
+};
+
+export const createWebhookForm = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    adminRespond(req, res, 'notifications/webhooks/form', {
+      pageName: 'Create Webhook',
+      webhook: null,
+    });
+  } catch (error: any) {
+    logger.error('Error:', error);
+    adminRespond(req, res, 'error', { pageName: 'Error', error: error.message || 'Failed to load form' });
+  }
+};
+
+export const createWebhook = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { url, secret, events, merchantId } = req.body;
+    const eventsArray = Array.isArray(events) ? events : (events ? [events] : []);
+
+    await notificationWebhookRepo.create({
+      url,
+      secret: secret || undefined,
+      events: eventsArray,
+      isActive: true,
+      merchantId: merchantId || undefined,
+    });
+
+    res.redirect('/admin/notifications/webhooks?success=Webhook+created+successfully');
+  } catch (error: any) {
+    logger.error('Error:', error);
+    adminRespond(req, res, 'notifications/webhooks/form', {
+      pageName: 'Create Webhook',
+      webhook: null,
+      error: error.message || 'Failed to create webhook',
+      formData: req.body,
+    });
+  }
+};
+
+export const deactivateWebhook = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { webhookId } = req.params;
+    await notificationWebhookRepo.deactivate(webhookId);
+    res.redirect('/admin/notifications/webhooks?success=Webhook+deactivated');
+  } catch (error: any) {
+    logger.error('Error:', error);
+    res.redirect('/admin/notifications/webhooks?error=' + encodeURIComponent(error.message || 'Failed to deactivate webhook'));
+  }
+};
+
+// ============================================================================
+// Notification Template Translations
+// ============================================================================
+
+export const listTemplateTranslations = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { templateId } = req.params;
+
+    const template = await notificationTemplateRepo.findById(templateId);
+
+    if (!template) {
+      adminRespond(req, res, 'error', { pageName: 'Not Found', error: 'Notification template not found' });
+      return;
+    }
+
+    const translations = await notificationTemplateTranslationRepo.findByTemplate(templateId);
+    const preview = await notificationTemplateRepo.getPreview(templateId);
+
+    adminRespond(req, res, 'notifications/templates/view', {
+      pageName: `Template: ${template.name}`,
+      template,
+      preview,
+      translations,
+      success: req.query.success || null,
+    });
+  } catch (error: any) {
+    logger.error('Error:', error);
+    adminRespond(req, res, 'error', { pageName: 'Error', error: error.message || 'Failed to load template translations' });
+  }
+};

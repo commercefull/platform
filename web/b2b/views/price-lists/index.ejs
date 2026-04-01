@@ -1,0 +1,42 @@
+<!-- Price Lists -->
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">Your Price Lists</h3>
+  </div>
+  <div class="card-body p-0">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Currency</th>
+          <th>Status</th>
+          <th>Created</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (priceLists && priceLists.length > 0) { %>
+          <% priceLists.forEach(pl => { %>
+            <tr>
+              <td><strong><%= pl.name %></strong></td>
+              <td><%= pl.currency %></td>
+              <td>
+                <span class="badge badge-<%= pl.isActive ? 'success' : 'secondary' %>">
+                  <%= pl.isActive ? 'Active' : 'Inactive' %>
+                </span>
+              </td>
+              <td><%= new Date(pl.createdAt).toLocaleDateString() %></td>
+              <td>
+                <a href="/b2b/price-lists/<%= pl.b2bPriceListId %>" class="btn btn-sm btn-info">
+                  <i class="fas fa-eye"></i> View
+                </a>
+              </td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr><td colspan="5" class="text-center text-muted py-4">No price lists assigned to your account</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>

@@ -4,6 +4,7 @@
 
 import express from 'express';
 import * as paymentController from '../controllers/PaymentController';
+import * as paymentCustomerController from '../controllers/paymentCustomerController';
 import { isCustomerLoggedIn } from '../../../../libs/auth';
 
 const router = express.Router();
@@ -28,5 +29,15 @@ router.get('/payment/transactions', paymentController.getMyTransactions);
  * GET /payments/orders/:orderId
  */
 router.get('/payment/orders/:orderId', paymentController.getTransactionByOrder);
+
+// ============================================================================
+// Stored Payment Methods (protected)
+// ============================================================================
+router.use('/payment-methods', isCustomerLoggedIn);
+
+router.get('/payment-methods', paymentCustomerController.listStoredMethods);
+router.post('/payment-methods', paymentCustomerController.saveStoredMethod);
+router.post('/payment-methods/:methodId/default', paymentCustomerController.setDefaultMethod);
+router.delete('/payment-methods/:methodId', paymentCustomerController.deleteStoredMethod);
 
 export const paymentCustomerRouter = router;

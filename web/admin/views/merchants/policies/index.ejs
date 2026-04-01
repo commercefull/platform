@@ -1,0 +1,80 @@
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <h2 class="page-title">Seller Policies</h2>
+    </div>
+  </div>
+</div>
+
+<section class="content">
+  <div class="container-fluid">
+    <%- include('../../../partials/alerts') %>
+
+    <div class="card mb-4">
+      <div class="card-header"><h3 class="card-title">Add / Update Policy</h3></div>
+      <div class="card-body">
+        <form method="POST" action="/admin/operations/merchants/<%= merchantId %>/policies">
+          <div class="mb-3">
+            <label class="form-label">Policy Type <span class="text-danger">*</span></label>
+            <select class="form-select" name="policyType" required>
+              <option value="return">Return Policy</option>
+              <option value="shipping">Shipping Policy</option>
+              <option value="privacy">Privacy Policy</option>
+              <option value="terms">Terms & Conditions</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Title <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" name="title" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Content <span class="text-danger">*</span></label>
+            <textarea class="form-control" name="content" rows="6" required></textarea>
+          </div>
+          <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" name="isActive" value="true" id="isActive" checked>
+            <label class="form-check-label" for="isActive">Active</label>
+          </div>
+          <button type="submit" class="btn btn-primary">Save Policy</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Existing Policies</h3>
+        <span class="float-end text-muted"><%= (policies || []).length %> records</span>
+      </div>
+      <div class="card-body table-responsive p-0">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Title</th>
+              <th>Active</th>
+              <th>Updated</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% (policies || []).forEach(function(pol) { %>
+            <tr>
+              <td><span class="badge bg-secondary"><%= pol.policyType %></span></td>
+              <td><%= pol.title %></td>
+              <td>
+                <span class="badge bg-<%= pol.isActive ? 'success' : 'secondary' %>">
+                  <%= pol.isActive ? 'Active' : 'Inactive' %>
+                </span>
+              </td>
+              <td><%= new Date(pol.updatedAt).toLocaleDateString() %></td>
+            </tr>
+            <% }); %>
+            <% if ((policies || []).length === 0) { %>
+            <tr><td colspan="4" class="text-center text-muted py-4">No policies found.</td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>

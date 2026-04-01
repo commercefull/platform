@@ -1,0 +1,59 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <h2 class="page-title">Payment Reports</h2>
+    </div>
+  </div>
+</div>
+
+<section class="content">
+  <div class="container-fluid">
+    <%- include('../../partials/alerts') %>
+
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Reports</h3>
+        <span class="float-end text-muted"><%= (reports || []).length %> records</span>
+      </div>
+      <div class="card-body table-responsive p-0">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Report ID</th>
+              <th>Merchant</th>
+              <th>Type</th>
+              <th>Currency</th>
+              <th>Total Amount</th>
+              <th>Transactions</th>
+              <th>Period</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% (reports || []).forEach(function(r) { %>
+            <tr>
+              <td><code><%= r.paymentReportId.substring(0, 8) %>...</code></td>
+              <td><code><%= r.merchantId %></code></td>
+              <td><span class="badge bg-info"><%= r.type %></span></td>
+              <td><%= r.currency %></td>
+              <td><strong><%= r.currency %> <%= (r.totalAmount || 0).toFixed(2) %></strong></td>
+              <td><%= r.transactionCount || 0 %></td>
+              <td>
+                <%= new Date(r.periodStart).toLocaleDateString() %> &ndash;
+                <%= new Date(r.periodEnd).toLocaleDateString() %>
+              </td>
+              <td>
+                <a href="/admin/payments/reports/<%= r.paymentReportId %>" class="btn btn-sm btn-outline-info">View</a>
+              </td>
+            </tr>
+            <% }); %>
+            <% if ((reports || []).length === 0) { %>
+            <tr><td colspan="8" class="text-center text-muted py-4">No reports found.</td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>

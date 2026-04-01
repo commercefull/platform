@@ -1,0 +1,126 @@
+<!-- Create Purchase Order -->
+<% if (creditStatus) { %>
+<div class="row mb-3">
+  <div class="col-md-4">
+    <div class="info-box">
+      <span class="info-box-icon bg-info"><i class="fas fa-credit-card"></i></span>
+      <div class="info-box-content">
+        <span class="info-box-text">Credit Limit</span>
+        <span class="info-box-number">
+          <%= creditStatus.currency %> <%= creditStatus.creditLimit !== null ? creditStatus.creditLimit.toFixed(2) : 'Unlimited' %>
+        </span>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="info-box">
+      <span class="info-box-icon bg-warning"><i class="fas fa-balance-scale"></i></span>
+      <div class="info-box-content">
+        <span class="info-box-text">Outstanding Balance</span>
+        <span class="info-box-number"><%= creditStatus.currency %> <%= creditStatus.currentBalance.toFixed(2) %></span>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="info-box">
+      <span class="info-box-icon bg-success"><i class="fas fa-check-circle"></i></span>
+      <div class="info-box-content">
+        <span class="info-box-text">Available Credit</span>
+        <span class="info-box-number">
+          <%= creditStatus.currency %> <%= creditStatus.availableCredit !== null ? creditStatus.availableCredit.toFixed(2) : 'Unlimited' %>
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+<% } %>
+
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">New Purchase Order</h3>
+    <div class="card-tools">
+      <a href="/b2b/purchase-orders" class="btn btn-sm btn-default"><i class="fas fa-arrow-left"></i> Back</a>
+    </div>
+  </div>
+  <div class="card-body">
+    <form method="POST" action="/b2b/purchase-orders" id="poForm">
+      <div class="row">
+        <div class="col-md-4">
+          <div class="form-group">
+            <label>Currency</label>
+            <select name="currency" class="form-control">
+              <option value="USD">USD</option>
+              <option value="EUR">EUR</option>
+              <option value="GBP">GBP</option>
+            </select>
+          </div>
+        </div>
+        <div class="col-md-8">
+          <div class="form-group">
+            <label>Notes</label>
+            <input type="text" name="notes" class="form-control" placeholder="Optional notes">
+          </div>
+        </div>
+      </div>
+
+      <h5 class="mt-3">Order Items</h5>
+      <div id="items-container">
+        <div class="item-row row mb-2">
+          <div class="col-md-4">
+            <input type="text" name="items[0][name]" class="form-control" placeholder="Item name *" required>
+          </div>
+          <div class="col-md-2">
+            <input type="number" name="items[0][quantity]" class="form-control" placeholder="Qty *" min="1" required>
+          </div>
+          <div class="col-md-2">
+            <input type="number" name="items[0][unitPrice]" class="form-control" placeholder="Unit price *" step="0.01" min="0" required>
+          </div>
+          <div class="col-md-2">
+            <input type="text" name="items[0][sku]" class="form-control" placeholder="SKU">
+          </div>
+          <div class="col-md-2">
+            <input type="text" name="items[0][notes]" class="form-control" placeholder="Notes">
+          </div>
+        </div>
+      </div>
+
+      <button type="button" class="btn btn-sm btn-secondary mt-2" id="addItem">
+        <i class="fas fa-plus"></i> Add Item
+      </button>
+
+      <div class="mt-4">
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-paper-plane"></i> Submit Purchase Order
+        </button>
+        <a href="/b2b/purchase-orders" class="btn btn-default ml-2">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  let itemIndex = 1;
+  document.getElementById('addItem').addEventListener('click', function () {
+    const container = document.getElementById('items-container');
+    const row = document.createElement('div');
+    row.className = 'item-row row mb-2';
+    row.innerHTML = `
+      <div class="col-md-4"><input type="text" name="items[${itemIndex}][name]" class="form-control" placeholder="Item name *" required></div>
+      <div class="col-md-2"><input type="number" name="items[${itemIndex}][quantity]" class="form-control" placeholder="Qty *" min="1" required></div>
+      <div class="col-md-2"><input type="number" name="items[${itemIndex}][unitPrice]" class="form-control" placeholder="Unit price *" step="0.01" min="0" required></div>
+      <div class="col-md-2"><input type="text" name="items[${itemIndex}][sku]" class="form-control" placeholder="SKU"></div>
+      <div class="col-md-2">
+        <input type="text" name="items[${itemIndex}][notes]" class="form-control" placeholder="Notes">
+        <button type="button" class="btn btn-sm btn-danger mt-1 remove-item">Remove</button>
+      </div>
+    `;
+    container.appendChild(row);
+    itemIndex++;
+  });
+
+  document.getElementById('items-container').addEventListener('click', function (e) {
+    if (e.target.classList.contains('remove-item')) {
+      e.target.closest('.item-row').remove();
+    }
+  });
+</script>

@@ -1,0 +1,43 @@
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">Refunds</h3>
+  </div>
+  <div class="card-body p-0">
+    <% if (refunds && refunds.length > 0) { %>
+    <table class="table table-striped mb-0">
+      <thead>
+        <tr>
+          <th>Refund ID</th>
+          <th>Amount</th>
+          <th>Status</th>
+          <th>Reason</th>
+          <th>Transaction ID</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% refunds.forEach(function(refund) { %>
+        <tr>
+          <td><code><%= refund.orderPaymentRefundId.substring(0, 8) %>…</code></td>
+          <td><%= refund.amount %></td>
+          <td>
+            <% if (refund.status === 'completed') { %>
+              <span class="badge badge-success"><%= refund.status %></span>
+            <% } else if (refund.status === 'failed') { %>
+              <span class="badge badge-danger"><%= refund.status %></span>
+            <% } else { %>
+              <span class="badge badge-warning"><%= refund.status %></span>
+            <% } %>
+          </td>
+          <td><%= refund.reason || '—' %></td>
+          <td><%= refund.transactionId || '—' %></td>
+          <td><%= new Date(refund.createdAt).toLocaleString() %></td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <% } else { %>
+    <div class="p-3 text-muted">No refunds recorded.</div>
+    <% } %>
+  </div>
+</div>

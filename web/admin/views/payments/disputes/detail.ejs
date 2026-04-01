@@ -1,0 +1,93 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <h2 class="page-title">Dispute Detail</h2>
+      <div class="text-muted mt-1">
+        <a href="/admin/payments/disputes">Disputes</a> &rsaquo; <%= dispute.paymentDisputeId.substring(0, 8) %>...
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="content">
+  <div class="container-fluid">
+    <%- include('../../partials/alerts') %>
+
+    <div class="row">
+      <!-- Dispute Info -->
+      <div class="col-md-8">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Dispute Information</h3>
+          </div>
+          <div class="card-body">
+            <dl class="row">
+              <dt class="col-sm-4">Dispute ID</dt>
+              <dd class="col-sm-8"><code><%= dispute.paymentDisputeId %></code></dd>
+
+              <dt class="col-sm-4">Payment ID</dt>
+              <dd class="col-sm-8"><code><%= dispute.paymentId %></code></dd>
+
+              <dt class="col-sm-4">Merchant ID</dt>
+              <dd class="col-sm-8"><%= dispute.merchantId %></dd>
+
+              <dt class="col-sm-4">External ID</dt>
+              <dd class="col-sm-8"><%= dispute.externalDisputeId || '-' %></dd>
+
+              <dt class="col-sm-4">Amount</dt>
+              <dd class="col-sm-8"><strong><%= dispute.currency %> <%= (dispute.amount || 0).toFixed(2) %></strong></dd>
+
+              <dt class="col-sm-4">Reason</dt>
+              <dd class="col-sm-8"><%= dispute.reason || '-' %></dd>
+
+              <dt class="col-sm-4">Status</dt>
+              <dd class="col-sm-8">
+                <span class="badge bg-<%= dispute.status === 'resolved' || dispute.status === 'won' ? 'success' : dispute.status === 'lost' ? 'danger' : dispute.status === 'open' ? 'warning' : 'info' %>">
+                  <%= dispute.status %>
+                </span>
+              </dd>
+
+              <dt class="col-sm-4">Due By</dt>
+              <dd class="col-sm-8"><%= dispute.dueBy ? new Date(dispute.dueBy).toLocaleString() : '-' %></dd>
+
+              <dt class="col-sm-4">Resolved At</dt>
+              <dd class="col-sm-8"><%= dispute.resolvedAt ? new Date(dispute.resolvedAt).toLocaleString() : '-' %></dd>
+
+              <dt class="col-sm-4">Created</dt>
+              <dd class="col-sm-8"><%= new Date(dispute.createdAt).toLocaleString() %></dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+
+      <!-- Update Status -->
+      <div class="col-md-4">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Update Status</h3>
+          </div>
+          <div class="card-body">
+            <form method="POST" action="/admin/payments/disputes/<%= dispute.paymentDisputeId %>/status">
+              <div class="mb-3">
+                <label class="form-label">New Status</label>
+                <select class="form-select" name="status" required>
+                  <option value="open" <%= dispute.status === 'open' ? 'selected' : '' %>>Open</option>
+                  <option value="under_review" <%= dispute.status === 'under_review' ? 'selected' : '' %>>Under Review</option>
+                  <option value="resolved" <%= dispute.status === 'resolved' ? 'selected' : '' %>>Resolved</option>
+                  <option value="won" <%= dispute.status === 'won' ? 'selected' : '' %>>Won</option>
+                  <option value="lost" <%= dispute.status === 'lost' ? 'selected' : '' %>>Lost</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-primary w-100">Update Status</button>
+            </form>
+          </div>
+        </div>
+
+        <div class="mt-3">
+          <a href="/admin/payments/disputes" class="btn btn-outline-secondary w-100">Back to Disputes</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

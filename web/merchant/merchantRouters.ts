@@ -15,6 +15,7 @@ import * as inventoryController from './controllers/inventoryController';
 import * as fulfillmentController from './controllers/fulfillmentController';
 import * as analyticsController from './controllers/analyticsController';
 import * as settingsController from './controllers/settingsController';
+import * as financialsController from './controllers/financialsController';
 
 const router = express.Router();
 
@@ -80,6 +81,18 @@ router.get('/analytics', analyticsController.salesAnalytics);
 router.get('/analytics/sales', analyticsController.salesAnalytics);
 router.get('/analytics/products', analyticsController.productPerformance);
 router.get('/analytics/customers', analyticsController.customerInsights);
+
+// ============================================================================
+// Financials
+// ============================================================================
+
+router.get('/financials', financialsController.getFinancialsDashboard);
+router.get('/financials/balance', financialsController.getPaymentBalance);
+router.get('/financials/reports', financialsController.listPaymentReports);
+router.get('/financials/payouts', financialsController.listPayouts);
+router.get('/financials/payouts/:payoutId', financialsController.viewPayout);
+router.get('/financials/invoices', financialsController.listInvoices);
+router.get('/financials/settlements', financialsController.listSettlements);
 
 // ============================================================================
 // Settings

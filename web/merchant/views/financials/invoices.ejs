@@ -1,0 +1,71 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row align-items-center">
+    <div class="col">
+      <h2 class="page-title">Invoices</h2>
+      <div class="text-muted mt-1"><a href="/merchant/financials">Financials</a> / Invoices</div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">All Invoices</h3>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-vcenter card-table">
+      <thead>
+        <tr>
+          <th>Invoice #</th>
+          <th>Type</th>
+          <th>Amount</th>
+          <th>Currency</th>
+          <th>Status</th>
+          <th>Due Date</th>
+          <th>Paid At</th>
+          <th>Period</th>
+          <th>Created</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (invoices && invoices.length > 0) { %>
+          <% invoices.forEach(invoice => { %>
+            <tr>
+              <td><strong><%= invoice.invoiceNumber %></strong></td>
+              <td class="text-muted"><%= invoice.type %></td>
+              <td><%= (invoice.amount / 100).toLocaleString('en-US', { style: 'currency', currency: invoice.currency }) %></td>
+              <td><%= invoice.currency %></td>
+              <td>
+                <span class="badge bg-<%= invoice.status === 'paid' ? 'success' : invoice.status === 'overdue' ? 'danger' : invoice.status === 'pending' ? 'warning' : 'secondary' %>-lt">
+                  <%= invoice.status %>
+                </span>
+              </td>
+              <td class="text-muted"><%= invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString() : '—' %></td>
+              <td class="text-muted"><%= invoice.paidAt ? new Date(invoice.paidAt).toLocaleDateString() : '—' %></td>
+              <td class="text-muted">
+                <% if (invoice.periodStart && invoice.periodEnd) { %>
+                  <%= new Date(invoice.periodStart).toLocaleDateString() %> – <%= new Date(invoice.periodEnd).toLocaleDateString() %>
+                <% } else { %>
+                  —
+                <% } %>
+              </td>
+              <td class="text-muted"><%= new Date(invoice.createdAt).toLocaleDateString() %></td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr>
+            <td colspan="9" class="text-center text-muted py-4">No invoices found.</td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+  <% if (invoices && invoices.length === limit) { %>
+    <div class="card-footer d-flex align-items-center">
+      <% if (offset > 0) { %>
+        <a href="?offset=<%= Math.max(0, offset - limit) %>&limit=<%= limit %>" class="btn btn-outline-secondary me-2">Previous</a>
+      <% } %>
+      <a href="?offset=<%= offset + limit %>&limit=<%= limit %>" class="btn btn-outline-secondary ms-auto">Next</a>
+    </div>
+  <% } %>
+</div>

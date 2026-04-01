@@ -1,0 +1,63 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <h2 class="page-title"><%= priceList ? 'Edit Price List' : 'Create Price List' %></h2>
+      <div class="text-muted mt-1">
+        <a href="/admin/b2b/price-lists">Price Lists</a> &rsaquo;
+        <%= priceList ? priceList.name : 'New' %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="content">
+  <div class="container-fluid">
+    <%- include('../../partials/alerts') %>
+
+    <div class="row">
+      <div class="col-md-7">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title"><%= priceList ? 'Edit' : 'New' %> Price List</h3>
+          </div>
+          <div class="card-body">
+            <form method="POST" action="<%= priceList ? '/admin/b2b/price-lists/' + priceList.b2bPriceListId : '/admin/b2b/price-lists' %>">
+              <div class="mb-3">
+                <label class="form-label">Name <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" name="name"
+                  value="<%= priceList ? priceList.name : '' %>" required>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Currency</label>
+                <input type="text" class="form-control" name="currency" maxlength="3"
+                  value="<%= priceList ? priceList.currency : 'USD' %>">
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Company ID (optional)</label>
+                <input type="text" class="form-control" name="b2bCompanyId"
+                  value="<%= priceList && priceList.b2bCompanyId ? priceList.b2bCompanyId : '' %>"
+                  placeholder="Leave blank for global price list">
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Status</label>
+                <select class="form-select" name="isActive">
+                  <option value="true" <%= !priceList || priceList.isActive ? 'selected' : '' %>>Active</option>
+                  <option value="false" <%= priceList && !priceList.isActive ? 'selected' : '' %>>Inactive</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Notes</label>
+                <textarea class="form-control" name="notes" rows="3"><%= priceList && priceList.notes ? priceList.notes : '' %></textarea>
+              </div>
+              <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary"><%= priceList ? 'Update' : 'Create' %> Price List</button>
+                <a href="/admin/b2b/price-lists" class="btn btn-outline-secondary">Cancel</a>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

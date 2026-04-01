@@ -1,0 +1,94 @@
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <h2 class="page-title">Merchant Contacts</h2>
+    </div>
+    <div class="col-auto ms-auto">
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addContactModal">
+        Add Contact
+      </button>
+    </div>
+  </div>
+</div>
+
+<section class="content">
+  <div class="container-fluid">
+    <%- include('../../../partials/alerts') %>
+
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Contacts</h3>
+        <span class="float-end text-muted"><%= (contacts || []).length %> records</span>
+      </div>
+      <div class="card-body table-responsive p-0">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Role</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Primary</th>
+              <th>Created</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% (contacts || []).forEach(function(c) { %>
+            <tr>
+              <td><%= c.name %></td>
+              <td><%= c.role || '-' %></td>
+              <td><%= c.email || '-' %></td>
+              <td><%= c.phone || '-' %></td>
+              <td><%= c.isPrimary ? '<span class="badge bg-success">Yes</span>' : '-' %></td>
+              <td><%= new Date(c.createdAt).toLocaleDateString() %></td>
+            </tr>
+            <% }); %>
+            <% if ((contacts || []).length === 0) { %>
+            <tr><td colspan="6" class="text-center text-muted py-4">No contacts found.</td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Add Contact Modal -->
+<div class="modal fade" id="addContactModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="POST" action="/admin/operations/merchants/<%= merchantId %>/contacts">
+        <div class="modal-header">
+          <h5 class="modal-title">Add Contact</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Name <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" name="name" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Role</label>
+            <input type="text" class="form-control" name="role">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-control" name="email">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Phone</label>
+            <input type="text" class="form-control" name="phone">
+          </div>
+          <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" name="isPrimary" value="true" id="isPrimary">
+            <label class="form-check-label" for="isPrimary">Primary Contact</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Add Contact</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

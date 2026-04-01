@@ -1,0 +1,115 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <h2 class="page-title"><%= campaign.name %></h2>
+      <div class="text-muted mt-1">
+        <span class="badge bg-<%= campaign.status === 'sent' ? 'success' : campaign.status === 'sending' ? 'info' : campaign.status === 'scheduled' ? 'warning' : 'secondary' %>">
+          <%= campaign.status %>
+        </span>
+      </div>
+    </div>
+    <div class="col-auto">
+      <a href="/admin/marketing/campaigns" class="btn btn-outline-secondary">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
+          stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+          <polyline points="15 6 9 12 15 18"/>
+        </svg>
+        Back
+      </a>
+      <% if (campaign.status === 'draft') { %>
+      <button class="btn btn-success" onclick="sendCampaign()">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
+          stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+          <line x1="10" y1="14" x2="21" y2="3"/>
+          <path d="M21 3l-6.5 18a0.55 .55 0 0 1 -1 0l-3.5 -7l-7 -3.5a0.55 .55 0 0 1 0 -1l18 -6.5"/>
+        </svg>
+        Send Campaign
+      </button>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<section class="content">
+  <div class="container-fluid">
+    <%- include('../../partials/alerts') %>
+
+    <% if (typeof success !== 'undefined' && success) { %>
+    <div class="alert alert-success"><%= success %></div>
+    <% } %>
+
+    <div class="row">
+      <div class="col-md-8">
+        <div class="card">
+          <div class="card-header"><h3 class="card-title">Campaign Details</h3></div>
+          <div class="card-body">
+            <dl class="row">
+              <dt class="col-sm-3">Name</dt>
+              <dd class="col-sm-9"><%= campaign.name %></dd>
+              <dt class="col-sm-3">Subject</dt>
+              <dd class="col-sm-9"><%= campaign.subject %></dd>
+              <dt class="col-sm-3">Template ID</dt>
+              <dd class="col-sm-9"><%= campaign.templateId || '—' %></dd>
+              <dt class="col-sm-3">Scheduled At</dt>
+              <dd class="col-sm-9"><%= campaign.scheduledAt ? new Date(campaign.scheduledAt).toLocaleString() : '—' %></dd>
+              <dt class="col-sm-3">Sent At</dt>
+              <dd class="col-sm-9"><%= campaign.sentAt ? new Date(campaign.sentAt).toLocaleString() : '—' %></dd>
+              <dt class="col-sm-3">Created</dt>
+              <dd class="col-sm-9"><%= new Date(campaign.createdAt).toLocaleString() %></dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card">
+          <div class="card-header"><h3 class="card-title">Stats</h3></div>
+          <div class="card-body">
+            <div class="row g-3">
+              <div class="col-6">
+                <div class="text-muted">Recipients</div>
+                <div class="h3"><%= (campaign.recipientCount || 0).toLocaleString() %></div>
+              </div>
+              <div class="col-6">
+                <div class="text-muted">Opens</div>
+                <div class="h3"><%= (campaign.openCount || 0).toLocaleString() %></div>
+              </div>
+              <div class="col-6">
+                <div class="text-muted">Clicks</div>
+                <div class="h3"><%= (campaign.clickCount || 0).toLocaleString() %></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <% if (campaign.status === 'draft') { %>
+    <!-- Send Form -->
+    <div class="card" id="sendForm" style="display:none;">
+      <div class="card-header"><h3 class="card-title">Send Campaign</h3></div>
+      <div class="card-body">
+        <form method="POST" action="/admin/marketing/campaigns/<%= campaign.marketingEmailCampaignId %>/send">
+          <div class="mb-3">
+            <label class="form-label">Recipients (one email per line)</label>
+            <textarea name="recipientEmails" class="form-control" rows="6"
+              placeholder="customer@example.com&#10;another@example.com"></textarea>
+            <small class="text-muted">Enter recipient email addresses, one per line.</small>
+          </div>
+          <button type="submit" class="btn btn-success">Send Now</button>
+          <button type="button" class="btn btn-link" onclick="document.getElementById('sendForm').style.display='none'">Cancel</button>
+        </form>
+      </div>
+    </div>
+    <% } %>
+  </div>
+</section>
+
+<script>
+function sendCampaign() {
+  document.getElementById('sendForm').style.display = 'block';
+  document.getElementById('sendForm').scrollIntoView({ behavior: 'smooth' });
+}
+</script>

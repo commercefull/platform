@@ -1,0 +1,87 @@
+<%- include('../../partials/header', { title: pageName }) %>
+
+<div class="content-wrapper">
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0"><i class="fas fa-tag me-2"></i><%= pageName %></h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-end">
+            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/admin/products">Products</a></li>
+            <li class="breadcrumb-item"><a href="/admin/products/categories">Categories</a></li>
+            <li class="breadcrumb-item active"><%= category ? 'Edit' : 'Create' %></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="content">
+    <div class="container-fluid">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title"><%= category ? 'Edit Category' : 'New Category' %></h3>
+        </div>
+        <form method="POST" action="<%= category ? '/admin/products/categories/' + category.productCategoryId : '/admin/products/categories' %>">
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Name <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" name="name" value="<%= formData.name || '' %>" required>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Slug</label>
+                <input type="text" class="form-control" name="slug" value="<%= formData.slug || '' %>" placeholder="auto-generated if empty">
+              </div>
+              <div class="col-md-12 mb-3">
+                <label class="form-label">Description</label>
+                <textarea class="form-control" name="description" rows="3"><%= formData.description || '' %></textarea>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Parent Category</label>
+                <select class="form-select" name="parentId">
+                  <option value="">None (top-level)</option>
+                  <% if (categories) { categories.forEach(function(c) { %>
+                  <option value="<%= c.productCategoryId %>" <%= formData.parentId === c.productCategoryId ? 'selected' : '' %>><%= c.name %></option>
+                  <% }); } %>
+                </select>
+              </div>
+              <div class="col-md-3 mb-3">
+                <label class="form-label">Position</label>
+                <input type="number" class="form-control" name="position" value="<%= formData.position || 0 %>" min="0">
+              </div>
+              <div class="col-md-3 mb-3">
+                <label class="form-label">Status</label>
+                <select class="form-select" name="isActive">
+                  <option value="true" <%= formData.isActive !== false ? 'selected' : '' %>>Active</option>
+                  <option value="false" <%= formData.isActive === false ? 'selected' : '' %>>Inactive</option>
+                </select>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Image URL</label>
+                <input type="text" class="form-control" name="imageUrl" value="<%= formData.imageUrl || '' %>">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Meta Title</label>
+                <input type="text" class="form-control" name="metaTitle" value="<%= formData.metaTitle || '' %>">
+              </div>
+              <div class="col-md-12 mb-3">
+                <label class="form-label">Meta Description</label>
+                <textarea class="form-control" name="metaDescription" rows="2"><%= formData.metaDescription || '' %></textarea>
+              </div>
+            </div>
+          </div>
+          <div class="card-footer">
+            <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i>Save Category</button>
+            <a href="/admin/products/categories" class="btn btn-secondary ms-2">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+</div>
+
+<%- include('../../partials/footer') %>

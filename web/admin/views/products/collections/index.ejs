@@ -1,0 +1,82 @@
+<%- include('../../partials/header', { title: pageName }) %>
+
+<div class="content-wrapper">
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0"><i class="fas fa-layer-group me-2"></i><%= pageName %></h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-end">
+            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/admin/products">Products</a></li>
+            <li class="breadcrumb-item active">Collections</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="content">
+    <div class="container-fluid">
+      <% if (success) { %>
+      <div class="alert alert-success alert-dismissible">
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <i class="fas fa-check-circle me-2"></i><%= success %>
+      </div>
+      <% } %>
+
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h3 class="card-title">Product Collections</h3>
+          <a href="/admin/products/collections/create" class="btn btn-primary btn-sm">
+            <i class="fas fa-plus me-1"></i>New Collection
+          </a>
+        </div>
+        <div class="card-body p-0">
+          <% if (collections && collections.length > 0) { %>
+          <table class="table table-striped mb-0">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Slug</th>
+                <th>Position</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% collections.forEach(function(col) { %>
+              <tr>
+                <td><%= col.name %></td>
+                <td><code><%= col.slug %></code></td>
+                <td><%= col.position %></td>
+                <td>
+                  <% if (col.isActive) { %>
+                    <span class="badge bg-success">Active</span>
+                  <% } else { %>
+                    <span class="badge bg-secondary">Inactive</span>
+                  <% } %>
+                </td>
+                <td>
+                  <a href="/admin/products/collections/<%= col.productCollectionId %>/edit" class="btn btn-sm btn-outline-primary">Edit</a>
+                  <form method="POST" action="/admin/products/collections/<%= col.productCollectionId %>?_method=DELETE" class="d-inline" onsubmit="return confirm('Delete this collection?')">
+                    <input type="hidden" name="_method" value="DELETE">
+                    <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                  </form>
+                </td>
+              </tr>
+              <% }); %>
+            </tbody>
+          </table>
+          <% } else { %>
+          <div class="p-4 text-muted text-center">No collections found. <a href="/admin/products/collections/create">Create one</a>.</div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<%- include('../../partials/footer') %>

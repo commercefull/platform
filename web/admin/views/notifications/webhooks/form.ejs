@@ -1,0 +1,64 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col"><h2 class="page-title"><%= pageName %></h2></div>
+    <div class="col-auto ms-auto">
+      <a href="/admin/notifications/webhooks" class="btn btn-secondary"><i class="ti ti-arrow-left"></i> Back</a>
+    </div>
+  </div>
+</div>
+<section class="content">
+  <div class="container-fluid">
+    <%- include("../../partials/alerts") %>
+    <div class="row">
+      <div class="col-md-8">
+        <div class="card">
+          <div class="card-header"><h3 class="card-title">Webhook Details</h3></div>
+          <div class="card-body">
+            <form method="POST" action="/admin/notifications/webhooks">
+              <div class="mb-3">
+                <label class="form-label required">Endpoint URL</label>
+                <input type="url" name="url" class="form-control" value="<%= formData?.url || '' %>" placeholder="https://example.com/webhook" required>
+                <div class="form-hint">The URL that will receive POST requests for notification events.</div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Secret</label>
+                <input type="text" name="secret" class="form-control" value="<%= formData?.secret || '' %>" placeholder="Optional signing secret">
+                <div class="form-hint">Used to sign webhook payloads for verification.</div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Merchant ID</label>
+                <input type="text" name="merchantId" class="form-control" value="<%= formData?.merchantId || '' %>" placeholder="Leave blank for global webhook">
+                <div class="form-hint">Scope this webhook to a specific merchant, or leave blank for all merchants.</div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Events</label>
+                <div class="row">
+                  <% const eventOptions = ['notification.sent', 'notification.delivered', 'notification.failed', 'notification.bounced', 'notification.opened', 'notification.clicked']; %>
+                  <% const selectedEvents = formData?.events ? (Array.isArray(formData.events) ? formData.events : [formData.events]) : []; %>
+                  <% eventOptions.forEach(ev => { %>
+                    <div class="col-md-6">
+                      <label class="form-check">
+                        <input class="form-check-input" type="checkbox" name="events" value="<%= ev %>" <%= selectedEvents.includes(ev) ? 'checked' : '' %>>
+                        <span class="form-check-label"><%= ev %></span>
+                      </label>
+                    </div>
+                  <% }); %>
+                </div>
+                <div class="form-hint">Select the events this webhook should receive.</div>
+              </div>
+
+              <div class="form-footer">
+                <button type="submit" class="btn btn-primary">Create Webhook</button>
+                <a href="/admin/notifications/webhooks" class="btn btn-secondary ms-2">Cancel</a>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

@@ -39,6 +39,8 @@ import * as loyaltyController from './controllers/loyaltyController';
 import * as subscriptionController from './controllers/subscriptionController';
 import * as membershipController from './controllers/membershipController';
 import * as notificationController from './controllers/notificationController';
+import * as referralController from './controllers/referralController';
+import { isCustomerLoggedIn } from '../../libs/auth';
 
 const router = express.Router();
 
@@ -318,6 +320,22 @@ router.get('/notifications/preferences', notificationController.getPreferences);
 
 // POST: update notification preferences
 router.post('/notifications/preferences', notificationController.updatePreferences);
+
+// GET: push notification devices
+router.get('/notifications/devices', isCustomerLoggedIn, notificationController.getDevices);
+
+// POST: register a push notification device
+router.post('/notifications/devices', isCustomerLoggedIn, notificationController.registerDevice);
+
+// POST: delete a push notification device
+router.post('/notifications/devices/:deviceToken/delete', isCustomerLoggedIn, notificationController.deleteDevice);
+
+// ============================================================================
+// Referral Routes
+// ============================================================================
+
+// GET: referral status page (auth required)
+router.get('/referrals', isCustomerLoggedIn, referralController.getReferralStatus);
 
 // ============================================================================
 // Content Routes

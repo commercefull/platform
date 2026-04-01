@@ -1,0 +1,79 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col"><h2 class="page-title"><%= pageName %></h2></div>
+    <div class="col-auto ms-auto">
+      <a href="/admin/notifications/webhooks/create" class="btn btn-primary">
+        <i class="ti ti-plus"></i> Add Webhook
+      </a>
+    </div>
+  </div>
+</div>
+<section class="content">
+  <div class="container-fluid">
+    <%- include("../../partials/alerts") %>
+    <div class="card">
+      <div class="card-header"><h3 class="card-title">Notification Webhooks</h3></div>
+      <div class="card-body table-responsive p-0">
+        <table class="table table-hover text-nowrap">
+          <thead>
+            <tr>
+              <th>URL</th>
+              <th>Events</th>
+              <th>Merchant</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (!webhooks || webhooks.length === 0) { %>
+              <tr>
+                <td colspan="6" class="text-center py-4">
+                  <em>No webhooks configured. <a href="/admin/notifications/webhooks/create">Add your first webhook</a>.</em>
+                </td>
+              </tr>
+            <% } else { %>
+              <% webhooks.forEach(webhook => { %>
+                <tr>
+                  <td>
+                    <code class="text-truncate d-inline-block" style="max-width:300px;" title="<%= webhook.url %>">
+                      <%= webhook.url %>
+                    </code>
+                  </td>
+                  <td>
+                    <% const events = Array.isArray(webhook.events) ? webhook.events : (webhook.events ? [webhook.events] : []); %>
+                    <% events.slice(0, 3).forEach(ev => { %>
+                      <span class="badge bg-azure-lt me-1"><%= ev %></span>
+                    <% }); %>
+                    <% if (events.length > 3) { %>
+                      <span class="text-muted">+<%= events.length - 3 %> more</span>
+                    <% } %>
+                  </td>
+                  <td><%= webhook.merchantId || '<em class="text-muted">Global</em>' %></td>
+                  <td>
+                    <% if (webhook.isActive) { %>
+                      <span class="badge bg-success">Active</span>
+                    <% } else { %>
+                      <span class="badge bg-secondary">Inactive</span>
+                    <% } %>
+                  </td>
+                  <td><%= webhook.createdAt ? new Date(webhook.createdAt).toLocaleString() : '-' %></td>
+                  <td>
+                    <% if (webhook.isActive) { %>
+                      <form method="POST" action="/admin/notifications/webhooks/<%= webhook.notificationWebhookId %>/deactivate" class="d-inline">
+                        <button type="submit" class="btn btn-sm btn-warning" onclick="return confirm('Deactivate this webhook?')">
+                          <i class="ti ti-player-pause"></i> Deactivate
+                        </button>
+                      </form>
+                    <% } %>
+                  </td>
+                </tr>
+              <% }); %>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>

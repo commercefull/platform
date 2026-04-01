@@ -41,4 +41,13 @@ export async function markPaid(merchantInvoiceId: string): Promise<void> {
   await query(`UPDATE "merchantInvoice" SET status = 'paid', "paidAt" = $1, "updatedAt" = $2 WHERE "merchantInvoiceId" = $3`, [now, now, merchantInvoiceId]);
 }
 
-export default { create, findByMerchant, findById, markPaid };
+export async function updateStatus(merchantInvoiceId: string, status: string): Promise<void> {
+  const now = new Date();
+  const paidAt = status === 'paid' ? now : null;
+  await query(
+    `UPDATE "merchantInvoice" SET status = $1, "paidAt" = COALESCE($2, "paidAt"), "updatedAt" = $3 WHERE "merchantInvoiceId" = $4`,
+    [status, paidAt, now, merchantInvoiceId],
+  );
+}
+
+export default { create, findByMerchant, findById, markPaid, updateStatus };

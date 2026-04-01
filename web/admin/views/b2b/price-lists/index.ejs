@@ -1,0 +1,68 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <h2 class="page-title">B2B Price Lists</h2>
+    </div>
+    <div class="col-auto">
+      <a href="/admin/b2b/price-lists/create" class="btn btn-primary">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
+          stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        New Price List
+      </a>
+    </div>
+  </div>
+</div>
+
+<section class="content">
+  <div class="container-fluid">
+    <%- include('../../partials/alerts') %>
+
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Price Lists</h3>
+        <span class="float-end text-muted"><%= (priceLists || []).length %> records</span>
+      </div>
+      <div class="card-body table-responsive p-0">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Currency</th>
+              <th>Company</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% (priceLists || []).forEach(function(pl) { %>
+            <tr>
+              <td><strong><%= pl.name %></strong></td>
+              <td><%= pl.currency %></td>
+              <td><%= pl.b2bCompanyId ? pl.b2bCompanyId.substring(0, 8) + '...' : 'Global' %></td>
+              <td>
+                <span class="badge bg-<%= pl.isActive ? 'success' : 'secondary' %>">
+                  <%= pl.isActive ? 'Active' : 'Inactive' %>
+                </span>
+              </td>
+              <td><%= new Date(pl.createdAt).toLocaleDateString() %></td>
+              <td>
+                <a href="/admin/b2b/price-lists/<%= pl.b2bPriceListId %>" class="btn btn-sm btn-outline-info">View</a>
+                <a href="/admin/b2b/price-lists/<%= pl.b2bPriceListId %>/edit" class="btn btn-sm btn-outline-secondary">Edit</a>
+              </td>
+            </tr>
+            <% }); %>
+            <% if ((priceLists || []).length === 0) { %>
+            <tr><td colspan="6" class="text-center text-muted py-4">No price lists found.</td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>

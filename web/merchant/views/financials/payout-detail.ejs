@@ -1,0 +1,106 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row align-items-center">
+    <div class="col">
+      <h2 class="page-title">Payout Detail</h2>
+      <div class="text-muted mt-1">
+        <a href="/merchant/financials">Financials</a> /
+        <a href="/merchant/financials/payouts">Payouts</a> /
+        Detail
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <!-- Payout Summary -->
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Payout Summary</h3>
+      </div>
+      <div class="card-body">
+        <dl class="row">
+          <dt class="col-5 text-muted">Amount</dt>
+          <dd class="col-7"><strong><%= (payout.amount / 100).toLocaleString('en-US', { style: 'currency', currency: payout.currency }) %></strong></dd>
+
+          <dt class="col-5 text-muted">Currency</dt>
+          <dd class="col-7"><%= payout.currency %></dd>
+
+          <dt class="col-5 text-muted">Status</dt>
+          <dd class="col-7">
+            <span class="badge bg-<%= payout.status === 'completed' ? 'success' : payout.status === 'pending' ? 'warning' : payout.status === 'failed' ? 'danger' : 'secondary' %>-lt">
+              <%= payout.status %>
+            </span>
+          </dd>
+
+          <% if (payout.reference) { %>
+            <dt class="col-5 text-muted">Reference</dt>
+            <dd class="col-7"><%= payout.reference %></dd>
+          <% } %>
+
+          <% if (payout.scheduledAt) { %>
+            <dt class="col-5 text-muted">Scheduled</dt>
+            <dd class="col-7"><%= new Date(payout.scheduledAt).toLocaleDateString() %></dd>
+          <% } %>
+
+          <% if (payout.processedAt) { %>
+            <dt class="col-5 text-muted">Processed</dt>
+            <dd class="col-7"><%= new Date(payout.processedAt).toLocaleDateString() %></dd>
+          <% } %>
+
+          <dt class="col-5 text-muted">Created</dt>
+          <dd class="col-7"><%= new Date(payout.createdAt).toLocaleDateString() %></dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+
+  <!-- Line Items -->
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Line Items</h3>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-vcenter card-table">
+          <thead>
+            <tr>
+              <th>Description</th>
+              <th>Order</th>
+              <th>Amount</th>
+              <th>Currency</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (lineItems && lineItems.length > 0) { %>
+              <% lineItems.forEach(item => { %>
+                <tr>
+                  <td><%= item.description || '—' %></td>
+                  <td class="text-muted"><%= item.orderId || '—' %></td>
+                  <td><%= (item.amount / 100).toLocaleString('en-US', { style: 'currency', currency: item.currency }) %></td>
+                  <td><%= item.currency %></td>
+                </tr>
+              <% }) %>
+              <tr class="table-active fw-bold">
+                <td colspan="2">Total</td>
+                <td>
+                  <%
+                    const total = lineItems.reduce((sum, item) => sum + item.amount, 0);
+                    const currency = lineItems[0]?.currency || payout.currency;
+                  %>
+                  <%= (total / 100).toLocaleString('en-US', { style: 'currency', currency }) %>
+                </td>
+                <td><%= lineItems[0]?.currency || payout.currency %></td>
+              </tr>
+            <% } else { %>
+              <tr>
+                <td colspan="4" class="text-center text-muted py-4">No line items for this payout.</td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

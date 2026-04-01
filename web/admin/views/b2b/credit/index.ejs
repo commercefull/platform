@@ -1,0 +1,80 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <h2 class="page-title">Credit Limit</h2>
+      <div class="text-muted mt-1">
+        <a href="/admin/b2b/companies">Companies</a> &rsaquo;
+        <a href="/admin/b2b/companies/<%= company.b2bCompanyId %>"><%= company.name %></a> &rsaquo; Credit
+      </div>
+    </div>
+    <div class="col-auto">
+      <a href="/admin/b2b/companies/<%= company.b2bCompanyId %>/credit/transactions" class="btn btn-outline-secondary">
+        View Transactions
+      </a>
+    </div>
+  </div>
+</div>
+
+<section class="content">
+  <div class="container-fluid">
+    <%- include('../../partials/alerts') %>
+
+    <div class="row">
+      <div class="col-md-6">
+        <!-- Current Credit Status -->
+        <div class="card mb-3">
+          <div class="card-header">
+            <h3 class="card-title">Current Credit Status</h3>
+          </div>
+          <div class="card-body">
+            <% if (creditStatus) { %>
+            <dl class="row">
+              <dt class="col-sm-5">Credit Limit</dt>
+              <dd class="col-sm-7">
+                <strong><%= creditStatus.currency %> <%= (creditStatus.creditLimit || 0).toFixed(2) %></strong>
+              </dd>
+              <dt class="col-sm-5">Current Balance Used</dt>
+              <dd class="col-sm-7"><%= creditStatus.currency %> <%= (creditStatus.currentBalance || 0).toFixed(2) %></dd>
+              <dt class="col-sm-5">Available Credit</dt>
+              <dd class="col-sm-7">
+                <span class="text-<%= (creditStatus.availableCredit || 0) > 0 ? 'success' : 'danger' %>">
+                  <%= creditStatus.currency %> <%= (creditStatus.availableCredit || 0).toFixed(2) %>
+                </span>
+              </dd>
+            </dl>
+            <% } else { %>
+            <p class="text-muted">No credit limit set for this company.</p>
+            <% } %>
+          </div>
+        </div>
+
+        <!-- Update Credit Limit Form -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title"><%= creditStatus ? 'Update' : 'Set' %> Credit Limit</h3>
+          </div>
+          <div class="card-body">
+            <form method="POST" action="/admin/b2b/companies/<%= company.b2bCompanyId %>/credit">
+              <div class="mb-3">
+                <label class="form-label">Credit Limit <span class="text-danger">*</span></label>
+                <input type="number" step="0.01" min="0" class="form-control" name="creditLimit"
+                  value="<%= creditStatus ? creditStatus.creditLimit : '' %>" required>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Currency</label>
+                <input type="text" class="form-control" name="currency" maxlength="3"
+                  value="<%= creditStatus ? creditStatus.currency : 'USD' %>">
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Notes</label>
+                <textarea class="form-control" name="notes" rows="2"></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary">Save Credit Limit</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,54 @@
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">Product Q&amp;A</h3>
+  </div>
+  <div class="card-body p-0">
+    <% if (qaList && qaList.length > 0) { %>
+    <table class="table table-striped mb-0">
+      <thead>
+        <tr>
+          <th>Question</th>
+          <th>Asker</th>
+          <th>Status</th>
+          <th>Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% qaList.forEach(function(qa) { %>
+        <tr>
+          <td><%= qa.question %></td>
+          <td><%= qa.askerName || qa.askerEmail || '—' %></td>
+          <td>
+            <% if (qa.status === 'approved') { %>
+              <span class="badge bg-success">Approved</span>
+            <% } else if (qa.status === 'rejected') { %>
+              <span class="badge bg-danger">Rejected</span>
+            <% } else { %>
+              <span class="badge bg-warning text-dark">Pending</span>
+            <% } %>
+          </td>
+          <td><%= new Date(qa.createdAt).toLocaleDateString() %></td>
+          <td>
+            <% if (qa.status !== 'approved') { %>
+            <form method="POST" action="/admin/products/<%= productId %>/qa/<%= qa.productQaId %>/status" class="d-inline">
+              <input type="hidden" name="status" value="approved">
+              <button type="submit" class="btn btn-sm btn-outline-success">Approve</button>
+            </form>
+            <% } %>
+            <% if (qa.status !== 'rejected') { %>
+            <form method="POST" action="/admin/products/<%= productId %>/qa/<%= qa.productQaId %>/status" class="d-inline">
+              <input type="hidden" name="status" value="rejected">
+              <button type="submit" class="btn btn-sm btn-outline-danger">Reject</button>
+            </form>
+            <% } %>
+          </td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <% } else { %>
+    <div class="p-3 text-muted">No Q&amp;A entries for this product.</div>
+    <% } %>
+  </div>
+</div>

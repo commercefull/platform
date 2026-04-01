@@ -1,0 +1,40 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row align-items-center">
+    <div class="col-auto">
+      <h2 class="page-title">Payment Balance</h2>
+    </div>
+    <div class="col-auto ms-auto">
+      <a href="/merchant/financials/reports" class="btn btn-outline-primary">View Reports</a>
+    </div>
+  </div>
+</div>
+
+<% if (balances && balances.length > 0) { %>
+  <div class="row">
+    <% balances.forEach(balance => { %>
+      <div class="col-md-4 col-sm-6">
+        <div class="card">
+          <div class="card-body text-center">
+            <div class="h1 mb-1"><%= balance.currency %></div>
+            <div class="h2 mb-3">
+              <%= (balance.amount / 100).toLocaleString('en-US', { style: 'currency', currency: balance.currency }) %>
+            </div>
+            <div class="text-muted small">
+              Last updated: <%= new Date(balance.updatedAt).toLocaleDateString() %>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% }) %>
+  </div>
+<% } else { %>
+  <div class="card">
+    <div class="card-body text-center py-5">
+      <div class="text-muted">
+        <i class="ti ti-wallet fs-1 mb-3 d-block"></i>
+        No balance records found. Balances will appear here once payments are processed.
+      </div>
+    </div>
+  </div>
+<% } %>

@@ -1,0 +1,56 @@
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">Order Notes</h3>
+  </div>
+  <div class="card-body p-0">
+    <% if (notes && notes.length > 0) { %>
+    <table class="table table-striped mb-0">
+      <thead>
+        <tr>
+          <th>Note</th>
+          <th>Visible to Customer</th>
+          <th>Created By</th>
+          <th>Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% notes.forEach(function(note) { %>
+        <tr>
+          <td><%= note.content %></td>
+          <td>
+            <% if (note.isCustomerVisible) { %>
+              <span class="badge badge-success">Yes</span>
+            <% } else { %>
+              <span class="badge badge-secondary">No</span>
+            <% } %>
+          </td>
+          <td><%= note.createdBy || '—' %></td>
+          <td><%= new Date(note.createdAt).toLocaleString() %></td>
+          <td>
+            <form method="POST" action="/admin/orders/<%= orderId %>/notes/<%= note.orderNoteId %>/delete" style="display:inline;">
+              <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this note?')">Delete</button>
+            </form>
+          </td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <% } else { %>
+    <div class="p-3 text-muted">No notes yet.</div>
+    <% } %>
+  </div>
+  <div class="card-footer">
+    <form method="POST" action="/admin/orders/<%= orderId %>/notes">
+      <div class="form-group">
+        <label for="noteContent">Add Note</label>
+        <textarea id="noteContent" name="content" class="form-control" rows="3" placeholder="Enter note..." required></textarea>
+      </div>
+      <div class="form-group form-check">
+        <input type="checkbox" class="form-check-input" id="isCustomerVisible" name="isCustomerVisible" value="true">
+        <label class="form-check-label" for="isCustomerVisible">Visible to customer</label>
+      </div>
+      <button type="submit" class="btn btn-primary">Add Note</button>
+    </form>
+  </div>
+</div>

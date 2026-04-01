@@ -1,0 +1,86 @@
+<!-- Purchase Order Detail -->
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">
+      Purchase Order: <%= purchaseOrder.orderNumber || purchaseOrder.b2bPurchaseOrderId.slice(0, 8) %>
+    </h3>
+    <div class="card-tools">
+      <a href="/b2b/purchase-orders" class="btn btn-sm btn-default"><i class="fas fa-arrow-left"></i> Back</a>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="row">
+      <div class="col-md-3">
+        <strong>Status:</strong><br>
+        <span class="badge badge-<%= purchaseOrder.status === 'approved' ? 'success' : purchaseOrder.status === 'rejected' ? 'danger' : purchaseOrder.status === 'fulfilled' ? 'info' : 'warning' %> badge-lg">
+          <%= purchaseOrder.status %>
+        </span>
+      </div>
+      <div class="col-md-3">
+        <strong>Total Amount:</strong><br>
+        <span class="h5"><%= purchaseOrder.currency %> <%= purchaseOrder.totalAmount.toFixed(2) %></span>
+      </div>
+      <div class="col-md-3">
+        <strong>Created:</strong><br>
+        <%= new Date(purchaseOrder.createdAt).toLocaleString() %>
+      </div>
+      <div class="col-md-3">
+        <strong>Last Updated:</strong><br>
+        <%= new Date(purchaseOrder.updatedAt).toLocaleString() %>
+      </div>
+    </div>
+    <% if (purchaseOrder.notes) { %>
+    <div class="row mt-3">
+      <div class="col-12">
+        <strong>Notes:</strong> <%= purchaseOrder.notes %>
+      </div>
+    </div>
+    <% } %>
+  </div>
+</div>
+
+<!-- Order Items -->
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">Items (<%= items ? items.length : 0 %>)</h3>
+  </div>
+  <div class="card-body p-0">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>SKU</th>
+          <th>Qty</th>
+          <th>Unit Price</th>
+          <th>Line Total</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (items && items.length > 0) { %>
+          <% items.forEach(item => { %>
+            <tr>
+              <td><strong><%= item.name %></strong></td>
+              <td><%= item.sku || '—' %></td>
+              <td><%= item.quantity %></td>
+              <td><%= item.unitPrice.toFixed(2) %></td>
+              <td><strong><%= item.lineTotal.toFixed(2) %></strong></td>
+              <td><%= item.notes || '—' %></td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr><td colspan="6" class="text-center text-muted py-4">No items</td></tr>
+        <% } %>
+      </tbody>
+      <% if (items && items.length > 0) { %>
+      <tfoot>
+        <tr>
+          <td colspan="4" class="text-right"><strong>Total:</strong></td>
+          <td><strong><%= purchaseOrder.currency %> <%= purchaseOrder.totalAmount.toFixed(2) %></strong></td>
+          <td></td>
+        </tr>
+      </tfoot>
+      <% } %>
+    </table>
+  </div>
+</div>

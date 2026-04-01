@@ -1,0 +1,59 @@
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <h2 class="page-title">Merchant Payouts</h2>
+    </div>
+  </div>
+</div>
+
+<section class="content">
+  <div class="container-fluid">
+    <%- include('../../../partials/alerts') %>
+
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Payouts</h3>
+        <span class="float-end text-muted"><%= (payouts || []).length %> records</span>
+      </div>
+      <div class="card-body table-responsive p-0">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Payout ID</th>
+              <th>Amount</th>
+              <th>Currency</th>
+              <th>Status</th>
+              <th>Scheduled</th>
+              <th>Processed</th>
+              <th>Reference</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% (payouts || []).forEach(function(p) { %>
+            <tr>
+              <td><code><%= p.merchantPayoutId.substring(0, 8) %>...</code></td>
+              <td><strong><%= (p.amount || 0).toFixed(2) %></strong></td>
+              <td><%= p.currency %></td>
+              <td>
+                <span class="badge bg-<%= p.status === 'completed' ? 'success' : p.status === 'failed' ? 'danger' : p.status === 'processing' ? 'info' : 'warning' %>">
+                  <%= p.status %>
+                </span>
+              </td>
+              <td><%= p.scheduledAt ? new Date(p.scheduledAt).toLocaleDateString() : '-' %></td>
+              <td><%= p.processedAt ? new Date(p.processedAt).toLocaleDateString() : '-' %></td>
+              <td><%= p.reference || '-' %></td>
+              <td>
+                <a href="/admin/operations/merchants/<%= merchantId %>/payouts/<%= p.merchantPayoutId %>" class="btn btn-sm btn-outline-info">View</a>
+              </td>
+            </tr>
+            <% }); %>
+            <% if ((payouts || []).length === 0) { %>
+            <tr><td colspan="8" class="text-center text-muted py-4">No payouts found.</td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>

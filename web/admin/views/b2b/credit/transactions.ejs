@@ -1,0 +1,72 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <h2 class="page-title">Credit Transactions</h2>
+      <div class="text-muted mt-1">
+        <a href="/admin/b2b/companies">Companies</a> &rsaquo;
+        <a href="/admin/b2b/companies/<%= company.b2bCompanyId %>"><%= company.name %></a> &rsaquo;
+        <a href="/admin/b2b/companies/<%= company.b2bCompanyId %>/credit">Credit</a> &rsaquo; Transactions
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="content">
+  <div class="container-fluid">
+    <%- include('../../partials/alerts') %>
+
+    <!-- Balance Summary -->
+    <div class="card mb-3">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-auto">
+            <span class="text-muted">Current Balance Used:</span>
+            <strong class="ms-2"><%= (balance || 0).toFixed(2) %></strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Transactions Table -->
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Transaction History</h3>
+        <span class="float-end text-muted"><%= (transactions || []).length %> records</span>
+      </div>
+      <div class="card-body table-responsive p-0">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Type</th>
+              <th>Amount</th>
+              <th>Reference</th>
+              <th>Notes</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% (transactions || []).forEach(function(t) { %>
+            <tr>
+              <td><code><%= t.b2bCompanyCreditTransactionId.substring(0, 8) %>...</code></td>
+              <td><span class="badge bg-info"><%= t.type %></span></td>
+              <td>
+                <span class="<%= t.amount > 0 ? 'text-danger' : 'text-success' %>">
+                  <%= t.amount > 0 ? '+' : '' %><%= (t.amount || 0).toFixed(2) %>
+                </span>
+              </td>
+              <td><%= t.referenceId || '-' %></td>
+              <td><%= t.notes || '-' %></td>
+              <td><%= new Date(t.createdAt).toLocaleString() %></td>
+            </tr>
+            <% }); %>
+            <% if ((transactions || []).length === 0) { %>
+            <tr><td colspan="6" class="text-center text-muted py-4">No transactions found.</td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>

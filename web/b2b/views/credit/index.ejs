@@ -1,0 +1,76 @@
+<!-- Credit Dashboard -->
+<div class="row">
+  <% if (creditStatus) { %>
+  <div class="col-lg-4 col-6">
+    <div class="small-box bg-info">
+      <div class="inner">
+        <h3><%= creditStatus.currency %> <%= creditStatus.creditLimit !== null ? creditStatus.creditLimit.toFixed(2) : '&infin;' %></h3>
+        <p>Credit Limit</p>
+      </div>
+      <div class="icon"><i class="fas fa-credit-card"></i></div>
+    </div>
+  </div>
+  <div class="col-lg-4 col-6">
+    <div class="small-box bg-warning">
+      <div class="inner">
+        <h3><%= creditStatus.currency %> <%= creditStatus.currentBalance.toFixed(2) %></h3>
+        <p>Outstanding Balance</p>
+      </div>
+      <div class="icon"><i class="fas fa-balance-scale"></i></div>
+    </div>
+  </div>
+  <div class="col-lg-4 col-6">
+    <div class="small-box bg-success">
+      <div class="inner">
+        <h3><%= creditStatus.currency %> <%= creditStatus.availableCredit !== null ? creditStatus.availableCredit.toFixed(2) : 'Unlimited' %></h3>
+        <p>Available Credit</p>
+      </div>
+      <div class="icon"><i class="fas fa-check-circle"></i></div>
+    </div>
+  </div>
+  <% } else { %>
+  <div class="col-12">
+    <div class="alert alert-info">No credit account configured for your company.</div>
+  </div>
+  <% } %>
+</div>
+
+<!-- Recent Transactions -->
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">Recent Transactions</h3>
+    <div class="card-tools">
+      <a href="/b2b/credit/transactions" class="btn btn-sm btn-default">View All</a>
+    </div>
+  </div>
+  <div class="card-body p-0">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Type</th>
+          <th>Amount</th>
+          <th>Reference</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (recentTransactions && recentTransactions.length > 0) { %>
+          <% recentTransactions.forEach(tx => { %>
+            <tr>
+              <td><%= new Date(tx.createdAt).toLocaleDateString() %></td>
+              <td><span class="badge badge-secondary"><%= tx.type %></span></td>
+              <td class="<%= tx.amount >= 0 ? 'text-success' : 'text-danger' %>">
+                <%= tx.amount >= 0 ? '+' : '' %><%= tx.amount.toFixed(2) %>
+              </td>
+              <td><%= tx.referenceId || '—' %></td>
+              <td><%= tx.notes || '—' %></td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr><td colspan="5" class="text-center text-muted py-4">No transactions yet</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>

@@ -13,6 +13,10 @@ import { SearchProductsCommand, SearchProductsUseCase } from '../../application/
 import { ProductStatus } from '../../domain/valueObjects/ProductStatus';
 import { ProductVisibility } from '../../domain/valueObjects/ProductVisibility';
 import productReviewRepo from '../../infrastructure/repositories/productReviewRepo';
+import productQaRepo from '../../infrastructure/repositories/productQaRepo';
+import { SubmitProductQaCommand, SubmitProductQaUseCase } from '../../application/useCases/SubmitProductQa';
+import { VoteOnReviewCommand, VoteOnReviewUseCase } from '../../application/useCases/VoteOnReview';
+import { successResponse, errorResponse } from '../../../../libs/apiResponse';
 
 // ============================================================================
 // Content Negotiation Helpers
@@ -347,5 +351,79 @@ export const reportReview = async (req: TypedRequest, res: Response): Promise<vo
   } catch (error: any) {
     logger.error('Error:', error);
     respondError(req, res, error.message || 'Failed to report review');
+  }
+};
+
+// ============================================================================
+// Q&A (Customer)
+// ============================================================================
+
+/**
+ * List approved Q&A for a product (customer-facing)
+ * GET /products/:productId/qa
+ */
+export const listProductQaCustomer = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { productId } = req.params;
+    const qa = await productQaRepo.findByProduct(productId, 'approved');
+    successResponse(res, qa);
+  } catch (error: any) {
+    logger.error('Error listing product Q&A:', error);
+    errorResponse(res, error.message || 'Failed to list product Q&A');
+  }
+};
+
+/**
+ * Submit a Q&A question for a product
+ * POST /products/:productId/qa
+ */
+export const submitProductQa = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { productId } = req.params;
+    const customerId = req.user?.customerId;
+    const { question, askerName, askerEmail } = req.body;
+
+    if (!question?.trim()) {
+      errorResponse(res, 'question is required', 400);
+      return;
+    }
+
+    const command = new SubmitProductQaCommand(productId, question, customerId, askerName, askerEmail);
+    const useCase = new SubmitProductQaUseCase();
+    const result = await useCase.execute(command);
+    successResponse(res, result, 201);
+  } catch (error: any) {
+    logger.error('Error submitting product Q&A:', error);
+    const status = error.message.includes('not found') ? 404 : 400;
+    errorResponse(res, error.message || 'Failed to submit Q&A', status);
+  }
+};
+
+/**
+ * Vote on a product review
+ * POST /products/:productId/reviews/:reviewId/vote
+ */
+export const voteOnReview = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { reviewId } = req.params;
+    const customerId = req.user?.customerId;
+    const { isHelpful } = req.body;
+
+    if (!customerId) {
+      errorResponse(res, 'Authentication required', 401);
+      return;
+    }
+    if (typeof isHelpful !== 'boolean') {
+      errorResponse(res, 'isHelpful (boolean) is required', 400);
+      return;
+    }
+
+    const command = new VoteOnReviewCommand(reviewId, customerId, isHelpful);
+    const useCase = new VoteOnReviewUseCase();
+    const result = await useCase.execute(command);
+    successResponse(res, result);
+  } catch (error: any) {
+    logger.error('Error voting on review:', error);
+    errorResponse(res, error.message || 'Failed to vote on review', 400);
   }
 };

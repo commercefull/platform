@@ -1,0 +1,137 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row align-items-center">
+    <div class="col">
+      <h2 class="page-title">Financials</h2>
+    </div>
+    <div class="col-auto ms-auto">
+      <a href="/merchant/financials/payouts" class="btn btn-outline-primary me-2">Payouts</a>
+      <a href="/merchant/financials/invoices" class="btn btn-outline-primary me-2">Invoices</a>
+      <a href="/merchant/financials/settlements" class="btn btn-outline-primary">Settlements</a>
+    </div>
+  </div>
+</div>
+
+<!-- Balance Summary -->
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Balance Summary</h3>
+        <div class="card-options">
+          <a href="/merchant/financials/balance" class="btn btn-sm btn-outline-secondary">Full Balance</a>
+        </div>
+      </div>
+      <div class="card-body">
+        <% if (balance) { %>
+          <div class="row text-center">
+            <div class="col-md-3 col-6">
+              <div class="h3 mb-1"><%= (balance.availableBalance / 100).toLocaleString('en-US', { style: 'currency', currency: balance.currency || 'USD' }) %></div>
+              <div class="text-muted">Available</div>
+            </div>
+            <div class="col-md-3 col-6">
+              <div class="h3 mb-1"><%= (balance.pendingBalance / 100).toLocaleString('en-US', { style: 'currency', currency: balance.currency || 'USD' }) %></div>
+              <div class="text-muted">Pending</div>
+            </div>
+            <div class="col-md-3 col-6">
+              <div class="h3 mb-1"><%= (balance.totalEarned / 100).toLocaleString('en-US', { style: 'currency', currency: balance.currency || 'USD' }) %></div>
+              <div class="text-muted">Total Earned</div>
+            </div>
+            <div class="col-md-3 col-6">
+              <div class="h3 mb-1"><%= (balance.totalPaid / 100).toLocaleString('en-US', { style: 'currency', currency: balance.currency || 'USD' }) %></div>
+              <div class="text-muted">Total Paid Out</div>
+            </div>
+          </div>
+        <% } else { %>
+          <div class="text-center text-muted py-3">No balance data available yet.</div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <!-- Recent Payouts -->
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Recent Payouts</h3>
+        <div class="card-options">
+          <a href="/merchant/financials/payouts" class="btn btn-sm btn-outline-secondary">View All</a>
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-vcenter card-table">
+          <thead>
+            <tr>
+              <th>Amount</th>
+              <th>Status</th>
+              <th>Date</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (recentPayouts && recentPayouts.length > 0) { %>
+              <% recentPayouts.forEach(payout => { %>
+                <tr>
+                  <td><%= (payout.amount / 100).toLocaleString('en-US', { style: 'currency', currency: payout.currency }) %></td>
+                  <td>
+                    <span class="badge bg-<%= payout.status === 'completed' ? 'success' : payout.status === 'pending' ? 'warning' : 'secondary' %>-lt">
+                      <%= payout.status %>
+                    </span>
+                  </td>
+                  <td class="text-muted"><%= new Date(payout.createdAt).toLocaleDateString() %></td>
+                  <td><a href="/merchant/financials/payouts/<%= payout.merchantPayoutId %>">View</a></td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr><td colspan="4" class="text-center text-muted">No payouts yet</td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Invoices -->
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Recent Invoices</h3>
+        <div class="card-options">
+          <a href="/merchant/financials/invoices" class="btn btn-sm btn-outline-secondary">View All</a>
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-vcenter card-table">
+          <thead>
+            <tr>
+              <th>Invoice #</th>
+              <th>Amount</th>
+              <th>Status</th>
+              <th>Due</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (recentInvoices && recentInvoices.length > 0) { %>
+              <% recentInvoices.forEach(invoice => { %>
+                <tr>
+                  <td><%= invoice.invoiceNumber %></td>
+                  <td><%= (invoice.amount / 100).toLocaleString('en-US', { style: 'currency', currency: invoice.currency }) %></td>
+                  <td>
+                    <span class="badge bg-<%= invoice.status === 'paid' ? 'success' : invoice.status === 'overdue' ? 'danger' : 'warning' %>-lt">
+                      <%= invoice.status %>
+                    </span>
+                  </td>
+                  <td class="text-muted"><%= invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString() : '—' %></td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr><td colspan="4" class="text-center text-muted">No invoices yet</td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

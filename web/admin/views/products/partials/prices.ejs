@@ -1,0 +1,79 @@
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">Product Prices</h3>
+  </div>
+  <div class="card-body p-0">
+    <% if (prices && prices.length > 0) { %>
+    <table class="table table-striped mb-0">
+      <thead>
+        <tr>
+          <th>Currency</th>
+          <th>Amount</th>
+          <th>Compare At</th>
+          <th>Min Qty</th>
+          <th>Max Qty</th>
+          <th>Starts At</th>
+          <th>Ends At</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% prices.forEach(function(price) { %>
+        <tr>
+          <td><strong><%= price.currencyCode %></strong></td>
+          <td><%= price.amount %></td>
+          <td><%= price.compareAtAmount || '—' %></td>
+          <td><%= price.minQuantity || '—' %></td>
+          <td><%= price.maxQuantity || '—' %></td>
+          <td><%= price.startsAt ? new Date(price.startsAt).toLocaleDateString() : '—' %></td>
+          <td><%= price.endsAt ? new Date(price.endsAt).toLocaleDateString() : '—' %></td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <% } else { %>
+    <div class="p-3 text-muted">No custom prices configured.</div>
+    <% } %>
+  </div>
+  <div class="card-footer">
+    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="collapse" data-bs-target="#addPriceForm">
+      <i class="fas fa-plus me-1"></i>Add Price
+    </button>
+    <div class="collapse mt-3" id="addPriceForm">
+      <form method="POST" action="/admin/products/<%= productId %>/prices">
+        <div class="row g-2">
+          <div class="col-md-2">
+            <label class="form-label">Currency <span class="text-danger">*</span></label>
+            <input type="text" class="form-control form-control-sm" name="currencyCode" placeholder="USD" required maxlength="3">
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">Amount <span class="text-danger">*</span></label>
+            <input type="number" class="form-control form-control-sm" name="amount" step="0.01" min="0" required>
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">Compare At</label>
+            <input type="number" class="form-control form-control-sm" name="compareAtAmount" step="0.01" min="0">
+          </div>
+          <div class="col-md-1">
+            <label class="form-label">Min Qty</label>
+            <input type="number" class="form-control form-control-sm" name="minQuantity" min="1">
+          </div>
+          <div class="col-md-1">
+            <label class="form-label">Max Qty</label>
+            <input type="number" class="form-control form-control-sm" name="maxQuantity" min="1">
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">Starts At</label>
+            <input type="date" class="form-control form-control-sm" name="startsAt">
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">Ends At</label>
+            <input type="date" class="form-control form-control-sm" name="endsAt">
+          </div>
+          <div class="col-12 mt-2">
+            <button type="submit" class="btn btn-primary btn-sm">Save Price</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

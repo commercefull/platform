@@ -1,0 +1,53 @@
+<!-- Purchase Orders -->
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">Purchase Orders</h3>
+    <div class="card-tools">
+      <a href="/b2b/purchase-orders/create" class="btn btn-sm btn-primary">
+        <i class="fas fa-plus"></i> New Purchase Order
+      </a>
+    </div>
+  </div>
+  <div class="card-body p-0">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Order #</th>
+          <th>Status</th>
+          <th>Total</th>
+          <th>Currency</th>
+          <th>Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (purchaseOrders && purchaseOrders.length > 0) { %>
+          <% purchaseOrders.forEach(po => { %>
+            <tr>
+              <td>
+                <a href="/b2b/purchase-orders/<%= po.b2bPurchaseOrderId %>">
+                  <%= po.orderNumber || po.b2bPurchaseOrderId.slice(0, 8) %>
+                </a>
+              </td>
+              <td>
+                <span class="badge badge-<%= po.status === 'approved' ? 'success' : po.status === 'rejected' ? 'danger' : po.status === 'fulfilled' ? 'info' : 'warning' %>">
+                  <%= po.status %>
+                </span>
+              </td>
+              <td><%= po.totalAmount.toFixed(2) %></td>
+              <td><%= po.currency %></td>
+              <td><%= new Date(po.createdAt).toLocaleDateString() %></td>
+              <td>
+                <a href="/b2b/purchase-orders/<%= po.b2bPurchaseOrderId %>" class="btn btn-sm btn-info">
+                  <i class="fas fa-eye"></i>
+                </a>
+              </td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr><td colspan="6" class="text-center text-muted py-4">No purchase orders yet</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>

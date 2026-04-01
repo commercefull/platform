@@ -1,0 +1,57 @@
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">Fulfillment Packages</h3>
+  </div>
+  <div class="card-body p-0">
+    <% if (packages && packages.length > 0) { %>
+    <table class="table table-striped mb-0">
+      <thead>
+        <tr>
+          <th>Package #</th>
+          <th>Tracking Number</th>
+          <th>Type</th>
+          <th>Weight</th>
+          <th>Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% packages.forEach(function(pkg) { %>
+        <tr>
+          <td><%= pkg.packageNumber %></td>
+          <td><%= pkg.trackingNumber || '—' %></td>
+          <td><%= pkg.packageType || '—' %></td>
+          <td><%= pkg.weight ? pkg.weight + ' kg' : '—' %></td>
+          <td><%= new Date(pkg.createdAt).toLocaleString() %></td>
+          <td>
+            <button type="button" class="btn btn-sm btn-outline-primary"
+              data-toggle="collapse" data-target="#tracking-form-<%= pkg.orderFulfillmentPackageId %>">
+              Update Tracking
+            </button>
+            <div class="collapse mt-2" id="tracking-form-<%= pkg.orderFulfillmentPackageId %>">
+              <form method="POST" action="/admin/orders/<%= orderId %>/packages/<%= pkg.orderFulfillmentPackageId %>/tracking">
+                <div class="form-group">
+                  <input type="text" name="trackingNumber" class="form-control form-control-sm"
+                    placeholder="Tracking number" value="<%= pkg.trackingNumber || '' %>">
+                </div>
+                <div class="form-group">
+                  <input type="text" name="shippingLabelUrl" class="form-control form-control-sm"
+                    placeholder="Shipping label URL" value="<%= pkg.shippingLabelUrl || '' %>">
+                </div>
+                <div class="form-group">
+                  <input type="text" name="commercialInvoiceUrl" class="form-control form-control-sm"
+                    placeholder="Commercial invoice URL" value="<%= pkg.commercialInvoiceUrl || '' %>">
+                </div>
+                <button type="submit" class="btn btn-sm btn-primary">Save</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <% } else { %>
+    <div class="p-3 text-muted">No fulfillment packages found.</div>
+    <% } %>
+  </div>
+</div>

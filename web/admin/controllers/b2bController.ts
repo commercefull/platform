@@ -921,3 +921,207 @@ export const b2bQuoteAnalytics = async (req: TypedRequest, res: Response): Promi
     });
   }
 };
+
+// ============================================================================
+// B2B Credit Management (Admin)
+// ============================================================================
+
+import * as b2bCompanyCreditLimitRepo from '../../../modules/b2b/infrastructure/repositories/b2bCompanyCreditLimitRepo';
+import * as b2bCompanyCreditTransactionRepo from '../../../modules/b2b/infrastructure/repositories/b2bCompanyCreditTransactionRepo';
+import { GetCompanyCreditStatusUseCase } from '../../../modules/b2b/application/useCases/GetCompanyCreditStatus';
+import { RecordCreditTransactionUseCase } from '../../../modules/b2b/application/useCases/RecordCreditTransaction';
+import * as b2bPriceListRepo from '../../../modules/b2b/infrastructure/repositories/b2bPriceListRepo';
+import * as b2bPriceListItemRepo from '../../../modules/b2b/infrastructure/repositories/b2bPriceListItemRepo';
+import { ManageB2BPriceListUseCase } from '../../../modules/b2b/application/useCases/ManageB2BPriceList';
+
+export const viewCompanyCreditLimit = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { companyId } = req.params;
+    const company = await getCompany(companyId);
+    if (!company) {
+      adminRespond(req, res, 'error', { pageName: 'Not Found', error: 'Company not found' });
+      return;
+    }
+    const useCase = new GetCompanyCreditStatusUseCase();
+    const result = await useCase.execute({ b2bCompanyId: companyId });
+    adminRespond(req, res, 'b2b/credit/index', {
+      pageName: `Credit Limit: ${company.name}`,
+      company,
+      creditStatus: result.creditStatus ?? null,
+      success: req.query.success || null,
+    });
+  } catch (error: any) {
+    logger.error('Error:', error);
+    adminRespond(req, res, 'error', { pageName: 'Error', error: error.message || 'Failed to load credit limit' });
+  }
+};
+
+export const updateCompanyCreditLimit = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { companyId } = req.params;
+    const { creditLimit, currency, notes } = req.body;
+    const existing = await b2bCompanyCreditLimitRepo.findByCompany(companyId);
+    if (existing) {
+      await b2bCompanyCreditLimitRepo.update(existing.b2bCompanyCreditLimitId, {
+        creditLimit: parseFloat(creditLimit),
+        currency,
+        notes,
+      });
+    } else {
+      await b2bCompanyCreditLimitRepo.create({
+        b2bCompanyId: companyId,
+        creditLimit: parseFloat(creditLimit),
+        currency,
+        notes,
+      });
+    }
+    res.redirect(`/admin/b2b/companies/${companyId}/credit?success=1`);
+  } catch (error: any) {
+    logger.error('Error:', error);
+    res.redirect(`/admin/b2b/companies/${companyId}/credit?error=${encodeURIComponent(error.message)}`);
+  }
+};
+
+export const listCompanyCreditTransactions = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { companyId } = req.params;
+    const company = await getCompany(companyId);
+    if (!company) {
+      adminRespond(req, res, 'error', { pageName: 'Not Found', error: 'Company not found' });
+      return;
+    }
+    const transactions = await b2bCompanyCreditTransactionRepo.findByCompany(companyId);
+    const balance = await b2bCompanyCreditTransactionRepo.getBalance(companyId);
+    adminRespond(req, res, 'b2b/credit/transactions', {
+      pageName: `Credit Transactions: ${company.name}`,
+      company,
+      transactions,
+      balance,
+    });
+  } catch (error: any) {
+    logger.error('Error:', error);
+    adminRespond(req, res, 'error', { pageName: 'Error', error: error.message || 'Failed to load transactions' });
+  }
+};
+
+// ============================================================================
+// B2B Price List Management (Admin)
+// ============================================================================
+
+export const listB2bPriceLists = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const priceLists = await b2bPriceListRepo.findAll();
+    adminRespond(req, res, 'b2b/price-lists/index', {
+      pageName: 'B2B Price Lists',
+      priceLists,
+      success: req.query.success || null,
+    });
+  } catch (error: any) {
+    logger.error('Error:', error);
+    adminRespond(req, res, 'error', { pageName: 'Error', error: error.message || 'Failed to load price lists' });
+  }
+};
+
+export const createB2bPriceListForm = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    adminRespond(req, res, 'b2b/price-lists/form', {
+      pageName: 'Create Price List',
+      priceList: null,
+    });
+  } catch (error: any) {
+    logger.error('Error:', error);
+    adminRespond(req, res, 'error', { pageName: 'Error', error: error.message || 'Failed to load form' });
+  }
+};
+
+export const createB2bPriceList = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { name, currency, isActive, notes, b2bCompanyId } = req.body;
+    const useCase = new ManageB2BPriceListUseCase();
+    const result = await useCase.execute({
+      name,
+      currency,
+      isActive: isActive === 'true' || isActive === '1',
+      notes,
+      b2bCompanyId: b2bCompanyId || undefined,
+    });
+    if (!result.success) {
+      adminRespond(req, res, 'b2b/price-lists/form', {
+        pageName: 'Create Price List',
+        priceList: null,
+        error: result.error,
+      });
+      return;
+    }
+    res.redirect(`/admin/b2b/price-lists?success=1`);
+  } catch (error: any) {
+    logger.error('Error:', error);
+    res.redirect('/admin/b2b/price-lists?error=' + encodeURIComponent(error.message));
+  }
+};
+
+export const viewB2bPriceList = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { priceListId } = req.params;
+    const priceList = await b2bPriceListRepo.findById(priceListId);
+    if (!priceList) {
+      adminRespond(req, res, 'error', { pageName: 'Not Found', error: 'Price list not found' });
+      return;
+    }
+    const items = await b2bPriceListItemRepo.findByPriceList(priceListId);
+    adminRespond(req, res, 'b2b/price-lists/detail', {
+      pageName: `Price List: ${priceList.name}`,
+      priceList,
+      items,
+    });
+  } catch (error: any) {
+    logger.error('Error:', error);
+    adminRespond(req, res, 'error', { pageName: 'Error', error: error.message || 'Failed to load price list' });
+  }
+};
+
+export const editB2bPriceListForm = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { priceListId } = req.params;
+    const priceList = await b2bPriceListRepo.findById(priceListId);
+    if (!priceList) {
+      adminRespond(req, res, 'error', { pageName: 'Not Found', error: 'Price list not found' });
+      return;
+    }
+    adminRespond(req, res, 'b2b/price-lists/form', {
+      pageName: `Edit Price List: ${priceList.name}`,
+      priceList,
+    });
+  } catch (error: any) {
+    logger.error('Error:', error);
+    adminRespond(req, res, 'error', { pageName: 'Error', error: error.message || 'Failed to load form' });
+  }
+};
+
+export const updateB2bPriceList = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { priceListId } = req.params;
+    const { name, currency, isActive, notes } = req.body;
+    const useCase = new ManageB2BPriceListUseCase();
+    const result = await useCase.execute({
+      b2bPriceListId: priceListId,
+      name,
+      currency,
+      isActive: isActive === 'true' || isActive === '1',
+      notes,
+    });
+    if (!result.success) {
+      const priceList = await b2bPriceListRepo.findById(priceListId);
+      adminRespond(req, res, 'b2b/price-lists/form', {
+        pageName: 'Edit Price List',
+        priceList,
+        error: result.error,
+      });
+      return;
+    }
+    res.redirect(`/admin/b2b/price-lists/${priceListId}?success=1`);
+  } catch (error: any) {
+    logger.error('Error:', error);
+    res.redirect(`/admin/b2b/price-lists/${req.params.priceListId}?error=` + encodeURIComponent(error.message));
+  }
+};

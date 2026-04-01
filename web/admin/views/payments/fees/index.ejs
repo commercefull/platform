@@ -1,0 +1,52 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <h2 class="page-title">Payment Fees</h2>
+    </div>
+  </div>
+</div>
+
+<section class="content">
+  <div class="container-fluid">
+    <%- include('../../partials/alerts') %>
+
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Fees</h3>
+        <span class="float-end text-muted"><%= (fees || []).length %> records</span>
+      </div>
+      <div class="card-body table-responsive p-0">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Fee ID</th>
+              <th>Transaction ID</th>
+              <th>Merchant</th>
+              <th>Type</th>
+              <th>Amount</th>
+              <th>Description</th>
+              <th>Created</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% (fees || []).forEach(function(f) { %>
+            <tr>
+              <td><code><%= f.paymentFeeId.substring(0, 8) %>...</code></td>
+              <td><code><%= f.transactionId.substring(0, 8) %>...</code></td>
+              <td><%= f.merchantId %></td>
+              <td><span class="badge bg-secondary"><%= f.type %></span></td>
+              <td><strong><%= f.currency %> <%= (f.amount || 0).toFixed(2) %></strong></td>
+              <td><%= f.description || '-' %></td>
+              <td><%= new Date(f.createdAt).toLocaleDateString() %></td>
+            </tr>
+            <% }); %>
+            <% if ((fees || []).length === 0) { %>
+            <tr><td colspan="7" class="text-center text-muted py-4">No fees found.</td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>

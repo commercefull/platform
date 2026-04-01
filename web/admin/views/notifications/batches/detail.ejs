@@ -1,0 +1,90 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col"><h2 class="page-title"><%= pageName %></h2></div>
+    <div class="col-auto ms-auto">
+      <a href="/admin/notifications/batches" class="btn btn-secondary"><i class="ti ti-arrow-left"></i> Back</a>
+    </div>
+  </div>
+</div>
+<section class="content">
+  <div class="container-fluid">
+    <%- include("../../partials/alerts") %>
+    <div class="row">
+      <div class="col-md-8">
+        <div class="card">
+          <div class="card-header"><h3 class="card-title">Batch Details</h3></div>
+          <div class="card-body">
+            <dl class="row">
+              <dt class="col-sm-4">Batch ID</dt>
+              <dd class="col-sm-8"><code><%= batch.notificationBatchId %></code></dd>
+              <dt class="col-sm-4">Name</dt>
+              <dd class="col-sm-8"><%= batch.name || '-' %></dd>
+              <dt class="col-sm-4">Channel</dt>
+              <dd class="col-sm-8"><span class="badge bg-blue-lt"><%= batch.channel || '-' %></span></dd>
+              <dt class="col-sm-4">Status</dt>
+              <dd class="col-sm-8">
+                <% const statusColor = batch.status === 'completed' ? 'success' : batch.status === 'failed' ? 'danger' : batch.status === 'processing' ? 'warning' : 'secondary'; %>
+                <span class="badge bg-<%= statusColor %>"><%= batch.status || '-' %></span>
+              </dd>
+              <dt class="col-sm-4">Total</dt>
+              <dd class="col-sm-8"><%= batch.totalCount || 0 %></dd>
+              <dt class="col-sm-4">Sent</dt>
+              <dd class="col-sm-8"><%= batch.sentCount || 0 %></dd>
+              <dt class="col-sm-4">Failed</dt>
+              <dd class="col-sm-8"><%= batch.failedCount || 0 %></dd>
+              <dt class="col-sm-4">Created</dt>
+              <dd class="col-sm-8"><%= batch.createdAt ? new Date(batch.createdAt).toLocaleString() : '-' %></dd>
+            </dl>
+          </div>
+        </div>
+
+        <div class="card mt-3">
+          <div class="card-header"><h3 class="card-title">Delivery Log</h3></div>
+          <div class="card-body table-responsive p-0">
+            <table class="table table-hover text-nowrap">
+              <thead>
+                <tr>
+                  <th>Notification ID</th>
+                  <th>Channel</th>
+                  <th>Status</th>
+                  <th>Recipient</th>
+                  <th>Sent At</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (!deliveryLogs || deliveryLogs.length === 0) { %>
+                  <tr>
+                    <td colspan="5" class="text-center py-4"><em>No delivery logs found.</em></td>
+                  </tr>
+                <% } else { %>
+                  <% deliveryLogs.forEach(log => { %>
+                    <tr>
+                      <td><code><%= log.notificationId %></code></td>
+                      <td><span class="badge bg-blue-lt"><%= log.channel || '-' %></span></td>
+                      <td>
+                        <% const logColor = log.status === 'delivered' ? 'success' : log.status === 'failed' ? 'danger' : 'secondary'; %>
+                        <span class="badge bg-<%= logColor %>-lt"><%= log.status || '-' %></span>
+                      </td>
+                      <td><%= log.recipient || '-' %></td>
+                      <td><%= log.sentAt ? new Date(log.sentAt).toLocaleString() : '-' %></td>
+                    </tr>
+                  <% }); %>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card">
+          <div class="card-header"><h3 class="card-title">Actions</h3></div>
+          <div class="card-body">
+            <a href="/admin/notifications/batches" class="btn btn-outline-secondary w-100">Back to Batches</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

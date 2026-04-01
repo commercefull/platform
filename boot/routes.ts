@@ -9,6 +9,10 @@ import { identitySocialRouter } from '../modules/identity/interface/routers/iden
 import { customerRouter } from '../modules/customer/interface/routers/customerRouter';
 import { taxCustomerRouter } from '../modules/tax/interface/routers/taxCustomerRouter';
 import { b2bCustomerRouter } from '../modules/b2b/interface/routers/b2bCustomerRouter';
+import { b2bCreditRouter } from '../modules/b2b/interface/routers/b2bCreditRouter';
+import { b2bPriceListRouter } from '../modules/b2b/interface/routers/b2bPriceListRouter';
+import { b2bPurchaseOrderRouter } from '../modules/b2b/interface/routers/b2bPurchaseOrderRouter';
+import { b2bMerchantRouter } from '../modules/b2b/interface/routers/b2bMerchantRouter';
 import { gdprCustomerRouter } from '../modules/gdpr/interface/routers/gdprCustomerRouter';
 import { orderCustomerRouter } from '../modules/order/interface/routers/customerRouter';
 import { basketCustomerRouter } from '../modules/basket/interface/routers/basketRouter';
@@ -75,6 +79,9 @@ import { merchantCustomerRouter } from '../modules/merchant/interface/http/merch
 import { attributeBusinessRouter } from '../modules/product/interface/routers/attributeRouter';
 import { categoryCustomerRouter } from '../modules/product/interface/routers/categoryCustomerRouter';
 import { webhookBusinessRouter } from '../modules/webhook/interface/routers/webhookBusinessRouter';
+import { merchantFinancialsRouter } from '../modules/merchant/interface/routers/merchantFinancialsRouter';
+import { marketingBusinessRouter } from '../modules/marketing/interface/routers/marketingBusinessRouter';
+import { marketingCustomerRouter } from '../modules/marketing/interface/routers/marketingCustomerRouter';
 
 /**
  * Configure all application routes
@@ -86,6 +93,9 @@ export function configureRoutes(app: Express): void {
   app.use('/admin', adminRouter);
   app.use('/merchant', merchantRouter);
   app.use('/b2b', b2bPortalRouter);
+
+  // B2B API routes (JSON)
+  app.use('/', [b2bCreditRouter, b2bPriceListRouter, b2bPurchaseOrderRouter]);
 
   app.use('/customer', [
     identityCustomerRouter, // Must be first - public auth routes
@@ -115,6 +125,7 @@ export function configureRoutes(app: Express): void {
     storeCustomerRouter,
     fulfillmentCustomerRouter,
     merchantCustomerRouter,
+    marketingCustomerRouter,
   ]);
 
   // Business/Merchant API routes
@@ -156,6 +167,9 @@ export function configureRoutes(app: Express): void {
     basketBusinessRouter,
     attributeBusinessRouter,
     webhookBusinessRouter,
+    merchantFinancialsRouter,
+    b2bMerchantRouter,
+    marketingBusinessRouter,
   ]);
 
   // Health check endpoint (before other routes for load balancers)

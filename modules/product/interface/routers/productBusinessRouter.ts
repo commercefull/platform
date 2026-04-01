@@ -175,4 +175,27 @@ router.post('/products/:productId/attributes', attributeController.setProductAtt
 router.put('/products/:productId/attributes', attributeController.setProductAttributes.bind(attributeController));
 router.delete('/products/:productId/attributes/:attributeId', attributeController.removeProductAttribute.bind(attributeController));
 
+// ============================================================================
+// Q&A Routes (Business)
+// ============================================================================
+
+router.get('/products/:productId/qa', productController.listProductQa);
+router.patch('/products/:productId/qa/:qaId/status', productController.updateQaStatus);
+
+// ============================================================================
+// Review Media Routes (Business)
+// ============================================================================
+
+router.get('/products/:productId/reviews/media', productController.listReviewMedia);
+router.delete('/products/:productId/reviews/media/:mediaId', productController.deleteReviewMedia);
+
+// ============================================================================
+// Collection Routes (Business)
+// ============================================================================
+
+router.get('/collections', productController.listCollections);
+router.post('/collections', productController.createCollection);
+router.put('/collections/:collectionId', productController.updateCollection);
+router.delete('/collections/:collectionId', productController.deleteCollection);
+
 export const productBusinessRouter = router;

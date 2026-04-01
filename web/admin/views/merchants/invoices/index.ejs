@@ -1,0 +1,57 @@
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <h2 class="page-title">Merchant Invoices</h2>
+    </div>
+  </div>
+</div>
+
+<section class="content">
+  <div class="container-fluid">
+    <%- include('../../../partials/alerts') %>
+
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Invoices</h3>
+        <span class="float-end text-muted"><%= (invoices || []).length %> records</span>
+      </div>
+      <div class="card-body table-responsive p-0">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Invoice #</th>
+              <th>Type</th>
+              <th>Amount</th>
+              <th>Currency</th>
+              <th>Status</th>
+              <th>Due Date</th>
+              <th>Paid At</th>
+              <th>Created</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% (invoices || []).forEach(function(inv) { %>
+            <tr>
+              <td><strong><%= inv.invoiceNumber %></strong></td>
+              <td><%= inv.type %></td>
+              <td><%= (inv.amount || 0).toFixed(2) %></td>
+              <td><%= inv.currency %></td>
+              <td>
+                <span class="badge bg-<%= inv.status === 'paid' ? 'success' : inv.status === 'overdue' ? 'danger' : inv.status === 'cancelled' ? 'secondary' : 'warning' %>">
+                  <%= inv.status %>
+                </span>
+              </td>
+              <td><%= inv.dueDate ? new Date(inv.dueDate).toLocaleDateString() : '-' %></td>
+              <td><%= inv.paidAt ? new Date(inv.paidAt).toLocaleDateString() : '-' %></td>
+              <td><%= new Date(inv.createdAt).toLocaleDateString() %></td>
+            </tr>
+            <% }); %>
+            <% if ((invoices || []).length === 0) { %>
+            <tr><td colspan="8" class="text-center text-muted py-4">No invoices found.</td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>

@@ -17,6 +17,11 @@ import { ProductVisibility } from '../../domain/valueObjects/ProductVisibility';
 import productVariantRepo from '../../infrastructure/repositories/productVariantRepo';
 import productImageRepo from '../../infrastructure/repositories/productImageRepo';
 import productReviewRepo from '../../infrastructure/repositories/productReviewRepo';
+import productQaRepo from '../../infrastructure/repositories/productQaRepo';
+import productReviewMediaRepo from '../../infrastructure/repositories/productReviewMediaRepo';
+import productCollectionRepo from '../../infrastructure/repositories/productCollectionRepo';
+import { ManageProductCollectionCommand, ManageProductCollectionUseCase } from '../../application/useCases/ManageProductCollection';
+import { successResponse, errorResponse } from '../../../../libs/apiResponse';
 
 // ============================================================================
 // Content Negotiation Helpers
@@ -642,5 +647,184 @@ export const deleteReview = async (req: TypedRequest, res: Response): Promise<vo
   } catch (error: any) {
     logger.error('Error:', error);
     respondError(req, res, error.message || 'Failed to delete review');
+  }
+};
+
+// ============================================================================
+// Q&A Management (Business)
+// ============================================================================
+
+/**
+ * List Q&A for a product (admin/business)
+ * GET /products/:productId/qa
+ */
+export const listProductQa = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { productId } = req.params;
+    const { status } = req.query;
+    const qa = await productQaRepo.findByProduct(productId, status as any);
+    successResponse(res, qa);
+  } catch (error: any) {
+    logger.error('Error listing product Q&A:', error);
+    errorResponse(res, error.message || 'Failed to list product Q&A');
+  }
+};
+
+/**
+ * Update Q&A status
+ * PATCH /products/:productId/qa/:qaId/status
+ */
+export const updateQaStatus = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { qaId } = req.params;
+    const { status } = req.body;
+    if (!status) {
+      errorResponse(res, 'status is required', 400);
+      return;
+    }
+    const qa = await productQaRepo.updateStatus(qaId, status);
+    if (!qa) {
+      errorResponse(res, 'Q&A not found', 404);
+      return;
+    }
+    successResponse(res, qa);
+  } catch (error: any) {
+    logger.error('Error updating Q&A status:', error);
+    errorResponse(res, error.message || 'Failed to update Q&A status');
+  }
+};
+
+// ============================================================================
+// Review Media Management (Business)
+// ============================================================================
+
+/**
+ * List review media for a product
+ * GET /products/:productId/reviews/media
+ */
+export const listReviewMedia = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { reviewId } = req.query;
+    if (!reviewId) {
+      errorResponse(res, 'reviewId query param is required', 400);
+      return;
+    }
+    const media = await productReviewMediaRepo.findByReview(reviewId as string);
+    successResponse(res, media);
+  } catch (error: any) {
+    logger.error('Error listing review media:', error);
+    errorResponse(res, error.message || 'Failed to list review media');
+  }
+};
+
+/**
+ * Delete review media
+ * DELETE /products/:productId/reviews/media/:mediaId
+ */
+export const deleteReviewMedia = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { mediaId } = req.params;
+    const deleted = await productReviewMediaRepo.delete(mediaId);
+    if (!deleted) {
+      errorResponse(res, 'Review media not found', 404);
+      return;
+    }
+    successResponse(res, { deleted: true });
+  } catch (error: any) {
+    logger.error('Error deleting review media:', error);
+    errorResponse(res, error.message || 'Failed to delete review media');
+  }
+};
+
+// ============================================================================
+// Collection Management (Business)
+// ============================================================================
+
+/**
+ * List all collections
+ * GET /collections
+ */
+export const listCollections = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const collections = await productCollectionRepo.findAll();
+    successResponse(res, collections);
+  } catch (error: any) {
+    logger.error('Error listing collections:', error);
+    errorResponse(res, error.message || 'Failed to list collections');
+  }
+};
+
+/**
+ * Create a collection
+ * POST /collections
+ */
+export const createCollection = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const merchantId = req.user?.merchantId;
+    const { name, slug, description, imageUrl, isActive, position, addProducts } = req.body;
+    if (!name?.trim()) {
+      errorResponse(res, 'name is required', 400);
+      return;
+    }
+    if (!slug?.trim()) {
+      errorResponse(res, 'slug is required', 400);
+      return;
+    }
+    const command = new ManageProductCollectionCommand(name, slug, undefined, description, imageUrl, isActive, position, merchantId, addProducts);
+    const useCase = new ManageProductCollectionUseCase();
+    const result = await useCase.execute(command);
+    successResponse(res, result, 201);
+  } catch (error: any) {
+    logger.error('Error creating collection:', error);
+    errorResponse(res, error.message || 'Failed to create collection', 400);
+  }
+};
+
+/**
+ * Update a collection
+ * PUT /collections/:collectionId
+ */
+export const updateCollection = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { collectionId } = req.params;
+    const merchantId = req.user?.merchantId;
+    const { name, slug, description, imageUrl, isActive, position, addProducts, removeMapIds } = req.body;
+    if (!name?.trim()) {
+      errorResponse(res, 'name is required', 400);
+      return;
+    }
+    if (!slug?.trim()) {
+      errorResponse(res, 'slug is required', 400);
+      return;
+    }
+    const command = new ManageProductCollectionCommand(
+      name, slug, collectionId, description, imageUrl, isActive, position, merchantId, addProducts, removeMapIds,
+    );
+    const useCase = new ManageProductCollectionUseCase();
+    const result = await useCase.execute(command);
+    successResponse(res, result);
+  } catch (error: any) {
+    logger.error('Error updating collection:', error);
+    const status = error.message.includes('not found') ? 404 : 400;
+    errorResponse(res, error.message || 'Failed to update collection', status);
+  }
+};
+
+/**
+ * Delete a collection
+ * DELETE /collections/:collectionId
+ */
+export const deleteCollection = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { collectionId } = req.params;
+    const deleted = await productCollectionRepo.softDelete(collectionId);
+    if (!deleted) {
+      errorResponse(res, 'Collection not found', 404);
+      return;
+    }
+    successResponse(res, { deleted: true });
+  } catch (error: any) {
+    logger.error('Error deleting collection:', error);
+    errorResponse(res, error.message || 'Failed to delete collection');
   }
 };

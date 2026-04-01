@@ -1,0 +1,52 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <h2 class="page-title">Payment Balances</h2>
+    </div>
+  </div>
+</div>
+
+<section class="content">
+  <div class="container-fluid">
+    <%- include('../../partials/alerts') %>
+
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Merchant Balances</h3>
+        <span class="float-end text-muted"><%= (balances || []).length %> records</span>
+      </div>
+      <div class="card-body table-responsive p-0">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Balance ID</th>
+              <th>Merchant ID</th>
+              <th>Currency</th>
+              <th>Amount</th>
+              <th>Last Updated</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% (balances || []).forEach(function(b) { %>
+            <tr>
+              <td><code><%= b.paymentBalanceId.substring(0, 8) %>...</code></td>
+              <td><code><%= b.merchantId %></code></td>
+              <td><span class="badge bg-secondary"><%= b.currency %></span></td>
+              <td>
+                <strong class="<%= b.amount < 0 ? 'text-danger' : 'text-success' %>">
+                  <%= b.currency %> <%= (b.amount || 0).toFixed(2) %>
+                </strong>
+              </td>
+              <td><%= new Date(b.updatedAt).toLocaleString() %></td>
+            </tr>
+            <% }); %>
+            <% if ((balances || []).length === 0) { %>
+            <tr><td colspan="5" class="text-center text-muted py-4">No balance records found.</td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>

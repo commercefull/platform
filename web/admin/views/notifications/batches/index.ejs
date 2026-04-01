@@ -1,0 +1,62 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col"><h2 class="page-title"><%= pageName %></h2></div>
+  </div>
+</div>
+<section class="content">
+  <div class="container-fluid">
+    <%- include("../../partials/alerts") %>
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Notification Batches</h3>
+        <div class="card-options">
+          <span class="badge bg-secondary"><%= total %> total</span>
+        </div>
+      </div>
+      <div class="card-body table-responsive p-0">
+        <table class="table table-hover text-nowrap">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Channel</th>
+              <th>Status</th>
+              <th>Total</th>
+              <th>Sent</th>
+              <th>Failed</th>
+              <th>Created</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (!batches || batches.length === 0) { %>
+              <tr>
+                <td colspan="8" class="text-center py-4"><em>No notification batches found.</em></td>
+              </tr>
+            <% } else { %>
+              <% batches.forEach(batch => { %>
+                <tr>
+                  <td><strong><%= batch.name || batch.notificationBatchId %></strong></td>
+                  <td><span class="badge bg-blue-lt"><%= batch.channel || '-' %></span></td>
+                  <td>
+                    <% const statusColor = batch.status === 'completed' ? 'success' : batch.status === 'failed' ? 'danger' : batch.status === 'processing' ? 'warning' : 'secondary'; %>
+                    <span class="badge bg-<%= statusColor %>-lt"><%= batch.status || '-' %></span>
+                  </td>
+                  <td><%= batch.totalCount || 0 %></td>
+                  <td><%= batch.sentCount || 0 %></td>
+                  <td><%= batch.failedCount || 0 %></td>
+                  <td><%= batch.createdAt ? new Date(batch.createdAt).toLocaleString() : '-' %></td>
+                  <td>
+                    <a href="/admin/notifications/batches/<%= batch.notificationBatchId %>" class="btn btn-sm btn-info">
+                      <i class="ti ti-eye"></i> View
+                    </a>
+                  </td>
+                </tr>
+              <% }); %>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>

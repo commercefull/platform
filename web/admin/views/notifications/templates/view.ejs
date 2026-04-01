@@ -4,7 +4,6 @@
     <div class="col"><h2 class="page-title"><%= pageName %></h2></div>
     <div class="col-auto ms-auto">
       <a href="/admin/notifications/templates" class="btn btn-secondary me-2"><i class="ti ti-arrow-left"></i> Back</a>
-
     </div>
   </div>
 </div>
@@ -17,20 +16,56 @@
           <div class="card-header"><h3 class="card-title">Details</h3></div>
           <div class="card-body">
             <dl class="row">
-              <dt class="col-sm-4">Name</dt><dd class="col-sm-8"><%= item?.name || '-' %></dd>
-              <dt class="col-sm-4">Status</dt><dd class="col-sm-8"><span class="badge bg-<%= item?.status === 'active' || item?.isActive ? 'success' : 'secondary' %>"><%= item?.status || '-' %></span></dd>
-              <dt class="col-sm-4">Description</dt><dd class="col-sm-8"><%= item?.description || '-' %></dd>
-              <dt class="col-sm-4">Created</dt><dd class="col-sm-8"><%= item?.createdAt ? new Date(item.createdAt).toLocaleString() : '-' %></dd>
+              <dt class="col-sm-4">Name</dt><dd class="col-sm-8"><%= template?.name || item?.name || '-' %></dd>
+              <dt class="col-sm-4">Status</dt><dd class="col-sm-8"><span class="badge bg-<%= (template?.isActive || item?.isActive) ? 'success' : 'secondary' %>"><%= (template?.isActive || item?.isActive) ? 'Active' : 'Inactive' %></span></dd>
+              <dt class="col-sm-4">Description</dt><dd class="col-sm-8"><%= template?.description || item?.description || '-' %></dd>
+              <dt class="col-sm-4">Created</dt><dd class="col-sm-8"><%= (template?.createdAt || item?.createdAt) ? new Date(template?.createdAt || item?.createdAt).toLocaleString() : '-' %></dd>
             </dl>
           </div>
         </div>
+
+        <% if (typeof translations !== 'undefined') { %>
+        <div class="card mt-3">
+          <div class="card-header"><h3 class="card-title">Translations</h3></div>
+          <div class="card-body table-responsive p-0">
+            <table class="table table-hover text-nowrap">
+              <thead>
+                <tr>
+                  <th>Locale</th>
+                  <th>Subject</th>
+                  <th>Updated</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (!translations || translations.length === 0) { %>
+                  <tr>
+                    <td colspan="3" class="text-center py-4"><em>No translations found.</em></td>
+                  </tr>
+                <% } else { %>
+                  <% translations.forEach(tr => { %>
+                    <tr>
+                      <td><span class="badge bg-azure-lt"><%= tr.locale %></span></td>
+                      <td><%= tr.subject || '-' %></td>
+                      <td><%= tr.updatedAt ? new Date(tr.updatedAt).toLocaleString() : '-' %></td>
+                    </tr>
+                  <% }); %>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <% } %>
       </div>
+
       <div class="col-md-4">
         <div class="card">
           <div class="card-header"><h3 class="card-title">Actions</h3></div>
           <div class="card-body">
             <div class="d-grid gap-2">
-
+              <% if (template?.notificationTemplateId) { %>
+                <a href="/admin/notifications/templates/<%= template.notificationTemplateId %>/edit" class="btn btn-primary">Edit Template</a>
+                <a href="/admin/notifications/templates/<%= template.notificationTemplateId %>/translations" class="btn btn-outline-secondary">View Translations</a>
+              <% } %>
               <a href="/admin/notifications/templates" class="btn btn-outline-secondary">Back to List</a>
             </div>
           </div>

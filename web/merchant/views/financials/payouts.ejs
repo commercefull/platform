@@ -1,0 +1,65 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row align-items-center">
+    <div class="col">
+      <h2 class="page-title">Payouts</h2>
+      <div class="text-muted mt-1"><a href="/merchant/financials">Financials</a> / Payouts</div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">All Payouts</h3>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-vcenter card-table">
+      <thead>
+        <tr>
+          <th>Reference</th>
+          <th>Amount</th>
+          <th>Currency</th>
+          <th>Status</th>
+          <th>Scheduled</th>
+          <th>Processed</th>
+          <th>Date</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (payouts && payouts.length > 0) { %>
+          <% payouts.forEach(payout => { %>
+            <tr>
+              <td class="text-muted"><%= payout.reference || '—' %></td>
+              <td><%= (payout.amount / 100).toLocaleString('en-US', { style: 'currency', currency: payout.currency }) %></td>
+              <td><%= payout.currency %></td>
+              <td>
+                <span class="badge bg-<%= payout.status === 'completed' ? 'success' : payout.status === 'pending' ? 'warning' : payout.status === 'failed' ? 'danger' : 'secondary' %>-lt">
+                  <%= payout.status %>
+                </span>
+              </td>
+              <td class="text-muted"><%= payout.scheduledAt ? new Date(payout.scheduledAt).toLocaleDateString() : '—' %></td>
+              <td class="text-muted"><%= payout.processedAt ? new Date(payout.processedAt).toLocaleDateString() : '—' %></td>
+              <td class="text-muted"><%= new Date(payout.createdAt).toLocaleDateString() %></td>
+              <td>
+                <a href="/merchant/financials/payouts/<%= payout.merchantPayoutId %>" class="btn btn-sm btn-outline-secondary">View</a>
+              </td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr>
+            <td colspan="8" class="text-center text-muted py-4">No payouts found.</td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+  <% if (payouts && payouts.length === limit) { %>
+    <div class="card-footer d-flex align-items-center">
+      <% if (offset > 0) { %>
+        <a href="?offset=<%= Math.max(0, offset - limit) %>&limit=<%= limit %>" class="btn btn-outline-secondary me-2">Previous</a>
+      <% } %>
+      <a href="?offset=<%= offset + limit %>&limit=<%= limit %>" class="btn btn-outline-secondary ms-auto">Next</a>
+    </div>
+  <% } %>
+</div>

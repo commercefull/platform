@@ -1,0 +1,75 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <h2 class="page-title">Affiliates</h2>
+    </div>
+    <div class="col-auto">
+      <a href="/admin/marketing/affiliates/create" class="btn btn-primary">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
+          stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        New Affiliate
+      </a>
+    </div>
+  </div>
+</div>
+
+<section class="content">
+  <div class="container-fluid">
+    <%- include('../../partials/alerts') %>
+
+    <% if (typeof success !== 'undefined' && success) { %>
+    <div class="alert alert-success"><%= success %></div>
+    <% } %>
+
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Affiliates</h3>
+        <span class="float-end text-muted"><%= (affiliates || []).length %> records</span>
+      </div>
+      <div class="card-body table-responsive p-0">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Code</th>
+              <th>Commission Rate</th>
+              <th>Total Earned</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% (affiliates || []).forEach(function(a) { %>
+            <tr>
+              <td><strong><%= a.name %></strong></td>
+              <td><%= a.email %></td>
+              <td><code><%= a.code %></code></td>
+              <td><%= a.commissionRate %>%</td>
+              <td><%= (a.totalEarned || 0).toFixed(2) %></td>
+              <td>
+                <span class="badge bg-<%= a.status === 'active' ? 'success' : 'secondary' %>">
+                  <%= a.status %>
+                </span>
+              </td>
+              <td><%= new Date(a.createdAt).toLocaleDateString() %></td>
+              <td>
+                <a href="/admin/marketing/affiliates/<%= a.marketingAffiliateId %>" class="btn btn-sm btn-outline-info">View</a>
+              </td>
+            </tr>
+            <% }); %>
+            <% if ((affiliates || []).length === 0) { %>
+            <tr><td colspan="8" class="text-center text-muted py-4">No affiliates found. <a href="/admin/marketing/affiliates/create">Create your first affiliate</a>.</td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>

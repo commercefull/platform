@@ -1,0 +1,88 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <h2 class="page-title"><%= affiliate ? 'Edit Affiliate' : 'Create Affiliate' %></h2>
+    </div>
+    <div class="col-auto">
+      <a href="/admin/marketing/affiliates" class="btn btn-outline-secondary">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
+          stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+          <polyline points="15 6 9 12 15 18"/>
+        </svg>
+        Back to Affiliates
+      </a>
+    </div>
+  </div>
+</div>
+
+<section class="content">
+  <div class="container-fluid">
+    <%- include('../../partials/alerts') %>
+
+    <% if (typeof error !== 'undefined' && error) { %>
+    <div class="alert alert-danger"><%= error %></div>
+    <% } %>
+
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title"><%= affiliate ? 'Edit' : 'New' %> Affiliate</h3>
+      </div>
+      <div class="card-body">
+        <form method="POST" action="/admin/marketing/affiliates">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label required">Name</label>
+              <input type="text" name="name" class="form-control" required
+                value="<%= (formData && formData.name) || (affiliate && affiliate.name) || '' %>"
+                placeholder="Affiliate name">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label required">Email</label>
+              <input type="email" name="email" class="form-control" required
+                value="<%= (formData && formData.email) || (affiliate && affiliate.email) || '' %>"
+                placeholder="affiliate@example.com">
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label required">Affiliate Code</label>
+              <input type="text" name="code" class="form-control" required
+                value="<%= (formData && formData.code) || (affiliate && affiliate.code) || '' %>"
+                placeholder="e.g. PARTNER2024">
+              <small class="text-muted">Unique code used in tracking links.</small>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label required">Commission Rate (%)</label>
+              <input type="number" name="commissionRate" class="form-control" required min="0" max="100" step="0.01"
+                value="<%= (formData && formData.commissionRate) || (affiliate && affiliate.commissionRate) || '10' %>">
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Tracking URL <span class="text-muted">(optional)</span></label>
+              <input type="url" name="trackingUrl" class="form-control"
+                value="<%= (formData && formData.trackingUrl) || '' %>"
+                placeholder="https://yourstore.com/ref/CODE">
+              <small class="text-muted">Leave blank to auto-generate.</small>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Tracking Slug <span class="text-muted">(optional)</span></label>
+              <input type="text" name="trackingSlug" class="form-control"
+                value="<%= (formData && formData.trackingSlug) || '' %>"
+                placeholder="e.g. partner2024">
+              <small class="text-muted">Leave blank to use the affiliate code.</small>
+            </div>
+          </div>
+          <div class="form-footer">
+            <button type="submit" class="btn btn-primary">
+              <%= affiliate ? 'Update Affiliate' : 'Create Affiliate' %>
+            </button>
+            <a href="/admin/marketing/affiliates" class="btn btn-link">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>

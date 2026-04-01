@@ -8,6 +8,8 @@ import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
 import { storefrontRespond } from '../../respond';
 import { query, queryOne } from '../../../libs/db';
+import * as notificationDeviceRepo from '../../../modules/notification/infrastructure/repositories/notificationDeviceRepo';
+import { RegisterNotificationDeviceUseCase, RegisterNotificationDeviceCommand } from '../../../modules/notification/application/useCases/RegisterNotificationDevice';
 
 /**
  * GET: List customer notifications
@@ -164,5 +166,73 @@ export const updatePreferences = async (req: TypedRequest, res: Response) => {
     logger.error('Error:', error);
     (req as any).flash?.('error', 'Failed to update preferences');
     res.redirect('/notifications/preferences');
+  }
+};
+
+/**
+ * GET /notifications/devices
+ * List registered push notification devices
+ */
+export const getDevices = async (req: TypedRequest, res: Response) => {
+  try {
+    const customerId = req.user?.customerId;
+    if (!customerId) return res.redirect('/signin');
+
+    const devices = await notificationDeviceRepo.findByUser(customerId);
+
+    storefrontRespond(req, res, 'notifications/devices', {
+      pageName: 'Push Notification Devices',
+      devices,
+    });
+  } catch (error) {
+    logger.error('Error loading notification devices:', error);
+    storefrontRespond(req, res, 'error', { pageName: 'Error', error: 'Failed to load devices' });
+  }
+};
+
+/**
+ * POST /notifications/devices
+ * Register a new push notification device
+ */
+export const registerDevice = async (req: TypedRequest, res: Response) => {
+  try {
+    const customerId = req.user?.customerId;
+    if (!customerId) return res.redirect('/signin');
+
+    const { deviceToken, platform } = req.body;
+
+    const useCase = new RegisterNotificationDeviceUseCase();
+    await useCase.execute(
+      new RegisterNotificationDeviceCommand(customerId, 'customer', deviceToken, platform),
+    );
+
+    (req as any).flash?.('success', 'Device registered successfully');
+    res.redirect('/notifications/devices');
+  } catch (error) {
+    logger.error('Error registering notification device:', error);
+    (req as any).flash?.('error', 'Failed to register device');
+    res.redirect('/notifications/devices');
+  }
+};
+
+/**
+ * POST /notifications/devices/:deviceToken/delete
+ * Remove a registered push notification device
+ */
+export const deleteDevice = async (req: TypedRequest, res: Response) => {
+  try {
+    const customerId = req.user?.customerId;
+    if (!customerId) return res.redirect('/signin');
+
+    const { deviceToken } = req.params;
+
+    await notificationDeviceRepo.deactivate(deviceToken);
+
+    (req as any).flash?.('success', 'Device removed successfully');
+    res.redirect('/notifications/devices');
+  } catch (error) {
+    logger.error('Error deleting notification device:', error);
+    (req as any).flash?.('error', 'Failed to remove device');
+    res.redirect('/notifications/devices');
   }
 };

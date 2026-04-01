@@ -1,0 +1,67 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <h2 class="page-title"><%= campaign ? 'Edit Campaign' : 'Create Campaign' %></h2>
+    </div>
+    <div class="col-auto">
+      <a href="/admin/marketing/campaigns" class="btn btn-outline-secondary">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
+          stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+          <polyline points="15 6 9 12 15 18"/>
+        </svg>
+        Back to Campaigns
+      </a>
+    </div>
+  </div>
+</div>
+
+<section class="content">
+  <div class="container-fluid">
+    <%- include('../../partials/alerts') %>
+
+    <% if (typeof error !== 'undefined' && error) { %>
+    <div class="alert alert-danger"><%= error %></div>
+    <% } %>
+
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title"><%= campaign ? 'Edit' : 'New' %> Email Campaign</h3>
+      </div>
+      <div class="card-body">
+        <form method="POST" action="/admin/marketing/campaigns<%= campaign ? '/' + campaign.marketingEmailCampaignId : '' %>">
+          <div class="mb-3">
+            <label class="form-label required">Campaign Name</label>
+            <input type="text" name="name" class="form-control" required
+              value="<%= (formData && formData.name) || (campaign && campaign.name) || '' %>"
+              placeholder="e.g. Summer Sale Newsletter">
+          </div>
+          <div class="mb-3">
+            <label class="form-label required">Subject Line</label>
+            <input type="text" name="subject" class="form-control" required
+              value="<%= (formData && formData.subject) || (campaign && campaign.subject) || '' %>"
+              placeholder="e.g. Don't miss our summer deals!">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Template ID <span class="text-muted">(optional)</span></label>
+            <input type="text" name="templateId" class="form-control"
+              value="<%= (formData && formData.templateId) || (campaign && campaign.templateId) || '' %>"
+              placeholder="UUID of email template">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Scheduled At <span class="text-muted">(optional)</span></label>
+            <input type="datetime-local" name="scheduledAt" class="form-control"
+              value="<%= (formData && formData.scheduledAt) || '' %>">
+          </div>
+          <div class="form-footer">
+            <button type="submit" class="btn btn-primary">
+              <%= campaign ? 'Update Campaign' : 'Create Campaign' %>
+            </button>
+            <a href="/admin/marketing/campaigns" class="btn btn-link">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>

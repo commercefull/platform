@@ -1,0 +1,96 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <h2 class="page-title"><%= affiliate.name %></h2>
+      <div class="text-muted mt-1">
+        <span class="badge bg-<%= affiliate.status === 'active' ? 'success' : 'secondary' %>">
+          <%= affiliate.status %>
+        </span>
+        &nbsp;Code: <code><%= affiliate.code %></code>
+      </div>
+    </div>
+    <div class="col-auto">
+      <a href="/admin/marketing/affiliates" class="btn btn-outline-secondary">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
+          stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+          <polyline points="15 6 9 12 15 18"/>
+        </svg>
+        Back
+      </a>
+    </div>
+  </div>
+</div>
+
+<section class="content">
+  <div class="container-fluid">
+    <%- include('../../partials/alerts') %>
+
+    <% if (typeof success !== 'undefined' && success) { %>
+    <div class="alert alert-success"><%= success %></div>
+    <% } %>
+
+    <div class="row">
+      <div class="col-md-5">
+        <div class="card">
+          <div class="card-header"><h3 class="card-title">Affiliate Info</h3></div>
+          <div class="card-body">
+            <dl class="row">
+              <dt class="col-sm-5">Name</dt>
+              <dd class="col-sm-7"><%= affiliate.name %></dd>
+              <dt class="col-sm-5">Email</dt>
+              <dd class="col-sm-7"><%= affiliate.email %></dd>
+              <dt class="col-sm-5">Code</dt>
+              <dd class="col-sm-7"><code><%= affiliate.code %></code></dd>
+              <dt class="col-sm-5">Commission</dt>
+              <dd class="col-sm-7"><%= affiliate.commissionRate %>%</dd>
+              <dt class="col-sm-5">Total Earned</dt>
+              <dd class="col-sm-7"><%= (affiliate.totalEarned || 0).toFixed(2) %></dd>
+              <dt class="col-sm-5">Total Paid</dt>
+              <dd class="col-sm-7"><%= (affiliate.totalPaid || 0).toFixed(2) %></dd>
+              <dt class="col-sm-5">Created</dt>
+              <dd class="col-sm-7"><%= new Date(affiliate.createdAt).toLocaleString() %></dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-7">
+        <div class="card">
+          <div class="card-header"><h3 class="card-title">Commission History</h3></div>
+          <div class="card-body table-responsive p-0">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Amount</th>
+                  <th>Currency</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% (commissions || []).forEach(function(c) { %>
+                <tr>
+                  <td><code><%= c.orderId ? c.orderId.substring(0, 8) + '...' : '—' %></code></td>
+                  <td><%= parseFloat(c.amount).toFixed(2) %></td>
+                  <td><%= c.currency %></td>
+                  <td>
+                    <span class="badge bg-<%= c.status === 'paid' ? 'success' : c.status === 'pending' ? 'warning' : 'secondary' %>">
+                      <%= c.status %>
+                    </span>
+                  </td>
+                  <td><%= new Date(c.createdAt).toLocaleDateString() %></td>
+                </tr>
+                <% }); %>
+                <% if ((commissions || []).length === 0) { %>
+                <tr><td colspan="5" class="text-center text-muted py-4">No commissions recorded yet.</td></tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

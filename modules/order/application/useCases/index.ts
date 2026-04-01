@@ -8,3 +8,7 @@ export * from './UpdateOrderStatus';
 export * from './CancelOrder';
 export * from './ProcessRefund';
 export * from './GetCustomerOrders';
+export * from './GetOrderDetails';
+export * from './AddOrderNote';
+export * from './CreateOrderRefund';
+export * from './TrackFulfillmentPackage';

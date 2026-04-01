@@ -1,0 +1,54 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <h2 class="page-title">Referrals</h2>
+    </div>
+  </div>
+</div>
+
+<section class="content">
+  <div class="container-fluid">
+    <%- include('../../partials/alerts') %>
+
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Referrals</h3>
+        <span class="float-end text-muted"><%= (referrals || []).length %> records</span>
+      </div>
+      <div class="card-body table-responsive p-0">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Code</th>
+              <th>Referrer ID</th>
+              <th>Referred Email</th>
+              <th>Status</th>
+              <th>Converted At</th>
+              <th>Created</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% (referrals || []).forEach(function(r) { %>
+            <tr>
+              <td><code><%= r.code %></code></td>
+              <td><code><%= r.referrerId ? r.referrerId.substring(0, 8) + '...' : '—' %></code></td>
+              <td><%= r.referredEmail %></td>
+              <td>
+                <span class="badge bg-<%= r.status === 'converted' ? 'success' : r.status === 'pending' ? 'warning' : 'secondary' %>">
+                  <%= r.status %>
+                </span>
+              </td>
+              <td><%= r.convertedAt ? new Date(r.convertedAt).toLocaleDateString() : '—' %></td>
+              <td><%= new Date(r.createdAt).toLocaleDateString() %></td>
+            </tr>
+            <% }); %>
+            <% if ((referrals || []).length === 0) { %>
+            <tr><td colspan="6" class="text-center text-muted py-4">No referrals found.</td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>

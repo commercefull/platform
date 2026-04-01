@@ -12,6 +12,12 @@ import { GetOrderCommand, GetOrderUseCase } from '../../../modules/order/applica
 import { UpdateOrderStatusCommand, UpdateOrderStatusUseCase } from '../../../modules/order/application/useCases/UpdateOrderStatus';
 import { CancelOrderCommand, CancelOrderUseCase } from '../../../modules/order/application/useCases/CancelOrder';
 import { ProcessRefundCommand, ProcessRefundUseCase } from '../../../modules/order/application/useCases/ProcessRefund';
+import { AddOrderNoteCommand, AddOrderNoteUseCase } from '../../../modules/order/application/useCases/AddOrderNote';
+import { TrackFulfillmentPackageCommand, TrackFulfillmentPackageUseCase } from '../../../modules/order/application/useCases/TrackFulfillmentPackage';
+import * as orderNoteRepo from '../../../modules/order/infrastructure/repositories/orderNoteRepo';
+import * as orderPaymentRefundRepo from '../../../modules/order/infrastructure/repositories/orderPaymentRefundRepo';
+import * as orderFulfillmentPackageRepo from '../../../modules/order/infrastructure/repositories/orderFulfillmentPackageRepo';
+import { query as dbQuery } from '../../../libs/db';
 import { OrderStatus } from '../../../modules/order/domain/valueObjects/OrderStatus';
 import { PaymentStatus } from '../../../modules/order/domain/valueObjects/PaymentStatus';
 import { FulfillmentStatus } from '../../../modules/order/domain/valueObjects/FulfillmentStatus';
@@ -271,5 +277,118 @@ export const processRefund = async (req: TypedRequest, res: Response): Promise<v
         res.redirect(`/hub/orders/${req.params.orderId}?error=${encodeURIComponent(error.message)}`);
       }
     }
+  }
+};
+
+// ============================================================================
+// Order Notes
+// ============================================================================
+
+export const listOrderNotes = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { orderId } = req.params;
+    const notes = await orderNoteRepo.findByOrder(orderId);
+    adminRespond(req, res, 'orders/partials/notes', { orderId, notes });
+  } catch (error: any) {
+    logger.error('Error:', error);
+    adminRespond(req, res, 'error', { pageName: 'Error', error: error.message || 'Failed to load notes' });
+  }
+};
+
+export const addOrderNote = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { orderId } = req.params;
+    const { content, isCustomerVisible } = req.body;
+    const createdBy = (req as any).user?.id || 'admin';
+
+    const command = new AddOrderNoteCommand(orderId, content, isCustomerVisible === 'true' || isCustomerVisible === true, createdBy);
+    const useCase = new AddOrderNoteUseCase();
+    await useCase.execute(command);
+
+    (req as any).flash?.('success', 'Note added');
+    res.redirect(`/admin/orders/${orderId}`);
+  } catch (error: any) {
+    logger.error('Error:', error);
+    (req as any).flash?.('error', error.message || 'Failed to add note');
+    res.redirect(`/admin/orders/${req.params.orderId}`);
+  }
+};
+
+export const deleteOrderNote = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { orderId, noteId } = req.params;
+    await orderNoteRepo.softDelete(noteId);
+    (req as any).flash?.('success', 'Note deleted');
+    res.redirect(`/admin/orders/${orderId}`);
+  } catch (error: any) {
+    logger.error('Error:', error);
+    (req as any).flash?.('error', error.message || 'Failed to delete note');
+    res.redirect(`/admin/orders/${req.params.orderId}`);
+  }
+};
+
+// ============================================================================
+// Order Refunds
+// ============================================================================
+
+export const listOrderRefunds = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { orderId } = req.params;
+    const refunds = await orderPaymentRefundRepo.findByOrder(orderId);
+    adminRespond(req, res, 'orders/partials/refunds', { orderId, refunds });
+  } catch (error: any) {
+    logger.error('Error:', error);
+    adminRespond(req, res, 'error', { pageName: 'Error', error: error.message || 'Failed to load refunds' });
+  }
+};
+
+// ============================================================================
+// Fulfillment Packages
+// ============================================================================
+
+export const listFulfillmentPackages = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { orderId } = req.params;
+    // Fetch all fulfillment packages for all fulfillments on this order
+    const packages = await dbQuery<orderFulfillmentPackageRepo.OrderFulfillmentPackage[]>(
+      `SELECT p.* FROM "orderFulfillmentPackage" p
+       JOIN "orderFulfillment" f ON f."orderFulfillmentId" = p."orderFulfillmentId"
+       WHERE f."orderId" = $1
+       ORDER BY p."createdAt" ASC`,
+      [orderId],
+    );
+    adminRespond(req, res, 'orders/partials/packages', { orderId, packages: packages || [] });
+  } catch (error: any) {
+    logger.error('Error:', error);
+    adminRespond(req, res, 'error', { pageName: 'Error', error: error.message || 'Failed to load packages' });
+  }
+};
+
+export const updatePackageTracking = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { orderId, packageId } = req.params;
+    const { trackingNumber, shippingLabelUrl, commercialInvoiceUrl } = req.body;
+
+    const command = new TrackFulfillmentPackageCommand(
+      '', // orderFulfillmentId not needed for update path
+      '', // packageNumber not needed for update path
+      trackingNumber || undefined,
+      shippingLabelUrl || undefined,
+      commercialInvoiceUrl || undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      packageId,
+    );
+    const useCase = new TrackFulfillmentPackageUseCase();
+    await useCase.execute(command);
+
+    (req as any).flash?.('success', 'Tracking updated');
+    res.redirect(`/admin/orders/${orderId}`);
+  } catch (error: any) {
+    logger.error('Error:', error);
+    (req as any).flash?.('error', error.message || 'Failed to update tracking');
+    res.redirect(`/admin/orders/${req.params.orderId}`);
   }
 };

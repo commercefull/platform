@@ -1,22 +1,23 @@
 /**
  * Notification Customer Router
  *
- * Customer-facing routes for notification management.
+ * Customer-facing routes for notification preferences and device management.
  */
 
 import express from 'express';
 import { isCustomerLoggedIn } from '../../../../libs/auth';
 import { GetNotificationsUseCase, MarkAsReadUseCase } from '../../application/useCases';
 import notificationRepo from '../../infrastructure/repositories/notificationRepo';
+import * as notificationCustomerController from '../controllers/notificationCustomerController';
 
 const router = express.Router();
 
 router.use(isCustomerLoggedIn);
 
-/**
- * Get customer's notifications
- * GET /notifications
- */
+// ============================================================================
+// Existing notification read/mark-read routes
+// ============================================================================
+
 router.get('/notifications', async (req, res) => {
   try {
     const useCase = new GetNotificationsUseCase(notificationRepo);
@@ -40,10 +41,6 @@ router.get('/notifications', async (req, res) => {
   }
 });
 
-/**
- * Get unread notification count
- * GET /notifications/count
- */
 router.get('/notifications/count', async (req, res) => {
   try {
     const useCase = new GetNotificationsUseCase(notificationRepo);
@@ -67,10 +64,6 @@ router.get('/notifications/count', async (req, res) => {
   }
 });
 
-/**
- * Mark notification as read
- * PUT /notifications/:notificationId/read
- */
 router.put('/notifications/:notificationId/read', async (req, res) => {
   try {
     const useCase = new MarkAsReadUseCase(notificationRepo);
@@ -91,10 +84,6 @@ router.put('/notifications/:notificationId/read', async (req, res) => {
   }
 });
 
-/**
- * Mark multiple notifications as read
- * PUT /notifications/read
- */
 router.put('/notifications/read', async (req, res) => {
   try {
     const useCase = new MarkAsReadUseCase(notificationRepo);
@@ -109,15 +98,26 @@ router.put('/notifications/read', async (req, res) => {
       return res.status(400).json({ success: false, error: 'notificationIds array is required' });
     }
 
-    const result = await useCase.execute({
-      notificationIds,
-      recipientId: customerId,
-    });
-
+    const result = await useCase.execute({ notificationIds, recipientId: customerId });
     res.json({ success: true, data: result });
   } catch (error: any) {
     res.status(400).json({ success: false, error: error.message });
   }
 });
+
+// ============================================================================
+// Preferences
+// ============================================================================
+
+router.get('/notifications/preferences', notificationCustomerController.getPreferences);
+router.post('/notifications/preferences', notificationCustomerController.updatePreference);
+
+// ============================================================================
+// Devices
+// ============================================================================
+
+router.get('/notifications/devices', notificationCustomerController.listDevices);
+router.post('/notifications/devices', notificationCustomerController.registerDevice);
+router.delete('/notifications/devices/:deviceToken', notificationCustomerController.deleteDevice);
 
 export const notificationCustomerRouter = router;

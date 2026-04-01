@@ -479,3 +479,377 @@ export const unpublishProduct = async (req: TypedRequest, res: Response): Promis
     res.status(500).json({ success: false, message: error.message || 'Failed to unpublish product' });
   }
 };
+
+// ============================================================================
+// Additional imports for new handlers
+// ============================================================================
+import productCategoryRepo from '../../../modules/product/infrastructure/repositories/productCategoryRepo';
+import productTagRepo from '../../../modules/product/infrastructure/repositories/productTagRepo';
+import productCollectionRepo from '../../../modules/product/infrastructure/repositories/productCollectionRepo';
+import productQaRepo from '../../../modules/product/infrastructure/repositories/productQaRepo';
+import productReviewMediaRepo from '../../../modules/product/infrastructure/repositories/productReviewMediaRepo';
+import productPriceRepo from '../../../modules/product/infrastructure/repositories/productPriceRepo';
+
+// ============================================================================
+// Product Categories
+// ============================================================================
+
+export const listProductCategories = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const categories = await productCategoryRepo.findAll();
+    adminRespond(req, res, 'products/categories/index', {
+      pageName: 'Product Categories',
+      categories,
+      success: req.query.success || null,
+    });
+  } catch (error: any) {
+    logger.error('Error:', error);
+    adminRespond(req, res, 'error', { pageName: 'Error', error: error.message || 'Failed to load categories' });
+  }
+};
+
+export const createProductCategoryForm = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const categories = await productCategoryRepo.findAll();
+    adminRespond(req, res, 'products/categories/form', {
+      pageName: 'Create Product Category',
+      category: null,
+      categories,
+      formData: {},
+    });
+  } catch (error: any) {
+    logger.error('Error:', error);
+    adminRespond(req, res, 'error', { pageName: 'Error', error: error.message || 'Failed to load form' });
+  }
+};
+
+export const createProductCategory = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { name, slug, description, parentId, position, isActive, imageUrl, metaTitle, metaDescription } = req.body;
+    await productCategoryRepo.create({
+      name,
+      slug: slug || name.toLowerCase().replace(/\s+/g, '-'),
+      description: description || null,
+      parentId: parentId || null,
+      position: parseInt(position) || 0,
+      isActive: isActive !== 'false',
+      imageUrl: imageUrl || null,
+      metaTitle: metaTitle || null,
+      metaDescription: metaDescription || null,
+    });
+    res.redirect('/admin/products/categories?success=Category created successfully');
+  } catch (error: any) {
+    logger.error('Error:', error);
+    res.redirect('/admin/products/categories?error=' + encodeURIComponent(error.message || 'Failed to create category'));
+  }
+};
+
+export const editProductCategoryForm = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { categoryId } = req.params;
+    const [category, categories] = await Promise.all([
+      productCategoryRepo.findById(categoryId),
+      productCategoryRepo.findAll(),
+    ]);
+    if (!category) {
+      adminRespond(req, res, 'error', { pageName: 'Not Found', error: 'Category not found' });
+      return;
+    }
+    adminRespond(req, res, 'products/categories/form', {
+      pageName: `Edit Category: ${category.name}`,
+      category,
+      categories: categories.filter(c => c.productCategoryId !== categoryId),
+      formData: category,
+    });
+  } catch (error: any) {
+    logger.error('Error:', error);
+    adminRespond(req, res, 'error', { pageName: 'Error', error: error.message || 'Failed to load form' });
+  }
+};
+
+export const updateProductCategory = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { categoryId } = req.params;
+    const { name, slug, description, parentId, position, isActive, imageUrl, metaTitle, metaDescription } = req.body;
+    await productCategoryRepo.update(categoryId, {
+      name,
+      slug,
+      description: description || null,
+      parentId: parentId || null,
+      position: parseInt(position) || 0,
+      isActive: isActive !== 'false',
+      imageUrl: imageUrl || null,
+      metaTitle: metaTitle || null,
+      metaDescription: metaDescription || null,
+    });
+    res.redirect('/admin/products/categories?success=Category updated successfully');
+  } catch (error: any) {
+    logger.error('Error:', error);
+    res.redirect('/admin/products/categories?error=' + encodeURIComponent(error.message || 'Failed to update category'));
+  }
+};
+
+export const deleteProductCategory = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { categoryId } = req.params;
+    await productCategoryRepo.softDelete(categoryId);
+    res.redirect('/admin/products/categories?success=Category deleted successfully');
+  } catch (error: any) {
+    logger.error('Error:', error);
+    res.redirect('/admin/products/categories?error=' + encodeURIComponent(error.message || 'Failed to delete category'));
+  }
+};
+
+// ============================================================================
+// Product Tags
+// ============================================================================
+
+export const listProductTags = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const tags = await productTagRepo.findAll();
+    adminRespond(req, res, 'products/tags/index', {
+      pageName: 'Product Tags',
+      tags,
+      success: req.query.success || null,
+    });
+  } catch (error: any) {
+    logger.error('Error:', error);
+    adminRespond(req, res, 'error', { pageName: 'Error', error: error.message || 'Failed to load tags' });
+  }
+};
+
+export const createProductTag = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { name, slug, description } = req.body;
+    await productTagRepo.create({
+      name,
+      slug: slug || name.toLowerCase().replace(/\s+/g, '-'),
+      description: description || null,
+    });
+    res.redirect('/admin/products/tags?success=Tag created successfully');
+  } catch (error: any) {
+    logger.error('Error:', error);
+    res.redirect('/admin/products/tags?error=' + encodeURIComponent(error.message || 'Failed to create tag'));
+  }
+};
+
+export const deleteProductTag = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { tagId } = req.params;
+    await productTagRepo.softDelete(tagId);
+    res.redirect('/admin/products/tags?success=Tag deleted successfully');
+  } catch (error: any) {
+    logger.error('Error:', error);
+    res.redirect('/admin/products/tags?error=' + encodeURIComponent(error.message || 'Failed to delete tag'));
+  }
+};
+
+// ============================================================================
+// Product Collections
+// ============================================================================
+
+export const listProductCollections = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const collections = await productCollectionRepo.findAll();
+    adminRespond(req, res, 'products/collections/index', {
+      pageName: 'Product Collections',
+      collections,
+      success: req.query.success || null,
+    });
+  } catch (error: any) {
+    logger.error('Error:', error);
+    adminRespond(req, res, 'error', { pageName: 'Error', error: error.message || 'Failed to load collections' });
+  }
+};
+
+export const createProductCollectionForm = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    adminRespond(req, res, 'products/collections/form', {
+      pageName: 'Create Product Collection',
+      collection: null,
+      formData: {},
+    });
+  } catch (error: any) {
+    logger.error('Error:', error);
+    adminRespond(req, res, 'error', { pageName: 'Error', error: error.message || 'Failed to load form' });
+  }
+};
+
+export const createProductCollection = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { name, slug, description, imageUrl, isActive, position } = req.body;
+    await productCollectionRepo.create({
+      name,
+      slug: slug || name.toLowerCase().replace(/\s+/g, '-'),
+      description: description || null,
+      imageUrl: imageUrl || null,
+      isActive: isActive !== 'false',
+      position: parseInt(position) || 0,
+      merchantId: null,
+    });
+    res.redirect('/admin/products/collections?success=Collection created successfully');
+  } catch (error: any) {
+    logger.error('Error:', error);
+    res.redirect('/admin/products/collections?error=' + encodeURIComponent(error.message || 'Failed to create collection'));
+  }
+};
+
+export const editProductCollectionForm = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { collectionId } = req.params;
+    const collection = await productCollectionRepo.findById(collectionId);
+    if (!collection) {
+      adminRespond(req, res, 'error', { pageName: 'Not Found', error: 'Collection not found' });
+      return;
+    }
+    adminRespond(req, res, 'products/collections/form', {
+      pageName: `Edit Collection: ${collection.name}`,
+      collection,
+      formData: collection,
+    });
+  } catch (error: any) {
+    logger.error('Error:', error);
+    adminRespond(req, res, 'error', { pageName: 'Error', error: error.message || 'Failed to load form' });
+  }
+};
+
+export const updateProductCollection = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { collectionId } = req.params;
+    const { name, slug, description, imageUrl, isActive, position } = req.body;
+    await productCollectionRepo.update(collectionId, {
+      name,
+      slug,
+      description: description || null,
+      imageUrl: imageUrl || null,
+      isActive: isActive !== 'false',
+      position: parseInt(position) || 0,
+    });
+    res.redirect('/admin/products/collections?success=Collection updated successfully');
+  } catch (error: any) {
+    logger.error('Error:', error);
+    res.redirect('/admin/products/collections?error=' + encodeURIComponent(error.message || 'Failed to update collection'));
+  }
+};
+
+export const deleteProductCollection = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { collectionId } = req.params;
+    await productCollectionRepo.softDelete(collectionId);
+    res.redirect('/admin/products/collections?success=Collection deleted successfully');
+  } catch (error: any) {
+    logger.error('Error:', error);
+    res.redirect('/admin/products/collections?error=' + encodeURIComponent(error.message || 'Failed to delete collection'));
+  }
+};
+
+// ============================================================================
+// Product Q&A
+// ============================================================================
+
+export const listProductQa = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { productId } = req.params;
+    const qaList = await productQaRepo.findByProduct(productId);
+    res.render('admin/views/products/partials/qa', { qaList, productId });
+  } catch (error: any) {
+    logger.error('Error:', error);
+    res.status(500).send(error.message || 'Failed to load Q&A');
+  }
+};
+
+export const updateQaStatus = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { productId, qaId } = req.params;
+    const { status } = req.body;
+    await productQaRepo.updateStatus(qaId, status);
+    res.redirect(`/admin/products/${productId}?success=Q%26A status updated`);
+  } catch (error: any) {
+    logger.error('Error:', error);
+    res.redirect(`/admin/products/${req.params.productId}?error=` + encodeURIComponent(error.message || 'Failed to update Q&A status'));
+  }
+};
+
+// ============================================================================
+// Product Review Media
+// ============================================================================
+
+export const listReviewMedia = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { productId } = req.params;
+    const reviews = await productReviewRepo.findByProductId(productId);
+    const mediaByReview = await Promise.all(
+      reviews.map(async r => ({
+        review: r,
+        media: await productReviewMediaRepo.findByReview(r.productReviewId),
+      })),
+    );
+    res.render('admin/views/products/partials/review-media', { mediaByReview, productId });
+  } catch (error: any) {
+    logger.error('Error:', error);
+    res.status(500).send(error.message || 'Failed to load review media');
+  }
+};
+
+export const deleteReviewMedia = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { productId, mediaId } = req.params;
+    await productReviewMediaRepo.delete(mediaId);
+    res.redirect(`/admin/products/${productId}?success=Media deleted`);
+  } catch (error: any) {
+    logger.error('Error:', error);
+    res.redirect(`/admin/products/${req.params.productId}?error=` + encodeURIComponent(error.message || 'Failed to delete media'));
+  }
+};
+
+// ============================================================================
+// Product Prices
+// ============================================================================
+
+export const listProductPrices = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { productId } = req.params;
+    const prices = await productPriceRepo.findByProduct(productId);
+    res.render('admin/views/products/partials/prices', { prices, productId });
+  } catch (error: any) {
+    logger.error('Error:', error);
+    res.status(500).send(error.message || 'Failed to load prices');
+  }
+};
+
+export const upsertProductPrice = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { productId } = req.params;
+    const { productPriceId, currencyCode, amount, compareAtAmount, minQuantity, maxQuantity, startsAt, endsAt, priceListId, productVariantId } = req.body;
+
+    if (productPriceId) {
+      await productPriceRepo.update(productPriceId, {
+        currencyCode,
+        amount: parseFloat(amount),
+        compareAtAmount: compareAtAmount ? parseFloat(compareAtAmount) : null,
+        minQuantity: minQuantity ? parseInt(minQuantity) : null,
+        maxQuantity: maxQuantity ? parseInt(maxQuantity) : null,
+        startsAt: startsAt || null,
+        endsAt: endsAt || null,
+        priceListId: priceListId || null,
+      });
+    } else {
+      await productPriceRepo.create({
+        productId,
+        productVariantId: productVariantId || null,
+        priceListId: priceListId || null,
+        currencyCode,
+        amount: parseFloat(amount),
+        compareAtAmount: compareAtAmount ? parseFloat(compareAtAmount) : null,
+        minQuantity: minQuantity ? parseInt(minQuantity) : null,
+        maxQuantity: maxQuantity ? parseInt(maxQuantity) : null,
+        startsAt: startsAt || null,
+        endsAt: endsAt || null,
+      });
+    }
+    res.redirect(`/admin/products/${productId}?success=Price saved`);
+  } catch (error: any) {
+    logger.error('Error:', error);
+    res.redirect(`/admin/products/${req.params.productId}?error=` + encodeURIComponent(error.message || 'Failed to save price'));
+  }
+};

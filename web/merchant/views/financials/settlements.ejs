@@ -1,0 +1,65 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row align-items-center">
+    <div class="col">
+      <h2 class="page-title">Settlements</h2>
+      <div class="text-muted mt-1"><a href="/merchant/financials">Financials</a> / Settlements</div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">All Settlements</h3>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-vcenter card-table">
+      <thead>
+        <tr>
+          <th>Reference</th>
+          <th>Amount</th>
+          <th>Currency</th>
+          <th>Status</th>
+          <th>Scheduled</th>
+          <th>Processed</th>
+          <th>Created</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (settlements && settlements.length > 0) { %>
+          <% settlements.forEach(settlement => { %>
+            <tr>
+              <td class="text-muted"><%= settlement.reference || '—' %></td>
+              <td><%= (settlement.amount / 100).toLocaleString('en-US', { style: 'currency', currency: settlement.currency }) %></td>
+              <td><%= settlement.currency %></td>
+              <td>
+                <span class="badge bg-<%= settlement.status === 'completed' ? 'success' : settlement.status === 'pending' ? 'warning' : settlement.status === 'failed' ? 'danger' : 'secondary' %>-lt">
+                  <%= settlement.status %>
+                </span>
+              </td>
+              <td class="text-muted"><%= settlement.scheduledAt ? new Date(settlement.scheduledAt).toLocaleDateString() : '—' %></td>
+              <td class="text-muted"><%= settlement.processedAt ? new Date(settlement.processedAt).toLocaleDateString() : '—' %></td>
+              <td class="text-muted"><%= new Date(settlement.createdAt).toLocaleDateString() %></td>
+              <td>
+                <a href="/merchant/financials/payouts/<%= settlement.merchantPayoutId %>" class="btn btn-sm btn-outline-secondary">View</a>
+              </td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr>
+            <td colspan="8" class="text-center text-muted py-4">No settlements found.</td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+  <% if (settlements && settlements.length === limit) { %>
+    <div class="card-footer d-flex align-items-center">
+      <% if (offset > 0) { %>
+        <a href="?offset=<%= Math.max(0, offset - limit) %>&limit=<%= limit %>" class="btn btn-outline-secondary me-2">Previous</a>
+      <% } %>
+      <a href="?offset=<%= offset + limit %>&limit=<%= limit %>" class="btn btn-outline-secondary ms-auto">Next</a>
+    </div>
+  <% } %>
+</div>

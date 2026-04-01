@@ -1,0 +1,50 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row align-items-center">
+    <div class="col-auto">
+      <h2 class="page-title">Payment Reports</h2>
+    </div>
+    <div class="col-auto ms-auto">
+      <a href="/merchant/financials/balance" class="btn btn-outline-primary">View Balance</a>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body p-0">
+    <table class="table table-vcenter card-table">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Currency</th>
+          <th>Total Amount</th>
+          <th>Transactions</th>
+          <th>Period Start</th>
+          <th>Period End</th>
+          <th>Created</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (reports && reports.length > 0) { %>
+          <% reports.forEach(report => { %>
+            <tr>
+              <td><span class="badge bg-blue-lt"><%= report.type %></span></td>
+              <td><%= report.currency %></td>
+              <td>
+                <%= (report.totalAmount / 100).toLocaleString('en-US', { style: 'currency', currency: report.currency }) %>
+              </td>
+              <td><%= report.transactionCount %></td>
+              <td><%= new Date(report.periodStart).toLocaleDateString() %></td>
+              <td><%= new Date(report.periodEnd).toLocaleDateString() %></td>
+              <td><%= new Date(report.createdAt).toLocaleDateString() %></td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr>
+            <td colspan="7" class="text-center text-muted py-4">No payment reports found.</td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>

@@ -83,6 +83,19 @@ router.post('/products/:productId/reviews', productController.createReview);
 router.post('/reviews/:reviewId/helpful', productController.markReviewHelpful);
 router.post('/reviews/:reviewId/report', productController.reportReview);
 
+// ============================================================================
+// Q&A Routes (Customer)
+// ============================================================================
+
+router.get('/products/:productId/qa', productController.listProductQaCustomer);
+router.post('/products/:productId/qa', productController.submitProductQa);
+
+// ============================================================================
+// Review Vote Routes (Customer)
+// ============================================================================
+
+router.post('/products/:productId/reviews/:reviewId/vote', productController.voteOnReview);
+
 /**
  * Get product by ID or slug
  * GET /products/:identifier

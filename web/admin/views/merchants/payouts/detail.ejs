@@ -1,0 +1,81 @@
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <h2 class="page-title">Payout Details</h2>
+    </div>
+    <div class="col-auto ms-auto">
+      <a href="/admin/operations/merchants/<%= merchantId %>/payouts" class="btn btn-secondary">Back to Payouts</a>
+    </div>
+  </div>
+</div>
+
+<section class="content">
+  <div class="container-fluid">
+    <%- include('../../../partials/alerts') %>
+
+    <% if (payout) { %>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header"><h3 class="card-title">Payout Summary</h3></div>
+          <div class="card-body">
+            <dl class="row">
+              <dt class="col-sm-4">Payout ID</dt>
+              <dd class="col-sm-8"><code><%= payout.merchantPayoutId %></code></dd>
+              <dt class="col-sm-4">Amount</dt>
+              <dd class="col-sm-8"><strong><%= payout.currency %> <%= (payout.amount || 0).toFixed(2) %></strong></dd>
+              <dt class="col-sm-4">Status</dt>
+              <dd class="col-sm-8">
+                <span class="badge bg-<%= payout.status === 'completed' ? 'success' : payout.status === 'failed' ? 'danger' : payout.status === 'processing' ? 'info' : 'warning' %>">
+                  <%= payout.status %>
+                </span>
+              </dd>
+              <dt class="col-sm-4">Reference</dt>
+              <dd class="col-sm-8"><%= payout.reference || '-' %></dd>
+              <dt class="col-sm-4">Scheduled</dt>
+              <dd class="col-sm-8"><%= payout.scheduledAt ? new Date(payout.scheduledAt).toLocaleString() : '-' %></dd>
+              <dt class="col-sm-4">Processed</dt>
+              <dd class="col-sm-8"><%= payout.processedAt ? new Date(payout.processedAt).toLocaleString() : '-' %></dd>
+              <dt class="col-sm-4">Created</dt>
+              <dd class="col-sm-8"><%= new Date(payout.createdAt).toLocaleString() %></dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mt-3">
+      <div class="card-header"><h3 class="card-title">Payout Items</h3></div>
+      <div class="card-body table-responsive p-0">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Item ID</th>
+              <th>Order</th>
+              <th>Description</th>
+              <th>Amount</th>
+              <th>Currency</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% (items || []).forEach(function(item) { %>
+            <tr>
+              <td><code><%= item.merchantPayoutItemId.substring(0, 8) %>...</code></td>
+              <td><%= item.orderId ? item.orderId.substring(0, 8) + '...' : '-' %></td>
+              <td><%= item.description || '-' %></td>
+              <td><strong><%= (item.amount || 0).toFixed(2) %></strong></td>
+              <td><%= item.currency %></td>
+            </tr>
+            <% }); %>
+            <% if ((items || []).length === 0) { %>
+            <tr><td colspan="5" class="text-center text-muted py-4">No items found.</td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <% } else { %>
+    <div class="alert alert-warning">Payout not found.</div>
+    <% } %>
+  </div>
+</section>

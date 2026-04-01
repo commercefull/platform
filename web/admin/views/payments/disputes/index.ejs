@@ -1,0 +1,84 @@
+<!-- Page Header -->
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col">
+      <h2 class="page-title">Payment Disputes</h2>
+    </div>
+  </div>
+</div>
+
+<section class="content">
+  <div class="container-fluid">
+    <%- include('../../partials/alerts') %>
+
+    <!-- Filters -->
+    <div class="card mb-3">
+      <div class="card-body">
+        <form method="GET" class="row g-3">
+          <div class="col-md-3">
+            <select class="form-select" name="status">
+              <option value="">All Statuses</option>
+              <option value="open" <%= filters.status === 'open' ? 'selected' : '' %>>Open</option>
+              <option value="under_review" <%= filters.status === 'under_review' ? 'selected' : '' %>>Under Review</option>
+              <option value="resolved" <%= filters.status === 'resolved' ? 'selected' : '' %>>Resolved</option>
+              <option value="lost" <%= filters.status === 'lost' ? 'selected' : '' %>>Lost</option>
+              <option value="won" <%= filters.status === 'won' ? 'selected' : '' %>>Won</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100">Filter</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Disputes Table -->
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Disputes</h3>
+        <span class="float-end text-muted"><%= (disputes || []).length %> records</span>
+      </div>
+      <div class="card-body table-responsive p-0">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Dispute ID</th>
+              <th>Payment ID</th>
+              <th>Merchant</th>
+              <th>Amount</th>
+              <th>Reason</th>
+              <th>Status</th>
+              <th>Due By</th>
+              <th>Created</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% (disputes || []).forEach(function(d) { %>
+            <tr>
+              <td><code><%= d.paymentDisputeId.substring(0, 8) %>...</code></td>
+              <td><code><%= d.paymentId.substring(0, 8) %>...</code></td>
+              <td><%= d.merchantId %></td>
+              <td><strong><%= d.currency %> <%= (d.amount || 0).toFixed(2) %></strong></td>
+              <td><%= d.reason || '-' %></td>
+              <td>
+                <span class="badge bg-<%= d.status === 'resolved' || d.status === 'won' ? 'success' : d.status === 'lost' ? 'danger' : d.status === 'open' ? 'warning' : 'info' %>">
+                  <%= d.status %>
+                </span>
+              </td>
+              <td><%= d.dueBy ? new Date(d.dueBy).toLocaleDateString() : '-' %></td>
+              <td><%= new Date(d.createdAt).toLocaleDateString() %></td>
+              <td>
+                <a href="/admin/payments/disputes/<%= d.paymentDisputeId %>" class="btn btn-sm btn-outline-info">View</a>
+              </td>
+            </tr>
+            <% }); %>
+            <% if ((disputes || []).length === 0) { %>
+            <tr><td colspan="9" class="text-center text-muted py-4">No disputes found.</td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>

@@ -12,6 +12,14 @@ import {
   markAllNotificationsAsRead,
   deleteNotification,
   getUnreadCount,
+  listBatches,
+  getBatch,
+  sendBatch,
+  listWebhooks,
+  createWebhook,
+  deactivateWebhook,
+  listTranslations,
+  upsertTranslation,
 } from '../controllers/notificationBusinessController';
 
 const router = express.Router();
@@ -36,5 +44,25 @@ router.get('/notifications/recent', getRecentNotifications);
 router.get('/notifications/count', getUnreadCount);
 router.put('/notifications/:id/read', markNotificationAsRead);
 router.put('/notifications/read-all', markAllNotificationsAsRead);
+
+// ============================================================================
+// Batch routes
+// ============================================================================
+router.get('/notifications/batches', listBatches);
+router.post('/notifications/batches', sendBatch);
+router.get('/notifications/batches/:batchId', getBatch);
+
+// ============================================================================
+// Webhook routes
+// ============================================================================
+router.get('/notifications/webhooks', listWebhooks);
+router.post('/notifications/webhooks', createWebhook);
+router.delete('/notifications/webhooks/:webhookId', deactivateWebhook);
+
+// ============================================================================
+// Template translation routes
+// ============================================================================
+router.get('/notifications/templates/:templateId/translations', listTranslations);
+router.post('/notifications/templates/:templateId/translations', upsertTranslation);
 
 export const notificationMerchantRouter = router;
