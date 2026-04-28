@@ -28,17 +28,13 @@ export class ProductCategoryRepo {
   }
 
   async findById(productCategoryId: string): Promise<ProductCategory | null> {
-    return queryOne<ProductCategory>(
-      `SELECT * FROM "productCategory" WHERE "productCategoryId" = $1 AND "deletedAt" IS NULL`,
-      [productCategoryId],
-    );
+    return queryOne<ProductCategory>(`SELECT * FROM "productCategory" WHERE "productCategoryId" = $1 AND "deletedAt" IS NULL`, [
+      productCategoryId,
+    ]);
   }
 
   async findBySlug(slug: string): Promise<ProductCategory | null> {
-    return queryOne<ProductCategory>(
-      `SELECT * FROM "productCategory" WHERE "slug" = $1 AND "deletedAt" IS NULL`,
-      [slug],
-    );
+    return queryOne<ProductCategory>(`SELECT * FROM "productCategory" WHERE "slug" = $1 AND "deletedAt" IS NULL`, [slug]);
   }
 
   async create(params: ProductCategoryCreateParams): Promise<ProductCategory> {

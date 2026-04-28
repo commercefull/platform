@@ -24,10 +24,10 @@ export class UserStoreRepository implements IUserStoreRepository {
   }
 
   async findByUserAndStore(userId: string, storeId: string): Promise<UserStoreAssignment | null> {
-    const row = await queryOne<Record<string, any>>(
-      `SELECT * FROM "${this.tableName}" WHERE "userId" = $1 AND "storeId" = $2`,
-      [userId, storeId],
-    );
+    const row = await queryOne<Record<string, any>>(`SELECT * FROM "${this.tableName}" WHERE "userId" = $1 AND "storeId" = $2`, [
+      userId,
+      storeId,
+    ]);
 
     return row ? this.mapToAssignment(row) : null;
   }
@@ -42,18 +42,17 @@ export class UserStoreRepository implements IUserStoreRepository {
   }
 
   async save(assignment: UserStoreAssignment): Promise<UserStoreAssignment> {
-    const existing = await queryOne<Record<string, any>>(
-      `SELECT "userStoreId" FROM "${this.tableName}" WHERE "userStoreId" = $1`,
-      [assignment.userStoreId],
-    );
+    const existing = await queryOne<Record<string, any>>(`SELECT "userStoreId" FROM "${this.tableName}" WHERE "userStoreId" = $1`, [
+      assignment.userStoreId,
+    ]);
 
     const payload = assignment.toJSON();
 
     if (payload.isPrimary) {
-      await query(
-        `UPDATE "${this.tableName}" SET "isPrimary" = false, "updatedAt" = NOW() WHERE "userId" = $1 AND "userStoreId" <> $2`,
-        [payload.userId, payload.userStoreId],
-      );
+      await query(`UPDATE "${this.tableName}" SET "isPrimary" = false, "updatedAt" = NOW() WHERE "userId" = $1 AND "userStoreId" <> $2`, [
+        payload.userId,
+        payload.userStoreId,
+      ]);
     }
 
     if (existing) {
@@ -112,11 +111,7 @@ export class UserStoreRepository implements IUserStoreRepository {
       role: row.role,
       isPrimary: Boolean(row.isPrimary),
       isActive: Boolean(row.isActive),
-      permissions: Array.isArray(row.permissions)
-        ? row.permissions
-        : row.permissions
-          ? JSON.parse(row.permissions)
-          : [],
+      permissions: Array.isArray(row.permissions) ? row.permissions : row.permissions ? JSON.parse(row.permissions) : [],
       createdAt: new Date(row.createdAt),
       updatedAt: new Date(row.updatedAt),
     });

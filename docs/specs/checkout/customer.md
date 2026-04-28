@@ -11,7 +11,7 @@
 
 ## Context
 
-A customer initiates a checkout from a non-empty `basket`, then progressively sets shipping address, billing address, shipping method, payment method, and (optionally) a coupon. When the session is *ready for payment*, the customer requests a payment intent — at that moment a draft `Order` is created in `PAYMENT_PENDING` and a gateway payment intent is opened. The customer authorises payment client-side; the gateway webhook then promotes the order to `PROCESSING` (success) or `PAYMENT_FAILED` (failure). `POST /complete` is an idempotent confirmation step that finalises the session once the order is paid. The session can also be abandoned, expire, or fail.
+A customer initiates a checkout from a non-empty `basket`, then progressively sets shipping address, billing address, shipping method, payment method, and (optionally) a coupon. When the session is _ready for payment_, the customer requests a payment intent — at that moment a draft `Order` is created in `PAYMENT_PENDING` and a gateway payment intent is opened. The customer authorises payment client-side; the gateway webhook then promotes the order to `PROCESSING` (success) or `PAYMENT_FAILED` (failure). `POST /complete` is an idempotent confirmation step that finalises the session once the order is paid. The session can also be abandoned, expire, or fail.
 
 ### Actors
 
@@ -25,34 +25,32 @@ A customer initiates a checkout from a non-empty `basket`, then progressively se
 Source of truth: `modules/checkout/domain/entities/CheckoutSession.ts`.
 
 ```ts
-type CheckoutStatus =
-  'active' | 'pending_payment' | 'processing' | 'completed' | 'abandoned' | 'expired' | 'failed';
-type PaymentStatus =
-  'pending' | 'authorized' | 'captured' | 'failed' | 'refunded';
+type CheckoutStatus = 'active' | 'pending_payment' | 'processing' | 'completed' | 'abandoned' | 'expired' | 'failed';
+type PaymentStatus = 'pending' | 'authorized' | 'captured' | 'failed' | 'refunded';
 ```
 
 Permitted transitions (derived from the entity's mutator methods):
 
-| From              | To (allowed)                                   | Trigger                                        |
-| ----------------- | ---------------------------------------------- | ---------------------------------------------- |
-| `active`          | `pending_payment`, `abandoned`, `expired`      | `POST /payment-intent` (Order created); abandon; TTL |
-| `pending_payment` | `processing`, `failed`, `abandoned`            | gateway authorises / fails / customer abandons       |
-| `processing`      | `completed`, `failed`                          | gateway captures (success) / capture fails           |
-| `completed`       | _(terminal)_                                   |                                                |
-| `abandoned`       | _(terminal)_                                   |                                                |
-| `expired`         | _(terminal)_                                   |                                                |
-| `failed`          | _(terminal — customer must initiate new session)_ |                                            |
+| From              | To (allowed)                                      | Trigger                                              |
+| ----------------- | ------------------------------------------------- | ---------------------------------------------------- |
+| `active`          | `pending_payment`, `abandoned`, `expired`         | `POST /payment-intent` (Order created); abandon; TTL |
+| `pending_payment` | `processing`, `failed`, `abandoned`               | gateway authorises / fails / customer abandons       |
+| `processing`      | `completed`, `failed`                             | gateway captures (success) / capture fails           |
+| `completed`       | _(terminal)_                                      |                                                      |
+| `abandoned`       | _(terminal)_                                      |                                                      |
+| `expired`         | _(terminal)_                                      |                                                      |
+| `failed`          | _(terminal — customer must initiate new session)_ |                                                      |
 
 ### Policy defaults
 
 Source: `CheckoutSession.create` (`@ modules/checkout/domain/entities/CheckoutSession.ts:47-68`).
 
-| Policy                          | Default                                         |
-| ------------------------------- | ----------------------------------------------- |
-| Session TTL                     | 30 minutes from `createdAt` (extended on resume)|
-| Default currency                | `USD` (overridable via `basket.currency`)       |
-| Billing address fallback        | `sameAsShipping = true` by default              |
-| Existing-session reuse          | `InitiateCheckout` returns the existing active session for the same `basketId` and extends its expiration |
+| Policy                   | Default                                                                                                   |
+| ------------------------ | --------------------------------------------------------------------------------------------------------- |
+| Session TTL              | 30 minutes from `createdAt` (extended on resume)                                                          |
+| Default currency         | `USD` (overridable via `basket.currency`)                                                                 |
+| Billing address fallback | `sameAsShipping = true` by default                                                                        |
+| Existing-session reuse   | `InitiateCheckout` returns the existing active session for the same `basketId` and extends its expiration |
 
 ---
 
@@ -214,52 +212,52 @@ POST /customer/checkout/:id/complete (idempotent confirmation)
    TTL elapsed                          ──► Session expired   (terminal)
 ```
 
-| Policy                          | Default                                         |
-| ------------------------------- | ----------------------------------------------- |
-| Session TTL                     | 30 minutes (extended on resume)                 |
-| Default `sameAsShipping`        | `true`                                          |
-| Default currency                | `USD` / `basket.currency`                       |
+| Policy                   | Default                         |
+| ------------------------ | ------------------------------- |
+| Session TTL              | 30 minutes (extended on resume) |
+| Default `sameAsShipping` | `true`                          |
+| Default currency         | `USD` / `basket.currency`       |
 
 ---
 
 ## 8. Use Case Traceability
 
-| #     | Requirement (summary)                              | Use Case                       | Source File                                                              |
-| ----- | -------------------------------------------------- | ------------------------------ | ------------------------------------------------------------------------ |
-| 2.1.1 | Start session → `POST /customer/checkout`          | `InitiateCheckoutUseCase`      | `modules/checkout/application/useCases/InitiateCheckout.ts`              |
-| 2.1.2 | Resume existing active session                     | `InitiateCheckoutUseCase`      | same — `findByBasketId` + `extendExpiration` branch                      |
-| 2.2.3 | Get session by id                                  | controller `getCheckout`       | `modules/checkout/interface/controllers/CheckoutController.ts`           |
-| 2.3.4 | Set shipping address                               | `SetShippingAddressUseCase`    | `modules/checkout/application/useCases/SetShippingAddress.ts`            |
-| 2.3.5 | Set billing address                                | `SetBillingAddressUseCase`     | `modules/checkout/application/useCases/SetBillingAddress.ts`             |
-| 2.4.7 | Set shipping method                                | `SetShippingMethodUseCase`     | `modules/checkout/application/useCases/SetShippingMethod.ts`             |
-| 2.5.9 | Set payment method                                 | `SetPaymentMethodUseCase`      | `modules/checkout/application/useCases/SetPaymentMethod.ts`              |
-| 2.6.10| Apply coupon                                       | `ApplyCouponUseCase`           | `modules/checkout/application/useCases/ApplyCoupon.ts`                   |
-| 2.6.11| Remove coupon                                      | `RemoveCouponUseCase`          | `modules/checkout/application/useCases/RemoveCoupon.ts`                  |
-| 2.7.12| 🚧 Create payment intent + draft order             | `CreatePaymentIntentUseCase` *(proposed)* | `modules/checkout/application/useCases/CreatePaymentIntent.ts` *(to be added)* — must invoke `CreateOrderUseCase` from `modules/order/application/useCases/CreateOrder.ts` |
-| 2.8.14| Confirm completion (idempotent)                    | `CompleteCheckoutUseCase`      | `modules/checkout/application/useCases/CompleteCheckout.ts` (rewrite: replace TODO with idempotent finalization that asserts the linked order is `PROCESSING`) |
-| 2.9.16| 🚧 Payment captured (webhook)                       | `payment` module webhook handler + `UpdateOrderStatusUseCase` | `modules/payment/...` *(handler)* + `modules/order/application/useCases/UpdateOrderStatus.ts` |
-| 2.9.17| 🚧 Payment failed (webhook)                         | `payment` module webhook handler + `UpdateOrderStatusUseCase` | same                                                                     |
-| 2.10.18| Abandon checkout                                  | `AbandonCheckoutUseCase`       | `modules/checkout/application/useCases/AbandonCheckout.ts` (extend to cancel linked `PAYMENT_PENDING` order) |
+| #       | Requirement (summary)                     | Use Case                                                      | Source File                                                                                                                                                                |
+| ------- | ----------------------------------------- | ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2.1.1   | Start session → `POST /customer/checkout` | `InitiateCheckoutUseCase`                                     | `modules/checkout/application/useCases/InitiateCheckout.ts`                                                                                                                |
+| 2.1.2   | Resume existing active session            | `InitiateCheckoutUseCase`                                     | same — `findByBasketId` + `extendExpiration` branch                                                                                                                        |
+| 2.2.3   | Get session by id                         | controller `getCheckout`                                      | `modules/checkout/interface/controllers/CheckoutController.ts`                                                                                                             |
+| 2.3.4   | Set shipping address                      | `SetShippingAddressUseCase`                                   | `modules/checkout/application/useCases/SetShippingAddress.ts`                                                                                                              |
+| 2.3.5   | Set billing address                       | `SetBillingAddressUseCase`                                    | `modules/checkout/application/useCases/SetBillingAddress.ts`                                                                                                               |
+| 2.4.7   | Set shipping method                       | `SetShippingMethodUseCase`                                    | `modules/checkout/application/useCases/SetShippingMethod.ts`                                                                                                               |
+| 2.5.9   | Set payment method                        | `SetPaymentMethodUseCase`                                     | `modules/checkout/application/useCases/SetPaymentMethod.ts`                                                                                                                |
+| 2.6.10  | Apply coupon                              | `ApplyCouponUseCase`                                          | `modules/checkout/application/useCases/ApplyCoupon.ts`                                                                                                                     |
+| 2.6.11  | Remove coupon                             | `RemoveCouponUseCase`                                         | `modules/checkout/application/useCases/RemoveCoupon.ts`                                                                                                                    |
+| 2.7.12  | 🚧 Create payment intent + draft order    | `CreatePaymentIntentUseCase` _(proposed)_                     | `modules/checkout/application/useCases/CreatePaymentIntent.ts` _(to be added)_ — must invoke `CreateOrderUseCase` from `modules/order/application/useCases/CreateOrder.ts` |
+| 2.8.14  | Confirm completion (idempotent)           | `CompleteCheckoutUseCase`                                     | `modules/checkout/application/useCases/CompleteCheckout.ts` (rewrite: replace TODO with idempotent finalization that asserts the linked order is `PROCESSING`)             |
+| 2.9.16  | 🚧 Payment captured (webhook)             | `payment` module webhook handler + `UpdateOrderStatusUseCase` | `modules/payment/...` _(handler)_ + `modules/order/application/useCases/UpdateOrderStatus.ts`                                                                              |
+| 2.9.17  | 🚧 Payment failed (webhook)               | `payment` module webhook handler + `UpdateOrderStatusUseCase` | same                                                                                                                                                                       |
+| 2.10.18 | Abandon checkout                          | `AbandonCheckoutUseCase`                                      | `modules/checkout/application/useCases/AbandonCheckout.ts` (extend to cancel linked `PAYMENT_PENDING` order)                                                               |
 
 ### Controller wiring
 
 Routes mounted in `modules/checkout/interface/routers/checkoutRouter.ts` and registered under `/customer` in `boot/routes.ts`.
 
-| Endpoint                                                      | Controller handler                          |
-| ------------------------------------------------------------- | ------------------------------------------- |
-| `POST /customer/checkout`                                     | `checkoutController.initiateCheckout`       |
-| `GET /customer/checkout/payment-methods`                      | `checkoutController.getPaymentMethods`      |
-| `GET /customer/checkout/:checkoutId`                          | `checkoutController.getCheckout`            |
-| `PUT /customer/checkout/:checkoutId/shipping-address`         | `checkoutController.setShippingAddress`     |
-| `PUT /customer/checkout/:checkoutId/billing-address`          | `checkoutController.setBillingAddress`      |
-| `GET /customer/checkout/:checkoutId/shipping-methods`         | `checkoutController.getShippingMethods`     |
-| `PUT /customer/checkout/:checkoutId/shipping-method`          | `checkoutController.setShippingMethod`      |
-| `PUT /customer/checkout/:checkoutId/payment-method`           | `checkoutController.setPaymentMethod`       |
-| `POST /customer/checkout/:checkoutId/coupon`                  | `checkoutController.applyCoupon`            |
-| `DELETE /customer/checkout/:checkoutId/coupon`                | `checkoutController.removeCoupon`           |
-| `POST /customer/checkout/:checkoutId/payment-intent` (🚧)     | `checkoutController.createPaymentIntent` *(to be added)* |
-| `POST /customer/checkout/:checkoutId/complete`                | `checkoutController.completeCheckout`       |
-| `POST /customer/checkout/:checkoutId/abandon`                 | `checkoutController.abandonCheckout`        |
+| Endpoint                                                  | Controller handler                                       |
+| --------------------------------------------------------- | -------------------------------------------------------- |
+| `POST /customer/checkout`                                 | `checkoutController.initiateCheckout`                    |
+| `GET /customer/checkout/payment-methods`                  | `checkoutController.getPaymentMethods`                   |
+| `GET /customer/checkout/:checkoutId`                      | `checkoutController.getCheckout`                         |
+| `PUT /customer/checkout/:checkoutId/shipping-address`     | `checkoutController.setShippingAddress`                  |
+| `PUT /customer/checkout/:checkoutId/billing-address`      | `checkoutController.setBillingAddress`                   |
+| `GET /customer/checkout/:checkoutId/shipping-methods`     | `checkoutController.getShippingMethods`                  |
+| `PUT /customer/checkout/:checkoutId/shipping-method`      | `checkoutController.setShippingMethod`                   |
+| `PUT /customer/checkout/:checkoutId/payment-method`       | `checkoutController.setPaymentMethod`                    |
+| `POST /customer/checkout/:checkoutId/coupon`              | `checkoutController.applyCoupon`                         |
+| `DELETE /customer/checkout/:checkoutId/coupon`            | `checkoutController.removeCoupon`                        |
+| `POST /customer/checkout/:checkoutId/payment-intent` (🚧) | `checkoutController.createPaymentIntent` _(to be added)_ |
+| `POST /customer/checkout/:checkoutId/complete`            | `checkoutController.completeCheckout`                    |
+| `POST /customer/checkout/:checkoutId/abandon`             | `checkoutController.abandonCheckout`                     |
 
 ### Event wiring
 
@@ -293,13 +291,13 @@ Subscribers are registered in `libs/events/registerEventHandlers.ts`. The `POST 
 
 Source: `tests/integration/checkout/checkout.test.ts`.
 
-| Requirement | Test (describe → it)                                                                              |
-| ----------- | ------------------------------------------------------------------------------------------------- |
-| 1.3 (camelCase only)   | `Checkout Session API` → `should create a checkout session with camelCase properties`     |
-| 1.3 / 2.2.3            | `Checkout Session API` → `should get a checkout session by ID with camelCase properties`  |
-| 2.1.1                  | `Checkout Session API` → `should create a checkout session with camelCase properties` (covers initial 201) |
-| 5.2.4 (empty basket)   | _missing_ — see gaps                                                                              |
-| 5.2.3 (basket not found) | _missing_ — see gaps                                                                            |
+| Requirement              | Test (describe → it)                                                                                       |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| 1.3 (camelCase only)     | `Checkout Session API` → `should create a checkout session with camelCase properties`                      |
+| 1.3 / 2.2.3              | `Checkout Session API` → `should get a checkout session by ID with camelCase properties`                   |
+| 2.1.1                    | `Checkout Session API` → `should create a checkout session with camelCase properties` (covers initial 201) |
+| 5.2.4 (empty basket)     | _missing_ — see gaps                                                                                       |
+| 5.2.3 (basket not found) | _missing_ — see gaps                                                                                       |
 
 ### Required additional tests (gaps)
 

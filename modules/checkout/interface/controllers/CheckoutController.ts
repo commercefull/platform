@@ -8,6 +8,8 @@ import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
 import CheckoutRepo from '../../infrastructure/repositories/CheckoutRepository';
 import BasketRepo from '../../../basket/infrastructure/repositories/BasketRepository';
+import OrderRepo from '../../../order/infrastructure/repositories/OrderRepository';
+import PaymentRepo from '../../../payment/infrastructure/repositories/PaymentRepository';
 import { Money } from '../../../basket/domain/valueObjects/Money';
 import {
   InitiateCheckoutCommand,
@@ -29,6 +31,8 @@ import {
   CompleteCheckoutUseCase,
   AbandonCheckoutCommand,
   AbandonCheckoutUseCase,
+  CreatePaymentIntentCommand,
+  CreatePaymentIntentUseCase,
 } from '../../application/useCases';
 
 // ============================================================================
@@ -301,7 +305,7 @@ export const completeCheckout = async (req: TypedRequest, res: Response): Promis
     const { checkoutId } = req.params;
 
     const command = new CompleteCheckoutCommand(checkoutId);
-    const useCase = new CompleteCheckoutUseCase(CheckoutRepo);
+    const useCase = new CompleteCheckoutUseCase(CheckoutRepo, OrderRepo);
     const result = await useCase.execute(command);
 
     respond(req, res, result, 201, 'checkout/complete');
@@ -321,7 +325,7 @@ export const abandonCheckout = async (req: TypedRequest, res: Response): Promise
     const { checkoutId } = req.params;
 
     const command = new AbandonCheckoutCommand(checkoutId);
-    const useCase = new AbandonCheckoutUseCase(CheckoutRepo);
+    const useCase = new AbandonCheckoutUseCase(CheckoutRepo, OrderRepo);
     const result = await useCase.execute(command);
 
     respond(req, res, result, 200, 'checkout/abandoned');
@@ -364,5 +368,31 @@ export const setBillingAddress = async (req: TypedRequest, res: Response): Promi
     logger.error('Error:', error);
 
     respondError(req, res, error.message || 'Failed to set billing address', 500, 'checkout/error');
+  }
+};
+
+/**
+ * Create payment intent and draft order
+ * POST /checkout/:checkoutId/payment-intent
+ */
+export const createPaymentIntent = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { checkoutId } = req.params;
+    const customerId = req.user?.customerId;
+
+    const command = new CreatePaymentIntentCommand(checkoutId, customerId);
+    const useCase = new CreatePaymentIntentUseCase(CheckoutRepo, BasketRepo, OrderRepo, PaymentRepo);
+    const result = await useCase.execute(command);
+
+    respond(req, res, result, 201, 'checkout/payment-intent');
+  } catch (error: any) {
+    logger.error('Error:', error);
+
+    const isNotFound = error.message?.includes('not found');
+    const isNotReady = error.message?.includes('not ready for payment');
+    const isNoGateway = error.message?.includes('No payment gateway');
+
+    const statusCode = isNotFound ? 404 : isNotReady ? 400 : isNoGateway ? 503 : 500;
+    respondError(req, res, error.message || 'Failed to create payment intent', statusCode, 'checkout/error');
   }
 };

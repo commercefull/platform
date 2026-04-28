@@ -5,7 +5,7 @@
 
 exports.up = async function (knex) {
   const hasTable = await knex.schema.hasTable('organization');
-  
+
   if (!hasTable) {
     // Create full organization table with extended fields
     await knex.schema.createTable('organization', table => {

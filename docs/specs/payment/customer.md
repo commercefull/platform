@@ -20,24 +20,24 @@ The `payment` module also exposes stored payment methods and transaction history
 
 ### Actors
 
-| Actor   | Role |
-|---------|------|
-| Customer | Authenticated user; views transactions, manages stored payment methods |
-| Gateway  | External payment provider (Stripe, etc.); posts signed webhook events |
+| Actor    | Role                                                                                  |
+| -------- | ------------------------------------------------------------------------------------- |
+| Customer | Authenticated user; views transactions, manages stored payment methods                |
+| Gateway  | External payment provider (Stripe, etc.); posts signed webhook events                 |
 | System   | Verifies signatures, transitions transaction/order/session state, emits domain events |
 
 ### Transaction status state machine
 
 Source: `modules/payment/domain/valueObjects/PaymentStatus.ts` (`TransactionStatusTransitions`).
 
-| From | To (allowed) |
-|------|-------------|
-| `pending` | `authorized`, `paid`, `failed`, `cancelled`, `expired` |
-| `authorized` | `paid`, `voided`, `failed`, `expired` |
-| `paid` | `partially_refunded`, `refunded` |
-| `partially_refunded` | `refunded` |
-| `failed` | `pending` (retry) |
-| `voided` / `refunded` / `cancelled` / `expired` | _(terminal)_ |
+| From                                            | To (allowed)                                           |
+| ----------------------------------------------- | ------------------------------------------------------ |
+| `pending`                                       | `authorized`, `paid`, `failed`, `cancelled`, `expired` |
+| `authorized`                                    | `paid`, `voided`, `failed`, `expired`                  |
+| `paid`                                          | `partially_refunded`, `refunded`                       |
+| `partially_refunded`                            | `refunded`                                             |
+| `failed`                                        | `pending` (retry)                                      |
+| `voided` / `refunded` / `cancelled` / `expired` | _(terminal)_                                           |
 
 ---
 
@@ -146,25 +146,25 @@ Source: `modules/payment/domain/valueObjects/PaymentStatus.ts` (`TransactionStat
 
 ## 6. Use Case Traceability
 
-| # | Requirement | Use Case / Handler | Source File |
-|---|-------------|-------------------|-------------|
-| 2.1.1 | Initiate payment intent | `InitiatePaymentUseCase` | `modules/payment/application/useCases/InitiatePayment.ts` |
-| 2.2.4 | Webhook — payment captured | `handleGatewayWebhook` (🚧) | `modules/payment/interface/controllers/webhookController.ts` *(to be added)* |
-| 2.3.5 | Webhook — payment failed | `handleGatewayWebhook` (🚧) | same |
-| 2.4.6 | List my transactions | controller `getMyTransactions` | `modules/payment/interface/controllers/PaymentController.ts` |
-| 2.5.8–11 | Stored payment methods CRUD | `storedPaymentMethodRepo` + `SaveStoredPaymentMethodUseCase` | `modules/payment/infrastructure/repositories/storedPaymentMethodRepo.ts` |
+| #        | Requirement                 | Use Case / Handler                                           | Source File                                                                  |
+| -------- | --------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------------------- |
+| 2.1.1    | Initiate payment intent     | `InitiatePaymentUseCase`                                     | `modules/payment/application/useCases/InitiatePayment.ts`                    |
+| 2.2.4    | Webhook — payment captured  | `handleGatewayWebhook` (🚧)                                  | `modules/payment/interface/controllers/webhookController.ts` _(to be added)_ |
+| 2.3.5    | Webhook — payment failed    | `handleGatewayWebhook` (🚧)                                  | same                                                                         |
+| 2.4.6    | List my transactions        | controller `getMyTransactions`                               | `modules/payment/interface/controllers/PaymentController.ts`                 |
+| 2.5.8–11 | Stored payment methods CRUD | `storedPaymentMethodRepo` + `SaveStoredPaymentMethodUseCase` | `modules/payment/infrastructure/repositories/storedPaymentMethodRepo.ts`     |
 
 ### Controller wiring
 
-| Endpoint | Handler |
-|----------|---------|
-| `POST /payment/webhook` (🚧) | `webhookController.handleGatewayWebhook` |
-| `GET /customer/payment/transactions` | `PaymentController.getMyTransactions` |
-| `GET /customer/payment/orders/:orderId` | `PaymentController.getTransactionByOrder` |
-| `GET /customer/payment-methods` | `paymentCustomerController.listStoredMethods` |
-| `POST /customer/payment-methods` | `paymentCustomerController.saveStoredMethod` |
-| `POST /customer/payment-methods/:methodId/default` | `paymentCustomerController.setDefaultMethod` |
-| `DELETE /customer/payment-methods/:methodId` | `paymentCustomerController.deleteStoredMethod` |
+| Endpoint                                           | Handler                                        |
+| -------------------------------------------------- | ---------------------------------------------- |
+| `POST /payment/webhook` (🚧)                       | `webhookController.handleGatewayWebhook`       |
+| `GET /customer/payment/transactions`               | `PaymentController.getMyTransactions`          |
+| `GET /customer/payment/orders/:orderId`            | `PaymentController.getTransactionByOrder`      |
+| `GET /customer/payment-methods`                    | `paymentCustomerController.listStoredMethods`  |
+| `POST /customer/payment-methods`                   | `paymentCustomerController.saveStoredMethod`   |
+| `POST /customer/payment-methods/:methodId/default` | `paymentCustomerController.setDefaultMethod`   |
+| `DELETE /customer/payment-methods/:methodId`       | `paymentCustomerController.deleteStoredMethod` |
 
 The webhook route must be mounted **without** `isMerchantLoggedIn` or `isCustomerLoggedIn` — it is authenticated by signature verification only. Mount it at the root level in `boot/routes.ts` (e.g. `app.post('/payment/webhook', webhookController.handleGatewayWebhook)`).
 
@@ -194,13 +194,13 @@ InitiatePaymentUseCase          ──► eventBus.emit('payment.received')
 
 The following are required for the webhook handler to work but do not yet exist:
 
-| Gap | Location | Notes |
-|-----|----------|-------|
-| `findByPaymentIntentId` on `CheckoutRepository` | `modules/checkout/domain/repositories/CheckoutRepository.ts` + infra impl | Needed to look up the session from the gateway's `paymentIntentId` |
-| `webhookController.ts` | `modules/payment/interface/controllers/webhookController.ts` | New file — handles `POST /payment/webhook` |
-| Webhook route (unauthenticated) | `boot/routes.ts` | `app.post('/payment/webhook', ...)` — no auth middleware |
-| `GatewayAdapterService` (optional) | `modules/payment/application/services/GatewayAdapterService.ts` | Wraps Stripe SDK; returns `clientSecret` to `CreatePaymentIntentUseCase` in checkout |
-| `orderId` field on `CheckoutSession` | `CheckoutSession` entity + `CheckoutRepository` infra | Needed to look up the linked order from the session during webhook processing |
+| Gap                                             | Location                                                                  | Notes                                                                                |
+| ----------------------------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `findByPaymentIntentId` on `CheckoutRepository` | `modules/checkout/domain/repositories/CheckoutRepository.ts` + infra impl | Needed to look up the session from the gateway's `paymentIntentId`                   |
+| `webhookController.ts`                          | `modules/payment/interface/controllers/webhookController.ts`              | New file — handles `POST /payment/webhook`                                           |
+| Webhook route (unauthenticated)                 | `boot/routes.ts`                                                          | `app.post('/payment/webhook', ...)` — no auth middleware                             |
+| `GatewayAdapterService` (optional)              | `modules/payment/application/services/GatewayAdapterService.ts`           | Wraps Stripe SDK; returns `clientSecret` to `CreatePaymentIntentUseCase` in checkout |
+| `orderId` field on `CheckoutSession`            | `CheckoutSession` entity + `CheckoutRepository` infra                     | Needed to look up the linked order from the session during webhook processing        |
 
 ---
 
@@ -208,17 +208,17 @@ The following are required for the webhook handler to work but do not yet exist:
 
 Source: `tests/integration/payment/payment.test.ts` (to be created).
 
-| Requirement | Test |
-|-------------|------|
-| 2.1.1 | `InitiatePaymentUseCase` creates a `PENDING` transaction and emits `payment.received` |
-| 2.1.2 | `amount <= 0` throws the documented error |
-| 2.2.4 | Simulated webhook `payment_intent.succeeded` → transaction `PAID`, order `PROCESSING`, session `processing` |
-| 2.3.5 | Simulated webhook `payment_intent.payment_failed` → transaction `FAILED`, order `PAYMENT_FAILED`, session `failed` |
-| 4.1.1 | Webhook with invalid signature → `400` |
-| 4.2.3 | Re-delivered success webhook on already-`PAID` transaction → `200`, no duplicate events |
-| 4.2.4 | Re-delivered failure webhook on already-`FAILED` transaction → `200`, no duplicate events |
-| 2.4.6 | `GET /customer/payment/transactions` returns only the authenticated customer's transactions |
-| 2.5.9 | `POST /customer/payment-methods` enforces single-default invariant |
+| Requirement | Test                                                                                                               |
+| ----------- | ------------------------------------------------------------------------------------------------------------------ |
+| 2.1.1       | `InitiatePaymentUseCase` creates a `PENDING` transaction and emits `payment.received`                              |
+| 2.1.2       | `amount <= 0` throws the documented error                                                                          |
+| 2.2.4       | Simulated webhook `payment_intent.succeeded` → transaction `PAID`, order `PROCESSING`, session `processing`        |
+| 2.3.5       | Simulated webhook `payment_intent.payment_failed` → transaction `FAILED`, order `PAYMENT_FAILED`, session `failed` |
+| 4.1.1       | Webhook with invalid signature → `400`                                                                             |
+| 4.2.3       | Re-delivered success webhook on already-`PAID` transaction → `200`, no duplicate events                            |
+| 4.2.4       | Re-delivered failure webhook on already-`FAILED` transaction → `200`, no duplicate events                          |
+| 2.4.6       | `GET /customer/payment/transactions` returns only the authenticated customer's transactions                        |
+| 2.5.9       | `POST /customer/payment-methods` enforces single-default invariant                                                 |
 
 ---
 

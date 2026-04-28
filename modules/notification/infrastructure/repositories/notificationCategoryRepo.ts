@@ -11,16 +11,16 @@ export interface NotificationCategory {
 }
 
 export async function findAll(): Promise<NotificationCategory[]> {
-  return (await query<NotificationCategory[]>(
-    `SELECT * FROM "notificationCategory" WHERE "isActive" = true ORDER BY name ASC`,
-  )) || [];
+  return (await query<NotificationCategory[]>(`SELECT * FROM "notificationCategory" WHERE "isActive" = true ORDER BY name ASC`)) || [];
 }
 
 export async function findBySlug(slug: string): Promise<NotificationCategory | null> {
   return queryOne<NotificationCategory>(`SELECT * FROM "notificationCategory" WHERE slug = $1`, [slug]);
 }
 
-export async function create(params: Omit<NotificationCategory, 'notificationCategoryId' | 'createdAt' | 'updatedAt'>): Promise<NotificationCategory | null> {
+export async function create(
+  params: Omit<NotificationCategory, 'notificationCategoryId' | 'createdAt' | 'updatedAt'>,
+): Promise<NotificationCategory | null> {
   const now = new Date();
   return queryOne<NotificationCategory>(
     `INSERT INTO "notificationCategory" (name, slug, description, "isActive", "createdAt", "updatedAt")

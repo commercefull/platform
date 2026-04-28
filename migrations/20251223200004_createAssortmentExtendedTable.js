@@ -4,7 +4,7 @@
 
 exports.up = async function (knex) {
   const hasTable = await knex.schema.hasTable('assortment');
-  
+
   if (!hasTable) {
     await knex.schema.createTable('assortment', table => {
       table.uuid('assortmentId').primary().defaultTo(knex.raw('uuidv7()'));

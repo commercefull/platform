@@ -5,7 +5,7 @@
 
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';;
+import { TypedRequest } from 'libs/types/express';
 import CategoryRepo from '../../../modules/product/infrastructure/repositories/categoryRepo';
 import { adminRespond } from '../../respond';
 
@@ -130,7 +130,7 @@ export const editCategoryForm = async (req: TypedRequest, res: Response): Promis
     adminRespond(req, res, 'catalog/categories/edit', {
       pageName: `Edit: ${category.name}`,
       category,
-      parentCategories: parentCategories.filter((c) => c.productCategoryId !== categoryId),
+      parentCategories: parentCategories.filter(c => c.productCategoryId !== categoryId),
     });
   } catch (error: any) {
     logger.error('Error:', error);

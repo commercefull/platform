@@ -41,20 +41,14 @@ export const viewPlan = async (req: TypedRequest, res: Response) => {
   try {
     const { planId } = req.params;
 
-    const plan = await queryOne(
-      `SELECT * FROM "membershipPlan" WHERE "membershipPlanId" = $1 AND "isActive" = true`,
-      [planId],
-    );
+    const plan = await queryOne(`SELECT * FROM "membershipPlan" WHERE "membershipPlanId" = $1 AND "isActive" = true`, [planId]);
 
     if (!plan) {
       (req as any).flash?.('error', 'Membership plan not found');
       return res.redirect('/membership');
     }
 
-    const benefits = await query(
-      `SELECT * FROM "membershipBenefit" WHERE "membershipPlanId" = $1 ORDER BY "sortOrder"`,
-      [planId],
-    );
+    const benefits = await query(`SELECT * FROM "membershipBenefit" WHERE "membershipPlanId" = $1 ORDER BY "sortOrder"`, [planId]);
 
     storefrontRespond(req, res, 'membership/plan-detail', {
       pageName: (plan as any).name,
@@ -85,10 +79,9 @@ export const myMembership = async (req: TypedRequest, res: Response) => {
     );
 
     const benefits = membership
-      ? await query(
-          `SELECT * FROM "membershipBenefit" WHERE "membershipPlanId" = $1 ORDER BY "sortOrder"`,
-          [(membership as any).membershipPlanId],
-        )
+      ? await query(`SELECT * FROM "membershipBenefit" WHERE "membershipPlanId" = $1 ORDER BY "sortOrder"`, [
+          (membership as any).membershipPlanId,
+        ])
       : [];
 
     storefrontRespond(req, res, 'membership/my-membership', {
@@ -112,10 +105,7 @@ export const joinPlan = async (req: TypedRequest, res: Response) => {
 
     const { planId } = req.params;
 
-    const plan = await queryOne(
-      `SELECT * FROM "membershipPlan" WHERE "membershipPlanId" = $1 AND "isActive" = true`,
-      [planId],
-    );
+    const plan = await queryOne(`SELECT * FROM "membershipPlan" WHERE "membershipPlanId" = $1 AND "isActive" = true`, [planId]);
 
     if (!plan) {
       (req as any).flash?.('error', 'Membership plan not found');
@@ -123,10 +113,7 @@ export const joinPlan = async (req: TypedRequest, res: Response) => {
     }
 
     // Check if already a member
-    const existing = await queryOne(
-      `SELECT * FROM "membership" WHERE "customerId" = $1 AND "status" = 'active'`,
-      [customerId],
-    );
+    const existing = await queryOne(`SELECT * FROM "membership" WHERE "customerId" = $1 AND "status" = 'active'`, [customerId]);
 
     if (existing) {
       (req as any).flash?.('error', 'You already have an active membership. Please cancel it first to switch plans.');

@@ -13,23 +13,23 @@
 
 All engineering standards are under [`docs/standards/`](./docs/standards/README.md):
 
-| Topic                            | Document                                                    |
-| -------------------------------- | ----------------------------------------------------------- |
-| Database (naming, SQL helpers)   | [standards/database.md](./docs/standards/database.md)       |
-| Migrations (Knex, file format)   | [standards/migrations.md](./docs/standards/migrations.md)   |
-| Seeds                            | [standards/seeds.md](./docs/standards/seeds.md)             |
-| Module structure (DDD)           | [standards/modules-ddd.md](./docs/standards/modules-ddd.md) |
-| Web layer (EJS portals)          | [standards/web-layer.md](./docs/standards/web-layer.md)     |
-| API response patterns            | [standards/api-responses.md](./docs/standards/api-responses.md) |
-| Authentication & authorization   | [standards/authentication.md](./docs/standards/authentication.md) |
-| Event system                     | [standards/events.md](./docs/standards/events.md)           |
-| Testing                          | [standards/testing.md](./docs/standards/testing.md)         |
-| Code style & formatting          | [standards/code-style.md](./docs/standards/code-style.md)   |
-| Security                         | [standards/security.md](./docs/standards/security.md)       |
-| Internationalization (i18n)      | [standards/i18n.md](./docs/standards/i18n.md)               |
-| Shared libraries (`libs/`)       | [standards/libraries.md](./docs/standards/libraries.md)     |
-| Infrastructure & deployment      | [standards/infrastructure.md](./docs/standards/infrastructure.md) |
-| Do's and Don'ts (quick reference)| [standards/do-and-dont.md](./docs/standards/do-and-dont.md) |
+| Topic                             | Document                                                          |
+| --------------------------------- | ----------------------------------------------------------------- |
+| Database (naming, SQL helpers)    | [standards/database.md](./docs/standards/database.md)             |
+| Migrations (Knex, file format)    | [standards/migrations.md](./docs/standards/migrations.md)         |
+| Seeds                             | [standards/seeds.md](./docs/standards/seeds.md)                   |
+| Module structure (DDD)            | [standards/modules-ddd.md](./docs/standards/modules-ddd.md)       |
+| Web layer (EJS portals)           | [standards/web-layer.md](./docs/standards/web-layer.md)           |
+| API response patterns             | [standards/api-responses.md](./docs/standards/api-responses.md)   |
+| Authentication & authorization    | [standards/authentication.md](./docs/standards/authentication.md) |
+| Event system                      | [standards/events.md](./docs/standards/events.md)                 |
+| Testing                           | [standards/testing.md](./docs/standards/testing.md)               |
+| Code style & formatting           | [standards/code-style.md](./docs/standards/code-style.md)         |
+| Security                          | [standards/security.md](./docs/standards/security.md)             |
+| Internationalization (i18n)       | [standards/i18n.md](./docs/standards/i18n.md)                     |
+| Shared libraries (`libs/`)        | [standards/libraries.md](./docs/standards/libraries.md)           |
+| Infrastructure & deployment       | [standards/infrastructure.md](./docs/standards/infrastructure.md) |
+| Do's and Don'ts (quick reference) | [standards/do-and-dont.md](./docs/standards/do-and-dont.md)       |
 
 ## Mission
 

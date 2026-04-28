@@ -213,7 +213,7 @@ export const testWebhook = async (req: TypedRequest, res: Response): Promise<voi
           'X-Webhook-Signature': signature,
           'X-Webhook-Event': 'webhook.test',
           'X-Webhook-Delivery-Id': 'test',
-          ...(typeof endpoint.headers === 'object' && endpoint.headers ? endpoint.headers as Record<string, string> : {}),
+          ...(typeof endpoint.headers === 'object' && endpoint.headers ? (endpoint.headers as Record<string, string>) : {}),
         },
         body: testPayload,
         signal: controller.signal,

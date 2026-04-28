@@ -206,17 +206,20 @@ docker-compose -f infra/docker/docker-compose.yml logs -f
 ## Performance Tuning
 
 ### Application
+
 - Resource limits set in `docker-compose.prod.yml`
 - Compression enabled for responses
 - Static asset caching (1 year)
 - Health checks prevent serving unhealthy instances
 
 ### Database
+
 - Connection pooling configured
 - Persistent volumes for data durability
 - UTF-8 encoding for internationalization
 
 ### Cache
+
 - Redis memory limits prevent OOM
 - Append-only file for persistence
 - LRU eviction policy configured
@@ -236,6 +239,7 @@ docker-compose exec -T postgres psql -U commercefull commercefull < backup.sql
 ### Volumes
 
 Persistent data is stored in named volumes:
+
 - `postgres_data` / `postgres_prod_data`
 - `redis_data` / `redis_prod_data`
 

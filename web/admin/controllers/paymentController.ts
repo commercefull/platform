@@ -1,12 +1,12 @@
 import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';;
+import { TypedRequest } from 'libs/types/express';
 import PaymentRepo from '../../../modules/payment/infrastructure/repositories/paymentRepo';
 import * as paymentDisputeRepo from '../../../modules/payment/infrastructure/repositories/paymentDisputeRepo';
 import * as paymentFeeRepo from '../../../modules/payment/infrastructure/repositories/paymentFeeRepo';
 import * as paymentSettingsRepo from '../../../modules/payment/infrastructure/repositories/paymentSettingsRepo';
 import * as paymentBalanceRepo from '../../../modules/payment/infrastructure/repositories/paymentBalanceRepo';
 import * as paymentReportRepo from '../../../modules/payment/infrastructure/repositories/paymentReportRepo';
-import { query as dbQuery, queryOne as dbQueryOne  } from '../../../libs/db';
+import { query as dbQuery, queryOne as dbQueryOne } from '../../../libs/db';
 import { logger } from '../../../libs/logger';
 import { adminRespond } from '../../respond';
 
@@ -329,10 +329,7 @@ export const updateDisputeStatus = async (req: TypedRequest, res: Response): Pro
 export const listPaymentFees = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const fees = await (async () => {
-      const rows = await dbQuery<paymentFeeRepo.PaymentFee[]>(
-        `SELECT * FROM "paymentFee" ORDER BY "createdAt" DESC LIMIT 100`,
-        [],
-      );
+      const rows = await dbQuery<paymentFeeRepo.PaymentFee[]>(`SELECT * FROM "paymentFee" ORDER BY "createdAt" DESC LIMIT 100`, []);
       return rows || [];
     })();
 
@@ -435,10 +432,9 @@ export const listPaymentReports = async (req: TypedRequest, res: Response): Prom
 export const viewPaymentReport = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { reportId } = req.params;
-    const report = await dbQueryOne<paymentReportRepo.PaymentReport>(
-      `SELECT * FROM "paymentReport" WHERE "paymentReportId" = $1`,
-      [reportId],
-    );
+    const report = await dbQueryOne<paymentReportRepo.PaymentReport>(`SELECT * FROM "paymentReport" WHERE "paymentReportId" = $1`, [
+      reportId,
+    ]);
 
     if (!report) {
       adminRespond(req, res, 'error', { pageName: 'Not Found', error: 'Report not found' });

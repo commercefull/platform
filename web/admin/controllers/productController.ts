@@ -5,7 +5,7 @@
 
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';;
+import { TypedRequest } from 'libs/types/express';
 import ProductRepo from '../../../modules/product/infrastructure/repositories/ProductRepository';
 import { ListProductsCommand, ListProductsUseCase } from '../../../modules/product/application/useCases/ListProducts';
 import { CreateProductCommand, CreateProductUseCase } from '../../../modules/product/application/useCases/CreateProduct';
@@ -105,7 +105,9 @@ export const viewProduct = async (req: TypedRequest, res: Response): Promise<voi
     // Load additional rich data in parallel
     const [productAttributes, reviewStats, productType, category, brand] = await Promise.all([
       dynamicAttributeRepo.getProductAttributes(productId).catch(() => []),
-      productReviewRepo.getProductStatistics(productId).catch(() => ({ totalReviews: 0, averageRating: 0, distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }, verifiedPurchaseCount: 0 })),
+      productReviewRepo
+        .getProductStatistics(productId)
+        .catch(() => ({ totalReviews: 0, averageRating: 0, distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }, verifiedPurchaseCount: 0 })),
       product.productTypeId ? productTypeRepo.findById(product.productTypeId).catch(() => null) : Promise.resolve(null),
       product.categoryId ? categoryRepo.findOne(product.categoryId).catch(() => null) : Promise.resolve(null),
       product.brandId ? brandRepository.findById(product.brandId).catch(() => null) : Promise.resolve(null),
@@ -547,10 +549,7 @@ export const createProductCategory = async (req: TypedRequest, res: Response): P
 export const editProductCategoryForm = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { categoryId } = req.params;
-    const [category, categories] = await Promise.all([
-      productCategoryRepo.findById(categoryId),
-      productCategoryRepo.findAll(),
-    ]);
+    const [category, categories] = await Promise.all([productCategoryRepo.findById(categoryId), productCategoryRepo.findAll()]);
     if (!category) {
       adminRespond(req, res, 'error', { pageName: 'Not Found', error: 'Category not found' });
       return;
@@ -820,7 +819,18 @@ export const listProductPrices = async (req: TypedRequest, res: Response): Promi
 export const upsertProductPrice = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { productId } = req.params;
-    const { productPriceId, currencyCode, amount, compareAtAmount, minQuantity, maxQuantity, startsAt, endsAt, priceListId, productVariantId } = req.body;
+    const {
+      productPriceId,
+      currencyCode,
+      amount,
+      compareAtAmount,
+      minQuantity,
+      maxQuantity,
+      startsAt,
+      endsAt,
+      priceListId,
+      productVariantId,
+    } = req.body;
 
     if (productPriceId) {
       await productPriceRepo.update(productPriceId, {

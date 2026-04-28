@@ -52,10 +52,9 @@ export class NotificationDeliveryLogRepo {
    * Find delivery log by ID
    */
   async findById(notificationDeliveryLogId: string): Promise<NotificationDeliveryLog | null> {
-    return await queryOne<NotificationDeliveryLog>(
-      `SELECT * FROM "notificationDeliveryLog" WHERE "notificationDeliveryLogId" = $1`,
-      [notificationDeliveryLogId],
-    );
+    return await queryOne<NotificationDeliveryLog>(`SELECT * FROM "notificationDeliveryLog" WHERE "notificationDeliveryLogId" = $1`, [
+      notificationDeliveryLogId,
+    ]);
   }
 
   /**

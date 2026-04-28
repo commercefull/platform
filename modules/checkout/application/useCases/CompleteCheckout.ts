@@ -1,11 +1,13 @@
 /**
  * Complete Checkout Use Case
- * Completes a checkout session and creates an order
+ * Idempotent finalization — asserts the linked order is PROCESSING + PAID before completing.
  */
 
 import { CheckoutRepository } from '../../domain/repositories/CheckoutRepository';
+import { OrderRepository } from '../../../order/domain/repositories/OrderRepository';
+import { OrderStatus } from '../../../order/domain/valueObjects/OrderStatus';
+import { PaymentStatus } from '../../../order/domain/valueObjects/PaymentStatus';
 import { eventBus } from '../../../../libs/events/eventBus';
-import { generateUUID } from '../../../../libs/uuid';
 
 // ============================================================================
 // Command
@@ -32,7 +34,10 @@ export interface CompleteCheckoutResponse {
 // ============================================================================
 
 export class CompleteCheckoutUseCase {
-  constructor(private readonly checkoutRepository: CheckoutRepository) {}
+  constructor(
+    private readonly checkoutRepository: CheckoutRepository,
+    private readonly orderRepository?: OrderRepository,
+  ) {}
 
   async execute(command: CompleteCheckoutCommand): Promise<CompleteCheckoutResponse> {
     const session = await this.checkoutRepository.findById(command.checkoutId);
@@ -40,13 +45,31 @@ export class CompleteCheckoutUseCase {
       throw new Error('Checkout session not found');
     }
 
-    if (!session.isReadyForPayment) {
-      throw new Error('Checkout is not ready for completion. Please ensure shipping address and method are set.');
+    // Idempotency: already completed
+    if (session.status === 'completed') {
+      return {
+        orderId: session.orderId || '',
+        checkoutId: session.id,
+        total: session.total.amount,
+        currency: session.total.currency,
+        status: 'completed',
+      };
     }
 
-    // TODO: Integrate with order creation service
-    // For now, generate a placeholder order ID
-    const orderId = generateUUID();
+    if (session.status !== 'processing') {
+      throw new Error('Cannot complete checkout: payment has not been confirmed yet');
+    }
+
+    // Verify linked order is in the right state
+    if (this.orderRepository && session.orderId) {
+      const order = await this.orderRepository.findById(session.orderId);
+      if (!order) {
+        throw new Error('Linked order not found');
+      }
+      if (order.status !== OrderStatus.PROCESSING || order.paymentStatus !== PaymentStatus.PAID) {
+        throw new Error('Cannot complete checkout: payment has not been confirmed yet');
+      }
+    }
 
     session.complete();
     await this.checkoutRepository.save(session);
@@ -54,13 +77,13 @@ export class CompleteCheckoutUseCase {
     eventBus.emit('checkout.completed', {
       checkoutId: session.id,
       basketId: session.basketId,
-      orderId,
+      orderId: session.orderId,
       customerId: session.customerId,
       total: session.total.amount,
     });
 
     return {
-      orderId,
+      orderId: session.orderId || '',
       checkoutId: session.id,
       total: session.total.amount,
       currency: session.total.currency,

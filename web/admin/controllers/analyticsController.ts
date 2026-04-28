@@ -6,7 +6,7 @@
 
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';;
+import { TypedRequest } from 'libs/types/express';
 import { query, queryOne } from '../../../libs/db';
 import { getSalesSummary, getTopProducts, getCustomerCohorts } from '../../../modules/analytics/infrastructure/repositories/analyticsRepo';
 import {

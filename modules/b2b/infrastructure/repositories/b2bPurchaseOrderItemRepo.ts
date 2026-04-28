@@ -30,10 +30,9 @@ export interface B2bPurchaseOrderItem {
 
 export async function findByPurchaseOrder(b2bPurchaseOrderId: string): Promise<B2bPurchaseOrderItem[]> {
   return (
-    (await query<B2bPurchaseOrderItem[]>(
-      `SELECT * FROM "b2bPurchaseOrderItem" WHERE "b2bPurchaseOrderId" = $1 ORDER BY "createdAt" ASC`,
-      [b2bPurchaseOrderId],
-    )) ?? []
+    (await query<B2bPurchaseOrderItem[]>(`SELECT * FROM "b2bPurchaseOrderItem" WHERE "b2bPurchaseOrderId" = $1 ORDER BY "createdAt" ASC`, [
+      b2bPurchaseOrderId,
+    ])) ?? []
   );
 }
 

@@ -15,7 +15,9 @@ export interface NotificationBatch {
   updatedAt: Date;
 }
 
-export async function create(params: Pick<NotificationBatch, 'name' | 'channel' | 'totalCount' | 'scheduledAt'>): Promise<NotificationBatch | null> {
+export async function create(
+  params: Pick<NotificationBatch, 'name' | 'channel' | 'totalCount' | 'scheduledAt'>,
+): Promise<NotificationBatch | null> {
   const now = new Date();
   return queryOne<NotificationBatch>(
     `INSERT INTO "notificationBatch" (name, channel, status, "totalCount", "sentCount", "failedCount", "scheduledAt", "createdAt", "updatedAt")
@@ -29,10 +31,12 @@ export async function findById(notificationBatchId: string): Promise<Notificatio
 }
 
 export async function updateProgress(notificationBatchId: string, sentCount: number, failedCount: number): Promise<void> {
-  await query(
-    `UPDATE "notificationBatch" SET "sentCount" = $1, "failedCount" = $2, "updatedAt" = $3 WHERE "notificationBatchId" = $4`,
-    [sentCount, failedCount, new Date(), notificationBatchId],
-  );
+  await query(`UPDATE "notificationBatch" SET "sentCount" = $1, "failedCount" = $2, "updatedAt" = $3 WHERE "notificationBatchId" = $4`, [
+    sentCount,
+    failedCount,
+    new Date(),
+    notificationBatchId,
+  ]);
 }
 
 export async function complete(notificationBatchId: string): Promise<void> {

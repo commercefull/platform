@@ -8,6 +8,10 @@
 import { eventBus } from './eventBus';
 import { WebhookDispatchService } from '../../modules/webhook/application/services/WebhookDispatchService';
 import WebhookRepo from '../../modules/webhook/infrastructure/repositories/WebhookRepository';
+import OrderRepo from '../../modules/order/infrastructure/repositories/OrderRepository';
+import * as inventoryReservationRepo from '../../modules/inventory/infrastructure/repositories/inventoryReservationRepo';
+import InventoryRepo from '../../modules/inventory/infrastructure/repositories/inventoryRepo';
+import { logger } from '../logger';
 
 // Track registration state
 let isRegistered = false;
@@ -85,19 +89,82 @@ export function areHandlersRegistered(): boolean {
 // ============================================================================
 
 function registerOrderEventHandlers(): void {
-  // Order created -> trigger fulfillment creation, send confirmation
+  // Order created -> reserve inventory
   eventBus.registerHandler('order.created', async payload => {
-    // Fulfillment and notification modules will handle this
+    const data = (payload as any).data ?? payload;
+    const orderId: string = data.orderId;
+    if (!orderId) return;
+
+    try {
+      const order = await OrderRepo.findById(orderId);
+      if (!order) return;
+
+      for (const item of order.items) {
+        try {
+          const availability = await InventoryRepo.checkProductAvailability(item.productId, item.productVariantId, item.quantity);
+
+          if (availability.available && availability.locations.length > 0) {
+            const loc = availability.locations[0] as any;
+            const locationId: string = loc.locationId || loc.inventoryLocationId || '';
+            if (!locationId) continue;
+            await inventoryReservationRepo.create({
+              orderId,
+              productVariantId: item.productVariantId || item.productId,
+              locationId,
+              quantity: item.quantity,
+            });
+          } else {
+            eventBus.emit('inventory.reservation_failed', {
+              orderId,
+              productId: item.productId,
+              productVariantId: item.productVariantId,
+              requested: item.quantity,
+            });
+          }
+        } catch (itemErr: any) {
+          logger.warn(`inventory reservation failed for item ${item.productId}: ${itemErr.message}`);
+          eventBus.emit('inventory.reservation_failed', {
+            orderId,
+            productId: item.productId,
+            productVariantId: item.productVariantId,
+            requested: item.quantity,
+          });
+        }
+      }
+    } catch (err: any) {
+      logger.error(`order.created inventory handler error: ${err.message}`);
+    }
   });
 
   // Order paid -> trigger fulfillment processing
-  eventBus.registerHandler('order.paid', async payload => {});
+  eventBus.registerHandler('order.paid', async _payload => {});
 
-  // Order cancelled -> release inventory, cancel fulfillment
-  eventBus.registerHandler('order.cancelled', async payload => {});
+  // Order cancelled -> release inventory reservations
+  eventBus.registerHandler('order.cancelled', async payload => {
+    const data = (payload as any).data ?? payload;
+    const orderId: string = data.orderId;
+    if (!orderId) return;
+    try {
+      await inventoryReservationRepo.releaseByOrder(orderId);
+    } catch (err: any) {
+      logger.error(`order.cancelled inventory release error: ${err.message}`);
+    }
+  });
+
+  // Order payment failed -> release inventory reservations
+  eventBus.registerHandler('order.payment_failed', async payload => {
+    const data = (payload as any).data ?? payload;
+    const orderId: string = data.orderId;
+    if (!orderId) return;
+    try {
+      await inventoryReservationRepo.releaseByOrder(orderId);
+    } catch (err: any) {
+      logger.error(`order.payment_failed inventory release error: ${err.message}`);
+    }
+  });
 
   // Order completed -> trigger loyalty points earning
-  eventBus.registerHandler('order.completed', async payload => {});
+  eventBus.registerHandler('order.completed', async _payload => {});
 }
 
 function registerInventoryEventHandlers(): void {

@@ -32,20 +32,24 @@ yarn job:new:admin --email=ops@example.com --pass=secure123 --name="Operations U
 ## Default Permissions by Role
 
 ### super_admin
+
 - `*` (full access)
 
 ### admin
+
 - `users:read`, `users:write`, `users:delete`
 - `orders:read`, `orders:write`
 - `products:read`, `products:write`
 - `analytics:read`
 
 ### support
+
 - `users:read`
 - `orders:read`, `orders:write`
 - `support:read`, `support:write`
 
 ### operations
+
 - `orders:read`, `orders:write`
 - `inventory:read`, `inventory:write`
 - `fulfillment:read`, `fulfillment:write`

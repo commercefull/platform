@@ -419,9 +419,7 @@ export class OrderReturnRepo {
    * Count returns by customer
    */
   async countByCustomerId(customerId: string): Promise<number> {
-    const result = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "orderReturn" WHERE "customerId" = $1`, [
-      customerId,
-    ]);
+    const result = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "orderReturn" WHERE "customerId" = $1`, [customerId]);
 
     return result ? parseInt(result.count, 10) : 0;
   }

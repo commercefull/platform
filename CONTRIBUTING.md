@@ -75,6 +75,7 @@ yarn dev
 ## Development Workflow
 
 1. **Create a branch** from `main`:
+
    ```bash
    git checkout -b feature/my-feature
    # or: git checkout -b fix/bug-description
@@ -83,6 +84,7 @@ yarn dev
 2. **Make your changes** following the [coding standards](#coding-standards).
 
 3. **Test your changes**:
+
    ```bash
    yarn lint          # TypeScript + ESLint check
    yarn test:unit     # Unit tests
@@ -90,6 +92,7 @@ yarn dev
    ```
 
 4. **Commit** with a descriptive message:
+
    ```bash
    git commit -m "feat(product): add bulk import functionality"
    ```
@@ -111,6 +114,7 @@ We follow [Conventional Commits](https://www.conventionalcommits.org/):
 **Scopes:** Module names (`product`, `order`, `checkout`), `admin`, `storefront`, `libs`, `infra`
 
 **Examples:**
+
 ```
 feat(checkout): add multi-step checkout flow
 fix(inventory): correct stock reservation on concurrent orders
@@ -183,10 +187,7 @@ web/<portal>/
 ```typescript
 import { query, queryOne } from '../../../libs/db';
 
-const result = await query(
-  `SELECT * FROM "product" WHERE "categoryId" = $1 AND "deletedAt" IS NULL`,
-  [categoryId]
-);
+const result = await query(`SELECT * FROM "product" WHERE "categoryId" = $1 AND "deletedAt" IS NULL`, [categoryId]);
 ```
 
 ### API Responses
@@ -233,6 +234,7 @@ adminRespond(req, res, 'products/index', {
 ## Creating a New Module
 
 1. **Create the directory structure:**
+
    ```bash
    mkdir -p modules/mymodule/{application/useCases,domain/{entities,events,repositories,valueObjects},infrastructure/repositories,interface/{controllers,routers}}
    ```
@@ -250,6 +252,7 @@ adminRespond(req, res, 'products/index', {
 7. **Create routers** in `interface/routers/` and register in `boot/routes.ts`
 
 8. **Create a migration** for the database table:
+
    ```bash
    yarn db:migrate:new create_mymodule_table
    ```
@@ -272,9 +275,7 @@ Admin views use **Tabler** (Bootstrap-based) and are rendered via EJS.
   <div class="row g-2 align-items-center">
     <div class="col"><h2 class="page-title"><%= pageName %></h2></div>
     <div class="col-auto ms-auto">
-      <a href="/admin/mymodule/create" class="btn btn-primary">
-        <i class="ti ti-plus"></i> Create
-      </a>
+      <a href="/admin/mymodule/create" class="btn btn-primary"> <i class="ti ti-plus"></i> Create </a>
     </div>
   </div>
 </div>
@@ -338,7 +339,7 @@ This creates a file in `migrations/` with a timestamp prefix.
 import { Knex } from 'knex';
 
 export async function up(knex: Knex): Promise<void> {
-  await knex.schema.createTable('myTable', (table) => {
+  await knex.schema.createTable('myTable', table => {
     table.uuid('myTableId').primary().defaultTo(knex.fn.uuid());
     table.string('name').notNullable();
     table.string('status').defaultTo('active');
@@ -408,6 +409,7 @@ yarn test:e2e      # Cypress E2E tests
 ## Pull Request Process
 
 1. **Ensure all checks pass:**
+
    ```bash
    yarn lint          # 0 errors
    yarn test          # All tests pass
@@ -428,6 +430,7 @@ yarn test:e2e      # Cypress E2E tests
 ### PR Title Format
 
 Follow the same convention as commit messages:
+
 ```
 feat(product): add bulk import functionality
 fix(checkout): handle expired sessions gracefully
@@ -440,6 +443,7 @@ fix(checkout): handle expired sessions gracefully
 ### Bug Reports
 
 Include:
+
 - **Steps to reproduce**
 - **Expected behavior**
 - **Actual behavior**
@@ -449,6 +453,7 @@ Include:
 ### Feature Requests
 
 Include:
+
 - **Use case** — What problem does this solve?
 - **Proposed solution** — How should it work?
 - **Alternatives considered**

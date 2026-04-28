@@ -20,13 +20,17 @@ export interface CustomerProductView {
 }
 
 export async function findForCustomer(customerId: string, type: string, limit = 10): Promise<MarketingProductRecommendation[]> {
-  return (await query<MarketingProductRecommendation[]>(
-    `SELECT * FROM "marketingProductRecommendation" WHERE "customerId" = $1 AND type = $2 ORDER BY score DESC LIMIT $3`,
-    [customerId, type, limit],
-  )) || [];
+  return (
+    (await query<MarketingProductRecommendation[]>(
+      `SELECT * FROM "marketingProductRecommendation" WHERE "customerId" = $1 AND type = $2 ORDER BY score DESC LIMIT $3`,
+      [customerId, type, limit],
+    )) || []
+  );
 }
 
-export async function upsert(params: Omit<MarketingProductRecommendation, 'marketingProductRecommendationId' | 'createdAt' | 'updatedAt'>): Promise<void> {
+export async function upsert(
+  params: Omit<MarketingProductRecommendation, 'marketingProductRecommendationId' | 'createdAt' | 'updatedAt'>,
+): Promise<void> {
   const now = new Date();
   await query(
     `INSERT INTO "marketingProductRecommendation" ("customerId", "productId", "recommendedProductId", score, type, "createdAt", "updatedAt")
@@ -37,17 +41,21 @@ export async function upsert(params: Omit<MarketingProductRecommendation, 'marke
 }
 
 export async function trackView(customerId: string | null, sessionId: string | null, productId: string): Promise<void> {
-  await query(
-    `INSERT INTO "customerProductView" ("customerId", "sessionId", "productId", "viewedAt") VALUES ($1, $2, $3, $4)`,
-    [customerId, sessionId, productId, new Date()],
-  );
+  await query(`INSERT INTO "customerProductView" ("customerId", "sessionId", "productId", "viewedAt") VALUES ($1, $2, $3, $4)`, [
+    customerId,
+    sessionId,
+    productId,
+    new Date(),
+  ]);
 }
 
 export async function findRecentlyViewed(customerId: string, limit = 10): Promise<CustomerProductView[]> {
-  return (await query<CustomerProductView[]>(
-    `SELECT DISTINCT ON ("productId") * FROM "customerProductView" WHERE "customerId" = $1 ORDER BY "productId", "viewedAt" DESC LIMIT $2`,
-    [customerId, limit],
-  )) || [];
+  return (
+    (await query<CustomerProductView[]>(
+      `SELECT DISTINCT ON ("productId") * FROM "customerProductView" WHERE "customerId" = $1 ORDER BY "productId", "viewedAt" DESC LIMIT $2`,
+      [customerId, limit],
+    )) || []
+  );
 }
 
 export default { findForCustomer, upsert, trackView, findRecentlyViewed };

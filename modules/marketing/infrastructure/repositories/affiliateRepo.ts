@@ -43,12 +43,24 @@ export async function findById(id: string): Promise<MarketingAffiliate | null> {
   return queryOne<MarketingAffiliate>(`SELECT * FROM "marketingAffiliate" WHERE "marketingAffiliateId" = $1`, [id]);
 }
 
-export async function create(params: Omit<MarketingAffiliate, 'marketingAffiliateId' | 'totalEarned' | 'totalPaid' | 'createdAt' | 'updatedAt'>): Promise<MarketingAffiliate | null> {
+export async function create(
+  params: Omit<MarketingAffiliate, 'marketingAffiliateId' | 'totalEarned' | 'totalPaid' | 'createdAt' | 'updatedAt'>,
+): Promise<MarketingAffiliate | null> {
   const now = new Date();
   return queryOne<MarketingAffiliate>(
     `INSERT INTO "marketingAffiliate" ("customerId", "merchantId", name, email, code, "commissionRate", status, "totalEarned", "totalPaid", "createdAt", "updatedAt")
      VALUES ($1, $2, $3, $4, $5, $6, $7, 0, 0, $8, $9) RETURNING *`,
-    [params.customerId || null, params.merchantId || null, params.name, params.email, params.code, params.commissionRate, params.status, now, now],
+    [
+      params.customerId || null,
+      params.merchantId || null,
+      params.name,
+      params.email,
+      params.code,
+      params.commissionRate,
+      params.status,
+      now,
+      now,
+    ],
   );
 }
 
@@ -59,13 +71,22 @@ export async function createLink(affiliateId: string, url: string, slug: string)
   );
 }
 
-export async function recordCommission(affiliateId: string, orderId: string, amount: number, currency: string): Promise<MarketingAffiliateCommission | null> {
+export async function recordCommission(
+  affiliateId: string,
+  orderId: string,
+  amount: number,
+  currency: string,
+): Promise<MarketingAffiliateCommission | null> {
   const result = await queryOne<MarketingAffiliateCommission>(
     `INSERT INTO "marketingAffiliateCommission" ("affiliateId", "orderId", amount, currency, status, "createdAt") VALUES ($1, $2, $3, $4, 'pending', $5) RETURNING *`,
     [affiliateId, orderId, amount, currency, new Date()],
   );
   if (result) {
-    await query(`UPDATE "marketingAffiliate" SET "totalEarned" = "totalEarned" + $1, "updatedAt" = $2 WHERE "marketingAffiliateId" = $3`, [amount, new Date(), affiliateId]);
+    await query(`UPDATE "marketingAffiliate" SET "totalEarned" = "totalEarned" + $1, "updatedAt" = $2 WHERE "marketingAffiliateId" = $3`, [
+      amount,
+      new Date(),
+      affiliateId,
+    ]);
   }
   return result;
 }

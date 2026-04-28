@@ -27,10 +27,9 @@ export async function findByCustomer(customerId: string): Promise<StoredPaymentM
 }
 
 export async function findById(storedPaymentMethodId: string): Promise<StoredPaymentMethod | null> {
-  return queryOne<StoredPaymentMethod>(
-    `SELECT * FROM "storedPaymentMethod" WHERE "storedPaymentMethodId" = $1 AND "deletedAt" IS NULL`,
-    [storedPaymentMethodId],
-  );
+  return queryOne<StoredPaymentMethod>(`SELECT * FROM "storedPaymentMethod" WHERE "storedPaymentMethodId" = $1 AND "deletedAt" IS NULL`, [
+    storedPaymentMethodId,
+  ]);
 }
 
 export async function create(
@@ -59,10 +58,10 @@ export async function create(
 
 export async function setDefault(storedPaymentMethodId: string, customerId: string): Promise<StoredPaymentMethod | null> {
   const now = new Date();
-  await query(
-    `UPDATE "storedPaymentMethod" SET "isDefault" = false, "updatedAt" = $1 WHERE "customerId" = $2 AND "deletedAt" IS NULL`,
-    [now, customerId],
-  );
+  await query(`UPDATE "storedPaymentMethod" SET "isDefault" = false, "updatedAt" = $1 WHERE "customerId" = $2 AND "deletedAt" IS NULL`, [
+    now,
+    customerId,
+  ]);
   return queryOne<StoredPaymentMethod>(
     `UPDATE "storedPaymentMethod" SET "isDefault" = true, "updatedAt" = $1 WHERE "storedPaymentMethodId" = $2 RETURNING *`,
     [now, storedPaymentMethodId],

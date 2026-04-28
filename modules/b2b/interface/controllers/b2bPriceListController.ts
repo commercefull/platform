@@ -16,9 +16,7 @@ import * as b2bPriceListRepo from '../../infrastructure/repositories/b2bPriceLis
 export const listPriceLists = async (req: Request, res: Response): Promise<void> => {
   try {
     const companyId = (req.user as any)?.companyId || (req.query.companyId as string);
-    const priceLists = companyId
-      ? await b2bPriceListRepo.findByCompany(companyId)
-      : await b2bPriceListRepo.findAll();
+    const priceLists = companyId ? await b2bPriceListRepo.findByCompany(companyId) : await b2bPriceListRepo.findAll();
     successResponse(res, { priceLists });
   } catch (error: any) {
     logger.error('listPriceLists error:', error);
@@ -33,7 +31,7 @@ export const listPriceLists = async (req: Request, res: Response): Promise<void>
 export const getPriceList = async (req: Request, res: Response): Promise<void> => {
   try {
     const { priceListId } = req.params;
-    const priceList = await b2bPriceListRepo.findById(priceListId);
+    const priceList = await b2bPriceListRepo.findById(String(priceListId));
     if (!priceList) {
       errorResponse(res, 'Price list not found', 404);
       return;
@@ -83,7 +81,7 @@ export const updatePriceList = async (req: Request, res: Response): Promise<void
       return;
     }
     const useCase = new ManageB2BPriceListUseCase();
-    const result = await useCase.execute({ b2bPriceListId: priceListId, name, currency, isActive, notes, items });
+    const result = await useCase.execute({ b2bPriceListId: String(priceListId), name, currency, isActive, notes, items });
     if (!result.success) {
       errorResponse(res, result.error || 'Failed to update price list', 400);
       return;

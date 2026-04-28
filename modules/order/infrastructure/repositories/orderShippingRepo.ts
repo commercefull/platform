@@ -18,14 +18,14 @@ export interface OrderShipping {
 
 export type OrderShippingCreateParams = Omit<OrderShipping, 'orderShippingId' | 'createdAt' | 'updatedAt'>;
 export type OrderShippingUpdateParams = Partial<
-  Pick<OrderShipping, 'shippingMethod' | 'carrier' | 'service' | 'amount' | 'taxAmount' | 'trackingNumber' | 'trackingUrl' | 'estimatedDeliveryDate'>
+  Pick<
+    OrderShipping,
+    'shippingMethod' | 'carrier' | 'service' | 'amount' | 'taxAmount' | 'trackingNumber' | 'trackingUrl' | 'estimatedDeliveryDate'
+  >
 >;
 
 export const findByOrder = async (orderId: string): Promise<OrderShipping[]> => {
-  const results = await query<OrderShipping[]>(
-    `SELECT * FROM "orderShipping" WHERE "orderId" = $1 ORDER BY "createdAt" ASC`,
-    [orderId],
-  );
+  const results = await query<OrderShipping[]>(`SELECT * FROM "orderShipping" WHERE "orderId" = $1 ORDER BY "createdAt" ASC`, [orderId]);
   return results || [];
 };
 
@@ -76,10 +76,7 @@ export const update = async (orderShippingId: string, params: OrderShippingUpdat
   values.push(unixTimestamp());
   values.push(orderShippingId);
 
-  return queryOne<OrderShipping>(
-    `UPDATE "orderShipping" SET ${fields.join(', ')} WHERE "orderShippingId" = $${i} RETURNING *`,
-    values,
-  );
+  return queryOne<OrderShipping>(`UPDATE "orderShipping" SET ${fields.join(', ')} WHERE "orderShippingId" = $${i} RETURNING *`, values);
 };
 
 export default { findByOrder, create, update };

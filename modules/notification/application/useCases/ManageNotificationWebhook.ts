@@ -52,9 +52,7 @@ export interface ManageNotificationWebhookResponse {
 // ============================================================================
 
 export class ManageNotificationWebhookUseCase {
-  constructor(
-    private readonly webhookRepo: typeof notificationWebhookRepo = notificationWebhookRepo,
-  ) {}
+  constructor(private readonly webhookRepo: typeof notificationWebhookRepo = notificationWebhookRepo) {}
 
   async execute(command: ManageNotificationWebhookCommand): Promise<ManageNotificationWebhookResponse> {
     switch (command.action) {

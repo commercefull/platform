@@ -26,10 +26,9 @@ export class ProductCollectionRepo {
   }
 
   async findById(productCollectionId: string): Promise<ProductCollection | null> {
-    return queryOne<ProductCollection>(
-      `SELECT * FROM "productCollection" WHERE "productCollectionId" = $1 AND "deletedAt" IS NULL`,
-      [productCollectionId],
-    );
+    return queryOne<ProductCollection>(`SELECT * FROM "productCollection" WHERE "productCollectionId" = $1 AND "deletedAt" IS NULL`, [
+      productCollectionId,
+    ]);
   }
 
   async create(params: ProductCollectionCreateParams): Promise<ProductCollection> {

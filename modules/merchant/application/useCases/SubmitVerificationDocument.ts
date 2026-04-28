@@ -40,9 +40,7 @@ export interface SubmitVerificationDocumentResponse {
 // ============================================================================
 
 export class SubmitVerificationDocumentUseCase {
-  constructor(
-    private readonly repo: typeof merchantVerificationDocumentRepo = merchantVerificationDocumentRepo,
-  ) {}
+  constructor(private readonly repo: typeof merchantVerificationDocumentRepo = merchantVerificationDocumentRepo) {}
 
   async execute(command: SubmitVerificationDocumentCommand): Promise<SubmitVerificationDocumentResponse> {
     const doc = await this.repo.create({

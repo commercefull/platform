@@ -54,12 +54,12 @@ Infrastructure→  SQL repositories, external adapters
 
 ### Dependency Rules
 
-| Layer            | Can depend on                 | Cannot depend on                         |
-| ---------------- | ----------------------------- | ---------------------------------------- |
-| Domain           | Nothing (pure)                | Application, Infrastructure, Interface   |
-| Application      | Domain                        | Infrastructure (directly), Interface     |
-| Infrastructure   | Domain (implements interfaces)| Application, Interface                   |
-| Interface        | Application, Domain           | Infrastructure (directly)                |
+| Layer          | Can depend on                  | Cannot depend on                       |
+| -------------- | ------------------------------ | -------------------------------------- |
+| Domain         | Nothing (pure)                 | Application, Infrastructure, Interface |
+| Application    | Domain                         | Infrastructure (directly), Interface   |
+| Infrastructure | Domain (implements interfaces) | Application, Interface                 |
+| Interface      | Application, Domain            | Infrastructure (directly)              |
 
 Overall project dependency direction: `web → modules → libs`.
 
@@ -67,28 +67,28 @@ Overall project dependency direction: `web → modules → libs`.
 
 Routes are configured in `boot/routes.ts`:
 
-| Prefix      | Purpose                           | Auth                                  |
-| ----------- | --------------------------------- | ------------------------------------- |
-| `/`         | Storefront (public)               | None / `isCustomerLoggedIn` if needed |
-| `/admin`    | Admin panel (EJS)                 | `isAdminLoggedIn`                     |
-| `/merchant` | Merchant dashboard (EJS)          | `isMerchantLoggedIn`                  |
-| `/b2b`      | B2B portal (EJS)                  | `isB2BLoggedIn`                       |
-| `/customer` | Customer-facing API               | `isCustomerLoggedIn` where needed     |
-| `/business` | Merchant / business API           | `isMerchantLoggedIn`                  |
-| `/health`   | Health check                      | None                                  |
+| Prefix      | Purpose                  | Auth                                  |
+| ----------- | ------------------------ | ------------------------------------- |
+| `/`         | Storefront (public)      | None / `isCustomerLoggedIn` if needed |
+| `/admin`    | Admin panel (EJS)        | `isAdminLoggedIn`                     |
+| `/merchant` | Merchant dashboard (EJS) | `isMerchantLoggedIn`                  |
+| `/b2b`      | B2B portal (EJS)         | `isB2BLoggedIn`                       |
+| `/customer` | Customer-facing API      | `isCustomerLoggedIn` where needed     |
+| `/business` | Merchant / business API  | `isMerchantLoggedIn`                  |
+| `/health`   | Health check             | None                                  |
 
 ## Modules (36 bounded contexts)
 
-| Category      | Modules                                                                                              |
-| ------------- | ---------------------------------------------------------------------------------------------------- |
-| Catalog       | `product`, `assortment`, `brand`, `pricing`                                                           |
-| Sales         | `order`, `basket`, `checkout`, `payment`                                                              |
-| Fulfillment   | `fulfillment`, `shipping`, `inventory`, `warehouse`                                                   |
-| Marketing     | `promotion`, `coupon`, `segment`                                                                      |
-| Customer      | `customer`, `loyalty`, `membership`, `subscription`                                                   |
-| Content       | `content`, `media`, `notification`                                                                    |
-| B2B           | `b2b`, `merchant`, `supplier`                                                                         |
-| Platform      | `identity`, `configuration`, `localization`, `channel`, `store`, `organization`, `analytics`, `gdpr`, `support`, `tax`, `business` |
+| Category    | Modules                                                                                                                            |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Catalog     | `product`, `assortment`, `brand`, `pricing`                                                                                        |
+| Sales       | `order`, `basket`, `checkout`, `payment`                                                                                           |
+| Fulfillment | `fulfillment`, `shipping`, `inventory`, `warehouse`                                                                                |
+| Marketing   | `promotion`, `coupon`, `segment`                                                                                                   |
+| Customer    | `customer`, `loyalty`, `membership`, `subscription`                                                                                |
+| Content     | `content`, `media`, `notification`                                                                                                 |
+| B2B         | `b2b`, `merchant`, `supplier`                                                                                                      |
+| Platform    | `identity`, `configuration`, `localization`, `channel`, `store`, `organization`, `analytics`, `gdpr`, `support`, `tax`, `business` |
 
 ## Technology Stack (at a glance)
 

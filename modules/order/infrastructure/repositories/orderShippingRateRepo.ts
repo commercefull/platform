@@ -24,10 +24,7 @@ export interface OrderShippingRate {
 export type OrderShippingRateCreateParams = Omit<OrderShippingRate, 'orderShippingRateId' | 'createdAt' | 'updatedAt'>;
 
 export const findByOrder = async (orderId: string): Promise<OrderShippingRate[]> => {
-  const results = await query<OrderShippingRate[]>(
-    `SELECT * FROM "orderShippingRate" WHERE "orderId" = $1 ORDER BY "rate" ASC`,
-    [orderId],
-  );
+  const results = await query<OrderShippingRate[]>(`SELECT * FROM "orderShippingRate" WHERE "orderId" = $1 ORDER BY "rate" ASC`, [orderId]);
   return results || [];
 };
 

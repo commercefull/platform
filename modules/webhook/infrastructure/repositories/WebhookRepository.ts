@@ -115,13 +115,13 @@ class WebhookRepository implements WebhookRepositoryInterface {
     let paramIdx = 2;
 
     const fieldMap: Record<string, (v: any) => any> = {
-      name: (v) => v,
-      url: (v) => v,
-      secret: (v) => v,
-      events: (v) => JSON.stringify(v),
-      isActive: (v) => v,
-      headers: (v) => v ? JSON.stringify(v) : null,
-      retryPolicy: (v) => JSON.stringify(v),
+      name: v => v,
+      url: v => v,
+      secret: v => v,
+      events: v => JSON.stringify(v),
+      isActive: v => v,
+      headers: v => (v ? JSON.stringify(v) : null),
+      retryPolicy: v => JSON.stringify(v),
     };
 
     for (const [field, transform] of Object.entries(fieldMap)) {
@@ -235,8 +235,14 @@ class WebhookRepository implements WebhookRepositoryInterface {
     let paramIdx = 2;
 
     const fields: (keyof WebhookDeliveryProps)[] = [
-      'status', 'attempts', 'lastAttemptAt', 'nextRetryAt',
-      'responseStatus', 'responseBody', 'errorMessage', 'duration',
+      'status',
+      'attempts',
+      'lastAttemptAt',
+      'nextRetryAt',
+      'responseStatus',
+      'responseBody',
+      'errorMessage',
+      'duration',
     ];
 
     for (const field of fields) {
@@ -275,11 +281,12 @@ class WebhookRepository implements WebhookRepositoryInterface {
   private parseEndpoint(row: any): WebhookEndpointProps {
     return {
       ...row,
-      events: typeof row.events === 'string' ? JSON.parse(row.events) : (row.events || []),
+      events: typeof row.events === 'string' ? JSON.parse(row.events) : row.events || [],
       headers: typeof row.headers === 'string' ? JSON.parse(row.headers) : row.headers,
-      retryPolicy: typeof row.retryPolicy === 'string'
-        ? JSON.parse(row.retryPolicy)
-        : (row.retryPolicy || { maxRetries: 5, retryIntervalMs: 5000, backoffMultiplier: 2 }),
+      retryPolicy:
+        typeof row.retryPolicy === 'string'
+          ? JSON.parse(row.retryPolicy)
+          : row.retryPolicy || { maxRetries: 5, retryIntervalMs: 5000, backoffMultiplier: 2 },
     };
   }
 }

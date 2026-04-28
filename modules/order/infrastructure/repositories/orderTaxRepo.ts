@@ -20,10 +20,7 @@ export interface OrderTax {
 export type OrderTaxCreateParams = Omit<OrderTax, 'orderTaxId' | 'createdAt' | 'updatedAt'>;
 
 export const findByOrder = async (orderId: string): Promise<OrderTax[]> => {
-  const results = await query<OrderTax[]>(
-    `SELECT * FROM "orderTax" WHERE "orderId" = $1 ORDER BY "createdAt" ASC`,
-    [orderId],
-  );
+  const results = await query<OrderTax[]>(`SELECT * FROM "orderTax" WHERE "orderId" = $1 ORDER BY "createdAt" ASC`, [orderId]);
   return results || [];
 };
 

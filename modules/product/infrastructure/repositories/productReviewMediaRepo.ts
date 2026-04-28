@@ -15,10 +15,9 @@ export type ProductReviewMediaCreateParams = Omit<ProductReviewMedia, 'productRe
 export class ProductReviewMediaRepo {
   async findByReview(productReviewId: string): Promise<ProductReviewMedia[]> {
     return (
-      (await query<ProductReviewMedia[]>(
-        `SELECT * FROM "productReviewMedia" WHERE "productReviewId" = $1 ORDER BY "position" ASC`,
-        [productReviewId],
-      )) || []
+      (await query<ProductReviewMedia[]>(`SELECT * FROM "productReviewMedia" WHERE "productReviewId" = $1 ORDER BY "position" ASC`, [
+        productReviewId,
+      ])) || []
     );
   }
 

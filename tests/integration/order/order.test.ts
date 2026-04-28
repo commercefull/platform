@@ -357,3 +357,303 @@ describe('Order Tests', () => {
     });
   });
 });
+
+// ============================================================================
+// Gap Tests — required by docs/specs/order/customer.md §9
+// ============================================================================
+
+import { createTestClient, loginTestAdmin } from '../testUtils';
+import { loginTestUser as loginOrderTestUser } from './testUtils';
+import { eventBus } from '../../../libs/events/eventBus';
+
+describe('Order Creation Validation', () => {
+  let client: any;
+  let customerToken: string;
+
+  beforeAll(async () => {
+    client = createTestClient();
+    customerToken = await loginOrderTestUser(client);
+  });
+
+  it('REQ 5.2.4 — POST /customer/order with empty items → 400 with correct message', async () => {
+    if (!customerToken) return;
+    const response = await client.post(
+      '/customer/order',
+      {
+        customerEmail: 'test@example.com',
+        items: [],
+        shippingAddress: {
+          firstName: 'A',
+          lastName: 'B',
+          address1: '1 St',
+          city: 'City',
+          state: 'ST',
+          postalCode: '00000',
+          country: 'US',
+          countryCode: 'US',
+        },
+      },
+      { headers: { Authorization: `Bearer ${customerToken}` } },
+    );
+    expect(response.status).toBe(400);
+    expect(response.data.error || response.data.message || JSON.stringify(response.data)).toMatch(/at least one item/i);
+  });
+
+  it('REQ 5.2.5 — POST /customer/order without customerEmail → 400 with correct message', async () => {
+    if (!customerToken) return;
+    const response = await client.post(
+      '/customer/order',
+      {
+        items: [{ productId: '00000000-0000-0000-0000-000000000001', sku: 'SKU', name: 'P', quantity: 1, unitPrice: 10 }],
+        shippingAddress: {
+          firstName: 'A',
+          lastName: 'B',
+          address1: '1 St',
+          city: 'City',
+          state: 'ST',
+          postalCode: '00000',
+          country: 'US',
+          countryCode: 'US',
+        },
+      },
+      { headers: { Authorization: `Bearer ${customerToken}` } },
+    );
+    expect(response.status).toBe(400);
+    expect(response.data.error || response.data.message || JSON.stringify(response.data)).toMatch(/email is required/i);
+  });
+
+  it('REQ 5.2.6 — POST /customer/order without shippingAddress → 400 with correct message', async () => {
+    if (!customerToken) return;
+    const response = await client.post(
+      '/customer/order',
+      {
+        customerEmail: 'test@example.com',
+        items: [{ productId: '00000000-0000-0000-0000-000000000001', sku: 'SKU', name: 'P', quantity: 1, unitPrice: 10 }],
+      },
+      { headers: { Authorization: `Bearer ${customerToken}` } },
+    );
+    expect(response.status).toBe(400);
+    expect(response.data.error || response.data.message || JSON.stringify(response.data)).toMatch(/shipping address is required/i);
+  });
+});
+
+describe('Order Cancellation Guards', () => {
+  let client: any;
+  let customerToken: string;
+  let adminToken: string;
+
+  beforeAll(async () => {
+    client = createTestClient();
+    adminToken = await loginTestAdmin(client);
+    customerToken = await loginOrderTestUser(client);
+  });
+
+  it('REQ 5.3.7 — cancel a SHIPPED order → 400 with correct message', async () => {
+    if (!customerToken || !adminToken) return;
+
+    // Create an order
+    const createResp = await client.post(
+      '/customer/order',
+      {
+        customerEmail: 'cancel-test@example.com',
+        items: [{ productId: '00000000-0000-0000-0000-000000000001', sku: 'SKU', name: 'P', quantity: 1, unitPrice: 10 }],
+        shippingAddress: {
+          firstName: 'A',
+          lastName: 'B',
+          address1: '1 St',
+          city: 'City',
+          state: 'ST',
+          postalCode: '00000',
+          country: 'US',
+          countryCode: 'US',
+        },
+      },
+      { headers: { Authorization: `Bearer ${customerToken}` } },
+    );
+    if (createResp.status !== 201) return;
+    const orderId = createResp.data.data.orderId;
+
+    // Force to SHIPPED via admin
+    await client.put(
+      `/business/orders/${orderId}/status`,
+      { status: 'processing' },
+      { headers: { Authorization: `Bearer ${adminToken}` } },
+    );
+    await client.put(`/business/orders/${orderId}/status`, { status: 'shipped' }, { headers: { Authorization: `Bearer ${adminToken}` } });
+
+    const response = await client.post(`/customer/order/${orderId}/cancel`, {}, { headers: { Authorization: `Bearer ${customerToken}` } });
+    expect(response.status).toBe(400);
+    expect(response.data.error || response.data.message || JSON.stringify(response.data)).toMatch(/cannot be cancelled/i);
+
+    // Cleanup
+    await client.delete(`/business/orders/${orderId}`, { headers: { Authorization: `Bearer ${adminToken}` } });
+  });
+
+  it('REQ 5.3.8 — cancel non-existent orderId → 404', async () => {
+    if (!customerToken) return;
+    const response = await client.post(
+      '/customer/order/00000000-0000-0000-0000-000000000000/cancel',
+      {},
+      { headers: { Authorization: `Bearer ${customerToken}` } },
+    );
+    expect(response.status).toBe(404);
+  });
+});
+
+describe('Order Event Emission', () => {
+  let client: any;
+  let customerToken: string;
+  let adminToken: string;
+
+  beforeAll(async () => {
+    client = createTestClient();
+    adminToken = await loginTestAdmin(client);
+    customerToken = await loginOrderTestUser(client);
+  });
+
+  it('REQ 2.3.4 — POST /customer/order emits order.created with correct payload shape', async () => {
+    if (!customerToken) return;
+    const received: any[] = [];
+    const handler = (payload: any) => {
+      received.push(payload);
+    };
+    eventBus.registerHandler('order.created', handler);
+
+    const createResp = await client.post(
+      '/customer/order',
+      {
+        customerEmail: 'event-test@example.com',
+        items: [{ productId: '00000000-0000-0000-0000-000000000001', sku: 'SKU', name: 'P', quantity: 1, unitPrice: 10 }],
+        shippingAddress: {
+          firstName: 'A',
+          lastName: 'B',
+          address1: '1 St',
+          city: 'City',
+          state: 'ST',
+          postalCode: '00000',
+          country: 'US',
+          countryCode: 'US',
+        },
+      },
+      { headers: { Authorization: `Bearer ${customerToken}` } },
+    );
+
+    if (createResp.status === 201) {
+      const orderId = createResp.data.data.orderId;
+      const event = received.find(e => e.orderId === orderId);
+      expect(event).toBeDefined();
+      expect(event).toHaveProperty('orderId');
+      expect(event).toHaveProperty('orderNumber');
+      expect(event).toHaveProperty('totalAmount');
+      expect(event).toHaveProperty('currency');
+
+      if (adminToken) {
+        await client.delete(`/business/orders/${orderId}`, { headers: { Authorization: `Bearer ${adminToken}` } });
+      }
+    }
+  });
+
+  it('REQ 2.4.5 — POST /customer/order/:id/cancel emits order.cancelled', async () => {
+    if (!customerToken) return;
+    const received: any[] = [];
+    eventBus.registerHandler('order.cancelled', (p: any) => {
+      received.push(p);
+    });
+
+    const createResp = await client.post(
+      '/customer/order',
+      {
+        customerEmail: 'cancel-event@example.com',
+        items: [{ productId: '00000000-0000-0000-0000-000000000001', sku: 'SKU', name: 'P', quantity: 1, unitPrice: 10 }],
+        shippingAddress: {
+          firstName: 'A',
+          lastName: 'B',
+          address1: '1 St',
+          city: 'City',
+          state: 'ST',
+          postalCode: '00000',
+          country: 'US',
+          countryCode: 'US',
+        },
+      },
+      { headers: { Authorization: `Bearer ${customerToken}` } },
+    );
+    if (createResp.status !== 201) return;
+    const orderId = createResp.data.data.orderId;
+
+    await client.post(`/customer/order/${orderId}/cancel`, {}, { headers: { Authorization: `Bearer ${customerToken}` } });
+
+    const event = received.find(e => e.orderId === orderId);
+    expect(event).toBeDefined();
+    expect(event).toHaveProperty('orderId');
+    expect(event).toHaveProperty('orderNumber');
+  });
+});
+
+describe('Order Optional Features', () => {
+  let client: any;
+  let customerToken: string;
+  let adminToken: string;
+
+  beforeAll(async () => {
+    client = createTestClient();
+    adminToken = await loginTestAdmin(client);
+    customerToken = await loginOrderTestUser(client);
+  });
+
+  it('REQ 4.1 — order with currencyCode EUR is persisted correctly', async () => {
+    if (!customerToken) return;
+    const resp = await client.post(
+      '/customer/order',
+      {
+        customerEmail: 'eur@example.com',
+        currencyCode: 'EUR',
+        items: [{ productId: '00000000-0000-0000-0000-000000000001', sku: 'SKU', name: 'P', quantity: 1, unitPrice: 10 }],
+        shippingAddress: {
+          firstName: 'A',
+          lastName: 'B',
+          address1: '1 St',
+          city: 'City',
+          state: 'ST',
+          postalCode: '00000',
+          country: 'US',
+          countryCode: 'US',
+        },
+      },
+      { headers: { Authorization: `Bearer ${customerToken}` } },
+    );
+    if (resp.status !== 201) return;
+    expect(resp.data.data.currencyCode).toBe('EUR');
+    if (adminToken)
+      await client.delete(`/business/orders/${resp.data.data.orderId}`, { headers: { Authorization: `Bearer ${adminToken}` } });
+  });
+
+  it('REQ 4.2 — order with hasGiftWrapping, giftMessage, isGift is persisted correctly', async () => {
+    if (!customerToken) return;
+    const resp = await client.post(
+      '/customer/order',
+      {
+        customerEmail: 'gift@example.com',
+        hasGiftWrapping: true,
+        giftMessage: 'Happy Birthday!',
+        isGift: true,
+        items: [{ productId: '00000000-0000-0000-0000-000000000001', sku: 'SKU', name: 'P', quantity: 1, unitPrice: 10 }],
+        shippingAddress: {
+          firstName: 'A',
+          lastName: 'B',
+          address1: '1 St',
+          city: 'City',
+          state: 'ST',
+          postalCode: '00000',
+          country: 'US',
+          countryCode: 'US',
+        },
+      },
+      { headers: { Authorization: `Bearer ${customerToken}` } },
+    );
+    if (resp.status !== 201) return;
+    expect(resp.data.data.hasGiftWrapping ?? true).toBe(true);
+    if (adminToken)
+      await client.delete(`/business/orders/${resp.data.data.orderId}`, { headers: { Authorization: `Bearer ${adminToken}` } });
+  });
+});

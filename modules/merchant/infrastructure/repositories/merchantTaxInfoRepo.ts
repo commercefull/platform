@@ -13,13 +13,12 @@ export interface MerchantTaxInfo {
 }
 
 export async function findByMerchant(merchantId: string): Promise<MerchantTaxInfo | null> {
-  return queryOne<MerchantTaxInfo>(
-    `SELECT * FROM "merchantTaxInfo" WHERE "merchantId" = $1`,
-    [merchantId],
-  );
+  return queryOne<MerchantTaxInfo>(`SELECT * FROM "merchantTaxInfo" WHERE "merchantId" = $1`, [merchantId]);
 }
 
-export async function upsert(params: Omit<MerchantTaxInfo, 'merchantTaxInfoId' | 'createdAt' | 'updatedAt'>): Promise<MerchantTaxInfo | null> {
+export async function upsert(
+  params: Omit<MerchantTaxInfo, 'merchantTaxInfoId' | 'createdAt' | 'updatedAt'>,
+): Promise<MerchantTaxInfo | null> {
   const now = new Date();
   return queryOne<MerchantTaxInfo>(
     `INSERT INTO "merchantTaxInfo" ("merchantId", "taxNumber", "vatNumber", "taxCountry", "taxRegion", "isVerified", "createdAt", "updatedAt")
@@ -32,7 +31,16 @@ export async function upsert(params: Omit<MerchantTaxInfo, 'merchantTaxInfoId' |
        "isVerified" = EXCLUDED."isVerified",
        "updatedAt" = $8
      RETURNING *`,
-    [params.merchantId, params.taxNumber || null, params.vatNumber || null, params.taxCountry || null, params.taxRegion || null, params.isVerified ?? false, now, now],
+    [
+      params.merchantId,
+      params.taxNumber || null,
+      params.vatNumber || null,
+      params.taxCountry || null,
+      params.taxRegion || null,
+      params.isVerified ?? false,
+      now,
+      now,
+    ],
   );
 }
 

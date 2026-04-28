@@ -14,24 +14,25 @@ export interface MerchantOrder {
 }
 
 export async function findByMerchant(merchantId: string, limit = 20, offset = 0): Promise<MerchantOrder[]> {
-  return (await query<MerchantOrder[]>(
-    `SELECT * FROM "merchantOrder" WHERE "merchantId" = $1 ORDER BY "createdAt" DESC LIMIT $2 OFFSET $3`,
-    [merchantId, limit, offset],
-  )) || [];
+  return (
+    (await query<MerchantOrder[]>(`SELECT * FROM "merchantOrder" WHERE "merchantId" = $1 ORDER BY "createdAt" DESC LIMIT $2 OFFSET $3`, [
+      merchantId,
+      limit,
+      offset,
+    ])) || []
+  );
 }
 
 export async function findById(merchantOrderId: string): Promise<MerchantOrder | null> {
-  return queryOne<MerchantOrder>(
-    `SELECT * FROM "merchantOrder" WHERE "merchantOrderId" = $1`,
-    [merchantOrderId],
-  );
+  return queryOne<MerchantOrder>(`SELECT * FROM "merchantOrder" WHERE "merchantOrderId" = $1`, [merchantOrderId]);
 }
 
 export async function updateStatus(merchantOrderId: string, status: string): Promise<void> {
-  await query(
-    `UPDATE "merchantOrder" SET status = $1, "updatedAt" = $2 WHERE "merchantOrderId" = $3`,
-    [status, new Date(), merchantOrderId],
-  );
+  await query(`UPDATE "merchantOrder" SET status = $1, "updatedAt" = $2 WHERE "merchantOrderId" = $3`, [
+    status,
+    new Date(),
+    merchantOrderId,
+  ]);
 }
 
 export default { findByMerchant, findById, updateStatus };

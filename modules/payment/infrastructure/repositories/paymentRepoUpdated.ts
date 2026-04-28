@@ -95,9 +95,7 @@ export class PaymentRepo {
   }
 
   async findPaymentMethodByCode(code: string): Promise<PaymentMethod | null> {
-    const method = await queryOne<PaymentMethod>('SELECT * FROM "paymentMethod" WHERE "code" = $1 AND "deleted_at" IS NULL', [
-      code,
-    ]);
+    const method = await queryOne<PaymentMethod>('SELECT * FROM "paymentMethod" WHERE "code" = $1 AND "deleted_at" IS NULL', [code]);
     return method || null;
   }
 
@@ -197,23 +195,17 @@ export class PaymentRepo {
 
   // Payment Gateway methods
   async findAllPaymentGateways(): Promise<PaymentGateway[]> {
-    const gateways = await query<PaymentGateway[]>(
-      'SELECT * FROM "paymentGateway" WHERE "deleted_at" IS NULL ORDER BY "name" ASC',
-    );
+    const gateways = await query<PaymentGateway[]>('SELECT * FROM "paymentGateway" WHERE "deleted_at" IS NULL ORDER BY "name" ASC');
     return gateways || [];
   }
 
   async findPaymentGatewayById(id: string): Promise<PaymentGateway | null> {
-    const gateway = await queryOne<PaymentGateway>('SELECT * FROM "paymentGateway" WHERE "id" = $1 AND "deleted_at" IS NULL', [
-      id,
-    ]);
+    const gateway = await queryOne<PaymentGateway>('SELECT * FROM "paymentGateway" WHERE "id" = $1 AND "deleted_at" IS NULL', [id]);
     return gateway || null;
   }
 
   async findPaymentGatewayByCode(code: string): Promise<PaymentGateway | null> {
-    const gateway = await queryOne<PaymentGateway>('SELECT * FROM "paymentGateway" WHERE "code" = $1 AND "deleted_at" IS NULL', [
-      code,
-    ]);
+    const gateway = await queryOne<PaymentGateway>('SELECT * FROM "paymentGateway" WHERE "code" = $1 AND "deleted_at" IS NULL', [code]);
     return gateway || null;
   }
 

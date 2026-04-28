@@ -17,10 +17,7 @@ export const getProfile = async (req: TypedRequest, res: Response) => {
     const merchantId = req.user?.merchantId;
     if (!merchantId) return res.redirect('/merchant/login');
 
-    const merchant = await queryOne(
-      `SELECT * FROM "merchant" WHERE "merchantId" = $1`,
-      [merchantId],
-    );
+    const merchant = await queryOne(`SELECT * FROM "merchant" WHERE "merchantId" = $1`, [merchantId]);
 
     merchantRespond(req, res, 'settings/profile', {
       pageName: 'Profile Settings',
@@ -69,14 +66,8 @@ export const getStoreSettings = async (req: TypedRequest, res: Response) => {
     if (!merchantId) return res.redirect('/merchant/login');
 
     const [shippingMethods, paymentMethods] = await Promise.all([
-      query(
-        `SELECT * FROM "shippingMethod" WHERE "merchantId" = $1 ORDER BY "name"`,
-        [merchantId],
-      ),
-      query(
-        `SELECT * FROM "paymentMethod" WHERE "merchantId" = $1 ORDER BY "name"`,
-        [merchantId],
-      ),
+      query(`SELECT * FROM "shippingMethod" WHERE "merchantId" = $1 ORDER BY "name"`, [merchantId]),
+      query(`SELECT * FROM "paymentMethod" WHERE "merchantId" = $1 ORDER BY "name"`, [merchantId]),
     ]);
 
     merchantRespond(req, res, 'settings/store', {
@@ -98,10 +89,7 @@ export const getNotificationSettings = async (req: TypedRequest, res: Response) 
     const merchantId = req.user?.merchantId;
     if (!merchantId) return res.redirect('/merchant/login');
 
-    const preferences = await queryOne(
-      `SELECT * FROM "merchantNotificationPreference" WHERE "merchantId" = $1`,
-      [merchantId],
-    );
+    const preferences = await queryOne(`SELECT * FROM "merchantNotificationPreference" WHERE "merchantId" = $1`, [merchantId]);
 
     merchantRespond(req, res, 'settings/notifications', {
       pageName: 'Notification Settings',

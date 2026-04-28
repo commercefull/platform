@@ -36,10 +36,11 @@ export async function resubscribe(userId: string, channel: string, type?: string
 }
 
 export async function findByUser(userId: string): Promise<NotificationUnsubscribe[]> {
-  return (await query<NotificationUnsubscribe[]>(
-    `SELECT * FROM "notificationUnsubscribe" WHERE "userId" = $1 ORDER BY "createdAt" DESC`,
-    [userId],
-  )) || [];
+  return (
+    (await query<NotificationUnsubscribe[]>(`SELECT * FROM "notificationUnsubscribe" WHERE "userId" = $1 ORDER BY "createdAt" DESC`, [
+      userId,
+    ])) || []
+  );
 }
 
 export default { isUnsubscribed, unsubscribe, resubscribe, findByUser };

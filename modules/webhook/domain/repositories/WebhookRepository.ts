@@ -35,7 +35,10 @@ export interface WebhookRepositoryInterface {
   // Delivery operations
   createDelivery(props: Omit<WebhookDeliveryProps, 'createdAt' | 'updatedAt'>): Promise<WebhookDeliveryProps>;
   findDeliveryById(id: string): Promise<WebhookDeliveryProps | null>;
-  findDeliveries(filters?: WebhookDeliveryFilters, pagination?: PaginationOptions): Promise<{ data: WebhookDeliveryProps[]; total: number }>;
+  findDeliveries(
+    filters?: WebhookDeliveryFilters,
+    pagination?: PaginationOptions,
+  ): Promise<{ data: WebhookDeliveryProps[]; total: number }>;
   updateDelivery(id: string, updates: Partial<WebhookDeliveryProps>): Promise<WebhookDeliveryProps | null>;
   findPendingRetries(): Promise<WebhookDeliveryProps[]>;
 }

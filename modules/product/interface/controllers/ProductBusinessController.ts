@@ -567,11 +567,7 @@ export const listReviews = async (req: TypedRequest, res: Response): Promise<voi
     const filters: any = {};
     if (productId) filters.productId = productId as string;
     if (status) filters.status = status as string;
-    const reviews = await productReviewRepo.findWithFilters(
-      filters,
-      parseInt(limit as string) || 50,
-      parseInt(offset as string) || 0,
-    );
+    const reviews = await productReviewRepo.findWithFilters(filters, parseInt(limit as string) || 50, parseInt(offset as string) || 0);
     respond(req, res, reviews);
   } catch (error: any) {
     logger.error('Error:', error);
@@ -770,7 +766,17 @@ export const createCollection = async (req: TypedRequest, res: Response): Promis
       errorResponse(res, 'slug is required', 400);
       return;
     }
-    const command = new ManageProductCollectionCommand(name, slug, undefined, description, imageUrl, isActive, position, merchantId, addProducts);
+    const command = new ManageProductCollectionCommand(
+      name,
+      slug,
+      undefined,
+      description,
+      imageUrl,
+      isActive,
+      position,
+      merchantId,
+      addProducts,
+    );
     const useCase = new ManageProductCollectionUseCase();
     const result = await useCase.execute(command);
     successResponse(res, result, 201);
@@ -798,7 +804,16 @@ export const updateCollection = async (req: TypedRequest, res: Response): Promis
       return;
     }
     const command = new ManageProductCollectionCommand(
-      name, slug, collectionId, description, imageUrl, isActive, position, merchantId, addProducts, removeMapIds,
+      name,
+      slug,
+      collectionId,
+      description,
+      imageUrl,
+      isActive,
+      position,
+      merchantId,
+      addProducts,
+      removeMapIds,
     );
     const useCase = new ManageProductCollectionUseCase();
     const result = await useCase.execute(command);

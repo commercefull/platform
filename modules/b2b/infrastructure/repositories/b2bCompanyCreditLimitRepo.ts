@@ -24,10 +24,7 @@ export interface B2bCompanyCreditLimit {
 // ============================================================================
 
 export async function findByCompany(companyId: string): Promise<B2bCompanyCreditLimit | null> {
-  return queryOne<B2bCompanyCreditLimit>(
-    `SELECT * FROM "b2bCompanyCreditLimit" WHERE "b2bCompanyId" = $1`,
-    [companyId],
-  );
+  return queryOne<B2bCompanyCreditLimit>(`SELECT * FROM "b2bCompanyCreditLimit" WHERE "b2bCompanyId" = $1`, [companyId]);
 }
 
 export async function create(data: {

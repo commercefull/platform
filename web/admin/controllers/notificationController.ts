@@ -5,7 +5,7 @@
 
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';;
+import { TypedRequest } from 'libs/types/express';
 import notificationTemplateRepo from '../../../modules/notification/infrastructure/repositories/notificationTemplateRepo';
 import { adminRespond } from '../../respond';
 
@@ -345,10 +345,8 @@ export const listBatches = async (req: TypedRequest, res: Response): Promise<voi
     const limit = parseInt(req.query.limit as string) || 50;
     const offset = parseInt(req.query.offset as string) || 0;
 
-    const batches = await query<any[]>(
-      `SELECT * FROM "notificationBatch" ORDER BY "createdAt" DESC LIMIT $1 OFFSET $2`,
-      [limit, offset],
-    ) || [];
+    const batches =
+      (await query<any[]>(`SELECT * FROM "notificationBatch" ORDER BY "createdAt" DESC LIMIT $1 OFFSET $2`, [limit, offset])) || [];
 
     const totalResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "notificationBatch"`);
     const total = totalResult ? parseInt(totalResult.count, 10) : 0;
@@ -370,22 +368,20 @@ export const viewBatch = async (req: TypedRequest, res: Response): Promise<void>
   try {
     const { batchId } = req.params;
 
-    const batch = await queryOne<any>(
-      `SELECT * FROM "notificationBatch" WHERE "notificationBatchId" = $1`,
-      [batchId],
-    );
+    const batch = await queryOne<any>(`SELECT * FROM "notificationBatch" WHERE "notificationBatchId" = $1`, [batchId]);
 
     if (!batch) {
       adminRespond(req, res, 'error', { pageName: 'Not Found', error: 'Batch not found' });
       return;
     }
 
-    const deliveryLogs = await query<any[]>(
-      `SELECT * FROM "notificationDeliveryLog" WHERE "notificationId" IN (
+    const deliveryLogs =
+      (await query<any[]>(
+        `SELECT * FROM "notificationDeliveryLog" WHERE "notificationId" IN (
         SELECT "notificationId" FROM "notification" WHERE "notificationBatchId" = $1
       ) ORDER BY "createdAt" DESC LIMIT 100`,
-      [batchId],
-    ) || [];
+        [batchId],
+      )) || [];
 
     adminRespond(req, res, 'notifications/batches/detail', {
       pageName: `Batch: ${batch.name}`,
@@ -404,9 +400,7 @@ export const viewBatch = async (req: TypedRequest, res: Response): Promise<void>
 
 export const listWebhooks = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const webhooks = await query<any[]>(
-      `SELECT * FROM "notificationWebhook" ORDER BY "createdAt" DESC`,
-    ) || [];
+    const webhooks = (await query<any[]>(`SELECT * FROM "notificationWebhook" ORDER BY "createdAt" DESC`)) || [];
 
     adminRespond(req, res, 'notifications/webhooks/index', {
       pageName: 'Notification Webhooks',
@@ -434,7 +428,7 @@ export const createWebhookForm = async (req: TypedRequest, res: Response): Promi
 export const createWebhook = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { url, secret, events, merchantId } = req.body;
-    const eventsArray = Array.isArray(events) ? events : (events ? [events] : []);
+    const eventsArray = Array.isArray(events) ? events : events ? [events] : [];
 
     await notificationWebhookRepo.create({
       url,

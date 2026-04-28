@@ -50,12 +50,7 @@ export class RecordAffiliateCommissionUseCase {
     const affiliate = await this.affRepo.findById(command.affiliateId);
     if (!affiliate) throw new Error(`Affiliate ${command.affiliateId} not found`);
 
-    const commission = await this.affRepo.recordCommission(
-      command.affiliateId,
-      command.orderId,
-      command.amount,
-      command.currency,
-    );
+    const commission = await this.affRepo.recordCommission(command.affiliateId, command.orderId, command.amount, command.currency);
 
     if (!commission) throw new Error('Failed to record affiliate commission');
 

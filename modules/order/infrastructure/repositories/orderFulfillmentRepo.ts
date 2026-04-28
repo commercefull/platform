@@ -61,28 +61,23 @@ export class OrderFulfillmentRepo {
    * Find fulfillment by ID
    */
   async findById(orderFulfillmentId: string): Promise<OrderFulfillment | null> {
-    return await queryOne<OrderFulfillment>(`SELECT * FROM "orderFulfillment" WHERE "orderFulfillmentId" = $1`, [
-      orderFulfillmentId,
-    ]);
+    return await queryOne<OrderFulfillment>(`SELECT * FROM "orderFulfillment" WHERE "orderFulfillmentId" = $1`, [orderFulfillmentId]);
   }
 
   /**
    * Find fulfillment by number
    */
   async findByFulfillmentNumber(fulfillmentNumber: string): Promise<OrderFulfillment | null> {
-    return await queryOne<OrderFulfillment>(`SELECT * FROM "orderFulfillment" WHERE "fulfillmentNumber" = $1`, [
-      fulfillmentNumber,
-    ]);
+    return await queryOne<OrderFulfillment>(`SELECT * FROM "orderFulfillment" WHERE "fulfillmentNumber" = $1`, [fulfillmentNumber]);
   }
 
   /**
    * Find all fulfillments for an order
    */
   async findByOrderId(orderId: string): Promise<OrderFulfillment[]> {
-    const results = await query<OrderFulfillment[]>(
-      `SELECT * FROM "orderFulfillment" WHERE "orderId" = $1 ORDER BY "createdAt" DESC`,
-      [orderId],
-    );
+    const results = await query<OrderFulfillment[]>(`SELECT * FROM "orderFulfillment" WHERE "orderId" = $1 ORDER BY "createdAt" DESC`, [
+      orderId,
+    ]);
     return results || [];
   }
 
@@ -104,9 +99,7 @@ export class OrderFulfillmentRepo {
    * Find fulfillments by tracking number
    */
   async findByTrackingNumber(trackingNumber: string): Promise<OrderFulfillment[]> {
-    const results = await query<OrderFulfillment[]>(`SELECT * FROM "orderFulfillment" WHERE "trackingNumber" = $1`, [
-      trackingNumber,
-    ]);
+    const results = await query<OrderFulfillment[]>(`SELECT * FROM "orderFulfillment" WHERE "trackingNumber" = $1`, [trackingNumber]);
     return results || [];
   }
 
@@ -289,9 +282,7 @@ export class OrderFulfillmentRepo {
    * Count fulfillments by order
    */
   async countByOrderId(orderId: string): Promise<number> {
-    const result = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "orderFulfillment" WHERE "orderId" = $1`, [
-      orderId,
-    ]);
+    const result = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "orderFulfillment" WHERE "orderId" = $1`, [orderId]);
 
     return result ? parseInt(result.count, 10) : 0;
   }

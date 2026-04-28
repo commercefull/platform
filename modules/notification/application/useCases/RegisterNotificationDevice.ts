@@ -41,9 +41,7 @@ export interface RegisterNotificationDeviceResponse {
 // ============================================================================
 
 export class RegisterNotificationDeviceUseCase {
-  constructor(
-    private readonly deviceRepo: typeof notificationDeviceRepo = notificationDeviceRepo,
-  ) {}
+  constructor(private readonly deviceRepo: typeof notificationDeviceRepo = notificationDeviceRepo) {}
 
   async execute(command: RegisterNotificationDeviceCommand): Promise<RegisterNotificationDeviceResponse> {
     if (!command.userId) throw new Error('userId is required');

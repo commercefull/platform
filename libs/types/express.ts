@@ -57,7 +57,7 @@ export interface TypedRequest<
   ResBody = any,
   ReqBody = any,
   ReqQuery = any,
-  Locals extends Record<string, any> = Record<string, any>
+  Locals extends Record<string, any> = Record<string, any>,
 > extends ExpressRequest<P, ResBody, ReqBody, ReqQuery, Locals> {
   params: P;
   user?: Express.User;

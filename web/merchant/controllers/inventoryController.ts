@@ -20,8 +20,8 @@ export const listInventory = async (req: TypedRequest, res: Response) => {
     const page = parseInt(req.query.page as string) || 1;
     const limit = 25;
     const offset = (page - 1) * limit;
-    const search = req.query.search as string || '';
-    const filter = req.query.filter as string || 'all';
+    const search = (req.query.search as string) || '';
+    const filter = (req.query.filter as string) || 'all';
 
     let whereClause = 'WHERE il."merchantId" = $1';
     const params: any[] = [merchantId];
@@ -83,10 +83,10 @@ export const adjustStock = async (req: TypedRequest, res: Response) => {
     }
 
     // Verify ownership
-    const item = await queryOne(
-      `SELECT * FROM "inventoryLevel" WHERE "inventoryLevelId" = $1 AND "merchantId" = $2`,
-      [inventoryLevelId, merchantId],
-    );
+    const item = await queryOne(`SELECT * FROM "inventoryLevel" WHERE "inventoryLevelId" = $1 AND "merchantId" = $2`, [
+      inventoryLevelId,
+      merchantId,
+    ]);
 
     if (!item) {
       (req as any).flash?.('error', 'Inventory item not found');
@@ -94,16 +94,22 @@ export const adjustStock = async (req: TypedRequest, res: Response) => {
     }
 
     const newQuantity = (item as any).quantity + parseInt(adjustment);
-    await query(
-      `UPDATE "inventoryLevel" SET "quantity" = $1, "updatedAt" = NOW() WHERE "inventoryLevelId" = $2`,
-      [newQuantity, inventoryLevelId],
-    );
+    await query(`UPDATE "inventoryLevel" SET "quantity" = $1, "updatedAt" = NOW() WHERE "inventoryLevelId" = $2`, [
+      newQuantity,
+      inventoryLevelId,
+    ]);
 
     // Log the adjustment
     await query(
       `INSERT INTO "inventoryMovement" ("inventoryLevelId", "type", "quantity", "reason", "createdBy", "createdAt")
        VALUES ($1, $2, $3, $4, $5, NOW())`,
-      [inventoryLevelId, parseInt(adjustment) > 0 ? 'addition' : 'reduction', Math.abs(parseInt(adjustment)), reason || 'Manual adjustment', req.user?.userId || ''],
+      [
+        inventoryLevelId,
+        parseInt(adjustment) > 0 ? 'addition' : 'reduction',
+        Math.abs(parseInt(adjustment)),
+        reason || 'Manual adjustment',
+        req.user?.userId || '',
+      ],
     );
 
     (req as any).flash?.('success', 'Stock adjusted successfully');

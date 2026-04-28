@@ -23,18 +23,11 @@ export interface BalanceTransaction {
 
 export async function findByMerchant(merchantId: string): Promise<PaymentBalance[]> {
   return (
-    (await query<PaymentBalance[]>(
-      `SELECT * FROM "paymentBalance" WHERE "merchantId" = $1 ORDER BY currency ASC`,
-      [merchantId],
-    )) || []
+    (await query<PaymentBalance[]>(`SELECT * FROM "paymentBalance" WHERE "merchantId" = $1 ORDER BY currency ASC`, [merchantId])) || []
   );
 }
 
-export async function credit(
-  merchantId: string,
-  currency: string,
-  amount: number,
-): Promise<PaymentBalance | null> {
+export async function credit(merchantId: string, currency: string, amount: number): Promise<PaymentBalance | null> {
   const now = new Date();
   return queryOne<PaymentBalance>(
     `INSERT INTO "paymentBalance" ("merchantId", currency, amount, "createdAt", "updatedAt")
@@ -45,11 +38,7 @@ export async function credit(
   );
 }
 
-export async function debit(
-  merchantId: string,
-  currency: string,
-  amount: number,
-): Promise<PaymentBalance | null> {
+export async function debit(merchantId: string, currency: string, amount: number): Promise<PaymentBalance | null> {
   const now = new Date();
   return queryOne<PaymentBalance>(
     `UPDATE "paymentBalance" SET amount = amount - $1, "updatedAt" = $2

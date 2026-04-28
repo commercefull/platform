@@ -23,6 +23,7 @@ export interface CheckoutSessionProps {
   shippingMethodName?: string;
   paymentMethodId?: string;
   paymentIntentId?: string;
+  orderId?: string;
   subtotal: Money;
   taxAmount: Money;
   shippingAmount: Money;
@@ -124,6 +125,10 @@ export class CheckoutSession {
     return this.props.paymentIntentId;
   }
 
+  get orderId(): string | undefined {
+    return this.props.orderId;
+  }
+
   get subtotal(): Money {
     return this.props.subtotal;
   }
@@ -219,8 +224,9 @@ export class CheckoutSession {
     this.touch();
   }
 
-  setPaymentIntent(intentId: string): void {
+  setPaymentIntent(intentId: string, orderId: string): void {
     this.props.paymentIntentId = intentId;
+    this.props.orderId = orderId;
     this.props.status = 'pending_payment';
     this.touch();
   }
@@ -342,6 +348,7 @@ export class CheckoutSession {
       shippingMethodName: this.props.shippingMethodName,
       paymentMethodId: this.props.paymentMethodId,
       paymentIntentId: this.props.paymentIntentId,
+      orderId: this.props.orderId,
       subtotal: this.props.subtotal.amount,
       taxAmount: this.props.taxAmount.amount,
       shippingAmount: this.props.shippingAmount.amount,

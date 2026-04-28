@@ -57,19 +57,20 @@ export class TrackFulfillmentPackageUseCase {
   constructor(private readonly packageRepo: typeof orderFulfillmentPackageRepo = orderFulfillmentPackageRepo) {}
 
   async execute(command: TrackFulfillmentPackageCommand): Promise<TrackFulfillmentPackageResponse> {
-    let pkg: OrderFulfillmentPackage | null = null;
+    let pkg: OrderFulfillmentPackage;
 
     if (command.orderFulfillmentPackageId) {
       // Update tracking on existing package
-      pkg = await this.packageRepo.updateTracking(command.orderFulfillmentPackageId, {
+      const updated = await this.packageRepo.updateTracking(command.orderFulfillmentPackageId, {
         trackingNumber: command.trackingNumber,
         shippingLabelUrl: command.shippingLabelUrl,
         commercialInvoiceUrl: command.commercialInvoiceUrl,
       });
 
-      if (!pkg) {
+      if (!updated) {
         throw new Error('Fulfillment package not found');
       }
+      pkg = updated;
     } else {
       // Create a new package record
       const createParams: OrderFulfillmentPackageCreateParams = {

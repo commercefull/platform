@@ -20,7 +20,7 @@ export const listInvoices = async (req: TypedRequest, res: Response) => {
     const page = parseInt(req.query.page as string) || 1;
     const limit = 25;
     const offset = (page - 1) * limit;
-    const status = req.query.status as string || '';
+    const status = (req.query.status as string) || '';
 
     let whereClause = 'WHERE o."b2bCompanyId" = $1';
     const params: any[] = [companyId];
@@ -32,10 +32,7 @@ export const listInvoices = async (req: TypedRequest, res: Response) => {
       paramIdx++;
     }
 
-    const countResult = await queryOne(
-      `SELECT COUNT(*) as total FROM "order" o ${whereClause}`,
-      params,
-    );
+    const countResult = await queryOne(`SELECT COUNT(*) as total FROM "order" o ${whereClause}`, params);
     const total = parseInt((countResult as any)?.total || '0');
 
     const invoices = await query(
@@ -72,25 +69,16 @@ export const viewInvoice = async (req: TypedRequest, res: Response) => {
 
     const { orderId } = req.params;
 
-    const order = await queryOne(
-      `SELECT o.* FROM "order" o WHERE o."orderId" = $1 AND o."b2bCompanyId" = $2`,
-      [orderId, companyId],
-    );
+    const order = await queryOne(`SELECT o.* FROM "order" o WHERE o."orderId" = $1 AND o."b2bCompanyId" = $2`, [orderId, companyId]);
 
     if (!order) {
       (req as any).flash?.('error', 'Invoice not found');
       return res.redirect('/b2b/invoices');
     }
 
-    const items = await query(
-      `SELECT * FROM "orderItem" WHERE "orderId" = $1`,
-      [orderId],
-    );
+    const items = await query(`SELECT * FROM "orderItem" WHERE "orderId" = $1`, [orderId]);
 
-    const payments = await query(
-      `SELECT * FROM "paymentTransaction" WHERE "orderId" = $1 ORDER BY "createdAt" DESC`,
-      [orderId],
-    );
+    const payments = await query(`SELECT * FROM "paymentTransaction" WHERE "orderId" = $1 ORDER BY "createdAt" DESC`, [orderId]);
 
     b2bRespond(req, res, 'invoices/view', {
       pageName: `Invoice #${(order as any).orderNumber}`,

@@ -20,10 +20,7 @@ export interface OrderDiscount {
 export type OrderDiscountCreateParams = Omit<OrderDiscount, 'orderDiscountId' | 'createdAt' | 'updatedAt'>;
 
 export const findByOrder = async (orderId: string): Promise<OrderDiscount[]> => {
-  const results = await query<OrderDiscount[]>(
-    `SELECT * FROM "orderDiscount" WHERE "orderId" = $1 ORDER BY "createdAt" ASC`,
-    [orderId],
-  );
+  const results = await query<OrderDiscount[]>(`SELECT * FROM "orderDiscount" WHERE "orderId" = $1 ORDER BY "createdAt" ASC`, [orderId]);
   return results || [];
 };
 

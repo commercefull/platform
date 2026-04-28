@@ -65,17 +65,39 @@ export class WebhookEndpointEntity {
   }
 
   // Getters
-  get webhookEndpointId(): string { return this.props.webhookEndpointId; }
-  get merchantId(): string | null { return this.props.merchantId; }
-  get name(): string { return this.props.name; }
-  get url(): string { return this.props.url; }
-  get secret(): string { return this.props.secret; }
-  get events(): string[] { return this.props.events; }
-  get isActive(): boolean { return this.props.isActive; }
-  get headers(): Record<string, string> | null { return this.props.headers; }
-  get retryPolicy(): WebhookEndpointProps['retryPolicy'] { return this.props.retryPolicy; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get webhookEndpointId(): string {
+    return this.props.webhookEndpointId;
+  }
+  get merchantId(): string | null {
+    return this.props.merchantId;
+  }
+  get name(): string {
+    return this.props.name;
+  }
+  get url(): string {
+    return this.props.url;
+  }
+  get secret(): string {
+    return this.props.secret;
+  }
+  get events(): string[] {
+    return this.props.events;
+  }
+  get isActive(): boolean {
+    return this.props.isActive;
+  }
+  get headers(): Record<string, string> | null {
+    return this.props.headers;
+  }
+  get retryPolicy(): WebhookEndpointProps['retryPolicy'] {
+    return this.props.retryPolicy;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   // Domain methods
   activate(): void {

@@ -5,11 +5,7 @@ All API endpoints return a consistent JSON envelope. Helpers live in `libs/apiRe
 ## Helpers
 
 ```typescript
-import {
-  successResponse,
-  errorResponse,
-  validationErrorResponse,
-} from '../../libs/apiResponse';
+import { successResponse, errorResponse, validationErrorResponse } from '../../libs/apiResponse';
 
 // Success (200)
 successResponse(res, data);
@@ -60,7 +56,7 @@ validationErrorResponse(res, ['Name is required', 'Email is invalid']);
 ```json
 {
   "success": true,
-  "data": [ "..." ],
+  "data": ["..."],
   "pagination": {
     "page": 1,
     "limit": 20,

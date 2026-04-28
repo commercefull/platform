@@ -11,10 +11,11 @@ export interface NotificationTemplateTranslation {
 }
 
 export async function findByTemplate(templateId: string): Promise<NotificationTemplateTranslation[]> {
-  return (await query<NotificationTemplateTranslation[]>(
-    `SELECT * FROM "notificationTemplateTranslation" WHERE "templateId" = $1`,
-    [templateId],
-  )) || [];
+  return (
+    (await query<NotificationTemplateTranslation[]>(`SELECT * FROM "notificationTemplateTranslation" WHERE "templateId" = $1`, [
+      templateId,
+    ])) || []
+  );
 }
 
 export async function findByTemplateAndLocale(templateId: string, locale: string): Promise<NotificationTemplateTranslation | null> {
@@ -24,7 +25,9 @@ export async function findByTemplateAndLocale(templateId: string, locale: string
   );
 }
 
-export async function upsert(params: Omit<NotificationTemplateTranslation, 'notificationTemplateTranslationId' | 'createdAt' | 'updatedAt'>): Promise<NotificationTemplateTranslation | null> {
+export async function upsert(
+  params: Omit<NotificationTemplateTranslation, 'notificationTemplateTranslationId' | 'createdAt' | 'updatedAt'>,
+): Promise<NotificationTemplateTranslation | null> {
   const now = new Date();
   return queryOne<NotificationTemplateTranslation>(
     `INSERT INTO "notificationTemplateTranslation" ("templateId", locale, subject, body, "createdAt", "updatedAt")

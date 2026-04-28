@@ -88,11 +88,7 @@ export const approveStoreDispatch = async (req: TypedRequest, res: Response): Pr
 export const dispatchFromStore = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const useCase = new DispatchFromStoreUseCase(storeDispatchRepository, InventoryRepository);
-    const result = await useCase.execute(
-      req.params.dispatchId,
-      req.user?.userId || req.user?.id || req.body.dispatchedBy,
-      req.body.items,
-    );
+    const result = await useCase.execute(req.params.dispatchId, req.user?.userId || req.user?.id || req.body.dispatchedBy, req.body.items);
     respond(res, result);
   } catch (error: any) {
     logger.error('Error:', error);

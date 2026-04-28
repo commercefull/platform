@@ -1,6 +1,6 @@
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';;
+import { TypedRequest } from 'libs/types/express';
 import { storefrontRespond } from '../../respond';
 import ProductRepo from '../../../modules/product/infrastructure/repositories/ProductRepository';
 import { ListProductsCommand, ListProductsUseCase } from '../../../modules/product/application/useCases/ListProducts';

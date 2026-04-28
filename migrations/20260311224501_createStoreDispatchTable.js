@@ -7,7 +7,10 @@ exports.up = async function (knex) {
     table.uuid('fromStoreId').notNullable().references('storeId').inTable('store').onDelete('CASCADE');
     table.uuid('toStoreId').notNullable().references('storeId').inTable('store').onDelete('CASCADE');
     table.string('dispatchNumber', 50).notNullable().unique();
-    table.enum('status', ['draft', 'pending_approval', 'approved', 'dispatched', 'in_transit', 'received', 'cancelled']).notNullable().defaultTo('draft');
+    table
+      .enum('status', ['draft', 'pending_approval', 'approved', 'dispatched', 'in_transit', 'received', 'cancelled'])
+      .notNullable()
+      .defaultTo('draft');
     table.uuid('requestedBy').nullable();
     table.uuid('approvedBy').nullable();
     table.uuid('dispatchedBy').nullable();

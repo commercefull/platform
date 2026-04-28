@@ -20,7 +20,7 @@ export const listFulfillments = async (req: TypedRequest, res: Response) => {
     const page = parseInt(req.query.page as string) || 1;
     const limit = 25;
     const offset = (page - 1) * limit;
-    const status = req.query.status as string || '';
+    const status = (req.query.status as string) || '';
 
     let whereClause = 'WHERE f."merchantId" = $1';
     const params: any[] = [merchantId];
@@ -32,10 +32,7 @@ export const listFulfillments = async (req: TypedRequest, res: Response) => {
       paramIdx++;
     }
 
-    const countResult = await queryOne(
-      `SELECT COUNT(*) as total FROM "fulfillment" f ${whereClause}`,
-      params,
-    );
+    const countResult = await queryOne(`SELECT COUNT(*) as total FROM "fulfillment" f ${whereClause}`, params);
     const total = parseInt((countResult as any)?.total || '0');
 
     const fulfillments = await query(
@@ -85,10 +82,7 @@ export const viewFulfillment = async (req: TypedRequest, res: Response) => {
       return res.redirect('/merchant/fulfillments');
     }
 
-    const items = await query(
-      `SELECT fi.* FROM "fulfillmentItem" fi WHERE fi."fulfillmentId" = $1`,
-      [fulfillmentId],
-    );
+    const items = await query(`SELECT fi.* FROM "fulfillmentItem" fi WHERE fi."fulfillmentId" = $1`, [fulfillmentId]);
 
     merchantRespond(req, res, 'fulfillment/view', {
       pageName: `Fulfillment Details`,
@@ -112,10 +106,10 @@ export const updateTracking = async (req: TypedRequest, res: Response) => {
     const { fulfillmentId } = req.params;
     const { trackingNumber, trackingUrl, carrier } = req.body;
 
-    const fulfillment = await queryOne(
-      `SELECT * FROM "fulfillment" WHERE "fulfillmentId" = $1 AND "merchantId" = $2`,
-      [fulfillmentId, merchantId],
-    );
+    const fulfillment = await queryOne(`SELECT * FROM "fulfillment" WHERE "fulfillmentId" = $1 AND "merchantId" = $2`, [
+      fulfillmentId,
+      merchantId,
+    ]);
 
     if (!fulfillment) {
       (req as any).flash?.('error', 'Fulfillment not found');

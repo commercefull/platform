@@ -28,12 +28,24 @@ export async function findByCode(code: string): Promise<FulfillmentPartner | nul
   return queryOne<FulfillmentPartner>(`SELECT * FROM "fulfillmentPartner" WHERE code = $1`, [code]);
 }
 
-export async function create(params: Omit<FulfillmentPartner, 'fulfillmentPartnerId' | 'createdAt' | 'updatedAt'>): Promise<FulfillmentPartner | null> {
+export async function create(
+  params: Omit<FulfillmentPartner, 'fulfillmentPartnerId' | 'createdAt' | 'updatedAt'>,
+): Promise<FulfillmentPartner | null> {
   const now = new Date();
   return queryOne<FulfillmentPartner>(
     `INSERT INTO "fulfillmentPartner" (name, code, type, "isActive", "apiEndpoint", credentials, "supportedRegions", "createdAt", "updatedAt")
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
-    [params.name, params.code, params.type, params.isActive, params.apiEndpoint || null, params.credentials ? JSON.stringify(params.credentials) : null, params.supportedRegions ? JSON.stringify(params.supportedRegions) : null, now, now],
+    [
+      params.name,
+      params.code,
+      params.type,
+      params.isActive,
+      params.apiEndpoint || null,
+      params.credentials ? JSON.stringify(params.credentials) : null,
+      params.supportedRegions ? JSON.stringify(params.supportedRegions) : null,
+      now,
+      now,
+    ],
   );
 }
 

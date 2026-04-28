@@ -63,21 +63,51 @@ export class WebhookDeliveryEntity {
   }
 
   // Getters
-  get webhookDeliveryId(): string { return this.props.webhookDeliveryId; }
-  get webhookEndpointId(): string { return this.props.webhookEndpointId; }
-  get eventType(): string { return this.props.eventType; }
-  get eventId(): string { return this.props.eventId; }
-  get payload(): unknown { return this.props.payload; }
-  get status(): DeliveryStatus { return this.props.status; }
-  get attempts(): number { return this.props.attempts; }
-  get lastAttemptAt(): Date | null { return this.props.lastAttemptAt; }
-  get nextRetryAt(): Date | null { return this.props.nextRetryAt; }
-  get responseStatus(): number | null { return this.props.responseStatus; }
-  get responseBody(): string | null { return this.props.responseBody; }
-  get errorMessage(): string | null { return this.props.errorMessage; }
-  get duration(): number | null { return this.props.duration; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get webhookDeliveryId(): string {
+    return this.props.webhookDeliveryId;
+  }
+  get webhookEndpointId(): string {
+    return this.props.webhookEndpointId;
+  }
+  get eventType(): string {
+    return this.props.eventType;
+  }
+  get eventId(): string {
+    return this.props.eventId;
+  }
+  get payload(): unknown {
+    return this.props.payload;
+  }
+  get status(): DeliveryStatus {
+    return this.props.status;
+  }
+  get attempts(): number {
+    return this.props.attempts;
+  }
+  get lastAttemptAt(): Date | null {
+    return this.props.lastAttemptAt;
+  }
+  get nextRetryAt(): Date | null {
+    return this.props.nextRetryAt;
+  }
+  get responseStatus(): number | null {
+    return this.props.responseStatus;
+  }
+  get responseBody(): string | null {
+    return this.props.responseBody;
+  }
+  get errorMessage(): string | null {
+    return this.props.errorMessage;
+  }
+  get duration(): number | null {
+    return this.props.duration;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   recordSuccess(responseStatus: number, responseBody: string, durationMs: number): void {
     this.props.status = 'success';

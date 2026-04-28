@@ -4,7 +4,13 @@
  */
 
 import express from 'express';
-import { getActiveLocales, getActiveCountries, getLocaleByCode, getCountryByCode, detectLocale } from '../controllers/localizationCustomerController';
+import {
+  getActiveLocales,
+  getActiveCountries,
+  getLocaleByCode,
+  getCountryByCode,
+  detectLocale,
+} from '../controllers/localizationCustomerController';
 
 const router = express.Router();
 

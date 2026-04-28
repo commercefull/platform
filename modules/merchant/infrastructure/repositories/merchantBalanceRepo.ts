@@ -13,10 +13,7 @@ export interface MerchantBalance {
 }
 
 export async function findByMerchant(merchantId: string, currency = 'USD'): Promise<MerchantBalance | null> {
-  return queryOne<MerchantBalance>(
-    `SELECT * FROM "merchantBalance" WHERE "merchantId" = $1 AND currency = $2`,
-    [merchantId, currency],
-  );
+  return queryOne<MerchantBalance>(`SELECT * FROM "merchantBalance" WHERE "merchantId" = $1 AND currency = $2`, [merchantId, currency]);
 }
 
 export async function upsert(merchantId: string, currency: string): Promise<MerchantBalance | null> {

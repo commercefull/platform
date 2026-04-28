@@ -5,7 +5,7 @@
 
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';;
+import { TypedRequest } from 'libs/types/express';
 import ContentRepo from '../../../modules/content/infrastructure/repositories/contentRepo';
 import { adminRespond } from '../../respond';
 

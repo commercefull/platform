@@ -5,7 +5,7 @@
 
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';;
+import { TypedRequest } from 'libs/types/express';
 import OrderRepo from '../../../modules/order/infrastructure/repositories/OrderRepository';
 import { ListOrdersCommand, ListOrdersUseCase } from '../../../modules/order/application/useCases/ListOrders';
 import { GetOrderCommand, GetOrderUseCase } from '../../../modules/order/application/useCases/GetOrder';
@@ -13,7 +13,10 @@ import { UpdateOrderStatusCommand, UpdateOrderStatusUseCase } from '../../../mod
 import { CancelOrderCommand, CancelOrderUseCase } from '../../../modules/order/application/useCases/CancelOrder';
 import { ProcessRefundCommand, ProcessRefundUseCase } from '../../../modules/order/application/useCases/ProcessRefund';
 import { AddOrderNoteCommand, AddOrderNoteUseCase } from '../../../modules/order/application/useCases/AddOrderNote';
-import { TrackFulfillmentPackageCommand, TrackFulfillmentPackageUseCase } from '../../../modules/order/application/useCases/TrackFulfillmentPackage';
+import {
+  TrackFulfillmentPackageCommand,
+  TrackFulfillmentPackageUseCase,
+} from '../../../modules/order/application/useCases/TrackFulfillmentPackage';
 import * as orderNoteRepo from '../../../modules/order/infrastructure/repositories/orderNoteRepo';
 import * as orderPaymentRefundRepo from '../../../modules/order/infrastructure/repositories/orderPaymentRefundRepo';
 import * as orderFulfillmentPackageRepo from '../../../modules/order/infrastructure/repositories/orderFulfillmentPackageRepo';

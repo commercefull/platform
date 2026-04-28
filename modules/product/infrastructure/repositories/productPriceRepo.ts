@@ -81,10 +81,7 @@ export class ProductPriceRepo {
     fields.push(`"updatedAt" = $${i++}`);
     values.push(new Date(), productPriceId);
 
-    return queryOne<ProductPrice>(
-      `UPDATE "productPrice" SET ${fields.join(', ')} WHERE "productPriceId" = $${i} RETURNING *`,
-      values,
-    );
+    return queryOne<ProductPrice>(`UPDATE "productPrice" SET ${fields.join(', ')} WHERE "productPriceId" = $${i} RETURNING *`, values);
   }
 }
 

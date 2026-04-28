@@ -65,25 +65,21 @@ async function run() {
         break;
       case 'admin':
         permissions = [
-          'users:read', 'users:write', 'users:delete',
-          'orders:read', 'orders:write',
-          'products:read', 'products:write',
-          'analytics:read'
+          'users:read',
+          'users:write',
+          'users:delete',
+          'orders:read',
+          'orders:write',
+          'products:read',
+          'products:write',
+          'analytics:read',
         ];
         break;
       case 'support':
-        permissions = [
-          'users:read',
-          'orders:read', 'orders:write',
-          'support:read', 'support:write'
-        ];
+        permissions = ['users:read', 'orders:read', 'orders:write', 'support:read', 'support:write'];
         break;
       case 'operations':
-        permissions = [
-          'orders:read', 'orders:write',
-          'inventory:read', 'inventory:write',
-          'fulfillment:read', 'fulfillment:write'
-        ];
+        permissions = ['orders:read', 'orders:write', 'inventory:read', 'inventory:write', 'fulfillment:read', 'fulfillment:write'];
         break;
     }
 
@@ -95,7 +91,7 @@ async function run() {
       passwordHash,
       role,
       permissions,
-      status: 'active'
+      status: 'active',
     });
 
     console.log('✅ Admin user created successfully!');
@@ -106,7 +102,6 @@ async function run() {
     console.log(`   📅 Created: ${adminUser.createdAt.toISOString()}`);
     console.log('');
     console.log('🔐 You can now log in with the provided email and password.');
-
   } catch (error) {
     console.error('❌ Failed to create admin user:', error);
     process.exit(1);

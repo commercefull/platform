@@ -31,10 +31,7 @@ export const findByOrder = async (orderId: string): Promise<OrderPaymentRefund[]
 };
 
 export const findById = async (orderPaymentRefundId: string): Promise<OrderPaymentRefund | null> => {
-  return queryOne<OrderPaymentRefund>(
-    `SELECT * FROM "orderPaymentRefund" WHERE "orderPaymentRefundId" = $1`,
-    [orderPaymentRefundId],
-  );
+  return queryOne<OrderPaymentRefund>(`SELECT * FROM "orderPaymentRefund" WHERE "orderPaymentRefundId" = $1`, [orderPaymentRefundId]);
 };
 
 export const create = async (params: OrderPaymentRefundCreateParams): Promise<OrderPaymentRefund> => {

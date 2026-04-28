@@ -5,7 +5,7 @@
 
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';;
+import { TypedRequest } from 'libs/types/express';
 import ContentRepo from '../../../modules/content/infrastructure/repositories/contentRepo';
 import { CreatePageUseCase, CreatePageCommand } from '../../../modules/content/application/useCases/CreatePage';
 import { UpdatePageUseCase, UpdatePageCommand } from '../../../modules/content/application/useCases/UpdatePage';

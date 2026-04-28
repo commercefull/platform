@@ -286,10 +286,9 @@ export class ProductMediaRepo {
    * Delete all media for product
    */
   async deleteByProductId(productId: string): Promise<number> {
-    const result = await queryOne<{ count: string }>(
-      `DELETE FROM "productMedia" WHERE "productId" = $1 RETURNING COUNT(*) as count`,
-      [productId],
-    );
+    const result = await queryOne<{ count: string }>(`DELETE FROM "productMedia" WHERE "productId" = $1 RETURNING COUNT(*) as count`, [
+      productId,
+    ]);
 
     return result ? parseInt(result.count, 10) : 0;
   }
@@ -310,9 +309,7 @@ export class ProductMediaRepo {
    * Count media by product
    */
   async countByProductId(productId: string): Promise<number> {
-    const result = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "productMedia" WHERE "productId" = $1`, [
-      productId,
-    ]);
+    const result = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "productMedia" WHERE "productId" = $1`, [productId]);
 
     return result ? parseInt(result.count, 10) : 0;
   }

@@ -5,7 +5,7 @@
 
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';;
+import { TypedRequest } from 'libs/types/express';
 import orderFulfillmentRepo from '../../../modules/order/infrastructure/repositories/orderFulfillmentRepo';
 import orderRepo from '../../../modules/order/infrastructure/repositories/orderRepo';
 import warehouseRepo from '../../../modules/warehouse/infrastructure/repositories/warehouseRepo';

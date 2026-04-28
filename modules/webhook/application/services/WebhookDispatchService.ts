@@ -64,10 +64,7 @@ export class WebhookDispatchService {
   /**
    * Dispatch a single event payload to a webhook endpoint
    */
-  private async dispatchToEndpoint(
-    endpoint: WebhookEndpointEntity,
-    payload: EventPayload,
-  ): Promise<void> {
+  private async dispatchToEndpoint(endpoint: WebhookEndpointEntity, payload: EventPayload): Promise<void> {
     const deliveryId = generateUUID();
     const eventId = payload.correlationId || generateUUID();
 
@@ -108,10 +105,7 @@ export class WebhookDispatchService {
   /**
    * Attempt to deliver a webhook payload
    */
-  private async attemptDelivery(
-    delivery: WebhookDeliveryEntity,
-    endpoint: WebhookEndpointEntity,
-  ): Promise<void> {
+  private async attemptDelivery(delivery: WebhookDeliveryEntity, endpoint: WebhookEndpointEntity): Promise<void> {
     const bodyStr = JSON.stringify(delivery.payload);
     const signature = this.signPayload(bodyStr, endpoint.secret);
     const startTime = Date.now();

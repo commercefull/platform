@@ -43,13 +43,7 @@ export const createCampaign = async (req: Request, res: Response): Promise<void>
     const { name, subject, templateId, scheduledAt } = req.body;
     const merchantId = (req as any).user?.merchantId;
 
-    const command = new CreateEmailCampaignCommand(
-      name,
-      subject,
-      merchantId,
-      templateId,
-      scheduledAt ? new Date(scheduledAt) : undefined,
-    );
+    const command = new CreateEmailCampaignCommand(name, subject, merchantId, templateId, scheduledAt ? new Date(scheduledAt) : undefined);
 
     const useCase = new CreateEmailCampaignUseCase();
     const result = await useCase.execute(command);
@@ -70,7 +64,7 @@ export const sendCampaign = async (req: Request, res: Response): Promise<void> =
     const { campaignId } = req.params;
     const { recipients } = req.body;
 
-    const command = new SendEmailCampaignCommand(campaignId, recipients || []);
+    const command = new SendEmailCampaignCommand(String(campaignId), recipients || []);
     const useCase = new SendEmailCampaignUseCase();
     const result = await useCase.execute(command);
 
@@ -94,7 +88,7 @@ export const listAffiliates = async (req: Request, res: Response): Promise<void>
     const { code } = req.query;
 
     if (code) {
-      const affiliate = await affiliateRepo.findByCode(code as string);
+      const affiliate = await affiliateRepo.findByCode(String(code));
       successResponse(res, { affiliates: affiliate ? [affiliate] : [] });
       return;
     }
@@ -116,16 +110,7 @@ export const createAffiliate = async (req: Request, res: Response): Promise<void
     const { name, email, code, commissionRate, trackingUrl, trackingSlug, customerId } = req.body;
     const merchantId = (req as any).user?.merchantId;
 
-    const command = new CreateAffiliateCommand(
-      name,
-      email,
-      code,
-      commissionRate,
-      trackingUrl,
-      trackingSlug,
-      customerId,
-      merchantId,
-    );
+    const command = new CreateAffiliateCommand(name, email, code, commissionRate, trackingUrl, trackingSlug, customerId, merchantId);
 
     const useCase = new CreateAffiliateUseCase();
     const result = await useCase.execute(command);
@@ -145,13 +130,13 @@ export const getAffiliate = async (req: Request, res: Response): Promise<void> =
   try {
     const { affiliateId } = req.params;
 
-    const affiliate = await affiliateRepo.findById(affiliateId);
+    const affiliate = await affiliateRepo.findById(String(affiliateId));
     if (!affiliate) {
       errorResponse(res, 'Affiliate not found', 404);
       return;
     }
 
-    const commissions = await affiliateRepo.findCommissions(affiliateId);
+    const commissions = await affiliateRepo.findCommissions(String(affiliateId));
 
     successResponse(res, { affiliate, commissions });
   } catch (error: any) {
@@ -177,7 +162,7 @@ export const listReferrals = async (req: Request, res: Response): Promise<void> 
       return;
     }
 
-    const referrals = await referralRepo.findByReferrer(referrerId as string);
+    const referrals = await referralRepo.findByReferrer(String(referrerId));
     successResponse(res, { referrals });
   } catch (error: any) {
     logger.error('listReferrals error:', error);

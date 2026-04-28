@@ -5,7 +5,7 @@
 
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';;
+import { TypedRequest } from 'libs/types/express';
 import { storefrontRespond } from '../../respond';
 import BasketRepo from '../../../modules/basket/infrastructure/repositories/BasketRepository';
 import OrderRepo from '../../../modules/order/infrastructure/repositories/OrderRepository';

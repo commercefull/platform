@@ -5,7 +5,7 @@
 
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';;
+import { TypedRequest } from 'libs/types/express';
 import { merchantRespond } from '../../respond';
 import DashboardQueryRepository from '../../../modules/analytics/infrastructure/repositories/DashboardQueryRepository';
 

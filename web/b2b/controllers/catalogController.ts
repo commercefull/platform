@@ -20,8 +20,8 @@ export const listProducts = async (req: TypedRequest, res: Response) => {
     const page = parseInt(req.query.page as string) || 1;
     const limit = 24;
     const offset = (page - 1) * limit;
-    const search = req.query.search as string || '';
-    const categoryId = req.query.category as string || '';
+    const search = (req.query.search as string) || '';
+    const categoryId = (req.query.category as string) || '';
 
     let whereClause = 'WHERE p."status" = \'active\' AND p."visibility" = \'visible\'';
     const params: any[] = [];
@@ -39,10 +39,7 @@ export const listProducts = async (req: TypedRequest, res: Response) => {
       paramIdx++;
     }
 
-    const countResult = await queryOne(
-      `SELECT COUNT(*) as total FROM "product" p ${whereClause}`,
-      params,
-    );
+    const countResult = await queryOne(`SELECT COUNT(*) as total FROM "product" p ${whereClause}`, params);
     const total = parseInt((countResult as any)?.total || '0');
 
     const products = await query(
@@ -87,10 +84,7 @@ export const viewProduct = async (req: TypedRequest, res: Response) => {
 
     const { productId } = req.params;
 
-    const product = await queryOne(
-      `SELECT p.* FROM "product" p WHERE p."productId" = $1 AND p."status" = 'active'`,
-      [productId],
-    );
+    const product = await queryOne(`SELECT p.* FROM "product" p WHERE p."productId" = $1 AND p."status" = 'active'`, [productId]);
 
     if (!product) {
       (req as any).flash?.('error', 'Product not found');

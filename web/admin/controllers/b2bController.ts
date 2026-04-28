@@ -5,7 +5,7 @@
 
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';;
+import { TypedRequest } from 'libs/types/express';
 import {
   getCompany,
   getCompanies,
@@ -957,8 +957,8 @@ export const viewCompanyCreditLimit = async (req: TypedRequest, res: Response): 
 };
 
 export const updateCompanyCreditLimit = async (req: TypedRequest, res: Response): Promise<void> => {
+  const { companyId } = req.params;
   try {
-    const { companyId } = req.params;
     const { creditLimit, currency, notes } = req.body;
     const existing = await b2bCompanyCreditLimitRepo.findByCompany(companyId);
     if (existing) {

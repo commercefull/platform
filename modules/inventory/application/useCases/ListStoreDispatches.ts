@@ -1,8 +1,4 @@
-import {
-  DispatchFilters,
-  PaginationOptions,
-  StoreDispatchRepository,
-} from '../../domain/repositories/StoreDispatchRepository';
+import { DispatchFilters, PaginationOptions, StoreDispatchRepository } from '../../domain/repositories/StoreDispatchRepository';
 
 export interface ListStoreDispatchesInput extends DispatchFilters {
   limit?: number;

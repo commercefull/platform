@@ -43,9 +43,7 @@ export const getCategory = async (req: TypedRequest, res: Response): Promise<voi
     const { identifier } = req.params;
 
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(identifier);
-    const category = isUuid
-      ? await categoryRepo.findOne(identifier)
-      : await categoryRepo.findBySlug(identifier);
+    const category = isUuid ? await categoryRepo.findOne(identifier) : await categoryRepo.findBySlug(identifier);
 
     if (!category || !category.isActive) {
       res.status(404).json({ success: false, error: 'Category not found' });

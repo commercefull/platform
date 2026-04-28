@@ -5,7 +5,7 @@
 
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';;
+import { TypedRequest } from 'libs/types/express';
 import { adminRespond } from '../../respond';
 
 export const listMerchants = async (req: TypedRequest, res: Response): Promise<void> => {
@@ -163,7 +163,9 @@ export const addMerchantContact = async (req: TypedRequest, res: Response): Prom
     res.redirect(`/admin/operations/merchants/${merchantId}/contacts?success=Contact added successfully`);
   } catch (error: any) {
     logger.error('Error adding merchant contact:', error);
-    res.redirect(`/admin/operations/merchants/${req.params.merchantId}/contacts?error=${encodeURIComponent(error.message || 'Failed to add contact')}`);
+    res.redirect(
+      `/admin/operations/merchants/${req.params.merchantId}/contacts?error=${encodeURIComponent(error.message || 'Failed to add contact')}`,
+    );
   }
 };
 
@@ -194,7 +196,9 @@ export const updateDocumentStatus = async (req: TypedRequest, res: Response): Pr
     res.redirect(`/admin/operations/merchants/${merchantId}/documents?success=Document status updated`);
   } catch (error: any) {
     logger.error('Error updating document status:', error);
-    res.redirect(`/admin/operations/merchants/${req.params.merchantId}/documents?error=${encodeURIComponent(error.message || 'Failed to update status')}`);
+    res.redirect(
+      `/admin/operations/merchants/${req.params.merchantId}/documents?error=${encodeURIComponent(error.message || 'Failed to update status')}`,
+    );
   }
 };
 
@@ -225,7 +229,9 @@ export const updateReviewStatus = async (req: TypedRequest, res: Response): Prom
     res.redirect(`/admin/operations/merchants/${merchantId}/reviews?success=Review status updated`);
   } catch (error: any) {
     logger.error('Error updating review status:', error);
-    res.redirect(`/admin/operations/merchants/${req.params.merchantId}/reviews?error=${encodeURIComponent(error.message || 'Failed to update status')}`);
+    res.redirect(
+      `/admin/operations/merchants/${req.params.merchantId}/reviews?error=${encodeURIComponent(error.message || 'Failed to update status')}`,
+    );
   }
 };
 
@@ -355,7 +361,9 @@ export const updateCommissionProfile = async (req: TypedRequest, res: Response):
     res.redirect('/admin/operations/merchants/commission-profiles?success=Commission profile updated');
   } catch (error: any) {
     logger.error('Error updating commission profile:', error);
-    res.redirect(`/admin/operations/merchants/commission-profiles/${req.params.profileId}/edit?error=${encodeURIComponent(error.message || 'Failed to update')}`);
+    res.redirect(
+      `/admin/operations/merchants/commission-profiles/${req.params.profileId}/edit?error=${encodeURIComponent(error.message || 'Failed to update')}`,
+    );
   }
 };
 
@@ -391,6 +399,8 @@ export const upsertSellerPolicy = async (req: TypedRequest, res: Response): Prom
     res.redirect(`/admin/operations/merchants/${merchantId}/policies?success=Policy saved`);
   } catch (error: any) {
     logger.error('Error upserting seller policy:', error);
-    res.redirect(`/admin/operations/merchants/${req.params.merchantId}/policies?error=${encodeURIComponent(error.message || 'Failed to save policy')}`);
+    res.redirect(
+      `/admin/operations/merchants/${req.params.merchantId}/policies?error=${encodeURIComponent(error.message || 'Failed to save policy')}`,
+    );
   }
 };

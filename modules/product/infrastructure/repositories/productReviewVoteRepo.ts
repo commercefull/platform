@@ -13,18 +13,17 @@ export type ProductReviewVoteCreateParams = Omit<ProductReviewVote, 'productRevi
 export class ProductReviewVoteRepo {
   async findByReview(productReviewId: string): Promise<ProductReviewVote[]> {
     return (
-      (await query<ProductReviewVote[]>(
-        `SELECT * FROM "productReviewVote" WHERE "productReviewId" = $1 ORDER BY "createdAt" DESC`,
-        [productReviewId],
-      )) || []
+      (await query<ProductReviewVote[]>(`SELECT * FROM "productReviewVote" WHERE "productReviewId" = $1 ORDER BY "createdAt" DESC`, [
+        productReviewId,
+      ])) || []
     );
   }
 
   async findByCustomer(productReviewId: string, customerId: string): Promise<ProductReviewVote | null> {
-    return queryOne<ProductReviewVote>(
-      `SELECT * FROM "productReviewVote" WHERE "productReviewId" = $1 AND "customerId" = $2`,
-      [productReviewId, customerId],
-    );
+    return queryOne<ProductReviewVote>(`SELECT * FROM "productReviewVote" WHERE "productReviewId" = $1 AND "customerId" = $2`, [
+      productReviewId,
+      customerId,
+    ]);
   }
 
   async create(params: ProductReviewVoteCreateParams): Promise<ProductReviewVote | null> {

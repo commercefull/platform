@@ -253,10 +253,9 @@ export class OrderItemRepo {
    * Delete order item
    */
   async delete(orderItemId: string): Promise<boolean> {
-    const result = await queryOne<{ orderItemId: string }>(
-      `DELETE FROM "orderItem" WHERE "orderItemId" = $1 RETURNING "orderItemId"`,
-      [orderItemId],
-    );
+    const result = await queryOne<{ orderItemId: string }>(`DELETE FROM "orderItem" WHERE "orderItemId" = $1 RETURNING "orderItemId"`, [
+      orderItemId,
+    ]);
 
     return !!result;
   }

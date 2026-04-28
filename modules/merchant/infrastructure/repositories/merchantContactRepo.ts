@@ -14,13 +14,17 @@ export interface MerchantContact {
 }
 
 export async function findByMerchant(merchantId: string): Promise<MerchantContact[]> {
-  return (await query<MerchantContact[]>(
-    `SELECT * FROM "merchantContact" WHERE "merchantId" = $1 AND "deletedAt" IS NULL ORDER BY "isPrimary" DESC, "createdAt" ASC`,
-    [merchantId],
-  )) || [];
+  return (
+    (await query<MerchantContact[]>(
+      `SELECT * FROM "merchantContact" WHERE "merchantId" = $1 AND "deletedAt" IS NULL ORDER BY "isPrimary" DESC, "createdAt" ASC`,
+      [merchantId],
+    )) || []
+  );
 }
 
-export async function create(params: Omit<MerchantContact, 'merchantContactId' | 'createdAt' | 'updatedAt' | 'deletedAt'>): Promise<MerchantContact | null> {
+export async function create(
+  params: Omit<MerchantContact, 'merchantContactId' | 'createdAt' | 'updatedAt' | 'deletedAt'>,
+): Promise<MerchantContact | null> {
   const now = new Date();
   return queryOne<MerchantContact>(
     `INSERT INTO "merchantContact" ("merchantId", name, role, email, phone, "isPrimary", "createdAt", "updatedAt")
@@ -30,10 +34,11 @@ export async function create(params: Omit<MerchantContact, 'merchantContactId' |
 }
 
 export async function softDelete(merchantContactId: string): Promise<void> {
-  await query(
-    `UPDATE "merchantContact" SET "deletedAt" = $1, "updatedAt" = $2 WHERE "merchantContactId" = $3`,
-    [new Date(), new Date(), merchantContactId],
-  );
+  await query(`UPDATE "merchantContact" SET "deletedAt" = $1, "updatedAt" = $2 WHERE "merchantContactId" = $3`, [
+    new Date(),
+    new Date(),
+    merchantContactId,
+  ]);
 }
 
 export default { findByMerchant, create, softDelete };

@@ -46,11 +46,7 @@ export class GetProductRecommendationsUseCase {
   async execute(command: GetProductRecommendationsCommand): Promise<GetProductRecommendationsResponse> {
     if (!command.customerId) throw new Error('customerId is required');
 
-    const recommendations = await this.recommendationRepo.findForCustomer(
-      command.customerId,
-      command.type,
-      command.limit,
-    );
+    const recommendations = await this.recommendationRepo.findForCustomer(command.customerId, command.type, command.limit);
 
     return {
       customerId: command.customerId,

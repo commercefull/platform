@@ -13,10 +13,8 @@ export type ProductQaVoteCreateParams = Omit<ProductQaVote, 'productQaVoteId' | 
 export class ProductQaVoteRepo {
   async findByQuestion(productQaId: string): Promise<ProductQaVote[]> {
     return (
-      (await query<ProductQaVote[]>(
-        `SELECT * FROM "productQaVote" WHERE "productQaId" = $1 ORDER BY "createdAt" DESC`,
-        [productQaId],
-      )) || []
+      (await query<ProductQaVote[]>(`SELECT * FROM "productQaVote" WHERE "productQaId" = $1 ORDER BY "createdAt" DESC`, [productQaId])) ||
+      []
     );
   }
 

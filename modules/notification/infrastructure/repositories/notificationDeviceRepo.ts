@@ -12,13 +12,14 @@ export interface NotificationDevice {
 }
 
 export async function findByUser(userId: string): Promise<NotificationDevice[]> {
-  return (await query<NotificationDevice[]>(
-    `SELECT * FROM "notificationDevice" WHERE "userId" = $1 AND "isActive" = true`,
-    [userId],
-  )) || [];
+  return (
+    (await query<NotificationDevice[]>(`SELECT * FROM "notificationDevice" WHERE "userId" = $1 AND "isActive" = true`, [userId])) || []
+  );
 }
 
-export async function upsert(params: Omit<NotificationDevice, 'notificationDeviceId' | 'createdAt' | 'updatedAt'>): Promise<NotificationDevice | null> {
+export async function upsert(
+  params: Omit<NotificationDevice, 'notificationDeviceId' | 'createdAt' | 'updatedAt'>,
+): Promise<NotificationDevice | null> {
   const now = new Date();
   return queryOne<NotificationDevice>(
     `INSERT INTO "notificationDevice" ("userId", "userType", "deviceToken", platform, "isActive", "createdAt", "updatedAt")

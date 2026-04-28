@@ -20,12 +20,24 @@ export async function findActive(organizationId?: string): Promise<FulfillmentNe
   return (await query<FulfillmentNetworkRule[]>(sql, organizationId ? [organizationId] : [])) || [];
 }
 
-export async function create(params: Omit<FulfillmentNetworkRule, 'fulfillmentNetworkRuleId' | 'createdAt' | 'updatedAt'>): Promise<FulfillmentNetworkRule | null> {
+export async function create(
+  params: Omit<FulfillmentNetworkRule, 'fulfillmentNetworkRuleId' | 'createdAt' | 'updatedAt'>,
+): Promise<FulfillmentNetworkRule | null> {
   const now = new Date();
   return queryOne<FulfillmentNetworkRule>(
     `INSERT INTO "fulfillmentNetworkRule" (name, "organizationId", priority, conditions, "routingStrategy", "locationIds", "isActive", "createdAt", "updatedAt")
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
-    [params.name, params.organizationId || null, params.priority, JSON.stringify(params.conditions), params.routingStrategy, params.locationIds ? JSON.stringify(params.locationIds) : null, params.isActive, now, now],
+    [
+      params.name,
+      params.organizationId || null,
+      params.priority,
+      JSON.stringify(params.conditions),
+      params.routingStrategy,
+      params.locationIds ? JSON.stringify(params.locationIds) : null,
+      params.isActive,
+      now,
+      now,
+    ],
   );
 }
 

@@ -3,11 +3,15 @@ import { TypedRequest } from 'libs/types/express';
 import * as emailCampaignRepo from '../../../modules/marketing/infrastructure/repositories/emailCampaignRepo';
 import * as affiliateRepo from '../../../modules/marketing/infrastructure/repositories/affiliateRepo';
 import * as referralRepo from '../../../modules/marketing/infrastructure/repositories/referralRepo';
-import { CreateEmailCampaignUseCase, CreateEmailCampaignCommand } from '../../../modules/marketing/application/useCases/CreateEmailCampaign';
+import {
+  CreateEmailCampaignUseCase,
+  CreateEmailCampaignCommand,
+} from '../../../modules/marketing/application/useCases/CreateEmailCampaign';
 import { SendEmailCampaignUseCase, SendEmailCampaignCommand } from '../../../modules/marketing/application/useCases/SendEmailCampaign';
 import { CreateAffiliateUseCase, CreateAffiliateCommand } from '../../../modules/marketing/application/useCases/CreateAffiliate';
 import { logger } from '../../../libs/logger';
 import { adminRespond } from '../../respond';
+import { query } from '../../../libs/db';
 
 // ============================================================================
 // Campaigns
@@ -20,12 +24,11 @@ export const listCampaigns = async (req: TypedRequest, res: Response): Promise<v
     if (status) {
       campaigns = await emailCampaignRepo.findByStatus(status as string);
     } else {
-      // Fetch all by querying each status and merging, or use a direct query
-      const { query } = await import('../../../libs/db');
-      campaigns = (await query<emailCampaignRepo.MarketingEmailCampaign[]>(
-        `SELECT * FROM "marketingEmailCampaign" ORDER BY "createdAt" DESC LIMIT 100`,
-        [],
-      )) || [];
+      campaigns =
+        (await query<emailCampaignRepo.MarketingEmailCampaign[]>(
+          `SELECT * FROM "marketingEmailCampaign" ORDER BY "createdAt" DESC LIMIT 100`,
+          [],
+        )) || [];
     }
 
     adminRespond(req, res, 'marketing/campaigns/index', {
@@ -58,13 +61,7 @@ export const createCampaign = async (req: TypedRequest, res: Response): Promise<
     const { name, subject, templateId, scheduledAt } = req.body;
     const useCase = new CreateEmailCampaignUseCase();
     const result = await useCase.execute(
-      new CreateEmailCampaignCommand(
-        name,
-        subject,
-        undefined,
-        templateId || undefined,
-        scheduledAt ? new Date(scheduledAt) : undefined,
-      ),
+      new CreateEmailCampaignCommand(name, subject, undefined, templateId || undefined, scheduledAt ? new Date(scheduledAt) : undefined),
     );
     res.redirect(`/admin/marketing/campaigns/${result.marketingEmailCampaignId}?success=Campaign+created`);
   } catch (error: any) {
@@ -116,11 +113,8 @@ export const sendCampaign = async (req: TypedRequest, res: Response): Promise<vo
 
 export const listAffiliates = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { query } = await import('../../../libs/db');
-    const affiliates = (await query<affiliateRepo.MarketingAffiliate[]>(
-      `SELECT * FROM "marketingAffiliate" ORDER BY "createdAt" DESC LIMIT 100`,
-      [],
-    )) || [];
+    const affiliates =
+      (await query<affiliateRepo.MarketingAffiliate[]>(`SELECT * FROM "marketingAffiliate" ORDER BY "createdAt" DESC LIMIT 100`, [])) || [];
 
     adminRespond(req, res, 'marketing/affiliates/index', {
       pageName: 'Affiliates',
@@ -199,11 +193,7 @@ export const viewAffiliate = async (req: TypedRequest, res: Response): Promise<v
 
 export const listReferrals = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { query } = await import('../../../libs/db');
-    const referrals = (await query<referralRepo.Referral[]>(
-      `SELECT * FROM "referral" ORDER BY "createdAt" DESC LIMIT 100`,
-      [],
-    )) || [];
+    const referrals = (await query<referralRepo.Referral[]>(`SELECT * FROM "referral" ORDER BY "createdAt" DESC LIMIT 100`, [])) || [];
 
     adminRespond(req, res, 'marketing/referrals/index', {
       pageName: 'Referrals',

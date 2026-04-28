@@ -13,18 +13,31 @@ export interface MerchantVerificationDocument {
 }
 
 export async function findByMerchant(merchantId: string): Promise<MerchantVerificationDocument[]> {
-  return (await query<MerchantVerificationDocument[]>(
-    `SELECT * FROM "merchantVerificationDocument" WHERE "merchantId" = $1 ORDER BY "createdAt" DESC`,
-    [merchantId],
-  )) || [];
+  return (
+    (await query<MerchantVerificationDocument[]>(
+      `SELECT * FROM "merchantVerificationDocument" WHERE "merchantId" = $1 ORDER BY "createdAt" DESC`,
+      [merchantId],
+    )) || []
+  );
 }
 
-export async function create(params: Omit<MerchantVerificationDocument, 'merchantVerificationDocumentId' | 'createdAt' | 'updatedAt'>): Promise<MerchantVerificationDocument | null> {
+export async function create(
+  params: Omit<MerchantVerificationDocument, 'merchantVerificationDocumentId' | 'createdAt' | 'updatedAt'>,
+): Promise<MerchantVerificationDocument | null> {
   const now = new Date();
   return queryOne<MerchantVerificationDocument>(
     `INSERT INTO "merchantVerificationDocument" ("merchantId", "documentType", "fileUrl", status, "reviewedAt", "reviewNote", "createdAt", "updatedAt")
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
-    [params.merchantId, params.documentType, params.fileUrl, params.status || 'pending', params.reviewedAt || null, params.reviewNote || null, now, now],
+    [
+      params.merchantId,
+      params.documentType,
+      params.fileUrl,
+      params.status || 'pending',
+      params.reviewedAt || null,
+      params.reviewNote || null,
+      now,
+      now,
+    ],
   );
 }
 

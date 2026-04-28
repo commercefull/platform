@@ -15,7 +15,7 @@ import * as b2bPurchaseOrderRepo from '../../infrastructure/repositories/b2bPurc
 
 export const listPurchaseOrders = async (req: Request, res: Response): Promise<void> => {
   try {
-    const companyId = (req.user as any)?.companyId || req.params.companyId;
+    const companyId = (req.user as any)?.companyId || String(req.params.companyId || '');
     if (!companyId) {
       errorResponse(res, 'Company ID is required', 400);
       return;
@@ -35,7 +35,7 @@ export const listPurchaseOrders = async (req: Request, res: Response): Promise<v
 export const getPurchaseOrder = async (req: Request, res: Response): Promise<void> => {
   try {
     const { purchaseOrderId } = req.params;
-    const purchaseOrder = await b2bPurchaseOrderRepo.findById(purchaseOrderId);
+    const purchaseOrder = await b2bPurchaseOrderRepo.findById(String(purchaseOrderId));
     if (!purchaseOrder) {
       errorResponse(res, 'Purchase order not found', 404);
       return;

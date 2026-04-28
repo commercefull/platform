@@ -78,4 +78,9 @@ export interface CheckoutRepository {
    * Calculate tax for checkout
    */
   calculateTax(subtotal: number, shippingAmount: number, address: any): Promise<number>;
+
+  /**
+   * Find checkout session by payment intent ID
+   */
+  findByPaymentIntentId(paymentIntentId: string): Promise<CheckoutSession | null>;
 }

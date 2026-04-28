@@ -20,16 +20,11 @@ export interface FeeSum {
 
 export async function findByTransaction(transactionId: string): Promise<PaymentFee[]> {
   return (
-    (await query<PaymentFee[]>(
-      `SELECT * FROM "paymentFee" WHERE "transactionId" = $1 ORDER BY "createdAt" DESC`,
-      [transactionId],
-    )) || []
+    (await query<PaymentFee[]>(`SELECT * FROM "paymentFee" WHERE "transactionId" = $1 ORDER BY "createdAt" DESC`, [transactionId])) || []
   );
 }
 
-export async function create(
-  params: Omit<PaymentFee, 'paymentFeeId' | 'createdAt' | 'updatedAt'>,
-): Promise<PaymentFee | null> {
+export async function create(params: Omit<PaymentFee, 'paymentFeeId' | 'createdAt' | 'updatedAt'>): Promise<PaymentFee | null> {
   const now = new Date();
   return queryOne<PaymentFee>(
     `INSERT INTO "paymentFee" ("transactionId", "merchantId", type, amount, currency, description, "createdAt", "updatedAt")

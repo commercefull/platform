@@ -1,7 +1,12 @@
 import { logger } from '../../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
-import { MembershipRepo, MembershipTier, LegacyMembershipBenefit as MembershipBenefit, UserMembership } from '../../infrastructure/repositories/membershipRepo';
+import {
+  MembershipRepo,
+  MembershipTier,
+  LegacyMembershipBenefit as MembershipBenefit,
+  UserMembership,
+} from '../../infrastructure/repositories/membershipRepo';
 
 // Create a single instance of the repository to be shared across handlers
 const membershipRepo = new MembershipRepo();

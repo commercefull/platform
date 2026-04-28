@@ -12,15 +12,10 @@ export interface PaymentWebhook {
 }
 
 export async function findByExternalId(externalId: string): Promise<PaymentWebhook | null> {
-  return queryOne<PaymentWebhook>(
-    `SELECT * FROM "paymentWebhook" WHERE "externalId" = $1`,
-    [externalId],
-  );
+  return queryOne<PaymentWebhook>(`SELECT * FROM "paymentWebhook" WHERE "externalId" = $1`, [externalId]);
 }
 
-export async function create(
-  params: Omit<PaymentWebhook, 'paymentWebhookId' | 'createdAt' | 'updatedAt'>,
-): Promise<PaymentWebhook | null> {
+export async function create(params: Omit<PaymentWebhook, 'paymentWebhookId' | 'createdAt' | 'updatedAt'>): Promise<PaymentWebhook | null> {
   const now = new Date();
   return queryOne<PaymentWebhook>(
     `INSERT INTO "paymentWebhook" ("externalId", provider, "eventType", payload, "processedAt", "createdAt", "updatedAt")

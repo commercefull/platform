@@ -1,7 +1,16 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
 
-export type OrderPaymentType = 'creditCard' | 'debitCard' | 'paypal' | 'applePay' | 'googlePay' | 'bankTransfer' | 'crypto' | 'giftCard' | 'storeCredit';
+export type OrderPaymentType =
+  | 'creditCard'
+  | 'debitCard'
+  | 'paypal'
+  | 'applePay'
+  | 'googlePay'
+  | 'bankTransfer'
+  | 'crypto'
+  | 'giftCard'
+  | 'storeCredit';
 export type OrderPaymentStatus = 'pending' | 'authorized' | 'captured' | 'refunded' | 'partiallyRefunded' | 'voided' | 'failed';
 
 export interface OrderPayment {
@@ -29,18 +38,12 @@ export interface OrderPayment {
 export type OrderPaymentCreateParams = Omit<OrderPayment, 'orderPaymentId' | 'createdAt' | 'updatedAt'>;
 
 export const findByOrder = async (orderId: string): Promise<OrderPayment[]> => {
-  const results = await query<OrderPayment[]>(
-    `SELECT * FROM "orderPayment" WHERE "orderId" = $1 ORDER BY "createdAt" ASC`,
-    [orderId],
-  );
+  const results = await query<OrderPayment[]>(`SELECT * FROM "orderPayment" WHERE "orderId" = $1 ORDER BY "createdAt" ASC`, [orderId]);
   return results || [];
 };
 
 export const findById = async (orderPaymentId: string): Promise<OrderPayment | null> => {
-  return queryOne<OrderPayment>(
-    `SELECT * FROM "orderPayment" WHERE "orderPaymentId" = $1`,
-    [orderPaymentId],
-  );
+  return queryOne<OrderPayment>(`SELECT * FROM "orderPayment" WHERE "orderPaymentId" = $1`, [orderPaymentId]);
 };
 
 export const create = async (params: OrderPaymentCreateParams): Promise<OrderPayment> => {

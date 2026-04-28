@@ -3,8 +3,14 @@ import { successResponse, errorResponse } from '../../../../libs/apiResponse';
 import { logger } from '../../../../libs/logger';
 import * as notificationPreferenceRepo from '../../infrastructure/repositories/notificationPreferenceRepo';
 import * as notificationDeviceRepo from '../../infrastructure/repositories/notificationDeviceRepo';
-import { ManageNotificationPreferenceUseCase, ManageNotificationPreferenceCommand } from '../../application/useCases/ManageNotificationPreference';
-import { RegisterNotificationDeviceUseCase, RegisterNotificationDeviceCommand } from '../../application/useCases/RegisterNotificationDevice';
+import {
+  ManageNotificationPreferenceUseCase,
+  ManageNotificationPreferenceCommand,
+} from '../../application/useCases/ManageNotificationPreference';
+import {
+  RegisterNotificationDeviceUseCase,
+  RegisterNotificationDeviceCommand,
+} from '../../application/useCases/RegisterNotificationDevice';
 
 /**
  * GET /customer/notifications/preferences
@@ -40,9 +46,7 @@ export const updatePreference = async (req: Request, res: Response): Promise<voi
 
     const { channel, type, isEnabled } = req.body;
     const useCase = new ManageNotificationPreferenceUseCase(notificationPreferenceRepo);
-    const result = await useCase.execute(
-      new ManageNotificationPreferenceCommand(userId, 'customer', channel, type, isEnabled),
-    );
+    const result = await useCase.execute(new ManageNotificationPreferenceCommand(userId, 'customer', channel, type, isEnabled));
 
     successResponse(res, result);
   } catch (error: any) {
@@ -85,9 +89,7 @@ export const registerDevice = async (req: Request, res: Response): Promise<void>
 
     const { deviceToken, platform } = req.body;
     const useCase = new RegisterNotificationDeviceUseCase(notificationDeviceRepo);
-    const result = await useCase.execute(
-      new RegisterNotificationDeviceCommand(userId, 'customer', deviceToken, platform),
-    );
+    const result = await useCase.execute(new RegisterNotificationDeviceCommand(userId, 'customer', deviceToken, platform));
 
     successResponse(res, result, 201);
   } catch (error: any) {
@@ -103,7 +105,7 @@ export const registerDevice = async (req: Request, res: Response): Promise<void>
 export const deleteDevice = async (req: Request, res: Response): Promise<void> => {
   try {
     const { deviceToken } = req.params;
-    await notificationDeviceRepo.deactivate(deviceToken);
+    await notificationDeviceRepo.deactivate(String(deviceToken));
     successResponse(res, { deviceToken });
   } catch (error: any) {
     logger.error('deleteDevice error:', error);

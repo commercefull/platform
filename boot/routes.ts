@@ -1,4 +1,5 @@
 import { Express } from 'express';
+import express from 'express';
 
 // Storefront routes
 import { storefrontCustomerRouter } from '../web/storefront/storefrontRouter';
@@ -82,11 +83,15 @@ import { webhookBusinessRouter } from '../modules/webhook/interface/routers/webh
 import { merchantFinancialsRouter } from '../modules/merchant/interface/routers/merchantFinancialsRouter';
 import { marketingBusinessRouter } from '../modules/marketing/interface/routers/marketingBusinessRouter';
 import { marketingCustomerRouter } from '../modules/marketing/interface/routers/marketingCustomerRouter';
+import * as gatewayWebhookController from '../modules/payment/interface/controllers/webhookController';
 
 /**
  * Configure all application routes
  */
 export function configureRoutes(app: Express): void {
+  // Gateway webhook — unauthenticated, HMAC-verified, raw body required
+  app.post('/payment/webhook', express.raw({ type: 'application/json' }), gatewayWebhookController.handleGatewayWebhook);
+
   // Storefront routes (public website)
   app.use('/', storefrontCustomerRouter);
 

@@ -5,7 +5,7 @@
 
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';;
+import { TypedRequest } from 'libs/types/express';
 import { query, queryOne } from '../../../libs/db';
 import { v4 as uuidv4 } from 'uuid';
 import { adminRespond } from '../../respond';
@@ -422,7 +422,15 @@ export const createDispatch = async (req: TypedRequest, res: Response): Promise<
     const items = Array.isArray(req.body.items)
       ? req.body.items
       : req.body.productId
-        ? [{ productId: req.body.productId, variantId: req.body.variantId || undefined, quantity: parseInt(req.body.quantity || '0', 10), sku: req.body.sku || undefined, productName: req.body.productName || undefined }]
+        ? [
+            {
+              productId: req.body.productId,
+              variantId: req.body.variantId || undefined,
+              quantity: parseInt(req.body.quantity || '0', 10),
+              sku: req.body.sku || undefined,
+              productName: req.body.productName || undefined,
+            },
+          ]
         : [];
 
     const dispatch = await createStoreDispatchUseCase.execute({
@@ -436,7 +444,12 @@ export const createDispatch = async (req: TypedRequest, res: Response): Promise<
   } catch (error: any) {
     logger.error('Error:', error);
     const stores = await StoreRepo.findActive().catch(() => []);
-    adminRespond(req, res, 'inventory/dispatches/create', { pageName: 'Create Dispatch', stores, formData: req.body, error: error.message || 'Failed to create dispatch' });
+    adminRespond(req, res, 'inventory/dispatches/create', {
+      pageName: 'Create Dispatch',
+      stores,
+      formData: req.body,
+      error: error.message || 'Failed to create dispatch',
+    });
   }
 };
 
@@ -484,7 +497,10 @@ export const receiveDispatch = async (req: TypedRequest, res: Response): Promise
       dispatchId: req.params.dispatchId,
       receivedBy: (req as any).user?.userId || 'admin',
       notes: req.body.notes || undefined,
-      items: (dispatch.items || []).map((item: any) => ({ dispatchItemId: item.dispatchItemId, receivedQuantity: item.dispatchedQuantity || item.requestedQuantity })),
+      items: (dispatch.items || []).map((item: any) => ({
+        dispatchItemId: item.dispatchItemId,
+        receivedQuantity: item.dispatchedQuantity || item.requestedQuantity,
+      })),
     });
     res.redirect(`/admin/dispatches/${req.params.dispatchId}?success=Dispatch received successfully`);
   } catch (error: any) {

@@ -18,23 +18,15 @@ export interface PaymentDispute {
 
 export async function findByPayment(paymentId: string): Promise<PaymentDispute[]> {
   return (
-    (await query<PaymentDispute[]>(
-      `SELECT * FROM "paymentDispute" WHERE "paymentId" = $1 ORDER BY "createdAt" DESC`,
-      [paymentId],
-    )) || []
+    (await query<PaymentDispute[]>(`SELECT * FROM "paymentDispute" WHERE "paymentId" = $1 ORDER BY "createdAt" DESC`, [paymentId])) || []
   );
 }
 
 export async function findById(paymentDisputeId: string): Promise<PaymentDispute | null> {
-  return queryOne<PaymentDispute>(
-    `SELECT * FROM "paymentDispute" WHERE "paymentDisputeId" = $1`,
-    [paymentDisputeId],
-  );
+  return queryOne<PaymentDispute>(`SELECT * FROM "paymentDispute" WHERE "paymentDisputeId" = $1`, [paymentDisputeId]);
 }
 
-export async function create(
-  params: Omit<PaymentDispute, 'paymentDisputeId' | 'createdAt' | 'updatedAt'>,
-): Promise<PaymentDispute | null> {
+export async function create(params: Omit<PaymentDispute, 'paymentDisputeId' | 'createdAt' | 'updatedAt'>): Promise<PaymentDispute | null> {
   const now = new Date();
   return queryOne<PaymentDispute>(
     `INSERT INTO "paymentDispute" ("paymentId", "merchantId", "externalDisputeId", status, reason, amount, currency, evidence, "dueBy", "resolvedAt", "createdAt", "updatedAt")
@@ -56,11 +48,7 @@ export async function create(
   );
 }
 
-export async function updateStatus(
-  paymentDisputeId: string,
-  status: string,
-  resolvedAt?: Date,
-): Promise<PaymentDispute | null> {
+export async function updateStatus(paymentDisputeId: string, status: string, resolvedAt?: Date): Promise<PaymentDispute | null> {
   return queryOne<PaymentDispute>(
     `UPDATE "paymentDispute" SET status = $1, "resolvedAt" = $2, "updatedAt" = $3 WHERE "paymentDisputeId" = $4 RETURNING *`,
     [status, resolvedAt || null, new Date(), paymentDisputeId],

@@ -17,18 +17,14 @@ export type ProductListUpdateParams = Partial<Omit<ProductListCreateParams, 'mer
 export class ProductListRepo {
   async findByMerchant(merchantId: string): Promise<ProductList[]> {
     return (
-      (await query<ProductList[]>(
-        `SELECT * FROM "productList" WHERE "merchantId" = $1 AND "deletedAt" IS NULL ORDER BY "createdAt" DESC`,
-        [merchantId],
-      )) || []
+      (await query<ProductList[]>(`SELECT * FROM "productList" WHERE "merchantId" = $1 AND "deletedAt" IS NULL ORDER BY "createdAt" DESC`, [
+        merchantId,
+      ])) || []
     );
   }
 
   async findById(productListId: string): Promise<ProductList | null> {
-    return queryOne<ProductList>(
-      `SELECT * FROM "productList" WHERE "productListId" = $1 AND "deletedAt" IS NULL`,
-      [productListId],
-    );
+    return queryOne<ProductList>(`SELECT * FROM "productList" WHERE "productListId" = $1 AND "deletedAt" IS NULL`, [productListId]);
   }
 
   async create(params: ProductListCreateParams): Promise<ProductList> {

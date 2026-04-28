@@ -5,7 +5,7 @@
 
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';;
+import { TypedRequest } from 'libs/types/express';
 import { query, queryOne } from '../../../libs/db';
 import { storefrontRespond } from '../../respond';
 
@@ -75,10 +75,10 @@ export const submitReview = async (req: TypedRequest, res: Response) => {
     }
 
     // Check if customer already reviewed this product
-    const existing = await queryOne<any>(
-      `SELECT "productReviewId" FROM "productReview" WHERE "customerId" = $1 AND "productId" = $2`,
-      [user.customerId, productId],
-    );
+    const existing = await queryOne<any>(`SELECT "productReviewId" FROM "productReview" WHERE "customerId" = $1 AND "productId" = $2`, [
+      user.customerId,
+      productId,
+    ]);
 
     if (existing) {
       return res.status(400).json({ error: 'You have already reviewed this product' });
@@ -101,16 +101,7 @@ export const submitReview = async (req: TypedRequest, res: Response) => {
         "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, 'pending', $6, $7, $8, 0, 0, 0, false, NOW(), NOW())
       RETURNING "productReviewId"`,
-      [
-        productId,
-        user.customerId,
-        rating,
-        title || null,
-        content || null,
-        !!purchase,
-        user.name || 'Anonymous',
-        user.email,
-      ],
+      [productId, user.customerId, rating, title || null, content || null, !!purchase, user.name || 'Anonymous', user.email],
     );
 
     if (req.xhr || req.headers.accept?.includes('application/json')) {

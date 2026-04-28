@@ -16,10 +16,7 @@ export interface PaymentReport {
 
 export async function findByMerchant(merchantId: string): Promise<PaymentReport[]> {
   return (
-    (await query<PaymentReport[]>(
-      `SELECT * FROM "paymentReport" WHERE "merchantId" = $1 ORDER BY "periodStart" DESC`,
-      [merchantId],
-    )) || []
+    (await query<PaymentReport[]>(`SELECT * FROM "paymentReport" WHERE "merchantId" = $1 ORDER BY "periodStart" DESC`, [merchantId])) || []
   );
 }
 
@@ -32,9 +29,7 @@ export async function findByDateRange(merchantId: string, from: Date, to: Date):
   );
 }
 
-export async function create(
-  params: Omit<PaymentReport, 'paymentReportId' | 'createdAt' | 'updatedAt'>,
-): Promise<PaymentReport | null> {
+export async function create(params: Omit<PaymentReport, 'paymentReportId' | 'createdAt' | 'updatedAt'>): Promise<PaymentReport | null> {
   const now = new Date();
   return queryOne<PaymentReport>(
     `INSERT INTO "paymentReport" ("merchantId", type, currency, "totalAmount", "transactionCount", data, "periodStart", "periodEnd", "createdAt", "updatedAt")

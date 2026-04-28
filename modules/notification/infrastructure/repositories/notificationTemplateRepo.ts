@@ -69,9 +69,7 @@ export class NotificationTemplateRepo {
    * Find template by type
    */
   async findByType(type: NotificationType): Promise<NotificationTemplate | null> {
-    return await queryOne<NotificationTemplate>(`SELECT * FROM "notificationTemplate" WHERE "type" = $1 AND "isActive" = true`, [
-      type,
-    ]);
+    return await queryOne<NotificationTemplate>(`SELECT * FROM "notificationTemplate" WHERE "type" = $1 AND "isActive" = true`, [type]);
   }
 
   /**

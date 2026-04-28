@@ -18,13 +18,19 @@ export async function bulkCreate(campaignId: string, recipients: { customerId?: 
   const now = new Date();
   const values = recipients.map((r, i) => `($${i * 4 + 1}, $${i * 4 + 2}, $${i * 4 + 3}, 'pending', $${i * 4 + 4})`).join(', ');
   const params = recipients.flatMap(r => [campaignId, r.customerId || null, r.email, now]);
-  await query(`INSERT INTO "marketingEmailCampaignRecipient" ("campaignId", "customerId", email, status, "createdAt") VALUES ${values} ON CONFLICT DO NOTHING`, params);
+  await query(
+    `INSERT INTO "marketingEmailCampaignRecipient" ("campaignId", "customerId", email, status, "createdAt") VALUES ${values} ON CONFLICT DO NOTHING`,
+    params,
+  );
 }
 
 export async function updateStatus(id: string, status: string, timestampField?: string): Promise<void> {
   const now = new Date();
   const extra = timestampField ? `, "${timestampField}" = '${now.toISOString()}'` : '';
-  await query(`UPDATE "marketingEmailCampaignRecipient" SET status = $1${extra}, "updatedAt" = $2 WHERE "marketingEmailCampaignRecipientId" = $3`, [status, now, id]);
+  await query(
+    `UPDATE "marketingEmailCampaignRecipient" SET status = $1${extra}, "updatedAt" = $2 WHERE "marketingEmailCampaignRecipientId" = $3`,
+    [status, now, id],
+  );
 }
 
 export async function findByCampaign(campaignId: string, status?: string): Promise<MarketingEmailCampaignRecipient[]> {

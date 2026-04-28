@@ -392,10 +392,9 @@ export class SupplierRepo {
    * Delete supplier
    */
   async delete(supplierId: string): Promise<boolean> {
-    const result = await queryOne<{ supplierId: string }>(
-      `DELETE FROM "supplier" WHERE "supplierId" = $1 RETURNING "supplierId"`,
-      [supplierId],
-    );
+    const result = await queryOne<{ supplierId: string }>(`DELETE FROM "supplier" WHERE "supplierId" = $1 RETURNING "supplierId"`, [
+      supplierId,
+    ]);
 
     return !!result;
   }

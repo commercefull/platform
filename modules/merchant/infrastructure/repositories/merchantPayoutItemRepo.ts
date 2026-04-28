@@ -11,10 +11,11 @@ export interface MerchantPayoutItem {
 }
 
 export async function findByPayout(merchantPayoutId: string): Promise<MerchantPayoutItem[]> {
-  return (await query<MerchantPayoutItem[]>(
-    `SELECT * FROM "merchantPayoutItem" WHERE "merchantPayoutId" = $1 ORDER BY "createdAt" ASC`,
-    [merchantPayoutId],
-  )) || [];
+  return (
+    (await query<MerchantPayoutItem[]>(`SELECT * FROM "merchantPayoutItem" WHERE "merchantPayoutId" = $1 ORDER BY "createdAt" ASC`, [
+      merchantPayoutId,
+    ])) || []
+  );
 }
 
 export async function create(params: Omit<MerchantPayoutItem, 'merchantPayoutItemId' | 'createdAt'>): Promise<MerchantPayoutItem | null> {

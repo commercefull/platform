@@ -30,14 +30,7 @@ export const create = async (params: OrderNoteCreateParams): Promise<OrderNote> 
       "createdAt", "updatedAt"
     ) VALUES ($1, $2, $3, $4, $5, $6)
     RETURNING *`,
-    [
-      params.orderId,
-      params.content,
-      params.isCustomerVisible ?? false,
-      params.createdBy || null,
-      now,
-      now,
-    ],
+    [params.orderId, params.content, params.isCustomerVisible ?? false, params.createdBy || null, now, now],
   );
   if (!result) throw new Error('Failed to create orderNote');
   return result;

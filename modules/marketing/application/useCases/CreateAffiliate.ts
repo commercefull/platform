@@ -75,11 +75,7 @@ export class CreateAffiliateUseCase {
 
     if (!affiliate) throw new Error('Failed to create affiliate');
 
-    const link = await this.affRepo.createLink(
-      affiliate.marketingAffiliateId,
-      command.trackingUrl,
-      command.trackingSlug,
-    );
+    const link = await this.affRepo.createLink(affiliate.marketingAffiliateId, command.trackingUrl, command.trackingSlug);
 
     if (!link) throw new Error('Failed to create affiliate tracking link');
 

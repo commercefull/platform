@@ -9,17 +9,13 @@ export interface MerchantStore {
 }
 
 export async function findByMerchant(merchantId: string): Promise<MerchantStore[]> {
-  return (await query<MerchantStore[]>(
-    `SELECT * FROM "merchantStore" WHERE "merchantId" = $1 ORDER BY "createdAt" ASC`,
-    [merchantId],
-  )) || [];
+  return (
+    (await query<MerchantStore[]>(`SELECT * FROM "merchantStore" WHERE "merchantId" = $1 ORDER BY "createdAt" ASC`, [merchantId])) || []
+  );
 }
 
 export async function findByStore(storeId: string): Promise<MerchantStore[]> {
-  return (await query<MerchantStore[]>(
-    `SELECT * FROM "merchantStore" WHERE "storeId" = $1 ORDER BY "createdAt" ASC`,
-    [storeId],
-  )) || [];
+  return (await query<MerchantStore[]>(`SELECT * FROM "merchantStore" WHERE "storeId" = $1 ORDER BY "createdAt" ASC`, [storeId])) || [];
 }
 
 export async function create(merchantId: string, storeId: string, isActive = true): Promise<MerchantStore | null> {
@@ -31,10 +27,7 @@ export async function create(merchantId: string, storeId: string, isActive = tru
 }
 
 export async function deleteMerchantStore(merchantId: string, storeId: string): Promise<void> {
-  await query(
-    `DELETE FROM "merchantStore" WHERE "merchantId" = $1 AND "storeId" = $2`,
-    [merchantId, storeId],
-  );
+  await query(`DELETE FROM "merchantStore" WHERE "merchantId" = $1 AND "storeId" = $2`, [merchantId, storeId]);
 }
 
 export default { findByMerchant, findByStore, create, delete: deleteMerchantStore };

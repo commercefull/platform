@@ -73,6 +73,12 @@ router.post('/checkout/:checkoutId/coupon', checkoutController.applyCoupon);
 router.delete('/checkout/:checkoutId/coupon', checkoutController.removeCoupon);
 
 /**
+ * Create payment intent and draft order
+ * POST /checkout/:checkoutId/payment-intent
+ */
+router.post('/checkout/:checkoutId/payment-intent', checkoutController.createPaymentIntent);
+
+/**
  * Complete checkout and create order
  * POST /checkout/:checkoutId/complete
  */

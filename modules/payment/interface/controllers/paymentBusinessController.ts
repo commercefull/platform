@@ -19,9 +19,7 @@ import { GetPaymentBalanceCommand, GetPaymentBalanceUseCase } from '../../applic
 export const listDisputes = async (req: Request, res: Response): Promise<void> => {
   try {
     const { paymentId } = req.query;
-    const disputes = paymentId
-      ? await paymentDisputeRepo.findByPayment(paymentId as string)
-      : [];
+    const disputes = paymentId ? await paymentDisputeRepo.findByPayment(paymentId as string) : [];
     successResponse(res, { disputes });
   } catch (error: any) {
     logger.error('listDisputes error:', error);
@@ -32,7 +30,7 @@ export const listDisputes = async (req: Request, res: Response): Promise<void> =
 export const getDispute = async (req: Request, res: Response): Promise<void> => {
   try {
     const { disputeId } = req.params;
-    const dispute = await paymentDisputeRepo.findById(disputeId);
+    const dispute = await paymentDisputeRepo.findById(String(disputeId));
     if (!dispute) {
       errorResponse(res, 'Dispute not found', 404);
       return;
@@ -52,11 +50,7 @@ export const updateDisputeStatus = async (req: Request, res: Response): Promise<
       errorResponse(res, 'status is required', 400);
       return;
     }
-    const dispute = await paymentDisputeRepo.updateStatus(
-      disputeId,
-      status,
-      resolvedAt ? new Date(resolvedAt) : undefined,
-    );
+    const dispute = await paymentDisputeRepo.updateStatus(String(disputeId), status, resolvedAt ? new Date(resolvedAt) : undefined);
     if (!dispute) {
       errorResponse(res, 'Dispute not found', 404);
       return;
@@ -144,9 +138,7 @@ export const getBalance = async (req: Request, res: Response): Promise<void> => 
     }
     const { currency } = req.query;
     const useCase = new GetPaymentBalanceUseCase();
-    const result = await useCase.execute(
-      new GetPaymentBalanceCommand(merchantId, currency as string | undefined),
-    );
+    const result = await useCase.execute(new GetPaymentBalanceCommand(merchantId, currency as string | undefined));
     successResponse(res, result);
   } catch (error: any) {
     logger.error('getBalance error:', error);
@@ -185,11 +177,7 @@ export const getReport = async (req: Request, res: Response): Promise<void> => {
       errorResponse(res, 'from and to query parameters are required', 400);
       return;
     }
-    const reports = await paymentReportRepo.findByDateRange(
-      merchantId,
-      new Date(from as string),
-      new Date(to as string),
-    );
+    const reports = await paymentReportRepo.findByDateRange(merchantId, new Date(from as string), new Date(to as string));
     successResponse(res, { reports });
   } catch (error: any) {
     logger.error('getReport error:', error);

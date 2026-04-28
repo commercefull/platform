@@ -2,22 +2,22 @@
 
 ## Layer Responsibilities
 
-| Layer              | Purpose                                     | Location                                |
-| ------------------ | ------------------------------------------- | --------------------------------------- |
-| **Domain**         | Core business logic, aggregates, invariants | `modules/[mod]/domain/`                 |
-| **Application**    | Orchestrate domain operations (use cases)   | `modules/[mod]/application/`            |
-| **Infrastructure** | Data persistence, external adapters         | `modules/[mod]/infrastructure/`         |
-| **Interface**      | HTTP controllers and routers                | `modules/[mod]/interface/`              |
-| **Repos (legacy)** | Direct SQL repositories (pre-DDD modules)   | `modules/[mod]/repos/`                  |
+| Layer              | Purpose                                     | Location                        |
+| ------------------ | ------------------------------------------- | ------------------------------- |
+| **Domain**         | Core business logic, aggregates, invariants | `modules/[mod]/domain/`         |
+| **Application**    | Orchestrate domain operations (use cases)   | `modules/[mod]/application/`    |
+| **Infrastructure** | Data persistence, external adapters         | `modules/[mod]/infrastructure/` |
+| **Interface**      | HTTP controllers and routers                | `modules/[mod]/interface/`      |
+| **Repos (legacy)** | Direct SQL repositories (pre-DDD modules)   | `modules/[mod]/repos/`          |
 
 ### Dependency Rules
 
-| Layer            | Can Depend On                 | Cannot Depend On                         |
-| ---------------- | ----------------------------- | ---------------------------------------- |
-| Domain           | Nothing (pure)                | Application, Infrastructure, Interface   |
-| Application      | Domain                        | Infrastructure (directly), Interface     |
-| Infrastructure   | Domain (implements interfaces)| Application, Interface                   |
-| Interface        | Application, Domain           | Infrastructure (directly)                |
+| Layer          | Can Depend On                  | Cannot Depend On                       |
+| -------------- | ------------------------------ | -------------------------------------- |
+| Domain         | Nothing (pure)                 | Application, Infrastructure, Interface |
+| Application    | Domain                         | Infrastructure (directly), Interface   |
+| Infrastructure | Domain (implements interfaces) | Application, Interface                 |
+| Interface      | Application, Domain            | Infrastructure (directly)              |
 
 ## DDD Module Layout (reference: `product`)
 
@@ -139,8 +139,12 @@ export class Product {
   }
 
   // Getters only — mutations go through domain methods
-  get productId(): string { return this.props.productId; }
-  get name(): string { return this.props.name; }
+  get productId(): string {
+    return this.props.productId;
+  }
+  get name(): string {
+    return this.props.name;
+  }
 
   private touch(): void {
     this.props.updatedAt = new Date();

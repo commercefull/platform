@@ -64,8 +64,10 @@ export const viewStore = async (req: TypedRequest, res: Response): Promise<void>
 
     const [users, orders, dispatches] = await Promise.all([
       listStoreUsersUseCase.execute(req.params.storeId).catch(() => []),
-      OrderRepo.findAll({ storeId: req.params.storeId }, { limit: 10, offset: 0, orderBy: 'createdAt', orderDirection: 'desc' }).catch(() => ({ data: [] } as any)),
-      storeDispatchRepository.findAll({ fromStoreId: req.params.storeId }, { limit: 10, offset: 0 }).catch(() => ({ data: [] } as any)),
+      OrderRepo.findAll({ storeId: req.params.storeId }, { limit: 10, offset: 0, orderBy: 'createdAt', orderDirection: 'desc' }).catch(
+        () => ({ data: [] }) as any,
+      ),
+      storeDispatchRepository.findAll({ fromStoreId: req.params.storeId }, { limit: 10, offset: 0 }).catch(() => ({ data: [] }) as any),
     ]);
 
     adminRespond(req, res, 'stores/view', {
@@ -138,7 +140,13 @@ export const editStoreForm = async (req: TypedRequest, res: Response): Promise<v
     const storeResult = await getStoreUseCase.execute(new GetStoreQuery(req.params.storeId));
     const businesses = await BusinessRepo.findActive();
     const stores = await StoreRepo.findActive();
-    adminRespond(req, res, 'stores/edit', { pageName: 'Edit Store', store: storeResult.store, businesses, stores, formData: storeResult.store });
+    adminRespond(req, res, 'stores/edit', {
+      pageName: 'Edit Store',
+      store: storeResult.store,
+      businesses,
+      stores,
+      formData: storeResult.store,
+    });
   } catch (error: any) {
     logger.error('Error:', error);
     adminRespond(req, res, 'error', { pageName: 'Error', error: error.message || 'Failed to load store form' });
@@ -199,7 +207,12 @@ export const assignUserToStore = async (req: TypedRequest, res: Response): Promi
       storeId: req.params.storeId,
       role: req.body.role,
       isPrimary: req.body.isPrimary === 'on',
-      permissions: req.body.permissions ? String(req.body.permissions).split(',').map((value: string) => value.trim()).filter(Boolean) : [],
+      permissions: req.body.permissions
+        ? String(req.body.permissions)
+            .split(',')
+            .map((value: string) => value.trim())
+            .filter(Boolean)
+        : [],
     });
     res.redirect(`/admin/stores/${req.params.storeId}/users?success=User assigned successfully`);
   } catch (error: any) {

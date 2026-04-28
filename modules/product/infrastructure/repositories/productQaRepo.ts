@@ -55,10 +55,11 @@ export class ProductQaRepo {
   }
 
   async updateStatus(productQaId: string, status: ProductQaStatus): Promise<ProductQa | null> {
-    return queryOne<ProductQa>(
-      `UPDATE "productQa" SET "status" = $1, "updatedAt" = $2 WHERE "productQaId" = $3 RETURNING *`,
-      [status, new Date(), productQaId],
-    );
+    return queryOne<ProductQa>(`UPDATE "productQa" SET "status" = $1, "updatedAt" = $2 WHERE "productQaId" = $3 RETURNING *`, [
+      status,
+      new Date(),
+      productQaId,
+    ]);
   }
 }
 

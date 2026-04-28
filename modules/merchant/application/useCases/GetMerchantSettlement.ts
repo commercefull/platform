@@ -14,9 +14,7 @@ import merchantPayoutItemRepo, { MerchantPayoutItem } from '../../infrastructure
 // ============================================================================
 
 export class GetMerchantSettlementCommand {
-  constructor(
-    public readonly merchantPayoutId: string,
-  ) {}
+  constructor(public readonly merchantPayoutId: string) {}
 }
 
 // ============================================================================

@@ -28,25 +28,18 @@ export interface B2bUser {
 
 export async function findByCompany(companyId: string): Promise<B2bUser[]> {
   return (
-    (await query<B2bUser[]>(
-      `SELECT * FROM "b2bUser" WHERE "b2bCompanyId" = $1 AND "deletedAt" IS NULL ORDER BY "createdAt" ASC`,
-      [companyId],
-    )) ?? []
+    (await query<B2bUser[]>(`SELECT * FROM "b2bUser" WHERE "b2bCompanyId" = $1 AND "deletedAt" IS NULL ORDER BY "createdAt" ASC`, [
+      companyId,
+    ])) ?? []
   );
 }
 
 export async function findById(b2bUserId: string): Promise<B2bUser | null> {
-  return queryOne<B2bUser>(
-    `SELECT * FROM "b2bUser" WHERE "b2bUserId" = $1 AND "deletedAt" IS NULL`,
-    [b2bUserId],
-  );
+  return queryOne<B2bUser>(`SELECT * FROM "b2bUser" WHERE "b2bUserId" = $1 AND "deletedAt" IS NULL`, [b2bUserId]);
 }
 
 export async function findByEmail(email: string): Promise<B2bUser | null> {
-  return queryOne<B2bUser>(
-    `SELECT * FROM "b2bUser" WHERE "email" = $1 AND "deletedAt" IS NULL`,
-    [email],
-  );
+  return queryOne<B2bUser>(`SELECT * FROM "b2bUser" WHERE "email" = $1 AND "deletedAt" IS NULL`, [email]);
 }
 
 export async function create(data: {
@@ -62,15 +55,7 @@ export async function create(data: {
     `INSERT INTO "b2bUser" ("b2bCompanyId", "email", "firstName", "lastName", "role", "isActive", "createdAt", "updatedAt")
      VALUES ($1, $2, $3, $4, $5, $6, $7, $7)
      RETURNING *`,
-    [
-      data.b2bCompanyId,
-      data.email,
-      data.firstName ?? null,
-      data.lastName ?? null,
-      data.role ?? 'buyer',
-      data.isActive ?? true,
-      now,
-    ],
+    [data.b2bCompanyId, data.email, data.firstName ?? null, data.lastName ?? null, data.role ?? 'buyer', data.isActive ?? true, now],
   ) as Promise<B2bUser>;
 }
 
@@ -93,8 +78,5 @@ export async function update(
 }
 
 export async function softDelete(b2bUserId: string): Promise<void> {
-  await query(
-    `UPDATE "b2bUser" SET "deletedAt" = $1, "updatedAt" = $1 WHERE "b2bUserId" = $2`,
-    [new Date().toISOString(), b2bUserId],
-  );
+  await query(`UPDATE "b2bUser" SET "deletedAt" = $1, "updatedAt" = $1 WHERE "b2bUserId" = $2`, [new Date().toISOString(), b2bUserId]);
 }

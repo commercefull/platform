@@ -32,11 +32,7 @@ export async function findByCompany(companyId: string): Promise<B2bCompanyCredit
   );
 }
 
-export async function findByDateRange(
-  companyId: string,
-  from: Date,
-  to: Date,
-): Promise<B2bCompanyCreditTransaction[]> {
+export async function findByDateRange(companyId: string, from: Date, to: Date): Promise<B2bCompanyCreditTransaction[]> {
   return (
     (await query<B2bCompanyCreditTransaction[]>(
       `SELECT * FROM "b2bCompanyCreditTransaction"

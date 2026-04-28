@@ -21,10 +21,7 @@ export class ProductTagRepo {
   }
 
   async findById(productTagId: string): Promise<ProductTag | null> {
-    return queryOne<ProductTag>(
-      `SELECT * FROM "productTag" WHERE "productTagId" = $1 AND "deletedAt" IS NULL`,
-      [productTagId],
-    );
+    return queryOne<ProductTag>(`SELECT * FROM "productTag" WHERE "productTagId" = $1 AND "deletedAt" IS NULL`, [productTagId]);
   }
 
   async create(params: ProductTagCreateParams): Promise<ProductTag> {

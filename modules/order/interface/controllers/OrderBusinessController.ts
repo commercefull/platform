@@ -461,8 +461,17 @@ export const listFulfillmentPackages = async (req: TypedRequest, res: Response):
  */
 export const createFulfillmentPackage = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { orderFulfillmentId, packageNumber, trackingNumber, weight, dimensions, packageType, shippingLabelUrl, commercialInvoiceUrl, customsInfo } =
-      req.body;
+    const {
+      orderFulfillmentId,
+      packageNumber,
+      trackingNumber,
+      weight,
+      dimensions,
+      packageType,
+      shippingLabelUrl,
+      commercialInvoiceUrl,
+      customsInfo,
+    } = req.body;
 
     const command = new TrackFulfillmentPackageCommand(
       orderFulfillmentId,

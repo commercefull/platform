@@ -120,10 +120,7 @@ export const viewPayout = async (req: TypedRequest, res: Response) => {
     if (!merchantId) return res.redirect('/merchant/login');
 
     const { payoutId } = req.params as { payoutId: string };
-    const [payout, lineItems] = await Promise.all([
-      merchantPayoutRepo.findById(payoutId),
-      merchantPayoutItemRepo.findByPayout(payoutId),
-    ]);
+    const [payout, lineItems] = await Promise.all([merchantPayoutRepo.findById(payoutId), merchantPayoutItemRepo.findByPayout(payoutId)]);
 
     if (!payout || payout.merchantId !== merchantId) {
       return res.redirect('/merchant/financials/payouts');

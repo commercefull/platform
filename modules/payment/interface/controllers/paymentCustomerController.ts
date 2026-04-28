@@ -70,7 +70,7 @@ export const setDefaultMethod = async (req: Request, res: Response): Promise<voi
       return;
     }
     const { methodId } = req.params;
-    const method = await storedPaymentMethodRepo.setDefault(methodId, customerId);
+    const method = await storedPaymentMethodRepo.setDefault(String(methodId), customerId);
     if (!method) {
       errorResponse(res, 'Payment method not found', 404);
       return;
@@ -85,7 +85,7 @@ export const setDefaultMethod = async (req: Request, res: Response): Promise<voi
 export const deleteStoredMethod = async (req: Request, res: Response): Promise<void> => {
   try {
     const { methodId } = req.params;
-    const method = await storedPaymentMethodRepo.softDelete(methodId);
+    const method = await storedPaymentMethodRepo.softDelete(String(methodId));
     if (!method) {
       errorResponse(res, 'Payment method not found', 404);
       return;

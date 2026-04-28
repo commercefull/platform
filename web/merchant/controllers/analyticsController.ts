@@ -17,7 +17,7 @@ export const salesAnalytics = async (req: TypedRequest, res: Response) => {
     const merchantId = req.user?.merchantId;
     if (!merchantId) return res.redirect('/merchant/login');
 
-    const period = req.query.period as string || '30d';
+    const period = (req.query.period as string) || '30d';
     let dateFilter = "NOW() - INTERVAL '30 days'";
     if (period === '7d') dateFilter = "NOW() - INTERVAL '7 days'";
     else if (period === '90d') dateFilter = "NOW() - INTERVAL '90 days'";

@@ -15,36 +15,36 @@ A customer interacts with the `order` module to place orders during checkout, vi
 
 ### Actors
 
-| Actor    | Role                                                                              |
-| -------- | --------------------------------------------------------------------------------- |
-| Customer | Authenticated end-user; places, views, and cancels their own orders               |
+| Actor    | Role                                                                                |
+| -------- | ----------------------------------------------------------------------------------- |
+| Customer | Authenticated end-user; places, views, and cancels their own orders                 |
 | System   | Generates order numbers, computes totals, emits domain events, enforces transitions |
 
 ### Order status state machine (customer-visible subset)
 
 Source of truth: `modules/order/domain/valueObjects/OrderStatus.ts` (`OrderStatusTransitions`).
 
-| From            | To (allowed)                                                          |
-| --------------- | --------------------------------------------------------------------- |
-| `PENDING`         | `PROCESSING`, `PAYMENT_PENDING`, `CANCELLED`, `FAILED`                |
-| `PAYMENT_PENDING` | `PENDING`, `PROCESSING`, `PAYMENT_FAILED`, `CANCELLED`                |
-| `PROCESSING`      | `SHIPPED`, `ON_HOLD`, `BACKORDERED`, `CANCELLED`, `REFUNDED`          |
-| `SHIPPED`         | `DELIVERED`, `REFUNDED`                                               |
-| `DELIVERED`       | `COMPLETED`, `REFUNDED`                                               |
-| `COMPLETED`       | `REFUNDED`                                                            |
-| `CANCELLED`       | _(terminal)_                                                          |
-| `REFUNDED`        | _(terminal)_                                                          |
+| From              | To (allowed)                                                 |
+| ----------------- | ------------------------------------------------------------ |
+| `PENDING`         | `PROCESSING`, `PAYMENT_PENDING`, `CANCELLED`, `FAILED`       |
+| `PAYMENT_PENDING` | `PENDING`, `PROCESSING`, `PAYMENT_FAILED`, `CANCELLED`       |
+| `PROCESSING`      | `SHIPPED`, `ON_HOLD`, `BACKORDERED`, `CANCELLED`, `REFUNDED` |
+| `SHIPPED`         | `DELIVERED`, `REFUNDED`                                      |
+| `DELIVERED`       | `COMPLETED`, `REFUNDED`                                      |
+| `COMPLETED`       | `REFUNDED`                                                   |
+| `CANCELLED`       | _(terminal)_                                                 |
+| `REFUNDED`        | _(terminal)_                                                 |
 
 Customer self-cancel is allowed only while `canBeCancelled` is true on the `Order` entity, i.e. status ∈ {`PENDING`, `PROCESSING`, `PAYMENT_PENDING`} (see `Order.ts` getter).
 
 ### Policy defaults
 
-| Policy                         | Default                                          |
-| ------------------------------ | ------------------------------------------------ |
-| Customer self-cancel window    | While `canBeCancelled` is true (pre-shipping)    |
-| Default currency               | `USD` (used when `currencyCode` not provided)    |
-| Billing address fallback       | Shipping address used when billing not provided  |
-| Order source                   | Provided by client; defaults set in `Order.create` |
+| Policy                      | Default                                            |
+| --------------------------- | -------------------------------------------------- |
+| Customer self-cancel window | While `canBeCancelled` is true (pre-shipping)      |
+| Default currency            | `USD` (used when `currencyCode` not provided)      |
+| Billing address fallback    | Shipping address used when billing not provided    |
+| Order source                | Provided by client; defaults set in `Order.create` |
 
 ---
 
@@ -186,11 +186,11 @@ any of {SHIPPED, DELIVERED, COMPLETED}                  ──► REFUNDED (term
 Customer self-cancel allowed while status ∈ {PENDING, PAYMENT_PENDING, PROCESSING} ──► CANCELLED (terminal)
 ```
 
-| Policy                         | Default                                          |
-| ------------------------------ | ------------------------------------------------ |
-| Customer self-cancel window    | While status ∈ {PENDING, PAYMENT_PENDING, PROCESSING} |
-| Default currency               | `USD`                                            |
-| Billing address fallback       | Shipping address                                 |
+| Policy                      | Default                                               |
+| --------------------------- | ----------------------------------------------------- |
+| Customer self-cancel window | While status ∈ {PENDING, PAYMENT_PENDING, PROCESSING} |
+| Default currency            | `USD`                                                 |
+| Billing address fallback    | Shipping address                                      |
 
 ---
 
@@ -198,28 +198,28 @@ Customer self-cancel allowed while status ∈ {PENDING, PAYMENT_PENDING, PROCESS
 
 Every event-driven and complex requirement above is implemented by exactly one use case (or by the customer controller delegating to it).
 
-| # | Requirement (summary)                                | Use Case                  | Source File                                                              |
-| - | ---------------------------------------------------- | ------------------------- | ------------------------------------------------------------------------ |
-| 2.1.1 | List my orders → `GET /customer/order`           | `GetCustomerOrdersUseCase`| `modules/order/application/useCases/GetCustomerOrders.ts`                |
-| 2.2.2 | View one of my orders → `GET /customer/order/:id`| `GetOrderUseCase`         | `modules/order/application/useCases/GetOrder.ts`                         |
-| 2.2.3 | View order by number → `GET /customer/order/number/:n` | `GetOrderUseCase`   | `modules/order/application/useCases/GetOrder.ts`                         |
+| #       | Requirement (summary)                                           | Use Case                                                                     | Source File                                                                                                                                    |
+| ------- | --------------------------------------------------------------- | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2.1.1   | List my orders → `GET /customer/order`                          | `GetCustomerOrdersUseCase`                                                   | `modules/order/application/useCases/GetCustomerOrders.ts`                                                                                      |
+| 2.2.2   | View one of my orders → `GET /customer/order/:id`               | `GetOrderUseCase`                                                            | `modules/order/application/useCases/GetOrder.ts`                                                                                               |
+| 2.2.3   | View order by number → `GET /customer/order/number/:n`          | `GetOrderUseCase`                                                            | `modules/order/application/useCases/GetOrder.ts`                                                                                               |
 | 2.3.A.4 | 🚧 Canonical: payment-intent creates order in `PAYMENT_PENDING` | `CreateOrderUseCase` (invoked by `CreatePaymentIntentUseCase` in `checkout`) | `modules/order/application/useCases/CreateOrder.ts` (called from `modules/checkout/application/useCases/CreatePaymentIntent.ts` — to be added) |
-| 2.3.B.5 | Direct: `POST /customer/order`                    | `CreateOrderUseCase`      | `modules/order/application/useCases/CreateOrder.ts`                      |
-| 2.4.6   | Cancel my order → `POST /customer/order/:id/cancel` | `CancelOrderUseCase`    | `modules/order/application/useCases/CancelOrder.ts`                      |
-| 2.5.7   | 🚧 Payment captured → `PROCESSING`                 | `UpdateOrderStatusUseCase` (invoked by `payment` webhook handler) | `modules/order/application/useCases/UpdateOrderStatus.ts`               |
-| 2.5.8   | 🚧 Payment failed → `PAYMENT_FAILED`               | `UpdateOrderStatusUseCase` (invoked by `payment` webhook handler) | same                                                                     |
-| 2.5.9   | 🚧 Payment retry → `PAYMENT_FAILED → PAYMENT_PENDING` | `UpdateOrderStatusUseCase` (invoked by `payment`)               | same                                                                     |
-| 6.2   | Status-change audit on cancel                     | `CancelOrderUseCase` + `OrderRepository.recordStatusChange` | `modules/order/application/useCases/CancelOrder.ts` |
+| 2.3.B.5 | Direct: `POST /customer/order`                                  | `CreateOrderUseCase`                                                         | `modules/order/application/useCases/CreateOrder.ts`                                                                                            |
+| 2.4.6   | Cancel my order → `POST /customer/order/:id/cancel`             | `CancelOrderUseCase`                                                         | `modules/order/application/useCases/CancelOrder.ts`                                                                                            |
+| 2.5.7   | 🚧 Payment captured → `PROCESSING`                              | `UpdateOrderStatusUseCase` (invoked by `payment` webhook handler)            | `modules/order/application/useCases/UpdateOrderStatus.ts`                                                                                      |
+| 2.5.8   | 🚧 Payment failed → `PAYMENT_FAILED`                            | `UpdateOrderStatusUseCase` (invoked by `payment` webhook handler)            | same                                                                                                                                           |
+| 2.5.9   | 🚧 Payment retry → `PAYMENT_FAILED → PAYMENT_PENDING`           | `UpdateOrderStatusUseCase` (invoked by `payment`)                            | same                                                                                                                                           |
+| 6.2     | Status-change audit on cancel                                   | `CancelOrderUseCase` + `OrderRepository.recordStatusChange`                  | `modules/order/application/useCases/CancelOrder.ts`                                                                                            |
 
 ### Controller wiring
 
-| Endpoint                                  | Controller handler                                                              |
-| ----------------------------------------- | ------------------------------------------------------------------------------- |
+| Endpoint                                  | Controller handler                                                                               |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------ |
 | `GET /customer/order`                     | `orderController.getMyOrders` (`modules/order/interface/controllers/OrderCustomerController.ts`) |
-| `GET /customer/order/number/:orderNumber` | `orderController.getOrderByNumber`                                              |
-| `GET /customer/order/:orderId`            | `orderController.getOrder`                                                      |
-| `POST /customer/order`                    | `orderController.createOrder`                                                   |
-| `POST /customer/order/:orderId/cancel`    | `orderController.cancelOrder`                                                   |
+| `GET /customer/order/number/:orderNumber` | `orderController.getOrderByNumber`                                                               |
+| `GET /customer/order/:orderId`            | `orderController.getOrder`                                                                       |
+| `POST /customer/order`                    | `orderController.createOrder`                                                                    |
+| `POST /customer/order/:orderId/cancel`    | `orderController.cancelOrder`                                                                    |
 
 Routes are mounted in `modules/order/interface/routers/customerRouter.ts` and registered in `boot/routes.ts` under the `/customer` prefix.
 
@@ -246,17 +246,17 @@ Subscribers are registered in `libs/events/registerEventHandlers.ts`.
 
 Every requirement in this spec must be backed by at least one integration test in `tests/integration/order/order.test.ts`. The mapping below is the contract: a requirement without a test is incomplete, and a test without a requirement is unreviewable.
 
-| Requirement | Test (describe → it)                                                                            |
-| ----------- | ----------------------------------------------------------------------------------------------- |
-| 1.4 (camelCase only)         | `Admin Order Operations` → `should get all orders (admin)` (covers same response shape used by customer endpoints)  |
-| 1.5 / 5.1.2 (cross-customer 404) | `Customer Order Operations` → `should prevent customers from accessing orders that are not theirs` |
-| 1.7 / 5.1.1 (auth required)  | `Authorization Tests` → `should require authentication for customer orders`, `should reject invalid tokens`         |
-| 2.1.1 (list my orders)       | `Customer Order Operations` → `should get customer orders`                                                          |
-| 2.2.2 (view my order + camelCase items) | `Customer Order Operations` → `should get order details for customer`                                    |
-| 2.2.3 (lookup by number)     | `Order Lookup by Number (UC-ORD-003)` → `should get order by order number (customer)`                               |
-| 2.3.4 (create order, 201)    | `Order Creation Flow` → `should create a new order`                                                                 |
-| 2.4.5 / 3.1 (self-cancel allowed) | `Customer Order Operations` → `should allow customers to cancel their order`                                   |
-| 5.4.9 (invalid transition rejected) | `Admin Order Operations` → `should update an order status (admin)` (asserts 400 branch on illegal transition) |
+| Requirement                             | Test (describe → it)                                                                                               |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| 1.4 (camelCase only)                    | `Admin Order Operations` → `should get all orders (admin)` (covers same response shape used by customer endpoints) |
+| 1.5 / 5.1.2 (cross-customer 404)        | `Customer Order Operations` → `should prevent customers from accessing orders that are not theirs`                 |
+| 1.7 / 5.1.1 (auth required)             | `Authorization Tests` → `should require authentication for customer orders`, `should reject invalid tokens`        |
+| 2.1.1 (list my orders)                  | `Customer Order Operations` → `should get customer orders`                                                         |
+| 2.2.2 (view my order + camelCase items) | `Customer Order Operations` → `should get order details for customer`                                              |
+| 2.2.3 (lookup by number)                | `Order Lookup by Number (UC-ORD-003)` → `should get order by order number (customer)`                              |
+| 2.3.4 (create order, 201)               | `Order Creation Flow` → `should create a new order`                                                                |
+| 2.4.5 / 3.1 (self-cancel allowed)       | `Customer Order Operations` → `should allow customers to cancel their order`                                       |
+| 5.4.9 (invalid transition rejected)     | `Admin Order Operations` → `should update an order status (admin)` (asserts 400 branch on illegal transition)      |
 
 ### Required additional tests (gaps)
 

@@ -11,10 +11,7 @@ export interface PaymentSettings {
 }
 
 export async function findByMerchant(merchantId: string): Promise<PaymentSettings | null> {
-  return queryOne<PaymentSettings>(
-    `SELECT * FROM "paymentSettings" WHERE "merchantId" = $1`,
-    [merchantId],
-  );
+  return queryOne<PaymentSettings>(`SELECT * FROM "paymentSettings" WHERE "merchantId" = $1`, [merchantId]);
 }
 
 export async function upsert(

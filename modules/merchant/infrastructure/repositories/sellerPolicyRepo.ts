@@ -12,10 +12,9 @@ export interface SellerPolicy {
 }
 
 export async function findByMerchant(merchantId: string): Promise<SellerPolicy[]> {
-  return (await query<SellerPolicy[]>(
-    `SELECT * FROM "sellerPolicy" WHERE "merchantId" = $1 ORDER BY "policyType" ASC`,
-    [merchantId],
-  )) || [];
+  return (
+    (await query<SellerPolicy[]>(`SELECT * FROM "sellerPolicy" WHERE "merchantId" = $1 ORDER BY "policyType" ASC`, [merchantId])) || []
+  );
 }
 
 export async function create(params: Omit<SellerPolicy, 'sellerPolicyId' | 'createdAt' | 'updatedAt'>): Promise<SellerPolicy | null> {
@@ -27,22 +26,34 @@ export async function create(params: Omit<SellerPolicy, 'sellerPolicyId' | 'crea
   );
 }
 
-export async function update(sellerPolicyId: string, params: Partial<Omit<SellerPolicy, 'sellerPolicyId' | 'merchantId' | 'createdAt' | 'updatedAt'>>): Promise<SellerPolicy | null> {
+export async function update(
+  sellerPolicyId: string,
+  params: Partial<Omit<SellerPolicy, 'sellerPolicyId' | 'merchantId' | 'createdAt' | 'updatedAt'>>,
+): Promise<SellerPolicy | null> {
   const now = new Date();
   const fields: string[] = ['"updatedAt" = $1'];
   const values: unknown[] = [now];
   let idx = 2;
 
-  if (params.policyType !== undefined) { fields.push(`"policyType" = $${idx++}`); values.push(params.policyType); }
-  if (params.title !== undefined) { fields.push(`title = $${idx++}`); values.push(params.title); }
-  if (params.content !== undefined) { fields.push(`content = $${idx++}`); values.push(params.content); }
-  if (params.isActive !== undefined) { fields.push(`"isActive" = $${idx++}`); values.push(params.isActive); }
+  if (params.policyType !== undefined) {
+    fields.push(`"policyType" = $${idx++}`);
+    values.push(params.policyType);
+  }
+  if (params.title !== undefined) {
+    fields.push(`title = $${idx++}`);
+    values.push(params.title);
+  }
+  if (params.content !== undefined) {
+    fields.push(`content = $${idx++}`);
+    values.push(params.content);
+  }
+  if (params.isActive !== undefined) {
+    fields.push(`"isActive" = $${idx++}`);
+    values.push(params.isActive);
+  }
 
   values.push(sellerPolicyId);
-  return queryOne<SellerPolicy>(
-    `UPDATE "sellerPolicy" SET ${fields.join(', ')} WHERE "sellerPolicyId" = $${idx} RETURNING *`,
-    values,
-  );
+  return queryOne<SellerPolicy>(`UPDATE "sellerPolicy" SET ${fields.join(', ')} WHERE "sellerPolicyId" = $${idx} RETURNING *`, values);
 }
 
 export default { findByMerchant, create, update };

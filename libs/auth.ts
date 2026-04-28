@@ -205,9 +205,10 @@ export const requireStoreAccess = (requiredPermission?: string) => {
       return res.status(403).send('Forbidden');
     }
 
-    const targetStoreId = (req.params as Record<string, string | undefined>)?.storeId
-      || (req.body as Record<string, unknown> | undefined)?.storeId as string | undefined
-      || (req.query as Record<string, string | undefined>)?.storeId;
+    const targetStoreId =
+      (req.params as Record<string, string | undefined>)?.storeId ||
+      ((req.body as Record<string, unknown> | undefined)?.storeId as string | undefined) ||
+      (req.query as Record<string, string | undefined>)?.storeId;
 
     if (targetStoreId && user.storeId && targetStoreId !== user.storeId) {
       if (isJsonRequest(req)) {

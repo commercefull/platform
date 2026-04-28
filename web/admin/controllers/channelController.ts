@@ -5,7 +5,7 @@
 
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';;
+import { TypedRequest } from 'libs/types/express';
 import { adminRespond } from '../../respond';
 
 export const listChannels = async (req: TypedRequest, res: Response): Promise<void> => {

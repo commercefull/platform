@@ -38,9 +38,7 @@ export interface LogNotificationEventResponse {
 // ============================================================================
 
 export class LogNotificationEventUseCase {
-  constructor(
-    private readonly eventLogRepo: typeof notificationEventLogRepo = notificationEventLogRepo,
-  ) {}
+  constructor(private readonly eventLogRepo: typeof notificationEventLogRepo = notificationEventLogRepo) {}
 
   async execute(command: LogNotificationEventCommand): Promise<LogNotificationEventResponse> {
     if (!command.eventType) throw new Error('eventType is required');

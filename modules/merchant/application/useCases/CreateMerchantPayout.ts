@@ -53,9 +53,7 @@ export class CreateMerchantPayoutUseCase {
 
     const available = balance?.availableBalance ?? 0;
     if (available < command.amount) {
-      throw new Error(
-        `Insufficient funds: available ${available} ${command.currency}, requested ${command.amount} ${command.currency}`,
-      );
+      throw new Error(`Insufficient funds: available ${available} ${command.currency}, requested ${command.amount} ${command.currency}`);
     }
 
     const payout = await this.payoutRepo.create({

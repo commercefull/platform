@@ -88,38 +88,38 @@ Before the numbered requirements, write a short prose section that:
 **Example — Actors table (order module):**
 
 ```markdown
-| Actor    | Role                                                              |
-| -------- | ----------------------------------------------------------------- |
-| Customer | Places orders via storefront / `/customer` API; views own orders  |
-| Merchant | Manages own-store orders via `/merchant` portal and `/business` API |
-| Admin    | Cross-tenant order operations via `/admin` portal                  |
-| B2B Buyer| Places quote-driven orders via `/b2b` portal                       |
-| System   | Automated transitions (payment capture, fulfillment, refunds)      |
+| Actor     | Role                                                                |
+| --------- | ------------------------------------------------------------------- |
+| Customer  | Places orders via storefront / `/customer` API; views own orders    |
+| Merchant  | Manages own-store orders via `/merchant` portal and `/business` API |
+| Admin     | Cross-tenant order operations via `/admin` portal                   |
+| B2B Buyer | Places quote-driven orders via `/b2b` portal                        |
+| System    | Automated transitions (payment capture, fulfillment, refunds)       |
 ```
 
 **Example — State transition table (`OrderStatus`):**
 
 ```markdown
-| From            | To (allowed)                                                          |
-| --------------- | --------------------------------------------------------------------- |
-| PENDING         | PROCESSING, PAYMENT_PENDING, CANCELLED, FAILED                        |
-| PAYMENT_PENDING | PENDING, PROCESSING, PAYMENT_FAILED, CANCELLED                        |
-| PROCESSING      | SHIPPED, ON_HOLD, BACKORDERED, CANCELLED, REFUNDED                    |
-| SHIPPED         | DELIVERED, REFUNDED                                                   |
-| DELIVERED       | COMPLETED, REFUNDED                                                   |
-| COMPLETED       | REFUNDED                                                              |
-| CANCELLED       | _(none)_                                                              |
-| REFUNDED        | _(none)_                                                              |
+| From            | To (allowed)                                       |
+| --------------- | -------------------------------------------------- |
+| PENDING         | PROCESSING, PAYMENT_PENDING, CANCELLED, FAILED     |
+| PAYMENT_PENDING | PENDING, PROCESSING, PAYMENT_FAILED, CANCELLED     |
+| PROCESSING      | SHIPPED, ON_HOLD, BACKORDERED, CANCELLED, REFUNDED |
+| SHIPPED         | DELIVERED, REFUNDED                                |
+| DELIVERED       | COMPLETED, REFUNDED                                |
+| COMPLETED       | REFUNDED                                           |
+| CANCELLED       | _(none)_                                           |
+| REFUNDED        | _(none)_                                           |
 ```
 
 **Example — Policy defaults table:**
 
 ```markdown
-| Policy                          | Default               |
-| ------------------------------- | --------------------- |
-| Customer self-cancel window     | Until status = SHIPPED|
-| Refund window after delivery    | 30 days               |
-| Max abandoned-cart reminders    | 3                     |
+| Policy                       | Default                |
+| ---------------------------- | ---------------------- |
+| Customer self-cancel window  | Until status = SHIPPED |
+| Refund window after delivery | 30 days                |
+| Max abandoned-cart reminders | 3                      |
 ```
 
 ---
@@ -330,11 +330,11 @@ PENDING ──► PAYMENT_PENDING ──► PROCESSING ──► SHIPPED ──�
 **Policy defaults table:**
 
 ```markdown
-| Policy                          | Default                   |
-| ------------------------------- | ------------------------- |
-| Customer self-cancel window     | Until status = SHIPPED    |
-| Refund window after delivery    | 30 days                   |
-| Idempotency key TTL             | 24 hours                  |
+| Policy                       | Default                |
+| ---------------------------- | ---------------------- |
+| Customer self-cancel window  | Until status = SHIPPED |
+| Refund window after delivery | 30 days                |
+| Idempotency key TTL          | 24 hours               |
 ```
 
 ---
@@ -348,11 +348,11 @@ Every EARS spec must end with a **Section 8: Use Case Traceability** table that 
 ```markdown
 ## 8. Use Case Traceability
 
-| Requirement (summary)              | Use Case                  | Source File                                                  |
-| ---------------------------------- | ------------------------- | ------------------------------------------------------------ |
-| Submit checkout → PROCESSING       | `CreateOrderUseCase`      | `modules/order/application/useCases/CreateOrder.ts`          |
-| Mark shipped → SHIPPED             | `UpdateOrderStatusUseCase`| `modules/order/application/useCases/UpdateOrderStatus.ts`    |
-| Issue refund → OrderPartiallyRefunded | `CreateOrderRefundUseCase` | `modules/order/application/useCases/CreateOrderRefund.ts`  |
+| Requirement (summary)                 | Use Case                   | Source File                                               |
+| ------------------------------------- | -------------------------- | --------------------------------------------------------- |
+| Submit checkout → PROCESSING          | `CreateOrderUseCase`       | `modules/order/application/useCases/CreateOrder.ts`       |
+| Mark shipped → SHIPPED                | `UpdateOrderStatusUseCase` | `modules/order/application/useCases/UpdateOrderStatus.ts` |
+| Issue refund → OrderPartiallyRefunded | `CreateOrderRefundUseCase` | `modules/order/application/useCases/CreateOrderRefund.ts` |
 ```
 
 **Rules:**
@@ -402,18 +402,18 @@ Open `libs/events/registerEventHandlers.ts` and the individual handler files. Ea
 
 ## Naming and Location Conventions
 
-| What            | Convention                          | Example                                        |
-| --------------- | ----------------------------------- | ---------------------------------------------- |
-| Spec file       | `docs/specs/[module]/[actor].md`    | `docs/specs/order/merchant.md`                 |
-| Section headers | `## N. [Pattern Name] Requirements` | `## 2. Event-Driven Requirements`              |
-| Sub-sections    | `### N.M [Feature Area]`            | `### 2.3 Refunds`                              |
-| Status names    | SCREAMING_SNAKE_CASE in backticks   | `` `PROCESSING` ``, `` `SHIPPED` ``            |
-| Event names     | PascalCase in backticks             | `` `OrderCreated` ``, `` `PaymentFailed` ``    |
-| Use case names  | PascalCase + `UseCase` suffix       | `` `CreateOrderUseCase` ``                     |
-| Endpoints       | Method + path in backticks          | `` `POST /customer/order` ``                   |
+| What            | Convention                            | Example                                            |
+| --------------- | ------------------------------------- | -------------------------------------------------- |
+| Spec file       | `docs/specs/[module]/[actor].md`      | `docs/specs/order/merchant.md`                     |
+| Section headers | `## N. [Pattern Name] Requirements`   | `## 2. Event-Driven Requirements`                  |
+| Sub-sections    | `### N.M [Feature Area]`              | `### 2.3 Refunds`                                  |
+| Status names    | SCREAMING_SNAKE_CASE in backticks     | `` `PROCESSING` ``, `` `SHIPPED` ``                |
+| Event names     | PascalCase in backticks               | `` `OrderCreated` ``, `` `PaymentFailed` ``        |
+| Use case names  | PascalCase + `UseCase` suffix         | `` `CreateOrderUseCase` ``                         |
+| Endpoints       | Method + path in backticks            | `` `POST /customer/order` ``                       |
 | Code references | Inline code with module-relative path | `modules/order/domain/valueObjects/OrderStatus.ts` |
-| Policy values   | Exact numbers from configuration    | 30 days, 3 reminders                           |
-| DB identifiers  | camelCase, double-quoted in SQL     | `` `"orderId"` ``, `` `"createdAt"` ``         |
+| Policy values   | Exact numbers from configuration      | 30 days, 3 reminders                               |
+| DB identifiers  | camelCase, double-quoted in SQL       | `` `"orderId"` ``, `` `"createdAt"` ``             |
 
 ---
 
@@ -437,12 +437,12 @@ Before committing a spec, verify:
 
 ## Reference Material
 
-| Resource                       | Path                                                |
-| ------------------------------ | --------------------------------------------------- |
-| Architecture overview          | `ARCHITECTURE.md`                                   |
-| Agent / contributor guide      | `AGENTS.md`                                         |
-| Module specifications          | `docs/modules/`                                     |
-| Engineering standards          | `docs/standards/`                                   |
-| Module source                  | `modules/[module]/{domain,application,infrastructure,interface}/` |
-| Event wiring                   | `libs/events/registerEventHandlers.ts`              |
-| Route mounting                 | `boot/routes.ts`                                    |
+| Resource                  | Path                                                              |
+| ------------------------- | ----------------------------------------------------------------- |
+| Architecture overview     | `ARCHITECTURE.md`                                                 |
+| Agent / contributor guide | `AGENTS.md`                                                       |
+| Module specifications     | `docs/modules/`                                                   |
+| Engineering standards     | `docs/standards/`                                                 |
+| Module source             | `modules/[module]/{domain,application,infrastructure,interface}/` |
+| Event wiring              | `libs/events/registerEventHandlers.ts`                            |
+| Route mounting            | `boot/routes.ts`                                                  |

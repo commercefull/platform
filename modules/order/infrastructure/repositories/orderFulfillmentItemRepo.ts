@@ -28,13 +28,7 @@ export const create = async (params: OrderFulfillmentItemCreateParams): Promise<
       "createdAt", "updatedAt"
     ) VALUES ($1, $2, $3, $4, $5)
     RETURNING *`,
-    [
-      params.orderFulfillmentId,
-      params.orderItemId,
-      params.quantity ?? 1,
-      now,
-      now,
-    ],
+    [params.orderFulfillmentId, params.orderItemId, params.quantity ?? 1, now, now],
   );
   if (!result) throw new Error('Failed to create orderFulfillmentItem');
   return result;

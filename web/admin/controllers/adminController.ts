@@ -1,6 +1,6 @@
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';;
+import { TypedRequest } from 'libs/types/express';
 import bcrypt from 'bcryptjs';
 import { SessionService } from '../../../libs/session';
 import AdminRepository from '../../../modules/identity/infrastructure/repositories/AdminRepository';

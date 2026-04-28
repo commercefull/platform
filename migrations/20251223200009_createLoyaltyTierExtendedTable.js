@@ -4,7 +4,7 @@
 
 exports.up = async function (knex) {
   const hasTable = await knex.schema.hasTable('loyaltyTier');
-  
+
   if (!hasTable) {
     await knex.schema.createTable('loyaltyTier', table => {
       table.uuid('tierId').primary().defaultTo(knex.raw('uuidv7()'));

@@ -32,18 +32,18 @@ t.uuid('customerId').primary().defaultTo(knex.raw('uuidv7()'));
 
 ## Standard Column Patterns
 
-| Pattern              | Type          | Example                                                    |
-| -------------------- | ------------- | ---------------------------------------------------------- |
-| Primary key          | `uuid`        | `t.uuid('productId').primary().defaultTo(knex.raw('uuidv7()'))` |
-| Foreign key          | `uuid`        | `t.uuid('merchantId').references('merchantId').inTable('merchant')` |
-| Created timestamp    | `timestamp`   | `t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now())` |
-| Updated timestamp    | `timestamp`   | `t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now())` |
-| Soft delete          | `timestamp`   | `t.timestamp('deletedAt')`                                 |
-| Boolean flags        | `boolean`     | `t.boolean('isActive').notNullable().defaultTo(true)`       |
-| Enum/Status          | `enu`         | `t.enu('status', ['draft', 'active']).defaultTo('draft')`  |
-| Money                | `decimal`     | `t.decimal('price', 15, 2)`                                |
-| Flexible data        | `jsonb`       | `t.jsonb('customFields')`                                  |
-| UUID arrays          | `specificType`| `t.specificType('relatedProducts', 'uuid[]')`              |
+| Pattern           | Type           | Example                                                             |
+| ----------------- | -------------- | ------------------------------------------------------------------- |
+| Primary key       | `uuid`         | `t.uuid('productId').primary().defaultTo(knex.raw('uuidv7()'))`     |
+| Foreign key       | `uuid`         | `t.uuid('merchantId').references('merchantId').inTable('merchant')` |
+| Created timestamp | `timestamp`    | `t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now())`   |
+| Updated timestamp | `timestamp`    | `t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now())`   |
+| Soft delete       | `timestamp`    | `t.timestamp('deletedAt')`                                          |
+| Boolean flags     | `boolean`      | `t.boolean('isActive').notNullable().defaultTo(true)`               |
+| Enum/Status       | `enu`          | `t.enu('status', ['draft', 'active']).defaultTo('draft')`           |
+| Money             | `decimal`      | `t.decimal('price', 15, 2)`                                         |
+| Flexible data     | `jsonb`        | `t.jsonb('customFields')`                                           |
+| UUID arrays       | `specificType` | `t.specificType('relatedProducts', 'uuid[]')`                       |
 
 ## Boolean Naming
 
@@ -92,10 +92,7 @@ const products = await query<Product[]>(
 );
 
 // Query single row
-const product = await queryOne<Product>(
-  `SELECT * FROM "product" WHERE "productId" = $1 AND "deletedAt" IS NULL`,
-  [productId],
-);
+const product = await queryOne<Product>(`SELECT * FROM "product" WHERE "productId" = $1 AND "deletedAt" IS NULL`, [productId]);
 ```
 
 Always use parameterized queries (`$1`, `$2`, …). Never interpolate user input into SQL strings.

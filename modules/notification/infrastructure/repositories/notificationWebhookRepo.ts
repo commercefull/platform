@@ -12,20 +12,20 @@ export interface NotificationWebhook {
 }
 
 export async function findActive(event: string): Promise<NotificationWebhook[]> {
-  return (await query<NotificationWebhook[]>(
-    `SELECT * FROM "notificationWebhook" WHERE "isActive" = true AND events @> $1::jsonb`,
-    [JSON.stringify([event])],
-  )) || [];
+  return (
+    (await query<NotificationWebhook[]>(`SELECT * FROM "notificationWebhook" WHERE "isActive" = true AND events @> $1::jsonb`, [
+      JSON.stringify([event]),
+    ])) || []
+  );
 }
 
 export async function findByMerchant(merchantId: string): Promise<NotificationWebhook[]> {
-  return (await query<NotificationWebhook[]>(
-    `SELECT * FROM "notificationWebhook" WHERE "merchantId" = $1`,
-    [merchantId],
-  )) || [];
+  return (await query<NotificationWebhook[]>(`SELECT * FROM "notificationWebhook" WHERE "merchantId" = $1`, [merchantId])) || [];
 }
 
-export async function create(params: Omit<NotificationWebhook, 'notificationWebhookId' | 'createdAt' | 'updatedAt'>): Promise<NotificationWebhook | null> {
+export async function create(
+  params: Omit<NotificationWebhook, 'notificationWebhookId' | 'createdAt' | 'updatedAt'>,
+): Promise<NotificationWebhook | null> {
   const now = new Date();
   return queryOne<NotificationWebhook>(
     `INSERT INTO "notificationWebhook" ("merchantId", url, secret, events, "isActive", "createdAt", "updatedAt")
@@ -35,7 +35,10 @@ export async function create(params: Omit<NotificationWebhook, 'notificationWebh
 }
 
 export async function deactivate(notificationWebhookId: string): Promise<void> {
-  await query(`UPDATE "notificationWebhook" SET "isActive" = false, "updatedAt" = $1 WHERE "notificationWebhookId" = $2`, [new Date(), notificationWebhookId]);
+  await query(`UPDATE "notificationWebhook" SET "isActive" = false, "updatedAt" = $1 WHERE "notificationWebhookId" = $2`, [
+    new Date(),
+    notificationWebhookId,
+  ]);
 }
 
 export default { findActive, findByMerchant, create, deactivate };

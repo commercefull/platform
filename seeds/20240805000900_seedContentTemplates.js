@@ -5,11 +5,36 @@
  */
 exports.seed = async function (knex) {
   const templates = [
-    { slug: 'standard-page', name: 'Standard Page', description: 'Default single column page layout', areas: JSON.stringify({ areas: ['main'] }) },
-    { slug: 'blog-post', name: 'Blog Post', description: 'Standard blog post layout with featured image', areas: JSON.stringify({ areas: ['featured', 'main', 'sidebar'] }) },
-    { slug: 'two-column', name: 'Two Column', description: 'Two column layout with sidebar', areas: JSON.stringify({ areas: ['header', 'main', 'sidebar', 'footer'] }) },
-    { slug: 'landing-page', name: 'Landing Page', description: 'Full width marketing landing page', areas: JSON.stringify({ areas: ['header', 'main', 'cta', 'footer'] }) },
-    { slug: 'product-detail', name: 'Product Detail', description: 'Product detail page with image gallery', areas: JSON.stringify({ areas: ['images', 'details', 'description', 'related'] }) },
+    {
+      slug: 'standard-page',
+      name: 'Standard Page',
+      description: 'Default single column page layout',
+      areas: JSON.stringify({ areas: ['main'] }),
+    },
+    {
+      slug: 'blog-post',
+      name: 'Blog Post',
+      description: 'Standard blog post layout with featured image',
+      areas: JSON.stringify({ areas: ['featured', 'main', 'sidebar'] }),
+    },
+    {
+      slug: 'two-column',
+      name: 'Two Column',
+      description: 'Two column layout with sidebar',
+      areas: JSON.stringify({ areas: ['header', 'main', 'sidebar', 'footer'] }),
+    },
+    {
+      slug: 'landing-page',
+      name: 'Landing Page',
+      description: 'Full width marketing landing page',
+      areas: JSON.stringify({ areas: ['header', 'main', 'cta', 'footer'] }),
+    },
+    {
+      slug: 'product-detail',
+      name: 'Product Detail',
+      description: 'Product detail page with image gallery',
+      areas: JSON.stringify({ areas: ['images', 'details', 'description', 'related'] }),
+    },
   ];
 
   for (const template of templates) {

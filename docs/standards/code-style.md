@@ -35,19 +35,19 @@
 
 ## File Naming Conventions
 
-| Type                 | Convention       | Example                              |
-| -------------------- | ---------------- | ------------------------------------ |
-| Domain entities      | PascalCase       | `Product.ts`, `ProductVariant.ts`    |
-| Value objects        | PascalCase       | `Price.ts`, `ProductStatus.ts`       |
-| Use cases            | PascalCase       | `CreateProduct.ts`, `ListProducts.ts`|
-| Controllers          | camelCase        | `productBusinessController.ts`       |
-| Routers              | camelCase        | `productBusinessRouter.ts`           |
-| Legacy repositories  | camelCase        | `productRepo.ts`                     |
-| Infra repositories   | PascalCase       | `ProductRepository.ts`               |
-| Migrations           | timestamp prefix | `20240805000468_createProduct.js`    |
-| Seeds                | timestamp prefix | `20240805001026_seedSampleProduct.js`|
-| EJS views            | kebab-case       | `product-list.ejs`                   |
-| Locale files         | camelCase        | `product.json`, `shared.json`        |
+| Type                | Convention       | Example                               |
+| ------------------- | ---------------- | ------------------------------------- |
+| Domain entities     | PascalCase       | `Product.ts`, `ProductVariant.ts`     |
+| Value objects       | PascalCase       | `Price.ts`, `ProductStatus.ts`        |
+| Use cases           | PascalCase       | `CreateProduct.ts`, `ListProducts.ts` |
+| Controllers         | camelCase        | `productBusinessController.ts`        |
+| Routers             | camelCase        | `productBusinessRouter.ts`            |
+| Legacy repositories | camelCase        | `productRepo.ts`                      |
+| Infra repositories  | PascalCase       | `ProductRepository.ts`                |
+| Migrations          | timestamp prefix | `20240805000468_createProduct.js`     |
+| Seeds               | timestamp prefix | `20240805001026_seedSampleProduct.js` |
+| EJS views           | kebab-case       | `product-list.ejs`                    |
+| Locale files        | camelCase        | `product.json`, `shared.json`         |
 
 ## Directory Naming
 

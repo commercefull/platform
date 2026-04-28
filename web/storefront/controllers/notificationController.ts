@@ -9,7 +9,10 @@ import { TypedRequest } from 'libs/types/express';
 import { storefrontRespond } from '../../respond';
 import { query, queryOne } from '../../../libs/db';
 import * as notificationDeviceRepo from '../../../modules/notification/infrastructure/repositories/notificationDeviceRepo';
-import { RegisterNotificationDeviceUseCase, RegisterNotificationDeviceCommand } from '../../../modules/notification/application/useCases/RegisterNotificationDevice';
+import {
+  RegisterNotificationDeviceUseCase,
+  RegisterNotificationDeviceCommand,
+} from '../../../modules/notification/application/useCases/RegisterNotificationDevice';
 
 /**
  * GET: List customer notifications
@@ -23,10 +26,7 @@ export const listNotifications = async (req: TypedRequest, res: Response) => {
     const limit = 20;
     const offset = (page - 1) * limit;
 
-    const countResult = await queryOne(
-      `SELECT COUNT(*) as total FROM "notification" WHERE "userId" = $1`,
-      [customerId],
-    );
+    const countResult = await queryOne(`SELECT COUNT(*) as total FROM "notification" WHERE "userId" = $1`, [customerId]);
     const total = parseInt((countResult as any)?.total || '0');
 
     const notifications = await query(
@@ -37,10 +37,9 @@ export const listNotifications = async (req: TypedRequest, res: Response) => {
       [customerId, limit, offset],
     );
 
-    const unreadCount = await queryOne(
-      `SELECT COUNT(*) as count FROM "notification" WHERE "userId" = $1 AND "readAt" IS NULL`,
-      [customerId],
-    );
+    const unreadCount = await queryOne(`SELECT COUNT(*) as count FROM "notification" WHERE "userId" = $1 AND "readAt" IS NULL`, [
+      customerId,
+    ]);
 
     const totalPages = Math.ceil(total / limit);
 
@@ -66,10 +65,7 @@ export const markAsRead = async (req: TypedRequest, res: Response) => {
 
     const { notificationId } = req.params;
 
-    await query(
-      `UPDATE "notification" SET "readAt" = NOW() WHERE "notificationId" = $1 AND "userId" = $2`,
-      [notificationId, customerId],
-    );
+    await query(`UPDATE "notification" SET "readAt" = NOW() WHERE "notificationId" = $1 AND "userId" = $2`, [notificationId, customerId]);
 
     // If AJAX request, return JSON
     if (req.xhr || req.headers.accept?.includes('json')) {
@@ -96,10 +92,7 @@ export const markAllAsRead = async (req: TypedRequest, res: Response) => {
     const customerId = req.user?.customerId;
     if (!customerId) return res.redirect('/signin');
 
-    await query(
-      `UPDATE "notification" SET "readAt" = NOW() WHERE "userId" = $1 AND "readAt" IS NULL`,
-      [customerId],
-    );
+    await query(`UPDATE "notification" SET "readAt" = NOW() WHERE "userId" = $1 AND "readAt" IS NULL`, [customerId]);
 
     if (req.xhr || req.headers.accept?.includes('json')) {
       res.json({ success: true });
@@ -126,10 +119,7 @@ export const getPreferences = async (req: TypedRequest, res: Response) => {
     const customerId = req.user?.customerId;
     if (!customerId) return res.redirect('/signin');
 
-    const preferences = await queryOne(
-      `SELECT * FROM "notificationPreference" WHERE "userId" = $1`,
-      [customerId],
-    );
+    const preferences = await queryOne(`SELECT * FROM "notificationPreference" WHERE "userId" = $1`, [customerId]);
 
     storefrontRespond(req, res, 'notifications/preferences', {
       pageName: 'Notification Preferences',
@@ -202,9 +192,7 @@ export const registerDevice = async (req: TypedRequest, res: Response) => {
     const { deviceToken, platform } = req.body;
 
     const useCase = new RegisterNotificationDeviceUseCase();
-    await useCase.execute(
-      new RegisterNotificationDeviceCommand(customerId, 'customer', deviceToken, platform),
-    );
+    await useCase.execute(new RegisterNotificationDeviceCommand(customerId, 'customer', deviceToken, platform));
 
     (req as any).flash?.('success', 'Device registered successfully');
     res.redirect('/notifications/devices');

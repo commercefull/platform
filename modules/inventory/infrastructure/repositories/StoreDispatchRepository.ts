@@ -56,7 +56,9 @@ export class StoreDispatchRepository implements IStoreDispatchRepository {
   }
 
   async save(dispatch: StoreDispatch): Promise<StoreDispatch> {
-    const existing = await queryOne<Record<string, any>>('SELECT "dispatchId" FROM "storeDispatch" WHERE "dispatchId" = $1', [dispatch.dispatchId]);
+    const existing = await queryOne<Record<string, any>>('SELECT "dispatchId" FROM "storeDispatch" WHERE "dispatchId" = $1', [
+      dispatch.dispatchId,
+    ]);
     const now = new Date().toISOString();
 
     if (existing) {
@@ -167,7 +169,9 @@ export class StoreDispatchRepository implements IStoreDispatchRepository {
   }
 
   private async findItems(dispatchId: string): Promise<StoreDispatchItemProps[]> {
-    const rows = await query<Record<string, any>[]>('SELECT * FROM "storeDispatchItem" WHERE "dispatchId" = $1 ORDER BY "createdAt" ASC', [dispatchId]);
+    const rows = await query<Record<string, any>[]>('SELECT * FROM "storeDispatchItem" WHERE "dispatchId" = $1 ORDER BY "createdAt" ASC', [
+      dispatchId,
+    ]);
 
     return (rows || []).map(row => ({
       dispatchItemId: row.dispatchItemId,

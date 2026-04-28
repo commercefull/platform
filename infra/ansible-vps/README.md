@@ -4,15 +4,15 @@ Hardened Ansible infrastructure for deploying CommerceFull to a single VPS.
 
 ## Stack
 
-| Component    | Version | Notes                              |
-| ------------ | ------- | ---------------------------------- |
-| Ubuntu       | 22.04+  | Fresh VPS with SSH access          |
-| Node.js      | 22      | Via NodeSource repo                |
-| PostgreSQL   | 18      | Via PGDG repo, scram-sha-256 auth  |
-| Nginx        | Latest  | TLS 1.2/1.3, HSTS, rate limiting  |
-| PM2          | Latest  | Process manager, auto-restart      |
-| Yarn         | Latest  | Package manager                    |
-| UFW          | -       | Firewall: SSH + HTTP + HTTPS only  |
+| Component  | Version | Notes                             |
+| ---------- | ------- | --------------------------------- |
+| Ubuntu     | 22.04+  | Fresh VPS with SSH access         |
+| Node.js    | 22      | Via NodeSource repo               |
+| PostgreSQL | 18      | Via PGDG repo, scram-sha-256 auth |
+| Nginx      | Latest  | TLS 1.2/1.3, HSTS, rate limiting  |
+| PM2        | Latest  | Process manager, auto-restart     |
+| Yarn       | Latest  | Package manager                   |
+| UFW        | -       | Firewall: SSH + HTTP + HTTPS only |
 
 ## Architecture
 
@@ -88,17 +88,17 @@ nano ~/deployments/shared/.env
 
 All operations use `./deploy.sh` or direct `ansible-playbook` calls:
 
-| Command                | Description                                |
-| ---------------------- | ------------------------------------------ |
-| `./deploy.sh setup`   | Full server setup                          |
-| `./deploy.sh deploy`  | Zero-downtime deployment                   |
-| `./deploy.sh deploy:migrate` | Deploy + run DB migrations          |
-| `./deploy.sh rollback`| Rollback to previous release               |
-| `./deploy.sh backup`  | Backup DB + files to local machine         |
-| `./deploy.sh restore` | Restore DB and/or files from backup        |
-| `./deploy.sh update`  | System apt upgrade + reboot if needed      |
-| `./deploy.sh restart` | Restart PM2 + Nginx                        |
-| `./deploy.sh db:setup`| One-time database & user creation          |
+| Command                      | Description                           |
+| ---------------------------- | ------------------------------------- |
+| `./deploy.sh setup`          | Full server setup                     |
+| `./deploy.sh deploy`         | Zero-downtime deployment              |
+| `./deploy.sh deploy:migrate` | Deploy + run DB migrations            |
+| `./deploy.sh rollback`       | Rollback to previous release          |
+| `./deploy.sh backup`         | Backup DB + files to local machine    |
+| `./deploy.sh restore`        | Restore DB and/or files from backup   |
+| `./deploy.sh update`         | System apt upgrade + reboot if needed |
+| `./deploy.sh restart`        | Restart PM2 + Nginx                   |
+| `./deploy.sh db:setup`       | One-time database & user creation     |
 
 ### Direct Ansible Examples
 
@@ -166,18 +166,21 @@ ansible-vps/
 ## Security Hardening
 
 ### SSH
+
 - Password authentication **disabled**
 - Root login **disabled**
 - Empty passwords **disabled**
 - Max auth tries: **3**
 
 ### PostgreSQL
+
 - Listens on **127.0.0.1 only** (no external access)
 - Password encryption: **scram-sha-256**
 - Default trust rules **removed**
 - App user has minimal required privileges
 
 ### Nginx
+
 - Security headers: `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`
 - HSTS with 2-year max-age, includeSubDomains, preload
 - TLS 1.2 + 1.3 only, modern cipher suite
@@ -186,6 +189,7 @@ ansible-vps/
 - `server_tokens off`
 
 ### Firewall (UFW)
+
 - Default: **deny all incoming**, allow all outgoing
 - Allowed: SSH, HTTP (80), HTTPS (443)
 - Logging enabled

@@ -23,7 +23,9 @@ export async function findById(id: string): Promise<MarketingEmailTemplate | nul
   return queryOne<MarketingEmailTemplate>(`SELECT * FROM "marketingEmailTemplate" WHERE "marketingEmailTemplateId" = $1`, [id]);
 }
 
-export async function create(params: Omit<MarketingEmailTemplate, 'marketingEmailTemplateId' | 'createdAt' | 'updatedAt'>): Promise<MarketingEmailTemplate | null> {
+export async function create(
+  params: Omit<MarketingEmailTemplate, 'marketingEmailTemplateId' | 'createdAt' | 'updatedAt'>,
+): Promise<MarketingEmailTemplate | null> {
   const now = new Date();
   return queryOne<MarketingEmailTemplate>(
     `INSERT INTO "marketingEmailTemplate" ("merchantId", name, subject, "htmlBody", "textBody", "isActive", "createdAt", "updatedAt")

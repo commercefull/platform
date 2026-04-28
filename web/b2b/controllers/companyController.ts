@@ -17,10 +17,7 @@ export const getCompanyProfile = async (req: TypedRequest, res: Response) => {
     const companyId = req.user?.companyId;
     if (!companyId) return res.redirect('/b2b/login');
 
-    const company = await queryOne(
-      `SELECT * FROM "b2bCompany" WHERE "b2bCompanyId" = $1`,
-      [companyId],
-    );
+    const company = await queryOne(`SELECT * FROM "b2bCompany" WHERE "b2bCompanyId" = $1`, [companyId]);
 
     if (!company) {
       (req as any).flash?.('error', 'Company not found');
@@ -73,10 +70,7 @@ export const listUsers = async (req: TypedRequest, res: Response) => {
     const companyId = req.user?.companyId;
     if (!companyId) return res.redirect('/b2b/login');
 
-    const users = await query(
-      `SELECT * FROM "b2bCompanyUser" WHERE "b2bCompanyId" = $1 ORDER BY "createdAt" DESC`,
-      [companyId],
-    );
+    const users = await query(`SELECT * FROM "b2bCompanyUser" WHERE "b2bCompanyId" = $1 ORDER BY "createdAt" DESC`, [companyId]);
 
     b2bRespond(req, res, 'company/users', {
       pageName: 'Company Users',
@@ -104,10 +98,7 @@ export const inviteUser = async (req: TypedRequest, res: Response) => {
     }
 
     // Check if user already exists
-    const existing = await queryOne(
-      `SELECT * FROM "b2bCompanyUser" WHERE "b2bCompanyId" = $1 AND "email" = $2`,
-      [companyId, email],
-    );
+    const existing = await queryOne(`SELECT * FROM "b2bCompanyUser" WHERE "b2bCompanyId" = $1 AND "email" = $2`, [companyId, email]);
 
     if (existing) {
       (req as any).flash?.('error', 'A user with this email already exists');
@@ -163,10 +154,10 @@ export const addAddress = async (req: TypedRequest, res: Response) => {
     const { label, type, firstName, lastName, company, address1, address2, city, state, postalCode, country, phone, isDefault } = req.body;
 
     if (isDefault) {
-      await query(
-        `UPDATE "b2bCompanyAddress" SET "isDefault" = false WHERE "b2bCompanyId" = $1 AND "type" = $2`,
-        [companyId, type || 'shipping'],
-      );
+      await query(`UPDATE "b2bCompanyAddress" SET "isDefault" = false WHERE "b2bCompanyId" = $1 AND "type" = $2`, [
+        companyId,
+        type || 'shipping',
+      ]);
     }
 
     await query(
@@ -174,7 +165,22 @@ export const addAddress = async (req: TypedRequest, res: Response) => {
        ("b2bCompanyId", "label", "type", "firstName", "lastName", "company", "address1", "address2",
         "city", "state", "postalCode", "country", "phone", "isDefault", "createdAt", "updatedAt")
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW(), NOW())`,
-      [companyId, label, type || 'shipping', firstName, lastName, company, address1, address2, city, state, postalCode, country, phone, !!isDefault],
+      [
+        companyId,
+        label,
+        type || 'shipping',
+        firstName,
+        lastName,
+        company,
+        address1,
+        address2,
+        city,
+        state,
+        postalCode,
+        country,
+        phone,
+        !!isDefault,
+      ],
     );
 
     (req as any).flash?.('success', 'Address added successfully');

@@ -56,7 +56,9 @@ class DashboardQueryRepositoryClass {
       queryOne<{ count: string }>(
         `SELECT COUNT(*) as count FROM "order" WHERE "deletedAt" IS NULL AND "status" IN ('pending', 'processing')`,
       ),
-      queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "inventoryLevel" WHERE ("availableQuantity" - "reservedQuantity") <= "reorderQuantity"`),
+      queryOne<{ count: string }>(
+        `SELECT COUNT(*) as count FROM "inventoryLevel" WHERE ("availableQuantity" - "reservedQuantity") <= "reorderQuantity"`,
+      ),
       queryOne<{ count: string; total: string }>(
         `SELECT COUNT(*) as count, COALESCE(SUM("totalAmount"), 0) as total FROM "order" WHERE "deletedAt" IS NULL AND "createdAt" >= $1`,
         [today],

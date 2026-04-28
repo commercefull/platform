@@ -143,7 +143,7 @@ export const getSettlement = async (req: Request, res: Response): Promise<void> 
   try {
     const { payoutId } = req.params;
     const useCase = new GetMerchantSettlementUseCase();
-    const result = await useCase.execute(new GetMerchantSettlementCommand(payoutId));
+    const result = await useCase.execute(new GetMerchantSettlementCommand(String(payoutId)));
     successResponse(res, result);
   } catch (error: any) {
     logger.error('getSettlement error:', error);

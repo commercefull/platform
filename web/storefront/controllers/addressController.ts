@@ -95,7 +95,19 @@ export const addAddress = async (req: TypedRequest, res: Response) => {
         "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW(), NOW())
       RETURNING "customerAddressId"`,
-      [user.customerId, firstName, lastName, addressLine1, addressLine2 || null, city, state || null, postalCode, country, phone || null, !!isDefault],
+      [
+        user.customerId,
+        firstName,
+        lastName,
+        addressLine1,
+        addressLine2 || null,
+        city,
+        state || null,
+        postalCode,
+        country,
+        phone || null,
+        !!isDefault,
+      ],
     );
 
     return res.redirect('/addresses');
@@ -174,7 +186,20 @@ export const updateAddress = async (req: TypedRequest, res: Response) => {
         "isDefault" = $10, "updatedAt" = NOW()
        WHERE "customerAddressId" = $11 AND "customerId" = $12 AND "deletedAt" IS NULL
        RETURNING "customerAddressId"`,
-      [firstName, lastName, addressLine1, addressLine2 || null, city, state || null, postalCode, country, phone || null, !!isDefault, addressId, user.customerId],
+      [
+        firstName,
+        lastName,
+        addressLine1,
+        addressLine2 || null,
+        city,
+        state || null,
+        postalCode,
+        country,
+        phone || null,
+        !!isDefault,
+        addressId,
+        user.customerId,
+      ],
     );
 
     return res.redirect('/addresses');

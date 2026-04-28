@@ -11,7 +11,7 @@ import { emitEvent } from '../../../libs/events';
 emitEvent('order.created', { orderId, customerId, total });
 
 // Register (in libs/events/registerEventHandlers.ts)
-registerHandler('order.created', async (data) => {
+registerHandler('order.created', async data => {
   await sendOrderConfirmationEmail(data);
   await updateInventory(data);
 });
@@ -21,18 +21,18 @@ registerHandler('order.created', async (data) => {
 
 Events follow `domain.action`.
 
-| Domain       | Events                                                                |
-| ------------ | --------------------------------------------------------------------- |
-| `order`      | created, paid, shipped, completed, cancelled, refunded, delivered     |
+| Domain       | Events                                                                   |
+| ------------ | ------------------------------------------------------------------------ |
+| `order`      | created, paid, shipped, completed, cancelled, refunded, delivered        |
 | `product`    | created, updated, deleted, published, unpublished, price_changed, viewed |
-| `basket`     | created, item_added, item_removed, abandoned, converted_to_order      |
-| `checkout`   | started, updated, completed, abandoned                                |
-| `customer`   | registered, verified, profile_updated, deactivated                    |
-| `payment`    | initiated, completed, failed, refunded                                |
-| `inventory`  | stock_updated, low_stock, out_of_stock, reserved, released            |
-| `review`     | created, approved, rejected                                           |
-| `membership` | subscribed, renewed, cancelled, upgraded, downgraded                  |
-| `loyalty`    | points_earned, points_redeemed, tier_changed                          |
+| `basket`     | created, item_added, item_removed, abandoned, converted_to_order         |
+| `checkout`   | started, updated, completed, abandoned                                   |
+| `customer`   | registered, verified, profile_updated, deactivated                       |
+| `payment`    | initiated, completed, failed, refunded                                   |
+| `inventory`  | stock_updated, low_stock, out_of_stock, reserved, released               |
+| `review`     | created, approved, rejected                                              |
+| `membership` | subscribed, renewed, cancelled, upgraded, downgraded                     |
+| `loyalty`    | points_earned, points_redeemed, tier_changed                             |
 
 ## Analytics Handlers
 

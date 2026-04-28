@@ -11,10 +11,10 @@
 
 This spec covers **two distinct webhook concepts** that must not be confused:
 
-| Concept | Direction | Owner | Spec |
-|---------|-----------|-------|------|
-| **Outbound webhook** | Platform → Merchant endpoint | `webhook` module | **This file** |
-| **Inbound gateway webhook** | Payment gateway → Platform | `payment` module | `docs/specs/payment/customer.md §2.2–2.3` |
+| Concept                     | Direction                    | Owner            | Spec                                      |
+| --------------------------- | ---------------------------- | ---------------- | ----------------------------------------- |
+| **Outbound webhook**        | Platform → Merchant endpoint | `webhook` module | **This file**                             |
+| **Inbound gateway webhook** | Payment gateway → Platform   | `payment` module | `docs/specs/payment/customer.md §2.2–2.3` |
 
 The `webhook` module dispatches platform domain events (e.g. `order.created`, `order.paid`) to merchant-registered HTTP endpoints. It is **not** the handler for Stripe/gateway callbacks — that lives in `modules/payment/interface/controllers/webhookController.ts` (to be added per `docs/specs/checkout/tasks.md` task 3).
 
@@ -26,23 +26,23 @@ Merchants register HTTP endpoints via the `/business/webhooks` API. The `Webhook
 
 ### Actors
 
-| Actor | Role |
-|-------|------|
-| Merchant | Registers, updates, and deactivates webhook endpoints; views delivery history |
-| System | Dispatches events to registered endpoints; retries failures; tracks delivery status |
+| Actor    | Role                                                                                |
+| -------- | ----------------------------------------------------------------------------------- |
+| Merchant | Registers, updates, and deactivates webhook endpoints; views delivery history       |
+| System   | Dispatches events to registered endpoints; retries failures; tracks delivery status |
 
 ### Delivery status state machine
 
 Source: `modules/webhook/domain/entities/WebhookDelivery.ts`.
 
-| From | To | Trigger |
-|------|----|---------|
-| `pending` | `success` | HTTP 2xx response received |
-| `pending` | `retrying` | Non-2xx or network error, attempts < maxRetries |
-| `pending` | `failed` | Non-2xx or network error, attempts ≥ maxRetries |
-| `retrying` | `success` | Retry succeeds |
-| `retrying` | `failed` | Retry exhausted |
-| `success` / `failed` | _(terminal)_ | |
+| From                 | To           | Trigger                                         |
+| -------------------- | ------------ | ----------------------------------------------- |
+| `pending`            | `success`    | HTTP 2xx response received                      |
+| `pending`            | `retrying`   | Non-2xx or network error, attempts < maxRetries |
+| `pending`            | `failed`     | Non-2xx or network error, attempts ≥ maxRetries |
+| `retrying`           | `success`    | Retry succeeds                                  |
+| `retrying`           | `failed`     | Retry exhausted                                 |
+| `success` / `failed` | _(terminal)_ |                                                 |
 
 ---
 
@@ -122,15 +122,15 @@ Source: `modules/webhook/domain/entities/WebhookDelivery.ts`.
 
 The `webhook` module is the **outbound fan-out layer** — it forwards platform events to merchant endpoints. The events it dispatches that are critical to the checkout → order → payment flow are:
 
-| Event | Emitted by | Dispatched to merchant endpoints |
-|-------|-----------|----------------------------------|
-| `order.created` | `CreateOrderUseCase` | ✅ |
-| `order.paid` | `payment` webhook handler (🚧) | ✅ |
-| `order.payment_failed` | `payment` webhook handler (🚧) | ✅ |
-| `order.cancelled` | `CancelOrderUseCase` | ✅ |
-| `checkout.payment_captured` | `payment` webhook handler (🚧) | ✅ |
-| `checkout.failed` | `payment` webhook handler (🚧) | ✅ |
-| `checkout.completed` | `CompleteCheckoutUseCase` | ✅ |
+| Event                       | Emitted by                     | Dispatched to merchant endpoints |
+| --------------------------- | ------------------------------ | -------------------------------- |
+| `order.created`             | `CreateOrderUseCase`           | ✅                               |
+| `order.paid`                | `payment` webhook handler (🚧) | ✅                               |
+| `order.payment_failed`      | `payment` webhook handler (🚧) | ✅                               |
+| `order.cancelled`           | `CancelOrderUseCase`           | ✅                               |
+| `checkout.payment_captured` | `payment` webhook handler (🚧) | ✅                               |
+| `checkout.failed`           | `payment` webhook handler (🚧) | ✅                               |
+| `checkout.completed`        | `CompleteCheckoutUseCase`      | ✅                               |
 
 The `WebhookDispatchService` already listens to `eventBus.on('*', ...)` so all of the above are automatically forwarded once the emitting use cases / handlers are implemented (see `docs/specs/checkout/tasks.md`).
 
@@ -140,29 +140,29 @@ The `WebhookDispatchService` already listens to `eventBus.on('*', ...)` so all o
 
 ## 6. Use Case Traceability
 
-| # | Requirement | Use Case / Service | Source File |
-|---|-------------|-------------------|-------------|
-| 2.1.1 | Register endpoint | `RegisterWebhookUseCase` | `modules/webhook/application/useCases/RegisterWebhook.ts` |
-| 2.2.3–6 | Dispatch event | `WebhookDispatchService.handleEvent` | `modules/webhook/application/services/WebhookDispatchService.ts` |
-| 2.3.7–8 | Retry processing | `WebhookDispatchService.processRetries` | same |
-| 2.4.9 | Update endpoint | `WebhookBusinessController.updateWebhook` | `modules/webhook/interface/controllers/WebhookBusinessController.ts` |
-| 2.4.10 | Delete endpoint | `UnregisterWebhookUseCase` | `modules/webhook/application/useCases/UnregisterWebhook.ts` |
-| 2.4.11 | List endpoints | `ListWebhooksUseCase` | `modules/webhook/application/useCases/ListWebhooks.ts` |
-| 2.4.12 | Delivery history | `WebhookBusinessController.getDeliveries` | `modules/webhook/interface/controllers/WebhookBusinessController.ts` |
-| 2.5.13 | Test delivery | `WebhookBusinessController.testWebhook` | same |
+| #       | Requirement       | Use Case / Service                        | Source File                                                          |
+| ------- | ----------------- | ----------------------------------------- | -------------------------------------------------------------------- |
+| 2.1.1   | Register endpoint | `RegisterWebhookUseCase`                  | `modules/webhook/application/useCases/RegisterWebhook.ts`            |
+| 2.2.3–6 | Dispatch event    | `WebhookDispatchService.handleEvent`      | `modules/webhook/application/services/WebhookDispatchService.ts`     |
+| 2.3.7–8 | Retry processing  | `WebhookDispatchService.processRetries`   | same                                                                 |
+| 2.4.9   | Update endpoint   | `WebhookBusinessController.updateWebhook` | `modules/webhook/interface/controllers/WebhookBusinessController.ts` |
+| 2.4.10  | Delete endpoint   | `UnregisterWebhookUseCase`                | `modules/webhook/application/useCases/UnregisterWebhook.ts`          |
+| 2.4.11  | List endpoints    | `ListWebhooksUseCase`                     | `modules/webhook/application/useCases/ListWebhooks.ts`               |
+| 2.4.12  | Delivery history  | `WebhookBusinessController.getDeliveries` | `modules/webhook/interface/controllers/WebhookBusinessController.ts` |
+| 2.5.13  | Test delivery     | `WebhookBusinessController.testWebhook`   | same                                                                 |
 
 ### Controller wiring
 
-| Endpoint | Handler |
-|----------|---------|
-| `POST /business/webhooks` | `WebhookBusinessController.registerWebhook` |
-| `GET /business/webhooks` | `WebhookBusinessController.listWebhooks` |
-| `GET /business/webhooks/events` | `WebhookBusinessController.getAvailableEvents` |
-| `GET /business/webhooks/:id` | `WebhookBusinessController.getWebhook` |
-| `PUT /business/webhooks/:id` | `WebhookBusinessController.updateWebhook` |
-| `DELETE /business/webhooks/:id` | `WebhookBusinessController.unregisterWebhook` |
-| `GET /business/webhooks/:id/deliveries` | `WebhookBusinessController.getDeliveries` |
-| `POST /business/webhooks/:id/test` | `WebhookBusinessController.testWebhook` |
+| Endpoint                                | Handler                                        |
+| --------------------------------------- | ---------------------------------------------- |
+| `POST /business/webhooks`               | `WebhookBusinessController.registerWebhook`    |
+| `GET /business/webhooks`                | `WebhookBusinessController.listWebhooks`       |
+| `GET /business/webhooks/events`         | `WebhookBusinessController.getAvailableEvents` |
+| `GET /business/webhooks/:id`            | `WebhookBusinessController.getWebhook`         |
+| `PUT /business/webhooks/:id`            | `WebhookBusinessController.updateWebhook`      |
+| `DELETE /business/webhooks/:id`         | `WebhookBusinessController.unregisterWebhook`  |
+| `GET /business/webhooks/:id/deliveries` | `WebhookBusinessController.getDeliveries`      |
+| `POST /business/webhooks/:id/test`      | `WebhookBusinessController.testWebhook`        |
 
 ---
 
@@ -170,18 +170,18 @@ The `WebhookDispatchService` already listens to `eventBus.on('*', ...)` so all o
 
 Source: `tests/integration/webhook/webhook.test.ts` (to be created).
 
-| Requirement | Test |
-|-------------|------|
-| 2.1.1 | `POST /business/webhooks` creates endpoint, returns `secret` once |
-| 2.1.2 | Empty `events` array is rejected |
-| 2.2.3 | Emitting `order.created` dispatches to a subscribed endpoint |
-| 2.2.4 | 2xx response marks delivery `success` |
-| 2.2.5 | Non-2xx response marks delivery `retrying` with correct `nextRetryAt` |
-| 2.2.6 | Exhausted retries mark delivery `failed` |
-| 2.4.11 | `GET /business/webhooks` returns only the authenticated merchant's endpoints |
-| 4.4 | `GET /business/webhooks/:id` does not include `secret` |
-| 4.3 | `GET /business/webhooks/unknown-id` returns `404` |
-| 2.5.13 | `POST /business/webhooks/:id/test` returns `statusCode` and `durationMs` |
+| Requirement | Test                                                                         |
+| ----------- | ---------------------------------------------------------------------------- |
+| 2.1.1       | `POST /business/webhooks` creates endpoint, returns `secret` once            |
+| 2.1.2       | Empty `events` array is rejected                                             |
+| 2.2.3       | Emitting `order.created` dispatches to a subscribed endpoint                 |
+| 2.2.4       | 2xx response marks delivery `success`                                        |
+| 2.2.5       | Non-2xx response marks delivery `retrying` with correct `nextRetryAt`        |
+| 2.2.6       | Exhausted retries mark delivery `failed`                                     |
+| 2.4.11      | `GET /business/webhooks` returns only the authenticated merchant's endpoints |
+| 4.4         | `GET /business/webhooks/:id` does not include `secret`                       |
+| 4.3         | `GET /business/webhooks/unknown-id` returns `404`                            |
+| 2.5.13      | `POST /business/webhooks/:id/test` returns `statusCode` and `durationMs`     |
 
 ---
 

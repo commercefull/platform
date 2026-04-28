@@ -17,7 +17,9 @@ export interface OrderFulfillmentPackage {
 }
 
 export type OrderFulfillmentPackageCreateParams = Omit<OrderFulfillmentPackage, 'orderFulfillmentPackageId' | 'createdAt' | 'updatedAt'>;
-export type OrderFulfillmentPackageTrackingParams = Partial<Pick<OrderFulfillmentPackage, 'trackingNumber' | 'shippingLabelUrl' | 'commercialInvoiceUrl'>>;
+export type OrderFulfillmentPackageTrackingParams = Partial<
+  Pick<OrderFulfillmentPackage, 'trackingNumber' | 'shippingLabelUrl' | 'commercialInvoiceUrl'>
+>;
 
 export const findByFulfillment = async (orderFulfillmentId: string): Promise<OrderFulfillmentPackage[]> => {
   const results = await query<OrderFulfillmentPackage[]>(
@@ -70,10 +72,9 @@ export const updateTracking = async (
   }
 
   if (fields.length === 0) {
-    return queryOne<OrderFulfillmentPackage>(
-      `SELECT * FROM "orderFulfillmentPackage" WHERE "orderFulfillmentPackageId" = $1`,
-      [orderFulfillmentPackageId],
-    );
+    return queryOne<OrderFulfillmentPackage>(`SELECT * FROM "orderFulfillmentPackage" WHERE "orderFulfillmentPackageId" = $1`, [
+      orderFulfillmentPackageId,
+    ]);
   }
 
   fields.push(`"updatedAt" = $${i++}`);

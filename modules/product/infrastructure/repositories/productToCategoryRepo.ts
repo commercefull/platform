@@ -23,10 +23,9 @@ export class ProductToCategoryRepo {
 
   async findByCategory(productCategoryId: string): Promise<ProductToCategory[]> {
     return (
-      (await query<ProductToCategory[]>(
-        `SELECT * FROM "productToCategory" WHERE "productCategoryId" = $1 ORDER BY "position" ASC`,
-        [productCategoryId],
-      )) || []
+      (await query<ProductToCategory[]>(`SELECT * FROM "productToCategory" WHERE "productCategoryId" = $1 ORDER BY "position" ASC`, [
+        productCategoryId,
+      ])) || []
     );
   }
 

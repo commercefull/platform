@@ -54,8 +54,9 @@ export class CheckoutRepo implements CheckoutRepository {
           "shippingAddressId" = $5, "billingAddressId" = $6, "sameBillingAsShipping" = $7,
           "selectedShippingMethodId" = $8, "shippingCalculated" = $9, "taxesCalculated" = $10,
           "agreeToTerms" = $11, "agreeToMarketing" = $12, notes = $13, "updatedAt" = $14,
-          "lastActivityAt" = $15, "convertedToOrderId" = $16, "expiresAt" = $17
-        WHERE "checkoutSessionId" = $18`,
+          "lastActivityAt" = $15, "convertedToOrderId" = $16, "expiresAt" = $17,
+          "paymentIntentId" = $18, "metadata" = $19
+        WHERE "checkoutSessionId" = $20`,
         [
           session.customerId || null,
           session.guestEmail || null,
@@ -72,8 +73,14 @@ export class CheckoutRepo implements CheckoutRepository {
           session.notes || null,
           now,
           now,
-          null,
+          session.orderId || null,
           session.expiresAt.toISOString(),
+          session.paymentIntentId || null,
+          session.orderId
+            ? JSON.stringify({ ...session.metadata, orderId: session.orderId })
+            : session.metadata
+              ? JSON.stringify(session.metadata)
+              : null,
           session.id,
         ],
       );
@@ -83,8 +90,9 @@ export class CheckoutRepo implements CheckoutRepository {
         `INSERT INTO "checkoutSession" (
           "checkoutSessionId", "sessionId", "basketId", "customerId", email,
           status, step, "sameBillingAsShipping", "shippingCalculated", "taxesCalculated",
-          "agreeToTerms", "agreeToMarketing", notes, "createdAt", "updatedAt", "lastActivityAt", "expiresAt"
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)`,
+          "agreeToTerms", "agreeToMarketing", notes, "createdAt", "updatedAt", "lastActivityAt", "expiresAt",
+          "paymentIntentId", "metadata"
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)`,
         [
           session.id,
           sessionId,
@@ -103,11 +111,19 @@ export class CheckoutRepo implements CheckoutRepository {
           now,
           now,
           session.expiresAt.toISOString(),
+          session.paymentIntentId || null,
+          session.orderId ? JSON.stringify({ orderId: session.orderId }) : null,
         ],
       );
     }
 
     return session;
+  }
+
+  async findByPaymentIntentId(paymentIntentId: string): Promise<CheckoutSession | null> {
+    const row = await queryOne<Record<string, any>>('SELECT * FROM "checkoutSession" WHERE "paymentIntentId" = $1', [paymentIntentId]);
+    if (!row) return null;
+    return this.mapToCheckoutSession(row);
   }
 
   async delete(id: string): Promise<void> {
@@ -237,6 +253,17 @@ export class CheckoutRepo implements CheckoutRepository {
     const shippingAddress: Address | undefined = undefined;
     const billingAddress: Address | undefined = undefined;
 
+    // orderId is stored in convertedToOrderId column or in metadata JSONB
+    let orderId: string | undefined = row.convertedToOrderId || undefined;
+    if (!orderId && row.metadata) {
+      try {
+        const meta = typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata;
+        orderId = meta?.orderId || undefined;
+      } catch {
+        // ignore parse errors
+      }
+    }
+
     return CheckoutSession.reconstitute({
       id: row.checkoutSessionId,
       customerId: row.customerId || undefined,
@@ -250,7 +277,8 @@ export class CheckoutRepo implements CheckoutRepository {
       shippingMethodId: row.selectedShippingMethodId || undefined,
       shippingMethodName: undefined,
       paymentMethodId: undefined,
-      paymentIntentId: undefined,
+      paymentIntentId: row.paymentIntentId || undefined,
+      orderId,
       subtotal: Money.create(0, currency),
       taxAmount: Money.create(0, currency),
       shippingAmount: Money.create(0, currency),
@@ -258,7 +286,7 @@ export class CheckoutRepo implements CheckoutRepository {
       total: Money.create(0, currency),
       couponCode: undefined,
       notes: row.notes || undefined,
-      metadata: undefined,
+      metadata: row.metadata ? (typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata) : undefined,
       createdAt: new Date(row.createdAt),
       updatedAt: new Date(row.updatedAt),
       completedAt: row.convertedToOrderId ? new Date(row.updatedAt) : undefined,

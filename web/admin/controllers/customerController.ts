@@ -5,7 +5,7 @@
 
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';;
+import { TypedRequest } from 'libs/types/express';
 import CustomerRepo from '../../../modules/customer/infrastructure/repositories/CustomerRepository';
 import { GetCustomerCommand, GetCustomerUseCase } from '../../../modules/customer/application/useCases/GetCustomer';
 import { UpdateCustomerCommand, UpdateCustomerUseCase } from '../../../modules/customer/application/useCases/UpdateCustomer';

@@ -247,10 +247,9 @@ export class ProductRelationshipRepo {
    * Delete all relationships for product
    */
   async deleteAllByProductId(productId: string): Promise<number> {
-    const result = await queryOne<{ count: string }>(
-      `DELETE FROM "productRelated" WHERE "productId" = $1 RETURNING COUNT(*) as count`,
-      [productId],
-    );
+    const result = await queryOne<{ count: string }>(`DELETE FROM "productRelated" WHERE "productId" = $1 RETURNING COUNT(*) as count`, [
+      productId,
+    ]);
 
     return result ? parseInt(result.count, 10) : 0;
   }

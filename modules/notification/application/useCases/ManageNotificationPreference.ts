@@ -41,9 +41,7 @@ export interface ManageNotificationPreferenceResponse {
 // ============================================================================
 
 export class ManageNotificationPreferenceUseCase {
-  constructor(
-    private readonly preferenceRepo: typeof notificationPreferenceRepo = notificationPreferenceRepo,
-  ) {}
+  constructor(private readonly preferenceRepo: typeof notificationPreferenceRepo = notificationPreferenceRepo) {}
 
   async execute(command: ManageNotificationPreferenceCommand): Promise<ManageNotificationPreferenceResponse> {
     if (!command.userId) throw new Error('userId is required');

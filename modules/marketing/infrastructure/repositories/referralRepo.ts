@@ -40,14 +40,27 @@ export async function create(referrerId: string, referredEmail: string, code: st
 
 export async function convert(referralId: string, referredId: string, orderId: string): Promise<void> {
   const now = new Date();
-  await query(`UPDATE "referral" SET status = 'converted', "referredId" = $1, "orderId" = $2, "convertedAt" = $3, "updatedAt" = $4 WHERE "referralId" = $5`, [referredId, orderId, now, now, referralId]);
+  await query(
+    `UPDATE "referral" SET status = 'converted', "referredId" = $1, "orderId" = $2, "convertedAt" = $3, "updatedAt" = $4 WHERE "referralId" = $5`,
+    [referredId, orderId, now, now, referralId],
+  );
 }
 
 export async function createReward(params: Omit<ReferralReward, 'referralRewardId' | 'createdAt'>): Promise<ReferralReward | null> {
   return queryOne<ReferralReward>(
     `INSERT INTO "referralReward" ("referralId", "recipientId", "recipientType", type, amount, currency, status, "awardedAt", "createdAt")
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
-    [params.referralId, params.recipientId, params.recipientType, params.type, params.amount, params.currency, params.status, params.awardedAt || null, new Date()],
+    [
+      params.referralId,
+      params.recipientId,
+      params.recipientType,
+      params.type,
+      params.amount,
+      params.currency,
+      params.status,
+      params.awardedAt || null,
+      new Date(),
+    ],
   );
 }
 

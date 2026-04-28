@@ -26,19 +26,11 @@ export interface B2bPriceList {
 // ============================================================================
 
 export async function findAll(): Promise<B2bPriceList[]> {
-  return (
-    (await query<B2bPriceList[]>(
-      `SELECT * FROM "b2bPriceList" WHERE "deletedAt" IS NULL ORDER BY "createdAt" DESC`,
-      [],
-    )) ?? []
-  );
+  return (await query<B2bPriceList[]>(`SELECT * FROM "b2bPriceList" WHERE "deletedAt" IS NULL ORDER BY "createdAt" DESC`, [])) ?? [];
 }
 
 export async function findById(b2bPriceListId: string): Promise<B2bPriceList | null> {
-  return queryOne<B2bPriceList>(
-    `SELECT * FROM "b2bPriceList" WHERE "b2bPriceListId" = $1 AND "deletedAt" IS NULL`,
-    [b2bPriceListId],
-  );
+  return queryOne<B2bPriceList>(`SELECT * FROM "b2bPriceList" WHERE "b2bPriceListId" = $1 AND "deletedAt" IS NULL`, [b2bPriceListId]);
 }
 
 export async function findByCompany(companyId: string): Promise<B2bPriceList[]> {
@@ -62,14 +54,7 @@ export async function create(data: {
     `INSERT INTO "b2bPriceList" ("b2bCompanyId", "name", "currency", "isActive", "notes", "createdAt", "updatedAt")
      VALUES ($1, $2, $3, $4, $5, $6, $6)
      RETURNING *`,
-    [
-      data.b2bCompanyId ?? null,
-      data.name,
-      data.currency ?? 'USD',
-      data.isActive ?? true,
-      data.notes ?? null,
-      now,
-    ],
+    [data.b2bCompanyId ?? null, data.name, data.currency ?? 'USD', data.isActive ?? true, data.notes ?? null, now],
   ) as Promise<B2bPriceList>;
 }
 
@@ -92,8 +77,8 @@ export async function update(
 }
 
 export async function softDelete(b2bPriceListId: string): Promise<void> {
-  await query(
-    `UPDATE "b2bPriceList" SET "deletedAt" = $1, "updatedAt" = $1 WHERE "b2bPriceListId" = $2`,
-    [new Date().toISOString(), b2bPriceListId],
-  );
+  await query(`UPDATE "b2bPriceList" SET "deletedAt" = $1, "updatedAt" = $1 WHERE "b2bPriceListId" = $2`, [
+    new Date().toISOString(),
+    b2bPriceListId,
+  ]);
 }

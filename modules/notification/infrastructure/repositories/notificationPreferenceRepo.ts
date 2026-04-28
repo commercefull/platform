@@ -12,13 +12,17 @@ export interface NotificationPreference {
 }
 
 export async function findByUser(userId: string, userType: string): Promise<NotificationPreference[]> {
-  return (await query<NotificationPreference[]>(
-    `SELECT * FROM "notificationPreference" WHERE "userId" = $1 AND "userType" = $2`,
-    [userId, userType],
-  )) || [];
+  return (
+    (await query<NotificationPreference[]>(`SELECT * FROM "notificationPreference" WHERE "userId" = $1 AND "userType" = $2`, [
+      userId,
+      userType,
+    ])) || []
+  );
 }
 
-export async function upsert(params: Omit<NotificationPreference, 'notificationPreferenceId' | 'createdAt' | 'updatedAt'>): Promise<NotificationPreference | null> {
+export async function upsert(
+  params: Omit<NotificationPreference, 'notificationPreferenceId' | 'createdAt' | 'updatedAt'>,
+): Promise<NotificationPreference | null> {
   const now = new Date();
   return queryOne<NotificationPreference>(
     `INSERT INTO "notificationPreference" ("userId", "userType", channel, type, "isEnabled", "createdAt", "updatedAt")

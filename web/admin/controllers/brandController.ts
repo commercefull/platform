@@ -5,7 +5,7 @@
 
 import { logger } from '../../../libs/logger';
 import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';;
+import { TypedRequest } from 'libs/types/express';
 import { adminRespond } from '../../respond';
 
 // Note: Brand repository would need to be created or imported from modules/brand

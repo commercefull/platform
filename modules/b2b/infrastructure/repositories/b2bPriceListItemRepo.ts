@@ -26,19 +26,15 @@ export interface B2bPriceListItem {
 
 export async function findByPriceList(b2bPriceListId: string): Promise<B2bPriceListItem[]> {
   return (
-    (await query<B2bPriceListItem[]>(
-      `SELECT * FROM "b2bPriceListItem" WHERE "b2bPriceListId" = $1 ORDER BY "createdAt" ASC`,
-      [b2bPriceListId],
-    )) ?? []
+    (await query<B2bPriceListItem[]>(`SELECT * FROM "b2bPriceListItem" WHERE "b2bPriceListId" = $1 ORDER BY "createdAt" ASC`, [
+      b2bPriceListId,
+    ])) ?? []
   );
 }
 
 export async function findByProduct(productId: string): Promise<B2bPriceListItem[]> {
   return (
-    (await query<B2bPriceListItem[]>(
-      `SELECT * FROM "b2bPriceListItem" WHERE "productId" = $1 ORDER BY "createdAt" ASC`,
-      [productId],
-    )) ?? []
+    (await query<B2bPriceListItem[]>(`SELECT * FROM "b2bPriceListItem" WHERE "productId" = $1 ORDER BY "createdAt" ASC`, [productId])) ?? []
   );
 }
 
@@ -54,21 +50,11 @@ export async function create(data: {
     `INSERT INTO "b2bPriceListItem" ("b2bPriceListId", "productId", "productVariantId", "price", "currency", "createdAt", "updatedAt")
      VALUES ($1, $2, $3, $4, $5, $6, $6)
      RETURNING *`,
-    [
-      data.b2bPriceListId,
-      data.productId,
-      data.productVariantId ?? null,
-      data.price,
-      data.currency ?? 'USD',
-      now,
-    ],
+    [data.b2bPriceListId, data.productId, data.productVariantId ?? null, data.price, data.currency ?? 'USD', now],
   ) as Promise<B2bPriceListItem>;
 }
 
-export async function update(
-  b2bPriceListItemId: string,
-  data: { price?: number; currency?: string },
-): Promise<B2bPriceListItem | null> {
+export async function update(b2bPriceListItemId: string, data: { price?: number; currency?: string }): Promise<B2bPriceListItem | null> {
   const now = new Date().toISOString();
   return queryOne<B2bPriceListItem>(
     `UPDATE "b2bPriceListItem"

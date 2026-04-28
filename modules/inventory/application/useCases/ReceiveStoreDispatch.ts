@@ -37,7 +37,11 @@ export class ReceiveStoreDispatchUseCase {
         continue;
       }
 
-      let inventory = await this.inventoryRepository.findByProductAndLocation(item.productId, destinationLocation.locationId, item.variantId);
+      let inventory = await this.inventoryRepository.findByProductAndLocation(
+        item.productId,
+        destinationLocation.locationId,
+        item.variantId,
+      );
       const previousQuantity = inventory?.quantity || 0;
 
       if (!inventory) {

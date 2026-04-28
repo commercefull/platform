@@ -45,10 +45,7 @@ describe('Product API', () => {
   });
 
   it('should list products', async () => {
-    const res = await request
-      .get('/business/products')
-      .set('Authorization', `Bearer ${authToken}`)
-      .set('Accept', 'application/json');
+    const res = await request.get('/business/products').set('Authorization', `Bearer ${authToken}`).set('Accept', 'application/json');
 
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);

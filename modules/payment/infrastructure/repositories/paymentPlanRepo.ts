@@ -12,24 +12,14 @@ export interface PaymentPlan {
 }
 
 export async function findAll(): Promise<PaymentPlan[]> {
-  return (
-    (await query<PaymentPlan[]>(
-      `SELECT * FROM "paymentPlan" ORDER BY "createdAt" DESC`,
-      [],
-    )) || []
-  );
+  return (await query<PaymentPlan[]>(`SELECT * FROM "paymentPlan" ORDER BY "createdAt" DESC`, [])) || [];
 }
 
 export async function findById(paymentPlanId: string): Promise<PaymentPlan | null> {
-  return queryOne<PaymentPlan>(
-    `SELECT * FROM "paymentPlan" WHERE "paymentPlanId" = $1`,
-    [paymentPlanId],
-  );
+  return queryOne<PaymentPlan>(`SELECT * FROM "paymentPlan" WHERE "paymentPlanId" = $1`, [paymentPlanId]);
 }
 
-export async function create(
-  params: Omit<PaymentPlan, 'paymentPlanId' | 'createdAt' | 'updatedAt'>,
-): Promise<PaymentPlan | null> {
+export async function create(params: Omit<PaymentPlan, 'paymentPlanId' | 'createdAt' | 'updatedAt'>): Promise<PaymentPlan | null> {
   const now = new Date();
   return queryOne<PaymentPlan>(
     `INSERT INTO "paymentPlan" (name, description, installments, "intervalDays", "isActive", "createdAt", "updatedAt")
@@ -47,7 +37,15 @@ export async function update(
      installments = COALESCE($3, installments), "intervalDays" = COALESCE($4, "intervalDays"),
      "isActive" = COALESCE($5, "isActive"), "updatedAt" = $6
      WHERE "paymentPlanId" = $7 RETURNING *`,
-    [params.name || null, params.description || null, params.installments || null, params.intervalDays || null, params.isActive ?? null, new Date(), paymentPlanId],
+    [
+      params.name || null,
+      params.description || null,
+      params.installments || null,
+      params.intervalDays || null,
+      params.isActive ?? null,
+      new Date(),
+      paymentPlanId,
+    ],
   );
 }
 

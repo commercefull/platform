@@ -13,17 +13,17 @@ export interface MerchantReview {
 }
 
 export async function findByMerchant(merchantId: string, limit = 20, offset = 0): Promise<MerchantReview[]> {
-  return (await query<MerchantReview[]>(
-    `SELECT * FROM "merchantReview" WHERE "merchantId" = $1 ORDER BY "createdAt" DESC LIMIT $2 OFFSET $3`,
-    [merchantId, limit, offset],
-  )) || [];
+  return (
+    (await query<MerchantReview[]>(`SELECT * FROM "merchantReview" WHERE "merchantId" = $1 ORDER BY "createdAt" DESC LIMIT $2 OFFSET $3`, [
+      merchantId,
+      limit,
+      offset,
+    ])) || []
+  );
 }
 
 export async function findById(merchantReviewId: string): Promise<MerchantReview | null> {
-  return queryOne<MerchantReview>(
-    `SELECT * FROM "merchantReview" WHERE "merchantReviewId" = $1`,
-    [merchantReviewId],
-  );
+  return queryOne<MerchantReview>(`SELECT * FROM "merchantReview" WHERE "merchantReviewId" = $1`, [merchantReviewId]);
 }
 
 export async function create(params: Omit<MerchantReview, 'merchantReviewId' | 'createdAt' | 'updatedAt'>): Promise<MerchantReview | null> {
@@ -36,10 +36,11 @@ export async function create(params: Omit<MerchantReview, 'merchantReviewId' | '
 }
 
 export async function updateStatus(merchantReviewId: string, status: string): Promise<void> {
-  await query(
-    `UPDATE "merchantReview" SET status = $1, "updatedAt" = $2 WHERE "merchantReviewId" = $3`,
-    [status, new Date(), merchantReviewId],
-  );
+  await query(`UPDATE "merchantReview" SET status = $1, "updatedAt" = $2 WHERE "merchantReviewId" = $3`, [
+    status,
+    new Date(),
+    merchantReviewId,
+  ]);
 }
 
 export default { findByMerchant, findById, create, updateStatus };

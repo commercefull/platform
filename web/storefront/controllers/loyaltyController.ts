@@ -77,10 +77,9 @@ export const pointsHistory = async (req: TypedRequest, res: Response) => {
     const limit = 20;
     const offset = (parseInt(page as string) - 1) * limit;
 
-    const countResult = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM "loyaltyTransaction" WHERE "customerId" = $1`,
-      [user.customerId],
-    );
+    const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "loyaltyTransaction" WHERE "customerId" = $1`, [
+      user.customerId,
+    ]);
     const total = parseInt(countResult?.count || '0');
 
     const transactions = await query<any[]>(
@@ -126,19 +125,13 @@ export const redeemReward = async (req: TypedRequest, res: Response) => {
 
     const { rewardId } = req.params;
 
-    const reward = await queryOne<any>(
-      `SELECT * FROM "loyaltyReward" WHERE "loyaltyRewardId" = $1 AND "isActive" = true`,
-      [rewardId],
-    );
+    const reward = await queryOne<any>(`SELECT * FROM "loyaltyReward" WHERE "loyaltyRewardId" = $1 AND "isActive" = true`, [rewardId]);
 
     if (!reward) {
       return res.status(404).json({ error: 'Reward not found' });
     }
 
-    const membership = await queryOne<any>(
-      `SELECT * FROM "loyaltyMember" WHERE "customerId" = $1`,
-      [user.customerId],
-    );
+    const membership = await queryOne<any>(`SELECT * FROM "loyaltyMember" WHERE "customerId" = $1`, [user.customerId]);
 
     if (!membership || membership.pointsBalance < reward.pointsCost) {
       return res.status(400).json({ error: 'Insufficient points' });

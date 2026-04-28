@@ -8,17 +8,19 @@ export interface MerchantFollower {
 }
 
 export async function findByMerchant(merchantId: string, limit = 20, offset = 0): Promise<MerchantFollower[]> {
-  return (await query<MerchantFollower[]>(
-    `SELECT * FROM "merchantFollower" WHERE "merchantId" = $1 ORDER BY "createdAt" DESC LIMIT $2 OFFSET $3`,
-    [merchantId, limit, offset],
-  )) || [];
+  return (
+    (await query<MerchantFollower[]>(
+      `SELECT * FROM "merchantFollower" WHERE "merchantId" = $1 ORDER BY "createdAt" DESC LIMIT $2 OFFSET $3`,
+      [merchantId, limit, offset],
+    )) || []
+  );
 }
 
 export async function findByCustomer(customerId: string): Promise<MerchantFollower[]> {
-  return (await query<MerchantFollower[]>(
-    `SELECT * FROM "merchantFollower" WHERE "customerId" = $1 ORDER BY "createdAt" DESC`,
-    [customerId],
-  )) || [];
+  return (
+    (await query<MerchantFollower[]>(`SELECT * FROM "merchantFollower" WHERE "customerId" = $1 ORDER BY "createdAt" DESC`, [customerId])) ||
+    []
+  );
 }
 
 export async function create(merchantId: string, customerId: string): Promise<MerchantFollower | null> {
@@ -30,10 +32,7 @@ export async function create(merchantId: string, customerId: string): Promise<Me
 }
 
 export async function deleteMerchantFollower(merchantId: string, customerId: string): Promise<void> {
-  await query(
-    `DELETE FROM "merchantFollower" WHERE "merchantId" = $1 AND "customerId" = $2`,
-    [merchantId, customerId],
-  );
+  await query(`DELETE FROM "merchantFollower" WHERE "merchantId" = $1 AND "customerId" = $2`, [merchantId, customerId]);
 }
 
 export default { findByMerchant, findByCustomer, create, delete: deleteMerchantFollower };

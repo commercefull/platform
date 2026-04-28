@@ -22,13 +22,14 @@ export interface OrderReturnItem {
 }
 
 export type OrderReturnItemCreateParams = Omit<OrderReturnItem, 'orderReturnItemId' | 'createdAt'>;
-export type OrderReturnItemUpdateStatusParams = Partial<Pick<OrderReturnItem, 'condition' | 'restockItem' | 'refundAmount' | 'inspectionNotes'>>;
+export type OrderReturnItemUpdateStatusParams = Partial<
+  Pick<OrderReturnItem, 'condition' | 'restockItem' | 'refundAmount' | 'inspectionNotes'>
+>;
 
 export const findByReturn = async (orderReturnId: string): Promise<OrderReturnItem[]> => {
-  const results = await query<OrderReturnItem[]>(
-    `SELECT * FROM "orderReturnItem" WHERE "orderReturnId" = $1 ORDER BY "createdAt" ASC`,
-    [orderReturnId],
-  );
+  const results = await query<OrderReturnItem[]>(`SELECT * FROM "orderReturnItem" WHERE "orderReturnId" = $1 ORDER BY "createdAt" ASC`, [
+    orderReturnId,
+  ]);
   return results || [];
 };
 
@@ -62,7 +63,10 @@ export const create = async (params: OrderReturnItemCreateParams): Promise<Order
   return result;
 };
 
-export const updateStatus = async (orderReturnItemId: string, params: OrderReturnItemUpdateStatusParams): Promise<OrderReturnItem | null> => {
+export const updateStatus = async (
+  orderReturnItemId: string,
+  params: OrderReturnItemUpdateStatusParams,
+): Promise<OrderReturnItem | null> => {
   const fields: string[] = [];
   const values: any[] = [];
   let i = 1;
