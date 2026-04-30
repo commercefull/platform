@@ -5,9 +5,9 @@
 
 export enum ProductVisibility {
   VISIBLE = 'visible',
-  HIDDEN = 'hidden',
-  CATALOG_ONLY = 'catalog_only',
-  SEARCH_ONLY = 'search_only',
+  NOT_VISIBLE = 'not_visible',
+  CATALOG_ONLY = 'catalog',
+  SEARCH_ONLY = 'search',
   FEATURED = 'featured',
 }
 
@@ -17,7 +17,7 @@ export enum ProductVisibility {
 export function getVisibilityLabel(visibility: ProductVisibility): string {
   const labels: Record<ProductVisibility, string> = {
     [ProductVisibility.VISIBLE]: 'Visible',
-    [ProductVisibility.HIDDEN]: 'Hidden',
+    [ProductVisibility.NOT_VISIBLE]: 'Not Visible',
     [ProductVisibility.CATALOG_ONLY]: 'Catalog Only',
     [ProductVisibility.SEARCH_ONLY]: 'Search Only',
     [ProductVisibility.FEATURED]: 'Featured',
@@ -32,16 +32,10 @@ export function isVisibleInCatalog(visibility: ProductVisibility): boolean {
   return [ProductVisibility.VISIBLE, ProductVisibility.CATALOG_ONLY, ProductVisibility.FEATURED].includes(visibility);
 }
 
-/**
- * Check if product is searchable
- */
 export function isSearchable(visibility: ProductVisibility): boolean {
   return [ProductVisibility.VISIBLE, ProductVisibility.SEARCH_ONLY, ProductVisibility.FEATURED].includes(visibility);
 }
 
-/**
- * Check if product is featured
- */
 export function isFeaturedVisibility(visibility: ProductVisibility): boolean {
   return visibility === ProductVisibility.FEATURED;
 }

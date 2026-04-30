@@ -73,8 +73,8 @@ exports.up = function (knex) {
     t.boolean('hasVariants').notNullable().defaultTo(false);
     t.jsonb('variantAttributes');
 
-    t.uuid('businessId').references('businessId').inTable('business');
-    t.uuid('storeId').references('storeId').inTable('store');
+    t.uuid('businessId');
+    t.uuid('storeId');
     t.string('organizationId', 50).nullable();
     t.string('approvalStatus', 20).defaultTo('approved');
     t.boolean('platformVisible').defaultTo(true);

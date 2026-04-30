@@ -365,7 +365,7 @@ export const reportReview = async (req: TypedRequest, res: Response): Promise<vo
 export const listProductQaCustomer = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
     const { productId } = req.params;
-    const qa = await productQaRepo.findByProduct(productId, 'approved');
+    const qa = await productQaRepo.findByProduct(productId, 'answered');
     successResponse(res, qa);
   } catch (error: any) {
     logger.error('Error listing product Q&A:', error);

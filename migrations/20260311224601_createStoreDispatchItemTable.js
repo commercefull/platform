@@ -6,7 +6,7 @@ exports.up = async function (knex) {
     table.uuid('dispatchItemId').primary().defaultTo(knex.raw('uuidv7()'));
     table.uuid('dispatchId').notNullable().references('dispatchId').inTable('storeDispatch').onDelete('CASCADE');
     table.uuid('productId').notNullable().references('productId').inTable('product').onDelete('CASCADE');
-    table.uuid('variantId').nullable().references('variantId').inTable('productVariant').onDelete('SET NULL');
+    table.uuid('variantId').nullable().references('productVariantId').inTable('productVariant').onDelete('SET NULL');
     table.string('sku', 100).nullable();
     table.string('productName', 255).nullable();
     table.integer('requestedQuantity').notNullable();

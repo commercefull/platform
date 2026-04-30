@@ -3,7 +3,7 @@
  * Database operations for platform administrators
  */
 
-import { v4 as uuidv4 } from 'uuid';
+import { generateUUID as uuidv4 } from '../../../../libs/uuid';
 import { query, queryOne } from '../../../../libs/db';
 
 export interface AdminUser {

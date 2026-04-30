@@ -2,9 +2,10 @@ import { AxiosInstance } from 'axios';
 import { createTestClient, loginTestAdmin } from '../testUtils';
 
 // Fixed UUIDs from seed data for consistent testing
-export const SEEDED_PRODUCT_1_ID = '00000000-0000-0000-0000-000000000001';
-export const SEEDED_PRODUCT_2_ID = '00000000-0000-0000-0000-000000000002';
-export const SEEDED_PRODUCT_3_ID = '00000000-0000-0000-0000-000000000003';
+// Source: seeds/20240805001058_seedProductTestData.js
+export const SEEDED_PRODUCT_1_ID = '10000000-0000-0000-0000-000000000001';
+export const SEEDED_PRODUCT_2_ID = '10000000-0000-0000-0000-000000000002';
+export const SEEDED_PRODUCT_3_ID = '10000000-0000-0000-0000-000000000003';
 export const SEEDED_VARIANT_1_ID = '20000000-0000-0000-0000-000000000001';
 export const SEEDED_VARIANT_2_ID = '20000000-0000-0000-0000-000000000002';
 
@@ -34,6 +35,12 @@ export const SEEDED_ATTRIBUTE_VALUE_SIZE_M_ID = '60000000-0000-0000-0000-0000000
 export const SEEDED_ATTRIBUTE_GROUP_BASIC_ID = '70000000-0000-0000-0000-000000000001';
 export const SEEDED_ATTRIBUTE_GROUP_PHYSICAL_ID = '70000000-0000-0000-0000-000000000002';
 export const SEEDED_ATTRIBUTE_GROUP_TECH_ID = '70000000-0000-0000-0000-000000000003';
+
+// Extended test data — seeds/20240805001059_seedProductTestExtended.js
+export const SEEDED_REVIEW_1_ID      = 'a0000000-0000-0000-0000-000000000001';
+export const SEEDED_QA_1_ID          = 'b0000000-0000-0000-0000-000000000001';
+export const SEEDED_BUNDLE_1_ID      = 'c0000000-0000-0000-0000-000000000001';
+export const SEEDED_COLLECTION_1_ID  = 'd0000000-0000-0000-0000-000000000001';
 
 // Common test data for product
 export const testProduct = {
@@ -206,17 +213,44 @@ export async function setupProductTests() {
     adminToken = await loginTestAdmin(client);
   } catch (error) {}
 
-  // Use seeded product data - these products are created by the seed file
-  // with fixed UUIDs for consistent testing
+  // Create or fetch a reusable attribute option for tests that need one
+  let testAttributeOptionId: string | null = null;
+  try {
+    // Try to create; if duplicate, fetch the existing one
+    const optRes = await client.post(
+      '/business/attribute-options',
+      { attributeId: SEEDED_ATTRIBUTE_COLOR_ID, value: 'setup-option', label: 'Setup Option', sortOrder: 99 },
+      { headers: { Authorization: `Bearer ${adminToken}` } },
+    );
+    if (optRes.status === 201) {
+      testAttributeOptionId =
+        optRes.data.data?.productAttributeOptionId || optRes.data.data?.id || null;
+    }
+  } catch (_) {}
+
+  // If creation failed (e.g. duplicate), fetch the existing option by value
+  if (!testAttributeOptionId) {
+    try {
+      const getRes = await client.get(
+        `/business/attribute-options/attribute/${SEEDED_ATTRIBUTE_COLOR_ID}/value/setup-option`,
+        { headers: { Authorization: `Bearer ${adminToken}` } },
+      );
+      if (getRes.status === 200) {
+        testAttributeOptionId =
+          getRes.data.data?.productAttributeOptionId || getRes.data.data?.id || null;
+      }
+    } catch (_) {}
+  }
+
   return {
     client,
     adminToken,
     testCategoryId: null as string | null,
     testProductId: SEEDED_PRODUCT_1_ID,
     testVariantId: SEEDED_VARIANT_1_ID,
-    testAttributeGroupId: null as string | null,
-    testAttributeId: null as string | null,
-    testAttributeOptionId: null as string | null,
+    testAttributeGroupId: SEEDED_ATTRIBUTE_GROUP_BASIC_ID,
+    testAttributeId: SEEDED_ATTRIBUTE_COLOR_ID,
+    testAttributeOptionId,
   };
 }
 
@@ -229,19 +263,30 @@ export async function cleanupProductTests(
   testAttributeGroupId: string | null,
 ) {
   try {
-    // Delete test product (this should cascade delete variants)
-    await client.delete(`/business/products/${testProductId}`, {
-      headers: { Authorization: `Bearer ${adminToken}` },
-    });
+    // Only delete products that were dynamically created (not seeded ones)
+    if (testProductId && testProductId !== SEEDED_PRODUCT_1_ID && testProductId !== SEEDED_PRODUCT_2_ID && testProductId !== SEEDED_PRODUCT_3_ID) {
+      await client.delete(`/business/products/${testProductId}`, {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      });
+    }
 
     // Delete test category
-    await client.delete(`/business/categories/${testCategoryId}`, {
-      headers: { Authorization: `Bearer ${adminToken}` },
-    });
+    if (testCategoryId) {
+      await client.delete(`/business/categories/${testCategoryId}`, {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      });
+    }
 
-    // Delete test attribute group (this should cascade delete attributes and options)
-    await client.delete(`/business/attribute-groups/${testAttributeGroupId}`, {
-      headers: { Authorization: `Bearer ${adminToken}` },
-    });
+    // Only delete attribute groups that were dynamically created (not seeded ones)
+    if (
+      testAttributeGroupId &&
+      testAttributeGroupId !== SEEDED_ATTRIBUTE_GROUP_BASIC_ID &&
+      testAttributeGroupId !== SEEDED_ATTRIBUTE_GROUP_PHYSICAL_ID &&
+      testAttributeGroupId !== SEEDED_ATTRIBUTE_GROUP_TECH_ID
+    ) {
+      await client.delete(`/business/attribute-groups/${testAttributeGroupId}`, {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      });
+    }
   } catch (error) {}
 }

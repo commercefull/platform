@@ -96,19 +96,19 @@ router.post('/products/:productId/qa', productController.submitProductQa);
 
 router.post('/products/:productId/reviews/:reviewId/vote', productController.voteOnReview);
 
-/**
- * Get product by ID or slug
- * GET /products/:identifier
- */
-router.get('/products/:identifier', productController.getProduct);
-
 // ============================================================================
 // Bundle Routes
 // ============================================================================
 
 router.get('/products/bundles', bundleController.getActiveBundles);
-router.get('/products/bundles/:id', bundleController.getBundleDetails);
 router.get('/products/bundles/product/:productId', bundleController.getBundleByProduct);
+router.get('/products/bundles/:id', bundleController.getBundleDetails);
 router.post('/products/bundles/:id/calculate', bundleController.calculateBundlePrice);
+
+/**
+ * Get product by ID or slug
+ * GET /products/:identifier
+ */
+router.get('/products/:identifier', productController.getProduct);
 
 export const productCustomerRouter = router;

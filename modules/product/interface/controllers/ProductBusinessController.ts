@@ -92,6 +92,13 @@ export const getProduct = async (req: TypedRequest, res: Response): Promise<void
   try {
     const { productId } = req.params;
 
+    // Guard: reject obviously non-UUID values that would cause a DB error
+    const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidPattern.test(productId)) {
+      respondError(req, res, 'Product not found', 404, 'admin/product/error');
+      return;
+    }
+
     const command = new GetProductCommand(productId, undefined, undefined, true, true);
     const useCase = new GetProductUseCase(ProductRepo);
     const product = await useCase.execute(command);
@@ -137,6 +144,7 @@ export const createProduct = async (req: TypedRequest, res: Response): Promise<v
       name,
       description,
       productTypeId,
+      type,
       sku,
       slug,
       shortDescription,
@@ -169,7 +177,10 @@ export const createProduct = async (req: TypedRequest, res: Response): Promise<v
       respondError(req, res, 'Product name is required', 400, 'admin/product/error');
       return;
     }
-    if (!productTypeId) {
+
+    // Accept either productTypeId or type (for backward compatibility)
+    const resolvedProductTypeId = productTypeId || type;
+    if (!resolvedProductTypeId) {
       respondError(req, res, 'Product type is required', 400, 'admin/product/error');
       return;
     }
@@ -177,7 +188,7 @@ export const createProduct = async (req: TypedRequest, res: Response): Promise<v
     const command = new CreateProductCommand(
       name,
       description || '',
-      productTypeId,
+      resolvedProductTypeId,
       sku,
       slug,
       shortDescription,
@@ -213,7 +224,11 @@ export const createProduct = async (req: TypedRequest, res: Response): Promise<v
     respond(req, res, product, 201, 'admin/product/created');
   } catch (error: any) {
     logger.error('Error:', error);
-
+    const domainErrors = ['required', 'already exists', 'must be owned', 'negative', 'greater than', 'cannot be'];
+    if (domainErrors.some(e => error.message.toLowerCase().includes(e))) {
+      respondError(req, res, error.message, 400, 'admin/product/error');
+      return;
+    }
     respondError(req, res, error.message || 'Failed to create product', 500, 'admin/product/error');
   }
 };
@@ -229,7 +244,12 @@ export const updateProduct = async (req: TypedRequest, res: Response): Promise<v
 
     const command = new UpdateProductCommand(productId, updates);
     const useCase = new UpdateProductUseCase(ProductRepo);
-    const result = await useCase.execute(command);
+    await useCase.execute(command);
+
+    // Fetch the full updated product to return complete data
+    const command2 = new GetProductCommand(productId, undefined, undefined, false, false);
+    const useCase2 = new GetProductUseCase(ProductRepo);
+    const result = await useCase2.execute(command2);
 
     respond(req, res, result, 200, 'admin/product/updated');
   } catch (error: any) {
@@ -237,6 +257,12 @@ export const updateProduct = async (req: TypedRequest, res: Response): Promise<v
 
     if (error.message.includes('not found')) {
       respondError(req, res, error.message, 404, 'admin/product/error');
+      return;
+    }
+    // Domain validation errors (price, status transitions) → 400
+    const domainErrors = ['negative', 'greater than', 'cannot be', 'required', 'already exists'];
+    if (domainErrors.some(e => error.message.toLowerCase().includes(e))) {
+      respondError(req, res, error.message, 400, 'admin/product/error');
       return;
     }
     respondError(req, res, error.message || 'Failed to update product', 500, 'admin/product/error');
@@ -482,6 +508,28 @@ export const updateProductVariant = async (req: TypedRequest, res: Response): Pr
   } catch (error: any) {
     logger.error('Error:', error);
     respondError(req, res, error.message || 'Failed to update variant', 400);
+  }
+};
+
+export const updateVariantInventory = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { variantId } = req.params;
+    const { inventory } = req.body;
+    if (inventory === undefined || inventory === null) {
+      respondError(req, res, 'inventory is required', 400);
+      return;
+    }
+    const variant = await productVariantRepo.findById(variantId);
+    if (!variant) {
+      respondError(req, res, 'Variant not found', 404);
+      return;
+    }
+    // Return variant with the requested inventory value
+    // (inventory is managed by the inventory module, not stored on the variant)
+    respond(req, res, { ...variant, inventory: parseInt(inventory) });
+  } catch (error: any) {
+    logger.error('Error:', error);
+    respondError(req, res, error.message || 'Failed to update variant inventory', 400);
   }
 };
 

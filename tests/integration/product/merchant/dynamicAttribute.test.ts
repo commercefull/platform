@@ -1,6 +1,9 @@
 import { AxiosInstance } from 'axios';
-import { createTestClient, loginTestAdmin } from '../testUtils';
-import { SEEDED_PRODUCT_1_ID, SEEDED_ATTRIBUTE_COLOR_ID, SEEDED_ATTRIBUTE_SIZE_ID, SEEDED_ATTRIBUTE_MATERIAL_ID } from './testUtils';
+import { createTestClient, loginTestAdmin } from '../../testUtils';
+import { SEEDED_ATTRIBUTE_COLOR_ID, SEEDED_ATTRIBUTE_MATERIAL_ID, SEEDED_ATTRIBUTE_SIZE_ID, SEEDED_PRODUCT_1_ID } from '../testUtils';
+
+;
+;
 
 describe('Dynamic Attribute System', () => {
   let client: AxiosInstance;

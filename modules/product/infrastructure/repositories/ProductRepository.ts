@@ -151,7 +151,7 @@ export class ProductRepo implements IProductRepository {
           "merchantId", "businessId", "storeId", "publishedAt", "createdAt", "updatedAt"
         ) VALUES (
           $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18,
-          $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36
+          $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37
         )`,
         [
           product.productId,
@@ -208,6 +208,8 @@ export class ProductRepo implements IProductRepository {
   }
 
   async hardDelete(productId: string): Promise<void> {
+    // Remove FK-dependent records before hard deleting
+    await query('DELETE FROM "analyticsReportEvent" WHERE "productId" = $1', [productId]).catch(() => {});
     await query('DELETE FROM product WHERE "productId" = $1', [productId]);
   }
 
@@ -271,7 +273,7 @@ export class ProductRepo implements IProductRepository {
 
   // Variant methods
   async findVariantsByProductId(productId: string): Promise<ProductVariant[]> {
-    const rows = await query<Record<string, any>[]>('SELECT * FROM "productVariant" WHERE "productId" = $1 ORDER BY "sortOrder" ASC', [
+    const rows = await query<Record<string, any>[]>('SELECT * FROM "productVariant" WHERE "productId" = $1 ORDER BY "position" ASC', [
       productId,
     ]);
     return (rows || []).map(row => this.mapToVariant(row));
@@ -558,7 +560,14 @@ export class ProductRepo implements IProductRepository {
       productId: row.productId,
       sku: row.sku,
       name: row.name,
-      price: Price.create(parseFloat(row.price || 0), currency, row.compareAtPrice ? parseFloat(row.compareAtPrice) : undefined, undefined),
+      price: Price.create(
+        parseFloat(row.price || 0),
+        currency,
+        // salePrice should be less than basePrice; compareAtPrice is the "was" price (higher)
+        // Don't pass compareAtPrice as salePrice to avoid Price validation errors
+        undefined,
+        undefined,
+      ),
       dimensions: Dimensions.create({
         weight: row.weight ? parseFloat(row.weight) : undefined,
         weightUnit: row.weightUnit || 'g',
@@ -573,7 +582,7 @@ export class ProductRepo implements IProductRepository {
       stockQuantity: parseInt(row.stockQuantity || 0),
       lowStockThreshold: parseInt(row.lowStockThreshold || 5),
       isDefault: Boolean(row.isDefault),
-      isActive: Boolean(row.isActive),
+      isActive: row.status === 'active' || Boolean(row.isActive),
       position: parseInt(row.position || 0),
       barcode: row.barcode,
       externalId: row.externalId,

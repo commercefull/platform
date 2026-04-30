@@ -78,7 +78,7 @@ export class GetProductCatalogEnrichmentUseCase {
     const tags = await productTagRepo.findAll();
 
     // Fetch Q&A questions with their answers
-    const qaStatus = command.approvedQaOnly ? 'approved' : undefined;
+    const qaStatus = command.approvedQaOnly ? 'answered' : undefined;
     const questions = await productQaRepo.findByProduct(command.productId, qaStatus as any);
 
     const qa: QaWithAnswers[] = [];

@@ -9,7 +9,7 @@ import { listPriceLists, getPriceList, createPriceList, updatePriceList } from '
 
 const router = Router();
 
-router.use(isB2BLoggedIn);
+router.use('/b2b/price-lists', isB2BLoggedIn);
 
 router.get('/b2b/price-lists', listPriceLists);
 router.post('/b2b/price-lists', createPriceList);

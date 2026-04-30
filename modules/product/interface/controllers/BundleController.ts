@@ -58,7 +58,13 @@ export const createBundle: AsyncHandler = async (req, res, next) => {
 
 export const updateBundle: AsyncHandler = async (req, res, next) => {
   try {
+    const existing = await bundleRepo.getBundle(req.params.id);
+    if (!existing) {
+      res.status(404).json({ success: false, message: 'Bundle not found' });
+      return;
+    }
     const bundle = await bundleRepo.saveBundle({
+      ...existing,
       productBundleId: req.params.id,
       ...req.body,
     });
@@ -97,7 +103,13 @@ export const addBundleItem: AsyncHandler = async (req, res, next) => {
 
 export const updateBundleItem: AsyncHandler = async (req, res, next) => {
   try {
+    const existing = await bundleRepo.getBundleItem(req.params.itemId);
+    if (!existing) {
+      res.status(404).json({ success: false, message: 'Bundle item not found' });
+      return;
+    }
     const item = await bundleRepo.saveBundleItem({
+      ...existing,
       bundleItemId: req.params.itemId,
       productBundleId: req.params.id,
       ...req.body,

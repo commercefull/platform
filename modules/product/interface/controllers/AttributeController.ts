@@ -55,6 +55,28 @@ export class AttributeController {
   }
 
   /**
+   * GET /attributes/group/:groupId
+   * List attributes by group
+   */
+  async listAttributesByGroup(req: TypedRequest, res: Response): Promise<void> {
+    try {
+      const { groupId } = req.params;
+      const attributes = await dynamicAttributeRepository.findAttributesByGroup(groupId);
+
+      res.json({
+        success: true,
+        data: attributes,
+      });
+    } catch (error) {
+      logger.error('Error:', error);
+      res.status(500).json({
+        success: false,
+        error: `Failed to list attributes by group: ${(error as Error).message}`,
+      });
+    }
+  }
+
+  /**
    * GET /attributes/:id
    * Get a single attribute by ID
    */
@@ -130,7 +152,13 @@ export class AttributeController {
    */
   async createAttribute(req: TypedRequest, res: Response): Promise<void> {
     try {
-      const result = await createAttributeUseCase.execute(req.body);
+      // Map attributeGroupId → groupId for backward compatibility
+      const body = { ...req.body };
+      if (body.attributeGroupId !== undefined && body.groupId === undefined) {
+        body.groupId = body.attributeGroupId;
+        delete body.attributeGroupId;
+      }
+      const result = await createAttributeUseCase.execute(body);
 
       if (!result.success) {
         res.status(400).json(result);
@@ -154,9 +182,12 @@ export class AttributeController {
   async updateAttribute(req: TypedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
+      const { sortOrder, ...rest } = req.body;
       const result = await updateAttributeUseCase.execute({
         attributeId: id,
-        ...req.body,
+        ...rest,
+        // Map sortOrder to position for backward compatibility
+        ...(sortOrder !== undefined ? { position: sortOrder } : {}),
       });
 
       if (!result.success) {

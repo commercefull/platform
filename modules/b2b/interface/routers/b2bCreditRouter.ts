@@ -9,7 +9,7 @@ import { getCreditStatus, listTransactions, recordTransaction } from '../control
 
 const router = Router();
 
-router.use(isB2BLoggedIn);
+router.use('/b2b/credit', isB2BLoggedIn);
 
 router.get('/b2b/credit', getCreditStatus);
 router.get('/b2b/credit/transactions', listTransactions);

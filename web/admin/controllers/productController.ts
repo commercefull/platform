@@ -683,7 +683,6 @@ export const createProductCollection = async (req: TypedRequest, res: Response):
       description: description || null,
       imageUrl: imageUrl || null,
       isActive: isActive !== 'false',
-      position: parseInt(position) || 0,
       merchantId: null,
     });
     res.redirect('/admin/products/collections?success=Collection created successfully');
@@ -722,7 +721,6 @@ export const updateProductCollection = async (req: TypedRequest, res: Response):
       description: description || null,
       imageUrl: imageUrl || null,
       isActive: isActive !== 'false',
-      position: parseInt(position) || 0,
     });
     res.redirect('/admin/products/collections?success=Collection updated successfully');
   } catch (error: any) {

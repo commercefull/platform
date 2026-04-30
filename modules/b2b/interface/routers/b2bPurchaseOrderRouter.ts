@@ -9,7 +9,7 @@ import { listPurchaseOrders, getPurchaseOrder, createPurchaseOrder } from '../co
 
 const router = Router();
 
-router.use(isB2BLoggedIn);
+router.use('/b2b/purchase-orders', isB2BLoggedIn);
 
 router.get('/b2b/purchase-orders', listPurchaseOrders);
 router.post('/b2b/purchase-orders', createPurchaseOrder);

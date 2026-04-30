@@ -7,7 +7,7 @@ import { logger } from '../../../libs/logger';
 import { Response } from 'express';
 import { TypedRequest } from 'libs/types/express';
 import { query, queryOne } from '../../../libs/db';
-import { v4 as uuidv4 } from 'uuid';
+import { generateUUID as uuidv4 } from '../../../libs/uuid';
 import { adminRespond } from '../../respond';
 
 // ============================================================================

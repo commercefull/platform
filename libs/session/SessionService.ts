@@ -3,7 +3,7 @@
  * Database-backed session management for web applications
  */
 
-import { v4 as uuidv4 } from 'uuid';
+import { generateUUID as uuidv4 } from '../uuid';
 import { query, queryOne } from '../db';
 
 export interface SessionData {

@@ -4,29 +4,25 @@ export interface ProductCollection {
   productCollectionId: string;
   createdAt: string;
   updatedAt: string;
-  deletedAt?: string | null;
   name: string;
   slug: string;
   description?: string | null;
   imageUrl?: string | null;
   isActive: boolean;
-  position: number;
   merchantId?: string | null;
 }
 
-export type ProductCollectionCreateParams = Omit<ProductCollection, 'productCollectionId' | 'createdAt' | 'updatedAt' | 'deletedAt'>;
+export type ProductCollectionCreateParams = Omit<ProductCollection, 'productCollectionId' | 'createdAt' | 'updatedAt'>;
 export type ProductCollectionUpdateParams = Partial<Omit<ProductCollectionCreateParams, never>>;
 
 export class ProductCollectionRepo {
-  async findAll(includeDeleted = false): Promise<ProductCollection[]> {
-    const sql = includeDeleted
-      ? `SELECT * FROM "productCollection" ORDER BY "position" ASC, "name" ASC`
-      : `SELECT * FROM "productCollection" WHERE "deletedAt" IS NULL ORDER BY "position" ASC, "name" ASC`;
+  async findAll(): Promise<ProductCollection[]> {
+    const sql = `SELECT * FROM "productCollection" ORDER BY "name" ASC`;
     return (await query<ProductCollection[]>(sql)) || [];
   }
 
   async findById(productCollectionId: string): Promise<ProductCollection | null> {
-    return queryOne<ProductCollection>(`SELECT * FROM "productCollection" WHERE "productCollectionId" = $1 AND "deletedAt" IS NULL`, [
+    return queryOne<ProductCollection>(`SELECT * FROM "productCollection" WHERE "productCollectionId" = $1`, [
       productCollectionId,
     ]);
   }
@@ -34,15 +30,14 @@ export class ProductCollectionRepo {
   async create(params: ProductCollectionCreateParams): Promise<ProductCollection> {
     const now = new Date();
     const result = await queryOne<ProductCollection>(
-      `INSERT INTO "productCollection" ("name", "slug", "description", "imageUrl", "isActive", "position", "merchantId", "createdAt", "updatedAt")
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
+      `INSERT INTO "productCollection" ("name", "slug", "description", "imageUrl", "isActive", "merchantId", "createdAt", "updatedAt")
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
       [
         params.name,
         params.slug,
         params.description || null,
         params.imageUrl || null,
         params.isActive ?? true,
-        params.position ?? 0,
         params.merchantId || null,
         now,
         now,
@@ -57,7 +52,11 @@ export class ProductCollectionRepo {
     const values: any[] = [];
     let i = 1;
 
+    // Skip fields that don't exist in the DB schema
+    const skipFields = ['position', 'deletedAt'];
+
     for (const [key, value] of Object.entries(params)) {
+      if (skipFields.includes(key)) continue;
       if (value !== undefined) {
         fields.push(`"${key}" = $${i++}`);
         values.push(value);
@@ -67,18 +66,20 @@ export class ProductCollectionRepo {
     if (fields.length === 0) return this.findById(productCollectionId);
 
     fields.push(`"updatedAt" = $${i++}`);
-    values.push(new Date(), productCollectionId);
+    values.push(new Date());
+    values.push(productCollectionId);
 
     return queryOne<ProductCollection>(
-      `UPDATE "productCollection" SET ${fields.join(', ')} WHERE "productCollectionId" = $${i} AND "deletedAt" IS NULL RETURNING *`,
+      `UPDATE "productCollection" SET ${fields.join(', ')} WHERE "productCollectionId" = $${i} RETURNING *`,
       values,
     );
   }
 
   async softDelete(productCollectionId: string): Promise<boolean> {
+    // No deletedAt column in schema — use hard delete
     const result = await queryOne<{ productCollectionId: string }>(
-      `UPDATE "productCollection" SET "deletedAt" = $1 WHERE "productCollectionId" = $2 AND "deletedAt" IS NULL RETURNING "productCollectionId"`,
-      [new Date(), productCollectionId],
+      `DELETE FROM "productCollection" WHERE "productCollectionId" = $1 RETURNING "productCollectionId"`,
+      [productCollectionId],
     );
     return !!result;
   }

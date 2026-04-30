@@ -121,11 +121,6 @@ export class Product {
     const now = new Date();
     const slug = props.slug || Product.generateSlug(props.name);
 
-    // Validate ownership - products must be owned by either merchant or business
-    if (!props.merchantId && !props.businessId) {
-      throw new Error('Product must be owned by either a merchant or business');
-    }
-
     return new Product({
       productId: props.productId,
       name: props.name,
@@ -140,7 +135,7 @@ export class Product {
       businessId: props.businessId,
       storeId: props.storeId,
       status: ProductStatus.DRAFT,
-      visibility: ProductVisibility.HIDDEN,
+      visibility: ProductVisibility.NOT_VISIBLE,
       price: Price.create(props.basePrice || 0, props.currencyCode || 'USD', props.salePrice, props.cost),
       dimensions: Dimensions.create({
         weight: props.weight,
@@ -394,7 +389,7 @@ export class Product {
   }
 
   unpublish(): void {
-    this.props.visibility = ProductVisibility.HIDDEN;
+    this.props.visibility = ProductVisibility.NOT_VISIBLE;
     this.touch();
   }
 
@@ -523,13 +518,13 @@ export class Product {
 
   archive(): void {
     this.updateStatus(ProductStatus.ARCHIVED);
-    this.props.visibility = ProductVisibility.HIDDEN;
+    this.props.visibility = ProductVisibility.NOT_VISIBLE;
   }
 
   softDelete(): void {
     this.props.deletedAt = new Date();
     this.props.status = ProductStatus.ARCHIVED;
-    this.props.visibility = ProductVisibility.HIDDEN;
+    this.props.visibility = ProductVisibility.NOT_VISIBLE;
     this.touch();
   }
 

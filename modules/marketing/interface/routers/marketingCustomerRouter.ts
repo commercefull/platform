@@ -4,7 +4,7 @@ import * as controller from '../controllers/marketingCustomerController';
 
 const router = express.Router();
 
-router.use(isCustomerLoggedIn);
+router.use('/referrals', isCustomerLoggedIn);
 
 router.get('/referrals', controller.getReferralStatus);
 

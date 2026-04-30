@@ -322,8 +322,10 @@ export class DynamicAttributeRepository {
 
   async deleteAttributeValue(id: string): Promise<boolean> {
     const sql = `DELETE FROM "${this.attributeValueTable}" WHERE "productAttributeValueId" = $1`;
-    const result = await query(sql, [id]);
-    return result !== null;
+    await query(sql, [id]);
+    // DELETE queries don't return rows, so we can't check result !== null
+    // We assume success if no error was thrown
+    return true;
   }
 
   // ==================== PRODUCT ATTRIBUTE DATA METHODS ====================

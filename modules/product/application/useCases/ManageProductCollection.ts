@@ -66,7 +66,6 @@ export class ManageProductCollectionUseCase {
         description: command.description,
         imageUrl: command.imageUrl,
         isActive: command.isActive,
-        position: command.position,
         merchantId: command.merchantId,
       });
       if (!updated) {
@@ -81,7 +80,6 @@ export class ManageProductCollectionUseCase {
         description: command.description,
         imageUrl: command.imageUrl,
         isActive: command.isActive ?? true,
-        position: command.position ?? 0,
         merchantId: command.merchantId,
       });
     }

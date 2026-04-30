@@ -12,7 +12,7 @@ import * as notificationCustomerController from '../controllers/notificationCust
 
 const router = express.Router();
 
-router.use(isCustomerLoggedIn);
+router.use('/notifications', isCustomerLoggedIn);
 
 // ============================================================================
 // Existing notification read/mark-read routes

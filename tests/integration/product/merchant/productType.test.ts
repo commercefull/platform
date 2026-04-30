@@ -1,6 +1,9 @@
 import { AxiosInstance } from 'axios';
-import { createTestClient, loginTestAdmin } from '../testUtils';
-import { SEEDED_PRODUCT_TYPE_SIMPLE_ID, SEEDED_PRODUCT_TYPE_CONFIGURABLE_ID, SEEDED_ATTRIBUTE_SET_APPAREL_ID } from './testUtils';
+import { createTestClient, loginTestAdmin } from '../../testUtils';
+import { SEEDED_ATTRIBUTE_SET_APPAREL_ID, SEEDED_PRODUCT_TYPE_CONFIGURABLE_ID, SEEDED_PRODUCT_TYPE_SIMPLE_ID } from '../testUtils';
+
+;
+;
 
 describe('Product Type Tests', () => {
   let client: AxiosInstance;

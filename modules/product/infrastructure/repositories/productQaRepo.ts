@@ -1,6 +1,6 @@
 import { query, queryOne } from '../../../../libs/db';
 
-export type ProductQaStatus = 'pending' | 'approved' | 'rejected';
+export type ProductQaStatus = 'pending' | 'answered' | 'closed';
 
 export interface ProductQa {
   productQaId: string;

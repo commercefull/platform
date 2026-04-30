@@ -6,8 +6,11 @@
 import express from 'express';
 import * as productController from '../controllers/ProductBusinessController';
 import * as bundleController from '../controllers/BundleController';
+import * as categoryController from '../controllers/CategoryBusinessController';
 import attributeController from '../controllers/AttributeController';
 import attributeGroupController from '../controllers/AttributeGroupController';
+import attributeOptionController from '../controllers/AttributeOptionController';
+import attributeSetController from '../controllers/AttributeSetController';
 import productTypeController from '../controllers/ProductTypeController';
 import { isMerchantLoggedIn } from '../../../../libs/auth';
 
@@ -15,6 +18,19 @@ const router = express.Router();
 
 // Apply authentication middleware
 router.use(isMerchantLoggedIn);
+
+// ============================================================================
+// Category Routes (Business)
+// ============================================================================
+
+router.get('/categories/root', categoryController.getRootCategories);
+router.get('/categories', categoryController.listCategories);
+router.post('/categories', categoryController.createCategory);
+router.get('/categories/:id/children', categoryController.getCategoryChildren);
+router.get('/categories/slug/:slug', categoryController.getCategoryBySlug);
+router.get('/categories/:id', categoryController.getCategory);
+router.put('/categories/:id', categoryController.updateCategory);
+router.delete('/categories/:id', categoryController.deleteCategory);
 
 // ============================================================================
 // Business/Admin Product Routes
@@ -37,6 +53,20 @@ router.post('/products', productController.createProduct);
  * GET /business/products/:productId/store-availability
  */
 router.get('/products/:productId/store-availability', productController.getProductStoreAvailability);
+
+/**
+ * Find product by variant barcode
+ * GET /business/products/barcode/:barcode
+ */
+router.get('/products/barcode/:barcode', productController.findByBarcode);
+
+/**
+ * Flat variant routes — must be before /:productId to avoid collision
+ */
+router.get('/products/variants/:variantId', productController.getProductVariant);
+router.put('/products/variants/:variantId', productController.updateProductVariant);
+router.patch('/products/variants/:variantId/inventory', productController.updateVariantInventory);
+router.delete('/products/variants/:variantId', productController.deleteProductVariant);
 
 /**
  * Get product details
@@ -73,12 +103,6 @@ router.post('/products/:productId/publish', productController.publishProduct);
  * POST /business/products/:productId/unpublish
  */
 router.post('/products/:productId/unpublish', productController.unpublishProduct);
-
-/**
- * Find product by variant barcode
- * GET /business/products/barcode/:barcode
- */
-router.get('/products/barcode/:barcode', productController.findByBarcode);
 
 /**
  * Delete a product
@@ -143,6 +167,19 @@ router.delete('/product-types/:id', productTypeController.deleteProductType.bind
 router.get('/product-types/:id/attributes', productTypeController.getProductTypeAttributes.bind(productTypeController));
 
 // ============================================================================
+// Attribute Set Routes
+// ============================================================================
+
+router.get('/attribute-sets', attributeSetController.listAttributeSets.bind(attributeSetController));
+router.get('/attribute-sets/:id', attributeSetController.getAttributeSet.bind(attributeSetController));
+router.post('/attribute-sets', attributeSetController.createAttributeSet.bind(attributeSetController));
+router.put('/attribute-sets/:id', attributeSetController.updateAttributeSet.bind(attributeSetController));
+router.delete('/attribute-sets/:id', attributeSetController.deleteAttributeSet.bind(attributeSetController));
+router.post('/attribute-sets/:id/attributes', attributeSetController.addAttributeToSet.bind(attributeSetController));
+router.delete('/attribute-sets/:id/attributes/:attributeId', attributeSetController.removeAttributeFromSet.bind(attributeSetController));
+router.post('/attribute-sets/:id/attributes/reorder', attributeSetController.reorderAttributes.bind(attributeSetController));
+
+// ============================================================================
 // Attribute Group Routes
 // ============================================================================
 
@@ -158,8 +195,9 @@ router.delete('/attribute-groups/:id', attributeGroupController.deleteAttributeG
 // ============================================================================
 
 router.get('/attributes', attributeController.listAttributes.bind(attributeController));
-router.get('/attributes/:id', attributeController.getAttribute.bind(attributeController));
 router.get('/attributes/code/:code', attributeController.getAttributeByCode.bind(attributeController));
+router.get('/attributes/group/:groupId', attributeController.listAttributesByGroup.bind(attributeController));
+router.get('/attributes/:id', attributeController.getAttribute.bind(attributeController));
 router.post('/attributes', attributeController.createAttribute.bind(attributeController));
 router.put('/attributes/:id', attributeController.updateAttribute.bind(attributeController));
 router.delete('/attributes/:id', attributeController.deleteAttribute.bind(attributeController));
@@ -174,6 +212,17 @@ router.get('/products/:productId/attributes', attributeController.getProductAttr
 router.post('/products/:productId/attributes', attributeController.setProductAttribute.bind(attributeController));
 router.put('/products/:productId/attributes', attributeController.setProductAttributes.bind(attributeController));
 router.delete('/products/:productId/attributes/:attributeId', attributeController.removeProductAttribute.bind(attributeController));
+
+// ============================================================================
+// Attribute Option Routes
+// ============================================================================
+
+router.get('/attribute-options/attribute/:attributeId/value/:value', attributeOptionController.getOptionByValue.bind(attributeOptionController));
+router.get('/attribute-options/attribute/:attributeId', attributeOptionController.getOptionsByAttribute.bind(attributeOptionController));
+router.get('/attribute-options/:id', attributeOptionController.getAttributeOption.bind(attributeOptionController));
+router.post('/attribute-options', attributeOptionController.createAttributeOption.bind(attributeOptionController));
+router.put('/attribute-options/:id', attributeOptionController.updateAttributeOption.bind(attributeOptionController));
+router.delete('/attribute-options/:id', attributeOptionController.deleteAttributeOption.bind(attributeOptionController));
 
 // ============================================================================
 // Q&A Routes (Business)

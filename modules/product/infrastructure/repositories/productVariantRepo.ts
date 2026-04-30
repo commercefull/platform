@@ -41,27 +41,26 @@ export type VariantOption = {
   value: string;
 };
 
-// DB column names - database uses camelCase so no mapping needed
+// DB column names matching the productVariant table schema
 const dbColumns = [
   'productVariantId',
   'productId',
   'sku',
   'name',
-  'barcode',
+  'status',
   'price',
-  'compareAtPrice',
-  'costPrice',
   'salePrice',
+  'costPrice',
+  'compareAtPrice',
+  'isDefault',
   'weight',
   'length',
   'width',
   'height',
-  'isDefault',
-  'position',
   'optionValues',
-  'status',
   'barcode',
   'mpn',
+  'position',
   'createdAt',
   'updatedAt',
 ];
@@ -72,8 +71,27 @@ dbColumns.forEach(col => {
   dbToTsMapping[col] = col;
 });
 
-// No conversion needed - use column names directly
-const tsToDbMapping = dbToTsMapping;
+// Map TypeScript property names to DB column names
+const tsToDbMapping: Record<string, string> = {
+  ...dbToTsMapping,
+  // Map common aliases to actual DB columns
+  options: 'optionValues',
+  isActive: 'status', // handled specially below
+};
+
+/** Parse numeric fields that Postgres returns as strings */
+function parseVariantRow(row: any): any {
+  if (!row) return row;
+  return {
+    ...row,
+    price: row.price != null ? parseFloat(row.price) : row.price,
+    salePrice: row.salePrice != null ? parseFloat(row.salePrice) : row.salePrice,
+    costPrice: row.costPrice != null ? parseFloat(row.costPrice) : row.costPrice,
+    compareAtPrice: row.compareAtPrice != null ? parseFloat(row.compareAtPrice) : row.compareAtPrice,
+    weight: row.weight != null ? parseFloat(row.weight) : row.weight,
+    position: row.position != null ? parseInt(row.position) : row.position,
+  };
+}
 
 export class ProductVariantRepo {
   /**
@@ -100,7 +118,7 @@ export class ProductVariantRepo {
    */
   async findById(id: string): Promise<ProductVariant | null> {
     const selectFields = this.generateSelectFields();
-    return await queryOne<ProductVariant>(`SELECT ${selectFields} FROM "${Table.ProductVariant}" WHERE "id" = $1 AND "deletedAt" IS NULL`, [
+    return await queryOne<ProductVariant>(`SELECT ${selectFields} FROM "${Table.ProductVariant}" WHERE "productVariantId" = $1`, [
       id,
     ]);
   }
@@ -111,31 +129,25 @@ export class ProductVariantRepo {
   async findBySku(sku: string): Promise<ProductVariant | null> {
     const selectFields = this.generateSelectFields();
     return await queryOne<ProductVariant>(
-      `SELECT ${selectFields} FROM "${Table.ProductVariant}" WHERE "sku" = $1 AND "deletedAt" IS NULL`,
+      `SELECT ${selectFields} FROM "${Table.ProductVariant}" WHERE "sku" = $1`,
       [sku],
     );
   }
 
-  /**
-   * Find variants by product ID
-   */
   async findByProductId(productId: string): Promise<ProductVariant[]> {
     const selectFields = this.generateSelectFields();
     return (
       (await query<ProductVariant[]>(
-        `SELECT ${selectFields} FROM "${Table.ProductVariant}" WHERE "productId" = $1 AND "deletedAt" IS NULL ORDER BY "position" ASC`,
+        `SELECT ${selectFields} FROM "${Table.ProductVariant}" WHERE "productId" = $1 ORDER BY "position" ASC`,
         [productId],
       )) || []
     );
   }
 
-  /**
-   * Find the default variant for a product
-   */
   async findDefaultForProduct(productId: string): Promise<ProductVariant | null> {
     const selectFields = this.generateSelectFields();
     return await queryOne<ProductVariant>(
-      `SELECT ${selectFields} FROM "${Table.ProductVariant}" WHERE "productId" = $1 AND "isDefault" = true AND "deletedAt" IS NULL`,
+      `SELECT ${selectFields} FROM "${Table.ProductVariant}" WHERE "productId" = $1 AND "isDefault" = true`,
       [productId],
     );
   }
@@ -147,19 +159,37 @@ export class ProductVariantRepo {
     const now = new Date();
     const id = generateUUID();
 
+    // Fields that don't exist in the DB schema — skip them
+    const skipFields = new Set(['inventory', 'inventoryPolicy', 'deletedAt', 'isActive', 'options']);
+
     // Convert property names to DB column names
     const columnMap: Record<string, any> = {
-      id,
-      created_at: now,
-      updated_at: now,
+      productVariantId: id,
+      createdAt: now,
+      updatedAt: now,
     };
 
     // Map all properties to their DB column names
     for (const [key, value] of Object.entries(variant)) {
-      if (value !== undefined) {
+      if (value !== undefined && !skipFields.has(key)) {
         const dbColumn = this.tsToDb(key);
         columnMap[dbColumn] = value;
       }
+    }
+
+    // Handle special mappings
+    if ((variant as any).options !== undefined) {
+      columnMap['optionValues'] = JSON.stringify((variant as any).options);
+    }
+    if (!columnMap['optionValues']) {
+      columnMap['optionValues'] = JSON.stringify([]);
+    }
+    // Map isActive to status
+    if ((variant as any).isActive !== undefined) {
+      columnMap['status'] = (variant as any).isActive ? 'active' : 'inactive';
+    }
+    if (!columnMap['status']) {
+      columnMap['status'] = 'active';
     }
 
     const columns = Object.keys(columnMap);
@@ -186,7 +216,7 @@ export class ProductVariantRepo {
       await this.updateOtherVariantsNonDefault(id, variant.productId);
     }
 
-    return result;
+    return parseVariantRow(result) as ProductVariant;
   }
 
   /**
@@ -196,7 +226,7 @@ export class ProductVariantRepo {
     const now = new Date();
 
     // Convert property names to DB column names
-    const updateData: Record<string, any> = { updated_at: now };
+    const updateData: Record<string, any> = { updatedAt: now };
 
     for (const [key, value] of Object.entries(variant)) {
       if (value !== undefined) {
@@ -228,7 +258,7 @@ export class ProductVariantRepo {
     const sql = `
       UPDATE "${Table.ProductVariant}" 
       SET ${setStatements.join(', ')} 
-      WHERE "id" = $${values.length} AND "deletedAt" IS NULL 
+      WHERE "productVariantId" = $${values.length} 
       RETURNING ${returnFields}
     `;
 
@@ -246,7 +276,7 @@ export class ProductVariantRepo {
       }
     }
 
-    return result;
+    return parseVariantRow(result) as ProductVariant;
   }
 
   /**
@@ -268,7 +298,7 @@ export class ProductVariantRepo {
 
     const now = new Date();
 
-    await query(`UPDATE "${Table.ProductVariant}" SET "deletedAt" = $1, "updatedAt" = $2 WHERE "id" = $3`, [now, now, id]);
+    await query(`DELETE FROM "${Table.ProductVariant}" WHERE "productVariantId" = $1`, [id]);
 
     return true;
   }
@@ -333,7 +363,7 @@ export class ProductVariantRepo {
 
     // First, unset default on all variants for this product
     await query(
-      `UPDATE "${Table.ProductVariant}" SET "isDefault" = false, "updatedAt" = $1 WHERE "productId" = $2 AND "deletedAt" IS NULL`,
+      `UPDATE "${Table.ProductVariant}" SET "isDefault" = false, "updatedAt" = $1 WHERE "productId" = $2`,
       [now, variant.productId],
     );
 
@@ -341,7 +371,7 @@ export class ProductVariantRepo {
     const sql = `
       UPDATE "${Table.ProductVariant}" 
       SET "isDefault" = true, "updatedAt" = $1 
-      WHERE "id" = $2 AND "deletedAt" IS NULL 
+      WHERE "productVariantId" = $2 
       RETURNING ${returnFields}
     `;
 
@@ -351,7 +381,7 @@ export class ProductVariantRepo {
       throw new Error('Failed to set default variant');
     }
 
-    return result;
+    return parseVariantRow(result) as ProductVariant;
   }
 
   /**
@@ -368,7 +398,7 @@ export class ProductVariantRepo {
     const sql = `
       UPDATE "${Table.ProductVariant}" 
       SET "inventory" = $1, "updatedAt" = $2 
-      WHERE "id" = $3 AND "deletedAt" IS NULL 
+      WHERE "productVariantId" = $3 
       RETURNING ${returnFields}
     `;
 
@@ -378,7 +408,7 @@ export class ProductVariantRepo {
       throw new Error('Failed to update inventory');
     }
 
-    return result;
+    return parseVariantRow(result) as ProductVariant;
   }
 
   /**
@@ -403,7 +433,7 @@ export class ProductVariantRepo {
 
     // Create statements for reordering
     const queries = variantIds.map((id, index) => ({
-      sql: `UPDATE "${Table.ProductVariant}" SET "position" = $1, "updatedAt" = $2 WHERE "id" = $3 AND "productId" = $4 AND "deletedAt" IS NULL`,
+      sql: `UPDATE "${Table.ProductVariant}" SET "position" = $1, "updatedAt" = $2 WHERE "productVariantId" = $3 AND "productId" = $4`,
       params: [index, now, id, productId],
     }));
 
@@ -421,7 +451,7 @@ export class ProductVariantRepo {
   private async updateOtherVariantsNonDefault(currentVariantId: string, productId: string): Promise<void> {
     const now = new Date();
     await query(
-      `UPDATE "${Table.ProductVariant}" SET "isDefault" = false, "updatedAt" = $1 WHERE "productId" = $2 AND "id" != $3 AND "deletedAt" IS NULL`,
+      `UPDATE "${Table.ProductVariant}" SET "isDefault" = false, "updatedAt" = $1 WHERE "productId" = $2 AND "productVariantId" != $3`,
       [now, productId, currentVariantId],
     );
   }
