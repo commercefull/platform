@@ -122,4 +122,68 @@ describe('Collections & Product Lists', () => {
       createdCollectionId = null;
     });
   });
+
+  describe('Collection product removal', () => {
+    let removeCollectionId: string | null = null;
+    let mapItemId: string | null = null;
+
+    beforeAll(async () => {
+      const res = await client.post(
+        '/business/collections',
+        {
+          name: `Remove Test Collection ${Date.now()}`,
+          slug: `remove-col-${Date.now()}`,
+          isActive: true,
+          addProducts: [
+            { productId: SEEDED_PRODUCT_1_ID, position: 0 },
+            { productId: SEEDED_PRODUCT_2_ID, position: 1 },
+          ],
+        },
+        { headers: { Authorization: `Bearer ${adminToken}` } },
+      );
+      removeCollectionId =
+        res.data.data?.collection?.productCollectionId ||
+        res.data.data?.productCollectionId ||
+        res.data.data?.id;
+      // Grab a map item ID to remove
+      const mapItems = res.data.data?.mapItems || [];
+      if (mapItems.length > 0) {
+        mapItemId =
+          mapItems[0]?.productCollectionMapId ||
+          mapItems[0]?.mapId ||
+          mapItems[0]?.id;
+      }
+    });
+
+    afterAll(async () => {
+      if (removeCollectionId) {
+        await client
+          .delete(`/business/collections/${removeCollectionId}`, {
+            headers: { Authorization: `Bearer ${adminToken}` },
+          })
+          .catch(() => {});
+      }
+    });
+
+    it('should remove products from a collection via removeMapIds', async () => {
+      if (!removeCollectionId || !mapItemId) return;
+      const res = await client.put(
+        `/business/collections/${removeCollectionId}`,
+        {
+          name: `Updated Remove Collection ${Date.now()}`,
+          slug: `updated-remove-col-${Date.now()}`,
+          removeMapIds: [mapItemId],
+        },
+        { headers: { Authorization: `Bearer ${adminToken}` } },
+      );
+      expect(res.status).toBe(200);
+      expect(res.data.success).toBe(true);
+      // Verify the map items count decreased
+      const remainingItems = res.data.data?.mapItems || [];
+      const remainingIds = remainingItems.map((m: any) =>
+        m.productCollectionMapId || m.mapId || m.id,
+      );
+      expect(remainingIds).not.toContain(mapItemId);
+    });
+  });
 });

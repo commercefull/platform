@@ -17,6 +17,8 @@ import productQaRepo from '../../infrastructure/repositories/productQaRepo';
 import { SubmitProductQaCommand, SubmitProductQaUseCase } from '../../application/useCases/SubmitProductQa';
 import { VoteOnReviewCommand, VoteOnReviewUseCase } from '../../application/useCases/VoteOnReview';
 import { successResponse, errorResponse } from '../../../../libs/apiResponse';
+import productVariantRepo from '../../infrastructure/repositories/productVariantRepo';
+import productDownloadRepo from '../../infrastructure/repositories/productDownloadRepo';
 
 // ============================================================================
 // Content Negotiation Helpers
@@ -425,5 +427,49 @@ export const voteOnReview = async (req: TypedRequest, res: Response): Promise<vo
   } catch (error: any) {
     logger.error('Error voting on review:', error);
     errorResponse(res, error.message || 'Failed to vote on review', 400);
+  }
+};
+
+// ============================================================================
+// Configurable Product (Customer)
+// ============================================================================
+
+export const configureVariant = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { productId } = req.params;
+    const { options } = req.body;
+    if (!options || !Array.isArray(options) || options.length === 0) {
+      errorResponse(res, 'options array is required', 400);
+      return;
+    }
+    const variants = await productVariantRepo.findByProductId(productId);
+    const match = variants.find(v =>
+      options.every((reqOpt: { name: string; value: string }) =>
+        v.options.some((vOpt: { name: string; value: string }) => vOpt.name === reqOpt.name && vOpt.value === reqOpt.value),
+      ),
+    );
+    if (!match) {
+      errorResponse(res, 'No matching variant found for the given options', 404);
+      return;
+    }
+    successResponse(res, match);
+  } catch (error: any) {
+    logger.error('Error configuring variant:', error);
+    errorResponse(res, error.message || 'Failed to configure variant');
+  }
+};
+
+// ============================================================================
+// Product Downloads (Customer)
+// ============================================================================
+
+export const getProductDownloads = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { productId } = req.params;
+    const downloads = await productDownloadRepo.findByProductId(productId, undefined, true);
+    successResponse(res, downloads);
+  } catch (error: any) {
+    logger.error('Error getting product downloads:', error);
+    errorResponse(res, error.message || 'Failed to get product downloads');
   }
 };

@@ -7,6 +7,8 @@ import { generateUUID } from '../../../../libs/uuid';
 import { ProductRepository } from '../../domain/repositories/ProductRepository';
 import { Product } from '../../domain/entities/Product';
 import { eventBus } from '../../../../libs/events/eventBus';
+import { ProductAttributeSetRepository } from '../../infrastructure/repositories/ProductAttributeSetRepository';
+import { DynamicAttributeRepository } from '../../infrastructure/repositories/DynamicAttributeRepository';
 
 // ============================================================================
 // Command
@@ -133,6 +135,27 @@ export class CreateProductUseCase {
 
     // Save product
     const savedProduct = await this.productRepository.save(product);
+
+    // Auto-assign attributes from the product type's attribute sets
+    try {
+      const attributeSetRepo = new ProductAttributeSetRepository();
+      const dynamicAttrRepo = new DynamicAttributeRepository();
+
+      const attributes = await attributeSetRepo.getAttributesForProductType(command.productTypeId);
+      if (attributes.length > 0) {
+        const attrsToSet = attributes
+          .filter(attr => attr.isRequired)
+          .map(attr => ({
+            attributeId: attr.productAttributeId,
+            value: attr.defaultValue || '',
+          }));
+        if (attrsToSet.length > 0) {
+          await dynamicAttrRepo.setProductAttributes(savedProduct.productId, attrsToSet);
+        }
+      }
+    } catch {
+      // Auto-assignment is best-effort; don't fail product creation if it errors
+    }
 
     // Emit event
     eventBus.emit('product.created', {

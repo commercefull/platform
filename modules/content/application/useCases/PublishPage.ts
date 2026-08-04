@@ -22,11 +22,11 @@ export class PublishPageCommand {
 // ============================================================================
 
 export interface PublishPageResponse {
-  id: string;
+  contentPageId: string;
   title: string;
   slug: string;
   status: string;
-  publishedAt: string;
+  publishedAt: Date | null;
 }
 
 // ============================================================================
@@ -54,7 +54,7 @@ export class PublishPageUseCase {
     }
 
     // Update page status to published
-    const now = new Date().toISOString();
+    const now = new Date();
     const updatedPage = await this.contentRepo.updatePage(command.pageId, {
       status: 'published',
       publishedAt: now,
@@ -62,7 +62,7 @@ export class PublishPageUseCase {
 
     // Emit event
     eventBus.emit('content.page.published', {
-      pageId: updatedPage.id,
+      pageId: updatedPage.contentPageId,
       title: updatedPage.title,
       slug: updatedPage.slug,
       publishedAt: now,
@@ -70,11 +70,11 @@ export class PublishPageUseCase {
     });
 
     return {
-      id: updatedPage.id,
+      contentPageId: updatedPage.contentPageId,
       title: updatedPage.title,
       slug: updatedPage.slug,
       status: updatedPage.status,
-      publishedAt: updatedPage.publishedAt || now,
+      publishedAt: updatedPage.publishedAt,
     };
   }
 }

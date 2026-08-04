@@ -96,18 +96,18 @@ export const createContentBlockForm = async (req: TypedRequest, res: Response): 
 
 export const createContentBlock = async (req: TypedRequest, res: Response): Promise<void> => {
   try {
-    const { pageId, contentTypeId, name, order, content } = req.body;
+    const { contentPageId, blockTypeId, title, sortOrder, content } = req.body;
 
     const block = await ContentRepo.createBlock({
-      pageId,
-      contentTypeId,
-      name: name || 'Untitled Block',
-      order: parseInt(order) || 1,
+      contentPageId,
+      blockTypeId,
+      title: title || 'Untitled Block',
+      sortOrder: parseInt(sortOrder) || 1,
       content: content ? JSON.parse(content) : {},
-      status: 'active',
+      isVisible: true,
     });
 
-    res.redirect(`/hub/content/pages/${pageId}?success=Content block created successfully`);
+    res.redirect(`/hub/content/pages/${contentPageId}?success=Content block created successfully`);
   } catch (error: any) {
     logger.error('Error:', error);
 
@@ -146,13 +146,13 @@ export const editContentBlockForm = async (req: TypedRequest, res: Response): Pr
     }
 
     // Get the page this block belongs to
-    const page = await ContentRepo.findPageById(block.pageId);
+    const page = await ContentRepo.findPageById(block.contentPageId);
 
     // Get content type details
-    const contentType = await ContentRepo.findContentTypeById(block.contentTypeId);
+    const contentType = await ContentRepo.findBlockTypeById(block.blockTypeId);
 
     adminRespond(req, res, 'content/blocks/edit', {
-      pageName: `Edit: ${block.name}`,
+      pageName: `Edit: ${block.title || 'Untitled Block'}`,
       block,
       page,
       contentType,
@@ -172,26 +172,26 @@ export const updateContentBlock = async (req: TypedRequest, res: Response): Prom
     const { blockId } = req.params;
     const updates: any = {};
 
-    const { name, order, content, status } = req.body;
+    const { title, sortOrder, content, isVisible } = req.body;
 
-    if (name !== undefined) updates.name = name;
-    if (order !== undefined) updates.order = parseInt(order);
+    if (title !== undefined) updates.title = title;
+    if (sortOrder !== undefined) updates.sortOrder = parseInt(sortOrder);
     if (content !== undefined) updates.content = JSON.parse(content);
-    if (status !== undefined) updates.status = status;
+    if (isVisible !== undefined) updates.isVisible = isVisible === 'true' || isVisible === true;
 
     const block = await ContentRepo.updateBlock(blockId, updates);
 
-    res.redirect(`/hub/content/pages/${block.pageId}?success=Content block updated successfully`);
+    res.redirect(`/hub/content/pages/${block.contentPageId}?success=Content block updated successfully`);
   } catch (error: any) {
     logger.error('Error:', error);
 
     try {
       const block = await ContentRepo.findBlockById(req.params.blockId);
-      const page = block ? await ContentRepo.findPageById(block.pageId) : null;
-      const contentType = block ? await ContentRepo.findContentTypeById(block.contentTypeId) : null;
+      const page = block ? await ContentRepo.findPageById(block.contentPageId) : null;
+      const contentType = block ? await ContentRepo.findBlockTypeById(block.blockTypeId) : null;
 
       adminRespond(req, res, 'content/blocks/edit', {
-        pageName: `Edit: ${block?.name || 'Block'}`,
+        pageName: `Edit: ${block?.title || 'Block'}`,
         block,
         page,
         contentType,
@@ -217,7 +217,7 @@ export const deleteContentBlock = async (req: TypedRequest, res: Response): Prom
       throw new Error('Content block not found');
     }
 
-    const pageId = block.pageId;
+    const pageId = block.contentPageId;
 
     const success = await ContentRepo.deleteBlock(blockId);
 

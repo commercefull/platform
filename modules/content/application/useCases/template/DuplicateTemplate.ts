@@ -16,11 +16,11 @@ export class DuplicateTemplateCommand {
 }
 
 export interface DuplicateTemplateResponse {
-  id: string;
+  contentTemplateId: string;
   name: string;
   slug: string;
   originalTemplateId: string;
-  createdAt: string;
+  createdAt: Date;
 }
 
 export class DuplicateTemplateUseCase {
@@ -51,17 +51,16 @@ export class DuplicateTemplateUseCase {
       compatibleContentTypes: original.compatibleContentTypes,
       isSystem: false, // Duplicates are never system templates
       isActive: true,
-      createdBy: command.createdBy,
     });
 
     eventBus.emit('content.template.created', {
-      templateId: duplicate.id,
+      templateId: duplicate.contentTemplateId,
       name: duplicate.name,
       slug: duplicate.slug,
     });
 
     return {
-      id: duplicate.id,
+      contentTemplateId: duplicate.contentTemplateId,
       name: duplicate.name,
       slug: duplicate.slug,
       originalTemplateId: command.templateId,

@@ -20,6 +20,10 @@ import productReviewRepo from '../../infrastructure/repositories/productReviewRe
 import productQaRepo from '../../infrastructure/repositories/productQaRepo';
 import productReviewMediaRepo from '../../infrastructure/repositories/productReviewMediaRepo';
 import productCollectionRepo from '../../infrastructure/repositories/productCollectionRepo';
+import productDownloadRepo from '../../infrastructure/repositories/productDownloadRepo';
+import productRelationshipRepo from '../../infrastructure/repositories/productRelationshipRepo';
+import { ProductAttributeSetRepository } from '../../infrastructure/repositories/ProductAttributeSetRepository';
+import { DynamicAttributeRepository } from '../../infrastructure/repositories/DynamicAttributeRepository';
 import { ManageProductCollectionCommand, ManageProductCollectionUseCase } from '../../application/useCases/ManageProductCollection';
 import { successResponse, errorResponse } from '../../../../libs/apiResponse';
 
@@ -889,5 +893,265 @@ export const deleteCollection = async (req: TypedRequest, res: Response): Promis
   } catch (error: any) {
     logger.error('Error deleting collection:', error);
     errorResponse(res, error.message || 'Failed to delete collection');
+  }
+};
+
+// ============================================================================
+// Download Management (Business)
+// ============================================================================
+
+export const listDownloads = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { productId } = req.params;
+    const { activeOnly } = req.query;
+    const downloads = await productDownloadRepo.findByProductId(productId, undefined, activeOnly === 'true');
+    successResponse(res, downloads);
+  } catch (error: any) {
+    logger.error('Error listing downloads:', error);
+    errorResponse(res, error.message || 'Failed to list downloads');
+  }
+};
+
+export const createDownload = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { productId } = req.params;
+    const { name, fileUrl, filePath, fileSize, mimeType, maxDownloads, daysValid, isActive, sampleUrl, sortOrder, productVariantId } = req.body;
+    if (!name?.trim()) {
+      errorResponse(res, 'name is required', 400);
+      return;
+    }
+    if (!fileUrl?.trim()) {
+      errorResponse(res, 'fileUrl is required', 400);
+      return;
+    }
+    const download = await productDownloadRepo.create({
+      productId,
+      productVariantId,
+      name,
+      fileUrl,
+      filePath,
+      fileSize,
+      mimeType,
+      maxDownloads,
+      daysValid,
+      isActive: isActive !== false,
+      sampleUrl,
+      sortOrder: sortOrder || 0,
+    });
+    successResponse(res, download, 201);
+  } catch (error: any) {
+    logger.error('Error creating download:', error);
+    errorResponse(res, error.message || 'Failed to create download', 400);
+  }
+};
+
+export const updateDownload = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { downloadId } = req.params;
+    const updated = await productDownloadRepo.update(downloadId, req.body);
+    if (!updated) {
+      errorResponse(res, 'Download not found', 404);
+      return;
+    }
+    successResponse(res, updated);
+  } catch (error: any) {
+    logger.error('Error updating download:', error);
+    errorResponse(res, error.message || 'Failed to update download');
+  }
+};
+
+export const deleteDownload = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { downloadId } = req.params;
+    const deleted = await productDownloadRepo.delete(downloadId);
+    if (!deleted) {
+      errorResponse(res, 'Download not found', 404);
+      return;
+    }
+    successResponse(res, { deleted: true });
+  } catch (error: any) {
+    logger.error('Error deleting download:', error);
+    errorResponse(res, error.message || 'Failed to delete download');
+  }
+};
+
+// ============================================================================
+// Product Relationship Management (Business)
+// ============================================================================
+
+export const listRelationships = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { productId } = req.params;
+    const { type } = req.query;
+    const relationships = await productRelationshipRepo.findByProductId(productId, type as any);
+    successResponse(res, relationships);
+  } catch (error: any) {
+    logger.error('Error listing relationships:', error);
+    errorResponse(res, error.message || 'Failed to list relationships');
+  }
+};
+
+export const createRelationship = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { productId } = req.params;
+    const { relatedProductId, type, position, isAutomated } = req.body;
+    if (!relatedProductId) {
+      errorResponse(res, 'relatedProductId is required', 400);
+      return;
+    }
+    if (!type) {
+      errorResponse(res, 'type is required (related, accessory, cross_sell, up_sell, grouped)', 400);
+      return;
+    }
+    const relationship = await productRelationshipRepo.create({
+      productId,
+      relatedProductId,
+      type,
+      position: position || 0,
+      isAutomated: isAutomated || false,
+    });
+    successResponse(res, relationship, 201);
+  } catch (error: any) {
+    logger.error('Error creating relationship:', error);
+    errorResponse(res, error.message || 'Failed to create relationship', 400);
+  }
+};
+
+export const deleteRelationship = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { relationshipId } = req.params;
+    const deleted = await productRelationshipRepo.delete(relationshipId);
+    if (!deleted) {
+      errorResponse(res, 'Relationship not found', 404);
+      return;
+    }
+    successResponse(res, { deleted: true });
+  } catch (error: any) {
+    logger.error('Error deleting relationship:', error);
+    errorResponse(res, error.message || 'Failed to delete relationship');
+  }
+};
+
+// ============================================================================
+// Configurable Product Management (Business)
+// ============================================================================
+
+export const getVariantMatrix = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { productId } = req.params;
+    const variants = await productVariantRepo.findByProductId(productId);
+    const product = await ProductRepo.findById(productId);
+    if (!product) {
+      errorResponse(res, 'Product not found', 404);
+      return;
+    }
+    const matrix = variants.map(v => ({
+      variantId: v.id,
+      sku: v.sku,
+      name: v.name,
+      price: v.price,
+      compareAtPrice: v.compareAtPrice,
+      inventory: v.inventory,
+      isDefault: v.isDefault,
+      position: v.position,
+      options: v.options,
+      isActive: v.isActive,
+    }));
+    const optionAxes = matrix.length > 0
+      ? [...new Set(matrix.flatMap(v => v.options.map(o => o.name)))]
+      : [];
+    successResponse(res, { productId, productName: product.name, hasVariants: product.hasVariants, optionAxes, variants: matrix });
+  } catch (error: any) {
+    logger.error('Error getting variant matrix:', error);
+    errorResponse(res, error.message || 'Failed to get variant matrix');
+  }
+};
+
+export const configureVariant = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { productId } = req.params;
+    const { options } = req.body;
+    if (!options || !Array.isArray(options) || options.length === 0) {
+      errorResponse(res, 'options array is required', 400);
+      return;
+    }
+    const variants = await productVariantRepo.findByProductId(productId);
+    const match = variants.find(v =>
+      options.every((reqOpt: { name: string; value: string }) =>
+        v.options.some((vOpt: { name: string; value: string }) => vOpt.name === reqOpt.name && vOpt.value === reqOpt.value),
+      ),
+    );
+    if (!match) {
+      errorResponse(res, 'No matching variant found for the given options', 404);
+      return;
+    }
+    successResponse(res, match);
+  } catch (error: any) {
+    logger.error('Error configuring variant:', error);
+    errorResponse(res, error.message || 'Failed to configure variant');
+  }
+};
+
+// ============================================================================
+// Grouped Product Management (Business)
+// ============================================================================
+
+export const listGroupedChildren = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { productId } = req.params;
+    const relationships = await productRelationshipRepo.findByProductId(productId, 'grouped' as any);
+    const childIds = relationships.map(r => r.relatedProductId);
+    const children: any[] = [];
+    for (const id of childIds) {
+      const p = await ProductRepo.findById(id);
+      if (p) children.push(p.toJSON());
+    }
+    successResponse(res, children);
+  } catch (error: any) {
+    logger.error('Error listing grouped children:', error);
+    errorResponse(res, error.message || 'Failed to list grouped children');
+  }
+};
+
+// ============================================================================
+// Attribute Set Management (Business)
+// ============================================================================
+
+export const applyAttributeSet = async (req: TypedRequest, res: Response): Promise<void> => {
+  try {
+    const { productId } = req.params;
+    const { attributeSetId } = req.body;
+    if (!attributeSetId) {
+      errorResponse(res, 'attributeSetId is required', 400);
+      return;
+    }
+
+    const product = await ProductRepo.findById(productId);
+    if (!product) {
+      errorResponse(res, 'Product not found', 404);
+      return;
+    }
+
+    const attributeSetRepo = new ProductAttributeSetRepository();
+    const setWithAttrs = await attributeSetRepo.findByIdWithAttributes(attributeSetId);
+    if (!setWithAttrs) {
+      errorResponse(res, 'Attribute set not found', 404);
+      return;
+    }
+
+    const dynamicAttrRepo = new DynamicAttributeRepository();
+    const attrsToSet = setWithAttrs.attributes.map(attr => ({
+      attributeId: attr.productAttributeId,
+      value: attr.defaultValue || '',
+    }));
+
+    if (attrsToSet.length > 0) {
+      await dynamicAttrRepo.setProductAttributes(productId, attrsToSet);
+    }
+
+    successResponse(res, { applied: true, attributeSetId, attributesAssigned: attrsToSet.length });
+  } catch (error: any) {
+    logger.error('Error applying attribute set:', error);
+    errorResponse(res, error.message || 'Failed to apply attribute set');
   }
 };

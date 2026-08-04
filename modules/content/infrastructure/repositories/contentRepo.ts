@@ -1,5 +1,5 @@
 import { queryOne, query } from '../../../../libs/db';
-import { Table } from '../../../../libs/db/types';
+import { Table, ContentType, ContentPage, ContentBlock, ContentBlockType, ContentTemplate } from '../../../../libs/db/types';
 import { unixTimestamp } from '../../../../libs/date';
 
 // Table constants
@@ -7,131 +7,59 @@ const TABLES = {
   CONTENT_TYPE: Table.ContentType,
   CONTENT_PAGE: Table.ContentPage,
   CONTENT_BLOCK: Table.ContentBlock,
+  CONTENT_BLOCK_TYPE: Table.ContentBlockType,
   CONTENT_TEMPLATE: Table.ContentTemplate,
 };
 
-// Content Type defines the structure of content blocks
-export interface ContentType {
-  id: string;
-  name: string;
-  slug: string;
-  description?: string;
-  icon?: string;
-  allowedBlocks?: string[];
-  defaultTemplate?: string;
-  requiredFields?: Record<string, any>;
-  metaFields?: Record<string, any>;
-  isSystem: boolean;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-  createdBy?: string;
-  updatedBy?: string;
-}
+// Re-export generated types for convenience
+export type { ContentType, ContentPage, ContentBlock, ContentTemplate };
 
-// ContentPage represents a full page with a collection of content blocks
-export interface ContentPage {
-  id: string;
-  title: string;
-  slug: string;
-  contentTypeId: string;
-  templateId?: string;
-  status: 'draft' | 'published' | 'scheduled' | 'archived';
-  visibility: 'public' | 'private' | 'password_protected';
-  accessPassword?: string;
-  summary?: string;
-  featuredImage?: string;
-  parentId?: string;
-  sortOrder?: number;
-  metaTitle?: string;
-  metaDescription?: string;
-  metaKeywords?: string;
-  openGraphImage?: string;
-  canonicalUrl?: string;
-  noIndex?: boolean;
-  customFields?: Record<string, any>;
-  publishedAt?: string;
-  scheduledAt?: string;
-  expiresAt?: string;
-  isHomePage?: boolean;
-  path?: string;
-  depth?: number;
-  createdAt: string;
-  updatedAt: string;
-  createdBy?: string;
-}
+// Create / Update params derived from generated types
+type ContentTypeCreateParams = Omit<ContentType, 'contentTypeId' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy'>;
+type ContentTypeUpdateParams = Partial<Omit<ContentType, 'contentTypeId' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy'>>;
 
-// ContentBlock represents a single content section within a page
-export interface ContentBlock {
-  id: string;
-  pageId: string;
-  contentTypeId: string;
-  name: string;
-  order: number;
-  content: Record<string, any>; // JSON content matching the type schema
-  status: 'active' | 'inactive';
-  createdAt: string;
-  updatedAt: string;
-}
+type ContentPageCreateParams = Partial<Omit<ContentPage, 'contentPageId' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy' | 'publishedBy' | 'path' | 'depth'>> & { title: string; slug: string; contentTypeId: string; status: string; visibility: string };
+type ContentPageUpdateParams = Partial<Omit<ContentPage, 'contentPageId' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy' | 'publishedBy'>>;
 
-// ContentTemplate provides reusable page layouts and section templates
-export interface ContentTemplate {
-  id: string;
-  name: string;
-  slug: string;
-  description?: string;
-  thumbnail?: string;
-  htmlStructure?: string;
-  cssStyles?: string;
-  jsScripts?: string;
-  areas?: Record<string, any>;
-  defaultBlocks?: Record<string, any>;
-  compatibleContentTypes?: string[];
-  isSystem: boolean;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-  createdBy?: string;
-  updatedBy?: string;
-}
+type ContentBlockCreateParams = Omit<ContentBlock, 'contentBlockId' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy' | 'parentBlockId' | 'cssClasses' | 'conditions' | 'settings' | 'area'>;
+type ContentBlockUpdateParams = Partial<Omit<ContentBlock, 'contentBlockId' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy'>>;
 
-// Helper to add id field from DB primary key
-function addId<T>(result: any, idField: string): T {
-  if (!result) return null as any;
-  return { ...result, id: result[idField] } as T;
-}
-
-function addIdArray<T>(results: any[], idField: string): T[] {
-  if (!results || !Array.isArray(results)) return [];
-  return results.map(r => ({ ...r, id: r[idField] })) as T[];
-}
-
-type ContentTypeCreateParams = Omit<ContentType, 'id' | 'createdAt' | 'updatedAt'>;
-type ContentTypeUpdateParams = Partial<Omit<ContentType, 'id' | 'createdAt' | 'updatedAt'>>;
-
-type ContentPageCreateParams = Omit<ContentPage, 'id' | 'createdAt' | 'updatedAt'>;
-type ContentPageUpdateParams = Partial<Omit<ContentPage, 'id' | 'createdAt' | 'updatedAt'>>;
-
-type ContentBlockCreateParams = Omit<ContentBlock, 'id' | 'createdAt' | 'updatedAt'>;
-type ContentBlockUpdateParams = Partial<Omit<ContentBlock, 'id' | 'createdAt' | 'updatedAt'>>;
-
-type ContentTemplateCreateParams = Omit<ContentTemplate, 'id' | 'createdAt' | 'updatedAt'>;
-type ContentTemplateUpdateParams = Partial<Omit<ContentTemplate, 'id' | 'createdAt' | 'updatedAt'>>;
+type ContentTemplateCreateParams = Omit<ContentTemplate, 'contentTemplateId' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy'>;
+type ContentTemplateUpdateParams = Partial<Omit<ContentTemplate, 'contentTemplateId' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy'>>;
 
 export class ContentRepo {
+  // Content Block Type methods
+  async findBlockTypeById(id: string): Promise<ContentBlockType | null> {
+    return queryOne<ContentBlockType>(`SELECT * FROM "${TABLES.CONTENT_BLOCK_TYPE}" WHERE "contentBlockTypeId" = $1`, [id]);
+  }
+
+  async findAllBlockTypes(isActive?: boolean, limit: number = 50, offset: number = 0): Promise<ContentBlockType[]> {
+    let sql = `SELECT * FROM "${TABLES.CONTENT_BLOCK_TYPE}"`;
+    const params: any[] = [];
+
+    if (isActive !== undefined) {
+      sql += ` WHERE "isActive" = $1`;
+      params.push(isActive);
+    }
+
+    sql += ` ORDER BY "sortOrder" ASC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
+    params.push(limit, offset);
+
+    const results = await query<ContentBlockType[]>(sql, params);
+    return results || [];
+  }
+
   // Content Type methods
   async findContentTypeById(id: string): Promise<ContentType | null> {
-    const result = await queryOne<any>(`SELECT * FROM "${TABLES.CONTENT_TYPE}" WHERE "contentTypeId" = $1`, [id]);
-    return addId<ContentType>(result, 'contentTypeId');
+    return queryOne<ContentType>(`SELECT * FROM "${TABLES.CONTENT_TYPE}" WHERE "contentTypeId" = $1`, [id]);
   }
 
   async findContentTypeBySlug(slug: string): Promise<ContentType | null> {
-    const result = await queryOne<any>(`SELECT * FROM "${TABLES.CONTENT_TYPE}" WHERE "slug" = $1`, [slug]);
-    return addId<ContentType>(result, 'contentTypeId');
+    return queryOne<ContentType>(`SELECT * FROM "${TABLES.CONTENT_TYPE}" WHERE "slug" = $1`, [slug]);
   }
 
   async findAllContentTypes(isActive?: boolean, limit: number = 50, offset: number = 0): Promise<ContentType[]> {
-    let sql = 'SELECT * FROM "contentType"';
+    let sql = `SELECT * FROM "${TABLES.CONTENT_TYPE}"`;
     const params: any[] = [];
 
     if (isActive !== undefined) {
@@ -142,8 +70,8 @@ export class ContentRepo {
     sql += ' ORDER BY "name" ASC LIMIT $' + (params.length + 1) + ' OFFSET $' + (params.length + 2);
     params.push(limit, offset);
 
-    const results = await query<any[]>(sql, params);
-    return addIdArray<ContentType>(results || [], 'contentTypeId');
+    const results = await query<ContentType[]>(sql, params);
+    return results || [];
   }
 
   async createContentType(params: ContentTypeCreateParams): Promise<ContentType> {
@@ -155,8 +83,8 @@ export class ContentRepo {
       throw new Error(`Content type with slug "${params.slug}" already exists`);
     }
 
-    const result = await queryOne<any>(
-      `INSERT INTO "contentType" 
+    const result = await queryOne<ContentType>(
+      `INSERT INTO "${TABLES.CONTENT_TYPE}" 
       ("name", "slug", "description", "icon", "allowedBlocks", "defaultTemplate", 
        "requiredFields", "metaFields", "isSystem", "isActive", "createdAt", "updatedAt") 
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) 
@@ -181,7 +109,7 @@ export class ContentRepo {
       throw new Error('Failed to create content type');
     }
 
-    return addId<ContentType>(result, 'contentTypeId');
+    return result;
   }
 
   async updateContentType(id: string, params: ContentTypeUpdateParams): Promise<ContentType> {
@@ -248,19 +176,19 @@ export class ContentRepo {
       RETURNING *
     `;
 
-    const result = await queryOne<any>(query, values);
+    const result = await queryOne<ContentType>(query, values);
 
     if (!result) {
       throw new Error(`Failed to update content type with ID ${id}`);
     }
 
-    return addId<ContentType>(result, 'contentTypeId');
+    return result;
   }
 
   async deleteContentType(id: string): Promise<boolean> {
     // Check if the content type is being used by any content blocks
     const blocksUsingType = await query<Array<{ count: string }>>(
-      `SELECT COUNT(*) as count FROM "${TABLES.CONTENT_BLOCK}" WHERE "contentTypeId" = $1`,
+      `SELECT COUNT(*) as count FROM "${TABLES.CONTENT_BLOCK}" WHERE "blockTypeId" = $1`,
       [id],
     );
 
@@ -278,18 +206,15 @@ export class ContentRepo {
 
   // Content Page methods
   async findPageById(id: string): Promise<ContentPage | null> {
-    const result = await queryOne<any>(`SELECT * FROM "${TABLES.CONTENT_PAGE}" WHERE "contentPageId" = $1`, [id]);
-    return addId<ContentPage>(result, 'contentPageId');
+    return queryOne<ContentPage>(`SELECT * FROM "${TABLES.CONTENT_PAGE}" WHERE "contentPageId" = $1`, [id]);
   }
 
   async findPageBySlug(slug: string): Promise<ContentPage | null> {
-    const result = await queryOne<any>(`SELECT * FROM "${TABLES.CONTENT_PAGE}" WHERE "slug" = $1`, [slug]);
-    return addId<ContentPage>(result, 'contentPageId');
+    return queryOne<ContentPage>(`SELECT * FROM "${TABLES.CONTENT_PAGE}" WHERE "slug" = $1`, [slug]);
   }
 
   async findHomePage(): Promise<ContentPage | null> {
-    const result = await queryOne<any>(`SELECT * FROM "${TABLES.CONTENT_PAGE}" WHERE "isHomePage" = true LIMIT 1`);
-    return addId<ContentPage>(result, 'contentPageId');
+    return queryOne<ContentPage>(`SELECT * FROM "${TABLES.CONTENT_PAGE}" WHERE "isHomePage" = true LIMIT 1`);
   }
 
   async findAllPages(
@@ -297,6 +222,7 @@ export class ContentRepo {
     contentTypeId?: string,
     limit: number = 50,
     offset: number = 0,
+    search?: string,
   ): Promise<ContentPage[]> {
     let sql = `SELECT * FROM "${TABLES.CONTENT_PAGE}"`;
     const whereConditions: string[] = [];
@@ -313,6 +239,11 @@ export class ContentRepo {
       params.push(contentTypeId);
     }
 
+    if (search) {
+      whereConditions.push(`("title" ILIKE $${paramIndex++} OR "slug" ILIKE $${paramIndex++})`);
+      params.push(`%${search}%`, `%${search}%`);
+    }
+
     if (whereConditions.length > 0) {
       sql += ' WHERE ' + whereConditions.join(' AND ');
     }
@@ -320,8 +251,8 @@ export class ContentRepo {
     sql += ' ORDER BY "title" ASC LIMIT $' + paramIndex++ + ' OFFSET $' + paramIndex;
     params.push(limit, offset);
 
-    const results = await query<any[]>(sql, params);
-    return addIdArray<ContentPage>(results || [], 'contentPageId');
+    const results = await query<ContentPage[]>(sql, params);
+    return results || [];
   }
 
   async createPage(params: ContentPageCreateParams): Promise<ContentPage> {
@@ -345,7 +276,7 @@ export class ContentRepo {
     let paramIndex = 1;
 
     Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && key !== 'id' && key !== 'createdAt' && key !== 'updatedAt') {
+      if (value !== undefined) {
         fieldNames.push(`"${key}"`);
         placeholders.push(`$${paramIndex++}`);
 
@@ -369,13 +300,13 @@ export class ContentRepo {
       RETURNING *
     `;
 
-    const result = await queryOne<any>(sqlQuery, fieldValues);
+    const result = await queryOne<ContentPage>(sqlQuery, fieldValues);
 
     if (!result) {
       throw new Error('Failed to create content page');
     }
 
-    return addId<ContentPage>(result, 'contentPageId');
+    return result;
   }
 
   async updatePage(id: string, params: ContentPageUpdateParams): Promise<ContentPage> {
@@ -388,13 +319,13 @@ export class ContentRepo {
 
     // If setting as home page, clear any existing home page
     if (params.isHomePage) {
-      await query('UPDATE "${TABLES.CONTENT_PAGE}" SET "isHomePage" = false WHERE "isHomePage" = true');
+      await query(`UPDATE "${TABLES.CONTENT_PAGE}" SET "isHomePage" = false WHERE "isHomePage" = true`);
     }
 
     // Check slug uniqueness if it's being updated
     if (params.slug && params.slug !== currentPage.slug) {
       const existingPage = await this.findPageBySlug(params.slug);
-      if (existingPage && existingPage.id !== id) {
+      if (existingPage && existingPage.contentPageId !== id) {
         throw new Error(`Page with slug "${params.slug}" already exists`);
       }
     }
@@ -405,7 +336,7 @@ export class ContentRepo {
     let paramIndex = 1;
 
     Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && key !== 'id' && key !== 'createdAt' && key !== 'updatedAt') {
+      if (value !== undefined) {
         updateFields.push(`"${key}" = $${paramIndex++}`);
 
         // Special handling for JSON fields
@@ -431,18 +362,18 @@ export class ContentRepo {
       RETURNING *
     `;
 
-    const result = await queryOne<any>(sql, values);
+    const result = await queryOne<ContentPage>(sql, values);
 
     if (!result) {
       throw new Error(`Failed to update page with ID ${id}`);
     }
 
-    return addId<ContentPage>(result, 'contentPageId');
+    return result;
   }
 
   async deletePage(id: string): Promise<boolean> {
     // Delete all content blocks associated with the page first
-    await query(`DELETE FROM "${TABLES.CONTENT_BLOCK}" WHERE "pageId" = $1`, [id]);
+    await query(`DELETE FROM "${TABLES.CONTENT_BLOCK}" WHERE "contentPageId" = $1`, [id]);
 
     // Now delete the page
     const result = await queryOne<{ id: string }>(
@@ -456,7 +387,7 @@ export class ContentRepo {
   async publishPage(id: string): Promise<ContentPage> {
     const now = unixTimestamp();
 
-    const result = await queryOne<any>(
+    const result = await queryOne<ContentPage>(
       `UPDATE "${TABLES.CONTENT_PAGE}" 
        SET "status" = 'published', "publishedAt" = $1, "updatedAt" = $1 
        WHERE "contentPageId" = $2 
@@ -468,49 +399,57 @@ export class ContentRepo {
       throw new Error(`Failed to publish page with ID ${id}`);
     }
 
-    return addId<ContentPage>(result, 'contentPageId');
+    return result;
   }
 
   // Content Block methods
   async findBlockById(id: string): Promise<ContentBlock | null> {
-    const result = await queryOne<any>(`SELECT * FROM "${TABLES.CONTENT_BLOCK}" WHERE "contentBlockId" = $1`, [id]);
-    return addId<ContentBlock>(result, 'contentBlockId');
+    return queryOne<ContentBlock>(`SELECT * FROM "${TABLES.CONTENT_BLOCK}" WHERE "contentBlockId" = $1`, [id]);
   }
 
   async findBlocksByPageId(pageId: string): Promise<ContentBlock[]> {
-    const results = await query<any[]>('SELECT * FROM "${TABLES.CONTENT_BLOCK}" WHERE "pageId" = $1 ORDER BY "order" ASC', [pageId]);
-
-    return addIdArray<ContentBlock>(results || [], 'contentBlockId');
+    const results = await query<ContentBlock[]>(`SELECT * FROM "${TABLES.CONTENT_BLOCK}" WHERE "contentPageId" = $1 ORDER BY "sortOrder" ASC`, [pageId]);
+    return results || [];
   }
 
   async createBlock(params: ContentBlockCreateParams): Promise<ContentBlock> {
     const now = unixTimestamp();
 
     // Validate that page exists
-    const page = await this.findPageById(params.pageId);
+    const page = await this.findPageById(params.contentPageId);
     if (!page) {
-      throw new Error(`Page with ID ${params.pageId} not found`);
+      throw new Error(`Page with ID ${params.contentPageId} not found`);
     }
 
-    // Validate that content type exists
-    const contentType = await this.findContentTypeById(params.contentTypeId);
-    if (!contentType) {
-      throw new Error(`Content type with ID ${params.contentTypeId} not found`);
+    // Validate that block type exists
+    const blockType = await this.findBlockTypeById(params.blockTypeId);
+    if (!blockType) {
+      throw new Error(`Block type with ID ${params.blockTypeId} not found`);
     }
 
-    const result = await queryOne<any>(
+    const result = await queryOne<ContentBlock>(
       `INSERT INTO "${TABLES.CONTENT_BLOCK}" 
-      ("pageId", "contentTypeId", "name", "order", "content", "status", "createdAt", "updatedAt") 
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
+      ("contentPageId", "blockTypeId", "title", "area", "sortOrder", "content", "isVisible", "createdAt", "updatedAt") 
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
       RETURNING *`,
-      [params.pageId, params.contentTypeId, params.name, params.order, JSON.stringify(params.content), params.status, now, now],
+      [
+        params.contentPageId,
+        params.blockTypeId,
+        params.title || null,
+        'main',
+        params.sortOrder,
+        JSON.stringify(params.content),
+        params.isVisible,
+        now,
+        now,
+      ],
     );
 
     if (!result) {
       throw new Error('Failed to create content block');
     }
 
-    return addId<ContentBlock>(result, 'contentBlockId');
+    return result;
   }
 
   async updateBlock(id: string, params: ContentBlockUpdateParams): Promise<ContentBlock> {
@@ -521,43 +460,23 @@ export class ContentRepo {
       throw new Error(`Content block with ID ${id} not found`);
     }
 
-    // Build dynamic query with snake_case field names
+    // Build dynamic query with DB column names
     const updateFields: string[] = [];
     const values: any[] = [];
     let paramIndex = 1;
 
-    // Handle each field that might be updated
-    if (params.pageId !== undefined) {
-      updateFields.push(`"pageId" = $${paramIndex++}`);
-      values.push(params.pageId);
-    }
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined) {
+        updateFields.push(`"${key}" = $${paramIndex++}`);
+        if (key === 'content' || key === 'settings' || key === 'conditions') {
+          values.push(JSON.stringify(value));
+        } else {
+          values.push(value);
+        }
+      }
+    });
 
-    if (params.contentTypeId !== undefined) {
-      updateFields.push(`"contentTypeId" = $${paramIndex++}`);
-      values.push(params.contentTypeId);
-    }
-
-    if (params.name !== undefined) {
-      updateFields.push(`"name" = $${paramIndex++}`);
-      values.push(params.name);
-    }
-
-    if (params.order !== undefined) {
-      updateFields.push(`"order" = $${paramIndex++}`);
-      values.push(params.order);
-    }
-
-    if (params.content !== undefined) {
-      updateFields.push(`"content" = $${paramIndex++}`);
-      values.push(JSON.stringify(params.content));
-    }
-
-    if (params.status !== undefined) {
-      updateFields.push(`"status" = $${paramIndex++}`);
-      values.push(params.status);
-    }
-
-    // Always update the updated_at timestamp
+    // Always update the updatedAt timestamp
     updateFields.push(`"updatedAt" = $${paramIndex++}`);
     values.push(now);
 
@@ -569,20 +488,20 @@ export class ContentRepo {
     // Add ID for WHERE clause
     values.push(id);
 
-    const query = `
+    const sql = `
       UPDATE "${TABLES.CONTENT_BLOCK}" 
       SET ${updateFields.join(', ')} 
       WHERE "contentBlockId" = $${paramIndex} 
       RETURNING *
     `;
 
-    const result = await queryOne<any>(query, values);
+    const result = await queryOne<ContentBlock>(sql, values);
 
     if (!result) {
       throw new Error(`Failed to update content block with ID ${id}`);
     }
 
-    return addId<ContentBlock>(result, 'contentBlockId');
+    return result;
   }
 
   async deleteBlock(id: string): Promise<boolean> {
@@ -596,12 +515,11 @@ export class ContentRepo {
 
   // Content Template methods
   async findTemplateById(id: string): Promise<ContentTemplate | null> {
-    const result = await queryOne<any>(`SELECT * FROM "${TABLES.CONTENT_TEMPLATE}" WHERE "contentTemplateId" = $1`, [id]);
-    return addId<ContentTemplate>(result, 'contentTemplateId');
+    return queryOne<ContentTemplate>(`SELECT * FROM "${TABLES.CONTENT_TEMPLATE}" WHERE "contentTemplateId" = $1`, [id]);
   }
 
   async findAllTemplates(isActive?: boolean, limit: number = 50, offset: number = 0): Promise<ContentTemplate[]> {
-    let sql = 'SELECT * FROM "contentTemplate"';
+    let sql = `SELECT * FROM "${TABLES.CONTENT_TEMPLATE}"`;
     const whereConditions: string[] = [];
     const params: any[] = [];
     let paramIndex = 1;
@@ -618,15 +536,15 @@ export class ContentRepo {
     sql += ' ORDER BY "name" ASC LIMIT $' + paramIndex++ + ' OFFSET $' + paramIndex;
     params.push(limit, offset);
 
-    const results = await query<any[]>(sql, params);
-    return addIdArray<ContentTemplate>(results || [], 'contentTemplateId');
+    const results = await query<ContentTemplate[]>(sql, params);
+    return results || [];
   }
 
   async createTemplate(params: ContentTemplateCreateParams): Promise<ContentTemplate> {
     const now = unixTimestamp();
 
-    const result = await queryOne<any>(
-      `INSERT INTO "contentTemplate" 
+    const result = await queryOne<ContentTemplate>(
+      `INSERT INTO "${TABLES.CONTENT_TEMPLATE}" 
       ("name", "slug", "description", "thumbnail", "htmlStructure", "cssStyles", "jsScripts", 
        "areas", "defaultBlocks", "compatibleContentTypes", "isSystem", "isActive", "createdAt", "updatedAt") 
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) 
@@ -653,7 +571,7 @@ export class ContentRepo {
       throw new Error('Failed to create content template');
     }
 
-    return addId<ContentTemplate>(result, 'contentTemplateId');
+    return result;
   }
 
   async updateTemplate(id: string, params: ContentTemplateUpdateParams): Promise<ContentTemplate> {
@@ -669,38 +587,18 @@ export class ContentRepo {
     const values: any[] = [];
     let paramIndex = 1;
 
-    // Handle each field that might be updated
-    if (params.name !== undefined) {
-      updateFields.push(`"name" = $${paramIndex++}`);
-      values.push(params.name);
-    }
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined) {
+        updateFields.push(`"${key}" = $${paramIndex++}`);
+        if (key === 'areas' || key === 'defaultBlocks') {
+          values.push(JSON.stringify(value));
+        } else {
+          values.push(value);
+        }
+      }
+    });
 
-    if (params.slug !== undefined) {
-      updateFields.push(`"slug" = $${paramIndex++}`);
-      values.push(params.slug);
-    }
-
-    if (params.description !== undefined) {
-      updateFields.push(`"description" = $${paramIndex++}`);
-      values.push(params.description);
-    }
-
-    if (params.htmlStructure !== undefined) {
-      updateFields.push(`"htmlStructure" = $${paramIndex++}`);
-      values.push(params.htmlStructure);
-    }
-
-    if (params.areas !== undefined) {
-      updateFields.push(`"areas" = $${paramIndex++}`);
-      values.push(JSON.stringify(params.areas));
-    }
-
-    if (params.isActive !== undefined) {
-      updateFields.push(`"isActive" = $${paramIndex++}`);
-      values.push(params.isActive);
-    }
-
-    // Always update the updated_at timestamp
+    // Always update the updatedAt timestamp
     updateFields.push(`"updatedAt" = $${paramIndex++}`);
     values.push(now);
 
@@ -712,20 +610,20 @@ export class ContentRepo {
     // Add ID for WHERE clause
     values.push(id);
 
-    const query = `
+    const sql = `
       UPDATE "${TABLES.CONTENT_TEMPLATE}" 
       SET ${updateFields.join(', ')} 
       WHERE "contentTemplateId" = $${paramIndex} 
       RETURNING *
     `;
 
-    const result = await queryOne<any>(query, values);
+    const result = await queryOne<ContentTemplate>(sql, values);
 
     if (!result) {
       throw new Error(`Failed to update content template with ID ${id}`);
     }
 
-    return addId<ContentTemplate>(result, 'contentTemplateId');
+    return result;
   }
 
   async deleteTemplate(id: string): Promise<boolean> {
@@ -768,12 +666,12 @@ export class ContentRepo {
         throw new Error(`Block with ID ${blockOrder.id} not found`);
       }
 
-      if (block.pageId !== pageId) {
+      if (block.contentPageId !== pageId) {
         throw new Error(`Block with ID ${blockOrder.id} does not belong to page ${pageId}`);
       }
 
       // Update the block order
-      await query(`UPDATE "${TABLES.CONTENT_BLOCK}" SET "order" = $1, "updatedAt" = $2 WHERE "contentBlockId" = $3`, [
+      await query(`UPDATE "${TABLES.CONTENT_BLOCK}" SET "sortOrder" = $1, "updatedAt" = $2 WHERE "contentBlockId" = $3`, [
         blockOrder.order,
         unixTimestamp(),
         blockOrder.id,

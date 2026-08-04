@@ -50,6 +50,7 @@ import { pricingMerchantRouter } from '../modules/pricing/interface/routers/pric
 import { loyaltyMerchantRouter } from '../modules/loyalty/interface/routers/loyaltyBusinessRouter';
 import { notificationMerchantRouter } from '../modules/notification/interface/routers/notificationBusinessRouter';
 import { contentRouterAdmin } from '../modules/content/interface/routers/contentBusinessRouter';
+import { contentCustomerRouter } from '../modules/content/interface/routers/contentCustomerRouter';
 import { membershipBusinessRouter } from '../modules/membership/interface/routers/membershipBusinessRouter';
 import { shippingBusinessRouter } from '../modules/shipping/interface/routers/shippingBusinessRouter';
 import { inventoryBusinessRouter } from '../modules/inventory/interface/routers/businessRouter';
@@ -131,6 +132,7 @@ export function configureRoutes(app: Express): void {
     fulfillmentCustomerRouter,
     merchantCustomerRouter,
     marketingCustomerRouter,
+    contentCustomerRouter,
   ]);
 
   // Business/Merchant API routes

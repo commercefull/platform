@@ -8,79 +8,79 @@ import { eventBus } from '../../../../../libs/events/eventBus';
 
 export class AddBlockToPageCommand {
   constructor(
-    public readonly pageId: string,
-    public readonly contentTypeId: string,
-    public readonly name: string,
+    public readonly contentPageId: string,
+    public readonly blockTypeId: string,
+    public readonly title: string,
     public readonly content: Record<string, any>,
-    public readonly order?: number,
-    public readonly status?: 'active' | 'inactive',
+    public readonly sortOrder?: number,
+    public readonly isVisible?: boolean,
     public readonly createdBy?: string,
   ) {}
 }
 
 export interface BlockResponse {
-  id: string;
-  pageId: string;
-  contentTypeId: string;
-  name: string;
-  order: number;
+  contentBlockId: string;
+  contentPageId: string;
+  blockTypeId: string;
+  title: string | null;
+  sortOrder: number;
   content: Record<string, any>;
-  status: string;
-  createdAt: string;
+  isVisible: boolean;
+  createdAt: Date;
 }
 
 export class AddBlockToPageUseCase {
   constructor(private readonly contentRepo: ContentRepo) {}
 
   async execute(command: AddBlockToPageCommand): Promise<BlockResponse> {
-    if (!command.pageId || !command.contentTypeId || !command.name) {
-      throw new Error('Page ID, content type ID, and name are required');
+    if (!command.contentPageId || !command.blockTypeId || !command.title) {
+      throw new Error('Content page ID, block type ID, and title are required');
     }
 
     // Verify page exists
-    const page = await this.contentRepo.findPageById(command.pageId);
+    const page = await this.contentRepo.findPageById(command.contentPageId);
     if (!page) {
-      throw new Error(`Page with ID ${command.pageId} not found`);
+      throw new Error(`Page with ID ${command.contentPageId} not found`);
     }
 
     // Verify content type exists
-    const contentType = await this.contentRepo.findContentTypeById(command.contentTypeId);
+    const contentType = await this.contentRepo.findBlockTypeById(command.blockTypeId);
     if (!contentType) {
-      throw new Error(`Content type with ID ${command.contentTypeId} not found`);
+      throw new Error(`Block type with ID ${command.blockTypeId} not found`);
     }
 
-    // Get existing blocks to determine order
-    let order = command.order;
-    if (order === undefined) {
-      const existingBlocks = await this.contentRepo.findBlocksByPageId(command.pageId);
-      order = existingBlocks.length;
+    // Get existing blocks to determine sort order
+    let sortOrder = command.sortOrder;
+    if (sortOrder === undefined) {
+      const existingBlocks = await this.contentRepo.findBlocksByPageId(command.contentPageId);
+      sortOrder = existingBlocks.length;
     }
 
     const block = await this.contentRepo.createBlock({
-      pageId: command.pageId,
-      contentTypeId: command.contentTypeId,
-      name: command.name,
-      order,
+      contentPageId: command.contentPageId,
+      blockTypeId: command.blockTypeId,
+      title: command.title,
+      sortOrder,
       content: command.content,
-      status: command.status || 'active',
+      isVisible: command.isVisible ?? true,
     });
 
     eventBus.emit('content.block.created', {
-      blockId: block.id,
-      pageId: block.pageId,
-      name: block.name,
-      contentTypeId: block.contentTypeId,
-      order: block.order,
+      blockId: block.contentBlockId,
+      pageId: block.contentPageId,
+      title: block.title,
+      blockTypeId: block.blockTypeId,
+      sortOrder: block.sortOrder,
     });
 
     return {
-      id: block.id,
-      pageId: block.pageId,
-      contentTypeId: block.contentTypeId,
-      name: block.name,
-      order: block.order,
+      contentBlockId: block.contentBlockId,
+      contentPageId: block.contentPageId,
+      blockTypeId: block.blockTypeId,
+      title: block.title,
+      sortOrder: block.sortOrder,
       content: block.content,
-      status: block.status,
+      isVisible: block.isVisible,
       createdAt: block.createdAt,
     };
   }

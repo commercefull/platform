@@ -78,11 +78,11 @@ describe('Content Templates API', () => {
 
       expect(response.status).toBe(201);
       expect(response.data.success).toBe(true);
-      expect(response.data.data.id).toBeDefined();
+      expect(response.data.data.contentTemplateId).toBeDefined();
       expect(response.data.data.name).toBe(templateData.name);
       expect(response.data.data.slug).toBe(templateData.slug);
 
-      createdTemplateId = response.data.data.id;
+      createdTemplateId = response.data.data.contentTemplateId;
     });
 
     it('should return 400 if name is missing', async () => {
@@ -112,7 +112,7 @@ describe('Content Templates API', () => {
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
-      expect(response.data.data.id).toBe(createdTemplateId);
+      expect(response.data.data.contentTemplateId).toBe(createdTemplateId);
     });
 
     it('should return 404 for non-existent template', async () => {
@@ -178,12 +178,12 @@ describe('Content Templates API', () => {
 
       expect(response.status).toBe(201);
       expect(response.data.success).toBe(true);
-      expect(response.data.data.id).toBeDefined();
+      expect(response.data.data.contentTemplateId).toBeDefined();
       expect(response.data.data.name).toBe(duplicateData.name);
       expect(response.data.data.slug).toBe(duplicateData.slug);
       expect(response.data.data.isSystem).toBe(false); // Duplicates are never system templates
 
-      duplicatedTemplateId = response.data.data.id;
+      duplicatedTemplateId = response.data.data.contentTemplateId;
     });
 
     it('should return 400 if name is missing for duplicate', async () => {

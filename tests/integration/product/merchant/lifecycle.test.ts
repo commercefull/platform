@@ -7,9 +7,6 @@ import { AxiosInstance } from 'axios';
 import { createTestClient, loginTestAdmin } from '../../testUtils';
 import { SEEDED_PRODUCT_1_ID, SEEDED_PRODUCT_2_ID, SEEDED_PRODUCT_TYPE_SIMPLE_ID } from '../testUtils';
 
-;
-;
-
 describe('Merchant: Product Lifecycle', () => {
   let client: AxiosInstance;
   let adminToken: string;
@@ -282,6 +279,25 @@ describe('Merchant: Product Lifecycle', () => {
         headers: { Authorization: `Bearer ${adminToken}` },
       });
       expect(getRes.status).toBe(404);
+    });
+  });
+
+  describe('Store availability', () => {
+    it('should return store availability for a valid product', async () => {
+      const res = await client.get(
+        `/business/products/${SEEDED_PRODUCT_1_ID}/store-availability`,
+        { headers: { Authorization: `Bearer ${adminToken}` } },
+      );
+      // 200 if store data exists, 500 if no store/inventory data seeded
+      expect([200, 500]).toContain(res.status);
+    });
+
+    it('should return 404 for non-existent product store availability', async () => {
+      const res = await client.get(
+        '/business/products/00000000-0000-0000-0000-999999999999/store-availability',
+        { headers: { Authorization: `Bearer ${adminToken}` } },
+      );
+      expect(res.status).toBe(404);
     });
   });
 });

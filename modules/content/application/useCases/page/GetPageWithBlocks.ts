@@ -14,13 +14,13 @@ export class GetPageWithBlocksQuery {
 }
 
 export interface BlockWithType {
-  id: string;
-  name: string;
-  order: number;
+  contentBlockId: string;
+  title: string | null;
+  sortOrder: number;
   content: Record<string, any>;
-  status: string;
+  isVisible: boolean;
   contentType: {
-    id: string;
+    contentTypeId: string;
     name: string;
     slug: string;
   };
@@ -28,29 +28,29 @@ export interface BlockWithType {
 
 export interface PageWithBlocksResponse {
   page: {
-    id: string;
+    contentPageId: string;
     title: string;
     slug: string;
     status: string;
     visibility: string;
-    summary?: string;
-    featuredImage?: string;
-    metaTitle?: string;
-    metaDescription?: string;
-    publishedAt?: string;
-    createdAt: string;
-    updatedAt: string;
+    summary?: string | null;
+    featuredImage?: string | null;
+    metaTitle?: string | null;
+    metaDescription?: string | null;
+    publishedAt?: Date | null;
+    createdAt: Date;
+    updatedAt: Date;
   };
   contentType: {
-    id: string;
+    contentTypeId: string;
     name: string;
     slug: string;
   } | null;
   template: {
-    id: string;
+    contentTemplateId: string;
     name: string;
     slug: string;
-    htmlStructure?: string;
+    htmlStructure?: string | null;
   } | null;
   blocks: BlockWithType[];
 }
@@ -79,7 +79,7 @@ export class GetPageWithBlocksUseCase {
       const ct = await this.contentRepo.findContentTypeById(page.contentTypeId);
       if (ct) {
         contentType = {
-          id: ct.id,
+          contentTypeId: ct.contentTypeId,
           name: ct.name,
           slug: ct.slug,
         };
@@ -92,7 +92,7 @@ export class GetPageWithBlocksUseCase {
       const t = await this.contentRepo.findTemplateById(page.templateId);
       if (t) {
         template = {
-          id: t.id,
+          contentTemplateId: t.contentTemplateId,
           name: t.name,
           slug: t.slug,
           htmlStructure: t.htmlStructure,
@@ -101,39 +101,39 @@ export class GetPageWithBlocksUseCase {
     }
 
     // Get blocks
-    const allBlocks = await this.contentRepo.findBlocksByPageId(page.id);
-    const filteredBlocks = query.includeInactiveBlocks ? allBlocks : allBlocks.filter(b => b.status === 'active');
+    const allBlocks = await this.contentRepo.findBlocksByPageId(page.contentPageId);
+    const filteredBlocks = query.includeInactiveBlocks ? allBlocks : allBlocks.filter(b => b.isVisible);
 
     // Enrich blocks with content type info
     const blocksWithTypes: BlockWithType[] = [];
     for (const block of filteredBlocks) {
-      const blockType = await this.contentRepo.findContentTypeById(block.contentTypeId);
+      const blockType = await this.contentRepo.findBlockTypeById(block.blockTypeId);
       blocksWithTypes.push({
-        id: block.id,
-        name: block.name,
-        order: block.order,
+        contentBlockId: block.contentBlockId,
+        title: block.title,
+        sortOrder: block.sortOrder,
         content: block.content,
-        status: block.status,
+        isVisible: block.isVisible,
         contentType: blockType
           ? {
-              id: blockType.id,
+              contentTypeId: blockType.contentBlockTypeId,
               name: blockType.name,
               slug: blockType.slug,
             }
           : {
-              id: block.contentTypeId,
+              contentTypeId: block.blockTypeId,
               name: 'Unknown',
               slug: 'unknown',
             },
       });
     }
 
-    // Sort blocks by order
-    blocksWithTypes.sort((a, b) => a.order - b.order);
+    // Sort blocks by sortOrder
+    blocksWithTypes.sort((a, b) => a.sortOrder - b.sortOrder);
 
     return {
       page: {
-        id: page.id,
+        contentPageId: page.contentPageId,
         title: page.title,
         slug: page.slug,
         status: page.status,

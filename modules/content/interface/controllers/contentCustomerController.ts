@@ -19,10 +19,10 @@ export const getPublishedPages = async (req: TypedRequest, res: Response): Promi
 
     // Remove sensitive information
     const sanitizedPages = pages.map(page => ({
-      id: page.id,
+      id: page.contentPageId,
       title: page.title,
       slug: page.slug,
-      summary: page.summary, // Using summary instead of description as per ContentPage interface
+      summary: page.summary,
       metaTitle: page.metaTitle,
       metaDescription: page.metaDescription,
       publishedAt: page.publishedAt,
@@ -68,7 +68,7 @@ export const getPublishedPageBySlug = async (req: TypedRequest, res: Response): 
       }
 
       // Then get content blocks for the page
-      const blocks = await contentRepo.findBlocksByPageId(page.id);
+      const blocks = await contentRepo.findBlocksByPageId(page.contentPageId);
 
       // Get the template if one is assigned to the page
       const template = page.templateId ? await contentRepo.findTemplateById(page.templateId) : undefined;
@@ -78,11 +78,11 @@ export const getPublishedPageBySlug = async (req: TypedRequest, res: Response): 
         page,
         blocks: await Promise.all(
           blocks.map(async block => {
-            const contentType = await contentRepo.findContentTypeById(block.contentTypeId);
+            const contentType = await contentRepo.findBlockTypeById(block.blockTypeId);
             return {
               ...block,
               contentType: contentType || {
-                id: block.contentTypeId,
+                id: block.blockTypeId,
                 name: 'Unknown',
                 slug: 'unknown',
               },
@@ -103,12 +103,12 @@ export const getPublishedPageBySlug = async (req: TypedRequest, res: Response): 
 
       // Sanitize content types to remove sensitive schema information
       const sanitizedBlocks = pageData.blocks.map((block: any) => ({
-        id: block.id,
-        name: block.name,
-        order: block.order,
+        id: block.contentBlockId,
+        title: block.title,
+        sortOrder: block.sortOrder,
         content: block.content,
         contentType: {
-          id: block.contentType.id,
+          id: block.contentType.contentTypeId,
           name: block.contentType.name,
           slug: block.contentType.slug,
         },
@@ -117,7 +117,7 @@ export const getPublishedPageBySlug = async (req: TypedRequest, res: Response): 
       // Sanitize template if present
       const sanitizedTemplate = pageData.template
         ? {
-            id: pageData.template.id,
+            id: pageData.template.contentTemplateId,
             name: pageData.template.name,
             slug: pageData.template.slug,
             htmlStructure: pageData.template.htmlStructure,
@@ -126,7 +126,7 @@ export const getPublishedPageBySlug = async (req: TypedRequest, res: Response): 
 
       // Sanitize page data
       const sanitizedPage = {
-        id: pageData.page.id,
+        id: pageData.page.contentPageId,
         title: pageData.page.title,
         slug: pageData.page.slug,
         summary: pageData.page.summary,
@@ -174,7 +174,7 @@ export const getActiveContentTypes = async (req: TypedRequest, res: Response): P
 
     // Sanitize content types to remove sensitive schema information
     const sanitizedContentTypes = contentTypes.map(type => ({
-      id: type.id,
+      id: type.contentTypeId,
       name: type.name,
       slug: type.slug,
       description: type.description,

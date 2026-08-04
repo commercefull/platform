@@ -1,7 +1,7 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
 
-export type RelationType = 'related' | 'accessory' | 'bundle';
+export type RelationType = 'related' | 'accessory' | 'bundle' | 'cross_sell' | 'up_sell' | 'grouped';
 
 export interface ProductRelationship {
   productRelatedId: string;

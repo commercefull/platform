@@ -4,6 +4,7 @@ import {
   TEST_CONTENT_PAGE_ID,
   TEST_CONTENT_BLOCK_ID,
   TEST_CONTENT_TEMPLATE_ID,
+  TEST_BLOCK_TYPE_ID,
   TEST_CONTENT_TYPE,
   TEST_CONTENT_PAGE,
   TEST_CONTENT_BLOCK,
@@ -161,12 +162,12 @@ describe('Content Feature Tests', () => {
       const createBlockResponse = await client.post(
         '/business/content/blocks',
         {
-          pageId: testContentPageId,
-          contentTypeId: testContentTypeId,
-          name: TEST_CONTENT_BLOCK.name,
-          order: 0,
+          contentPageId: testContentPageId,
+          blockTypeId: TEST_BLOCK_TYPE_ID,
+          title: TEST_CONTENT_BLOCK.title,
+          sortOrder: 0,
           content: TEST_CONTENT_BLOCK.content,
-          status: 'active',
+          isVisible: true,
         },
         { headers: { Authorization: `Bearer ${adminToken}` } },
       );

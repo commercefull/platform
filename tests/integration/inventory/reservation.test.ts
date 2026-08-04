@@ -1,5 +1,5 @@
 import { AxiosInstance } from 'axios';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'node:crypto';
 import { setupInventoryTests, cleanupInventoryTests } from './testUtils';
 
 describe('Inventory Reservation Tests', () => {
@@ -20,7 +20,7 @@ describe('Inventory Reservation Tests', () => {
     testInventoryItemId = setup.testInventoryItemId;
 
     // Generate a test cart ID
-    testCartId = `test-cart-${uuidv4()}`;
+    testCartId = `test-cart-${randomUUID()}`;
   });
 
   afterAll(async () => {
@@ -149,8 +149,8 @@ describe('Inventory Reservation Tests', () => {
 
     it('should handle multiple reservations for same inventory item', async () => {
       // Create two more test cart IDs
-      const testCartId2 = `test-cart-${uuidv4()}`;
-      const testCartId3 = `test-cart-${uuidv4()}`;
+      const testCartId2 = `test-cart-${randomUUID()}`;
+      const testCartId3 = `test-cart-${randomUUID()}`;
 
       // Make two reservations (routes may not exist)
       const res1 = await client.post(
@@ -203,7 +203,7 @@ describe('Inventory Reservation Tests', () => {
 
     it('should release reservations for a cart', async () => {
       // Create another test cart ID
-      const testCartId4 = `test-cart-${uuidv4()}`;
+      const testCartId4 = `test-cart-${randomUUID()}`;
 
       // Make a reservation
       await client.post(
@@ -250,7 +250,7 @@ describe('Inventory Reservation Tests', () => {
       const expiredReservation = {
         inventoryId: testInventoryItemId,
         quantity: 8,
-        cartId: `expired-cart-${uuidv4()}`,
+        cartId: `expired-cart-${randomUUID()}`,
         expiresAt: new Date(Date.now() - 60 * 1000).toISOString(), // 1 minute in the past
         status: 'active',
       };

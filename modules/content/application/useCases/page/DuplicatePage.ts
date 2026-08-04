@@ -16,12 +16,12 @@ export class DuplicatePageCommand {
 }
 
 export interface DuplicatePageResponse {
-  id: string;
+  contentPageId: string;
   title: string;
   slug: string;
   originalPageId: string;
   blocksCopied: number;
-  createdAt: string;
+  createdAt: Date;
 }
 
 export class DuplicatePageUseCase {
@@ -61,18 +61,18 @@ export class DuplicatePageUseCase {
 
     for (const block of originalBlocks) {
       await this.contentRepo.createBlock({
-        pageId: duplicatePage.id,
-        contentTypeId: block.contentTypeId,
-        name: block.name,
-        order: block.order,
+        contentPageId: duplicatePage.contentPageId,
+        blockTypeId: block.blockTypeId,
+        title: block.title,
+        sortOrder: block.sortOrder,
         content: block.content,
-        status: block.status,
+        isVisible: block.isVisible,
       });
       blocksCopied++;
     }
 
     eventBus.emit('content.page.created', {
-      pageId: duplicatePage.id,
+      pageId: duplicatePage.contentPageId,
       title: duplicatePage.title,
       slug: duplicatePage.slug,
       contentTypeId: duplicatePage.contentTypeId,
@@ -81,7 +81,7 @@ export class DuplicatePageUseCase {
     });
 
     return {
-      id: duplicatePage.id,
+      contentPageId: duplicatePage.contentPageId,
       title: duplicatePage.title,
       slug: duplicatePage.slug,
       originalPageId: command.pageId,

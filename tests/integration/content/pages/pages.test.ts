@@ -42,7 +42,7 @@ describe('Content Pages API', () => {
     });
 
     if (typeResponse.status === 201) {
-      createdContentTypeId = typeResponse.data.data.id;
+      createdContentTypeId = typeResponse.data.data.contentTypeId;
     }
   });
 
@@ -87,12 +87,12 @@ describe('Content Pages API', () => {
 
       expect(response.status).toBe(201);
       expect(response.data.success).toBe(true);
-      expect(response.data.data.id).toBeDefined();
+      expect(response.data.data.contentPageId).toBeDefined();
       expect(response.data.data.title).toBe(pageData.title);
       expect(response.data.data.slug).toBe(pageData.slug);
       expect(response.data.data.status).toBe('draft');
 
-      createdPageId = response.data.data.id;
+      createdPageId = response.data.data.contentPageId;
     });
 
     it('should return 400 if title is missing', async () => {
@@ -111,7 +111,7 @@ describe('Content Pages API', () => {
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
-      expect(response.data.data.id).toBe(createdPageId);
+      expect(response.data.data.contentPageId).toBe(createdPageId);
     });
 
     it('should return 404 for non-existent page', async () => {

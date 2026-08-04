@@ -123,6 +123,48 @@ describe('Product Variants & Barcode', () => {
       });
       expect(res.status).toBe(404);
     });
+
+    it('should reject variant with duplicate SKU', async () => {
+      // Create a variant with a unique SKU
+      const sku = `DUPVAR-${Date.now()}`;
+      const createRes = await client.post(
+        `/business/products/${testProductId}/variants`,
+        {
+          productId: testProductId,
+          name: 'Dup SKU Variant',
+          sku,
+          price: 49.99,
+          isDefault: false,
+        },
+        { headers: { Authorization: `Bearer ${adminToken}` } },
+      );
+      expect(createRes.status).toBe(201);
+      const variantId =
+        createRes.data.data?.productVariantId || createRes.data.data?.id;
+
+      // Try to create another variant with the same SKU
+      const dupRes = await client.post(
+        `/business/products/${testProductId}/variants`,
+        {
+          productId: testProductId,
+          name: 'Dup SKU Variant 2',
+          sku,
+          price: 59.99,
+          isDefault: false,
+        },
+        { headers: { Authorization: `Bearer ${adminToken}` } },
+      );
+      expect(dupRes.status).toBeGreaterThanOrEqual(400);
+
+      // Cleanup
+      if (variantId) {
+        await client
+          .delete(`/business/products/variants/${variantId}`, {
+            headers: { Authorization: `Bearer ${adminToken}` },
+          })
+          .catch(() => {});
+      }
+    });
   });
 
   // ── Merchant: Barcode Lookup ─────────────────────────────────────────────

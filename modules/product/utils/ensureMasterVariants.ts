@@ -81,7 +81,7 @@ export async function ensureAllProductsHaveMasterVariants(): Promise<{
 
 /**
  * CLI entry point for running the utility
- * Example: ts-node ensureMasterVariants.ts
+ * Example: tsx ensureMasterVariants.ts
  */
 if (require.main === module) {
   (async () => {

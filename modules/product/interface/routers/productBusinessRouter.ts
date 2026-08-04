@@ -247,4 +247,40 @@ router.post('/collections', productController.createCollection);
 router.put('/collections/:collectionId', productController.updateCollection);
 router.delete('/collections/:collectionId', productController.deleteCollection);
 
+// ============================================================================
+// Download Routes (Business)
+// ============================================================================
+
+router.get('/products/:productId/downloads', productController.listDownloads);
+router.post('/products/:productId/downloads', productController.createDownload);
+router.put('/downloads/:downloadId', productController.updateDownload);
+router.delete('/downloads/:downloadId', productController.deleteDownload);
+
+// ============================================================================
+// Product Relationship Routes (Business)
+// ============================================================================
+
+router.get('/products/:productId/relationships', productController.listRelationships);
+router.post('/products/:productId/relationships', productController.createRelationship);
+router.delete('/relationships/:relationshipId', productController.deleteRelationship);
+
+// ============================================================================
+// Configurable Product Routes (Business)
+// ============================================================================
+
+router.get('/products/:productId/variant-matrix', productController.getVariantMatrix);
+router.post('/products/:productId/configure', productController.configureVariant);
+
+// ============================================================================
+// Grouped Product Routes (Business)
+// ============================================================================
+
+router.get('/products/:productId/grouped-children', productController.listGroupedChildren);
+
+// ============================================================================
+// Attribute Set Application Route (Business)
+// ============================================================================
+
+router.post('/products/:productId/apply-attribute-set', productController.applyAttributeSet);
+
 export const productBusinessRouter = router;

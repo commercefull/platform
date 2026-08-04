@@ -1,6 +1,6 @@
 import { AxiosInstance } from 'axios';
 import { createTestClient, loginTestUser } from '../testUtils';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'node:crypto';
 
 // Seeded promotion test data IDs (from seeds/20240805001500_seedPromotionTestData.js)
 export const SEEDED_PROMOTION_ID = '01935f00-0000-7000-8000-000000000001';
@@ -58,16 +58,16 @@ export const SEEDED_GIFT_CARD_CODE = 'GIFT-TEST-0001';
 export async function createTestCart(client: AxiosInstance, adminToken: string) {
   try {
     const cartResponse = await client.post('/customer/basket', {
-      sessionId: `test-session-${uuidv4()}`,
+      sessionId: `test-session-${randomUUID()}`,
     });
 
     if (cartResponse.data?.data?.basketId) {
       return cartResponse.data.data.basketId;
     }
     // Return a placeholder if cart creation fails
-    return `test-cart-${uuidv4()}`;
+    return `test-cart-${randomUUID()}`;
   } catch (error) {
-    return `test-cart-${uuidv4()}`;
+    return `test-cart-${randomUUID()}`;
   }
 }
 

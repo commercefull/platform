@@ -126,12 +126,12 @@ export const TEST_CONTENT_PAGE = {
 // Test Content Block Data
 export const TEST_CONTENT_BLOCK = {
   id: TEST_CONTENT_BLOCK_ID,
-  pageId: TEST_CONTENT_PAGE_ID,
-  contentTypeId: TEST_BLOCK_TYPE_ID,
-  name: 'Integration Test Block',
-  order: 0,
+  contentPageId: TEST_CONTENT_PAGE_ID,
+  blockTypeId: TEST_BLOCK_TYPE_ID,
+  title: 'Integration Test Block',
+  sortOrder: 0,
   content: { text: 'Test content for integration testing' },
-  status: 'active',
+  isVisible: true,
 };
 
 // Test Content Template Data

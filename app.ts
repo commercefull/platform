@@ -215,7 +215,6 @@ i18next
       ignoreCase: true,
       cookieSecure: false,
     },
-    initImmediate: true, // Initialize i18next synchronously to prevent race conditions
   });
 
 app.use(
@@ -341,8 +340,21 @@ app.locals.formSubmit = formSubmit;
 
 const port = process.env.PORT || 10000;
 app.set('port', port);
-app.listen(port, () => {
+const server = app.listen(port, () => {
   logger.info(`CommerceFull service started on port ${port}`);
 });
 
-module.exports = app;
+server.on('error', (err: Error) => {
+  logger.error('Server error:', err);
+  process.exit(1);
+});
+
+process.on('SIGTERM', () => {
+  server.close(() => process.exit(0));
+});
+
+process.on('SIGINT', () => {
+  server.close(() => process.exit(0));
+});
+
+export default app;

@@ -4,6 +4,7 @@
  */
 
 import { ContentRepo } from '../../infrastructure/repositories/contentRepo';
+import type { ContentPage } from '../../../../libs/db/types';
 import { eventBus } from '../../../../libs/events/eventBus';
 
 // ============================================================================
@@ -37,17 +38,17 @@ export class CreatePageCommand {
 // ============================================================================
 
 export interface PageResponse {
-  id: string;
+  contentPageId: string;
   title: string;
   slug: string;
   contentTypeId: string;
-  templateId?: string;
+  templateId?: string | null;
   status: string;
   visibility: string;
-  summary?: string;
-  isHomePage?: boolean;
-  createdAt: string;
-  updatedAt: string;
+  summary?: string | null;
+  isHomePage?: boolean | null;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 // ============================================================================
@@ -96,14 +97,14 @@ export class CreatePageUseCase {
       metaDescription: command.metaDescription,
       metaKeywords: command.metaKeywords,
       customFields: command.customFields,
-      publishedAt: command.publishedAt,
-      scheduledAt: command.scheduledAt,
+      publishedAt: command.publishedAt ? new Date(command.publishedAt) : undefined,
+      scheduledAt: command.scheduledAt ? new Date(command.scheduledAt) : undefined,
       isHomePage: command.isHomePage,
     });
 
     // Emit event
     eventBus.emit('content.page.created', {
-      pageId: page.id,
+      pageId: page.contentPageId,
       title: page.title,
       slug: page.slug,
       contentTypeId: page.contentTypeId,
@@ -114,9 +115,9 @@ export class CreatePageUseCase {
     return this.mapToResponse(page);
   }
 
-  private mapToResponse(page: any): PageResponse {
+  private mapToResponse(page: ContentPage): PageResponse {
     return {
-      id: page.id,
+      contentPageId: page.contentPageId,
       title: page.title,
       slug: page.slug,
       contentTypeId: page.contentTypeId,

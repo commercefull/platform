@@ -122,6 +122,34 @@ describe('Attribute Group Tests', () => {
     });
   });
 
+  describe('Attribute Group by Code', () => {
+    it('should get an attribute group by code', async () => {
+      // First fetch the seeded group to find its code
+      const getRes = await client.get(`/business/attribute-groups/${testAttributeGroupId}`, {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      });
+      expect(getRes.status).toBe(200);
+      const code = getRes.data.data?.code;
+      if (!code) return;
+
+      const res = await client.get(`/business/attribute-groups/code/${code}`, {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      });
+      expect(res.status).toBe(200);
+      expect(res.data.success).toBe(true);
+      const returnedId =
+        res.data.data?.productAttributeGroupId || res.data.data?.id;
+      expect(returnedId).toBe(testAttributeGroupId);
+    });
+
+    it('should return 404 for non-existent attribute group code', async () => {
+      const res = await client.get('/business/attribute-groups/code/nonexistent-code-xyz', {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      });
+      expect(res.status).toBe(404);
+    });
+  });
+
   afterAll(async () => {
     await cleanupProductTests(client, adminToken, testProductId, testCategoryId, testAttributeGroupId);
   });

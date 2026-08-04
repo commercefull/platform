@@ -35,9 +35,9 @@ id_rsa*
 
 # Cloud credentials
 *.p12
-*.json
 service-account-key.json
 azuredeploy.parameters.json
+cdk.context.json
 
 # Documentation builds
 *.pdf

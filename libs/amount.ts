@@ -1,5 +1,3 @@
-import Dinero, { Currency } from 'dinero.js';
-
 export const countDecimals = function (value: number) {
   if (Math.floor(value.valueOf()) === value.valueOf()) return 0;
   return value.toString().split('.')[1].length || 0;
@@ -21,6 +19,11 @@ export const formattedAmount = function (amount: number, decimals: number) {
 };
 
 export const formattedLocalizedAmount = function (amount: number, decimals: number, currency: string, locale: string) {
-  const currencyConfig = { amount, precision: decimals, currency } as { amount: number; precision: number; currency: Currency };
-  return Dinero(currencyConfig).toFormat();
+  const value = amount / Math.pow(10, decimals);
+  return new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency,
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  }).format(value);
 };

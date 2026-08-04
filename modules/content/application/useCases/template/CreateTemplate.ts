@@ -25,14 +25,14 @@ export class CreateTemplateCommand {
 }
 
 export interface TemplateResponse {
-  id: string;
+  contentTemplateId: string;
   name: string;
   slug: string;
-  description?: string;
-  thumbnail?: string;
+  description?: string | null;
+  thumbnail?: string | null;
   isSystem: boolean;
   isActive: boolean;
-  createdAt: string;
+  createdAt: Date;
 }
 
 export class CreateTemplateUseCase {
@@ -56,27 +56,26 @@ export class CreateTemplateUseCase {
     const template = await this.contentRepo.createTemplate({
       name: command.name,
       slug: command.slug,
-      description: command.description,
-      thumbnail: command.thumbnail,
-      htmlStructure: command.htmlStructure,
-      cssStyles: command.cssStyles,
-      jsScripts: command.jsScripts,
-      areas: command.areas,
-      defaultBlocks: command.defaultBlocks,
-      compatibleContentTypes: command.compatibleContentTypes,
+      description: command.description || null,
+      thumbnail: command.thumbnail || null,
+      htmlStructure: command.htmlStructure || null,
+      cssStyles: command.cssStyles || null,
+      jsScripts: command.jsScripts || null,
+      areas: command.areas || null,
+      defaultBlocks: command.defaultBlocks || null,
+      compatibleContentTypes: command.compatibleContentTypes || null,
       isSystem: command.isSystem || false,
       isActive: command.isActive !== undefined ? command.isActive : true,
-      createdBy: command.createdBy,
     });
 
     eventBus.emit('content.template.created', {
-      templateId: template.id,
+      templateId: template.contentTemplateId,
       name: template.name,
       slug: template.slug,
     });
 
     return {
-      id: template.id,
+      contentTemplateId: template.contentTemplateId,
       name: template.name,
       slug: template.slug,
       description: template.description,

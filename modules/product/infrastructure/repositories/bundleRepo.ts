@@ -320,6 +320,24 @@ export async function deleteBundleItem(bundleItemId: string): Promise<void> {
 // Bundle Pricing
 // ============================================================================
 
+async function getProductPrice(productId: string, productVariantId?: string): Promise<number> {
+  if (productVariantId) {
+    const variant = await queryOne<{ price: string }>(
+      `SELECT "price" FROM "productVariant" WHERE "productVariantId" = $1`,
+      [productVariantId],
+    );
+    if (variant) return parseFloat(variant.price);
+  }
+  const product = await queryOne<{ basePrice: string; salePrice: string | null }>(
+    `SELECT "basePrice", "salePrice" FROM "product" WHERE "productId" = $1`,
+    [productId],
+  );
+  if (!product) return 0;
+  const base = parseFloat(product.basePrice);
+  const sale = product.salePrice ? parseFloat(product.salePrice) : null;
+  return sale !== null && sale < base ? sale : base;
+}
+
 export async function calculateBundlePrice(
   productBundleId: string,
   selectedItems?: { productId: string; productVariantId?: string; quantity: number }[],
@@ -330,11 +348,10 @@ export async function calculateBundlePrice(
   const items = await getBundleItems(productBundleId);
 
   if (bundle.pricingType === 'fixed' && bundle.fixedPrice) {
-    // Calculate savings from individual prices
     let individualTotal = 0;
     for (const item of items) {
-      // Would need to fetch product prices here
-      individualTotal += item.quantity * 100; // Placeholder
+      const itemPrice = await getProductPrice(item.productId, item.productVariantId);
+      individualTotal += itemPrice * item.quantity;
     }
     const savings = individualTotal - bundle.fixedPrice;
     return {
@@ -344,12 +361,11 @@ export async function calculateBundlePrice(
     };
   }
 
-  // For calculated pricing, sum up item prices with discounts
   let total = 0;
   let originalTotal = 0;
 
   for (const item of items) {
-    const itemPrice = 100; // Placeholder - would fetch actual price
+    const itemPrice = await getProductPrice(item.productId, item.productVariantId);
     const quantity = selectedItems?.find(s => s.productId === item.productId)?.quantity || item.quantity;
     const discountedPrice = itemPrice * (1 - item.discountPercent / 100) + item.priceAdjustment;
 
@@ -357,13 +373,14 @@ export async function calculateBundlePrice(
     originalTotal += itemPrice * quantity;
   }
 
-  // Apply bundle-level discount
   if (bundle.discountPercent) {
     total = total * (1 - bundle.discountPercent / 100);
   }
   if (bundle.discountAmount) {
     total = total - bundle.discountAmount;
   }
+
+  if (bundle.maxPrice && total > bundle.maxPrice) total = bundle.maxPrice;
 
   const savings = originalTotal - total;
   return {

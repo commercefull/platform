@@ -1,5 +1,4 @@
 import axios, { AxiosInstance } from 'axios';
-import { v4 as uuidv4 } from 'uuid';
 
 const API_URL = process.env.API_URL || 'http://localhost:3000';
 

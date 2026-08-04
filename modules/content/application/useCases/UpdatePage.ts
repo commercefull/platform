@@ -36,11 +36,11 @@ export class UpdatePageCommand {
 // ============================================================================
 
 export interface UpdatePageResponse {
-  id: string;
+  contentPageId: string;
   title: string;
   slug: string;
   status: string;
-  updatedAt: string;
+  updatedAt: Date;
 }
 
 // ============================================================================
@@ -84,14 +84,14 @@ export class UpdatePageUseCase {
       metaDescription: command.metaDescription,
       metaKeywords: command.metaKeywords,
       customFields: command.customFields,
-      publishedAt: command.publishedAt,
-      scheduledAt: command.scheduledAt,
+      publishedAt: command.publishedAt ? new Date(command.publishedAt) : undefined,
+      scheduledAt: command.scheduledAt ? new Date(command.scheduledAt) : undefined,
       isHomePage: command.isHomePage,
     });
 
     // Emit event
     eventBus.emit('content.page.updated', {
-      pageId: updatedPage.id,
+      pageId: updatedPage.contentPageId,
       title: updatedPage.title,
       slug: updatedPage.slug,
       updatedBy: command.updatedBy,
@@ -99,7 +99,7 @@ export class UpdatePageUseCase {
     });
 
     return {
-      id: updatedPage.id,
+      contentPageId: updatedPage.contentPageId,
       title: updatedPage.title,
       slug: updatedPage.slug,
       status: updatedPage.status,

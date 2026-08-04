@@ -15,11 +15,11 @@ export class SchedulePageCommand {
 }
 
 export interface SchedulePageResponse {
-  id: string;
+  contentPageId: string;
   title: string;
   slug: string;
   status: string;
-  scheduledAt: string;
+  scheduledAt: Date | null;
 }
 
 export class SchedulePageUseCase {
@@ -48,14 +48,13 @@ export class SchedulePageUseCase {
     }
 
     // Update page status to scheduled
-    const scheduledAtStr = command.scheduledAt.toISOString();
     const updatedPage = await this.contentRepo.updatePage(command.pageId, {
       status: 'scheduled',
-      scheduledAt: scheduledAtStr,
+      scheduledAt: command.scheduledAt,
     });
 
     eventBus.emit('content.page.updated', {
-      pageId: updatedPage.id,
+      pageId: updatedPage.contentPageId,
       title: updatedPage.title,
       slug: updatedPage.slug,
       updatedBy: command.scheduledBy,
@@ -63,11 +62,11 @@ export class SchedulePageUseCase {
     });
 
     return {
-      id: updatedPage.id,
+      contentPageId: updatedPage.contentPageId,
       title: updatedPage.title,
       slug: updatedPage.slug,
       status: updatedPage.status,
-      scheduledAt: scheduledAtStr,
+      scheduledAt: updatedPage.scheduledAt,
     };
   }
 }

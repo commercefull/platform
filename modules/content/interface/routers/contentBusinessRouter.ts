@@ -87,4 +87,31 @@ router.get('/content/redirects/:id', contentController.getRedirectById);
 router.put('/content/redirects/:id', contentController.updateRedirect);
 router.delete('/content/redirects/:id', contentController.deleteRedirect);
 
+// Page Version routes
+router.get('/content/pages/:pageId/versions', contentController.getPageVersions);
+router.post('/content/pages/:pageId/versions', contentController.createPageVersion);
+router.post('/content/pages/:pageId/versions/:versionId/restore', contentController.restorePageVersion);
+router.delete('/content/versions/:versionId', contentController.deletePageVersion);
+
+// Page Translation routes
+router.get('/content/pages/:pageId/translations', contentController.getPageTranslations);
+router.get('/content/pages/:pageId/translations/:localeId', contentController.getPageTranslationByLocale);
+router.post('/content/pages/:pageId/translations', contentController.createPageTranslation);
+router.put('/content/translations/:translationId', contentController.updatePageTranslation);
+router.delete('/content/translations/:translationId', contentController.deletePageTranslation);
+
+// Categorization routes
+router.get('/content/pages/:pageId/categories', contentController.getPageCategories);
+router.post('/content/pages/:pageId/categories', contentController.assignPageToCategory);
+router.delete('/content/pages/:pageId/categories/:categoryId', contentController.removePageFromCategory);
+router.post('/content/pages/:pageId/categories/primary', contentController.setPrimaryCategory);
+router.get('/content/categories/:categoryId/pages', contentController.getPagesByCategory);
+
+// Media Usage routes
+router.get('/content/media/:mediaId/usage', contentController.getMediaUsage);
+router.get('/content/media/usage/:entityType/:entityId', contentController.getMediaUsageByEntity);
+router.post('/content/media/usage', contentController.trackMediaUsage);
+router.delete('/content/media/usage/:usageId', contentController.untrackMediaUsage);
+router.get('/content/media/:mediaId/usage/count', contentController.getMediaUsageCount);
+
 export const contentRouterAdmin = router;

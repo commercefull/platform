@@ -105,6 +105,18 @@ router.get('/products/bundles/product/:productId', bundleController.getBundleByP
 router.get('/products/bundles/:id', bundleController.getBundleDetails);
 router.post('/products/bundles/:id/calculate', bundleController.calculateBundlePrice);
 
+// ============================================================================
+// Configurable Product Routes (Customer)
+// ============================================================================
+
+router.post('/products/:productId/configure', productController.configureVariant);
+
+// ============================================================================
+// Product Download Routes (Customer)
+// ============================================================================
+
+router.get('/products/:productId/downloads', productController.getProductDownloads);
+
 /**
  * Get product by ID or slug
  * GET /products/:identifier

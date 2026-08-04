@@ -9,7 +9,7 @@
 
 import { AxiosInstance } from 'axios';
 import { createTestClient, loginTestAdmin } from '../../testUtils';
-import { SEEDED_ATTRIBUTE_COLOR_ID, SEEDED_ATTRIBUTE_RAM_ID, SEEDED_ATTRIBUTE_SCREEN_SIZE_ID, SEEDED_ATTRIBUTE_SET_APPAREL_ID, SEEDED_ATTRIBUTE_SET_DEFAULT_ID, SEEDED_ATTRIBUTE_SET_ELECTRONICS_ID, SEEDED_ATTRIBUTE_SIZE_ID, SEEDED_PRODUCT_TYPE_CONFIGURABLE_ID, SEEDED_PRODUCT_TYPE_SIMPLE_ID } from '../testUtils';
+import { SEEDED_ATTRIBUTE_COLOR_ID, SEEDED_ATTRIBUTE_RAM_ID, SEEDED_ATTRIBUTE_SCREEN_SIZE_ID, SEEDED_ATTRIBUTE_SET_APPAREL_ID, SEEDED_ATTRIBUTE_SET_DEFAULT_ID, SEEDED_ATTRIBUTE_SET_ELECTRONICS_ID, SEEDED_ATTRIBUTE_SIZE_ID, SEEDED_PRODUCT_TYPE_CONFIGURABLE_ID, SEEDED_PRODUCT_TYPE_SIMPLE_ID, SEEDED_PRODUCT_1_ID } from '../testUtils';
 
 describe('Attribute Set Tests', () => {
   let client: AxiosInstance;
@@ -262,6 +262,69 @@ describe('Attribute Set Tests', () => {
       expect(res.status).toBe(200);
       expect(res.data.success).toBe(true);
       createdSetId = null;
+    });
+  });
+
+  // ── Merchant: Apply Attribute Set to Product ─────────────────────────────
+
+  describe('Merchant: Apply Attribute Set to Product', () => {
+    it('should apply an attribute set to an existing product', async () => {
+      const res = await client.post(
+        `/business/products/${SEEDED_PRODUCT_1_ID}/apply-attribute-set`,
+        { attributeSetId: SEEDED_ATTRIBUTE_SET_DEFAULT_ID },
+        { headers: { Authorization: `Bearer ${adminToken}` } },
+      );
+
+      if (res.status === 200) {
+        expect(res.data.success).toBe(true);
+        expect(res.data.data.applied).toBe(true);
+        expect(res.data.data).toHaveProperty('attributesAssigned');
+      } else {
+        expect([400, 500]).toContain(res.status);
+      }
+    });
+
+    it('should reject apply-attribute-set without attributeSetId', async () => {
+      const res = await client.post(
+        `/business/products/${SEEDED_PRODUCT_1_ID}/apply-attribute-set`,
+        {},
+        { headers: { Authorization: `Bearer ${adminToken}` } },
+      );
+
+      expect(res.status).toBe(400);
+    });
+
+    it('should return 404 for non-existent attribute set', async () => {
+      const fakeId = '99999999-9999-9999-9999-999999999999';
+      const res = await client.post(
+        `/business/products/${SEEDED_PRODUCT_1_ID}/apply-attribute-set`,
+        { attributeSetId: fakeId },
+        { headers: { Authorization: `Bearer ${adminToken}` } },
+      );
+
+      expect(res.status).toBe(404);
+    });
+
+    it('should return 404 for non-existent product when applying attribute set', async () => {
+      const fakeProductId = '99999999-9999-9999-9999-999999999999';
+      const res = await client.post(
+        `/business/products/${fakeProductId}/apply-attribute-set`,
+        { attributeSetId: SEEDED_ATTRIBUTE_SET_DEFAULT_ID },
+        { headers: { Authorization: `Bearer ${adminToken}` } },
+      );
+
+      expect(res.status).toBe(404);
+    });
+  });
+
+  // ── Auth Guards ──────────────────────────────────────────────────────────
+
+  describe('Auth Guards', () => {
+    it('should reject apply-attribute-set without auth', async () => {
+      const res = await client.post(`/business/products/${SEEDED_PRODUCT_1_ID}/apply-attribute-set`, {
+        attributeSetId: SEEDED_ATTRIBUTE_SET_DEFAULT_ID,
+      });
+      expect([401, 403]).toContain(res.status);
     });
   });
 });

@@ -5,7 +5,7 @@ exports.up = function (knex) {
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     t.uuid('productId').notNullable().references('productId').inTable('product').onDelete('CASCADE');
     t.uuid('relatedProductId').notNullable().references('productId').inTable('product').onDelete('CASCADE');
-    t.enum('type', ['related', 'accessory', 'bundle']).notNullable().defaultTo('related');
+    t.enum('type', ['related', 'accessory', 'bundle', 'cross_sell', 'up_sell', 'grouped']).notNullable().defaultTo('related');
     t.integer('position').notNullable().defaultTo(0);
     t.boolean('isAutomated').notNullable().defaultTo(false);
 

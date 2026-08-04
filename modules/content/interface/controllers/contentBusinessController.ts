@@ -6,6 +6,10 @@ import { ContentCategoryRepo } from '../../infrastructure/repositories/contentCa
 import { ContentNavigationRepo } from '../../infrastructure/repositories/contentNavigationRepo';
 import { ContentMediaRepo } from '../../infrastructure/repositories/contentMediaRepo';
 import { ContentRedirectRepo } from '../../infrastructure/repositories/contentRedirectRepo';
+import { ContentPageVersionRepo } from '../../infrastructure/repositories/contentPageVersionRepo';
+import { ContentPageTranslationRepo } from '../../infrastructure/repositories/contentPageTranslationRepo';
+import { ContentCategorizationRepo } from '../../infrastructure/repositories/contentCategorizationRepo';
+import { ContentMediaUsageRepo } from '../../infrastructure/repositories/contentMediaUsageRepo';
 import { eventBus } from '../../../../libs/events/eventBus';
 
 export class ContentController {
@@ -14,6 +18,10 @@ export class ContentController {
   private navigationRepo: ContentNavigationRepo;
   private mediaRepo: ContentMediaRepo;
   private redirectRepo: ContentRedirectRepo;
+  private pageVersionRepo: ContentPageVersionRepo;
+  private pageTranslationRepo: ContentPageTranslationRepo;
+  private categorizationRepo: ContentCategorizationRepo;
+  private mediaUsageRepo: ContentMediaUsageRepo;
 
   constructor() {
     this.contentRepo = new ContentRepo();
@@ -21,6 +29,10 @@ export class ContentController {
     this.navigationRepo = new ContentNavigationRepo();
     this.mediaRepo = new ContentMediaRepo();
     this.redirectRepo = new ContentRedirectRepo();
+    this.pageVersionRepo = new ContentPageVersionRepo();
+    this.pageTranslationRepo = new ContentPageTranslationRepo();
+    this.categorizationRepo = new ContentCategorizationRepo();
+    this.mediaUsageRepo = new ContentMediaUsageRepo();
   }
 
   // Content Type Handlers
@@ -266,8 +278,10 @@ export class ContentController {
       const limit = parseInt(req.query.limit as string) || 50;
       const offset = parseInt(req.query.offset as string) || 0;
       const status = req.query.status as 'draft' | 'published' | 'scheduled' | 'archived' | undefined;
+      const contentTypeId = req.query.contentTypeId as string | undefined;
+      const search = req.query.search as string | undefined;
 
-      const pages = await this.contentRepo.findAllPages(status, undefined, limit, offset);
+      const pages = await this.contentRepo.findAllPages(status, contentTypeId, limit, offset, search);
 
       res.status(200).json({
         success: true,
@@ -598,24 +612,54 @@ export class ContentController {
    */
   createBlock = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
-      const { pageId, contentTypeId, name, order, content, status = 'active' } = req.body;
+      const { contentPageId, blockTypeId, title, area, sortOrder, content, isVisible = true } = req.body;
 
       // Basic validation
-      if (!pageId || !contentTypeId || !name || order === undefined || !content) {
+      if (!contentPageId || !blockTypeId || sortOrder === undefined || !content) {
         res.status(400).json({
           success: false,
-          message: 'Page ID, content type ID, name, order, and content are required',
+          message: 'contentPageId, blockTypeId, sortOrder, and content are required',
         });
         return;
       }
 
+      // Validate block type exists
+      const blockType = await this.contentRepo.findBlockTypeById(blockTypeId);
+      if (!blockType) {
+        res.status(404).json({
+          success: false,
+          message: `Block type with ID ${blockTypeId} not found`,
+        });
+        return;
+      }
+
+      // Check schema required fields if defined on the block type
+      if (blockType.schema && typeof blockType.schema === 'object') {
+        const schema = blockType.schema as Record<string, any>;
+        const missingFields: string[] = [];
+        for (const [field, config] of Object.entries(schema)) {
+          if (config && typeof config === 'object' && (config as any).required === true) {
+            if (content[field] === undefined || content[field] === null || content[field] === '') {
+              missingFields.push(field);
+            }
+          }
+        }
+        if (missingFields.length > 0) {
+          res.status(400).json({
+            success: false,
+            message: `Missing required fields for block type "${blockType.name}": ${missingFields.join(', ')}`,
+          });
+          return;
+        }
+      }
+
       const block = await this.contentRepo.createBlock({
-        pageId,
-        contentTypeId,
-        name,
-        order,
+        contentPageId,
+        blockTypeId,
+        title: title || null,
+        sortOrder,
         content,
-        status,
+        isVisible,
       });
 
       res.status(201).json({
@@ -646,7 +690,7 @@ export class ContentController {
   updateBlock = async (req: TypedRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
-      const { contentTypeId, name, order, content, status } = req.body;
+      const { blockTypeId, title, area, sortOrder, content, isVisible } = req.body;
 
       // Check if block exists
       const existingBlock = await this.contentRepo.findBlockById(id);
@@ -658,12 +702,49 @@ export class ContentController {
         return;
       }
 
+      // Validate against content type if blockTypeId or content is being updated
+      const effectiveBlockTypeId = blockTypeId || existingBlock.blockTypeId;
+      const effectiveTitle = title || existingBlock.title;
+      const effectiveContent = content || existingBlock.content;
+
+      if (blockTypeId || content) {
+        const blockType = await this.contentRepo.findBlockTypeById(effectiveBlockTypeId);
+        if (!blockType) {
+          res.status(404).json({
+            success: false,
+            message: `Block type with ID ${effectiveBlockTypeId} not found`,
+          });
+          return;
+        }
+
+        // Check schema required fields
+        if (blockType.schema && typeof blockType.schema === 'object' && effectiveContent) {
+          const schema = blockType.schema as Record<string, any>;
+          const missingFields: string[] = [];
+          for (const [field, config] of Object.entries(schema)) {
+            if (config && typeof config === 'object' && (config as any).required === true) {
+              if (effectiveContent[field] === undefined || effectiveContent[field] === null || effectiveContent[field] === '') {
+                missingFields.push(field);
+              }
+            }
+          }
+          if (missingFields.length > 0) {
+            res.status(400).json({
+              success: false,
+              message: `Missing required fields for block type "${blockType.name}": ${missingFields.join(', ')}`,
+            });
+            return;
+          }
+        }
+      }
+
       const updatedBlock = await this.contentRepo.updateBlock(id, {
-        contentTypeId,
-        name,
-        order,
+        blockTypeId,
+        title,
+        area,
+        sortOrder,
         content,
-        status,
+        isVisible,
       });
 
       res.status(200).json({
@@ -1013,7 +1094,7 @@ export class ContentController {
         isActive: true,
       });
 
-      eventBus.emit('content.template.created', { templateId: duplicate.id, name: duplicate.name, slug: duplicate.slug });
+      eventBus.emit('content.template.created', { templateId: duplicate.contentTemplateId, name: duplicate.name, slug: duplicate.slug });
       res.status(201).json({ success: true, data: duplicate, message: 'Template duplicated successfully' });
     } catch (error: any) {
       logger.error('Error:', error);
@@ -1038,7 +1119,7 @@ export class ContentController {
 
       const updatedPage = await this.contentRepo.updatePage(id, {
         status: 'published',
-        publishedAt: new Date().toISOString(),
+        publishedAt: new Date(),
       });
 
       eventBus.emit('content.page.published', { pageId: id, title: updatedPage.title, slug: updatedPage.slug });
@@ -1139,16 +1220,16 @@ export class ContentController {
       const blocks = await this.contentRepo.findBlocksByPageId(id);
       for (const block of blocks) {
         await this.contentRepo.createBlock({
-          pageId: duplicatePage.id,
-          contentTypeId: block.contentTypeId,
-          name: block.name,
-          order: block.order,
+          contentPageId: duplicatePage.contentPageId,
+          blockTypeId: block.blockTypeId,
+          title: block.title,
+          sortOrder: block.sortOrder,
           content: block.content,
-          status: block.status,
+          isVisible: block.isVisible,
         });
       }
 
-      eventBus.emit('content.page.created', { pageId: duplicatePage.id, title: duplicatePage.title, slug: duplicatePage.slug });
+      eventBus.emit('content.page.created', { pageId: duplicatePage.contentPageId, title: duplicatePage.title, slug: duplicatePage.slug });
       res.status(201).json({ success: true, data: duplicatePage, message: 'Page duplicated successfully' });
     } catch (error: any) {
       logger.error('Error:', error);
@@ -1870,6 +1951,442 @@ export class ContentController {
       logger.error('Error:', error);
 
       res.status(500).json({ success: false, message: 'Failed to delete redirect', error: error.message });
+    }
+  };
+
+  // Page Version Handlers
+
+  getPageVersions = async (req: TypedRequest, res: Response): Promise<void> => {
+    try {
+      const { pageId } = req.params;
+      const limit = parseInt(req.query.limit as string) || 50;
+      const offset = parseInt(req.query.offset as string) || 0;
+
+      const page = await this.contentRepo.findPageById(pageId);
+      if (!page) {
+        res.status(404).json({ success: false, message: `Page with ID ${pageId} not found` });
+        return;
+      }
+
+      const versions = await this.pageVersionRepo.findVersionsByPageId(pageId, limit, offset);
+      res.status(200).json({ success: true, data: versions });
+    } catch (error: any) {
+      logger.error('Error:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch page versions', error: error.message });
+    }
+  };
+
+  createPageVersion = async (req: TypedRequest, res: Response): Promise<void> => {
+    try {
+      const { pageId } = req.params;
+      const { comment } = req.body;
+
+      const page = await this.contentRepo.findPageById(pageId);
+      if (!page) {
+        res.status(404).json({ success: false, message: `Page with ID ${pageId} not found` });
+        return;
+      }
+
+      const version = await this.pageVersionRepo.createVersion({
+        contentPageId: pageId,
+        title: page.title,
+        status: page.status,
+        summary: page.summary || undefined,
+        content: (page.customFields as Record<string, unknown>) || undefined,
+        customFields: (page.customFields as Record<string, unknown>) || undefined,
+        comment: comment || `Version snapshot of "${page.title}"`,
+        createdBy: null,
+      });
+
+      eventBus.emit('content.page.version_created', { pageId, versionId: version.contentPageVersionId, version: version.version });
+      res.status(201).json({ success: true, data: version, message: 'Page version created successfully' });
+    } catch (error: any) {
+      logger.error('Error:', error);
+      res.status(500).json({ success: false, message: 'Failed to create page version', error: error.message });
+    }
+  };
+
+  restorePageVersion = async (req: TypedRequest, res: Response): Promise<void> => {
+    try {
+      const { pageId, versionId } = req.params;
+
+      const page = await this.contentRepo.findPageById(pageId);
+      if (!page) {
+        res.status(404).json({ success: false, message: `Page with ID ${pageId} not found` });
+        return;
+      }
+
+      const version = await this.pageVersionRepo.findVersionById(versionId);
+      if (!version || version.contentPageId !== pageId) {
+        res.status(404).json({ success: false, message: `Version with ID ${versionId} not found for page ${pageId}` });
+        return;
+      }
+
+      const restoredPage = await this.contentRepo.updatePage(pageId, {
+        title: version.title,
+        status: version.status as any,
+        summary: version.summary || undefined,
+        customFields: version.customFields as Record<string, any> || undefined,
+      });
+
+      eventBus.emit('content.page.version_restored', { pageId, versionId, version: version.version });
+      res.status(200).json({ success: true, data: restoredPage, message: `Page restored to version ${version.version}` });
+    } catch (error: any) {
+      logger.error('Error:', error);
+      res.status(500).json({ success: false, message: 'Failed to restore page version', error: error.message });
+    }
+  };
+
+  deletePageVersion = async (req: TypedRequest, res: Response): Promise<void> => {
+    try {
+      const { versionId } = req.params;
+
+      const version = await this.pageVersionRepo.findVersionById(versionId);
+      if (!version) {
+        res.status(404).json({ success: false, message: `Version with ID ${versionId} not found` });
+        return;
+      }
+
+      await this.pageVersionRepo.deleteVersion(versionId);
+      res.status(200).json({ success: true, message: 'Page version deleted successfully' });
+    } catch (error: any) {
+      logger.error('Error:', error);
+      res.status(500).json({ success: false, message: 'Failed to delete page version', error: error.message });
+    }
+  };
+
+  // Page Translation Handlers
+
+  getPageTranslations = async (req: TypedRequest, res: Response): Promise<void> => {
+    try {
+      const { pageId } = req.params;
+
+      const page = await this.contentRepo.findPageById(pageId);
+      if (!page) {
+        res.status(404).json({ success: false, message: `Page with ID ${pageId} not found` });
+        return;
+      }
+
+      const translations = await this.pageTranslationRepo.findTranslationsByPageId(pageId);
+      res.status(200).json({ success: true, data: translations });
+    } catch (error: any) {
+      logger.error('Error:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch page translations', error: error.message });
+    }
+  };
+
+  getPageTranslationByLocale = async (req: TypedRequest, res: Response): Promise<void> => {
+    try {
+      const { pageId, localeId } = req.params;
+
+      const translation = await this.pageTranslationRepo.findTranslationByPageAndLocale(pageId, localeId);
+      if (!translation) {
+        res.status(404).json({ success: false, message: `Translation for locale ${localeId} not found` });
+        return;
+      }
+
+      res.status(200).json({ success: true, data: translation });
+    } catch (error: any) {
+      logger.error('Error:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch page translation', error: error.message });
+    }
+  };
+
+  createPageTranslation = async (req: TypedRequest, res: Response): Promise<void> => {
+    try {
+      const { pageId } = req.params;
+      const { localeId, title, slug, summary, content, metaTitle, metaDescription, metaKeywords,
+              openGraphTitle, openGraphDescription, featuredImage, isAutoTranslated,
+              translationSource, isApproved, isPublished } = req.body;
+
+      if (!localeId || !title) {
+        res.status(400).json({ success: false, message: 'Locale ID and title are required' });
+        return;
+      }
+
+      const page = await this.contentRepo.findPageById(pageId);
+      if (!page) {
+        res.status(404).json({ success: false, message: `Page with ID ${pageId} not found` });
+        return;
+      }
+
+      const translation = await this.pageTranslationRepo.createTranslation({
+        contentPageId: pageId,
+        localeId,
+        title,
+        slug,
+        summary,
+        content,
+        metaTitle,
+        metaDescription,
+        metaKeywords,
+        openGraphTitle,
+        openGraphDescription,
+        featuredImage,
+        isAutoTranslated,
+        translationSource,
+        isApproved,
+        isPublished,
+      });
+
+      eventBus.emit('content.page.translation_created', { pageId, translationId: translation.contentPageTranslationId, localeId });
+      res.status(201).json({ success: true, data: translation, message: 'Page translation created successfully' });
+    } catch (error: any) {
+      if (error.message.includes('already exists')) {
+        res.status(409).json({ success: false, message: error.message });
+        return;
+      }
+      logger.error('Error:', error);
+      res.status(500).json({ success: false, message: 'Failed to create page translation', error: error.message });
+    }
+  };
+
+  updatePageTranslation = async (req: TypedRequest, res: Response): Promise<void> => {
+    try {
+      const { translationId } = req.params;
+      const { title, slug, summary, content, metaTitle, metaDescription, metaKeywords,
+              openGraphTitle, openGraphDescription, featuredImage, isAutoTranslated,
+              translationSource, isApproved, isPublished, publishedAt } = req.body;
+
+      const existing = await this.pageTranslationRepo.findTranslationById(translationId);
+      if (!existing) {
+        res.status(404).json({ success: false, message: `Translation with ID ${translationId} not found` });
+        return;
+      }
+
+      const updated = await this.pageTranslationRepo.updateTranslation(translationId, {
+        title, slug, summary, content, metaTitle, metaDescription, metaKeywords,
+        openGraphTitle, openGraphDescription, featuredImage, isAutoTranslated,
+        translationSource, isApproved, isPublished, publishedAt,
+      });
+
+      eventBus.emit('content.page.translation_updated', { translationId, pageId: existing.contentPageId });
+      res.status(200).json({ success: true, data: updated, message: 'Page translation updated successfully' });
+    } catch (error: any) {
+      logger.error('Error:', error);
+      res.status(500).json({ success: false, message: 'Failed to update page translation', error: error.message });
+    }
+  };
+
+  deletePageTranslation = async (req: TypedRequest, res: Response): Promise<void> => {
+    try {
+      const { translationId } = req.params;
+
+      const existing = await this.pageTranslationRepo.findTranslationById(translationId);
+      if (!existing) {
+        res.status(404).json({ success: false, message: `Translation with ID ${translationId} not found` });
+        return;
+      }
+
+      await this.pageTranslationRepo.deleteTranslation(translationId);
+      eventBus.emit('content.page.translation_deleted', { translationId, pageId: existing.contentPageId });
+      res.status(200).json({ success: true, message: 'Page translation deleted successfully' });
+    } catch (error: any) {
+      logger.error('Error:', error);
+      res.status(500).json({ success: false, message: 'Failed to delete page translation', error: error.message });
+    }
+  };
+
+  // Categorization Handlers
+
+  getPageCategories = async (req: TypedRequest, res: Response): Promise<void> => {
+    try {
+      const { pageId } = req.params;
+
+      const page = await this.contentRepo.findPageById(pageId);
+      if (!page) {
+        res.status(404).json({ success: false, message: `Page with ID ${pageId} not found` });
+        return;
+      }
+
+      const categorizations = await this.categorizationRepo.findCategorizationsByPageId(pageId);
+      res.status(200).json({ success: true, data: categorizations });
+    } catch (error: any) {
+      logger.error('Error:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch page categories', error: error.message });
+    }
+  };
+
+  assignPageToCategory = async (req: TypedRequest, res: Response): Promise<void> => {
+    try {
+      const { pageId } = req.params;
+      const { categoryId, isPrimary } = req.body;
+
+      if (!categoryId) {
+        res.status(400).json({ success: false, message: 'Category ID is required' });
+        return;
+      }
+
+      const page = await this.contentRepo.findPageById(pageId);
+      if (!page) {
+        res.status(404).json({ success: false, message: `Page with ID ${pageId} not found` });
+        return;
+      }
+
+      const category = await this.categoryRepo.findCategoryById(categoryId);
+      if (!category) {
+        res.status(404).json({ success: false, message: `Category with ID ${categoryId} not found` });
+        return;
+      }
+
+      const categorization = await this.categorizationRepo.createCategorization({
+        contentPageId: pageId,
+        categoryId,
+        isPrimary: isPrimary || false,
+      });
+
+      eventBus.emit('content.page.categorized', { pageId, categoryId, isPrimary: categorization.isPrimary });
+      res.status(201).json({ success: true, data: categorization, message: 'Page assigned to category successfully' });
+    } catch (error: any) {
+      logger.error('Error:', error);
+      res.status(500).json({ success: false, message: 'Failed to assign page to category', error: error.message });
+    }
+  };
+
+  removePageFromCategory = async (req: TypedRequest, res: Response): Promise<void> => {
+    try {
+      const { pageId, categoryId } = req.params;
+
+      const deleted = await this.categorizationRepo.deleteCategorizationByPageAndCategory(pageId, categoryId);
+      if (!deleted) {
+        res.status(404).json({ success: false, message: 'Categorization not found' });
+        return;
+      }
+
+      eventBus.emit('content.page.uncategorized', { pageId, categoryId });
+      res.status(200).json({ success: true, message: 'Page removed from category successfully' });
+    } catch (error: any) {
+      logger.error('Error:', error);
+      res.status(500).json({ success: false, message: 'Failed to remove page from category', error: error.message });
+    }
+  };
+
+  setPrimaryCategory = async (req: TypedRequest, res: Response): Promise<void> => {
+    try {
+      const { pageId } = req.params;
+      const { categorizationId } = req.body;
+
+      if (!categorizationId) {
+        res.status(400).json({ success: false, message: 'Categorization ID is required' });
+        return;
+      }
+
+      const updated = await this.categorizationRepo.setPrimaryCategory(pageId, categorizationId);
+      eventBus.emit('content.page.primary_category_set', { pageId, categorizationId });
+      res.status(200).json({ success: true, data: updated, message: 'Primary category set successfully' });
+    } catch (error: any) {
+      logger.error('Error:', error);
+      res.status(500).json({ success: false, message: 'Failed to set primary category', error: error.message });
+    }
+  };
+
+  getPagesByCategory = async (req: TypedRequest, res: Response): Promise<void> => {
+    try {
+      const { categoryId } = req.params;
+      const limit = parseInt(req.query.limit as string) || 50;
+      const offset = parseInt(req.query.offset as string) || 0;
+
+      const categorizations = await this.categorizationRepo.findCategorizationsByCategoryId(categoryId, limit, offset);
+
+      // Fetch the actual pages
+      const pages = await Promise.all(
+        categorizations.map(async (cat) => {
+          const page = await this.contentRepo.findPageById(cat.contentPageId);
+          return page ? { ...page, isPrimary: cat.isPrimary } : null;
+        }),
+      );
+
+      const validPages = pages.filter(p => p !== null);
+      res.status(200).json({ success: true, data: validPages });
+    } catch (error: any) {
+      logger.error('Error:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch pages by category', error: error.message });
+    }
+  };
+
+  // Media Usage Handlers
+
+  getMediaUsage = async (req: TypedRequest, res: Response): Promise<void> => {
+    try {
+      const { mediaId } = req.params;
+
+      const media = await this.mediaRepo.findMediaById(mediaId);
+      if (!media) {
+        res.status(404).json({ success: false, message: `Media with ID ${mediaId} not found` });
+        return;
+      }
+
+      const usages = await this.mediaUsageRepo.findUsageByMediaId(mediaId);
+      res.status(200).json({ success: true, data: usages });
+    } catch (error: any) {
+      logger.error('Error:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch media usage', error: error.message });
+    }
+  };
+
+  getMediaUsageByEntity = async (req: TypedRequest, res: Response): Promise<void> => {
+    try {
+      const { entityType, entityId } = req.params;
+
+      const usages = await this.mediaUsageRepo.findUsageByEntity(entityType, entityId);
+      res.status(200).json({ success: true, data: usages });
+    } catch (error: any) {
+      logger.error('Error:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch media usage by entity', error: error.message });
+    }
+  };
+
+  trackMediaUsage = async (req: TypedRequest, res: Response): Promise<void> => {
+    try {
+      const { mediaId, entityType, entityId, field, sortOrder } = req.body;
+
+      if (!mediaId || !entityType || !entityId) {
+        res.status(400).json({ success: false, message: 'Media ID, entity type, and entity ID are required' });
+        return;
+      }
+
+      const usage = await this.mediaUsageRepo.createUsage({
+        mediaId,
+        entityType,
+        entityId,
+        field,
+        sortOrder,
+      });
+
+      eventBus.emit('content.media.usage_tracked', { mediaId, entityType, entityId });
+      res.status(201).json({ success: true, data: usage, message: 'Media usage tracked successfully' });
+    } catch (error: any) {
+      logger.error('Error:', error);
+      res.status(500).json({ success: false, message: 'Failed to track media usage', error: error.message });
+    }
+  };
+
+  untrackMediaUsage = async (req: TypedRequest, res: Response): Promise<void> => {
+    try {
+      const { usageId } = req.params;
+
+      const deleted = await this.mediaUsageRepo.deleteUsage(usageId);
+      if (!deleted) {
+        res.status(404).json({ success: false, message: `Media usage with ID ${usageId} not found` });
+        return;
+      }
+
+      res.status(200).json({ success: true, message: 'Media usage untracked successfully' });
+    } catch (error: any) {
+      logger.error('Error:', error);
+      res.status(500).json({ success: false, message: 'Failed to untrack media usage', error: error.message });
+    }
+  };
+
+  getMediaUsageCount = async (req: TypedRequest, res: Response): Promise<void> => {
+    try {
+      const { mediaId } = req.params;
+
+      const count = await this.mediaUsageRepo.getUsageCount(mediaId);
+      res.status(200).json({ success: true, data: { mediaId, usageCount: count } });
+    } catch (error: any) {
+      logger.error('Error:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch media usage count', error: error.message });
     }
   };
 }

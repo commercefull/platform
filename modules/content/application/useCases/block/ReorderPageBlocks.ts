@@ -39,7 +39,7 @@ export class ReorderPageBlocksUseCase {
 
     // Verify all blocks exist and belong to this page
     const existingBlocks = await this.contentRepo.findBlocksByPageId(command.pageId);
-    const existingBlockIds = new Set(existingBlocks.map(b => b.id));
+    const existingBlockIds = new Set(existingBlocks.map(b => b.contentBlockId));
 
     for (const blockOrder of command.blockOrders) {
       if (!existingBlockIds.has(blockOrder.id)) {

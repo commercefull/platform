@@ -1,5 +1,5 @@
 import { AxiosInstance } from 'axios';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'node:crypto';
 import { setupInventoryTests, cleanupInventoryTests, testInventoryLocation } from './testUtils';
 
 describe('Inventory Location Tests', () => {
@@ -60,7 +60,7 @@ describe('Inventory Location Tests', () => {
 
     it('should create a new location', async () => {
       const newLocation = {
-        name: `Test Store ${uuidv4().substring(0, 8)}`,
+        name: `Test Store ${randomUUID().substring(0, 8)}`,
         type: 'store',
         address: '456 Test Blvd',
         city: 'Testopolis',
@@ -87,7 +87,7 @@ describe('Inventory Location Tests', () => {
 
     it('should update a location', async () => {
       const updateData = {
-        name: `Updated Location ${uuidv4().substring(0, 8)}`,
+        name: `Updated Location ${randomUUID().substring(0, 8)}`,
         isActive: false,
       };
 

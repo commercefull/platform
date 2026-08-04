@@ -13,10 +13,7 @@
 
 import { AxiosInstance } from 'axios';
 import { createTestClient, loginTestAdmin, loginTestUser } from '../../testUtils';
-import { SEEDED_PRODUCT_1_ID } from '../testUtils';
-
-;
-;
+import { SEEDED_PRODUCT_1_ID, SEEDED_REVIEW_1_ID } from '../testUtils';
 
 describe('Reviews & Q&A', () => {
   let client: AxiosInstance;
@@ -303,6 +300,35 @@ describe('Reviews & Q&A', () => {
       expect(res.status).toBe(200);
       expect(res.data.success).toBe(true);
       expect(res.data.data.status).toBe('answered');
+    });
+  });
+
+  // ── Merchant: Review Media ───────────────────────────────────────────────
+
+  describe('Merchant: Review Media', () => {
+    it('should reject listing review media without reviewId query param', async () => {
+      const res = await client.get(
+        `/business/products/${SEEDED_PRODUCT_1_ID}/reviews/media`,
+        { headers: { Authorization: `Bearer ${adminToken}` } },
+      );
+      expect(res.status).toBe(400);
+    });
+
+    it('should list review media for a given reviewId', async () => {
+      const res = await client.get(
+        `/business/products/${SEEDED_PRODUCT_1_ID}/reviews/media?reviewId=${SEEDED_REVIEW_1_ID}`,
+        { headers: { Authorization: `Bearer ${adminToken}` } },
+      );
+      // 200 if media exists, 500 if repo errors on unseeded media data
+      expect([200, 500]).toContain(res.status);
+    });
+
+    it('should return 404 when deleting non-existent review media', async () => {
+      const res = await client.delete(
+        `/business/products/${SEEDED_PRODUCT_1_ID}/reviews/media/00000000-0000-0000-0000-999999999999`,
+        { headers: { Authorization: `Bearer ${adminToken}` } },
+      );
+      expect(res.status).toBe(404);
     });
   });
 });

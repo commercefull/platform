@@ -108,7 +108,7 @@ export const createContentPage = async (req: TypedRequest, res: Response): Promi
     const useCase = new CreatePageUseCase(ContentRepo);
     const result = await useCase.execute(command);
 
-    res.redirect(`/hub/content/pages/${result.id}?success=Content page created successfully`);
+    res.redirect(`/hub/content/pages/${result.contentPageId}?success=Content page created successfully`);
   } catch (error: any) {
     logger.error('Error:', error);
 
